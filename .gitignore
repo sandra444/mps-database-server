@@ -5,7 +5,7 @@
 /venv
 /datadumps
 /.idea
-mps.iml
+*.iml
 mps_credentials.py
 datadumps.zip
 datadumps-nk.zip
