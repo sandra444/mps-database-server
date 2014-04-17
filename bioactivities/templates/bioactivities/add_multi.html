@@ -1,0 +1,28 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_static admin_modify %}
+{% load admin_urls %}
+
+{% block breadcrumbs %}{% if not is_popup %}
+<div class="breadcrumbs">
+     <a href="../../../">{% trans "Home" %}</a> ›
+     <a href="../../">{{ opts.app_label|capfirst|escape }}</a> ›
+     <a href="../">{{ opts.verbose_name_plural|capfirst }}</a> ›
+     {% trans 'Add multiple' %}</div>
+{% endif %}{% endblock %}
+
+
+{% block content %}<div id="content-main">
+
+<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.module_name }}_form">{% csrf_token %}{% block form_top %}{% endblock %}
+  <fieldset class="module aligned ">
+    <div class="form-row field-chemblids">
+      <div>
+  {{ form.as_table }}
+      </div>
+    </div>
+  </fieldset>
+<div class="submit-row">
+  <input type="submit" value="Add {{ what }}s" class="default" name="_add" />
+</div>
+</form></div>
+{% endblock %}

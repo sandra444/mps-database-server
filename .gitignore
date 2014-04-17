@@ -1,0 +1,13 @@
+*.pyc
+*db
+/static
+/media
+/venv
+/datadumps
+/.idea
+mps.iml
+mps_credentials.py
+datadumps.zip
+datadumps-nk.zip
+scripts/*.gz
+

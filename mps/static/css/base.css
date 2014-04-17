@@ -1,0 +1,7 @@
+@charset "UTF-8";
+
+.row {
+    padding-left: 1em !important;
+    padding-right: 1em !important;
+    min-width: 90% !important;
+}

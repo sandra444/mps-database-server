@@ -1,4 +1,4 @@
 mps-database-server
 ===================
 
-Microphysiology Project Database Server
+Microphysiology Systems Database Services
