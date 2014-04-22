@@ -37,14 +37,14 @@ class CellType(models.Model):
     organ = models.ForeignKey('Organ')
 
     class Meta(object):
-        ordering = ('cell_type', 'species', 'cell_subtype',)
+        ordering = ('species', 'cell_type', 'cell_subtype',)
         unique_together = [('cell_type', 'species', 'cell_subtype')]
 
 
     def __unicode__(self):
-        return u'{} {} {}'.format(self.cell_subtype,
-                                  self.species,
-                                  self.cell_type)
+        return u'{} ({} {})'.format(self.cell_type,
+                                  self.cell_subtype,
+                                  self.species)
 
     def cell_name(self):
         return self.__unicode__()
@@ -125,6 +125,8 @@ class CellSample(LockableModel):
     percent_viability = models.FloatField(null=True, blank=True)
     cell_image = models.ImageField(upload_to='cellsamples',
                                    null=True, blank=True)
+    class Meta(object):
+        ordering = ('cell_type', 'cell_source', 'id',)
 
     def __unicode__(self):
         return u'#{} {} {} supplied by {}'.format(self.id,

@@ -58,32 +58,34 @@ class CellSampleAdmin(LockableAdmin):
     save_as = True
     fieldsets = (
         (None, {
-            'fields': ('locked',
-                       'cell_type',
-                       'cell_source',
-                       'receipt_date',
-                       'notes',
-                       'cell_image',
-                       'created_by',
-                       'created_on',
-                       'modified_by',
-                       'modified_on')
+            'fields': (('locked',
+                       'cell_type'),
+                       ('cell_source',
+                       'receipt_date'),
+                       ('cell_image'),
+                       ('notes'),)
         }),
         ('Supplier Information', {
-            'fields': ('supplier', 'product_id', 'barcode',)
+            'fields': (('supplier', 'product_id', 'barcode'),)
         }),
         ('Patient Information', {
-            'fields': ('patient_age', 'patient_gender',
-                       'patient_condition',)
+            'fields': (('patient_age', 'patient_gender',
+                       'patient_condition'),)
         }),
         ('Isolation Information', {
-            'fields': ('isolation_datetime', 'isolation_method',
-                       'isolation_notes')
+            'fields': (('isolation_datetime'), ('isolation_method',
+                       'isolation_notes'),)
         }),
         ('Cell Viability', {
-            'fields': ('viable_count',
+            'fields': (('viable_count',
                        'viable_count_unit',
-                       'percent_viability')
+                       'percent_viability'),)
+        }),
+        ('Change Tracking', {
+            'fields': (('created_by',
+                       'created_on'),
+                       ('modified_by',
+                       'modified_on'))
         }),
     )
 
