@@ -37,7 +37,9 @@ class CellType(models.Model):
     organ = models.ForeignKey('Organ')
 
     class Meta(object):
-        ordering = ('cell_type', )
+        ordering = ('cell_type', 'species', 'cell_subtype',)
+        unique_together = [('cell_type', 'species', 'cell_subtype')]
+
 
     def __unicode__(self):
         return u'{} {} {}'.format(self.cell_subtype,
