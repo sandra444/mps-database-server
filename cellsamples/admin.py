@@ -70,7 +70,7 @@ class CellSampleAdmin(LockableAdmin):
                        'modified_on')
         }),
         ('Supplier Information', {
-            'fields': ('supplier', 'barcode', 'product_id')
+            'fields': ('supplier', 'product_id', 'barcode',)
         }),
         ('Patient Information', {
             'fields': ('patient_age', 'patient_gender',

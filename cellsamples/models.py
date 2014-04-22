@@ -85,7 +85,7 @@ class CellSample(LockableModel):
     # SAMPLE
 
     supplier = models.ForeignKey('Supplier')
-    barcode = models.CharField(max_length=255, blank=True)
+    barcode = models.CharField(max_length=255, blank=True, verbose_name='Barcode/Lot#')
     product_id = models.CharField(max_length=255, blank=True)
 
     # PATIENT
