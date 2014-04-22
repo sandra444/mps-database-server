@@ -69,9 +69,9 @@ class Supplier(models.Model):
 class CellSample(LockableModel):
     cell_type = models.ForeignKey('CellType')
     CELLSOURCETYPE = (
-        ('Primary', 'Primary'),
+        ('Freshly isolated', 'Freshly isolated'),
         ('Cryopreserved', 'Cryopreserved'),
-        ('iPSC', 'iPSC'),
+        ('Cultured', 'Cultured'),
         ('Other', 'Other'),
     )
     cell_source = models.CharField(max_length=20,
