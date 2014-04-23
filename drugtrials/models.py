@@ -131,7 +131,7 @@ class TestType(models.Model):
 class Test(LockableModel):
     class Meta(object):
         unique_together = [('test_type', 'test_name')]
-        ordering = ('organ', 'test_name', )
+        ordering = ('organ','test_type', 'test_name', )
 
     organ_model = models.ForeignKey(OrganModel,
                                     blank=True, null=True)
@@ -144,8 +144,9 @@ class Test(LockableModel):
 
     def __unicode__(self):
         return u'{} :: {} :: {}'.format(self.organ,
-                                        self.test_name,
-                                        self.test_type)
+                                        self.test_type,
+                                        self.test_name
+                                        )
 
 
 class FindingType(models.Model):
