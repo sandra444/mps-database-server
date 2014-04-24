@@ -325,6 +325,9 @@ def heatmap(request):
         rows='compound',
         cols=['target', 'bioactivity'],
         values='value'
-    ).dropna(axis=0, thresh=1).dropna(axis=1, thresh=1)
+    )
+
+    result.dropna(axis=0, thresh=1, inplace=True)
+    result.dropna(axis=1, thresh=1, inplace=True)
 
     return result.to_json(orient='split')
