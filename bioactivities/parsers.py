@@ -327,7 +327,7 @@ def heatmap(request):
         values='value'
     )
 
-    result.dropna(axis=0, thresh=4, inplace=True)
-    result.dropna(axis=1, thresh=4, inplace=True)
+    result.dropna(axis=0, thresh=1, inplace=True)
+    result.dropna(axis=1, thresh=1, inplace=True)
 
     return result.to_json(orient='split')
