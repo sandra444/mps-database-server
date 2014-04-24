@@ -38,7 +38,7 @@ class TimeUnits(models.Model):
     unit = models.CharField(max_length=16)
     description = models.CharField(max_length=256,
                                    blank=True, null=True)
-    unit_order = models.IntegerField(blank=True, null=True)
+    unit_order = models.FloatField(default=0)
 
     # this meta class is used to avoid a double 's' on the model name
     class Meta(object):
