@@ -490,4 +490,6 @@ class TimeUnitsAdmin(admin.ModelAdmin):
     save_on_top = True
     list_per_page = 20
 
+    list_display = ('unit','unit_order',)
+
 admin.site.register(TimeUnits, TimeUnitsAdmin)
