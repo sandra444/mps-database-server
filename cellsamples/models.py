@@ -37,12 +37,14 @@ class CellType(models.Model):
     organ = models.ForeignKey('Organ')
 
     class Meta(object):
-        ordering = ('cell_type', )
+        ordering = ('species', 'cell_type', 'cell_subtype',)
+        unique_together = [('cell_type', 'species', 'cell_subtype')]
+
 
     def __unicode__(self):
-        return u'{} {} {}'.format(self.cell_subtype,
-                                  self.species,
-                                  self.cell_type)
+        return u'{} ({} {})'.format(self.cell_type,
+                                  self.cell_subtype,
+                                  self.species)
 
     def cell_name(self):
         return self.__unicode__()
@@ -69,9 +71,9 @@ class Supplier(models.Model):
 class CellSample(LockableModel):
     cell_type = models.ForeignKey('CellType')
     CELLSOURCETYPE = (
-        ('Primary', 'Primary'),
+        ('Freshly isolated', 'Freshly isolated'),
         ('Cryopreserved', 'Cryopreserved'),
-        ('iPSC', 'iPSC'),
+        ('Cultured', 'Cultured'),
         ('Other', 'Other'),
     )
     cell_source = models.CharField(max_length=20,
@@ -83,7 +85,7 @@ class CellSample(LockableModel):
     # SAMPLE
 
     supplier = models.ForeignKey('Supplier')
-    barcode = models.CharField(max_length=255, blank=True)
+    barcode = models.CharField(max_length=255, blank=True, verbose_name='Barcode/Lot#')
     product_id = models.CharField(max_length=255, blank=True)
 
     # PATIENT
@@ -123,6 +125,8 @@ class CellSample(LockableModel):
     percent_viability = models.FloatField(null=True, blank=True)
     cell_image = models.ImageField(upload_to='cellsamples',
                                    null=True, blank=True)
+    class Meta(object):
+        ordering = ('cell_type', 'cell_source', 'id',)
 
     def __unicode__(self):
         return u'#{} {} {} supplied by {}'.format(self.id,
