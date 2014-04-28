@@ -135,10 +135,14 @@ def generate_list_of_all_targets_in_bioactivities():
     cursor = connection.cursor()
 
     cursor.execute(
-        'SELECT bioactivities_target.name '
-        'FROM bioactivities_bioactivity '
-        'INNER JOIN bioactivities_target '
-        'ON bioactivities_bioactivity.target_id=bioactivities_target.id;'
+        " SELECT bioactivities_target.name "
+        " FROM bioactivities_bioactivity "
+
+        " INNER JOIN bioactivities_target "
+        " ON bioactivities_bioactivity.target_id=bioactivities_target.id "
+
+        " WHERE bioactivities_target.organism='Homo sapiens' "
+        " AND bioactivities_target.target_type='SINGLE PROTEIN' "
     )
 
     result = query_to_frequencylist(cursor.fetchall())
