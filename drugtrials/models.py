@@ -48,6 +48,7 @@ TRIALTYPES = (
     ('P', 'Preclinical'),
     ('C', 'Clinical'),
     ('M', 'Post-marketing'),
+    ('B', 'Combined Clinical-Post Market'),
     ('U', 'Unknown / Unspecified'),
 )
 
