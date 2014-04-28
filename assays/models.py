@@ -252,8 +252,13 @@ class AssayDeviceReadout(LockableModel):
 
     timeunit = models.CharField(default='minutes',
                                 max_length=16,
-                                choices=(('M', 'minutes'),
-                                         ('H', 'hours')))
+                                choices=(('S', 'seconds'),
+                                         ('M', 'minutes'),
+                                         ('H', 'hours'),
+                                         ('D', 'days'),
+                                         ('W', 'weeks'),
+                                         ('O', 'months'),
+                                         ('Y', 'years')))
 
     treatment_time_length = models.FloatField(verbose_name='Treatment Duration',
                                               blank=True, null=True)
