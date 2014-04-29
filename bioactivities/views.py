@@ -110,4 +110,4 @@ def gen_heatmap(request):
         return JSONResponse(result)
     else:
         logging.debug('Final JSON response step failed: result has no data')
-        return JSONResponse({})
+        return HttpResponse()
