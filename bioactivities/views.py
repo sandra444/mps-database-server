@@ -10,6 +10,9 @@ from bioactivities.models import *
 from bioactivities.parsers import *
 from bioactivities.serializers import BioactivitiesSerializer
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class JSONResponse(HttpResponse):
 
@@ -100,4 +103,11 @@ def list_of_all_compounds_in_bioactivities(request):
 
 @csrf_exempt
 def gen_heatmap(request):
-    return JSONResponse(heatmap(request))
+    result = heatmap(request)
+    if result:
+        logging.debug('Final JSON response step: returning JSON response'
+                      ' with heatmap result')
+        return JSONResponse(result)
+    else:
+        logging.debug('Final JSON response step failed: result has no data')
+        return JSONResponse({})

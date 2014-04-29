@@ -4,7 +4,7 @@ from pandas import *
 
 import json
 from django.db import connection
-
+import logging
 
 """
 
@@ -169,7 +169,11 @@ def generate_list_of_all_compounds_in_bioactivities():
 
 def fetch_all_standard_bioactivities_data(request):
 
+    if len(request.body) == 0:
+        return
+
     # convert data sent in request to a dict data type from a string data type
+
     request_filter = json.loads(request.body)
 
     desired_targets = [
@@ -319,8 +323,16 @@ def heatmap(request):
     # drugtrials_raw_data = fetch_all_standard_drugtrials_data()
     # mps_assay_raw_data = fetch_all_standard_mps_assay_data()
 
+    all_std_bioactivities = fetch_all_standard_bioactivities_data(request)
+
+    if not all_std_bioactivities:
+        return
+
+    if len(all_std_bioactivities) == 0:
+        return
+
     bioactivities_data = pandas.DataFrame(
-        fetch_all_standard_bioactivities_data(request),
+        all_std_bioactivities,
         columns=['compound', 'target', 'bioactivity', 'value']
     )
 
@@ -333,5 +345,8 @@ def heatmap(request):
 
     result.dropna(axis=0, thresh=1, inplace=True)
     result.dropna(axis=1, thresh=1, inplace=True)
+
+    print('heatmap pandas data size: ' + len(result))
+    assert len(result)
 
     return result.to_json(orient='split')
