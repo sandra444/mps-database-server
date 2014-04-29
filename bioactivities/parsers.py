@@ -346,7 +346,4 @@ def heatmap(request):
     result.dropna(axis=0, thresh=1, inplace=True)
     result.dropna(axis=1, thresh=1, inplace=True)
 
-    print('heatmap pandas data size: ' + len(result))
-    assert len(result)
-
     return result.to_json(orient='split')
