@@ -27,7 +27,7 @@ class CellType(models.Model):
         ('Human', 'Human'),
         ('Rat', 'Rat'),
     )
-    cell_type = models.CharField(max_length=255, unique=True,
+    cell_type = models.CharField(max_length=255,
                                  help_text='Example: hepatocyte, muscle, kidney, etc')
     species = models.CharField(max_length=10,
                                choices=SPECIESTYPE, default='Human', null=True,
