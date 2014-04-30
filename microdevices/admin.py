@@ -103,6 +103,7 @@ class TestInline(admin.TabularInline):
 
 class OrganModelAdmin(admin.ModelAdmin):
     list_per_page = 20
+    filter_horizontal = ('cell_type',)
     list_display = (
         'model_name', 'organ', 'device', 'cell_types', 'center', 'description')
     search_fields = [
