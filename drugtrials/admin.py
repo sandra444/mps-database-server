@@ -145,7 +145,8 @@ admin.site.register(ResultDescriptor, ResultDescriptorAdmin)
 class TestAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 20
-    list_display = ('test_name', 'organ', 'test_unit', 'description', 'locked')
+    list_display = ('test_name', 'test_type', 'organ', 'test_unit',
+                    'description', 'locked')
     search_fields = ['test_name', ]
     actions = ['update_fields']
 
