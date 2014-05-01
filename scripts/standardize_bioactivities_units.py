@@ -14,13 +14,14 @@ def standardize_concentration(
         unit_to_convert,
         value_to_convert):
 
+    print('standardizing concentrations')
+    
     print(
-        'about to fix concentrations for: ' + bioactivity_to_convert +
-        ' original units: ' + unit_to_convert +
-        ' original values: ' + value_to_convert
+        'original units: ' + str(unit_to_convert) +
+        ' original values: ' + str(value_to_convert)
     )
 
-    return
+    return unit_to_convert, value_to_convert
 
 bioactivity_truth_table = {
     'AC50': standardize_concentration,
@@ -31,9 +32,8 @@ bioactivity_truth_table = {
 def save_bioactivity(bioactivity_id, standard_unit, standard_value):
 
     print(
-        'saving bioactivity id: ' + bioactivity_id +
-        ' new units: ' + standard_unit +
-        ' new value: ' + standard_value
+        'new units: ' + str(standard_unit) +
+        ' new value: ' + str(standard_value)
     )
 
     return
@@ -75,20 +75,36 @@ for q in query:
     original_unit = q[3]
     original_value = q[4]
 
+    # we will not perform any operations if any single field is missing data
+    if not (q[0] and q[1] and q[2] and q[3] and q[4]):
+        continue
+
     if original_bioactivity in bioactivity_truth_table:
+
+        print('bioactivity match found!')
+        print(
+            'bioactivity: ' + str(original_bioactivity) +
+            ' bioactivity id: ' + str(original_bioactivity_id)
+        )
+
         new_unit, new_value = bioactivity_truth_table[original_bioactivity](
             bioactivity_to_convert=original_bioactivity,
             unit_to_convert=original_unit,
             value_to_convert=original_value
         )
         print(
-            'saving bioactivity: ' + original_bioactivity +
-            ' compound: ' + original_compound_name)
+            'preparing to save bioactivity: ' + str(original_bioactivity) +
+            ' for compound: ' + str(original_compound_name)
+        )
+
         save_bioactivity(
             bioactivity_id=original_bioactivity_id,
             standard_unit=new_unit,
             standard_value=new_value
         )
+
+        # print a blank line
+        print('')
 
 cursor.close()
 
