@@ -49,11 +49,11 @@ cursor = connection.cursor()
 # n=4: values before standardization (float)
 
 cursor.execute(
-    " SELECT 	bioactivities_bioactivity.id,  "
-    " 		compounds_compound.name, "
-    "       bioactivities_bioactivity.bioactivity_type,   "
-    " 		bioactivities_bioactivity.units,  "
-    " 		bioactivities_bioactivity.value  "
+    " SELECT    bioactivities_bioactivity.id,  "
+    "      	    compounds_compound.name, "
+    "           bioactivities_bioactivity.bioactivity_type,   "
+    "           bioactivities_bioactivity.units,  "
+    "           bioactivities_bioactivity.value  "
     " FROM bioactivities_bioactivity   "
     " INNER JOIN compounds_compound   "
     " ON bioactivities_bioactivity.compound_id=compounds_compound.id;  "
