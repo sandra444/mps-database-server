@@ -1,6 +1,7 @@
 # begin django environment imports
 import sys
 import os
+
 sys.path.append('..')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'mps.settings'
 # end django environment imports
@@ -13,9 +14,8 @@ def standardize_concentration(
         bioactivity_to_convert,
         unit_to_convert,
         value_to_convert):
-
     print('standardizing concentrations')
-    
+
     print(
         'original units: ' + str(unit_to_convert) +
         ' original values: ' + str(value_to_convert)
@@ -23,20 +23,21 @@ def standardize_concentration(
 
     return unit_to_convert, value_to_convert
 
+
 bioactivity_truth_table = {
     'AC50': standardize_concentration,
-    'ID50': standardize_concentration
+    'IC50': standardize_concentration
 }
 
 
 def save_bioactivity(bioactivity_id, standard_unit, standard_value):
-
     print(
         'new units: ' + str(standard_unit) +
         ' new value: ' + str(standard_value)
     )
 
     return
+
 
 cursor = connection.cursor()
 
