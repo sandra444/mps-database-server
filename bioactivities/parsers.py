@@ -4,7 +4,7 @@ from pandas import *
 
 import json
 from django.db import connection
-import logging
+import networkx
 
 """
 
@@ -167,44 +167,11 @@ def generate_list_of_all_compounds_in_bioactivities():
     return result
 
 
-def fetch_all_standard_bioactivities_data(request):
-
-    if len(request.body) == 0:
-        return
-
-    # convert data sent in request to a dict data type from a string data type
-
-    request_filter = json.loads(request.body)
-
-    desired_targets = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'targets_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
-
-    desired_compounds = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'compounds_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
-
-    desired_bioactivities = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'bioactivities_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
+def fetch_all_standard_bioactivities_data(
+        desired_compounds,
+        desired_targets,
+        desired_bioactivities
+):
 
     # using values for now, FUTURE: use standardized_values
     cursor = connection.cursor()
@@ -316,14 +283,49 @@ def fetch_all_standard_mps_assay_data():
 
 
 def heatmap(request):
-    # data = json.loads(request.body)
 
-    # print data
+    if len(request.body) == 0:
+        return
 
-    # drugtrials_raw_data = fetch_all_standard_drugtrials_data()
-    # mps_assay_raw_data = fetch_all_standard_mps_assay_data()
+    # convert data sent in request to a dict data type from a string data type
 
-    all_std_bioactivities = fetch_all_standard_bioactivities_data(request)
+    request_filter = json.loads(request.body)
+
+    desired_targets = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'targets_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_compounds = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'compounds_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_bioactivities = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'bioactivities_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    all_std_bioactivities = fetch_all_standard_bioactivities_data(
+        desired_compounds,
+        desired_targets,
+        desired_bioactivities
+    )
 
     if not all_std_bioactivities:
         return
@@ -343,7 +345,77 @@ def heatmap(request):
         values='value'
     )
 
-    result.dropna(axis=0, thresh=1, inplace=True)
-    result.dropna(axis=1, thresh=1, inplace=True)
+    # reindex our data frame
+    df1 = result.reindex()
 
-    return result.to_json(orient='split')
+    # remove redundant columns
+    df2 = df1.groupby(axis=1, level=0).sum()
+
+    # reshape our rectangular table into a square matrix
+    df3 = pandas.concat([df2, df2.T]).fillna(0)
+
+    # construct a networkx graph from our pandas dataframe
+    graph = networkx.from_numpy_matrix(df3.values)
+
+    # construct an adjacency matrix using labeled nodes
+    named_graph = networkx.relabel_nodes(
+        graph,
+        dict(enumerate(df3.columns))
+    )
+
+    links = []
+
+    # construct a network of edges
+
+    # links: [ {"source" : ____ , "target" : ____ , "value" : ____ } , ... ]
+    # ======================================================================
+    #
+    #            VALUE
+    # SOURCE -------------> TARGET
+    #
+    # SOURCE:  A single bioactivity, drugtrial, or assay
+    # TARGET:  A single compound
+    # VALUE:   The value of the bioactivity, drugtrial, or assay
+    # (Keep everything standardized to specific units per measurement type)
+    #
+    # Please let me know if you have any suggestions, comments, or concerns.
+    #
+    # Each colored cell represents two bioactivities, drugtrials,
+    # or assays that evoked a response in the same drug
+
+    # Darker cells indicate bioactivities, drugtrials, or assays that
+    # co-occurred more frequently
+
+
+    for item in named_graph.adj.iteritems():
+            # each[0] is the source
+            # each[1] is a dictionary of targets
+            # targets are within this dictionary
+        for key, value in item[1].iteritems():
+            source = item[0]
+            target = key
+            weight = value.get('weight')
+            if (source in desired_bioactivities) \
+                    and (target in desired_compounds):
+                links.append(
+                    {
+                        "source": desired_bioactivities.index(source),
+                        "target": desired_compounds.index(target),
+                        "value": weight
+                    }
+                )
+
+    nodes = []
+
+    # build node table
+
+
+    # The result data for the adjacency matrix must be in
+    # the following format:
+    #
+    # {
+    #   nodes: [ ... see below ...] ,
+    #   links: [ ... see below ...]
+    # }
+
+    return d3_json
