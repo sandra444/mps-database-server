@@ -366,7 +366,7 @@ def heatmap(request):
     links = []
 
     # construct a network of edges
-
+    #
     # links: [ {"source" : ____ , "target" : ____ , "value" : ____ } , ... ]
     # ======================================================================
     #
@@ -376,13 +376,14 @@ def heatmap(request):
     # SOURCE:  A single bioactivity, drugtrial, or assay
     # TARGET:  A single compound
     # VALUE:   The value of the bioactivity, drugtrial, or assay
+    #
     # (Keep everything standardized to specific units per measurement type)
     #
     # Please let me know if you have any suggestions, comments, or concerns.
     #
     # Each colored cell represents two bioactivities, drugtrials,
     # or assays that evoked a response in the same drug
-
+    #
     # Darker cells indicate bioactivities, drugtrials, or assays that
     # co-occurred more frequently
 
@@ -408,6 +409,17 @@ def heatmap(request):
     nodes = []
 
     # build node table
+    #
+    # nodes: [ {"name" : ____ , "group" : ____ } , ... ]
+    # ==================================================
+    #
+    # NAME:  a bioactivity type name, a drugtrial name,
+    #        or an MPS assay test name
+    #
+    # GROUP: the ID number of the drug in our database
+    #        which resulted in a response of any sort
+    #
+
 
 
     # The result data for the adjacency matrix must be in
