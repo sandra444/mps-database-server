@@ -363,8 +363,6 @@ def heatmap(request):
         dict(enumerate(df3.columns))
     )
 
-    links = []
-
     # construct a network of edges
     #
     # links: [ {"source" : ____ , "target" : ____ , "value" : ____ } , ... ]
@@ -386,28 +384,7 @@ def heatmap(request):
     #
     # Darker cells indicate bioactivities, drugtrials, or assays that
     # co-occurred more frequently
-
-
-    for item in named_graph.adj.iteritems():
-            # each[0] is the source
-            # each[1] is a dictionary of targets
-            # targets are within this dictionary
-        for key, value in item[1].iteritems():
-            source = item[0]
-            target = key
-            weight = value.get('weight')
-            if (source in desired_bioactivities) \
-                    and (target in desired_compounds):
-                links.append(
-                    {
-                        "source": desired_bioactivities.index(source),
-                        "target": desired_compounds.index(target),
-                        "value": weight
-                    }
-                )
-
-    nodes = []
-
+    #
     # build node table
     #
     # nodes: [ {"name" : ____ , "group" : ____ } , ... ]
@@ -418,9 +395,40 @@ def heatmap(request):
     #
     # GROUP: the ID number of the drug in our database
     #        which resulted in a response of any sort
-    #
 
+    links = []
+    nodes_dict = {}
 
+    for item in named_graph.adj.iteritems():
+        for key, value in item[1].iteritems():
+            source = item[0]
+            target = key
+            weight = value.get('weight')
+            if (source in desired_targets) \
+                    and (target in desired_compounds):
+
+                # {"source" : ____ , "target" : ____ , "value" : ____ } , ...
+                links.append(
+                    {
+                        "source": desired_targets.index(source),
+                        "target": desired_compounds.index(target),
+                        "value": weight
+                    }
+                )
+
+                # {"name" : ____ , "group" : ____ } , ...
+                nodes_dict.update(
+                    {
+                        source: desired_compounds.index(target)
+                    }
+                )
+
+    nodes = nodes_dict.items()
+
+    d3_json = {
+        'nodes': nodes,
+        'links': links
+    }
 
     # The result data for the adjacency matrix must be in
     # the following format:
