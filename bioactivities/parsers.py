@@ -423,7 +423,10 @@ def heatmap(request):
                     }
                 )
 
-    nodes = nodes_dict.items()
+    nodes = []
+
+    for key, value in nodes_dict.iteritems():
+        nodes.append({'name': key, 'group': value})
 
     d3_json = {
         'nodes': nodes,
