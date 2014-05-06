@@ -1,10 +1,14 @@
 # coding=utf-8
 
-from pandas import *
+from mps.settings import MEDIA_ROOT
+import os
 
+from pandas import *
 import json
 from django.db import connection
-import networkx
+import matplotlib
+import pylab
+import numpy
 
 """
 
@@ -338,107 +342,27 @@ def heatmap(request):
         columns=['compound', 'target', 'bioactivity', 'value']
     )
 
-    # dropna thresh --> require at least N valid entries per axis
     result = bioactivities_data.pivot_table(
         rows='compound',
         cols=['target', 'bioactivity'],
         values='value'
     )
 
-    # reindex our data frame
-    df1 = result.reindex()
+    #Create test data with zero valued diagonal:
+    data = numpy.random.random_sample((25, 25))
+    rows, cols = numpy.indices((25,25))
+    data[numpy.diag(rows, k=0), numpy.diag(cols, k=0)] = 0
 
-    # remove redundant columns
-    df2 = df1.groupby(axis=1, level=0).sum()
-
-    # reshape our rectangular table into a square matrix
-    df3 = pandas.concat([df2, df2.T]).fillna(0)
-
-    # construct a networkx graph from our pandas dataframe
-    graph = networkx.from_numpy_matrix(df3.values)
-
-    # construct an adjacency matrix using labeled nodes
-    named_graph = networkx.relabel_nodes(
-        graph,
-        dict(enumerate(df3.columns))
+    #Create new colormap, with white for zero
+    #(can also take RGB values, like (255,255,255):
+    colors = ['white'] + [(pylab.cm.jet(i)) for i in xrange(1,256)]
+    new_map = matplotlib.colors.LinearSegmentedColormap.from_list(
+        'new_map', colors, N=256
     )
 
-    # construct a network of edges
-    #
-    # links: [ {"source" : ____ , "target" : ____ , "value" : ____ } , ... ]
-    # ======================================================================
-    #
-    #            VALUE
-    # SOURCE -------------> TARGET
-    #
-    # SOURCE:  A single bioactivity, drugtrial, or assay
-    # TARGET:  A single compound
-    # VALUE:   The value of the bioactivity, drugtrial, or assay
-    #
-    # (Keep everything standardized to specific units per measurement type)
-    #
-    # Please let me know if you have any suggestions, comments, or concerns.
-    #
-    # Each colored cell represents two bioactivities, drugtrials,
-    # or assays that evoked a response in the same drug
-    #
-    # Darker cells indicate bioactivities, drugtrials, or assays that
-    # co-occurred more frequently
-    #
-    # build node table
-    #
-    # nodes: [ {"name" : ____ , "group" : ____ } , ... ]
-    # ==================================================
-    #
-    # NAME:  a bioactivity type name, a drugtrial name,
-    #        or an MPS assay test name
-    #
-    # GROUP: the ID number of the drug in our database
-    #        which resulted in a response of any sort
-
-    links = []
-    nodes_dict = {}
-
-    for item in named_graph.adj.iteritems():
-        for key, value in item[1].iteritems():
-            source = item[0]
-            target = key
-            weight = value.get('weight')
-            if (source in desired_targets) \
-                    and (target in desired_compounds):
-
-                # {"source" : ____ , "target" : ____ , "value" : ____ } , ...
-                links.append(
-                    {
-                        "source": desired_targets.index(source),
-                        "target": desired_compounds.index(target),
-                        "value": weight
-                    }
-                )
-
-                # {"name" : ____ , "group" : ____ } , ...
-                nodes_dict.update(
-                    {
-                        source: desired_compounds.index(target)
-                    }
-                )
-
-    nodes = []
-
-    for key, value in nodes_dict.iteritems():
-        nodes.append({'name': key, 'group': value})
-
-    d3_json = {
-        'nodes': nodes,
-        'links': links
-    }
-
-    # The result data for the adjacency matrix must be in
-    # the following format:
-    #
-    # {
-    #   nodes: [ ... see below ...] ,
-    #   links: [ ... see below ...]
-    # }
-
-    return d3_json
+    pylab.pcolor(data, cmap=new_map)
+    pylab.colorbar()
+    heatmap_relative_path = 'heatmap/map.png'
+    heatmap_path = os.path.join(MEDIA_ROOT, heatmap_relative_path)
+    pylab.savefig(heatmap_path)
+    return {'url': u'/media/{}'.format(heatmap_relative_path)}
