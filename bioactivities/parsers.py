@@ -1,14 +1,11 @@
 # coding=utf-8
 
-from mps.settings import MEDIA_ROOT
-import os
-
-from pandas import *
 import json
+from pandas import *
 from django.db import connection
-import matplotlib
-import pylab
-import numpy
+import os
+import hashlib
+from mps.settings import MEDIA_ROOT
 
 """
 
@@ -176,7 +173,6 @@ def fetch_all_standard_bioactivities_data(
         desired_targets,
         desired_bioactivities
 ):
-
     # using values for now, FUTURE: use standardized_values
     cursor = connection.cursor()
 
@@ -287,7 +283,6 @@ def fetch_all_standard_mps_assay_data():
 
 
 def heatmap(request):
-
     if len(request.body) == 0:
         return
 
@@ -342,27 +337,18 @@ def heatmap(request):
         columns=['compound', 'target', 'bioactivity', 'value']
     )
 
-    result = bioactivities_data.pivot_table(
-        rows='compound',
-        cols=['target', 'bioactivity'],
-        values='value'
+    data_hash = hashlib.sha512(bioactivities_data.to_string()).hexdigest()[:10]
+
+    data_filename = os.path.join(
+        MEDIA_ROOT,
+        'heatmap',
+        data_hash + '.tsv'
     )
 
-    #Create test data with zero valued diagonal:
-    data = numpy.random.random_sample((25, 25))
-    rows, cols = numpy.indices((25,25))
-    data[numpy.diag(rows, k=0), numpy.diag(cols, k=0)] = 0
-
-    #Create new colormap, with white for zero
-    #(can also take RGB values, like (255,255,255):
-    colors = ['white'] + [(pylab.cm.jet(i)) for i in xrange(1,256)]
-    new_map = matplotlib.colors.LinearSegmentedColormap.from_list(
-        'new_map', colors, N=256
+    bioactivities_data.to_csv(
+        index=False,
+        path_or_buf=data_filename,
+        sep="\t"
     )
 
-    pylab.pcolor(data, cmap=new_map)
-    pylab.colorbar()
-    heatmap_relative_path = 'heatmap/map.png'
-    heatmap_path = os.path.join(MEDIA_ROOT, heatmap_relative_path)
-    pylab.savefig(heatmap_path)
-    return {'url': u'/media/{}'.format(heatmap_relative_path)}
+    return {'csv': data_hash}
