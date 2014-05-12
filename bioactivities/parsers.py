@@ -335,6 +335,13 @@ def heatmap(request):
     bioactivities_data = pandas.DataFrame(
         all_std_bioactivities,
         columns=['compound', 'target', 'bioactivity', 'value']
+    ).fillna(0)
+
+    def bin_bioactivities(current_bioactivity):
+        return desired_bioactivities.index(current_bioactivity)
+
+    bioactivities_data['bioactivity'] = bioactivities_data.bioactivity.apply(
+        bin_bioactivities
     )
 
     data_hash = hashlib.sha512(bioactivities_data.to_string()).hexdigest()[:10]
