@@ -358,4 +358,4 @@ def heatmap(request):
         sep="\t"
     )
 
-    return {'csv': data_hash}
+    return {'tsv': data_hash}
