@@ -254,14 +254,26 @@ class TestResult(models.Model):
 
         """
 
+        if self.value or self.value_units:
+            if not (self.drug_trial.source and self.drug_trial.source_link
+                    and self.value_units and self.value):
+                raise ValidationError(
+                    "There exists data in the drugtrials "
+                    "database tables that has values and "
+                    "units but no corresponding source "
+                    "and source link"
+                )
+
         if self.value:
             if not self.value_units:
-                raise ValidationError("You must specify the units "
-                                      "for the value you entered")
+                raise ValidationError(
+                    "You must specify valid units "
+                    "for the value you entered"
+                )
 
         if not self.value:
             if self.value_units:
-                raise ValidationError("You specified the units but no value!")
+                raise ValidationError("You forgot to enter a value!")
 
     def __unicode__(self):
         return u''
