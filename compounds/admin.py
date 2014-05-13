@@ -5,30 +5,30 @@ from django import forms
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
-
-from mps.base.admin import LockableAdmin
-
-from .models import Compound
-
 from bioservices import ChEMBLdb
+
+from compounds.resource import CompoundResource
+from mps.base.admin import LockableAdmin
+from compounds.models import Compound
 
 
 class CompoundAdmin(LockableAdmin):
+    resource_class = CompoundResource
 
     class Media(object):
         js = ('compounds/customize_admin.js',)
 
-
     class AddMultiForm(forms.Form):
 
         chemblids = forms.CharField(required=True, label="ChEMBL IDs",
-            widget=forms.Textarea(),
-            help_text="<br>ChEMBL IDs separated by a space or a new line.")
+                                    widget=forms.Textarea(),
+                                    help_text="<br>ChEMBL IDs separated by a "
+                                              "space or a new line.")
 
     save_on_top = True
     list_per_page = 20
     list_display = ('name', 'chembl_link', 'known_drug',
-            'molecular_formula', 'thumb', 'last_update', 'locked')
+                    'molecular_formula', 'thumb', 'last_update', 'locked')
     search_fields = ['=name', 'synonyms', '=chemblid']
     readonly_fields = ('last_update', )
     actions = ['update_fields']
@@ -41,7 +41,7 @@ class CompoundAdmin(LockableAdmin):
         }),
         ('Molecular Properties', {
             'fields': ('molecular_formula', 'molecular_weight',
-                       'rotatable_bonds' ,
+                       'rotatable_bonds',
                        'acidic_pka', 'basic_pka',
                        'logp', 'logd', 'alogp',)
         }),
@@ -54,8 +54,8 @@ class CompoundAdmin(LockableAdmin):
     def get_urls(self):
 
         return patterns('',
-            (r'^add_multi/$',
-             self.admin_site.admin_view(self.add_compounds))
+                        (r'^add_multi/$',
+                         self.admin_site.admin_view(self.add_compounds))
         ) + super(CompoundAdmin, self).get_urls()
 
     def add_compounds(self, request):
@@ -74,7 +74,9 @@ class CompoundAdmin(LockableAdmin):
                         skipped += 1
                         continue
                     try:
-                        data = ChEMBLdb().get_compounds_by_chemblId(str(chemblid))
+                        data = ChEMBLdb().get_compounds_by_chemblId(
+                            str(chemblid)
+                        )
                     except Exception:
                         notfound += 1
                     else:
@@ -85,24 +87,29 @@ class CompoundAdmin(LockableAdmin):
 
                 if counter:
                     self.message_user(request,
-                        "Successfully added {} compound{}."
-                        .format(counter, '' if counter == 1 else 's'))
+                                      "Successfully added {} compound{}."
+                                      .format(counter,
+                                              '' if counter == 1 else 's'))
                 if skipped:
                     self.message_user(request, "Skipped {} compound{} that "
-                        "{} already in the database."
-                        .format(skipped, '' if skipped == 1 else 's',
-                            'is' if skipped == 1 else 'are'),
-                        level=messages.WARNING)
+                                               "{} already in the database."
+                                      .format(skipped,
+                                              '' if skipped == 1 else 's',
+                                              'is' if skipped == 1 else 'are'),
+                                      level=messages.WARNING)
                 if invalid:
                     self.message_user(request, "Skipped {} invalid "
-                        "identifier{}."
-                        .format(invalid, '' if invalid == 1 else 's'),
-                        level=messages.WARNING)
+                                               "identifier{}."
+                                      .format(invalid,
+                                              '' if invalid == 1 else 's'),
+                                      level=messages.WARNING)
                 if notfound:
                     self.message_user(request,
-                        "Could not find {} identifier{} in ChEMBL database."
-                        .format(notfound, '' if notfound == 1 else 's'),
-                        level=messages.WARNING)
+                                      "Could not find {} identifier{} in "
+                                      "ChEMBL database."
+                                      .format(notfound,
+                                              '' if notfound == 1 else 's'),
+                                      level=messages.WARNING)
 
                 return HttpResponseRedirect(request.get_full_path())
         else:
@@ -112,7 +119,8 @@ class CompoundAdmin(LockableAdmin):
             'title': 'Add multiple compounds',
             'opts': self.model._meta,
             'form': form,
-            #'root_path': self.admin_site.root_path,
+            # 'root_path': self.admin_site.root_path,
         }, context_instance=RequestContext(request))
+
 
 admin.site.register(Compound, CompoundAdmin)

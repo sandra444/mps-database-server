@@ -171,6 +171,9 @@ INSTALLED_APPS = (
     'south',
     'django_extensions',
 
+    # django-import-export plugin
+    'import_export',
+
     # Django REST Framework
     # http://www.django-rest-framework.org
     'rest_framework',

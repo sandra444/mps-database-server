@@ -10,10 +10,10 @@ who created the item and who last edited the item
 
 """
 
-from django.contrib import admin
+from import_export.admin import ImportExportModelAdmin
 
 
-class TrackableAdmin(admin.ModelAdmin):
+class TrackableAdmin(ImportExportModelAdmin):
     """
 
     The class that all other "normal" admin classes subclass by default.
