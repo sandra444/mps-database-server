@@ -3,9 +3,11 @@ import csv
 from django.contrib import admin
 from django import forms
 
-from .models import *
+from assays.models import *
 from compounds.models import Compound
 from mps.base.admin import LockableAdmin
+from assays.resource import *
+from import_export.admin import ImportExportModelAdmin
 
 
 class AssayLayoutFormatForm(forms.ModelForm):
@@ -342,6 +344,9 @@ def parseReadoutCSV(currentAssayReadout, file):
 
 
 class AssayDeviceReadoutAdmin(LockableAdmin):
+
+    resource_class = AssayDeviceReadoutResource
+
     class Media(object):
         js = ('assays/customize_readout.js',)
         css = {'all': ('assays/customize_admin.css',)}
@@ -445,6 +450,9 @@ class AssayResultInline(admin.TabularInline):
 
 
 class AssayTestAdmin(LockableAdmin):
+
+    resource_class = AssayTestResource
+
     save_on_top = True
     list_per_page = 20
     list_display = (
