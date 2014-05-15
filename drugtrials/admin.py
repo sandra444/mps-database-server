@@ -4,7 +4,8 @@ from django.db.models import URLField
 from django.utils.safestring import mark_safe
 
 from mps.base.admin import LockableAdmin
-from .models import *
+from drugtrials.models import *
+from drugtrials.resource import *
 from forms import *
 
 
@@ -81,6 +82,9 @@ class FindingResultInline(admin.TabularInline):
 
 
 class DrugTrialAdmin(LockableAdmin):
+
+    resource_class = DrugTrialResource
+
     formfield_overrides = {
         URLField: {'widget': URLFieldWidget},
     }

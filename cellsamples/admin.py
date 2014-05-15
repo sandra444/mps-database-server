@@ -7,7 +7,7 @@ CellSamples Admin
 """
 
 from django.contrib import admin
-
+from cellsamples.resource import CellSampleResource
 from mps.base.admin import LockableAdmin
 from models import Organ, CellType, CellSubtype, Supplier, CellSample
 
@@ -41,6 +41,9 @@ admin.site.register(CellSubtype, CellSubtypeAdmin)
 
 
 class CellSampleAdmin(LockableAdmin):
+
+    resource_class = CellSampleResource
+    
     save_on_top = True
 
     list_display = ('__unicode__',  # calls CellSample.__unicode__ function
