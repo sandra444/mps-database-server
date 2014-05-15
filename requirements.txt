@@ -57,3 +57,4 @@ statprof
 suds
 wsgiref
 wstools
+django-import-export
