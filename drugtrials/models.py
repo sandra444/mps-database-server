@@ -258,9 +258,7 @@ class TestResult(models.Model):
             if not (self.drug_trial.source and self.drug_trial.source_link
                     and self.value_units and self.value):
                 raise ValidationError(
-                    "There exists data in the drugtrials "
-                    "database tables that has values and "
-                    "units but no corresponding source "
+                    "Values and units must have a defined source "
                     "and source link"
                 )
 
