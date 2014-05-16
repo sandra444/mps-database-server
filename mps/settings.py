@@ -41,8 +41,8 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'mpsdb',
-            'USER': 'mps_database',  # development DB username
-            'PASSWORD': '4UhdAwqEqaBG2D9QF4KxIg',  # development DB password
+            'USER': 'mps',  # development DB username
+            'PASSWORD': '4UhIg',  # development DB password
             'HOST': '127.0.0.1',
             'PORT': '',
         }
