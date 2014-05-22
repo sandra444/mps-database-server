@@ -1,13 +1,15 @@
 # begin django environment imports
 import sys
 import os
+import types
 
-sys.path.append('..')
+# sys.path.append('..')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'mps.settings'
 # end django environment imports
 
 # import database driver
 from django.db import connection
+from mps import settings
 
 
 def standardize_concentration(
@@ -17,22 +19,55 @@ def standardize_concentration(
     print('standardizing concentrations')
 
     print(
-        'original units: ' + str(unit_to_convert) +
+        'bioactivity to convert: ' + str(bioactivity_to_convert) +
+        ' original units: ' + str(unit_to_convert) +
         ' original values: ' + str(value_to_convert)
     )
 
-    return unit_to_convert, value_to_convert
+    final_unit = 'uM'
+
+    concentration_units = {
+        'pM': 10**-6,
+        'nM': 10**-3,
+        'uM': 10**0,
+        'mM': 10**3,
+        'M': 10**6
+    }
+
+    multiplier = concentration_units.get(unit_to_convert)
+
+    if not isinstance(multiplier, types.NoneType):
+        new_val = value_to_convert * multiplier
+    else:
+        new_val = 0
+        final_unit = 'ERROR'
+
+    return final_unit, new_val
 
 
-bioactivity_truth_table = {
-    'AC50': standardize_concentration,
-    'IC50': standardize_concentration
-}
+def get_truth_dict():
+    result_dict = {}
+    with open(
+            os.path.join(
+                settings.PROJECT_ROOT,
+                '..',
+                'scripts/bioactivities_truth_table.txt'
+            ),
+            'r'
+    ) as datafile:
+        for line in datafile:
+            (key, value) = line.split(sep=',')
+            assert key.__len__() > 0
+            assert value.__len__() > 0
+            result_dict[str(key)] = value
+    assert result_dict.__len__() > 0
+    return result_dict
 
 
 def save_bioactivity(bioactivity_id, standard_unit, standard_value):
     print(
-        'new units: ' + str(standard_unit) +
+        'bioactivity id: ' + str(bioactivity_id) +
+        ' new units: ' + str(standard_unit) +
         ' new value: ' + str(standard_value)
     )
 
@@ -80,7 +115,9 @@ for q in query:
     if not (q[0] and q[1] and q[2] and q[3] and q[4]):
         continue
 
-    if original_bioactivity in bioactivity_truth_table:
+    bioactivities_truth_dict = get_truth_dict()
+
+    if original_bioactivity in bioactivities_truth_dict:
 
         print('bioactivity match found!')
         print(
@@ -88,7 +125,12 @@ for q in query:
             ' bioactivity id: ' + str(original_bioactivity_id)
         )
 
-        new_unit, new_value = bioactivity_truth_table[original_bioactivity](
+        standardizing_function = bioactivities_truth_dict[original_bioactivity]
+
+        new_unit, new_value = getattr(
+            sys.modules[__name__],
+            standardizing_function
+        )(
             bioactivity_to_convert=original_bioactivity,
             unit_to_convert=original_unit,
             value_to_convert=original_value

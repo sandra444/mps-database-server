@@ -1,11 +1,15 @@
 # coding=utf-8
 
 import json
-from pandas import *
-from django.db import connection
 import os
 import hashlib
+import random
+
+from pandas import *
+from django.db import connection
+
 from mps.settings import MEDIA_ROOT
+
 
 """
 
@@ -337,14 +341,16 @@ def heatmap(request):
         columns=['compound', 'target', 'bioactivity', 'value']
     ).fillna(0)
 
-    def bin_bioactivities(current_bioactivity):
-        return desired_bioactivities.index(current_bioactivity)
-
-    bioactivities_data['bioactivity'] = bioactivities_data.bioactivity.apply(
-        bin_bioactivities
+    pivoted_data = pandas.pivot_table(
+        bioactivities_data,
+        values='value',
+        cols=['target', 'bioactivity'],
+        rows='compound'
     )
 
-    data_hash = hashlib.sha512(bioactivities_data.to_string()).hexdigest()[:10]
+    data_hash = hashlib.sha512(
+        str(random.random)
+    ).hexdigest()[:10]
 
     data_filename = os.path.join(
         MEDIA_ROOT,
@@ -352,7 +358,18 @@ def heatmap(request):
         data_hash + '.tsv'
     )
 
-    bioactivities_data.to_csv(
+    unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
+
+    unwound_data['target_bioactivity_pair'] = \
+        unwound_data['target'] + ' ' + unwound_data['bioactivity']
+
+    del unwound_data['target']
+    del unwound_data['bioactivity']
+
+    data_order = ['compound', 'target_bioactivity_pair', 'value']
+    rearranged_data = unwound_data[data_order]
+
+    rearranged_data.to_csv(
         index=False,
         path_or_buf=data_filename,
         sep="\t"
