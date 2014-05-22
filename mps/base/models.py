@@ -40,6 +40,14 @@ class TrackableModel(models.Model):
                                        blank=True,
                                        null=True)
 
+    signed_off_by = models.ForeignKey('auth.User',
+                                      related_name='%(class)s_signed_off_by',
+                                      blank=True,
+                                      null=True)
+
+    signed_off_date = models.DateTimeField(blank=True,
+                                           null=True)
+
     class Meta(object):
         abstract = True
 
