@@ -2,6 +2,48 @@ from django.db import models
 from mps.base.models import LockableModel
 
 
+CHEMBL = None
+
+def get_chembl_handle():
+
+    from bioservices import ChEMBLdb
+    global CHEMBL
+    if CHEMBL is None:
+        CHEMBL = ChEMBLdb()
+    return CHEMBL
+
+
+FIELDS = {
+    'acdAcidicPka': 'acidic_pka',
+    'acdBasicPka': 'basic_pka',
+    'acdLogd': 'logd',
+    'acdLogp': 'logp',
+    'alogp': 'alogp',
+    'chemblId': 'chemblid',
+    'knownDrug': 'known_drug',
+    'medChemFriendly': 'medchem_friendly',
+    'molecularFormula': 'molecular_formula',
+    'molecularWeight': 'molecular_weight',
+    'numRo5Violations': 'ro5_violations',
+    'passesRuleOfThree': 'ro3_passes',
+    'preferredCompoundName': 'name',
+    'rotatableBonds': 'rotatable_bonds',
+    'smiles': 'smiles',
+    'species': 'species',
+    'stdInChiKey': 'inchikey',
+    'synonyms': 'synonyms'
+}
+
+
+def chembl_compound(chemblid):
+    chembl = get_chembl_handle()
+    data = chembl.get_compounds_by_chemblId(str(chemblid))['compound']
+    return {
+        FIELDS[key]: value for key, value in data.items()
+        if key in FIELDS
+    }
+
+
 class Compound(LockableModel):
 
     #compound_id = AutoField(primary_key=True)

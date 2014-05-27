@@ -1,10 +1,12 @@
-import sys
+import sys, os
+sys.path.append('/home/mps/mps-database-server')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'mps.settings'
+from django.conf import settings
 import datetime
 
 from compounds.models import Compound, chembl_compound
 from bioactivities.models import Assay, Target, Bioactivity
 from bioactivities.models import chembl_target, chembl_assay
-
 
 from bioservices import ChEMBLdb
 
@@ -122,8 +124,5 @@ def run(days=180):
     print('{} bioactivities were added, {} were found in the database, and '
           '{} failed due to value errors.'.format(count, skip, error))
 
-
-
-
-
+run(0)
 
