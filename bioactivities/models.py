@@ -49,29 +49,26 @@ def chembl_assay(chemblid):
 
 class Target(LockableModel):
     #compound_id = AutoField(primary_key=True)
-    name = models.CharField(max_length=200,
-                            help_text="Preferred target name.")
-    synonyms = models.TextField(max_length=4000,
-                                null=True, blank=True)
-
+    name = models.TextField(help_text="Preferred target name.")
+    synonyms = models.TextField(null=True, blank=True)
+                                
     # external identifiers, not unique because does go with null on SQL server
-    chemblid = models.CharField('ChEMBL ID', max_length=20,
+    chemblid = models.TextField('ChEMBL ID',
                                 null=True, blank=True, unique=True,
                                 help_text="Enter a ChEMBL id, e.g. CHEMBL260, "
                                           "and click Retrieve to get target "
                                           "information automatically.")
 
-    description = models.CharField(max_length=400,
-                                   null=True, blank=True)
-    gene_names = models.CharField(max_length=250,
-                                  null=True, blank=True)
-    organism = models.CharField(max_length=100,
-                                null=True, blank=True)
-    uniprot_accession = models.CharField(max_length=200,
-                                         null=True, blank=True)
-    target_type = models.CharField(max_length=100,
-                                   null=True, blank=True)
-
+    description = models.TextField(null=True, blank=True)
+                                   
+    gene_names = models.TextField(null=True, blank=True)
+                                  
+    organism = models.TextField(null=True, blank=True)
+                                
+    uniprot_accession = models.TextField(null=True, blank=True)
+                                         
+    target_type = models.TextField(null=True, blank=True)
+                                   
     last_update = models.DateField(blank=True, null=True,
                                    help_text="Last time when activities "
                                              "associated with the target "
@@ -101,18 +98,18 @@ ASSAYTYPES = (('B', 'Binding'), ('F', 'Functional'), ('A', 'ADMET'))
 
 class Assay(LockableModel):
     # external identifiers, not unique because does go with null on SQL server
-    chemblid = models.CharField('ChEMBL ID', max_length=20,
+    chemblid = models.TextField('ChEMBL ID',
                                 null=True, blank=True, unique=True,
                                 help_text="Enter a ChEMBL id, e.g. "
                                           "CHEMBL1217643, and click Retrieve "
                                           "to get target information "
                                           "automatically.")
 
-    description = models.TextField(max_length=1000, blank=True, null=True)
-    organism = models.CharField(max_length=100, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    organism = models.TextField(blank=True, null=True)
     assay_type = models.CharField(max_length=1, choices=ASSAYTYPES)
-    journal = models.CharField(max_length=100, blank=True, null=True)
-    strain = models.CharField(max_length=100, blank=True, null=True)
+    journal = models.TextField(blank=True, null=True)
+    strain = models.TextField(blank=True, null=True)
 
     last_update = models.DateField(blank=True, null=True,
                                    help_text="Last time when activities "
@@ -152,23 +149,22 @@ class Bioactivity(LockableModel):
     target = models.ForeignKey(Target)
     target_confidence = models.IntegerField(blank=True, null=True)
 
-    bioactivity_type = models.CharField(max_length=100)
-    operator = models.CharField(max_length=20, blank=True, null=True)
+    bioactivity_type = models.TextField(blank=True, null=True)
+    operator = models.TextField(blank=True, null=True)
 
-    units = models.CharField(max_length=40, blank=True, null=True)
+    units = models.TextField(blank=True, null=True)
     value = models.FloatField(blank=True, null=True)
 
-    standardized_units = models.CharField(max_length=40,
-                                          verbose_name="std units",
+    standardized_units = models.TextField(verbose_name="std units",
                                           blank=True,
                                           null=True)
     standardized_value = models.FloatField(verbose_name="std vals",
                                            blank=True,
                                            null=True)
 
-    activity_comment = models.CharField(max_length=250, blank=True, null=True)
-    reference = models.CharField(max_length=100, blank=True, null=True)
-    name_in_reference = models.CharField(max_length=100, blank=True, null=True)
+    activity_comment = models.TextField(blank=True, null=True)
+    reference = models.TextField(blank=True, null=True)
+    name_in_reference = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
         return (str(self.compound) + ': ' + self.bioactivity_type + ' of ' +
