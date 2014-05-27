@@ -10,5 +10,6 @@ uwsgi --chdir=/home/mps/mps-database-server \
  --vacuum \
  --daemonize=/home/mps/log/mps.log \
  --threads 2 \
- --master
+ --master \
+ --touch-reload=/home/mps/touch-reload-production
 
