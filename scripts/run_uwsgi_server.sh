@@ -11,5 +11,8 @@ uwsgi --chdir=/home/mps/mps-database-server \
  --daemonize=/home/mps/log/mps.log \
  --threads 2 \
  --master \
- --touch-reload=/home/mps/touch-reload-production
+ --touch-reload=/home/mps/touch-reload-production \
+ --thunder-lock \
+ --post-buffering 1
+
 
