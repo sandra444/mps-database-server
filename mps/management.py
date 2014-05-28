@@ -10,7 +10,6 @@ def webhook(request):
 
     print('request.body')
     print(request.body)
-    print('====')
     print('data')
     print(data)
 
