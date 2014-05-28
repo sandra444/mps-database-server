@@ -2,7 +2,6 @@ import json
 import subprocess
 import hmac
 import hashlib
-import pprint
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -15,18 +14,16 @@ def webhook(request):
         # use our hidden credential file to import username and
         # password info
         import mps_credentials
-
-        pprint.pprint(request.META)
-
-        remote_signature = request.META.get('X-Hub-Signature')
+        remote_signature = request.META.get('HTTP_X_HUB_SIGNATURE').split('=')[1]
         real_signature = hmac.new(
             mps_credentials.webhook_secret,
             request.body,
-            hashlib.sha256
+            hashlib.sha1
         ).hexdigest()
 
         print(remote_signature)
         print(real_signature)
+        print(remote_signature in real_signature)
 
         # we only want to update if we push to master
         if "refs/heads/master" in data['ref']:
