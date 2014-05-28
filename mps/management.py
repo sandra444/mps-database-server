@@ -12,6 +12,7 @@ def webhook(request):
     except ValueError:
         return HttpResponse(status=405)
     try:
+        print request.META['REMOTE_ADDR']
         if "refs/heads/master" in data['ref']:
             if "nszceta" in data['pusher']['name']:
                 subprocess.call(['git', 'reset', '--hard', 'HEAD'])
