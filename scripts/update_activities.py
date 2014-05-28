@@ -9,6 +9,7 @@ from bioactivities.models import Assay, Target, Bioactivity
 from bioactivities.models import chembl_target, chembl_assay
 
 from bioservices import ChEMBLdb
+from bioservices.services import BioServicesError
 
 FIELDS = {
     'reference': 'reference',
@@ -62,7 +63,12 @@ def run(days=180):
             (datetime.date.today() - compound.last_update) >=
              datetime.timedelta(days)):
             ncomp += 1
-            acts = chembl.get_compounds_activities(str(compound.chemblid))
+
+            try:            
+                acts = chembl.get_compounds_activities(str(compound.chemblid))
+            except BioServicesError:
+                continue
+
             for act in acts['bioactivities']:
                 act = {FIELDS[key]: value for key, value in act.items()
                         if key in FIELDS}
