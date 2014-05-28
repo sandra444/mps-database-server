@@ -6,9 +6,10 @@ import subprocess
 
 @csrf_exempt
 def webhook(request):
-
+    data = {}
     try:
         data = json.loads(request.body)
+        print(data)
     except ValueError:
         pass
 
