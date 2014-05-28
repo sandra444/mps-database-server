@@ -6,12 +6,14 @@ import subprocess
 
 @csrf_exempt
 def webhook(request):
-    data = json.loads(request.body)
+
+    try:
+        data = json.loads(request.body)
+    except ValueError:
+        pass
 
     print('request.body')
     print(request.body)
-    print('data')
-    print(data)
 
     try:
         if "refs/heads/master" in data.ref:
