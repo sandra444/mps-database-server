@@ -14,16 +14,17 @@ def webhook(request):
         # use our hidden credential file to import username and
         # password info
         import mps_credentials
-        remote_signature = request.META.get('HTTP_X_HUB_SIGNATURE').split('=')[1]
+
+        remote_signature = request.META.get('HTTP_X_HUB_SIGNATURE').split('=')[
+            1]
         real_signature = hmac.new(
             mps_credentials.webhook_secret,
             request.body,
             hashlib.sha1
         ).hexdigest()
 
-        print(remote_signature)
-        print(real_signature)
-        print(remote_signature in real_signature)
+        if remote_signature not in real_signature:
+            raise Exception
 
         # we only want to update if we push to master
         if "refs/heads/master" in data['ref']:
@@ -46,10 +47,10 @@ def webhook(request):
     return HttpResponse(status=405)
 
 
-    @csrf_exempt
-    def database(request):
-        return HttpResponse(
-            subprocess.check_output(
-                ["pg_dump", "-Fc", "mpsdb"]
-            )
+@csrf_exempt
+def database(request):
+    return HttpResponse(
+        subprocess.check_output(
+            ["pg_dump", "-Fc", "mpsdb"]
         )
+    )
