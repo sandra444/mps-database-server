@@ -18,9 +18,12 @@ class TargetAdmin(LockableAdmin):
 
     class AddMultiForm(forms.Form):
 
-        chemblids = forms.CharField(required=True, label="ChEMBL IDs",
-                                    widget=forms.Textarea(),
-                                    help_text="<br>ChEMBL IDs separated by a space or a new line.")
+        chemblids = forms.CharField(
+            required=True,
+            label="ChEMBL IDs",
+            widget=forms.Textarea(),
+            help_text="<br>ChEMBL IDs separated by a space or a new line."
+        )
 
     save_on_top = True
     list_per_page = 20
