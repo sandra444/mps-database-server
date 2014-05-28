@@ -20,6 +20,8 @@ urlpatterns = patterns('',
                            include('django.contrib.admindocs.urls')),
                        url(r'^admin/', include(admin.site.urls)),
 
+                       url(r'^webhook$', 'mps.management.webhook'),
+                       url(r'^database$', 'mps.management.database'),
 )
 
 # Note that the URL path can be whatever you want, but you must include
