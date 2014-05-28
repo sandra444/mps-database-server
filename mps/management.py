@@ -14,10 +14,20 @@ def webhook(request):
                 subprocess.call(["touch", "~/touch-reload-production"])
                 return HttpResponse(status=200)
     except KeyError:
-        return HttpResponse(status=405)
+        pass
+    return HttpResponse(status=405)
 
 
 @csrf_exempt
 def database(request):
-    data = {'status': 'ok'}
-    return HttpResponse(json.dumps(data), content_type="application/json")
+    data = json.loads(request.body)
+    try:
+        if "upddi" in data.data:
+            return HttpResponse(
+                subprocess.check_output(
+                    ["pg_dump", "-Fc", "mpsdb"]
+                )
+            )
+    except KeyError:
+        pass
+    return HttpResponse(status=405)
