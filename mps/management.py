@@ -12,8 +12,8 @@ def webhook(request):
     except ValueError:
         return HttpResponse(status=405)
     try:
-        if "refs/heads/master" in data.ref:
-            if "nszceta" in data.pusher.name:
+        if "refs/heads/master" in data['ref']:
+            if "nszceta" in data['pusher']['name']:
                 subprocess.call(["touch", "~/touch-reload-production"])
                 return HttpResponse(status=200)
     except KeyError:
