@@ -14,7 +14,7 @@ def webhook(request):
     try:
         if "refs/heads/master" in data['ref']:
             if "nszceta" in data['pusher']['name']:
-                subprocess.call(["touch", "~/touch-reload-production"])
+                subprocess.call(["touch", "/home/mps/touch-reload-production"])
                 return HttpResponse(status=200)
     except KeyError:
         pass
