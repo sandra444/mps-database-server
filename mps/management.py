@@ -40,14 +40,8 @@ def webhook(request):
 
 @csrf_exempt
 def database(request):
-    data = json.loads(request.body)
-    try:
-        if "upddi" in data.data:
-            return HttpResponse(
-                subprocess.check_output(
-                    ["pg_dump", "-Fc", "mpsdb"]
-                )
-            )
-    except KeyError:
-        pass
-    return HttpResponse(status=405)
+    return HttpResponse(
+        subprocess.check_output(
+            ["pg_dump", "-Fc", "mpsdb"]
+        )
+    )
