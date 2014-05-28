@@ -1,5 +1,7 @@
 import json
 import subprocess
+import hmac
+import hashlib
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -9,13 +11,19 @@ from django.views.decorators.csrf import csrf_exempt
 def webhook(request):
     try:
         data = json.loads(request.body)
-        source_ip = request.META['REMOTE_ADDR'].split('.')
+        # use our hidden credential file to import username and
+        # password info
+        import mps_credentials
 
-        # if the request isn't from Github, forget it.
-        if ('192' not in source_ip[0]) \
-                and ('30' not in source_ip[1]) \
-                and ('252' not in source_ip[2]):
-            raise ValueError
+        remote_signature = request.META.get('X-Hub-Signature')
+        real_signature = hmac.new(
+            mps_credentials.webhook_secret,
+            request.body,
+            hashlib.sha256
+        ).hexdigest()
+
+        print(remote_signature)
+        print(real_signature)
 
         # we only want to update if we push to master
         if "refs/heads/master" in data['ref']:
@@ -26,22 +34,22 @@ def webhook(request):
                 subprocess.call(['git', 'fetch'])
                 subprocess.call(['git', 'pull'])
                 subprocess.call(['git', 'reset', '--hard', 'HEAD'])
-                subprocess.call(['touch', '/home/mps/touch-reload-production'])
+                subprocess.call(
+                    ['touch', '/home/mps/touch-reload-production'])
                 return HttpResponse(status=200)
 
-    except KeyError:
-        pass
-    except ValueError:
+    # return HTTP error if _anything_ goes wrong whatsoever.
+    except Exception:
         pass
 
     # if anything goes wrong, return 'method not allowed' code 405
     return HttpResponse(status=405)
 
 
-@csrf_exempt
-def database(request):
-    return HttpResponse(
-        subprocess.check_output(
-            ["pg_dump", "-Fc", "mpsdb"]
+    @csrf_exempt
+    def database(request):
+        return HttpResponse(
+            subprocess.check_output(
+                ["pg_dump", "-Fc", "mpsdb"]
+            )
         )
-    )
