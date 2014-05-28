@@ -7,16 +7,10 @@ from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
 def webhook(request):
-    data = {}
     try:
         data = json.loads(request.body)
-        print(data)
     except ValueError:
-        pass
-
-    print('request.body')
-    print(request.body)
-
+        return HttpResponse(status=405)
     try:
         if "refs/heads/master" in data.ref:
             if "nszceta" in data.pusher.name:
