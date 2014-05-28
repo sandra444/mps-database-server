@@ -8,6 +8,12 @@ import subprocess
 def webhook(request):
     data = json.loads(request.body)
 
+    print('request.body')
+    print(request.body)
+    print('====')
+    print('data')
+    print(data)
+
     try:
         if "refs/heads/master" in data.ref:
             if "nszceta" in data.pusher.name:
