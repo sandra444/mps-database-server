@@ -2,6 +2,7 @@ import json
 import subprocess
 import hmac
 import hashlib
+import pprint
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -14,6 +15,8 @@ def webhook(request):
         # use our hidden credential file to import username and
         # password info
         import mps_credentials
+
+        pprint.pprint(request.META)
 
         remote_signature = request.META.get('X-Hub-Signature')
         real_signature = hmac.new(
