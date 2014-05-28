@@ -17,7 +17,6 @@ from .models import *
 # Ajax requests are sent to ajax(request) and funneled into the correct
 # handler function using a simulated Python switch routing function
 
-
 def main(request):
     return render_to_response('ajax_error.html',
                               context_instance=RequestContext(request))
