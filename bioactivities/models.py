@@ -186,5 +186,5 @@ class BioactivityTypeTable(LockableModel):
     standard_unit = models.TextField(default='')
 
     def __unicode__(self):
-        return str(self.standard_name)
+        return u''.format(self.standard_name)
 
