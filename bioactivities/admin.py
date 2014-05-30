@@ -9,7 +9,7 @@ from bioactivities.resource import BioactivityTypeTableResource
 
 from mps.base.admin import LockableAdmin
 
-from .models import Target, chembl_target, Assay, chembl_assay, Bioactivity
+from .models import *
 
 
 class TargetAdmin(LockableAdmin):
@@ -223,3 +223,5 @@ class BioactivityTypeTableAdmin(LockableAdmin):
         'description',
         'standard_unit',
     )
+
+admin.site.register(BioactivityTypeTable, BioactivityTypeTableAdmin)
