@@ -5,6 +5,7 @@ from django import forms
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
+from bioactivities.resource import BioactivityTypeTableResource
 
 from mps.base.admin import LockableAdmin
 
@@ -196,7 +197,6 @@ class BioactivityAdmin(LockableAdmin):
     list_per_page = 20
     raw_id_fields = ("compound",)
 
-
     def chembl_link(self, obj):
         return obj.assay.chembl_link()
 
@@ -210,3 +210,10 @@ class BioactivityAdmin(LockableAdmin):
     actions = ['update_fields']
 
 admin.site.register(Bioactivity, BioactivityAdmin)
+
+
+class BioactivityTypeTableAdmin(LockableAdmin):
+
+    resource_class = BioactivityTypeTableResource
+    save_on_top = True
+    list_per_page = 20

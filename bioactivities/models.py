@@ -51,7 +51,7 @@ class Target(LockableModel):
     #compound_id = AutoField(primary_key=True)
     name = models.TextField(help_text="Preferred target name.")
     synonyms = models.TextField(null=True, blank=True)
-                                
+
     # external identifiers, not unique because does go with null on SQL server
     chemblid = models.TextField('ChEMBL ID',
                                 null=True, blank=True, unique=True,
@@ -60,15 +60,15 @@ class Target(LockableModel):
                                           "information automatically.")
 
     description = models.TextField(null=True, blank=True)
-                                   
+
     gene_names = models.TextField(null=True, blank=True)
-                                  
+
     organism = models.TextField(null=True, blank=True)
-                                
+
     uniprot_accession = models.TextField(null=True, blank=True)
-                                         
+
     target_type = models.TextField(null=True, blank=True)
-                                   
+
     last_update = models.DateField(blank=True, null=True,
                                    help_text="Last time when activities "
                                              "associated with the target "
@@ -169,3 +169,18 @@ class Bioactivity(LockableModel):
     def __unicode__(self):
         return (str(self.compound) + ': ' + self.bioactivity_type + ' of ' +
                 self.target.name)
+
+
+class BioactivityTypeTable(LockableModel):
+
+    chembl_name = models.TextField(default='')
+
+    standard_name = models.TextField(default='')
+
+    description = models.TextField(default='')
+
+    standard_unit = models.TextField(default='')
+
+    def __unicode__(self):
+        return str(self.standard_name)
+
