@@ -217,7 +217,7 @@ class BioactivityTypeTableAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 20
     list_display = (
-        'chembl_name',
+        'chembl_bioactivity',
         'standard_name',
         'description',
         'standard_unit',

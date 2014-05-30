@@ -173,7 +173,11 @@ class Bioactivity(LockableModel):
 
 class BioactivityTypeTable(LockableModel):
 
-    chembl_name = models.TextField(default='')
+    chembl_bioactivity = models.ForeignKey(
+        'bioactivities.Bioactivity',
+        blank=True,
+        null=True
+    )
 
     standard_name = models.TextField(default='')
 
