@@ -6,9 +6,8 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from bioactivities.resource import BioactivityTypeTableResource
-
+from django.forms import Textarea
 from mps.base.admin import LockableAdmin
-
 from .models import *
 
 
@@ -223,5 +222,8 @@ class BioactivityTypeTableAdmin(LockableAdmin):
         'description',
         'standard_unit',
     )
+    formfield_overrides = {
+        models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 30})}
+    }
 
 admin.site.register(BioactivityTypeTable, BioactivityTypeTableAdmin)
