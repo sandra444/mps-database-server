@@ -217,3 +217,9 @@ class BioactivityTypeTableAdmin(LockableAdmin):
     resource_class = BioactivityTypeTableResource
     save_on_top = True
     list_per_page = 20
+    list_display = (
+        'chembl_name',
+        'standard_name',
+        'description',
+        'standard_unit',
+    )
