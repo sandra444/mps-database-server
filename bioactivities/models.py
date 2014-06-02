@@ -1,5 +1,4 @@
 from django.db import models
-
 from mps.base.models import LockableModel
 
 
@@ -150,7 +149,7 @@ class Bioactivity(LockableModel):
 
     bioactivity_type = models.TextField(blank=True, null=True)
 
-    standard_name = models.TextField(blank=True, null=True)
+    standard_name = models.TextField(blank=True, null=True, unique=True)
 
     operator = models.TextField(blank=True, null=True)
 
