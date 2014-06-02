@@ -5,14 +5,14 @@ from django import forms
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
-from bioactivities.resource import BioactivityTypeResource
 from django.forms import Textarea
+
+from bioactivities.resource import BioactivityTypeResource
 from mps.base.admin import LockableAdmin
 from .models import *
 
 
 class TargetAdmin(LockableAdmin):
-
     class Media(object):
         js = ('bioactivities/customize_admin.js',)
 
@@ -37,7 +37,7 @@ class TargetAdmin(LockableAdmin):
         return patterns('',
                         (r'^add_multi/$',
                          self.admin_site.admin_view(self.add_targets))
-                        ) + super(TargetAdmin, self).get_urls()
+        ) + super(TargetAdmin, self).get_urls()
 
     def add_targets(self, request):
 
@@ -67,22 +67,27 @@ class TargetAdmin(LockableAdmin):
                 if counter:
                     self.message_user(request,
                                       "Successfully added {} target{}."
-                                      .format(counter, '' if counter == 1 else 's'))
+                                      .format(counter,
+                                              '' if counter == 1 else 's'))
                 if skipped:
                     self.message_user(request, "Skipped {} target{} that "
-                                      "{} already in the database."
-                        .format(skipped, '' if skipped == 1 else 's',
-                                'is' if skipped == 1 else 'are'),
-                        level=messages.WARNING)
+                                               "{} already in the database."
+                                      .format(skipped,
+                                              '' if skipped == 1 else 's',
+                                              'is' if skipped == 1 else 'are'),
+                                      level=messages.WARNING)
                 if invalid:
                     self.message_user(request, "Skipped {} invalid "
-                                      "identifier{}."
-                        .format(invalid, '' if invalid == 1 else 's'),
-                        level=messages.WARNING)
+                                               "identifier{}."
+                                      .format(invalid,
+                                              '' if invalid == 1 else 's'),
+                                      level=messages.WARNING)
                 if notfound:
                     self.message_user(request,
-                                      "Could not find {} identifier{} in ChEMBL database."
-                                      .format(notfound, '' if notfound == 1 else 's'),
+                                      "Could not find {} identifier{} in "
+                                      "ChEMBL database."
+                                      .format(notfound,
+                                              '' if notfound == 1 else 's'),
                                       level=messages.WARNING)
 
                 return HttpResponseRedirect(request.get_full_path())
@@ -94,14 +99,14 @@ class TargetAdmin(LockableAdmin):
             'opts': self.model._meta,
             'form': form,
             'what': 'target',
-            #'root_path': self.admin_site.root_path,
+            # 'root_path': self.admin_site.root_path,
         }, context_instance=RequestContext(request))
+
 
 admin.site.register(Target, TargetAdmin)
 
 
 class AssayAdmin(LockableAdmin):
-
     class Media(object):
         js = ('bioactivities/customize_admin.js',)
 
@@ -109,12 +114,13 @@ class AssayAdmin(LockableAdmin):
 
         chemblids = forms.CharField(required=True, label="ChEMBL IDs",
                                     widget=forms.Textarea(),
-                                    help_text="<br>ChEMBL IDs separated by a space or a new line.")
+                                    help_text="<br>ChEMBL IDs separated by a "
+                                              "space or a new line.")
 
     save_on_top = True
     list_per_page = 20
     list_display = (
-        'description', 'chembl_link', 'organism',  'assay_type', 'locked')
+        'description', 'chembl_link', 'organism', 'assay_type', 'locked')
     search_fields = ['description', '=chemblid']
     actions = ['update_fields']
 
@@ -127,7 +133,7 @@ class AssayAdmin(LockableAdmin):
         return patterns('',
                         (r'^add_multi/$',
                          self.admin_site.admin_view(self.add_assays))
-                        ) + super(AssayAdmin, self).get_urls()
+        ) + super(AssayAdmin, self).get_urls()
 
     def add_assays(self, request):
 
@@ -157,22 +163,27 @@ class AssayAdmin(LockableAdmin):
                 if counter:
                     self.message_user(request,
                                       "Successfully added {} assay{}."
-                                      .format(counter, '' if counter == 1 else 's'))
+                                      .format(counter,
+                                              '' if counter == 1 else 's'))
                 if skipped:
                     self.message_user(request, "Skipped {} assay{} that "
-                                      "{} already in the database."
-                        .format(skipped, '' if skipped == 1 else 's',
-                                'is' if skipped == 1 else 'are'),
-                        level=messages.WARNING)
+                                               "{} already in the database."
+                                      .format(skipped,
+                                              '' if skipped == 1 else 's',
+                                              'is' if skipped == 1 else 'are'),
+                                      level=messages.WARNING)
                 if invalid:
                     self.message_user(request, "Skipped {} invalid "
-                                      "identifier{}."
-                        .format(invalid, '' if invalid == 1 else 's'),
-                        level=messages.WARNING)
+                                               "identifier{}."
+                                      .format(invalid,
+                                              '' if invalid == 1 else 's'),
+                                      level=messages.WARNING)
                 if notfound:
                     self.message_user(request,
-                                      "Could not find {} identifier{} in ChEMBL database."
-                                      .format(notfound, '' if notfound == 1 else 's'),
+                                      "Could not find {} identifier{} in "
+                                      "ChEMBL database."
+                                      .format(notfound,
+                                              '' if notfound == 1 else 's'),
                                       level=messages.WARNING)
 
                 return HttpResponseRedirect(request.get_full_path())
@@ -184,14 +195,14 @@ class AssayAdmin(LockableAdmin):
             'opts': self.model._meta,
             'form': form,
             'what': 'assay',
-            #'root_path': self.admin_site.root_path,
+            # 'root_path': self.admin_site.root_path,
         }, context_instance=RequestContext(request))
+
 
 admin.site.register(Assay, AssayAdmin)
 
 
 class BioactivityAdmin(LockableAdmin):
-
     save_on_top = True
     list_per_page = 20
     raw_id_fields = ("compound",)
@@ -221,11 +232,11 @@ class BioactivityAdmin(LockableAdmin):
         models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 20})}
     }
 
+
 admin.site.register(Bioactivity, BioactivityAdmin)
 
 
 class BioactivityTypeAdmin(LockableAdmin):
-
     resource_class = BioactivityTypeResource
     save_on_top = True
     list_per_page = 20
@@ -238,5 +249,15 @@ class BioactivityTypeAdmin(LockableAdmin):
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 30})}
     }
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 admin.site.register(BioactivityType, BioactivityTypeAdmin)
