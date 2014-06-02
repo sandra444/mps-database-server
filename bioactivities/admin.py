@@ -217,6 +217,10 @@ class BioactivityAdmin(LockableAdmin):
     search_fields = ['compound__name', 'target__name', 'bioactivity_type']
     actions = ['update_fields']
 
+    formfield_overrides = {
+        models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 20})}
+    }
+
 admin.site.register(Bioactivity, BioactivityAdmin)
 
 
