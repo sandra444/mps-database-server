@@ -5,7 +5,7 @@ from bioactivities.models import BioactivityType
 class BioactivityTypeTableResource(resources.ModelResource):
 
     class Meta(object):
-        model = BioactivityTypeTable
+        model = BioactivityType
 
 
 
