@@ -203,6 +203,7 @@ class BioactivityAdmin(LockableAdmin):
     chembl_link.short_description = 'CHEMBL Links'
 
     list_display = ('compound', 'chembl_link', 'bioactivity_type',
+                    'chembl_bioactivity',
                     'operator', 'value', 'units', 'locked',
                     'standardized_units', 'standardized_value')
     search_fields = ['compound__name', 'target__name', 'bioactivity_type']

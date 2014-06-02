@@ -150,6 +150,14 @@ class Bioactivity(LockableModel):
     target_confidence = models.IntegerField(blank=True, null=True)
 
     bioactivity_type = models.TextField(blank=True, null=True)
+
+    chembl_bioactivity = models.ForeignKey(
+        'bioactivities.BioactivityTypeTable',
+        blank=True,
+        null=True,
+        verbose_name="ChEMBL Bioactivity"
+    )
+
     operator = models.TextField(blank=True, null=True)
 
     units = models.TextField(blank=True, null=True)
@@ -173,11 +181,7 @@ class Bioactivity(LockableModel):
 
 class BioactivityTypeTable(LockableModel):
 
-    chembl_bioactivity = models.ForeignKey(
-        'bioactivities.Bioactivity',
-        blank=True,
-        null=True
-    )
+    chembl_bioactivity = models.TextField(default='')
 
     standard_name = models.TextField(default='')
 
@@ -186,5 +190,5 @@ class BioactivityTypeTable(LockableModel):
     standard_unit = models.TextField(default='')
 
     def __unicode__(self):
-        return u''.format(self.standard_name)
+        return unicode(self.standard_name)
 
