@@ -17,7 +17,9 @@ function reset_all () {
         mps-web-client \
         nginx.conf \
         reload_all.sh \
-        touch-reload-production
+        touch-reload-production \
+        nightly.sh \
+        weekly.sh
 
     cd /home/mps/mps-database-server
     git reset --hard HEAD
