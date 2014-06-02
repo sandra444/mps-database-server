@@ -48,7 +48,7 @@ def chembl_assay(chemblid):
 
 
 class Target(LockableModel):
-    #compound_id = AutoField(primary_key=True)
+    # compound_id = AutoField(primary_key=True)
     name = models.TextField(help_text="Preferred target name.")
     synonyms = models.TextField(null=True, blank=True)
 
@@ -136,7 +136,6 @@ class Assay(LockableModel):
 
 
 class Bioactivity(LockableModel):
-
     class Meta(object):
         verbose_name_plural = 'bioactivities'
         unique_together = ('assay', 'target', 'compound')
@@ -151,12 +150,7 @@ class Bioactivity(LockableModel):
 
     bioactivity_type = models.TextField(blank=True, null=True)
 
-    chembl_bioactivity = models.ForeignKey(
-        'bioactivities.BioactivityTypeTable',
-        blank=True,
-        null=True,
-        verbose_name="ChEMBL Bioactivity"
-    )
+    standardized_name = models.TextField(blank=True, null=True)
 
     operator = models.TextField(blank=True, null=True)
 
@@ -175,18 +169,17 @@ class Bioactivity(LockableModel):
     name_in_reference = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
-        return (str(self.compound) + ': ' + self.bioactivity_type + ' of ' +
-                self.target.name)
+        return u'{}: {} {}'.format(
+            self.compound,
+            self.bioactivity_type,
+            self.target.name
+        )
 
 
-class BioactivityTypeTable(LockableModel):
-
+class BioactivityType(LockableModel):
     chembl_bioactivity = models.TextField(default='')
-
     standard_name = models.TextField(default='')
-
     description = models.TextField(default='')
-
     standard_unit = models.TextField(default='')
 
     def __unicode__(self):

@@ -202,17 +202,25 @@ class BioactivityAdmin(LockableAdmin):
     chembl_link.allow_tags = True
     chembl_link.short_description = 'CHEMBL Links'
 
-    list_display = ('compound', 'chembl_link', 'bioactivity_type',
-                    'chembl_bioactivity',
-                    'operator', 'value', 'units', 'locked',
-                    'standardized_units', 'standardized_value')
+    list_display = (
+        'compound',
+        'chembl_link',
+        'bioactivity_type',
+        '',
+        'operator',
+        'locked',
+        'standardized_value',
+        'standardized_units',
+        'value',
+        'units'
+    )
     search_fields = ['compound__name', 'target__name', 'bioactivity_type']
     actions = ['update_fields']
 
 admin.site.register(Bioactivity, BioactivityAdmin)
 
 
-class BioactivityTypeTableAdmin(LockableAdmin):
+class BioactivityTypeAdmin(LockableAdmin):
 
     resource_class = BioactivityTypeTableResource
     save_on_top = True
@@ -227,4 +235,4 @@ class BioactivityTypeTableAdmin(LockableAdmin):
         models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 30})}
     }
 
-admin.site.register(BioactivityTypeTable, BioactivityTypeTableAdmin)
+admin.site.register(BioactivityType, BioactivityTypeAdmin)
