@@ -250,14 +250,5 @@ class BioactivityTypeAdmin(LockableAdmin):
         models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 30})}
     }
 
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
 
 admin.site.register(BioactivityType, BioactivityTypeAdmin)
