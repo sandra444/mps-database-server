@@ -5,7 +5,7 @@ from django import forms
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
-from bioactivities.resource import BioactivityTypeTableResource
+from bioactivities.resource import BioactivityTypeResource
 from django.forms import Textarea
 from mps.base.admin import LockableAdmin
 from .models import *

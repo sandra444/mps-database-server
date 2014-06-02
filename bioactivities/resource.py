@@ -1,5 +1,5 @@
 from import_export import resources
-from bioactivities.models import BioactivityTypeTable
+from bioactivities.models import BioactivityType
 
 
 class BioactivityTypeTableResource(resources.ModelResource):
