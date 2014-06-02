@@ -31,12 +31,9 @@ def webhook(request):
 
             # adam is responsible for deploying to master
             if "nszceta" in data['pusher']['name']:
-                subprocess.call(['git', 'reset', '--hard', 'HEAD'])
-                subprocess.call(['git', 'fetch'])
-                subprocess.call(['git', 'pull'])
-                subprocess.call(['git', 'reset', '--hard', 'HEAD'])
                 subprocess.call(
-                    ['touch', '/home/mps/touch-reload-production'])
+                    ['/home/mps/mps-database-server/scripts/reload-all.sh']
+                )
                 return HttpResponse(status=200)
 
     # return HTTP error if _anything_ goes wrong whatsoever.
