@@ -15,8 +15,9 @@ def webhook(request):
         # password info
         import mps_credentials
 
-        remote_signature = request.META.get('HTTP_X_HUB_SIGNATURE').split('=')[
-            1]
+        remote_signature = request.META.get(
+            'HTTP_X_HUB_SIGNATURE'
+        ).split('=')[1]
         real_signature = hmac.new(
             mps_credentials.webhook_secret,
             request.body,
