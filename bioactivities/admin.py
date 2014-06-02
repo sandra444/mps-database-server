@@ -206,7 +206,7 @@ class BioactivityAdmin(LockableAdmin):
         'compound',
         'chembl_link',
         'bioactivity_type',
-        '',
+        'standard_name',
         'operator',
         'locked',
         'standardized_value',
@@ -222,7 +222,7 @@ admin.site.register(Bioactivity, BioactivityAdmin)
 
 class BioactivityTypeAdmin(LockableAdmin):
 
-    resource_class = BioactivityTypeTableResource
+    resource_class = BioactivityTypeResource
     save_on_top = True
     list_per_page = 20
     list_display = (

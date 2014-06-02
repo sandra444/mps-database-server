@@ -150,7 +150,7 @@ class Bioactivity(LockableModel):
 
     bioactivity_type = models.TextField(blank=True, null=True)
 
-    standardized_name = models.TextField(blank=True, null=True)
+    standard_name = models.TextField(blank=True, null=True)
 
     operator = models.TextField(blank=True, null=True)
 
