@@ -13,6 +13,7 @@ uwsgi --chdir=/home/mps/mps-database-server \
  --master \
  --touch-reload=/home/mps/touch-reload-production \
  --thunder-lock \
- --post-buffering 1
+ --post-buffering 1 \
+ --max-worker-lifetime 100
 
 
