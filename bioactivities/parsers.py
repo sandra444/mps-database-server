@@ -291,7 +291,6 @@ def heatmap(request):
         return
 
     # convert data sent in request to a dict data type from a string data type
-
     request_filter = json.loads(request.body)
 
     desired_targets = [
@@ -368,6 +367,12 @@ def heatmap(request):
 
     data_order = ['compound', 'target_bioactivity_pair', 'value']
     rearranged_data = unwound_data[data_order]
+
+    # try to make heatmap folder and ignore the exception if the folder exists
+    try:
+        os.makedirs(os.path.join(MEDIA_ROOT, 'heatmap'))
+    except OSError:
+        pass
 
     rearranged_data.to_csv(
         index=False,
