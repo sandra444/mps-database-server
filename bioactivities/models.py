@@ -176,7 +176,7 @@ class Bioactivity(LockableModel):
 
 
 class BioactivityType(LockableModel):
-    chembl_bioactivity = models.TextField(default='')
+    chembl_bioactivity = models.TextField(default='', unique=True)
     standard_name = models.TextField(default='')
     description = models.TextField(default='')
     standard_unit = models.TextField(default='')
