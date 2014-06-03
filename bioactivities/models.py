@@ -149,7 +149,7 @@ class Bioactivity(LockableModel):
 
     bioactivity_type = models.TextField(blank=True, null=True)
 
-    standard_name = models.TextField(blank=True, null=True, unique=True)
+    standard_name = models.TextField(blank=True, null=True)
 
     operator = models.TextField(blank=True, null=True)
 
@@ -176,8 +176,8 @@ class Bioactivity(LockableModel):
 
 
 class BioactivityType(LockableModel):
-    chembl_bioactivity = models.TextField(default='', unique=True)
-    standard_name = models.TextField(default='')
+    chembl_bioactivity = models.TextField(default='')
+    standard_name = models.TextField(default='', unique=True)
     description = models.TextField(default='')
     standard_unit = models.TextField(default='')
 
