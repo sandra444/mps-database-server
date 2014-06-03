@@ -31,7 +31,8 @@ def webhook(request):
         if "refs/heads/master" in data['ref']:
 
             # adam is responsible for deploying to master
-            if "nszceta" in data['pusher']['name']:
+            if "nszceta" in data['pusher']['name'] \
+                    or "ahgough" in data['pusher']['name']:
                 subprocess.call(
                     ['/home/mps/mps-database-server/scripts/reload-all.sh']
                 )
