@@ -167,7 +167,7 @@ class FindingAdmin(admin.ModelAdmin):
     search_fields = ['finding_name', ]
     fieldsets = (
         (None, {
-            'fields': (('finding_name',), 'organ', 'description',)
+            'fields': (('finding_name',), 'finding_type', 'organ', 'description',)
         }),
     )
     actions = ['update_fields']
