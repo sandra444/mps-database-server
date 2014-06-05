@@ -161,7 +161,7 @@ admin.site.register(Test, TestAdmin)
 class FindingAdmin(admin.ModelAdmin):
     save_on_top = True
     list_per_page = 20
-    list_display = ('finding_name', 'organ', 'description')
+    list_display = ('finding_name', 'finding_type', 'organ', 'description')
     list_display_links = ('finding_name',)
     list_filter = sorted(['finding_type'])
     search_fields = ['finding_name', ]
