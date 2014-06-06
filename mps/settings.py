@@ -130,8 +130,9 @@ NEVERCACHE_KEY = 'x=scmcpvq_$-9pz3651h=ln0b#-x&%%hz_)u0uzghfwk6#++pl'
 
 CACHES = {
     'default': {
-        'BACKEND': 'uwsgicache.UWSGICache',
-    }
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': 'unix:/home/mps/memcached.sock',
+        }
 }
 
 # List of callables that know how to import templates from various sources.
