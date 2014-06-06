@@ -176,7 +176,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
-    'gunicorn',
     'south',
     'django_extensions',
 
