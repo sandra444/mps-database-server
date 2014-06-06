@@ -240,6 +240,8 @@ LOGGING = {
 # Before Django 1.6 this was always ZERO
 CONN_MAX_AGE = 600
 
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
 REST_FRAMEWORK = {
     # Use hyperlinked styles by default.
     # Only used if the `serializer_class` attribute is not set on a view.
