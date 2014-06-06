@@ -255,8 +255,10 @@ REST_FRAMEWORK = {
     ]
 }
 
-SHOW_TOOLBAR = True
+
+def show_toolbar():
+    return True
 
 DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': 'mps.settings.SHOW_TOOLBAR'
+    'SHOW_TOOLBAR_CALLBACK': 'mps.settings.show_toolbar'
 }
