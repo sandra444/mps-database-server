@@ -39,6 +39,27 @@ class AssayModelTypeAdmin(LockableAdmin):
     save_on_top = True
     list_display = ('assay_type_name', 'assay_type_description', 'locked')
 
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'assay_type_name',
+                    'assay_type_description',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
 
 admin.site.register(AssayModelType, AssayModelTypeAdmin)
 
@@ -63,8 +84,10 @@ class AssayModelAdmin(LockableAdmin):
         (
             'Change Tracking', {
                 'fields': (
+                    'locked',
                     ('created_by', 'created_on', ),
                     ('modified_by', 'modified_on', ),
+                    ('signed_off_by', 'signed_off_date', ),
                 )
             }
         ),
@@ -130,6 +153,28 @@ class AssayWellTypeAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 20
     list_display = ('colored_display', 'well_description', 'locked')
+
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'well_type',
+                    'well_description',
+                    'background_color',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
 
 
 admin.site.register(AssayWellType, AssayWellTypeAdmin)
