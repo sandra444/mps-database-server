@@ -134,6 +134,14 @@ class AssayLayoutFormatAdmin(LockableAdmin):
                 )
             }
         ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
     )
 
     readonly_fields = (
