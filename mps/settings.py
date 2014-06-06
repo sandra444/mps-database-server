@@ -178,6 +178,9 @@ INSTALLED_APPS = (
     'south',
     'django_extensions',
 
+    # django debug toolbar
+    'debug_toolbar',
+
     # django-import-export plugin
     'import_export',
 
