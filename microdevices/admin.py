@@ -11,11 +11,56 @@ class MicrophysiologyCenterAdmin(LockableAdmin):
     list_display = (
         'center_name', 'description', 'contact_person', 'center_website')
 
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'center_name',
+                    'description',
+                    'contact_person',
+                    'center_website',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
 admin.site.register(MicrophysiologyCenter, MicrophysiologyCenterAdmin)
 
 
 class ManufacturerAdmin(LockableAdmin):
     save_on_top = True
+
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                'manufacturer_name',
+                'contact_person',
+                'Manufacturer_website',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
 
 admin.site.register(Manufacturer, ManufacturerAdmin)
 
@@ -78,6 +123,16 @@ class MicrodeviceAdmin(LockableAdmin):
                     (
                         'device_image', 'device_cross_section_image',
                     ),
+                )
+            }
+        ),
+        (
+            None, {
+                'fields': (
+                    'locked',
+                    'created_by',
+                    'modified_by',
+                    ('signed_off_by', 'signed_off_date'),
                 )
             }
         ),
