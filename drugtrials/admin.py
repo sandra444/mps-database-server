@@ -99,9 +99,10 @@ class DrugTrialAdmin(LockableAdmin):
         'compound__name', 'species__species_name']
     actions = ['update_fields']
     raw_id_fields = ('compound',)
+
     fieldsets = (
         (None, {
-            'fields': ('locked', ('compound', 'title'),
+            'fields': (('compound', 'title'),
                        ('trial_type', 'trial_sub_type', 'trial_date'),
                        ('condition', 'description',),)
         }),
@@ -115,6 +116,15 @@ class DrugTrialAdmin(LockableAdmin):
         ('References', {
             'fields': (('source', 'references', 'source_link'),)
         }),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
     )
     inlines = [TestResultInline, FindingResultInline]
 
@@ -153,6 +163,28 @@ class TestAdmin(LockableAdmin):
                     'description', 'locked')
     search_fields = ['test_name', ]
     actions = ['update_fields']
+
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    ('organ_model', 'organ'),
+                    ('test_type', 'test_name', 'test_unit'),
+                    'description',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
 
 
 admin.site.register(Test, TestAdmin)
