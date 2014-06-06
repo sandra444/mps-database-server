@@ -31,7 +31,6 @@ flake8
 flakeplus
 fpconst
 futures
-gunicorn==18.0
 ipdb
 ipython
 logilab-common
