@@ -255,4 +255,3 @@ REST_FRAMEWORK = {
     ]
 }
 
-INTERNAL_IPS = ['213.112.4.78']
