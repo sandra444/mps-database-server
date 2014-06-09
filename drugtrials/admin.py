@@ -92,7 +92,7 @@ class DrugTrialAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 20
     list_display = (
-        'compound', 'trial_type', 'species', 'trial_sub_type',
+        'compound', 'species', 'trial_type', 'trial_sub_type',
         'source', 'trial_date', 'locked')
     list_filter = ['trial_type', ]
     search_fields = [
