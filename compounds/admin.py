@@ -34,7 +34,7 @@ class CompoundAdmin(LockableAdmin):
     actions = ['update_fields']
     fieldsets = (
         (None, {
-            'fields': ('name', 'chemblid', 'inchikey', 'last_update', 'locked')
+            'fields': ('name', 'chemblid', 'inchikey', 'last_update',)
         }),
         ('Molecular Identifiers', {
             'fields': ('smiles', 'synonyms')
@@ -49,6 +49,15 @@ class CompoundAdmin(LockableAdmin):
             'fields': ('known_drug', 'medchem_friendly', 'ro3_passes',
                        'ro5_violations', 'species',)
         }),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                'created_by',
+                'modified_by',
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
     )
 
     def get_urls(self):

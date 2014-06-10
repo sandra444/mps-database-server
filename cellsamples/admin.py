@@ -43,7 +43,7 @@ admin.site.register(CellSubtype, CellSubtypeAdmin)
 class CellSampleAdmin(LockableAdmin):
 
     resource_class = CellSampleResource
-    
+
     save_on_top = True
 
     list_display = ('__unicode__',  # calls CellSample.__unicode__ function
@@ -61,12 +61,11 @@ class CellSampleAdmin(LockableAdmin):
     save_as = True
     fieldsets = (
         (None, {
-            'fields': (('locked',
-                       'cell_type'),
+            'fields': ('cell_type',
                        ('cell_source',
                        'receipt_date'),
-                       ('cell_image'),
-                       ('notes'),)
+                       'cell_image',
+                       'notes',)
         }),
         ('Supplier Information', {
             'fields': (('supplier', 'product_id', 'barcode'),)
@@ -76,7 +75,7 @@ class CellSampleAdmin(LockableAdmin):
                        'patient_condition'),)
         }),
         ('Isolation Information', {
-            'fields': (('isolation_datetime'), ('isolation_method',
+            'fields': ('isolation_datetime', ('isolation_method',
                        'isolation_notes'),)
         }),
         ('Cell Viability', {
@@ -85,10 +84,11 @@ class CellSampleAdmin(LockableAdmin):
                        'percent_viability'),)
         }),
         ('Change Tracking', {
-            'fields': (('created_by',
-                       'created_on'),
-                       ('modified_by',
-                       'modified_on'))
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'), )
         }),
     )
 

@@ -32,6 +32,34 @@ class TargetAdmin(LockableAdmin):
     actions = ['update_fields']
     readonly_fields = ('last_update', )
 
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'name',
+                    'synonyms',
+                    'chemblid',
+                    'description',
+                    'gene_names',
+                    'organism',
+                    'uniprot_accession',
+                    'target_type',
+                    readonly_fields,
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    'created_by',
+                    'modified_by',
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
     def get_urls(self):
 
         return patterns('',
@@ -123,10 +151,30 @@ class AssayAdmin(LockableAdmin):
         'description', 'chembl_link', 'organism', 'assay_type', 'locked')
     search_fields = ['description', '=chemblid']
     actions = ['update_fields']
-
     readonly_fields = ('last_update', )
-    fields = ('chemblid', 'description', 'assay_type', 'organism', 'strain',
-              'journal', 'locked')
+
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'chemblid',
+                    'description',
+                    'assay_type',
+                    'organism',
+                    'strain',
+                    'journal',
+                    readonly_fields,
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                )
+            }
+        ),
+    )
 
     def get_urls(self):
 
@@ -249,6 +297,28 @@ class BioactivityTypeAdmin(LockableAdmin):
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 30})}
     }
+
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'chembl_bioactivity',
+                    'description',
+                    ('standard_name', 'standard_unit'),
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
 
 
 admin.site.register(BioactivityType, BioactivityTypeAdmin)

@@ -39,6 +39,27 @@ class AssayModelTypeAdmin(LockableAdmin):
     save_on_top = True
     list_display = ('assay_type_name', 'assay_type_description', 'locked')
 
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'assay_type_name',
+                    'assay_type_description',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
 
 admin.site.register(AssayModelType, AssayModelTypeAdmin)
 
@@ -63,8 +84,10 @@ class AssayModelAdmin(LockableAdmin):
         (
             'Change Tracking', {
                 'fields': (
+                    'locked',
                     ('created_by', 'created_on', ),
                     ('modified_by', 'modified_on', ),
+                    ('signed_off_by', 'signed_off_date', ),
                 )
             }
         ),
@@ -111,6 +134,14 @@ class AssayLayoutFormatAdmin(LockableAdmin):
                 )
             }
         ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
     )
 
     readonly_fields = (
@@ -131,6 +162,28 @@ class AssayWellTypeAdmin(LockableAdmin):
     list_per_page = 20
     list_display = ('colored_display', 'well_description', 'locked')
 
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'well_type',
+                    'well_description',
+                    'background_color',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
 
 admin.site.register(AssayWellType, AssayWellTypeAdmin)
 
@@ -139,6 +192,26 @@ class AssayReaderAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 20
     list_display = ('reader_name', 'reader_type')
+
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    ('reader_name', 'reader_type'),
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        )
+    )
 
 
 admin.site.register(AssayReader, AssayReaderAdmin)
@@ -190,6 +263,14 @@ class AssayBaseLayoutAdmin(LockableAdmin):
                         'device_image_display',
                         'device_cross_section_image_display',
                     ),
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('signed_off_by', 'signed_off_date'),
                 )
             }
         ),
@@ -404,12 +485,22 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
                     (
                         'scientist', 'notebook', 'notebook_page', 'notes',
                     ),
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
                     (
                         'created_by', 'created_on',
                     ),
                     (
                         'modified_by', 'modified_on',
-                    )
+                    ),
+                    (
+                        'signed_off_by', 'signed_off_date'
+                    ),
                 )
             }
         ),
@@ -467,7 +558,6 @@ class AssayTestAdmin(LockableAdmin):
         (
             'Device Parameters', {
                 'fields': (
-                    ('locked',),
                     ('microdevice', 'assay_layout',),
                     ('assay_device_id', 'reader_name'),
                 ),
@@ -480,8 +570,19 @@ class AssayTestAdmin(LockableAdmin):
                 )
             }
         ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
     )
     inlines = [AssayResultInline]
+
 
 
 admin.site.register(AssayTest, AssayTestAdmin)
