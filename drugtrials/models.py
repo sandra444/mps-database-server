@@ -164,7 +164,7 @@ class FindingType(models.Model):
         return self.finding_type
 
 
-class Finding(models.Model):
+class Finding(LockableModel):
     class Meta(object):
         unique_together = [('organ', 'finding_name')]
         ordering = ('organ', 'finding_name', )
