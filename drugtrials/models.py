@@ -54,6 +54,9 @@ TRIALTYPES = (
 
 
 class DrugTrial(LockableModel):
+    class Meta(object):
+        ordering = ('compound', 'species', )
+
     title = models.CharField(max_length=255, blank=True, null=True)
     condition = models.CharField(max_length=255, blank=True, null=True)
     source = models.ForeignKey(TrialSource)
@@ -132,7 +135,7 @@ class TestType(models.Model):
 class Test(LockableModel):
     class Meta(object):
         unique_together = [('test_type', 'test_name')]
-        ordering = ('organ','test_type', 'test_name', )
+        ordering = ('organ', 'test_type', 'test_name', )
 
     organ_model = models.ForeignKey(OrganModel,
                                     blank=True, null=True)
