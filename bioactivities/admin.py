@@ -276,6 +276,17 @@ class BioactivityAdmin(LockableAdmin):
     search_fields = ['compound__name', 'target__name', 'bioactivity_type']
     actions = ['update_fields']
 
+    fieldsets = (
+        (None, {
+            'fields': (('compound', 'assay'), ('target', 'target_confidence'),
+                       ('bioactivity_type', 'value', 'units'),
+                       ('standard_name', 'standardized_value', 'standardized_units'),
+                       ('activity_comment', 'reference', 'name_in_reference'), 'locked',
+                       ('created_by', 'created_on'), ('modified_by', 'modified_on'),
+                       ('signed_off_by', 'signed_off_date'),)
+        }),
+    )
+
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 20})}
     }

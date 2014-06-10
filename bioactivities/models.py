@@ -147,10 +147,9 @@ class Bioactivity(LockableModel):
     target = models.ForeignKey(Target)
     target_confidence = models.IntegerField(blank=True, null=True)
 
-    bioactivity_type = models.TextField(blank=True, null=True)
+    bioactivity_type = models.TextField(verbose_name="name", blank=True, null=True)
 
     standard_name = models.TextField(blank=True, null=True)
-
     operator = models.TextField(blank=True, null=True)
 
     units = models.TextField(blank=True, null=True)
