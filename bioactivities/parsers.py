@@ -126,8 +126,8 @@ def generate_list_of_all_bioactivities_in_bioactivities():
     cursor = connection.cursor()
 
     cursor.execute(
-        'SELECT bioactivities_bioactivity.bioactivity_type '
-        'FROM bioactivities_bioactivity;'
+        'SELECT bioactivities_bioactivity.standard_name '
+        'FROM bioactivities_bioactivity WHERE bioactivities_bioactivity.standardized_value>0;'
     )
 
     result = query_to_frequencylist(cursor.fetchall())
@@ -181,15 +181,18 @@ def fetch_all_standard_bioactivities_data(
     cursor = connection.cursor()
 
     cursor.execute(
-        'SELECT compounds_compound.name, '
-        'bioactivities_target.name, '
-        'bioactivities_bioactivity.bioactivity_type, '
-        'bioactivities_bioactivity.value '
+        'SELECT compound,target,bioactivity,AVG(value) as value '
+	'FROM ( '
+	'SELECT compounds_compound.name as compound, '
+        'bioactivities_target.name as target, '
+        'bioactivities_bioactivity.standard_name as bioactivity, '
+        'bioactivities_bioactivity.standardized_value as value '
         'FROM bioactivities_bioactivity '
         'INNER JOIN compounds_compound '
         'ON bioactivities_bioactivity.compound_id=compounds_compound.id '
         'INNER JOIN bioactivities_target '
-        'ON bioactivities_bioactivity.target_id=bioactivities_target.id;'
+        'ON bioactivities_bioactivity.target_id=bioactivities_target.id ) as tbl '
+        'GROUP BY compound,target,bioactivity;'
     )
 
     # bioactivity is a tuple:
@@ -203,7 +206,6 @@ def fetch_all_standard_bioactivities_data(
 
         if q[0] not in desired_compounds:
             continue
-
         if q[1] not in desired_targets:
             continue
 
@@ -360,7 +362,7 @@ def heatmap(request):
     unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
 
     unwound_data['target_bioactivity_pair'] = \
-        unwound_data['target'] + ' ' + unwound_data['bioactivity']
+        unwound_data['target'] + '_ ' + unwound_data['bioactivity']
 
     del unwound_data['target']
     del unwound_data['bioactivity']
