@@ -31,7 +31,7 @@ class PhysicalUnits(models.Model):
         ordering = ['unit_type', 'unit']
 
     def __unicode__(self):
-        return u'{} :: {}'.format(self.get_unit_type_display(), self.unit)
+        return u'{}'.format(self.unit)
 
 
 class TimeUnits(models.Model):

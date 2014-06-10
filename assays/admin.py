@@ -591,6 +591,7 @@ admin.site.register(AssayTest, AssayTestAdmin)
 class PhysicalUnitsAdmin(admin.ModelAdmin):
     save_on_top = True
     list_per_page = 20
+    list_display = ('unit_type', 'unit', 'description')
 
 admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 
