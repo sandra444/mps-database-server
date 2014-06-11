@@ -35,6 +35,8 @@ TRIALSUBTYPES = (
 
 
 class TrialSource(models.Model):
+    class Meta(object):
+        ordering = ('source_name', )
     source_name = models.CharField(max_length=40, unique=True)
     source_website = models.URLField(blank=True, null=True)
     description = models.CharField(max_length=400, blank=True, null=True)
@@ -167,7 +169,7 @@ class FindingType(models.Model):
 class Finding(LockableModel):
     class Meta(object):
         unique_together = [('organ', 'finding_name')]
-        ordering = ('organ', 'finding_name', )
+        ordering = ('finding_name', 'organ', )
 
     finding_type = models.ForeignKey(FindingType, blank=True, null=True)
     finding_name = models.CharField(max_length=100)
@@ -182,6 +184,8 @@ class Finding(LockableModel):
 
 
 class ResultDescriptor(models.Model):
+    class Meta(object):
+        ordering = ('result_descriptor', )
     result_descriptor = models.CharField(max_length=40, unique=True)
 
     def __unicode__(self):
