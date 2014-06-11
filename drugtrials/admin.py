@@ -33,6 +33,7 @@ class URLFieldWidget(AdminURLFieldWidget):
 
 
 class SpeciesAdmin(admin.ModelAdmin):
+    list_per_page = 300
     save_on_top = True
 
 
@@ -44,7 +45,7 @@ admin.site.register(Species, SpeciesAdmin)
 
 class TrialSourceAdmin(admin.ModelAdmin):
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = ('source_name', 'source_website', 'description')
 
     actions = ['update_fields']
@@ -90,7 +91,7 @@ class DrugTrialAdmin(LockableAdmin):
     }
 
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = (
         'compound', 'species', 'trial_type', 'trial_sub_type',
         'source', 'trial_date', 'locked')
@@ -134,7 +135,7 @@ admin.site.register(DrugTrial, DrugTrialAdmin)
 
 class TestTypeAdmin(admin.ModelAdmin):
     list_display = ('test_type', 'description',)
-
+    list_per_page = 300
     save_on_top = True
 
 
@@ -142,6 +143,7 @@ admin.site.register(TestType, TestTypeAdmin)
 
 
 class FindingTypeAdmin(admin.ModelAdmin):
+    list_per_page = 300
     save_on_top = True
     list_display = ('finding_type', 'description')
 
@@ -150,6 +152,7 @@ admin.site.register(FindingType, FindingTypeAdmin)
 
 
 class ResultDescriptorAdmin(admin.ModelAdmin):
+    list_per_page = 300
     save_on_top = True
 
 
@@ -158,7 +161,7 @@ admin.site.register(ResultDescriptor, ResultDescriptorAdmin)
 
 class TestAdmin(LockableAdmin):
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = ('test_name', 'test_type', 'organ', 'test_unit',
                     'description', 'locked')
     search_fields = ['test_name', ]
@@ -192,7 +195,7 @@ admin.site.register(Test, TestAdmin)
 
 class FindingAdmin(admin.ModelAdmin):
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = ('finding_name', 'finding_type', 'organ', 'description')
     list_display_links = ('finding_name',)
     list_filter = sorted(['finding_type'])

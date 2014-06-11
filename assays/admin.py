@@ -38,7 +38,7 @@ class AssayLayoutFormatForm(forms.ModelForm):
 class AssayModelTypeAdmin(LockableAdmin):
     save_on_top = True
     list_display = ('assay_type_name', 'assay_type_description', 'locked')
-
+    list_per_page = 300
     fieldsets = (
         (
             None, {
@@ -66,7 +66,7 @@ admin.site.register(AssayModelType, AssayModelTypeAdmin)
 
 class AssayModelAdmin(LockableAdmin):
     save_on_top = True
-
+    list_per_page = 300
     list_display = (
         'assay_name', 'version_number', 'assay_type', 'assay_description',
         'locked'
@@ -113,7 +113,7 @@ class AssayLayoutFormatAdmin(LockableAdmin):
 
     device_image_display.allow_tags = True
     device_cross_section_image_display.allow_tags = True
-
+    list_per_page = 300
     fieldsets = (
         (
             None, {
@@ -159,7 +159,7 @@ admin.site.register(AssayLayoutFormat, AssayLayoutFormatAdmin)
 
 class AssayWellTypeAdmin(LockableAdmin):
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = ('colored_display', 'well_description', 'locked')
 
     fieldsets = (
@@ -190,7 +190,7 @@ admin.site.register(AssayWellType, AssayWellTypeAdmin)
 
 class AssayReaderAdmin(LockableAdmin):
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = ('reader_name', 'reader_type')
 
     fieldsets = (
@@ -228,7 +228,7 @@ class AssayBaseLayoutAdmin(LockableAdmin):
         css = {'all': ('assays/customize_admin.css',)}
 
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
 
     def device_image_display(self, obj):
         if obj.layout_format.device.id \
@@ -322,7 +322,7 @@ class AssayLayoutAdmin(LockableAdmin):
         css = {'all': ('assays/customize_admin.css',)}
 
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
 
     def save_model(self, request, obj, form, change):
 
@@ -434,7 +434,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 
     raw_id_fields = ("cell_sample",)
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = ('assay_device_id',
                     'organ_name',
                     'assay_name',
@@ -545,7 +545,7 @@ class AssayTestAdmin(LockableAdmin):
     resource_class = AssayTestResource
 
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = (
         'test_date', 'microdevice', 'assay_device_id',
         'compound', 'assay_layout',
@@ -590,7 +590,7 @@ admin.site.register(AssayTest, AssayTestAdmin)
 
 class PhysicalUnitsAdmin(admin.ModelAdmin):
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = ('unit_type', 'unit', 'description')
 
 admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
@@ -598,7 +598,7 @@ admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 
 class TimeUnitsAdmin(admin.ModelAdmin):
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
 
     list_display = ('unit','unit_order',)
 

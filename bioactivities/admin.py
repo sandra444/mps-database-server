@@ -26,7 +26,7 @@ class TargetAdmin(LockableAdmin):
         )
 
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = ('name', 'organism', 'target_type', 'chembl_link', 'locked')
     search_fields = ['name', 'organism', 'synonyms', '=chemblid']
     actions = ['update_fields']
@@ -146,7 +146,7 @@ class AssayAdmin(LockableAdmin):
                                               "space or a new line.")
 
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = (
         'description', 'chembl_link', 'organism', 'assay_type', 'locked')
     search_fields = ['description', '=chemblid']
@@ -252,7 +252,7 @@ admin.site.register(Assay, AssayAdmin)
 
 class BioactivityAdmin(LockableAdmin):
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     raw_id_fields = ("compound",)
 
     def chembl_link(self, obj):
@@ -298,7 +298,7 @@ admin.site.register(Bioactivity, BioactivityAdmin)
 class BioactivityTypeAdmin(LockableAdmin):
     resource_class = BioactivityTypeResource
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = (
         'chembl_bioactivity',
         'standard_name',

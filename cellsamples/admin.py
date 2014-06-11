@@ -45,7 +45,7 @@ class CellSampleAdmin(LockableAdmin):
     resource_class = CellSampleResource
 
     save_on_top = True
-
+    list_per_page = 300
     list_display = ('__unicode__',  # calls CellSample.__unicode__ function
                     'supplier',
                     'receipt_date',
@@ -99,6 +99,7 @@ admin.site.register(CellSample, CellSampleAdmin)
 class SupplierAdmin(admin.ModelAdmin):
     save_on_top = True
     list_display = ('name', 'phone', 'address')
+    list_per_page = 300
 
 
 admin.site.register(Supplier, SupplierAdmin)

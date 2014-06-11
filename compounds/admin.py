@@ -26,7 +26,7 @@ class CompoundAdmin(LockableAdmin):
                                               "space or a new line.")
 
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = ('name', 'chembl_link', 'known_drug',
                     'molecular_formula', 'thumb', 'last_update', 'locked')
     search_fields = ['=name', 'synonyms', '=chemblid']

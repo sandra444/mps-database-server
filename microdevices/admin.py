@@ -10,7 +10,7 @@ class MicrophysiologyCenterAdmin(LockableAdmin):
     save_on_top = True
     list_display = (
         'center_name', 'description', 'contact_person', 'center_website')
-
+    list_per_page = 300
     fieldsets = (
         (
             None, {
@@ -39,7 +39,7 @@ admin.site.register(MicrophysiologyCenter, MicrophysiologyCenterAdmin)
 
 class ManufacturerAdmin(LockableAdmin):
     save_on_top = True
-
+    list_per_page = 300
     fieldsets = (
         (
             None, {
@@ -82,7 +82,7 @@ class MicrodeviceAdmin(LockableAdmin):
     device_cross_section_image_display.allow_tags = True
 
     save_on_top = True
-    list_per_page = 20
+    list_per_page = 300
     list_display = ('device_name', 'organ', 'center', 'manufacturer',
                     'description')
     search_fields = ['device_name', 'organ', 'center',  'description']
@@ -157,7 +157,7 @@ class TestInline(admin.TabularInline):
 
 
 class OrganModelAdmin(admin.ModelAdmin):
-    list_per_page = 20
+    list_per_page = 300
     filter_horizontal = ('cell_type',)
     list_display = (
         'model_name', 'organ', 'device', 'cell_types', 'center', 'description')
