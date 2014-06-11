@@ -592,6 +592,26 @@ class PhysicalUnitsAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('unit_type', 'unit', 'description')
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'unit',
+                    'description',
+                    'unit_type',
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
 
 admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 
@@ -601,5 +621,25 @@ class TimeUnitsAdmin(LockableAdmin):
     list_per_page = 300
 
     list_display = ('unit','unit_order',)
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'unit',
+                    'description',
+                    'unit_order',
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
 
 admin.site.register(TimeUnits, TimeUnitsAdmin)

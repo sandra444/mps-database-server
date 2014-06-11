@@ -35,7 +35,24 @@ class URLFieldWidget(AdminURLFieldWidget):
 class SpeciesAdmin(LockableAdmin):
     list_per_page = 300
     save_on_top = True
-
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'species_name',
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
 
 admin.site.register(Species, SpeciesAdmin)
 
@@ -137,6 +154,25 @@ class TestTypeAdmin(LockableAdmin):
     list_display = ('test_type', 'description',)
     list_per_page = 300
     save_on_top = True
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'test_type',
+                    'description',
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
 
 
 admin.site.register(TestType, TestTypeAdmin)
@@ -146,7 +182,25 @@ class FindingTypeAdmin(LockableAdmin):
     list_per_page = 300
     save_on_top = True
     list_display = ('finding_type', 'description')
-
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'finding_type',
+                    'description',
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
 
 admin.site.register(FindingType, FindingTypeAdmin)
 
