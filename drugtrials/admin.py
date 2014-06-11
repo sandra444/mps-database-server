@@ -255,24 +255,27 @@ class FindingAdmin(LockableAdmin):
     list_filter = sorted(['finding_type'])
     search_fields = ['finding_name', ]
     fieldsets = (
-        None, {
-            'fields': (
-                'finding_name',
-                'finding_type',
-                'organ',
-                'description',)
-        },
-    ),
-    (
-        'Change Tracking', {
-            'fields': (
-                'locked',
-                ('created_by', 'created_on'),
-                ('modified_by', 'modified_on'),
-                ('signed_off_by', 'signed_off_date'),
-            )
-        }
-    ),
+        (
+            None, {
+                'fields': (
+                    'finding_name',
+                    'finding_type',
+                    'organ',
+                    'description',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
     actions = ['update_fields']
 
 
