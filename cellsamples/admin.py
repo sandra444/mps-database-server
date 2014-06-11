@@ -16,6 +16,28 @@ class CellTypeAdmin(LockableAdmin):
     save_on_top = True
     list_display = ('cell_name', 'organ')
 
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'cell_type',
+                    'species',
+                    'cell_subtype',
+                    'organ',
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
+
 
 admin.site.register(CellType, CellTypeAdmin)
 
@@ -26,7 +48,24 @@ class CellTypeInline(admin.TabularInline):
 
 class OrganAdmin(LockableAdmin):
     save_on_top = True
-
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'organ_name',
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
     inlines = [CellTypeInline]
 
 
@@ -35,6 +74,24 @@ admin.site.register(Organ, OrganAdmin)
 
 class CellSubtypeAdmin(LockableAdmin):
     save_on_top = True
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'cell_subtype',
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
 
 
 admin.site.register(CellSubtype, CellSubtypeAdmin)
@@ -100,6 +157,25 @@ class SupplierAdmin(LockableAdmin):
     save_on_top = True
     list_display = ('name', 'phone', 'address')
     list_per_page = 300
-
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'name',
+                    'phone',
+                    'address',
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
 
 admin.site.register(Supplier, SupplierAdmin)
