@@ -12,7 +12,7 @@ from mps.base.admin import LockableAdmin
 from models import Organ, CellType, CellSubtype, Supplier, CellSample
 
 
-class CellTypeAdmin(admin.ModelAdmin):
+class CellTypeAdmin(LockableAdmin):
     save_on_top = True
     list_display = ('cell_name', 'organ')
 
@@ -24,7 +24,7 @@ class CellTypeInline(admin.TabularInline):
     model = CellType
 
 
-class OrganAdmin(admin.ModelAdmin):
+class OrganAdmin(LockableAdmin):
     save_on_top = True
 
     inlines = [CellTypeInline]
@@ -33,7 +33,7 @@ class OrganAdmin(admin.ModelAdmin):
 admin.site.register(Organ, OrganAdmin)
 
 
-class CellSubtypeAdmin(admin.ModelAdmin):
+class CellSubtypeAdmin(LockableAdmin):
     save_on_top = True
 
 
@@ -96,7 +96,7 @@ class CellSampleAdmin(LockableAdmin):
 admin.site.register(CellSample, CellSampleAdmin)
 
 
-class SupplierAdmin(admin.ModelAdmin):
+class SupplierAdmin(LockableAdmin):
     save_on_top = True
     list_display = ('name', 'phone', 'address')
     list_per_page = 300

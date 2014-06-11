@@ -12,7 +12,7 @@ from django.db import models
 from mps.base.models import LockableModel
 
 
-class Organ(models.Model):
+class Organ(LockableModel):
     organ_name = models.CharField(max_length=255, unique=True)
 
     class Meta(object):
@@ -22,7 +22,7 @@ class Organ(models.Model):
         return u'{}'.format(self.organ_name)
 
 
-class CellType(models.Model):
+class CellType(LockableModel):
     SPECIESTYPE = (
         ('Human', 'Human'),
         ('Rat', 'Rat'),
@@ -50,7 +50,7 @@ class CellType(models.Model):
         return self.__unicode__()
 
 
-class CellSubtype(models.Model):
+class CellSubtype(LockableModel):
     cell_subtype = models.CharField(max_length=255, unique=True,
                                     help_text="Example: motor (type of neuron), "
                                               "skeletal (type of muscle), etc.")
@@ -59,7 +59,7 @@ class CellSubtype(models.Model):
         return u'{}'.format(self.cell_subtype)
 
 
-class Supplier(models.Model):
+class Supplier(LockableModel):
     name = models.CharField(max_length=255, unique=True)
     phone = models.CharField(max_length=255, blank=True)
     address = models.CharField(max_length=255, blank=True)
