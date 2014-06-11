@@ -9,7 +9,7 @@ from assays.models import PhysicalUnits, TimeUnits
 from django.core.exceptions import ValidationError
 
 
-class Species(models.Model):
+class Species(LockableModel):
     class Meta(object):
         verbose_name_plural = 'species'
 
@@ -124,7 +124,7 @@ class DrugTrial(LockableModel):
                                            self.source.source_name)
 
 
-class TestType(models.Model):
+class TestType(LockableModel):
     test_type = models.CharField(max_length=60, unique=True)
     description = models.CharField(max_length=200, blank=True, null=True)
 
@@ -153,7 +153,7 @@ class Test(LockableModel):
                                         )
 
 
-class FindingType(models.Model):
+class FindingType(LockableModel):
     class Meta(object):
         ordering = ('finding_type', )
 

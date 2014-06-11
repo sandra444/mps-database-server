@@ -588,7 +588,7 @@ class AssayTestAdmin(LockableAdmin):
 admin.site.register(AssayTest, AssayTestAdmin)
 
 
-class PhysicalUnitsAdmin(admin.ModelAdmin):
+class PhysicalUnitsAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('unit_type', 'unit', 'description')
@@ -596,7 +596,7 @@ class PhysicalUnitsAdmin(admin.ModelAdmin):
 admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 
 
-class TimeUnitsAdmin(admin.ModelAdmin):
+class TimeUnitsAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
 

@@ -32,7 +32,7 @@ class URLFieldWidget(AdminURLFieldWidget):
         return mark_safe(html)
 
 
-class SpeciesAdmin(admin.ModelAdmin):
+class SpeciesAdmin(LockableAdmin):
     list_per_page = 300
     save_on_top = True
 
@@ -133,7 +133,7 @@ class DrugTrialAdmin(LockableAdmin):
 admin.site.register(DrugTrial, DrugTrialAdmin)
 
 
-class TestTypeAdmin(admin.ModelAdmin):
+class TestTypeAdmin(LockableAdmin):
     list_display = ('test_type', 'description',)
     list_per_page = 300
     save_on_top = True
@@ -142,7 +142,7 @@ class TestTypeAdmin(admin.ModelAdmin):
 admin.site.register(TestType, TestTypeAdmin)
 
 
-class FindingTypeAdmin(admin.ModelAdmin):
+class FindingTypeAdmin(LockableAdmin):
     list_per_page = 300
     save_on_top = True
     list_display = ('finding_type', 'description')
@@ -193,7 +193,7 @@ class TestAdmin(LockableAdmin):
 admin.site.register(Test, TestAdmin)
 
 
-class FindingAdmin(admin.ModelAdmin):
+class FindingAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('finding_name', 'finding_type', 'organ', 'description')
@@ -203,12 +203,21 @@ class FindingAdmin(admin.ModelAdmin):
     fieldsets = (
         None, {
             'fields': (
-                'locked',
                 'finding_name',
                 'finding_type',
                 'organ',
                 'description',)
         },
+    ),
+    (
+        'Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
     ),
     actions = ['update_fields']
 
