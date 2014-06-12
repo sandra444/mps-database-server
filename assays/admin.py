@@ -270,6 +270,8 @@ class AssayBaseLayoutAdmin(LockableAdmin):
             'Change Tracking', {
                 'fields': (
                     'locked',
+                    'created_by',
+                    'modified_by',
                     ('signed_off_by', 'signed_off_date'),
                 )
             }
