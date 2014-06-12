@@ -60,11 +60,31 @@ admin.site.register(Species, SpeciesAdmin)
 # instead of a seperate entity
 
 
-class TrialSourceAdmin(admin.ModelAdmin):
+class TrialSourceAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('source_name', 'source_website', 'description')
-
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'source_name',
+                    'source_website',
+                    'description',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
     actions = ['update_fields']
 
 
@@ -205,9 +225,28 @@ class FindingTypeAdmin(LockableAdmin):
 admin.site.register(FindingType, FindingTypeAdmin)
 
 
-class ResultDescriptorAdmin(admin.ModelAdmin):
+class ResultDescriptorAdmin(LockableAdmin):
     list_per_page = 300
     save_on_top = True
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'result_descriptor',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
 
 
 admin.site.register(ResultDescriptor, ResultDescriptorAdmin)

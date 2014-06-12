@@ -34,7 +34,7 @@ TRIALSUBTYPES = (
 # instead of a seperate entity
 
 
-class TrialSource(models.Model):
+class TrialSource(LockableModel):
     source_name = models.CharField(max_length=40, unique=True)
     source_website = models.URLField(blank=True, null=True)
     description = models.CharField(max_length=400, blank=True, null=True)
@@ -181,7 +181,7 @@ class Finding(LockableModel):
         return u'{} :: {}'.format(self.organ, self.finding_name)
 
 
-class ResultDescriptor(models.Model):
+class ResultDescriptor(LockableModel):
     result_descriptor = models.CharField(max_length=40, unique=True)
 
     def __unicode__(self):
