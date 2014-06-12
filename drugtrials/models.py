@@ -12,6 +12,7 @@ from django.core.exceptions import ValidationError
 class Species(models.Model):
     class Meta(object):
         verbose_name_plural = 'species'
+        ordering = ('species_name', )
 
     species_name = models.CharField(max_length=40, unique=True)
 
@@ -127,6 +128,9 @@ class DrugTrial(LockableModel):
 
 
 class TestType(models.Model):
+    class Meta(object):
+        ordering = ('test_type',)
+
     test_type = models.CharField(max_length=60, unique=True)
     description = models.CharField(max_length=200, blank=True, null=True)
 
@@ -137,7 +141,7 @@ class TestType(models.Model):
 class Test(LockableModel):
     class Meta(object):
         unique_together = [('test_type', 'test_name')]
-        ordering = ('organ', 'test_type', 'test_name', )
+        ordering = ('test_name', 'organ', 'test_type', )
 
     organ_model = models.ForeignKey(OrganModel,
                                     blank=True, null=True)
