@@ -253,7 +253,7 @@ admin.site.register(Assay, AssayAdmin)
 class BioactivityAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
-    raw_id_fields = ("compound",)
+    raw_id_fields = ("compound", 'target', 'assay',)
 
     def chembl_link(self, obj):
         return obj.assay.chembl_link()
