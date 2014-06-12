@@ -326,18 +326,16 @@ class AssayLayoutAdmin(LockableAdmin):
     fieldsets = (
         (
             None, {
-                'fields': ('layout_name', 
-                           'base_layout', )
+                'fields': (
+                    ('layout_name',
+                     'base_layout',
+                     'locked',
+                     ('created_by', 'created_on', ),
+                     ('modified_by', 'modified_on', ),
+                     ('signed_off_by', 'signed_off_date', ), )
+                )
             }
         ),
-        (
-            'Change Tracking', {
-                'fields': ('locked',
-                           ('created_by', 'created_on', ),
-                           ('modified_by', 'modified_on', ),
-                           ('signed_off_by', 'signed_off_date', ), )
-            }
-        )
     )
 
     def save_model(self, request, obj, form, change):
