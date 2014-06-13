@@ -22,17 +22,13 @@ function reset_all () {
         weekly.sh
 
     cd /home/mps/mps-database-server
-    git reset --hard HEAD
     git fetch
-    git pull
     git reset --hard HEAD
     python manage.py migrate --all
     ./manage.py collectstatic --noinput
 
     cd /home/mps/mps-web-client
-    git reset --hard HEAD
     git fetch
-    git pull
     git reset --hard HEAD
 
     touch /home/mps/touch-reload-production
