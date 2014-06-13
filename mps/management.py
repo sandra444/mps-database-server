@@ -51,5 +51,6 @@ def database(request):
     return HttpResponse(
         subprocess.check_output(
             ["pg_dump", "-Fc", "mpsdb"]
-        )
+        ),
+        'application/octet-stream'
     )
