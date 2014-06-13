@@ -253,7 +253,7 @@ admin.site.register(Assay, AssayAdmin)
 class BioactivityAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
-    ordering = ('compound', 'bioactivity_type')
+    ordering = ('compound', 'standard_name')
     raw_id_fields = ("compound", 'target', 'assay',)
 
     def chembl_link(self, obj):
@@ -264,15 +264,15 @@ class BioactivityAdmin(LockableAdmin):
 
     list_display = (
         'compound',
-        'chembl_link',
-        'bioactivity_type',
         'standard_name',
         'operator',
-        'locked',
         'standardized_value',
         'standardized_units',
+        'chembl_link',
+        'bioactivity_type',
         'value',
-        'units'
+        'units',
+        'locked'
     )
     search_fields = ['compound__name', 'target__name', 'bioactivity_type']
     actions = ['update_fields']
