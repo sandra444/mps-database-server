@@ -191,7 +191,8 @@ def fetch_all_standard_bioactivities_data(
         'INNER JOIN compounds_compound '
         'ON bioactivities_bioactivity.compound_id=compounds_compound.id '
         'INNER JOIN bioactivities_target '
-        'ON bioactivities_bioactivity.target_id=bioactivities_target.id ) as tbl '
+        'ON bioactivities_bioactivity.target_id=bioactivities_target.id ) '
+        'as tbl '
         'GROUP BY compound,target,bioactivity;'
     )
 
