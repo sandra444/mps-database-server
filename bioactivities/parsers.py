@@ -182,8 +182,8 @@ def fetch_all_standard_bioactivities_data(
 
     cursor.execute(
         'SELECT compound,target,bioactivity,AVG(value) as value '
-	'FROM ( '
-	'SELECT compounds_compound.name as compound, '
+        'FROM ( '
+        'SELECT compounds_compound.name as compound, '
         'bioactivities_target.name as target, '
         'bioactivities_bioactivity.standard_name as bioactivity, '
         'bioactivities_bioactivity.standardized_value as value '
@@ -290,7 +290,7 @@ def fetch_all_standard_mps_assay_data():
 
 def heatmap(request):
     if len(request.body) == 0:
-        return
+        return {'error': 'empty request body'}
 
     # convert data sent in request to a dict data type from a string data type
     request_filter = json.loads(request.body)
@@ -332,10 +332,9 @@ def heatmap(request):
     )
 
     if not all_std_bioactivities:
-        return
-
+        return {'error': 'no standard bioactivities'}
     if len(all_std_bioactivities) == 0:
-        return
+        return {'error': 'standard bioactivities zero length'}
 
     bioactivities_data = pandas.DataFrame(
         all_std_bioactivities,
@@ -383,3 +382,4 @@ def heatmap(request):
     )
 
     return {'tsv': data_hash}
+
