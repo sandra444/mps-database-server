@@ -127,7 +127,8 @@ def generate_list_of_all_bioactivities_in_bioactivities():
 
     cursor.execute(
         'SELECT bioactivities_bioactivity.standard_name '
-        'FROM bioactivities_bioactivity WHERE bioactivities_bioactivity.standardized_value>0;'
+        'FROM bioactivities_bioactivity '
+        'WHERE bioactivities_bioactivity.standardized_value>0;'
     )
 
     result = query_to_frequencylist(cursor.fetchall())
