@@ -7,6 +7,9 @@ from mps.base.admin import LockableAdmin
 from drugtrials.models import *
 from drugtrials.resource import *
 from forms import *
+from django.http import HttpResponseRedirect
+from django.utils.encoding import force_unicode
+from django.utils.translation import ugettext_lazy as _
 
 
 class URLFieldWidget(AdminURLFieldWidget):
@@ -128,6 +131,47 @@ class DrugTrialAdmin(LockableAdmin):
         ),
     )
     inlines = [TestResultInline, FindingResultInline]
+
+    def response_change(self, request, obj):
+        """
+        Determines the HttpResponse for the change_view stage.
+        """
+        if request.POST.has_key("_viewnext"):
+            msg = (_('The %(name)s "%(obj)s" was changed successfully.') %
+                   {'name': force_unicode(obj._meta.verbose_name),
+                    'obj': force_unicode(obj)})
+            next = obj.__class__.objects.filter(id__gt=obj.id).order_by('id')[:1]
+
+            if next:
+                self.message_user(request, msg)
+                return HttpResponseRedirect("../%s/" % next[0].pk)
+        return super(DrugTrial, self).response_change(request, obj)
+
+    # def response_change_pre(self, request, obj):
+    #     """
+    #     Determines the HttpResponse for the change_view stage.
+    #     """
+    #     if request.POST.has_key("_viewprevious"):
+    #         msg = (_('The %(name)s "%(obj)s" was changed successfully.') %
+    #                {'name': force_unicode(obj._meta.verbose_name),
+    #                 'obj': force_unicode(obj)})
+    #         next = obj.__class__.objects.filter(id__gt=obj.id).order_by('id')[:1]
+    #         if next:
+    #             self.message_user(request, msg)
+    #             return HttpResponseRedirect("../%s/" % next[0].pk)
+    #         return super(DrugTrial, self).response_change(request, obj)
+
+    # def next(self):
+    #     try:
+    #         return DrugTrial.objects.get(pk=self.pk+1)
+    #     except:
+    #         return None
+    #
+    # def previous(self):
+    #     try:
+    #         return DrugTrial.objects.get(pk=self.pk-1)
+    #     except:
+    #         return None
 
 
 admin.site.register(DrugTrial, DrugTrialAdmin)
