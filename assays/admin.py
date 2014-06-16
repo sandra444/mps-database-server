@@ -558,6 +558,7 @@ class AssayTestAdmin(LockableAdmin):
 
     resource_class = AssayTestResource
 
+    save_as = True
     save_on_top = True
     list_per_page = 300
     list_display = (

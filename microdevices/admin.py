@@ -81,6 +81,7 @@ class MicrodeviceAdmin(LockableAdmin):
     device_image_display.allow_tags = True
     device_cross_section_image_display.allow_tags = True
 
+    save_as = True
     save_on_top = True
     list_per_page = 300
     list_display = ('device_name', 'organ', 'center', 'manufacturer',

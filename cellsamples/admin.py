@@ -25,6 +25,7 @@ class CellTypeInline(admin.TabularInline):
 
 
 class OrganAdmin(admin.ModelAdmin):
+    save_as = True
     save_on_top = True
 
     inlines = [CellTypeInline]
