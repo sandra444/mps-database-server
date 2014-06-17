@@ -140,7 +140,7 @@ class DrugTrialAdmin(LockableAdmin):
             msg = (_('The %(name)s "%(obj)s" was changed successfully.') %
                    {'name': force_unicode(obj._meta.verbose_name),
                     'obj': force_unicode(obj)})
-            next = obj.__class__.objects.filter(id__gt=obj.id).order_by('id')[:1]
+            next = obj.__class__.objects.filter(id__gt=obj.id).order_by('compound', 'species')[:1]
 
             if next:
                 self.message_user(request, msg)
