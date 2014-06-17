@@ -141,11 +141,11 @@ class DrugTrialAdmin(LockableAdmin):
                    {'name': force_unicode(obj._meta.verbose_name),
                     'obj': force_unicode(obj)})
             next = obj.__class__.objects.filter(id__gt=obj.id).order_by('compound', 'species')[:1]
-
+            #returns first off the list returned by the filter/order by
             if next:
                 self.message_user(request, msg)
                 return HttpResponseRedirect("../%s/" % next[0].pk)
-        return super(DrugTrial, self).response_change(request, obj)
+        return super(DrugTrialAdmin, self).response_change(request, obj)
 
     # def response_change_pre(self, request, obj):
     #     """
