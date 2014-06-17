@@ -132,6 +132,7 @@ class DrugTrialAdmin(LockableAdmin):
     )
     inlines = [TestResultInline, FindingResultInline]
 
+
     def response_change(self, request, obj):
         """
         Determines the HttpResponse for the change_view stage.
@@ -140,8 +141,15 @@ class DrugTrialAdmin(LockableAdmin):
             msg = (_('The %(name)s "%(obj)s" was changed successfully.') %
                    {'name': force_unicode(obj._meta.verbose_name),
                     'obj': force_unicode(obj)})
+            #return all objects in the DrugTrial model after the current id ordered by compound then species
+            #so why is it only returning a very specific, narrow list?
+            #doesn't work to use compound__gt = obj.compound either
+            #I think [:1] means splice everything after and including the 1st entry in the next list
             next = obj.__class__.objects.filter(id__gt=obj.id).order_by('compound', 'species')[:1]
             #returns first off the list returned by the filter/order by
+            #returns the first object in the whole list every time
+            # obj.__class__.objects.all().order_by('compound', 'species')[:1]
+            print obj.__class__.objects.filter(id__gt=obj.id).order_by('compound', 'species')
             if next:
                 self.message_user(request, msg)
                 return HttpResponseRedirect("../%s/" % next[0].pk)
