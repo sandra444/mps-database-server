@@ -2,6 +2,7 @@ import csv
 
 from django.contrib import admin
 from django import forms
+from assays.forms import AssayResultForm
 
 from assays.models import *
 from compounds.models import Compound
