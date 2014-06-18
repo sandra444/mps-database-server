@@ -73,7 +73,7 @@ class FindingResultInline(admin.TabularInline):
     form = FindingResultForm
     verbose_name = 'Organ Finding'
     verbose_name_plural = 'Organ Findings'
-    fields = (('finding_name', 'finding_type', 'finding_time', 'time_units',
+    fields = (('finding_name', 'finding_time', 'time_units',
                'result', 'severity', 'percent_min', 'percent_max', 'value', 'value_units',
                'descriptor',),)
     extra = 0

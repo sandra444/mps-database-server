@@ -173,7 +173,7 @@ class FindingType(models.Model):
 class Finding(LockableModel):
     class Meta(object):
         unique_together = [('organ', 'finding_name')]
-        ordering = ('finding_name', 'organ', )
+        ordering = ('organ', 'finding_type', 'finding_name', )
 
     finding_type = models.ForeignKey(FindingType, blank=True, null=True)
     finding_name = models.CharField(max_length=100)
@@ -184,7 +184,7 @@ class Finding(LockableModel):
     description = models.CharField(max_length=400, blank=True, null=True)
 
     def __unicode__(self):
-        return u'{} :: {}'.format(self.organ, self.finding_name)
+        return u'{} :: {} :: {}'.format(self.organ, self.finding_type, self.finding_name)
 
 
 class ResultDescriptor(models.Model):

@@ -207,7 +207,7 @@ class AssayTest(LockableModel):
         return u'{0}'.format(self.assay_device_id)
 
 
-class AssayResult(LockableModel):
+class AssayResult(models.Model):
     assay_test = models.ForeignKey(AssayTest)
 
     test_name = models.ForeignKey('drugtrials.Test',
