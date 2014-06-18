@@ -295,11 +295,6 @@ class FindingResult(models.Model):
     finding_name = models.ForeignKey(Finding,
                                      verbose_name='Finding')
 
-    finding_type = models.ForeignKey(FindingType,
-                                     verbose_name='Finding Type',
-                                     blank=True,
-                                     null=True)
-
     finding_time = models.FloatField(verbose_name='Time', blank=True, null=True)
 
     time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
