@@ -540,6 +540,7 @@ admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
 class AssayResultInline(admin.TabularInline):
     model = AssayResult
+    form = AssayResultForm
     verbose_name = 'Assay/Drug Trial Test'
     verbose_name_plural = 'Assay/Drug Trial Test Results'
     fields = (

@@ -20,5 +20,6 @@ class FindingResultForm(forms.ModelForm):
         widgets = {
             'finding_time': forms.TextInput(attrs={'size': 3}),
             'percent_min': forms.TextInput(attrs={'size': 3}),
-            'percent_max': forms.TextInput(attrs={'size': 3})
+            'percent_max': forms.TextInput(attrs={'size': 3}),
+            'value': forms.TextInput(attrs={'size': 3})
         }
