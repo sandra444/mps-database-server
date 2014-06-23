@@ -157,7 +157,7 @@ class TestInline(admin.TabularInline):
         css = {"all": ("css/hide_admin_original.css",)}
 
 
-class OrganModelAdmin(admin.ModelAdmin):
+class OrganModelAdmin(LockableAdmin):
     list_per_page = 300
     filter_horizontal = ('cell_type',)
     list_display = (
@@ -175,11 +175,21 @@ class OrganModelAdmin(admin.ModelAdmin):
                         'organ', 'device', 'description',
                     ),
                     (
-                        'cell_type'
+                        'cell_type',
                     ),
                 )
             }
         ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        )
     )
 
     actions = ['update_fields']

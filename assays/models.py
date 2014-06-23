@@ -16,7 +16,7 @@ PHYSICAL_UNIT_TYPES = (
 )
 
 
-class PhysicalUnits(models.Model):
+class PhysicalUnits(LockableModel):
     unit = models.CharField(max_length=256)
     description = models.CharField(max_length=256,
                                    blank=True, null=True)
@@ -34,7 +34,7 @@ class PhysicalUnits(models.Model):
         return u'{}'.format(self.unit)
 
 
-class TimeUnits(models.Model):
+class TimeUnits(LockableModel):
     unit = models.CharField(max_length=16)
     description = models.CharField(max_length=256,
                                    blank=True, null=True)
@@ -207,7 +207,7 @@ class AssayTest(LockableModel):
         return u'{0}'.format(self.assay_device_id)
 
 
-class AssayResult(LockableModel):
+class AssayResult(models.Model):
     assay_test = models.ForeignKey(AssayTest)
 
     test_name = models.ForeignKey('drugtrials.Test',
