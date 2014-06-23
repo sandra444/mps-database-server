@@ -51,6 +51,8 @@ class CellType(LockableModel):
 
 
 class CellSubtype(LockableModel):
+    class Meta(object):
+        ordering = ('cell_subtype', )
     cell_subtype = models.CharField(max_length=255, unique=True,
                                     help_text="Example: motor (type of neuron), "
                                               "skeletal (type of muscle), etc.")
@@ -60,6 +62,8 @@ class CellSubtype(LockableModel):
 
 
 class Supplier(LockableModel):
+    class Meta(object):
+        ordering = ('name', )
     name = models.CharField(max_length=255, unique=True)
     phone = models.CharField(max_length=255, blank=True)
     address = models.CharField(max_length=255, blank=True)

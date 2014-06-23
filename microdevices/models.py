@@ -6,6 +6,8 @@ from mps.base.models import LockableModel
 
 
 class MicrophysiologyCenter(LockableModel):
+    class Meta(object):
+        ordering = ('center_name', )
 
     center_name = models.CharField(max_length=100)
     description = models.CharField(max_length=400, blank=True, null=True)
@@ -17,6 +19,8 @@ class MicrophysiologyCenter(LockableModel):
 
 
 class Manufacturer(LockableModel):
+    class Meta(object):
+        ordering = ('manufacturer_name', )
 
     manufacturer_name = models.CharField(max_length=100)
     contact_person = models.CharField(max_length=250, blank=True, null=True)
@@ -27,6 +31,8 @@ class Manufacturer(LockableModel):
 
 
 class Microdevice(LockableModel):
+    class Meta(object):
+        ordering = ('device_name', 'organ', )
 
     device_name = models.CharField(max_length=200)
 
@@ -64,6 +70,8 @@ class Microdevice(LockableModel):
 
 
 class OrganModel(LockableModel):
+    class Meta(object):
+        ordering = ('model_name', 'organ', )
 
     model_name = models.CharField(max_length=200)
     organ = models.ForeignKey('cellsamples.Organ')

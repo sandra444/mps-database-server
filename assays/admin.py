@@ -2,6 +2,7 @@ import csv
 
 from django.contrib import admin
 from django import forms
+from assays.forms import AssayResultForm
 
 from assays.models import *
 from compounds.models import Compound
@@ -327,6 +328,20 @@ class AssayLayoutAdmin(LockableAdmin):
 
     save_on_top = True
     list_per_page = 300
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    ('layout_name',
+                     'base_layout',
+                     'locked',
+                     ('created_by', 'created_on', ),
+                     ('modified_by', 'modified_on', ),
+                     ('signed_off_by', 'signed_off_date', ), )
+                )
+            }
+        ),
+    )
 
     def save_model(self, request, obj, form, change):
 
@@ -530,6 +545,7 @@ admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
 class AssayResultInline(admin.TabularInline):
     model = AssayResult
+    form = AssayResultForm
     verbose_name = 'Assay/Drug Trial Test'
     verbose_name_plural = 'Assay/Drug Trial Test Results'
     fields = (

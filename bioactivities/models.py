@@ -138,6 +138,7 @@ class Bioactivity(LockableModel):
     class Meta(object):
         verbose_name_plural = 'bioactivities'
         unique_together = ('assay', 'target', 'compound')
+        ordering = ('compound', 'bioactivity_type',)
 
     assay = models.ForeignKey(Assay)
     compound = models.ForeignKey('compounds.Compound',
@@ -175,6 +176,8 @@ class Bioactivity(LockableModel):
 
 
 class BioactivityType(LockableModel):
+    class Meta(object):
+        ordering = ('chembl_bioactivity', )
     chembl_bioactivity = models.TextField(default='')
     standard_name = models.TextField(default='', unique=True)
     description = models.TextField(default='')

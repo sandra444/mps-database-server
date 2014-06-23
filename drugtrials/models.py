@@ -12,6 +12,7 @@ from django.core.exceptions import ValidationError
 class Species(LockableModel):
     class Meta(object):
         verbose_name_plural = 'species'
+        ordering = ('species_name', )
 
     species_name = models.CharField(max_length=40, unique=True)
 
@@ -35,6 +36,8 @@ TRIALSUBTYPES = (
 
 
 class TrialSource(LockableModel):
+    class Meta(object):
+        ordering = ('source_name', )
     source_name = models.CharField(max_length=40, unique=True)
     source_website = models.URLField(blank=True, null=True)
     description = models.CharField(max_length=400, blank=True, null=True)
@@ -125,6 +128,8 @@ class DrugTrial(LockableModel):
 
 
 class TestType(LockableModel):
+    class Meta(object):
+        ordering = ('test_type',)
     test_type = models.CharField(max_length=60, unique=True)
     description = models.CharField(max_length=200, blank=True, null=True)
 
@@ -135,7 +140,7 @@ class TestType(LockableModel):
 class Test(LockableModel):
     class Meta(object):
         unique_together = [('test_type', 'test_name')]
-        ordering = ('organ', 'test_type', 'test_name', )
+        ordering = ('test_name', 'organ', 'test_type', )
 
     organ_model = models.ForeignKey(OrganModel,
                                     blank=True, null=True)
@@ -167,7 +172,7 @@ class FindingType(LockableModel):
 class Finding(LockableModel):
     class Meta(object):
         unique_together = [('organ', 'finding_name')]
-        ordering = ('organ', 'finding_name', )
+        ordering = ('organ', 'finding_type', 'finding_name', )
 
     finding_type = models.ForeignKey(FindingType, blank=True, null=True)
     finding_name = models.CharField(max_length=100)
@@ -178,10 +183,12 @@ class Finding(LockableModel):
     description = models.CharField(max_length=400, blank=True, null=True)
 
     def __unicode__(self):
-        return u'{} :: {}'.format(self.organ, self.finding_name)
+        return u'{} :: {} :: {}'.format(self.organ, self.finding_type, self.finding_name)
 
 
 class ResultDescriptor(LockableModel):
+    class Meta(object):
+        ordering = ('result_descriptor', )
     result_descriptor = models.CharField(max_length=40, unique=True)
 
     def __unicode__(self):
@@ -286,11 +293,6 @@ class FindingResult(models.Model):
 
     finding_name = models.ForeignKey(Finding,
                                      verbose_name='Finding')
-
-    finding_type = models.ForeignKey(FindingType,
-                                     verbose_name='Finding Type',
-                                     blank=True,
-                                     null=True)
 
     finding_time = models.FloatField(verbose_name='Time', blank=True, null=True)
 

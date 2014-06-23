@@ -50,6 +50,9 @@ class TimeUnits(LockableModel):
 
 
 class AssayModelType(LockableModel):
+    class Meta(object):
+        ordering = ('assay_type_name',)
+
     assay_type_name = models.CharField(max_length=200, unique=True)
     assay_type_description = models.TextField(blank=True, null=True)
 
@@ -58,6 +61,9 @@ class AssayModelType(LockableModel):
 
 
 class AssayModel(LockableModel):
+    class Meta(object):
+        ordering = ('assay_name',)
+
     assay_name = models.CharField(max_length=200, unique=True)
     assay_type = models.ForeignKey(AssayModelType)
     version_number = models.CharField(max_length=200, verbose_name='Version',
@@ -90,6 +96,9 @@ class AssayLayoutFormat(LockableModel):
 
     device = models.ForeignKey(Microdevice)
 
+    class Meta(object):
+        ordering = ('layout_format_name',)
+
     def __unicode__(self):
         return self.layout_format_name
 
@@ -98,11 +107,17 @@ class AssayBaseLayout(LockableModel):
     base_layout_name = models.CharField(max_length=200)
     layout_format = models.ForeignKey(AssayLayoutFormat)
 
+    class Meta(object):
+        ordering = ('base_layout_name',)
+
     def __unicode__(self):
         return self.base_layout_name
 
 
 class AssayWellType(LockableModel):
+    class Meta(object):
+        ordering = ('well_type',)
+
     well_type = models.CharField(max_length=200, unique=True)
     well_description = models.TextField(blank=True, null=True)
     background_color = models.CharField(max_length=20,
@@ -135,6 +150,9 @@ class AssayWell(LockableModel):
 
 
 class AssayLayout(LockableModel):
+    class Meta(object):
+        ordering = ('layout_name',)
+
     layout_name = models.CharField(max_length=200)
     base_layout = models.ForeignKey(AssayBaseLayout)
 
@@ -172,6 +190,8 @@ class AssayTest(LockableModel):
     (not the raw readouts) and the MPS device results
 
     """
+    class Meta(object):
+        ordering = ('test_date', 'microdevice', 'compound')
 
     assay_device_id = models.CharField(max_length=512,
                                        verbose_name='Device ID/ Barcode')
@@ -187,7 +207,7 @@ class AssayTest(LockableModel):
         return u'{0}'.format(self.assay_device_id)
 
 
-class AssayResult(LockableModel):
+class AssayResult(models.Model):
     assay_test = models.ForeignKey(AssayTest)
 
     test_name = models.ForeignKey('drugtrials.Test',
@@ -210,6 +230,9 @@ class AssayResult(LockableModel):
 
 
 class AssayDeviceReadout(LockableModel):
+    class Meta(object):
+        ordering = ('assay_device_id', 'organ_name', 'assay_name',)
+
     # the unique readout identifier
     # can be a barcode or a hand written identifier
     assay_device_id = models.CharField(max_length=512,
@@ -282,6 +305,9 @@ class AssayDeviceReadout(LockableModel):
 
 
 class AssayReader(LockableModel):
+    class Meta(object):
+        ordering = ('reader_name',)
+
     reader_name = models.CharField(max_length=128)
     reader_type = models.CharField(max_length=128)
 
