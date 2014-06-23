@@ -2,6 +2,7 @@ import csv
 
 from django.contrib import admin
 from django import forms
+from assays.forms import AssayResultForm
 
 from assays.models import *
 from compounds.models import Compound
@@ -540,6 +541,7 @@ admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
 class AssayResultInline(admin.TabularInline):
     model = AssayResult
+    form = AssayResultForm
     verbose_name = 'Assay/Drug Trial Test'
     verbose_name_plural = 'Assay/Drug Trial Test Results'
     fields = (
