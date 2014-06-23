@@ -12,7 +12,7 @@ from django.db import models
 from mps.base.models import LockableModel
 
 
-class Organ(models.Model):
+class Organ(LockableModel):
     organ_name = models.CharField(max_length=255, unique=True)
 
     class Meta(object):
@@ -22,7 +22,7 @@ class Organ(models.Model):
         return u'{}'.format(self.organ_name)
 
 
-class CellType(models.Model):
+class CellType(LockableModel):
     SPECIESTYPE = (
         ('Human', 'Human'),
         ('Rat', 'Rat'),
@@ -50,7 +50,7 @@ class CellType(models.Model):
         return self.__unicode__()
 
 
-class CellSubtype(models.Model):
+class CellSubtype(LockableModel):
     class Meta(object):
         ordering = ('cell_subtype', )
     cell_subtype = models.CharField(max_length=255, unique=True,
@@ -61,7 +61,7 @@ class CellSubtype(models.Model):
         return u'{}'.format(self.cell_subtype)
 
 
-class Supplier(models.Model):
+class Supplier(LockableModel):
     class Meta(object):
         ordering = ('name', )
     name = models.CharField(max_length=255, unique=True)

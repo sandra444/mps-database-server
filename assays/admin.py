@@ -139,6 +139,8 @@ class AssayLayoutFormatAdmin(LockableAdmin):
             'Change Tracking', {
                 'fields': (
                     'locked',
+                    'created_by',
+                    'modified_by',
                     ('signed_off_by', 'signed_off_date'),
                 )
             }
@@ -271,6 +273,8 @@ class AssayBaseLayoutAdmin(LockableAdmin):
             'Change Tracking', {
                 'fields': (
                     'locked',
+                    'created_by',
+                    'modified_by',
                     ('signed_off_by', 'signed_off_date'),
                 )
             }
@@ -604,18 +608,58 @@ class AssayTestAdmin(LockableAdmin):
 admin.site.register(AssayTest, AssayTestAdmin)
 
 
-class PhysicalUnitsAdmin(admin.ModelAdmin):
+class PhysicalUnitsAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('unit_type', 'unit', 'description')
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'unit',
+                    'description',
+                    'unit_type',
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
 
 admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 
 
-class TimeUnitsAdmin(admin.ModelAdmin):
+class TimeUnitsAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
 
     list_display = ('unit','unit_order',)
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'unit',
+                    'description',
+                    'unit_order',
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
 
 admin.site.register(TimeUnits, TimeUnitsAdmin)
