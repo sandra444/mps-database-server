@@ -152,6 +152,7 @@ class AssayLayoutFormatAdmin(LockableAdmin):
         'device_cross_section_image_display',
     )
 
+    save_as = True
     save_on_top = True
     form = AssayLayoutFormatForm
     list_display = ('layout_format_name', 'locked')
@@ -230,6 +231,7 @@ class AssayBaseLayoutAdmin(LockableAdmin):
         js = ('assays/customize_admin.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
+    save_as = True
     save_on_top = True
     list_per_page = 300
 
@@ -326,6 +328,7 @@ class AssayLayoutAdmin(LockableAdmin):
         js = ('assays/customize_admin.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
+    save_as = True
     save_on_top = True
     list_per_page = 300
     fieldsets = (
@@ -564,6 +567,7 @@ class AssayTestAdmin(LockableAdmin):
 
     resource_class = AssayTestResource
 
+    save_as = True
     save_on_top = True
     list_per_page = 300
     list_display = (

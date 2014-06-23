@@ -47,6 +47,7 @@ class CellTypeInline(admin.TabularInline):
 
 
 class OrganAdmin(LockableAdmin):
+    save_as = True
     save_on_top = True
     fieldsets = (
         (
