@@ -29,8 +29,6 @@ WHERE
   B.finding_name_id = A.finding_id and
   B.finding_type_id = A.finding_type_id ;
 
-
-
 INSERT INTO drugtrials_findingresult(drug_trial_id, 
   finding_name_id, 
   finding_type_id, 
