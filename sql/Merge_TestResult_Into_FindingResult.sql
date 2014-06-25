@@ -26,12 +26,10 @@ WHERE
   drugtrials_test.test_type_id = drugtrials_testtype.id AND
   drugtrials_testtype.test_type = drugtrials_findingtype.finding_type) as A 
   WHERE B.drug_trial_id = A.drug_trial_id and 
-  B.finding_name_id = A.finding_id and
-  B.finding_type_id = A.finding_type_id ;
+  B.finding_name_id = A.finding_id  ;
 
 INSERT INTO drugtrials_findingresult(drug_trial_id, 
   finding_name_id, 
-  finding_type_id, 
   finding_time, 
   result, 
   severity, 
@@ -47,7 +45,7 @@ SELECT
    
   drugtrials_testresult.drug_trial_id, 
     drugtrials_finding.id, 
-      drugtrials_findingtype.id, 
+     
   drugtrials_testresult.test_time, 
   drugtrials_testresult.result, 
   drugtrials_testresult.severity, 
