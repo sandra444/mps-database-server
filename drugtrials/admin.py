@@ -91,20 +91,6 @@ class TrialSourceAdmin(LockableAdmin):
 admin.site.register(TrialSource, TrialSourceAdmin)
 
 
-class TestResultInline(admin.TabularInline):
-    model = TestResult
-    form = TestResultForm
-    verbose_name = 'Organ Function Test'
-    verbose_name_plural = 'Organ Function Test Results'
-    fields = (('test_name', 'test_time', 'time_units', 'result',
-               'severity', 'percent_min', 'percent_max', 'value',
-               'value_units',),)
-    extra = 0
-
-    class Media(object):
-        css = {"all": ("css/hide_admin_original.css",)}
-
-
 class FindingResultInline(admin.TabularInline):
     model = FindingResult
     form = FindingResultForm
@@ -164,38 +150,10 @@ class DrugTrialAdmin(LockableAdmin):
         }
         ),
     )
-    inlines = [TestResultInline, FindingResultInline]
+    inlines = [FindingResultInline]
 
 
 admin.site.register(DrugTrial, DrugTrialAdmin)
-
-
-class TestTypeAdmin(LockableAdmin):
-    list_display = ('test_type', 'description',)
-    list_per_page = 300
-    save_on_top = True
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    'test_type',
-                    'description',
-                )
-            }
-        ),
-        ('Change Tracking', {
-            'fields': (
-                'locked',
-                ('created_by', 'created_on'),
-                ('modified_by', 'modified_on'),
-                ('signed_off_by', 'signed_off_date'),
-            )
-        }
-        ),
-    )
-
-
-admin.site.register(TestType, TestTypeAdmin)
 
 
 class FindingTypeAdmin(LockableAdmin):
@@ -250,40 +208,6 @@ class ResultDescriptorAdmin(LockableAdmin):
 
 
 admin.site.register(ResultDescriptor, ResultDescriptorAdmin)
-
-
-class TestAdmin(LockableAdmin):
-    save_on_top = True
-    list_per_page = 300
-    list_display = ('test_name', 'test_type', 'organ', 'test_unit',
-                    'description', 'locked')
-    search_fields = ['test_name', ]
-    actions = ['update_fields']
-
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    ('organ_model', 'organ'),
-                    ('test_type', 'test_name', 'test_unit'),
-                    'description',
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on'),
-                    ('modified_by', 'modified_on'),
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        ),
-    )
-
-
-admin.site.register(Test, TestAdmin)
 
 
 class FindingAdmin(LockableAdmin):
