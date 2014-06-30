@@ -126,6 +126,15 @@ class DrugTrial(LockableModel):
                                            self.compound.name,
                                            self.source.source_name)
 
+    def sourcelink(self):
+
+        if self.source_link:
+            return (u'<a href=""''{0}"target="_blank"">{0}</a>').format(self.source_link)
+        else:
+            return u''
+
+    sourcelink.allow_tags = True
+
 
 class TestType(LockableModel):
     class Meta(object):

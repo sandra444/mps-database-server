@@ -131,12 +131,13 @@ class DrugTrialAdmin(LockableAdmin):
     list_per_page = 300
     list_display = (
         'compound', 'species', 'trial_type', 'trial_sub_type',
-        'source', 'trial_date', 'locked')
+        'source_link', 'trial_date', 'locked')
     list_filter = ['trial_type', ]
     search_fields = [
         'compound__name', 'species__species_name']
     actions = ['update_fields']
     raw_id_fields = ('compound',)
+    sourcelink.allow_tags = True
 
     fieldsets = (
         (None, {
