@@ -313,4 +313,44 @@ class AssayReader(LockableModel):
 
     def __unicode__(self):
         return u'{0} - {1}'.format(self.reader_name, self.reader_type)
+      
+SEVERITY_SCORE = (
+    ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
+    ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
+)
 
+
+POSNEG = (
+    ('0', 'Neg'), ('1', 'Pos')
+)
+
+
+class AssayTestResult(models.Model):
+
+    assay_device_readout = models.ForeignKey('assays.AssayDeviceReadout')
+
+    finding_name = models.ForeignKey('drugtrials.Finding',
+                                     verbose_name='Assay Test')
+
+    assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
+
+    time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
+
+    result = models.CharField(default='1',
+                              max_length=8,
+                              choices=POSNEG,
+                              verbose_name='Pos/Neg?')
+
+    severity = models.CharField(default='-1',
+                                max_length=5,
+                                choices=SEVERITY_SCORE,
+                                verbose_name='Severity',
+                                blank=True,
+                                null=True)
+
+    value = models.FloatField(blank=True, null=True)
+
+    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
+
+    def __unicode__(self):
+        return u''
