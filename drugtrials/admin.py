@@ -289,8 +289,8 @@ admin.site.register(Test, TestAdmin)
 class FindingAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
-    list_display = ('finding_name', 'finding_type', 'organ', 'description')
-    list_display_links = ('finding_name',)
+    list_display = ('organ', 'finding_type', 'finding_name', 'description')
+    list_display_links = ('organ', 'finding_name', 'finding_type')
     list_filter = sorted(['finding_type'])
     search_fields = ['finding_name', ]
     fieldsets = (
