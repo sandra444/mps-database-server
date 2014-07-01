@@ -67,7 +67,6 @@ admin.site.register(Resource, ResourceAdmin)
 class ResourceTypeAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
-    list_display = 'resource_type_name'
 
     fieldsets = (
         (
@@ -82,10 +81,14 @@ class ResourceTypeAdmin(LockableAdmin):
             'Change Tracking', {
                 'fields': (
                     'locked',
-                    ('created_by','created_on'),
+                    ('created_by', 'created_on'),
                     ('modified_by', 'modified_on'),
                     ('signed_off_by', 'signed_off_date'),
                 )
             }
         ),
     )
+    actions = ['update_fields']
+
+
+admin.site.register(ResourceType, ResourceTypeAdmin)
