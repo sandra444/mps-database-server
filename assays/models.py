@@ -324,12 +324,33 @@ POSNEG = (
     ('0', 'Neg'), ('1', 'Pos')
 )
 
+class AssayFindingType(LockableModel):
+    class Meta(object):
+        ordering = ('assay_finding_type', )
 
-class AssayTestResult(models.Model):
+    assay_finding_type = models.CharField(max_length=100, unique=True)
+    description = models.CharField(max_length=200, blank=True, null=True)
+
+    def __unicode__(self):
+        return self.assay_finding_type
+
+class AssayFinding(LockableModel):
+    class Meta(object):
+        ordering = ('assay_finding_type', 'assay_finding_name', )
+
+    assay_finding_type = models.ForeignKey(AssayFindingType, blank=True, null=True)
+    assay_finding_name = models.CharField(max_length=100)
+    description = models.CharField(max_length=400, blank=True, null=True)
+
+    def __unicode__(self):
+        return u'{} :: {}'.format(self.assay_finding_type, self.assay_finding_name)
+
+class AssayTestResult(LockableModel):
 
     assay_device_readout = models.ForeignKey('assays.AssayDeviceReadout')
+    compound = models.ForeignKey('compounds.Compound')
 
-    finding_name = models.ForeignKey('drugtrials.Finding',
+    assay_finding_name = models.ForeignKey(AssayFinding,
                                      verbose_name='Assay Test')
 
     assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
