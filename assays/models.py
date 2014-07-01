@@ -313,4 +313,65 @@ class AssayReader(LockableModel):
 
     def __unicode__(self):
         return u'{0} - {1}'.format(self.reader_name, self.reader_type)
+      
+SEVERITY_SCORE = (
+    ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
+    ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
+)
 
+
+POSNEG = (
+    ('0', 'Neg'), ('1', 'Pos')
+)
+
+class AssayFindingType(LockableModel):
+    class Meta(object):
+        ordering = ('assay_finding_type', )
+
+    assay_finding_type = models.CharField(max_length=100, unique=True)
+    description = models.CharField(max_length=200, blank=True, null=True)
+
+    def __unicode__(self):
+        return self.assay_finding_type
+
+class AssayFinding(LockableModel):
+    class Meta(object):
+        ordering = ('assay_finding_type', 'assay_finding_name', )
+
+    assay_finding_type = models.ForeignKey(AssayFindingType, blank=True, null=True)
+    assay_finding_name = models.CharField(max_length=100)
+    description = models.CharField(max_length=400, blank=True, null=True)
+
+    def __unicode__(self):
+        return u'{} :: {}'.format(self.assay_finding_type, self.assay_finding_name)
+
+class AssayTestResult(LockableModel):
+
+    assay_device_readout = models.ForeignKey('assays.AssayDeviceReadout')
+    compound = models.ForeignKey('compounds.Compound')
+
+    assay_finding_name = models.ForeignKey(AssayFinding,
+                                     verbose_name='Assay Test')
+
+    assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
+
+    time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
+
+    result = models.CharField(default='1',
+                              max_length=8,
+                              choices=POSNEG,
+                              verbose_name='Pos/Neg?')
+
+    severity = models.CharField(default='-1',
+                                max_length=5,
+                                choices=SEVERITY_SCORE,
+                                verbose_name='Severity',
+                                blank=True,
+                                null=True)
+
+    value = models.FloatField(blank=True, null=True)
+
+    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
+
+    def __unicode__(self):
+        return u''
