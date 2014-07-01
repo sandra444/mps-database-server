@@ -23,4 +23,4 @@ class Resource(LockableModel):
     type = models.ForeignKey(ResourceType)
 
     def __unicode__(self):
-        return self.source_name
+        return self.resource_name
