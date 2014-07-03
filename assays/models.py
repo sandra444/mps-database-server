@@ -181,6 +181,7 @@ class AssayReadout(models.Model):
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
     value = models.FloatField()
+    elapsed_time = models.FloatField(default=0)
 
 
 class AssayTest(LockableModel):
