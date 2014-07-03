@@ -180,7 +180,7 @@ class Finding(LockableModel):
     organ = models.ForeignKey(Organ,
                               blank=True,
                               null=True)
-    description = models.CharField(max_length=400, blank=True, null=True)
+    description = models.CharField(max_length=500, blank=True, null=True)
 
     def __unicode__(self):
         return u'{} :: {} :: {}'.format(self.organ, self.finding_type, self.finding_name)
