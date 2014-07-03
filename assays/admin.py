@@ -668,6 +668,33 @@ class TimeUnitsAdmin(LockableAdmin):
 
 admin.site.register(TimeUnits, TimeUnitsAdmin)
 
+class ReadoutUnitAdmin(LockableAdmin):
+    save_on_top = True
+    list_per_page = 100
+
+    list_display = ('readout_unit','description',)
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'readout_unit',
+                    'description'
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
+
+admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
+
 class AssayFindingTypeAdmin(LockableAdmin):
     list_per_page = 300
     save_on_top = True

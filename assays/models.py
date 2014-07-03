@@ -228,7 +228,14 @@ class AssayResult(models.Model):
     test_unit = models.ForeignKey(PhysicalUnits,
                                   blank=True,
                                   null=True)
-
+    
+class ReadoutUnit(LockableModel):
+    class Meta(object):
+        ordering = ('readout_unit',)
+    readout_unit = models.CharField(max_length=512,unique=True)
+    description = models.CharField(max_length=512,blank=True,null=True)
+    def __unicode__(self):
+        return self.readout_unit
 
 class AssayDeviceReadout(LockableModel):
     class Meta(object):
