@@ -486,7 +486,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
                         'cellsample_density_unit',
                     ),
                     (
-                         'readout_unit', 'timeunit',
+                          'timeunit',
                     ),
                     (
                         'treatment_time_length', 

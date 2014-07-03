@@ -267,11 +267,6 @@ class AssayDeviceReadout(LockableModel):
     
     reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
 
-    readout_unit = models.CharField(default='RFU',
-                                    max_length=16,
-                                    choices=(('RFU', 'RFU'),
-                                             ('RLU', 'RLU'),
-                                             ('Absorbance', 'Absorbance')))
 
     timeunit = models.ForeignKey(TimeUnits)
 
