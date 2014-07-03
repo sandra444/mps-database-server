@@ -458,19 +458,16 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('assay_device_id',
-                    'organ_name',
                     'assay_name',
                     'cell_sample',
-                    'microdevice',
                     'reader_name')
-    search_fields = ['assay_device_id',
-                     'microdevice__device_name']
+    search_fields = ['assay_device_id']
     fieldsets = (
         (
             'Device Parameters', {
                 'fields': (
                     (
-                        'assay_device_id', 'microdevice',
+                        'assay_device_id', 
                     ),
                     (
                         'assay_layout', 'reader_name',
@@ -482,18 +479,17 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
             'Assay Parameters', {
                 'fields': (
                     (
-                        'assay_name', 'organ_name',
+                        'assay_name', 
                     ),
                     (
                         'cell_sample', 'cellsample_density',
                         'cellsample_density_unit',
                     ),
                     (
-                        'readout_type', 'readout_unit', 'timeunit',
+                         'readout_unit', 'timeunit',
                     ),
                     (
-                        'treatment_time_length', 'time_interval',
-                        'timepoint',
+                        'treatment_time_length', 
                     ),
                     (
                         'file',

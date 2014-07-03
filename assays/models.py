@@ -239,7 +239,7 @@ class ReadoutUnit(LockableModel):
 
 class AssayDeviceReadout(LockableModel):
     class Meta(object):
-        ordering = ('assay_device_id', 'organ_name', 'assay_name',)
+        ordering = ('assay_device_id', 'assay_name',)
 
     # the unique readout identifier
     # can be a barcode or a hand written identifier
@@ -247,8 +247,7 @@ class AssayDeviceReadout(LockableModel):
                                        verbose_name='Device ID/ Barcode')
 
     cell_sample = models.ForeignKey('cellsamples.CellSample')
-    organ_name = models.ForeignKey('cellsamples.Organ', verbose_name='Organ',
-                                   null=True)
+    
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
     # Cell samples
@@ -265,8 +264,7 @@ class AssayDeviceReadout(LockableModel):
                                                         ('MM', 'cells / mm^2')))
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
     assay_layout = models.ForeignKey(AssayLayout)
-    microdevice = models.ForeignKey('microdevices.Microdevice',
-                                    verbose_name='Assay Device')
+    
     reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
 
     readout_unit = models.CharField(default='RFU',
@@ -275,22 +273,10 @@ class AssayDeviceReadout(LockableModel):
                                              ('RLU', 'RLU'),
                                              ('Absorbance', 'Absorbance')))
 
-    READOUT_CHOICES = ((u'E', u'Endpoint'), (u'K', u'Kinetic'))
-
-    readout_type = models.CharField(default='E',
-                                    max_length=2,
-                                    choices=READOUT_CHOICES)
-
     timeunit = models.ForeignKey(TimeUnits)
 
     treatment_time_length = models.FloatField(verbose_name='Treatment Duration',
                                               blank=True, null=True)
-
-    timepoint = models.FloatField(verbose_name='End time', blank=True,
-                                  null=True,
-                                  help_text='Leave blank if using Kinetic type')
-
-    time_interval = models.FloatField(blank=True, null=True)
 
     assay_timestamp = models.DateTimeField(auto_now_add=True, blank=True,
                                            null=True)
