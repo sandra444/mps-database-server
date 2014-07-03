@@ -214,7 +214,7 @@ admin.site.register(ResultDescriptor, ResultDescriptorAdmin)
 class FindingAdmin(LockableAdmin):
 
     form = FindingForm
-    
+
     save_on_top = True
     list_per_page = 300
     list_display = ('organ', 'finding_type', 'finding_name', 'description')

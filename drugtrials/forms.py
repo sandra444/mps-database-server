@@ -29,5 +29,6 @@ class FindingForm(forms.ModelForm):
 
     class Meta(object):
         widgets = {
-            'description': forms.Textarea(attrs = {'size':500, 'rows': 5, 'cols':100})
+            'finding_name': forms.Textarea(attrs={'size': 100, 'rows': 1, 'cols': 100}),
+            'description': forms.Textarea(attrs={'size': 400, 'rows': 4, 'cols': 100}),
         }
