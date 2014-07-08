@@ -4,6 +4,7 @@ import json
 import os
 import hashlib
 import random
+import csv
 
 from pandas import *
 from django.db import connection
@@ -354,12 +355,6 @@ def heatmap(request):
         str(random.random)
     ).hexdigest()[:10]
 
-    data_filename = os.path.join(
-        MEDIA_ROOT,
-        'heatmap',
-        data_hash + '.tsv'
-    )
-
     unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
 
     unwound_data['target_bioactivity_pair'] = \
@@ -377,11 +372,82 @@ def heatmap(request):
     except OSError:
         pass
 
-    rearranged_data.to_csv(
-        index=False,
-        path_or_buf=data_filename,
-        sep="\t"
+    heatmap_rows = []
+    heatmap_columns = []
+    data = []
+
+    # create a unique array of rows and columns
+    # so we have a fully populated heatmap where the indexes
+    # are from 0 -> n and produces a nice and dense representation
+    # of our data
+
+    for record in rearranged_data.values:
+        if str(record[0]) not in heatmap_rows:
+            heatmap_rows.append(str(record[0]))
+        if str(record[1]) not in heatmap_columns:
+            heatmap_columns.append(str(record[1]))
+
+    # map and reduce the records in the dataframe to the more
+    # dense representation of our new unique heatmap rows and
+    # columns array.
+
+    # the data in the old dataframe is replaced with
+    # a new dataframe-like plain array with just row and column indexes
+
+    for record in rearranged_data.values:
+        data.append(
+            [
+                heatmap_rows.index(str(record[0])),
+                heatmap_columns.index(str(record[1])),
+                record[2]
+            ]
+        )
+
+    # generate a unique full path for data and rows and columns information
+
+    fullpath_without_extension = os.path.join(
+        MEDIA_ROOT,
+        'heatmap',
+        data_hash
     )
 
-    return {'tsv': data_hash}
+    # string representation of the respective full full paths
+    data_csv_fullpath = fullpath_without_extension + '_data.csv'
+    rows_csv_fullpath = fullpath_without_extension + '_rows.csv'
+    cols_csv_fullpath = fullpath_without_extension + '_cols.csv'
 
+    # generate file handles for the csv writer
+    data_csv_filehandle = open(data_csv_fullpath, "w")
+    rows_csv_filehandle = open(rows_csv_fullpath, "w")
+    cols_csv_filehandle = open(cols_csv_fullpath, "w")
+
+    # generate csv writers for each file handle
+    data_csv_writer = csv.writer(data_csv_filehandle)
+    rows_csv_writer = csv.writer(rows_csv_filehandle)
+    cols_csv_writer = csv.writer(cols_csv_filehandle)
+
+    # write out our data lists into csv format
+    data_csv_writer.writerows(data)
+
+    for record in heatmap_rows:
+        rows_csv_writer.writerow([str(record)])
+
+    for record in heatmap_columns:
+        cols_csv_writer.writerow([str(record)])
+
+    # close the csv files that we have written so far
+    data_csv_filehandle.close()
+    rows_csv_filehandle.close()
+    cols_csv_filehandle.close()
+
+    # return the paths to each respective filetype as a JSON
+    return {
+        # csv filepath for the data
+        'data_csv': data_csv_fullpath,
+
+        # csv filepath for the rows index information
+        'rows_csv': rows_csv_fullpath,
+
+        # csv filepath for the columns index information
+        'cols_csv': cols_csv_fullpath
+    }
