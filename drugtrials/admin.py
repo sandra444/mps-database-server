@@ -127,20 +127,11 @@ class DrugTrialAdmin(LockableAdmin):
         URLField: {'widget': URLFieldWidget},
     }
 
-    def sourcelink(self):
-
-        if self.source_link:
-            return (u'<a href=""''{0}"target="_blank"">{0}</a>').format(self.source_link)
-        else:
-            return u''
-
-    sourcelink.allow_tags = True
-
     save_on_top = True
     list_per_page = 300
     list_display = (
         'compound', 'species', 'trial_type', 'trial_sub_type',
-        'source_link', 'trial_date', 'locked')
+        'show_source_link', 'trial_date', 'locked')
     list_filter = ['trial_type', ]
     search_fields = [
         'compound__name', 'species__species_name']
@@ -174,6 +165,10 @@ class DrugTrialAdmin(LockableAdmin):
         ),
     )
     inlines = [TestResultInline, FindingResultInline]
+
+    def show_source_link(self, obj):
+        return '<a href="%s">%s</a>' % (obj.source_link, obj.source_link)
+    show_source_link.allow_tags = True
 
 admin.site.register(DrugTrial, DrugTrialAdmin)
 
