@@ -167,7 +167,7 @@ class DrugTrialAdmin(LockableAdmin):
     inlines = [TestResultInline, FindingResultInline]
 
     def show_source_link(self, obj):
-        return '<a href="%s">%s</a>' % (obj.source_link, obj.source_link)
+        return '<a href="%s" target="_blank">%s</a>' % (obj.source_link, obj.source_link)
     show_source_link.allow_tags = True
 
 admin.site.register(DrugTrial, DrugTrialAdmin)
