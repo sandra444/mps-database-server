@@ -131,7 +131,7 @@ class DrugTrialAdmin(LockableAdmin):
     list_per_page = 300
     list_display = (
         'compound', 'species', 'trial_type', 'trial_sub_type',
-        'show_source_link', 'trial_date', 'locked')
+        'source_page', 'trial_date', 'locked')
     list_filter = ['trial_type', ]
     search_fields = [
         'compound__name', 'species__species_name']
@@ -166,9 +166,9 @@ class DrugTrialAdmin(LockableAdmin):
     )
     inlines = [TestResultInline, FindingResultInline]
 
-    def show_source_link(self, obj):
+    def source_page(self, obj):
         return '<a href="%s" target="_blank">%s</a>' % (obj.source_link, obj.source_link)
-    show_source_link.allow_tags = True
+    source_page.allow_tags = True
 
 admin.site.register(DrugTrial, DrugTrialAdmin)
 
