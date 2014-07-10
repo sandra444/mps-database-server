@@ -23,3 +23,12 @@ class FindingResultForm(forms.ModelForm):
             'percent_max': forms.TextInput(attrs={'size': 3}),
             'value': forms.TextInput(attrs={'size': 5})
         }
+
+
+class FindingForm(forms.ModelForm):
+
+    class Meta(object):
+        widgets = {
+            'finding_name': forms.Textarea(attrs={'size': 100, 'rows': 1, 'cols': 100}),
+            'description': forms.Textarea(attrs={'size': 400, 'rows': 4, 'cols': 100}),
+        }

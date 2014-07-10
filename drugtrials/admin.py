@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.admin.widgets import AdminURLFieldWidget
 from django.db.models import URLField
 from django.utils.safestring import mark_safe
+from django.forms import Textarea
 
 from mps.base.admin import LockableAdmin
 from drugtrials.models import *
@@ -214,6 +215,9 @@ admin.site.register(ResultDescriptor, ResultDescriptorAdmin)
 
 
 class FindingAdmin(LockableAdmin):
+
+    form = FindingForm
+
     save_on_top = True
     list_per_page = 300
     list_display = ('organ', 'finding_type', 'finding_name', 'description')
