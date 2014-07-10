@@ -30,7 +30,8 @@ class CompoundAdmin(LockableAdmin):
     list_display = ('name', 'chembl_link', 'known_drug',
                     'molecular_formula', 'thumb', 'last_update', 'locked')
     search_fields = ['=name', 'synonyms', '=chemblid']
-    readonly_fields = ('last_update', )
+    readonly_fields = ('last_update', 'created_by', 'created_on',
+                       'modified_by', 'modified_on')
     actions = ['update_fields']
     fieldsets = (
         (None, {
@@ -52,8 +53,8 @@ class CompoundAdmin(LockableAdmin):
         ('Change Tracking', {
             'fields': (
                 'locked',
-                'created_by',
-                'modified_by',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),
             )
         }
