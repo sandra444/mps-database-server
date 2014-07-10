@@ -23,7 +23,8 @@ var APPS = {
 
 // You need to specify HIDE_REMOVE item only if model needs to be hidden
 
-// WARNING: It appears to be the case that 3 indents is the maximum indentation!
+// WARNING: It appears to be the case that 5 indents is the maximum indentation!
+//Can change maximum indentation allowed in admintools under indent = ...
 
 var MODELS = {
     'Auth': {
