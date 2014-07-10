@@ -9,7 +9,7 @@ from drugtrials.models import Test
 class MicrophysiologyCenterAdmin(LockableAdmin):
     save_on_top = True
     list_display = (
-        'center_name', 'description', 'contact_person', 'center_website')
+        'center_name', 'description', 'contact_person', 'center_site')
     list_per_page = 300
     fieldsets = (
         (
@@ -33,6 +33,10 @@ class MicrophysiologyCenterAdmin(LockableAdmin):
             }
         ),
     )
+
+    def center_site(self, obj):
+        return '<a href="%s" target="_blank">%s</a>' % (obj.center_website, obj.center_website)
+    center_site.allow_tags = True
 
 admin.site.register(MicrophysiologyCenter, MicrophysiologyCenterAdmin)
 
