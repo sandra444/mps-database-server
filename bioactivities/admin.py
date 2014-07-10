@@ -10,6 +10,7 @@ from django.forms import Textarea
 from bioactivities.resource import BioactivityTypeResource
 from mps.base.admin import LockableAdmin
 from .models import *
+from bioactivities.forms import AssayForm
 
 
 class TargetAdmin(LockableAdmin):
@@ -135,6 +136,8 @@ admin.site.register(Target, TargetAdmin)
 
 
 class AssayAdmin(LockableAdmin):
+    form = AssayForm
+
     class Media(object):
         js = ('bioactivities/customize_admin.js',)
 
@@ -151,7 +154,8 @@ class AssayAdmin(LockableAdmin):
         'description', 'chembl_link', 'organism', 'assay_type', 'locked')
     search_fields = ['description', '=chemblid']
     actions = ['update_fields']
-    readonly_fields = ('last_update', )
+    readonly_fields = ('last_update', 'created_by', 'created_on',
+                       'modified_by', 'modified_on')
 
     fieldsets = (
         (
@@ -163,7 +167,7 @@ class AssayAdmin(LockableAdmin):
                     'organism',
                     'strain',
                     'journal',
-                    readonly_fields,
+                    'last_update',
                 )
             }
         ),
@@ -171,6 +175,9 @@ class AssayAdmin(LockableAdmin):
             'Change Tracking', {
                 'fields': (
                     'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
                 )
             }
         ),
