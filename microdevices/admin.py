@@ -40,6 +40,7 @@ admin.site.register(MicrophysiologyCenter, MicrophysiologyCenterAdmin)
 class ManufacturerAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
+    list_display = ['manufacturer_name', 'contact_person', 'manufacturer_site']
     fieldsets = (
         (
             None, {
@@ -61,6 +62,10 @@ class ManufacturerAdmin(LockableAdmin):
             }
         ),
     )
+
+    def manufacturer_site(self, obj):
+        return '<a href="%s" target="_blank">%s</a>' % (obj.Manufacturer_website, obj.Manufacturer_website)
+    manufacturer_site.allow_tags = True
 
 admin.site.register(Manufacturer, ManufacturerAdmin)
 
