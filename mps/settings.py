@@ -195,7 +195,8 @@ INSTALLED_APPS = (
     'microdevices',
     'bioactivities',
     'drugtrials',
-    'assays'
+    'assays',
+    'resources'
 )
 
 # A sample logging configuration. The only tangible logging
