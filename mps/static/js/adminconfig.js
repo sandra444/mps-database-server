@@ -23,7 +23,8 @@ var APPS = {
 
 // You need to specify HIDE_REMOVE item only if model needs to be hidden
 
-// WARNING: It appears to be the case that 3 indents is the maximum indentation!
+// WARNING: It appears to be the case that 5 indents is the maximum indentation!
+//Can change maximum indentation allowed in admintools under indent = ...
 
 var MODELS = {
     'Auth': {
@@ -37,16 +38,20 @@ var MODELS = {
     },
     'Assays': {
         'Assay tests': [0, 'Assay Tests and Results', 0],
-        'Assay device readouts': [1, 'Assay Readouts', 1],
-        'Assay models': [2, 'Assays', 2],
-        'Assay model types': [3, 'Assay Types', 3],
-        'Assay layouts': [4, 'Assay Layouts', 2],
-        'Assay base layouts': [5, 'Base Layouts', 3],
-        'Assay layout formats': [6, 'Layout Formats', 3],
-        'Assay well types': [7, 'Virtual Well Types', 3],
-        'Assay readers': [8, 'Assay Reader Devices', 2],
-        'Physical Units': [9, 'Physical Units of Measurement', 0],
-        'Time Units' : [10, 'Units of Time', 0]
+        'Assay test results': [2, 'Assay Test Results', 0],
+        'Assay findings': [3, 'Assay Findings', 1],
+        'Assay finding types': [4, 'Assay Finding Types', 2],
+        'Assay device readouts': [5, 'Assay Readouts', 1],
+        'Readout units': [6, 'Readout Units', 2],
+        'Assay models': [7, 'Assays', 2],
+        'Assay model types': [9, 'Assay Types', 3],
+        'Assay layouts': [11, 'Assay Layouts', 2],
+        'Assay base layouts': [13, 'Base Layouts', 3],
+        'Assay layout formats': [15, 'Layout Formats', 4],
+        'Assay well types': [17, 'Virtual Well Types', 3],
+        'Assay readers': [19, 'Assay Reader Devices', 2],
+        'Physical Units': [21, 'Units of Measurement', 0],
+        'Time Units' : [23, 'Units of Time', 0]
     },
     'Compounds': {
         'Compounds': [1, 'Compounds/Drugs', 0]

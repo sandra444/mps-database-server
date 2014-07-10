@@ -45,7 +45,9 @@ $(document).ready(function() {
     };
 
     var INDENT = ["", "&nbsp;&nbsp;&#8866; ", "&nbsp;&nbsp;&nbsp;&nbsp;&#8866; ",
-        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8866; "]
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8866; ",
+        "&nbsp&nbsp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8866;",
+        "&nbsp&nbsp&nbsp&nbsp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8866;"]
 
     function renameModels(app, module) {
        if (MODELS.hasOwnProperty(app)) {
@@ -73,7 +75,7 @@ $(document).ready(function() {
             });
         };
     };
-    
+
     function renameBreadcrumbs() {
         var breadcrumbs = $('.breadcrumbs');
         var items = breadcrumbs.text().split('›')
@@ -107,7 +109,7 @@ $(document).ready(function() {
         }
         breadcrumbs.append(last);
     };
-    
+
     if ($('.breadcrumbs > a').length < 2) {
         // ADMIN INDEX or APP INDEX page
         var modules = $('#content-main > .module');
