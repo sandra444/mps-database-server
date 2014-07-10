@@ -45,6 +45,12 @@ admin.site.register(CellType, CellTypeAdmin)
 class CellTypeInline(admin.TabularInline):
     model = CellType
 
+    fields = (('cell_type', 'species', 'cell_subtype', 'locked'),)
+    extra = 0
+
+    class Media(object):
+        css = {"all": ("css/hide_admin_original.css",)}
+
 
 class OrganAdmin(LockableAdmin):
     save_as = True
