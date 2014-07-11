@@ -132,8 +132,6 @@ class DrugTrialAdmin(LockableAdmin):
         if obj.compound.chemblid:
             url = (u'https://www.ebi.ac.uk/chembldb/compound/'
                    'displayimage/' + obj.compound.chemblid)
-            print '<img src="%s">' % \
-                url
             return '<img src="%s">' % \
                 url
         else:
