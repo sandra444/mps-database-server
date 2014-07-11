@@ -144,7 +144,8 @@ class DrugTrialAdmin(LockableAdmin):
 
     fieldsets = (
         (None, {
-            'fields': (('compound', 'title', 'drug_display'),
+            'fields': (('compound', 'title'),
+                       'drug_display',
                        ('trial_type', 'trial_sub_type', 'trial_date'),
                        ('condition', 'description',),)
         }),

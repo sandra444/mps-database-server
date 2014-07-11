@@ -296,7 +296,7 @@ class BioactivityAdmin(LockableAdmin):
 
     fieldsets = (
         (None, {
-            'fields': (('compound', 'assay', 'bioactivity_display'), ('target', 'target_confidence'),
+            'fields': (('compound', 'assay'), 'bioactivity_display', ('target', 'target_confidence'),
                        ('bioactivity_type', 'value', 'units'),
                        ('standard_name', 'standardized_value', 'standardized_units'),
                        ('activity_comment', 'reference', 'name_in_reference'), 'locked',
