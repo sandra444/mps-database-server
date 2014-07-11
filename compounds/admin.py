@@ -45,7 +45,7 @@ class CompoundAdmin(LockableAdmin):
         return ''
 
     image_display.allow_tags = True
-    image_display.short_description = 'Image'
+    image_display.short_description = 'Structure'
 
     fieldsets = (
         (None, {
