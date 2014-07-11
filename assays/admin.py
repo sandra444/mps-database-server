@@ -589,7 +589,7 @@ class AssayTestAdmin(LockableAdmin):
             return u''
 
     compound_display.allow_tags = True
-    compound_display.short_description = 'Image'
+    compound_display.short_description = 'Structure'
 
     fieldsets = (
         (
@@ -792,7 +792,7 @@ class AssayTestResultAdmin(LockableAdmin):
             return u''
 
     compound_display.allow_tags = True
-    compound_display.short_description = 'Image'
+    compound_display.short_description = 'Structure'
 
     fieldsets = (
         (

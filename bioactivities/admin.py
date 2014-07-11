@@ -273,7 +273,7 @@ class BioactivityAdmin(LockableAdmin):
             return u''
 
     bioactivity_display.allow_tags = True
-    bioactivity_display.short_description = 'Image'
+    bioactivity_display.short_description = 'Structure'
 
     list_display = (
         'compound',

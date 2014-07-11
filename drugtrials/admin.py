@@ -138,7 +138,7 @@ class DrugTrialAdmin(LockableAdmin):
             return u''
 
     drug_display.allow_tags = True
-    drug_display.short_description = 'Image'
+    drug_display.short_description = 'Structure'
 
     fieldsets = (
         (None, {
