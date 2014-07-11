@@ -34,7 +34,8 @@ class TargetAdmin(LockableAdmin):
     list_display = ('name', 'organism', 'target_type', 'chembl_link', 'locked')
     search_fields = ['name', 'organism', 'synonyms', '=chemblid']
     actions = ['update_fields']
-    readonly_fields = ('last_update', )
+    readonly_fields = ('last_update', 'created_by', 'created_on',
+                       'modified_by', 'modified_on')
 
     fieldsets = (
         (
@@ -48,7 +49,7 @@ class TargetAdmin(LockableAdmin):
                     'organism',
                     'uniprot_accession',
                     'target_type',
-                    readonly_fields,
+                    'last_update',
                 )
             }
         ),
@@ -56,8 +57,8 @@ class TargetAdmin(LockableAdmin):
             'Change Tracking', {
                 'fields': (
                     'locked',
-                    'created_by',
-                    'modified_by',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
                     ('signed_off_by', 'signed_off_date'),
                 )
             }
