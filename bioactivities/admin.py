@@ -11,11 +11,14 @@ from bioactivities.resource import BioactivityTypeResource
 from mps.base.admin import LockableAdmin
 from .models import *
 from bioactivities.forms import AssayForm
+from bioactivities.forms import TargetsForm
 
 
 class TargetAdmin(LockableAdmin):
     class Media(object):
         js = ('bioactivities/customize_admin.js',)
+
+    form = TargetsForm
 
     class AddMultiForm(forms.Form):
 
