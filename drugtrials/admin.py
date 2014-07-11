@@ -124,10 +124,27 @@ class DrugTrialAdmin(LockableAdmin):
         'compound__name', 'species__species_name']
     actions = ['update_fields']
     raw_id_fields = ('compound',)
+    readonly_fields = ['created_on', 'created_by', 'modified_by',
+                       'modified_on', 'drug_display']
+
+    def drug_display(self, obj):
+
+        if obj.compound.chemblid:
+            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
+                   'displayimage/' + obj.compound.chemblid)
+            print '<img src="%s">' % \
+                url
+            return '<img src="%s">' % \
+                url
+        else:
+            return u''
+
+    drug_display.allow_tags = True
+    drug_display.short_description = 'Image'
 
     fieldsets = (
         (None, {
-            'fields': (('compound', 'title'),
+            'fields': (('compound', 'title', 'drug_display'),
                        ('trial_type', 'trial_sub_type', 'trial_date'),
                        ('condition', 'description',),)
         }),
