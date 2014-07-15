@@ -174,7 +174,7 @@ class Finding(LockableModel):
         unique_together = [('organ', 'finding_name')]
         ordering = ('organ', 'finding_type', 'finding_name', )
 
-    finding_type = models.ForeignKey(FindingType, blank=True, null=True)
+    finding_type = models.ForeignKey(FindingType)
     finding_name = models.CharField(max_length=100)
     finding_unit = models.CharField(max_length=40, blank=True, null=True)
     organ = models.ForeignKey(Organ,
