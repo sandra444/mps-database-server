@@ -173,6 +173,9 @@ class OrganModelAdmin(LockableAdmin):
         'model_name', 'organ', 'device', 'cell_types', 'center', 'description')
     search_fields = [
         'model_name', 'organ', 'device', 'cell_types', 'center', 'description']
+    readonly_fields = ['created_by', 'created_on',
+                       'modified_by', 'modified_on',
+                       'organ_name']
     fieldsets = (
         (
             None, {
@@ -181,7 +184,7 @@ class OrganModelAdmin(LockableAdmin):
                         'model_name', 'center',
                     ),
                     (
-                        'organ', 'device', 'description',
+                        'organ_name', 'device', 'description',
                     ),
                     (
                         'cell_type',

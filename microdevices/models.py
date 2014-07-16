@@ -88,3 +88,6 @@ class OrganModel(LockableModel):
     def __unicode__(self):
 
         return self.model_name
+
+    def organ_name(self):
+        return self.device.organ.organ_name
