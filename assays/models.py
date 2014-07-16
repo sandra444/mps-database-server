@@ -267,17 +267,14 @@ class AssayDeviceReadout(LockableModel):
     
     reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
 
-
+    readout_unit = models.ForeignKey(ReadoutUnit)
     timeunit = models.ForeignKey(TimeUnits)
 
     treatment_time_length = models.FloatField(verbose_name='Treatment Duration',
                                               blank=True, null=True)
-
-    assay_timestamp = models.DateTimeField(auto_now_add=True, blank=True,
-                                           null=True)
-
-    readout_timestamp = models.DateTimeField(auto_now_add=True, blank=True,
-                                             null=True)
+    
+    assay_start_time = models.DateTimeField(blank=True, null=True)
+    readout_start_time = models.DateTimeField(blank=True, null=True)
 
     notebook = models.CharField(max_length=256, blank=True, null=True)
     notebook_page = models.IntegerField(blank=True, null=True)
