@@ -9,6 +9,7 @@ from compounds.models import Compound
 from mps.base.admin import LockableAdmin
 from assays.resource import *
 from import_export.admin import ImportExportModelAdmin
+from compounds.models import *
 
 
 class AssayLayoutFormatForm(forms.ModelForm):
@@ -467,7 +468,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
             'Device Parameters', {
                 'fields': (
                     (
-                        'assay_device_id', 
+                        'assay_device_id',
                     ),
                     (
                         'assay_layout', 'reader_name',
@@ -479,7 +480,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
             'Assay Parameters', {
                 'fields': (
                     (
-                        'assay_name', 
+                        'assay_name',
                     ),
                     (
                         'cell_sample', 'cellsample_density',
@@ -574,6 +575,22 @@ class AssayTestAdmin(LockableAdmin):
     search_fields = ['assay_device_id']
     actions = ['update_fields']
     raw_id_fields = ('compound', 'cell_sample',)
+    readonly_fields = ['created_by', 'created_on',
+                       'modified_by', 'modified_on', 'compound_display']
+
+    def compound_display(self, obj):
+
+        if obj.compound.chemblid:
+            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
+                   'displayimage/' + obj.compound.chemblid)
+            return '<img src="%s">' % \
+                url
+        else:
+            return u''
+
+    compound_display.allow_tags = True
+    compound_display.short_description = 'Structure'
+
     fieldsets = (
         (
             'Device Parameters', {
@@ -587,6 +604,7 @@ class AssayTestAdmin(LockableAdmin):
             'Assay Parameters', {
                 'fields': (
                     ('compound', 'cell_sample', 'test_date'),
+                    'compound_display',
                 )
             }
         ),
@@ -760,12 +778,28 @@ class AssayTestResultAdmin(LockableAdmin):
     search_fields = ['assay_device_readout']
     actions = ['update_fields']
     raw_id_fields = ('compound',)
+    readonly_fields = ['created_by', 'created_on',
+                       'modified_by', 'modified_on', 'compound_display']
+
+    def compound_display(self, obj):
+
+        if obj.compound.chemblid:
+            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
+                   'displayimage/' + obj.compound.chemblid)
+            return '<img src="%s">' % \
+                url
+        else:
+            return u''
+
+    compound_display.allow_tags = True
+    compound_display.short_description = 'Structure'
+
     fieldsets = (
         (
             'Device/Drug Parameters', {
                 'fields': (
                     ('assay_device_readout',),
-                    ('compound'),
+                    ('compound', 'compound_display'),
                 ),
             }
         ),

@@ -8,11 +8,12 @@
 var APPS = {
     'Auth': [10, 'Authentication'],
     'Microdevices': [2, 'MPS Centers & Models'],
-    'Compounds': [6, 'Compound'],
-    'Bioactivities': [7, 'External Compound/Drug Bioactivity'],
-    'Drugtrials': [8, 'MPS & External Drug Effects'],
-    'Cellsamples': [4, 'Cell Characteristics'],
-    'Assays': [7, 'MPS Assays'],
+    'Compounds': [4, 'Compound'],
+    'Bioactivities': [6, 'External Compound/Drug Bioactivity'],
+    'Drugtrials': [7, 'MPS & External Drug Effects'],
+    'Cellsamples': [8, 'Cell Characteristics'],
+    'Assays': [5, 'MPS Assays'],
+    'Resources': [3, 'Resources'],
     'Sites': [100, 'MPS Host']
 };
 
@@ -40,18 +41,18 @@ var MODELS = {
         'Assay tests': [0, 'Assay Tests and Results', 0],
         'Assay test results': [2, 'Assay Test Results', 0],
         'Assay findings': [3, 'Assay Findings', 1],
-        'Assay finding types': [4, 'Assay Finding Types', 2],
+        'Assay finding types': [4, 'Assay Finding Types', 2, true],
         'Assay device readouts': [5, 'Assay Readouts', 1],
-        'Readout units': [6, 'Readout Units', 2],
+        'Readout units': [6, 'Readout Units', 2, true],
         'Assay models': [7, 'Assays', 2],
-        'Assay model types': [9, 'Assay Types', 3],
+        'Assay model types': [9, 'Assay Types', 3, true],
         'Assay layouts': [11, 'Assay Layouts', 2],
         'Assay base layouts': [13, 'Base Layouts', 3],
         'Assay layout formats': [15, 'Layout Formats', 4],
-        'Assay well types': [17, 'Virtual Well Types', 3],
+        'Assay well types': [17, 'Virtual Well Types', 3, true],
         'Assay readers': [19, 'Assay Reader Devices', 2],
-        'Physical Units': [21, 'Units of Measurement', 0],
-        'Time Units' : [23, 'Units of Time', 0]
+        'Physical Units': [21, 'Units of Measurement', 0, true],
+        'Time Units' : [23, 'Units of Time', 0, true]
     },
     'Compounds': {
         'Compounds': [1, 'Compounds/Drugs', 0]
@@ -78,6 +79,10 @@ var MODELS = {
         'Finding types': [7, 'Finding Types', 2],
         'Test types': [5, 'Test Types', 2],
         'Result descriptors': [13, 'Result Descriptors', 0, true]
+    },
+    'Resources':{
+        'Resources': [1, 'Resources', 0],
+        'Resource types': [4, 'Resource Types', 1]
     },
     'Sites': {
         'Sites': [1, 'MPS Host (Do not change)', 0]
