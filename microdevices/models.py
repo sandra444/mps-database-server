@@ -91,3 +91,5 @@ class OrganModel(LockableModel):
 
     def organ_name(self):
         return self.device.organ.organ_name
+
+    organ_name.short_description = "Organ"
