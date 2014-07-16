@@ -28,14 +28,29 @@ class CompoundAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('name', 'chembl_link', 'known_drug',
-                    'molecular_formula', 'thumb', 'last_update', 'locked')
+                    'molecular_formula', 'last_update', 'locked')
     search_fields = ['=name', 'synonyms', '=chemblid']
     readonly_fields = ('last_update', 'created_by', 'created_on',
-                       'modified_by', 'modified_on')
+                       'modified_by', 'modified_on', 'image_display')
     actions = ['update_fields']
+
+    def image_display(self, obj):
+        if obj.chemblid:
+            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
+                    'displayimage/' + obj.chemblid)
+            print '<img src="%s">' % \
+                url
+            return '<img src="%s">' % \
+                url
+        return ''
+
+    image_display.allow_tags = True
+    image_display.short_description = 'Structure'
+
     fieldsets = (
         (None, {
-            'fields': ('name', 'chemblid', 'inchikey', 'last_update',)
+            'fields': (('name', 'image_display'),
+                       'chemblid', 'inchikey', 'last_update',)
         }),
         ('Molecular Identifiers', {
             'fields': ('smiles', 'synonyms')

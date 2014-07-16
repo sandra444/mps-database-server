@@ -273,6 +273,19 @@ class BioactivityAdmin(LockableAdmin):
     chembl_link.allow_tags = True
     chembl_link.short_description = 'CHEMBL Links'
 
+    def bioactivity_display(self, obj):
+
+        if obj.compound.chemblid:
+            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
+                   'displayimage/' + obj.compound.chemblid)
+            return '<img src="%s">' % \
+                url
+        else:
+            return u''
+
+    bioactivity_display.allow_tags = True
+    bioactivity_display.short_description = 'Structure'
+
     list_display = (
         'compound',
         'standard_name',
@@ -286,11 +299,13 @@ class BioactivityAdmin(LockableAdmin):
         'locked'
     )
     search_fields = ['compound__name', 'target__name', 'bioactivity_type']
+    readonly_fields = ['created_by', 'created_on', 'modified_by',
+                       'modified_on', 'bioactivity_display']
     actions = ['update_fields']
 
     fieldsets = (
         (None, {
-            'fields': (('compound', 'assay'), ('target', 'target_confidence'),
+            'fields': (('compound', 'assay'), 'bioactivity_display', ('target', 'target_confidence'),
                        ('bioactivity_type', 'value', 'units'),
                        ('standard_name', 'standardized_value', 'standardized_units'),
                        ('activity_comment', 'reference', 'name_in_reference'), 'locked',
