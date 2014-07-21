@@ -440,14 +440,26 @@ def heatmap(request):
     rows_csv_filehandle.close()
     cols_csv_filehandle.close()
 
+    heatmap_url_prefix = '/media/heatmap/'
+
+    data_csv_relpath = heatmap_url_prefix + os.path.basename(
+        data_csv_fullpath
+    )
+    rows_csv_relpath = heatmap_url_prefix + os.path.basename(
+        rows_csv_fullpath
+    )
+    cols_csv_relpath = heatmap_url_prefix + os.path.basename(
+        cols_csv_fullpath
+    )
+
     # return the paths to each respective filetype as a JSON
     return {
         # csv filepath for the data
-        'data_csv': data_csv_fullpath,
+        'data_csv': data_csv_relpath,
 
         # csv filepath for the rows index information
-        'rows_csv': rows_csv_fullpath,
+        'rows_csv': rows_csv_relpath,
 
         # csv filepath for the columns index information
-        'cols_csv': cols_csv_fullpath
+        'cols_csv': cols_csv_relpath
     }
