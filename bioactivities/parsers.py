@@ -390,7 +390,7 @@ def heatmap(request):
     data_csv_writer = csv.writer(data_csv_filehandle)
 
     # write out our data lists into csv format
-    data_csv_writer.writerow(['Compound', 'Target + Bioactivity', 'Value'])
+    data_csv_writer.writerow(['compound', 'bioactivity', 'value'])
     data_csv_writer.writerows(rearranged_data.values.tolist())
 
     # close the csv files that we have written so far
