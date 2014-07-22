@@ -351,10 +351,6 @@ def heatmap(request):
         rows='compound'
     )
 
-    data_hash = hashlib.sha512(
-        str(random.random)
-    ).hexdigest()[:10]
-
     unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
 
     unwound_data['target_bioactivity_pair'] = \
@@ -373,6 +369,10 @@ def heatmap(request):
         pass
 
     # generate a unique full path for data and rows and columns information
+
+    data_hash = hashlib.sha512(
+        str(rearranged_data)
+    ).hexdigest()[:10]
 
     fullpath_without_extension = os.path.join(
         MEDIA_ROOT,
