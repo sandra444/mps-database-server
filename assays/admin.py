@@ -854,4 +854,4 @@ class AssayRunAdmin(LockableAdmin):
         ),
     )
 
-    admin.site.register(AssayRun, AssayRunAdmin)
+admin.site.register(AssayRun, AssayRunAdmin)
