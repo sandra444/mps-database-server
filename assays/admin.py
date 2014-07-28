@@ -826,3 +826,32 @@ class AssayTestResultAdmin(LockableAdmin):
 
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
+
+class AssayRunAdmin(LockableAdmin):
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('assay_run_id', 'name', 'description', 'start_date')
+    fieldsets = (
+        (
+            'None', {
+                'fields': (
+                    'assay_run_id',
+                    'name',
+                    'description',
+                    'start_date'
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
+    admin.site.register(AssayRun, AssayRunAdmin)
