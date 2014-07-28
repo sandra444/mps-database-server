@@ -228,7 +228,7 @@ class AssayResult(models.Model):
     test_unit = models.ForeignKey(PhysicalUnits,
                                   blank=True,
                                   null=True)
-    
+
 class ReadoutUnit(LockableModel):
     class Meta(object):
         ordering = ('readout_unit',)
@@ -247,7 +247,7 @@ class AssayDeviceReadout(LockableModel):
                                        verbose_name='Device ID/ Barcode')
 
     cell_sample = models.ForeignKey('cellsamples.CellSample')
-    
+
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
     # Cell samples
@@ -264,7 +264,7 @@ class AssayDeviceReadout(LockableModel):
                                                         ('MM', 'cells / mm^2')))
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
     assay_layout = models.ForeignKey(AssayLayout)
-    
+
     reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
 
     readout_unit = models.ForeignKey(ReadoutUnit)
@@ -272,7 +272,7 @@ class AssayDeviceReadout(LockableModel):
 
     treatment_time_length = models.FloatField(verbose_name='Treatment Duration',
                                               blank=True, null=True)
-    
+
     assay_start_time = models.DateTimeField(blank=True, null=True)
     readout_start_time = models.DateTimeField(blank=True, null=True)
 
@@ -299,7 +299,7 @@ class AssayReader(LockableModel):
 
     def __unicode__(self):
         return u'{0} - {1}'.format(self.reader_name, self.reader_type)
-      
+
 SEVERITY_SCORE = (
     ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
     ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
@@ -361,3 +361,13 @@ class AssayTestResult(LockableModel):
 
     def __unicode__(self):
         return u''
+
+
+class AssayRun(LockableModel):
+    class Meta(object):
+        ordering = 'id'
+
+    id = models.TextField(unique=True)
+    name = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    start_date = models.DateTimeField(blank=True, null=True)
