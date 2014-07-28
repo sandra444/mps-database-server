@@ -369,3 +369,6 @@ class AssayRun(LockableModel):
     name = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     start_date = models.DateTimeField(blank=True, null=True)
+
+    def __unicode__(self):
+        return self.assay_run_id
