@@ -310,6 +310,7 @@ POSNEG = (
     ('0', 'Neg'), ('1', 'Pos')
 )
 
+
 class AssayFindingType(LockableModel):
     class Meta(object):
         ordering = ('assay_finding_type', )
@@ -319,6 +320,7 @@ class AssayFindingType(LockableModel):
 
     def __unicode__(self):
         return self.assay_finding_type
+
 
 class AssayFinding(LockableModel):
     class Meta(object):
@@ -330,6 +332,7 @@ class AssayFinding(LockableModel):
 
     def __unicode__(self):
         return u'{} :: {}'.format(self.assay_finding_type, self.assay_finding_name)
+
 
 class AssayTestResult(LockableModel):
 
