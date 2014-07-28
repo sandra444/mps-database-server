@@ -622,7 +622,6 @@ class AssayTestAdmin(LockableAdmin):
     inlines = [AssayResultInline]
 
 
-
 admin.site.register(AssayTest, AssayTestAdmin)
 
 
@@ -682,6 +681,7 @@ class TimeUnitsAdmin(LockableAdmin):
 
 admin.site.register(TimeUnits, TimeUnitsAdmin)
 
+
 class ReadoutUnitAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 100
@@ -709,6 +709,7 @@ class ReadoutUnitAdmin(LockableAdmin):
 
 admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
+
 class AssayFindingTypeAdmin(LockableAdmin):
     list_per_page = 300
     save_on_top = True
@@ -733,6 +734,7 @@ class AssayFindingTypeAdmin(LockableAdmin):
         ),
     )
 admin.site.register(AssayFindingType, AssayFindingTypeAdmin)
+
 
 class AssayFindingAdmin(LockableAdmin):
     save_on_top = True
@@ -766,6 +768,7 @@ class AssayFindingAdmin(LockableAdmin):
 
 
 admin.site.register(AssayFinding, AssayFindingAdmin)
+
 
 class AssayTestResultAdmin(LockableAdmin):
     save_as = True
