@@ -367,6 +367,8 @@ class AssayTestResult(LockableModel):
 
 
 class AssayRun(LockableModel):
+    class Meta(object):
+        ordering = ('assay_run_id', )
 
     assay_run_id = models.TextField(unique=True)
     name = models.TextField(blank=True, null=True)

@@ -45,6 +45,7 @@ var MODELS = {
         'Assay device readouts': [5, 'Assay Readouts', 1],
         'Readout units': [6, 'Readout Units', 2, true],
         'Assay models': [7, 'Assays', 2],
+        'Assay runs': [8, 'Assay Runs', 3],
         'Assay model types': [9, 'Assay Types', 3, true],
         'Assay layouts': [11, 'Assay Layouts', 2],
         'Assay base layouts': [13, 'Base Layouts', 3],
