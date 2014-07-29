@@ -43,7 +43,7 @@ var MODELS = {
         'Assay findings': [3, 'Assay Findings', 1],
         'Assay finding types': [4, 'Assay Finding Types', 2, true],
         'Assay device readouts': [5, 'Assay Readouts', 1],
-        'Readout units': [6, 'Readout Units', 2, true],
+        'Readout units': [20, 'Readout Units', 2, true],
         'Assay models': [8, 'Assays', 2],
         'Assay runs': [7, 'Assay Runs', 2],
         'Assay model types': [9, 'Assay Types', 3, true],
