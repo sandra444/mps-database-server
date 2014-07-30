@@ -3,6 +3,7 @@ import csv
 from django.contrib import admin
 from django import forms
 from assays.forms import AssayResultForm
+from assays.forms import AssayRunForm
 
 from assays.models import *
 from compounds.models import Compound
@@ -831,6 +832,7 @@ admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
 
 class AssayRunAdmin(LockableAdmin):
+    form = AssayRunForm
     save_on_top = True
     list_per_page = 300
     list_display = ('assay_run_id', 'name', 'description', 'start_date')
