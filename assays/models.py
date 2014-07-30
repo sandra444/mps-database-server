@@ -371,7 +371,7 @@ class AssayRun(LockableModel):
         ordering = ('assay_run_id', )
 
     assay_run_id = models.TextField(unique=True)
-    name = models.TextField(blank=True, null=True)
+    name = models.TextField(unique=True)
     description = models.TextField(blank=True, null=True)
     start_date = models.DateTimeField(blank=True, null=True)
 
