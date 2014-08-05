@@ -239,7 +239,7 @@ class FindingAdmin(LockableAdmin):
 
     save_on_top = True
     list_per_page = 300
-    list_display = ('organ', 'finding_type', 'finding_name', 'description')
+    list_display = ('organ', 'finding_type', 'finding_name', 'optional_link')
     list_display_links = ('organ', 'finding_name', 'finding_type')
     list_filter = sorted(['finding_type'])
     search_fields = ['finding_name', ]
@@ -266,6 +266,19 @@ class FindingAdmin(LockableAdmin):
         ),
     )
     actions = ['update_fields']
+
+    def optional_link(self, obj):
+        words = obj.description.split()
+        sentence = ''
+        for thing in words:
+            if thing.startswith("http://"):
+                link = '<a href="%s" target="_blank">%s</a>' % (thing, thing)
+                sentence += (' ' + link)
+            else:
+                sentence += (' ' + thing)
+        return sentence
+    optional_link.allow_tags = True
+    optional_link.short_description = "Description"
 
 
 admin.site.register(Finding, FindingAdmin)
