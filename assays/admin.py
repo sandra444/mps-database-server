@@ -737,7 +737,7 @@ admin.site.register(AssayFindingType, AssayFindingTypeAdmin)
 class AssayFindingAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
-    list_display = ('assay_finding_name', 'assay_finding_type', 'description')
+    list_display = ('assay_finding_name', 'assay_finding_type', 'optional_link')
     list_display_links = ('assay_finding_name',)
     list_filter = sorted(['assay_finding_type'])
     search_fields = ['assay_finding_name', ]
@@ -763,6 +763,14 @@ class AssayFindingAdmin(LockableAdmin):
         ),
     )
     actions = ['update_fields']
+
+    def optional_link(self, obj):
+        if obj.description.startswith("http://"):
+            return '<a href="%s" target="_blank">%s</a>' % (obj.description, obj.description)
+        else:
+            return obj.description
+    optional_link.allow_tags = True
+    optional_link.short_description = "Description"
 
 
 admin.site.register(AssayFinding, AssayFindingAdmin)
