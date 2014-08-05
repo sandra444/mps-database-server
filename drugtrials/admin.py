@@ -64,7 +64,7 @@ admin.site.register(Species, SpeciesAdmin)
 class TrialSourceAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
-    list_display = ('source_name', 'source_website', 'description')
+    list_display = ('source_name', 'source_site', 'description')
     fieldsets = (
         (
             None, {
@@ -88,6 +88,9 @@ class TrialSourceAdmin(LockableAdmin):
     )
     actions = ['update_fields']
 
+    def source_site(self, obj):
+        return '<a href="%s" target="_blank">%s</a>' % (obj.source_website, obj.source_website)
+    source_site.allow_tags = True
 
 admin.site.register(TrialSource, TrialSourceAdmin)
 
