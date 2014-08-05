@@ -183,19 +183,19 @@ def fetch_all_standard_bioactivities_data(
     cursor = connection.cursor()
 
     cursor.execute(
-        'SELECT compound,target,bioactivity,AVG(value) as value '
-        'FROM ( '
-        'SELECT compounds_compound.name as compound, '
+        'SELECT compound,target,bioactivity,AVG(value) as value,units '
+	'FROM ( '
+	'SELECT compounds_compound.name as compound, '
         'bioactivities_target.name as target, '
         'bioactivities_bioactivity.standard_name as bioactivity, '
-        'bioactivities_bioactivity.standardized_value as value '
+        'bioactivities_bioactivity.standardized_value as value,bioactivities_bioactivity.standardized_units as units '
         'FROM bioactivities_bioactivity '
         'INNER JOIN compounds_compound '
         'ON bioactivities_bioactivity.compound_id=compounds_compound.id '
         'INNER JOIN bioactivities_target '
-        'ON bioactivities_bioactivity.target_id=bioactivities_target.id ) '
-        'as tbl '
-        'GROUP BY compound,target,bioactivity;'
+        'ON bioactivities_bioactivity.target_id=bioactivities_target.id ) as tbl '
+        'GROUP BY compound,target,bioactivity,units '
+        'HAVING AVG(value) IS NOT NULL;'
     )
 
     # bioactivity is a tuple:
