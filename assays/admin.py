@@ -765,10 +765,15 @@ class AssayFindingAdmin(LockableAdmin):
     actions = ['update_fields']
 
     def optional_link(self, obj):
-        if obj.description.startswith("http://"):
-            return '<a href="%s" target="_blank">%s</a>' % (obj.description, obj.description)
-        else:
-            return obj.description
+        words = obj.description.split()
+        sentence = ''
+        for thing in words:
+            if thing.startswith("http://"):
+                link = '<a href="%s" target="_blank">%s</a>' % (thing, thing)
+                sentence += (' ' + link)
+            else:
+                sentence += (' ' + thing)
+        return sentence
     optional_link.allow_tags = True
     optional_link.short_description = "Description"
 
