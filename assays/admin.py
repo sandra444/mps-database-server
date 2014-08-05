@@ -3,6 +3,7 @@ import csv
 from django.contrib import admin
 from django import forms
 from assays.forms import AssayResultForm
+from assays.forms import AssayRunForm
 
 from assays.models import *
 from compounds.models import Compound
@@ -622,7 +623,6 @@ class AssayTestAdmin(LockableAdmin):
     inlines = [AssayResultInline]
 
 
-
 admin.site.register(AssayTest, AssayTestAdmin)
 
 
@@ -682,6 +682,7 @@ class TimeUnitsAdmin(LockableAdmin):
 
 admin.site.register(TimeUnits, TimeUnitsAdmin)
 
+
 class ReadoutUnitAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 100
@@ -709,6 +710,7 @@ class ReadoutUnitAdmin(LockableAdmin):
 
 admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
+
 class AssayFindingTypeAdmin(LockableAdmin):
     list_per_page = 300
     save_on_top = True
@@ -733,6 +735,7 @@ class AssayFindingTypeAdmin(LockableAdmin):
         ),
     )
 admin.site.register(AssayFindingType, AssayFindingTypeAdmin)
+
 
 class AssayFindingAdmin(LockableAdmin):
     save_on_top = True
@@ -766,6 +769,7 @@ class AssayFindingAdmin(LockableAdmin):
 
 
 admin.site.register(AssayFinding, AssayFindingAdmin)
+
 
 class AssayTestResultAdmin(LockableAdmin):
     save_as = True
@@ -826,3 +830,33 @@ class AssayTestResultAdmin(LockableAdmin):
 
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
+
+class AssayRunAdmin(LockableAdmin):
+    form = AssayRunForm
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('assay_run_id', 'name', 'description', 'start_date')
+    fieldsets = (
+        (
+            'None', {
+                'fields': (
+                    'assay_run_id',
+                    'name',
+                    'description',
+                    'start_date'
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
+admin.site.register(AssayRun, AssayRunAdmin)
