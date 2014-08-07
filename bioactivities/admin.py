@@ -288,6 +288,8 @@ class BioactivityAdmin(LockableAdmin):
 
     list_display = (
         'compound',
+        'target',
+        'organism',
         'standard_name',
         'operator',
         'standardized_value',
