@@ -27,12 +27,13 @@ class ResourceType(LockableModel):
 
 class Resource(LockableModel):
     class Meta(object):
-        ordering = ['type', 'resource_name']
+        ordering = ['type', 'resource_subtype', 'resource_name']
 
     resource_name = models.CharField(max_length=60, unique=True, verbose_name="Name")
     resource_website = models.URLField(blank=True, null=True)
     description = models.CharField(max_length=400, blank=True, null=True)
     type = models.ForeignKey(ResourceType)
+    resource_subtype = models.ForeignKey(ResourceSubtype, verbose_name="Subtype")
 
     def __unicode__(self):
         return self.resource_name
