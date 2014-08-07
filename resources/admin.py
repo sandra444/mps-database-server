@@ -79,7 +79,7 @@ class ResourceTypeAdmin(LockableAdmin):
     form = ResourceTypeForm
     save_on_top = True
     list_per_page = 300
-    list_display = ('resource_type_name', 'resource_subtype', 'description')
+    list_display = ('resouce_type_name', 'resource_subtype', 'description')
 
     fieldsets = (
         (
@@ -112,6 +112,7 @@ class ResourceSubtypeAdmin(LockableAdmin):
     form = ResourceSubtypeForm
     save_on_top = True
     list_per_page = 300
+    list_display = ('name', 'description')
 
     fieldsets = (
         (
