@@ -37,13 +37,18 @@ class ResourceAdmin(LockableAdmin):
     form = ResourceForm
     save_on_top = True
     list_per_page = 300
-    list_display = ('resource_name', 'type', 'resource_website', 'description',)
+    readonly_fields = ('created_by', 'created_on',
+                       'modified_by', 'modified_on',
+                       'subtype')
+    list_display = ('type', 'resource_subtype', 'resource_name',
+                    'resource_site', 'description',)
     fieldsets = (
         (
             None, {
                 'fields': (
                     'resource_name',
                     'type',
+                    'subtype',
                     'resource_website',
                     'description',
                 )
@@ -62,6 +67,10 @@ class ResourceAdmin(LockableAdmin):
     )
     actions = ['update_fields']
 
+    def resource_site(self, obj):
+        return '<a href="%s" target="_blank">%s</a>' % (obj.resource_website, obj.resource_website)
+    resource_site.allow_tags = True
+
 
 admin.site.register(Resource, ResourceAdmin)
 
@@ -76,6 +85,7 @@ class ResourceTypeAdmin(LockableAdmin):
             None, {
                 'fields': (
                     'resource_type_name',
+                    'resource_subtype',
                     'description',
                 )
             }
