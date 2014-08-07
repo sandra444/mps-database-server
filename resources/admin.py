@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 
 from mps.base.admin import LockableAdmin
 from resources.models import *
+from resources.forms import *
 
 
 # don't know if this is necessary
@@ -33,6 +34,7 @@ from resources.models import *
 
 
 class ResourceAdmin(LockableAdmin):
+    form = ResourceForm
     save_on_top = True
     list_per_page = 300
     list_display = ('resource_name', 'type', 'resource_website', 'description',)
@@ -65,6 +67,7 @@ admin.site.register(Resource, ResourceAdmin)
 
 
 class ResourceTypeAdmin(LockableAdmin):
+    form = ResourceTypeForm
     save_on_top = True
     list_per_page = 300
 
@@ -92,3 +95,34 @@ class ResourceTypeAdmin(LockableAdmin):
 
 
 admin.site.register(ResourceType, ResourceTypeAdmin)
+
+
+class ResourceSubtypeAdmin(LockableAdmin):
+    form = ResourceSubtypeForm
+    save_on_top = True
+    list_per_page = 300
+
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'name',
+                    'description',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+    actions = ['update_fields']
+
+
+admin.site.register(ResourceSubtype, ResourceSubtypeAdmin)
