@@ -110,7 +110,6 @@ class ResourceSubtypeAdmin(LockableAdmin):
     form = ResourceSubtypeForm
     save_on_top = True
     list_per_page = 300
-    list_display = ('name', 'description')
 
     fieldsets = (
         (
