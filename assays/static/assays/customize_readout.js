@@ -9,7 +9,6 @@ $(document).ready(function () {
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     function getReadouts(data) {
-
         // select the first table in the form (the one we want)
         var table = $('#layout_table')[0];
 
