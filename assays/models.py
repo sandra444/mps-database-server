@@ -87,7 +87,10 @@ class AssayLayoutFormat(LockableModel):
                                   'Space separated list of unique labels, '
                                   'e.g. "A B C D ..."'
                                   ' Number of items must match'
-                                  ' number of columns.')
+                                  ' number of rows.'''
+                                  '  Provide a single numerical value '
+                                  'as a starting point for '
+                                  'automatically generated row labels.')
     column_labels = models.CharField(max_length=1000,
                                      help_text='Space separated list of unique '
                                                'labels, e.g. "1 2 3 4 ...". '
