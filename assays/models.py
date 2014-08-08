@@ -281,7 +281,7 @@ class AssayDeviceReadout(LockableModel):
 
     compound = models.ForeignKey('compounds.Compound')
     concentration = models.FloatField(blank=True, null=True)
-    concentration_unit = models.ForeignKey('PhysicalUnits', verbose_name='Conc. Unit')
+    concentration_unit = models.ForeignKey('PhysicalUnits')
 
     notebook = models.CharField(max_length=256, blank=True, null=True)
     notebook_page = models.IntegerField(blank=True, null=True)
