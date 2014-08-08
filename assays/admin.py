@@ -18,7 +18,6 @@ class AssayLayoutFormatForm(forms.ModelForm):
     class Meta(object):
         model = AssayLayoutFormat
 
-
     def clean(self):
         """Validate size of rows/columns and corresponding label counts."""
 
