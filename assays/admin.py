@@ -17,6 +17,7 @@ class AssayLayoutFormatForm(forms.ModelForm):
     class Meta(object):
         model = AssayLayoutFormat
 
+
     def clean(self):
         """Validate size of rows/columns and corresponding label counts."""
 
@@ -24,19 +25,18 @@ class AssayLayoutFormatForm(forms.ModelForm):
         data = super(AssayLayoutFormatForm, self).clean()
 
         if not (int(data['number_of_columns']) ==
-                    len(set(data['column_labels'].split()))):
+                len(set(data['column_labels'].split()))):
             raise forms.ValidationError('Number of columns and '
                                         'number of unique column '
                                         'labels do not match.')
 
+        #cannot tell if it is number or letter in single entry list
         if not ((int(data['number_of_rows'] ==
                 len(set(data['row_labels'].split())))) or
-                (((len(set(data['row_labels']))) == 1) and
-                    isinstance(next(iter(set(data['row_labels']))), int))):
+                ((len(set(data['row_labels']))) == 1)):
             raise forms.ValidationError('Number of rows and '
                                         'number of unique row '
                                         'labels do not match.')
-
         # need to return clean data if it validates
         return data
 
