@@ -279,6 +279,10 @@ class AssayDeviceReadout(LockableModel):
     assay_start_time = models.DateTimeField(blank=True, null=True)
     readout_start_time = models.DateTimeField(blank=True, null=True)
 
+    compound = models.ForeignKey('compounds.Compound')
+    concentration = models.FloatField(blank=True, null=True)
+    concentration_unit = models.ForeignKey('PhysicalUnits')
+
     notebook = models.CharField(max_length=256, blank=True, null=True)
     notebook_page = models.IntegerField(blank=True, null=True)
     notes = models.CharField(max_length=2048, blank=True, null=True)
