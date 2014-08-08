@@ -28,8 +28,11 @@ class AssayLayoutFormatForm(forms.ModelForm):
             raise forms.ValidationError('Number of columns and '
                                         'number of unique column '
                                         'labels do not match.')
-        if not (int(data['number_of_rows']) ==
-                    len(set(data['row_labels'].split()))):
+
+        if not ((int(data['number_of_rows'] ==
+                len(set(data['row_labels'].split())))) or
+                (((len(set(data['row_labels']))) == 1) and
+                    isinstance(next(iter(set(data['row_labels']))), int))):
             raise forms.ValidationError('Number of rows and '
                                         'number of unique row '
                                         'labels do not match.')
