@@ -500,6 +500,11 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
                     (
                         'assay_name',
                     ),
+                    'compound',
+                    (
+                        'concentration',
+                        'concentration_unit',
+                    ),
                     (
                         'compound', 'concentration',
                         'concentration_unit',
