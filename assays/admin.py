@@ -11,12 +11,12 @@ from mps.base.admin import LockableAdmin
 from assays.resource import *
 from import_export.admin import ImportExportModelAdmin
 from compounds.models import *
+import unicodedata
 
 
 class AssayLayoutFormatForm(forms.ModelForm):
     class Meta(object):
         model = AssayLayoutFormat
-
 
     def clean(self):
         """Validate size of rows/columns and corresponding label counts."""
@@ -304,6 +304,7 @@ class AssayBaseLayoutAdmin(LockableAdmin):
         column_labels = layout.column_labels.split()
         row_labels = layout.row_labels.split()
         data = form.data
+
         for row in row_labels:
             for col in column_labels:
                 rowcol = (row, col)
@@ -320,7 +321,7 @@ class AssayBaseLayoutAdmin(LockableAdmin):
                                   AssayWellType.objects.get(id=data.get(key)),
                                   row=row,
                                   column=col
-                        ).save()
+                                  ).save()
                 elif rowcol in wells:
                     wells[rowcol].delete()
 
