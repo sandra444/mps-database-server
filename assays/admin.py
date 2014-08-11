@@ -38,6 +38,16 @@ class AssayLayoutFormatForm(forms.ModelForm):
                                         'number of unique row '
                                         'labels do not match.')
         # need to return clean data if it validates
+
+        if (int(data['number_of_rows'])) > 1 and len(set(data['row_labels'].split() == 1)):
+            rows = int(data['number_of_rows'])
+            row_list = list(data['row_labels'])
+            start = int(list(data['row_labels'][0]))
+            for x in range(1, rows-1):
+                start += 1
+                row_list.append(u'start')
+            data['row_labels'] = row_list
+
         return data
 
 
