@@ -1,26 +1,23 @@
 $(document).ready(function () {
 
-    var row_field = document.getElementById('id_row_labels');
-    console.log(row_field.value);
-    console.log(row_field);
+    var row_field = $('#id_row_labels');
 
-    //not working to change issue with assay device readouts
-    //not recognizing jquery functions??
+       row_field.change( function() {
 
-//    row_field.change( function() {
+        if ( row_field[0].value.split(" ").length == 1 ){
 
-        if ( row_field.value.split().length == 1 ){
-            var start = row_field.value;
+            var start = row_field[0].value;
             var rows = document.getElementById('id_number_of_rows').value;
             var input = "";
 
-            for ( var i = start; i <= rows; i++) {
-                input += i + " ";
+            for ( var i = 1; i <= rows; i++) {
+                input += start + " ";
+                start++;
             }
             console.log(input);
-            row_field.value = input;
+            row_field[0].value = input;
 
         }
-//    });
+        });
 
 });
