@@ -17,7 +17,6 @@ import unicodedata
 class AssayLayoutFormatForm(forms.ModelForm):
     class Meta(object):
         model = AssayLayoutFormat
-        js = ('assays/extra_button.js',)
 
     def clean(self):
         """Validate size of rows/columns and corresponding label counts."""
@@ -116,7 +115,7 @@ admin.site.register(AssayModel, AssayModelAdmin)
 
 
 class AssayLayoutFormatAdmin(LockableAdmin):
-    class Media(object):
+    class Meta(object):
         js = ('assays/extra_button.js',)
 
     def device_image_display(self, obj):
