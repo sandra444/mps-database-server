@@ -17,6 +17,7 @@ import unicodedata
 class AssayLayoutFormatForm(forms.ModelForm):
     class Meta(object):
         model = AssayLayoutFormat
+        js = ('assays/extra_button.js',)
 
     def clean(self):
         """Validate size of rows/columns and corresponding label counts."""

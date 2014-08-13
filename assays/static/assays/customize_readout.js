@@ -16,7 +16,6 @@ $(document).ready(function () {
         // `rows` is current row starting with 0
 
         for (var key in data) {
-
             var row = data[key][0].row;
             var column = data[key][0].column;
             var value = data[key][0].value;
