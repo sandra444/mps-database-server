@@ -39,15 +39,15 @@ class AssayLayoutFormatForm(forms.ModelForm):
                                         'labels do not match.')
         # need to return clean data if it validates
 
-        if ((int(data['number_of_rows'])) > 1) and (len(set(data['row_labels'])) == 1):
-            rows = int(data['number_of_rows'])
-            row_list = []
-            start = int(list(data['row_labels'])[0])
-            for x in range(0, rows):
-                row_list.append(start)
-                start += 1
-            data['row_labels'] = row_list
-            print data['row_labels']
+        # if ((int(data['number_of_rows'])) > 1) and (len(set(data['row_labels'])) == 1):
+        #     rows = int(data['number_of_rows'])
+        #     row_list = []
+        #     start = int(list(data['row_labels'])[0])
+        #     for x in range(0, rows):
+        #         row_list.append(start)
+        #         start += 1
+        #     data['row_labels'] = row_list
+        #     print data['row_labels']
 
         return data
 
