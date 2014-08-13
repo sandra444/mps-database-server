@@ -115,7 +115,7 @@ admin.site.register(AssayModel, AssayModelAdmin)
 
 
 class AssayLayoutFormatAdmin(LockableAdmin):
-    class Meta(object):
+    class Media(object):
         js = ('assays/extra_button.js',)
 
     def device_image_display(self, obj):
