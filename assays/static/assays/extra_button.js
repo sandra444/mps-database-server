@@ -5,6 +5,7 @@ $(document).ready(function () {
     console.log(row_field);
 
     //not working to change issue with assay device readouts
+    //not recognizing jquery functions??
 
 //    row_field.change( function() {
 
