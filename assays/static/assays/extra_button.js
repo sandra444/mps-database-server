@@ -5,6 +5,7 @@ $(document).ready(function () {
     console.log(array);
 
     row_field.change(function() {
+
         if ( row_field.value.split().length == 1 ){
             var start = row_field.value;
             var rows = document.getElementById('id_number_of_rows').value;
