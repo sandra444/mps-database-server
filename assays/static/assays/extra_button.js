@@ -4,7 +4,7 @@ $(document).ready(function () {
     console.log(row_field.value);
     console.log(row_field);
 
-    row_field.change( function() {
+//    row_field.change( function() {
 
         if ( row_field.value.split().length == 1 ){
             var start = row_field.value;
@@ -14,10 +14,10 @@ $(document).ready(function () {
             for ( var i = start; i <= rows; i++) {
                 input += i + " ";
             }
-
-            row_field.value(input);
+            console.log(input);
+            row_field.value = input;
 
         }
-    });
+//    });
 
 });
