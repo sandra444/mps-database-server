@@ -4,6 +4,8 @@ $(document).ready(function () {
     console.log(row_field.value);
     console.log(row_field);
 
+    //not working to change issue with assay device readouts
+
 //    row_field.change( function() {
 
         if ( row_field.value.split().length == 1 ){
