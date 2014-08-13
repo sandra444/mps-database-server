@@ -1,27 +1,23 @@
 $(document).ready(function () {
 
     var row_field = document.getElementById('id_row_labels');
-    var array = [row_field];
-    console.log(array);
+    console.log(row_field.value);
+    console.log(row_field);
 
-    row_field.change(function() {
+    row_field.change( function() {
 
         if ( row_field.value.split().length == 1 ){
             var start = row_field.value;
             var rows = document.getElementById('id_number_of_rows').value;
+            var input = "";
 
-            if ( rows == undefined ){
+            for ( var i = start; i <= rows; i++) {
+                input += i + " ";
             }
-            else {
 
-                var input = "";
-                for ( var i = start; i <= rows; i++){
-                    input += i + " ";
-                }
-                row_field.value(input);
+            row_field.value(input);
 
-            }
         }
-    }, false);
+    });
 
 });
