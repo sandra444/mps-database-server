@@ -183,24 +183,34 @@ def fetch_all_standard_bioactivities_data(
     cursor = connection.cursor()
 
     cursor.execute(
-        'SELECT compound,target,bioactivity,AVG(value) as value,units '
-	'FROM ( '
-	'SELECT compounds_compound.name as compound, '
+        'SELECT compound,target,tbl.bioactivity,AVG(value) as value,units,'
+        'AVG(norm_value) as norm_value,organism,target_type '
+        'FROM ( '
+        'SELECT compounds_compound.name as compound, '
         'bioactivities_target.name as target, '
         'bioactivities_bioactivity.standard_name as bioactivity, '
-        'bioactivities_bioactivity.standardized_value as value,bioactivities_bioactivity.standardized_units as units '
+        'bioactivities_bioactivity.standardized_value as value,bioactivities_bioactivity.standardized_units as units, ' 
+        'bioactivities_target.organism, '
+        'bioactivities_target.target_type,'
+        'CASE WHEN agg_tbl.max_value-agg_tbl.min_value <> 0 THEN (standardized_value-agg_tbl.min_value)/(agg_tbl.max_value-agg_tbl.min_value) ELSE 1 END as norm_value '
         'FROM bioactivities_bioactivity '
         'INNER JOIN compounds_compound '
         'ON bioactivities_bioactivity.compound_id=compounds_compound.id '
         'INNER JOIN bioactivities_target '
-        'ON bioactivities_bioactivity.target_id=bioactivities_target.id ) as tbl '
-        'GROUP BY compound,target,bioactivity,units '
-        'HAVING AVG(value) IS NOT NULL;'
+        'ON bioactivities_bioactivity.target_id=bioactivities_target.id '
+        'INNER JOIN '
+        '(SELECT bioactivities_bioactivity.standard_name ,MAX(standardized_value) as max_value,MIN(standardized_value) as min_value '
+	'FROM bioactivities_bioactivity '
+	'GROUP BY bioactivities_bioactivity.standard_name '
+        ') as agg_tbl ON bioactivities_bioactivity.standard_name = agg_tbl.standard_name '
+        ') as tbl '
+        ' GROUP BY compound,target,tbl.bioactivity,units,organism,target_type '
+        'HAVING AVG(value) IS NOT NULL ;'
     )
 
     # bioactivity is a tuple:
-    # (compound name, target name, the bioactivity, value)
-    # (0            , 1          , 2              , 3    )
+    # (compound name, target name, the bioactivity, value, units, norm_value,organism,target_type)
+    # (0            , 1          , 2              , 3 ,  4, 5, 6, 7   )
     query = cursor.fetchall()
 
     result = []
