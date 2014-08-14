@@ -32,6 +32,7 @@ class TargetAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('name', 'organism', 'target_type', 'chembl_link', 'locked')
+    list_filter = ('target_type', 'organism')
     search_fields = ['name', 'organism', 'synonyms', '=chemblid']
     actions = ['update_fields']
     readonly_fields = ('last_update', 'created_by', 'created_on',
@@ -156,6 +157,7 @@ class AssayAdmin(LockableAdmin):
     list_per_page = 300
     list_display = (
         'description', 'chembl_link', 'organism', 'assay_type', 'locked')
+    list_filter = ('assay_type', 'organism')
     search_fields = ['description', '=chemblid']
     actions = ['update_fields']
     readonly_fields = ('last_update', 'created_by', 'created_on',
@@ -288,6 +290,8 @@ class BioactivityAdmin(LockableAdmin):
 
     list_display = (
         'compound',
+        'target',
+        'organism',
         'standard_name',
         'operator',
         'standardized_value',

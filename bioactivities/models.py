@@ -167,6 +167,9 @@ class Bioactivity(LockableModel):
     reference = models.TextField(blank=True, null=True)
     name_in_reference = models.TextField(blank=True, null=True)
 
+    def organism(self):
+        return self.target.organism
+
     def __unicode__(self):
         return u'{}: {} {}'.format(
             self.compound,
