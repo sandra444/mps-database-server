@@ -2,6 +2,17 @@ $(document).ready(function () {
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
+
+
+    $('#id_assay_layout').change( function () {
+            if ($('#id_base_layout_name').val() === '') {
+            } else {
+                make_layout(base_layout.val());
+            }
+
+    });
+
+
     // ASSAY BASE LAYOUT
 
     // modifies cells selected in the layout
@@ -653,19 +664,5 @@ $(document).ready(function () {
     // END ASSAY LAYOUT
 
 
-    var assay_layout = $('#id_assay_layout');
-    if (assay_layout.length) {
-
-        assay_layout.change(function () {
-            console.log("here")
-            // Make sure ALL required input fields are full
-            // if not layout will get lost when saving with empty required fields
-            if ($('#id_base_layout_name').val() === '') {
-            } else {
-                make_layout(base_layout.val());
-            }
-
-        });
-    }
 
 });
