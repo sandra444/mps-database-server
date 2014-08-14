@@ -301,11 +301,11 @@ $(document).ready(function () {
         // Refer to the benchmarks for more information:
         // http://jsperf.com/performance-of-parseint
 
-        try {
-            return Math.floor($('.historylink').attr('href').split('/')[4]);
-        }catch(err){
-            return 0;
-        }
+        //not sure this is working before save happens, could be causing issue
+        //this is undefined when picking assay layout
+
+        return Math.floor($('.historylink').attr('href').split('/')[4]);
+
     }
 
     function checkAssayLayoutValidity() {
