@@ -301,9 +301,11 @@ $(document).ready(function () {
         // Refer to the benchmarks for more information:
         // http://jsperf.com/performance-of-parseint
 
-
-        return Math.floor($('.historylink').attr('href').split('/')[4]);
-
+        try {
+            return Math.floor($('.historylink').attr('href').split('/')[4]);
+        }catch(err){
+            return 0;
+        }
     }
 
     function checkAssayLayoutValidity() {
@@ -320,7 +322,7 @@ $(document).ready(function () {
     }
 
     checkAssayLayoutValidity();
-
+    console.log("here " + readout_id);
 
     $('#id_assay_layout').change( function () {
             checkAssayLayoutValidity();
