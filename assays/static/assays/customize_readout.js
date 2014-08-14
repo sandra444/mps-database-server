@@ -322,7 +322,7 @@ $(document).ready(function () {
     }
 
     checkAssayLayoutValidity();
-    console.log("here " + readout_id);
+
 
     $('#id_assay_layout').change( function () {
             checkAssayLayoutValidity();
