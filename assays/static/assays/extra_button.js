@@ -1,12 +1,13 @@
 $(document).ready(function () {
 
-    var row_field = $('#id_row_labels');
+    var row_field_dom = $('#id_row_labels');
+    var row_labels = document.getElementById('id_row_labels');
 
-       row_field.change( function() {
+       row_field_dom.change( function() {
 
-        if ( row_field[0].value.split(" ").length == 1 ){
+        if ( row_labels.value.split(" ").length == 1 ){
 
-            var start = row_field[0].value;
+            var start = row_labels.value;
             var rows = document.getElementById('id_number_of_rows').value;
             var input = "";
 
@@ -15,7 +16,7 @@ $(document).ready(function () {
                 start++;
             }
             console.log(input);
-            row_field[0].value = input;
+            row_labels.value = input;
 
         }
         });
