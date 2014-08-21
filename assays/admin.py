@@ -564,6 +564,88 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 
 admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
+class AssayChipReadoutAdmin(LockableAdmin):
+
+    raw_id_fields = ("compound","cell_sample",)
+    
+    list_per_page = 100
+    list_display = ('assay_chip_id',
+                    'assay_name',
+                    'assay_run_id',
+                    'compound',
+                    'cell_sample',
+                    'reader_name')
+    search_fields = ['assay_chip_id']
+    fieldsets = (
+        (
+            'Device Parameters', {
+                'fields': (
+                    (
+                        'assay_chip_id',
+                    ),
+                    (
+                        'device', 'reader_name',
+                    ),
+                )
+            }
+        ),
+        (
+            'Assay Parameters', {
+                'fields': (
+                    (
+                        'assay_name',
+                    ),
+		    (
+                        'compound', 'concentration',
+                        'unit',
+                    ),
+                    (
+                        'cell_sample', 'cellsample_density',
+                        'cellsample_density_unit',
+                    ),
+                    (
+                          'timeunit','readout_unit',
+                    ),
+                    (
+                        'treatment_time_length', 'assay_start_time','readout_start_time',
+                    ),
+                    (
+                        'file',
+                    ),
+                )
+            }
+        ),
+        (
+            'Reference Parameters', {
+                'fields': (
+                    (
+                        'scientist', 'notebook', 'notebook_page', 'notes',
+                    ),
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    (
+                        'created_by', 'created_on',
+                    ),
+                    (
+                        'modified_by', 'modified_on',
+                    ),
+                    (
+                        'signed_off_by', 'signed_off_date'
+                    ),
+                )
+            }
+        ),
+    )
+
+   
+
+admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
+
 
 class AssayResultInline(admin.TabularInline):
     model = AssayResult

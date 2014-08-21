@@ -384,3 +384,67 @@ class AssayRun(LockableModel):
 
     def __unicode__(self):
         return self.assay_run_id
+
+class AssayChipRawData(models.Model):
+    assay_chip_id = models.ForeignKey('assays.AssayChipReadout')
+    field_id = models.CharField(max_length=255, default = '0')
+    value = models.FloatField()
+    elapsed_time = models.FloatField(default=0)
+      
+class AssayChipReadout(LockableModel):
+    class Meta(object):
+        ordering = ('assay_chip_id', 'assay_name',)
+
+    # the unique readout identifier
+    # can be a barcode or a hand written identifier
+    assay_chip_id = models.CharField(max_length=512,
+                                       verbose_name='Chip ID/ Barcode')
+    
+    compound = models.ForeignKey('compounds.Compound')
+    concentration = models.FloatField(default=0)
+    unit = models.ForeignKey('assays.PhysicalUnits',verbose_name='concentration Unit')
+
+    cell_sample = models.ForeignKey('cellsamples.CellSample')
+
+    cellsample_density = models.FloatField(verbose_name='density', default=0)
+
+    # Cell samples
+    #
+    # Option 1 is cells / well
+    # Option 2 is cells / mL
+    # Option 3 is cells / mm^2
+
+    cellsample_density_unit = models.CharField(verbose_name='Unit',
+                                               max_length=8,
+                                               default="ML",
+                                               choices=(('WE', 'cells / well'),
+                                                        ('ML', 'cells / mL'),
+                                                        ('MM', 'cells / mm^2')))
+    assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
+    
+    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Run')
+    device = models.ForeignKey(Microdevice, verbose_name = 'Chip Model Name')
+
+    reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
+
+    readout_unit = models.ForeignKey(ReadoutUnit)
+    timeunit = models.ForeignKey(TimeUnits)
+
+    treatment_time_length = models.FloatField(verbose_name='Assay Treatment Duration',
+                                              blank=True, null=True)
+
+    assay_start_time = models.DateTimeField(blank=True, null=True)
+    readout_start_time = models.DateTimeField(blank=True, null=True)
+
+    notebook = models.CharField(max_length=256, blank=True, null=True)
+    notebook_page = models.IntegerField(blank=True, null=True)
+    notes = models.CharField(max_length=2048, blank=True, null=True)
+    scientist = models.CharField(max_length=100, blank=True, null=True)
+    file = models.FileField(upload_to='csv', verbose_name='Data File',
+                            blank=True, null=True)
+
+    def assay_chip_name(self):
+        return u'{0}'.format(self.assay_chip_id)
+
+    def __unicode__(self):
+        return u'{0}'.format(self.assay_chip_id)
