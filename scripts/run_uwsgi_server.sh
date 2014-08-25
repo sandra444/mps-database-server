@@ -5,13 +5,6 @@ uwsgi --chdir=/home/mps/mps-database-server \
  --env DJANGO_SETTINGS_MODULE=mps.settings \
  --socket=127.0.0.1:8090 \
  --processes=16 \
- --harakiri=300 \
- --max-requests=9000 \
- --vacuum \
- --daemonize=/home/mps/log/mps.log \
- --threads 2 \
- --master \
+ --daemonize=/home/mps/log/uwsgid.log \
  --touch-reload=/home/mps/touch-reload-production \
- --thunder-lock \
- --post-buffering 1
-
+ --logto=/home/mps/log/mps.log
