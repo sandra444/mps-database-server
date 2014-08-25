@@ -10,7 +10,6 @@ from django.template import RequestContext
 from .models import *
 
 
-
 # Calling main is and always will be indicative of an error condition.
 # ajax.py is strictly for AJAX requests
 
@@ -25,7 +24,12 @@ def main(request):
 def fetch_assay_layout_content(request):
     """Return compounds in a layout."""
 
-    assay_layout_id = request.POST['assay_layout_id']
+    assay_layout_id = request.POST.get('assay_layout_id')
+
+    if not assay_layout_id:
+        print('error: assay_layout_id not present in request to fetch_assay_layout_content')
+        return HttpResponseServerError()
+
     data = defaultdict(list)
     layout = AssayLayout.objects.get(id=assay_layout_id)
 
@@ -54,7 +58,11 @@ def fetch_assay_layout_content(request):
 
 
 def fetch_readout(request):
-    current_readout_id = request.POST['current_readout_id']
+    current_readout_id = request.POST.get('current_readout_id')
+
+    if not current_readout_id:
+        print('error: current_readout_id not present in request to fetch_readout')
+        return HttpResponseServerError()
 
     data = defaultdict(list)
 
@@ -78,7 +86,13 @@ def fetch_readout(request):
 def fetch_layout_format_labels(request):
     """Return layout format labels."""
 
-    layout = AssayLayoutFormat.objects.get(id=request.POST['id'])
+    request_id = request.POST.get('id')
+
+    if not request_id:
+        print('error: request_id not present in request to fetch_layout_format_labels')
+        return HttpResponseServerError()
+
+    layout = AssayLayoutFormat.objects.get(id=request_id)
 
     data = {}
 
@@ -106,7 +120,12 @@ def fetch_well_types(request):
 def fetch_well_type_color(request):
     """Return wells type colors."""
 
-    current_id = request.POST['id']
+    current_id = request.POST.get('id')
+
+    if not current_id:
+        print('error: current_id was not sent with fetch_well_type_color')
+        return HttpResponseServerError()
+
     data = AssayWellType.objects.get(id=current_id).background_color
 
     return HttpResponse(json.dumps(data),
@@ -116,7 +135,12 @@ def fetch_well_type_color(request):
 def fetch_baseid(request):
     """Return the base assay layout id for a given assay layout"""
 
-    current_layout_id = request.POST['current_layout_id']
+    current_layout_id = request.POST.get('current_layout_id')
+
+    if not current_layout_id:
+        print('current_layout_id not present in request to fetch_baseid')
+        return HttpResponseServerError()
+
     assay_layout = AssayLayout.objects.get(id=current_layout_id)
 
     # known to set base_layout_id to an integer value correctly
@@ -132,7 +156,11 @@ def fetch_baseid(request):
 def fetch_base_layout_wells(request):
     """Return wells in a base layout."""
 
-    base_id = request.POST['id']
+    base_id = request.POST.get('id')
+
+    if not base_id:
+        print('error: base_id not present in request to fetch_base_layout_wells')
+        return HttpResponseServerError()
 
     data = {}
 
@@ -149,7 +177,11 @@ def fetch_base_layout_wells(request):
 def fetch_base_layout_info(request):
     """Return wells in a base layout."""
 
-    base_id = request.POST['id']
+    base_id = request.POST.get('id')
+
+    if not base_id:
+        print('error: base_id not present in request to fetch_base_layout_info')
+        return HttpResponseServerError()
 
     base = AssayBaseLayout.objects.get(id=base_id)
 
@@ -181,7 +213,11 @@ switch = {
 
 
 def ajax(request):
-    post_call = request.POST['call']
+    post_call = request.POST.get('call')
+
+    if not post_call:
+        print('error: post_call not present in request to ajax')
+        return HttpResponseServerError
 
     # Abort if there is no valid call sent to us from Javascript
     if not post_call:
