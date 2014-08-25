@@ -75,7 +75,7 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
-#########
+# ########
 # PATHS #
 #########
 
@@ -215,15 +215,23 @@ LOGGING = {
     },
 
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
+        'null': {
+            'level': 'DEBUG',
+            'class': 'django.utils.log.NullHandler',
+        },
+        'logfile': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(PROJECT_ROOT, "/mps.log"),
+            'maxBytes': 500000,
+            'backupCount': 2,
+            'formatter': 'standard',
         },
         'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler'
-        }
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard'
+        },
     },
 
     'loggers': {
@@ -258,6 +266,7 @@ REST_FRAMEWORK = {
 
 def show_toolbar(request):
     return True
+
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': 'mps.settings.show_toolbar'
