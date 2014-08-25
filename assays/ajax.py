@@ -1,12 +1,11 @@
 # coding=utf-8
+from __future__ import print_function
+
+import sys
 import json
 from collections import defaultdict
 from django.http import *
 from .models import *
-
-import logging
-log = logging.getLogger('mps')
-log.setLevel(logging.DEBUG)
 
 
 # Calling main is and always will be indicative of an error condition.
@@ -25,7 +24,7 @@ def fetch_assay_layout_content(request):
     assay_layout_id = request.POST.get('assay_layout_id')
 
     if not assay_layout_id:
-        log.error('error: assay_layout_id not present in request to fetch_assay_layout_content')
+        print('error: assay_layout_id not present in request to fetch_assay_layout_content', file=sys.stderr)
         return HttpResponseServerError()
 
     data = defaultdict(list)
@@ -59,7 +58,7 @@ def fetch_readout(request):
     current_readout_id = request.POST.get('current_readout_id')
 
     if not current_readout_id:
-        log.error('error: current_readout_id not present in request to fetch_readout')
+        print('error: current_readout_id not present in request to fetch_readout', file=sys.stderr)
         return HttpResponseServerError()
 
     data = defaultdict(list)
@@ -87,7 +86,7 @@ def fetch_layout_format_labels(request):
     request_id = request.POST.get('id')
 
     if not request_id:
-        log.error('error: request_id not present in request to fetch_layout_format_labels')
+        print('error: request_id not present in request to fetch_layout_format_labels', file=sys.stderr)
         return HttpResponseServerError()
 
     layout = AssayLayoutFormat.objects.get(id=request_id)
@@ -121,7 +120,7 @@ def fetch_well_type_color(request):
     current_id = request.POST.get('id')
 
     if not current_id:
-        log.error('error: current_id was not sent with fetch_well_type_color')
+        print('error: current_id was not sent with fetch_well_type_color', file=sys.stderr)
         return HttpResponseServerError()
 
     data = AssayWellType.objects.get(id=current_id).background_color
@@ -136,7 +135,7 @@ def fetch_baseid(request):
     current_layout_id = request.POST.get('current_layout_id')
 
     if not current_layout_id:
-        log.error('current_layout_id not present in request to fetch_baseid')
+        print('current_layout_id not present in request to fetch_baseid', file=sys.stderr)
         return HttpResponseServerError()
 
     assay_layout = AssayLayout.objects.get(id=current_layout_id)
@@ -157,7 +156,7 @@ def fetch_base_layout_wells(request):
     base_id = request.POST.get('id')
 
     if not base_id:
-        log.error('error: base_id not present in request to fetch_base_layout_wells')
+        print('error: base_id not present in request to fetch_base_layout_wells', file=sys.stderr)
         return HttpResponseServerError()
 
     data = {}
@@ -178,7 +177,7 @@ def fetch_base_layout_info(request):
     base_id = request.POST.get('id')
 
     if not base_id:
-        log.error('error: base_id not present in request to fetch_base_layout_info')
+        print('error: base_id not present in request to fetch_base_layout_info', file=sys.stderr)
         return HttpResponseServerError()
 
     base = AssayBaseLayout.objects.get(id=base_id)
@@ -214,7 +213,7 @@ def ajax(request):
     post_call = request.POST.get('call')
 
     if not post_call:
-        log.error('error: post_call not present in request to ajax')
+        print('error: post_call not present in request to ajax', file=sys.stderr)
         return HttpResponseServerError
 
     # Abort if there is no valid call sent to us from Javascript
