@@ -1,5 +1,5 @@
 *.pyc
-*db
+*.db
 /static
 /media
 /venv
@@ -7,7 +7,3 @@
 /.idea
 *.iml
 mps_credentials.py
-datadumps.zip
-datadumps-nk.zip
-scripts/*.gz
-
