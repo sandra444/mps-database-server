@@ -217,37 +217,23 @@ LOGGING = {
     },
 
     'handlers': {
-        'file_critical': {
-            'level': 'CRITICAL',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/django.debug.log',
-            'formatter': 'verbose'
-        },
-        'file_error': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/django.error.log',
-            'formatter': 'verbose'
-        },
-        'file_warning': {
-            'level': 'WARNING',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/django.warning.log',
-            'formatter': 'verbose'
-        },
-        'file_info': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/django.info.log',
-            'formatter': 'verbose'
-        },
-        'file_debug': {
+        'null': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/django.debug.log',
-            'formatter': 'verbose'
+            'class': 'django.utils.log.NullHandler',
         },
-
+        'logfile': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(PROJECT_ROOT, "/mps.log"),
+            'maxBytes': 500000,
+            'backupCount': 2,
+            'formatter': 'standard',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard'
+        },
     },
 
     'loggers': {
