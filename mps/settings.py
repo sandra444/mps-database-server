@@ -128,14 +128,6 @@ STATICFILES_FINDERS = (
 SECRET_KEY = 'f7e5f_n3toret66n=1oe0hm9c%*$lxd(_%4)$(k-pljt01^skk'
 NEVERCACHE_KEY = 'x=scmcpvq_$-9pz3651h=ln0b#-x&%%hz_)u0uzghfwk6#++pl'
 
-if socket.gethostname() in 'prody':
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': 'unix:/home/mps/memcached.sock',
-        }
-    }
-
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
@@ -210,8 +202,8 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt' : "%d/%b/%Y %H:%M:%S"
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
@@ -229,9 +221,9 @@ LOGGING = {
     'loggers': {
 
         'django': {
-            'handlers':['file'],
+            'handlers': ['file'],
             'propagate': True,
-            'level':'DEBUG',
+            'level': 'DEBUG',
         },
 
         'assays': {
@@ -269,7 +261,6 @@ LOGGING = {
             'level': 'DEBUG',
         },
 
-        },
     }
 }
 
