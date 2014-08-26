@@ -198,67 +198,99 @@ INSTALLED_APPS = (
 # more details on how to customize your logging configuration.
 
 LOGGING = {
+
     'version': 1,
+
     'disable_existing_loggers': False,
+
     'formatters': {
+
         'verbose': {
             'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
             'datefmt': "%d/%b/%Y %H:%M:%S"
         },
+
         'simple': {
             'format': '%(levelname)s %(message)s'
         },
+
     },
+
     'handlers': {
-        'file': {
-            'level': 'DEBUG',
+        'file_critical': {
+            'level': 'CRITICAL',
             'class': 'logging.FileHandler',
-            'filename': 'django.log',
+            'filename': 'logs/django.debug.log',
             'formatter': 'verbose'
         },
+        'file_error': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/django.error.log',
+            'formatter': 'verbose'
+        },
+        'file_warning': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/django.warning.log',
+            'formatter': 'verbose'
+        },
+        'file_info': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/django.info.log',
+            'formatter': 'verbose'
+        },
+        'file_debug': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/django.debug.log',
+            'formatter': 'verbose'
+        },
+
     },
 
     'loggers': {
 
         'django': {
-            'handlers': ['file'],
+            'handlers': ['file_error'],
             'propagate': True,
-            'level': 'DEBUG',
+            'level': 'ERROR',
         },
 
         'assays': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
+            'handlers': ['file_error'],
+            'level': 'ERROR',
         },
 
         'bioactivities': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
+            'handlers': ['file_error'],
+            'level': 'ERROR',
         },
 
         'cellsamples': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
+            'handlers': ['file_error'],
+            'level': 'ERROR',
         },
 
         'compounds': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
+            'handlers': ['file_error'],
+            'level': 'ERROR',
         },
 
         'drugtrials': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
+            'handlers': ['file_error'],
+            'level': 'ERROR',
         },
 
         'microdevices': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
+            'handlers': ['file_error'],
+            'level': 'ERROR',
         },
 
         'resources': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
+            'handlers': ['file_error'],
+            'level': 'ERROR',
         },
 
     }
