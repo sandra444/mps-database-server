@@ -133,6 +133,31 @@ $(document).ready(function () {
                  },*/
             });
         }
+
+        if (!$('#id_locked').prop('checked')) {
+            // create selector
+
+            $.ajax({
+                       url: "/assays_ajax",
+                       type: "POST",
+                       dataType: "json",
+                       data: {
+                           // Function to call within the view is defined by `call:`
+                           call: 'fetch_well_types',
+
+                           // Always pass the CSRF middleware token with every AJAX call
+                           csrfmiddlewaretoken: middleware_token
+                       },
+                       success: function (json) {
+                           create_well_type_selector(json);
+                       },
+                       error: function (xhr, errmsg, err) {
+                           console.log(xhr.status + ": " + xhr.responseText);
+                       }
+                   });
+
+
+        }
     }
 
 
@@ -179,31 +204,6 @@ $(document).ready(function () {
                     console.log(xhr.status + ": " + xhr.responseText);
                 }
             });
-
-            if (!$('#id_locked').prop('checked')) {
-                // create selector
-
-                $.ajax({
-                    url: "/assays_ajax",
-                    type: "POST",
-                    dataType: "json",
-                    data: {
-                        // Function to call within the view is defined by `call:`
-                        call: 'fetch_well_types',
-
-                        // Always pass the CSRF middleware token with every AJAX call
-                        csrfmiddlewaretoken: middleware_token
-                    },
-                    success: function (json) {
-                        create_well_type_selector(json);
-                    },
-                    error: function (xhr, errmsg, err) {
-                        console.log(xhr.status + ": " + xhr.responseText);
-                    }
-                });
-
-
-            }
 
         } else {
             $('#layout_div').remove();
