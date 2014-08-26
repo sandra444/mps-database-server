@@ -218,15 +218,50 @@ LOGGING = {
             'formatter': 'verbose'
         },
     },
+
     'loggers': {
+
         'django': {
             'handlers':['file'],
             'propagate': True,
             'level':'DEBUG',
         },
-        'MYAPP': {
+
+        'assays': {
             'handlers': ['file'],
             'level': 'DEBUG',
+        },
+
+        'bioactivities': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+
+        'cellsamples': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+
+        'compounds': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+
+        'drugtrials': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+
+        'microdevices': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+
+        'resources': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+
         },
     }
 }
