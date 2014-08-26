@@ -198,87 +198,36 @@ INSTALLED_APPS = (
 # more details on how to customize your logging configuration.
 
 LOGGING = {
-
     'version': 1,
 
     'disable_existing_loggers': False,
-
     'formatters': {
-
         'verbose': {
-            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt': "%d/%b/%Y %H:%M:%S"
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
         },
-
         'simple': {
             'format': '%(levelname)s %(message)s'
         },
-
     },
-
     'handlers': {
-        'null': {
+        'file': {
             'level': 'DEBUG',
-            'class': 'django.utils.log.NullHandler',
-        },
-        'logfile': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(PROJECT_ROOT, "/mps.log"),
-            'maxBytes': 500000,
-            'backupCount': 2,
-            'formatter': 'standard',
-        },
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'standard'
+            'class': 'logging.FileHandler',
+            'filename': 'django.log',
+            'formatter': 'verbose'
         },
     },
-
     'loggers': {
-
         'django': {
-            'handlers': ['file_error'],
+            'handlers':['file'],
             'propagate': True,
-            'level': 'ERROR',
+            'level':'DEBUG',
         },
-
-        'assays': {
-            'handlers': ['file_error'],
-            'level': 'ERROR',
+        'MYAPP': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
         },
-
-        'bioactivities': {
-            'handlers': ['file_error'],
-            'level': 'ERROR',
-        },
-
-        'cellsamples': {
-            'handlers': ['file_error'],
-            'level': 'ERROR',
-        },
-
-        'compounds': {
-            'handlers': ['file_error'],
-            'level': 'ERROR',
-        },
-
-        'drugtrials': {
-            'handlers': ['file_error'],
-            'level': 'ERROR',
-        },
-
-        'microdevices': {
-            'handlers': ['file_error'],
-            'level': 'ERROR',
-        },
-
-        'resources': {
-            'handlers': ['file_error'],
-            'level': 'ERROR',
-        },
-
     }
 }
 
