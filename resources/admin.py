@@ -38,9 +38,8 @@ class ResourceAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     readonly_fields = ('created_by', 'created_on',
-                       'modified_by', 'modified_on',
-                       'subtype')
-    list_display = ('type', 'resource_subtype', 'resource_name',
+                       'modified_by', 'modified_on',)
+    list_display = ('type', 'resource_name',
                     'resource_site', 'description',)
     fieldsets = (
         (
@@ -48,7 +47,6 @@ class ResourceAdmin(LockableAdmin):
                 'fields': (
                     'resource_name',
                     'type',
-                    'subtype',
                     'resource_website',
                     'description',
                 )
