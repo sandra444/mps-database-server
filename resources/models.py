@@ -33,7 +33,6 @@ class Resource(LockableModel):
     resource_website = models.URLField(blank=True, null=True)
     description = models.CharField(max_length=400, blank=True, null=True)
     type = models.ForeignKey(ResourceType)
-    resource_subtype = models.ForeignKey(ResourceSubtype, verbose_name="Subtype")
 
     def __unicode__(self):
         return self.resource_name
