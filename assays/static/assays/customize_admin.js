@@ -512,7 +512,7 @@ $(document).ready(function () {
     }
 
     function make_layout(base_id) {
-        if (base_id.length) {
+        if (typeof(base_id) != "undefined" && base_id.length) {
             $('#layout_div').remove();
             $('#controls').remove();
 
