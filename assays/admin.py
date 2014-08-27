@@ -505,10 +505,6 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
                         'concentration_unit',
                     ),
                     (
-                        'compound', 'concentration',
-                        'concentration_unit',
-                    ),
-                    (
                         'cell_sample', 'cellsample_density',
                         'cellsample_density_unit',
                     ),
