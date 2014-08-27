@@ -505,7 +505,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
                         'cellsample_density_unit',
                     ),
                     (
-                        'readout_unit',
+                        'timeunit','readout_unit',
                     ),
                     (
                         'treatment_time_length', 'assay_start_time','readout_start_time',
@@ -563,7 +563,7 @@ admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 class AssayChipReadoutAdmin(LockableAdmin):
 
     raw_id_fields = ("compound","cell_sample",)
-    
+
     list_per_page = 100
     list_display = ('assay_chip_id',
                     'assay_name',
@@ -638,7 +638,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
         ),
     )
 
-   
+
 
 admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
 
