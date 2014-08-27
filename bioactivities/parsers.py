@@ -11,15 +11,6 @@ from django.db import connection
 from mps.settings import MEDIA_ROOT
 
 
-"""
-
-unit_table
-
-Convert and standardize units to a common value
-
-"""
-
-
 def generate_record_frequency_data(query):
     result = {}
 
