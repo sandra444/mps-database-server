@@ -87,7 +87,7 @@ class AssayLayoutFormat(LockableModel):
                                   'Space separated list of unique labels, '
                                   'e.g. "A B C D ..."'
                                   ' Number of items must match'
-                                  ' number of columns.'''
+                                  ' number of columns.''')
     column_labels = models.CharField(max_length=1000,
                                      help_text='Space separated list of unique '
                                                'labels, e.g. "1 2 3 4 ...". '
@@ -383,7 +383,7 @@ class AssayChipRawData(models.Model):
     field_id = models.CharField(max_length=255, default = '0')
     value = models.FloatField()
     elapsed_time = models.FloatField(default=0)
-      
+
 class AssayChipReadout(LockableModel):
     class Meta(object):
         ordering = ('assay_chip_id', 'assay_name',)
@@ -392,7 +392,7 @@ class AssayChipReadout(LockableModel):
     # can be a barcode or a hand written identifier
     assay_chip_id = models.CharField(max_length=512,
                                        verbose_name='Chip ID/ Barcode')
-    
+
     compound = models.ForeignKey('compounds.Compound')
     concentration = models.FloatField(default=0)
     unit = models.ForeignKey('assays.PhysicalUnits',verbose_name='concentration Unit')
@@ -414,7 +414,7 @@ class AssayChipReadout(LockableModel):
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
-    
+
     assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Run')
     device = models.ForeignKey(Microdevice, verbose_name = 'Chip Model Name')
 
