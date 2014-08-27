@@ -3,7 +3,6 @@
 import json
 import os
 import hashlib
-import random
 import csv
 
 from pandas import *
@@ -20,21 +19,8 @@ Convert and standardize units to a common value
 
 """
 
-unit_table = {
 
-    'nM': 10 ** -9,
-    'uM': 10 ** -6,
-    's': 1,
-    '%': 1,
-    'mg/dL': 1,
-    'g': 1,
-    'mg': 10 ** -3,
-    'ug.mL-1': 10 ** -6
-
-}
-
-
-def query_to_frequencylist(query):
+def generate_record_frequency_data(query):
     result = {}
 
     for q in query:
@@ -55,74 +41,6 @@ def query_to_frequencylist(query):
     return result_list
 
 
-def normalize(value, units):
-    """
-
-    Convert units imported from the CHEMBL data store into standard units,
-    or else return null or an error message as the result.
-
-    :param value: initial value to be converted
-    :param units: initial units to use for conversion
-
-    """
-
-    try:
-        # select the function from the dictionary
-        value *= unit_table[units]
-
-    # If all else fails, handle the error message
-    except KeyError:
-        # DEBUG: '{} {}'.format('ERROR ... ', units)
-        return 0, 'ERROR'
-
-    else:
-        return round(value, 12), units
-
-
-def generate_table():
-    cursor = connection.cursor()
-
-    cursor.execute(
-        'SELECT compounds_compound.name, '
-        'bioactivities_target.name, '
-        'bioactivities_bioactivity.bioactivity_type, '
-        'bioactivities_bioactivity.value, '
-        'bioactivities_bioactivity.units '
-        'FROM bioactivities_bioactivity '
-        'INNER JOIN compounds_compound '
-        'ON bioactivities_bioactivity.compound_id=compounds_compound.id '
-        'INNER JOIN bioactivities_target '
-        'ON bioactivities_bioactivity.target_id=bioactivities_target.id;'
-    )
-
-    # bioactivity is a tuple:
-    # (compound name, target name, the bioactivity, value, units)
-    # (0            , 1          , 2              , 3    , 4    )
-    query = cursor.fetchall()
-
-    result = []
-
-    for q in query:
-
-        normalized_value, normalized_units = normalize(q[3], q[4])
-
-        # DEBUG: print out errors in units
-        if 'ERROR' in normalized_units:
-            continue
-
-        result.append({
-            'compound': q[0],
-            'target': q[1],
-            'bioactivity': q[2],
-            'value': normalized_value,
-            'units': normalized_units,
-        })
-
-    cursor.close()
-
-    return result
-
-
 def generate_list_of_all_bioactivities_in_bioactivities():
     cursor = connection.cursor()
 
@@ -132,7 +50,7 @@ def generate_list_of_all_bioactivities_in_bioactivities():
         'WHERE bioactivities_bioactivity.standardized_value>0;'
     )
 
-    result = query_to_frequencylist(cursor.fetchall())
+    result = generate_record_frequency_data(cursor.fetchall())
     cursor.close()
 
     return result
@@ -152,7 +70,7 @@ def generate_list_of_all_targets_in_bioactivities():
         " AND bioactivities_target.target_type='SINGLE PROTEIN' "
     )
 
-    result = query_to_frequencylist(cursor.fetchall())
+    result = generate_record_frequency_data(cursor.fetchall())
     cursor.close()
 
     return result
@@ -168,7 +86,7 @@ def generate_list_of_all_compounds_in_bioactivities():
         'ON bioactivities_bioactivity.compound_id=compounds_compound.id;'
     )
 
-    result = query_to_frequencylist(cursor.fetchall())
+    result = generate_record_frequency_data(cursor.fetchall())
     cursor.close()
 
     return result
@@ -189,19 +107,21 @@ def fetch_all_standard_bioactivities_data(
         'SELECT compounds_compound.name as compound, '
         'bioactivities_target.name as target, '
         'bioactivities_bioactivity.standard_name as bioactivity, '
-        'bioactivities_bioactivity.standardized_value as value,bioactivities_bioactivity.standardized_units as units, ' 
+        'bioactivities_bioactivity.standardized_value as value,bioactivities_bioactivity.standardized_units as units, '
         'bioactivities_target.organism, '
         'bioactivities_target.target_type,'
-        'CASE WHEN agg_tbl.max_value-agg_tbl.min_value <> 0 THEN (standardized_value-agg_tbl.min_value)/(agg_tbl.max_value-agg_tbl.min_value) ELSE 1 END as norm_value '
+        'CASE WHEN agg_tbl.max_value-agg_tbl.min_value <> 0 '
+        'THEN (standardized_value-agg_tbl.min_value)/(agg_tbl.max_value-agg_tbl.min_value) ELSE 1 END as norm_value '
         'FROM bioactivities_bioactivity '
         'INNER JOIN compounds_compound '
         'ON bioactivities_bioactivity.compound_id=compounds_compound.id '
         'INNER JOIN bioactivities_target '
         'ON bioactivities_bioactivity.target_id=bioactivities_target.id '
         'INNER JOIN '
-        '(SELECT bioactivities_bioactivity.standard_name ,MAX(standardized_value) as max_value,MIN(standardized_value) as min_value '
-	'FROM bioactivities_bioactivity '
-	'GROUP BY bioactivities_bioactivity.standard_name '
+        '(SELECT bioactivities_bioactivity.standard_name ,'
+        'MAX(standardized_value) as max_value,MIN(standardized_value) as min_value '
+        'FROM bioactivities_bioactivity '
+        'GROUP BY bioactivities_bioactivity.standard_name '
         ') as agg_tbl ON bioactivities_bioactivity.standard_name = agg_tbl.standard_name '
         ') as tbl '
         ' GROUP BY compound,target,tbl.bioactivity,units,organism,target_type '
