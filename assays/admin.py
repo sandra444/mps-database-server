@@ -501,15 +501,11 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
                         'assay_name',
                     ),
                     (
-                        'compound', 'concentration',
-                        'concentration_unit',
-                    ),
-                    (
                         'cell_sample', 'cellsample_density',
                         'cellsample_density_unit',
                     ),
                     (
-                        'timeunit', 'readout_unit',
+                        'readout_unit',
                     ),
                     (
                         'treatment_time_length', 'assay_start_time','readout_start_time',
