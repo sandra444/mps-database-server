@@ -47,18 +47,44 @@ def generate_list_of_all_bioactivities_in_bioactivities():
     return result
 
 
-def generate_list_of_all_targets_in_bioactivities():
+def generate_list_of_all_targets_in_bioactivities(organisms, targets):
+
     cursor = connection.cursor()
 
+
+    where_clause = " WHERE ( "
+    organisms_clause = ""
+
+    if not organisms or not targets:
+        return
+
+    if len(organisms) is 1:
+        organisms_clause = "   LOWER(bioactivities_target.organism)=LOWER('{}') ".format(''.join(organisms))
+    else:
+        for organism in organisms:
+            organisms_clause = "OR LOWER(bioactivities_target.organism)=LOWER('{}') ".format(''.join(organism))
+
+    where_clause += organisms_clause[2:]  # remove the first 'OR'
+
+    where_clause += ") AND ("
+
+    targets_clause = ""
+
+    if len(targets) is 1:
+        targets_clause = "   LOWER(bioactivities_target.target_type)=LOWER('{}') ".format(''.join(targets))
+    else:
+        for target in targets:
+            targets_clause += "OR LOWER(bioactivities_target.target_type)=LOWER('{}') ".format(''.join(target))
+
+    where_clause += targets_clause[2:]  # remove the first 'OR'
+    where_clause += ");"
+
     cursor.execute(
-        " SELECT bioactivities_target.name "
-        " FROM bioactivities_bioactivity "
-
-        " INNER JOIN bioactivities_target "
-        " ON bioactivities_bioactivity.target_id=bioactivities_target.id "
-
-        " WHERE bioactivities_target.organism='Homo sapiens' "
-        " AND bioactivities_target.target_type='SINGLE PROTEIN' "
+        " SELECT bioactivities_target.name " +
+        " FROM bioactivities_bioactivity " +
+        " INNER JOIN bioactivities_target " +
+        " ON bioactivities_bioactivity.target_id=bioactivities_target.id " +
+        where_clause
     )
 
     result = generate_record_frequency_data(cursor.fetchall())
