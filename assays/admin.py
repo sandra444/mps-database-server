@@ -11,6 +11,7 @@ from mps.base.admin import LockableAdmin
 from assays.resource import *
 from import_export.admin import ImportExportModelAdmin
 from compounds.models import *
+import unicodedata
 
 
 class AssayLayoutFormatForm(forms.ModelForm):
@@ -24,17 +25,30 @@ class AssayLayoutFormatForm(forms.ModelForm):
         data = super(AssayLayoutFormatForm, self).clean()
 
         if not (int(data['number_of_columns']) ==
-                    len(set(data['column_labels'].split()))):
+                len(set(data['column_labels'].split()))):
             raise forms.ValidationError('Number of columns and '
                                         'number of unique column '
                                         'labels do not match.')
-        if not (int(data['number_of_rows']) ==
-                    len(set(data['row_labels'].split()))):
+
+        #cannot tell if it is number or letter in single entry list
+        if not ((int(data['number_of_rows'] ==
+                len(set(data['row_labels'].split())))) or
+                ((len(set(data['row_labels']))) == 1)):
             raise forms.ValidationError('Number of rows and '
                                         'number of unique row '
                                         'labels do not match.')
-
         # need to return clean data if it validates
+
+        # if ((int(data['number_of_rows'])) > 1) and (len(set(data['row_labels'])) == 1):
+        #     rows = int(data['number_of_rows'])
+        #     row_list = []
+        #     start = int(list(data['row_labels'])[0])
+        #     for x in range(0, rows):
+        #         row_list.append(start)
+        #         start += 1
+        #     data['row_labels'] = row_list
+        #     print data['row_labels']
+
         return data
 
 
@@ -301,6 +315,7 @@ class AssayBaseLayoutAdmin(LockableAdmin):
         column_labels = layout.column_labels.split()
         row_labels = layout.row_labels.split()
         data = form.data
+
         for row in row_labels:
             for col in column_labels:
                 rowcol = (row, col)
@@ -317,7 +332,7 @@ class AssayBaseLayoutAdmin(LockableAdmin):
                                   AssayWellType.objects.get(id=data.get(key)),
                                   row=row,
                                   column=col
-                        ).save()
+                                  ).save()
                 elif rowcol in wells:
                     wells[rowcol].delete()
 
@@ -453,7 +468,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
     resource_class = AssayDeviceReadoutResource
 
     class Media(object):
-        js = ('assays/customize_readout.js',)
+        js = ('assays/customize_readout.js', 'assays/customize_admin.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
     raw_id_fields = ("cell_sample",)
@@ -488,7 +503,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
                         'cellsample_density_unit',
                     ),
                     (
-                          'timeunit','readout_unit',
+                        'timeunit','readout_unit',
                     ),
                     (
                         'treatment_time_length', 'assay_start_time','readout_start_time',
@@ -546,7 +561,7 @@ admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 class AssayChipReadoutAdmin(LockableAdmin):
 
     raw_id_fields = ("compound","cell_sample",)
-    
+
     list_per_page = 100
     list_display = ('assay_chip_id',
                     'assay_name',
@@ -621,7 +636,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
         ),
     )
 
-   
+
 
 admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
 

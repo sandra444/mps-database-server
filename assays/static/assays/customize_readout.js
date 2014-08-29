@@ -9,7 +9,6 @@ $(document).ready(function () {
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     function getReadouts(data) {
-
         // select the first table in the form (the one we want)
         var table = $('#layout_table')[0];
 
@@ -17,7 +16,6 @@ $(document).ready(function () {
         // `rows` is current row starting with 0
 
         for (var key in data) {
-
             var row = data[key][0].row;
             var column = data[key][0].column;
             var value = data[key][0].value;
@@ -303,8 +301,11 @@ $(document).ready(function () {
         // Refer to the benchmarks for more information:
         // http://jsperf.com/performance-of-parseint
 
-        return Math.floor($('.historylink').attr('href').split('/')[4]);
-
+        try {
+            return Math.floor($('.historylink').attr('href').split('/')[4]);
+        }catch(err){
+            return 0;
+        }
     }
 
     function checkAssayLayoutValidity() {
@@ -322,8 +323,9 @@ $(document).ready(function () {
 
     checkAssayLayoutValidity();
 
-    $('#id_assay_layout').change(function () {
-        checkAssayLayoutValidity();
+
+    $('#id_assay_layout').change( function () {
+            checkAssayLayoutValidity();
     });
 
 

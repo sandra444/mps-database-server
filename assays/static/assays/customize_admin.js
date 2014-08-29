@@ -2,6 +2,17 @@ $(document).ready(function () {
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
+
+
+    $('#id_assay_layout').change( function () {
+            if ($('#id_base_layout_name').val() === '') {
+            } else {
+                make_layout(base_layout.val());
+            }
+
+    });
+
+
     // ASSAY BASE LAYOUT
 
     // modifies cells selected in the layout
@@ -501,7 +512,7 @@ $(document).ready(function () {
     }
 
     function make_layout(base_id) {
-        if (base_id.length) {
+        if (typeof(base_id) != "undefined" && base_id.length) {
             $('#layout_div').remove();
             $('#controls').remove();
 
@@ -651,5 +662,7 @@ $(document).ready(function () {
     }
 
     // END ASSAY LAYOUT
+
+
 
 });
