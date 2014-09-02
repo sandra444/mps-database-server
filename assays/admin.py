@@ -449,7 +449,9 @@ def parseReadoutCSV(currentAssayReadout, file):
                 currentAssayReadout.id = int(check)
                 break
 
-    removeExistingReadout(currentAssayReadout)
+    #No need to call this function if ID does not exist yet
+    else:
+        removeExistingReadout(currentAssayReadout)
 
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
