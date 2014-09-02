@@ -435,9 +435,10 @@ def removeExistingReadout(currentAssayReadout):
             readout.delete()
     return
 
-#EARLY FIX, NOT ROBUST: NEED TO CHANGE SAVE FUNCTION TO EMULATE SAVE/VALIDATION
+
 def parseReadoutCSV(currentAssayReadout, file):
 
+    #Early fix, finds the first valid ID
     if not currentAssayReadout.id:
         check = 0
         while not currentAssayReadout.id:
