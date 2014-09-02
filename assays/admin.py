@@ -13,7 +13,6 @@ from import_export.admin import ImportExportModelAdmin
 from compounds.models import *
 import unicodedata
 
-
 class AssayLayoutFormatForm(forms.ModelForm):
     class Meta(object):
         model = AssayLayoutFormat
@@ -436,8 +435,19 @@ def removeExistingReadout(currentAssayReadout):
             readout.delete()
     return
 
-
+#EARLY FIX, NOT ROBUST: NEED TO CHANGE SAVE FUNCTION TO EMULATE SAVE/VALIDATION
 def parseReadoutCSV(currentAssayReadout, file):
+
+    if not currentAssayReadout.id:
+        check = 0
+        while not currentAssayReadout.id:
+            try:
+                AssayDeviceReadout.objects.get(id=check)
+                check += 1
+            except:
+                currentAssayReadout.id = int(check)
+                break
+
     removeExistingReadout(currentAssayReadout)
 
     datareader = csv.reader(file, delimiter=',')
