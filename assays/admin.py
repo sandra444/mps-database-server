@@ -13,6 +13,7 @@ from import_export.admin import ImportExportModelAdmin
 from compounds.models import *
 import unicodedata
 
+
 class AssayLayoutFormatForm(forms.ModelForm):
     class Meta(object):
         model = AssayLayoutFormat
@@ -438,20 +439,7 @@ def removeExistingReadout(currentAssayReadout):
 
 def parseReadoutCSV(currentAssayReadout, file):
 
-    #Early fix, finds the first valid ID
-    if not currentAssayReadout.id:
-        check = 0
-        while not currentAssayReadout.id:
-            try:
-                AssayDeviceReadout.objects.get(id=check)
-                check += 1
-            except:
-                currentAssayReadout.id = int(check)
-                break
-
-    #No need to call this function if ID does not exist yet
-    else:
-        removeExistingReadout(currentAssayReadout)
+    removeExistingReadout(currentAssayReadout)
 
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
@@ -555,6 +543,11 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
     )
 
     def save_model(self, request, obj, form, change):
+
+        #Early fix, adds one to the max ID
+        if not obj.id:
+            maxId = AssayDeviceReadout.objects.latest('id').id
+            obj.id = maxId + 1
 
         if change:
             obj.modified_by = request.user
