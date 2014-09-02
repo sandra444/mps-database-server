@@ -542,6 +542,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
         ),
     )
 
+    #Acquires first unused ID
     def get_next_id(self):
         from django.db import connection
         cursor = connection.cursor()
@@ -553,7 +554,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 
     def save_model(self, request, obj, form, change):
 
-        #Early fix, adds one to the max ID
+        #Early fix: uses database "cursor" to track ID
         if not obj.id:
             obj.id = self.get_next_id()
 
