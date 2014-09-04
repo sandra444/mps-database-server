@@ -558,6 +558,53 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 
 admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
+def removeExistingChip(currentChipReadout):
+    readouts = AssayChipRawData.objects.filter(
+        assay_chip_readout_id=currentChipReadout.id)
+
+    for readout in readouts:
+        if readout.assay_chip_readout_id == currentChipReadout.id:
+            readout.delete()
+    return
+
+def parseChipCSV(currentChipReadout, file):
+    removeExistingChip(currentChipReadout)
+
+    datareader = csv.reader(file, delimiter=',')
+    datalist = list(datareader)
+
+    field_ids = []
+    times = []
+
+    for rowID, rowValue in enumerate(datalist):
+        # rowValue holds all of the row elements
+        # rowID is the index of the current row from top to bottom
+        for columnID, columnValue in enumerate(rowValue):
+            # columnValue is a single number: the value of our specific cell
+            # columnID is the index of the current column
+
+            # Treat empty strings as NULL values and do not save the data point
+            if not columnValue:
+                continue
+
+            if rowID == 0:
+                field_ids.append(columnValue)
+                continue
+
+            if columnID == 0:
+                times.append(columnValue)
+                continue
+
+            #Still need to discern how to parse Chip data
+            AssayChipRawData(
+                assay_chip_readout=currentChipReadout,
+                field_id = field_ids[columnID],
+                value = columnValue,
+                elapsed_time = times[rowID]
+            ).save()
+    return
+
+#Uses AssayChipRawData
 class AssayChipReadoutAdmin(LockableAdmin):
 
     raw_id_fields = ("compound","cell_sample",)
@@ -565,7 +612,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
     list_per_page = 100
     list_display = ('assay_chip_id',
                     'assay_name',
-                    'assay_run_id',
+                    #'assay_run_id',
                     'compound',
                     'cell_sample',
                     'reader_name')
@@ -636,7 +683,19 @@ class AssayChipReadoutAdmin(LockableAdmin):
         ),
     )
 
+    def save_model(self, request, obj, form, change):
 
+        if change:
+            obj.modified_by = request.user
+
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        if request.FILES:
+            # pass the upload file name to the CSV reader if a file exists
+            parseChipCSV(obj, request.FILES['file'].file)
+
+        obj.save()
 
 admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
 
