@@ -560,7 +560,7 @@ admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
 def removeExistingChip(currentChipReadout):
     readouts = AssayChipRawData.objects.filter(
-        assay_chip_readout_id=currentChipReadout.id)
+        assay_chip_id_id=currentChipReadout.id)
 
     for readout in readouts:
         if readout.assay_chip_readout_id == currentChipReadout.id:
@@ -597,10 +597,10 @@ def parseChipCSV(currentChipReadout, file):
 
             #Still need to discern how to parse Chip data
             AssayChipRawData(
-                assay_chip_readout=currentChipReadout,
+                assay_chip_id=currentChipReadout,
                 field_id = field_ids[columnID],
                 value = columnValue,
-                elapsed_time = times[rowID]
+                elapsed_time = times[rowID-1]
             ).save()
     return
 
@@ -683,7 +683,21 @@ class AssayChipReadoutAdmin(LockableAdmin):
         ),
     )
 
+    #Acquires first unused ID
+    def get_next_id(self):
+        from django.db import connection
+        cursor = connection.cursor()
+        cursor.execute( "select nextval('%s_id_seq')" % \
+                        AssayChipReadout._meta.db_table)
+        row = cursor.fetchone()
+        cursor.close()
+        return row[0]
+
     def save_model(self, request, obj, form, change):
+
+        #Early fix: uses database "cursor" to track ID
+        if not obj.id:
+            obj.id = self.get_next_id()
 
         if change:
             obj.modified_by = request.user
