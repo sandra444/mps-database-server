@@ -563,7 +563,7 @@ def removeExistingChip(currentChipReadout):
         assay_chip_id_id=currentChipReadout.id)
 
     for readout in readouts:
-        if readout.assay_chip_readout_id == currentChipReadout.id:
+        if readout.assay_chip_id_id == currentChipReadout.id:
             readout.delete()
     return
 
