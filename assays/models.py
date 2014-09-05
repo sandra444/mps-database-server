@@ -415,7 +415,7 @@ class AssayChipReadout(LockableModel):
                                                         ('MM', 'cells / mm^2')))
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
 
-    #assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Run')
+    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Run')
     device = models.ForeignKey(Microdevice, verbose_name = 'Chip Model Name')
 
     reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')

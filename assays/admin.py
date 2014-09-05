@@ -573,35 +573,25 @@ def parseChipCSV(currentChipReadout, file):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
 
-    field_ids = []
-    times = []
-
     for rowID, rowValue in enumerate(datalist):
         # rowValue holds all of the row elements
         # rowID is the index of the current row from top to bottom
-        for columnID, columnValue in enumerate(rowValue):
-            # columnValue is a single number: the value of our specific cell
-            # columnID is the index of the current column
 
-            # Treat empty strings as NULL values and do not save the data point
-            if not columnValue:
-                continue
+        #Skip any row with incomplete data for now
+        if any(not val for val in rowValue):
+            continue
 
-            if rowID == 0:
-                field_ids.append(columnValue)
-                continue
+        field = rowValue[1]
+        val = rowValue[2]
+        time = rowValue[0]
 
-            if columnID == 0:
-                times.append(columnValue)
-                continue
-
-            #Still need to discern how to parse Chip data
-            AssayChipRawData(
-                assay_chip_id=currentChipReadout,
-                field_id = field_ids[columnID],
-                value = columnValue,
-                elapsed_time = times[rowID-1]
-            ).save()
+        #How to parse Chip data
+        AssayChipRawData(
+            assay_chip_id=currentChipReadout,
+            field_id = field,
+            value = val,
+            elapsed_time = time
+        ).save()
     return
 
 #Uses AssayChipRawData
@@ -614,7 +604,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
     list_per_page = 100
     list_display = ('assay_chip_id',
                     'assay_name',
-                    #'assay_run_id',
+                    'assay_run_id',
                     'compound',
                     'cell_sample',
                     'reader_name')
