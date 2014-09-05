@@ -607,6 +607,8 @@ def parseChipCSV(currentChipReadout, file):
 #Uses AssayChipRawData
 class AssayChipReadoutAdmin(LockableAdmin):
 
+    save_on_top = True
+
     raw_id_fields = ("compound","cell_sample",)
 
     list_per_page = 100
