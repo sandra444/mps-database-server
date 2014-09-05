@@ -370,7 +370,8 @@ class AssayRun(LockableModel):
     class Meta(object):
         ordering = ('assay_run_id', )
 
-    assay_run_id = models.TextField(unique=True)
+    #help_text subject to change
+    assay_run_id = models.TextField(unique=True, help_text="Please use the standard")
     name = models.TextField(unique=True)
     description = models.TextField(blank=True, null=True)
     start_date = models.DateTimeField(blank=True, null=True)
