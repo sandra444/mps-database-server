@@ -370,7 +370,8 @@ class AssayRun(LockableModel):
     class Meta(object):
         ordering = ('assay_run_id', )
 
-    assay_run_id = models.TextField(unique=True)
+    #help_text subject to change
+    assay_run_id = models.TextField(unique=True, help_text="Please use the standard")
     name = models.TextField(unique=True)
     description = models.TextField(blank=True, null=True)
     start_date = models.DateTimeField(blank=True, null=True)
@@ -387,6 +388,9 @@ class AssayChipRawData(models.Model):
 class AssayChipReadout(LockableModel):
     class Meta(object):
         ordering = ('assay_chip_id', 'assay_name',)
+
+    #Control => control, Compound => compound; Abbreviate? Capitalize?
+    chip_test_type = models.CharField(max_length=8, choices=(("control","Control"),("compound","Compound")))
 
     # the unique readout identifier
     # can be a barcode or a hand written identifier

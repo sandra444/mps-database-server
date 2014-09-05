@@ -568,12 +568,55 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
             # pass the upload file name to the CSV reader if a file exists
             parseReadoutCSV(obj, request.FILES['file'].file)
 
+        #Need else to delete entries when a file is cleared
+        else:
+            removeExistingReadout(obj)
+
         obj.save()
 
 
 admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
+def removeExistingChip(currentChipReadout):
+    readouts = AssayChipRawData.objects.filter(
+        assay_chip_id_id=currentChipReadout.id)
+
+    for readout in readouts:
+        if readout.assay_chip_id_id == currentChipReadout.id:
+            readout.delete()
+    return
+
+def parseChipCSV(currentChipReadout, file):
+    removeExistingChip(currentChipReadout)
+
+    datareader = csv.reader(file, delimiter=',')
+    datalist = list(datareader)
+
+    for rowID, rowValue in enumerate(datalist):
+        # rowValue holds all of the row elements
+        # rowID is the index of the current row from top to bottom
+
+        #Skip any row with incomplete data for now
+        if any(not val for val in rowValue):
+            continue
+
+        field = rowValue[1]
+        val = rowValue[2]
+        time = rowValue[0]
+
+        #How to parse Chip data
+        AssayChipRawData(
+            assay_chip_id=currentChipReadout,
+            field_id = field,
+            value = val,
+            elapsed_time = time
+        ).save()
+    return
+
+#Uses AssayChipRawData
 class AssayChipReadoutAdmin(LockableAdmin):
+
+    save_on_top = True
 
     raw_id_fields = ("compound","cell_sample",)
 
@@ -586,6 +629,15 @@ class AssayChipReadoutAdmin(LockableAdmin):
                     'reader_name')
     search_fields = ['assay_chip_id']
     fieldsets = (
+        (
+            'Run Parameters', {
+                'fields': (
+                    (
+                    'assay_run_id','chip_test_type'
+                    ),
+                )
+            }
+        ),
         (
             'Device Parameters', {
                 'fields': (
@@ -651,7 +703,37 @@ class AssayChipReadoutAdmin(LockableAdmin):
         ),
     )
 
+    #Acquires first unused ID
+    def get_next_id(self):
+        from django.db import connection
+        cursor = connection.cursor()
+        cursor.execute( "select nextval('%s_id_seq')" % \
+                        AssayChipReadout._meta.db_table)
+        row = cursor.fetchone()
+        cursor.close()
+        return row[0]
 
+    def save_model(self, request, obj, form, change):
+
+        #Early fix: uses database "cursor" to track ID
+        if not obj.id:
+            obj.id = self.get_next_id()
+
+        if change:
+            obj.modified_by = request.user
+
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        if request.FILES:
+            # pass the upload file name to the CSV reader if a file exists
+            parseChipCSV(obj, request.FILES['file'].file)
+
+        #Need else to delete entries when a file is cleared
+        else:
+            removeExistingChip(obj)
+
+        obj.save()
 
 admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
 
