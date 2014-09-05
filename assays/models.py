@@ -388,6 +388,8 @@ class AssayChipReadout(LockableModel):
     class Meta(object):
         ordering = ('assay_chip_id', 'assay_name',)
 
+    chip_test_type = models.CharField(max_length=3, choices=(("CON","Control"),("COM","Compound")))
+
     # the unique readout identifier
     # can be a barcode or a hand written identifier
     assay_chip_id = models.CharField(max_length=512,

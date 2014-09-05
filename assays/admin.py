@@ -611,6 +611,15 @@ class AssayChipReadoutAdmin(LockableAdmin):
     search_fields = ['assay_chip_id']
     fieldsets = (
         (
+            'Run Parameters', {
+                'fields': (
+                    (
+                    'assay_run_id','chip_test_type'
+                    ),
+                )
+            }
+        ),
+        (
             'Device Parameters', {
                 'fields': (
                     (
