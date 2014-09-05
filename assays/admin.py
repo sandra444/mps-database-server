@@ -568,6 +568,10 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
             # pass the upload file name to the CSV reader if a file exists
             parseReadoutCSV(obj, request.FILES['file'].file)
 
+        #Need else to delete entries when a file is cleared
+        else:
+            removeExistingReadout(obj)
+
         obj.save()
 
 
@@ -724,6 +728,10 @@ class AssayChipReadoutAdmin(LockableAdmin):
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
             parseChipCSV(obj, request.FILES['file'].file)
+
+        #Need else to delete entries when a file is cleared
+        else:
+            removeExistingChip(obj)
 
         obj.save()
 
