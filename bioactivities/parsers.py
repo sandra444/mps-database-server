@@ -62,7 +62,7 @@ def generate_list_of_all_targets_in_bioactivities(organisms, targets):
         organisms_clause = "   LOWER(bioactivities_target.organism)=LOWER('{}') ".format(''.join(organisms))
     else:
         for organism in organisms:
-            organisms_clause = "OR LOWER(bioactivities_target.organism)=LOWER('{}') ".format(''.join(organism))
+            organisms_clause += "OR LOWER(bioactivities_target.organism)=LOWER('{}') ".format(''.join(organism))
 
     where_clause += organisms_clause[2:]  # remove the first 'OR'
 
