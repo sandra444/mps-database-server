@@ -596,8 +596,8 @@ def parseChipCSV(currentChipReadout, file):
         # rowValue holds all of the row elements
         # rowID is the index of the current row from top to bottom
 
-        #Skip any row with incomplete data for now
-        if any(not val for val in rowValue):
+        #Skip any row with incomplete data and first row (header) for now
+        if any(not val for val in rowValue) or rowID == 0:
             continue
 
         field = rowValue[1]
