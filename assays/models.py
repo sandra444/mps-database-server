@@ -371,7 +371,7 @@ class AssayRun(LockableModel):
         ordering = ('assay_run_id', )
 
     #help_text subject to change
-    assay_run_id = models.TextField(unique=True, help_text="Please use the standard")
+    assay_run_id = models.TextField(unique=True, help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering runs sequentially")
     name = models.TextField(unique=True)
     description = models.TextField(blank=True, null=True)
     start_date = models.DateTimeField(blank=True, null=True)
