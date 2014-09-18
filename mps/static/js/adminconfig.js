@@ -37,23 +37,25 @@ var MODELS = {
         'Microdevices': [8, 'Devices', 2],
         'Organ models': [4, 'Organ models', 1]
     },
+    //Order modified
     'Assays': {
         'Assay tests': [0, 'Tests and Results', 0],
-        'Assay test results': [2, 'Test Results', 0],
-        'Assay findings': [3, 'Findings', 1],
-        'Assay finding types': [4, 'Finding Types', 2, true],
-        'Assay device readouts': [5, 'Readouts', 1],
-        'Readout units': [20, 'Readout Units', 2, true],
+        'Assay test results': [1, 'Test Results', 0],
+        'Assay findings': [2, 'Findings', 1],
+        'Assay finding types': [3, 'Finding Types', 2, true],
+        'Assay chip readouts': [4, 'Chip Readouts', 1],
+        'Assay runs': [5, 'Runs', 2],
+        'Assay device readouts': [6, 'Plate Readouts', 1],
+        'Readout units': [7, 'Readout Units', 2, true],
         'Assay models': [8, 'Assays', 2],
-        'Assay runs': [7, 'Runs', 2],
         'Assay model types': [9, 'Assay Types', 3, true],
-        'Assay layouts': [11, 'Assay Layouts', 2],
-        'Assay base layouts': [13, 'Base Layouts', 3],
-        'Assay layout formats': [15, 'Layout Formats', 4],
-        'Assay well types': [17, 'Virtual Well Types', 3, true],
-        'Assay readers': [19, 'Reader Devices', 2],
-        'Physical Units': [21, 'Units of Measurement', 0, true],
-        'Time Units' : [23, 'Units of Time', 0, true]
+        'Assay layouts': [10, 'Assay Layouts', 2],
+        'Assay base layouts': [11, 'Base Layouts', 3],
+        'Assay layout formats': [12, 'Layout Formats', 4],
+        'Assay well types': [13, 'Virtual Well Types', 3, true],
+        'Assay readers': [14, 'Reader Devices', 2],
+        'Physical Units': [15, 'Units of Measurement', 0, true],
+        'Time Units' : [16, 'Units of Time', 0, true]
     },
     'Compounds': {
         'Compounds': [1, 'Compounds/Drugs', 0]
