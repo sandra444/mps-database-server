@@ -544,6 +544,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 
     #Acquires first unused ID
     def get_next_id(self):
+
         from django.db import connection
         cursor = connection.cursor()
         cursor.execute( "select nextval('%s_id_seq')" % \
@@ -578,6 +579,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
 def removeExistingChip(currentChipReadout):
+
     readouts = AssayChipRawData.objects.filter(
         assay_chip_id_id=currentChipReadout.id)
 
@@ -587,6 +589,7 @@ def removeExistingChip(currentChipReadout):
     return
 
 def parseChipCSV(currentChipReadout, file):
+
     removeExistingChip(currentChipReadout)
 
     datareader = csv.reader(file, delimiter=',')
@@ -615,6 +618,10 @@ def parseChipCSV(currentChipReadout, file):
 
 #Uses AssayChipRawData
 class AssayChipReadoutAdmin(LockableAdmin):
+
+    class Media(object):
+        js = ('assays/customize_chip.js',)
+        css = {'all': ('assays/customize_admin.css',)}
 
     save_on_top = True
 
