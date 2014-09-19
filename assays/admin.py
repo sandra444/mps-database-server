@@ -757,6 +757,9 @@ class AssayResultInline(admin.TabularInline):
 
 class AssayTestAdmin(LockableAdmin):
 
+    class Media(object):
+        js = ('assays/inline_fix.js',)
+
     resource_class = AssayTestResource
 
     save_as = True
