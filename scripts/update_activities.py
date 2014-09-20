@@ -8,7 +8,7 @@ from compounds.models import Compound, chembl_compound
 from bioactivities.models import Assay, Target, Bioactivity
 from bioactivities.models import chembl_target, chembl_assay
 
-from bioservices import ChEMBLdb
+from bioservices import ChEMBL as ChEMBLdb
 from bioservices.services import BioServicesError
 
 FIELDS = {
