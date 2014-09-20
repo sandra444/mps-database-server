@@ -23,7 +23,7 @@ FIELDS = {
 def chembl_target(chemblid):
     global CHEMBL
     if CHEMBL is None:
-        from bioservices import ChEMBLdb
+        from bioservices import ChEMBL as ChEMBLdb
 
         CHEMBL = ChEMBLdb()
 
@@ -36,7 +36,7 @@ def chembl_target(chemblid):
 def chembl_assay(chemblid):
     global CHEMBL
     if CHEMBL is None:
-        from bioservices import ChEMBLdb
+        from bioservices import ChEMBL as ChEMBLdb
 
         CHEMBL = ChEMBLdb()
 

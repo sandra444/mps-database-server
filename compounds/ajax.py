@@ -6,7 +6,7 @@ from django.template import RequestContext
 import json
 from .models import *
 
-from bioservices import ChEMBLdb
+from bioservices import ChEMBL as ChEMBLdb
 
 from bioactivities.models import Assay, Target
 

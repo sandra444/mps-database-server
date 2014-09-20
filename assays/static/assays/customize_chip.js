@@ -1,14 +1,4 @@
 $(document).ready(function () {
-    $('<div id="csv_table" align="center" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body').html("<table class='layout-table' style='width: 99%;'><tbody><tr><th>Time</th><th>Field</th><th>Raw Data</th></tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr></tbody></table>");
-    $("#csv_table").insertBefore($(".module")[3]);
-    
-    $('#id_file').change(function(evt) {
-        console.log("A change has been registered");
-        console.log($('#id_file')[0].files[0]);
-        
-        var file = $('#id_file')[0].files[0];
-        getText(file);
-    });
     
     var getText = function (readFile) {
         var reader = new FileReader();
@@ -32,7 +22,7 @@ $(document).ready(function () {
         
         all = null;
         
-        table = "<table class='layout-table' style='width: 99%;'><tbody>";
+        table = "<table class='layout-table' style='width: 99.5%;'><tbody>";
         
         for (i in lines) {
             console.log(lines[i]);
@@ -47,6 +37,23 @@ $(document).ready(function () {
         console.log(table);
         
         $('#csv_table').html(table);
-    }   
+    }  
     
+    if ($('#assaychipreadout_form')[0] != undefined) {
+        $('<div id="csv_table" align="center" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body').html("<table class='layout-table' style='width: 99%;'><tbody><tr><th>Time</th><th>Field</th><th>Raw Data</th></tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr></tbody></table>");
+        $("#csv_table").insertBefore($(".module")[3]);
+    }
+    
+    if ($('.file-upload').find($('a')).attr('href') != undefined) {
+        $.get($('.file-upload').find($('a')).attr('href'), function(data) { parseAndReplace(data); });
+    }
+    
+    $('#id_file').change(function(evt) {
+        console.log("A change has been registered");
+        console.log($('#id_file')[0].files[0]);
+        
+        var file = $('#id_file')[0].files[0];
+        getText(file);
+    });
+
 });

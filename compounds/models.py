@@ -6,7 +6,7 @@ CHEMBL = None
 
 def get_chembl_handle():
 
-    from bioservices import ChEMBLdb
+    from bioservices import ChEMBL as ChEMBLdb
     global CHEMBL
     if CHEMBL is None:
         CHEMBL = ChEMBLdb()
