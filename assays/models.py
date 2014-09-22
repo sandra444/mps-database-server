@@ -469,7 +469,7 @@ class AssayChipReadout(LockableModel):
     notes = models.CharField(max_length=2048, blank=True, null=True)
     scientist = models.CharField(max_length=100, blank=True, null=True)
     file = models.FileField(upload_to='csv', verbose_name='Data File',
-                            blank=True, null=True)
+                            blank=True, null=True, help_text='Note: First line treated as header')
 
     def assay_chip_name(self):
         return u'{0}'.format(self.assay_chip_id)
