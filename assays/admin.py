@@ -1037,6 +1037,64 @@ class AssayTestResultAdmin(LockableAdmin):
 
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
+class AssayPlateTestResultAdmin(LockableAdmin):
+    save_as = True
+    save_on_top = True
+    list_per_page = 300
+    list_display = (
+        'assay_device_id', 'compound', 'assay_finding_name',
+            'assay_test_time','time_units','result','severity','value','value_units'
+    )
+    search_fields = ['assay_device_id']
+    actions = ['update_fields']
+    raw_id_fields = ('compound',)
+    readonly_fields = ['created_by', 'created_on',
+                       'modified_by', 'modified_on', 'compound_display']
+
+    def compound_display(self, obj):
+
+        if obj.compound.chemblid:
+            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
+                   'displayimage/' + obj.compound.chemblid)
+            return '<img src="%s">' % \
+                url
+        else:
+            return u''
+
+    compound_display.allow_tags = True
+    compound_display.short_description = 'Structure'
+
+    fieldsets = (
+        (
+            'Device/Drug Parameters', {
+                'fields': (
+                    ('assay_device_id',),
+                    ('compound', 'compound_display'),
+                ),
+            }
+        ),
+        (
+            'Assay Test Parameters', {
+                'fields': (
+                    ('assay_finding_name', 'assay_test_time','time_units','result','severity','value','value_units'),
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+    actions = ['update_fields']
+
+
+admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
 class AssayRunAdmin(LockableAdmin):
     form = AssayRunForm
