@@ -8,7 +8,6 @@ $(document).ready(function () {
     
     var loaded = function (evt) {
         var fileString = evt.target.result;
-        console.log(fileString);
         parseAndReplace(fileString);
     }
     
@@ -25,7 +24,6 @@ $(document).ready(function () {
         table = "<table class='layout-table' style='width: 99.5%;'><tbody>";
         
         for (i in lines) {
-            console.log(lines[i]);
             table += "<tr>";
             table += "<th><br>" + lines[i][0] + "<br></th>";
             table += "<th><br>" + lines[i][1] + "<br></th>";
@@ -34,8 +32,6 @@ $(document).ready(function () {
         }
         
         table += "</tbody></table>";
-        console.log(table);
-        
         $('#csv_table').html(table);
     }  
     
@@ -49,9 +45,6 @@ $(document).ready(function () {
     }
     
     $('#id_file').change(function(evt) {
-        console.log("A change has been registered");
-        console.log($('#id_file')[0].files[0]);
-        
         var file = $('#id_file')[0].files[0];
         getText(file);
     });
