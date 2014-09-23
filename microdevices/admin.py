@@ -180,6 +180,7 @@ class OrganModelAdmin(LockableAdmin):
     readonly_fields = ['created_by', 'created_on',
                        'modified_by', 'modified_on']
 
+    #Deal with readonly when modifying vs. adding
     def get_readonly_fields(self, request, obj=None):
         if obj: # editing an existing object
             return self.readonly_fields + ['organ']
