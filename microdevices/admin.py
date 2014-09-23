@@ -188,7 +188,7 @@ class OrganModelAdmin(LockableAdmin):
                         'model_name', 'center',
                     ),
                     (
-                        'organ_name', 'device', 'description',
+                        'organ', 'device', 'description',
                     ),
                     (
                         'cell_type',
