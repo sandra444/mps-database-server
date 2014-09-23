@@ -332,6 +332,7 @@ class BioactivityTypeAdmin(LockableAdmin):
     list_per_page = 300
     list_display = (
         'chembl_bioactivity',
+        'chembl_unit',
         'standard_name',
         'description',
         'standard_unit',
@@ -344,7 +345,8 @@ class BioactivityTypeAdmin(LockableAdmin):
         (
             None, {
                 'fields': (
-                    'chembl_bioactivity',
+                    ('chembl_bioactivity','chembl_unit'),
+                    ('scale_factor','mass_flag'),
                     'description',
                     ('standard_name', 'standard_unit'),
                 )
