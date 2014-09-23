@@ -178,8 +178,13 @@ class OrganModelAdmin(LockableAdmin):
     search_fields = [
         'model_name', 'organ', 'device', 'cell_types', 'center', 'description']
     readonly_fields = ['created_by', 'created_on',
-                       'modified_by', 'modified_on',
-                       'organ_name']
+                       'modified_by', 'modified_on']
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj: # editing an existing object
+            return self.readonly_fields + ['organ']
+        return self.readonly_fields
+
     fieldsets = (
         (
             None, {
