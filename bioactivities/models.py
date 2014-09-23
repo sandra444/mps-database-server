@@ -180,9 +180,13 @@ class Bioactivity(LockableModel):
 
 class BioactivityType(LockableModel):
     class Meta(object):
-        ordering = ('chembl_bioactivity', )
+        ordering = ('chembl_bioactivity','chembl_unit', )
     chembl_bioactivity = models.TextField(default='')
-    standard_name = models.TextField(default='', unique=True)
+    chembl_unit = models.TextField(default='')
+    scale_factor = models.FloatField(default=1,blank=True, null=True)
+    mass_flag = models.CharField(max_length=8,default='N',choices=(('Y', 'Yes'),
+                                                        ('N', 'No')))
+    standard_name = models.TextField(default='')
     description = models.TextField(default='')
     standard_unit = models.TextField(default='')
 
