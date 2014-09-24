@@ -211,8 +211,8 @@ class AssayTest(LockableModel):
 class AssayResult(models.Model):
     assay_test = models.ForeignKey(AssayTest)
 
-    test_name = models.ForeignKey('drugtrials.Test',
-                                  verbose_name='Test',
+    test_name = models.ForeignKey(AssayModel,
+                                  verbose_name='Assay',
                                   blank=True,
                                   null=True)
 
@@ -222,6 +222,19 @@ class AssayResult(models.Model):
     time_units = models.ForeignKey(TimeUnits,
                                    blank=True,
                                    null=True)
+    result = models.CharField(default='1',
+                              max_length=8,
+                              choices=POSNEG,
+                              verbose_name='Pos/Neg?')
+
+    severity = models.CharField(default='-1',
+                                max_length=5,
+                                choices=SEVERITY_SCORE,
+                                verbose_name='Severity',
+                                blank=True,
+                                null=True)
+
+    result_type = models.ForeignKey(AssayFindingType)
 
     value = models.FloatField(blank=True, null=True)
 
@@ -335,21 +348,22 @@ class AssayFinding(LockableModel):
 
 
 class AssayResultType(LockableModel):
+#   Result types for CHIP RESULTS
     class Meta(object):
-        ordering = ('assay_finding_type', )
+        ordering = ('assay_result_type', )
 
     assay_result_type = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=200, blank=True, null=True)
 
     def __unicode__(self):
         return self.assay_result_type
-    
+
 
 class AssayTestResult(LockableModel):
 #   Results calculated from Raw Chip Data
     class Meta(object):
         verbose_name = 'Chip Result'
-    assay_device_readout = models.ForeignKey('assays.AssayChipReadout'
+    assay_device_readout = models.ForeignKey('assays.AssayChipReadout',
                                              verbose_name='Chip Readout')
 
     compound = models.ForeignKey('compounds.Compound')
