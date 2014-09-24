@@ -208,39 +208,6 @@ class AssayTest(LockableModel):
         return u'{0}'.format(self.assay_device_id)
 
 
-class AssayResult(models.Model):
-    assay_test = models.ForeignKey(AssayTest)
-
-    test_name = models.ForeignKey(AssayModel,
-                                  verbose_name='Assay',
-                                  blank=True,
-                                  null=True)
-
-    test_time = models.FloatField(verbose_name='Time',
-                                  blank=True, null=True)
-
-    time_units = models.ForeignKey(TimeUnits,
-                                   blank=True,
-                                   null=True)
-    result = models.CharField(default='1',
-                              max_length=8,
-                              choices=POSNEG,
-                              verbose_name='Pos/Neg?')
-
-    severity = models.CharField(default='-1',
-                                max_length=5,
-                                choices=SEVERITY_SCORE,
-                                verbose_name='Severity',
-                                blank=True,
-                                null=True)
-
-    result_type = models.ForeignKey(AssayFindingType)
-
-    value = models.FloatField(blank=True, null=True)
-
-    test_unit = models.ForeignKey(PhysicalUnits,
-                                  blank=True,
-                                  null=True)
 
 class ReadoutUnit(LockableModel):
     class Meta(object):
@@ -313,6 +280,7 @@ class AssayReader(LockableModel):
     def __unicode__(self):
         return u'{0} - {1}'.format(self.reader_name, self.reader_type)
 
+
 SEVERITY_SCORE = (
     ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
     ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
@@ -357,6 +325,41 @@ class AssayResultType(LockableModel):
 
     def __unicode__(self):
         return self.assay_result_type
+
+
+class AssayResult(models.Model):
+    assay_test = models.ForeignKey(AssayTest)
+
+    test_name = models.ForeignKey(AssayModel,
+                                  verbose_name='Assay',
+                                  blank=True,
+                                  null=True)
+
+    test_time = models.FloatField(verbose_name='Time',
+                                  blank=True, null=True)
+
+    time_units = models.ForeignKey(TimeUnits,
+                                   blank=True,
+                                   null=True)
+    result = models.CharField(default='1',
+                              max_length=8,
+                              choices=POSNEG,
+                              verbose_name='Pos/Neg?')
+
+    severity = models.CharField(default='-1',
+                                max_length=5,
+                                choices=SEVERITY_SCORE,
+                                verbose_name='Severity',
+                                blank=True,
+                                null=True)
+
+    result_type = models.ForeignKey(AssayFindingType)
+
+    value = models.FloatField(blank=True, null=True)
+
+    test_unit = models.ForeignKey(PhysicalUnits,
+                                  blank=True,
+                                  null=True)
 
 
 class AssayTestResult(LockableModel):
