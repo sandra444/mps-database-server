@@ -328,6 +328,7 @@ class AssayResultType(LockableModel):
 
 
 class AssayResult(models.Model):
+#   Individual reault parameters for CHIP RESULTS used in inline
     assay_test = models.ForeignKey(AssayTest)
 
     test_name = models.ForeignKey('drugtrials.Test',

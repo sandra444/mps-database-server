@@ -988,12 +988,13 @@ admin.site.register(AssayFinding, AssayFindingAdmin)
 
 
 class AssayTestResultAdmin(LockableAdmin):
+#   Results calculated from RAW CHIP DATA
     save_as = True
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'assay_device_readout', 'compound', 'assay_finding_name',
-            'assay_test_time','time_units','result','severity','value','value_units'
+        'assay_device_readout', 'compound', 'assay_name',
+            'result','severity','value','value_units'
     )
     search_fields = ['assay_device_readout']
     actions = ['update_fields']
