@@ -744,6 +744,32 @@ class AssayChipReadoutAdmin(LockableAdmin):
 admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
 
 
+class AssayResultTypeAdmin(LockableAdmin):
+    list_per_page = 300
+    save_on_top = True
+    list_display = ('assay_result_type', 'description')
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'assay_result_type',
+                    'description',
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
+admin.site.register(AssayResultType, AssayResultTypeAdmin)
+
+
 class AssayResultInline(admin.TabularInline):
     model = AssayResult
     form = AssayResultForm
@@ -914,31 +940,6 @@ class ReadoutUnitAdmin(LockableAdmin):
 admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
 
-class AssayFindingTypeAdmin(LockableAdmin):
-    list_per_page = 300
-    save_on_top = True
-    list_display = ('assay_finding_type', 'description')
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    'assay_finding_type',
-                    'description',
-                )
-            }
-        ),
-        ('Change Tracking', {
-            'fields': (
-                'locked',
-                ('created_by', 'created_on'),
-                ('modified_by', 'modified_on'),
-                ('signed_off_by', 'signed_off_date'),
-            )
-        }
-        ),
-    )
-admin.site.register(AssayFindingType, AssayFindingTypeAdmin)
-
 #   **************TO BE DELETED****************************************
 class AssayFindingAdmin(LockableAdmin):
     save_on_top = True
@@ -1027,7 +1028,7 @@ class AssayTestResultAdmin(LockableAdmin):
         (
             'Assay Test Parameters', {
                 'fields': (
-                    ('assay_finding_name', 'assay_test_time','time_units','result','severity','value','value_units'),
+                    ('assay_name', 'result','severity','value','value_units'),
                 )
             }
         ),
@@ -1042,7 +1043,7 @@ class AssayTestResultAdmin(LockableAdmin):
             }
         ),
     )
-    inlines = [AssayResultInline]
+#    inlines = [AssayResultInline]
     actions = ['update_fields']
 
 

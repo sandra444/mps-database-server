@@ -219,6 +219,7 @@ class ReadoutUnit(LockableModel):
 
 class AssayDeviceReadout(LockableModel):
     class Meta(object):
+        verbose_name = 'Plate Readout'
         ordering = ('assay_device_id', 'assay_name',)
 
     # the unique readout identifier
@@ -318,6 +319,7 @@ class AssayFinding(LockableModel):
 class AssayResultType(LockableModel):
 #   Result types for CHIP RESULTS
     class Meta(object):
+        verbose_name = 'Result type'
         ordering = ('assay_result_type', )
 
     assay_result_type = models.CharField(max_length=100, unique=True)
@@ -368,7 +370,7 @@ class AssayResult(models.Model):
 class AssayTestResult(LockableModel):
 #   Results calculated from Raw Chip Data
     class Meta(object):
-        verbose_name = 'Chip Results'
+        verbose_name = 'Chip Result'
     assay_device_readout = models.ForeignKey('assays.AssayChipReadout',
                                              verbose_name='Chip Readout')
 
@@ -453,6 +455,7 @@ class AssayChipRawData(models.Model):
 
 class AssayChipReadout(LockableModel):
     class Meta(object):
+        verbose_name = 'Chip Readout'
         ordering = ('assay_chip_id', 'assay_name',)
 
     #Control => control, Compound => compound; Abbreviate? Capitalize?

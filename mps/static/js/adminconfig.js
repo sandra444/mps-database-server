@@ -40,6 +40,7 @@ var MODELS = {
     //Order modified
     'Assays': {
         'Chip Results': [2, 'Chip Results', 0],
+        'Result types': [4, 'Result Types', 1, true],
         'Chip Readouts': [8, 'Chip Readouts', 1],
         'Assay runs': [10, 'Runs', 2],
         'Assay plate test results' : [11, 'Plate Results', 0],
@@ -56,7 +57,7 @@ var MODELS = {
         'Time Units' : [40, 'Time Units', 0, true],
         'Assay tests': [42, 'Tests and Results', 0, true],
         'Assay findings': [44, 'Findings', 0, true],
-        'Result types': [4, 'Result Types', 1, true],
+        'Assay finding types': [45, 'Finding type', 0, true]
     },
     'Compounds': {
         'Compounds': [1, 'Compounds/Drugs', 0]
