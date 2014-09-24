@@ -39,14 +39,11 @@ var MODELS = {
     },
     //Order modified
     'Assays': {
-        'Assay tests': [42, 'Tests and Results', 0, true],
-        'Assay test results': [2, 'Test Results', 0],
-        'Assay findings': [44, 'Findings', 0, true],
-        'Assay finding types': [45, 'Finding Types', 1, true],
-        'Assay chip readouts': [8, 'Chip Readouts', 1],
+        'Chip Results': [2, 'Chip Results', 0],
+        'Chip Readouts': [8, 'Chip Readouts', 1],
         'Assay runs': [10, 'Runs', 2],
-        'Assay device readouts': [12, 'Plate Readouts', 1],
-        'Readout units': [36, 'Readout Units', 0, true],
+        'Assay plate test results' : [11, 'Plate Results', 0],
+        'Plate Readouts': [12, 'Plate Readouts', 1],
         'Assay models': [16, 'Assays', 2],
         'Assay model types': [18, 'Assay Types', 3, true],
         'Assay layouts': [22, 'Assay Layouts', 2],
@@ -54,8 +51,12 @@ var MODELS = {
         'Assay layout formats': [26, 'Layout Formats', 4],
         'Assay well types': [30, 'Virtual Well Types', 4, true],
         'Assay readers': [32, 'Reader Devices', 2],
+        'Readout units': [36, 'Readout Units', 0, true],
         'Physical Units': [38, 'Measurement Units', 0, true],
-        'Time Units' : [40, 'Time Units', 0, true]
+        'Time Units' : [40, 'Time Units', 0, true],
+        'Assay tests': [42, 'Tests and Results', 0, true],
+        'Assay findings': [44, 'Findings', 0, true],
+        'Result types': [4, 'Result Types', 1, true],
     },
     'Compounds': {
         'Compounds': [1, 'Compounds/Drugs', 0]

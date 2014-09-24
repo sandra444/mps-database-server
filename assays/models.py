@@ -184,6 +184,7 @@ class AssayReadout(models.Model):
     elapsed_time = models.FloatField(default=0)
 
 
+#   **************TO BE DELETED****************************************
 class AssayTest(LockableModel):
     """
 
@@ -207,7 +208,7 @@ class AssayTest(LockableModel):
     def __unicode__(self):
         return u'{0}'.format(self.assay_device_id)
 
-
+#   **************TO BE DELETED****************************************
 class AssayResult(models.Model):
     assay_test = models.ForeignKey(AssayTest)
 
@@ -238,8 +239,10 @@ class ReadoutUnit(LockableModel):
         return self.readout_unit
 
 class AssayDeviceReadout(LockableModel):
+    # Endpoint readouts from microplates
     class Meta(object):
         ordering = ('assay_device_id', 'assay_name',)
+        verbose_name = 'Plate Readout'
 
     # the unique readout identifier
     # can be a barcode or a hand written identifier
@@ -310,18 +313,19 @@ POSNEG = (
     ('0', 'Neg'), ('1', 'Pos')
 )
 
-
 class AssayFindingType(LockableModel):
     class Meta(object):
         ordering = ('assay_finding_type', )
+        verbose_name = 'Result type'
 
-    assay_finding_type = models.CharField(max_length=100, unique=True)
+    assay_finding_type = models.CharField(max_length=100, unique=True,
+                                          verbose_name = 'Measure')
     description = models.CharField(max_length=200, blank=True, null=True)
 
     def __unicode__(self):
         return self.assay_finding_type
 
-
+#   *****************TO BE DELETED*************************************
 class AssayFinding(LockableModel):
     class Meta(object):
         ordering = ('assay_finding_type', 'assay_finding_name', )
@@ -334,16 +338,22 @@ class AssayFinding(LockableModel):
         return u'{} :: {}'.format(self.assay_finding_type, self.assay_finding_name)
 
 
+#   Results calculated from Raw Chip Data
 class AssayTestResult(LockableModel):
+    class Meta(object):
+        verbose_name = 'Chip Result'
 
-    assay_device_readout = models.ForeignKey('assays.AssayChipReadout')
+    assay_device_readout = models.ForeignKey('assays.AssayChipReadout',
+                                             verbose_name='Chip Readout')
     compound = models.ForeignKey('compounds.Compound')
 
-    assay_finding_name = models.ForeignKey(AssayFinding,
-                                     verbose_name='Assay Test')
 
+    assay_finding_name = models.ForeignKey(AssayModel,
+                                           verbose_name='Assay',
+                                           null=True)
+    # *************TO BE DELETED*****************************************
     assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
-
+    # *************TO BE DELETED*****************************************
     time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
 
     result = models.CharField(default='1',
@@ -358,16 +368,19 @@ class AssayTestResult(LockableModel):
                                 blank=True,
                                 null=True)
 
+    result_type = models.ForeignKey(AssayFindingType)
+
     value = models.FloatField(blank=True, null=True)
 
     value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
 
     def __unicode__(self):
         return u''
-      
-class AssayPlateTestResult(LockableModel):
 
-    assay_device_id = models.ForeignKey('assays.AssayDeviceReadout')
+class AssayPlateTestResult(LockableModel):
+    # This is for fixed end point readouts from plates
+
+    assay_device_id = models.ForeignKey('assays.AssayDeviceReadout',verbose_name='Plate Readout')
     compound = models.ForeignKey('compounds.Compound', blank=True, null=True)
 
     assay_finding_name = models.ForeignKey(AssayFinding,
@@ -417,7 +430,9 @@ class AssayChipRawData(models.Model):
     elapsed_time = models.FloatField(default=0)
 
 class AssayChipReadout(LockableModel):
+    # This is the raw kinetic data collected from an organ model
     class Meta(object):
+        verbose_name = 'Chip Readout'
         ordering = ('assay_chip_id', 'assay_name',)
 
     #Control => control, Compound => compound; Abbreviate? Capitalize?
@@ -446,6 +461,7 @@ class AssayChipReadout(LockableModel):
                                                max_length=8,
                                                default="ML",
                                                choices=(('WE', 'cells / well'),
+                                                        ('CP', 'cells / chip'),
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
