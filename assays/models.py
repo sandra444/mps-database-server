@@ -338,12 +338,6 @@ class AssayResult(models.Model):
                                   blank=True,
                                   null=True)
 
-    test_time = models.FloatField(verbose_name='Time',
-                                  blank=True, null=True)
-
-    time_units = models.ForeignKey(TimeUnits,
-                                   blank=True,
-                                   null=True)
     result = models.CharField(default='1',
                               max_length=8,
                               choices=POSNEG,
