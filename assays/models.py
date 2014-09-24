@@ -329,38 +329,6 @@ class AssayResultType(LockableModel):
         return self.assay_result_type
 
 
-class AssayResult(models.Model):
-#   Individual reault parameters for CHIP RESULTS used in inline
-    assay_test = models.ForeignKey(AssayTest)
-
-    test_name = models.ForeignKey('drugtrials.Test',
-                                  verbose_name='Assay',
-                                  blank=True,
-                                  null=True)
-
-    result = models.CharField(default='1',
-                              max_length=8,
-                              choices=POSNEG,
-                              verbose_name='Pos/Neg?')
-
-    severity = models.CharField(default='-1',
-                                max_length=5,
-                                choices=SEVERITY_SCORE,
-                                verbose_name='Severity',
-                                blank=True,
-                                null=True)
-
-    result_type = models.ForeignKey(AssayResultType,
-                                    blank=True,
-                                    null=True)
-
-    value = models.FloatField(blank=True, null=True)
-
-    test_unit = models.ForeignKey(PhysicalUnits,
-                                  blank=True,
-                                  null=True)
-
-
 class AssayTestResult(LockableModel):
 #   Results calculated from Raw Chip Data
     class Meta(object):
@@ -396,8 +364,41 @@ class AssayTestResult(LockableModel):
     def __unicode__(self):
         return u''
 
-class AssayPlateTestResult(LockableModel):
 
+class AssayResult(models.Model):
+#   Individual reault parameters for CHIP RESULTS used in inline
+    assay_result = models.ForeignKey(AssayTestResult)
+
+    test_name = models.ForeignKey(AssayModel,
+                                  verbose_name='Assay',
+                                  blank=True,
+                                  null=True)
+
+    result = models.CharField(default='1',
+                              max_length=8,
+                              choices=POSNEG,
+                              verbose_name='Pos/Neg?')
+
+    severity = models.CharField(default='-1',
+                                max_length=5,
+                                choices=SEVERITY_SCORE,
+                                verbose_name='Severity',
+                                blank=True,
+                                null=True)
+
+    result_type = models.ForeignKey(AssayResultType,
+                                    blank=True,
+                                    null=True)
+
+    value = models.FloatField(blank=True, null=True)
+
+    test_unit = models.ForeignKey(PhysicalUnits,
+                                  blank=True,
+                                  null=True)
+
+
+class AssayPlateTestResult(LockableModel):
+#   Test Results from MICROPLATES
     assay_device_id = models.ForeignKey('assays.AssayDeviceReadout')
     compound = models.ForeignKey('compounds.Compound', blank=True, null=True)
 
