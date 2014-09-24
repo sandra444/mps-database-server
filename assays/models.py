@@ -338,7 +338,9 @@ class AssayTestResult(LockableModel):
 #   Results calculated from Raw Chip Data
     class Meta(object):
         verbose_name = 'Chip Result'
-    assay_device_readout = models.ForeignKey('assays.AssayChipReadout')
+    assay_device_readout = models.ForeignKey('assays.AssayChipReadout'
+                                             verbose_name='Chip Readout')
+
     compound = models.ForeignKey('compounds.Compound')
 
     assay_finding_name = models.ForeignKey(AssayFinding,
