@@ -465,7 +465,7 @@ def parseReadoutCSV(currentAssayReadout, file):
 
 
 class AssayDeviceReadoutAdmin(LockableAdmin):
-
+    # Endpoint readouts from MICROPLATES
     resource_class = AssayDeviceReadoutResource
 
     class Media(object):
@@ -616,9 +616,8 @@ def parseChipCSV(currentChipReadout, file):
         ).save()
     return
 
-#Uses AssayChipRawData
 class AssayChipReadoutAdmin(LockableAdmin):
-
+    # TIMEPOINT readouts from ORGAN CHIPS
     class Media(object):
         js = ('assays/customize_chip.js',)
         css = {'all': ('assays/customize_admin.css',)}
@@ -748,12 +747,12 @@ admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
 class AssayResultInline(admin.TabularInline):
     model = AssayResult
     form = AssayResultForm
-    verbose_name = 'Assay/Drug Trial Test'
-    verbose_name_plural = 'Assay/Drug Trial Test Results'
+    verbose_name = 'Assay Test'
+    verbose_name_plural = 'Assay Test Results'
     fields = (
         (
-            'test_name', 'test_time', 'time_units',
-            'value', 'test_unit',
+            'test_name', 'result', 'severity',
+            'result_type', 'value', 'test_unit',
         ),
     )
     extra = 0
@@ -761,7 +760,7 @@ class AssayResultInline(admin.TabularInline):
     class Media(object):
         css = {"all": ("css/hide_admin_original.css",)}
 
-
+#   **************TO BE DELETED****************************************
 class AssayTestAdmin(LockableAdmin):
 
     class Media(object):
@@ -940,7 +939,7 @@ class AssayFindingTypeAdmin(LockableAdmin):
     )
 admin.site.register(AssayFindingType, AssayFindingTypeAdmin)
 
-
+#   **************TO BE DELETED****************************************
 class AssayFindingAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
@@ -1042,6 +1041,7 @@ class AssayTestResultAdmin(LockableAdmin):
             }
         ),
     )
+    inlines = [AssayResultInline]
     actions = ['update_fields']
 
 
