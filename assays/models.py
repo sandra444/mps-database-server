@@ -353,7 +353,7 @@ class AssayResult(models.Model):
                                 blank=True,
                                 null=True)
 
-    result_type = models.ForeignKey(AssayFindingType)
+    result_type = models.ForeignKey(AssayResultType)
 
     value = models.FloatField(blank=True, null=True)
 
@@ -371,8 +371,8 @@ class AssayTestResult(LockableModel):
 
     compound = models.ForeignKey('compounds.Compound')
 
-    assay_finding_name = models.ForeignKey(AssayFinding,
-                                     verbose_name='Assay Test')
+    assay_finding_name = models.ForeignKey(AssayModel,
+                                     verbose_name='Assay')
 #   **************TO BE DELETED****************************************
     assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
 #   **************TO BE DELETED****************************************
