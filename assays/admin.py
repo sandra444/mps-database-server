@@ -1026,13 +1026,6 @@ class AssayTestResultAdmin(LockableAdmin):
             }
         ),
         (
-            'Assay Test Parameters', {
-                'fields': (
-                    ('assay_name', 'result','severity','value','value_units'),
-                )
-            }
-        ),
-        (
             'Change Tracking', {
                 'fields': (
                     'locked',
@@ -1043,8 +1036,8 @@ class AssayTestResultAdmin(LockableAdmin):
             }
         ),
     )
-#    inlines = [AssayResultInline]
     actions = ['update_fields']
+    inlines = [AssayResultInline]
 
 
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
