@@ -310,7 +310,7 @@ POSNEG = (
     ('0', 'Neg'), ('1', 'Pos')
 )
 
-
+#   **************TO BE DELETED****************************************
 class AssayFindingType(LockableModel):
     class Meta(object):
         ordering = ('assay_finding_type', )
@@ -333,6 +333,17 @@ class AssayFinding(LockableModel):
     def __unicode__(self):
         return u'{} :: {}'.format(self.assay_finding_type, self.assay_finding_name)
 
+
+class AssayResultType(LockableModel):
+    class Meta(object):
+        ordering = ('assay_finding_type', )
+
+    assay_result_type = models.CharField(max_length=100, unique=True)
+    description = models.CharField(max_length=200, blank=True, null=True)
+
+    def __unicode__(self):
+        return self.assay_result_type
+    
 
 class AssayTestResult(LockableModel):
 #   Results calculated from Raw Chip Data
