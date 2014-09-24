@@ -336,8 +336,39 @@ class AssayFinding(LockableModel):
 
 class AssayTestResult(LockableModel):
 
-    assay_device_readout = models.ForeignKey('assays.AssayDeviceReadout')
+    assay_device_readout = models.ForeignKey('assays.AssayChipReadout')
     compound = models.ForeignKey('compounds.Compound')
+
+    assay_finding_name = models.ForeignKey(AssayFinding,
+                                     verbose_name='Assay Test')
+
+    assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
+
+    time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
+
+    result = models.CharField(default='1',
+                              max_length=8,
+                              choices=POSNEG,
+                              verbose_name='Pos/Neg?')
+
+    severity = models.CharField(default='-1',
+                                max_length=5,
+                                choices=SEVERITY_SCORE,
+                                verbose_name='Severity',
+                                blank=True,
+                                null=True)
+
+    value = models.FloatField(blank=True, null=True)
+
+    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
+
+    def __unicode__(self):
+        return u''
+      
+class AssayPlateTestResult(LockableModel):
+
+    assay_device_id = models.ForeignKey('assays.AssayDeviceReadout')
+    compound = models.ForeignKey('compounds.Compound', blank=True, null=True)
 
     assay_finding_name = models.ForeignKey(AssayFinding,
                                      verbose_name='Assay Test')
@@ -438,7 +469,7 @@ class AssayChipReadout(LockableModel):
     notes = models.CharField(max_length=2048, blank=True, null=True)
     scientist = models.CharField(max_length=100, blank=True, null=True)
     file = models.FileField(upload_to='csv', verbose_name='Data File',
-                            blank=True, null=True)
+                            blank=True, null=True, help_text='Note: First line treated as header')
 
     def assay_chip_name(self):
         return u'{0}'.format(self.assay_chip_id)

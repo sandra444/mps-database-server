@@ -544,6 +544,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 
     #Acquires first unused ID
     def get_next_id(self):
+
         from django.db import connection
         cursor = connection.cursor()
         cursor.execute( "select nextval('%s_id_seq')" % \
@@ -578,6 +579,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
 def removeExistingChip(currentChipReadout):
+
     readouts = AssayChipRawData.objects.filter(
         assay_chip_id_id=currentChipReadout.id)
 
@@ -587,6 +589,7 @@ def removeExistingChip(currentChipReadout):
     return
 
 def parseChipCSV(currentChipReadout, file):
+
     removeExistingChip(currentChipReadout)
 
     datareader = csv.reader(file, delimiter=',')
@@ -615,6 +618,10 @@ def parseChipCSV(currentChipReadout, file):
 
 #Uses AssayChipRawData
 class AssayChipReadoutAdmin(LockableAdmin):
+
+    class Media(object):
+        js = ('assays/customize_chip.js',)
+        css = {'all': ('assays/customize_admin.css',)}
 
     save_on_top = True
 
@@ -756,6 +763,9 @@ class AssayResultInline(admin.TabularInline):
 
 
 class AssayTestAdmin(LockableAdmin):
+
+    class Media(object):
+        js = ('assays/inline_fix.js',)
 
     resource_class = AssayTestResource
 
@@ -1037,6 +1047,64 @@ class AssayTestResultAdmin(LockableAdmin):
 
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
+class AssayPlateTestResultAdmin(LockableAdmin):
+    save_as = True
+    save_on_top = True
+    list_per_page = 300
+    list_display = (
+        'assay_device_id', 'compound', 'assay_finding_name',
+            'assay_test_time','time_units','result','severity','value','value_units'
+    )
+    search_fields = ['assay_device_id']
+    actions = ['update_fields']
+    raw_id_fields = ('compound',)
+    readonly_fields = ['created_by', 'created_on',
+                       'modified_by', 'modified_on', 'compound_display']
+
+    def compound_display(self, obj):
+
+        if obj.compound.chemblid:
+            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
+                   'displayimage/' + obj.compound.chemblid)
+            return '<img src="%s">' % \
+                url
+        else:
+            return u''
+
+    compound_display.allow_tags = True
+    compound_display.short_description = 'Structure'
+
+    fieldsets = (
+        (
+            'Device/Drug Parameters', {
+                'fields': (
+                    ('assay_device_id',),
+                    ('compound', 'compound_display'),
+                ),
+            }
+        ),
+        (
+            'Assay Test Parameters', {
+                'fields': (
+                    ('assay_finding_name', 'assay_test_time','time_units','result','severity','value','value_units'),
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+    actions = ['update_fields']
+
+
+admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
 class AssayRunAdmin(LockableAdmin):
     form = AssayRunForm
