@@ -183,7 +183,7 @@ class AssayReadout(models.Model):
     value = models.FloatField()
     elapsed_time = models.FloatField(default=0)
 
-
+#   **************TO BE DELETED****************************************
 class AssayTest(LockableModel):
     """
 
@@ -321,7 +321,7 @@ class AssayFindingType(LockableModel):
     def __unicode__(self):
         return self.assay_finding_type
 
-
+#   **************TO BE DELETED****************************************
 class AssayFinding(LockableModel):
     class Meta(object):
         ordering = ('assay_finding_type', 'assay_finding_name', )
@@ -345,9 +345,9 @@ class AssayTestResult(LockableModel):
 
     assay_finding_name = models.ForeignKey(AssayFinding,
                                      verbose_name='Assay Test')
-
+#   **************TO BE DELETED****************************************
     assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
-
+#   **************TO BE DELETED****************************************
     time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
 
     result = models.CharField(default='1',
