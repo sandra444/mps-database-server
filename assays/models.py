@@ -292,7 +292,7 @@ POSNEG = (
     ('0', 'Neg'), ('1', 'Pos')
 )
 
-#   **************TO BE DELETED****************************************
+# #   **************TO BE DELETED****************************************
 class AssayFindingType(LockableModel):
     class Meta(object):
         ordering = ('assay_finding_type', )
@@ -303,7 +303,7 @@ class AssayFindingType(LockableModel):
     def __unicode__(self):
         return self.assay_finding_type
 
-#   **************TO BE DELETED****************************************
+# #   **************TO BE DELETED****************************************
 class AssayFinding(LockableModel):
     class Meta(object):
         ordering = ('assay_finding_type', 'assay_finding_name', )
@@ -412,7 +412,7 @@ class AssayPlateTestResult(LockableModel):
     assay_device_id = models.ForeignKey('assays.AssayDeviceReadout')
     compound = models.ForeignKey('compounds.Compound', blank=True, null=True)
 
-    assay_finding_name = models.ForeignKey(AssayFinding,
+    assay_finding_name = models.ForeignKey(AssayModel,
                                      verbose_name='Assay Test')
 
     assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)

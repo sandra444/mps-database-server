@@ -965,7 +965,7 @@ class ReadoutUnitAdmin(LockableAdmin):
 admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
 
-#   **************TO BE DELETED****************************************
+# #   **************TO BE DELETED****************************************
 class AssayFindingAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
@@ -1011,7 +1011,7 @@ class AssayFindingAdmin(LockableAdmin):
 
 
 admin.site.register(AssayFinding, AssayFindingAdmin)
-
+#
 
 class AssayTestResultAdmin(LockableAdmin):
 #   Results calculated from RAW CHIP DATA aka 'Chip Result'
@@ -1097,7 +1097,7 @@ class AssayPlateTestResultAdmin(LockableAdmin):
         (
             'Device/Drug Parameters', {
                 'fields': (
-                    ('assay_device_id',),
+                    ('assay_device_id', 'assay_finding_name', ),
                     ('compound', 'compound_display'),
                 ),
             }
@@ -1105,7 +1105,8 @@ class AssayPlateTestResultAdmin(LockableAdmin):
         (
             'Assay Test Parameters', {
                 'fields': (
-                    ('assay_finding_name', 'assay_test_time','time_units','result','severity','value','value_units'),
+                    ('result', 'assay_test_time', 'time_units', 'value',
+                     'value_units', 'severity', ),
                 )
             }
         ),
