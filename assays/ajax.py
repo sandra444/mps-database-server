@@ -194,6 +194,50 @@ def fetch_base_layout_info(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+def fetch_plate_info(request):
+    """Returns dynamic info for plate assays"""
+
+    assay_id = request.POST.get('id')
+
+    if not assay_id:
+        logger.error('assay id not present in request to fetch_assay_info')
+        return HttpResponseServerError()
+
+    assay = AssayDeviceReadout.objects.get(id=assay_id).__dict__
+
+    data = {}
+
+    data.update({
+        'compound': 1,
+        'units': 2,
+        'concentration':3
+    })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
+def fetch_chip_info(request):
+    """Returns dynamic info for assays"""
+
+    assay_id = request.POST.get('id')
+
+    if not assay_id:
+        logger.error('assay id not present in request to fetch_assay_info')
+        return HttpResponseServerError()
+
+    assay = AssayDeviceReadout.objects.get(id=assay_id).__dict__
+
+    data = {}
+
+    data.update({
+        'compound': 1,
+        'units': 2,
+        'concentration':3,
+        'chip_test_type':4
+    })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
 
 switch = {
     'fetch_assay_layout_content': fetch_assay_layout_content,
@@ -204,6 +248,8 @@ switch = {
     'fetch_baseid': fetch_baseid,
     'fetch_base_layout_wells': fetch_base_layout_wells,
     'fetch_base_layout_info': fetch_base_layout_info,
+    'fetch_plate_info': fetch_plate_info,
+    'fetch_chip_info': fetch_chip_info,
 }
 
 
