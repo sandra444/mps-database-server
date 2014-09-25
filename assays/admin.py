@@ -965,52 +965,52 @@ class ReadoutUnitAdmin(LockableAdmin):
 admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
 
-# #   **************TO BE DELETED****************************************
-class AssayFindingAdmin(LockableAdmin):
-    save_on_top = True
-    list_per_page = 300
-    list_display = ('assay_finding_name', 'assay_finding_type', 'optional_link')
-    list_display_links = ('assay_finding_name',)
-    list_filter = sorted(['assay_finding_type'])
-    search_fields = ['assay_finding_name', ]
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    'assay_finding_name',
-                    'assay_finding_type',
-                    'description',
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on'),
-                    ('modified_by', 'modified_on'),
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        ),
-    )
-    actions = ['update_fields']
-
-    def optional_link(self, obj):
-        words = obj.description.split()
-        sentence = ''
-        for thing in words:
-            if thing.startswith("http://"):
-                link = '<a href="%s" target="_blank">%s</a>' % (thing, thing)
-                sentence += (' ' + link)
-            else:
-                sentence += (' ' + thing)
-        return sentence
-    optional_link.allow_tags = True
-    optional_link.short_description = "Description"
-
-
-admin.site.register(AssayFinding, AssayFindingAdmin)
+# # #   **************TO BE DELETED****************************************
+# class AssayFindingAdmin(LockableAdmin):
+#     save_on_top = True
+#     list_per_page = 300
+#     list_display = ('assay_finding_name', 'assay_finding_type', 'optional_link')
+#     list_display_links = ('assay_finding_name',)
+#     list_filter = sorted(['assay_finding_type'])
+#     search_fields = ['assay_finding_name', ]
+#     fieldsets = (
+#         (
+#             None, {
+#                 'fields': (
+#                     'assay_finding_name',
+#                     'assay_finding_type',
+#                     'description',
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     ('created_by', 'created_on'),
+#                     ('modified_by', 'modified_on'),
+#                     ('signed_off_by', 'signed_off_date'),
+#                 )
+#             }
+#         ),
+#     )
+#     actions = ['update_fields']
+#
+#     def optional_link(self, obj):
+#         words = obj.description.split()
+#         sentence = ''
+#         for thing in words:
+#             if thing.startswith("http://"):
+#                 link = '<a href="%s" target="_blank">%s</a>' % (thing, thing)
+#                 sentence += (' ' + link)
+#             else:
+#                 sentence += (' ' + thing)
+#         return sentence
+#     optional_link.allow_tags = True
+#     optional_link.short_description = "Description"
+#
+#
+# admin.site.register(AssayFinding, AssayFindingAdmin)
 #
 
 class AssayTestResultAdmin(LockableAdmin):

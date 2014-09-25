@@ -292,29 +292,29 @@ POSNEG = (
     ('0', 'Neg'), ('1', 'Pos')
 )
 
-# #   **************TO BE DELETED****************************************
-class AssayFindingType(LockableModel):
-    class Meta(object):
-        ordering = ('assay_finding_type', )
-
-    assay_finding_type = models.CharField(max_length=100, unique=True)
-    description = models.CharField(max_length=200, blank=True, null=True)
-
-    def __unicode__(self):
-        return self.assay_finding_type
-
-# #   **************TO BE DELETED****************************************
-class AssayFinding(LockableModel):
-    class Meta(object):
-        ordering = ('assay_finding_type', 'assay_finding_name', )
-
-    assay_finding_type = models.ForeignKey(AssayFindingType, blank=True, null=True)
-    assay_finding_name = models.CharField(max_length=100)
-    description = models.CharField(max_length=400, blank=True, null=True)
-
-    def __unicode__(self):
-        return u'{} :: {}'.format(self.assay_finding_type, self.assay_finding_name)
-
+# # #   **************TO BE DELETED****************************************
+# class AssayFindingType(LockableModel):
+#     class Meta(object):
+#         ordering = ('assay_finding_type', )
+#
+#     assay_finding_type = models.CharField(max_length=100, unique=True)
+#     description = models.CharField(max_length=200, blank=True, null=True)
+#
+#     def __unicode__(self):
+#         return self.assay_finding_type
+#
+# # #   **************TO BE DELETED****************************************
+# class AssayFinding(LockableModel):
+#     class Meta(object):
+#         ordering = ('assay_finding_type', 'assay_finding_name', )
+#
+#     assay_finding_type = models.ForeignKey(AssayFindingType, blank=True, null=True)
+#     assay_finding_name = models.CharField(max_length=100)
+#     description = models.CharField(max_length=400, blank=True, null=True)
+#
+#     def __unicode__(self):
+#         return u'{} :: {}'.format(self.assay_finding_type, self.assay_finding_name)
+#
 
 class AssayResultFunction(LockableModel):
 #   Function for analysis of CHIP RESULTS
