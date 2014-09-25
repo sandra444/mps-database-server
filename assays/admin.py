@@ -904,6 +904,10 @@ class AssayTestResultAdmin(LockableAdmin):
     class Media(object):
         js = ('js/inline_fix.js',)
 
+class AssayTestResultAdmin(LockableAdmin):
+    class Media(object):
+        js = ('assays/customize_chip_results_admin.js',)
+
     save_as = True
     save_on_top = True
     list_per_page = 300
@@ -956,7 +960,9 @@ class AssayTestResultAdmin(LockableAdmin):
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
 class AssayPlateTestResultAdmin(LockableAdmin):
-#   Test Results from MICROPLATES
+    class Media(object):
+        js = ('assays/customize_plate_results_admin.js',)
+
     save_as = True
     save_on_top = True
     list_per_page = 300
