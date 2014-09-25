@@ -194,6 +194,7 @@ def fetch_base_layout_info(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+#More complex than Chip; need to find way to get compound
 def fetch_plate_info(request):
     """Returns dynamic info for plate assays"""
 
@@ -210,7 +211,7 @@ def fetch_plate_info(request):
     data.update({
         'compound': 1,
         'units': 2,
-        'concentration':3
+        'concentration':3,
     })
 
     return HttpResponse(json.dumps(data),
@@ -230,10 +231,11 @@ def fetch_chip_info(request):
     data = {}
 
     data.update({
-        'compound': 1,
-        'units': 2,
-        'concentration':3,
-        'chip_test_type':4
+        #Need actual data, not ID
+        'compound': assay.get('compound_id'),
+        'unit':  assay.get('unit_id'),
+        'concentration':assay.get('concentration'),
+        'chip_test_type':assay.get('chip_test_type'),
     })
 
     return HttpResponse(json.dumps(data),

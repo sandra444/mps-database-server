@@ -36,7 +36,7 @@ $(document).ready(function () {
     }  
     
     if ($('#assaychipreadout_form')[0] != undefined) {
-        $('<div id="csv_table" align="center" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body').html("<table class='layout-table' style='width: 99%;'><tbody><tr><th>Time</th><th>Field</th><th>Raw Data</th></tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr></tbody></table>");
+        $('<div id="csv_table" align="center" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body').html("<table class='layout-table' style='width: 99.5%;'><tbody><tr><th>Time</th><th>Field</th><th>Raw Data</th></tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr></tbody></table>");
         $("#csv_table").insertBefore($(".module")[3]);
     }
     
