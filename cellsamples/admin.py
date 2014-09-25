@@ -55,7 +55,7 @@ class CellTypeInline(admin.TabularInline):
 class OrganAdmin(LockableAdmin):
 
     class Media(object):
-        js = ('cellsamples/inline_fix.js',)
+        js = ('js/inline_fix.js',)
 
     save_as = True
     save_on_top = True
