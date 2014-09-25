@@ -662,7 +662,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
                     (
                         'assay_name',
                     ),
-		    (
+		            (
                         'compound', 'concentration',
                         'unit',
                     ),
@@ -744,6 +744,32 @@ class AssayChipReadoutAdmin(LockableAdmin):
 admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
 
 
+class AssayResultFunctionAdmin(LockableAdmin):
+    list_per_page = 30
+    save_on_top = True
+    list_display = ('function_name', 'function_results', 'description')
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    ('function_name', 'function_results',),
+                    ('description',),
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
+admin.site.register(AssayResultType, AssayResultTypeAdmin)
+
+
 class AssayResultTypeAdmin(LockableAdmin):
     list_per_page = 300
     save_on_top = True
@@ -752,8 +778,7 @@ class AssayResultTypeAdmin(LockableAdmin):
         (
             None, {
                 'fields': (
-                    'assay_result_type',
-                    'description',
+                    ('assay_result_type', 'description'),
                 )
             }
         ),
@@ -994,8 +1019,8 @@ class AssayTestResultAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'assay_device_readout', 'compound', 'assay_name',
-            'result','severity','value','value_units'
+        'compound', 'assay_name', 'assay_device_readout',
+            'result','severity'
     )
     search_fields = ['assay_device_readout']
     actions = ['update_fields']
