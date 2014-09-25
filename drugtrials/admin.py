@@ -112,7 +112,7 @@ class FindingResultInline(admin.TabularInline):
 class DrugTrialAdmin(LockableAdmin):
 
     class Media(object):
-        js = ('drugtrials/inline_fix.js',)
+        js = ('js/inline_fix.js',)
 
     resource_class = DrugTrialResource
 

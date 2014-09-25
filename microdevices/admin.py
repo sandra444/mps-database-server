@@ -169,7 +169,7 @@ class TestInline(admin.TabularInline):
 class OrganModelAdmin(LockableAdmin):
 
     class Media(object):
-        js = ('microdevices/inline_fix.js',)
+        js = ('js/inline_fix.js',)
 
     list_per_page = 300
     filter_horizontal = ('cell_type',)
@@ -179,7 +179,7 @@ class OrganModelAdmin(LockableAdmin):
         'model_name', 'organ', 'device', 'cell_types', 'center', 'description']
     readonly_fields = ['created_by', 'created_on',
                        'modified_by', 'modified_on']
-    
+
     fieldsets = (
         (
             None, {
