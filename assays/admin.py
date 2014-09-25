@@ -767,7 +767,7 @@ class AssayResultFunctionAdmin(LockableAdmin):
         }
         ),
     )
-admin.site.register(AssayResultType, AssayResultTypeAdmin)
+admin.site.register(AssayResultFunction, AssayResultFunctionAdmin)
 
 
 class AssayResultTypeAdmin(LockableAdmin):
