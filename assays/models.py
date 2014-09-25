@@ -341,9 +341,9 @@ class AssayTestResult(LockableModel):
     assay_name = models.ForeignKey(AssayModel,
                                      verbose_name='Assay')
 #   **************TO BE DELETED****************************************
-    assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
+#    assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
 #   **************TO BE DELETED****************************************
-    time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
+#    time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
 
     result = models.CharField(default='1',
                               max_length=8,
