@@ -226,7 +226,7 @@ def fetch_chip_info(request):
         logger.error('assay id not present in request to fetch_assay_info')
         return HttpResponseServerError()
 
-    assay = AssayDeviceReadout.objects.get(id=assay_id).__dict__
+    assay = AssayChipReadout.objects.get(id=assay_id).__dict__
 
     data = {}
 
