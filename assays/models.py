@@ -316,6 +316,19 @@ class AssayFinding(LockableModel):
         return u'{} :: {}'.format(self.assay_finding_type, self.assay_finding_name)
 
 
+class AssayResultFunction(LockableModel):
+#   Function for analysis of CHIP RESULTS
+    class Meta(object):
+        verbose_name = 'Function'
+        ordering = ('function_name', )
+
+    function_name = models.CharField(max_length=100, unique=True)
+    function_results = models.CharField(max_length=100, blank=True, null=True)
+    description = models.CharField(max_length=200, blank=True, null=True)
+
+    def __unicode__(self):
+        return self.function_name
+
 class AssayResultType(LockableModel):
 #   Result types for CHIP RESULTS
     class Meta(object):
