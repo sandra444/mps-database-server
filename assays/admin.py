@@ -1115,10 +1115,11 @@ class AssayRunAdmin(LockableAdmin):
         (
             'None', {
                 'fields': (
+                    'center_id',
+                    'start_date',
+                     'name',
                     'assay_run_id',
-                    'name',
-                    'description',
-                    'start_date'
+                    'description'
                 )
             }
         ),
