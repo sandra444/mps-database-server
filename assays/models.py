@@ -364,7 +364,7 @@ class AssayTestResult(LockableModel):
 
     def __unicode__(self):
         return u''
-      
+
 class AssayPlateTestResult(LockableModel):
 
     assay_device_id = models.ForeignKey('assays.AssayDeviceReadout')
@@ -402,10 +402,11 @@ class AssayRun(LockableModel):
         ordering = ('assay_run_id', )
 
     #help_text subject to change
-    assay_run_id = models.TextField(unique=True, help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering runs sequentially")
-    name = models.TextField(unique=True)
-    description = models.TextField(blank=True, null=True)
+    center_id = models.ForeignKey('microdevices.MicrophysiologyCenter')
+    name = models.TextField(default='Run001',verbose_name='Run Name')
     start_date = models.DateTimeField(blank=True, null=True)
+    assay_run_id = models.TextField(unique=True, help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering runs sequentially")
+    description = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
         return self.assay_run_id
