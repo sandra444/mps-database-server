@@ -184,29 +184,27 @@ class AssayReadout(models.Model):
     elapsed_time = models.FloatField(default=0)
 
 #   **************TO BE DELETED****************************************
-class AssayTest(LockableModel):
-    """
-
-    The AssayTest model contains both the Cell Characterization results
-    (not the raw readouts) and the MPS device results
-
-    """
-    class Meta(object):
-        ordering = ('test_date', 'microdevice', 'compound')
-
-    assay_device_id = models.CharField(max_length=512,
-                                       verbose_name='Device ID/ Barcode')
-    microdevice = models.ForeignKey('microdevices.Microdevice',
-                                    verbose_name='Model Name')
-    assay_layout = models.ForeignKey(AssayLayout)
-    reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
-    cell_sample = models.ForeignKey('cellsamples.CellSample')
-    compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
-    test_date = models.DateField(null=True, blank=True)
-
-    def __unicode__(self):
-        return u'{0}'.format(self.assay_device_id)
-
+#class AssayTest(LockableModel):
+# #    """
+#     The AssayTest model contains both the Cell Characterization results
+#     (not the raw readouts) and the MPS device results
+#
+#     """
+#     class Meta(object):
+#         ordering = ('test_date', 'microdevice', 'compound')
+#
+#     assay_device_id = models.CharField(max_length=512,
+#                                        verbose_name='Device ID/ Barcode')
+#     microdevice = models.ForeignKey('microdevices.Microdevice',
+#                                     verbose_name='Model Name')
+#     assay_layout = models.ForeignKey(AssayLayout)
+#     reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
+#     cell_sample = models.ForeignKey('cellsamples.CellSample')
+#     compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
+#     test_date = models.DateField(null=True, blank=True)
+#
+#     def __unicode__(self):
+#         return u'{0}'.format(self.assay_device_id)
 
 
 class ReadoutUnit(LockableModel):
@@ -217,7 +215,9 @@ class ReadoutUnit(LockableModel):
     def __unicode__(self):
         return self.readout_unit
 
+
 class AssayDeviceReadout(LockableModel):
+    # Readout data collected from MICROPLATES
     class Meta(object):
         verbose_name = 'Plate Readout'
         ordering = ('assay_device_id', 'assay_name',)

@@ -812,72 +812,72 @@ class AssayResultInline(admin.TabularInline):
         css = {"all": ("css/hide_admin_original.css",)}
 
 #   **************TO BE DELETED****************************************
-class AssayTestAdmin(LockableAdmin):
-
-    class Media(object):
-        js = ('assays/inline_fix.js',)
-
-    resource_class = AssayTestResource
-
-    save_as = True
-    save_on_top = True
-    list_per_page = 300
-    list_display = (
-        'test_date', 'microdevice', 'assay_device_id',
-        'compound', 'assay_layout',
-        'cell_sample', 'locked'
-    )
-    search_fields = ['assay_device_id']
-    actions = ['update_fields']
-    raw_id_fields = ('compound', 'cell_sample',)
-    readonly_fields = ['created_by', 'created_on',
-                       'modified_by', 'modified_on', 'compound_display']
-
-    def compound_display(self, obj):
-
-        if obj.compound.chemblid:
-            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
-                   'displayimage/' + obj.compound.chemblid)
-            return '<img src="%s">' % \
-                url
-        else:
-            return u''
-
-    compound_display.allow_tags = True
-    compound_display.short_description = 'Structure'
-
-    fieldsets = (
-        (
-            'Device Parameters', {
-                'fields': (
-                    ('microdevice', 'assay_layout',),
-                    ('assay_device_id', 'reader_name'),
-                ),
-            }
-        ),
-        (
-            'Assay Parameters', {
-                'fields': (
-                    ('compound', 'cell_sample', 'test_date'),
-                    'compound_display',
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on'),
-                    ('modified_by', 'modified_on'),
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        ),
-    )
-    inlines = [AssayResultInline]
-
-
-admin.site.register(AssayTest, AssayTestAdmin)
+# class AssayTestAdmin(LockableAdmin):
+#
+#     class Media(object):
+#         js = ('assays/inline_fix.js',)
+#
+#     resource_class = AssayTestResource
+#
+#     save_as = True
+#     save_on_top = True
+#     list_per_page = 300
+#     list_display = (
+#         'test_date', 'microdevice', 'assay_device_id',
+#         'compound', 'assay_layout',
+#         'cell_sample', 'locked'
+#     )
+#     search_fields = ['assay_device_id']
+#     actions = ['update_fields']
+#     raw_id_fields = ('compound', 'cell_sample',)
+#     readonly_fields = ['created_by', 'created_on',
+#                        'modified_by', 'modified_on', 'compound_display']
+#
+#     def compound_display(self, obj):
+#
+#         if obj.compound.chemblid:
+#             url = (u'https://www.ebi.ac.uk/chembldb/compound/'
+#                    'displayimage/' + obj.compound.chemblid)
+#             return '<img src="%s">' % \
+#                 url
+#         else:
+#             return u''
+#
+#     compound_display.allow_tags = True
+#     compound_display.short_description = 'Structure'
+#
+#     fieldsets = (
+#         (
+#             'Device Parameters', {
+#                 'fields': (
+#                     ('microdevice', 'assay_layout',),
+#                     ('assay_device_id', 'reader_name'),
+#                 ),
+#             }
+#         ),
+#         (
+#             'Assay Parameters', {
+#                 'fields': (
+#                     ('compound', 'cell_sample', 'test_date'),
+#                     'compound_display',
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     ('created_by', 'created_on'),
+#                     ('modified_by', 'modified_on'),
+#                     ('signed_off_by', 'signed_off_date'),
+#                 )
+#             }
+#         ),
+#     )
+#     inlines = [AssayResultInline]
+#
+#
+# admin.site.register(AssayTest, AssayTestAdmin)
 
 
 class PhysicalUnitsAdmin(LockableAdmin):
