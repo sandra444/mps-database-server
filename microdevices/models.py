@@ -10,13 +10,14 @@ class MicrophysiologyCenter(LockableModel):
         ordering = ('center_name', )
 
     center_name = models.CharField(max_length=100)
+    center_id = models.CharField(max_length=20,default='-')
     description = models.CharField(max_length=400, blank=True, null=True)
     contact_person = models.CharField(max_length=250, blank=True, null=True)
     center_website = models.URLField(blank=True, null=True)
 
     def __unicode__(self):
-        return self.center_name
-
+       return self.center_name
+	
 
 class Manufacturer(LockableModel):
     class Meta(object):
