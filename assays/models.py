@@ -3,6 +3,7 @@
 from django.db import models
 from microdevices.models import Microdevice
 from mps.base.models import LockableModel
+from microdevices.models import models
 
 PHYSICAL_UNIT_TYPES = (
     (u'V', u'Volume'),
