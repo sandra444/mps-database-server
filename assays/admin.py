@@ -811,74 +811,6 @@ class AssayResultInline(admin.TabularInline):
     class Media(object):
         css = {"all": ("css/hide_admin_original.css",)}
 
-#   **************TO BE DELETED****************************************
-# class AssayTestAdmin(LockableAdmin):
-#
-#     class Media(object):
-#         js = ('assays/inline_fix.js',)
-#
-#     resource_class = AssayTestResource
-#
-#     save_as = True
-#     save_on_top = True
-#     list_per_page = 300
-#     list_display = (
-#         'test_date', 'microdevice', 'assay_device_id',
-#         'compound', 'assay_layout',
-#         'cell_sample', 'locked'
-#     )
-#     search_fields = ['assay_device_id']
-#     actions = ['update_fields']
-#     raw_id_fields = ('compound', 'cell_sample',)
-#     readonly_fields = ['created_by', 'created_on',
-#                        'modified_by', 'modified_on', 'compound_display']
-#
-#     def compound_display(self, obj):
-#
-#         if obj.compound.chemblid:
-#             url = (u'https://www.ebi.ac.uk/chembldb/compound/'
-#                    'displayimage/' + obj.compound.chemblid)
-#             return '<img src="%s">' % \
-#                 url
-#         else:
-#             return u''
-#
-#     compound_display.allow_tags = True
-#     compound_display.short_description = 'Structure'
-#
-#     fieldsets = (
-#         (
-#             'Device Parameters', {
-#                 'fields': (
-#                     ('microdevice', 'assay_layout',),
-#                     ('assay_device_id', 'reader_name'),
-#                 ),
-#             }
-#         ),
-#         (
-#             'Assay Parameters', {
-#                 'fields': (
-#                     ('compound', 'cell_sample', 'test_date'),
-#                     'compound_display',
-#                 )
-#             }
-#         ),
-#         (
-#             'Change Tracking', {
-#                 'fields': (
-#                     'locked',
-#                     ('created_by', 'created_on'),
-#                     ('modified_by', 'modified_on'),
-#                     ('signed_off_by', 'signed_off_date'),
-#                 )
-#             }
-#         ),
-#     )
-#     inlines = [AssayResultInline]
-#
-#
-# admin.site.register(AssayTest, AssayTestAdmin)
-
 
 class PhysicalUnitsAdmin(LockableAdmin):
     save_on_top = True
@@ -964,54 +896,6 @@ class ReadoutUnitAdmin(LockableAdmin):
 
 admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
-
-# # #   **************TO BE DELETED****************************************
-# class AssayFindingAdmin(LockableAdmin):
-#     save_on_top = True
-#     list_per_page = 300
-#     list_display = ('assay_finding_name', 'assay_finding_type', 'optional_link')
-#     list_display_links = ('assay_finding_name',)
-#     list_filter = sorted(['assay_finding_type'])
-#     search_fields = ['assay_finding_name', ]
-#     fieldsets = (
-#         (
-#             None, {
-#                 'fields': (
-#                     'assay_finding_name',
-#                     'assay_finding_type',
-#                     'description',
-#                 )
-#             }
-#         ),
-#         (
-#             'Change Tracking', {
-#                 'fields': (
-#                     'locked',
-#                     ('created_by', 'created_on'),
-#                     ('modified_by', 'modified_on'),
-#                     ('signed_off_by', 'signed_off_date'),
-#                 )
-#             }
-#         ),
-#     )
-#     actions = ['update_fields']
-#
-#     def optional_link(self, obj):
-#         words = obj.description.split()
-#         sentence = ''
-#         for thing in words:
-#             if thing.startswith("http://"):
-#                 link = '<a href="%s" target="_blank">%s</a>' % (thing, thing)
-#                 sentence += (' ' + link)
-#             else:
-#                 sentence += (' ' + thing)
-#         return sentence
-#     optional_link.allow_tags = True
-#     optional_link.short_description = "Description"
-#
-#
-# admin.site.register(AssayFinding, AssayFindingAdmin)
-#
 
 class AssayTestResultAdmin(LockableAdmin):
 #   Results calculated from RAW CHIP DATA aka 'Chip Result'

@@ -183,29 +183,6 @@ class AssayReadout(models.Model):
     value = models.FloatField()
     elapsed_time = models.FloatField(default=0)
 
-#   **************TO BE DELETED****************************************
-#class AssayTest(LockableModel):
-# #    """
-#     The AssayTest model contains both the Cell Characterization results
-#     (not the raw readouts) and the MPS device results
-#
-#     """
-#     class Meta(object):
-#         ordering = ('test_date', 'microdevice', 'compound')
-#
-#     assay_device_id = models.CharField(max_length=512,
-#                                        verbose_name='Device ID/ Barcode')
-#     microdevice = models.ForeignKey('microdevices.Microdevice',
-#                                     verbose_name='Model Name')
-#     assay_layout = models.ForeignKey(AssayLayout)
-#     reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
-#     cell_sample = models.ForeignKey('cellsamples.CellSample')
-#     compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
-#     test_date = models.DateField(null=True, blank=True)
-#
-#     def __unicode__(self):
-#         return u'{0}'.format(self.assay_device_id)
-
 
 class ReadoutUnit(LockableModel):
     class Meta(object):
@@ -230,12 +207,6 @@ class AssayDeviceReadout(LockableModel):
     cell_sample = models.ForeignKey('cellsamples.CellSample')
 
     cellsample_density = models.FloatField(verbose_name='density', default=0)
-
-    # Cell samples
-    #
-    # Option 1 is cells / well
-    # Option 2 is cells / mL
-    # Option 3 is cells / mm^2
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',
                                                max_length=8,
@@ -292,29 +263,6 @@ POSNEG = (
     ('0', 'Neg'), ('1', 'Pos')
 )
 
-# # #   **************TO BE DELETED****************************************
-# class AssayFindingType(LockableModel):
-#     class Meta(object):
-#         ordering = ('assay_finding_type', )
-#
-#     assay_finding_type = models.CharField(max_length=100, unique=True)
-#     description = models.CharField(max_length=200, blank=True, null=True)
-#
-#     def __unicode__(self):
-#         return self.assay_finding_type
-#
-# # #   **************TO BE DELETED****************************************
-# class AssayFinding(LockableModel):
-#     class Meta(object):
-#         ordering = ('assay_finding_type', 'assay_finding_name', )
-#
-#     assay_finding_type = models.ForeignKey(AssayFindingType, blank=True, null=True)
-#     assay_finding_name = models.CharField(max_length=100)
-#     description = models.CharField(max_length=400, blank=True, null=True)
-#
-#     def __unicode__(self):
-#         return u'{} :: {}'.format(self.assay_finding_type, self.assay_finding_name)
-#
 
 class AssayResultFunction(LockableModel):
 #   Function for analysis of CHIP RESULTS
@@ -353,27 +301,6 @@ class AssayTestResult(LockableModel):
 
     assay_name = models.ForeignKey(AssayModel,
                                      verbose_name='Assay')
-#   **************TO BE DELETED****************************************
-#    assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
-#   **************TO BE DELETED****************************************
-#    time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
-#
-#    result = models.CharField(default='1',
-#                              max_length=8,
-#                              choices=POSNEG,
-#                              verbose_name='Pos/Neg?')
-#
-#    severity = models.CharField(default='-1',
-#                                max_length=5,
-#                                choices=SEVERITY_SCORE,
-#                                verbose_name='Severity',
-#                                blank=True,
-#                                null=True)
-#
-#    value = models.FloatField(blank=True, null=True)
-#
-#    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
-#
     def __unicode__(self):
         return u''
 
@@ -479,12 +406,6 @@ class AssayChipReadout(LockableModel):
     cell_sample = models.ForeignKey('cellsamples.CellSample')
 
     cellsample_density = models.FloatField(verbose_name='density', default=0)
-
-    # Cell samples
-    #
-    # Option 1 is cells / well
-    # Option 2 is cells / mL
-    # Option 3 is cells / mm^2
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',
                                                max_length=8,
