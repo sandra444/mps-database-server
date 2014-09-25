@@ -9,7 +9,7 @@ from drugtrials.models import Test
 class MicrophysiologyCenterAdmin(LockableAdmin):
     save_on_top = True
     list_display = (
-        'center_name', 'center_id','description', 'contact_person', 'center_site')
+        'center_name', 'center_id', 'description', 'contact_person', 'center_site')
     list_per_page = 300
     fieldsets = (
         (

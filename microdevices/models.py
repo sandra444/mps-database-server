@@ -16,8 +16,8 @@ class MicrophysiologyCenter(LockableModel):
     center_website = models.URLField(blank=True, null=True)
 
     def __unicode__(self):
-       return self.center_name
-	
+        return self.center_name
+
 
 class Manufacturer(LockableModel):
     class Meta(object):
