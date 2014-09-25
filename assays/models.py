@@ -357,23 +357,23 @@ class AssayTestResult(LockableModel):
 #    assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
 #   **************TO BE DELETED****************************************
 #    time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
-
-    result = models.CharField(default='1',
-                              max_length=8,
-                              choices=POSNEG,
-                              verbose_name='Pos/Neg?')
-
-    severity = models.CharField(default='-1',
-                                max_length=5,
-                                choices=SEVERITY_SCORE,
-                                verbose_name='Severity',
-                                blank=True,
-                                null=True)
-
-    value = models.FloatField(blank=True, null=True)
-
-    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
-
+#
+#    result = models.CharField(default='1',
+#                              max_length=8,
+#                              choices=POSNEG,
+#                              verbose_name='Pos/Neg?')
+#
+#    severity = models.CharField(default='-1',
+#                                max_length=5,
+#                                choices=SEVERITY_SCORE,
+#                                verbose_name='Severity',
+#                                blank=True,
+#                                null=True)
+#
+#    value = models.FloatField(blank=True, null=True)
+#
+#    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
+#
     def __unicode__(self):
         return u''
 

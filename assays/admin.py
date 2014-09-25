@@ -1014,13 +1014,12 @@ admin.site.register(AssayFinding, AssayFindingAdmin)
 
 
 class AssayTestResultAdmin(LockableAdmin):
-#   Results calculated from RAW CHIP DATA
+#   Results calculated from RAW CHIP DATA aka 'Chip Result'
     save_as = True
     save_on_top = True
     list_per_page = 300
     list_display = (
         'compound', 'assay_name', 'assay_device_readout',
-            'result','severity'
     )
     search_fields = ['assay_device_readout']
     actions = ['update_fields']
@@ -1045,7 +1044,7 @@ class AssayTestResultAdmin(LockableAdmin):
         (
             'Device/Drug Parameters', {
                 'fields': (
-                    ('assay_device_readout',),
+                    ('assay_device_readout', 'assay_name'),
                     ('compound', 'compound_display'),
                 ),
             }
