@@ -184,51 +184,6 @@ class AssayReadout(models.Model):
     elapsed_time = models.FloatField(default=0)
 
 
-class AssayTest(LockableModel):
-    """
-
-    The AssayTest model contains both the Cell Characterization results
-    (not the raw readouts) and the MPS device results
-
-    """
-    class Meta(object):
-        ordering = ('test_date', 'microdevice', 'compound')
-
-    assay_device_id = models.CharField(max_length=512,
-                                       verbose_name='Device ID/ Barcode')
-    microdevice = models.ForeignKey('microdevices.Microdevice',
-                                    verbose_name='Model Name')
-    assay_layout = models.ForeignKey(AssayLayout)
-    reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
-    cell_sample = models.ForeignKey('cellsamples.CellSample')
-    compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
-    test_date = models.DateField(null=True, blank=True)
-
-    def __unicode__(self):
-        return u'{0}'.format(self.assay_device_id)
-
-
-class AssayResult(models.Model):
-    assay_test = models.ForeignKey(AssayTest)
-
-    test_name = models.ForeignKey('drugtrials.Test',
-                                  verbose_name='Test',
-                                  blank=True,
-                                  null=True)
-
-    test_time = models.FloatField(verbose_name='Time',
-                                  blank=True, null=True)
-
-    time_units = models.ForeignKey(TimeUnits,
-                                   blank=True,
-                                   null=True)
-
-    value = models.FloatField(blank=True, null=True)
-
-    test_unit = models.ForeignKey(PhysicalUnits,
-                                  blank=True,
-                                  null=True)
-
 class ReadoutUnit(LockableModel):
     class Meta(object):
         ordering = ('readout_unit',)
@@ -237,8 +192,11 @@ class ReadoutUnit(LockableModel):
     def __unicode__(self):
         return self.readout_unit
 
+
 class AssayDeviceReadout(LockableModel):
+    # Readout data collected from MICROPLATES
     class Meta(object):
+        verbose_name = 'Plate Readout'
         ordering = ('assay_device_id', 'assay_name',)
 
     # the unique readout identifier
@@ -249,12 +207,6 @@ class AssayDeviceReadout(LockableModel):
     cell_sample = models.ForeignKey('cellsamples.CellSample')
 
     cellsample_density = models.FloatField(verbose_name='density', default=0)
-
-    # Cell samples
-    #
-    # Option 1 is cells / well
-    # Option 2 is cells / mL
-    # Option 3 is cells / mm^2
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',
                                                max_length=8,
@@ -300,6 +252,7 @@ class AssayReader(LockableModel):
     def __unicode__(self):
         return u'{0} - {1}'.format(self.reader_name, self.reader_type)
 
+
 SEVERITY_SCORE = (
     ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
     ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
@@ -311,40 +264,57 @@ POSNEG = (
 )
 
 
-class AssayFindingType(LockableModel):
+class AssayResultFunction(LockableModel):
+#   Function for analysis of CHIP RESULTS
     class Meta(object):
-        ordering = ('assay_finding_type', )
+        verbose_name = 'Function'
+        ordering = ('function_name', )
 
-    assay_finding_type = models.CharField(max_length=100, unique=True)
+    function_name = models.CharField(max_length=100, unique=True)
+    function_results = models.CharField(max_length=100, blank=True, null=True)
     description = models.CharField(max_length=200, blank=True, null=True)
 
     def __unicode__(self):
-        return self.assay_finding_type
+        return self.function_name
 
-
-class AssayFinding(LockableModel):
+class AssayResultType(LockableModel):
+#   Result types for CHIP RESULTS
     class Meta(object):
-        ordering = ('assay_finding_type', 'assay_finding_name', )
+        verbose_name = 'Result type'
+        ordering = ('assay_result_type', )
 
-    assay_finding_type = models.ForeignKey(AssayFindingType, blank=True, null=True)
-    assay_finding_name = models.CharField(max_length=100)
-    description = models.CharField(max_length=400, blank=True, null=True)
+    assay_result_type = models.CharField(max_length=100, unique=True)
+    description = models.CharField(max_length=200, blank=True, null=True)
 
     def __unicode__(self):
-        return u'{} :: {}'.format(self.assay_finding_type, self.assay_finding_name)
+        return self.assay_result_type
 
 
 class AssayTestResult(LockableModel):
+#   Results calculated from Raw Chip Data
+    class Meta(object):
+        verbose_name = 'Chip Result'
+    assay_device_readout = models.ForeignKey('assays.AssayChipReadout',
+                                             verbose_name='Chip Readout')
 
-    assay_device_readout = models.ForeignKey('assays.AssayChipReadout')
     compound = models.ForeignKey('compounds.Compound')
 
-    assay_finding_name = models.ForeignKey(AssayFinding,
-                                     verbose_name='Assay Test')
+    assay_name = models.ForeignKey(AssayModel,
+                                     verbose_name='Assay')
+    def __unicode__(self):
+        return u''
 
-    assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
 
-    time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
+class AssayResult(models.Model):
+#   Individual reault parameters for CHIP RESULTS used in inline
+    assay_result = models.ForeignKey(AssayTestResult,
+                                     blank=True,
+                                     null=True)
+
+    result_function = models.ForeignKey(AssayResultFunction,
+                                        blank=True,
+                                        null=True,
+                                        verbose_name='Function')
 
     result = models.CharField(default='1',
                               max_length=8,
@@ -358,19 +328,24 @@ class AssayTestResult(LockableModel):
                                 blank=True,
                                 null=True)
 
+    result_type = models.ForeignKey(AssayResultType,
+                                    blank=True,
+                                    null=True,
+                                    verbose_name='Measure')
+
     value = models.FloatField(blank=True, null=True)
 
-    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
+    test_unit = models.ForeignKey(PhysicalUnits,
+                                  blank=True,
+                                  null=True)
 
-    def __unicode__(self):
-        return u''
 
 class AssayPlateTestResult(LockableModel):
-
+#   Test Results from MICROPLATES
     assay_device_id = models.ForeignKey('assays.AssayDeviceReadout')
     compound = models.ForeignKey('compounds.Compound', blank=True, null=True)
 
-    assay_finding_name = models.ForeignKey(AssayFinding,
+    assay_finding_name = models.ForeignKey(AssayModel,
                                      verbose_name='Assay Test')
 
     assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
@@ -419,6 +394,7 @@ class AssayChipRawData(models.Model):
 
 class AssayChipReadout(LockableModel):
     class Meta(object):
+        verbose_name = 'Chip Readout'
         ordering = ('assay_chip_id', 'assay_name',)
 
     #Control => control, Compound => compound; Abbreviate? Capitalize?
@@ -437,16 +413,11 @@ class AssayChipReadout(LockableModel):
 
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
-    # Cell samples
-    #
-    # Option 1 is cells / well
-    # Option 2 is cells / mL
-    # Option 3 is cells / mm^2
-
     cellsample_density_unit = models.CharField(verbose_name='Unit',
                                                max_length=8,
                                                default="ML",
                                                choices=(('WE', 'cells / well'),
+                                                        ('CP', 'cells / chip'),
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)

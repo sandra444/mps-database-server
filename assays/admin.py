@@ -465,7 +465,7 @@ def parseReadoutCSV(currentAssayReadout, file):
 
 
 class AssayDeviceReadoutAdmin(LockableAdmin):
-
+    # Endpoint readouts from MICROPLATES
     resource_class = AssayDeviceReadoutResource
 
     class Media(object):
@@ -616,9 +616,8 @@ def parseChipCSV(currentChipReadout, file):
         ).save()
     return
 
-#Uses AssayChipRawData
 class AssayChipReadoutAdmin(LockableAdmin):
-
+    # TIMEPOINT readouts from ORGAN CHIPS
     class Media(object):
         js = ('assays/customize_chip.js',)
         css = {'all': ('assays/customize_admin.css',)}
@@ -663,7 +662,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
                     (
                         'assay_name',
                     ),
-		    (
+		            (
                         'compound', 'concentration',
                         'unit',
                     ),
@@ -745,89 +744,73 @@ class AssayChipReadoutAdmin(LockableAdmin):
 admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
 
 
+class AssayResultFunctionAdmin(LockableAdmin):
+    list_per_page = 30
+    save_on_top = True
+    list_display = ('function_name', 'function_results', 'description')
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    ('function_name', 'function_results',),
+                    ('description',),
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
+admin.site.register(AssayResultFunction, AssayResultFunctionAdmin)
+
+
+class AssayResultTypeAdmin(LockableAdmin):
+    list_per_page = 300
+    save_on_top = True
+    list_display = ('assay_result_type', 'description')
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    ('assay_result_type', 'description'),
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
+admin.site.register(AssayResultType, AssayResultTypeAdmin)
+
+
 class AssayResultInline(admin.TabularInline):
+#   Results calculated from CHIP READOUTS
     model = AssayResult
     form = AssayResultForm
-    verbose_name = 'Assay/Drug Trial Test'
-    verbose_name_plural = 'Assay/Drug Trial Test Results'
+    verbose_name = 'Assay Test'
+    verbose_name_plural = 'Assay Test Results'
     fields = (
         (
-            'test_name', 'test_time', 'time_units',
-            'value', 'test_unit',
+            'result', 'result_function', 'result_type',
+            'value',  'test_unit', 'severity',
         ),
     )
     extra = 0
 
     class Media(object):
         css = {"all": ("css/hide_admin_original.css",)}
-
-
-class AssayTestAdmin(LockableAdmin):
-
-    class Media(object):
-        js = ('js/inline_fix.js',)
-
-    resource_class = AssayTestResource
-
-    save_as = True
-    save_on_top = True
-    list_per_page = 300
-    list_display = (
-        'test_date', 'microdevice', 'assay_device_id',
-        'compound', 'assay_layout',
-        'cell_sample', 'locked'
-    )
-    search_fields = ['assay_device_id']
-    actions = ['update_fields']
-    raw_id_fields = ('compound', 'cell_sample',)
-    readonly_fields = ['created_by', 'created_on',
-                       'modified_by', 'modified_on', 'compound_display']
-
-    def compound_display(self, obj):
-
-        if obj.compound.chemblid:
-            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
-                   'displayimage/' + obj.compound.chemblid)
-            return '<img src="%s">' % \
-                url
-        else:
-            return u''
-
-    compound_display.allow_tags = True
-    compound_display.short_description = 'Structure'
-
-    fieldsets = (
-        (
-            'Device Parameters', {
-                'fields': (
-                    ('microdevice', 'assay_layout',),
-                    ('assay_device_id', 'reader_name'),
-                ),
-            }
-        ),
-        (
-            'Assay Parameters', {
-                'fields': (
-                    ('compound', 'cell_sample', 'test_date'),
-                    'compound_display',
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on'),
-                    ('modified_by', 'modified_on'),
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        ),
-    )
-    inlines = [AssayResultInline]
-
-
-admin.site.register(AssayTest, AssayTestAdmin)
 
 
 class PhysicalUnitsAdmin(LockableAdmin):
@@ -915,86 +898,13 @@ class ReadoutUnitAdmin(LockableAdmin):
 admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
 
-class AssayFindingTypeAdmin(LockableAdmin):
-    list_per_page = 300
-    save_on_top = True
-    list_display = ('assay_finding_type', 'description')
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    'assay_finding_type',
-                    'description',
-                )
-            }
-        ),
-        ('Change Tracking', {
-            'fields': (
-                'locked',
-                ('created_by', 'created_on'),
-                ('modified_by', 'modified_on'),
-                ('signed_off_by', 'signed_off_date'),
-            )
-        }
-        ),
-    )
-admin.site.register(AssayFindingType, AssayFindingTypeAdmin)
-
-
-class AssayFindingAdmin(LockableAdmin):
-    save_on_top = True
-    list_per_page = 300
-    list_display = ('assay_finding_name', 'assay_finding_type', 'optional_link')
-    list_display_links = ('assay_finding_name',)
-    list_filter = sorted(['assay_finding_type'])
-    search_fields = ['assay_finding_name', ]
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    'assay_finding_name',
-                    'assay_finding_type',
-                    'description',
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on'),
-                    ('modified_by', 'modified_on'),
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        ),
-    )
-    actions = ['update_fields']
-
-    def optional_link(self, obj):
-        words = obj.description.split()
-        sentence = ''
-        for thing in words:
-            if thing.startswith("http://"):
-                link = '<a href="%s" target="_blank">%s</a>' % (thing, thing)
-                sentence += (' ' + link)
-            else:
-                sentence += (' ' + thing)
-        return sentence
-    optional_link.allow_tags = True
-    optional_link.short_description = "Description"
-
-
-admin.site.register(AssayFinding, AssayFindingAdmin)
-
-
 class AssayTestResultAdmin(LockableAdmin):
+#   Results calculated from RAW CHIP DATA aka 'Chip Result'
     save_as = True
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'assay_device_readout', 'compound', 'assay_finding_name',
-            'assay_test_time','time_units','result','severity','value','value_units'
+        'compound', 'assay_name', 'assay_device_readout',
     )
     search_fields = ['assay_device_readout']
     actions = ['update_fields']
@@ -1019,16 +929,9 @@ class AssayTestResultAdmin(LockableAdmin):
         (
             'Device/Drug Parameters', {
                 'fields': (
-                    ('assay_device_readout',),
+                    ('assay_device_readout', 'assay_name'),
                     ('compound', 'compound_display'),
                 ),
-            }
-        ),
-        (
-            'Assay Test Parameters', {
-                'fields': (
-                    ('assay_finding_name', 'assay_test_time','time_units','result','severity','value','value_units'),
-                )
             }
         ),
         (
@@ -1043,11 +946,13 @@ class AssayTestResultAdmin(LockableAdmin):
         ),
     )
     actions = ['update_fields']
+    inlines = [AssayResultInline]
 
 
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
 class AssayPlateTestResultAdmin(LockableAdmin):
+#   Test Results from MICROPLATES
     save_as = True
     save_on_top = True
     list_per_page = 300
@@ -1078,7 +983,7 @@ class AssayPlateTestResultAdmin(LockableAdmin):
         (
             'Device/Drug Parameters', {
                 'fields': (
-                    ('assay_device_id',),
+                    ('assay_device_id', 'assay_finding_name', ),
                     ('compound', 'compound_display'),
                 ),
             }
@@ -1086,7 +991,8 @@ class AssayPlateTestResultAdmin(LockableAdmin):
         (
             'Assay Test Parameters', {
                 'fields': (
-                    ('assay_finding_name', 'assay_test_time','time_units','result','severity','value','value_units'),
+                    ('result', 'assay_test_time', 'time_units', 'value',
+                     'value_units', 'severity', ),
                 )
             }
         ),
