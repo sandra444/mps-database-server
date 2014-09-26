@@ -307,9 +307,13 @@ class AssayTestResult(LockableModel):
 
 class AssayResult(models.Model):
 #   Individual reault parameters for CHIP RESULTS used in inline
-    assay_result = models.ForeignKey(AssayTestResult)
+    assay_result = models.ForeignKey(AssayTestResult,
+                                     blank=True,
+                                     null=True)
 
     result_function = models.ForeignKey(AssayResultFunction,
+                                        blank=True,
+                                        null=True,
                                         verbose_name='Function')
 
     result = models.CharField(default='1',
@@ -325,6 +329,8 @@ class AssayResult(models.Model):
                                 null=True)
 
     result_type = models.ForeignKey(AssayResultType,
+                                    blank=True,
+                                    null=True,
                                     verbose_name='Measure')
 
     value = models.FloatField(blank=True, null=True)
