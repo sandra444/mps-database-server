@@ -900,6 +900,10 @@ admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
 class AssayTestResultAdmin(LockableAdmin):
 #   Results calculated from RAW CHIP DATA aka 'Chip Result'
+
+    class Media(object):
+        js = ('js/inline_fix.js',)
+
     save_as = True
     save_on_top = True
     list_per_page = 300
