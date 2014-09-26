@@ -906,7 +906,7 @@ class AssayTestResultAdmin(LockableAdmin):
 
 class AssayTestResultAdmin(LockableAdmin):
     class Media(object):
-        js = ('assays/customize_chip_results_admin.js',)
+        js = ('assays/customize_chip_results_admin.js','js/inline_fix.js')
 
     save_as = True
     save_on_top = True
