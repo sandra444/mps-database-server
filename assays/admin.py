@@ -955,6 +955,7 @@ class AssayTestResultAdmin(LockableAdmin):
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
 class AssayPlateTestResultAdmin(LockableAdmin):
+    #   Test Results from MICROPLATES
     class Media(object):
         js = ('assays/customize_plate_results_admin.js',)
 
