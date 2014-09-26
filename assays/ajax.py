@@ -3,6 +3,7 @@ import json
 from collections import defaultdict
 from django.http import *
 from .models import *
+from compounds.models import Compound
 import logging
 logger = logging.getLogger(__name__)
 
@@ -232,10 +233,12 @@ def fetch_chip_info(request):
 
     data.update({
         #Need actual data, not ID
-        'compound': assay.get('compound_id'),
+        #str(Compound.objects.filter(id=assay.get('compound_id')).__dict__)
+        'compound': str(Compound.objects.filter(id=assay.get('compound_id'))[0].__dict__),
         'unit':  assay.get('unit_id'),
         'concentration':assay.get('concentration'),
         'chip_test_type':assay.get('chip_test_type'),
+        'assay':assay.get('assay_name_id'),
     })
 
     return HttpResponse(json.dumps(data),

@@ -297,10 +297,11 @@ class AssayTestResult(LockableModel):
     assay_device_readout = models.ForeignKey('assays.AssayChipReadout',
                                              verbose_name='Chip Readout')
 
+    ###TO BE REMOVED
     compound = models.ForeignKey('compounds.Compound')
-
     assay_name = models.ForeignKey(AssayModel,
                                      verbose_name='Assay')
+
     def __unicode__(self):
         return u''
 
@@ -343,10 +344,11 @@ class AssayResult(models.Model):
 class AssayPlateTestResult(LockableModel):
 #   Test Results from MICROPLATES
     assay_device_id = models.ForeignKey('assays.AssayDeviceReadout')
-    compound = models.ForeignKey('compounds.Compound', blank=True, null=True)
 
+    ##TO BE REMOVED
+    compound = models.ForeignKey('compounds.Compound', blank=True, null=True)
     assay_finding_name = models.ForeignKey(AssayModel,
-                                     verbose_name='Assay Test')
+                                    verbose_name='Assay Test')
 
     assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
 
