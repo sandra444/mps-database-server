@@ -796,14 +796,15 @@ admin.site.register(AssayResultType, AssayResultTypeAdmin)
 
 
 class AssayResultInline(admin.TabularInline):
+#   Results calculated from CHIP READOUTS
     model = AssayResult
     form = AssayResultForm
     verbose_name = 'Assay Test'
     verbose_name_plural = 'Assay Test Results'
     fields = (
         (
-            'result_function', 'result_type', 'value',
-            'test_unit', 'severity', 'result',
+            'result', 'result_function', 'result_type',
+            'value',  'test_unit', 'severity',
         ),
     )
     extra = 0
@@ -951,6 +952,7 @@ class AssayTestResultAdmin(LockableAdmin):
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
 class AssayPlateTestResultAdmin(LockableAdmin):
+#   Test Results from MICROPLATES
     save_as = True
     save_on_top = True
     list_per_page = 300
