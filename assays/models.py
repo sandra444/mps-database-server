@@ -416,6 +416,7 @@ class AssayChipReadout(LockableModel):
                                                max_length=8,
                                                default="ML",
                                                choices=(('WE', 'cells / well'),
+                                                        ('CP', 'cells / chip'),
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
