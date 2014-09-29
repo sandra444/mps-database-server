@@ -10,7 +10,6 @@ $(document).ready(function () {
         if (!$('#id_assay_device_readout').val()) {
             $('#compound').html("");
             $('#concentration').html("");
-            $('#unit').html("");
             $('#chip_test_type').html("");
             $('#assay').html("");
             return;
@@ -34,8 +33,7 @@ $(document).ready(function () {
             success: function (json) {
                 console.log(json);
                 $('#compound').html(json.compound);
-                $('#concentration').html(json.concentration);
-                $('#unit').html(json.unit);
+                $('#concentration').html(json.concentration + ' ' + json.unit);
                 $('#chip_test_type').html(json.chip_test_type);
                 $('#assay').html(json.assay);
             },
@@ -47,7 +45,7 @@ $(document).ready(function () {
 
     var add = '<div class="form-row"><div class="field-box">' +
         '<label for="compound">Compound:</label><p id="compound"></p></div>' +
-        '<div class="field-box"><label for="concentration">Concentration:</label><p id="concentration"></p><p id="unit"></p></div>' +
+        '<div class="field-box"><label for="concentration">Concentration:</label><p id="concentration"></p></div>' +
         '<div class="field-box"><label for="assay">Assay:</label><p id="assay"></p></div>' +
         '<div class="field-box"><label for="chip_test_type">Test Type:</label><p id="chip_test_type"></p></div>';
 
