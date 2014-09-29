@@ -195,7 +195,7 @@ def fetch_base_layout_info(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
-#More complex than Chip; need to find way to get compound
+#Fetches and displays assay layout from plate readout
 def fetch_plate_info(request):
     """Returns dynamic info for plate assays"""
 
@@ -210,9 +210,7 @@ def fetch_plate_info(request):
     data = {}
 
     data.update({
-        'compound': 1,
-        'units': 2,
-        'concentration':3,
+
     })
 
     return HttpResponse(json.dumps(data),
@@ -236,9 +234,9 @@ def fetch_chip_info(request):
         #str(Compound.objects.filter(id=assay.get('compound_id')).__dict__)
         'compound': str(Compound.objects.filter(id=assay.get('compound_id'))[0].__dict__.get('name')),
         'unit':  str(PhysicalUnits.objects.filter(id=assay.get('unit_id'))[0].__dict__.get('unit')),
-        'concentration':assay.get('concentration'),
-        'chip_test_type':assay.get('chip_test_type'),
-        'assay':assay.get('assay_name_id'),
+        'concentration': assay.get('concentration'),
+        'chip_test_type': assay.get('chip_test_type'),
+        'assay': str(AssayModel.objects.filter(id=assay.get('assay_name_id'))[0].__dict__.get('assay_name')),
     })
 
     return HttpResponse(json.dumps(data),
