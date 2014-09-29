@@ -41,7 +41,7 @@ $(document).ready(function () {
             "<tr><th><br><br></th><th><br><br></th><th><br><br></th>" +
             "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
             "</tbody></table>";
-        $('<div id="csv_table" align="center" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body').html();
+        $('<div id="csv_table" align="center" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body').html(add);
         $("#csv_table").insertBefore($(".module")[3]);
     }
 
