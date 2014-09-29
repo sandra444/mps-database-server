@@ -231,7 +231,6 @@ def fetch_chip_info(request):
 
     data.update({
         #Need actual data, not ID
-        #str(Compound.objects.filter(id=assay.get('compound_id')).__dict__)
         'compound': str(Compound.objects.filter(id=assay.get('compound_id'))[0].__dict__.get('name')),
         'unit':  str(PhysicalUnits.objects.filter(id=assay.get('unit_id'))[0].__dict__.get('unit')),
         'concentration': assay.get('concentration'),

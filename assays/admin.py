@@ -907,33 +907,18 @@ class AssayTestResultAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'compound', 'assay_name', 'assay_device_readout',
+        'assay_device_readout','first'
     )
     search_fields = ['assay_device_readout']
     actions = ['update_fields']
-    raw_id_fields = ('compound',)
     readonly_fields = ['created_by', 'created_on',
-                       'modified_by', 'modified_on', 'compound_display']
-
-    def compound_display(self, obj):
-
-        if obj.compound.chemblid:
-            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
-                   'displayimage/' + obj.compound.chemblid)
-            return '<img src="%s">' % \
-                url
-        else:
-            return u''
-
-    compound_display.allow_tags = True
-    compound_display.short_description = 'Structure'
+                       'modified_by', 'modified_on',]
 
     fieldsets = (
         (
             'Device/Drug Parameters', {
                 'fields': (
-                    ('assay_device_readout', 'assay_name'),
-                    ('compound', 'compound_display'),
+                    ('assay_device_readout',),
                 ),
             }
         ),
@@ -951,6 +936,10 @@ class AssayTestResultAdmin(LockableAdmin):
     actions = ['update_fields']
     inlines = [AssayResultInline]
 
+    def first(self, obj):
+        return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].__dict__
+    first.allow_tags = True
+
 
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
@@ -958,39 +947,25 @@ class AssayPlateTestResultAdmin(LockableAdmin):
     #   Test Results from MICROPLATES
     class Media(object):
         js = ('assays/customize_plate_results_admin.js',)
+        css = {'all': ('assays/customize_admin.css',)}
 
     save_as = True
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'assay_device_id', 'compound', 'assay_finding_name',
+        'assay_device_id',
             'assay_test_time','time_units','result','severity','value','value_units'
     )
     search_fields = ['assay_device_id']
     actions = ['update_fields']
-    raw_id_fields = ('compound',)
     readonly_fields = ['created_by', 'created_on',
-                       'modified_by', 'modified_on', 'compound_display']
-
-    def compound_display(self, obj):
-
-        if obj.compound.chemblid:
-            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
-                   'displayimage/' + obj.compound.chemblid)
-            return '<img src="%s">' % \
-                url
-        else:
-            return u''
-
-    compound_display.allow_tags = True
-    compound_display.short_description = 'Structure'
+                       'modified_by', 'modified_on']
 
     fieldsets = (
         (
             'Device/Drug Parameters', {
                 'fields': (
-                    ('assay_device_id', 'assay_finding_name', ),
-                    ('compound', 'compound_display'),
+                    ('assay_device_id',),
                 ),
             }
         ),
