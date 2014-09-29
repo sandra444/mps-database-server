@@ -21,9 +21,9 @@ $(document).ready(function () {
 
         all = null;
 
-        table = "<table class='layout-table' style='width: 99.5%;'><tbody>";
+        var table = "<table class='layout-table' style='width: 99.5%;'><tbody>";
 
-        for (i in lines) {
+        for (var i in lines) {
             table += "<tr>";
             table += "<th><br>" + lines[i][0] + "<br></th>";
             table += "<th><br>" + lines[i][1] + "<br></th>";
