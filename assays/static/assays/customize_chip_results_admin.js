@@ -43,7 +43,7 @@ $(document).ready(function () {
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
-    }
+    };
 
     var add = '<div class="form-row"><div class="field-box">' +
         '<label for="compound">Compound:</label><p id="compound"></p></div>' +
