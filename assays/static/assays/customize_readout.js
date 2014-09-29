@@ -158,7 +158,7 @@ $(document).ready(function () {
         $('#layout_div').remove();
         $('#controls').remove();
 
-        $('fieldset')
+        $('fieldset').first()
             .after($('<div>')
                 .attr('id', 'layout_div')
                 .addClass('module inline'));
