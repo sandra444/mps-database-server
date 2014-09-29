@@ -907,7 +907,7 @@ class AssayTestResultAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'assay_device_readout','first'
+        'assay_device_readout','compound','assay','result','result_function','result_type','severity'
     )
     search_fields = ['assay_device_readout']
     actions = ['update_fields']
@@ -936,10 +936,33 @@ class AssayTestResultAdmin(LockableAdmin):
     actions = ['update_fields']
     inlines = [AssayResultInline]
 
-    def first(self, obj):
-        return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].__dict__
-    first.allow_tags = True
+    def compound(self, obj):
+        assay = AssayChipReadout.objects.get(id=obj.assay_device_readout_id)
+        return Compound.objects.get(id=assay.compound_id).name
 
+    def assay(self, obj):
+        assay = AssayChipReadout.objects.get(id=obj.assay_device_readout_id)
+        return AssayModel.objects.get(id=assay.assay_name_id).assay_name
+
+    def result(self, obj):
+        abbreviation = AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result
+        if abbreviation == '1':
+            return u'Positive'
+        else:
+            return u'Negative'
+
+    def result_function(self, obj):
+        return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result_function
+
+    def result_type(self, obj):
+        return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result_type
+
+    def severity(self, obj):
+        SEVERITY_SCORE = dict((
+        ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
+        ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
+        ))
+        return SEVERITY_SCORE[AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].severity]
 
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
