@@ -469,7 +469,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
     resource_class = AssayDeviceReadoutResource
 
     class Media(object):
-        js = ('assays/customize_readout.js', 'assays/customize_admin.js',)
+        js = ('assays/customize_readout.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
     raw_id_fields = ("cell_sample",)
