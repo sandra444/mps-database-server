@@ -937,32 +937,44 @@ class AssayTestResultAdmin(LockableAdmin):
     inlines = [AssayResultInline]
 
     def compound(self, obj):
-        assay = AssayChipReadout.objects.get(id=obj.assay_device_readout_id)
-        return Compound.objects.get(id=assay.compound_id).name
+        if obj.assay_device_readout_id:
+            assay = AssayChipReadout.objects.get(id=obj.assay_device_readout_id)
+            return Compound.objects.get(id=assay.compound_id).name
+        return ''
 
     def assay(self, obj):
-        assay = AssayChipReadout.objects.get(id=obj.assay_device_readout_id)
-        return AssayModel.objects.get(id=assay.assay_name_id).assay_name
+        if obj.assay_device_readout_id:
+            assay = AssayChipReadout.objects.get(id=obj.assay_device_readout_id)
+            return AssayModel.objects.get(id=assay.assay_name_id).assay_name
+        return ''
 
     def result(self, obj):
-        abbreviation = AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result
-        if abbreviation == '1':
-            return u'Positive'
-        else:
-            return u'Negative'
+        if obj.id:
+            abbreviation = AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result
+            if abbreviation == '1':
+                return u'Positive'
+            else:
+                return u'Negative'
+        return ''
 
     def result_function(self, obj):
-        return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result_function
+        if obj.id:
+            return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result_function
+        return ''
 
     def result_type(self, obj):
-        return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result_type
+        if obj.id:
+            return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result_type
+        return ''
 
     def severity(self, obj):
         SEVERITY_SCORE = dict((
         ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
         ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
         ))
-        return SEVERITY_SCORE[AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].severity]
+        if obj.id:
+            return SEVERITY_SCORE[AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].severity]
+        return ''
 
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
