@@ -3,6 +3,7 @@ import json
 from collections import defaultdict
 from django.http import *
 from .models import *
+from compounds.models import Compound
 import logging
 logger = logging.getLogger(__name__)
 
@@ -194,6 +195,51 @@ def fetch_base_layout_info(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+#Fetches and displays assay layout from plate readout
+def fetch_plate_info(request):
+    """Returns dynamic info for plate assays"""
+
+    assay_id = request.POST.get('id')
+
+    if not assay_id:
+        logger.error('assay id not present in request to fetch_assay_info')
+        return HttpResponseServerError()
+
+    assay = AssayDeviceReadout.objects.get(id=assay_id)
+
+    data = {}
+
+    data.update({
+        'assay_layout_id': assay.assay_layout_id,
+    })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
+def fetch_chip_info(request):
+    """Returns dynamic info for assays"""
+
+    assay_id = request.POST.get('id')
+
+    if not assay_id:
+        logger.error('assay id not present in request to fetch_assay_info')
+        return HttpResponseServerError()
+
+    assay = AssayChipReadout.objects.get(id=assay_id)
+
+    data = {}
+
+    data.update({
+        #Need actual data, not ID
+        'compound': str(Compound.objects.get(id=assay.compound_id).name),
+        'unit':  str(PhysicalUnits.objects.get(id=assay.unit_id).unit),
+        'concentration': assay.concentration,
+        'chip_test_type': assay.chip_test_type,
+        'assay': str(AssayModel.objects.get(id=assay.assay_name_id).assay_name),
+    })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
 
 switch = {
     'fetch_assay_layout_content': fetch_assay_layout_content,
@@ -204,6 +250,8 @@ switch = {
     'fetch_baseid': fetch_baseid,
     'fetch_base_layout_wells': fetch_base_layout_wells,
     'fetch_base_layout_info': fetch_base_layout_info,
+    'fetch_plate_info': fetch_plate_info,
+    'fetch_chip_info': fetch_chip_info,
 }
 
 

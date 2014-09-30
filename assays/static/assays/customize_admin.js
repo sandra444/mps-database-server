@@ -189,7 +189,7 @@ $(document).ready(function () {
         if (format_id.length) {
             $('#layout_div').remove();
 
-            $('fieldset').after($('<div>').attr('id',
+            $('fieldset').first().after($('<div>').attr('id',
                 'layout_div').addClass('module inline'));
 
             // create table
@@ -494,7 +494,7 @@ $(document).ready(function () {
                 '<li><input id="id_howtoincr" type="radio" name="howtoincr" value="multiply">     Multiply</li>' +
                 '</ul></div>'));
 
-            $('fieldset').append(controls);
+            $('fieldset').first().append(controls);
 
             // make table selectable
             $('#layout_table').selectable({
@@ -516,7 +516,7 @@ $(document).ready(function () {
             $('#layout_div').remove();
             $('#controls').remove();
 
-            $('fieldset').after($('<div>').attr('id',
+            $('fieldset').first().after($('<div>').attr('id',
                 'layout_div').addClass('module inline'));
 
             // create table

@@ -2,7 +2,6 @@ $(document).ready(function () {
 
     var assay_layout_id;
     var base_layout_id;
-    var assay_layout;
     var readout_table;
     var readout_id;
 
@@ -257,7 +256,7 @@ $(document).ready(function () {
     }
 
     function fetchBaseLayout() {
-        assay_layout_id = assay_layout.val();
+        //assay_layout_id = assay_layout.val();
         console.log('Current Assay Layout: ' + assay_layout_id);
 
         $.ajax({
@@ -284,47 +283,55 @@ $(document).ready(function () {
         });
     }
 
-    function getReadoutValue() {
+    function getReadoutData() {
 
-        // Obtain current readout ID
+        $.ajax({
+            url: "/assays_ajax",
+            type: "POST",
+            dataType: "json",
+            data: {
+                // Function to call within the view is defined by `call:`
+                call: 'fetch_plate_info',
 
-        // 1) Select element of class 'historylink'
+                // First token is the var name within views.py
+                // Second token is the var name in this JS file
+                id: $('#id_assay_device_id').val(),
 
-        // 2) Select the href attribute
+                // Always pass the CSRF middleware token with every AJAX call
+                csrfmiddlewaretoken: middleware_token
+            },
+            success: function (json) {
+                console.log(json);
+                assay_layout_id = json.assay_layout_id;
+                readout_id = $('#id_assay_device_id').val();
+                fetchBaseLayout();
+            },
+            error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
 
-        // 3) Split the value of the href string into an array using '/' as delimiter
-
-        // 4) Read the 4th array element (technically 5th)
-
-        // 5) Cast the value to integer
-        // Math.floor is the fastest parseInt on the average UPDDI computer
-        // Refer to the benchmarks for more information:
-        // http://jsperf.com/performance-of-parseint
-
-        try {
-            return Math.floor($('.historylink').attr('href').split('/')[4]);
-        }catch(err){
-            return 0;
-        }
     }
 
     function checkAssayLayoutValidity() {
 
-        assay_layout = $('#id_assay_layout');
+        var previous = $('#layout_div');
 
-        if (assay_layout.length
-            && assay_layout.val() != ''
-            && assay_layout.val() >= 0) {
+        if(previous){
+            previous.remove();
+        }
 
-            readout_id = getReadoutValue();
-            fetchBaseLayout();
+        var assay_readout = $('#id_assay_device_id');
+
+        if (assay_readout.val()) {
+            getReadoutData();
         }
     }
 
     checkAssayLayoutValidity();
 
 
-    $('#id_assay_layout').change( function () {
+    $('#id_assay_device_id').change( function () {
             checkAssayLayoutValidity();
     });
 
