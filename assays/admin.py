@@ -949,7 +949,7 @@ class AssayTestResultAdmin(LockableAdmin):
         return ''
 
     def result(self, obj):
-        if obj.id:
+        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
             abbreviation = AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result
             if abbreviation == '1':
                 return u'Positive'
@@ -958,12 +958,12 @@ class AssayTestResultAdmin(LockableAdmin):
         return ''
 
     def result_function(self, obj):
-        if obj.id:
+        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
             return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result_function
         return ''
 
     def result_type(self, obj):
-        if obj.id:
+        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
             return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result_type
         return ''
 
@@ -972,7 +972,7 @@ class AssayTestResultAdmin(LockableAdmin):
         ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
         ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
         ))
-        if obj.id:
+        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
             return SEVERITY_SCORE[AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].severity]
         return ''
 
