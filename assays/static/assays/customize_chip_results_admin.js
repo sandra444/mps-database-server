@@ -1,7 +1,5 @@
 $(document).ready(function () {
 
-    //$('<div id="view_data">').appendTo($('fieldset')[0]).html('<div class="form-row"><div class="field-box"><label for="compound">Compound:</label><input type="text" readonly id="compound"></div><div class="field-box"><label for="concentration">Concentration:</label><input type="text" readonly id="concentration">></div><div class="field-box"><label for="unit">Unit:</label><input type="text" readonly id="unit"></div><div class="field-box"><label for="chip_test_type">Test Type:</label><input type="text" readonly id="chip_test_type"></div>');
-
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     var ajax_call = function () {
