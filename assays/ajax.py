@@ -4,6 +4,7 @@ from collections import defaultdict
 from django.http import *
 from .models import *
 from compounds.models import Compound
+from microdevices.models import MicrophysiologyCenter
 import logging
 logger = logging.getLogger(__name__)
 
@@ -230,12 +231,31 @@ def fetch_chip_info(request):
     data = {}
 
     data.update({
-        #Need actual data, not ID
         'compound': str(Compound.objects.get(id=assay.compound_id).name),
         'unit':  str(PhysicalUnits.objects.get(id=assay.unit_id).unit),
         'concentration': assay.concentration,
         'chip_test_type': assay.chip_test_type,
         'assay': str(AssayModel.objects.get(id=assay.assay_name_id).assay_name),
+    })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
+def fetch_center_id(request):
+    """Returns center ID for dynamic run form"""
+
+    center = request.POST.get('id')
+
+    if not center:
+        logger.error('center not present in request to fetch_assay_info')
+        return HttpResponseServerError()
+
+    center_data = MicrophysiologyCenter.objects.get(id=center)
+
+    data = {}
+
+    data.update({
+        'center_id': center_data.center_id,
     })
 
     return HttpResponse(json.dumps(data),
@@ -252,6 +272,7 @@ switch = {
     'fetch_base_layout_info': fetch_base_layout_info,
     'fetch_plate_info': fetch_plate_info,
     'fetch_chip_info': fetch_chip_info,
+    'fetch_center_id': fetch_center_id,
 }
 
 
