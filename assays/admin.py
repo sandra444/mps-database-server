@@ -1029,6 +1029,10 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
 class AssayRunAdmin(LockableAdmin):
+
+    class Media(object):
+        js = ('assays/customize_run.js',)
+
     form = AssayRunForm
     save_on_top = True
     list_per_page = 300
