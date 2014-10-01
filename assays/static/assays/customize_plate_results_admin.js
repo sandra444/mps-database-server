@@ -310,7 +310,6 @@ $(document).ready(function () {
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
-
     }
 
     function checkAssayLayoutValidity() {
@@ -330,10 +329,7 @@ $(document).ready(function () {
 
     checkAssayLayoutValidity();
 
-
     $('#id_assay_device_id').change( function () {
             checkAssayLayoutValidity();
     });
-
-
 });
