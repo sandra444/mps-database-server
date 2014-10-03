@@ -3,7 +3,6 @@ import json
 from collections import defaultdict
 from django.http import *
 from .models import *
-from compounds.models import Compound
 from microdevices.models import MicrophysiologyCenter
 import logging
 logger = logging.getLogger(__name__)
@@ -231,11 +230,13 @@ def fetch_chip_info(request):
     data = {}
 
     data.update({
-        'compound': str(Compound.objects.get(id=assay.compound_id).name),
-        'unit':  str(PhysicalUnits.objects.get(id=assay.unit_id).unit),
+        'compound': assay.compound.name,
+        'unit':  assay.unit.unit,
         'concentration': assay.concentration,
         'chip_test_type': assay.chip_test_type,
-        'assay': str(AssayModel.objects.get(id=assay.assay_name_id).assay_name),
+        'assay': assay.assay_name.assay_name,
+        'run': assay.assay_run_id.assay_run_id,
+        'model': assay.device.device_name,
     })
 
     return HttpResponse(json.dumps(data),
