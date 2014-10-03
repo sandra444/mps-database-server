@@ -30,7 +30,7 @@ $(document).ready(function () {
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
-                $('#compound').html(json.compound + ' ' + json.concentration + ' (' + json.unit + ')');
+                $('#compound').html(json.compound + ' (' + json.concentration + ' ' + json.unit + ')');
                 $('#chip_test_type').html(json.chip_test_type);
                 $('#assay').html(json.assay);
                 $('#run').html(json.run);
