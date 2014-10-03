@@ -4,7 +4,6 @@ $(document).ready(function () {
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     var ajax_call = function () {
-        console.log(readout.val());
 
         if (!readout.val()) {
             $('#compound').html("");
