@@ -15,8 +15,8 @@ $(document).ready(function () {
         var all = csv.split('\n');
         var lines = [];
 
-        for (i in all) {
-            lines.push(all[i].split(','));
+        for (var index in all) {
+            lines.push(all[index].split(','));
         }
 
         all = null;
@@ -35,12 +35,13 @@ $(document).ready(function () {
         $('#csv_table').html(table);
     };
 
-    if ($('#assaychipreadout_form')[0] != undefined) {
-        var add = "<table class='layout-table' style='width: 99.5%;'><tbody>" +
+    var add = "<table class='layout-table' style='width: 99.5%;'><tbody>" +
             "<tr><th>Time</th><th>Field</th><th>Raw Data</th></tr>" +
             "<tr><th><br><br></th><th><br><br></th><th><br><br></th>" +
             "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
             "</tbody></table>";
+
+    if ($('#assaychipreadout_form')[0] != undefined) {
         $('<div id="csv_table" align="center" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body').html(add);
         $("#csv_table").insertBefore($(".module")[3]);
     }
@@ -51,7 +52,17 @@ $(document).ready(function () {
 
     $('#id_file').change(function(evt) {
         var file = $('#id_file')[0].files[0];
-        getText(file);
+        if (file) {
+            getText(file);
+        }
+        else{
+            if ($('.file-upload').find($('a')).attr('href') != undefined) {
+                $.get($('.file-upload').find($('a')).attr('href'), function(data) { parseAndReplace(data); });
+            }
+            else {
+                $('#csv_table').html(add);
+            }
+        }
     });
 
 });
