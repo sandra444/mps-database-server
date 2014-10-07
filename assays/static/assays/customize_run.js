@@ -36,7 +36,7 @@ $(document).ready(function () {
                 }
             });
         }
-        else{
+        else {
             data[0] = '';
             set_data();
         }
@@ -44,7 +44,11 @@ $(document).ready(function () {
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
-    var data = [[],[],[]];
+    var data = [
+        [],
+        [],
+        []
+    ];
 
     var date = $('#id_start_date_0');
     var center = $('#id_center_id');

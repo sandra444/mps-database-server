@@ -25,7 +25,7 @@ $(document).ready(function () {
             currentCell = table.rows[row].cells[column];
 
             $(currentCell).append(
-                '<div style="text-align: center; color: blue;"><p><b>' +
+                    '<div style="text-align: center; color: blue;"><p><b>' +
                     value +
                     '</b></p></div>'
             );
@@ -80,9 +80,9 @@ $(document).ready(function () {
 
                     info =
                         'well="' + well + '"'
-                            + ',cellsample=' + cellsample_id
-                            + ',density=' + density
-                            + ',density_unit="' + density_unit + '"';
+                        + ',cellsample=' + cellsample_id
+                        + ',density=' + density
+                        + ',density_unit="' + density_unit + '"';
 
                     stampCounter++;
                     li.append($('<input>')
@@ -111,10 +111,10 @@ $(document).ready(function () {
 
                     info =
                         'well="' + well + '"'
-                            + ',compound=' + compound_id
-                            + ',concentration=' + concentration
-                            + ',concentration_unit="' + concentration_unit +
-                            '"';
+                        + ',compound=' + compound_id
+                        + ',concentration=' + concentration
+                        + ',concentration_unit="' + concentration_unit +
+                        '"';
 
                     stampCounter++;
                     li.append($('<input>')
@@ -316,7 +316,7 @@ $(document).ready(function () {
 
         var previous = $('#layout_div');
 
-        if(previous){
+        if (previous) {
             previous.remove();
         }
 
@@ -329,7 +329,7 @@ $(document).ready(function () {
 
     checkAssayLayoutValidity();
 
-    $('#id_assay_device_id').change( function () {
-            checkAssayLayoutValidity();
+    $('#id_assay_device_id').change(function () {
+        checkAssayLayoutValidity();
     });
 });

@@ -3,12 +3,11 @@ $(document).ready(function () {
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
 
-
-    $('#id_assay_layout').change( function () {
-            if ($('#id_base_layout_name').val() === '') {
-            } else {
-                make_layout(base_layout.val());
-            }
+    $('#id_assay_layout').change(function () {
+        if ($('#id_base_layout_name').val() === '') {
+        } else {
+            make_layout(base_layout.val());
+        }
 
     });
 
@@ -108,8 +107,8 @@ $(document).ready(function () {
     function create_base_layout_table(data) {
 
         var table = $('<table>').css('width',
-                '100%').addClass('layout-table').attr('id',
-                'layout_table').appendTo($('#layout_div'));
+            '100%').addClass('layout-table').attr('id',
+            'layout_table').appendTo($('#layout_div'));
 
         // make first row
         var row = $('<tr>');
@@ -149,23 +148,23 @@ $(document).ready(function () {
             // create selector
 
             $.ajax({
-                       url: "/assays_ajax",
-                       type: "POST",
-                       dataType: "json",
-                       data: {
-                           // Function to call within the view is defined by `call:`
-                           call: 'fetch_well_types',
+                url: "/assays_ajax",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    // Function to call within the view is defined by `call:`
+                    call: 'fetch_well_types',
 
-                           // Always pass the CSRF middleware token with every AJAX call
-                           csrfmiddlewaretoken: middleware_token
-                       },
-                       success: function (json) {
-                           create_well_type_selector(json);
-                       },
-                       error: function (xhr, errmsg, err) {
-                           console.log(xhr.status + ": " + xhr.responseText);
-                       }
-                   });
+                    // Always pass the CSRF middleware token with every AJAX call
+                    csrfmiddlewaretoken: middleware_token
+                },
+                success: function (json) {
+                    create_well_type_selector(json);
+                },
+                error: function (xhr, errmsg, err) {
+                    console.log(xhr.status + ": " + xhr.responseText);
+                }
+            });
 
 
         }
@@ -354,7 +353,7 @@ $(document).ready(function () {
                                 ' ' + concentration_unit + ')';
 
                             var li = $('<li>').text(text).attr('compound',
-                                    compound_id).click(function () {
+                                compound_id).click(function () {
                                     $(this).remove();
                                 });
 
@@ -364,7 +363,7 @@ $(document).ready(function () {
                                 concentration_unit + '"';
 
                             li.append($('<input>').attr('type',
-                                    'hidden').attr('name',
+                                'hidden').attr('name',
                                     'well_' + stamp).attr('value', info));
                             list.append(li);
 
@@ -397,13 +396,13 @@ $(document).ready(function () {
 
                         var text = 'Time: ' + tp + ' ' + tptext;
                         var li = $('<li>').attr('id',
-                                stamp).text(text).click(function () {
+                            stamp).text(text).click(function () {
                                 $(this).remove();
                             });
 
                         li.append($('<input>').attr('type',
-                                'hidden').attr('name', stamp).attr('value',
-                                tp));
+                            'hidden').attr('name', stamp).attr('value',
+                            tp));
                         list.prepend(li);
                     }
                 }
@@ -432,9 +431,9 @@ $(document).ready(function () {
         // color and label cells
         $.each(data['wells'], function (k, v) {
             $('#' + k).css('background-color',
-                    v[1]).append($('<div>').css('text-align',
+                v[1]).append($('<div>').css('text-align',
                     'center').append($('<b>').text(v[0]))).append($('<ul>').attr('id',
-                    k + '_list').addClass('layout-list'));
+                        k + '_list').addClass('layout-list'));
         });
 
         if (!$('#id_locked').prop('checked')) {
@@ -596,7 +595,7 @@ $(document).ready(function () {
                 if (tp > 0 && $('#' + stamp).length === 0) {
                     var text = 'Time: ' + tp + ' min';
                     var li = $('<li>').attr('id',
-                            stamp).text(text).click(function () {
+                        stamp).text(text).click(function () {
                             $(this).remove();
                         });
                     li.append($('<input>').attr('type', 'hidden').attr('name',
@@ -614,7 +613,7 @@ $(document).ready(function () {
                         concentration_unit + ')';
 
                     var li = $('<li>').text(text).attr('compound',
-                            compound_id).click(function () {
+                        compound_id).click(function () {
                             $(this).remove();
                         });
 
@@ -624,7 +623,7 @@ $(document).ready(function () {
 
                     stamp_counter++;
                     li.append($('<input>').attr('type', 'hidden').attr('name',
-                        'well_' + stamp_counter).attr('value', info));
+                            'well_' + stamp_counter).attr('value', info));
                     list.append(li);
 
                 }
@@ -662,7 +661,6 @@ $(document).ready(function () {
     }
 
     // END ASSAY LAYOUT
-
 
 
 });
