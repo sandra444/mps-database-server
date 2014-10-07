@@ -36,10 +36,10 @@ $(document).ready(function () {
     };
 
     var add = "<table class='layout-table' style='width: 99.5%;'><tbody>" +
-            "<tr><th>Time</th><th>Field</th><th>Raw Data</th></tr>" +
-            "<tr><th><br><br></th><th><br><br></th><th><br><br></th>" +
-            "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
-            "</tbody></table>";
+        "<tr><th>Time</th><th>Field</th><th>Raw Data</th></tr>" +
+        "<tr><th><br><br></th><th><br><br></th><th><br><br></th>" +
+        "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
+        "</tbody></table>";
 
     if ($('#assaychipreadout_form')[0] != undefined) {
         $('<div id="csv_table" align="center" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body').html(add);
@@ -47,17 +47,21 @@ $(document).ready(function () {
     }
 
     if ($('.file-upload').find($('a')).attr('href') != undefined) {
-        $.get($('.file-upload').find($('a')).attr('href'), function(data) { parseAndReplace(data); });
+        $.get($('.file-upload').find($('a')).attr('href'), function (data) {
+            parseAndReplace(data);
+        });
     }
 
-    $('#id_file').change(function(evt) {
+    $('#id_file').change(function (evt) {
         var file = $('#id_file')[0].files[0];
         if (file) {
             getText(file);
         }
-        else{
+        else {
             if ($('.file-upload').find($('a')).attr('href') != undefined) {
-                $.get($('.file-upload').find($('a')).attr('href'), function(data) { parseAndReplace(data); });
+                $.get($('.file-upload').find($('a')).attr('href'), function (data) {
+                    parseAndReplace(data);
+                });
             }
             else {
                 $('#csv_table').html(add);
