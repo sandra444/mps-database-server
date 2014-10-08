@@ -623,6 +623,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
         css = {'all': ('assays/customize_admin.css',)}
 
     save_on_top = True
+    save_as = True
 
     raw_id_fields = ("compound","cell_sample",)
 
