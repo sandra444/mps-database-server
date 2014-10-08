@@ -375,7 +375,7 @@ class AssayRun(LockableModel):
     assay_run_id = models.TextField(unique=True, help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering runs sequentially")
     description = models.TextField(blank=True, null=True)
 
-    file = models.FileField(upload_to='csv', verbose_name='Data File',
+    file = models.FileField(upload_to='csv', verbose_name='Batch Data File',
                             blank=True, null=True, help_text='Do not upload until you have made each Chip Readout')
 
     def __unicode__(self):

@@ -1049,7 +1049,7 @@ def parseRunCSV(currentRun, file):
             #Check if any Readouts already exist, if so, crash
             for id in readouts[2:]:
                 if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
-                    raise Exception('Chip Readout id = %s already exists' % id)
+                    raise Exception('Chip Readout id = %s already contains data' % id)
                     return
 
 
