@@ -48,7 +48,6 @@ $(document).ready(function () {
     };
 
     var parseAndReplace = function (csv) {
-
         if (!csv) {
             $('#csv_table').html(add);
             return;
