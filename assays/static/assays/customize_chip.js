@@ -28,7 +28,7 @@ $(document).ready(function () {
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
-                parseAndReplace(json.csv);
+                parseAndReplace(json.csv,true);
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
@@ -44,10 +44,10 @@ $(document).ready(function () {
 
     var loaded = function (evt) {
         var fileString = evt.target.result;
-        parseAndReplace(fileString);
+        parseAndReplace(fileString,false);
     };
 
-    var parseAndReplace = function (csv) {
+    var parseAndReplace = function (csv,exist) {
         if (!csv) {
             $('#csv_table').html(add);
             return;
@@ -64,10 +64,10 @@ $(document).ready(function () {
 
         all = null;
 
-        var table = "<table class='layout-table' style='width: 99.5%;'><tbody>";
+        var table = exist ? "<table class='layout-table' style='width: 99.5%;background: #7FFF00'><tbody>":"<table class='layout-table' style='width: 99.5%;'><tbody>";
 
         for (var i in lines) {
-            table += "<tr>";
+            table += i==0 && !exist ? "<tr style='background: #FF2400'>" : "<tr>";
             table += "<th><br>" + lines[i][0] + "<br></th>";
             table += "<th><br>" + lines[i][1] + "<br></th>";
             table += "<th><br>" + lines[i][2] + "<br></th>";
@@ -83,7 +83,7 @@ $(document).ready(function () {
     var id = getReadoutValue();
 
     var add = "<table class='layout-table' style='width: 99.5%;'><tbody>" +
-            "<tr><th>Time</th><th>Field</th><th>Raw Data</th></tr>" +
+            "<tr style='background: #FF2400'><th>Time</th><th>Field</th><th>Raw Data</th></tr>" +
             "<tr><th><br><br></th><th><br><br></th><th><br><br></th>" +
             "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
             "</tbody></table>";
