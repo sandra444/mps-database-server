@@ -1032,6 +1032,43 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
+def parseRunCSV(currentRun, file):
+
+    datareader = csv.reader(file, delimiter=',')
+    datalist = list(datareader)
+
+    readouts = []
+
+    for rowID, rowValue in enumerate(datalist):
+        # rowValue holds all of the row elements
+        # rowID is the index of the current row from top to bottom
+
+        #Get foreign keys from the first row
+        if rowID == 0:
+            readouts = list(rowValue)
+            #Check if any Readouts already exist, if so, crash
+            for id in readouts[2:]:
+                if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
+                    raise Exception('Chip Readout id = %s already exists' % id)
+                    return
+
+
+        else:
+            for colID in range(2,len(rowValue)):
+                currentChipReadout = readouts[colID]
+                field = rowValue[1]
+                val = rowValue[colID]
+                time = rowValue[0]
+
+                #How to parse Chip data
+                AssayChipRawData(
+                    assay_chip_id=AssayChipReadout.objects.get(id=currentChipReadout),
+                    field_id = field,
+                    value = val,
+                    elapsed_time = time
+                ).save()
+    return
+
 class AssayRunAdmin(LockableAdmin):
 
     class Media(object):
@@ -1047,9 +1084,10 @@ class AssayRunAdmin(LockableAdmin):
                 'fields': (
                     'center_id',
                     'start_date',
-                     'name',
+                    'name',
                     'assay_run_id',
-                    'description'
+                    'description',
+                    'file'
                 )
             }
         ),
@@ -1064,5 +1102,19 @@ class AssayRunAdmin(LockableAdmin):
             }
         ),
     )
+
+    def save_model(self, request, obj, form, change):
+
+        if change:
+            obj.modified_by = request.user
+
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        if request.FILES:
+            # pass the upload file name to the CSV reader if a file exists
+            parseRunCSV(obj, request.FILES['file'].file)
+
+        obj.save()
 
 admin.site.register(AssayRun, AssayRunAdmin)

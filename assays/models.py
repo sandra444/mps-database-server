@@ -375,6 +375,9 @@ class AssayRun(LockableModel):
     assay_run_id = models.TextField(unique=True, help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering runs sequentially")
     description = models.TextField(blank=True, null=True)
 
+    file = models.FileField(upload_to='csv', verbose_name='Data File',
+                            blank=True, null=True, help_text='Do not upload until you have made each Chip Readout')
+
     def __unicode__(self):
         return self.assay_run_id
 
@@ -433,7 +436,7 @@ class AssayChipReadout(LockableModel):
     notes = models.CharField(max_length=2048, blank=True, null=True)
     scientist = models.CharField(max_length=100, blank=True, null=True)
     file = models.FileField(upload_to='csv', verbose_name='Data File',
-                            blank=True, null=True, help_text='Note: First line treated as header')
+                            blank=True, null=True, help_text='Green = Data from database; Red = Line that will not be read')
 
     def assay_chip_name(self):
         return u'{0}'.format(self.assay_chip_id)
