@@ -262,6 +262,33 @@ def fetch_center_id(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+def fetch_chip_readout(request):
+    """Returns the Raw Chip Data stored for a Chip Readout"""
+
+    chip_id = request.POST.get('id')
+
+    if not chip_id:
+        logger.error('chip not present in request to fetch_chip_readout')
+        return HttpResponseServerError()
+
+    chip_data = AssayChipRawData.objects.filter(assay_chip_id=chip_id).order_by('id')
+
+    csv = ""
+
+    for raw in chip_data:
+        csv += str(raw.elapsed_time) + ','
+        csv += str(raw.field_id) + ','
+        csv += str(raw.value) + '\n'
+
+    data = {}
+
+    data.update({
+        'csv': csv,
+    })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
 switch = {
     'fetch_assay_layout_content': fetch_assay_layout_content,
     'fetch_readout': fetch_readout,
@@ -274,6 +301,7 @@ switch = {
     'fetch_plate_info': fetch_plate_info,
     'fetch_chip_info': fetch_chip_info,
     'fetch_center_id': fetch_center_id,
+    'fetch_chip_readout': fetch_chip_readout,
 }
 
 
