@@ -48,6 +48,12 @@ $(document).ready(function () {
     };
 
     var parseAndReplace = function (csv) {
+
+        if (!csv) {
+            $('#csv_table').html(add);
+            return;
+        }
+
         var all = csv.split('\n');
         var lines = [];
 
