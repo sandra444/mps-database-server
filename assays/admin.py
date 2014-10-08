@@ -628,8 +628,9 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
     list_per_page = 100
     list_display = ('assay_chip_id',
-                    'assay_name',
+                    'id',
                     'assay_run_id',
+                    'assay_name',
                     'compound',
                     'cell_sample',
                     'reader_name')
@@ -708,6 +709,9 @@ class AssayChipReadoutAdmin(LockableAdmin):
             }
         ),
     )
+
+    def id(self, obj):
+        return obj.id
 
     #Acquires first unused ID
     def get_next_id(self):
