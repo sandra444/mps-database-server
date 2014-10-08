@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from django.db import models
-from microdevices.models import Microdevice
+from microdevices.models import Microdevice, OrganModel
 from mps.base.models import LockableModel
 
 PHYSICAL_UNIT_TYPES = (
@@ -415,7 +415,7 @@ class AssayChipReadout(LockableModel):
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Run')
-    device = models.ForeignKey(Microdevice, verbose_name = 'Chip Model Name')
+    device = models.ForeignKey(OrganModel, verbose_name = 'Chip Model Name')
 
     reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
 
