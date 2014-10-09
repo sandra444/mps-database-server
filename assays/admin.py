@@ -1094,16 +1094,20 @@ class AssayRunForm(forms.ModelForm):
         # clean the form data, before validation
         data = super(AssayRunForm, self).clean()
 
-        datareader = csv.reader(data['file'].file, delimiter=',')
-        datalist = list(datareader)
+        if data['assay_run_id'].startswith('-'):
+            raise forms.ValidationError('Error with assay_run_id; please try again')
 
-        readouts = list(datalist[0])
-        #Check if any Readouts already exist, if so, crash
-        for id in readouts[2:]:
-            if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
-                raise forms.ValidationError('Chip Readout id = %s already contains data; please change your batch file' % id)
-            if not AssayChipReadout.objects.filter(id=id).exists():
-                raise forms.ValidationError('Chip Readout id = %s does not exist; please change your batch file' % id)
+        if data['file']:
+            datareader = csv.reader(data['file'].file, delimiter=',')
+            datalist = list(datareader)
+
+            readouts = list(datalist[0])
+            #Check if any Readouts already exist, if so, crash
+            for id in readouts[2:]:
+                if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
+                    raise forms.ValidationError('Chip Readout id = %s already contains data; please change your batch file' % id)
+                if not AssayChipReadout.objects.filter(id=id).exists():
+                    raise forms.ValidationError('Chip Readout id = %s does not exist; please change your batch file' % id)
 
         return data
 
