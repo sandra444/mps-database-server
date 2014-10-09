@@ -3,7 +3,6 @@ import csv
 from django.contrib import admin
 from django import forms
 from assays.forms import AssayResultForm
-from assays.forms import AssayRunForm
 from django.http import HttpResponseRedirect
 
 from assays.models import *
@@ -1062,13 +1061,6 @@ def parseRunCSV(currentRun, file):
         #Get foreign keys from the first row
         if rowID == 0:
             readouts = list(rowValue)
-            #Check if any Readouts already exist, if so, crash
-            for id in readouts[2:]:
-                if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
-                    raise Exception('Chip Readout id = %s already contains data' % id)
-                if not AssayChipReadout.objects.filter(id=id).exists():
-                    raise Exception('Chip Readout id = %s does not exist' % id)
-
 
         else:
             for colID in range(2,len(rowValue)):
@@ -1085,6 +1077,35 @@ def parseRunCSV(currentRun, file):
                     elapsed_time = time
                 ).save()
     return
+
+class AssayRunForm(forms.ModelForm):
+
+    class Meta(object):
+        model = AssayRun
+        widgets = {
+            'assay_run_id': forms.Textarea(attrs={'rows':1}),
+            'name': forms.Textarea(attrs={'rows':1}),
+            'description': forms.Textarea(attrs={'rows':3}),
+        }
+
+    def clean(self):
+        """Validate unique, existing Chip Readout IDs"""
+
+        # clean the form data, before validation
+        data = super(AssayRunForm, self).clean()
+
+        datareader = csv.reader(data['file'].file, delimiter=',')
+        datalist = list(datareader)
+
+        readouts = list(datalist[0])
+        #Check if any Readouts already exist, if so, crash
+        for id in readouts[2:]:
+            if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
+                raise forms.ValidationError('Chip Readout id = %s already contains data; please change your batch file' % id)
+            if not AssayChipReadout.objects.filter(id=id).exists():
+                raise forms.ValidationError('Chip Readout id = %s does not exist; please change your batch file' % id)
+
+        return data
 
 class AssayRunAdmin(LockableAdmin):
 
