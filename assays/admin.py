@@ -4,6 +4,7 @@ from django.contrib import admin
 from django import forms
 from assays.forms import AssayResultForm
 from assays.forms import AssayRunForm
+from django.http import HttpResponseRedirect
 
 from assays.models import *
 from compounds.models import Compound
@@ -710,6 +711,20 @@ class AssayChipReadoutAdmin(LockableAdmin):
             }
         ),
     )
+
+    def response_add(self, request, obj, post_url_continue="../%s/"):
+        """If save as new or save and add another, redirect to new change model; else go to list"""
+        if '_saveasnew' or '_addanother' in request.POST:
+            return HttpResponseRedirect("../%s" % obj.id)
+        else:
+            return super(AssayChipReadoutAdmin, self).response_add(request, obj, post_url_continue)
+
+    def response_change(self, request, obj):
+        """If save as new, redirect to new change model; else go to list"""
+        if '_saveasnew' in request.POST:
+            return HttpResponseRedirect("../%s" % obj.id)
+        else:
+            return super(LockableAdmin, self).response_change(request, obj)
 
     def id(self, obj):
         return obj.id
