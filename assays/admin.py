@@ -1151,7 +1151,7 @@ class AssayRunAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parseRunCSV(obj, request.FILES['file'].file)
+            parseRunCSV(obj, request.FILES['file'])
 
         obj.save()
 
