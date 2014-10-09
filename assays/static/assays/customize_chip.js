@@ -66,6 +66,8 @@ $(document).ready(function () {
 
         var table = exist ? "<table class='layout-table' style='width: 99.5%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 99.5%;'><tbody>";
 
+        table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Field</th><th>Raw Data</th></tr>" : "";
+
         for (var i in lines) {
             table += i==0 && !exist ? "<tr style='background: #FF2400'>" : "<tr>";
             table += "<th><br>" + lines[i][0] + "<br></th>";
