@@ -3,7 +3,7 @@ import csv
 from django.contrib import admin
 from django import forms
 from assays.forms import AssayResultForm
-from assays.forms import AssayRunForm
+from django.http import HttpResponseRedirect
 
 from assays.models import *
 from compounds.models import Compound
@@ -623,13 +623,15 @@ class AssayChipReadoutAdmin(LockableAdmin):
         css = {'all': ('assays/customize_admin.css',)}
 
     save_on_top = True
+    save_as = True
 
     raw_id_fields = ("compound","cell_sample",)
 
     list_per_page = 100
     list_display = ('assay_chip_id',
-                    'assay_name',
+                    'id',
                     'assay_run_id',
+                    'assay_name',
                     'compound',
                     'cell_sample',
                     'reader_name')
@@ -708,6 +710,23 @@ class AssayChipReadoutAdmin(LockableAdmin):
             }
         ),
     )
+
+    def response_add(self, request, obj, post_url_continue="../%s/"):
+        """If save as new or save and add another, redirect to new change model; else go to list"""
+        if '_saveasnew' or '_addanother' in request.POST:
+            return HttpResponseRedirect("../%s" % obj.id)
+        else:
+            return super(AssayChipReadoutAdmin, self).response_add(request, obj, post_url_continue)
+
+    def response_change(self, request, obj):
+        """If save as new, redirect to new change model; else go to list"""
+        if '_saveasnew' in request.POST:
+            return HttpResponseRedirect("../%s" % obj.id)
+        else:
+            return super(LockableAdmin, self).response_change(request, obj)
+
+    def id(self, obj):
+        return obj.id
 
     #Acquires first unused ID
     def get_next_id(self):
@@ -1028,6 +1047,70 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
+def parseRunCSV(currentRun, file):
+
+    datareader = csv.reader(file, delimiter=',')
+    datalist = list(datareader)
+
+    readouts = []
+
+    for rowID, rowValue in enumerate(datalist):
+        # rowValue holds all of the row elements
+        # rowID is the index of the current row from top to bottom
+
+        #Get foreign keys from the first row
+        if rowID == 0:
+            readouts = list(rowValue)
+
+        else:
+            for colID in range(2,len(rowValue)):
+                currentChipReadout = readouts[colID]
+                field = rowValue[1]
+                val = rowValue[colID]
+                time = rowValue[0]
+
+                #How to parse Chip data
+                AssayChipRawData(
+                    assay_chip_id=AssayChipReadout.objects.get(id=currentChipReadout),
+                    field_id = field,
+                    value = val,
+                    elapsed_time = time
+                ).save()
+    return
+
+class AssayRunForm(forms.ModelForm):
+
+    class Meta(object):
+        model = AssayRun
+        widgets = {
+            'assay_run_id': forms.Textarea(attrs={'rows':1}),
+            'name': forms.Textarea(attrs={'rows':1}),
+            'description': forms.Textarea(attrs={'rows':3}),
+        }
+
+    def clean(self):
+        """Validate unique, existing Chip Readout IDs"""
+
+        # clean the form data, before validation
+        data = super(AssayRunForm, self).clean()
+
+        if data['assay_run_id'].startswith('-'):
+            raise forms.ValidationError('Error with assay_run_id; please try again')
+
+        if data['file']:
+            datareader = csv.reader(data['file'].file, delimiter=',')
+            datalist = list(datareader)
+
+            readouts = list(datalist[0])
+            #Check if any Readouts already exist, if so, crash
+            for id in readouts[2:]:
+                if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
+                    raise forms.ValidationError('Chip Readout id = %s already contains data; please change your batch file' % id)
+                if not AssayChipReadout.objects.filter(id=id).exists():
+                    raise forms.ValidationError('Chip Readout id = %s does not exist; please change your batch file' % id)
+
+        return data
+
 class AssayRunAdmin(LockableAdmin):
 
     class Media(object):
@@ -1043,9 +1126,10 @@ class AssayRunAdmin(LockableAdmin):
                 'fields': (
                     'center_id',
                     'start_date',
-                     'name',
+                    'name',
                     'assay_run_id',
-                    'description'
+                    'description',
+                    'file'
                 )
             }
         ),
@@ -1060,5 +1144,19 @@ class AssayRunAdmin(LockableAdmin):
             }
         ),
     )
+
+    def save_model(self, request, obj, form, change):
+
+        if change:
+            obj.modified_by = request.user
+
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        if request.FILES:
+            # pass the upload file name to the CSV reader if a file exists
+            parseRunCSV(obj, request.FILES['file'])
+
+        obj.save()
 
 admin.site.register(AssayRun, AssayRunAdmin)
