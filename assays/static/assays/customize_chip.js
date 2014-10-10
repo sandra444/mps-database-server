@@ -85,32 +85,28 @@ $(document).ready(function () {
     var id = getReadoutValue();
 
     var add = "<table class='layout-table' style='width: 99.5%;'><tbody>" +
-        "<tr><th>Time</th><th>Field</th><th>Raw Data</th></tr>" +
-        "<tr><th><br><br></th><th><br><br></th><th><br><br></th>" +
-        "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
-        "</tbody></table>";
+            "<tr style='background: #FF2400'><th>Time</th><th>Field</th><th>Raw Data</th></tr>" +
+            "<tr><th><br><br></th><th><br><br></th><th><br><br></th>" +
+            "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
+            "</tbody></table>";
 
     if ($('#assaychipreadout_form')[0] != undefined) {
         $('<div id="csv_table" align="center" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body').html(add);
         $("#csv_table").insertBefore($(".module")[3]);
     }
 
-    if ($('.file-upload').find($('a')).attr('href') != undefined) {
-        $.get($('.file-upload').find($('a')).attr('href'), function (data) {
-            parseAndReplace(data);
-        });
+    if (id) {
+        getReadout();
     }
 
-    $('#id_file').change(function (evt) {
+    $('#id_file').change(function(evt) {
         var file = $('#id_file')[0].files[0];
         if (file) {
             getText(file);
         }
-        else {
-            if ($('.file-upload').find($('a')).attr('href') != undefined) {
-                $.get($('.file-upload').find($('a')).attr('href'), function (data) {
-                    parseAndReplace(data);
-                });
+        else{
+            if (id) {
+               getReadout()
             }
             else {
                 $('#csv_table').html(add);
@@ -118,4 +114,6 @@ $(document).ready(function () {
         }
     });
 });
+
+
 
