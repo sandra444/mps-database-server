@@ -31,6 +31,17 @@ def generate_record_frequency_data(query):
 
     return result_list
 
+def generate_list_of_all_data_in_bioactivities(organisms, targets):
+    bioactivities_data = generate_list_of_all_bioactivities_in_bioactivities()
+    compounds_data = generate_list_of_all_compounds_in_bioactivities()
+    targets_data = generate_list_of_all_targets_in_bioactivities(organisms, targets)
+
+    result = {'bioactivities':bioactivities_data,
+              'compounds':compounds_data,
+              'targets':targets_data
+            }
+
+    return result
 
 def generate_list_of_all_bioactivities_in_bioactivities():
     cursor = connection.cursor()
@@ -112,9 +123,11 @@ def generate_list_of_all_compounds_in_bioactivities():
 def fetch_all_standard_bioactivities_data(
         desired_compounds,
         desired_targets,
-        desired_bioactivities
+        desired_bioactivities,
+        normalized
 ):
     # using values for now, FUTURE: use standardized_values
+    #Appears to be using standardized_values now
     cursor = connection.cursor()
 
     cursor.execute(
@@ -152,6 +165,11 @@ def fetch_all_standard_bioactivities_data(
 
     result = []
 
+    norm = 3
+
+    if normalized:
+        norm = 5
+
     for q in query:
 
         if q[0] not in desired_compounds:
@@ -167,7 +185,7 @@ def fetch_all_standard_bioactivities_data(
                 'compound': q[0],
                 'target': q[1],
                 'bioactivity': q[2],
-                'value': q[3]
+                'value': q[norm]
             }
         )
 
@@ -275,10 +293,13 @@ def heatmap(request):
         ) is True
     ]
 
+    normalized = request_filter.get('normalize_bioactivities')
+
     all_std_bioactivities = fetch_all_standard_bioactivities_data(
         desired_compounds,
         desired_targets,
-        desired_bioactivities
+        desired_bioactivities,
+        normalized
     )
 
     if not all_std_bioactivities:

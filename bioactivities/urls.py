@@ -17,6 +17,8 @@ urlpatterns = patterns('bioactivities.views',
                            'list_of_all_targets_in_bioactivities'),
                        url(r'^bioactivities/all_compounds/$',
                            'list_of_all_compounds_in_bioactivities'),
+                       url(r'^bioactivities/all_data/$',
+                           'list_of_all_data_in_bioactivities'),
                        url(r'^bioactivities/gen_heatmap/$',
                            'gen_heatmap'),
                        )

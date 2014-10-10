@@ -117,6 +117,30 @@ def list_of_all_targets_in_bioactivities(request):
 def list_of_all_compounds_in_bioactivities(request):
     return JSONResponse(generate_list_of_all_compounds_in_bioactivities())
 
+@csrf_exempt
+def list_of_all_data_in_bioactivities(request):
+    target_types = json.loads(request.GET.get('target_types'))
+    organisms = json.loads(request.GET.get('organisms'))
+
+    desired_target_types = [
+        x.get(
+            'name'
+        ) for x in target_types
+        if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_organisms = [
+        x.get(
+            'name'
+        ) for x in organisms
+        if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    return JSONResponse(generate_list_of_all_data_in_bioactivities(desired_organisms, desired_target_types))
 
 @csrf_exempt
 def gen_heatmap(request):
