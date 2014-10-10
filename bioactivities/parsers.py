@@ -31,6 +31,17 @@ def generate_record_frequency_data(query):
 
     return result_list
 
+def generate_list_of_all_data_in_bioactivities(organisms, targets):
+    bioactivities_data = generate_list_of_all_bioactivities_in_bioactivities()
+    compounds_data = generate_list_of_all_compounds_in_bioactivities()
+    targets_data = generate_list_of_all_targets_in_bioactivities(organisms, targets)
+
+    result = {'bioactivities':bioactivities_data,
+              'compounds':compounds_data,
+              'targets':targets_data
+            }
+
+    return result
 
 def generate_list_of_all_bioactivities_in_bioactivities():
     cursor = connection.cursor()
