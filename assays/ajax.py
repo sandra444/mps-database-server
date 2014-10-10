@@ -236,7 +236,7 @@ def fetch_chip_info(request):
         'chip_test_type': assay.chip_test_type,
         'assay': assay.assay_name.assay_name,
         'run': assay.assay_run_id.assay_run_id,
-        'model': assay.device.device_name,
+        'model': assay.device.model_name,
     })
 
     return HttpResponse(json.dumps(data),
