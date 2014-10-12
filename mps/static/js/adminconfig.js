@@ -6,14 +6,14 @@
 // Something that needs to be at the end may have index 100
 
 var APPS = {
-    'Auth': [10, 'Authentication'],
     'Microdevices': [2, 'MPS Centers & Models'],
-    'Compounds': [4, 'Compound'],
-    'Bioactivities': [6, 'External Compound/Drug Bioactivity'],
-    'Drugtrials': [7, 'MPS & External Drug Effects'],
-    'Cellsamples': [8, 'Cell Characteristics'],
-    'Assays': [5, 'MPS Assays'],
-    'Resources': [3, 'Resources'],
+    'Assays': [4, 'MPS Assays'],
+    'Cellsamples': [6, 'Cell Characteristics'],
+    'Compounds': [8, 'Compound'],
+    'Bioactivities': [10, 'External Compound/Drug Bioactivity'],
+    'Drugtrials': [12, 'MPS & External Drug Effects'],
+    'Resources': [14, 'Resources'],
+    'Auth': [20, 'Authentication'],
     'Sites': [100, 'MPS Host']
 };
 
