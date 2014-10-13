@@ -1060,10 +1060,13 @@ def parseRunCSV(currentRun, file):
 
         #Get foreign keys from the first row
         if rowID == 0:
-            readouts = list(rowValue)
+            readouts = [x for x in rowValue if x]
+
+        elif any(not x for x in rowValue[:len(readouts)]):
+            continue
 
         else:
-            for colID in range(2,len(rowValue)):
+            for colID in range(2,len(readouts)):
                 currentChipReadout = readouts[colID]
                 field = rowValue[1]
                 val = rowValue[colID]
@@ -1101,7 +1104,7 @@ class AssayRunForm(forms.ModelForm):
             datareader = csv.reader(data['file'].file, delimiter=',')
             datalist = list(datareader)
 
-            readouts = list(datalist[0])
+            readouts = list(x for x in datalist[0] if x)
             #Check if any Readouts already exist, if so, crash
             for id in readouts[2:]:
                 if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
