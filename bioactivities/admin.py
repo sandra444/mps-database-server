@@ -329,7 +329,8 @@ admin.site.register(Bioactivity, BioactivityAdmin)
 class BioactivityTypeAdmin(LockableAdmin):
     resource_class = BioactivityTypeResource
     save_on_top = True
-    list_per_page = 300
+    list_per_page = 50
+    list_max_show_all = 2000
     list_display = (
         'chembl_bioactivity',
         'standard_name',
