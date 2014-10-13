@@ -315,8 +315,8 @@ def heatmap(request):
     pivoted_data = pandas.pivot_table(
         bioactivities_data,
         values='value',
-        columns=['target', 'bioactivity'],
-        index='compound'
+        cols=['target', 'bioactivity'],
+        rows='compound'
     )
 
     unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
