@@ -600,7 +600,7 @@ def parseChipCSV(currentChipReadout, file):
         # rowID is the index of the current row from top to bottom
 
         #Skip any row with incomplete data and first row (header) for now
-        if all(not val for val in rowValue) or rowID == 0:
+        if not rowValue[0] or not rowValue[1] or rowID == 0:
             continue
 
         field = rowValue[1]
@@ -1065,7 +1065,7 @@ def parseRunCSV(currentRun, file):
         if rowID == 0:
             readouts = [x for x in rowValue if x]
 
-        elif all(not x for x in rowValue[:len(readouts)]):
+        elif not rowValue[0] or not rowValue[1] or all(not x for x in rowValue[2:len(readouts)]):
             continue
 
         else:
@@ -1116,7 +1116,7 @@ class AssayRunForm(forms.ModelForm):
                 if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
                     raise forms.ValidationError('Chip Readout id = %s already contains data; please change your batch file' % id)
                 if not AssayChipReadout.objects.filter(id=id).exists():
-                    raise forms.ValidationError('Chip Readout id = %s does not exist; please change your batch file' % id)
+                    raise forms.ValidationError('Chip Readout id = %s does not exist; please change your batch file or add this readout' % id)
 
         return data
 
