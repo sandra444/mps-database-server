@@ -600,12 +600,15 @@ def parseChipCSV(currentChipReadout, file):
         # rowID is the index of the current row from top to bottom
 
         #Skip any row with incomplete data and first row (header) for now
-        if any(not val for val in rowValue) or rowID == 0:
+        if not rowValue[0] or not rowValue[1] or rowID == 0:
             continue
 
         field = rowValue[1]
         val = rowValue[2]
         time = rowValue[0]
+
+        if not val:
+            val = None
 
         #How to parse Chip data
         AssayChipRawData(
@@ -1060,14 +1063,20 @@ def parseRunCSV(currentRun, file):
 
         #Get foreign keys from the first row
         if rowID == 0:
-            readouts = list(rowValue)
+            readouts = [x for x in rowValue if x]
+
+        elif not rowValue[0] or not rowValue[1] or all(not x for x in rowValue[2:len(readouts)]):
+            continue
 
         else:
-            for colID in range(2,len(rowValue)):
+            for colID in range(2,len(readouts)):
                 currentChipReadout = readouts[colID]
                 field = rowValue[1]
                 val = rowValue[colID]
                 time = rowValue[0]
+
+                if not val:
+                    val = None
 
                 #How to parse Chip data
                 AssayChipRawData(
@@ -1101,13 +1110,13 @@ class AssayRunForm(forms.ModelForm):
             datareader = csv.reader(data['file'].file, delimiter=',')
             datalist = list(datareader)
 
-            readouts = list(datalist[0])
+            readouts = list(x for x in datalist[0] if x)
             #Check if any Readouts already exist, if so, crash
             for id in readouts[2:]:
                 if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
                     raise forms.ValidationError('Chip Readout id = %s already contains data; please change your batch file' % id)
                 if not AssayChipReadout.objects.filter(id=id).exists():
-                    raise forms.ValidationError('Chip Readout id = %s does not exist; please change your batch file' % id)
+                    raise forms.ValidationError('Chip Readout id = %s does not exist; please change your batch file or add this readout' % id)
 
         return data
 

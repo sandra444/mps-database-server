@@ -69,7 +69,15 @@ $(document).ready(function () {
         table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Field</th><th>Raw Data</th></tr>" : "";
 
         for (var i in lines) {
-            table += i==0 && !exist ? "<tr style='background: #FF2400'>" : "<tr>";
+            if (i == 0 && !exist || (!lines[i][0] && !lines[i][1] && !lines[i][2])){
+                table += "<tr style='background: #FF2400'>";
+            }
+            else if (i > 0 && lines[i][2] == 'None'){
+                table += "<tr style='background: #606060'>";
+            }
+            else{
+                table += "<tr>";
+            }
             table += "<th><br>" + lines[i][0] + "<br></th>";
             table += "<th><br>" + lines[i][1] + "<br></th>";
             table += "<th><br>" + lines[i][2] + "<br></th>";

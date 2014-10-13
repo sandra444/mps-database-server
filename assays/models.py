@@ -384,7 +384,7 @@ class AssayRun(LockableModel):
 class AssayChipRawData(models.Model):
     assay_chip_id = models.ForeignKey('assays.AssayChipReadout')
     field_id = models.CharField(max_length=255, default = '0')
-    value = models.FloatField()
+    value = models.FloatField(null=True)
     elapsed_time = models.FloatField(default=0)
 
 class AssayChipReadout(LockableModel):
@@ -436,7 +436,8 @@ class AssayChipReadout(LockableModel):
     notes = models.CharField(max_length=2048, blank=True, null=True)
     scientist = models.CharField(max_length=100, blank=True, null=True)
     file = models.FileField(upload_to='csv', verbose_name='Data File',
-                            blank=True, null=True, help_text='Green = Data from database; Red = Line that will not be read')
+                            blank=True, null=True, help_text='Green = Data from database; Red = Line that will not be read'
+                                                             '; Gray = Reading with null value')
 
     def assay_chip_name(self):
         return u'{0}'.format(self.assay_chip_id)
