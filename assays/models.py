@@ -371,7 +371,7 @@ class AssayRun(LockableModel):
     #help_text subject to change
     center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center Name')
     name = models.TextField(default='Run001',verbose_name='Run Name')
-    start_date = models.DateTimeField()
+    start_date = models.DateTimeField(null=True, blank=True)
     assay_run_id = models.TextField(unique=True, help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering runs sequentially")
     description = models.TextField(blank=True, null=True)
 
@@ -442,4 +442,7 @@ class AssayChipReadout(LockableModel):
         return u'{0}'.format(self.assay_chip_id)
 
     def __unicode__(self):
-        return u'{0}'.format(self.assay_chip_id)
+        return u'Chip-{0}:{1}:{2}'.format(self.assay_chip_id,
+                                        self.assay_name,
+                                        self.compound)
+
