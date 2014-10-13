@@ -341,6 +341,7 @@ class BioactivityTypeAdmin(LockableAdmin):
         'description'
     )
     search_fields = ['chembl_bioactivity', 'standard_name', 'chembl_unit', 'standard_unit']
+    list_filter = ['standard_unit', ]
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 30})}
     }
