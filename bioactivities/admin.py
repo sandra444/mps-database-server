@@ -332,10 +332,12 @@ class BioactivityTypeAdmin(LockableAdmin):
     list_per_page = 300
     list_display = (
         'chembl_bioactivity',
-        'chembl_unit',
         'standard_name',
-        'description',
+        'chembl_unit',
+        'scale_factor',
         'standard_unit',
+        'mass_flag',
+        'description'
     )
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 30})}
