@@ -329,14 +329,19 @@ admin.site.register(Bioactivity, BioactivityAdmin)
 class BioactivityTypeAdmin(LockableAdmin):
     resource_class = BioactivityTypeResource
     save_on_top = True
-    list_per_page = 300
+    list_per_page = 50
+    list_max_show_all = 2000
     list_display = (
         'chembl_bioactivity',
-        'chembl_unit',
         'standard_name',
-        'description',
+        'chembl_unit',
+        'scale_factor',
         'standard_unit',
+        'mass_flag',
+        'description'
     )
+    search_fields = ['chembl_bioactivity', 'standard_name', 'chembl_unit', 'standard_unit']
+    list_filter = ['standard_unit', ]
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 30})}
     }
