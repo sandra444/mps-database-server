@@ -758,7 +758,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
             parseChipCSV(obj, request.FILES['file'].file)
 
         #Need to delete entries when a file is cleared
-        if request.POST['file-clear'] == 'on':
+        if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
             removeExistingChip(obj)
 
         obj.save()
@@ -1107,7 +1107,7 @@ class AssayRunForm(forms.ModelForm):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
         # Check to make sure there is a file and it is not already in memory
-        if type(data['file'].file) == BytesIO:
+        if data['file'] and type(data['file'].file) == BytesIO:
             datareader = csv.reader(data['file'].file, delimiter=',')
             datalist = list(datareader)
 
