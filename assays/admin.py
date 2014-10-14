@@ -12,7 +12,7 @@ from assays.resource import *
 from import_export.admin import ImportExportModelAdmin
 from compounds.models import *
 import unicodedata
-
+from io import BytesIO
 
 class AssayLayoutFormatForm(forms.ModelForm):
     class Meta(object):
@@ -757,8 +757,8 @@ class AssayChipReadoutAdmin(LockableAdmin):
             # pass the upload file name to the CSV reader if a file exists
             parseChipCSV(obj, request.FILES['file'].file)
 
-        #Need else to delete entries when a file is cleared
-        else:
+        #Need to delete entries when a file is cleared
+        if request.POST['file-clear'] == 'on':
             removeExistingChip(obj)
 
         obj.save()
@@ -1065,7 +1065,7 @@ def parseRunCSV(currentRun, file):
         if rowID == 0:
             readouts = [x for x in rowValue if x]
 
-        elif not rowValue[0] or not rowValue[1] or all(not x for x in rowValue[2:len(readouts)]):
+        elif not rowValue[0] or not rowValue[1]:
             continue
 
         else:
@@ -1106,7 +1106,8 @@ class AssayRunForm(forms.ModelForm):
         if data['assay_run_id'].startswith('-'):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
-        if data['file']:
+        # Check to make sure there is a file and it is not already in memory
+        if type(data['file'].file) == BytesIO:
             datareader = csv.reader(data['file'].file, delimiter=',')
             datalist = list(datareader)
 
