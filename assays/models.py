@@ -363,16 +363,30 @@ class AssayPlateTestResult(LockableModel):
     def __unicode__(self):
         return u''
 
+types = (
+    ('TOX', 'Toxicity'), ('DM', 'Disease'), ('EFF', 'Efficacy')
+)
 
 class AssayRun(LockableModel):
     class Meta(object):
+        verbose_name = 'Chip Study'
+        verbose_name_plural = 'Chip Studies'
         ordering = ('assay_run_id', )
 
     #help_text subject to change
     center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center Name')
-    name = models.TextField(default='Run001',verbose_name='Run Name')
+    type1 = models.CharField(max_length=13,
+                            choices=types,
+                            verbose_name='Test Type 1')
+    type2 = models.CharField(max_length=13,
+                            choices=types,
+                            verbose_name='Test Type 2', null=True, blank=True)
+    type3 = models.CharField(max_length=13,
+                            choices=types,
+                            verbose_name='Test Type 3', null=True, blank=True)
+    name = models.TextField(default='Study001',verbose_name='Study Name')
     start_date = models.DateTimeField()
-    assay_run_id = models.TextField(unique=True, help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering runs sequentially")
+    assay_run_id = models.TextField(unique=True, help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering studies sequentially")
     description = models.TextField(blank=True, null=True)
 
     file = models.FileField(upload_to='csv', verbose_name='Batch Data File',
@@ -417,7 +431,11 @@ class AssayChipReadout(LockableModel):
                                                         ('MM', 'cells / mm^2')))
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
 
-    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Run')
+    type = models.CharField(max_length=13,
+                            choices=types,
+                            verbose_name='Test Type')
+
+    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Study')
     device = models.ForeignKey(OrganModel, verbose_name = 'Chip Model Name')
 
     reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
