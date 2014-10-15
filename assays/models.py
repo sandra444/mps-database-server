@@ -376,7 +376,7 @@ class AssayRun(LockableModel):
     #help_text subject to change
     center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center Name')
     type1 = models.CharField(max_length=13,
-                            choices=types,
+                            choices=types, default='TOX',
                             verbose_name='Study Type 1')
     type2 = models.CharField(max_length=13,
                             choices=types,
