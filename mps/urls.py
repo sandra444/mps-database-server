@@ -13,6 +13,7 @@ urlpatterns = patterns('',
                        url(r'^$', 'mps.views.main'),
 
                        url(r'^', include('bioactivities.urls')),
+                       url(r'^', include('assays.urls')),
 
                        # BEGIN old-style API
                        url(r'^assays_ajax$', 'assays.ajax.ajax'),
