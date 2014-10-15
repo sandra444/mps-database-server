@@ -388,7 +388,8 @@ class AssayRun(LockableModel):
                             verbose_name='Study Type 3', null=True, blank=True)
     name = models.TextField(default='Study01',verbose_name='Study Name')
     start_date = models.DateTimeField()
-    assay_run_id = models.TextField(unique=True, help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering studies sequentially")
+    assay_run_id = models.TextField(unique=True, verbose_name='Study ID',
+                                    help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering studies sequentially")
     description = models.TextField(blank=True, null=True)
 
     file = models.FileField(upload_to='csv', verbose_name='Batch Data File',
