@@ -171,6 +171,9 @@ INSTALLED_APPS = (
     'south',
     'django_extensions',
 
+    # adminplus for arbitrary views
+    'adminplus',
+
     # django debug toolbar
     'debug_toolbar',
 

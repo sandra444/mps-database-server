@@ -6,6 +6,14 @@ from .models import MicrophysiologyCenter, Manufacturer, Microdevice, OrganModel
 from drugtrials.models import Test
 
 
+# Testing adminplus
+from django.contrib import admin
+from django.shortcuts import render_to_response
+
+def my_admin_view(request):
+    return render_to_response('admin/base.html')
+admin.site.register_view('mypath',name='HELLO',view=my_admin_view)
+
 class MicrophysiologyCenterAdmin(LockableAdmin):
     save_on_top = True
     list_display = (

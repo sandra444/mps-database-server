@@ -4,8 +4,9 @@ from django.conf.urls import url, patterns, include
 import debug_toolbar
 
 from mps import settings
+from adminplus.sites import AdminSitePlus
 
-
+admin.site = AdminSitePlus()
 admin.autodiscover()
 
 urlpatterns = patterns('',
