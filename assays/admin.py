@@ -832,7 +832,7 @@ class AssayResultInline(admin.TabularInline):
     verbose_name_plural = 'Assay Test Results'
     fields = (
         (
-            'result', 'result_function', 'result_type',
+            'assay_name', 'result', 'result_function', 'result_type',
             'value', 'test_unit', 'severity',
         ),
     )

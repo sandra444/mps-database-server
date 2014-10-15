@@ -303,6 +303,8 @@ class AssayTestResult(LockableModel):
 
 class AssayResult(models.Model):
 #   Individual result parameters for CHIP RESULTS used in inline
+    assay_name = models.ForeignKey('assays.AssayChipReadout', verbose_name='Readout')
+
     assay_result = models.ForeignKey(AssayTestResult,
                                      blank=True,
                                      null=True)
