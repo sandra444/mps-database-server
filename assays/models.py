@@ -377,14 +377,14 @@ class AssayRun(LockableModel):
     center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center Name')
     type1 = models.CharField(max_length=13,
                             choices=types,
-                            verbose_name='Test Type 1')
+                            verbose_name='Study Type 1')
     type2 = models.CharField(max_length=13,
                             choices=types,
-                            verbose_name='Test Type 2', null=True, blank=True)
+                            verbose_name='Study Type 2', null=True, blank=True)
     type3 = models.CharField(max_length=13,
                             choices=types,
-                            verbose_name='Test Type 3', null=True, blank=True)
-    name = models.TextField(default='Study001',verbose_name='Study Name')
+                            verbose_name='Study Type 3', null=True, blank=True)
+    name = models.TextField(default='Study01',verbose_name='Study Name')
     start_date = models.DateTimeField()
     assay_run_id = models.TextField(unique=True, help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering studies sequentially")
     description = models.TextField(blank=True, null=True)
