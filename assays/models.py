@@ -407,6 +407,58 @@ class AssayChipRawData(models.Model):
     value = models.FloatField(null=True)
     elapsed_time = models.FloatField(default=0)
 
+class AssayChipCells(models.Model):
+#   Individual cell parameters for CHIP setup used in inline
+    cell_sample = models.ForeignKey('cellsamples.CellSample')
+
+    cellsample_density = models.FloatField(verbose_name='density', default=0)
+
+    cellsample_density_unit = models.CharField(verbose_name='Unit',
+                                               max_length=8,
+                                               default="ML",
+                                               choices=(('WE', 'cells / well'),
+                                                        ('CP', 'cells / chip'),
+                                                        ('ML', 'cells / mL'),
+                                                        ('MM', 'cells / mm^2')))
+    cell_passage = models.IntegerField(verbose_name='Passage#', default=0)
+    cell_biosensor = models.ForeignKey('cellsamples.CellSample', null=True, blank=True)
+
+class AssayChipSetup(LockableModel):
+    # The configuration of a Chip for implementing an assay
+    class Meta(object):
+        verbose_name = 'Chip Setup'
+        ordering = ('assay_chip_id', 'assay_name',)
+
+    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Study')
+    device = models.ForeignKey(OrganModel, verbose_name = 'Chip Model Name')
+    # the unique chip identifier
+    # can be a barcode or a hand written identifier
+    assay_chip_id = models.CharField(max_length=512,
+                                       verbose_name='Chip ID/ Barcode')
+
+    #Control => control, Compound => compound; Abbreviate? Capitalize?
+    chip_test_type = models.CharField(max_length=8, choices=(("control","Control"),("compound","Compound")))
+
+    compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
+    concentration = models.FloatField(default=0)
+    unit = models.ForeignKey('assays.PhysicalUnits',verbose_name='concentration Unit')
+
+    type = models.CharField(max_length=13,
+                            choices=types,
+                            verbose_name='Test Type')
+
+    scientist = models.CharField(max_length=100, blank=True, null=True)
+    notebook = models.CharField(max_length=256, blank=True, null=True)
+    notebook_page = models.IntegerField(blank=True, null=True)
+    notes = models.CharField(max_length=2048, blank=True, null=True)
+
+    def assay_chip_name(self):
+        return u'{0}'.format(self.assay_chip_id)
+
+    def __unicode__(self):
+        return u'Chip-{0}:{1}'.format(self.assay_chip_id,
+                                        self.compound)
+
 class AssayChipReadout(LockableModel):
     class Meta(object):
         verbose_name = 'Chip Readout'
@@ -470,4 +522,3 @@ class AssayChipReadout(LockableModel):
         return u'Chip-{0}:{1}:{2}'.format(self.assay_chip_id,
                                         self.assay_name,
                                         self.compound)
-
