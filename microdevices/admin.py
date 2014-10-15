@@ -9,15 +9,14 @@ from drugtrials.models import Test
 ### Testing adminplus ###
 from django.contrib import admin
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.template import RequestContext, loader
 
 def my_admin_view(request):
-    template = loader.get_template('admin/base_site.html')
     context = RequestContext(request, {
         'title': "HELLO",
     })
-    return HttpResponse(template.render(context))
+    return render(request, 'admin/base_site.html', context)
 admin.site.register_view('mypath',name='HELLO',view=my_admin_view)
 ### END TEST ###
 
