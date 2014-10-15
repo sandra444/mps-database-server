@@ -294,8 +294,8 @@ class AssayTestResult(LockableModel):
 #   Results calculated from Raw Chip Data
     class Meta(object):
         verbose_name = 'Chip Result'
-    assay_device_readout = models.ForeignKey('assays.AssayChipReadout',
-                                             verbose_name='Chip Readout')
+    assay_device_readout = models.ForeignKey('assays.AssayRun',
+                                             verbose_name='Chip Study')
 
     def __unicode__(self):
         return u''
