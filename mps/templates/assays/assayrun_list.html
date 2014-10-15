@@ -1,0 +1,10 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+    <h2>Runs</h2>
+    <ul>
+        {% for run in object_list %}
+            <li>{{ run.id }} : {{run.name}}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
