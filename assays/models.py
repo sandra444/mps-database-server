@@ -395,6 +395,9 @@ class AssayRun(LockableModel):
     file = models.FileField(upload_to='csv', verbose_name='Batch Data File',
                             blank=True, null=True, help_text='Do not upload until you have made each Chip Readout')
 
+    def study_types(self):
+        return u'{0}:{1}:{2}'.format(self.type1, self.type2, self.type3)
+
     def __unicode__(self):
         return self.assay_run_id
 

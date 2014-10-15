@@ -1143,7 +1143,7 @@ class AssayRunAdmin(LockableAdmin):
     form = AssayRunForm
     save_on_top = True
     list_per_page = 300
-    list_display = ('assay_run_id', 'description', 'start_date')
+    list_display = ('assay_run_id', 'study_types', 'start_date', 'description', )
     fieldsets = (
         (
             'None', {
