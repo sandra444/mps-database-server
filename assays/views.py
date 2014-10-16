@@ -7,9 +7,11 @@ class RunList(ListView):
 from django.forms.models import modelformset_factory
 from django.shortcuts import render_to_response
 from assays.models import AssayChipReadout
+from assays.forms import AssayChipReadoutForm
+from django.core.context_processors import csrf
 
 def manage_readouts(request):
-    ReadoutFormSet = modelformset_factory(AssayChipReadout)
+    ReadoutFormSet = AssayChipReadoutForm
     if request.method == 'POST':
         formset = ReadoutFormSet(request.POST, request.FILES)
         if formset.is_valid():
@@ -17,6 +19,9 @@ def manage_readouts(request):
             # do something.
     else:
         formset = ReadoutFormSet()
-    return render_to_response("assays/manage_readouts.html", {
-        "formset": formset,
-    })
+
+    args = {}
+    args.update(csrf(request))
+    args['form'] = formset
+
+    return render_to_response("assays/manage_readouts.html", args)
