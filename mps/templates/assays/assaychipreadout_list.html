@@ -1,10 +1,21 @@
 {% extends "admin/base.html" %}
 
+{% block sidebar %}
+{% endblock %}
+
 {% block content %}
-    <h2>Runs</h2>
+    <script>
+    $(document).ready(function () {
+        $('.readout').click(function() {
+            alert($(this).attr('id'));
+        });
+    });
+    </script>
+
+    <h2>Readout: Click ID to Get Plot</h2>
     <ul>
         {% for readout in object_list %}
-            <li>{{ readout.id }} : {{readout.assay_chip_id}}</li>
+            <li class="readout" id={{ readout.id }}>{{ readout.id }} : {{readout.assay_chip_id}}</li>
         {% endfor %}
     </ul>
 {% endblock %}
