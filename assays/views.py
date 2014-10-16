@@ -1,8 +1,11 @@
 from django.views.generic import ListView
-from assays.models import AssayRun
+from assays.models import AssayRun, AssayChipReadout
 
 class RunList(ListView):
     model = AssayRun
+
+class AssayChipReadoutList(ListView):
+    model = AssayChipReadout
 
 from django.forms.models import modelformset_factory
 from django.shortcuts import render_to_response
