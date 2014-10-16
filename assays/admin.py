@@ -629,13 +629,13 @@ class AssayChipSetupAdmin(LockableAdmin):
     save_on_top = True
     save_as = True
 
-    raw_id_fields = ("compound", "cell_sample",)
+    raw_id_fields = ("compound", )
 
     list_per_page = 100
     list_display = ('assay_run_id', 'assay_chip_id',
                     'device', 'chip_test_type',
-                    'compound','cell_sample',
-                    'reader_name')
+                    'compound', )
+
     search_fields = ['assay_chip_id']
     fieldsets = (
         (

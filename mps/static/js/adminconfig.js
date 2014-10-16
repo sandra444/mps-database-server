@@ -39,11 +39,12 @@ var MODELS = {
     },
     //Order modified
     'Assays': {
-        'Chip Results': [2, 'Chip Results', 1],
-        'Result types': [4, 'Result Types', 2, true],
-        'Functions': [6, 'Functions', 3, true],
-        'Chip Readouts': [8, 'Chip Readouts', 2],
         'Chip Studies': [1, 'Chip Studies', 0],
+        'Chip Setups': [2, 'Chip Setup', 1],
+        'Chip Readouts': [3, 'Chip Readouts', 1],
+        'Chip Results': [4, 'Chip Results', 1],
+        'Result types': [5, 'Result Types', 2, true],
+        'Functions': [6, 'Functions', 3, true],
         'Assay plate test results' : [11, 'Plate Results', 0],
         'Plate Readouts': [12, 'Plate Readouts', 1],
         'Assay models': [16, 'Assays', 2],

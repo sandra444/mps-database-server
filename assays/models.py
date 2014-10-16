@@ -421,13 +421,13 @@ class AssayChipCells(models.Model):
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
     cell_passage = models.IntegerField(verbose_name='Passage#', default=0)
-    cell_biosensor = models.ForeignKey('cellsamples.CellSample', null=True, blank=True)
+ #   cell_biosensor = models.ForeignKey('cellsamples.CellSample', null=True, blank=True)
 
 class AssayChipSetup(LockableModel):
     # The configuration of a Chip for implementing an assay
     class Meta(object):
         verbose_name = 'Chip Setup'
-        ordering = ('assay_chip_id', 'assay_name',)
+        ordering = ('assay_chip_id', )
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Study')
     device = models.ForeignKey(OrganModel, verbose_name = 'Chip Model Name')
