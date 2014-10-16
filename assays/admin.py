@@ -1304,7 +1304,7 @@ class AssayRunAdmin(LockableAdmin):
             }
         ),
         (
-            'Study Data Updload', {
+            'Study Data Upload', {
                 'fields': (
                     'file',
                 )
