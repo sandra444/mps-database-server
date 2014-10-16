@@ -1,0 +1,10 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+    <h2>Runs</h2>
+    <ul>
+        {% for readout in object_list %}
+            <li>{{ readout.id }} : {{readout.assay_chip_id}}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
