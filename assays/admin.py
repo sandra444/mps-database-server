@@ -1292,7 +1292,7 @@ class AssayRunAdmin(LockableAdmin):
     list_display = ('assay_run_id', 'study_types', 'start_date', 'description', )
     fieldsets = (
         (
-            'None', {
+            'Study', {
                 'fields': (
                     'center_id',
                     ('type1', 'type2', 'type3'),
@@ -1300,7 +1300,13 @@ class AssayRunAdmin(LockableAdmin):
                     'name',
                     'assay_run_id',
                     'description',
-                    'file'
+                )
+            }
+        ),
+        (
+            'Study Data Updload', {
+                'fields': (
+                    'file',
                 )
             }
         ),
