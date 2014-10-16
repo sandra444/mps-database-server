@@ -625,13 +625,16 @@ class AssayChipCellsInline(admin.TabularInline):
     model = AssayChipCells
     verbose_name = 'Model Cells'
     verbose_name_plural = 'Model Cells'
+
+    raw_id_fields = ("cell_sample", )
+
     fields = (
         (
             'cell_sample', 'cellsample_density', 'cellsample_density_unit',
             'cell_passage',
         ),
     )
-    extra = 1
+    extra = 0
 
     class Media(object):
         css = {"all": ("css/hide_admin_original.css",)}

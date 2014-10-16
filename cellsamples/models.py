@@ -130,10 +130,11 @@ class CellSample(LockableModel):
     cell_image = models.ImageField(upload_to='cellsamples',
                                    null=True, blank=True)
     class Meta(object):
-        ordering = ('cell_type', 'cell_source', 'id',)
+        ordering = ('cell_type', 'cell_source', 'supplier', 'barcode', 'id',)
 
     def __unicode__(self):
-        return u'#{} {} {} supplied by {}'.format(self.id,
-                                                  self.cell_source,
-                                                  self.cell_type,
-                                                  self.supplier)
+        return u'{} {} ({}-{})'.format(
+                                            self.cell_source,
+                                            self.cell_type,
+                                            self.supplier,
+                                            self.barcode)
