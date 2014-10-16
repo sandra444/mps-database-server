@@ -409,13 +409,16 @@ class AssayChipRawData(models.Model):
 
 class AssayChipCells(models.Model):
 #   Individual cell parameters for CHIP setup used in inline
+    assay_chip = models.ForeignKey('AssayChipSetup',
+                                     blank=True,
+                                     null=True)
     cell_sample = models.ForeignKey('cellsamples.CellSample')
 
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',
                                                max_length=8,
-                                               default="ML",
+                                               default="CP",
                                                choices=(('WE', 'cells / well'),
                                                         ('CP', 'cells / chip'),
                                                         ('ML', 'cells / mL'),
@@ -427,7 +430,7 @@ class AssayChipSetup(LockableModel):
     # The configuration of a Chip for implementing an assay
     class Meta(object):
         verbose_name = 'Chip Setup'
-        ordering = ('assay_chip_id', )
+        ordering = ('assay_run_id', 'assay_chip_id', )
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Study')
     device = models.ForeignKey(OrganModel, verbose_name = 'Chip Model Name')
@@ -440,8 +443,11 @@ class AssayChipSetup(LockableModel):
     chip_test_type = models.CharField(max_length=8, choices=(("control","Control"),("compound","Compound")))
 
     compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
-    concentration = models.FloatField(default=0)
-    unit = models.ForeignKey('assays.PhysicalUnits',verbose_name='concentration Unit')
+    concentration = models.FloatField(default=0, verbose_name='Conc.',
+                                      null=True, blank=True)
+    unit = models.ForeignKey('assays.PhysicalUnits',
+                             verbose_name='conc. Unit',
+                             null=True, blank=True)
 
     type = models.CharField(max_length=13,
                             choices=types,

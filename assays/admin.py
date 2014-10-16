@@ -620,10 +620,27 @@ def parseChipCSV(currentChipReadout, file):
     return
 
 
+class AssayChipCellsInline(admin.TabularInline):
+    # Cells used to constrcut the model
+    model = AssayChipCells
+    verbose_name = 'Model Cells'
+    verbose_name_plural = 'Model Cells'
+    fields = (
+        (
+            'cell_sample', 'cellsample_density', 'cellsample_density_unit',
+            'cell_passage',
+        ),
+    )
+    extra = 1
+
+    class Media(object):
+        css = {"all": ("css/hide_admin_original.css",)}
+
+
 class AssayChipSetupAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
     class Media(object):
-        js = ('assays/customize_chip.js',)
+        js = ('js/inline_fix.js')
         css = {'all': ('assays/customize_admin.css',)}
 
     save_on_top = True
@@ -639,10 +656,10 @@ class AssayChipSetupAdmin(LockableAdmin):
     search_fields = ['assay_chip_id']
     fieldsets = (
         (
-            'Run Parameters', {
+            'Study', {
                 'fields': (
                     (
-                        'assay_run_id', 'chip_test_type'
+                        'assay_run_id',
                     ),
                 )
             }
@@ -651,10 +668,7 @@ class AssayChipSetupAdmin(LockableAdmin):
             'Device Parameters', {
                 'fields': (
                     (
-                        'assay_chip_id',
-                    ),
-                    (
-                        'device', 'reader_name',
+                        'device', 'assay_chip_id',
                     ),
                 )
             }
@@ -663,24 +677,8 @@ class AssayChipSetupAdmin(LockableAdmin):
             'Assay Parameters', {
                 'fields': (
                     (
-                        'assay_name', 'type'
-                    ),
-                    (
-                        'compound', 'concentration',
+                        'chip_test_type', 'compound', 'concentration',
                         'unit',
-                    ),
-                    (
-                        'cell_sample', 'cellsample_density',
-                        'cellsample_density_unit',
-                    ),
-                    (
-                        'timeunit', 'readout_unit',
-                    ),
-                    (
-                        'treatment_time_length', 'assay_start_time', 'readout_start_time',
-                    ),
-                    (
-                        'file',
                     ),
                 )
             }
@@ -712,55 +710,58 @@ class AssayChipSetupAdmin(LockableAdmin):
         ),
     )
 
-    def response_add(self, request, obj, post_url_continue="../%s/"):
-        """If save as new or save and add another, redirect to new change model; else go to list"""
-        if '_saveasnew' or '_addanother' in request.POST:
-            return HttpResponseRedirect("../%s" % obj.id)
-        else:
-            return super(AssayChipReadoutAdmin, self).response_add(request, obj, post_url_continue)
+    actions = ['update_fields']
+    inlines = [AssayChipCellsInline]
 
-    def response_change(self, request, obj):
-        """If save as new, redirect to new change model; else go to list"""
-        if '_saveasnew' in request.POST:
-            return HttpResponseRedirect("../%s" % obj.id)
-        else:
-            return super(LockableAdmin, self).response_change(request, obj)
-
-    def id(self, obj):
-        return obj.id
-
-    # Acquires first unused ID
-    def get_next_id(self):
-        from django.db import connection
-
-        cursor = connection.cursor()
-        cursor.execute("select nextval('%s_id_seq')" % \
-                       AssayChipReadout._meta.db_table)
-        row = cursor.fetchone()
-        cursor.close()
-        return row[0]
-
-    def save_model(self, request, obj, form, change):
-
-        #Early fix: uses database "cursor" to track ID
-        if not obj.id:
-            obj.id = self.get_next_id()
-
-        if change:
-            obj.modified_by = request.user
-
-        else:
-            obj.modified_by = obj.created_by = request.user
-
-        if request.FILES:
-            # pass the upload file name to the CSV reader if a file exists
-            parseChipCSV(obj, request.FILES['file'].file)
-
-        #Need to delete entries when a file is cleared
-        if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
-            removeExistingChip(obj)
-
-        obj.save()
+    # def response_add(self, request, obj, post_url_continue="../%s/"):
+    #     """If save as new or save and add another, redirect to new change model; else go to list"""
+    #     if '_saveasnew' or '_addanother' in request.POST:
+    #         return HttpResponseRedirect("../%s" % obj.id)
+    #     else:
+    #         return super(AssayChipReadoutAdmin, self).response_add(request, obj, post_url_continue)
+    #
+    # def response_change(self, request, obj):
+    #     """If save as new, redirect to new change model; else go to list"""
+    #     if '_saveasnew' in request.POST:
+    #         return HttpResponseRedirect("../%s" % obj.id)
+    #     else:
+    #         return super(LockableAdmin, self).response_change(request, obj)
+    #
+    # # def id(self, obj):
+    #     return obj.id
+    #
+    # # Acquires first unused ID
+    # def get_next_id(self):
+    #     from django.db import connection
+    #
+    #     cursor = connection.cursor()
+    #     cursor.execute("select nextval('%s_id_seq')" % \
+    #                    AssayChipReadout._meta.db_table)
+    #     row = cursor.fetchone()
+    #     cursor.close()
+    #     return row[0]
+    #
+    # def save_model(self, request, obj, form, change):
+    #
+    #     #Early fix: uses database "cursor" to track ID
+    #     if not obj.id:
+    #         obj.id = self.get_next_id()
+    #
+    #     if change:
+    #         obj.modified_by = request.user
+    #
+    #     else:
+    #         obj.modified_by = obj.created_by = request.user
+    #
+    #     if request.FILES:
+    #         # pass the upload file name to the CSV reader if a file exists
+    #         parseChipCSV(obj, request.FILES['file'].file)
+    #
+    #     #Need to delete entries when a file is cleared
+    #     if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
+    #         removeExistingChip(obj)
+    #
+    #     obj.save()
 
 admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 
