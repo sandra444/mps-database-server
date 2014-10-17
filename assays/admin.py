@@ -14,6 +14,7 @@ from compounds.models import *
 import unicodedata
 from io import BytesIO
 
+
 class AssayLayoutFormatForm(forms.ModelForm):
     class Meta(object):
         model = AssayLayoutFormat
@@ -25,15 +26,15 @@ class AssayLayoutFormatForm(forms.ModelForm):
         data = super(AssayLayoutFormatForm, self).clean()
 
         if not (int(data['number_of_columns']) ==
-                len(set(data['column_labels'].split()))):
+                    len(set(data['column_labels'].split()))):
             raise forms.ValidationError('Number of columns and '
                                         'number of unique column '
                                         'labels do not match.')
 
-        #cannot tell if it is number or letter in single entry list
+        # cannot tell if it is number or letter in single entry list
         if not ((int(data['number_of_rows'] ==
-                len(set(data['row_labels'].split())))) or
-                ((len(set(data['row_labels']))) == 1)):
+            len(set(data['row_labels'].split())))) or
+                    ((len(set(data['row_labels']))) == 1)):
             raise forms.ValidationError('Number of rows and '
                                         'number of unique row '
                                         'labels do not match.')
@@ -115,7 +116,6 @@ admin.site.register(AssayModel, AssayModelAdmin)
 
 
 class AssayLayoutFormatAdmin(LockableAdmin):
-
     def device_image_display(self, obj):
         if obj.device.id and obj.device.device_image:
             return '<img src="%s">' % \
@@ -332,7 +332,7 @@ class AssayBaseLayoutAdmin(LockableAdmin):
                                   AssayWellType.objects.get(id=data.get(key)),
                                   row=row,
                                   column=col
-                                  ).save()
+                        ).save()
                 elif rowcol in wells:
                     wells[rowcol].delete()
 
@@ -385,7 +385,7 @@ class AssayLayoutAdmin(LockableAdmin):
             if not key.startswith('well_') and not '_time' in key:
                 continue
 
-            ### BEGIN save timepoint data ###
+            # ## BEGIN save timepoint data ###
 
             if '_time' in key:
                 content = key[:-5]
@@ -438,7 +438,6 @@ def removeExistingReadout(currentAssayReadout):
 
 
 def parseReadoutCSV(currentAssayReadout, file):
-
     removeExistingReadout(currentAssayReadout)
 
     datareader = csv.reader(file, delimiter=',')
@@ -504,10 +503,10 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
                         'cellsample_density_unit',
                     ),
                     (
-                        'timeunit','readout_unit',
+                        'timeunit', 'readout_unit',
                     ),
                     (
-                        'treatment_time_length', 'assay_start_time','readout_start_time',
+                        'treatment_time_length', 'assay_start_time', 'readout_start_time',
                     ),
                     (
                         'file',
@@ -542,13 +541,14 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
         ),
     )
 
-    #Acquires first unused ID
+    # Acquires first unused ID
     def get_next_id(self):
 
         from django.db import connection
+
         cursor = connection.cursor()
-        cursor.execute( "select nextval('%s_id_seq')" % \
-                        AssayDeviceReadout._meta.db_table)
+        cursor.execute("select nextval('%s_id_seq')" % \
+                       AssayDeviceReadout._meta.db_table)
         row = cursor.fetchone()
         cursor.close()
         return row[0]
@@ -578,8 +578,8 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 
 admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
-def removeExistingChip(currentChipReadout):
 
+def removeExistingChip(currentChipReadout):
     readouts = AssayChipRawData.objects.filter(
         assay_chip_id_id=currentChipReadout.id)
 
@@ -588,8 +588,8 @@ def removeExistingChip(currentChipReadout):
             readout.delete()
     return
 
-def parseChipCSV(currentChipReadout, file):
 
+def parseChipCSV(currentChipReadout, file):
     removeExistingChip(currentChipReadout)
 
     datareader = csv.reader(file, delimiter=',')
@@ -599,7 +599,7 @@ def parseChipCSV(currentChipReadout, file):
         # rowValue holds all of the row elements
         # rowID is the index of the current row from top to bottom
 
-        #Skip any row with incomplete data and first row (header) for now
+        # Skip any row with incomplete data and first row (header) for now
         if not rowValue[0] or not rowValue[1] or rowID == 0:
             continue
 
@@ -613,11 +613,12 @@ def parseChipCSV(currentChipReadout, file):
         #How to parse Chip data
         AssayChipRawData(
             assay_chip_id=currentChipReadout,
-            field_id = field,
-            value = val,
-            elapsed_time = time
+            field_id=field,
+            value=val,
+            elapsed_time=time
         ).save()
     return
+
 
 class AssayChipReadoutAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
@@ -628,7 +629,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
     save_on_top = True
     save_as = True
 
-    raw_id_fields = ("compound","cell_sample",)
+    raw_id_fields = ("compound", "cell_sample",)
 
     list_per_page = 100
     list_display = ('assay_chip_id',
@@ -644,7 +645,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
             'Run Parameters', {
                 'fields': (
                     (
-                    'assay_run_id','chip_test_type'
+                        'assay_run_id', 'chip_test_type'
                     ),
                 )
             }
@@ -667,7 +668,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
                     (
                         'assay_name',
                     ),
-		            (
+                    (
                         'compound', 'concentration',
                         'unit',
                     ),
@@ -676,10 +677,10 @@ class AssayChipReadoutAdmin(LockableAdmin):
                         'cellsample_density_unit',
                     ),
                     (
-                          'timeunit','readout_unit',
+                        'timeunit', 'readout_unit',
                     ),
                     (
-                        'treatment_time_length', 'assay_start_time','readout_start_time',
+                        'treatment_time_length', 'assay_start_time', 'readout_start_time',
                     ),
                     (
                         'file',
@@ -731,12 +732,13 @@ class AssayChipReadoutAdmin(LockableAdmin):
     def id(self, obj):
         return obj.id
 
-    #Acquires first unused ID
+    # Acquires first unused ID
     def get_next_id(self):
         from django.db import connection
+
         cursor = connection.cursor()
-        cursor.execute( "select nextval('%s_id_seq')" % \
-                        AssayChipReadout._meta.db_table)
+        cursor.execute("select nextval('%s_id_seq')" % \
+                       AssayChipReadout._meta.db_table)
         row = cursor.fetchone()
         cursor.close()
         return row[0]
@@ -762,6 +764,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
             removeExistingChip(obj)
 
         obj.save()
+
 
 admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
 
@@ -789,6 +792,8 @@ class AssayResultFunctionAdmin(LockableAdmin):
         }
         ),
     )
+
+
 admin.site.register(AssayResultFunction, AssayResultFunctionAdmin)
 
 
@@ -814,11 +819,13 @@ class AssayResultTypeAdmin(LockableAdmin):
         }
         ),
     )
+
+
 admin.site.register(AssayResultType, AssayResultTypeAdmin)
 
 
 class AssayResultInline(admin.TabularInline):
-#   Results calculated from CHIP READOUTS
+    # Results calculated from CHIP READOUTS
     model = AssayResult
     form = AssayResultForm
     verbose_name = 'Assay Test'
@@ -826,7 +833,7 @@ class AssayResultInline(admin.TabularInline):
     fields = (
         (
             'result', 'result_function', 'result_type',
-            'value',  'test_unit', 'severity',
+            'value', 'test_unit', 'severity',
         ),
     )
     extra = 0
@@ -860,6 +867,7 @@ class PhysicalUnitsAdmin(LockableAdmin):
         ),
     )
 
+
 admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 
 
@@ -867,7 +875,7 @@ class TimeUnitsAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
 
-    list_display = ('unit','unit_order',)
+    list_display = ('unit', 'unit_order',)
     fieldsets = (
         (
             None, {
@@ -889,6 +897,7 @@ class TimeUnitsAdmin(LockableAdmin):
         ),
     )
 
+
 admin.site.register(TimeUnits, TimeUnitsAdmin)
 
 
@@ -896,7 +905,7 @@ class ReadoutUnitAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 100
 
-    list_display = ('readout_unit','description',)
+    list_display = ('readout_unit', 'description',)
     fieldsets = (
         (
             None, {
@@ -917,24 +926,25 @@ class ReadoutUnitAdmin(LockableAdmin):
         ),
     )
 
+
 admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
 
 class AssayTestResultAdmin(LockableAdmin):
-    #   Results calculated from RAW CHIP DATA aka 'Chip Result'
+    # Results calculated from RAW CHIP DATA aka 'Chip Result'
     class Media(object):
-        js = ('assays/customize_chip_results_admin.js','js/inline_fix.js')
+        js = ('assays/customize_chip_results_admin.js', 'js/inline_fix.js')
 
     save_as = True
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'assay_device_readout','compound','assay','result','result_function','result_type','severity'
+        'assay_device_readout', 'compound', 'assay', 'result', 'result_function', 'result_type', 'severity'
     )
     search_fields = ['assay_device_readout']
     actions = ['update_fields']
     readonly_fields = ['created_by', 'created_on',
-                       'modified_by', 'modified_on',]
+                       'modified_by', 'modified_on', ]
 
     fieldsets = (
         (
@@ -991,17 +1001,19 @@ class AssayTestResultAdmin(LockableAdmin):
 
     def severity(self, obj):
         SEVERITY_SCORE = dict((
-        ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
-        ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
+            ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
+            ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
         ))
         if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
             return SEVERITY_SCORE[AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].severity]
         return ''
 
+
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
+
 class AssayPlateTestResultAdmin(LockableAdmin):
-    #   Test Results from MICROPLATES
+    # Test Results from MICROPLATES
     class Media(object):
         js = ('assays/customize_plate_results_admin.js',)
         css = {'all': ('assays/customize_admin.css',)}
@@ -1011,7 +1023,7 @@ class AssayPlateTestResultAdmin(LockableAdmin):
     list_per_page = 300
     list_display = (
         'assay_device_id',
-            'assay_test_time','time_units','result','severity','value','value_units'
+        'assay_test_time', 'time_units', 'result', 'severity', 'value', 'value_units'
     )
     search_fields = ['assay_device_id']
     actions = ['update_fields']
@@ -1050,8 +1062,8 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
-def parseRunCSV(currentRun, file):
 
+def parseRunCSV(currentRun, file):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
 
@@ -1061,7 +1073,7 @@ def parseRunCSV(currentRun, file):
         # rowValue holds all of the row elements
         # rowID is the index of the current row from top to bottom
 
-        #Get foreign keys from the first row
+        # Get foreign keys from the first row
         if rowID == 0:
             readouts = [x for x in rowValue if x]
 
@@ -1069,7 +1081,7 @@ def parseRunCSV(currentRun, file):
             continue
 
         else:
-            for colID in range(2,len(readouts)):
+            for colID in range(2, len(readouts)):
                 currentChipReadout = readouts[colID]
                 field = rowValue[1]
                 val = rowValue[colID]
@@ -1081,20 +1093,20 @@ def parseRunCSV(currentRun, file):
                 #How to parse Chip data
                 AssayChipRawData(
                     assay_chip_id=AssayChipReadout.objects.get(id=currentChipReadout),
-                    field_id = field,
-                    value = val,
-                    elapsed_time = time
+                    field_id=field,
+                    value=val,
+                    elapsed_time=time
                 ).save()
     return
 
-class AssayRunForm(forms.ModelForm):
 
+class AssayRunForm(forms.ModelForm):
     class Meta(object):
         model = AssayRun
         widgets = {
-            'assay_run_id': forms.Textarea(attrs={'rows':1}),
-            'name': forms.Textarea(attrs={'rows':1}),
-            'description': forms.Textarea(attrs={'rows':3}),
+            'assay_run_id': forms.Textarea(attrs={'rows': 1}),
+            'name': forms.Textarea(attrs={'rows': 1}),
+            'description': forms.Textarea(attrs={'rows': 3}),
         }
 
     def clean(self):
@@ -1112,17 +1124,19 @@ class AssayRunForm(forms.ModelForm):
             datalist = list(datareader)
 
             readouts = list(x for x in datalist[0] if x)
-            #Check if any Readouts already exist, if so, crash
+            # Check if any Readouts already exist, if so, crash
             for id in readouts[2:]:
                 if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
-                    raise forms.ValidationError('Chip Readout id = %s already contains data; please change your batch file' % id)
+                    raise forms.ValidationError(
+                        'Chip Readout id = %s already contains data; please change your batch file' % id)
                 if not AssayChipReadout.objects.filter(id=id).exists():
-                    raise forms.ValidationError('Chip Readout id = %s does not exist; please change your batch file or add this readout' % id)
+                    raise forms.ValidationError(
+                        'Chip Readout id = %s does not exist; please change your batch file or add this readout' % id)
 
         return data
 
-class AssayRunAdmin(LockableAdmin):
 
+class AssayRunAdmin(LockableAdmin):
     class Media(object):
         js = ('assays/customize_run.js',)
 
@@ -1168,5 +1182,6 @@ class AssayRunAdmin(LockableAdmin):
             parseRunCSV(obj, request.FILES['file'])
 
         obj.save()
+
 
 admin.site.register(AssayRun, AssayRunAdmin)
