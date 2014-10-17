@@ -20,7 +20,12 @@ $(document).ready(function () {
                         data.push(line[2]);
                     }
                 }
-                plot(data, time);
+                if (!plotted[name]) {
+                    plot(data, time, name);
+                }
+                else{
+                    unplot(name);
+                }
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
@@ -28,7 +33,7 @@ $(document).ready(function () {
         });
     };
 
-    var plot = function (data, time) {
+    var plot = function (data, time, name) {
         console.log(data);
 
         if (data.length == 1) {
@@ -37,11 +42,12 @@ $(document).ready(function () {
         }
 
         displayed += 1;
+        plotted[name] = true;
 
         time.unshift('x' + displayed);
 
         var xs = {};
-        xs[data[0]] = 'x' + displayed;
+        xs[name] = 'x' + displayed;
 
         console.log(xs);
 
@@ -71,12 +77,22 @@ $(document).ready(function () {
         }
     };
 
+    var unplot = function (name) {
+        displayed -= 1;
+        delete plotted[name];
+
+        chart.unload({
+                ids: [name]
+        });
+    };
+
     //Get token
     var middleware_token = getCookie('csrftoken');
 
     //Create chart variable
     var chart = null;
     var displayed = 0;
+    var plotted = {};
 
     $('.readout').click(function () {
         alert($(this).attr('id'));
