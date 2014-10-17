@@ -474,7 +474,7 @@ class AssayChipReadout(LockableModel):
         verbose_name = 'Chip Readout'
         ordering = ('assay_chip_id', 'assay_name',)
 
-    chip_setup = models.ForeignKey(AssayChipSetup, blank=True, null=True)
+    chip_setup = models.ForeignKey(AssayChipSetup)
 
     #Control => control, Compound => compound; Abbreviate? Capitalize?
     chip_test_type = models.CharField(max_length=8, choices=(("control","Control"),("compound","Compound")),

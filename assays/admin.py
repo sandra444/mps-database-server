@@ -776,15 +776,11 @@ class AssayChipReadoutAdmin(LockableAdmin):
     save_on_top = True
     save_as = True
 
-    raw_id_fields = ("compound", "cell_sample",)
-
     list_per_page = 100
-    list_display = ('assay_chip_id',
-                    'id',
+    list_display = ('id',
                     'assay_run_id',
+                    'chip_setup',
                     'assay_name',
-                    'compound',
-                    'cell_sample',
                     'reader_name')
     search_fields = ['assay_chip_id']
     fieldsets = (
@@ -792,19 +788,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
             'Run Parameters', {
                 'fields': (
                     (
-                        'assay_run_id', 'chip_test_type'
-                    ),
-                )
-            }
-        ),
-        (
-            'Device Parameters', {
-                'fields': (
-                    (
-                        'assay_chip_id',
-                    ),
-                    (
-                        'device', 'reader_name',
+                        'assay_run_id', 'chip_setup'
                     ),
                 )
             }
@@ -814,14 +798,6 @@ class AssayChipReadoutAdmin(LockableAdmin):
                 'fields': (
                     (
                         'assay_name', 'type'
-                    ),
-                    (
-                        'compound', 'concentration',
-                        'unit',
-                    ),
-                    (
-                        'cell_sample', 'cellsample_density',
-                        'cellsample_density_unit',
                     ),
                     (
                         'timeunit', 'readout_unit',
