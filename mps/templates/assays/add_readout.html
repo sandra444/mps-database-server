@@ -1,0 +1,19 @@
+{% extends "admin/base.html" %}
+
+{% block sidebar %}
+<ul>
+    <li><a href="/assays/reads">Cancel</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+
+<form action="/assays/new_read/" method="post">{% csrf_token %}
+<ul>
+{{form.as_ul}}
+</ul>
+
+<input type="submit" name="submit" value="Create Readout">
+</form>
+
+{% endblock %}
