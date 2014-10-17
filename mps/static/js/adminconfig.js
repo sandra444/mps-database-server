@@ -67,11 +67,12 @@ var MODELS = {
         'Targets': [3, 'Targets', 1]
     },
     'Cellsamples': {
-        'Cell samples': [2, 'Cell Samples', 0],
-        'Cell types': [3, 'Cell Types', 1],
-        'Cell subtypes': [4, 'Cell Subtypes', 2],
-        'Suppliers': [5, 'Suppliers', 1],
-        'Organs': [1, 'Organs', 0]
+        'Organs': [2, 'Organs', 0],
+        'Cell samples': [4, 'Cell Samples', 0],
+        'Cell types': [6, 'Cell Types', 1],
+        'Cell subtypes': [8, 'Cell Subtypes', 2],
+        'Biosensors': [3, 'Biosensors', 0],
+        'Suppliers': [12, 'Suppliers', 1]
     },
     'Drugtrials': {
         'Drug trials': [1, 'Drug Trials', 0],

@@ -72,6 +72,20 @@ class Supplier(LockableModel):
         return u'{}'.format(self.name)
 
 
+class Biosensor(LockableModel):
+    class Meta(object):
+        ordering = ('name', )
+    name = models.CharField(max_length=255, unique=True)
+    supplier = models.ForeignKey('Supplier')
+    product_id = models.CharField(max_length=255, blank=True)
+    lot_number = models.CharField(max_length=255, blank=True,
+                                  verbose_name='Lot#')
+    description = models.CharField(max_length=512, blank=True)
+
+    def __unicode__(self):
+        return u'{}'.format(self.name)
+
+
 class CellSample(LockableModel):
     cell_type = models.ForeignKey('CellType')
     CELLSOURCETYPE = (

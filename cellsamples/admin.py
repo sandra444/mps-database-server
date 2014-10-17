@@ -9,7 +9,7 @@ CellSamples Admin
 from django.contrib import admin
 from cellsamples.resource import CellSampleResource
 from mps.base.admin import LockableAdmin
-from models import Organ, CellType, CellSubtype, Supplier, CellSample
+from cellsamples.models import *
 
 
 class CellTypeAdmin(LockableAdmin):
@@ -162,6 +162,33 @@ class CellSampleAdmin(LockableAdmin):
 
 admin.site.register(CellSample, CellSampleAdmin)
 
+
+class BiosensorAdmin(LockableAdmin):
+    save_on_top = True
+    list_display = ('name', 'supplier',
+                    'lot_number', 'product_id', 'description')
+    list_per_page = 300
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    ('name', 'supplier', ),
+                    ('product_id', 'lot_number', 'description',),
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
+
+admin.site.register(Biosensor, BiosensorAdmin)
 
 class SupplierAdmin(LockableAdmin):
     save_on_top = True
