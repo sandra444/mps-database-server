@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    var get_points = function (id,name) {
+    var get_points = function (id, name) {
         $.ajax({
             url: "/assays_ajax",
             type: "POST",
@@ -20,7 +20,7 @@ $(document).ready(function () {
                         data.push(line[2]);
                     }
                 }
-                plot(data,time);
+                plot(data, time);
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
@@ -28,20 +28,20 @@ $(document).ready(function () {
         });
     };
 
-    var plot = function(data,time) {
+    var plot = function (data, time) {
         console.log(data);
 
-        if (data.length == 1){
+        if (data.length == 1) {
             alert('There is not any data for this readout!');
             return;
         }
 
         displayed += 1;
 
-        time.unshift('x'+displayed);
+        time.unshift('x' + displayed);
 
         var xs = {};
-        xs[data[0]] = 'x'+displayed;
+        xs[data[0]] = 'x' + displayed;
 
         console.log(xs);
 
@@ -80,7 +80,7 @@ $(document).ready(function () {
 
     $('.readout').click(function () {
         alert($(this).attr('id'));
-        get_points($(this).attr('id'),$(this).attr('name'));
+        get_points($(this).attr('id'), $(this).attr('name'));
     });
 
 });
