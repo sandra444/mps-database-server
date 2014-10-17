@@ -11,27 +11,15 @@
 {% endblock %}
 
 {% block content %}
-    <script>
-    $(document).ready(function () {
-        $('.readout').click(function() {
-            alert($(this).attr('id'));
-            var chart = c3.generate({
-            bindto: '#chart',
-            data: {
-              columns: [
-                ['data1', 30, 200, 100, 400, 150, 250],
-                ['data2', 50, 20, 10, 40, 15, 25]
-                ]
-                }
-            });
-        });
-    });
-    </script>
+    <script src="/static/js/cookies.js"></script>
+    <script src="/static/assays/plot.js"></script>
 
     <h2>Readout: Click ID to Get Plot</h2>
     <ul>
         {% for readout in object_list %}
-            <li class="readout" id={{ readout.id }}>{{ readout.id }} : {{readout.assay_chip_id}}</li>
+            <li class="readout" id={{ readout.id }} name={{readout.assay_chip_id}}>
+                {{ readout.id }} : {{readout.assay_chip_id}}
+            </li>
         {% endfor %}
     </ul>
     <div id="chart"></div>
