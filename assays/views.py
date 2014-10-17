@@ -1,7 +1,7 @@
 from django.views.generic import ListView
 from assays.models import AssayRun, AssayChipReadout
 
-class RunList(ListView):
+class AssayRunList(ListView):
     model = AssayRun
 
 class AssayChipReadoutList(ListView):
@@ -13,7 +13,7 @@ from assays.models import AssayChipReadout
 from assays.forms import AssayChipReadoutForm
 from django.core.context_processors import csrf
 
-def manage_readouts(request):
+def add_readout(request):
     ReadoutFormSet = AssayChipReadoutForm
     if request.method == 'POST':
         formset = ReadoutFormSet(request.POST, request.FILES)
@@ -27,4 +27,4 @@ def manage_readouts(request):
     args.update(csrf(request))
     args['form'] = formset
 
-    return render_to_response("assays/manage_readouts.html", args)
+    return render_to_response("assays/add_readout.html", args)
