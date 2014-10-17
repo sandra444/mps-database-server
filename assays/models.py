@@ -462,27 +462,37 @@ class AssayChipSetup(LockableModel):
         return u'{0}'.format(self.assay_chip_id)
 
     def __unicode__(self):
-        return u'Chip-{0}:{1}'.format(self.assay_chip_id,
-                                        self.compound)
+        return u'Chip-{}-{}:{}({}{})'.format(self.assay_chip_id,
+                                        self.chip_test_type,
+                                        self.compound,
+                                        self.concentration,
+                                        self.unit)
 
 class AssayChipReadout(LockableModel):
     class Meta(object):
         verbose_name = 'Chip Readout'
         ordering = ('assay_chip_id', 'assay_name',)
 
+    chip_setup = models.ForeignKey(AssayChipSetup)
+
     #Control => control, Compound => compound; Abbreviate? Capitalize?
-    chip_test_type = models.CharField(max_length=8, choices=(("control","Control"),("compound","Compound")))
+    chip_test_type = models.CharField(max_length=8, choices=(("control","Control"),("compound","Compound")),
+                                      blank=True, null=True)
 
     # the unique readout identifier
     # can be a barcode or a hand written identifier
     assay_chip_id = models.CharField(max_length=512,
-                                       verbose_name='Chip ID/ Barcode')
+                                       verbose_name='Chip ID/ Barcode',
+                                       null=True, blank=True)
 
-    compound = models.ForeignKey('compounds.Compound')
+    compound = models.ForeignKey('compounds.Compound',
+                                 null=True, blank=True)
     concentration = models.FloatField(default=0)
-    unit = models.ForeignKey('assays.PhysicalUnits',verbose_name='concentration Unit')
+    unit = models.ForeignKey('assays.PhysicalUnits',verbose_name='concentration Unit',
+                            null=True, blank=True)
 
-    cell_sample = models.ForeignKey('cellsamples.CellSample')
+    cell_sample = models.ForeignKey('cellsamples.CellSample',
+                                    null=True, blank=True)
 
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
@@ -492,7 +502,8 @@ class AssayChipReadout(LockableModel):
                                                choices=(('WE', 'cells / well'),
                                                         ('CP', 'cells / chip'),
                                                         ('ML', 'cells / mL'),
-                                                        ('MM', 'cells / mm^2')))
+                                                        ('MM', 'cells / mm^2')),
+                                               null=True, blank=True)
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
 
     type = models.CharField(max_length=13,
@@ -500,7 +511,8 @@ class AssayChipReadout(LockableModel):
                             verbose_name='Test Type')
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Study')
-    device = models.ForeignKey(OrganModel, verbose_name = 'Chip Model Name')
+    device = models.ForeignKey(OrganModel, verbose_name = 'Chip Model Name',
+                               null=True, blank=True)
 
     reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
 

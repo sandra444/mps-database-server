@@ -623,8 +623,8 @@ def parseChipCSV(currentChipReadout, file):
 class AssayChipCellsInline(admin.TabularInline):
     # Cells used to constrcut the model
     model = AssayChipCells
-    verbose_name = 'Model Cell Type'
-    verbose_name_plural = 'Model Cell Types'
+    verbose_name = 'Model Cells'
+    verbose_name_plural = 'Model Cells'
     fields = (
         (
             'cell_sample', 'cellsample_density', 'cellsample_density_unit',
@@ -640,7 +640,7 @@ class AssayChipCellsInline(admin.TabularInline):
 class AssayChipSetupAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
     class Media(object):
-        js = ('js/inline_fix.js',)
+        js = ('js/inline_fix.js')
         css = {'all': ('assays/customize_admin.css',)}
 
     save_on_top = True
@@ -1079,7 +1079,7 @@ admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 class AssayTestResultAdmin(LockableAdmin):
     # Results calculated from RAW CHIP DATA aka 'Chip Result'
     class Media(object):
-        js = ('assays/customize_chip_results_admin.js', 'js/inline_fix.js',)
+        js = ('assays/customize_chip_results_admin.js', 'js/inline_fix.js')
 
     save_as = True
     save_on_top = True
