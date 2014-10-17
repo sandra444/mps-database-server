@@ -625,13 +625,14 @@ class AssayChipCellsInline(admin.TabularInline):
     model = AssayChipCells
     verbose_name = 'Model Cells'
     verbose_name_plural = 'Model Cells'
+    raw_id_fields = ('cell_sample',)
     fields = (
         (
-            'cell_sample', 'cellsample_density', 'cellsample_density_unit',
-            'cell_passage',
+            'cell_sample', 'cell_biosensor', 'cellsample_density',
+            'cellsample_density_unit', 'cell_passage',
         ),
     )
-    extra = 1
+    extra = 0
 
     class Media(object):
         css = {"all": ("css/hide_admin_original.css",)}
@@ -646,7 +647,7 @@ class AssayChipSetupAdmin(LockableAdmin):
     save_on_top = True
     save_as = True
 
-    raw_id_fields = ("compound", )
+    raw_id_fields = ("compound",)
 
     list_per_page = 100
     list_display = ('assay_run_id', 'assay_chip_id',
@@ -1292,7 +1293,7 @@ class AssayRunAdmin(LockableAdmin):
     list_display = ('assay_run_id', 'study_types', 'start_date', 'description', )
     fieldsets = (
         (
-            'None', {
+            'Study', {
                 'fields': (
                     'center_id',
                     ('type1', 'type2', 'type3'),
@@ -1300,7 +1301,13 @@ class AssayRunAdmin(LockableAdmin):
                     'name',
                     'assay_run_id',
                     'description',
-                    'file'
+                )
+            }
+        ),
+        (
+            'Study Data Upload', {
+                'fields': (
+                    'file',
                 )
             }
         ),

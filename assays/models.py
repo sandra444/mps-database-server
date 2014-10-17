@@ -413,7 +413,7 @@ class AssayChipCells(models.Model):
                                      blank=True,
                                      null=True)
     cell_sample = models.ForeignKey('cellsamples.CellSample')
-
+    cell_biosensor = models.ForeignKey('cellsamples.Biosensor')
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',
@@ -474,7 +474,7 @@ class AssayChipReadout(LockableModel):
         verbose_name = 'Chip Readout'
         ordering = ('assay_chip_id', 'assay_name',)
 
-    chip_setup = models.ForeignKey(AssayChipSetup)
+    chip_setup = models.ForeignKey(AssayChipSetup, blank=True, null=True)
 
     #Control => control, Compound => compound; Abbreviate? Capitalize?
     chip_test_type = models.CharField(max_length=8, choices=(("control","Control"),("compound","Compound")),
