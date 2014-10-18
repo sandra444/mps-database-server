@@ -122,7 +122,8 @@ class CellSample(LockableModel):
 
     # ISOLATION
 
-    isolation_datetime = models.DateTimeField("Isolation")
+    isolation_datetime = models.DateTimeField("Isolation",blank=True,
+                                              null=True)
     isolation_method = models.CharField("Method", max_length=255,
                                         blank=True)
     isolation_notes = models.CharField("Notes", max_length=255,

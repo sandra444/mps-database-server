@@ -129,21 +129,21 @@ class CellSampleAdmin(LockableAdmin):
     fieldsets = (
         (None, {
             'fields': ('cell_type',
-                       ('cell_source',
-                       'receipt_date'),
-                       'cell_image',
-                       'notes',)
+                       ('cell_source', 'receipt_date'),
+                       )
         }),
         ('Supplier Information', {
-            'fields': (('supplier', 'product_id', 'barcode'),)
-        }),
-        ('Patient Information', {
-            'fields': (('patient_age', 'patient_gender',
-                       'patient_condition'),)
+            'fields': (('supplier', 'product_id', 'barcode'),
+                        'cell_image',
+                        'notes',)
         }),
         ('Isolation Information', {
             'fields': ('isolation_datetime', ('isolation_method',
                        'isolation_notes'),)
+        }),
+        ('Patient Information', {
+            'fields': (('patient_age', 'patient_gender',
+                       'patient_condition'),)
         }),
         ('Cell Viability', {
             'fields': (('viable_count',
