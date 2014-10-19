@@ -372,8 +372,8 @@ types = (
 
 class AssayRun(LockableModel):
     class Meta(object):
-        verbose_name = 'Chip Study'
-        verbose_name_plural = 'Chip Studies'
+        verbose_name = 'Organ Chip Study'
+        verbose_name_plural = 'Organ Chip Studies'
         ordering = ('assay_run_id', )
 
     #help_text subject to change
@@ -389,7 +389,7 @@ class AssayRun(LockableModel):
                             verbose_name='Study Type 3', null=True, blank=True)
     name = models.TextField(default='Study01',verbose_name='Study Name')
     start_date = models.DateTimeField()
-    assay_run_id = models.TextField(unique=True, verbose_name='Study ID',
+    assay_run_id = models.TextField(unique=True, verbose_name='Organ Chip Study ID',
                                     help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering studies sequentially")
     description = models.TextField(blank=True, null=True)
 
