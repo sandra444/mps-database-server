@@ -295,7 +295,7 @@ class AssayTestResult(LockableModel):
     class Meta(object):
         verbose_name = 'Chip Result'
     assay_device_readout = models.ForeignKey('assays.AssayRun',
-                                             verbose_name='Chip Study')
+                                             verbose_name='Organ Chip Study')
 
     def __unicode__(self):
         return u''
@@ -303,7 +303,8 @@ class AssayTestResult(LockableModel):
 
 class AssayResult(models.Model):
 #   Individual result parameters for CHIP RESULTS used in inline
-    assay_name = models.ForeignKey('assays.AssayChipReadout', verbose_name='Readout')
+    assay_name = models.ForeignKey('assays.AssayChipReadout',
+                                   verbose_name='Readout')
 
     assay_result = models.ForeignKey(AssayTestResult,
                                      blank=True,
@@ -433,8 +434,8 @@ class AssayChipSetup(LockableModel):
         verbose_name = 'Chip Setup'
         ordering = ('assay_run_id', 'assay_chip_id', )
 
-    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Study')
-    device = models.ForeignKey(OrganModel, verbose_name = 'Chip Model Name')
+    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
+    device = models.ForeignKey(OrganModel, verbose_name = 'Organ Chip Name')
     # the unique chip identifier
     # can be a barcode or a hand written identifier
     assay_chip_id = models.CharField(max_length=512,
@@ -511,7 +512,7 @@ class AssayChipReadout(LockableModel):
                             choices=types,
                             verbose_name='Test Type')
 
-    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Study')
+    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
     device = models.ForeignKey(OrganModel, verbose_name = 'Chip Model Name',
                                null=True, blank=True)
 

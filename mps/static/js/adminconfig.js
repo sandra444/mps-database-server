@@ -39,7 +39,7 @@ var MODELS = {
     },
     //Order modified
     'Assays': {
-        'Chip Studies': [1, 'Chip Studies', 0],
+        'Chip Studies': [1, 'Organ Chip Studies', 0],
         'Chip Setups': [2, 'Chip Setup', 1],
         'Chip Readouts': [3, 'Chip Readouts', 1],
         'Chip Results': [4, 'Chip Results', 1],
