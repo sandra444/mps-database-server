@@ -666,7 +666,7 @@ class AssayChipSetupAdmin(LockableAdmin):
             }
         ),
         (
-            'Device Parameters', {
+            'Model Parameters', {
                 'fields': (
                     (
                         'device', 'assay_chip_id',

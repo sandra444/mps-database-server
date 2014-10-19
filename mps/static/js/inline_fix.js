@@ -8,5 +8,12 @@ $(document).ready(function () {
         }
     }
 
+    for (i in $(".module")) {
+        if ($(".module")[i].outerHTML.indexOf("<h2>Reference Parameters</h2>") > -1){
+            index = i;
+            break;
+        }
+    }
+
     $( ".inline-group" ).insertBefore( $( ".module" )[index]);
-}); 
+});
