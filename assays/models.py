@@ -465,7 +465,7 @@ class AssayChipSetup(LockableModel):
 
     def __unicode__(self):
         return u'Chip-{}:{}({}{})'.format(self.assay_chip_id,
-                                        self.compound.name,
+                                        self.compound,
                                         self.concentration,
                                         self.unit)
 
@@ -474,7 +474,7 @@ class AssayChipReadout(LockableModel):
         verbose_name = 'Chip Readout'
         ordering = ('assay_name',)
 
-    chip_setup = models.ForeignKey(AssayChipSetup)
+    chip_setup = models.ForeignKey(AssayChipSetup, null=True)
 
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
 
