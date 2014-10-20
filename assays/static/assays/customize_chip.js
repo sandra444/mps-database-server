@@ -100,7 +100,7 @@ $(document).ready(function () {
 
     if ($('#assaychipreadout_form')[0] != undefined) {
         $('<div id="csv_table" align="center" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body').html(add);
-        $("#csv_table").insertBefore($(".module")[3]);
+        $("#csv_table").insertBefore($(".module")[2]);
     }
 
     if (id) {
