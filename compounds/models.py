@@ -125,7 +125,7 @@ class Compound(LockableModel):
 
     def __unicode__(self):
 
-        return u'{0} (ID: {1})'.format(self.name, self.id)
+        return u'{0}'.format(self.name)
 
     def chembl_link(self):
 
