@@ -216,31 +216,33 @@ def fetch_plate_info(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
-def fetch_chip_info(request):
-    """Returns dynamic info for assays"""
+# No longer needed
 
-    assay_id = request.POST.get('id')
-
-    if not assay_id:
-        logger.error('assay id not present in request to fetch_assay_info')
-        return HttpResponseServerError()
-
-    assay = AssayChipReadout.objects.get(id=assay_id)
-
-    data = {}
-
-    data.update({
-        'compound': assay.compound.name,
-        'unit':  assay.unit.unit,
-        'concentration': assay.concentration,
-        'chip_test_type': assay.chip_test_type,
-        'assay': assay.assay_name.assay_name,
-        'run': assay.assay_run_id.assay_run_id,
-        'model': assay.device.model_name,
-    })
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
+# def fetch_chip_info(request):
+#     """Returns dynamic info for assays"""
+#
+#     assay_id = request.POST.get('id')
+#
+#     if not assay_id:
+#         logger.error('assay id not present in request to fetch_assay_info')
+#         return HttpResponseServerError()
+#
+#     assay = AssayChipReadout.objects.get(id=assay_id)
+#
+#     data = {}
+#
+#     data.update({
+#         'compound': assay.compound.name,
+#         'unit':  assay.unit.unit,
+#         'concentration': assay.concentration,
+#         'chip_test_type': assay.chip_test_type,
+#         'assay': assay.assay_name.assay_name,
+#         'run': assay.assay_run_id.assay_run_id,
+#         'model': assay.device.model_name,
+#     })
+#
+#     return HttpResponse(json.dumps(data),
+#                         content_type="application/json")
 
 def fetch_center_id(request):
     """Returns center ID for dynamic run form"""
@@ -299,7 +301,7 @@ switch = {
     'fetch_base_layout_wells': fetch_base_layout_wells,
     'fetch_base_layout_info': fetch_base_layout_info,
     'fetch_plate_info': fetch_plate_info,
-    'fetch_chip_info': fetch_chip_info,
+#   'fetch_chip_info': fetch_chip_info,
     'fetch_center_id': fetch_center_id,
     'fetch_chip_readout': fetch_chip_readout,
 }
