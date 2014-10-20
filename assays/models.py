@@ -414,7 +414,7 @@ class AssayChipCells(models.Model):
                                      blank=True,
                                      null=True)
     cell_sample = models.ForeignKey('cellsamples.CellSample')
-    cell_biosensor = models.ForeignKey('cellsamples.Biosensor')
+    cell_biosensor = models.ForeignKey('cellsamples.Biosensor', null=True, blank=True)
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',
