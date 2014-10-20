@@ -294,8 +294,8 @@ class AssayTestResult(LockableModel):
 #   Results calculated from Raw Chip Data
     class Meta(object):
         verbose_name = 'Chip Result'
-    assay_device_readout = models.ForeignKey('assays.AssayChipReadout',
-                                             verbose_name='Chip Readout')
+    assay_device_readout = models.ForeignKey('assays.AssayRun',
+                                             verbose_name='Organ Chip Study')
 
     def __unicode__(self):
         return u''
@@ -303,6 +303,9 @@ class AssayTestResult(LockableModel):
 
 class AssayResult(models.Model):
 #   Individual result parameters for CHIP RESULTS used in inline
+    assay_name = models.ForeignKey('assays.AssayChipReadout',
+                                   verbose_name='Readout')
+
     assay_result = models.ForeignKey(AssayTestResult,
                                      blank=True,
                                      null=True)
@@ -363,20 +366,38 @@ class AssayPlateTestResult(LockableModel):
     def __unicode__(self):
         return u''
 
+types = (
+    ('TOX', 'Toxicity'), ('DM', 'Disease'), ('EFF', 'Efficacy')
+)
 
 class AssayRun(LockableModel):
     class Meta(object):
+        verbose_name = 'Organ Chip Study'
+        verbose_name_plural = 'Organ Chip Studies'
         ordering = ('assay_run_id', )
 
     #help_text subject to change
     center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center Name')
-    name = models.TextField(default='Run001',verbose_name='Run Name')
+    type1 = models.CharField(max_length=13,
+                            choices=types, default='TOX',
+                            verbose_name='Study Type 1')
+    type2 = models.CharField(max_length=13,
+                            choices=types,
+                            verbose_name='Study Type 2', null=True, blank=True)
+    type3 = models.CharField(max_length=13,
+                            choices=types,
+                            verbose_name='Study Type 3', null=True, blank=True)
+    name = models.TextField(default='Study01',verbose_name='Study Name')
     start_date = models.DateTimeField()
-    assay_run_id = models.TextField(unique=True, help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering runs sequentially")
+    assay_run_id = models.TextField(unique=True, verbose_name='Organ Chip Study ID',
+                                    help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering studies sequentially")
     description = models.TextField(blank=True, null=True)
 
     file = models.FileField(upload_to='csv', verbose_name='Batch Data File',
                             blank=True, null=True, help_text='Do not upload until you have made each Chip Readout')
+
+    def study_types(self):
+        return u'{0}:{1}:{2}'.format(self.type1, self.type2, self.type3)
 
     def __unicode__(self):
         return self.assay_run_id
@@ -387,39 +408,81 @@ class AssayChipRawData(models.Model):
     value = models.FloatField(null=True)
     elapsed_time = models.FloatField(default=0)
 
-class AssayChipReadout(LockableModel):
-    class Meta(object):
-        verbose_name = 'Chip Readout'
-        ordering = ('assay_chip_id', 'assay_name',)
-
-    #Control => control, Compound => compound; Abbreviate? Capitalize?
-    chip_test_type = models.CharField(max_length=8, choices=(("control","Control"),("compound","Compound")))
-
-    # the unique readout identifier
-    # can be a barcode or a hand written identifier
-    assay_chip_id = models.CharField(max_length=512,
-                                       verbose_name='Chip ID/ Barcode')
-
-    compound = models.ForeignKey('compounds.Compound')
-    concentration = models.FloatField(default=0)
-    unit = models.ForeignKey('assays.PhysicalUnits',verbose_name='concentration Unit')
-
+class AssayChipCells(models.Model):
+#   Individual cell parameters for CHIP setup used in inline
+    assay_chip = models.ForeignKey('AssayChipSetup',
+                                     blank=True,
+                                     null=True)
     cell_sample = models.ForeignKey('cellsamples.CellSample')
-
+    cell_biosensor = models.ForeignKey('cellsamples.Biosensor')
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',
                                                max_length=8,
-                                               default="ML",
+                                               default="CP",
                                                choices=(('WE', 'cells / well'),
                                                         ('CP', 'cells / chip'),
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
+    cell_passage = models.CharField(max_length=16,verbose_name='Passage#',
+                                    default='-')
+
+
+class AssayChipSetup(LockableModel):
+    # The configuration of a Chip for implementing an assay
+    class Meta(object):
+        verbose_name = 'Chip Setup'
+        ordering = ('assay_run_id', 'assay_chip_id', )
+
+    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
+    device = models.ForeignKey(OrganModel, verbose_name = 'Organ Chip Name')
+    # the unique chip identifier
+    # can be a barcode or a hand written identifier
+    assay_chip_id = models.CharField(max_length=512,
+                                       verbose_name='Chip ID/ Barcode')
+
+    #Control => control, Compound => compound; Abbreviate? Capitalize?
+    chip_test_type = models.CharField(max_length=8, choices=(("control","Control"),("compound","Compound")))
+
+    compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
+    concentration = models.FloatField(default=0, verbose_name='Conc.',
+                                      null=True, blank=True)
+    unit = models.ForeignKey('assays.PhysicalUnits',
+                             verbose_name='conc. Unit',
+                             null=True, blank=True)
+
+    type = models.CharField(max_length=13,
+                            choices=types,
+                            verbose_name='Test Type')
+
+    scientist = models.CharField(max_length=100, blank=True, null=True)
+    notebook = models.CharField(max_length=256, blank=True, null=True)
+    notebook_page = models.IntegerField(blank=True, null=True)
+    notes = models.CharField(max_length=2048, blank=True, null=True)
+
+    def assay_chip_name(self):
+        return u'{0}'.format(self.assay_chip_id)
+
+    def __unicode__(self):
+        return u'Chip-{}:{}({}{})'.format(self.assay_chip_id,
+                                        self.compound,
+                                        self.concentration,
+                                        self.unit)
+
+class AssayChipReadout(LockableModel):
+    class Meta(object):
+        verbose_name = 'Chip Readout'
+        ordering = ('assay_name',)
+
+    chip_setup = models.ForeignKey(AssayChipSetup, null=True)
+
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
 
-    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Assay Run')
-    device = models.ForeignKey(OrganModel, verbose_name = 'Chip Model Name')
+    type = models.CharField(max_length=13,
+                            choices=types,
+                            verbose_name='Test Type')
 
+    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
     reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
 
     readout_unit = models.ForeignKey(ReadoutUnit)
@@ -440,10 +503,7 @@ class AssayChipReadout(LockableModel):
                                                              '; Gray = Reading with null value')
 
     def assay_chip_name(self):
-        return u'{0}'.format(self.assay_chip_id)
+        return u'{0}'.format(AssayChipSetup.assay_chip_id)
 
     def __unicode__(self):
-        return u'Chip-{0}:{1}:{2}'.format(self.assay_chip_id,
-                                        self.assay_name,
-                                        self.compound)
-
+        return u'{0}-{1}'.format(self.chip_setup, self.assay_name)

@@ -39,11 +39,12 @@ var MODELS = {
     },
     //Order modified
     'Assays': {
-        'Chip Results': [2, 'Chip Results', 0],
-        'Result types': [4, 'Result Types', 1, true],
-        'Functions': [6, 'Functions', 2, true],
-        'Chip Readouts': [8, 'Chip Readouts', 1],
-        'Assay runs': [10, 'Runs', 2],
+        'Organ Chip Studies': [1, 'Organ Chip Studies', 0],
+        'Chip Setups': [2, 'Chip Setup', 1],
+        'Chip Readouts': [3, 'Chip Readouts', 1],
+        'Chip Results': [4, 'Chip Results', 1],
+        'Result types': [5, 'Result Types', 2, true],
+        'Functions': [6, 'Functions', 3, true],
         'Assay plate test results' : [11, 'Plate Results', 0],
         'Plate Readouts': [12, 'Plate Readouts', 1],
         'Assay models': [16, 'Assays', 2],
@@ -66,11 +67,12 @@ var MODELS = {
         'Targets': [3, 'Targets', 1]
     },
     'Cellsamples': {
-        'Cell samples': [2, 'Cell Samples', 0],
-        'Cell types': [3, 'Cell Types', 1],
-        'Cell subtypes': [4, 'Cell Subtypes', 2],
-        'Suppliers': [5, 'Suppliers', 1],
-        'Organs': [1, 'Organs', 0]
+        'Organs': [2, 'Organs', 0],
+        'Cell samples': [4, 'Cell Samples', 0],
+        'Cell types': [6, 'Cell Types', 1],
+        'Cell subtypes': [8, 'Cell Subtypes', 2],
+        'Biosensors': [3, 'Biosensors', 0],
+        'Suppliers': [12, 'Suppliers', 1]
     },
     'Drugtrials': {
         'Drug trials': [1, 'Drug Trials', 0],

@@ -620,6 +620,127 @@ def parseChipCSV(currentChipReadout, file):
     return
 
 
+class AssayChipCellsInline(admin.TabularInline):
+    # Cells used to constrcut the model
+    model = AssayChipCells
+    verbose_name = 'Model Cells'
+    verbose_name_plural = 'Model Cells'
+    raw_id_fields = ('cell_sample',)
+    fields = (
+        (
+            'cell_sample', 'cell_biosensor', 'cellsample_density',
+            'cellsample_density_unit', 'cell_passage',
+        ),
+    )
+    extra = 0
+
+    class Media(object):
+        css = {"all": ("css/hide_admin_original.css",)}
+
+
+class AssayChipSetupAdmin(LockableAdmin):
+    # TIMEPOINT readouts from ORGAN CHIPS
+    class Media(object):
+        js = ('js/inline_fix.js',)
+        css = {'all': ('assays/customize_admin.css',)}
+
+    save_on_top = True
+    save_as = True
+
+    raw_id_fields = ("compound",)
+
+    list_per_page = 100
+    list_display = ('assay_run_id', 'assay_chip_id',
+                    'device', 'chip_test_type',
+                    'compound', )
+
+    search_fields = ['assay_chip_id']
+    fieldsets = (
+        (
+            'Study', {
+                'fields': (
+                    (
+                        'assay_run_id',
+                    ),
+                )
+            }
+        ),
+        (
+            'Model Parameters', {
+                'fields': (
+                    (
+                        'device', 'assay_chip_id',
+                    ),
+                )
+            }
+        ),
+        (
+            'Assay Parameters', {
+                'fields': (
+                    (
+                        'chip_test_type', 'compound', 'concentration',
+                        'unit',
+                    ),
+                )
+            }
+        ),
+        (
+            'Reference Parameters', {
+                'fields': (
+                    (
+                        'scientist', 'notebook', 'notebook_page', 'notes',
+                    ),
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    (
+                        'created_by', 'created_on',
+                    ),
+                    (
+                        'modified_by', 'modified_on',
+                    ),
+                    (
+                        'signed_off_by', 'signed_off_date'
+                    ),
+                )
+            }
+        ),
+    )
+
+    actions = ['update_fields']
+    inlines = [AssayChipCellsInline]
+
+    def response_add(self, request, obj, post_url_continue="../%s/"):
+        """If save and add another, have same response as save and continue"""
+        if '_saveasnew' in request.POST or '_addanother' in request.POST:
+            return HttpResponseRedirect("../%s" % obj.id)
+        else:
+            return super(AssayChipSetupAdmin, self).response_add(request, obj, post_url_continue)
+
+    def response_change(self, request, obj):
+        """If save as new, redirect to new change model; else go to list"""
+        if '_saveasnew' in request.POST:
+            return HttpResponseRedirect("../%s" % obj.id)
+        else:
+            return super(LockableAdmin, self).response_change(request, obj)
+
+    def save_model(self, request, obj, form, change):
+
+        if change:
+            obj.modified_by = request.user
+
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        obj.save()
+
+admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
+
+
 class AssayChipReadoutAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
     class Media(object):
@@ -629,35 +750,24 @@ class AssayChipReadoutAdmin(LockableAdmin):
     save_on_top = True
     save_as = True
 
-    raw_id_fields = ("compound", "cell_sample",)
-
     list_per_page = 100
-    list_display = ('assay_chip_id',
-                    'id',
-                    'assay_run_id',
+    list_display = ('id',
                     'assay_name',
-                    'compound',
-                    'cell_sample',
+                    'chip_setup',
+                    'readout_start_time',
+                    'assay_run_id',
+
+
                     'reader_name')
+    list_display_links = ('id', 'assay_name', 'chip_setup',
+                          'readout_start_time',)
     search_fields = ['assay_chip_id']
     fieldsets = (
         (
             'Run Parameters', {
                 'fields': (
                     (
-                        'assay_run_id', 'chip_test_type'
-                    ),
-                )
-            }
-        ),
-        (
-            'Device Parameters', {
-                'fields': (
-                    (
-                        'assay_chip_id',
-                    ),
-                    (
-                        'device', 'reader_name',
+                        'assay_run_id', 'chip_setup'
                     ),
                 )
             }
@@ -666,18 +776,10 @@ class AssayChipReadoutAdmin(LockableAdmin):
             'Assay Parameters', {
                 'fields': (
                     (
-                        'assay_name',
+                        'assay_name', 'type'
                     ),
                     (
-                        'compound', 'concentration',
-                        'unit',
-                    ),
-                    (
-                        'cell_sample', 'cellsample_density',
-                        'cellsample_density_unit',
-                    ),
-                    (
-                        'timeunit', 'readout_unit',
+                        'reader_name', 'timeunit', 'readout_unit',
                     ),
                     (
                         'treatment_time_length', 'assay_start_time', 'readout_start_time',
@@ -716,8 +818,8 @@ class AssayChipReadoutAdmin(LockableAdmin):
     )
 
     def response_add(self, request, obj, post_url_continue="../%s/"):
-        """If save as new or save and add another, redirect to new change model; else go to list"""
-        if '_saveasnew' or '_addanother' in request.POST:
+        """If save and add another, have same response as save and continue"""
+        if '_saveasnew' in request.POST or '_addanother' in request.POST:
             return HttpResponseRedirect("../%s" % obj.id)
         else:
             return super(AssayChipReadoutAdmin, self).response_add(request, obj, post_url_continue)
@@ -832,7 +934,7 @@ class AssayResultInline(admin.TabularInline):
     verbose_name_plural = 'Assay Test Results'
     fields = (
         (
-            'result', 'result_function', 'result_type',
+            'assay_name', 'result', 'result_function', 'result_type',
             'value', 'test_unit', 'severity',
         ),
     )
@@ -933,13 +1035,13 @@ admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 class AssayTestResultAdmin(LockableAdmin):
     # Results calculated from RAW CHIP DATA aka 'Chip Result'
     class Media(object):
-        js = ('assays/customize_chip_results_admin.js', 'js/inline_fix.js')
+        js = ('js/inline_fix.js',)
 
     save_as = True
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'assay_device_readout', 'compound', 'assay', 'result', 'result_function', 'result_type', 'severity'
+        'assay_device_readout', 'chip_readout', 'result', 'result_function', 'result_type', 'severity'
     )
     search_fields = ['assay_device_readout']
     actions = ['update_fields']
@@ -968,16 +1070,9 @@ class AssayTestResultAdmin(LockableAdmin):
     actions = ['update_fields']
     inlines = [AssayResultInline]
 
-    def compound(self, obj):
-        if obj.assay_device_readout_id:
-            assay = AssayChipReadout.objects.get(id=obj.assay_device_readout_id)
-            return Compound.objects.get(id=assay.compound_id).name
-        return ''
-
-    def assay(self, obj):
-        if obj.assay_device_readout_id:
-            assay = AssayChipReadout.objects.get(id=obj.assay_device_readout_id)
-            return AssayModel.objects.get(id=assay.assay_name_id).assay_name
+    def chip_readout(self, obj):
+        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
+            return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].assay_name
         return ''
 
     def result(self, obj):
@@ -1143,17 +1238,24 @@ class AssayRunAdmin(LockableAdmin):
     form = AssayRunForm
     save_on_top = True
     list_per_page = 300
-    list_display = ('assay_run_id', 'name', 'description', 'start_date')
+    list_display = ('assay_run_id', 'study_types', 'start_date', 'description', )
     fieldsets = (
         (
-            'None', {
+            'Study', {
                 'fields': (
                     'center_id',
+                    ('type1', 'type2', 'type3'),
                     'start_date',
                     'name',
                     'assay_run_id',
                     'description',
-                    'file'
+                )
+            }
+        ),
+        (
+            'Study Data Upload', {
+                'fields': (
+                    'file',
                 )
             }
         ),

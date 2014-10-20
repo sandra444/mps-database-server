@@ -42,26 +42,56 @@ $(document).ready(function () {
         }
     }
 
+    function get_types() {
+        var types = [];
+        for (var i=1; i<4; i++) {
+            var val = $('#id_type' + i).val();
+            if (val){
+                types.push(val);
+            }
+        }
+        data[1] = types.join('_');
+        set_data();
+    }
+
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     var data = [
         [],
         [],
+        [],
         []
     ];
 
+    var type1 = $('#id_type1');
+    var type2 = $('#id_type2');
+    var type3 = $('#id_type3');
     var date = $('#id_start_date_0');
     var center = $('#id_center_id');
     var name = $('#id_name');
 
     //Need to have condition for adding vs. changing data
     get_center_id();
-    data[1] = date.val();
-    data[2] = name.val();
+    get_types();
+    data[2] = date.val();
+    data[3] = name.val();
 
     //Needs an AJAX call to get centerID
     center.change(function (evt) {
         get_center_id();
+    });
+
+    //Get the types for each drop down
+    type1.change(function (evt) {
+        get_types();
+    });
+
+    type2.change(function (evt) {
+        get_types();
+    });
+
+    type3.change(function (evt) {
+        get_types();
     });
 
     date.data("value", date.val());
@@ -72,13 +102,13 @@ $(document).ready(function () {
 
         if (date_data !== val) {
             date.data("value", val);
-            data[1] = $('#id_start_date_0').val();
+            data[2] = $('#id_start_date_0').val();
             set_data();
         }
     }, 100);
 
     name.on('input', function () {
-        data[2] = $('#id_name').val();
+        data[3] = $('#id_name').val();
         set_data();
     }).trigger('input');
 });

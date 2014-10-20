@@ -72,6 +72,20 @@ class Supplier(LockableModel):
         return u'{}'.format(self.name)
 
 
+class Biosensor(LockableModel):
+    class Meta(object):
+        ordering = ('name', )
+    name = models.CharField(max_length=255, unique=True)
+    supplier = models.ForeignKey('Supplier')
+    product_id = models.CharField(max_length=255, blank=True)
+    lot_number = models.CharField(max_length=255, blank=True,
+                                  verbose_name='Lot#')
+    description = models.CharField(max_length=512, blank=True)
+
+    def __unicode__(self):
+        return u'{}'.format(self.name)
+
+
 class CellSample(LockableModel):
     cell_type = models.ForeignKey('CellType')
     CELLSOURCETYPE = (
@@ -108,7 +122,8 @@ class CellSample(LockableModel):
 
     # ISOLATION
 
-    isolation_datetime = models.DateTimeField("Isolation")
+    isolation_datetime = models.DateTimeField("Isolation",blank=True,
+                                              null=True)
     isolation_method = models.CharField("Method", max_length=255,
                                         blank=True)
     isolation_notes = models.CharField("Notes", max_length=255,
@@ -130,10 +145,11 @@ class CellSample(LockableModel):
     cell_image = models.ImageField(upload_to='cellsamples',
                                    null=True, blank=True)
     class Meta(object):
-        ordering = ('cell_type', 'cell_source', 'id',)
+        ordering = ('cell_type', 'cell_source', 'supplier', 'barcode', 'id',)
 
     def __unicode__(self):
-        return u'#{} {} {} supplied by {}'.format(self.id,
-                                                  self.cell_source,
-                                                  self.cell_type,
-                                                  self.supplier)
+        return u'{} {} ({}-{})'.format(
+                                            self.cell_source,
+                                            self.cell_type,
+                                            self.supplier,
+                                            self.barcode)
