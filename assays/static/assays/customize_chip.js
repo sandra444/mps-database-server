@@ -64,7 +64,7 @@ $(document).ready(function () {
 
         all = null;
 
-        var table = exist ? "<table class='layout-table' style='width: 99.5%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 99.5%;'><tbody>";
+        var table = exist ? "<table class='layout-table' style='width: 20%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 20%;'><tbody>";
 
         table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Field</th><th>Raw Data</th></tr>" : "";
 
@@ -92,7 +92,7 @@ $(document).ready(function () {
 
     var id = getReadoutValue();
 
-    var add = "<table class='layout-table' style='width: 99.5%;'><tbody>" +
+    var add = "<table class='layout-table' style='width: 20%;'><tbody>" +
             "<tr style='background: #FF2400'><th>Time</th><th>Field</th><th>Raw Data</th></tr>" +
             "<tr><th><br><br></th><th><br><br></th><th><br><br></th>" +
             "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
