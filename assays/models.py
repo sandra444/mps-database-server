@@ -500,7 +500,8 @@ class AssayChipReadout(LockableModel):
 
     object_type = models.CharField(max_length=6,
                             choices=object_types,
-                            verbose_name='Object of Interest')
+                            verbose_name='Object of Interest',
+                            default='F')
 
     notebook = models.CharField(max_length=256, blank=True, null=True)
     notebook_page = models.IntegerField(blank=True, null=True)
