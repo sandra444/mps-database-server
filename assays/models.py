@@ -426,7 +426,7 @@ class AssayChipCells(models.Model):
                                                         ('MM', 'cells / mm^2')))
     cell_passage = models.CharField(max_length=16,verbose_name='Passage#',
                                     default='-')
- #   cell_biosensor = models.ForeignKey('cellsamples.CellSample', null=True, blank=True)
+
 
 class AssayChipSetup(LockableModel):
     # The configuration of a Chip for implementing an assay
