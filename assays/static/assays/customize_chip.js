@@ -1,5 +1,23 @@
 $(document).ready(function () {
 
+    function resetChart() {
+        chart = c3.generate({
+            bindto: '#chart',
+
+            data: {
+                columns: []
+            },
+            axis: {
+                x: {
+                    label: 'Time'
+                },
+                y: {
+                    label: 'Value'
+                }
+            }
+        });
+    }
+
     function getReadoutValue() {
         try {
             return Math.floor($('.historylink').attr('href').split('/')[4]);
@@ -89,22 +107,6 @@ $(document).ready(function () {
         $('#csv_table').html(table);
 
         //Make chart
-        chart = c3.generate({
-            bindto: '#chart',
-
-            data: {
-                columns: []
-            },
-            axis: {
-                x: {
-                    label: 'Time'
-                },
-                y: {
-                    label: 'Value'
-                }
-            }
-        });
-
         var objects = {};
 
         for (var i in lines) {
@@ -122,24 +124,16 @@ $(document).ready(function () {
             }
         }
 
-        //console.log(objects);
-
         var xs = {};
 
         var num = 1;
         for (var object in objects) {
-            //console.log(object);
             object = '' + object;
 
             xs[object] = 'x' + num;
 
-            console.log(xs);
-
             objects[object].data.unshift(object);
             objects[object].time.unshift('x' + num);
-
-            console.log(objects[object].data);
-            console.log(objects[object].time);
 
             chart.load({
                 xs: xs,
@@ -196,6 +190,7 @@ $(document).ready(function () {
     }
 
     $('#id_file').change(function(evt) {
+        resetChart();
         var file = $('#id_file')[0].files[0];
         if (file) {
             getText(file);
