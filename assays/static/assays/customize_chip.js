@@ -89,6 +89,22 @@ $(document).ready(function () {
         $('#csv_table').html(table);
 
         //Make chart
+        chart = c3.generate({
+            bindto: '#chart',
+
+            data: {
+                columns: []
+            },
+            axis: {
+                x: {
+                    label: 'Time'
+                },
+                y: {
+                    label: 'Value'
+                }
+            }
+        });
+
         var objects = {};
 
         for (var i in lines) {
