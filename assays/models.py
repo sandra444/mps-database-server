@@ -469,6 +469,10 @@ class AssayChipSetup(LockableModel):
                                         self.concentration,
                                         self.unit)
 
+object_types = (
+    ('F', 'Field'), ('C', 'Colony'), ('O', 'Other')
+)
+
 class AssayChipReadout(LockableModel):
     class Meta(object):
         verbose_name = 'Chip Readout'
@@ -493,6 +497,11 @@ class AssayChipReadout(LockableModel):
 
     assay_start_time = models.DateTimeField(blank=True, null=True)
     readout_start_time = models.DateTimeField(blank=True, null=True)
+
+    object_type = models.CharField(max_length=6,
+                            choices=object_types,
+                            verbose_name='Object of Interest',
+                            default='F')
 
     notebook = models.CharField(max_length=256, blank=True, null=True)
     notebook_page = models.IntegerField(blank=True, null=True)

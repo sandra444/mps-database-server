@@ -785,6 +785,9 @@ class AssayChipReadoutAdmin(LockableAdmin):
                         'treatment_time_length', 'assay_start_time', 'readout_start_time',
                     ),
                     (
+                        'object_type',
+                    ),
+                    (
                         'file',
                     ),
                 )
