@@ -64,7 +64,8 @@ $(document).ready(function () {
 
         all = null;
 
-        var table = exist ? "<table class='layout-table' style='width: 20%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 20%;'><tbody>";
+        //Make table
+        var table = exist ? "<table class='layout-table' style='width: 100%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 100%;'><tbody>";
 
         table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Field</th><th>Raw Data</th></tr>" : "";
 
@@ -86,21 +87,30 @@ $(document).ready(function () {
 
         table += "</tbody></table>";
         $('#csv_table').html(table);
+
+        //Make chart
+
     };
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     var id = getReadoutValue();
 
-    var add = "<table class='layout-table' style='width: 20%;'><tbody>" +
+    var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
             "<tr style='background: #FF2400'><th>Time</th><th>Field</th><th>Raw Data</th></tr>" +
             "<tr><th><br><br></th><th><br><br></th><th><br><br></th>" +
             "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
             "</tbody></table>";
 
     if ($('#assaychipreadout_form')[0] != undefined) {
-        $('<div id="csv_table" align="center" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body').html(add);
-        $("#csv_table").insertBefore($(".module")[2]);
+        $('<div id="extra" align="left" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body');
+        $("#extra").insertBefore($(".module")[2]);
+
+        $('<div id="csv_table" style="width: 20%;float: left;padding-bottom: 1000px;margin-bottom: -1000px;">')
+            .appendTo('#extra').html(add);
+
+        $('<div id="chart" style="width: 80%;float: left;padding-bottom: 1000px;margin-bottom: -1000px;">')
+            .appendTo('#extra');
     }
 
     if (id) {

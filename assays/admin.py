@@ -744,8 +744,8 @@ admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 class AssayChipReadoutAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
     class Media(object):
-        js = ('assays/customize_chip.js',)
-        css = {'all': ('assays/customize_admin.css',)}
+        js = ('assays/customize_chip.js', 'js/d3.v3.min.js', 'js/c3.min.js',)
+        css = {'all': ('assays/customize_admin.css', 'css/c3.css',)}
 
     save_on_top = True
     save_as = True
