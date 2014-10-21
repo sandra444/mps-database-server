@@ -1,6 +1,9 @@
 $(document).ready(function () {
 
     function resetChart() {
+        $('#chart').css('max-height',320);
+        $('#chart').css('height',320);
+
         chart = c3.generate({
             bindto: '#chart',
 
@@ -145,6 +148,11 @@ $(document).ready(function () {
             });
 
             num += 1;
+        }
+
+        if ($('#csv_table').height() > $('#chart').height()){
+            $('#chart').css('max-height',$('#csv_table').height()+10);
+            $('#chart').css('height',$('#csv_table').height()+10);
         }
     };
 
