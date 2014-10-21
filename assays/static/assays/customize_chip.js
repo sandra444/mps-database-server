@@ -97,9 +97,9 @@ $(document).ready(function () {
             else{
                 table += "<tr>";
             }
-            table += "<th><br>" + lines[i][0] + "<br></th>";
-            table += "<th><br>" + lines[i][1] + "<br></th>";
-            table += "<th><br>" + lines[i][2] + "<br></th>";
+            table += "<th>" + lines[i][0] + "</th>";
+            table += "<th>" + lines[i][1] + "</th>";
+            table += "<th>" + lines[i][2] + "</th>";
             table += "</tr>";
         }
 
