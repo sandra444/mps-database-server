@@ -89,7 +89,53 @@ $(document).ready(function () {
         $('#csv_table').html(table);
 
         //Make chart
+        var objects = {};
 
+        for (var i in lines) {
+            if (!lines[i][1] || (i == 0 && !exist)) {
+                continue;
+            }
+
+            if (!objects[lines[i][1]]){
+                objects[lines[i][1]] = {'time':[], 'data':[]};
+            }
+
+            if (lines[i][2] && lines[i][2] != 'None') {
+                objects[lines[i][1]].time.push(lines[i][0]);
+                objects[lines[i][1]].data.push(lines[i][2]);
+            }
+        }
+
+        //console.log(objects);
+
+        var xs = {};
+
+        var num = 1;
+        for (var object in objects) {
+            //console.log(object);
+            object = '' + object;
+
+            xs[object] = 'x' + num;
+
+            console.log(xs);
+
+            objects[object].data.unshift(object);
+            objects[object].time.unshift('x' + num);
+
+            console.log(objects[object].data);
+            console.log(objects[object].time);
+
+            chart.load({
+                xs: xs,
+
+                columns: [
+                    objects[object].data,
+                    objects[object].time,
+                ]
+            });
+
+            num += 1;
+        }
     };
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
@@ -103,14 +149,30 @@ $(document).ready(function () {
             "</tbody></table>";
 
     if ($('#assaychipreadout_form')[0] != undefined) {
-        $('<div id="extra" align="left" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body');
+        $('<div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;width: 99%">').appendTo('body');
         $("#extra").insertBefore($(".module")[2]);
 
-        $('<div id="csv_table" style="width: 20%;float: left;padding-bottom: 1000px;margin-bottom: -1000px;">')
+        $('<div id="csv_table" style="width: 20%;float: left;">')
             .appendTo('#extra').html(add);
 
-        $('<div id="chart" style="width: 80%;float: left;padding-bottom: 1000px;margin-bottom: -1000px;">')
+        $('<div id="chart" style="width: 80%;float: left;">')
             .appendTo('#extra');
+
+        var chart = c3.generate({
+            bindto: '#chart',
+
+            data: {
+                columns: []
+            },
+            axis: {
+                x: {
+                    label: 'Time'
+                },
+                y: {
+                    label: 'Value'
+                }
+            }
+        });
     }
 
     if (id) {
