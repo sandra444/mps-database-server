@@ -1,5 +1,23 @@
 $(document).ready(function () {
 
+    function resetChart() {
+        chart = c3.generate({
+            bindto: '#chart',
+
+            data: {
+                columns: []
+            },
+            axis: {
+                x: {
+                    label: 'Time'
+                },
+                y: {
+                    label: 'Value'
+                }
+            }
+        });
+    }
+
     function getReadoutValue() {
         try {
             return Math.floor($('.historylink').attr('href').split('/')[4]);
@@ -64,7 +82,8 @@ $(document).ready(function () {
 
         all = null;
 
-        var table = exist ? "<table class='layout-table' style='width: 99.5%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 99.5%;'><tbody>";
+        //Make table
+        var table = exist ? "<table class='layout-table' style='width: 100%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 100%;'><tbody>";
 
         table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Object</th><th>Raw Data</th></tr>" : "";
 
@@ -78,29 +97,92 @@ $(document).ready(function () {
             else{
                 table += "<tr>";
             }
-            table += "<th><br>" + lines[i][0] + "<br></th>";
-            table += "<th><br>" + lines[i][1] + "<br></th>";
-            table += "<th><br>" + lines[i][2] + "<br></th>";
+            table += "<th>" + lines[i][0] + "</th>";
+            table += "<th>" + lines[i][1] + "</th>";
+            table += "<th>" + lines[i][2] + "</th>";
             table += "</tr>";
         }
 
         table += "</tbody></table>";
         $('#csv_table').html(table);
+
+        //Make chart
+        var objects = {};
+
+        for (var i in lines) {
+            if (!lines[i][1] || (i == 0 && !exist)) {
+                continue;
+            }
+
+            if (!objects[lines[i][1]]){
+                objects[lines[i][1]] = {'time':[], 'data':[]};
+            }
+
+            if (lines[i][2] && lines[i][2] != 'None') {
+                objects[lines[i][1]].time.push(lines[i][0]);
+                objects[lines[i][1]].data.push(lines[i][2]);
+            }
+        }
+
+        var xs = {};
+
+        var num = 1;
+        for (var object in objects) {
+            object = '' + object;
+
+            xs[object] = 'x' + num;
+
+            objects[object].data.unshift(object);
+            objects[object].time.unshift('x' + num);
+
+            chart.load({
+                xs: xs,
+
+                columns: [
+                    objects[object].data,
+                    objects[object].time,
+                ]
+            });
+
+            num += 1;
+        }
     };
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     var id = getReadoutValue();
 
-    var add = "<table class='layout-table' style='width: 99.5%;'><tbody>" +
+    var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
             "<tr style='background: #FF2400'><th>Time</th><th>Object</th><th>Raw Data</th></tr>" +
             "<tr><th><br><br></th><th><br><br></th><th><br><br></th>" +
             "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
             "</tbody></table>";
 
     if ($('#assaychipreadout_form')[0] != undefined) {
-        $('<div id="csv_table" align="center" style="margin-top: 10px;margin-bottom: 10px;">').appendTo('body').html(add);
-        $("#csv_table").insertBefore($(".module")[2]);
+        $('<div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;width: 99%">').appendTo('body');
+        $("#extra").insertBefore($(".module")[2]);
+
+        $('<div id="csv_table" style="width: 20%;float: left;">')
+            .appendTo('#extra').html(add);
+
+        $('<div id="chart" style="width: 80%;float: left;">')
+            .appendTo('#extra');
+
+        var chart = c3.generate({
+            bindto: '#chart',
+
+            data: {
+                columns: []
+            },
+            axis: {
+                x: {
+                    label: 'Time'
+                },
+                y: {
+                    label: 'Value'
+                }
+            }
+        });
     }
 
     if (id) {
@@ -108,6 +190,7 @@ $(document).ready(function () {
     }
 
     $('#id_file').change(function(evt) {
+        resetChart();
         var file = $('#id_file')[0].files[0];
         if (file) {
             getText(file);
