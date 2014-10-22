@@ -588,7 +588,7 @@ def removeExistingChip(currentChipReadout):
             readout.delete()
     return
 
-
+# TODO Must change parsing for chip
 def parseChipCSV(currentChipReadout, file):
     removeExistingChip(currentChipReadout)
 
@@ -748,13 +748,25 @@ class AssayChipReadoutInline(admin.TabularInline):
 
     fields = (
         (
-            ('assay_id','object_type','reader_id','reader_unit',)
+            ('assay_id','object_type','reader_id','readout_unit',)
         ),
     )
     extra = 0
 
     class Media(object):
         css = {"all": ("css/hide_admin_original.css",)}
+
+class AssayChipReadoutForm(forms.ModelForm):
+    class Meta(object):
+        model = AssayRun
+
+    def clean(self):
+        """Validate unique, existing Chip Readout IDs"""
+
+        # clean the form data, before validation
+        data = super(AssayChipReadoutForm, self).clean()
+
+        return data
 
 class AssayChipReadoutAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
@@ -789,10 +801,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
             'Assay Parameters', {
                 'fields': (
                     (
-                        'timeunit', 'readout_unit',
-                    ),
-                    (
-                        'treatment_time_length', 'assay_start_time', 'readout_start_time',
+                        'timeunit', 'treatment_time_length', 'assay_start_time', 'readout_start_time',
                     ),
                     (
                         'file',
@@ -1169,7 +1178,7 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
-
+# TODO Must change parsing for chips
 def parseRunCSV(currentRun, file):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
