@@ -11,6 +11,7 @@ $(document).ready(function () {
                 data: {
                     columns: []
                 },
+
                 axis: {
                     x: {
                         label: 'Time'

@@ -766,6 +766,16 @@ class AssayChipReadoutForm(forms.ModelForm):
         # clean the form data, before validation
         data = super(AssayChipReadoutForm, self).clean()
 
+        # Check to make sure there is a file and it is not already in memory
+        if data['file'] and type(data['file'].file) == BytesIO:
+            datareader = csv.reader(data['file'].file, delimiter=',')
+            datalist = list(datareader)
+            for line in datalist[1:]:
+                assay_name = line[1]
+                if not AssayChipReadout.objects.filter(assay_name=assay_name).exists():
+                    raise forms.ValidationError(
+                        'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
+
         return data
 
 class AssayChipReadoutAdmin(LockableAdmin):
@@ -1248,6 +1258,12 @@ class AssayRunForm(forms.ModelForm):
                 if not AssayChipReadout.objects.filter(id=id).exists():
                     raise forms.ValidationError(
                         'Chip Readout id = %s does not exist; please change your batch file or add this readout' % id)
+
+            for line in datalist[1:]:
+                assay_name = line[1]
+                if not AssayChipReadout.objects.filter(assay_name=assay_name).exists():
+                    raise forms.ValidationError(
+                        'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
 
         return data
 
