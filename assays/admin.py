@@ -600,11 +600,12 @@ def parseChipCSV(currentChipReadout, file):
         # rowID is the index of the current row from top to bottom
 
         # Skip any row with incomplete data and first row (header) for now
-        if not rowValue[0] or not rowValue[1] or rowID == 0:
+        if not rowValue[0] or not rowValue[1] or not rowValue[2] or rowID == 0:
             continue
 
-        field = rowValue[1]
-        val = rowValue[2]
+        assay = rowValue[1]
+        field = rowValue[2]
+        val = rowValue[3]
         time = rowValue[0]
 
         if not val:
@@ -613,6 +614,7 @@ def parseChipCSV(currentChipReadout, file):
         #How to parse Chip data
         AssayChipRawData(
             assay_chip_id=currentChipReadout,
+            assay_id=AssayModel.objects.get(assay_name=assay),
             field_id=field,
             value=val,
             elapsed_time=time
