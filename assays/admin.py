@@ -588,7 +588,7 @@ def removeExistingChip(currentChipReadout):
             readout.delete()
     return
 
-# TODO Must change parsing for chip
+# TODO Must test parsing for chip
 def parseChipCSV(currentChipReadout, file):
     removeExistingChip(currentChipReadout)
 
@@ -1190,7 +1190,7 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
-# TODO Must change parsing for chips
+# TODO Must change parsing for runs
 def parseRunCSV(currentRun, file):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
@@ -1205,15 +1205,16 @@ def parseRunCSV(currentRun, file):
         if rowID == 0:
             readouts = [x for x in rowValue if x]
 
-        elif not rowValue[0] or not rowValue[1]:
+        elif not rowValue[0] or not rowValue[1] or not rowValue[2]:
             continue
 
         else:
-            for colID in range(2, len(readouts)):
+            for colID in range(3, len(readouts)):
                 currentChipReadout = readouts[colID]
-                field = rowValue[1]
+                field = rowValue[2]
                 val = rowValue[colID]
                 time = rowValue[0]
+                assay = rowValue[1]
 
                 if not val:
                     val = None
@@ -1221,6 +1222,7 @@ def parseRunCSV(currentRun, file):
                 #How to parse Chip data
                 AssayChipRawData(
                     assay_chip_id=AssayChipReadout.objects.get(id=currentChipReadout),
+                    assay_id=AssayChipReadout.objects.get(assay_name=assay),
                     field_id=field,
                     value=val,
                     elapsed_time=time
@@ -1253,7 +1255,7 @@ class AssayRunForm(forms.ModelForm):
 
             readouts = list(x for x in datalist[0] if x)
             # Check if any Readouts already exist, if so, crash
-            for id in readouts[2:]:
+            for id in readouts[3:]:
                 if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
                     raise forms.ValidationError(
                         'Chip Readout id = %s already contains data; please change your batch file' % id)
