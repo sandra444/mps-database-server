@@ -170,48 +170,6 @@ $(document).ready(function () {
             }
             chart += 1;
         }
-/*
-        var objects = {};
-
-        for (var i in lines) {
-            if (!lines[i][1] || (i == 0 && !exist)) {
-                continue;
-            }
-
-            if (!objects[lines[i][1]]){
-                objects[lines[i][1]] = {'time':[], 'data':[]};
-            }
-
-            if (lines[i][2] && lines[i][2] != 'None') {
-                objects[lines[i][1]].time.push(lines[i][0]);
-                objects[lines[i][1]].data.push(lines[i][2]);
-            }
-        }
-
-        var xs = {};
-
-        var num = 1;
-        for (var object in objects) {
-            object = '' + object;
-
-            xs[object] = 'x' + num;
-
-            objects[object].data.unshift(object);
-            objects[object].time.unshift('x' + num);
-
-            //Load for correct assay chart
-            charts[XXX].load({
-                xs: xs,
-
-                columns: [
-                    objects[object].data,
-                    objects[object].time,
-                ]
-            });
-
-            num += 1;
-        }
-*/
     };
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
