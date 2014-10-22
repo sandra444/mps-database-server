@@ -403,7 +403,11 @@ class AssayRun(LockableModel):
         return self.assay_run_id
 
 class AssayChipRawData(models.Model):
+    #class Meta(object):
+    #    unique_together = [('assay_chip_id', 'assay_id', 'field_id')]
+
     assay_chip_id = models.ForeignKey('assays.AssayChipReadout')
+    assay_id = models.ForeignKey('assays.AssayModel')
     field_id = models.CharField(max_length=255, default = '0')
     value = models.FloatField(null=True)
     elapsed_time = models.FloatField(default=0)
@@ -473,21 +477,30 @@ object_types = (
     ('F', 'Field'), ('C', 'Colony'), ('O', 'Other')
 )
 
+class AssayChipReadoutAssay(models.Model):
+    # Inline for CHIP readout assays
+
+    readout_id = models.ForeignKey('assays.AssayChipReadout', verbose_name='Readout')
+    assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True)
+    reader_id = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
+    object_type = models.CharField(max_length=6,
+                            choices=object_types,
+                            verbose_name='Object of Interest',
+                            default='F')
+
 class AssayChipReadout(LockableModel):
     class Meta(object):
         verbose_name = 'Chip Readout'
-        ordering = ('assay_name',)
+        ordering = ('chip_setup',)
 
     chip_setup = models.ForeignKey(AssayChipSetup, null=True)
-
-    assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
 
     type = models.CharField(max_length=13,
                             choices=types,
                             verbose_name='Test Type')
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
-    reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
+    #reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
 
     readout_unit = models.ForeignKey(ReadoutUnit)
     timeunit = models.ForeignKey(TimeUnits)
@@ -498,21 +511,18 @@ class AssayChipReadout(LockableModel):
     assay_start_time = models.DateTimeField(blank=True, null=True)
     readout_start_time = models.DateTimeField(blank=True, null=True)
 
-    object_type = models.CharField(max_length=6,
-                            choices=object_types,
-                            verbose_name='Object of Interest',
-                            default='F')
-
     notebook = models.CharField(max_length=256, blank=True, null=True)
     notebook_page = models.IntegerField(blank=True, null=True)
     notes = models.CharField(max_length=2048, blank=True, null=True)
     scientist = models.CharField(max_length=100, blank=True, null=True)
     file = models.FileField(upload_to='csv', verbose_name='Data File',
-                            blank=True, null=True, help_text='Green = Data from database; Red = Line that will not be read'
-                                                             '; Gray = Reading with null value')
+                            blank=True, null=True, help_text='Green = Data from database;'
+                                                             ' Red = Line that will not be read'
+                                                             '; Gray = Reading with null value'
+                                                             ' ***Uploading overwrites old data***')
 
     def assay_chip_name(self):
         return u'{0}'.format(AssayChipSetup.assay_chip_id)
 
     def __unicode__(self):
-        return u'{0}-{1}'.format(self.chip_setup, self.assay_name)
+        return u'{0}'.format(self.chip_setup)

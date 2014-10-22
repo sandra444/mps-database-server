@@ -273,12 +273,13 @@ def fetch_chip_readout(request):
         logger.error('chip not present in request to fetch_chip_readout')
         return HttpResponseServerError()
 
-    chip_data = AssayChipRawData.objects.filter(assay_chip_id=chip_id).order_by('id')
+    chip_data = AssayChipRawData.objects.filter(assay_chip_id=chip_id).order_by('elapsed_time')
 
     csv = ""
 
     for raw in chip_data:
         csv += str(raw.elapsed_time) + ','
+        csv += str(raw.assay_id.assay_name) + ','
         csv += str(raw.field_id) + ','
         csv += str(raw.value) + '\n'
 

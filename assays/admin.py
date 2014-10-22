@@ -740,11 +740,26 @@ class AssayChipSetupAdmin(LockableAdmin):
 
 admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 
+class AssayChipReadoutInline(admin.TabularInline):
+    # Assays for ChipReadout
+    model = AssayChipReadoutAssay
+    verbose_name = 'Assay Readout Assay'
+    verbose_plural_name = 'Assay Readout Assay'
+
+    fields = (
+        (
+            ('assay_id','reader_id','object_type')
+        ),
+    )
+    extra = 0
+
+    class Media(object):
+        css = {"all": ("css/hide_admin_original.css",)}
 
 class AssayChipReadoutAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
     class Media(object):
-        js = ('assays/customize_chip.js', 'js/d3.v3.min.js', 'js/c3.min.js',)
+        js = ('js/inline_fix.js','assays/customize_chip.js', 'js/d3.v3.min.js', 'js/c3.min.js',)
         css = {'all': ('assays/customize_admin.css', 'css/c3.css',)}
 
     save_on_top = True
@@ -752,14 +767,12 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
     list_per_page = 100
     list_display = ('id',
-                    'assay_name',
                     'chip_setup',
                     'readout_start_time',
                     'assay_run_id',
+                    )
 
-
-                    'reader_name')
-    list_display_links = ('id', 'assay_name', 'chip_setup',
+    list_display_links = ('id', 'chip_setup',
                           'readout_start_time',)
     search_fields = ['assay_chip_id']
     fieldsets = (
@@ -776,16 +789,13 @@ class AssayChipReadoutAdmin(LockableAdmin):
             'Assay Parameters', {
                 'fields': (
                     (
-                        'assay_name', 'type'
+                        'type'
                     ),
                     (
-                        'reader_name', 'timeunit', 'readout_unit',
+                        'timeunit', 'readout_unit',
                     ),
                     (
                         'treatment_time_length', 'assay_start_time', 'readout_start_time',
-                    ),
-                    (
-                        'object_type',
                     ),
                     (
                         'file',
@@ -819,6 +829,8 @@ class AssayChipReadoutAdmin(LockableAdmin):
             }
         ),
     )
+
+    inlines = [AssayChipReadoutInline]
 
     def response_add(self, request, obj, post_url_continue="../%s/"):
         """If save and add another, have same response as save and continue"""

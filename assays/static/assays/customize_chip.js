@@ -166,9 +166,9 @@ $(document).ready(function () {
             "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
             "</tbody></table>";
 
-    if ($('#assaychipreadout_form')[0] != undefined) {
+    if ($('#assaychipreadoutassay_set-group')[0] != undefined) {
         $('<div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;width: 99%">').appendTo('body');
-        $("#extra").insertBefore($(".module")[2]);
+        $("#extra").insertAfter($("#assaychipreadoutassay_set-group")[0]);
 
         $('<div id="csv_table" style="width: 20%;float: left;">')
             .appendTo('#extra').html(add);
