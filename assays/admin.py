@@ -772,9 +772,10 @@ class AssayChipReadoutForm(forms.ModelForm):
         if data['file'] and type(data['file'].file) == BytesIO:
             datareader = csv.reader(data['file'].file, delimiter=',')
             datalist = list(datareader)
+
             for line in datalist[1:]:
                 assay_name = line[1]
-                if not AssayChipReadout.objects.filter(assay_name=assay_name).exists():
+                if not AssayModel.objects.filter(assay_name=assay_name).exists():
                     raise forms.ValidationError(
                         'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
 
@@ -785,6 +786,8 @@ class AssayChipReadoutAdmin(LockableAdmin):
     class Media(object):
         js = ('js/inline_fix.js','assays/customize_chip.js', 'js/d3.v3.min.js', 'js/c3.min.js',)
         css = {'all': ('assays/customize_admin.css', 'css/c3.css',)}
+
+    form = AssayChipReadoutForm
 
     save_on_top = True
     save_as = True
@@ -1265,7 +1268,7 @@ class AssayRunForm(forms.ModelForm):
 
             for line in datalist[1:]:
                 assay_name = line[1]
-                if not AssayChipReadout.objects.filter(assay_name=assay_name).exists():
+                if not AssayModel.objects.filter(assay_name=assay_name).exists():
                     raise forms.ValidationError(
                         'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
 
