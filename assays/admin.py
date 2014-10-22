@@ -744,11 +744,11 @@ class AssayChipReadoutInline(admin.TabularInline):
     # Assays for ChipReadout
     model = AssayChipReadoutAssay
     verbose_name = 'Assay Readout Assay'
-    verbose_plural_name = 'Assay Readout Assay'
+    verbose_plural_name = 'Assay Readout Assays'
 
     fields = (
         (
-            ('assay_id','reader_id','object_type')
+            ('assay_id','object_type','reader_id','reader_unit',)
         ),
     )
     extra = 0
@@ -780,7 +780,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
             'Run Parameters', {
                 'fields': (
                     (
-                        'assay_run_id', 'chip_setup'
+                        'assay_run_id', 'chip_setup', 'type'
                     ),
                 )
             }
@@ -788,9 +788,6 @@ class AssayChipReadoutAdmin(LockableAdmin):
         (
             'Assay Parameters', {
                 'fields': (
-                    (
-                        'type'
-                    ),
                     (
                         'timeunit', 'readout_unit',
                     ),

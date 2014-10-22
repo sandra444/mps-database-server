@@ -487,6 +487,7 @@ class AssayChipReadoutAssay(models.Model):
                             choices=object_types,
                             verbose_name='Object of Interest',
                             default='F')
+    readout_unit = models.ForeignKey(ReadoutUnit)
 
 class AssayChipReadout(LockableModel):
     class Meta(object):
@@ -500,11 +501,8 @@ class AssayChipReadout(LockableModel):
                             verbose_name='Test Type')
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
-    #reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
 
-    readout_unit = models.ForeignKey(ReadoutUnit)
     timeunit = models.ForeignKey(TimeUnits)
-
     treatment_time_length = models.FloatField(verbose_name='Assay Treatment Duration',
                                               blank=True, null=True)
 
