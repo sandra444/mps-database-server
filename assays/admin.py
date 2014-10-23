@@ -724,8 +724,22 @@ class AssayChipSetupAdmin(LockableAdmin):
 
 admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 
+class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
+    def clean(self):
+        # get forms that actually have valid data
+        count = 0
+        for form in self.forms:
+            try:
+                if form.cleaned_data:
+                    count += 1
+            except AttributeError:
+                pass
+        if count < 1:
+            raise forms.ValidationError('You must have at least one assay')
+
 class AssayChipReadoutInline(admin.TabularInline):
     # Assays for ChipReadout
+    formset = AssayChipReadoutInlineFormset
     model = AssayChipReadoutAssay
     verbose_name = 'Assay Readout Assay'
     verbose_plural_name = 'Assay Readout Assays'
