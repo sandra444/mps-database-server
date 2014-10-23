@@ -779,7 +779,6 @@ class AssayChipReadoutAdmin(LockableAdmin):
     list_display = ('id',
                     'chip_setup',
                     'readout_start_time',
-                    'assay_run_id',
                     )
 
     list_display_links = ('id', 'chip_setup',
@@ -790,7 +789,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
             'Run Parameters', {
                 'fields': (
                     (
-                        'assay_run_id', 'chip_setup', 'type'
+                        'chip_setup', 'type'
                     ),
                 )
             }

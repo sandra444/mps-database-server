@@ -503,8 +503,6 @@ class AssayChipReadout(LockableModel):
                             choices=types,
                             verbose_name='Test Type')
 
-    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
-
     timeunit = models.ForeignKey(TimeUnits)
     treatment_time_length = models.FloatField(verbose_name='Assay Treatment Duration',
                                               blank=True, null=True)
