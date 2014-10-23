@@ -772,6 +772,8 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
     form = AssayChipReadoutForm
 
+    raw_id_fields = ("chip_setup",)
+
     save_on_top = True
     save_as = True
 
