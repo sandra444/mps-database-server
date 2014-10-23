@@ -1257,12 +1257,20 @@ class AssayRunForm(forms.ModelForm):
                     raise forms.ValidationError(
                         'Chip Readout id = %s does not exist; please change your batch file or add this readout' % id)
 
+            # TODO CHECK AssayChipReadoutAssay in lieu of AssayModel
             for line in datalist[1:]:
                 assay_name = line[1]
-                # TODO CHECK AssayChipReadoutAssay in lieu of AssayModel
-                if not AssayChipReadoutAssay.objects.filter(assay_id__assay_name__contains=assay_name).exists():
+                if not AssayModel.objects.filter(assay_name=assay_name).exists():
                     raise forms.ValidationError(
-                        'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
+                                'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
+                assay = AssayModel.objects.get(assay_name=assay_name)
+                for i in range(3,len(line)):
+                    val = line[i]
+                    if val and val != 'None':
+                        currentChipReadout = readouts[i]
+                        if not AssayChipReadoutAssay.objects.filter(readout_id=currentChipReadout, assay_id=assay).exists():
+                            raise forms.ValidationError(
+                                'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
 
         return data
 
