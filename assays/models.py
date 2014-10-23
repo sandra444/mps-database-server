@@ -407,7 +407,7 @@ class AssayChipRawData(models.Model):
     #    unique_together = [('assay_chip_id', 'assay_id', 'field_id')]
 
     assay_chip_id = models.ForeignKey('assays.AssayChipReadout')
-    assay_id = models.ForeignKey('assays.AssayModel')
+    assay_id = models.ForeignKey('assays.AssayChipReadoutAssay')
     field_id = models.CharField(max_length=255, default = '0')
     value = models.FloatField(null=True)
     elapsed_time = models.FloatField(default=0)
@@ -479,6 +479,9 @@ object_types = (
 
 class AssayChipReadoutAssay(models.Model):
     # Inline for CHIP readout assays
+
+    #class Meta(object):
+    #    unique_together = [('readout_id', 'assay_id')]
 
     readout_id = models.ForeignKey('assays.AssayChipReadout', verbose_name='Readout')
     assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True)
