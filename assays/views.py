@@ -28,3 +28,9 @@ def add_readout(request):
     args['form'] = formset
 
     return render_to_response("assays/add_readout.html", args)
+
+from django.views.generic.edit import CreateView
+
+class AssayChipReadoutAdd(CreateView):
+    model = AssayChipReadout
+    #fields = ['name']
