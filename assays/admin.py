@@ -14,7 +14,6 @@ from compounds.models import *
 import unicodedata
 from io import BytesIO
 
-
 class AssayLayoutFormatForm(forms.ModelForm):
     class Meta(object):
         model = AssayLayoutFormat
@@ -541,23 +540,9 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
         ),
     )
 
-    # Acquires first unused ID
-    def get_next_id(self):
-
-        from django.db import connection
-
-        cursor = connection.cursor()
-        cursor.execute("select nextval('%s_id_seq')" % \
-                       AssayDeviceReadout._meta.db_table)
-        row = cursor.fetchone()
-        cursor.close()
-        return row[0]
-
     def save_model(self, request, obj, form, change):
 
-        #Early fix: uses database "cursor" to track ID
-        if not obj.id:
-            obj.id = self.get_next_id()
+        obj.save()
 
         if change:
             obj.modified_by = request.user
@@ -567,14 +552,11 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parseReadoutCSV(obj, request.FILES['file'].file)
+            parseReadoutCSV(obj, request.FILES['file'])
 
         #Need else to delete entries when a file is cleared
         else:
             removeExistingReadout(obj)
-
-        obj.save()
-
 
 admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
@@ -603,7 +585,7 @@ def parseChipCSV(currentChipReadout, file):
         if not rowValue[0] or not rowValue[1] or not rowValue[2] or rowID == 0:
             continue
 
-        assay = rowValue[1]
+        assay = AssayModel.objects.get(assay_name=rowValue[1])
         field = rowValue[2]
         val = rowValue[3]
         time = rowValue[0]
@@ -614,7 +596,7 @@ def parseChipCSV(currentChipReadout, file):
         #How to parse Chip data
         AssayChipRawData(
             assay_chip_id=currentChipReadout,
-            assay_id=AssayModel.objects.get(assay_name=assay),
+            assay_id=AssayChipReadoutAssay.objects.get(readout_id=currentChipReadout, assay_id=assay),
             field_id=field,
             value=val,
             elapsed_time=time
@@ -773,6 +755,7 @@ class AssayChipReadoutForm(forms.ModelForm):
             datareader = csv.reader(data['file'].file, delimiter=',')
             datalist = list(datareader)
 
+            # TODO fix cleaning
             for line in datalist[1:]:
                 assay_name = line[1]
                 if not AssayModel.objects.filter(assay_name=assay_name).exists():
@@ -870,22 +853,15 @@ class AssayChipReadoutAdmin(LockableAdmin):
     def id(self, obj):
         return obj.id
 
-    # Acquires first unused ID
-    def get_next_id(self):
-        from django.db import connection
+    # TODO test presave
 
-        cursor = connection.cursor()
-        cursor.execute("select nextval('%s_id_seq')" % \
-                       AssayChipReadout._meta.db_table)
-        row = cursor.fetchone()
-        cursor.close()
-        return row[0]
+    def save_related(self, request, form, formsets, change):
+        obj = form.instance
 
-    def save_model(self, request, obj, form, change):
-
-        #Early fix: uses database "cursor" to track ID
-        if not obj.id:
-            obj.id = self.get_next_id()
+        # Save Chip Readout
+        obj.save()
+        # Save inline
+        super(LockableAdmin, self).save_related(request, form, formsets, change)
 
         if change:
             obj.modified_by = request.user
@@ -895,14 +871,14 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parseChipCSV(obj, request.FILES['file'].file)
+            parseChipCSV(obj, request.FILES['file'])
 
         #Need to delete entries when a file is cleared
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
             removeExistingChip(obj)
 
-        obj.save()
-
+    def save_model(self, request, obj, form, change):
+        pass
 
 admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
 
@@ -1193,7 +1169,7 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
-# TODO Must change parsing for runs
+# TODO Must test parsing for runs
 def parseRunCSV(currentRun, file):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
@@ -1217,7 +1193,7 @@ def parseRunCSV(currentRun, file):
                 field = rowValue[2]
                 val = rowValue[colID]
                 time = rowValue[0]
-                assay = rowValue[1]
+                assay = AssayModel.objects.get(assay_name=rowValue[1])
 
                 if not val:
                     val = None
@@ -1225,7 +1201,7 @@ def parseRunCSV(currentRun, file):
                 #How to parse Chip data
                 AssayChipRawData(
                     assay_chip_id=AssayChipReadout.objects.get(id=currentChipReadout),
-                    assay_id=AssayChipReadout.objects.get(assay_name=assay),
+                    assay_id=AssayChipReadoutAssay.objects.get(readout_id=currentChipReadout, assay_id=assay),
                     field_id=field,
                     value=val,
                     elapsed_time=time
@@ -1268,7 +1244,8 @@ class AssayRunForm(forms.ModelForm):
 
             for line in datalist[1:]:
                 assay_name = line[1]
-                if not AssayModel.objects.filter(assay_name=assay_name).exists():
+                # TODO CHECK AssayChipReadoutAssay in lieu of AssayModel
+                if not AssayChipReadoutAssay.objects.filter(assay_id__assay_name__contains=assay_name).exists():
                     raise forms.ValidationError(
                         'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
 

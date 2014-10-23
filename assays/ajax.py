@@ -279,7 +279,7 @@ def fetch_chip_readout(request):
 
     for raw in chip_data:
         csv += str(raw.elapsed_time) + ','
-        csv += str(raw.assay_id.assay_name) + ','
+        csv += str(raw.assay_id.assay_id.assay_name) + ','
         csv += str(raw.field_id) + ','
         csv += str(raw.value) + '\n'
 
