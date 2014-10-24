@@ -403,8 +403,8 @@ class AssayRun(LockableModel):
         return self.assay_run_id
 
 class AssayChipRawData(models.Model):
-    #class Meta(object):
-    #    unique_together = [('assay_chip_id', 'assay_id', 'field_id')]
+    class Meta(object):
+        unique_together = [('assay_chip_id', 'assay_id', 'field_id', 'elapsed_time')]
 
     assay_chip_id = models.ForeignKey('assays.AssayChipReadout')
     assay_id = models.ForeignKey('assays.AssayChipReadoutAssay')
@@ -480,8 +480,8 @@ object_types = (
 class AssayChipReadoutAssay(models.Model):
     # Inline for CHIP readout assays
 
-    #class Meta(object):
-    #    unique_together = [('readout_id', 'assay_id')]
+    class Meta(object):
+        unique_together = [('readout_id', 'assay_id')]
 
     readout_id = models.ForeignKey('assays.AssayChipReadout', verbose_name='Readout')
     assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True)
