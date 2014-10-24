@@ -14,7 +14,6 @@ from compounds.models import *
 import unicodedata
 from io import BytesIO
 
-
 class AssayLayoutFormatForm(forms.ModelForm):
     class Meta(object):
         model = AssayLayoutFormat
@@ -541,23 +540,9 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
         ),
     )
 
-    # Acquires first unused ID
-    def get_next_id(self):
-
-        from django.db import connection
-
-        cursor = connection.cursor()
-        cursor.execute("select nextval('%s_id_seq')" % \
-                       AssayDeviceReadout._meta.db_table)
-        row = cursor.fetchone()
-        cursor.close()
-        return row[0]
-
     def save_model(self, request, obj, form, change):
 
-        #Early fix: uses database "cursor" to track ID
-        if not obj.id:
-            obj.id = self.get_next_id()
+        obj.save()
 
         if change:
             obj.modified_by = request.user
@@ -567,14 +552,11 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parseReadoutCSV(obj, request.FILES['file'].file)
+            parseReadoutCSV(obj, request.FILES['file'])
 
         #Need else to delete entries when a file is cleared
         else:
             removeExistingReadout(obj)
-
-        obj.save()
-
 
 admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
@@ -588,7 +570,6 @@ def removeExistingChip(currentChipReadout):
             readout.delete()
     return
 
-
 def parseChipCSV(currentChipReadout, file):
     removeExistingChip(currentChipReadout)
 
@@ -600,11 +581,12 @@ def parseChipCSV(currentChipReadout, file):
         # rowID is the index of the current row from top to bottom
 
         # Skip any row with incomplete data and first row (header) for now
-        if not rowValue[0] or not rowValue[1] or rowID == 0:
+        if not rowValue[0] or not rowValue[1] or not rowValue[2] or rowID == 0:
             continue
 
-        field = rowValue[1]
-        val = rowValue[2]
+        assay = AssayModel.objects.get(assay_name=rowValue[1])
+        field = rowValue[2]
+        val = rowValue[3]
         time = rowValue[0]
 
         if not val:
@@ -613,6 +595,7 @@ def parseChipCSV(currentChipReadout, file):
         #How to parse Chip data
         AssayChipRawData(
             assay_chip_id=currentChipReadout,
+            assay_id=AssayChipReadoutAssay.objects.get(readout_id=currentChipReadout, assay_id=assay),
             field_id=field,
             value=val,
             elapsed_time=time
@@ -740,34 +723,102 @@ class AssayChipSetupAdmin(LockableAdmin):
 
 admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 
+class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
+    def clean(self):
+        forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
+
+        # List of assay names from inline
+        assays = []
+        for form in forms_data:
+            try:
+                if form.cleaned_data:
+                    assay_name = form.cleaned_data.get('assay_id').assay_name
+                    if assay_name not in assays:
+                        assays.append(assay_name)
+                    else:
+                        raise forms.ValidationError(
+                            'Duplicate assays are not permitted; please blank out or change the duplicate')
+            except AttributeError:
+                pass
+        if len(assays) < 1:
+            raise forms.ValidationError('You must have at least one assay')
+
+        """Validate unique, existing Chip Readout IDs"""
+
+        # Somewhat unusual way of getting parent data
+        data = self.instance.__dict__
+
+        # Check to make sure there is a file
+        if data['file']:
+            datareader = csv.reader(data['file'], delimiter=',')
+            datalist = list(datareader)
+
+            # All unique rows based on ('assay_id', 'field_id', 'elapsed_time')
+            unique = {}
+
+            for line in datalist[1:]:
+                time = line[0]
+                assay = line[1]
+                field = line[2]
+                if assay not in assays:
+                    raise forms.ValidationError(
+                        'No assay with the name "%s" exists; please change your file or add this assay' % assay)
+                if (time,assay,field) not in unique:
+                    unique.update({(time,assay,field):True})
+                else:
+                    raise forms.ValidationError(
+                        'File contains duplicate reading %s' % str((time,assay,field)))
+
+class AssayChipReadoutInline(admin.TabularInline):
+    # Assays for ChipReadout
+    formset = AssayChipReadoutInlineFormset
+    model = AssayChipReadoutAssay
+    verbose_name = 'Assay Readout Assay'
+    verbose_plural_name = 'Assay Readout Assays'
+
+    fields = (
+        (
+            ('assay_id','object_type','reader_id','readout_unit',)
+        ),
+    )
+    extra = 0
+
+    class Media(object):
+        css = {"all": ("css/hide_admin_original.css",)}
+
+# ChipReadout validation occurs in the inline formset
+class AssayChipReadoutForm(forms.ModelForm):
+    class Meta(object):
+        model = AssayRun
 
 class AssayChipReadoutAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
     class Media(object):
-        js = ('assays/customize_chip.js', 'js/d3.v3.min.js', 'js/c3.min.js',)
+        js = ('js/inline_fix.js','assays/customize_chip.js', 'js/d3.v3.min.js', 'js/c3.min.js',)
         css = {'all': ('assays/customize_admin.css', 'css/c3.css',)}
+
+    form = AssayChipReadoutForm
+
+    raw_id_fields = ("chip_setup",)
 
     save_on_top = True
     save_as = True
 
     list_per_page = 100
     list_display = ('id',
-                    'assay_name',
                     'chip_setup',
                     'readout_start_time',
-                    'assay_run_id',
+                    )
 
-
-                    'reader_name')
-    list_display_links = ('id', 'assay_name', 'chip_setup',
+    list_display_links = ('id', 'chip_setup',
                           'readout_start_time',)
     search_fields = ['assay_chip_id']
     fieldsets = (
         (
-            'Run Parameters', {
+            'Setup Parameters', {
                 'fields': (
                     (
-                        'assay_run_id', 'chip_setup'
+                        'chip_setup', 'type'
                     ),
                 )
             }
@@ -776,16 +827,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
             'Assay Parameters', {
                 'fields': (
                     (
-                        'assay_name', 'type'
-                    ),
-                    (
-                        'reader_name', 'timeunit', 'readout_unit',
-                    ),
-                    (
-                        'treatment_time_length', 'assay_start_time', 'readout_start_time',
-                    ),
-                    (
-                        'object_type',
+                        'timeunit', 'treatment_time_length', 'assay_start_time', 'readout_start_time',
                     ),
                     (
                         'file',
@@ -820,6 +862,8 @@ class AssayChipReadoutAdmin(LockableAdmin):
         ),
     )
 
+    inlines = [AssayChipReadoutInline]
+
     def response_add(self, request, obj, post_url_continue="../%s/"):
         """If save and add another, have same response as save and continue"""
         if '_saveasnew' in request.POST or '_addanother' in request.POST:
@@ -837,22 +881,14 @@ class AssayChipReadoutAdmin(LockableAdmin):
     def id(self, obj):
         return obj.id
 
-    # Acquires first unused ID
-    def get_next_id(self):
-        from django.db import connection
+    # save_realted takes the place of save_model so that the inline can be saved first
+    def save_related(self, request, form, formsets, change):
+        obj = form.instance
 
-        cursor = connection.cursor()
-        cursor.execute("select nextval('%s_id_seq')" % \
-                       AssayChipReadout._meta.db_table)
-        row = cursor.fetchone()
-        cursor.close()
-        return row[0]
-
-    def save_model(self, request, obj, form, change):
-
-        #Early fix: uses database "cursor" to track ID
-        if not obj.id:
-            obj.id = self.get_next_id()
+        # Save Chip Readout
+        obj.save()
+        # Save inline
+        super(LockableAdmin, self).save_related(request, form, formsets, change)
 
         if change:
             obj.modified_by = request.user
@@ -862,14 +898,15 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parseChipCSV(obj, request.FILES['file'].file)
+            parseChipCSV(obj, request.FILES['file'])
 
         #Need to delete entries when a file is cleared
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
             removeExistingChip(obj)
 
-        obj.save()
-
+    # save_model not used; would save twice otherwise
+    def save_model(self, request, obj, form, change):
+        pass
 
 admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
 
@@ -1160,7 +1197,6 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
-
 def parseRunCSV(currentRun, file):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
@@ -1175,15 +1211,16 @@ def parseRunCSV(currentRun, file):
         if rowID == 0:
             readouts = [x for x in rowValue if x]
 
-        elif not rowValue[0] or not rowValue[1]:
+        elif not rowValue[0] or not rowValue[1] or not rowValue[2]:
             continue
 
         else:
-            for colID in range(2, len(readouts)):
+            for colID in range(3, len(readouts)):
                 currentChipReadout = readouts[colID]
-                field = rowValue[1]
+                field = rowValue[2]
                 val = rowValue[colID]
                 time = rowValue[0]
+                assay = AssayModel.objects.get(assay_name=rowValue[1])
 
                 if not val:
                     val = None
@@ -1191,6 +1228,7 @@ def parseRunCSV(currentRun, file):
                 #How to parse Chip data
                 AssayChipRawData(
                     assay_chip_id=AssayChipReadout.objects.get(id=currentChipReadout),
+                    assay_id=AssayChipReadoutAssay.objects.get(readout_id=currentChipReadout, assay_id=assay),
                     field_id=field,
                     value=val,
                     elapsed_time=time
@@ -1223,13 +1261,29 @@ class AssayRunForm(forms.ModelForm):
 
             readouts = list(x for x in datalist[0] if x)
             # Check if any Readouts already exist, if so, crash
-            for id in readouts[2:]:
+            for id in readouts[3:]:
                 if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
                     raise forms.ValidationError(
                         'Chip Readout id = %s already contains data; please change your batch file' % id)
                 if not AssayChipReadout.objects.filter(id=id).exists():
                     raise forms.ValidationError(
                         'Chip Readout id = %s does not exist; please change your batch file or add this readout' % id)
+
+            for line in datalist[1:]:
+                assay_name = line[1]
+                if not assay_name:
+                    continue
+                if not AssayModel.objects.filter(assay_name=assay_name).exists():
+                    raise forms.ValidationError(
+                                'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
+                assay = AssayModel.objects.get(assay_name=assay_name)
+                for i in range(3,len(readouts)):
+                    val = line[i]
+                    if val and val != 'None':
+                        currentChipReadout = readouts[i]
+                        if not AssayChipReadoutAssay.objects.filter(readout_id=currentChipReadout, assay_id=assay).exists():
+                            raise forms.ValidationError(
+                                'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
 
         return data
 

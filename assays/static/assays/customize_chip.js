@@ -1,24 +1,34 @@
 $(document).ready(function () {
 
-    function resetChart() {
-        $('#chart').css('max-height',320);
-        $('#chart').css('height',320);
+    function addChart(id,name) {
+        $('<div id="chart'+id+'" align="right" style="width: 80%;float: right;">')
+            .appendTo('#extra');
 
-        chart = c3.generate({
-            bindto: '#chart',
+        charts.push(
+            c3.generate({
+                bindto: '#chart'+id,
 
-            data: {
-                columns: []
-            },
-            axis: {
-                x: {
-                    label: 'Time'
+                data: {
+                    columns: []
                 },
-                y: {
-                    label: 'Value'
+
+                axis: {
+                    x: {
+                        label: 'Time'
+                    },
+                    y: {
+                        label: name
+                    }
                 }
-            }
-        });
+            })
+        );
+    }
+
+    function resetChart() {
+        for (var i in charts) {
+            $('#chart'+i).remove();
+        }
+        charts = [];
     }
 
     function getReadoutValue() {
@@ -88,13 +98,13 @@ $(document).ready(function () {
         //Make table
         var table = exist ? "<table class='layout-table' style='width: 100%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 100%;'><tbody>";
 
-        table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Object</th><th>Raw Data</th></tr>" : "";
+        table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Assay</th><th>Object</th><th>Raw Data</th></tr>" : "";
 
         for (var i in lines) {
-            if (i == 0 && !exist || (!lines[i][0] && !lines[i][1] && !lines[i][2])){
+            if (i == 0 && !exist || (!lines[i][0] && !lines[i][1] && !lines[i][2] && !lines[i][3])){
                 table += "<tr style='background: #FF2400'>";
             }
-            else if (i > 0 && lines[i][2] == 'None'){
+            else if (lines[i][3] == 'None'){
                 table += "<tr style='background: #606060'>";
             }
             else{
@@ -103,6 +113,7 @@ $(document).ready(function () {
             table += "<th>" + lines[i][0] + "</th>";
             table += "<th>" + lines[i][1] + "</th>";
             table += "<th>" + lines[i][2] + "</th>";
+            table += "<th>" + lines[i][3] + "</th>";
             table += "</tr>";
         }
 
@@ -110,49 +121,54 @@ $(document).ready(function () {
         $('#csv_table').html(table);
 
         //Make chart
-        var objects = {};
+        var assays = {};
 
         for (var i in lines) {
             if (!lines[i][1] || (i == 0 && !exist)) {
                 continue;
             }
 
-            if (!objects[lines[i][1]]){
-                objects[lines[i][1]] = {'time':[], 'data':[]};
+            if (!assays[lines[i][1]]) {
+                assays[lines[i][1]] = {};
             }
 
-            if (lines[i][2] && lines[i][2] != 'None') {
-                objects[lines[i][1]].time.push(lines[i][0]);
-                objects[lines[i][1]].data.push(lines[i][2]);
+            if (lines[i][2] && lines[i][2] != 'None' && !assays[lines[i][1]][lines[i][2]]) {
+                assays[lines[i][1]][lines[i][2]] = {'time':[], 'data':[]};
+            }
+
+            if (lines[i][3] && lines[i][3] != 'None') {
+                assays[lines[i][1]][lines[i][2]].time.push(lines[i][0]);
+                assays[lines[i][1]][lines[i][2]].data.push(lines[i][3]);
             }
         }
 
-        var xs = {};
+        var chart = 0;
+        for (var assay in assays) {
+            addChart(chart,assay);
 
-        var num = 1;
-        for (var object in objects) {
-            object = '' + object;
+            var xs = {};
+            var num = 1;
+            for (var object in assays[assay]) {
+                object = '' + object;
 
-            xs[object] = 'x' + num;
+                xs[object] = 'x' + num;
 
-            objects[object].data.unshift(object);
-            objects[object].time.unshift('x' + num);
+                assays[assay][object].data.unshift(object);
+                assays[assay][object].time.unshift('x' + num);
 
-            chart.load({
-                xs: xs,
+                //Load for correct assay chart
+                charts[chart].load({
+                    xs: xs,
 
-                columns: [
-                    objects[object].data,
-                    objects[object].time,
-                ]
-            });
+                    columns: [
+                        assays[assay][object].data,
+                        assays[assay][object].time,
+                    ]
+                });
 
-            num += 1;
-        }
-
-        if ($('#csv_table').height() > $('#chart').height()){
-            $('#chart').css('max-height',$('#csv_table').height()+10);
-            $('#chart').css('height',$('#csv_table').height()+10);
+                num += 1;
+            }
+            chart += 1;
         }
     };
 
@@ -161,36 +177,20 @@ $(document).ready(function () {
     var id = getReadoutValue();
 
     var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
-            "<tr style='background: #FF2400'><th>Time</th><th>Object</th><th>Raw Data</th></tr>" +
-            "<tr><th><br><br></th><th><br><br></th><th><br><br></th>" +
-            "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
+            "<tr style='background: #FF2400'><th>Time</th><th>Assay</th><th>Object</th><th>Raw Data</th></tr>" +
+            "<tr><th><br><br></th><th><br><br></th><th><br><br></th><th><br><br></th>" +
+            "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
             "</tbody></table>";
 
-    if ($('#assaychipreadout_form')[0] != undefined) {
-        $('<div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;width: 99%">').appendTo('body');
-        $("#extra").insertBefore($(".module")[2]);
+    if ($('#assaychipreadoutassay_set-group')[0] != undefined) {
+        $('<div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;width: 99%;overflow: hidden;">')
+            .appendTo('body');
+        $("#extra").insertAfter($("#assaychipreadoutassay_set-group")[0]);
 
         $('<div id="csv_table" style="width: 20%;float: left;">')
             .appendTo('#extra').html(add);
 
-        $('<div id="chart" style="width: 80%;float: left;">')
-            .appendTo('#extra');
-
-        var chart = c3.generate({
-            bindto: '#chart',
-
-            data: {
-                columns: []
-            },
-            axis: {
-                x: {
-                    label: 'Time'
-                },
-                y: {
-                    label: 'Value'
-                }
-            }
-        });
+        var charts = [];
     }
 
     if (id) {
