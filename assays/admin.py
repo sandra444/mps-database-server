@@ -570,7 +570,6 @@ def removeExistingChip(currentChipReadout):
             readout.delete()
     return
 
-# TODO Must test parsing for chip
 def parseChipCSV(currentChipReadout, file):
     removeExistingChip(currentChipReadout)
 
@@ -757,7 +756,6 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
             # All unique rows based on ('assay_id', 'field_id', 'elapsed_time')
             unique = {}
 
-            # TODO fix cleaning
             for line in datalist[1:]:
                 time = line[0]
                 assay = line[1]
@@ -882,8 +880,6 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
     def id(self, obj):
         return obj.id
-
-    # TODO test presave
 
     # save_realted takes the place of save_model so that the inline can be saved first
     def save_related(self, request, form, formsets, change):
@@ -1201,7 +1197,6 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
-# TODO Must test parsing for runs
 def parseRunCSV(currentRun, file):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
@@ -1274,7 +1269,6 @@ class AssayRunForm(forms.ModelForm):
                     raise forms.ValidationError(
                         'Chip Readout id = %s does not exist; please change your batch file or add this readout' % id)
 
-            # TODO CHECK AssayChipReadoutAssay in lieu of AssayModel
             for line in datalist[1:]:
                 assay_name = line[1]
                 if not assay_name:
