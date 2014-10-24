@@ -104,7 +104,7 @@ $(document).ready(function () {
             if (i == 0 && !exist || (!lines[i][0] && !lines[i][1] && !lines[i][2] && !lines[i][3])){
                 table += "<tr style='background: #FF2400'>";
             }
-            else if (i > 0 && lines[i][3] == 'None'){
+            else if (lines[i][3] == 'None'){
                 table += "<tr style='background: #606060'>";
             }
             else{

@@ -1260,11 +1260,13 @@ class AssayRunForm(forms.ModelForm):
             # TODO CHECK AssayChipReadoutAssay in lieu of AssayModel
             for line in datalist[1:]:
                 assay_name = line[1]
+                if not assay_name:
+                    continue
                 if not AssayModel.objects.filter(assay_name=assay_name).exists():
                     raise forms.ValidationError(
                                 'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
                 assay = AssayModel.objects.get(assay_name=assay_name)
-                for i in range(3,len(line)):
+                for i in range(3,len(readouts)):
                     val = line[i]
                     if val and val != 'None':
                         currentChipReadout = readouts[i]
