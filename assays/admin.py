@@ -726,12 +726,18 @@ admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 
 class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
     def clean(self):
+        forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
+
         # List of assay names from inline
         assays = []
-        for form in self.forms:
+        for form in forms_data:
             try:
                 if form.cleaned_data:
-                    assays.append(form.cleaned_data.get('assay_id').assay_name)
+                    assay_name = form.cleaned_data.get('assay_id').assay_name
+                    if assay_name not in assays:
+                        assays.append(assay_name)
+                    else:
+                        raise forms.ValidationError('Duplicate assays are not permitted')
             except AttributeError:
                 pass
         if len(assays) < 1:
