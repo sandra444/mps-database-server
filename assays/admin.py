@@ -727,15 +727,32 @@ admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
     def clean(self):
         # get forms that actually have valid data
-        count = 0
+        assays = []
         for form in self.forms:
             try:
                 if form.cleaned_data:
-                    count += 1
+                    assays.append(form.cleaned_data.get('assay_id').assay_name)
             except AttributeError:
                 pass
-        if count < 1:
+        if len(assays) < 1:
             raise forms.ValidationError('You must have at least one assay')
+
+        """Validate unique, existing Chip Readout IDs"""
+
+        # clean the form data, before validation
+        data = self.instance.__dict__
+
+        # Check to make sure there is a file and it is not already in memory
+        if data['file']:
+            datareader = csv.reader(data['file'], delimiter=',')
+            datalist = list(datareader)
+
+            # TODO fix cleaning
+            for line in datalist[1:]:
+                assay = line[1]
+                if assay not in assays:
+                    raise forms.ValidationError(
+                        'No assay with the name "%s" exists; please change your file or add this assay' % assay)
 
 class AssayChipReadoutInline(admin.TabularInline):
     # Assays for ChipReadout
@@ -757,26 +774,6 @@ class AssayChipReadoutInline(admin.TabularInline):
 class AssayChipReadoutForm(forms.ModelForm):
     class Meta(object):
         model = AssayRun
-
-    def clean(self):
-        """Validate unique, existing Chip Readout IDs"""
-
-        # clean the form data, before validation
-        data = super(AssayChipReadoutForm, self).clean()
-
-        # Check to make sure there is a file and it is not already in memory
-        if data['file'] and type(data['file'].file) == BytesIO:
-            datareader = csv.reader(data['file'].file, delimiter=',')
-            datalist = list(datareader)
-
-            # TODO fix cleaning
-            for line in datalist[1:]:
-                assay_name = line[1]
-                if not AssayModel.objects.filter(assay_name=assay_name).exists():
-                    raise forms.ValidationError(
-                        'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
-
-        return data
 
 class AssayChipReadoutAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
@@ -802,7 +799,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
     search_fields = ['assay_chip_id']
     fieldsets = (
         (
-            'Run Parameters', {
+            'Setup Parameters', {
                 'fields': (
                     (
                         'chip_setup', 'type'
