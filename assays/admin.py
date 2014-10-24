@@ -726,7 +726,7 @@ admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 
 class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
     def clean(self):
-        # get forms that actually have valid data
+        # List of assay names from inline
         assays = []
         for form in self.forms:
             try:
@@ -739,10 +739,10 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
 
         """Validate unique, existing Chip Readout IDs"""
 
-        # clean the form data, before validation
+        # Somewhat unusual way of getting parent data
         data = self.instance.__dict__
 
-        # Check to make sure there is a file and it is not already in memory
+        # Check to make sure there is a file
         if data['file']:
             datareader = csv.reader(data['file'], delimiter=',')
             datalist = list(datareader)
@@ -771,6 +771,7 @@ class AssayChipReadoutInline(admin.TabularInline):
     class Media(object):
         css = {"all": ("css/hide_admin_original.css",)}
 
+# ChipReadout validation occurs in the inline formset
 class AssayChipReadoutForm(forms.ModelForm):
     class Meta(object):
         model = AssayRun
@@ -867,6 +868,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
     # TODO test presave
 
+    # save_realted takes the place of save_model so that the inline can be saved first
     def save_related(self, request, form, formsets, change):
         obj = form.instance
 
@@ -889,6 +891,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
             removeExistingChip(obj)
 
+    # save_model not used; would save twice otherwise
     def save_model(self, request, obj, form, change):
         pass
 
