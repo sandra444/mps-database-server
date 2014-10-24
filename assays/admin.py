@@ -737,7 +737,8 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
                     if assay_name not in assays:
                         assays.append(assay_name)
                     else:
-                        raise forms.ValidationError('Duplicate assays are not permitted')
+                        raise forms.ValidationError(
+                            'Duplicate assays are not permitted; please blank out or change the duplicate')
             except AttributeError:
                 pass
         if len(assays) < 1:
@@ -753,12 +754,22 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
             datareader = csv.reader(data['file'], delimiter=',')
             datalist = list(datareader)
 
+            # All unique rows based on ('assay_id', 'field_id', 'elapsed_time')
+            unique = {}
+
             # TODO fix cleaning
             for line in datalist[1:]:
+                time = line[0]
                 assay = line[1]
+                field = line[2]
                 if assay not in assays:
                     raise forms.ValidationError(
                         'No assay with the name "%s" exists; please change your file or add this assay' % assay)
+                if (time,assay,field) not in unique:
+                    unique.update({(time,assay,field):True})
+                else:
+                    raise forms.ValidationError(
+                        'File contains duplicate reading %s' % str((time,assay,field)))
 
 class AssayChipReadoutInline(admin.TabularInline):
     # Assays for ChipReadout
