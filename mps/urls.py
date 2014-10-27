@@ -12,6 +12,15 @@ urlpatterns = patterns('',
 
                        url(r'^$', 'mps.views.main'),
 
+                       # user auth urls
+                       url(r'^accounts/login/$',  'mps.views.login'),
+                       url(r'^accounts/auth/$',  'mps.views.auth_view'),
+                       url(r'^accounts/logout/$', 'mps.views.logout'),
+                       url(r'^accounts/loggedin/$', 'mps.views.loggedin'),
+                       url(r'^accounts/invalid/$', 'mps.views.invalid_login'),
+                       # url(r'^accounts/register/$', 'mps.views.register_user'),
+                       # url(r'^accounts/register_success/$', 'mps.views.register_success'),
+
                        url(r'^', include('bioactivities.urls')),
 
                        # BEGIN old-style API
