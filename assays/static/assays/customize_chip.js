@@ -98,7 +98,7 @@ $(document).ready(function () {
         //Make table
         var table = exist ? "<table class='layout-table' style='width: 100%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 100%;'><tbody>";
 
-        table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Assay</th><th>Object</th><th>Raw Data</th></tr>" : "";
+        table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Assay</th><th>Object</th><th>Data</th></tr>" : "";
 
         for (var i in lines) {
             if (i == 0 && !exist || (!lines[i][0] && !lines[i][1] && !lines[i][2] && !lines[i][3])){
@@ -177,7 +177,7 @@ $(document).ready(function () {
     var id = getReadoutValue();
 
     var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
-            "<tr style='background: #FF2400'><th>Time</th><th>Assay</th><th>Object</th><th>Raw Data</th></tr>" +
+            "<tr style='background: #FF2400'><th>Time</th><th>Assay</th><th>Object</th><th>Data</th></tr>" +
             "<tr><th><br><br></th><th><br><br></th><th><br><br></th><th><br><br></th>" +
             "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
             "</tbody></table>";
