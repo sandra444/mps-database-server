@@ -34,3 +34,15 @@ from django.views.generic.edit import CreateView
 class AssayChipReadoutAdd(CreateView):
     model = AssayChipReadout
     #fields = ['name']
+
+from django.views.generic.detail import DetailView
+from django.utils import timezone
+
+class AssayChipReadoutDetail(DetailView):
+
+    model = AssayChipReadout
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayChipReadoutDetail, self).get_context_data(**kwargs)
+        context['now'] = timezone.now()
+        return context
