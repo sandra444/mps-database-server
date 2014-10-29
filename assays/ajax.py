@@ -295,7 +295,7 @@ def fetch_chip_readout(request):
 def fetch_context(request):
     """Acquires context for whittling down number of dropdown"""
 
-    context = ""
+    context = '<option value="" selected="selected">---------</option>'
 
     # the model who's dropdown you want to whittle down
     models = {
