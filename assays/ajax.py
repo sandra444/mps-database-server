@@ -292,6 +292,42 @@ def fetch_chip_readout(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+def fetch_context(request):
+    """Acquires context for whittling down number of dropdown"""
+
+    context = ""
+
+    # the model who's dropdown you want to whittle down
+    models = {
+        'AssayChipReadout':AssayChipReadout,
+        'AssayChipSetup':AssayChipSetup,
+        'AssayRun':AssayRun,
+    }
+
+    # master is what determines the subject's drop down choices
+    # master itself is a string for the filter that comes later
+    master = request.POST.get('master')
+    master_id = request.POST.get('master_id')
+
+    # subject is the model of interest as selected from the above dictionary
+    subject = models.get(request.POST.get('subject'))
+
+    findings = subject.objects.filter(**{master:master_id})
+
+    for finding in findings:
+        # match value to the desired subject ID
+        value = str(finding.id)
+        context += '<option value="' + value + '">' + str(finding) + '</option>'
+
+    data = {}
+
+    data.update({
+        'context': context,
+    })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
 switch = {
     'fetch_assay_layout_content': fetch_assay_layout_content,
     'fetch_readout': fetch_readout,
@@ -305,6 +341,7 @@ switch = {
 #   'fetch_chip_info': fetch_chip_info,
     'fetch_center_id': fetch_center_id,
     'fetch_chip_readout': fetch_chip_readout,
+    'fetch_context': fetch_context,
 }
 
 
