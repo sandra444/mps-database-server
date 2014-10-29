@@ -312,7 +312,19 @@ def fetch_context(request):
     # subject is the model of interest as selected from the above dictionary
     subject = models.get(request.POST.get('subject'))
 
+    # filter is for additional filtering (for instance, if a subject is two FK away
+    next_model = request.POST.get('next_model')
+    next_filter = request.POST.get('next_filter')
+
     findings = subject.objects.filter(**{master:master_id})
+
+    if next_model and next_filter:
+        next_model = models.get(next_model)
+        original = list(findings)
+        findings = []
+
+        for item in original:
+            findings.extend(next_model.objects.filter(**{next_filter:item}))
 
     for finding in findings:
         # match value to the desired subject ID

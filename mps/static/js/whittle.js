@@ -1,7 +1,7 @@
 //Get token
 var middleware_token = getCookie('csrftoken');
 
-function whittle(master,master_id,subject) {
+function whittle(master,master_id,subject,next_model,next_filter) {
     $.ajax({
         url: "/assays_ajax",
         type: "POST",
@@ -12,6 +12,8 @@ function whittle(master,master_id,subject) {
             master: master,
             master_id: master_id,
             subject: subject,
+            next_model: next_model,
+            next_filter: next_filter,
 
             csrfmiddlewaretoken: middleware_token
         },
