@@ -5,7 +5,7 @@ $(document).ready(function () {
     if ($(".module")[1]) {
 
         // Check each module. If it is, desired stop and add inline before that module
-        for (i in $(".module")) {
+        for (var i in $(".module")) {
             if ($(".module")[i].outerHTML.indexOf("<h2>Change Tracking</h2>") > -1 ||
                 $(".module")[i].outerHTML.indexOf("<h2>Reference Parameters</h2>") > -1) {
                 index = i;
