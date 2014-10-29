@@ -14,11 +14,21 @@ $(document).ready(function () {
         $('#id_assayresult_set-'+i+'-assay_name').html(options);
     }
 
-    function changeAll() {
+    function changeAll(reset) {
         var IDs = getIDs();
+        var vals = [];
 
-        for (var i in IDs) {
-            $('#id_assayresult_set-'+i+'-assay_name').html(options);
+        if (!reset) {
+            for (var i in IDs) {
+                vals.push($('#id_assayresult_set-'+i+'-assay_name').val());
+            }
+        }
+
+        for (var j in IDs) {
+            $('#id_assayresult_set-'+j+'-assay_name').html(options);
+            if (!reset) {
+                $('#id_assayresult_set-'+j+'-assay_name').val(vals[j]);
+            }
         }
     }
 
@@ -26,11 +36,16 @@ $(document).ready(function () {
     var newRow = $('.add-row');
     var options = "";
 
+    $.when(whittle('assay_run_id',study.val(),'AssayChipSetup','AssayChipReadout','chip_setup')).then(function(data) {
+        options = data;
+        changeAll(false);
+    });
+
     study.change(function() {
         $.when(whittle('assay_run_id',study.val(),'AssayChipSetup','AssayChipReadout','chip_setup')).then(function(data) {
             options = data;
-            changeAll();
-        })
+            changeAll(true);
+        });
     });
 
     newRow.click(function() {
