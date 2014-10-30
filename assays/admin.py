@@ -542,13 +542,13 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 
     def save_model(self, request, obj, form, change):
 
-        obj.save()
-
         if change:
             obj.modified_by = request.user
 
         else:
             obj.modified_by = obj.created_by = request.user
+
+        obj.save()
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
@@ -885,16 +885,16 @@ class AssayChipReadoutAdmin(LockableAdmin):
     def save_related(self, request, form, formsets, change):
         obj = form.instance
 
-        # Save Chip Readout
-        obj.save()
-        # Save inline
-        super(LockableAdmin, self).save_related(request, form, formsets, change)
-
         if change:
             obj.modified_by = request.user
 
         else:
             obj.modified_by = obj.created_by = request.user
+
+        # Save Chip Readout
+        obj.save()
+        # Save inline
+        super(LockableAdmin, self).save_related(request, form, formsets, change)
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
@@ -1075,7 +1075,7 @@ admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 class AssayTestResultAdmin(LockableAdmin):
     # Results calculated from RAW CHIP DATA aka 'Chip Result'
     class Media(object):
-        js = ('js/inline_fix.js',)
+        js = ('js/cookies.js','js/whittle.js','js/inline_fix.js','assays/customize_chip_results_admin.js')
 
     save_as = True
     save_on_top = True
