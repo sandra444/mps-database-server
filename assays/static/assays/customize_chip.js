@@ -1,7 +1,7 @@
 $(document).ready(function () {
 
     function addChart(id,name) {
-        $('<div id="chart'+id+'" align="right" style="width: 80%;float: right;">')
+        $('<div id="chart'+id+'" align="right" style="width: 70%;float: right;">')
             .appendTo('#extra');
 
         charts.push(
