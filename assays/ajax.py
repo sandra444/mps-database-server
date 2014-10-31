@@ -4,7 +4,9 @@ from collections import defaultdict
 from django.http import *
 from .models import *
 from microdevices.models import MicrophysiologyCenter
+from math import log10, floor
 import logging
+
 logger = logging.getLogger(__name__)
 
 # Calling main is and always will be indicative of an error condition.
@@ -281,7 +283,11 @@ def fetch_chip_readout(request):
         csv += str(raw.elapsed_time) + ','
         csv += str(raw.assay_id.assay_id.assay_name) + ','
         csv += str(raw.field_id) + ','
-        csv += str(raw.value) + '\n'
+        # Calculate to 4 significant figures
+        value = str(round(raw.value, 4-int(floor(log10(abs(raw.value))))-1))
+        # Get rid of trailing zero and decimal if necessary
+        value = value.rstrip('0').rstrip('.') if '.' in value else value
+        csv += value + '\n'
 
     data = {}
 
