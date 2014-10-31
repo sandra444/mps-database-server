@@ -1,8 +1,16 @@
 $(document).ready(function () {
 
     function addChart(id,name) {
-        $('<div id="chart'+id+'" align="right" style="width: 70%;float: right;">')
-            .appendTo('#extra');
+
+        if (charts.length == 0) {
+            $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 12.5%;margin-left: 5%;">')
+                .appendTo('#extra');
+        }
+
+        else{
+            $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 12.5%;margin-left: 25%;">')
+                .appendTo('#extra');
+        }
 
         charts.push(
             c3.generate({
@@ -14,10 +22,16 @@ $(document).ready(function () {
 
                 axis: {
                     x: {
-                        label: 'Time'
+                        label: {
+                            text: 'Time',
+                            position: 'outer-center'
+                        }
                     },
                     y: {
-                        label: name
+                        label: {
+                            text: name,
+                            position: 'outer-middle'
+                        }
                     }
                 }
             })
@@ -187,7 +201,7 @@ $(document).ready(function () {
             .appendTo('body');
         $("#extra").insertAfter($("#assaychipreadoutassay_set-group")[0]);
 
-        $('<div id="csv_table" style="width: 20%;float: left;">')
+        $('<div id="csv_table" style="width: 20%;float: left;margin-left: 12.5%;">')
             .appendTo('#extra').html(add);
 
         var charts = [];
