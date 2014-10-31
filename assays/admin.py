@@ -93,7 +93,7 @@ class AssayModelAdmin(LockableAdmin):
         (
             None, {
                 'fields': (
-                    ('assay_name', 'assay_type',),
+                    ('assay_name', 'assay_type','type'),
                     ('version_number', 'assay_protocol_file', ),
                     ('assay_description',), )
             }
@@ -818,7 +818,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
             'Setup Parameters', {
                 'fields': (
                     (
-                        'chip_setup', 'type'
+                        'chip_setup'
                     ),
                 )
             }

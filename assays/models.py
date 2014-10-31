@@ -15,6 +15,10 @@ PHYSICAL_UNIT_TYPES = (
     (u'O', u'Other'),
 )
 
+types = (
+    ('TOX', 'Toxicity'), ('DM', 'Disease'), ('EFF', 'Efficacy')
+)
+
 
 class PhysicalUnits(LockableModel):
     unit = models.CharField(max_length=256)
@@ -73,9 +77,12 @@ class AssayModel(LockableModel):
     assay_protocol_file = models.FileField(upload_to='assays',
                                            verbose_name='Protocol File',
                                            null=True, blank=True)
+    type = models.CharField(max_length=13,
+                            choices=types,
+                            verbose_name='Test Type')
 
     def __unicode__(self):
-        return self.assay_name
+        return u'{0} ({1})'.format(self.assay_name, self.type)
 
 
 class AssayLayoutFormat(LockableModel):
@@ -366,10 +373,6 @@ class AssayPlateTestResult(LockableModel):
     def __unicode__(self):
         return u''
 
-types = (
-    ('TOX', 'Toxicity'), ('DM', 'Disease'), ('EFF', 'Efficacy')
-)
-
 class AssayRun(LockableModel):
     class Meta(object):
         verbose_name = 'Organ Chip Study'
@@ -498,10 +501,6 @@ class AssayChipReadout(LockableModel):
         ordering = ('chip_setup',)
 
     chip_setup = models.ForeignKey(AssayChipSetup, null=True)
-
-    type = models.CharField(max_length=13,
-                            choices=types,
-                            verbose_name='Test Type')
 
     timeunit = models.ForeignKey(TimeUnits)
     treatment_time_length = models.FloatField(verbose_name='Assay Treatment Duration',
