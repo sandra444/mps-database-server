@@ -697,12 +697,12 @@ class AssayChipSetupAdmin(LockableAdmin):
     actions = ['update_fields']
     inlines = [AssayChipCellsInline]
 
-    def response_add(self, request, obj, post_url_continue="../%s/"):
+    def response_add(self, request, obj):
         """If save and add another, have same response as save and continue"""
         if '_saveasnew' in request.POST or '_addanother' in request.POST:
             return HttpResponseRedirect("../%s" % obj.id)
         else:
-            return super(AssayChipSetupAdmin, self).response_add(request, obj, post_url_continue)
+            return super(AssayChipSetupAdmin, self).response_add(request, obj)
 
     def response_change(self, request, obj):
         """If save as new, redirect to new change model; else go to list"""
@@ -864,12 +864,12 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
     inlines = [AssayChipReadoutInline]
 
-    def response_add(self, request, obj, post_url_continue="../%s/"):
+    def response_add(self, request, obj):
         """If save and add another, have same response as save and continue"""
         if '_saveasnew' in request.POST or '_addanother' in request.POST:
             return HttpResponseRedirect("../%s" % obj.id)
         else:
-            return super(AssayChipReadoutAdmin, self).response_add(request, obj, post_url_continue)
+            return super(AssayChipReadoutAdmin, self).response_add(request, obj)
 
     def response_change(self, request, obj):
         """If save as new, redirect to new change model; else go to list"""
