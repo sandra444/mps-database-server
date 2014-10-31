@@ -3,12 +3,12 @@ $(document).ready(function () {
     function addChart(id,name) {
 
         if (charts.length == 0) {
-            $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 12.5%;margin-left: 5%;">')
+            $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 10%;margin-left: 10%;">')
                 .appendTo('#extra');
         }
 
         else{
-            $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 12.5%;margin-left: 25%;">')
+            $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 10%;margin-left: 30%;">')
                 .appendTo('#extra');
         }
 
@@ -201,7 +201,7 @@ $(document).ready(function () {
             .appendTo('body');
         $("#extra").insertAfter($("#assaychipreadoutassay_set-group")[0]);
 
-        $('<div id="csv_table" style="width: 20%;float: left;margin-left: 12.5%;">')
+        $('<div id="csv_table" style="width: 20%;float: left;margin-left: 10%;">')
             .appendTo('#extra').html(add);
 
         var charts = [];
