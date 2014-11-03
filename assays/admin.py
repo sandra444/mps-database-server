@@ -93,7 +93,7 @@ class AssayModelAdmin(LockableAdmin):
         (
             None, {
                 'fields': (
-                    ('assay_name', 'assay_type','type'),
+                    ('assay_name', 'assay_type','test_type'),
                     ('version_number', 'assay_protocol_file', ),
                     ('assay_description',), )
             }

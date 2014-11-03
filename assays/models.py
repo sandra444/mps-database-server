@@ -77,12 +77,12 @@ class AssayModel(LockableModel):
     assay_protocol_file = models.FileField(upload_to='assays',
                                            verbose_name='Protocol File',
                                            null=True, blank=True)
-    type = models.CharField(max_length=13,
+    test_type = models.CharField(max_length=13,
                             choices=types,
                             verbose_name='Test Type')
 
     def __unicode__(self):
-        return u'{0} ({1})'.format(self.assay_name, self.type)
+        return u'{0} ({1})'.format(self.assay_name, self.test_type)
 
 
 class AssayLayoutFormat(LockableModel):
@@ -457,10 +457,6 @@ class AssayChipSetup(LockableModel):
     unit = models.ForeignKey('assays.PhysicalUnits',
                              verbose_name='conc. Unit',
                              null=True, blank=True)
-
-    type = models.CharField(max_length=13,
-                            choices=types,
-                            verbose_name='Test Type')
 
     scientist = models.CharField(max_length=100, blank=True, null=True)
     notebook = models.CharField(max_length=256, blank=True, null=True)
