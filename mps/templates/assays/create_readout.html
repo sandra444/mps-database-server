@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+
+
+{% block content %}
+
+<h1>Add Readout and Assays</h1>
+
+<form enctype="multipart/form-data" class="form-horizontal form-inline" method="post" >
+  {% csrf_token %}
+  <legend>Readout Details</legend>
+  {{ form}}
+  {{ formset.management_form }}
+  <legend>Assays</legend>
+  <div class="assays">
+  {% for assay_form in formset %}
+    <div id="assay-{{ forloop.counter0 }}">
+      {{ assay_form }}
+    </div>
+  {% endfor %}
+ </div>
+ <div class="form-actions">
+   <a href="#" class="btn btn-info add-readout">Add Assay</a>
+   <button type="submit" class="btn btn-primary">Create Event</button>
+ </div>
+</form>
+
+{% endblock %}

@@ -22,6 +22,7 @@ urlpatterns = patterns('',
                        url(r'^accounts/register_success/$', 'mps.views.register_success'),
 
                        url(r'^', include('bioactivities.urls')),
+                       url(r'^', include('assays.urls')),
 
                        # BEGIN old-style API
                        url(r'^assays_ajax$', 'assays.ajax.ajax'),
