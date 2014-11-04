@@ -57,6 +57,9 @@ class AssayChipReadoutDetail(DetailView):
 
     model = AssayChipReadout
 
+    # Using get is a good way to circumvent tedious calls in a decorator
+    # It may be useful to define a modified base detail view with this preexisting
+    # Obviously the desired group is currently hardcoded, but it could be placed in a base model ("only viewable by:")
     def get(self, request, **kwargs):
         self.object = self.get_object()
         if not has_group(request.user, 'UPitt'):
