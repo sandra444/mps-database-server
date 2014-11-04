@@ -1,0 +1,26 @@
+{% extends "admin/base.html" %}
+{% load staticfiles %}
+
+{% block sidebar %}
+    <!-- Load c3.css -->
+    <link href="/static/css/c3.css" rel="stylesheet" type="text/css">
+
+    <!-- Load d3.js and c3.js -->
+    <script src="/static/js/d3.v3.min.js" charset="utf-8"></script>
+    <script src="/static/js/c3.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <script src="/static/js/cookies.js"></script>
+    <script src="/static/assays/plot.js"></script>
+
+    <h2>Readout: Click ID to Get Plot</h2>
+    <ul>
+        {% for readout in object_list %}
+            <li class="readout" id={{ readout.id }} name={{readout.assay_chip_id}}>
+                {{ readout.id }} : {{readout.assay_chip_id}}
+            </li>
+        {% endfor %}
+    </ul>
+    <div id="chart"></div>
+{% endblock %}
