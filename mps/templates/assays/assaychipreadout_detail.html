@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+
+{% block content %}
 <h1>{{ object.id}}</h1>
 <p>{{ object.chip_setup }}</p>
 <p>Date: {{ now|date }}</p>
+{% endblock %}

@@ -13,7 +13,7 @@ from django.views.generic.edit import CreateView
 from assays.models import AssayChipReadoutAssay
 from assays.admin import AssayChipReadoutInlineFormset, parseChipCSV
 from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
 
 ACRAFormSet = inlineformset_factory(AssayChipReadout,AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset)
@@ -51,11 +51,16 @@ class AssayChipReadoutAdd(CreateView):
 from django.views.generic.detail import DetailView
 from django.utils import timezone
 
+from mps.filters import *
+
 class AssayChipReadoutDetail(DetailView):
 
     model = AssayChipReadout
 
-    def get_context_data(self, **kwargs):
+    def get(self, request, **kwargs):
+        self.object = self.get_object()
+        if not has_group(request.user, 'UPitt'):
+            return self.render_to_response({'now':timezone.now()}) # Just date for now
         context = super(AssayChipReadoutDetail, self).get_context_data(**kwargs)
         context['now'] = timezone.now()
-        return context
+        return self.render_to_response(context)
