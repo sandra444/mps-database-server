@@ -1301,7 +1301,7 @@ class AssayRunAdmin(LockableAdmin):
             'Study', {
                 'fields': (
                     'center_id',
-                    ('type1', 'type2', 'type3'),
+                    ('toxicity', 'efficacy', 'disease'),
                     'start_date',
                     'name',
                     'assay_run_id',

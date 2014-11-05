@@ -381,15 +381,10 @@ class AssayRun(LockableModel):
 
     #help_text subject to change
     center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center Name')
-    type1 = models.CharField(max_length=13,
-                            choices=types, default='TOX',
-                            verbose_name='Study Type 1')
-    type2 = models.CharField(max_length=13,
-                            choices=types,
-                            verbose_name='Study Type 2', null=True, blank=True)
-    type3 = models.CharField(max_length=13,
-                            choices=types,
-                            verbose_name='Study Type 3', null=True, blank=True)
+    # Study type now multiple boolean fields; May need to add more in the future
+    toxicity = models.BooleanField(default=False)
+    efficacy = models.BooleanField(default=False)
+    disease = models.BooleanField(default=False)
     name = models.TextField(default='Study01',verbose_name='Study Name')
     start_date = models.DateTimeField()
     assay_run_id = models.TextField(unique=True, verbose_name='Organ Chip Study ID',
@@ -400,7 +395,14 @@ class AssayRun(LockableModel):
                             blank=True, null=True, help_text='Do not upload until you have made each Chip Readout')
 
     def study_types(self):
-        return u'{0}:{1}:{2}'.format(self.type1, self.type2, self.type3)
+        types = ''
+        if self.toxicity:
+            types += 'TOX '
+        if self.efficacy:
+            types += 'EFF '
+        if self.disease:
+            types += 'DM '
+        return u'{0}'.format(types)
 
     def __unicode__(self):
         return self.assay_run_id
