@@ -6,8 +6,10 @@
 
     <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/default.css" >
 
-    <script src="{% get_static_prefix %}js/jquery-2.0.0.min.js"></script>
-    <script src="{% get_static_prefix %}js/ajax.js"></script>
+    {% block extrahead %}
+        <script src="{% static "js/jquery-1.11.0.min.js" %}"></script>
+        <script src="{% static "js/jquery-ui-1.10.4.js" %}"></script>
+    {% endblock %}
 
     {% block js_load %}{% endblock %}
     {% block js %}{% endblock %}
