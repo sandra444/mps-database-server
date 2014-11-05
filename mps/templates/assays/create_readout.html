@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 
+{% block js %}
+<script src="{% get_static_prefix %}assays/inline_add.js"></script>
+{% endblock %}
 
 {% block content %}
 
@@ -19,7 +22,7 @@
   {% endfor %}
  </div>
  <div class="form-actions">
-   <a href="#" class="btn btn-info add-readout">Add Assay</a>
+   <button id="add_button" class="btn btn-info add-readout">Add Assay</button>
    <button type="submit" class="btn btn-primary">Create Event</button>
  </div>
 </form>

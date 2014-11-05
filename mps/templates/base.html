@@ -9,6 +9,9 @@
     <script src="{% get_static_prefix %}js/jquery-2.0.0.min.js"></script>
     <script src="{% get_static_prefix %}js/ajax.js"></script>
 
+    {% block js_load %}{% endblock %}
+    {% block js %}{% endblock %}
+
 </head>
 
 <body>
