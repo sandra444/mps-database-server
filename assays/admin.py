@@ -1251,6 +1251,9 @@ class AssayRunForm(forms.ModelForm):
         # clean the form data, before validation
         data = super(AssayRunForm, self).clean()
 
+        if not any([data['toxicity'],data['efficacy'],data['disease']]):
+            raise forms.ValidationError('Please select at least one study type')
+
         if data['assay_run_id'].startswith('-'):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
@@ -1301,7 +1304,7 @@ class AssayRunAdmin(LockableAdmin):
             'Study', {
                 'fields': (
                     'center_id',
-                    ('type1', 'type2', 'type3'),
+                    ('toxicity', 'efficacy', 'disease'),
                     'start_date',
                     'name',
                     'assay_run_id',

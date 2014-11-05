@@ -43,14 +43,23 @@ $(document).ready(function () {
     }
 
     function get_types() {
-        var types = [];
-        for (var i=1; i<4; i++) {
-            var val = $('#id_type' + i).val();
-            if (val){
-                types.push(val);
+        for (var i in type_selectors) {
+            if(!type_selectors[i].is(":checked")) {
+                types[i] = '';
+            }
+            else {
+                types[i] = fills[i];
             }
         }
-        data[1] = types.join('_');
+
+        var selected = [];
+        for (var i=0; i<3; i++) {
+            var val = types[i];
+            if (val){
+                selected.push(val);
+            }
+        }
+        data[1] = selected.join('_');
         set_data();
     }
 
@@ -63,9 +72,14 @@ $(document).ready(function () {
         []
     ];
 
-    var type1 = $('#id_type1');
-    var type2 = $('#id_type2');
-    var type3 = $('#id_type3');
+    var types = ['','',''];
+
+    var tox = $('#id_toxicity');
+    var eff = $('#id_efficacy');
+    var dm = $('#id_disease');
+    var type_selectors = [tox,eff,dm];
+    var fills = ['TOX','EFF','DM'];
+
     var date = $('#id_start_date_0');
     var center = $('#id_center_id');
     var name = $('#id_name');
@@ -81,16 +95,16 @@ $(document).ready(function () {
         get_center_id();
     });
 
-    //Get the types for each drop down
-    type1.change(function (evt) {
+    //Get the types for each checkbox
+    tox.change(function (evt) {
         get_types();
     });
 
-    type2.change(function (evt) {
+    eff.change(function (evt) {
         get_types();
     });
 
-    type3.change(function (evt) {
+    dm.change(function (evt) {
         get_types();
     });
 
