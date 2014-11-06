@@ -7,8 +7,37 @@
 {#  <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/default.css" > #}
 
     {% block extrahead %}
+        <!-- Load JQuery -->
         <script src="{% static "js/jquery-1.11.0.min.js" %}"></script>
         <script src="{% static "js/jquery-ui-1.10.4.js" %}"></script>
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+        <!-- Optional: Include the jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+        <!-- Optional: Incorporate the Bootstrap JavaScript plugins -->
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
+
+        <!-- Custom CSS Rules -->
+        <link rel="stylesheet" href="/static/css/bootstrap-overrides.css">
+
+        <!-- Underscore.js Library -->
+        <script src="/static/js/underscore-1.6.0.js"></script>
+
+        <!-- Modernizr Library -->
+        <script src="/static/js/modernizr-2.7.1.js"></script>
+
+        <!-- d3.js Library -->
+        <script src="/static/js/d3.v3.min.js"></script>
+
+        <!-- Load c3.css -->
+        <link href="{% static "css/c3.css" %}" rel="stylesheet" type="text/css">
+
+        <!-- Load d3.js and c3.js -->
+        <script src="{% static "js/c3.min.js" %}"></script>
     {% endblock %}
 
     {% block load %}{% endblock %}
