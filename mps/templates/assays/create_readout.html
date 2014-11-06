@@ -12,21 +12,19 @@
 
 <form enctype="multipart/form-data" class="form-horizontal form-inline" method="post" >
     {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Submit</button>
     <legend>Readout Details</legend>
     {{ form}}
     {{ formset.management_form }}
     <legend>Assays</legend>
     <div id="errors">{{ formset.non_form_errors }}</div>
+    <a id="add_button">Add Assay</a>
     <div id="assaychipreadoutassay_set-group" class="assays" name="inlines">
     {% for assay_form in formset %}
             <div class="inline" id="assay-{{ forloop.counter0 }}">
             {{ assay_form }}
             </div>
         {% endfor %}
-    </div>
-    <div class="form-actions">
-        <a id="add_button">Add Assay</a>
-        <button type="submit" class="btn btn-primary">Create Event</button>
     </div>
 </form>
 
