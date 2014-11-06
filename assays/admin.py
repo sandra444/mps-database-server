@@ -747,12 +747,20 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
 
         """Validate unique, existing Chip Readout IDs"""
 
-        # Somewhat unusual way of getting parent data
-        data = self.instance.__dict__
+        # Very unusual way of getting parent data; seems to work; TEST to be sure
+
+        if self.instance.__dict__['file']:
+            data = self.instance.__dict__
+            test_file = data['file']
+        elif not forms_data[-1].__dict__['files']:
+            test_file = None
+        else:
+            data = forms_data[-1].__dict__
+            test_file = data['files']['file']
 
         # Check to make sure there is a file
-        if data['file']:
-            datareader = csv.reader(data['file'], delimiter=',')
+        if test_file:
+            datareader = csv.reader(test_file, delimiter=',')
             datalist = list(datareader)
 
             # All unique rows based on ('assay_id', 'field_id', 'elapsed_time')
