@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block js %}
+{% block js_load %}
     <script src="{% static "js/inline_add.js" %}"></script>
 {% endblock %}
 
@@ -15,15 +15,15 @@
   {{ form}}
   {{ formset.management_form }}
   <legend>Assays</legend>
-  <div class="assays">
+  <div id="inlines" class="assays">
   {% for assay_form in formset %}
-    <div id="assay-{{ forloop.counter0 }}">
+    <div class="inline" id="assay-{{ forloop.counter0 }}">
       {{ assay_form }}
     </div>
   {% endfor %}
  </div>
  <div class="form-actions">
-   <button id="add_button" class="btn btn-info add-readout">Add Assay</button>
+   <a id="add_button">Add Assay</a>
    <button type="submit" class="btn btn-primary">Create Event</button>
  </div>
 </form>

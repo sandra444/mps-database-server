@@ -4,7 +4,7 @@
 <head>
     <title>{% block title %}My Base Template{% endblock %}</title>
 
-    <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/default.css" >
+{#  <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/default.css" > #}
 
     {% block extrahead %}
         <script src="{% static "js/jquery-1.11.0.min.js" %}"></script>
@@ -37,7 +37,7 @@
 	</ul>
 	{% endif %}
 
-        {% block content %}This is the content area{% endblock %}
+    {% block content %}This is the content area{% endblock %}
 
     </div>
 
