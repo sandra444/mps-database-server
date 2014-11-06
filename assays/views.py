@@ -16,7 +16,7 @@ from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
 
-ACRAFormSet = inlineformset_factory(AssayChipReadout,AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset, extra=2)
+ACRAFormSet = inlineformset_factory(AssayChipReadout,AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset, extra=1)
 
 class AssayChipReadoutAdd(CreateView):
     template_name = 'assays/create_readout.html'

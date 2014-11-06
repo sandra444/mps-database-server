@@ -12,5 +12,7 @@ $(document).ready(function () {
         // Use a regular expression to replace all the places where ID is needed
         $(tag).appendTo('#inlines').html(add.replace(new RegExp('-0-', 'g'),'-'+next_id+'-'));
         next_id += 1;
+        // Set the hidden TOTAL_FORMS to be incremented, otherwise won't bother reading other inline
+        $("input[id*='TOTAL_FORMS']").val(""+next_id);
     });
 });

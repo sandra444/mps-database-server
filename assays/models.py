@@ -522,3 +522,6 @@ class AssayChipReadout(LockableModel):
 
     def __unicode__(self):
         return u'{0}'.format(self.chip_setup)
+
+    def get_absolute_url(self):
+        return "/assays/assaychipreadout/%i/" % self.id
