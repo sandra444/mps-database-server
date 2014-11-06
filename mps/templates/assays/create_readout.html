@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block load %}
-    <script src="{% static "js/inline_add.js" %}"></script>
+<script src="{% static "js/inline_add.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -10,22 +10,23 @@
 <h1>Add Readout and Assays</h1>
 
 <form enctype="multipart/form-data" class="form-horizontal form-inline" method="post" >
-  {% csrf_token %}
-  <legend>Readout Details</legend>
-  {{ form}}
-  {{ formset.management_form }}
-  <legend>Assays</legend>
-  <div id="inlines" class="assays">
-  {% for assay_form in formset %}
-    <div class="inline" id="assay-{{ forloop.counter0 }}">
-      {{ assay_form }}
+    {% csrf_token %}
+    <legend>Readout Details</legend>
+    {{ form}}
+    {{ formset.management_form }}
+    <legend>Assays</legend>
+    <div id="errors">{{ formset.non_form_errors }}</div>
+    <div id="inlines" class="assays">
+    {% for assay_form in formset %}
+            <div class="inline" id="assay-{{ forloop.counter0 }}">
+            {{ assay_form }}
+            </div>
+        {% endfor %}
     </div>
-  {% endfor %}
- </div>
- <div class="form-actions">
-   <a id="add_button">Add Assay</a>
-   <button type="submit" class="btn btn-primary">Create Event</button>
- </div>
+    <div class="form-actions">
+        <a id="add_button">Add Assay</a>
+        <button type="submit" class="btn btn-primary">Create Event</button>
+    </div>
 </form>
 
 {% endblock %}
