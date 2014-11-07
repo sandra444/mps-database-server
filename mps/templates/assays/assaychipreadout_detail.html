@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Chip {{ object.id}}</h1>
+    <h1>Chip Readout {{ object.id}}</h1>
     <p>Setup: {{ object.chip_setup }}</p>
     <p>Time Unit: {{ object.timeunit }}</p>
     <p>Treatment Time Length: {{ object.treatment_time_length }}</p>
@@ -11,6 +11,8 @@
     <p>Notebook Page: {{ object.notebook_page }}</p>
     <p>Notes: {{ object.notes }}</p>
 
+    {% if object.file %}
     <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
+    {% endif %}
 
 {% endblock %}
