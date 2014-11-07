@@ -470,12 +470,14 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
         js = ('assays/customize_readout.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
+    date_hierarchy = 'readout_start_time'
     raw_id_fields = ("cell_sample",)
     save_on_top = True
     list_per_page = 300
     list_display = ('assay_device_id',
                     'assay_name',
                     'cell_sample',
+                    'readout_start_time',
                     'reader_name')
     search_fields = ['assay_device_id']
     fieldsets = (
@@ -798,6 +800,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
         css = {'all': ('assays/customize_admin.css', 'css/c3.css',)}
 
     form = AssayChipReadoutForm
+    date_hierarchy = 'readout_start_time'
 
     raw_id_fields = ("chip_setup",)
 
