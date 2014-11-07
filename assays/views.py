@@ -37,8 +37,12 @@ class AssayChipReadoutAdd(CreateView):
     def form_valid(self, form):
         context = self.get_context_data()
         formset = context['formset']
+        # get user via self.request.user
         if formset.is_valid():
             self.object = form.save()
+            self.object.modified_by = self.object.created_by = self.request.user
+            # Save Chip Readout
+            self.object.save()
             formset.instance = self.object
             formset.save()
             if formset.__dict__['files']:
