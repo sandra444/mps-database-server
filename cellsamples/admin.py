@@ -111,6 +111,7 @@ admin.site.register(CellSubtype, CellSubtypeAdmin)
 class CellSampleAdmin(LockableAdmin):
 
     resource_class = CellSampleResource
+    date_hierarchy = 'receipt_date'
 
     save_on_top = True
     list_per_page = 300
