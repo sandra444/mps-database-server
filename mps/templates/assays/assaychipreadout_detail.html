@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{ object.id}}</h1>
-<p>{{ object.chip_setup }}</p>
+    <h1>Chip {{ object.id}}</h1>
+    <p>Setup: {{ object.chip_setup }}</p>
+    <p>Time Unit: {{ object.timeunit }}</p>
+    <p>Treatment Time Length: {{ object.treatment_time_length }}</p>
+    <p>Assay Start Time: {{ object.assay_start_time }}</p>
+    <p>Readout Start Time: {{ object.readout_start_time }}</p>
+    <p>Notebook: {{ object.notebook }}</p>
+    <p>Notebook Page: {{ object.notebook_page }}</p>
+    <p>Notes: {{ object.notes }}</p>
+
+    <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
+
 {% endblock %}
