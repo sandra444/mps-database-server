@@ -232,8 +232,8 @@ class AssayDeviceReadout(LockableModel):
     treatment_time_length = models.FloatField(verbose_name='Treatment Duration',
                                               blank=True, null=True)
 
-    assay_start_time = models.DateTimeField(blank=True, null=True)
-    readout_start_time = models.DateTimeField(blank=True, null=True)
+    assay_start_time = models.DateField(verbose_name='Start Date', blank=True, null=True)
+    readout_start_time = models.DateField(verbose_name='Readout Date', blank=True, null=True)
 
     notebook = models.CharField(max_length=256, blank=True, null=True)
     notebook_page = models.IntegerField(blank=True, null=True)
@@ -504,8 +504,8 @@ class AssayChipReadout(LockableModel):
     treatment_time_length = models.FloatField(verbose_name='Assay Treatment Duration',
                                               blank=True, null=True)
 
-    assay_start_time = models.DateTimeField(blank=True, null=True)
-    readout_start_time = models.DateTimeField(blank=True, null=True)
+    assay_start_time = models.DateField(verbose_name='Start Date', blank=True, null=True)
+    readout_start_time = models.DateField(verbose_name='Readout Date', blank=True, null=True)
 
     notebook = models.CharField(max_length=256, blank=True, null=True)
     notebook_page = models.IntegerField(blank=True, null=True)
