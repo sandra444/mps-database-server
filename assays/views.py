@@ -69,5 +69,4 @@ class AssayChipReadoutDetail(DetailView):
         if not has_group(request.user, 'UPitt'):
             return self.render_to_response({'now':timezone.now()}) # Just date for now
         context = super(AssayChipReadoutDetail, self).get_context_data(**kwargs)
-        context['now'] = timezone.now()
         return self.render_to_response(context)
