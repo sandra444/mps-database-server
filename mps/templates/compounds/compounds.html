@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <h2>Compounds:</h2>
+    <ul>
+        {% for compound in object_list %}
+            <li class="compound" id={{ compound.id }} name={{ compound.name }}>
+                <a href="{{ compound.id }}">{{ compound.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="/compounds?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+                <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="/compounds?page={{ page_obj.next_page_number }}">next</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+{% endblock %}
