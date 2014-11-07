@@ -1158,6 +1158,7 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 
     save_as = True
     save_on_top = True
+    raw_id_fields = ('assay_device_id',)
     list_per_page = 300
     list_display = (
         'assay_device_id',

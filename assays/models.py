@@ -209,7 +209,7 @@ class AssayDeviceReadout(LockableModel):
     # the unique readout identifier
     # can be a barcode or a hand written identifier
     assay_device_id = models.CharField(max_length=512,
-                                       verbose_name='Device ID/ Barcode')
+                                       verbose_name='Plate ID/ Barcode')
 
     cell_sample = models.ForeignKey('cellsamples.CellSample')
 
@@ -348,7 +348,8 @@ class AssayResult(models.Model):
 
 class AssayPlateTestResult(LockableModel):
 #   Test Results from MICROPLATES
-    assay_device_id = models.ForeignKey('assays.AssayDeviceReadout')
+    assay_device_id = models.ForeignKey('assays.AssayDeviceReadout',
+                                        verbose_name='Plate ID/ Barcode')
 
     assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
 
