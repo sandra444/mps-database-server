@@ -7,7 +7,7 @@
     <ul>
         {% for readout in object_list %}
             <li class="readout" id={{ readout.id }} name={{readout.chip_setup}}>
-                {{ readout.id }} : {{readout.chip_setup}}
+                <a href="{{ readout.id }}">{{ readout.id }} : {{readout.chip_setup}}</a>
             </li>
         {% endfor %}
     </ul>
