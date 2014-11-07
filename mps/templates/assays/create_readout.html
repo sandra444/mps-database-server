@@ -14,7 +14,16 @@
     {% csrf_token %}
     <button type="submit" class="btn btn-primary">Submit</button>
     <legend>Readout Details</legend>
-    {{ form}}
+    <p>Setup: {{ form.chip_setup }}</p>
+    <p>Time Unit: {{ form.timeunit }}</p>
+    <p>Treatment Time Length: {{ form.treatment_time_length }}</p>
+    <p>Assay Start Time: {{ form.assay_start_time }}</p>
+    <p>Readout Start Time: {{ form.readout_start_time }}</p>
+    <p>Notebook: {{ form.notebook }}</p>
+    <p>Notebook Page: {{ form.notebook_page }}</p>
+    <p>Notes: {{ form.notes }}</p>
+    <p>File: {{ form.file }}</p>
+
     {{ formset.management_form }}
     <legend>Assays</legend>
     <div id="errors">{{ formset.non_form_errors }}</div>
