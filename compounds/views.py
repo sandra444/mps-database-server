@@ -3,12 +3,12 @@
 from .models import Compound
 
 from django.views.generic import ListView, DetailView
-from django.utils import timezone
 
 
 class CompoundList(ListView):
     model = Compound
     template_name = 'compounds/compounds.html'
+    # If variable pagination is desired, just jam that into GET too
     paginate_by = 50
 
     def get_queryset(self):
