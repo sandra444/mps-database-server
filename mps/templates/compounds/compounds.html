@@ -74,7 +74,11 @@
 
     <script>
         $(document).ready(function() {
-            $('#compounds').DataTable();
+            $('#compounds').DataTable({
+                "aoColumnDefs": [
+                    { "bSortable": false, "aTargets": [5] }
+                ]
+            });
         });
     </script>
 {% endblock %}
