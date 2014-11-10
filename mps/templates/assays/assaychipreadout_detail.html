@@ -11,6 +11,10 @@
     <p>Notebook Page: {{ object.notebook_page }}</p>
     <p>Notes: {{ object.notes }}</p>
 
+    {% for assay in object.assaychipreadoutassay_set.all %}
+        <p>{{ assay.assay_id }} ||| {{ assay.object_type }} ||| {{ assay.reader_id }} ||| {{ assay.readout_unit }}</p>
+    {% endfor %}
+
     {% if object.file %}
     <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
     {% endif %}
