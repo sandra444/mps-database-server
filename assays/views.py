@@ -19,7 +19,7 @@ from django.utils.decorators import method_decorator
 ACRAFormSet = inlineformset_factory(AssayChipReadout,AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset, extra=1)
 
 class AssayChipReadoutAdd(CreateView):
-    template_name = 'assays/create_readout.html'
+    template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
 
     @method_decorator(login_required)

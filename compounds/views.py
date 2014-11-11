@@ -1,13 +1,11 @@
-# coding=utf-8
-
 from .models import Compound
 
 from django.views.generic import ListView, DetailView
 
 
-class CompoundList(ListView):
+class CompoundsList(ListView):
     model = Compound
-    template_name = 'compounds/compounds.html'
+    template_name = 'compounds/compounds_list.html'
     # If variable pagination is desired, just jam that into GET too
     # paginate_by = 50
     #
@@ -22,6 +20,6 @@ class CompoundList(ListView):
     #         object_list = self.model.objects.all()
     #     return object_list
 
-class CompoundDetails(DetailView):
+class CompoundsDetails(DetailView):
     model = Compound
-    template_name = 'compounds/compound.html'
+    template_name = 'compounds/compounds_detail.html'

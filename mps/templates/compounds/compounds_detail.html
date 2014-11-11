@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Compound: {{ object.name}}</h1>
+    <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.chemblid }}">
+
+{% endblock %}
