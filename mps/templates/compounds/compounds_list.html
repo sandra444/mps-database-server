@@ -42,7 +42,6 @@
                     <th>Name</th>
                     <th>CHEMBL ID</th>
                     <th>Known Drug</th>
-                    <th>Molecular Formula</th>
                     <th>Last Update</th>
                     <th>Image</th>
                 </tr>
@@ -53,7 +52,6 @@
                     <th>Name</th>
                     <th>CHEMBL ID</th>
                     <th>Known Drug</th>
-                    <th>Molecular Formula</th>
                     <th>Last Update</th>
                     <th>Image</th>
                 </tr>
@@ -63,9 +61,8 @@
             {% for compound in object_list %}
                 <tr class="compound" id={{ compound.id }} name={{ compound.name }}>
                     <td><a href="{{ compound.id }}">{{ compound.name }}</a></td>
-                    <td>{{ compound.chemblid }}</td>
+                    <td><a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.chemblid }}">{{ compound.chemblid }}</a></td>
                     <td>{{ compound.known_drug }}</td>
-                    <td>{{ compound.smiles }}</td>
                     <td>{{ compound.last_update }}</td>
                     <td><img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}"></td>
                 </tr>
@@ -78,7 +75,7 @@
         $(document).ready(function() {
             $('#compounds').DataTable({
                 "aoColumnDefs": [
-                    { "bSortable": false, "aTargets": [5] }
+                    { "bSortable": false, "aTargets": [4] }
                 ]
             });
         });
