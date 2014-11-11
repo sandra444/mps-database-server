@@ -20,6 +20,6 @@ class CompoundsList(ListView):
     #         object_list = self.model.objects.all()
     #     return object_list
 
-class CompoundsDetails(DetailView):
+class CompoundsDetail(DetailView):
     model = Compound
     template_name = 'compounds/compounds_detail.html'
