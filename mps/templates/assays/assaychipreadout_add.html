@@ -8,6 +8,15 @@
 
 {% block content %}
 
+<script>
+    $(function() {
+        $("#id_assay_start_time").datepicker();
+        $("#id_readout_start_time").datepicker();
+        $("#id_assay_start_time").datepicker("option","dateFormat","yy-mm-dd");
+        $("#id_readout_start_time").datepicker("option","dateFormat","yy-mm-dd");
+    });
+</script>
+
 <h1>Add Readout and Assays</h1>
 
 <form enctype="multipart/form-data" class="form-horizontal form-inline" method="post" >
