@@ -66,3 +66,17 @@ class LockableModel(TrackableModel):
 
     class Meta(object):
         abstract = True
+
+class RestrictedModel(LockableModel):
+    """
+
+    The base model for Restricted models
+
+    """
+
+    restricted_to = models.ForeignKey('auth.Group',
+                                    blank=True,
+                                    null=True)
+
+    class Meta(object):
+        abstract = True

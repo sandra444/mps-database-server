@@ -860,6 +860,9 @@ class AssayChipReadoutAdmin(LockableAdmin):
                     (
                         'signed_off_by', 'signed_off_date'
                     ),
+                    (
+                        'restricted_to'
+                    ),
                 )
             }
         ),

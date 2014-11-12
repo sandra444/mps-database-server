@@ -2,7 +2,7 @@
 
 from django.db import models
 from microdevices.models import Microdevice, OrganModel
-from mps.base.models import LockableModel
+from mps.base.models import LockableModel, RestrictedModel
 
 PHYSICAL_UNIT_TYPES = (
     (u'V', u'Volume'),
@@ -493,7 +493,7 @@ class AssayChipReadoutAssay(models.Model):
                             default='F')
     readout_unit = models.ForeignKey(ReadoutUnit)
 
-class AssayChipReadout(LockableModel):
+class AssayChipReadout(RestrictedModel):
     class Meta(object):
         verbose_name = 'Chip Readout'
         ordering = ('chip_setup',)
