@@ -181,6 +181,9 @@ INSTALLED_APPS = (
     # http://www.django-rest-framework.org
     'rest_framework',
 
+    # Django simple captchas
+    'captcha',
+
     # MPS applications:
     'cellsamples',
     'compounds',
@@ -190,6 +193,11 @@ INSTALLED_APPS = (
     'assays',
     'resources'
 )
+
+# Required for captchas
+SOUTH_MIGRATION_MODULES = {
+    'captcha': 'captcha.south_migrations',
+}
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

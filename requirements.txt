@@ -58,3 +58,4 @@ suds
 wsgiref
 wstools
 django-import-export
+django-simple-captcha
