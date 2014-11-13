@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+{% endblock %}
+
+{% block content %}
+
+<script>
+    $(function() {
+    });
+</script>
+
+<h1 align="'Center">Filter</h1>
+
+<form method="post" >
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <table class="table table-striped">
+        <tbody>
+            {% for compound in form.compounds %}
+                <tr><td>{{ compound }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</form>
+
+{% endblock %}

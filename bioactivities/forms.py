@@ -1,5 +1,6 @@
 from django import forms
 from bioactivities.models import *
+from compounds.models import Compound
 
 
 class AssayForm(forms.ModelForm):
@@ -32,3 +33,17 @@ class TargetsForm(forms.ModelForm):
             'uniprot_accession': forms.Textarea(attrs={'rows': 1}),
             'target_type': forms.Textarea(attrs={'rows': 1}),
         }
+
+class FilterForm(forms.Form):
+    # bioactivities = forms.ModelMultipleChoiceField(
+    #     queryset=BioactivityType.objects.all(), # not optional, use .all() if unsure
+    #     widget=forms.CheckboxSelectMultiple,
+    # )
+    # target = forms.ModelMultipleChoiceField(
+    #     queryset=Target.objects.all(), # not optional, use .all() if unsure
+    #     widget=forms.CheckboxSelectMultiple,
+    # )
+    compounds = forms.ModelMultipleChoiceField(
+        queryset=Compound.objects.all(), # not optional, use .all() if unsure
+        widget=forms.CheckboxSelectMultiple,
+    )

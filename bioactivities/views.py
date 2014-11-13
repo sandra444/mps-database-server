@@ -3,12 +3,17 @@
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from django.shortcuts import render
+from django.http import HttpResponseRedirect
+
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 
 from bioactivities.models import *
 from bioactivities.parsers import *
 from bioactivities.serializers import BioactivitiesSerializer
+
+from bioactivities.forms import FilterForm
 
 import logging
 logger = logging.getLogger(__name__)
@@ -152,3 +157,13 @@ def gen_heatmap(request):
     else:
         logging.debug('Final JSON response step failed: result has no data')
         return HttpResponse()
+
+def show_filter(request):
+    if request.method == 'POST':
+        chosen = request.POST
+        return render(request, 'show_filter_results.html', {'chosen': chosen})
+
+    else:
+        form = FilterForm()
+
+    return render(request, 'bioactivities/filter.html', {'form': form})
