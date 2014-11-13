@@ -20,11 +20,25 @@ $(document).ready(function () {
     $( "body" ).on( "click", "input[name*='DELETE']", function() {
         // Use a regex to get the desired ID number
         // var thenum = thestring.match(/\d+$/)[0];
-        var id = event.target.id.match(/\d+/)[0];
+        var id = parseInt(event.target.id.match(/\d+/)[0]);
         $('#'+title+'-'+id).remove();
-
 
         // Need to find way to correctly decrement TOTAL_FORMS and next_id to avoid conflict
         // Rename all greater than deleted, next_id = inlines.length
+        inlines = $('.inline');
+        //console.log(inlines.length + " " + id);
+        next_id = inlines.length;
+
+        // Decrease TOTAL_FORMS
+        $("input[id*='TOTAL_FORMS']").val(""+inlines.length);
+
+        var end = inlines.length;
+        for (var i=id+1; i<=end; i++){
+            //console.log("Iter:" + i);
+            var tag = '<div class="inline" id="' + title + '-' + (i-1) + '">';
+            $(tag).appendTo($("div[name='inlines']")).html(add.replace(new RegExp('-0-', 'g'),'-'+ (i-1) +'-'));
+            // Remove old
+            $('#'+title+'-'+i).remove();
+        }
     });
 });
