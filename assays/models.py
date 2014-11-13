@@ -458,7 +458,7 @@ class AssayChipSetup(LockableModel):
     compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
     concentration = models.FloatField(default=0, verbose_name='Conc.',
                                       null=True, blank=True)
-    unit = models.ForeignKey('assays.PhysicalUnits',
+    unit = models.ForeignKey('assays.PhysicalUnits', default=4,
                              verbose_name='conc. Unit',
                              null=True, blank=True)
 
