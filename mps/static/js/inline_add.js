@@ -15,4 +15,11 @@ $(document).ready(function () {
         // Set the hidden TOTAL_FORMS to be incremented, otherwise won't bother reading other inline
         $("input[id*='TOTAL_FORMS']").val(""+next_id);
     });
+
+    $( "body" ).on( "click", "input[name*='DELETE']", function() {
+        // Use a regex to get the desired ID number
+        // var thenum = thestring.match(/\d+$/)[0];
+        var id = event.target.id.match(/\d+/)[0];
+        $('#'+title+'-'+id).remove();
+    });
 });
