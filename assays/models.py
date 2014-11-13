@@ -387,7 +387,7 @@ class AssayRun(LockableModel):
     efficacy = models.BooleanField(default=False)
     disease = models.BooleanField(default=False)
     name = models.TextField(default='Study01',verbose_name='Study Name')
-    start_date = models.DateTimeField()
+    start_date = models.DateField()
     assay_run_id = models.TextField(unique=True, verbose_name='Organ Chip Study ID',
                                     help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering studies sequentially")
     description = models.TextField(blank=True, null=True)
