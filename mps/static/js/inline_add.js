@@ -16,10 +16,15 @@ $(document).ready(function () {
         $("input[id*='TOTAL_FORMS']").val(""+next_id);
     });
 
+    // This selector will check all items with DELETE in the name, including newly created ones
     $( "body" ).on( "click", "input[name*='DELETE']", function() {
         // Use a regex to get the desired ID number
         // var thenum = thestring.match(/\d+$/)[0];
         var id = event.target.id.match(/\d+/)[0];
         $('#'+title+'-'+id).remove();
+
+
+        // Need to find way to correctly decrement TOTAL_FORMS and next_id to avoid conflict
+        // Rename all greater than deleted, next_id = inlines.length
     });
 });
