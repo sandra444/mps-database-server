@@ -1311,8 +1311,14 @@ class AssayRunAdmin(LockableAdmin):
                     ('toxicity', 'efficacy', 'disease'),
                     'start_date',
                     'name',
-                    'assay_run_id',
                     'description',
+                )
+            }
+        ),
+                (
+            'Study ID (Autocreated from entries above)', {
+                'fields': (
+                    'assay_run_id',
                 )
             }
         ),

@@ -386,10 +386,11 @@ class AssayRun(LockableModel):
     toxicity = models.BooleanField(default=False)
     efficacy = models.BooleanField(default=False)
     disease = models.BooleanField(default=False)
-    name = models.TextField(default='Study01',verbose_name='Study Name')
-    start_date = models.DateField()
+    name = models.TextField(default='Study-01',verbose_name='Study Name',
+                            help_text='Name-###')
+    start_date = models.DateField(help_text='YYYY-MM-DD')
     assay_run_id = models.TextField(unique=True, verbose_name='Organ Chip Study ID',
-                                    help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering studies sequentially")
+                                    help_text="Standard format 'CenterID-YYYY-MM-DD-Name-###'")
     description = models.TextField(blank=True, null=True)
 
     file = models.FileField(upload_to='csv', verbose_name='Batch Data File',
