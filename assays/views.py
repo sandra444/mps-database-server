@@ -2,7 +2,89 @@
 
 from django.views.generic import ListView, CreateView, DetailView
 from assays.models import *
+from assays.admin import *
+from assays.forms import *
 
+
+# Class-based views for studies
+class AssayRunList(ListView):
+    model = AssayRun
+
+
+class AssayRunAdd(CreateView):
+    template_name = 'assays/assayrun_add.html'
+    form_class = AssayRunForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayRunAdd, self).get_context_data(**kwargs)
+        if self.request.POST:
+            context['formset'] = AssayRunForm(self.request.POST, self.request.FILES)
+        else:
+            context['formset'] = AssayRunForm()
+        return context
+
+    # Test form validity
+    def form_valid(self, form):
+        context = self.get_context_data()
+        formset = context['formset']
+        # get user via self.request.user
+        if formset.is_valid():
+            self.object = form.save()
+            self.object.modified_by = self.object.created_by = self.request.user
+            # Save Chip Study
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            if formset.__dict__['files']:
+                file = formset.__dict__['files']['file']
+                # TODO test bulk import
+                parseRunCSV(self.object,file)
+            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+
+class AssayRunDetail(DetailView):
+    model = AssayRun
+
+
+# Class based view for chip setups
+class AssayChipSetupList(ListView):
+    model = AssayChipSetup
+
+
+class AssayChipSetupAdd(CreateView):
+    template_name = 'assays/assaychipsetup_add.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
+        if self.request.POST:
+            context['formset'] = AssayChipSetupForm(self.request.POST, self.request.FILES)
+        else:
+            context['formset'] = AssayChipSetupForm()
+        return context
+
+    # Test form validity
+    def form_valid(self, form):
+        context = self.get_context_data()
+        formset = context['formset']
+        if formset.is_valid():
+            self.object = form.save()
+            self.object.modified_by = self.object.created_by = self.request.user
+            # Save Chip Readout
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+
+class AssayChipSetupDetail(DetailView):
+    model = AssayChipSetup
+
+
+# Class based views for readouts
 class AssayChipReadoutList(ListView):
     model = AssayChipReadout
 
@@ -11,13 +93,13 @@ from assays.forms import AssayChipReadoutForm
 from django.forms.models import inlineformset_factory
 from django.views.generic.edit import CreateView
 from assays.models import *
-from assays.admin import *
 from django.shortcuts import redirect
 # May be useful later
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
 
 ACRAFormSet = inlineformset_factory(AssayChipReadout,AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset, extra=1)
+
 
 class AssayChipReadoutAdd(CreateView):
     template_name = 'assays/assaychipreadout_add.html'
@@ -58,6 +140,7 @@ from django.utils import timezone
 
 from mps.filters import *
 
+
 class AssayChipReadoutDetail(DetailView):
 
     model = AssayChipReadout
@@ -71,34 +154,3 @@ class AssayChipReadoutDetail(DetailView):
             return self.render_to_response({'now':timezone.now()}) # Just date for now
         context = super(AssayChipReadoutDetail, self).get_context_data(**kwargs)
         return self.render_to_response(context)
-
-# Class-based views for studies
-
-class AssayRunList(ListView):
-    model = AssayRun
-
-class AssayRunAdd(CreateView):
-    template_name = 'assays/assayrun_add.html'
-    form_class = AssayRunForm
-
-    # Test form validity
-    def form_valid(self, form):
-        context = self.get_context_data()
-        formset = context['formset']
-        # get user via self.request.user
-        if formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Chip Readout
-            self.object.save()
-            formset.instance = self.object
-            formset.save()
-            if formset.__dict__['files']:
-                file = formset.__dict__['files']['file']
-                parseRunCSV(self.object,file)
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
-
-class AssayRunDetail(DetailView):
-    model = AssayRun

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div class="container" style="padding-bottom: 50px">
+        <h2 align="center">Studies</h2>
+
+        <table id="setups" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Organ Chip Study</th>
+                    <th>Chip ID / Barcode</th>
+                    <th>Organ Chip Name</th>
+                    <th>Chip Test Type</th>
+                    <th>Compound</th>
+                    <th>Creator</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Organ Chip Study</th>
+                    <th>Chip ID / Barcode</th>
+                    <th>Organ Chip Name</th>
+                    <th>Chip Test Type</th>
+                    <th>Compound</th>
+                    <th>Creator</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for setup in object_list %}
+                <tr class="compound" id={{ setup.id }} name={{ setup.id }}>
+                    <td><a href="{{ setup.id }}">{{ setup.assay_run_id }}</a></td>
+                    <td><a href="{{ setup.id }}">{{ setup.assay_chip_id }}</a></td>
+                    <td>{{ setup.device }}</td>
+                    <td>{{ setup.chip_test_type }}</td>
+                    <td>{{ setup.compound }}</td>
+                    <td>{{ setup.created_by }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#setups').DataTable();
+        });
+    </script>
+{% endblock %}
+
