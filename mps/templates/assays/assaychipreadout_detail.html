@@ -11,9 +11,16 @@
     <p>Notebook Page: {{ object.notebook_page }}</p>
     <p>Notes: {{ object.notes }}</p>
 
-    {% for assay in object.assaychipreadoutassay_set.all %}
-        <p>{{ assay.assay_id }} ||| {{ assay.object_type }} ||| {{ assay.reader_id }} ||| {{ assay.readout_unit }}</p>
-    {% endfor %}
+    <table class="table table-striped">
+        <thead>
+            <tr><td>Assay</td><td>Object of Interest</td><td>Reader</td><td>Readout Unit</td></tr>
+        </thead>
+        <tbody>
+            {% for assay in object.assaychipreadoutassay_set.all %}
+                <tr><td>{{ assay.assay_id }}</td><td>{{ assay.object_type }}</td><td>{{ assay.reader_id }}</td><td>{{ assay.readout_unit }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     {% if object.file %}
     <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
