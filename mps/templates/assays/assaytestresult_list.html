@@ -10,6 +10,11 @@
             <thead>
                 <tr>
                     <th>Organ Chip Study</th>
+                    <th>Chip Readout</th>
+                    <th>Result</th>
+                    <th>Result Function</th>
+                    <th>Result Type</th>
+                    <th>Severity</th>
                     <th>Creator</th>
                 </tr>
             </thead>
@@ -17,6 +22,11 @@
             <tfoot>
                 <tr>
                     <th>Organ Chip Study</th>
+                    <th>Chip Readout</th>
+                    <th>Result</th>
+                    <th>Result Function</th>
+                    <th>Result Type</th>
+                    <th>Severity</th>
                     <th>Creator</th>
                 </tr>
             </tfoot>
@@ -25,6 +35,11 @@
             {% for result in object_list %}
                 <tr class="compound" id={{ result.id }} name={{ result.id }}>
                     <td><a href="{{ result.id }}">{{ result.assay_device_readout }}</a></td>
+                    <td>{{ result.chip_readout }}</td>
+                    <td>{{ result.result }}</td>
+                    <td>{{ result.result_function }}</td>
+                    <td>{{ result.result_type }}</td>
+                    <td>{{ result.severity }}</td>
                     <td>{{ result.created_by }}</td>
                 </tr>
             {% endfor %}
