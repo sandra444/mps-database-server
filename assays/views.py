@@ -4,6 +4,7 @@ from django.views.generic import ListView, CreateView, DetailView
 from assays.models import *
 from assays.admin import *
 from assays.forms import *
+from django import forms
 
 
 # Class-based views for studies
@@ -131,3 +132,42 @@ class AssayChipReadoutDetail(DetailView):
             return self.render_to_response({'now':timezone.now()}) # Just date for now
         context = super(AssayChipReadoutDetail, self).get_context_data(**kwargs)
         return self.render_to_response(context)
+
+
+# Class-based views for studies
+class AssayTestResultList(ListView):
+    model = AssayTestResult
+
+
+TestResultFormSet = inlineformset_factory(AssayTestResult,AssayResult, formset=forms.models.BaseInlineFormSet, extra=1)
+
+class AssayTestResultAdd(CreateView):
+    template_name = 'assays/assaytestresult_add.html'
+    form_class = AssayResultForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayTestResultAdd, self).get_context_data(**kwargs)
+        if self.request.POST:
+            context['formset'] = TestResultFormSet(self.request.POST, self.request.FILES)
+        else:
+            context['formset'] = TestResultFormSet()
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        formset = context['formset']
+        # get user via self.request.user
+        if formset.is_valid():
+            self.object = form.save()
+            self.object.modified_by = self.object.created_by = self.request.user
+            # Save Chip Readout
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+
+class AssayTestResultDetail(DetailView):
+    model = AssayTestResult

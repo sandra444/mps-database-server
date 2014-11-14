@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div class="container" style="padding-bottom: 50px">
+        <h2 align="center">Studies</h2>
+
+        <table id="results" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Organ Chip Study</th>
+                    <th>Creator</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Organ Chip Study</th>
+                    <th>Creator</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for result in object_list %}
+                <tr class="compound" id={{ result.id }} name={{ result.id }}>
+                    <td><a href="{{ result.id }}">{{ result.assay_device_readout }}</a></td>
+                    <td>{{ result.created_by }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#results').DataTable();
+        });
+    </script>
+{% endblock %}

@@ -13,4 +13,8 @@ urlpatterns = patterns('',
     url(r'^assays/assaychipreadout/$', AssayChipReadoutList.as_view()),
     url(r'^assays/assaychipreadout/add$', AssayChipReadoutAdd.as_view()),
     url(r'^assays/assaychipreadout/(?P<pk>[0-9]+)/$', AssayChipReadoutDetail.as_view(), name='readout-detail'),
+
+    url(r'^assays/assaytestresult/$', AssayTestResultList.as_view()),
+    url(r'^assays/assaytestresult/add$', AssayTestResultAdd.as_view()),
+    url(r'^assays/assaytestresult/(?P<pk>[0-9]+)/$', AssayTestResultDetail.as_view(), name='result-detail'),
 )

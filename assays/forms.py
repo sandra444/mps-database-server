@@ -1,10 +1,11 @@
 from django import forms
-from assays.models import AssayChipReadout, AssayChipSetup
+from assays.models import AssayChipReadout, AssayChipSetup, AssayTestResult
 
 class AssayResultForm(forms.ModelForm):
     """Size the text input boxes"""
 
     class Meta(object):
+        model = AssayTestResult
         widgets = {
             'test_time': forms.TextInput(attrs={'size': 3}),
             'value': forms.TextInput(attrs={'size': 10}),
