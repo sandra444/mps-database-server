@@ -161,7 +161,7 @@ def gen_heatmap(request):
 def show_filter(request):
     if request.method == 'POST':
         chosen = request.POST
-        return render(request, 'show_filter_results.html', {'chosen': chosen})
+        return render(request, 'bioactivities/show_filter_results.html', {'chosen': chosen})
 
     else:
         form = FilterForm()
