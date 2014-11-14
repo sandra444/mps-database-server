@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Organ Chip Study: {{ object.assay_run_id}}</h1>
+
+    {% if object.file %}
+    <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
+    {% endif %}
+
+{% endblock %}

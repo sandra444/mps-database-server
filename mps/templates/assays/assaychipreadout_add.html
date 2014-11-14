@@ -102,7 +102,7 @@
     <div id="errors">{{ formset.non_form_errors }}</div>
     <a id="add_button">Add Assay</a>
     <div id="assaychipreadoutassay_set-group" class="assays" name="inlines">
-    {% for assay_form in formset %}
+        {% for assay_form in formset %}
             <div class="inline" id="assay-{{ forloop.counter0 }}">
             {{ assay_form }}
             </div>
