@@ -80,7 +80,7 @@ $(document).ready(function () {
     var type_selectors = [tox,eff,dm];
     var fills = ['TOX','EFF','DM'];
 
-    var date = $('#id_start_date_0');
+    var date = $('#id_start_date');
     var center = $('#id_center_id');
     var name = $('#id_name');
 
@@ -116,7 +116,7 @@ $(document).ready(function () {
 
         if (date_data !== val) {
             date.data("value", val);
-            data[2] = $('#id_start_date_0').val();
+            data[2] = $('#id_start_date').val();
             set_data();
         }
     }, 100);
