@@ -1121,39 +1121,6 @@ class AssayTestResultAdmin(LockableAdmin):
     actions = ['update_fields']
     inlines = [AssayResultInline]
 
-    def chip_readout(self, obj):
-        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
-            return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].assay_name
-        return ''
-
-    def result(self, obj):
-        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
-            abbreviation = AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result
-            if abbreviation == '1':
-                return u'Positive'
-            else:
-                return u'Negative'
-        return ''
-
-    def result_function(self, obj):
-        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
-            return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result_function
-        return ''
-
-    def result_type(self, obj):
-        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
-            return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result_type
-        return ''
-
-    def severity(self, obj):
-        SEVERITY_SCORE = dict((
-            ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
-            ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
-        ))
-        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
-            return SEVERITY_SCORE[AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].severity]
-        return ''
-
 
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
