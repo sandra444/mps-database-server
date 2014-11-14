@@ -15,28 +15,16 @@ class AssayRunAdd(CreateView):
     template_name = 'assays/assayrun_add.html'
     form_class = AssayRunForm
 
-    def get_context_data(self, **kwargs):
-        context = super(AssayRunAdd, self).get_context_data(**kwargs)
-        if self.request.POST:
-            context['formset'] = AssayRunForm(self.request.POST, self.request.FILES)
-        else:
-            context['formset'] = AssayRunForm()
-        return context
-
     # Test form validity
     def form_valid(self, form):
-        context = self.get_context_data()
-        formset = context['formset']
         # get user via self.request.user
-        if formset.is_valid():
+        if form.is_valid():
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Study
             self.object.save()
-            formset.instance = self.object
-            formset.save()
-            if formset.__dict__['files']:
-                file = formset.__dict__['files']['file']
+            if form.__dict__['files']:
+                file = form.__dict__['files']['file']
                 # TODO test bulk import
                 parseRunCSV(self.object,file)
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
@@ -55,26 +43,15 @@ class AssayChipSetupList(ListView):
 
 class AssayChipSetupAdd(CreateView):
     template_name = 'assays/assaychipsetup_add.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
-        if self.request.POST:
-            context['formset'] = AssayChipSetupForm(self.request.POST, self.request.FILES)
-        else:
-            context['formset'] = AssayChipSetupForm()
-        return context
+    form_class = AssayChipSetupForm
 
     # Test form validity
     def form_valid(self, form):
-        context = self.get_context_data()
-        formset = context['formset']
-        if formset.is_valid():
+        if form.is_valid():
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
             self.object.save()
-            formset.instance = self.object
-            formset.save()
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
