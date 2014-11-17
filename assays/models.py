@@ -209,7 +209,7 @@ class AssayDeviceReadout(LockableModel):
     # the unique readout identifier
     # can be a barcode or a hand written identifier
     assay_device_id = models.CharField(max_length=512,
-                                       verbose_name='Device ID/ Barcode')
+                                       verbose_name='Plate ID/ Barcode')
 
     cell_sample = models.ForeignKey('cellsamples.CellSample')
 
@@ -384,7 +384,8 @@ class AssayResult(models.Model):
 
 class AssayPlateTestResult(LockableModel):
 #   Test Results from MICROPLATES
-    assay_device_id = models.ForeignKey('assays.AssayDeviceReadout')
+    assay_device_id = models.ForeignKey('assays.AssayDeviceReadout',
+                                        verbose_name='Plate ID/ Barcode')
 
     assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
 
@@ -421,10 +422,11 @@ class AssayRun(LockableModel):
     toxicity = models.BooleanField(default=False)
     efficacy = models.BooleanField(default=False)
     disease = models.BooleanField(default=False)
-    name = models.TextField(default='Study01',verbose_name='Study Name')
-    start_date = models.DateTimeField()
+    name = models.TextField(default='Study-01',verbose_name='Study Name',
+                            help_text='Name-###')
+    start_date = models.DateField(help_text='YYYY-MM-DD')
     assay_run_id = models.TextField(unique=True, verbose_name='Organ Chip Study ID',
-                                    help_text="Standard format 'CenterID-2014-09-15-R1' or '-R001' if numbering studies sequentially")
+                                    help_text="Standard format 'CenterID-YYYY-MM-DD-Name-###'")
     description = models.TextField(blank=True, null=True)
 
     file = models.FileField(upload_to='csv', verbose_name='Batch Data File',
@@ -495,7 +497,7 @@ class AssayChipSetup(LockableModel):
     compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
     concentration = models.FloatField(default=0, verbose_name='Conc.',
                                       null=True, blank=True)
-    unit = models.ForeignKey('assays.PhysicalUnits',
+    unit = models.ForeignKey('assays.PhysicalUnits', default=4,
                              verbose_name='conc. Unit',
                              null=True, blank=True)
 
