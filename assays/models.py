@@ -340,6 +340,9 @@ class AssayTestResult(LockableModel):
             return SEVERITY_SCORE[AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].severity]
         return ''
 
+    def get_absolute_url(self):
+        return "/assays/assaytestresult/%i/" % self.id
+
 
 class AssayResult(models.Model):
 #   Individual result parameters for CHIP RESULTS used in inline
@@ -440,6 +443,9 @@ class AssayRun(LockableModel):
     def __unicode__(self):
         return self.assay_run_id
 
+    def get_absolute_url(self):
+        return "/assays/organchipstudy/%i/" % self.id
+
 class AssayChipRawData(models.Model):
     class Meta(object):
         unique_together = [('assay_chip_id', 'assay_id', 'field_id', 'elapsed_time')]
@@ -506,6 +512,9 @@ class AssayChipSetup(LockableModel):
                                         self.compound,
                                         self.concentration,
                                         self.unit)
+
+    def get_absolute_url(self):
+        return "/assays/assaychipsetup/%i/" % self.id
 
 object_types = (
     ('F', 'Field'), ('C', 'Colony'), ('O', 'Other')

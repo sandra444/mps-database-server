@@ -1,2 +1,42 @@
 {% extends "base.html" %}
 {% load static %}
+
+{% block load %}
+<script src="{% static "js/inline_add.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+<h1>Assay Chip Setup</h1>
+
+<form class="form-horizontal" method="post" >
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+    <legend>Chip Setup Details</legend>
+    <p>Study: {{ form.assay_run_id }}</p>
+    <p>Organ Chip Name: {{ form.device }}</p>
+    <p>Chip ID/ Barcode: {{ form.assay_chip_id }}</p>
+    <p>Test Type: {{ form.chip_test_type }}</p>
+    <p>Compound: {{ form.compound }}</p>
+    <p>Concentration: {{ form.concentration }}</p>
+    <p>Concentration Unit: {{ form.unit }}</p>
+    <p>Scientist: {{ form.scientist }}</p>
+    <p>Notebook: {{ form.notebook }}</p>
+    <p>Notebook Page: {{ form.notebook_page }}</p>
+    <p>Notes: {{ form.notes }}</p>
+
+    {{ formset.management_form }}
+    <legend>Model Cells</legend>
+    <div id="errors">{{ formset.non_form_errors }}</div>
+    <a id="add_button">Add Assay</a>
+    <div id="assaychipcells_set-group" class="cells" name="inlines">
+        {% for result_form in formset %}
+            <div class="inline" id="results-{{ forloop.counter0 }}">
+            {{ result_form }}
+            </div>
+        {% endfor %}
+    </div>
+</form>
+
+{% endblock %}

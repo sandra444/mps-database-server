@@ -6,6 +6,20 @@ from assays.admin import *
 from assays.forms import *
 from django import forms
 
+from django.forms.models import inlineformset_factory
+from django.views.generic.edit import CreateView
+from assays.models import *
+from django.shortcuts import redirect
+# May be useful later
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.utils.decorators import method_decorator
+
+from django.views.generic.detail import DetailView
+from django.utils import timezone
+
+from mps.filters import *
+
+#TODO Refactor imports
 
 # Class-based views for studies
 class AssayRunList(ListView):
@@ -42,17 +56,32 @@ class AssayChipSetupList(ListView):
     model = AssayChipSetup
 
 
+AssayChipCellsFormset = inlineformset_factory(AssayChipSetup,AssayChipCells, formset=forms.models.BaseInlineFormSet, extra=1)
+
+
 class AssayChipSetupAdd(CreateView):
     template_name = 'assays/assaychipsetup_add.html'
     form_class = AssayChipSetupForm
 
-    # Test form validity
+    def get_context_data(self, **kwargs):
+        context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
+        if self.request.POST:
+            context['formset'] = AssayChipCellsFormset(self.request.POST)
+        else:
+            context['formset'] = AssayChipCellsFormset()
+        return context
+
     def form_valid(self, form):
-        if form.is_valid():
+        context = self.get_context_data()
+        formset = context['formset']
+        # get user via self.request.user
+        if formset.is_valid():
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
             self.object.save()
+            formset.instance = self.object
+            formset.save()
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -65,16 +94,6 @@ class AssayChipSetupDetail(DetailView):
 # Class based views for readouts
 class AssayChipReadoutList(ListView):
     model = AssayChipReadout
-
-from assays.forms import AssayChipReadoutForm
-
-from django.forms.models import inlineformset_factory
-from django.views.generic.edit import CreateView
-from assays.models import *
-from django.shortcuts import redirect
-# May be useful later
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.utils.decorators import method_decorator
 
 ACRAFormSet = inlineformset_factory(AssayChipReadout,AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset, extra=1)
 
@@ -113,11 +132,6 @@ class AssayChipReadoutAdd(CreateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
-from django.views.generic.detail import DetailView
-from django.utils import timezone
-
-from mps.filters import *
-
 
 class AssayChipReadoutDetail(DetailView):
 
@@ -148,7 +162,7 @@ class AssayTestResultAdd(CreateView):
     def get_context_data(self, **kwargs):
         context = super(AssayTestResultAdd, self).get_context_data(**kwargs)
         if self.request.POST:
-            context['formset'] = TestResultFormSet(self.request.POST, self.request.FILES)
+            context['formset'] = TestResultFormSet(self.request.POST)
         else:
             context['formset'] = TestResultFormSet()
         return context
