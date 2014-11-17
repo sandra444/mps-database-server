@@ -1,6 +1,7 @@
 $(document).ready(function () {
 
-    //Note that this requires certain class name, add name, inlines name
+    // Note that this requires certain class name, add name, inlines name
+    // Note that the selector that selects TABLES (not divs) with the name inlines
 
     var inlines = $('.inline');
     var next_id = inlines.length;
@@ -8,9 +9,9 @@ $(document).ready(function () {
     var add = $('.inline:first').html();
 
     $('#add_button').click(function() {
-        var tag = '<div class="inline" id="' + title + '-' + next_id + '">';
+        var tag = '<tr class="inline" id="' + title + '-' + next_id + '">';
         // Use a regular expression to replace all the places where ID is needed
-        $(tag).appendTo($("div[name='inlines']")).html(add.replace(new RegExp('-0-', 'g'),'-'+next_id+'-'));
+        $(tag).appendTo($("table[name='inlines']")).html(add.replace(new RegExp('-0-', 'g'),'-'+next_id+'-'));
         next_id += 1;
         // Set the hidden TOTAL_FORMS to be incremented, otherwise won't bother reading other inline
         $("input[id*='TOTAL_FORMS']").val(""+next_id);
@@ -35,8 +36,8 @@ $(document).ready(function () {
         var end = inlines.length;
         for (var i=id+1; i<=end; i++){
             //console.log("Iter:" + i);
-            var tag = '<div class="inline" id="' + title + '-' + (i-1) + '">';
-            $(tag).appendTo($("div[name='inlines']")).html(add.replace(new RegExp('-0-', 'g'),'-'+ (i-1) +'-'));
+            var tag = '<tr class="inline" id="' + title + '-' + (i-1) + '">';
+            $(tag).appendTo($("table[name='inlines']")).html(add.replace(new RegExp('-0-', 'g'),'-'+ (i-1) +'-'));
             // Remove old
             $('#'+title+'-'+i).remove();
         }

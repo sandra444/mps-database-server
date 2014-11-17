@@ -29,14 +29,17 @@
     {{ formset.management_form }}
     <legend>Model Cells</legend>
     <div id="errors">{{ formset.non_form_errors }}</div>
-    <a id="add_button">Add Assay</a>
-    <div id="assaychipcells_set-group" class="cells" name="inlines">
-        {% for result_form in formset %}
-            <div class="inline" id="results-{{ forloop.counter0 }}">
-            {{ result_form }}
-            </div>
-        {% endfor %}
-    </div>
+    <a id="add_button">Add Cell Type</a>
+    <table class="table table-striped" id="assaychipcells_set-group" class="cells" name="inlines">
+        <thead>
+            <tr><td>Cell Sample</td><td>Cell Biosensor</td><td>Density</td><td>Unit</td><td>Passage#</td><td>Delete#</td></tr>
+        </thead>
+        <tbody>
+            {% for cell in formset %}
+                <tr class="inline" id="results-{{ forloop.counter0 }}"><td>{{ cell.cell_sample }}</td><td>{{ cell.cell_biosensor }}</td><td>{{ cell.cellsample_density }}</td><td>{{ cell.cellsample_density_unit }}</td><td>{{ cell.cell_passage }}</td><td>{{ cell.DELETE }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </form>
 
 {% endblock %}

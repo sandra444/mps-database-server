@@ -101,13 +101,16 @@
     <legend>Assays</legend>
     <div id="errors">{{ formset.non_form_errors }}</div>
     <a id="add_button">Add Assay</a>
-    <div id="assaychipreadoutassay_set-group" class="assays" name="inlines">
-        {% for assay_form in formset %}
-            <div class="inline" id="assay-{{ forloop.counter0 }}">
-            {{ assay_form }}
-            </div>
-        {% endfor %}
-    </div>
+    <table class="table table-striped" id="assaychipreadoutassay_set-group" class="assays" name="inlines">
+        <thead>
+            <tr><td>Assay</td><td>Object of Interest</td><td>Reader</td><td>Readout Unit</td><td>Delete</td></tr>
+        </thead>
+        <tbody>
+            {% for assay in formset %}
+                <tr class="inline" id="assay-{{ forloop.counter0 }}"><td>{{ assay.assay_id }}</td><td>{{ assay.object_type }}</td><td>{{ assay.reader_id }}</td><td>{{ assay.readout_unit }}</td><td>{{ assay.DELETE }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </form>
 
 {% endblock %}
