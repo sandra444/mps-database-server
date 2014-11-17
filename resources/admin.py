@@ -20,8 +20,8 @@ class ResourceAdmin(LockableAdmin):
         (
             None, {
                 'fields': (
-                    'resource_name',
                     'type',
+                    'resource_name',
                     'resource_website',
                     'description',
                 )
@@ -58,8 +58,8 @@ class ResourceTypeAdmin(LockableAdmin):
         (
             None, {
                 'fields': (
-                    'resource_type_name',
                     'resource_subtype',
+                    'resource_type_name',
                     'description',
                 )
             }

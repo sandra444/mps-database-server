@@ -6,7 +6,7 @@ class ResourceSubtype(LockableModel):
     class Meta(object):
         ordering = ['name']
 
-    name = models.TextField(max_length=40, unique=True)
+    name = models.TextField(max_length=40, unique=True, verbose_name='Category')
     description = models.TextField(max_length=400, blank=True, null=True)
 
     def __unicode__(self):
@@ -15,14 +15,15 @@ class ResourceSubtype(LockableModel):
 
 class ResourceType(LockableModel):
     class Meta(object):
-        ordering = ['resource_type_name', 'resource_subtype']
+        ordering = ['resource_subtype','resource_type_name']
 
     resource_type_name = models.CharField(max_length=40, unique=True, verbose_name="Name")
     description = models.CharField(max_length=400, blank=True, null=True)
-    resource_subtype = models.ForeignKey(ResourceSubtype, verbose_name="Subtype")
+    resource_subtype = models.ForeignKey(ResourceSubtype, verbose_name="Category")
 
     def __unicode__(self):
-        return self.resource_type_name
+        return u'{} ({})'.format(self.resource_subtype,
+                                self.resource_type_name)
 
 
 class Resource(LockableModel):
