@@ -264,8 +264,12 @@ admin.site.register(Assay, AssayAdmin)
 
 
 class BioactivityAdmin(LockableAdmin):
+    change_list_template = 'admin/bioactivities/change_list.html'
+    alphabet_filter = 'standard_name'
+    DEFAULT_ALPHABET = u'ABCDEFGHIJKLMNOPQRSTUVWXYZ%['
+
     save_on_top = True
-    list_per_page = 300
+    list_per_page = 50
     ordering = ('compound', 'standard_name')
     raw_id_fields = ("compound", 'target', 'assay',)
 
