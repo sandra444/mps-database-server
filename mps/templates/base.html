@@ -20,9 +20,9 @@
         <link rel="stylesheet" href="{% static "css/jquery-ui-1.11.2.min.css" %}">
 
         <!-- Latest compiled and minified CSS -->
-        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
 
-        <!-- Optional: Incorporate the Bootstrap JavaScript plugins -->
+        <!-- Incorporate the Bootstrap JavaScript plugins -->
         <script src="{% static "js/bootstrap.min.js" %}"></script>
         <link rel="stylesheet" href="{% static "css/bootstrap-theme.min.css" %}">
 
@@ -76,13 +76,21 @@
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Assays<span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
-                <li><a href="/assays/assaychipreadout">View Chip Readouts</a></li>
-                <li><a href="/assays/assaychipreadout/add">Add Chip Readout</a></li>
-                <li><a href="#">Something else here</a></li>
+                <li class="dropdown-header">Organ Chip Study</li>
+                <li><a href="/assays/organchipstudy">View Studies</a></li>
+                <li><a href="/assays/organchipstudy/add">Add Study</a></li>
                 <li class="divider"></li>
-                <li class="dropdown-header">Nav header</li>
-                <li><a href="#">Separated link</a></li>
-                <li><a href="#">One more separated link</a></li>
+                <li class="dropdown-header">Chip Setup</li>
+                <li><a href="/assays/assaychipsetup">View Setups</a></li>
+                <li><a href="/assays/assaychipsetup/add">Add Setup</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Chip Readout</li>
+                <li><a href="/assays/assaychipreadout">View Readouts</a></li>
+                <li><a href="/assays/assaychipreadout/add">Add Readout</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Chip Test Result</li>
+                <li><a href="/assays/assaytestresult">View Results</a></li>
+                <li><a href="/assays/assaytestresult/add">Add Result</a></li>
               </ul>
             </li>
             <li><a href="/compounds">Compounds</a></li>

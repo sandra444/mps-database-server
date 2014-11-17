@@ -307,6 +307,42 @@ class AssayTestResult(LockableModel):
     def __unicode__(self):
         return u''
 
+    def chip_readout(self):
+        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            return AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].assay_name
+        return ''
+
+    def result(self):
+        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            abbreviation = AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result
+            if abbreviation == '1':
+                return u'Positive'
+            else:
+                return u'Negative'
+        return ''
+
+    def result_function(self):
+        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            return AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result_function
+        return ''
+
+    def result_type(self):
+        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            return AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result_type
+        return ''
+
+    def severity(self):
+        SEVERITY_SCORE = dict((
+            ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
+            ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
+        ))
+        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            return SEVERITY_SCORE[AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].severity]
+        return ''
+
+    def get_absolute_url(self):
+        return "/assays/assaytestresult/%i/" % self.id
+
 
 class AssayResult(models.Model):
 #   Individual result parameters for CHIP RESULTS used in inline
@@ -409,6 +445,9 @@ class AssayRun(LockableModel):
     def __unicode__(self):
         return self.assay_run_id
 
+    def get_absolute_url(self):
+        return "/assays/organchipstudy/%i/" % self.id
+
 class AssayChipRawData(models.Model):
     class Meta(object):
         unique_together = [('assay_chip_id', 'assay_id', 'field_id', 'elapsed_time')]
@@ -475,6 +514,9 @@ class AssayChipSetup(LockableModel):
                                         self.compound,
                                         self.concentration,
                                         self.unit)
+
+    def get_absolute_url(self):
+        return "/assays/assaychipsetup/%i/" % self.id
 
 object_types = (
     ('F', 'Field'), ('C', 'Colony'), ('O', 'Other')

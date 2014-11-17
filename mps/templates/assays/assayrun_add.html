@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+<script src="{% static "assays/customize_run.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+<script>
+    $(function() {
+        //Add datepicker to assay and readout start time
+        $("#id_start_date").datepicker();
+        $("#id_start_date").datepicker("option","dateFormat","yy-mm-dd");
+    });
+</script>
+
+<h1>Organ Chip Study</h1>
+
+<form enctype="multipart/form-data" class="form-horizontal" method="post" >
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+    <legend>Organ Chip Study Details</legend>
+    <p>Center Name: {{ form.center_id }}</p>
+    <p>Toxicity: {{ form.toxicity }} Disease: {{ form.disease }} Efficacy: {{ form.efficacy }}</p>
+    <p>Study Name: {{ form.name }}</p>
+    <p>Start Date: {{ form.start_date }}</p>
+    <p>Organ Chip Study ID: {{ form.assay_run_id }}</p>
+    <p>Description: {{ form.description }}</p>
+
+    <legend>Bulk Import</legend>
+    <p>File: {{ form.file }}</p>
+</form>
+
+{% endblock %}

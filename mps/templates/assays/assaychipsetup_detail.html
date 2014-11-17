@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Chip Setup: {{ object.assay_chip_id}}</h1>
+
+    <p>Organ Chip Study: {{ object.assay_run_id }}</p>
+    <p>Organ Model: {{ object.device }}</p>
+    <p>Test Type: {{ object.chip_test_type }}</p>
+    <p>Compound: {{ object.compound }} {{ object.concentration }} ({{ object.unit }})</p>
+    <p>Scientist: {{ object.scientist }}</p>
+    <p>Notebook: {{ object.notebook }}, page {{ object.notebook_page }}</p>
+    <p>Notes: {{ object.notes }}</p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr><td>Cell Sample</td><td>Cell Biosensor</td><td>Density</td><td>Unit</td><td>Passage#</td></tr>
+        </thead>
+        <tbody>
+            {% for cell in object.assaychipcells_set.all %}
+                <tr><td>{{ cell.cell_sample }}</td><td>{{ cell.cell_biosensor }}</td><td>{{ cell.cellsample_density }}</td><td>{{ cell.cellsample_density_unit }}</td><td>{{ cell.cell_passage }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

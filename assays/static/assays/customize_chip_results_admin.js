@@ -51,4 +51,11 @@ $(document).ready(function () {
     newRow.click(function() {
         changeNew();
     });
+
+    // This is to deal with new inline entries when on the frontend
+    if ($("#add_button")[0]) {
+        $("#add_button").click(function() {
+        changeNew();
+        });
+    }
 });
