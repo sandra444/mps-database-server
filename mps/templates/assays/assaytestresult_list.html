@@ -49,7 +49,9 @@
 
     <script>
         $(document).ready(function() {
-            $('#results').DataTable();
+            $('#results').DataTable( {
+                "iDisplayLength": 50
+            });
         });
     </script>
 {% endblock %}
