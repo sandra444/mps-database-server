@@ -8,31 +8,6 @@ from resources.models import *
 from resources.forms import *
 
 
-# don't know if this is necessary
-
-#class URLFieldWidget(AdminURLFieldWidget):
-#    def render(self, name, value, attrs=None):
-#        widget = super(URLFieldWidget, self).render(name, value, attrs)
-#
-#        html = \
-#            u'<div style="width: 55em; height: 4em;">' \
-#            u'<div>' \
-#            u'{0}' \
-#            u'</div>' \
-#            u'<div style="float: right; z-index: 10;' \
-#            u' margin-top: -3em; margin-right: -25em;">' \
-#            u'<input type="button" ' \
-#            u'value="Click here to open the URL in a new window." ' \
-#            u'style="float: right; clear: both;" ' \
-#            u'onclick="window.' \
-#            u'open(document.getElementById(\'{1}\')' \
-#            u'.value)" />' \
-#            u'</div>' \
-#            u'</div>'.format(widget, attrs['id'])
-#
-#        return mark_safe(html)
-
-
 class ResourceAdmin(LockableAdmin):
     form = ResourceForm
     save_on_top = True
