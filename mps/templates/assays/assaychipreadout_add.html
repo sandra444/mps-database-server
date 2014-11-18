@@ -35,20 +35,6 @@
 {#    <p>Notes: {{ form.notes }}</p>#}
 {#    <p>File: {{ form.file }}</p>#}
 
-    {% if form.errors %}
-        {% for field in form %}
-            {% if field.errors %}
-                {% for error in field.errors %}
-                    <div class="alert alert-danger" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
-                        {{field.label}}: {{error}}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endfor %}
-    {% endif %}
-
     <div class="form-group">
         <label for="chip_setup" class="col-sm-2 control-label">Setup</label>
         <div class="col-sm-10">
@@ -115,11 +101,19 @@
     {{ formset.management_form }}
     <legend>Assays</legend>
 
-    {% if formset.non_field_errors %}
+    {% if formset.errors %}
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
             <span class="sr-only">Error:</span>
-            {{ formset.non_field_errors }}
+            Missing Fields
+        </div>
+    {% endif %}
+
+    {% if formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ formset.non_form_errors }}
         </div>
     {% endif %}
 
