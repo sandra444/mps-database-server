@@ -18,11 +18,12 @@
     });
 </script>
 
-<h1>Add Readout and Assays</h1>
+
 
 <form enctype="multipart/form-data" class="form-horizontal" method="post" >
     {% csrf_token %}
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <h1>Add Chip Readout <button type="submit" class="btn btn-primary">Submit</button></h1>
+
     <legend>Readout Details</legend>
 {#    <p>Setup: {{ form.chip_setup }}</p>#}
 {#    <p>Time Unit: {{ form.timeunit }}</p>#}
@@ -99,15 +100,34 @@
 
     {{ formset.management_form }}
     <legend>Assays</legend>
-    <div id="errors">{{ formset.non_form_errors }}</div>
+
+    {% if formset.errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            Missing Fields
+        </div>
+    {% endif %}
+
+    {% if formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ formset.non_form_errors }}
+        </div>
+    {% endif %}
+
     <a id="add_button">Add Assay</a>
-    <div id="assaychipreadoutassay_set-group" class="assays" name="inlines">
-        {% for assay_form in formset %}
-            <div class="inline" id="assay-{{ forloop.counter0 }}">
-            {{ assay_form }}
-            </div>
-        {% endfor %}
-    </div>
+    <table class="table table-striped assays" id="assaychipreadoutassay_set-group"  name="inlines">
+        <thead>
+            <tr><td>Assay</td><td>Object of Interest</td><td>Reader</td><td>Readout Unit</td><td>Delete</td></tr>
+        </thead>
+        <tbody>
+            {% for assay in formset %}
+                <tr class="inline" id="assay-{{ forloop.counter0 }}"><td>{{ assay.assay_id }}</td><td>{{ assay.object_type }}</td><td>{{ assay.reader_id }}</td><td>{{ assay.readout_unit }}</td><td>{{ assay.DELETE }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </form>
 
 {% endblock %}

@@ -21,6 +21,8 @@ from mps.filters import *
 
 #TODO Refactor imports
 
+# NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
+
 # Class-based views for studies
 class AssayRunList(ListView):
     model = AssayRun
@@ -44,6 +46,8 @@ class AssayRunAdd(CreateView):
                 parseRunCSV(self.object,file)
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
+            # In order to display errors properly, make sure they are added to POST
+            form['errors'] = form.errors
             return self.render_to_response(self.get_context_data(form=form))
 
 
@@ -56,7 +60,9 @@ class AssayChipSetupList(ListView):
     model = AssayChipSetup
 
 
-AssayChipCellsFormset = inlineformset_factory(AssayChipSetup,AssayChipCells, formset=forms.models.BaseInlineFormSet, extra=1)
+AssayChipCellsFormset = inlineformset_factory(AssayChipSetup,AssayChipCells, formset=AssayChipCellsInlineFormset, extra=1,
+                                              widgets = {'cellsample_density': forms.TextInput(attrs={'size': 5}),
+                                                         'cell_passage': forms.TextInput(attrs={'size': 5}),})
 
 
 class AssayChipSetupAdd(CreateView):
@@ -153,7 +159,8 @@ class AssayTestResultList(ListView):
     model = AssayTestResult
 
 
-TestResultFormSet = inlineformset_factory(AssayTestResult,AssayResult, formset=forms.models.BaseInlineFormSet, extra=1)
+TestResultFormSet = inlineformset_factory(AssayTestResult,AssayResult, formset=TestResultInlineFormset, extra=1,
+                                              widgets = {'value': forms.TextInput(attrs={'size': 10}),})
 
 class AssayTestResultAdd(CreateView):
     template_name = 'assays/assaytestresult_add.html'

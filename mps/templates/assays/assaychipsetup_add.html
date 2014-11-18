@@ -7,36 +7,121 @@
 
 {% block content %}
 
-<h1>Assay Chip Setup</h1>
-
 <form class="form-horizontal" method="post" >
     {% csrf_token %}
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <h1>Assay Chip Setup <button type="submit" class="btn btn-primary">Submit</button></h1>
 
     <legend>Chip Setup Details</legend>
-    <p>Study: {{ form.assay_run_id }}</p>
-    <p>Organ Chip Name: {{ form.device }}</p>
-    <p>Chip ID/ Barcode: {{ form.assay_chip_id }}</p>
-    <p>Test Type: {{ form.chip_test_type }}</p>
-    <p>Compound: {{ form.compound }}</p>
-    <p>Concentration: {{ form.concentration }}</p>
-    <p>Concentration Unit: {{ form.unit }}</p>
-    <p>Scientist: {{ form.scientist }}</p>
-    <p>Notebook: {{ form.notebook }}</p>
-    <p>Notebook Page: {{ form.notebook_page }}</p>
-    <p>Notes: {{ form.notes }}</p>
+{#    <p>Study: {{ form.assay_run_id }}</p>#}
+{#    <p>Organ Chip Name: {{ form.device }}</p>#}
+{#    <p>Chip ID/ Barcode: {{ form.assay_chip_id }}</p>#}
+{#    <p>Test Type: {{ form.chip_test_type }}</p>#}
+{#    <p>Compound: {{ form.compound }}</p>#}
+{#    <p>Concentration: {{ form.concentration }}</p>#}
+{#    <p>Concentration Unit: {{ form.unit }}</p>#}
+{#    <p>Scientist: {{ form.scientist }}</p>#}
+{#    <p>Notebook: {{ form.notebook }}</p>#}
+{#    <p>Notebook Page: {{ form.notebook_page }}</p>#}
+{#    <p>Notes: {{ form.notes }}</p>#}
+
+    {% if form.errors %}
+        {% for field in form %}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{field.label}}: {{error}}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <div class="form-group">
+        <label for="assay_run_id" class="col-sm-2 control-label">Organ Chip Study ID</label>
+        <div class="col-sm-10">
+          {{ form.assay_run_id }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="device" class="col-sm-2 control-label">Organ Chip Name</label>
+        <div class="col-sm-10">
+          {{ form.device }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="assay_chip_id" class="col-sm-2 control-label">Chip ID/Barcode</label>
+        <div class="col-sm-10">
+          {{ form.assay_chip_id }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="chip_test_type" class="col-sm-2 control-label">Test Type</label>
+        <div class="col-sm-10">
+          {{ form.chip_test_type }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="compound" class="col-sm-2 control-label">Compound</label>
+        <div class="col-sm-10" style="float:left; display:inline; overflow:none; white-space:nowrap;">
+            {{ form.compound }}
+            <label for="concentration" style="padding-left: 20px;padding-right: 10px;">Concentration</label>
+            {{ form.concentration }}
+            <label for="unit" style="padding-left: 20px;padding-right: 10px;">Concentration Unit</label>
+            {{ form.unit }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="scientist" class="col-sm-2 control-label">Scientist</label>
+        <div class="col-sm-10">
+          {{ form.scientist }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="notebook" class="col-sm-2 control-label">Notebook</label>
+        <div class="col-sm-10">
+            {{ form.notebook }}
+            <label for="notebook_page" style="padding-left: 20px;padding-right: 10px;">Notebook Page</label>
+            {{ form.notebook_page }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="notes" class="col-sm-2 control-label">Notes</label>
+        <div class="col-sm-10">
+          {{ form.notes }}
+        </div>
+    </div>
 
     {{ formset.management_form }}
     <legend>Model Cells</legend>
-    <div id="errors">{{ formset.non_form_errors }}</div>
-    <a id="add_button">Add Assay</a>
-    <div id="assaychipcells_set-group" class="cells" name="inlines">
-        {% for result_form in formset %}
-            <div class="inline" id="results-{{ forloop.counter0 }}">
-            {{ result_form }}
-            </div>
-        {% endfor %}
-    </div>
+
+    {% if formset.errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            Missing Fields
+        </div>
+    {% endif %}
+
+    <a id="add_button">Add Cell Type</a>
+    <table class="table table-striped cells" id="assaychipcells_set-group" name="inlines">
+        <thead>
+            <tr><td>Cell Sample</td><td>Cell Biosensor</td><td>Density</td><td>Unit</td><td>Passage#</td><td>Delete</td></tr>
+        </thead>
+        <tbody>
+            {% for cell in formset %}
+                <tr class="inline" id="results-{{ forloop.counter0 }}"><td>{{ cell.cell_sample }}</td><td>{{ cell.cell_biosensor }}</td><td>{{ cell.cellsample_density }}</td><td>{{ cell.cellsample_density_unit }}</td><td>{{ cell.cell_passage }}</td><td>{{ cell.DELETE }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </form>
 
 {% endblock %}
