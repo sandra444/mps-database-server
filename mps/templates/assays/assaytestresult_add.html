@@ -18,6 +18,20 @@
 
     {#    <p>Study: {{ form.assay_device_readout }}</p>#}
 
+    {% if form.errors %}
+        {% for field in form %}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{field.label}}: {{error}}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
     <div class="form-group">
         <label for="study" class="col-sm-2 control-label">Study</label>
         <div class="col-sm-10">
@@ -27,7 +41,15 @@
 
     {{ formset.management_form }}
     <legend>Results</legend>
-    <div id="errors">{{ formset.non_form_errors }}</div>
+
+    {% if formset.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ formset.non_field_errors }}
+        </div>
+    {% endif %}
+
     <a id="add_button">Add Result</a>
     <table class="table table-striped results" id="assayresult_set-group" name="inlines">
         <thead>

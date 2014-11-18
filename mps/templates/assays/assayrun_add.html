@@ -17,6 +17,7 @@
 
 <form enctype="multipart/form-data" class="form-horizontal" method="post" >
     {% csrf_token %}
+    {{ formset.management_form }}
     <h1>Add Organ Chip Study <button type="submit" class="btn btn-primary">Submit</button></h1>
 
     <legend>Organ Chip Study Details</legend>
@@ -28,20 +29,27 @@
 {#    <p>Description: {{ form.description }}</p>#}
 
 
-{# Prototype error display #}
-{#    {% if form.errors %}#}
-{#        {% for field in form %}#}
-{#            {% if field.errors %}#}
-{#                {% for error in field.errors %}#}
-{#                    <div class="alert alert-danger" role="alert">#}
-{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
-{#                        <span class="sr-only">Error:</span>#}
-{#                        {{field.label}}: {{error}}#}
-{#                    </div>#}
-{#                {% endfor %}#}
-{#            {% endif %}#}
-{#        {% endfor %}#}
-{#    {% endif %}#}
+    {% if form.errors %}
+        {% for field in form %}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{field.label}}: {{error}}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
 
     <div class="form-group">
         <label for="center_name" class="col-sm-2 control-label">Center Name</label>
