@@ -8,7 +8,7 @@ import os
 import settings
 
 def main(request):
-    return render_to_response('base.html')
+    return HttpResponse(open(os.path.join(settings.STATIC_ROOT, 'mps.html')))
 
 def login(request):
     c = {}
