@@ -1,5 +1,5 @@
 from django import forms
-from assays.models import AssayChipReadout, AssayChipSetup, AssayTestResult
+from assays.models import AssayChipReadout, AssayChipSetup, AssayTestResult, AssayChipCells, AssayResult
 
 class AssayResultForm(forms.ModelForm):
     """Size the text input boxes"""
@@ -21,3 +21,13 @@ class AssayChipSetupForm(forms.ModelForm):
 
     class Meta(object):
         model = AssayChipSetup
+
+class AssayChipCellsInlineFormset(forms.models.BaseInlineFormSet):
+
+    class Meta(object):
+        model = AssayChipCells
+
+class TestResultInlineFormset(forms.models.BaseInlineFormSet):
+
+    class Meta(object):
+        model = AssayResult

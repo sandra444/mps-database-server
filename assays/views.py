@@ -58,7 +58,7 @@ class AssayChipSetupList(ListView):
     model = AssayChipSetup
 
 
-AssayChipCellsFormset = inlineformset_factory(AssayChipSetup,AssayChipCells, formset=forms.models.BaseInlineFormSet, extra=1)
+AssayChipCellsFormset = inlineformset_factory(AssayChipSetup,AssayChipCells, formset=AssayChipCellsInlineFormset, extra=1)
 
 
 class AssayChipSetupAdd(CreateView):
@@ -155,7 +155,7 @@ class AssayTestResultList(ListView):
     model = AssayTestResult
 
 
-TestResultFormSet = inlineformset_factory(AssayTestResult,AssayResult, formset=forms.models.BaseInlineFormSet, extra=1)
+TestResultFormSet = inlineformset_factory(AssayTestResult,AssayResult, formset=TestResultInlineFormset, extra=1)
 
 class AssayTestResultAdd(CreateView):
     template_name = 'assays/assaytestresult_add.html'
