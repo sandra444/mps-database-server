@@ -7,11 +7,9 @@
 
 {% block content %}
 
-<h1>Assay Chip Setup</h1>
-
 <form class="form-horizontal" method="post" >
     {% csrf_token %}
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <h1>Assay Chip Setup <button type="submit" class="btn btn-primary">Submit</button></h1>
 
     <legend>Chip Setup Details</legend>
 {#    <p>Study: {{ form.assay_run_id }}</p>#}
@@ -58,9 +56,9 @@
         <label for="compound" class="col-sm-2 control-label">Compound</label>
         <div class="col-sm-10" style="float:left; display:inline; overflow:none; white-space:nowrap;">
             {{ form.compound }}
-            <label for="concentration">Concentration</label>
+            <label for="concentration" style="padding-left: 20px;padding-right: 10px;">Concentration</label>
             {{ form.concentration }}
-            <label for="unit">Concentration Unit</label>
+            <label for="unit" style="padding-left: 20px;padding-right: 10px;">Concentration Unit</label>
             {{ form.unit }}
         </div>
     </div>
@@ -76,7 +74,7 @@
         <label for="notebook" class="col-sm-2 control-label">Notebook</label>
         <div class="col-sm-10">
             {{ form.notebook }}
-            <label for="notebook_page">Notebook Page</label>
+            <label for="notebook_page" style="padding-left: 20px;padding-right: 10px;">Notebook Page</label>
             {{ form.notebook_page }}
         </div>
     </div>

@@ -15,11 +15,9 @@
     });
 </script>
 
-<h1>Organ Chip Study</h1>
-
 <form enctype="multipart/form-data" class="form-horizontal" method="post" >
     {% csrf_token %}
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <h1>Add Organ Chip Study <button type="submit" class="btn btn-primary">Submit</button></h1>
 
     <legend>Organ Chip Study Details</legend>
 {#    <p>Center Name: {{ form.center_id }}</p>#}
@@ -37,11 +35,11 @@
     <div class="form-group">
         <label for="study_type" class="col-sm-2 control-label">Study Types</label>
         <div class="col-sm-10">
-            <label for="toxicity">Toxicity</label>
+            <label for="toxicity" style="padding-right: 10px;">Toxicity</label>
               {{ form.toxicity }}
-            <label for="disease">Disease</label>
+            <label for="disease" style="padding-left: 20px;padding-right: 10px;">Disease</label>
               {{ form.disease }}
-            <label for="efficacy">Efficacy</label>
+            <label for="efficacy" style="padding-left: 20px;padding-right: 10px;">Efficacy</label>
               {{ form.efficacy }}
         </div>
     </div>

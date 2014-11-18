@@ -10,11 +10,10 @@
 
 {% block content %}
 
-<h1>Assay Chip Test Results</h1>
-
 <form class="form-horizontal" method="post" >
     {% csrf_token %}
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <h1>Add Chip Test Results <button type="submit" class="btn btn-primary">Submit</button></h1>
+
     <legend>Test Results</legend>
 
     {#    <p>Study: {{ form.assay_device_readout }}</p>#}
