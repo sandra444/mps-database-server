@@ -12,9 +12,10 @@ class ResourceAdmin(LockableAdmin):
     form = ResourceForm
     save_on_top = True
     list_per_page = 300
+    search_fields = ['resource_name',]
     readonly_fields = ('created_by', 'created_on',
                        'modified_by', 'modified_on',)
-    list_display = ('type', 'resource_name',
+    list_display = ('resource_name','type',
                     'resource_site', 'description',)
     fieldsets = (
         (
