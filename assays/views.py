@@ -44,6 +44,8 @@ class AssayRunAdd(CreateView):
                 parseRunCSV(self.object,file)
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
+            # In order to display errors properly, make sure they are added to POST
+            form['errors'] = form.errors
             return self.render_to_response(self.get_context_data(form=form))
 
 
