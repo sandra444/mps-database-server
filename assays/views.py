@@ -21,6 +21,8 @@ from mps.filters import *
 
 #TODO Refactor imports
 
+# NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
+
 # Class-based views for studies
 class AssayRunList(ListView):
     model = AssayRun
@@ -58,7 +60,9 @@ class AssayChipSetupList(ListView):
     model = AssayChipSetup
 
 
-AssayChipCellsFormset = inlineformset_factory(AssayChipSetup,AssayChipCells, formset=AssayChipCellsInlineFormset, extra=1)
+AssayChipCellsFormset = inlineformset_factory(AssayChipSetup,AssayChipCells, formset=AssayChipCellsInlineFormset, extra=1,
+                                              widgets = {'cellsample_density': forms.TextInput(attrs={'size': 5}),
+                                                         'cell_passage': forms.TextInput(attrs={'size': 5}),})
 
 
 class AssayChipSetupAdd(CreateView):
@@ -155,7 +159,8 @@ class AssayTestResultList(ListView):
     model = AssayTestResult
 
 
-TestResultFormSet = inlineformset_factory(AssayTestResult,AssayResult, formset=TestResultInlineFormset, extra=1)
+TestResultFormSet = inlineformset_factory(AssayTestResult,AssayResult, formset=TestResultInlineFormset, extra=1,
+                                              widgets = {'value': forms.TextInput(attrs={'size': 10}),})
 
 class AssayTestResultAdd(CreateView):
     template_name = 'assays/assaytestresult_add.html'

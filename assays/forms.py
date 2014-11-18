@@ -21,6 +21,10 @@ class AssayChipSetupForm(forms.ModelForm):
 
     class Meta(object):
         model = AssayChipSetup
+        widgets = {
+            'concentration': forms.TextInput(attrs={'size': 5}),
+            'notebook_page': forms.TextInput(attrs={'size': 5}),
+        }
 
 class AssayChipCellsInlineFormset(forms.models.BaseInlineFormSet):
 
