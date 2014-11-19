@@ -482,7 +482,7 @@ class AssayChipSetup(LockableModel):
     # The configuration of a Chip for implementing an assay
     class Meta(object):
         verbose_name = 'Chip Setup'
-        ordering = ('assay_run_id', 'assay_chip_id', )
+        ordering = ('-assay_chip_id', 'assay_run_id', )
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
     device = models.ForeignKey(OrganModel, verbose_name = 'Organ Chip Name')
