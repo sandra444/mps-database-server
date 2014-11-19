@@ -635,7 +635,7 @@ class AssayChipSetupAdmin(LockableAdmin):
     raw_id_fields = ("compound",)
 
     list_per_page = 100
-    list_display = ('assay_run_id', 'assay_chip_id',
+    list_display = ('assay_chip_id', 'assay_run_id',
                     'device', 'chip_test_type',
                     'compound', )
 
