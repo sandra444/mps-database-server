@@ -20,6 +20,9 @@ class TargetAdmin(LockableAdmin):
 
     form = TargetsForm
 
+    change_list_template = 'admin/bioactivities/change_list.html'
+    alphabet_filter = 'name'
+
     class AddMultiForm(forms.Form):
 
         chemblids = forms.CharField(
@@ -143,6 +146,9 @@ admin.site.register(Target, TargetAdmin)
 class AssayAdmin(LockableAdmin):
     form = AssayForm
 
+    change_list_template = 'admin/bioactivities/change_list.html'
+    alphabet_filter = 'description'
+
     class Media(object):
         js = ('bioactivities/customize_admin.js',)
 
@@ -264,8 +270,12 @@ admin.site.register(Assay, AssayAdmin)
 
 
 class BioactivityAdmin(LockableAdmin):
+    change_list_template = 'admin/bioactivities/change_list.html'
+    alphabet_filter = 'standard_name'
+    DEFAULT_ALPHABET = u'ABCDEFGHIJKLMNOPQRSTUVWXYZ%['
+
     save_on_top = True
-    list_per_page = 300
+    list_per_page = 50
     ordering = ('compound', 'standard_name')
     raw_id_fields = ("compound", 'target', 'assay',)
 
@@ -327,6 +337,9 @@ admin.site.register(Bioactivity, BioactivityAdmin)
 
 
 class BioactivityTypeAdmin(LockableAdmin):
+    change_list_template = 'admin/bioactivities/change_list.html'
+    alphabet_filter = 'standard_name'
+
     resource_class = BioactivityTypeResource
     save_on_top = True
     list_per_page = 50
