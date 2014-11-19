@@ -59,3 +59,4 @@ wsgiref
 wstools
 django-import-export
 django-simple-captcha
+django-alphafilter

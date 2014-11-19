@@ -183,6 +183,8 @@ INSTALLED_APPS = (
 
     # Django simple captchas
     'captcha',
+    # Django admin alphabetical filter
+    'alphafilter',
 
     # MPS applications:
     'cellsamples',
