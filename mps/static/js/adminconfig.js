@@ -88,7 +88,7 @@ var MODELS = {
     'Resources':{
         'Resources': [1, 'Resources', 0],
         'Resource types': [4, 'Resource Types', 1],
-        'Resource subtypes': [7, 'Resource Subtypes', 2]
+        'Resource categories': [7, 'Resource Categories', 2]
     },
     'Sites': {
         'Sites': [1, 'MPS Host (Do not change)', 0]
