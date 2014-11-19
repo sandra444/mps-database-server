@@ -17,7 +17,7 @@ class ResourceType(LockableModel):
     class Meta(object):
         ordering = ['resource_subtype','resource_type_name']
 
-    resource_type_name = models.CharField(max_length=40, unique=True, verbose_name="Name")
+    resource_type_name = models.CharField(max_length=40, unique=True, verbose_name="Type")
     description = models.CharField(max_length=400, blank=True, null=True)
     resource_subtype = models.ForeignKey(ResourceSubtype, verbose_name="Category")
 
