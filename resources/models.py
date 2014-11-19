@@ -4,6 +4,8 @@ from mps.base.models import LockableModel
 
 class ResourceSubtype(LockableModel):
     class Meta(object):
+        verbose_name = 'Resource category'
+        verbose_name_plural = 'Resource categories'
         ordering = ['name']
 
     name = models.TextField(max_length=40, unique=True, verbose_name='Category')
