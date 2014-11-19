@@ -87,6 +87,8 @@ class Biosensor(LockableModel):
 
 
 class CellSample(LockableModel):
+    class Meta(object):
+        ordering = ('-receipt_date', )
     cell_type = models.ForeignKey('CellType')
     CELLSOURCETYPE = (
         ('Freshly isolated', 'Freshly isolated'),
