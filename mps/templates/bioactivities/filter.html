@@ -16,7 +16,7 @@
 <form method="post" >
     {% csrf_token %}
     <button type="submit" class="btn btn-primary">Submit</button>
-    <table class="table table-striped">
+    <table class="table table-striped" style="max-width:3%;">
         <tbody>
             {% for compound in form.compounds %}
                 <tr><td>{{ compound }}</td></tr>

@@ -160,8 +160,9 @@ def gen_heatmap(request):
 
 def show_filter(request):
     if request.method == 'POST':
-        chosen = request.POST
-        return render(request, 'bioactivities/show_filter_results.html', {'chosen': chosen})
+        # Must use getlist('key') to acquire lists from POST (nice Gotcha, Django)
+        compounds = request.POST.getlist('compounds')
+        return render(request, 'bioactivities/show_filter_results.html', {'compounds': compounds})
 
     else:
         form = FilterForm()

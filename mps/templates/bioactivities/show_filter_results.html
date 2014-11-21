@@ -13,6 +13,12 @@
 
 <h1 align="'Center">Filter Results</h1>
 
-{{ chosen.compounds }}
+<table class="table table-striped">
+    <tbody>
+        {% for compound in compounds %}
+            <tr><td>{{ compound }}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 {% endblock %}
