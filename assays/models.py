@@ -446,6 +446,7 @@ class AssayChipSetup(LockableModel):
         ordering = ('-assay_chip_id', 'assay_run_id', )
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
+    setup_date = models.DateField(help_text='YYYY-MM-DD')
     device = models.ForeignKey(OrganModel, verbose_name = 'Organ Chip Name')
     # the unique chip identifier
     # can be a barcode or a hand written identifier
