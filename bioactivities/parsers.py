@@ -441,21 +441,21 @@ def cluster(request):
         'data_json': d3Dendro
     }
 
-    fullpath = os.path.join(
-        MEDIA_ROOT,
-        'heatmap',
-        "d3-dendrogram.json"
-    )
-
-    # Output to JSON
-    json.dump(d3Dendro, open(fullpath, "w"), sort_keys=True, indent=4)
-
-    cluster_url_prefix = '/media/cluster/'
-
-    data_json_relpath = cluster_url_prefix + "d3-dendrogram.json"
-
-    # return the paths to each respective filetype as a JSON
-    return {
-        # json filepath for the data
-        'data_json': data_json_relpath
-    }
+    # fullpath = os.path.join(
+    #     MEDIA_ROOT,
+    #     'heatmap',
+    #     "d3-dendrogram.json"
+    # )
+    #
+    # # Output to JSON
+    # json.dump(d3Dendro, open(fullpath, "w"), sort_keys=True, indent=4)
+    #
+    # cluster_url_prefix = '/media/cluster/'
+    #
+    # data_json_relpath = cluster_url_prefix + "d3-dendrogram.json"
+    #
+    # # return the paths to each respective filetype as a JSON
+    # return {
+    #     # json filepath for the data
+    #     'data_json': data_json_relpath
+    # }
