@@ -375,3 +375,15 @@ def heatmap(request):
         # csv filepath for the data
         'data_csv': data_csv_relpath
     }
+
+def cluster(request):
+
+    cluster_url_prefix = '/media/cluster/'
+
+    data_json_relpath = cluster_url_prefix + "flare.json"
+
+    # return the paths to each respective filetype as a JSON
+    return {
+        # json filepath for the data
+        'data_json': data_json_relpath
+    }

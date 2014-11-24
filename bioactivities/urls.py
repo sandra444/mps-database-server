@@ -21,4 +21,6 @@ urlpatterns = patterns('bioactivities.views',
                            'list_of_all_data_in_bioactivities'),
                        url(r'^bioactivities/gen_heatmap/$',
                            'gen_heatmap'),
+                       url(r'^bioactivities/gen_cluster/$',
+                           'gen_cluster'),
                        )
