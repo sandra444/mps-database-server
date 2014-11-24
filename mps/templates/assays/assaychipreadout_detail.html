@@ -6,7 +6,6 @@
     <p><b>Setup:</b> {{ object.chip_setup }}</p>
     <p><b>Time Unit:</b> {{ object.timeunit }}</p>
     <p><b>Treatment Time Length:</b> {{ object.treatment_time_length }}</p>
-    <p><b>Assay Start Time:</b> {{ object.assay_start_time }}</p>
     <p><b>Readout Start Time:</b> {{ object.readout_start_time }}</p>
     <p><b>Notebook:</b> {{ object.notebook }}</p>
     <p><b>Notebook Page:</b> {{ object.notebook_page }}</p>
@@ -27,7 +26,7 @@
     {% endif %}
 
     {% if object.file %}
-    <legend>Readout File</legend>
+    <legend><b>Readout File</b></legend>
 
     <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
     {% endif %}
