@@ -485,6 +485,7 @@ class AssayChipSetup(LockableModel):
         ordering = ('-assay_chip_id', 'assay_run_id', )
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
+    setup_date = models.DateField(help_text='YYYY-MM-DD')
     device = models.ForeignKey(OrganModel, verbose_name = 'Organ Chip Name')
     # the unique chip identifier
     # can be a barcode or a hand written identifier
@@ -519,7 +520,7 @@ class AssayChipSetup(LockableModel):
         return "/assays/assaychipsetup/%i/" % self.id
 
 object_types = (
-    ('F', 'Field'), ('C', 'Colony'), ('O', 'Other')
+    ('F', 'Field'), ('C', 'Colony'), ('O', 'Outflow'), ('X', 'Other')
 )
 
 class AssayChipReadoutAssay(models.Model):
@@ -548,8 +549,7 @@ class AssayChipReadout(LockableModel):
     treatment_time_length = models.FloatField(verbose_name='Assay Treatment Duration',
                                               blank=True, null=True)
 
-    assay_start_time = models.DateField(verbose_name='Start Date', blank=True, null=True)
-    readout_start_time = models.DateField(verbose_name='Readout Date', blank=True, null=True)
+    readout_start_time = models.DateField(verbose_name='Readout Start Date', blank=True, null=True)
 
     notebook = models.CharField(max_length=256, blank=True, null=True)
     notebook_page = models.IntegerField(blank=True, null=True)

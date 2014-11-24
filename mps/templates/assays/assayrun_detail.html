@@ -1,16 +1,22 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Organ Chip Study: {{ object.assay_run_id}}</h1>
+    <legend><h1>Organ Chip Study: {{ object.assay_run_id}}</h1></legend>
 
-    <p>Name: {{ object.name }}</p>
-    <p>Study Types: {{ object.study_types }}</p>
-    <p>Center Name: {{ object.center_id }}</p>
-    <p>Start Date: {{ object.start_date }}</p>
-    <p>Description: {{ object.description }}</p>
+    <p><b>Name:</b> {{ object.name }}</p>
+    <p><b>Study Types:</b> {{ object.study_types }}</p>
+    <p><b>Center Name:</b> {{ object.center_id }}</p>
+    <p><b>Start Date:</b> {{ object.start_date }}</p>
+    <p><b>Description:</b> {{ object.description }}</p>
 
     {% if object.file %}
+        <legend><b>Bulk Upload File</b></legend>
+
         <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
     {% endif %}
+
+    <script>
+        $("p").addClass("lead");
+    </script>
 
 {% endblock %}

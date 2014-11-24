@@ -9,8 +9,9 @@
         <table id="setups" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th>Organ Chip Study</th>
                     <th>Chip ID / Barcode</th>
+                    <th>Organ Chip Study</th>
+                    <th>Date</th>
                     <th>Organ Chip Name</th>
                     <th>Chip Test Type</th>
                     <th>Compound</th>
@@ -20,9 +21,9 @@
 
             <tfoot>
                 <tr>
-                    <th>Organ Chip Study</th>
                     <th>Chip ID / Barcode</th>
-                    <th>Organ Chip Name</th>
+                    <th>Organ Chip Study</th>
+                    <th>Date</th>
                     <th>Chip Test Type</th>
                     <th>Compound</th>
                     <th>Creator</th>
@@ -32,8 +33,9 @@
             <tbody>
             {% for setup in object_list %}
                 <tr class="compound" id={{ setup.id }} name={{ setup.id }}>
-                    <td><a href="{{ setup.id }}">{{ setup.assay_run_id }}</a></td>
                     <td><a href="{{ setup.id }}">{{ setup.assay_chip_id }}</a></td>
+                    <td><a href="{{ setup.id }}">{{ setup.assay_run_id }}</a></td>
+                    <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.device }}</td>
                     <td>{{ setup.chip_test_type }}</td>
                     <td>{{ setup.compound }}</td>
