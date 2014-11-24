@@ -478,7 +478,7 @@ class AssayChipSetup(LockableModel):
                                         self.unit)
 
 object_types = (
-    ('F', 'Field'), ('C', 'Colony'), ('O', 'Other')
+    ('F', 'Field'), ('C', 'Colony'), ('O', 'Outflow'), ('X', 'Other')
 )
 
 class AssayChipReadoutAssay(models.Model):
