@@ -12,20 +12,23 @@
     <p><b>Notebook Page:</b> {{ object.notebook_page }}</p>
     <p><b>Notes:</b> {{ object.notes }}</p>
 
-    <legend>Assays</legend>
-
-    <table class="table table-striped">
-        <thead>
-            <tr><td><b>Assay</b></td><td><b>Object of Interest</b></td><td><b>Reader</b></td><td><b>Readout Unit</b></td></tr>
-        </thead>
-        <tbody>
-            {% for assay in object.assaychipreadoutassay_set.all %}
-                <tr><td>{{ assay.assay_id }}</td><td>{{ assay.object_type }}</td><td>{{ assay.reader_id }}</td><td>{{ assay.readout_unit }}</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% if object.assaychipreadoutassay_set.all %}
+        <legend><b>Assays</b></legend>
+        <table class="table table-striped">
+            <thead>
+                <tr><td><b>Assay</b></td><td><b>Object of Interest</b></td><td><b>Reader</b></td><td><b>Readout Unit</b></td></tr>
+            </thead>
+            <tbody>
+                {% for assay in object.assaychipreadoutassay_set.all %}
+                    <tr><td>{{ assay.assay_id }}</td><td>{{ assay.object_type }}</td><td>{{ assay.reader_id }}</td><td>{{ assay.readout_unit }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
 
     {% if object.file %}
+    <legend>Readout File</legend>
+
     <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
     {% endif %}
 
