@@ -521,7 +521,7 @@ def cluster(request):
         if node.right: add_node(node.right, newNode)
 
     # Initialize nested dictionary for d3, then recursively iterate through tree
-    d3Dendro = dict(children=[], name="Root1")
+    d3Dendro = dict(children=[], name="Root")
     add_node(T, d3Dendro)
 
     # Label each node with the names of each leaf in its subtree
@@ -539,7 +539,7 @@ def cluster(request):
         del n["node_id"]
 
         # Labeling convention: "-"-separated leaf names
-        n["name"] = name = "-".join(sorted(map(str, leafNames)))
+        n["name"] = name = "~".join(sorted(map(str, leafNames)))
 
         return leafNames
 
