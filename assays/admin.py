@@ -633,9 +633,10 @@ class AssayChipSetupAdmin(LockableAdmin):
     save_as = True
 
     raw_id_fields = ("compound",)
+    date_hierarchy = 'setup_date'
 
     list_per_page = 100
-    list_display = ('assay_chip_id', 'assay_run_id',
+    list_display = ('assay_chip_id', 'assay_run_id', 'setup_date',
                     'device', 'chip_test_type',
                     'compound', )
 
@@ -645,7 +646,7 @@ class AssayChipSetupAdmin(LockableAdmin):
             'Study', {
                 'fields': (
                     (
-                        'assay_run_id',
+                        'assay_run_id', 'setup_date',
                     ),
                 )
             }
@@ -830,7 +831,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
             'Assay Parameters', {
                 'fields': (
                     (
-                        'timeunit', 'treatment_time_length', 'assay_start_time', 'readout_start_time',
+                        'timeunit', 'treatment_time_length', 'readout_start_time',
                     ),
                     (
                         'file',
@@ -1296,12 +1297,14 @@ class AssayRunForm(forms.ModelForm):
 
 
 class AssayRunAdmin(LockableAdmin):
+    # AssayRun is now Organ Chip Study
     class Media(object):
         js = ('assays/customize_run.js',)
 
     form = AssayRunForm
     save_on_top = True
     list_per_page = 300
+    date_hierarchy = 'start_date'
     list_display = ('assay_run_id', 'study_types', 'start_date', 'description', )
     fieldsets = (
         (
