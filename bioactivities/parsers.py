@@ -379,17 +379,127 @@ def heatmap(request):
         'data_csv': data_csv_relpath
     }
 
+import collections
+
+def dic():
+    return collections.defaultdict(dic)
+
 def cluster(request):
 
-    # coding=utf-8  # Example data: gene expression
-    geneExp = {'genes': ['a', 'b', 'c', 'd', 'e', 'f'],
-               'exp1': [-2.2, 5.6, 0.9, -0.23, -3, 0.1],
-               'exp2': [5.4, -0.5, 2.33, 3.1, 4.1, -3.2]
-    }
-    df = pandas.DataFrame(geneExp)
+    if len(request.body) == 0:
+        return {'error': 'empty request body'}
+
+    # convert data sent in request to a dict data type from a string data type
+    request_filter = json.loads(request.body)
+
+    desired_targets = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'targets_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_compounds = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'compounds_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_bioactivities = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'bioactivities_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    normalized = request_filter.get('normalize_bioactivities')
+
+    all_std_bioactivities = fetch_all_standard_bioactivities_data(
+        desired_compounds,
+        desired_targets,
+        desired_bioactivities,
+        normalized
+    )
+
+    if not all_std_bioactivities:
+        return {'error': 'no standard bioactivities'}
+    if len(all_std_bioactivities) == 0:
+        return {'error': 'standard bioactivities zero length'}
+
+    bioactivities_data = pandas.DataFrame(
+        all_std_bioactivities,
+        columns=['compound', 'target', 'bioactivity', 'value']
+    ).fillna(0)
+
+    pivoted_data = pandas.pivot_table(
+        bioactivities_data,
+        values='value',
+        cols=['target', 'bioactivity'],
+        rows='compound'
+    )
+
+    unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
+
+    unwound_data['target_bioactivity_pair'] = \
+        unwound_data['target'] + '_ ' + unwound_data['bioactivity']
+
+    del unwound_data['target']
+    del unwound_data['bioactivity']
+
+    data_order = ['compound', 'target_bioactivity_pair', 'value']
+    rearranged_data = unwound_data[data_order].values.tolist()
+
+    # Initial dictionary before final data
+    initial_dic = dic()
+    # List of all unique bioactivities
+    bioactivities = {}
+    # use desired_compounds to reference compounds
+
+    # Go through every entry and put the data in the initial_dic and bioactivities
+    for line in rearranged_data:
+        compound = line[0]
+        bioactivity = line[1]
+        value = line[2]
+        initial_dic[compound][bioactivity] = value
+        if bioactivity not in bioactivities:
+            bioactivities[bioactivity] = True
+
+    # Fill in missing data with zeroes
+    for bioactivity in bioactivities:
+        for compound in initial_dic:
+            if not bioactivity in initial_dic[compound]:
+                initial_dic[compound][bioactivity] = 0
+
+    # Rearrange for final data
+    data = {'compounds': desired_compounds}
+
+    # Update the values for each bioactivity
+    for bioactivity in bioactivities:
+        values = []
+        for compound in desired_compounds:
+            values.append(initial_dic[compound][bioactivity])
+        data.update({bioactivity:values})
+
+    # # coding=utf-8  # Example data: gene expression
+    # data = {'genes': ['a', 'b', 'c', 'd', 'e', 'f'],
+    #            'exp1': [-2.2, 5.6, 0.9, -0.23, -3, 0.1],
+    #            'exp2': [5.4, -0.5, 2.33, 3.1, 4.1, -3.2]
+    # }
+    df = pandas.DataFrame(data)
 
     # Determine distances (default is Euclidean)
-    dataMatrix = np.array(df[['exp1', 'exp2']])
+    # The data frame should encompass all of the bioactivities
+    dataMatrix = np.array(df[[bioactivity for bioactivity in bioactivities]])
     distMat = scipy.spatial.distance.pdist(dataMatrix)
 
     # Cluster hierarchicaly using scipy
@@ -397,7 +507,7 @@ def cluster(request):
     T = scipy.cluster.hierarchy.to_tree(clusters, rd=False)
 
     # Create dictionary for labeling nodes by their IDs
-    labels = list(df.genes)
+    labels = list(df.compounds)
     id2name = dict(zip(range(len(labels)), labels))
 
     # Create a nested dictionary from the ClusterNode's returned by SciPy
