@@ -508,7 +508,7 @@ class AssayChipReadout(LockableModel):
                                               blank=True, null=True)
 
     assay_start_time = models.DateField(verbose_name='Start Date', blank=True, null=True)
-    readout_start_time = models.DateField(verbose_name='Readout Date', blank=True, null=True)
+    readout_start_time = models.DateField(verbose_name='Readout Start Date', blank=True, null=True)
 
     notebook = models.CharField(max_length=256, blank=True, null=True)
     notebook_page = models.IntegerField(blank=True, null=True)

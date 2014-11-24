@@ -646,7 +646,7 @@ class AssayChipSetupAdmin(LockableAdmin):
             'Study', {
                 'fields': (
                     (
-                        'assay_run_id', 'setup_date', 
+                        'assay_run_id', 'setup_date',
                     ),
                 )
             }
@@ -831,7 +831,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
             'Assay Parameters', {
                 'fields': (
                     (
-                        'timeunit', 'treatment_time_length', 'assay_start_time', 'readout_start_time',
+                        'timeunit', 'treatment_time_length', 'readout_start_time',
                     ),
                     (
                         'file',
