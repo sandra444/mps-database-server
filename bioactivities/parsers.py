@@ -546,7 +546,7 @@ def cluster(request):
         del n["node_id"]
 
         # Labeling convention: "-"-separated leaf names
-        n["name"] = name = "~".join(sorted(map(str, leafNames)))
+        n["name"] = name = "\n".join(sorted(map(str, leafNames)))
 
         return leafNames
 
