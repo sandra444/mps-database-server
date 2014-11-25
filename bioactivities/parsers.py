@@ -428,6 +428,9 @@ def cluster(request):
 
     normalized = request_filter.get('normalize_bioactivities')
 
+    method = request_filter.get('method')
+    metric = request_filter.get('metric')
+
     all_std_bioactivities = fetch_all_standard_bioactivities_data(
         desired_compounds,
         desired_targets,
@@ -507,10 +510,10 @@ def cluster(request):
     # Determine distances (default is Euclidean)
     # The data frame should encompass all of the bioactivities
     dataMatrix = np.array(df[[bioactivity for bioactivity in bioactivities]])
-    distMat = scipy.spatial.distance.pdist(dataMatrix)
+    distMat = scipy.spatial.distance.pdist(dataMatrix, metric=metric)
 
     # Cluster hierarchicaly using scipy
-    clusters = scipy.cluster.hierarchy.linkage(distMat, method='single')
+    clusters = scipy.cluster.hierarchy.linkage(distMat, method=method)
     T = scipy.cluster.hierarchy.to_tree(clusters, rd=False)
 
     # Create dictionary for labeling nodes by their IDs
