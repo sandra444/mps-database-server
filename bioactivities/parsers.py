@@ -422,6 +422,10 @@ def cluster(request):
         ) is True
     ]
 
+    # throw error if only one compound is selected (can not cluster just one)
+    if len(desired_compounds) < 2:
+        return {'error': 'require more than one compound to cluster'}
+
     normalized = request_filter.get('normalize_bioactivities')
 
     all_std_bioactivities = fetch_all_standard_bioactivities_data(
@@ -480,13 +484,16 @@ def cluster(request):
             if not bioactivity in initial_dic[compound]:
                 initial_dic[compound][bioactivity] = 0
 
+    # Only grab valid compounds (TEST)
+    valid_compounds = [compound for compound in desired_compounds if compound in initial_dic]
+
     # Rearrange for final data
-    data = {'compounds': desired_compounds}
+    data = {'compounds': valid_compounds}
 
     # Update the values for each bioactivity
     for bioactivity in bioactivities:
         values = []
-        for compound in desired_compounds:
+        for compound in valid_compounds:
             values.append(initial_dic[compound][bioactivity])
         data.update({bioactivity:values})
 
@@ -507,7 +514,7 @@ def cluster(request):
     T = scipy.cluster.hierarchy.to_tree(clusters, rd=False)
 
     # Create dictionary for labeling nodes by their IDs
-    labels = list(df.compounds)
+    labels = list(df['compounds'])
     id2name = dict(zip(range(len(labels)), labels))
 
     # Create a nested dictionary from the ClusterNode's returned by SciPy
