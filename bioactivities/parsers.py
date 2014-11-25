@@ -10,6 +10,9 @@ from django.db import connection
 
 from mps.settings import MEDIA_ROOT
 
+import scipy.spatial
+import scipy.cluster
+import numpy as np
 
 def generate_record_frequency_data(query):
     result = {}
@@ -375,3 +378,201 @@ def heatmap(request):
         # csv filepath for the data
         'data_csv': data_csv_relpath
     }
+
+import collections
+
+def dic():
+    return collections.defaultdict(dic)
+
+def cluster(request):
+
+    if len(request.body) == 0:
+        return {'error': 'empty request body'}
+
+    # convert data sent in request to a dict data type from a string data type
+    request_filter = json.loads(request.body)
+
+    desired_targets = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'targets_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_compounds = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'compounds_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_bioactivities = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'bioactivities_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    # throw error if only one compound is selected (can not cluster just one)
+    if len(desired_compounds) < 2:
+        return {'error': 'require more than one compound to cluster'}
+
+    normalized = request_filter.get('normalize_bioactivities')
+
+    all_std_bioactivities = fetch_all_standard_bioactivities_data(
+        desired_compounds,
+        desired_targets,
+        desired_bioactivities,
+        normalized
+    )
+
+    if not all_std_bioactivities:
+        return {'error': 'no standard bioactivities'}
+    if len(all_std_bioactivities) == 0:
+        return {'error': 'standard bioactivities zero length'}
+
+    bioactivities_data = pandas.DataFrame(
+        all_std_bioactivities,
+        columns=['compound', 'target', 'bioactivity', 'value']
+    ).fillna(0)
+
+    pivoted_data = pandas.pivot_table(
+        bioactivities_data,
+        values='value',
+        cols=['target', 'bioactivity'],
+        rows='compound'
+    )
+
+    unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
+
+    unwound_data['target_bioactivity_pair'] = \
+        unwound_data['target'] + '_ ' + unwound_data['bioactivity']
+
+    del unwound_data['target']
+    del unwound_data['bioactivity']
+
+    data_order = ['compound', 'target_bioactivity_pair', 'value']
+    rearranged_data = unwound_data[data_order].values.tolist()
+
+    # Initial dictionary before final data
+    initial_dic = dic()
+    # List of all unique bioactivities
+    bioactivities = {}
+    # use desired_compounds to reference compounds
+
+    # Go through every entry and put the data in the initial_dic and bioactivities
+    for line in rearranged_data:
+        compound = line[0]
+        bioactivity = line[1]
+        value = line[2]
+        initial_dic[compound][bioactivity] = value
+        if bioactivity not in bioactivities:
+            bioactivities[bioactivity] = True
+
+    # Fill in missing data with zeroes
+    for bioactivity in bioactivities:
+        for compound in initial_dic:
+            if not bioactivity in initial_dic[compound]:
+                initial_dic[compound][bioactivity] = 0
+
+    # Only grab valid compounds (TEST)
+    valid_compounds = [compound for compound in desired_compounds if compound in initial_dic]
+
+    # Rearrange for final data
+    data = {'compounds': valid_compounds}
+
+    # Update the values for each bioactivity
+    for bioactivity in bioactivities:
+        values = []
+        for compound in valid_compounds:
+            values.append(initial_dic[compound][bioactivity])
+        data.update({bioactivity:values})
+
+    # # coding=utf-8  # Example data: gene expression
+    # data = {'genes': ['a', 'b', 'c', 'd', 'e', 'f'],
+    #            'exp1': [-2.2, 5.6, 0.9, -0.23, -3, 0.1],
+    #            'exp2': [5.4, -0.5, 2.33, 3.1, 4.1, -3.2]
+    # }
+    df = pandas.DataFrame(data)
+
+    # Determine distances (default is Euclidean)
+    # The data frame should encompass all of the bioactivities
+    dataMatrix = np.array(df[[bioactivity for bioactivity in bioactivities]])
+    distMat = scipy.spatial.distance.pdist(dataMatrix)
+
+    # Cluster hierarchicaly using scipy
+    clusters = scipy.cluster.hierarchy.linkage(distMat, method='single')
+    T = scipy.cluster.hierarchy.to_tree(clusters, rd=False)
+
+    # Create dictionary for labeling nodes by their IDs
+    labels = list(df['compounds'])
+    id2name = dict(zip(range(len(labels)), labels))
+
+    # Create a nested dictionary from the ClusterNode's returned by SciPy
+    def add_node(node, parent):
+        # First create the new node and append it to its parent's children
+        newNode = dict(node_id=node.id, children=[])
+        parent["children"].append(newNode)
+
+        # Recursively add the current node's children
+        if node.left: add_node(node.left, newNode)
+        if node.right: add_node(node.right, newNode)
+
+    # Initialize nested dictionary for d3, then recursively iterate through tree
+    d3Dendro = dict(children=[], name="Root")
+    add_node(T, d3Dendro)
+
+    # Label each node with the names of each leaf in its subtree
+    def label_tree(n):
+        # If the node is a leaf, then we have its name
+        if len(n["children"]) == 0:
+            leafNames = [id2name[n["node_id"]]]
+
+        # If not, flatten all the leaves in the node's subtree
+        else:
+            leafNames = reduce(lambda ls, c: ls + label_tree(c), n["children"], [])
+
+        # Delete the node id since we don't need it anymore and
+        # it makes for cleaner JSON
+        del n["node_id"]
+
+        # Labeling convention: "-"-separated leaf names
+        n["name"] = name = "~".join(sorted(map(str, leafNames)))
+
+        return leafNames
+
+
+    label_tree(d3Dendro["children"][0])
+
+    return {
+        # json filepath for the data
+        'data_json': d3Dendro
+    }
+
+    # fullpath = os.path.join(
+    #     MEDIA_ROOT,
+    #     'heatmap',
+    #     "d3-dendrogram.json"
+    # )
+    #
+    # # Output to JSON
+    # json.dump(d3Dendro, open(fullpath, "w"), sort_keys=True, indent=4)
+    #
+    # cluster_url_prefix = '/media/cluster/'
+    #
+    # data_json_relpath = cluster_url_prefix + "d3-dendrogram.json"
+    #
+    # # return the paths to each respective filetype as a JSON
+    # return {
+    #     # json filepath for the data
+    #     'data_json': data_json_relpath
+    # }
