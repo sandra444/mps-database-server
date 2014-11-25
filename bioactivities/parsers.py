@@ -428,8 +428,8 @@ def cluster(request):
 
     normalized = request_filter.get('normalize_bioactivities')
 
-    method = request_filter.get('method')
-    metric = request_filter.get('metric')
+    method = str(request_filter.get('method'))
+    metric = str(request_filter.get('metric'))
 
     all_std_bioactivities = fetch_all_standard_bioactivities_data(
         desired_compounds,
