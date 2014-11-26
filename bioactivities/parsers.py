@@ -557,8 +557,9 @@ def cluster(request):
     label_tree(d3Dendro["children"][0])
 
     return {
-        # json filepath for the data
-        'data_json': d3Dendro
+        # json data
+        'data_json': d3Dendro,
+        'bioactivities': bioactivities
     }
 
     # fullpath = os.path.join(
