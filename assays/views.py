@@ -23,12 +23,18 @@ from mps.filters import *
 
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
+# Add this mixin via multiple-inheritance and you need not change the dispatch every time
+class LoginRequiredMixin(object):
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(LoginRequiredMixin, self).dispatch(*args, **kwargs)
+
 # Class-based views for studies
 class AssayRunList(ListView):
     model = AssayRun
 
 
-class AssayRunAdd(CreateView):
+class AssayRunAdd(LoginRequiredMixin, CreateView):
     template_name = 'assays/assayrun_add.html'
     form_class = AssayRunForm
 
@@ -65,7 +71,7 @@ AssayChipCellsFormset = inlineformset_factory(AssayChipSetup,AssayChipCells, for
                                                          'cell_passage': forms.TextInput(attrs={'size': 5}),})
 
 
-class AssayChipSetupAdd(CreateView):
+class AssayChipSetupAdd(LoginRequiredMixin, CreateView):
     template_name = 'assays/assaychipsetup_add.html'
     form_class = AssayChipSetupForm
 
@@ -104,13 +110,9 @@ class AssayChipReadoutList(ListView):
 ACRAFormSet = inlineformset_factory(AssayChipReadout,AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset, extra=1)
 
 
-class AssayChipReadoutAdd(CreateView):
+class AssayChipReadoutAdd(LoginRequiredMixin, CreateView):
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(AssayChipReadoutAdd, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(AssayChipReadoutAdd, self).get_context_data(**kwargs)
@@ -146,12 +148,14 @@ class AssayChipReadoutDetail(DetailView):
     # Using get is a good way to circumvent tedious calls in a decorator
     # It may be useful to define a modified base detail view with this preexisting
     # Obviously the desired group is currently hardcoded, but it could be placed in a base model ("only viewable by:")
-    def get(self, request, **kwargs):
-        self.object = self.get_object()
-        if not has_group(request.user, 'UPitt'):
-            return self.render_to_response({'now':timezone.now()}) # Just date for now
-        context = super(AssayChipReadoutDetail, self).get_context_data(**kwargs)
-        return self.render_to_response(context)
+
+    ### TODO
+    # def get(self, request, **kwargs):
+    #     self.object = self.get_object()
+    #     if not has_group(request.user, 'UPitt'):
+    #         return self.render_to_response({'now':timezone.now()}) # Just date for now
+    #     context = super(AssayChipReadoutDetail, self).get_context_data(**kwargs)
+    #     return self.render_to_response(context)
 
 
 # Class-based views for studies
@@ -162,7 +166,7 @@ class AssayTestResultList(ListView):
 TestResultFormSet = inlineformset_factory(AssayTestResult,AssayResult, formset=TestResultInlineFormset, extra=1,
                                               widgets = {'value': forms.TextInput(attrs={'size': 10}),})
 
-class AssayTestResultAdd(CreateView):
+class AssayTestResultAdd(LoginRequiredMixin, CreateView):
     template_name = 'assays/assaytestresult_add.html'
     form_class = AssayResultForm
 
