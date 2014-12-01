@@ -9,9 +9,12 @@
 
 <script>
     $(function() {
+        var date = $("#id_start_date");
+        var curr_date = date.val();
         //Add datepicker to assay and readout start time
-        $("#id_start_date").datepicker();
-        $("#id_start_date").datepicker("option","dateFormat","yy-mm-dd");
+        date.datepicker();
+        date.datepicker("option","dateFormat","yy-mm-dd");
+        date.datepicker("setDate" , curr_date);
     });
 </script>
 
