@@ -14,6 +14,8 @@ import scipy.spatial
 import scipy.cluster
 import numpy as np
 
+from compounds.models import Compound
+
 def generate_record_frequency_data(query):
     result = {}
 
@@ -556,9 +558,45 @@ def cluster(request):
 
     label_tree(d3Dendro["children"][0])
 
+    # Trun bioactivities into a sorted list of bioactivity-target pairs
+    bioactivities = sorted(bioactivities.keys())
+
+    compounds = {}
+
+    for compound in desired_compounds:
+        compound = Compound.objects.get(name=compound)
+        CHEMBL = compound.chemblid
+        name = compound.name
+        known_drug = compound.known_drug
+        ro3 = compound.ro3_passes
+        ro5 = compound.ro5_violations
+        species = compound.species
+
+        box = "<div id='com' class='thumbnail text-center affix'>"
+        box += '<button id="X" type="button" class="btn-xs btn-danger">X</button>'
+        box += "<img src='https://www.ebi.ac.uk/chembldb/compound/displayimage/"+ CHEMBL + "' class='img-polaroid'>"
+        box += "<strong>" + name + "</strong><br>"
+        box += "Known Drug: "
+        if known_drug:
+            box += "<span class='glyphicon glyphicon-ok'></span><br>"
+        else:
+            box += "<span class='glyphicon glyphicon-remove'></span><br>"
+        box += "Passes Rule of 3: "
+        if ro3:
+            box += "<span class='glyphicon glyphicon-ok'></span><br>"
+        else:
+            box += "<span class='glyphicon glyphicon-remove'></span><br>"
+        box += "Rule of 5 Violations: " + str(ro5) + "<br>"
+        box += "Species: " + str(species)
+        box += "</div>"
+
+        compounds[name] = box
+
     return {
-        # json filepath for the data
-        'data_json': d3Dendro
+        # json data
+        'data_json': d3Dendro,
+        'bioactivities': bioactivities,
+        'compounds': compounds
     }
 
     # fullpath = os.path.join(
