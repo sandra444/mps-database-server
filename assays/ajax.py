@@ -281,8 +281,13 @@ def fetch_chip_readout(request):
         csv += str(raw.elapsed_time) + ','
         csv += str(raw.assay_id.assay_id.assay_name) + ','
         csv += str(raw.field_id) + ','
-        #Format to two decimal places
-        value = '%.2f' % raw.value
+        # Format to two decimal places
+        value = raw.value
+        # Check if None first before format
+        if value is not None:
+            value = '%.2f' % raw.value
+        else:
+            value = str(value)
         # Get rid of trailing zero and decimal if necessary
         value = value.rstrip('0').rstrip('.') if '.' in value else value
         csv += value + '\n'

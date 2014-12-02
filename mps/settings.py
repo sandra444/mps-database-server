@@ -181,6 +181,9 @@ INSTALLED_APPS = (
     # http://www.django-rest-framework.org
     'rest_framework',
 
+    # Django admin alphabetical filter
+    'alphafilter',
+
     # MPS applications:
     'cellsamples',
     'compounds',

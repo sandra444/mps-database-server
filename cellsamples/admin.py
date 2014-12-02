@@ -115,9 +115,8 @@ class CellSampleAdmin(LockableAdmin):
 
     save_on_top = True
     list_per_page = 300
-    list_display = ('cell_type', 'cell_source',
+    list_display = ('receipt_date','cell_type', 'cell_source',
                     'supplier', 'barcode',
-                    'receipt_date',
                     'locked')
 
     search_fields = ['cell_type__cell_type',
