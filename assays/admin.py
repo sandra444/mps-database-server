@@ -865,7 +865,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
             }
         ),
         (
-            'Change Tracking', {
+            'Group Access', {
                 'fields':(
                     'group','restricted'
                  ),
