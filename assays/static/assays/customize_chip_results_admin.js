@@ -58,4 +58,13 @@ $(document).ready(function () {
         changeNew();
         });
     }
+
+    // Resolve deletion error frontent
+    // This selector will check all items with DELETE in the name, including newly created ones
+    $( "body" ).on( "click", "input[name*='DELETE']", function(event) {
+        $.when(whittle('assay_run_id',study.val(),'AssayChipSetup','AssayChipReadout','chip_setup')).then(function(data) {
+            options = data;
+            changeAll(false);
+        });
+    });
 });
