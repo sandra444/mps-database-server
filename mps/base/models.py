@@ -7,6 +7,7 @@ Base Models
 """
 
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 class TrackableModel(models.Model):
@@ -67,6 +68,7 @@ class LockableModel(TrackableModel):
     class Meta(object):
         abstract = True
 
+
 class RestrictedModel(LockableModel):
     """
 
@@ -74,9 +76,22 @@ class RestrictedModel(LockableModel):
 
     """
 
-    restricted_to = models.ForeignKey('auth.Group',
-                                    blank=True,
-                                    null=True)
+    group = models.ForeignKey('auth.Group',
+                                      blank=True,
+                                      null=True,
+                                      help_text=
+                                      'Bind to a group')
+
+    restricted = models.BooleanField(default=False,
+                                     help_text=
+                                     'Check box to restrict to selected group')
+
+    def clean(self):
+        """
+        Require at least one of ipv4 or ipv6 to be set
+        """
+        if self.restricted and not self.group:
+            raise ValidationError("Can not restrict to NULL group")
 
     class Meta(object):
         abstract = True
