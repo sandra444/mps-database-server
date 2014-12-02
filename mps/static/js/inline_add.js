@@ -18,7 +18,7 @@ $(document).ready(function () {
     });
 
     // This selector will check all items with DELETE in the name, including newly created ones
-    $( "body" ).on( "click", "input[name*='DELETE']", function() {
+    $( "body" ).on( "click", "input[name*='DELETE']", function(event) {
         // Use a regex to get the desired ID number
         // var thenum = thestring.match(/\d+$/)[0];
         var id = parseInt(event.target.id.match(/\d+/)[0]);
