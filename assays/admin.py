@@ -1096,7 +1096,7 @@ class AssayTestResultAdmin(LockableAdmin):
         (
             'Device/Drug Parameters', {
                 'fields': (
-                    ('assay_device_readout',),
+                    ('assay_device_readout','chip_setup'),
                 ),
             }
         ),
