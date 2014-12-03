@@ -487,7 +487,7 @@ def cluster(request):
     for bioactivity in bioactivities:
         for compound in initial_dic:
             if not bioactivity in initial_dic[compound]:
-                initial_dic[compound][bioactivity] = 0
+                initial_dic[compound][bioactivity] = None
 
     # Only grab valid compounds (TEST)
     valid_compounds = [compound for compound in desired_compounds if compound in initial_dic]
@@ -500,19 +500,21 @@ def cluster(request):
         values = []
         for compound in valid_compounds:
             values.append(initial_dic[compound][bioactivity])
+        # Get median from list after excluding all None values
+        median = np.median(np.array([value for value in values if value != None]))
+        # Convert values such that there are no None values
+        values = [value if value != None else median for value in values]
         data.update({bioactivity:values})
 
-    # # coding=utf-8  # Example data: gene expression
-    # data = {'genes': ['a', 'b', 'c', 'd', 'e', 'f'],
-    #            'exp1': [-2.2, 5.6, 0.9, -0.23, -3, 0.1],
-    #            'exp2': [5.4, -0.5, 2.33, 3.1, 4.1, -3.2]
-    # }
     df = pandas.DataFrame(data)
 
     # Determine distances (default is Euclidean)
     # The data frame should encompass all of the bioactivities
     dataMatrix = np.array(df[[bioactivity for bioactivity in bioactivities]])
     distMat = scipy.spatial.distance.pdist(dataMatrix, metric=metric)
+    # GOTCHA
+    # Small numbers appear to trigger a quirk in Scipy (removing them most expedient solution)
+    distMat[abs(distMat)<1e-10] = 0.0
 
     # Cluster hierarchicaly using scipy
     clusters = scipy.cluster.hierarchy.linkage(distMat, method=method)
