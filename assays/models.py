@@ -306,7 +306,7 @@ class AssayTestResult(LockableModel):
     chip_setup = models.ForeignKey('assays.AssayChipSetup',
                                              verbose_name='Chip Setup')
     def __unicode__(self):
-        return u''
+        return u'{}:{}'.format(self.assay_device_readout,self.chip_setup)
 
 
 class AssayResult(models.Model):
