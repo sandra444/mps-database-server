@@ -57,6 +57,7 @@ $(document).ready(function () {
         $.when(whittle('assay_run_id',study.val(),'AssayChipSetup','','')).then(function(data) {
             setupOptions = data;
             setup.html(setupOptions);
+            setup.trigger('change');
         });
     });
 

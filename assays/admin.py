@@ -1085,7 +1085,7 @@ class AssayTestResultAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'assay_device_readout', 'chip_readout', 'result', 'result_function', 'result_type', 'severity'
+        'assay_device_readout', 'assay', 'result', 'result_function', 'result_type', 'severity'
     )
     search_fields = ['assay_device_readout']
     actions = ['update_fields']
@@ -1114,7 +1114,7 @@ class AssayTestResultAdmin(LockableAdmin):
     actions = ['update_fields']
     inlines = [AssayResultInline]
 
-    def chip_readout(self, obj):
+    def assay(self, obj):
         if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
             return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].assay_name
         return ''
