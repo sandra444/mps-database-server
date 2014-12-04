@@ -383,6 +383,7 @@ def heatmap(request):
 
 import collections
 
+# dic is a dictionary capable of autovivification
 def dic():
     return collections.defaultdict(dic)
 
@@ -430,6 +431,9 @@ def cluster(request):
 
     normalized = request_filter.get('normalize_bioactivities')
 
+    # Whether or not to use chemical properties
+    chemical_properties = request_filter.get('chemical_properties')
+
     method = str(request_filter.get('method'))
     metric = str(request_filter.get('metric'))
 
@@ -440,79 +444,115 @@ def cluster(request):
         normalized
     )
 
-    if not all_std_bioactivities:
+    # Should throw error only if no chemical_properties and no bioactivities
+    if not all_std_bioactivities and not chemical_properties:
         return {'error': 'no standard bioactivities'}
-    if len(all_std_bioactivities) == 0:
+    if len(all_std_bioactivities) == 0 and not chemical_properties:
         return {'error': 'standard bioactivities zero length'}
 
-    bioactivities_data = pandas.DataFrame(
-        all_std_bioactivities,
-        columns=['compound', 'target', 'bioactivity', 'value']
-    ).fillna(0)
-
-    pivoted_data = pandas.pivot_table(
-        bioactivities_data,
-        values='value',
-        cols=['target', 'bioactivity'],
-        rows='compound'
-    )
-
-    unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
-
-    unwound_data['target_bioactivity_pair'] = \
-        unwound_data['target'] + '_ ' + unwound_data['bioactivity']
-
-    del unwound_data['target']
-    del unwound_data['bioactivity']
-
-    data_order = ['compound', 'target_bioactivity_pair', 'value']
-    rearranged_data = unwound_data[data_order].values.tolist()
-
-    # Initial dictionary before final data
-    initial_dic = dic()
-    # List of all unique bioactivities
-    bioactivities = {}
-    # use desired_compounds to reference compounds
-
-    # Go through every entry and put the data in the initial_dic and bioactivities
-    for line in rearranged_data:
-        compound = line[0]
-        bioactivity = line[1]
-        value = line[2]
-        initial_dic[compound][bioactivity] = value
-        if bioactivity not in bioactivities:
-            bioactivities[bioactivity] = True
-
-    # Fill in missing data with zeroes
-    for bioactivity in bioactivities:
-        for compound in initial_dic:
-            if not bioactivity in initial_dic[compound]:
-                initial_dic[compound][bioactivity] = 0
-
-    # Only grab valid compounds (TEST)
-    valid_compounds = [compound for compound in desired_compounds if compound in initial_dic]
-
-    # Rearrange for final data
+    # Initially all compounds are valid
+    valid_compounds = list(desired_compounds)
     data = {'compounds': valid_compounds}
 
-    # Update the values for each bioactivity
-    for bioactivity in bioactivities:
-        values = []
-        for compound in valid_compounds:
-            values.append(initial_dic[compound][bioactivity])
-        data.update({bioactivity:values})
+    # List of all unique bioactivities
+    bioactivities = {}
 
-    # # coding=utf-8  # Example data: gene expression
-    # data = {'genes': ['a', 'b', 'c', 'd', 'e', 'f'],
-    #            'exp1': [-2.2, 5.6, 0.9, -0.23, -3, 0.1],
-    #            'exp2': [5.4, -0.5, 2.33, 3.1, 4.1, -3.2]
-    # }
+    if len(all_std_bioactivities) != 0:
+        bioactivities_data = pandas.DataFrame(
+            all_std_bioactivities,
+            columns=['compound', 'target', 'bioactivity', 'value']
+        ).fillna(0)
+
+        pivoted_data = pandas.pivot_table(
+            bioactivities_data,
+            values='value',
+            cols=['target', 'bioactivity'],
+            rows='compound'
+        )
+
+        unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
+
+        unwound_data['target_bioactivity_pair'] = \
+            unwound_data['target'] + '_ ' + unwound_data['bioactivity']
+
+        del unwound_data['target']
+        del unwound_data['bioactivity']
+
+        data_order = ['compound', 'target_bioactivity_pair', 'value']
+        rearranged_data = unwound_data[data_order].values.tolist()
+
+        # Initial dictionary before final data
+        initial_dic = dic()
+        # use desired_compounds to reference compounds
+
+        # Go through every entry and put the data in the initial_dic and bioactivities
+        for line in rearranged_data:
+            compound = line[0]
+            bioactivity = line[1]
+            value = line[2]
+            initial_dic[compound][bioactivity] = value
+            if bioactivity not in bioactivities:
+                bioactivities[bioactivity] = True
+
+        # Fill in missing data with zeroes
+        for bioactivity in bioactivities:
+            for compound in initial_dic:
+                if not bioactivity in initial_dic[compound]:
+                    initial_dic[compound][bioactivity] = None
+
+        # Only grab valid compounds (TEST)
+        valid_compounds = [compound for compound in desired_compounds if compound in initial_dic]
+
+        # Rearrange for final data
+        data['compounds'] = valid_compounds
+
+        # Update the values for each bioactivity
+        for bioactivity in bioactivities:
+            values = []
+            for compound in valid_compounds:
+                values.append(initial_dic[compound][bioactivity])
+            # Get median from list after excluding all None values
+            median = np.median(np.array([value for value in values if value != None]))
+            # Convert values such that there are no None values
+            values = [value if value != None else median for value in values]
+            data.update({bioactivity:values})
+
+    # List of properties
+    props = ['molecular_weight',
+             'rotatable_bonds',
+             'acidic_pka',
+             'basic_pka',
+             'logp',
+             'logd',
+             'alogp',
+             'ro5_violations',
+             'ro3_passes']
+
+    # Update values for chemical properties (if chemical_properties)
+    if chemical_properties:
+        for prop in props:
+            values = []
+            for compound in valid_compounds:
+                # Get data for prop here
+                values.append(Compound.objects.get(name=compound).__dict__.get(prop))
+            # Get median from list after excluding all None values
+            median = np.median(np.array([value for value in values if value != None]))
+            # Convert values such that there are no None values
+            values = [value if value != None else median for value in values]
+            data.update({prop:values})
+
     df = pandas.DataFrame(data)
 
     # Determine distances (default is Euclidean)
     # The data frame should encompass all of the bioactivities
-    dataMatrix = np.array(df[[bioactivity for bioactivity in bioactivities]])
+    frame = [bioactivity for bioactivity in bioactivities]
+    if chemical_properties:
+        frame.extend(props)
+    dataMatrix = np.array(df[frame])
     distMat = scipy.spatial.distance.pdist(dataMatrix, metric=metric)
+    # GOTCHA
+    # Small numbers appear to trigger a quirk in Scipy (removing them most expedient solution)
+    distMat[abs(distMat)<1e-10] = 0.0
 
     # Cluster hierarchicaly using scipy
     clusters = scipy.cluster.hierarchy.linkage(distMat, method=method)
@@ -558,7 +598,7 @@ def cluster(request):
 
     label_tree(d3Dendro["children"][0])
 
-    # Trun bioactivities into a sorted list of bioactivity-target pairs
+    # Turn bioactivities into a sorted list of bioactivity-target pairs
     bioactivities = sorted(bioactivities.keys())
 
     compounds = {}
