@@ -763,6 +763,7 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
                 time = line[0]
                 assay = line[1]
                 field = line[2]
+                val = line[3]
                 if assay not in assays:
                     raise forms.ValidationError(
                         'No assay with the name "%s" exists; please change your file or add this assay' % assay)
@@ -771,6 +772,12 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
                 else:
                     raise forms.ValidationError(
                         'File contains duplicate reading %s' % str((time,assay,field)))
+                # Check every value to make sure it can resolve to a float
+                try:
+                    float(val)
+                except:
+                    raise forms.ValidationError(
+                            'The value "%s" is invalid; please make sure all values are numerical' % str(val))
 
 class AssayChipReadoutInline(admin.TabularInline):
     # Assays for ChipReadout
@@ -1292,6 +1299,12 @@ class AssayRunForm(forms.ModelForm):
                         if not AssayChipReadoutAssay.objects.filter(readout_id=currentChipReadout, assay_id=assay).exists():
                             raise forms.ValidationError(
                                 'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
+                    # Check every value to make sure it can resolve to a float
+                    try:
+                        float(val)
+                    except:
+                        raise forms.ValidationError(
+                                'The value "%s" is invalid; please make sure all values are numerical' % str(val))
 
         return data
 
