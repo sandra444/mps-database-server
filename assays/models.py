@@ -303,15 +303,16 @@ class AssayTestResult(LockableModel):
         verbose_name = 'Chip Result'
     assay_device_readout = models.ForeignKey('assays.AssayRun',
                                              verbose_name='Organ Chip Study')
-
+    chip_setup = models.ForeignKey('assays.AssayChipSetup',
+                                             verbose_name='Chip Setup')
     def __unicode__(self):
-        return u''
+        return u'{}:{}'.format(self.assay_device_readout,self.chip_setup)
 
 
 class AssayResult(models.Model):
 #   Individual result parameters for CHIP RESULTS used in inline
-    assay_name = models.ForeignKey('assays.AssayChipReadout',
-                                   verbose_name='Readout')
+    assay_name = models.ForeignKey('assays.AssayChipReadoutAssay',
+                                   verbose_name='Assay')
 
     assay_result = models.ForeignKey(AssayTestResult,
                                      blank=True,
@@ -495,6 +496,9 @@ class AssayChipReadoutAssay(models.Model):
                             verbose_name='Object of Interest',
                             default='F')
     readout_unit = models.ForeignKey(ReadoutUnit)
+
+    def __unicode__(self):
+        return u'{}'.format(self.assay_id)
 
 class AssayChipReadout(LockableModel):
     class Meta(object):
