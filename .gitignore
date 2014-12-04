@@ -8,3 +8,5 @@
 *.iml
 mps_credentials.py
 *.log
+mps/settings.py
+mps/urls.py
