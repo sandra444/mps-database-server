@@ -695,6 +695,13 @@ class AssayChipSetupAdmin(LockableAdmin):
                 )
             }
         ),
+        (
+            'Group Access', {
+                'fields':(
+                    'group','restricted'
+                 ),
+            }
+        ),
     )
 
     actions = ['update_fields']
@@ -771,6 +778,7 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
                 time = line[0]
                 assay = line[1]
                 field = line[2]
+                val = line[3]
                 if assay not in assays:
                     raise forms.ValidationError(
                         'No assay with the name "%s" exists; please change your file or add this assay' % assay)
@@ -779,6 +787,12 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
                 else:
                     raise forms.ValidationError(
                         'File contains duplicate reading %s' % str((time,assay,field)))
+                # Check every value to make sure it can resolve to a float
+                try:
+                    float(val)
+                except:
+                    raise forms.ValidationError(
+                            'The value "%s" is invalid; please make sure all values are numerical' % str(val))
 
 class AssayChipReadoutInline(admin.TabularInline):
     # Assays for ChipReadout
@@ -870,6 +884,13 @@ class AssayChipReadoutAdmin(LockableAdmin):
                         'signed_off_by', 'signed_off_date'
                     ),
                 )
+            }
+        ),
+        (
+            'Group Access', {
+                'fields':(
+                    'group','restricted'
+                 ),
             }
         ),
     )
@@ -1093,7 +1114,7 @@ class AssayTestResultAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'assay_device_readout', 'chip_readout', 'result', 'result_function', 'result_type', 'severity'
+        'assay_device_readout', 'assay', 'result', 'result_function', 'result_type', 'severity'
     )
     search_fields = ['assay_device_readout']
     actions = ['update_fields']
@@ -1104,7 +1125,7 @@ class AssayTestResultAdmin(LockableAdmin):
         (
             'Device/Drug Parameters', {
                 'fields': (
-                    ('assay_device_readout',),
+                    ('assay_device_readout','chip_setup'),
                 ),
             }
         ),
@@ -1118,10 +1139,16 @@ class AssayTestResultAdmin(LockableAdmin):
                 )
             }
         ),
+        (
+            'Group Access', {
+                'fields':(
+                    'group','restricted'
+                 ),
+            }
+        ),
     )
     actions = ['update_fields']
     inlines = [AssayResultInline]
-
 
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
@@ -1267,6 +1294,12 @@ class AssayRunForm(forms.ModelForm):
                         if not AssayChipReadoutAssay.objects.filter(readout_id=currentChipReadout, assay_id=assay).exists():
                             raise forms.ValidationError(
                                 'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
+                    # Check every value to make sure it can resolve to a float
+                    try:
+                        float(val)
+                    except:
+                        raise forms.ValidationError(
+                                'The value "%s" is invalid; please make sure all values are numerical' % str(val))
 
         return data
 
@@ -1315,6 +1348,13 @@ class AssayRunAdmin(LockableAdmin):
                     ('modified_by', 'modified_on'),
                     ('signed_off_by', 'signed_off_date'),
                 )
+            }
+        ),
+        (
+            'Group Access', {
+                'fields':(
+                    'group','restricted'
+                 ),
             }
         ),
     )
