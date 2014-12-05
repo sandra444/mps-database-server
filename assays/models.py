@@ -297,7 +297,7 @@ class AssayResultType(LockableModel):
         return self.assay_result_type
 
 
-class AssayTestResult(LockableModel):
+class AssayTestResult(RestrictedModel):
 #   Results calculated from Raw Chip Data
     class Meta(object):
         verbose_name = 'Chip Result'
@@ -374,7 +374,7 @@ class AssayPlateTestResult(LockableModel):
     def __unicode__(self):
         return u''
 
-class AssayRun(LockableModel):
+class AssayRun(RestrictedModel):
     class Meta(object):
         verbose_name = 'Organ Chip Study'
         verbose_name_plural = 'Organ Chip Studies'
@@ -439,7 +439,7 @@ class AssayChipCells(models.Model):
                                     default='-')
 
 
-class AssayChipSetup(LockableModel):
+class AssayChipSetup(RestrictedModel):
     # The configuration of a Chip for implementing an assay
     class Meta(object):
         verbose_name = 'Chip Setup'
