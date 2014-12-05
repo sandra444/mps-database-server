@@ -76,22 +76,14 @@ class RestrictedModel(LockableModel):
 
     """
 
+    # It is mandatory to bind a group to a restricted model
     group = models.ForeignKey('auth.Group',
-                                      blank=True,
-                                      null=True,
-                                      help_text=
-                                      'Bind to a group')
+                              help_text=
+                              'Bind to a group')
 
     restricted = models.BooleanField(default=False,
                                      help_text=
                                      'Check box to restrict to selected group')
-
-    def clean(self):
-        """
-        Require at least one of ipv4 or ipv6 to be set
-        """
-        if self.restricted and not self.group:
-            raise ValidationError("Can not restrict to NULL group")
 
     class Meta(object):
         abstract = True
