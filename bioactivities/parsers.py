@@ -10,6 +10,11 @@ from django.db import connection
 
 from mps.settings import MEDIA_ROOT
 
+import scipy.spatial
+import scipy.cluster
+import numpy as np
+
+from compounds.models import Compound
 
 def generate_record_frequency_data(query):
     result = {}
@@ -375,3 +380,280 @@ def heatmap(request):
         # csv filepath for the data
         'data_csv': data_csv_relpath
     }
+
+import collections
+
+# dic is a dictionary capable of autovivification
+def dic():
+    return collections.defaultdict(dic)
+
+def cluster(request):
+
+    if len(request.body) == 0:
+        return {'error': 'empty request body'}
+
+    # convert data sent in request to a dict data type from a string data type
+    request_filter = json.loads(request.body)
+
+    desired_targets = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'targets_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_compounds = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'compounds_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_bioactivities = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'bioactivities_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    # throw error if only one compound is selected (can not cluster just one)
+    if len(desired_compounds) < 2:
+        return {'error': 'require more than one compound to cluster'}
+
+    normalized = request_filter.get('normalize_bioactivities')
+
+    # Whether or not to use chemical properties
+    chemical_properties = request_filter.get('chemical_properties')
+
+    method = str(request_filter.get('method'))
+    metric = str(request_filter.get('metric'))
+
+    all_std_bioactivities = fetch_all_standard_bioactivities_data(
+        desired_compounds,
+        desired_targets,
+        desired_bioactivities,
+        normalized
+    )
+
+    # Should throw error only if no chemical_properties and no bioactivities
+    if not all_std_bioactivities and not chemical_properties:
+        return {'error': 'no standard bioactivities'}
+    if len(all_std_bioactivities) == 0 and not chemical_properties:
+        return {'error': 'standard bioactivities zero length'}
+
+    # Initially all compounds are valid
+    valid_compounds = list(desired_compounds)
+    data = {'compounds': valid_compounds}
+
+    # List of all unique bioactivities
+    bioactivities = {}
+
+    if len(all_std_bioactivities) != 0:
+        bioactivities_data = pandas.DataFrame(
+            all_std_bioactivities,
+            columns=['compound', 'target', 'bioactivity', 'value']
+        ).fillna(0)
+
+        pivoted_data = pandas.pivot_table(
+            bioactivities_data,
+            values='value',
+            cols=['target', 'bioactivity'],
+            rows='compound'
+        )
+
+        unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
+
+        unwound_data['target_bioactivity_pair'] = \
+            unwound_data['target'] + '_ ' + unwound_data['bioactivity']
+
+        del unwound_data['target']
+        del unwound_data['bioactivity']
+
+        data_order = ['compound', 'target_bioactivity_pair', 'value']
+        rearranged_data = unwound_data[data_order].values.tolist()
+
+        # Initial dictionary before final data
+        initial_dic = dic()
+        # use desired_compounds to reference compounds
+
+        # Go through every entry and put the data in the initial_dic and bioactivities
+        for line in rearranged_data:
+            compound = line[0]
+            bioactivity = line[1]
+            value = line[2]
+            initial_dic[compound][bioactivity] = value
+            if bioactivity not in bioactivities:
+                bioactivities[bioactivity] = True
+
+        # Fill in missing data with zeroes
+        for bioactivity in bioactivities:
+            for compound in initial_dic:
+                if not bioactivity in initial_dic[compound]:
+                    initial_dic[compound][bioactivity] = None
+
+        # Only grab valid compounds (TEST)
+        valid_compounds = [compound for compound in desired_compounds if compound in initial_dic]
+
+        # Rearrange for final data
+        data['compounds'] = valid_compounds
+
+        # Update the values for each bioactivity
+        for bioactivity in bioactivities:
+            values = []
+            for compound in valid_compounds:
+                values.append(initial_dic[compound][bioactivity])
+            # Get median from list after excluding all None values
+            median = np.median(np.array([value for value in values if value != None]))
+            # Convert values such that there are no None values
+            values = [value if value != None else median for value in values]
+            data.update({bioactivity:values})
+
+    # List of properties
+    props = ['molecular_weight',
+             'rotatable_bonds',
+             'acidic_pka',
+             'basic_pka',
+             'logp',
+             'logd',
+             'alogp',
+             'ro5_violations',
+             'ro3_passes']
+
+    # Update values for chemical properties (if chemical_properties)
+    if chemical_properties:
+        for prop in props:
+            values = []
+            for compound in valid_compounds:
+                # Get data for prop here
+                values.append(Compound.objects.get(name=compound).__dict__.get(prop))
+            # Get median from list after excluding all None values
+            median = np.median(np.array([value for value in values if value != None]))
+            # Convert values such that there are no None values
+            values = [value if value != None else median for value in values]
+            data.update({prop:values})
+
+    df = pandas.DataFrame(data)
+
+    # Determine distances (default is Euclidean)
+    # The data frame should encompass all of the bioactivities
+    frame = [bioactivity for bioactivity in bioactivities]
+    if chemical_properties:
+        frame.extend(props)
+    dataMatrix = np.array(df[frame])
+    distMat = scipy.spatial.distance.pdist(dataMatrix, metric=metric)
+    # GOTCHA
+    # Small numbers appear to trigger a quirk in Scipy (removing them most expedient solution)
+    distMat[abs(distMat)<1e-10] = 0.0
+
+    # Cluster hierarchicaly using scipy
+    clusters = scipy.cluster.hierarchy.linkage(distMat, method=method)
+    T = scipy.cluster.hierarchy.to_tree(clusters, rd=False)
+
+    # Create dictionary for labeling nodes by their IDs
+    labels = list(df['compounds'])
+    id2name = dict(zip(range(len(labels)), labels))
+
+    # Create a nested dictionary from the ClusterNode's returned by SciPy
+    def add_node(node, parent):
+        # First create the new node and append it to its parent's children
+        newNode = dict(node_id=node.id, children=[])
+        parent["children"].append(newNode)
+
+        # Recursively add the current node's children
+        if node.left: add_node(node.left, newNode)
+        if node.right: add_node(node.right, newNode)
+
+    # Initialize nested dictionary for d3, then recursively iterate through tree
+    d3Dendro = dict(children=[], name="Root")
+    add_node(T, d3Dendro)
+
+    # Label each node with the names of each leaf in its subtree
+    def label_tree(n):
+        # If the node is a leaf, then we have its name
+        if len(n["children"]) == 0:
+            leafNames = [id2name[n["node_id"]]]
+
+        # If not, flatten all the leaves in the node's subtree
+        else:
+            leafNames = reduce(lambda ls, c: ls + label_tree(c), n["children"], [])
+
+        # Delete the node id since we don't need it anymore and
+        # it makes for cleaner JSON
+        del n["node_id"]
+
+        # Labeling convention: "-"-separated leaf names
+        n["name"] = name = "\n".join(sorted(map(str, leafNames)))
+
+        return leafNames
+
+
+    label_tree(d3Dendro["children"][0])
+
+    # Turn bioactivities into a sorted list of bioactivity-target pairs
+    bioactivities = sorted(bioactivities.keys())
+
+    compounds = {}
+
+    for compound in desired_compounds:
+        compound = Compound.objects.get(name=compound)
+        CHEMBL = compound.chemblid
+        name = compound.name
+        known_drug = compound.known_drug
+        ro3 = compound.ro3_passes
+        ro5 = compound.ro5_violations
+        species = compound.species
+
+        box = "<div id='com' class='thumbnail text-center affix'>"
+        box += '<button id="X" type="button" class="btn-xs btn-danger">X</button>'
+        box += "<img src='https://www.ebi.ac.uk/chembldb/compound/displayimage/"+ CHEMBL + "' class='img-polaroid'>"
+        box += "<strong>" + name + "</strong><br>"
+        box += "Known Drug: "
+        if known_drug:
+            box += "<span class='glyphicon glyphicon-ok'></span><br>"
+        else:
+            box += "<span class='glyphicon glyphicon-remove'></span><br>"
+        box += "Passes Rule of 3: "
+        if ro3:
+            box += "<span class='glyphicon glyphicon-ok'></span><br>"
+        else:
+            box += "<span class='glyphicon glyphicon-remove'></span><br>"
+        box += "Rule of 5 Violations: " + str(ro5) + "<br>"
+        box += "Species: " + str(species)
+        box += "</div>"
+
+        compounds[name] = box
+
+    return {
+        # json data
+        'data_json': d3Dendro,
+        'bioactivities': bioactivities,
+        'compounds': compounds
+    }
+
+    # fullpath = os.path.join(
+    #     MEDIA_ROOT,
+    #     'heatmap',
+    #     "d3-dendrogram.json"
+    # )
+    #
+    # # Output to JSON
+    # json.dump(d3Dendro, open(fullpath, "w"), sort_keys=True, indent=4)
+    #
+    # cluster_url_prefix = '/media/cluster/'
+    #
+    # data_json_relpath = cluster_url_prefix + "d3-dendrogram.json"
+    #
+    # # return the paths to each respective filetype as a JSON
+    # return {
+    #     # json filepath for the data
+    #     'data_json': data_json_relpath
+    # }

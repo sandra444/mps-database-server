@@ -152,3 +152,14 @@ def gen_heatmap(request):
     else:
         logging.debug('Final JSON response step failed: result has no data')
         return HttpResponse()
+
+@csrf_exempt
+def gen_cluster(request):
+    result = cluster(request)
+    if result:
+        logging.debug('Final JSON response step: returning JSON response'
+                      ' with heatmap result')
+        return JSONResponse(result)
+    else:
+        logging.debug('Final JSON response step failed: result has no data')
+        return HttpResponse()
