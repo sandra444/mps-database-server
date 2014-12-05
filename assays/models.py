@@ -2,7 +2,7 @@
 
 from django.db import models
 from microdevices.models import Microdevice, OrganModel
-from mps.base.models import LockableModel
+from mps.base.models import LockableModel, RestrictedModel
 
 PHYSICAL_UNIT_TYPES = (
     (u'V', u'Volume'),
@@ -284,6 +284,7 @@ class AssayResultFunction(LockableModel):
     def __unicode__(self):
         return self.function_name
 
+
 class AssayResultType(LockableModel):
 #   Result types for CHIP RESULTS
     class Meta(object):
@@ -297,7 +298,7 @@ class AssayResultType(LockableModel):
         return self.assay_result_type
 
 
-class AssayTestResult(LockableModel):
+class AssayTestResult(RestrictedModel):
 #   Results calculated from Raw Chip Data
     class Meta(object):
         verbose_name = 'Chip Result'
@@ -375,7 +376,8 @@ class AssayPlateTestResult(LockableModel):
     def __unicode__(self):
         return u''
 
-class AssayRun(LockableModel):
+
+class AssayRun(RestrictedModel):
     class Meta(object):
         verbose_name = 'Organ Chip Study'
         verbose_name_plural = 'Organ Chip Studies'
@@ -410,6 +412,7 @@ class AssayRun(LockableModel):
     def __unicode__(self):
         return self.assay_run_id
 
+
 class AssayChipRawData(models.Model):
     class Meta(object):
         unique_together = [('assay_chip_id', 'assay_id', 'field_id', 'elapsed_time')]
@@ -419,6 +422,7 @@ class AssayChipRawData(models.Model):
     field_id = models.CharField(max_length=255, default = '0')
     value = models.FloatField(null=True)
     elapsed_time = models.FloatField(default=0)
+
 
 class AssayChipCells(models.Model):
 #   Individual cell parameters for CHIP setup used in inline
@@ -440,7 +444,7 @@ class AssayChipCells(models.Model):
                                     default='-')
 
 
-class AssayChipSetup(LockableModel):
+class AssayChipSetup(RestrictedModel):
     # The configuration of a Chip for implementing an assay
     class Meta(object):
         verbose_name = 'Chip Setup'
@@ -482,6 +486,7 @@ object_types = (
     ('F', 'Field'), ('C', 'Colony'), ('O', 'Outflow'), ('X', 'Other')
 )
 
+
 class AssayChipReadoutAssay(models.Model):
     # Inline for CHIP readout assays
 
@@ -500,7 +505,8 @@ class AssayChipReadoutAssay(models.Model):
     def __unicode__(self):
         return u'{}'.format(self.assay_id)
 
-class AssayChipReadout(LockableModel):
+
+class AssayChipReadout(RestrictedModel):
     class Meta(object):
         verbose_name = 'Chip Readout'
         ordering = ('chip_setup',)

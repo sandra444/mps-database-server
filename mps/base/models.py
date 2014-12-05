@@ -66,3 +66,23 @@ class LockableModel(TrackableModel):
 
     class Meta(object):
         abstract = True
+
+
+class RestrictedModel(LockableModel):
+    """
+
+    The base model for Restricted models
+
+    """
+
+    # It is mandatory to bind a group to a restricted model
+    group = models.ForeignKey('auth.Group',
+                              help_text=
+                              'Bind to a group')
+
+    restricted = models.BooleanField(default=False,
+                                     help_text=
+                                     'Check box to restrict to selected group')
+
+    class Meta(object):
+        abstract = True
