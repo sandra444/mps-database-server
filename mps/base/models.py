@@ -7,7 +7,6 @@ Base Models
 """
 
 from django.db import models
-from django.core.exceptions import ValidationError
 
 
 class TrackableModel(models.Model):
