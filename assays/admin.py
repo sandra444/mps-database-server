@@ -695,6 +695,13 @@ class AssayChipSetupAdmin(LockableAdmin):
                 )
             }
         ),
+        (
+            'Group Access', {
+                'fields':(
+                    'group','restricted'
+                 ),
+            }
+        ),
     )
 
     actions = ['update_fields']
@@ -1117,6 +1124,13 @@ class AssayTestResultAdmin(LockableAdmin):
                 )
             }
         ),
+        (
+            'Group Access', {
+                'fields':(
+                    'group','restricted'
+                 ),
+            }
+        ),
     )
     actions = ['update_fields']
     inlines = [AssayResultInline]
@@ -1347,6 +1361,13 @@ class AssayRunAdmin(LockableAdmin):
                     ('modified_by', 'modified_on'),
                     ('signed_off_by', 'signed_off_date'),
                 )
+            }
+        ),
+        (
+            'Group Access', {
+                'fields':(
+                    'group','restricted'
+                 ),
             }
         ),
     )
