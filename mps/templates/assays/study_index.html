@@ -4,10 +4,13 @@
 {% block content %}
 
     <div class="container" style="padding-bottom: 50px">
-        <h1 align="center">{{ object_list.0.assay_run_id }}</h1>
+        <div class="alert alert-info" role="alert">
+            <h1 align="center">Study: {{ object_list.0.assay_run_id }}</h1>
+        </div>
 
-        <h2 align="center">Setups</h2>
+        <legend><h2>Setups  <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Setup</a></h2></legend>
 
+        {% if setups %}
         <table id="setups" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -43,9 +46,15 @@
             {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No chip setups exist for this study
+        </div>
+        {% endif %}
 
-        <h2 align="center">Readouts</h2>
+        <legend><h2>Readouts  <a href="assaychipreadout/add" class="btn btn-success" role="button">Add Readout</a></h2></legend>
 
+        {% if readouts %}
         <table id="readouts" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -76,9 +85,15 @@
             {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No chip readouts exist for this study
+        </div>
+        {% endif %}
 
-        <h2 align="center">Results</h2>
+        <legend><h2>Results  <a href="assaytestresult/add" class="btn btn-success" role="button">Add Result</a></h2></legend>
 
+        {% if results %}
         <table id="results" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -115,6 +130,11 @@
             {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No chip results exist for this study
+        </div>
+        {% endif %}
 
     </div>
 {% endblock %}
