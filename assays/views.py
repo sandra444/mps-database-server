@@ -101,6 +101,30 @@ class AssayRunList(ListView):
     model = AssayRun
 
 
+# Outdated AssayRunAdd
+# class AssayRunAdd(LoginRequiredMixin, CreateView):
+#     template_name = 'assays/assayrun_add.html'
+#     form_class = AssayRunForm
+#
+#     # Test form validity
+#     def form_valid(self, form):
+#         # get user via self.request.user
+#         if form.is_valid():
+#             self.object = form.save()
+#             self.object.modified_by = self.object.created_by = self.request.user
+#             # Save Chip Study
+#             self.object.save()
+#             if form.__dict__['files']:
+#                 file = form.__dict__['files']['file']
+#                 # TODO test/create bulk import
+#                 parseRunCSV(self.object,file)
+#             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+#         else:
+#             # In order to display errors properly, make sure they are added to POST
+#             form['errors'] = form.errors
+#             return self.render_to_response(self.get_context_data(form=form))
+
+
 class AssayRunAdd(LoginRequiredMixin, CreateView):
     template_name = 'assays/assayrun_add.html'
     form_class = AssayRunForm
@@ -113,16 +137,11 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Study
             self.object.save()
-            if form.__dict__['files']:
-                file = form.__dict__['files']['file']
-                # TODO test bulk import
-                parseRunCSV(self.object,file)
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             # In order to display errors properly, make sure they are added to POST
             form['errors'] = form.errors
             return self.render_to_response(self.get_context_data(form=form))
-
 
 class AssayRunDetail(DetailView):
     model = AssayRun
