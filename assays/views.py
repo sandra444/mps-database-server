@@ -9,8 +9,9 @@ from django import forms
 from django.forms.models import inlineformset_factory
 from django.views.generic.edit import CreateView
 from assays.models import *
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import Group
+from django.http import Http404
 # May be useful later
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
@@ -32,7 +33,7 @@ class LoginRequiredMixin(object):
 
 
 # Class-based views for indexes
-class UserIndex(ListView):
+class UserIndex(LoginRequiredMixin,ListView):
     context_object_name = 'user_index'
     template_name = 'assays/index.html'
 
@@ -41,12 +42,14 @@ class UserIndex(ListView):
         return super(UserIndex, self).get_context_data(**kwargs)
 
     def get(self, request, **kwargs):
+        if not request.user or request.user.groups.values_list('pk',flat=True) == []:
+            raise Http404
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
         context['title'] = 'User Study Index'
         return self.render_to_response(context)
 
-class GroupIndex(ListView):
+class GroupIndex(LoginRequiredMixin,ListView):
     context_object_name = 'group_index'
     template_name = 'assays/index.html'
 
@@ -65,13 +68,15 @@ class GroupIndex(ListView):
         return super(GroupIndex, self).get_context_data(**kwargs)
 
     def get(self, request, **kwargs):
+        if not request.user or request.user.groups.values_list('pk',flat=True) == []:
+            raise Http404
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
         context['title'] = 'Group Study Index'
         return self.render_to_response(context)
 
 
-class StudyIndex(ListView):
+class StudyIndex(LoginRequiredMixin,ListView):
     context_object_name = 'study_index'
     template_name = 'assays/study_index.html'
 
@@ -81,6 +86,9 @@ class StudyIndex(ListView):
         return super(StudyIndex, self).get_context_data(**kwargs)
 
     def get(self, request, **kwargs):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        if not has_group(request.user, study.group):
+            raise Http404
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
         context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset)
