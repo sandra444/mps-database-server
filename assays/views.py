@@ -10,6 +10,7 @@ from django.forms.models import inlineformset_factory
 from django.views.generic.edit import CreateView
 from assays.models import *
 from django.shortcuts import redirect
+from django.contrib.auth.models import Group
 # May be useful later
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
@@ -28,6 +29,49 @@ class LoginRequiredMixin(object):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(LoginRequiredMixin, self).dispatch(*args, **kwargs)
+
+
+# Class-based views for indexes
+class UserIndex(ListView):
+    context_object_name = 'user_index'
+    template_name = 'assays/index.html'
+
+    def get_context_data(self, request, **kwargs):
+        self.object_list = AssayRun.objects.filter(created_by=request.user)
+        return super(UserIndex, self).get_context_data(**kwargs)
+
+    # TODO implement this
+    # Proposed means of acquiring only objects related to chosen study
+    def get(self, request, **kwargs):
+        context = self.get_context_data(request, **kwargs)
+        self.queryset = self.object_list
+    #     context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset)
+    #     context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups'])
+    #     context['results'] = AssayTestResult.objects.filter(chip_setup=context['setups'])
+        return self.render_to_response(context)
+
+class GroupIndex(ListView):
+    context_object_name = 'group_index'
+    template_name = 'assays/index.html'
+
+    def get_context_data(self, request, **kwargs):
+        # Alternative method using users
+        # groups = request.user.groups.values_list('name',flat=True)
+        # users = Group.objects.get(name=groups[0]).user_set.all()
+        # if len(groups) > 1:
+        #     for group in groups[1:]:
+        #         current_users = Group.objects.get(name=group).user_set.all()
+        #         users = current_users | users
+        # self.object_list = AssayRun.objects.filter(created_by=users)
+        groups = request.user.groups.values_list('pk',flat=True)
+        groups = Group.objects.filter(pk__in=groups)
+        self.object_list = AssayRun.objects.filter(group__in=groups)
+        return super(GroupIndex, self).get_context_data(**kwargs)
+
+    def get(self, request, **kwargs):
+        context = self.get_context_data(request, **kwargs)
+        self.queryset = self.object_list
+        return self.render_to_response(context)
 
 # Class-based views for studies
 class AssayRunList(ListView):

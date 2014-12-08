@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div class="container" style="padding-bottom: 50px">
+        <h2 align="center">Studies</h2>
+
+        <table id="studies" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Study Types</th>
+                    <th>Start Date</th>
+                    <th>Description</th>
+                    <th>Creator</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>ID</th>
+                    <th>Study Types</th>
+                    <th>Start Date</th>
+                    <th>Description</th>
+                    <th>Creator</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for study in object_list %}
+                <tr class="compound" id={{ study.id }} name={{ study.id }}>
+                    <td><a href="{{ study.id }}">{{ study.assay_run_id }}</a></td>
+                    <td>{{ study.study_types }}</td>
+                    <td>{{ study.start_date }}</td>
+                    <td>{{ study.description }}</td>
+                    <td>{{ study.created_by }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#studies').DataTable( {
+                "iDisplayLength": 50
+            });
+        });
+    </script>
+{% endblock %}
