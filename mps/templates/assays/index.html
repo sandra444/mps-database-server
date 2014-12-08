@@ -4,7 +4,7 @@
 {% block content %}
 
     <div class="container" style="padding-bottom: 50px">
-        <h2 align="center">Studies</h2>
+        <h2 align="center">{{ title }}</h2>
 
         <table id="studies" class="display" cellspacing="0" width="100%">
             <thead>
@@ -30,7 +30,7 @@
             <tbody>
             {% for study in object_list %}
                 <tr class="compound" id={{ study.id }} name={{ study.id }}>
-                    <td><a href="{{ study.id }}">{{ study.assay_run_id }}</a></td>
+                    <td><a href="/assays/{{ study.id }}">{{ study.assay_run_id }}</a></td>
                     <td>{{ study.study_types }}</td>
                     <td>{{ study.start_date }}</td>
                     <td>{{ study.description }}</td>

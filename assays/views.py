@@ -40,14 +40,10 @@ class UserIndex(ListView):
         self.object_list = AssayRun.objects.filter(created_by=request.user)
         return super(UserIndex, self).get_context_data(**kwargs)
 
-    # TODO implement this
-    # Proposed means of acquiring only objects related to chosen study
     def get(self, request, **kwargs):
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
-    #     context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset)
-    #     context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups'])
-    #     context['results'] = AssayTestResult.objects.filter(chip_setup=context['setups'])
+        context['title'] = 'User Study Index'
         return self.render_to_response(context)
 
 class GroupIndex(ListView):
@@ -71,6 +67,25 @@ class GroupIndex(ListView):
     def get(self, request, **kwargs):
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
+        context['title'] = 'Group Study Index'
+        return self.render_to_response(context)
+
+
+class StudyIndex(ListView):
+    context_object_name = 'study_index'
+    template_name = 'assays/study_index.html'
+
+    def get_context_data(self, request, **kwargs):
+        # Use kwargs to grab info from the URL
+        self.object_list = AssayRun.objects.filter(pk=self.kwargs['study_id'])
+        return super(StudyIndex, self).get_context_data(**kwargs)
+
+    def get(self, request, **kwargs):
+        context = self.get_context_data(request, **kwargs)
+        self.queryset = self.object_list
+        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset)
+        context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups'])
+        context['results'] = AssayTestResult.objects.filter(chip_setup=context['setups'])
         return self.render_to_response(context)
 
 # Class-based views for studies
