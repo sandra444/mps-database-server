@@ -16,7 +16,7 @@ urlpatterns = patterns('',
     # # Add pages for respective models
     url(r'^assays/(?P<study_id>[0-9]+)/assaychipsetup/add/$', AssayChipSetupAdd.as_view(), name='setup_add'),
     url(r'^assays/(?P<study_id>[0-9]+)/assaychipreadout/add/$', AssayChipReadoutAdd.as_view(), name='readout_add'),
-    # url(r'^assays/(?P<study_id>[0-9]+)/assaytestresult/add/$', XXX),
+    url(r'^assays/(?P<study_id>[0-9]+)/assaytestresult/add/$', AssayTestResultAdd.as_view(), name='result_add'),
 
     # Original URLS: Add views to be replaced by new interface
     # TODO limit list and detail views to unrestricted models

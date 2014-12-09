@@ -178,7 +178,9 @@ class AssayChipSetupAdd(LoginRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        form.instance.assay_run_id = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        form.instance.assay_run_id = study
+        form.instance.group = study.group
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
@@ -200,7 +202,6 @@ class AssayChipSetupAdd(LoginRequiredMixin, CreateView):
             raise Http404
         form_class = self.get_form_class()
         form = self.get_form(form_class)
-        # form = AssayChipSetupForm(initial={'assay_run_id': self.kwargs['study_id']})
         return self.render_to_response(self.get_context_data(form=form))
 
 
@@ -230,6 +231,8 @@ class AssayChipReadoutAdd(LoginRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        form.instance.group = study.group
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
@@ -290,11 +293,16 @@ class AssayTestResultAdd(LoginRequiredMixin, CreateView):
         context = super(AssayTestResultAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = TestResultFormSet(self.request.POST)
+            context['study'] = self.kwargs.get('study_id')
         else:
             context['formset'] = TestResultFormSet()
+            context['study'] = self.kwargs.get('study_id')
         return context
 
     def form_valid(self, form):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        form.instance.assay_device_readout = study
+        form.instance.group = study.group
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
@@ -308,6 +316,15 @@ class AssayTestResultAdd(LoginRequiredMixin, CreateView):
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+    def get(self, request, **kwargs):
+        self.object = None
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        if not has_group(request.user, study.group):
+            raise Http404
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayTestResultDetail(DetailView):
