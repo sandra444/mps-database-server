@@ -12,9 +12,13 @@
 
 <script>
     $(function() {
+        var setup = $('#id_chip_setup');
+        var initialSetup = setup.val();
+
         $.when(whittle('assay_run_id',{{ study }},'AssayChipSetup','','')).then(function(data) {
-            $('#id_chip_setup').html(data);
-    });
+            setup.html(data);
+            setup.val(initialSetup);
+        });
 
         var date = $("#id_readout_start_time");
         var curr_date = date.val();
