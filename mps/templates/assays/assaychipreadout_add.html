@@ -14,7 +14,7 @@
     $(function() {
         $.when(whittle('assay_run_id',{{ study }},'AssayChipSetup','','')).then(function(data) {
             $('#id_chip_setup').html(data);
-        });
+    });
 
         var date = $("#id_readout_start_time");
         var curr_date = date.val();
@@ -89,12 +89,12 @@
         </div>
     </div>
 
-    <div class="form-group">
-        <label for="group" class="col-sm-2 control-label">Group</label>
-        <div class="col-sm-10">
-          {{ form.group }}
-        </div>
-    </div>
+{#    <div class="form-group">#}
+{#        <label for="group" class="col-sm-2 control-label">Group</label>#}
+{#        <div class="col-sm-10">#}
+{#          {{ form.group }}#}
+{#        </div>#}
+{#    </div>#}
 
     <div class="form-group">
         <label for="file" class="col-sm-2 control-label">File</label>
