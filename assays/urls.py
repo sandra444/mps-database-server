@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     # url(r'^assays/(?P<study_id>[0-9]+)/assaytestresult/?P<result_id>[0-9]+/$', XXX),
     # # Add pages for respective models
     # url(r'^assays/(?P<study_id>[0-9]+)/assaychipsetup/add/$', XXX),
-    # url(r'^assays/(?P<study_id>[0-9]+)/assaychipreadout/add/$', XXX),
+    url(r'^assays/(?P<study_id>[0-9]+)/assaychipreadout/add/$', AssayChipReadoutAdd.as_view(), name='readout_add'),
     # url(r'^assays/(?P<study_id>[0-9]+)/assaytestresult/add/$', XXX),
 
     # Original URLS: Add views to be replaced by new interface

@@ -25,6 +25,7 @@ from mps.filters import *
 
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
+
 # Add this mixin via multiple-inheritance and you need not change the dispatch every time
 class LoginRequiredMixin(object):
     @method_decorator(login_required)
@@ -48,6 +49,7 @@ class UserIndex(LoginRequiredMixin,ListView):
         self.queryset = self.object_list
         context['title'] = 'User Study Index'
         return self.render_to_response(context)
+
 
 class GroupIndex(LoginRequiredMixin,ListView):
     context_object_name = 'group_index'
@@ -96,6 +98,7 @@ class StudyIndex(LoginRequiredMixin,ListView):
         context['results'] = AssayTestResult.objects.filter(chip_setup=context['setups'])
         return self.render_to_response(context)
 
+
 # Class-based views for studies
 class AssayRunList(ListView):
     model = AssayRun
@@ -140,8 +143,9 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             # In order to display errors properly, make sure they are added to POST
-            form['errors'] = form.errors
+            #form['errors'] = form.errors
             return self.render_to_response(self.get_context_data(form=form))
+
 
 class AssayRunDetail(DetailView):
     model = AssayRun
@@ -204,8 +208,10 @@ class AssayChipReadoutAdd(LoginRequiredMixin, CreateView):
         context = super(AssayChipReadoutAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = ACRAFormSet(self.request.POST, self.request.FILES)
+            context['study'] = self.kwargs.get('study_id')
         else:
             context['formset'] = ACRAFormSet()
+            context['study'] = self.kwargs.get('study_id')
         return context
 
     def form_valid(self, form):
@@ -225,6 +231,15 @@ class AssayChipReadoutAdd(LoginRequiredMixin, CreateView):
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+    def get(self, request, **kwargs):
+        self.object = None
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        if not has_group(request.user, study.group):
+            raise Http404
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayChipReadoutDetail(DetailView):
