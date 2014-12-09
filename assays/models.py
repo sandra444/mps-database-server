@@ -343,7 +343,7 @@ class AssayTestResult(RestrictedModel):
         return ''
 
     def get_absolute_url(self):
-        return "/assays/assaytestresult/%i/" % self.id
+        return "/assays/%i/" % self.assay_device_readout.id
 
 
 class AssayResult(models.Model):
@@ -449,7 +449,7 @@ class AssayRun(RestrictedModel):
         return self.assay_run_id
 
     def get_absolute_url(self):
-        return "/assays/organchipstudy/%i/" % self.id
+        return "/assays/%i/" % self.id
 
 
 class AssayChipRawData(models.Model):
@@ -522,7 +522,7 @@ class AssayChipSetup(RestrictedModel):
                                         self.unit)
 
     def get_absolute_url(self):
-        return "/assays/assaychipsetup/%i/" % self.id
+        return "/assays/%i/" % self.assay_run_id.id
 
 object_types = (
     ('F', 'Field'), ('C', 'Colony'), ('O', 'Outflow'), ('X', 'Other')
@@ -578,4 +578,4 @@ class AssayChipReadout(RestrictedModel):
         return u'{0}'.format(self.chip_setup)
 
     def get_absolute_url(self):
-        return "/assays/assaychipreadout/%i/" % self.id
+        return "/assays/%i/" % self.chip_setup.assay_run_id.id
