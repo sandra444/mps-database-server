@@ -10,12 +10,13 @@ class AssayResultForm(forms.ModelForm):
             'test_time': forms.TextInput(attrs={'size': 3}),
             'value': forms.TextInput(attrs={'size': 10}),
         }
+        exclude = ('assay_device_readout','group',)
 
 class AssayChipReadoutForm(forms.ModelForm):
 
     class Meta(object):
         model = AssayChipReadout
-        exclude = ('created_by','modified_by','signed_off_by','signed_off_date','locked')
+        exclude = ('created_by','modified_by','signed_off_by','signed_off_date','locked', 'group')
 
 class AssayChipSetupForm(forms.ModelForm):
 
@@ -25,7 +26,8 @@ class AssayChipSetupForm(forms.ModelForm):
             'concentration': forms.TextInput(attrs={'size': 5}),
             'notebook_page': forms.TextInput(attrs={'size': 5}),
         }
-        exclude = ('assay_run_id',)
+        # Assay Run ID is always bound to the parent Study
+        exclude = ('assay_run_id','group')
 
 class AssayChipCellsInlineFormset(forms.models.BaseInlineFormSet):
 

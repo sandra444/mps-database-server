@@ -814,7 +814,7 @@ class AssayChipReadoutInline(admin.TabularInline):
 # ChipReadout validation occurs in the inline formset
 class AssayChipReadoutForm(forms.ModelForm):
     class Meta(object):
-        model = AssayRun
+        model = AssayChipReadout
 
 class AssayChipReadoutAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
