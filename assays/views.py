@@ -162,18 +162,23 @@ AssayChipCellsFormset = inlineformset_factory(AssayChipSetup,AssayChipCells, for
 
 
 class AssayChipSetupAdd(LoginRequiredMixin, CreateView):
+    model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
+    # May want to define form with initial here
     form_class = AssayChipSetupForm
 
     def get_context_data(self, **kwargs):
         context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = AssayChipCellsFormset(self.request.POST)
+            context['study'] = self.kwargs.get('study_id')
         else:
             context['formset'] = AssayChipCellsFormset()
+            context['study'] = self.kwargs.get('study_id')
         return context
 
     def form_valid(self, form):
+        form.instance.assay_run_id = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
@@ -187,6 +192,16 @@ class AssayChipSetupAdd(LoginRequiredMixin, CreateView):
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+    def get(self, request, **kwargs):
+        self.object = None
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        if not has_group(request.user, study.group):
+            raise Http404
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        # form = AssayChipSetupForm(initial={'assay_run_id': self.kwargs['study_id']})
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayChipSetupDetail(DetailView):

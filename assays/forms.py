@@ -25,6 +25,7 @@ class AssayChipSetupForm(forms.ModelForm):
             'concentration': forms.TextInput(attrs={'size': 5}),
             'notebook_page': forms.TextInput(attrs={'size': 5}),
         }
+        exclude = ('assay_run_id',)
 
 class AssayChipCellsInlineFormset(forms.models.BaseInlineFormSet):
 
