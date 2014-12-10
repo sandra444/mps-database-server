@@ -156,6 +156,14 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
             #form['errors'] = form.errors
             return self.render_to_response(self.get_context_data(form=form))
 
+    def get(self, request, **kwargs):
+        self.object = None
+        if len(request.user.groups.values_list('pk',flat=True)) == 0:
+            raise Http404
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        return self.render_to_response(self.get_context_data(form=form))
+
 
 class AssayRunDetail(DetailView):
     model = AssayRun
