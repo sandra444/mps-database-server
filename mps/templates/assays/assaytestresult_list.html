@@ -9,7 +9,8 @@
         <table id="results" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th>Organ Chip Study</th>
+                    <th>Study</th>
+                    <th>Setup</th>
                     <th>Assay</th>
                     <th>Result</th>
                     <th>Result Function</th>
@@ -21,7 +22,8 @@
 
             <tfoot>
                 <tr>
-                    <th>Organ Chip Study</th>
+                    <th>Study</th>
+                    <th>Setup</th>
                     <th>Assay</th>
                     <th>Result</th>
                     <th>Result Function</th>
@@ -35,6 +37,7 @@
             {% for result in object_list %}
                 <tr class="compound" id={{ result.id }} name={{ result.id }}>
                     <td><a href="{{ result.id }}">{{ result.assay_device_readout }}</a></td>
+                    <td>{{ result.chip_setup }}</td>
                     <td>{{ result.assay }}</td>
                     <td>{{ result.result }}</td>
                     <td>{{ result.result_function }}</td>

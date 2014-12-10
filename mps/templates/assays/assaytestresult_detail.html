@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <legend><h1>Test Results for study: {{ object.assay_device_readout}}</h1></legend>
+    <legend><h1>Test Results for Study:<br>{{ object.assay_device_readout}}</h1></legend>
 
-    </br>
+    <br>
+
+    <p><b>Setup:</b> {{ object.chip_setup }}</p>
+
+    <br>
+
+    <legend><b>Results</b></legend>
 
     <table class="table table-striped">
         <thead>
@@ -15,5 +21,9 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <script>
+        $("p").addClass("lead");
+    </script>
 
 {% endblock %}
