@@ -33,6 +33,16 @@ class LoginRequiredMixin(object):
         return super(LoginRequiredMixin, self).dispatch(*args, **kwargs)
 
 
+class StudyAccessMixin(object):
+    def get(self, request, **kwargs):
+        self.object = None
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        if not has_group(request.user, study.group):
+            raise Http404
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        return self.render_to_response(self.get_context_data(form=form))
+
 # Class-based views for indexes
 class UserIndex(LoginRequiredMixin,ListView):
     context_object_name = 'user_index'
@@ -43,7 +53,7 @@ class UserIndex(LoginRequiredMixin,ListView):
         return super(UserIndex, self).get_context_data(**kwargs)
 
     def get(self, request, **kwargs):
-        if not request.user or request.user.groups.values_list('pk',flat=True) == []:
+        if len(request.user.groups.values_list('pk',flat=True)) == 0:
             raise Http404
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
@@ -70,7 +80,7 @@ class GroupIndex(LoginRequiredMixin,ListView):
         return super(GroupIndex, self).get_context_data(**kwargs)
 
     def get(self, request, **kwargs):
-        if not request.user or request.user.groups.values_list('pk',flat=True) == []:
+        if len(request.user.groups.values_list('pk',flat=True)) == 0:
             raise Http404
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
@@ -161,7 +171,7 @@ AssayChipCellsFormset = inlineformset_factory(AssayChipSetup,AssayChipCells, for
                                                          'cell_passage': forms.TextInput(attrs={'size': 5}),})
 
 
-class AssayChipSetupAdd(LoginRequiredMixin, CreateView):
+class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
     # May want to define form with initial here
@@ -195,14 +205,15 @@ class AssayChipSetupAdd(LoginRequiredMixin, CreateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
-    def get(self, request, **kwargs):
-        self.object = None
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        if not has_group(request.user, study.group):
-            raise Http404
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        return self.render_to_response(self.get_context_data(form=form))
+    # Covered in mixin
+    # def get(self, request, **kwargs):
+    #     self.object = None
+    #     study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+    #     if not has_group(request.user, study.group):
+    #         raise Http404
+    #     form_class = self.get_form_class()
+    #     form = self.get_form(form_class)
+    #     return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayChipSetupDetail(DetailView):
@@ -216,7 +227,7 @@ class AssayChipReadoutList(ListView):
 ACRAFormSet = inlineformset_factory(AssayChipReadout,AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset, extra=1)
 
 
-class AssayChipReadoutAdd(LoginRequiredMixin, CreateView):
+class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
 
@@ -250,14 +261,15 @@ class AssayChipReadoutAdd(LoginRequiredMixin, CreateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
-    def get(self, request, **kwargs):
-        self.object = None
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        if not has_group(request.user, study.group):
-            raise Http404
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        return self.render_to_response(self.get_context_data(form=form))
+    # Covered in mixin
+    # def get(self, request, **kwargs):
+    #     self.object = None
+    #     study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+    #     if not has_group(request.user, study.group):
+    #         raise Http404
+    #     form_class = self.get_form_class()
+    #     form = self.get_form(form_class)
+    #     return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayChipReadoutDetail(DetailView):
@@ -285,7 +297,7 @@ class AssayTestResultList(ListView):
 TestResultFormSet = inlineformset_factory(AssayTestResult,AssayResult, formset=TestResultInlineFormset, extra=1,
                                               widgets = {'value': forms.TextInput(attrs={'size': 10}),})
 
-class AssayTestResultAdd(LoginRequiredMixin, CreateView):
+class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     template_name = 'assays/assaytestresult_add.html'
     form_class = AssayResultForm
 
@@ -317,14 +329,15 @@ class AssayTestResultAdd(LoginRequiredMixin, CreateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
-    def get(self, request, **kwargs):
-        self.object = None
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        if not has_group(request.user, study.group):
-            raise Http404
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        return self.render_to_response(self.get_context_data(form=form))
+    # Covered in mixin
+    # def get(self, request, **kwargs):
+    #     self.object = None
+    #     study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+    #     if not has_group(request.user, study.group):
+    #         raise Http404
+    #     form_class = self.get_form_class()
+    #     form = self.get_form(form_class)
+    #     return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayTestResultDetail(DetailView):
