@@ -36,7 +36,7 @@
             <tbody>
             {% for setup in setups %}
                 <tr id={{ setup.id }} name={{ setup.id }}>
-                    <td>{{ setup.assay_chip_id }}</td>
+                    <td><a href="/assays/assaychipsetup/{{ setup.id }}">{{ setup.assay_chip_id }}</a></td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.device }}</td>
                     <td>{{ setup.chip_test_type }}</td>
@@ -77,7 +77,7 @@
             <tbody>
             {% for readout in readouts %}
                 <tr id={{ readout.id }} name={{ readout.id }}>
-                    <td>{{ readout.id }}</td>
+                    <td><a href="/assays/assaychipreadout/{{ readout.id }}">{{ readout.id }}</a></td>
                     <td>{{ readout.chip_setup }}</td>
                     <td>{{ readout.readout_start_time }}</td>
                     <td>{{ readout.created_by }}</td>
@@ -121,7 +121,7 @@
             <tbody>
             {% for result in results %}
                 <tr id={{ result.id }} name={{ result.id }}>
-                    <td>{{ result.chip_setup }}</td>
+                    <td><a href="/assays/assaytestresult/{{ result.id }}">{{ result.chip_setup }}</a></td>
                     <td>{{ result.assay }}</td>
                     <td>{{ result.result }}</td>
                     <td>{{ result.result_function }}</td>
