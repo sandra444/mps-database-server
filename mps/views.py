@@ -2,7 +2,7 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import auth
 from django.core.context_processors import csrf
-from forms import MyRegistrationForm
+# from forms import MyRegistrationForm
 
 import os
 import settings

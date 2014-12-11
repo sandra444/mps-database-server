@@ -21,8 +21,9 @@ urlpatterns = patterns('',
                        # url(r'^accounts/register/$', 'mps.views.register_user'),
                        # url(r'^accounts/register_success/$', 'mps.views.register_success'),
 
+                       # Comment out captchas for now
                        # Captchas
-                       url(r'^captcha/', include('captcha.urls')),
+                       # url(r'^captcha/', include('captcha.urls')),
 
                        # The frontend
                        url(r'^', include('bioactivities.urls')),

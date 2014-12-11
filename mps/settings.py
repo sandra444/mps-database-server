@@ -181,8 +181,10 @@ INSTALLED_APPS = (
     # http://www.django-rest-framework.org
     'rest_framework',
 
+    # Comment out captchas for now
     # Django simple captchas
-    'captcha',
+    #'captcha',
+
     # Django admin alphabetical filter
     'alphafilter',
 
