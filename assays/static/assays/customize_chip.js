@@ -2,15 +2,8 @@ $(document).ready(function () {
 
     function addChart(id,name) {
 
-        if (charts.length == 0) {
-            $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 10%;margin-left: 10%;">')
-                .appendTo('#extra');
-        }
-
-        else{
-            $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 10%;margin-left: 30%;">')
-                .appendTo('#extra');
-        }
+        $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 10%;margin-left: -100%px;">')
+            .appendTo('#extra');
 
         charts.push(
             c3.generate({
