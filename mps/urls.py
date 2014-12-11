@@ -29,6 +29,7 @@ urlpatterns = patterns('',
                        url(r'^', include('bioactivities.urls')),
                        url(r'^', include('assays.urls')),
                        url(r'^', include('compounds.urls')),
+                       url(r'^', include('microdevices.urls')),
 
                        # BEGIN old-style API
                        url(r'^assays_ajax$', 'assays.ajax.ajax'),
