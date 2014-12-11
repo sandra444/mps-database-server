@@ -46,11 +46,20 @@ $(document).ready(function () {
     }
 
     function getReadoutValue() {
-        try {
-            return Math.floor($('.historylink').attr('href').split('/')[4]);
+        // Admin
+        if($('.historylink')[0]) {
+            try {
+                return Math.floor($('.historylink').attr('href').split('/')[4]);
+            }
+            catch (err) {
+                return null;
+            }
         }
-        catch(err) {
-            return null;
+        // Frontend
+        else {
+            // Details does not have access to CSRF on its own
+            middleware_token = getCookie('csrftoken');
+            return Math.floor(window.location.href.split('/')[5]);
         }
     }
 
