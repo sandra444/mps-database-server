@@ -1,6 +1,8 @@
 from .models import Compound
-
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, CreateView
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 
 
 class CompoundsList(ListView):
@@ -23,3 +25,17 @@ class CompoundsList(ListView):
 class CompoundsDetail(DetailView):
     model = Compound
     template_name = 'compounds/compounds_detail.html'
+
+
+class CompoundsAdd(CreateView):
+    model = Compound
+    template_name = 'compounds/compounds_add.html'
+
+    # Custom dispatch (achieve same as GET in assay views
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        if len(request.user.groups.values_list('pk',flat=True)) == 0:
+            raise PermissionDenied()
+        return super(CompoundsAdd, self).dispatch(request, *args, **kwargs)
+
+
