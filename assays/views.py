@@ -11,7 +11,8 @@ from django.views.generic.edit import CreateView
 from assays.models import *
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import Group
-from django.http import Http404
+from django.core.exceptions import PermissionDenied
+#from django.http import Http404
 # May be useful later
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
@@ -38,7 +39,7 @@ class StudyAccessMixin(object):
         self.object = None
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         if not has_group(request.user, study.group):
-            raise Http404
+            raise PermissionDenied()
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         return self.render_to_response(self.get_context_data(form=form))
@@ -54,7 +55,7 @@ class UserIndex(LoginRequiredMixin,ListView):
 
     def get(self, request, **kwargs):
         if len(request.user.groups.values_list('pk',flat=True)) == 0:
-            raise Http404
+            raise PermissionDenied()
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
         context['title'] = 'User Study Index'
@@ -81,7 +82,7 @@ class GroupIndex(LoginRequiredMixin,ListView):
 
     def get(self, request, **kwargs):
         if len(request.user.groups.values_list('pk',flat=True)) == 0:
-            raise Http404
+            raise PermissionDenied()
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
         context['title'] = 'Group Study Index'
@@ -100,7 +101,7 @@ class StudyIndex(LoginRequiredMixin,ListView):
     def get(self, request, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         if not has_group(request.user, study.group):
-            raise Http404
+            raise PermissionDenied()
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
         context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset)
@@ -159,7 +160,7 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
     def get(self, request, **kwargs):
         self.object = None
         if len(request.user.groups.values_list('pk',flat=True)) == 0:
-            raise Http404
+            raise PermissionDenied()
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         return self.render_to_response(self.get_context_data(form=form))
@@ -218,7 +219,7 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     #     self.object = None
     #     study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
     #     if not has_group(request.user, study.group):
-    #         raise Http404
+    #         raise PermissionDenied()
     #     form_class = self.get_form_class()
     #     form = self.get_form(form_class)
     #     return self.render_to_response(self.get_context_data(form=form))
@@ -274,7 +275,7 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     #     self.object = None
     #     study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
     #     if not has_group(request.user, study.group):
-    #         raise Http404
+    #         raise PermissionDenied()
     #     form_class = self.get_form_class()
     #     form = self.get_form(form_class)
     #     return self.render_to_response(self.get_context_data(form=form))
@@ -342,7 +343,7 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     #     self.object = None
     #     study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
     #     if not has_group(request.user, study.group):
-    #         raise Http404
+    #         raise PermissionDenied()
     #     form_class = self.get_form_class()
     #     form = self.get_form(form_class)
     #     return self.render_to_response(self.get_context_data(form=form))
