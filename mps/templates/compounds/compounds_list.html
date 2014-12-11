@@ -12,7 +12,7 @@
                     <th>Name</th>
                     <th>CHEMBL ID</th>
                     <th>Known Drug</th>
-                    <th>Last Update</th>
+{#                    <th>Last Update</th>#}
                     <th>Image</th>
                 </tr>
             </thead>
@@ -22,7 +22,7 @@
                     <th>Name</th>
                     <th>CHEMBL ID</th>
                     <th>Known Drug</th>
-                    <th>Last Update</th>
+{#                    <th>Last Update</th>#}
                     <th>Image</th>
                 </tr>
             </tfoot>
@@ -33,7 +33,7 @@
                     <td><a href="{{ compound.id }}">{{ compound.name }}</a></td>
                     <td><a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.chemblid }}">{{ compound.chemblid }}</a></td>
                     <td>{{ compound.known_drug }}</td>
-                    <td>{{ compound.last_update }}</td>
+{#                    <td>{{ compound.last_update }}</td>#}
                     <td><img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}"></td>
                 </tr>
             {% endfor %}
@@ -45,7 +45,7 @@
         $(document).ready(function() {
             $('#compounds').DataTable({
                 "aoColumnDefs": [
-                    { "bSortable": false, "aTargets": [4] }
+                    { "bSortable": false, "aTargets": [3] }
                 ],
                 "iDisplayLength": 25
                 // If one wants to display top and bottom
