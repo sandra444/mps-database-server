@@ -21,7 +21,11 @@
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.chemblid }}">
         </div>
 
-        <legend>Molecular Properties</legend>
+    </div>
+
+    <legend>Molecular Properties</legend>
+
+    <div class="container-fluid">
 
         <div class="col-xs-12">
             <p><b>Molecular Weight:</b> {{ object.molecular_weight }}</p>
@@ -33,7 +37,11 @@
             <p><b>ALogP:</b> {{ object.alogp }}</p>
         </div>
 
-        <legend>Drug/Drug-like Properties</legend>
+    </div>
+
+    <legend>Drug/Drug-like Properties</legend>
+
+    <div class="container-fluid">
 
         <div class="col-xs-12">
             <p><b>Known Drug:</b> {{ object.known_drug }}</p>
@@ -42,6 +50,7 @@
             <p><b>Rule of 5 Violations:</b> {{ object.ro5_violations }}</p>
             <p><b>Molecular Species:</b> {{ object.species }}</p>
         </div>
+
     </div>
     <script>
         $("p").addClass("lead");
