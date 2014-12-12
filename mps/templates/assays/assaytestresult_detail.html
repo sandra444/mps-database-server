@@ -3,11 +3,11 @@
 {% block content %}
     <legend><h1>Test Results for Study:<br>{{ object.assay_device_readout}}</h1></legend>
 
-    <br>
-
-    <p><b>Setup:</b> {{ object.chip_setup }}</p>
-
-    <br>
+    <div class="container-fluid">
+        <div class="col-xs-12">
+        <p><b>Setup:</b> {{ object.chip_setup }}</p>
+        </div>
+    </div>
 
     <legend><b>Results</b></legend>
 

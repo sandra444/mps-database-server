@@ -16,13 +16,17 @@
 
     <legend><h1>Chip Readout ID# {{ object.id}}</h1></legend>
 
-    <p><b>Setup:</b> {{ object.chip_setup }}</p>
-    <p><b>Time Unit:</b> {{ object.timeunit }}</p>
-    <p><b>Treatment Time Length:</b> {{ object.treatment_time_length }}</p>
-    <p><b>Readout Start Time:</b> {{ object.readout_start_time }}</p>
-    <p><b>Notebook:</b> {{ object.notebook }}</p>
-    <p><b>Notebook Page:</b> {{ object.notebook_page }}</p>
-    <p><b>Notes:</b> {{ object.notes }}</p>
+    <div class="container-fluid">
+        <div class="col-xs-12">
+        <p><b>Setup:</b> {{ object.chip_setup }}</p>
+        <p><b>Time Unit:</b> {{ object.timeunit }}</p>
+        <p><b>Treatment Time Length:</b> {{ object.treatment_time_length }}</p>
+        <p><b>Readout Start Time:</b> {{ object.readout_start_time }}</p>
+        <p><b>Notebook:</b> {{ object.notebook }}</p>
+        <p><b>Notebook Page:</b> {{ object.notebook_page }}</p>
+        <p><b>Notes:</b> {{ object.notes }}</p>
+        </div>
+    </div>
 
     {% if object.file %}
     <legend><b>Readout File</b></legend>

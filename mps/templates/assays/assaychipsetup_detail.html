@@ -3,13 +3,17 @@
 {% block content %}
     <legend><h1>Chip Setup: {{ object.assay_chip_id}}</h1></legend>
 
-    <p><b>Organ Chip Study:</b> {{ object.assay_run_id }}</p>
-    <p><b>Organ Model:</b> {{ object.device }}</p>
-    <p><b>Test Type:</b> {{ object.chip_test_type }}</p>
-    <p><b>Compound:</b> {{ object.compound }} {{ object.concentration }} ({{ object.unit }})</p>
-    <p><b>Scientist:</b> {{ object.scientist }}</p>
-    <p><b>Notebook:</b> {{ object.notebook }}, page {{ object.notebook_page }}</p>
-    <p><b>Notes:</b> {{ object.notes }}</p>
+    <div class="container-fluid">
+        <div class="col-xs-12">
+        <p><b>Organ Chip Study:</b> {{ object.assay_run_id }}</p>
+        <p><b>Organ Model:</b> {{ object.device }}</p>
+        <p><b>Test Type:</b> {{ object.chip_test_type }}</p>
+        <p><b>Compound:</b> {{ object.compound }} {{ object.concentration }} ({{ object.unit }})</p>
+        <p><b>Scientist:</b> {{ object.scientist }}</p>
+        <p><b>Notebook:</b> {{ object.notebook }}, page {{ object.notebook_page }}</p>
+        <p><b>Notes:</b> {{ object.notes }}</p>
+        </div>
+    </div>
 
     {% if object.assaychipcells_set.all %}
         <legend><b>Cells</b></legend>

@@ -3,11 +3,15 @@
 {% block content %}
     <legend><h1>Organ Chip Study: {{ object.assay_run_id}}</h1></legend>
 
-    <p><b>Name:</b> {{ object.name }}</p>
-    <p><b>Study Types:</b> {{ object.study_types }}</p>
-    <p><b>Center Name:</b> {{ object.center_id }}</p>
-    <p><b>Start Date:</b> {{ object.start_date }}</p>
-    <p><b>Description:</b> {{ object.description }}</p>
+    <div class="container-fluid">
+        <div class="col-xs-12">
+        <p><b>Name:</b> {{ object.name }}</p>
+        <p><b>Study Types:</b> {{ object.study_types }}</p>
+        <p><b>Center Name:</b> {{ object.center_id }}</p>
+        <p><b>Start Date:</b> {{ object.start_date }}</p>
+        <p><b>Description:</b> {{ object.description }}</p>
+        </div>
+    </div>
 
     {% if object.file %}
         <legend><b>Bulk Upload File</b></legend>
