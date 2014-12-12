@@ -24,12 +24,11 @@
             <p><b>Device Cross Section:</b> <img src="/media/{{ object.device_cross_section_image }}"></p>
         </div>
 
-        <div class="col-xs-12">
-            <legend>Dimensions</legend>
+        <legend>Dimensions</legend>
 
-            <div class="col-xs-12">
-                <p><b>Dimensions:</b> {{ object.device_width }} mm X {{ object.device_width }} mm X {{ object.device_thickness }} mm</p>
-            </div>
+        <div class="col-xs-12">
+            <p><b>Dimensions:</b> {{ object.device_width }} mm X {{ object.device_width }} mm X {{ object.device_thickness }} mm</p>
+        </div>
 
 {#            <div class="col-xs-4">#}
 {#                <p><b>Width:</b> {{ object.device_width }} {{ object.device_size_unit }}</p>#}
@@ -43,17 +42,16 @@
 {#                <p><b>Thickness:</b> {{ object.device_thickness }} {{ object.device_size_unit }}</p>#}
 {#            </div>#}
 
-            <div class="col-xs-6">
-                <p><b>Substrate Material:</b> {{ object.substrate_material }}</p>
-            </div>
+        <div class="col-xs-6">
+            <p><b>Substrate Material:</b> {{ object.substrate_material }}</p>
+        </div>
 
-            <div class="col-xs-6">
-                <p><b>Substrate Thickness:</b> {{ object.substrate_thickness }} um</p>
-            </div>
+        <div class="col-xs-6">
+            <p><b>Substrate Thickness:</b> {{ object.substrate_thickness }} um</p>
+        </div>
 
-            <div class="col-xs-12">
-                <p><b>Fluid Volume:</b> {{ object.device_fluid_volume }} {{ object.device_fluid_volume_unit }}</p>
-            </div>
+        <div class="col-xs-12">
+            <p><b>Fluid Volume:</b> {{ object.device_fluid_volume }} {{ object.device_fluid_volume_unit }}</p>
         </div>
     </div>
 
