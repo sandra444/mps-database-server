@@ -611,26 +611,35 @@ def cluster(request):
         ro3 = compound.ro3_passes
         ro5 = compound.ro5_violations
         species = compound.species
+        data ={
+            'CHEMBL': CHEMBL,
+            'name': name,
+            'knownDrug': known_drug,
+            'ro3': ro3,
+            'ro5': ro5,
+            'species': species,
+        }
 
-        box = "<div id='com' class='thumbnail text-center affix'>"
-        box += '<button id="X" type="button" class="btn-xs btn-danger">X</button>'
-        box += "<img src='https://www.ebi.ac.uk/chembldb/compound/displayimage/"+ CHEMBL + "' class='img-polaroid'>"
-        box += "<strong>" + name + "</strong><br>"
-        box += "Known Drug: "
-        if known_drug:
-            box += "<span class='glyphicon glyphicon-ok'></span><br>"
-        else:
-            box += "<span class='glyphicon glyphicon-remove'></span><br>"
-        box += "Passes Rule of 3: "
-        if ro3:
-            box += "<span class='glyphicon glyphicon-ok'></span><br>"
-        else:
-            box += "<span class='glyphicon glyphicon-remove'></span><br>"
-        box += "Rule of 5 Violations: " + str(ro5) + "<br>"
-        box += "Species: " + str(species)
-        box += "</div>"
+        # Add in JS
+        # box = "<div id='com' class='thumbnail text-center affix'>"
+        # box += '<button id="X" type="button" class="btn-xs btn-danger">X</button>'
+        # box += "<img src='https://www.ebi.ac.uk/chembldb/compound/displayimage/"+ CHEMBL + "' class='img-polaroid'>"
+        # box += "<strong>" + name + "</strong><br>"
+        # box += "Known Drug: "
+        # if known_drug:
+        #     box += "<span class='glyphicon glyphicon-ok'></span><br>"
+        # else:
+        #     box += "<span class='glyphicon glyphicon-remove'></span><br>"
+        # box += "Passes Rule of 3: "
+        # if ro3:
+        #     box += "<span class='glyphicon glyphicon-ok'></span><br>"
+        # else:
+        #     box += "<span class='glyphicon glyphicon-remove'></span><br>"
+        # box += "Rule of 5 Violations: " + str(ro5) + "<br>"
+        # box += "Species: " + str(species)
+        # box += "</div>"
 
-        compounds[name] = box
+        compounds[name] = data
 
     return {
         # json data
