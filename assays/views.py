@@ -114,6 +114,9 @@ class StudyIndex(LoginRequiredMixin,ListView):
 class AssayRunList(LoginRequiredMixin, ListView):
     model = AssayRun
 
+    def get_queryset(self):
+        return AssayRun.objects.filter(restricted=False)
+
 
 # Outdated AssayRunAdd
 # class AssayRunAdd(LoginRequiredMixin, CreateView):
@@ -174,6 +177,9 @@ class AssayRunDetail(LoginRequiredMixin, DetailView):
 class AssayChipSetupList(LoginRequiredMixin, ListView):
     model = AssayChipSetup
 
+    def get_queryset(self):
+        return AssayChipSetup.objects.filter(assay_run_id__restricted=False)
+
 
 AssayChipCellsFormset = inlineformset_factory(AssayChipSetup,AssayChipCells, formset=AssayChipCellsInlineFormset, extra=1,
                                               widgets = {'cellsample_density': forms.TextInput(attrs={'size': 5}),
@@ -232,6 +238,9 @@ class AssayChipSetupDetail(LoginRequiredMixin, DetailView):
 # Class based views for readouts
 class AssayChipReadoutList(LoginRequiredMixin, ListView):
     model = AssayChipReadout
+
+    def get_queryset(self):
+        return AssayChipReadout.objects.filter(chip_setup__assay_run_id__restricted=False)
 
 ACRAFormSet = inlineformset_factory(AssayChipReadout,AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset, extra=1)
 
@@ -301,6 +310,9 @@ class AssayChipReadoutDetail(LoginRequiredMixin, DetailView):
 # Class-based views for studies
 class AssayTestResultList(LoginRequiredMixin, ListView):
     model = AssayTestResult
+
+    def get_queryset(self):
+        return AssayTestResult.objects.filter(assay_device_readout__restricted=False)
 
 
 TestResultFormSet = inlineformset_factory(AssayTestResult,AssayResult, formset=TestResultInlineFormset, extra=1,
