@@ -115,7 +115,7 @@ class AssayRunList(LoginRequiredMixin, ListView):
     model = AssayRun
 
     def get_queryset(self):
-        return AssayRun.objects.filter(restricted=False)
+        return AssayRun.objects.filter(restricted=False) | AssayRun.objects.filter(group__in=self.request.user.groups.all())
 
 
 # Outdated AssayRunAdd
@@ -178,7 +178,7 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
     model = AssayChipSetup
 
     def get_queryset(self):
-        return AssayChipSetup.objects.filter(assay_run_id__restricted=False)
+        return AssayChipSetup.objects.filter(assay_run_id__restricted=False) | AssayChipSetup.objects.filter(assay_run_id__group__in=self.request.user.groups.all())
 
 
 AssayChipCellsFormset = inlineformset_factory(AssayChipSetup,AssayChipCells, formset=AssayChipCellsInlineFormset, extra=1,
@@ -240,7 +240,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
     model = AssayChipReadout
 
     def get_queryset(self):
-        return AssayChipReadout.objects.filter(chip_setup__assay_run_id__restricted=False)
+        return AssayChipReadout.objects.filter(chip_setup__assay_run_id__restricted=False) | AssayChipReadout.objects.filter(chip_setup__assay_run_id__group__in=self.request.user.groups.all())
 
 ACRAFormSet = inlineformset_factory(AssayChipReadout,AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset, extra=1)
 
@@ -312,7 +312,7 @@ class AssayTestResultList(LoginRequiredMixin, ListView):
     model = AssayTestResult
 
     def get_queryset(self):
-        return AssayTestResult.objects.filter(assay_device_readout__restricted=False)
+        return AssayTestResult.objects.filter(assay_device_readout__restricted=False) | AssayTestResult.objects.filter(assay_device_readout__group__in=self.request.user.groups.all())
 
 
 TestResultFormSet = inlineformset_factory(AssayTestResult,AssayResult, formset=TestResultInlineFormset, extra=1,
