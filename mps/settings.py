@@ -197,11 +197,11 @@ INSTALLED_APPS = (
     'assays',
     'resources'
 )
-
+# Comment out captcha for now
 # Required for captchas
-SOUTH_MIGRATION_MODULES = {
-    'captcha': 'captcha.south_migrations',
-}
+# SOUTH_MIGRATION_MODULES = {
+#     'captcha': 'captcha.south_migrations',
+# }
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
