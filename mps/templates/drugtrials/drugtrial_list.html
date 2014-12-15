@@ -39,9 +39,9 @@
                     <tr class="finding" id={{ finding.id }}>
                         <td>{{ drugtrial.compound }}</td>
                         <td>{{ drugtrial.species }}</td>
-                        <td>{{ drugtrial.trial_type }}</td>
+                        <td>{{ drugtrial.get_trial_type_display }}</td>
                         <td>{{ finding.finding_name }}</td>
-                        <td>{{ finding.result }}</td>
+                        <td>{{ finding.get_result_display }}</td>
                         <td>{{ finding.percent_max }}</td>
                         <td>{{ finding.value }}</td>
                         <td>{{ finding.value_units }}</td>
