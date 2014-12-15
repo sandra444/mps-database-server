@@ -136,11 +136,23 @@
     <a id="add_button" class="btn btn-success" role="button">Add Assay</a>
     <table class="table table-striped assays" id="assaychipreadoutassay_set-group"  name="inlines">
         <thead>
-            <tr style="font-weight:bold;"><td>Assay</td><td>Object of Interest</td><td>Reader</td><td>Readout Unit</td><td>Delete</td></tr>
+            <tr style="font-weight:bold;">
+                <td>Assay</td>
+                <td>Object of Interest</td>
+                <td>Reader</td>
+                <td>Readout Unit</td>
+                <td>Delete</td>
+            </tr>
         </thead>
         <tbody>
             {% for assay in formset %}
-                <tr class="inline" id="assay-{{ forloop.counter0 }}"><td>{{ assay.assay_id }}</td><td>{{ assay.object_type }}</td><td>{{ assay.reader_id }}</td><td>{{ assay.readout_unit }}</td><td>{{ assay.DELETE }}</td></tr>
+                <tr class="inline" id="assay-{{ forloop.counter0 }}">
+                    <td>{{ assay.assay_id }}</td>
+                    <td>{{ assay.object_type }}</td>
+                    <td>{{ assay.reader_id }}</td>
+                    <td>{{ assay.readout_unit }}</td>
+                    <td>{{ assay.DELETE }}</td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>

@@ -139,11 +139,25 @@
     <a id="add_button" class="btn btn-success" role="button">Add Cell Type</a>
     <table class="table table-striped cells" id="assaychipcells_set-group" name="inlines">
         <thead>
-            <tr style="font-weight:bold;"><td>Cell Sample</td><td>Cell Biosensor</td><td>Density</td><td>Unit</td><td>Passage#</td><td>Delete</td></tr>
+            <tr style="font-weight:bold;">
+                <td>Cell Sample</td>
+                <td>Cell Biosensor</td>
+                <td>Density</td>
+                <td>Unit</td>
+                <td>Passage#</td>
+                <td>Delete</td>
+            </tr>
         </thead>
         <tbody>
             {% for cell in formset %}
-                <tr class="inline" id="results-{{ forloop.counter0 }}"><td>{{ cell.cell_sample }}</td><td>{{ cell.cell_biosensor }}</td><td>{{ cell.cellsample_density }}</td><td>{{ cell.cellsample_density_unit }}</td><td>{{ cell.cell_passage }}</td><td>{{ cell.DELETE }}</td></tr>
+                <tr class="inline" id="results-{{ forloop.counter0 }}">
+                    <td>{{ cell.cell_sample }}</td>
+                    <td>{{ cell.cell_biosensor }}</td>
+                    <td>{{ cell.cellsample_density }}</td>
+                    <td>{{ cell.cellsample_density_unit }}</td>
+                    <td>{{ cell.cell_passage }}</td>
+                    <td>{{ cell.DELETE }}</td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>

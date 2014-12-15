@@ -25,11 +25,23 @@
         <legend><b>Cells</b></legend>
         <table class="table table-striped">
             <thead>
-                <tr style="font-weight:bold;"><td>Cell Sample</td><td>Cell Biosensor</td><td>Density</td><td>Unit</td><td>Passage#</td></tr>
+                <tr style="font-weight:bold;">
+                    <td>Cell Sample</td>
+                    <td>Cell Biosensor</td>
+                    <td>Density</td>
+                    <td>Unit</td>
+                    <td>Passage#</td>
+                </tr>
             </thead>
             <tbody>
                 {% for cell in object.assaychipcells_set.all %}
-                    <tr><td>{{ cell.cell_sample }}</td><td>{{ cell.cell_biosensor }}</td><td>{{ cell.cellsample_density }}</td><td>{{ cell.cellsample_density_unit }}</td><td>{{ cell.cell_passage }}</td></tr>
+                    <tr>
+                        <td>{{ cell.cell_sample }}</td>
+                        <td>{{ cell.cell_biosensor }}</td>
+                        <td>{{ cell.cellsample_density }}</td>
+                        <td>{{ cell.cellsample_density_unit }}</td>
+                        <td>{{ cell.cell_passage }}</td>
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>
