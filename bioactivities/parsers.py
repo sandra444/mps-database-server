@@ -260,6 +260,11 @@ def fetch_all_standard_mps_assay_data():
 
     return result
 
+import collections
+
+# dic is a dictionary capable of autovivification
+def dic():
+    return collections.defaultdict(dic)
 
 def heatmap(request):
     if len(request.body) == 0:
@@ -375,17 +380,88 @@ def heatmap(request):
         data_csv_fullpath
     )
 
+    # Make rearranged values into a list for cluster
+    rearranged_data = unwound_data[data_order].values.tolist()
+
+    # Initially all compounds are valid
+    valid_compounds = list(desired_compounds)
+    data = {'compounds': valid_compounds}
+
+    # List of all unique bioactivities
+    bioactivities = {}
+
+    if len(all_std_bioactivities) != 0:
+
+        # Initial dictionary before final data
+        initial_dic = dic()
+        # use desired_compounds to reference compounds
+
+        # Go through every entry and put the data in the initial_dic and bioactivities
+        for line in rearranged_data:
+            compound = line[0]
+            bioactivity = line[1]
+            value = line[2]
+            initial_dic[compound][bioactivity] = value
+            if bioactivity not in bioactivities:
+                bioactivities[bioactivity] = True
+
+        # Fill in missing data with zeroes
+        for bioactivity in bioactivities:
+            for compound in initial_dic:
+                if not bioactivity in initial_dic[compound]:
+                    initial_dic[compound][bioactivity] = None
+
+        # Only grab valid compounds (TEST)
+        valid_compounds = [compound for compound in desired_compounds if compound in initial_dic]
+
+        # Rearrange for final data
+        data['compounds'] = valid_compounds
+
+        # Update the values for each bioactivity
+        for bioactivity in bioactivities:
+            values = []
+            for compound in valid_compounds:
+                values.append(initial_dic[compound][bioactivity])
+            # Get median from list after excluding all None values
+            median = np.median(np.array([value for value in values if value != None]))
+            # Convert values such that there are no None values
+            values = [value if value != None else median for value in values]
+            data.update({bioactivity:values})
+
+    df = pandas.DataFrame(data)
+
+    # For *Rows*
+
+    # Determine distances (default is Euclidean)
+    # The data frame should encompass all of the bioactivities
+    frame = [bioactivity for bioactivity in bioactivities]
+    dataMatrix = np.array(df[frame])
+    distMat = scipy.spatial.distance.pdist(dataMatrix, metric='euclidean')
+    # GOTCHA
+    # Small numbers appear to trigger a quirk in Scipy (removing them most expedient solution)
+    distMat[abs(distMat)<1e-10] = 0.0
+
+    # Cluster hierarchicaly using scipy
+    clusters = scipy.cluster.hierarchy.linkage(distMat, method='complete')
+    dendro = scipy.cluster.hierarchy.dendrogram(clusters, orientation='right', no_plot=True)
+    row_leaves = [valid_compounds[i] for i in dendro['leaves']]
+
+    # For *Columns*
+
+    distMat = scipy.spatial.distance.pdist(dataMatrix.T, metric='euclidean')
+    distMat[abs(distMat)<1e-10] = 0.0
+
+    clusters = scipy.cluster.hierarchy.linkage(distMat, method='complete')
+    dendro = scipy.cluster.hierarchy.dendrogram(clusters, orientation='right', no_plot=True)
+    col_leaves = [frame[i] for i in dendro['leaves']]
+
     # return the paths to each respective filetype as a JSON
     return {
         # csv filepath for the data
-        'data_csv': data_csv_relpath
+        'data_csv': data_csv_relpath,
+        'row_order': row_leaves,
+        'col_order': col_leaves,
     }
-
-import collections
-
-# dic is a dictionary capable of autovivification
-def dic():
-    return collections.defaultdict(dic)
 
 def cluster(request):
 
