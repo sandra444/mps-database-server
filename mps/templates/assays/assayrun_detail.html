@@ -9,7 +9,9 @@
         <p><b>Study Types:</b> {{ object.study_types }}</p>
         <p><b>Center Name:</b> {{ object.center_id }}</p>
         <p><b>Start Date:</b> {{ object.start_date }}</p>
-        <p><b>Description:</b> {{ object.description }}</p>
+        {% if object.description %}
+            <p><b>Description:</b> {{ object.description }}</p>
+        {% endif %}
         </div>
     </div>
 

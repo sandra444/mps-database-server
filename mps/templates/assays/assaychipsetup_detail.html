@@ -9,9 +9,15 @@
         <p><b>Organ Model:</b> {{ object.device }}</p>
         <p><b>Test Type:</b> {{ object.chip_test_type }}</p>
         <p><b>Compound:</b> {{ object.compound }} {{ object.concentration }} ({{ object.unit }})</p>
-        <p><b>Scientist:</b> {{ object.scientist }}</p>
-        <p><b>Notebook:</b> {{ object.notebook }}, page {{ object.notebook_page }}</p>
-        <p><b>Notes:</b> {{ object.notes }}</p>
+        {% if object.scientist %}
+            <p><b>Scientist:</b> {{ object.scientist }}</p>
+        {% endif %}
+        {% if object.notebook %}
+            <p><b>Notebook:</b> {{ object.notebook }}, page {{ object.notebook_page }}</p>
+        {% endif %}
+        {% if object.notes %}
+            <p><b>Notes:</b> {{ object.notes }}</p>
+        {% endif %}
         </div>
     </div>
 

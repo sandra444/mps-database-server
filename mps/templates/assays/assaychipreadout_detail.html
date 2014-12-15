@@ -22,9 +22,12 @@
         <p><b>Time Unit:</b> {{ object.timeunit }}</p>
         <p><b>Treatment Time Length:</b> {{ object.treatment_time_length }}</p>
         <p><b>Readout Start Time:</b> {{ object.readout_start_time }}</p>
-        <p><b>Notebook:</b> {{ object.notebook }}</p>
-        <p><b>Notebook Page:</b> {{ object.notebook_page }}</p>
-        <p><b>Notes:</b> {{ object.notes }}</p>
+        {% if object.notebook %}
+            <p><b>Notebook:</b> {{ object.notebook }}, page {{ object.notebook_page }}</p>
+        {% endif %}
+        {% if object.notes %}
+            <p><b>Notes:</b> {{ object.notes }}</p>
+        {% endif %}
         </div>
     </div>
 
