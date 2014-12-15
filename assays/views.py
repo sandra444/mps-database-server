@@ -111,7 +111,7 @@ class StudyIndex(LoginRequiredMixin,ListView):
 
 
 # Class-based views for studies
-class AssayRunList(ListView):
+class AssayRunList(LoginRequiredMixin, ListView):
     model = AssayRun
 
 
@@ -166,12 +166,12 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayRunDetail(DetailView):
+class AssayRunDetail(LoginRequiredMixin, DetailView):
     model = AssayRun
 
 
 # Class based view for chip setups
-class AssayChipSetupList(ListView):
+class AssayChipSetupList(LoginRequiredMixin, ListView):
     model = AssayChipSetup
 
 
@@ -225,12 +225,12 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     #     return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayChipSetupDetail(DetailView):
+class AssayChipSetupDetail(LoginRequiredMixin, DetailView):
     model = AssayChipSetup
 
 
 # Class based views for readouts
-class AssayChipReadoutList(ListView):
+class AssayChipReadoutList(LoginRequiredMixin, ListView):
     model = AssayChipReadout
 
 ACRAFormSet = inlineformset_factory(AssayChipReadout,AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset, extra=1)
@@ -281,7 +281,7 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     #     return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayChipReadoutDetail(DetailView):
+class AssayChipReadoutDetail(LoginRequiredMixin, DetailView):
 
     model = AssayChipReadout
 
@@ -299,7 +299,7 @@ class AssayChipReadoutDetail(DetailView):
 
 
 # Class-based views for studies
-class AssayTestResultList(ListView):
+class AssayTestResultList(LoginRequiredMixin, ListView):
     model = AssayTestResult
 
 
@@ -349,5 +349,5 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     #     return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayTestResultDetail(DetailView):
+class AssayTestResultDetail(LoginRequiredMixin, DetailView):
     model = AssayTestResult
