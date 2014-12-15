@@ -52,7 +52,7 @@
                 {% for assay in object.assaychipreadoutassay_set.all %}
                     <tr>
                         <td>{{ assay.assay_id }}</td>
-                        <td>{{ assay.object_type }}</td>
+                        <td>{{ assay.get_object_type_display }}</td>
                         <td>{{ assay.reader_id }}</td>
                         <td>{{ assay.readout_unit }}</td>
                     </tr>

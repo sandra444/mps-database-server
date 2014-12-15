@@ -39,7 +39,7 @@
                         <td>{{ cell.cell_sample }}</td>
                         <td>{{ cell.cell_biosensor }}</td>
                         <td>{{ cell.cellsample_density }}</td>
-                        <td>{{ cell.cellsample_density_unit }}</td>
+                        <td>{{ cell.get_cellsample_density_unit_display }}</td>
                         <td>{{ cell.cell_passage }}</td>
                     </tr>
                 {% endfor %}

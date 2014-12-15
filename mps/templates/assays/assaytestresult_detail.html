@@ -19,12 +19,12 @@
             {% for result in object.assayresult_set.all %}
                 <tr>
                     <td>{{ result.assay_name }}</td>
-                    <td>{{ result.result|yesno:"Positive,Negative,Equivocal" }}</td>
+                    <td>{{ result.get_result_display }}</td>
                     <td>{{ result.result_function }}</td>
                     <td>{{ result.result_type }}</td>
                     <td>{{ result.value }}</td>
                     <td>{{ result.test_unit }}</td>
-                    <td>{{ result.severity }}</td>
+                    <td>{{ result.get_severity_display }}</td>
                 </tr>
             {% endfor %}
         </tbody>
