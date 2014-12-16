@@ -14,11 +14,8 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
 #from django.http import Http404
 # May be useful later
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-
-from django.views.generic.detail import DetailView
-from django.utils import timezone
 
 from mps.filters import *
 
@@ -118,30 +115,6 @@ class AssayRunList(LoginRequiredMixin, ListView):
         return AssayRun.objects.filter(restricted=False) | AssayRun.objects.filter(group__in=self.request.user.groups.all())
 
 
-# Outdated AssayRunAdd
-# class AssayRunAdd(LoginRequiredMixin, CreateView):
-#     template_name = 'assays/assayrun_add.html'
-#     form_class = AssayRunForm
-#
-#     # Test form validity
-#     def form_valid(self, form):
-#         # get user via self.request.user
-#         if form.is_valid():
-#             self.object = form.save()
-#             self.object.modified_by = self.object.created_by = self.request.user
-#             # Save Chip Study
-#             self.object.save()
-#             if form.__dict__['files']:
-#                 file = form.__dict__['files']['file']
-#                 # TODO test/create bulk import
-#                 parseRunCSV(self.object,file)
-#             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
-#         else:
-#             # In order to display errors properly, make sure they are added to POST
-#             form['errors'] = form.errors
-#             return self.render_to_response(self.get_context_data(form=form))
-
-
 class AssayRunAdd(LoginRequiredMixin, CreateView):
     template_name = 'assays/assayrun_add.html'
     form_class = AssayRunForm
@@ -228,16 +201,6 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
-    # Covered in mixin
-    # def get(self, request, **kwargs):
-    #     self.object = None
-    #     study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-    #     if not has_group(request.user, study.group):
-    #         raise PermissionDenied()
-    #     form_class = self.get_form_class()
-    #     form = self.get_form(form_class)
-    #     return self.render_to_response(self.get_context_data(form=form))
-
 
 class AssayChipSetupDetail(LoginRequiredMixin, DetailView):
     model = AssayChipSetup
@@ -295,16 +258,6 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
-    # Covered in mixin
-    # def get(self, request, **kwargs):
-    #     self.object = None
-    #     study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-    #     if not has_group(request.user, study.group):
-    #         raise PermissionDenied()
-    #     form_class = self.get_form_class()
-    #     form = self.get_form(form_class)
-    #     return self.render_to_response(self.get_context_data(form=form))
-
 
 class AssayChipReadoutDetail(LoginRequiredMixin, DetailView):
     model = AssayChipReadout
@@ -315,18 +268,6 @@ class AssayChipReadoutDetail(LoginRequiredMixin, DetailView):
             raise PermissionDenied
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
-
-    # Using get is a good way to circumvent tedious calls in a decorator
-    # It may be useful to define a modified base detail view with this preexisting
-    # Obviously the desired group is currently hardcoded, but it could be placed in a base model ("only viewable by:")
-
-    ### TODO
-    # def get(self, request, **kwargs):
-    #     self.object = self.get_object()
-    #     if not has_group(request.user, 'UPitt'):
-    #         return self.render_to_response({'now':timezone.now()}) # Just date for now
-    #     context = super(AssayChipReadoutDetail, self).get_context_data(**kwargs)
-    #     return self.render_to_response(context)
 
 
 # Class-based views for studies
@@ -372,16 +313,6 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
-
-    # Covered in mixin
-    # def get(self, request, **kwargs):
-    #     self.object = None
-    #     study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-    #     if not has_group(request.user, study.group):
-    #         raise PermissionDenied()
-    #     form_class = self.get_form_class()
-    #     form = self.get_form(form_class)
-    #     return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayTestResultDetail(LoginRequiredMixin, DetailView):
