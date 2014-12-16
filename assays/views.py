@@ -213,6 +213,7 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.assay_run_id = study
         form.instance.group = study.group
+        form.instance.restricted = study.restricted
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
@@ -276,6 +277,7 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.group = study.group
+        form.instance.restricted = study.restricted
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
@@ -356,6 +358,7 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.assay_device_readout = study
         form.instance.group = study.group
+        form.instance.restricted = study.restricted
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
