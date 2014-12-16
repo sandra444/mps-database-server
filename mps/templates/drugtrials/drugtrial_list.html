@@ -34,19 +34,17 @@
             </tfoot>
 
             <tbody>
-            {% for drugtrial in object_list %}
-                {% for finding in drugtrial.findingresult_set.all %}
-                    <tr class="finding" id={{ finding.id }}>
-                        <td>{{ drugtrial.compound }}</td>
-                        <td>{{ drugtrial.species }}</td>
-                        <td>{{ drugtrial.get_trial_type_display }}</td>
-                        <td>{{ finding.finding_name }}</td>
-                        <td>{{ finding.get_result_display }}</td>
-                        <td>{{ finding.percent_max }}</td>
-                        <td>{{ finding.value }}</td>
-                        <td>{{ finding.value_units }}</td>
-                    </tr>
-                {% endfor %}
+            {% for finding in object_list %}
+                <tr class="finding" id={{ finding.id }}>
+                    <td>{{ finding.drug_trial.compound }}</td>
+                    <td>{{ finding.drug_trial.species }}</td>
+                    <td>{{ finding.drug_trial.get_trial_type_display }}</td>
+                    <td>{{ finding.finding_name }}</td>
+                    <td>{{ finding.get_result_display }}</td>
+                    <td>{{ finding.percent_max }}</td>
+                    <td>{{ finding.value }}</td>
+                    <td>{{ finding.value_units }}</td>
+                </tr>
             {% endfor %}
             </tbody>
         </table>
