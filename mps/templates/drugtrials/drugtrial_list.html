@@ -55,7 +55,8 @@
     <script>
         $(document).ready(function() {
             $('#drugtrials').DataTable({
-                "iDisplayLength": 50
+                "iDisplayLength": 50,
+                "deferRender": true
                 // If one wants to display top and bottom
                 //"sDom": '<"wrapper"lfptip>'
             });
