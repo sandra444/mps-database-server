@@ -172,6 +172,13 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
 class AssayRunDetail(LoginRequiredMixin, DetailView):
     model = AssayRun
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.restricted and not has_group(request.user, self.object.group):
+            raise PermissionDenied
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
 
 # Class based view for chip setups
 class AssayChipSetupList(LoginRequiredMixin, ListView):
@@ -234,6 +241,13 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
 class AssayChipSetupDetail(LoginRequiredMixin, DetailView):
     model = AssayChipSetup
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.assay_run_id.restricted and not has_group(request.user, self.object.assay_run_id.group):
+            raise PermissionDenied
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
 
 # Class based views for readouts
 class AssayChipReadoutList(LoginRequiredMixin, ListView):
@@ -291,8 +305,14 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
 
 
 class AssayChipReadoutDetail(LoginRequiredMixin, DetailView):
-
     model = AssayChipReadout
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.chip_setup.assay_run_id.restricted and not has_group(request.user, self.object.chip_setup.assay_run_id.group):
+            raise PermissionDenied
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
 
     # Using get is a good way to circumvent tedious calls in a decorator
     # It may be useful to define a modified base detail view with this preexisting
@@ -363,3 +383,10 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
 
 class AssayTestResultDetail(LoginRequiredMixin, DetailView):
     model = AssayTestResult
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.assay_device_readout.restricted and not has_group(request.user, self.object.assay_device_readout.group):
+            raise PermissionDenied
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
