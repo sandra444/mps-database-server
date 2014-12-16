@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div class="container" style="padding-bottom: 50px">
+        <h2 align="center">Microdevices</h2>
+
+        <table id="microdevices" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Device Name</th>
+                    <th>Organ</th>
+                    <th>Center</th>
+                    <th>Manufacturer</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Device Name</th>
+                    <th>Organ</th>
+                    <th>Center</th>
+                    <th>Manufacturer</th>
+                    <th>Description</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for microdevice in object_list %}
+                <tr class="microdevice" id={{ microdevice.id }} name={{ microdevice.device_name }}>
+                    <td><a href="{{ microdevice.id }}">{{ microdevice.device_name }}</a></td>
+                    <td>{{ microdevice.organ }}</td>
+                    <td>{{ microdevice.center }}</td>
+                    <td>{{ microdevice.manufacturer }}</td>
+                    <td>{{ microdevice.description }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#microdevices').DataTable({
+                "iDisplayLength": 25
+                // If one wants to display top and bottom
+                //"sDom": '<"wrapper"lfptip>'
+            });
+        });
+    </script>
+{% endblock %}

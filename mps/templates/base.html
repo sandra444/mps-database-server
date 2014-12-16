@@ -1,0 +1,175 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<head>
+    <title>{% block title %}MPS Database{% endblock %}</title>
+
+{#  <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/default.css" > #}
+
+    {% block extrahead %}
+        <!-- Load JQuery -->
+        <script src="{% static "js/jquery-1.11.0.min.js" %}"></script>
+
+        <!-- Load JQuery UI-->
+        <script src="{% static "js/jquery-ui-1.11.2.min.js" %}"></script>
+        <link rel="stylesheet" href="{% static "css/jquery-ui-1.11.2.min.css" %}">
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+
+        <!-- Incorporate the Bootstrap JavaScript plugins -->
+        <script src="{% static "js/bootstrap.min.js" %}"></script>
+        <link rel="stylesheet" href="{% static "css/bootstrap-theme.min.css" %}">
+
+        <!-- Custom CSS Rules -->
+        <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
+
+        <!-- Underscore.js Library -->
+        <script src="{% static "js/underscore-1.6.0.js" %}"></script>
+
+        <!-- Modernizr Library -->
+        <script src="{% static "js/modernizr-2.7.1.js" %}"></script>
+
+        <!-- d3.js Library -->
+        <script src="{% static "js/d3.v3.min.js" %}"></script>
+
+        <!-- Load c3.css -->
+        <link href="{% static "css/c3.css" %}" rel="stylesheet" type="text/css">
+
+        <!-- Load d3.js and c3.js -->
+        <script src="{% static "js/c3.min.js" %}"></script>
+
+        <!-- DataTables CSS -->
+        <link rel="stylesheet" type="text/css" href="{% static "css/jquery.dataTables.min.css" %}">
+
+        <!-- DataTables -->
+        <script type="text/javascript" charset="utf8" src="{% static "js/jquery.dataTables.min.js" %}"></script>
+    {% endblock %}
+
+    {% block load %}{% endblock %}
+    {% block js %}{% endblock %}
+
+</head>
+
+<body>
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">MPS</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/admin">Admin</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Assays<span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                  <li class="dropdown-header">Add/Edit Studies</li>
+                  <li><a href="/assays/user_index">My Studies</a></li>
+                  <li><a href="/assays/group_index">Group Studies</a></li>
+                  <li class="divider"></li>
+{#                  Old List/Detail views, consider removing soon#}
+                  <li class="dropdown-header">View All Public Data</li>
+                  <li><a href="/assays/organchipstudy">Studies</a></li>
+                  <li><a href="/assays/assaychipsetup">Setups</a></li>
+                  <li><a href="/assays/assaychipreadout">Readouts</a></li>
+                  <li><a href="/assays/assaytestresult">Results</a></li>
+                </ul>
+{#              <ul class="dropdown-menu" role="menu">#}
+{#                <li class="dropdown-header">Organ Chip Study</li>#}
+{#                <li><a href="/assays/organchipstudy">View Studies</a></li>#}
+{#                <li><a href="/assays/organchipstudy/add">Add Study</a></li>#}
+{#                <li class="divider"></li>#}
+{#                <li class="dropdown-header">Chip Setup</li>#}
+{#                <li><a href="/assays/assaychipsetup">View Setups</a></li>#}
+{#                <li><a href="/assays/assaychipsetup/add">Add Setup</a></li>#}
+{#                <li class="divider"></li>#}
+{#                <li class="dropdown-header">Chip Readout</li>#}
+{#                <li><a href="/assays/assaychipreadout">View Readouts</a></li>#}
+{#                <li><a href="/assays/assaychipreadout/add">Add Readout</a></li>#}
+{#                <li class="divider"></li>#}
+{#                <li class="dropdown-header">Chip Test Result</li>#}
+{#                <li><a href="/assays/assaytestresult">View Results</a></li>#}
+{#                <li><a href="/assays/assaytestresult/add">Add Result</a></li>#}
+{#              </ul>#}
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Compounds<span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                      <li><a href="/compounds/">View Compounds</a></li>
+                      <li class="divider"></li>
+                      <li class="dropdown-header">Requires Permission</li>
+                      <li><a href="/compounds/add">Add Compound</a></li>
+                  </ul>
+            </li>
+                <li><a href="/microdevices">Devices</a></li>
+                <li><a href="/drugtrials">Drug Trials</a></li>
+                <li><a href="/#/bioactivities/heatmap_selection">Heatmap</a></li>
+                <li><a href="/#/bioactivities/cluster_selection#">Cluster</a></li>
+              </ul>
+          <ul class="nav navbar-nav navbar-right">
+            {% if user.is_active %}
+                <li><a href="/accounts/logout">Logout</a></li>
+            {% else %}
+                <li><a href="/accounts/login">Log In</a></li>
+            {% endif %}
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+	<div id="page">
+
+    <div id="sidebar">
+        {% block sidebar %}
+        {% endblock %}
+    </div>
+
+    <div id="content" class="container">
+
+	{% if messages %}
+	<ul class="messages">
+	    {% for message in messages %}
+	    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+	    {% endfor %}
+	</ul>
+	{% endif %}
+
+    {% block content %}This is the content area{% endblock %}
+
+    </div>
+	</div>
+
+    <div class="container">
+        <footer>
+            <hr>
+            <div class="row">
+                <div class="col-xs-9">
+                    <p>
+                        Copyright 2012-2014 The University of Pittsburgh Drug Discovery Institute Microphysiology Database Project
+                    </p>
+                </div>
+                <div class="col-xs-3">
+                    <span class="pull-right">
+                    <a href="https://github.com/UPDDI">Contribute on Github</a>
+                    <br>
+                    <a href="#/about">About the MPS Project</a>
+                </span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+</body>
+</html>

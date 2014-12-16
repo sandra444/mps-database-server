@@ -175,3 +175,6 @@ class Compound(LockableModel):
 
     image.allow_tags = True
     image.short_description = 'Image'
+
+    def get_absolute_url(self):
+        return "/compounds/%i/" % self.id

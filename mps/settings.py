@@ -181,6 +181,10 @@ INSTALLED_APPS = (
     # http://www.django-rest-framework.org
     'rest_framework',
 
+    # Comment out captchas for now
+    # Django simple captchas
+    #'captcha',
+
     # Django admin alphabetical filter
     'alphafilter',
 
@@ -193,6 +197,11 @@ INSTALLED_APPS = (
     'assays',
     'resources'
 )
+# Comment out captcha for now
+# Required for captchas
+# SOUTH_MIGRATION_MODULES = {
+#     'captcha': 'captcha.south_migrations',
+# }
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

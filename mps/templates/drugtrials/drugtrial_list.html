@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div class="container" style="padding-bottom: 50px">
+        <h2 align="center">Drug Trials</h2>
+
+        <table id="drugtrials" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Compound</th>
+                    <th>Species</th>
+                    <th>Trial Type</th>
+                    <th>Finding</th>
+                    <th>+/-</th>
+                    <th>Max Affected</th>
+                    <th>Value</th>
+                    <th>Value Units</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Compound</th>
+                    <th>Species</th>
+                    <th>Trial Type</th>
+                    <th>Finding</th>
+                    <th>+/-</th>
+                    <th>Max Affected</th>
+                    <th>Value</th>
+                    <th>Value Units</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for finding in object_list %}
+                <tr class="finding" id={{ finding.id }}>
+                    <td>{{ finding.drug_trial.compound }}</td>
+                    <td>{{ finding.drug_trial.species }}</td>
+                    <td>{{ finding.drug_trial.get_trial_type_display }}</td>
+                    <td>{{ finding.finding_name }}</td>
+                    <td>{{ finding.get_result_display }}</td>
+                    <td>{{ finding.percent_max }}</td>
+                    <td>{{ finding.value }}</td>
+                    <td>{{ finding.value_units }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#drugtrials').DataTable({
+                "iDisplayLength": 50,
+                "deferRender": true
+                // If one wants to display top and bottom
+                //"sDom": '<"wrapper"lfptip>'
+            });
+        });
+    </script>
+{% endblock %}

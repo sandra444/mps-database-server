@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <style>
+    p {
+        word-wrap: break-word;
+    }
+    </style>
+
+    <legend><h1>{{ object.name}}</h1></legend>
+
+    <div class="container-fluid">
+
+        <div class="col-xs-6">
+            <p><b>ChEMBL ID:</b> <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ object.chemblid }}">{{ object.chemblid }}</a></p>
+            <p><b>Smiles:</b> {{ object.smiles }}</p>
+            <p><b>Molecular Formula:</b> {{ object.molecular_formula }}</p>
+        </div>
+
+        <div class="col-xs-6">
+            <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.chemblid }}">
+        </div>
+
+    </div>
+
+    <legend>Molecular Properties</legend>
+
+    <div class="container-fluid">
+
+        <div class="col-xs-12">
+            <p><b>Molecular Weight:</b> {{ object.molecular_weight }}</p>
+            <p><b>Rotatable Bonds:</b> {{ object.rotatable_bonds }}</p>
+            <p><b>Acidic pKa:</b> {{ object.acidic_pka }}</p>
+            <p><b>Basic pKa:</b> {{ object.basic_pka }}</p>
+            <p><b>LogP:</b> {{ object.logp }}</p>
+            <p><b>LogD:</b> {{ object.logd }}</p>
+            <p><b>ALogP:</b> {{ object.alogp }}</p>
+        </div>
+
+    </div>
+
+    <legend>Drug/Drug-like Properties</legend>
+
+    <div class="container-fluid">
+
+        <div class="col-xs-12">
+            <p><b>Known Drug:</b> {{ object.known_drug }}</p>
+            <p><b>Med Chem Friendly:</b> {{ object.medchem_friendly }}</p>
+            <p><b>Passes of Rule of 3:</b> {{ object.ro3_passes }}</p>
+            <p><b>Rule of 5 Violations:</b> {{ object.ro5_violations }}</p>
+            <p><b>Molecular Species:</b> {{ object.species }}</p>
+        </div>
+
+    </div>
+    <script>
+        $("p").addClass("lead");
+    </script>
+{% endblock %}

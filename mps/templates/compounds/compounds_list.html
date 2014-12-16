@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div class="container" style="padding-bottom: 50px">
+        <h2 align="center">Compounds</h2>
+
+        <table id="compounds" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>CHEMBL ID</th>
+                    <th>Known Drug</th>
+{#                    <th>Last Update</th>#}
+                    <th>Image</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Name</th>
+                    <th>CHEMBL ID</th>
+                    <th>Known Drug</th>
+{#                    <th>Last Update</th>#}
+                    <th>Image</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for compound in object_list %}
+                <tr class="compound" id={{ compound.id }} name={{ compound.name }}>
+                    <td><a href="{{ compound.id }}">{{ compound.name }}</a></td>
+                    <td><a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.chemblid }}">{{ compound.chemblid }}</a></td>
+                    <td>{{ compound.known_drug }}</td>
+{#                    <td>{{ compound.last_update }}</td>#}
+                    <td><img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}"></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#compounds').DataTable({
+                "aoColumnDefs": [
+                    { "bSortable": false, "aTargets": [3] }
+                ],
+                "iDisplayLength": 25
+                // If one wants to display top and bottom
+                //"sDom": '<"wrapper"lfptip>'
+            });
+        });
+    </script>
+{% endblock %}

@@ -12,7 +12,23 @@ urlpatterns = patterns('',
 
                        url(r'^$', 'mps.views.main'),
 
+                       # user auth urls
+                       url(r'^accounts/login/$',  'mps.views.login'),
+                       url(r'^accounts/auth/$',  'mps.views.auth_view'),
+                       url(r'^accounts/logout/$', 'mps.views.logout'),
+                       url(r'^accounts/loggedin/$', 'mps.views.loggedin'),
+                       url(r'^accounts/invalid/$', 'mps.views.invalid_login'),
+
+                       # Comment out captchas for now
+                       # Captchas
+                       # url(r'^captcha/', include('captcha.urls')),
+
+                       # The frontend
                        url(r'^', include('bioactivities.urls')),
+                       url(r'^', include('assays.urls')),
+                       url(r'^', include('compounds.urls')),
+                       url(r'^', include('microdevices.urls')),
+                       url(r'^', include('drugtrials.urls')),
 
                        # BEGIN old-style API
                        url(r'^assays_ajax$', 'assays.ajax.ajax'),

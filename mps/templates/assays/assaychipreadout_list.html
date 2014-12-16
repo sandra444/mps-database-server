@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div class="container" style="padding-bottom: 50px">
+        <h2 align="center">Readouts</h2>
+
+        <table id="readouts" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Chip Setup</th>
+                    <th>Readout Date</th>
+                    <th>Creator</th>
+{#                    <th>Group</th>#}
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>ID</th>
+                    <th>Chip Setup</th>
+                    <th>Readout Date</th>
+                    <th>Creator</th>
+{#                    <th>Group</th>#}
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for readout in object_list %}
+                <tr class="compound" id={{ readout.id }} name={{ readout.id }}>
+                    <td><a href="{{ readout.id }}">{{ readout.id }}</a></td>
+                    <td>{{ readout.chip_setup }}</td>
+                    <td>{{ readout.readout_start_time }}</td>
+                    <td>{{ readout.created_by }}</td>
+{#                    <td>{{ compound.group }}</td>#}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#readouts').DataTable( {
+                "iDisplayLength": 50
+            });
+        });
+    </script>
+{% endblock %}

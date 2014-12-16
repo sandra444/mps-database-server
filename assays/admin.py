@@ -755,12 +755,20 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
 
         """Validate unique, existing Chip Readout IDs"""
 
-        # Somewhat unusual way of getting parent data
-        data = self.instance.__dict__
+        # Very unusual way of getting parent data; seems to work; TEST to be sure
+
+        if self.instance.__dict__['file']:
+            data = self.instance.__dict__
+            test_file = data['file']
+        elif not forms_data[-1].__dict__['files']:
+            test_file = None
+        else:
+            data = forms_data[-1].__dict__
+            test_file = data['files']['file']
 
         # Check to make sure there is a file
-        if data['file']:
-            datareader = csv.reader(data['file'], delimiter=',')
+        if test_file:
+            datareader = csv.reader(test_file, delimiter=',')
             datalist = list(datareader)
 
             # All unique rows based on ('assay_id', 'field_id', 'elapsed_time')
@@ -806,7 +814,7 @@ class AssayChipReadoutInline(admin.TabularInline):
 # ChipReadout validation occurs in the inline formset
 class AssayChipReadoutForm(forms.ModelForm):
     class Meta(object):
-        model = AssayRun
+        model = AssayChipReadout
 
 class AssayChipReadoutAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
@@ -1141,40 +1149,6 @@ class AssayTestResultAdmin(LockableAdmin):
     )
     actions = ['update_fields']
     inlines = [AssayResultInline]
-
-    def assay(self, obj):
-        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
-            return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].assay_name
-        return ''
-
-    def result(self, obj):
-        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
-            abbreviation = AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result
-            if abbreviation == '1':
-                return u'Positive'
-            else:
-                return u'Negative'
-        return ''
-
-    def result_function(self, obj):
-        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
-            return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result_function
-        return ''
-
-    def result_type(self, obj):
-        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
-            return AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].result_type
-        return ''
-
-    def severity(self, obj):
-        SEVERITY_SCORE = dict((
-            ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
-            ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
-        ))
-        if obj.id and not len(AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')) == 0:
-            return SEVERITY_SCORE[AssayResult.objects.filter(assay_result_id=obj.id).order_by('id')[0].severity]
-        return ''
-
 
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 

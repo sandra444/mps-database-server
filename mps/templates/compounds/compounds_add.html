@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+<script src="{% static "compounds/customize_admin.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+<form enctype="multipart/form-data" class="form-horizontal" method="post" >
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <h1>Add Compound <button type="submit" class="btn btn-primary">Submit</button></h1>
+
+    <legend>General</legend>
+
+    {% if form.errors %}
+        {% for field in form %}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{field.label}}: {{error}}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div class="alert alert-info" role="alert">
+            <span class="sr-only">Info:</span>
+            Click "Retrieve" to automatically fill in data after typing a CHEMBL ID:
+    </div>
+
+    <div class="form-group">
+        <label for="chemblid" class="col-sm-2 control-label compounds-compound">CHEMBL ID</label>
+        <div class="col-sm-10">
+          {{ form.chemblid }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="name" class="col-sm-2 control-label">Name</label>
+        <div class="col-sm-10">
+          {{ form.name }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="inchikey" class="col-sm-2 control-label">IUPAC Standard InChI Key</label>
+        <div class="col-sm-10">
+          {{ form.inchikey }}
+        </div>
+    </div>
+
+    <legend>Molecular Identifiers</legend>
+
+    <div class="form-group">
+        <label for="smiles" class="col-sm-2 control-label">Smiles</label>
+        <div class="col-sm-10">
+          {{ form.smiles }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="synonyms" class="col-sm-2 control-label">Synonyms</label>
+        <div class="col-sm-10">
+          {{ form.synonyms }}
+        </div>
+    </div>
+
+    <legend>Molecular Properties</legend>
+
+    <div class="form-group">
+        <label for="molecular_formula" class="col-sm-2 control-label">Molecular Formula</label>
+        <div class="col-sm-10">
+          {{ form.molecular_formula }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="molecular_weight" class="col-sm-2 control-label">Molecular Weight</label>
+        <div class="col-sm-10">
+          {{ form.molecular_weight }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="rotatable_bonds" class="col-sm-2 control-label">Rotatable Bonds</label>
+        <div class="col-sm-10">
+          {{ form.rotatable_bonds }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="acidic_pka" class="col-sm-2 control-label">Acidic pKa</label>
+        <div class="col-sm-10">
+          {{ form.acidic_pka }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="basic_pka" class="col-sm-2 control-label">Basic pKa</label>
+        <div class="col-sm-10">
+          {{ form.basic_pka }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="logp" class="col-sm-2 control-label">LogP</label>
+        <div class="col-sm-10">
+          {{ form.logp }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="logd" class="col-sm-2 control-label">LogD</label>
+        <div class="col-sm-10">
+          {{ form.logd }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="alogp" class="col-sm-2 control-label">ALogP</label>
+        <div class="col-sm-10">
+          {{ form.alogp }}
+        </div>
+    </div>
+
+    <legend>Drug/Drug-like Properties</legend>
+
+    <div class="form-group">
+        <label for="known_drug" class="col-sm-2 control-label">Known Drug</label>
+        <div class="col-sm-10">
+          {{ form.known_drug }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="medchem_friendly" class="col-sm-2 control-label">Medchem Friendly</label>
+        <div class="col-sm-10">
+          {{ form.medchem_friendly }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="ro5_violations" class="col-sm-2 control-label">Rule of 5 Violations</label>
+        <div class="col-sm-10">
+          {{ form.ro5_violations }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="ro3_passes" class="col-sm-2 control-label">Rule of 3 Passes</label>
+        <div class="col-sm-10">
+          {{ form.ro3_passes }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="species" class="col-sm-2 control-label">Species</label>
+        <div class="col-sm-10">
+          {{ form.species }}
+        </div>
+    </div>
+
+</form>
+
+{% endblock %}

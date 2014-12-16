@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <legend><h1>Organ Chip Study: {{ object.assay_run_id}}</h1></legend>
+
+    <div class="container-fluid">
+        <div class="col-xs-12">
+        <p><b>Name:</b> {{ object.name }}</p>
+        <p><b>Study Types:</b> {{ object.study_types }}</p>
+        <p><b>Center Name:</b> {{ object.center_id }}</p>
+        <p><b>Start Date:</b> {{ object.start_date }}</p>
+        {% if object.description %}
+            <p><b>Description:</b> {{ object.description }}</p>
+        {% endif %}
+        </div>
+    </div>
+
+    {% if object.file %}
+        <legend><b>Bulk Upload File</b></legend>
+
+        <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
+    {% endif %}
+
+    <script>
+        $("p").addClass("lead");
+    </script>
+
+{% endblock %}

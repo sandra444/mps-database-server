@@ -2,15 +2,8 @@ $(document).ready(function () {
 
     function addChart(id,name) {
 
-        if (charts.length == 0) {
-            $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 10%;margin-left: 10%;">')
-                .appendTo('#extra');
-        }
-
-        else{
-            $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 10%;margin-left: 30%;">')
-                .appendTo('#extra');
-        }
+        $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 10%;margin-left: -100%px;">')
+            .appendTo('#extra');
 
         charts.push(
             c3.generate({
@@ -46,11 +39,20 @@ $(document).ready(function () {
     }
 
     function getReadoutValue() {
-        try {
-            return Math.floor($('.historylink').attr('href').split('/')[4]);
+        // Admin
+        if($('.historylink')[0]) {
+            try {
+                return Math.floor($('.historylink').attr('href').split('/')[4]);
+            }
+            catch (err) {
+                return null;
+            }
         }
-        catch(err) {
-            return null;
+        // Frontend
+        else {
+            // Details does not have access to CSRF on its own
+            middleware_token = getCookie('csrftoken');
+            return Math.floor(window.location.href.split('/')[5]);
         }
     }
 

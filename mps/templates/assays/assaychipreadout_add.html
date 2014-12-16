@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+<script src="{% static "js/inline_add.js" %}"></script>
+<script src="{% static "js/cookies.js" %}"></script>
+<script src="{% static "js/whittle.js" %}"></script>
+<script src="{% static "assays/customize_chip.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+<style>
+.layout-table th {
+    border: 1px solid black;
+    padding: 2px;
+}
+</style>
+
+<script>
+    $(function() {
+        var setup = $('#id_chip_setup');
+        var initialSetup = setup.val();
+
+        $.when(whittle('assay_run_id',{{ study }},'AssayChipSetup','','')).then(function(data) {
+            setup.html(data);
+            setup.val(initialSetup);
+        });
+
+        var date = $("#id_readout_start_time");
+        var curr_date = date.val();
+        //Add datepicker to assay and readout start time
+        date.datepicker();
+        date.datepicker("option","dateFormat","yy-mm-dd");
+        date.datepicker("setDate" , curr_date);
+    });
+</script>
+
+<form enctype="multipart/form-data" class="form-horizontal" method="post" >
+    {% csrf_token %}
+    <h1>Add Chip Readout <button type="submit" class="btn btn-primary">Submit</button></h1>
+
+    <legend>Readout Details</legend>
+{#    <p>Setup: {{ form.chip_setup }}</p>#}
+{#    <p>Time Unit: {{ form.timeunit }}</p>#}
+{#    <p>Treatment Time Length: {{ form.treatment_time_length }}</p>#}
+{#    <p>Assay Start Time: {{ form.assay_start_time }}</p>#}
+{#    <p>Readout Start Time: {{ form.readout_start_time }}</p>#}
+{#    <p>Notebook: {{ form.notebook }}</p>#}
+{#    <p>Notebook Page: {{ form.notebook_page }}</p>#}
+{#    <p>Notes: {{ form.notes }}</p>#}
+{#    <p>File: {{ form.file }}</p>#}
+
+    <div class="form-group has-error">
+        <label for="chip_setup" class="col-sm-2 control-label">Setup</label>
+        <div class="col-sm-10">
+          {{ form.chip_setup }}
+        </div>
+    </div>
+
+    <div class="form-group has-error">
+        <label for="timeunit" class="col-sm-2 control-label">Time Unit</label>
+        <div class="col-sm-10">
+          {{ form.timeunit }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="treatment_time_length" class="col-sm-2 control-label">Treatment Time Length</label>
+        <div class="col-sm-10">
+          {{ form.treatment_time_length }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="readout_start_time" class="col-sm-2 control-label">Readout Start Time</label>
+        <div class="col-sm-10">
+          {{ form.readout_start_time }} [yyyy-mm-dd]
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="notebook" class="col-sm-2 control-label">Notebook</label>
+        <div class="col-sm-10">
+          {{ form.notebook }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="notebook_page" class="col-sm-2 control-label">Notebook Page</label>
+        <div class="col-sm-10">
+          {{ form.notebook_page }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="notes" class="col-sm-2 control-label">Notes</label>
+        <div class="col-sm-10">
+          {{ form.notes }}
+        </div>
+    </div>
+
+{#    <div class="form-group">#}
+{#        <label for="group" class="col-sm-2 control-label">Group</label>#}
+{#        <div class="col-sm-10">#}
+{#          {{ form.group }}#}
+{#        </div>#}
+{#    </div>#}
+
+    <div class="form-group">
+        <label for="file" class="col-sm-2 control-label">File</label>
+        <div class="col-sm-10">
+          {{ form.file }}
+        </div>
+    </div>
+
+    {{ formset.management_form }}
+    <legend>Assays</legend>
+
+    {% if formset.errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            Missing Fields
+        </div>
+    {% endif %}
+
+    {% if formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ formset.non_form_errors }}
+        </div>
+    {% endif %}
+
+    <a id="add_button" class="btn btn-success" role="button">Add Assay</a>
+    <table class="table table-striped assays" id="assaychipreadoutassay_set-group"  name="inlines">
+        <thead>
+            <tr style="font-weight:bold;">
+                <td>Assay</td>
+                <td>Object of Interest</td>
+                <td>Reader</td>
+                <td>Readout Unit</td>
+                <td>Delete</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for assay in formset %}
+                <tr class="inline" id="assay-{{ forloop.counter0 }}">
+                    <td>{{ assay.assay_id }}</td>
+                    <td>{{ assay.object_type }}</td>
+                    <td>{{ assay.reader_id }}</td>
+                    <td>{{ assay.readout_unit }}</td>
+                    <td>{{ assay.DELETE }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</form>
+
+{% endblock %}
