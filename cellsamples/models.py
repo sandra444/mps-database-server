@@ -9,7 +9,7 @@ CellSamples Models
 from django.db import models
 
 # Use our own model base classes instead of models.Model
-from mps.base.models import LockableModel
+from mps.base.models import LockableModel, RestrictedModel
 
 
 class Organ(LockableModel):
@@ -86,7 +86,7 @@ class Biosensor(LockableModel):
         return u'{}'.format(self.name)
 
 
-class CellSample(LockableModel):
+class CellSample(RestrictedModel):
     class Meta(object):
         ordering = ('-receipt_date', )
     cell_type = models.ForeignKey('CellType')
