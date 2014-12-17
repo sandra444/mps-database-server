@@ -151,7 +151,10 @@
         <tbody>
             {% for cell in formset %}
                 <tr class="inline" id="results-{{ forloop.counter0 }}">
-                    <td>{{ cell.cell_sample }}</td>
+                    <td><input readonly='true' id="id_assaychipcells_set-{{ forloop.counter0 }}-cell_sample"
+                               name="assaychipcells_set-{{ forloop.counter0 }}-cell_sample" size="5">
+                        <span id='search-{{ forloop.counter0 }}-' class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </td>
                     <td>{{ cell.cell_biosensor }}</td>
                     <td>{{ cell.cellsample_density }}</td>
                     <td>{{ cell.cellsample_density_unit }}</td>
@@ -162,5 +165,26 @@
         </tbody>
     </table>
 </form>
+
+<div id="modalText" style="display:none;">
+    
+</div>
+
+<script>
+$( "body" ).on( "click", "span[id*='search-']", function(event) {
+    event.preventDefault();
+    // Get ID of the clicked search
+    var id = +event.target.id.replace(/\D/g,'');
+    console.log(id);
+    var w = window.open("", "popupWindow", "width=600, height=400, scrollbars=yes");
+    var $w = $(w.document.body);
+    $w.html($('#modalText').html());
+    // Example code; delete soon
+{#    $w.find(".addimage").click(function(e) {#}
+{#        e.preventDefault();#}
+{#        $("#imagelist", w.opener.document).append("<li></li>");#}
+{#    });#}
+});
+</script>
 
 {% endblock %}
