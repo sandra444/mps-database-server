@@ -555,7 +555,7 @@ class AssayChipReadout(RestrictedModel):
 
     chip_setup = models.ForeignKey(AssayChipSetup, null=True)
 
-    timeunit = models.ForeignKey(TimeUnits)
+    timeunit = models.ForeignKey(TimeUnits, default=3)
     treatment_time_length = models.FloatField(verbose_name='Assay Treatment Duration',
                                               blank=True, null=True)
 

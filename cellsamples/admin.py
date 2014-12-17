@@ -157,6 +157,13 @@ class CellSampleAdmin(LockableAdmin):
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'), )
         }),
+        (
+            'Group Access', {
+                'fields':(
+                    'group','restricted'
+                 ),
+            }
+        ),
     )
 
 
