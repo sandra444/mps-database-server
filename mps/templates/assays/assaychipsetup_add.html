@@ -167,23 +167,57 @@
 </form>
 
 <div id="modalText" style="display:none;">
-    
+    <table id="cellsamples" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Receipt Date</th>
+                    <th>Cell Type</th>
+                    <th>Cell Source</th>
+                    <th>Supplier</th>
+                    <th>Barcode/Lot #</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Receipt Date</th>
+                    <th>Cell Type</th>
+                    <th>Cell Source</th>
+                    <th>Supplier</th>
+                    <th>Barcode/Lot #</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for cellsample in cellsamples %}
+                <tr class="cellsample" id={{ cellsample.id }} name={{ cellsample.id }}>
+                    <td>{{ cellsample.receipt_date }}</td>
+                    <td>{{ cellsample.cell_type }}</td>
+                    <td>{{ cellsample.cell_source }}</td>
+                    <td>{{ cellsample.supplier }}</td>
+                    <td>{{ cellsample.barcode }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+    </table>
 </div>
 
 <script>
-$( "body" ).on( "click", "span[id*='search-']", function(event) {
-    event.preventDefault();
-    // Get ID of the clicked search
-    var id = +event.target.id.replace(/\D/g,'');
-    console.log(id);
-    var w = window.open("", "popupWindow", "width=600, height=400, scrollbars=yes");
-    var $w = $(w.document.body);
-    $w.html($('#modalText').html());
-    // Example code; delete soon
-{#    $w.find(".addimage").click(function(e) {#}
-{#        e.preventDefault();#}
-{#        $("#imagelist", w.opener.document).append("<li></li>");#}
-{#    });#}
+$(document).ready(function() {
+    $( "body" ).on( "click", "span[id*='search-']", function(event) {
+        event.preventDefault();
+        // Get ID of the clicked search
+        var id = +event.target.id.replace(/\D/g,'');
+        console.log(id);
+        var w = window.open("", "popupWindow", "width=600, height=400, scrollbars=yes");
+        var $w = $(w.document.body);
+        $w.html($('#modalText').html());
+        // Example code; delete soon
+    {#    $w.find(".addimage").click(function(e) {#}
+    {#        e.preventDefault();#}
+    {#        $("#imagelist", w.opener.document).append("<li></li>");#}
+    {#    });#}
+    });
 });
 </script>
 

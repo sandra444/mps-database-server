@@ -2,13 +2,13 @@
 
 from django.views.generic import ListView, CreateView, DetailView
 from assays.models import *
+from cellsamples.models import CellSample
 from assays.admin import *
 from assays.forms import *
 from django import forms
 
 from django.forms.models import inlineformset_factory
 from django.views.generic.edit import CreateView
-from assays.models import *
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
@@ -173,13 +173,17 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     form_class = AssayChipSetupForm
 
     def get_context_data(self, **kwargs):
+        groups = self.request.user.groups.values_list('id',flat=True)
+        cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date')
         context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = AssayChipCellsFormset(self.request.POST)
             context['study'] = self.kwargs.get('study_id')
+            context['cellsamples'] = cellsamples
         else:
             context['formset'] = AssayChipCellsFormset()
             context['study'] = self.kwargs.get('study_id')
+            context['cellsamples'] = cellsamples
         return context
 
     def form_valid(self, form):
