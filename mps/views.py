@@ -11,6 +11,8 @@ def main(request):
     return HttpResponse(open(os.path.join(settings.STATIC_ROOT, 'mps.html')))
 
 def login(request):
+    if request.user.is_active:
+        return HttpResponseRedirect("/accounts/logout")
     c = {}
     c.update(csrf(request))
     return render_to_response('login.html', c)
