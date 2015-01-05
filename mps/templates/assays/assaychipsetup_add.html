@@ -212,8 +212,25 @@
     </table>
 </div>
 
+{#For retrieving old values#}
+<div hidden id="old">
+    {{ formset }}
+</div>
+
 <script>
 $(function() {
+    var i = 0;
+
+    // Retrieve old values
+    while ($('select[name="assaychipcells_set-'+ i +'-cell_sample"]')[0]){
+        var oldVal = $('select[name="assaychipcells_set-'+ i +'-cell_sample"]').val();
+        $('#id_assaychipcells_set-'+ i + '-cell_sample').val(oldVal);
+        i += 1;
+    }
+
+    //Delete old values
+    $('#old').remove();
+
     var id = null;
 
     $("body").on( "click", "span[id*='search-']", function(event) {
