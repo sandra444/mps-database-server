@@ -15,6 +15,12 @@
         date.datepicker();
         date.datepicker("option","dateFormat","yy-mm-dd");
         date.datepicker("setDate" , curr_date);
+
+        //Acquire old group
+        var old = $('select[name="group"]')[1];
+        var oldGroup = old.options[old.selectedIndex].value;
+        $('#old').remove();
+        $('#id_group').val(oldGroup);
     });
 </script>
 
@@ -128,5 +134,9 @@
 {#        </div>#}
 {#    </div>#}
 </form>
+
+<div hidden id="old">
+  {{ form.group }}
+</div>
 
 {% endblock %}
