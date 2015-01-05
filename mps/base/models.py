@@ -80,7 +80,7 @@ class RestrictedModel(LockableModel):
                               help_text=
                               'Bind to a group')
 
-    restricted = models.BooleanField(default=False,
+    restricted = models.BooleanField(default=True,
                                      help_text=
                                      'Check box to restrict to selected group')
 
