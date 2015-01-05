@@ -17,8 +17,10 @@
         date.datepicker("setDate" , curr_date);
 
         // Open and then close dialog so it doesn't get placed in window itself
-        $('#dialog').dialog();
-        $('#dialog').dialog('close');
+        var dialog = $('#dialog');
+        dialog.dialog();
+        dialog.dialog('close');
+        dialog.removeProp('hidden');
     });
 </script>
 
@@ -170,7 +172,7 @@
     </table>
 </form>
 
-<div id="dialog">
+<div hidden id="dialog">
     <div class="alert alert-info" role="alert">
             <h1 align="center">Click Desired Row</h1>
     </div>
