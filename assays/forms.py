@@ -14,11 +14,15 @@ class AssayResultForm(forms.ModelForm):
 
 class AssayChipReadoutForm(forms.ModelForm):
 
+    another = forms.BooleanField(required=False)
+
     class Meta(object):
         model = AssayChipReadout
         exclude = ('created_by','modified_by','signed_off_by','signed_off_date','locked', 'group')
 
 class AssayChipSetupForm(forms.ModelForm):
+
+    another = forms.BooleanField(required=False)
 
     class Meta(object):
         model = AssayChipSetup

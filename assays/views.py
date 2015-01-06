@@ -202,13 +202,17 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         formset = context['formset']
         # get user via self.request.user
         if formset.is_valid():
+            data = form.cleaned_data
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
             self.object.save()
             formset.instance = self.object
             formset.save()
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            if data['another']:
+                return self.render_to_response(self.get_context_data(form=form))
+            else:
+                return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -256,6 +260,7 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         formset = context['formset']
         # get user via self.request.user
         if formset.is_valid():
+            data = form.cleaned_data
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
@@ -265,7 +270,10 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
             if formset.__dict__['files']:
                 file = formset.__dict__['files']['file']
                 parseChipCSV(self.object,file)
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            if data['another']:
+                return self.render_to_response(self.get_context_data(form=form))
+            else:
+                return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
 

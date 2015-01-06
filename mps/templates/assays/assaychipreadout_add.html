@@ -38,7 +38,21 @@
 
 <form enctype="multipart/form-data" class="form-horizontal" method="post" >
     {% csrf_token %}
-    <h1>Add Chip Readout <button type="submit" class="btn btn-primary">Submit</button></h1>
+    <h1>
+        Add Chip Readout
+        <button type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
+        <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Add Another</button>
+    </h1>
+
+    {% if form.another.value and not form.errors and not formset.non_form_errors%}
+        <div class="alert alert-success" role="alert">
+            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            <span class="sr-only">Success:</span>
+            Successful Submission
+        </div>
+    {% endif %}
+
+    {{ form.another.as_hidden }}
 
     <legend>Readout Details</legend>
 {#    <p>Setup: {{ form.chip_setup }}</p>#}
@@ -117,13 +131,14 @@
     {{ formset.management_form }}
     <legend>Assays</legend>
 
-    {% if formset.errors %}
-        <div class="alert alert-danger" role="alert">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            <span class="sr-only">Error:</span>
-            Missing Fields
-        </div>
-    {% endif %}
+{# Need to refactor display of formset errors #}
+{#    {% if formset.errors %}#}
+{#        <div class="alert alert-danger" role="alert">#}
+{#            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#            <span class="sr-only">Error:</span>#}
+{#            Missing Fields#}
+{#        </div>#}
+{#    {% endif %}#}
 
     {% if formset.non_form_errors %}
         <div class="alert alert-danger" role="alert">
