@@ -15,12 +15,6 @@
         date.datepicker();
         date.datepicker("option","dateFormat","yy-mm-dd");
         date.datepicker("setDate" , curr_date);
-
-        //Acquire old group
-        var old = $('select[name="group"]')[1];
-        var oldGroup = old.options[old.selectedIndex].value;
-        $('#old').remove();
-        $('#id_group').val(oldGroup);
     });
 </script>
 
@@ -113,7 +107,12 @@
           <select id="id_group" name="group">
             <option value="">---------</option>
             {% for group in groups %}
-              <option value={{ group.id }}>{{ group.name }}</option>
+              {# It is necessary to coerce the forms value into an integer for this compare #}
+              {% if group.id|add:"0" == form.group.value|add:"0" %}
+                <option value={{ group.id }} selected>{{ group.name }}</option>
+              {% else %}
+                <option value={{ group.id }}>{{ group.name }}</option>
+              {% endif %}
             {% endfor %}
           </select>
         </div>
@@ -134,9 +133,5 @@
 {#        </div>#}
 {#    </div>#}
 </form>
-
-<div hidden id="old">
-  {{ form.group }}
-</div>
 
 {% endblock %}
