@@ -122,12 +122,8 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         # Get group selection possibilities
         groups = self.request.user.groups.all()
-
         context = super(AssayRunAdd, self).get_context_data(**kwargs)
-        if self.request.POST:
-            context['groups'] = groups
-        else:
-            context['groups'] = groups
+        context['groups'] = groups
         return context
 
     # Test form validity
