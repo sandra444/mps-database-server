@@ -18,6 +18,10 @@ urlpatterns = patterns('',
                        url(r'^accounts/logout/$', 'mps.views.logout'),
                        url(r'^accounts/loggedin/$', 'mps.views.loggedin'),
                        url(r'^accounts/invalid/$', 'mps.views.invalid_login'),
+                       url(r'^password_change/$', 'django.contrib.auth.views.password_change',
+                           {'template_name': 'password_change.html'}),
+                       url(r'^password_change_done/$', 'django.contrib.auth.views.password_change_done',
+                           {'template_name': 'password_change_done.html'}, name="password_change_done"),
 
                        # Comment out captchas for now
                        # Captchas
