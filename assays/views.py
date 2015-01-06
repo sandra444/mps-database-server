@@ -119,6 +119,13 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
     template_name = 'assays/assayrun_add.html'
     form_class = AssayRunForm
 
+    def get_context_data(self, **kwargs):
+        # Get group selection possibilities
+        groups = self.request.user.groups.all()
+        context = super(AssayRunAdd, self).get_context_data(**kwargs)
+        context['groups'] = groups
+        return context
+
     # Test form validity
     def form_valid(self, form):
         # get user via self.request.user

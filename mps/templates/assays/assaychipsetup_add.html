@@ -17,8 +17,10 @@
         date.datepicker("setDate" , curr_date);
 
         // Open and then close dialog so it doesn't get placed in window itself
-        $('#dialog').dialog();
-        $('#dialog').dialog('close');
+        var dialog = $('#dialog');
+        dialog.dialog();
+        dialog.dialog('close');
+        dialog.removeProp('hidden');
     });
 </script>
 
@@ -156,7 +158,7 @@
             {% for cell in formset %}
                 <tr class="inline" id="results-{{ forloop.counter0 }}">
                     <td><input readonly=true id="id_assaychipcells_set-{{ forloop.counter0 }}-cell_sample"
-                               name="assaychipcells_set-{{ forloop.counter0 }}-cell_sample" size="5">
+                               name="assaychipcells_set-{{ forloop.counter0 }}-cell_sample" size="5" value={{ cell.cell_sample.value }}>
                         <span id='search-{{ forloop.counter0 }}-' class="glyphicon glyphicon-search" aria-hidden="true"></span>
                     </td>
                     <td>{{ cell.cell_biosensor }}</td>
@@ -170,7 +172,7 @@
     </table>
 </form>
 
-<div id="dialog">
+<div hidden id="dialog">
     <div class="alert alert-info" role="alert">
             <h1 align="center">Click Desired Row</h1>
     </div>
