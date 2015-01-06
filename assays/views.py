@@ -18,6 +18,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
 from mps.filters import *
+from django.db.models import Q
 
 #TODO Refactor imports
 
@@ -121,7 +122,7 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         # Get group selection possibilities
-        groups = self.request.user.groups.all()
+        groups = self.request.user.groups.filter(~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
         context = super(AssayRunAdd, self).get_context_data(**kwargs)
         context['groups'] = groups
         return context
