@@ -305,6 +305,9 @@ def heatmap(request):
 
     normalized = request_filter.get('normalize_bioactivities')
 
+    method = str(request_filter.get('method'))
+    metric = str(request_filter.get('metric'))
+
     all_std_bioactivities = fetch_all_standard_bioactivities_data(
         desired_compounds,
         desired_targets,
@@ -436,22 +439,22 @@ def heatmap(request):
     # The data frame should encompass all of the bioactivities
     frame = [bioactivity for bioactivity in bioactivities]
     dataMatrix = np.array(df[frame])
-    distMat = scipy.spatial.distance.pdist(dataMatrix, metric='euclidean')
+    distMat = scipy.spatial.distance.pdist(dataMatrix, metric=metric)
     # GOTCHA
     # Small numbers appear to trigger a quirk in Scipy (removing them most expedient solution)
     distMat[abs(distMat)<1e-10] = 0.0
 
     # Cluster hierarchicaly using scipy
-    clusters = scipy.cluster.hierarchy.linkage(distMat, method='complete')
+    clusters = scipy.cluster.hierarchy.linkage(distMat, method=method)
     dendro = scipy.cluster.hierarchy.dendrogram(clusters, orientation='right', no_plot=True)
     row_leaves = [valid_compounds[i] for i in dendro['leaves']]
 
     # For *Columns*
 
-    distMat = scipy.spatial.distance.pdist(dataMatrix.T, metric='euclidean')
+    distMat = scipy.spatial.distance.pdist(dataMatrix.T, metric=metric)
     distMat[abs(distMat)<1e-10] = 0.0
 
-    clusters = scipy.cluster.hierarchy.linkage(distMat, method='complete')
+    clusters = scipy.cluster.hierarchy.linkage(distMat, method=method)
     dendro = scipy.cluster.hierarchy.dendrogram(clusters, orientation='right', no_plot=True)
     col_leaves = [frame[i] for i in dendro['leaves']]
 
