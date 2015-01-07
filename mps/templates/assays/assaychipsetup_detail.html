@@ -1,54 +1,123 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <legend><h1>Chip Setup: {{ object.assay_chip_id}}</h1></legend>
+    <legend><h1>Chip Setup: {{ object.assay_chip_id }}</h1></legend>
 
-    <div class="container-fluid">
-        <div class="col-xs-12">
-        <p><b>Organ Chip Study:</b> {{ object.assay_run_id }}</p>
-        <p><b>Organ Model:</b> {{ object.device }}</p>
-        <p><b>Test Type:</b> {{ object.chip_test_type }}</p>
-        <p><b>Compound:</b> {{ object.compound }} {{ object.concentration }} ({{ object.unit }})</p>
-        {% if object.scientist %}
-            <p><b>Scientist:</b> {{ object.scientist }}</p>
-        {% endif %}
-        {% if object.notebook %}
-            <p><b>Notebook:</b> {{ object.notebook }}, page {{ object.notebook_page }}</p>
-        {% endif %}
-        {% if object.notes %}
-            <p><b>Notes:</b> {{ object.notes }}</p>
-        {% endif %}
+    {#    <div class="container-fluid">#}
+    {#        <div class="col-xs-12">#}
+    {#        <p><b>Organ Chip Study:</b> {{ object.assay_run_id }}</p>#}
+    {#        <p><b>Organ Model:</b> {{ object.device }}</p>#}
+    {#        <p><b>Test Type:</b> {{ object.chip_test_type }}</p>#}
+    {#        <p><b>Compound:</b> {{ object.compound }} {{ object.concentration }} ({{ object.unit }})</p>#}
+    {#        {% if object.scientist %}#}
+    {#            <p><b>Scientist:</b> {{ object.scientist }}</p>#}
+    {#        {% endif %}#}
+    {#        {% if object.notebook %}#}
+    {#            <p><b>Notebook:</b> {{ object.notebook }}, page {{ object.notebook_page }}</p>#}
+    {#        {% endif %}#}
+    {#        {% if object.notes %}#}
+    {#            <p><b>Notes:</b> {{ object.notes }}</p>#}
+    {#        {% endif %}#}
+    {#        </div>#}
+    {#    </div>#}
+
+    <div class="row">
+        <div class="col-xs-3 lead text-right">
+            <b>Organ Chip Study:</b>
+        </div>
+        <div class="col-xs-9 lead">
+            {{ object.assay_run_id }}
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-xs-3 lead text-right">
+            <b>Organ Model:</b>
+        </div>
+        <div class="col-xs-9 lead">
+            {{ object.device }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-3 lead text-right">
+            <b>Test Type:</b>
+        </div>
+        <div class="col-xs-9 lead">
+            {{ object.chip_test_type }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-3 lead text-right">
+            <b>Compound:</b>
+        </div>
+        <div class="col-xs-9 lead">
+            {{ object.compound }} {{ object.concentration }} ({{ object.unit }})
+        </div>
+    </div>
+
+    {% if object.scientist %}
+        <div class="row">
+            <div class="col-xs-3 lead text-right">
+                <b>Scientist:</b>
+            </div>
+            <div class="col-xs-9 lead">
+                {{ object.scientist }}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if object.notebook %}
+        <div class="row">
+            <div class="col-xs-3 lead text-right">
+                <b>Notebook:</b>
+            </div>
+            <div class="col-xs-9 lead">
+                {{ object.notebook }}, page {{ object.notebook_page }}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if object.notes %}
+        <div class="row">
+            <div class="col-xs-3 lead text-right">
+                <b>Notes:</b>
+            </div>
+            <div class="col-xs-9 lead">
+                {{ object.notes }}
+            </div>
+        </div>
+    {% endif %}
 
     {% if object.assaychipcells_set.all %}
         <legend><b>Cells</b></legend>
         <table class="table table-striped">
             <thead>
-                <tr style="font-weight:bold;">
-                    <td>Cell Sample</td>
-                    <td>Cell Biosensor</td>
-                    <td>Density</td>
-                    <td>Unit</td>
-                    <td>Passage#</td>
-                </tr>
+            <tr style="font-weight:bold;">
+                <td>Cell Sample</td>
+                <td>Cell Biosensor</td>
+                <td>Density</td>
+                <td>Unit</td>
+                <td>Passage#</td>
+            </tr>
             </thead>
             <tbody>
-                {% for cell in object.assaychipcells_set.all %}
-                    <tr>
-                        <td>{{ cell.cell_sample }}</td>
-                        <td>{{ cell.cell_biosensor }}</td>
-                        <td>{{ cell.cellsample_density }}</td>
-                        <td>{{ cell.get_cellsample_density_unit_display }}</td>
-                        <td>{{ cell.cell_passage }}</td>
-                    </tr>
-                {% endfor %}
+            {% for cell in object.assaychipcells_set.all %}
+                <tr>
+                    <td>{{ cell.cell_sample }}</td>
+                    <td>{{ cell.cell_biosensor }}</td>
+                    <td>{{ cell.cellsample_density }}</td>
+                    <td>{{ cell.get_cellsample_density_unit_display }}</td>
+                    <td>{{ cell.cell_passage }}</td>
+                </tr>
+            {% endfor %}
             </tbody>
         </table>
     {% endif %}
 
-    <script>
-        $("p").addClass("lead");
-    </script>
+    {#    <script>#}
+    {#        $("p").addClass("lead");#}
+    {#    </script>#}
 
 {% endblock %}
