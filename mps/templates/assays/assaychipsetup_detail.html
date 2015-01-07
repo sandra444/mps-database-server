@@ -22,47 +22,47 @@
     {#    </div>#}
 
     <div class="row">
-        <div class="col-xs-3 lead text-right">
-            <b>Organ Chip Study:</b>
+        <div class="col-xs-2 lead text-right">
+            <b>Study:</b>
         </div>
-        <div class="col-xs-9 lead">
+        <div class="col-xs-10 lead">
             {{ object.assay_run_id }}
         </div>
     </div>
 
     <div class="row">
-        <div class="col-xs-3 lead text-right">
-            <b>Organ Model:</b>
+        <div class="col-xs-2 lead text-right">
+            <b>Model:</b>
         </div>
-        <div class="col-xs-9 lead">
+        <div class="col-xs-10 lead">
             {{ object.device }}
         </div>
     </div>
 
     <div class="row">
-        <div class="col-xs-3 lead text-right">
+        <div class="col-xs-2 lead text-right">
             <b>Test Type:</b>
         </div>
-        <div class="col-xs-9 lead">
+        <div class="col-xs-10 lead">
             {{ object.chip_test_type }}
         </div>
     </div>
 
     <div class="row">
-        <div class="col-xs-3 lead text-right">
+        <div class="col-xs-2 lead text-right">
             <b>Compound:</b>
         </div>
-        <div class="col-xs-9 lead">
+        <div class="col-xs-10 lead">
             {{ object.compound }} {{ object.concentration }} ({{ object.unit }})
         </div>
     </div>
 
     {% if object.scientist %}
         <div class="row">
-            <div class="col-xs-3 lead text-right">
+            <div class="col-xs-2 lead text-right">
                 <b>Scientist:</b>
             </div>
-            <div class="col-xs-9 lead">
+            <div class="col-xs-10 lead">
                 {{ object.scientist }}
             </div>
         </div>
@@ -70,10 +70,10 @@
 
     {% if object.notebook %}
         <div class="row">
-            <div class="col-xs-3 lead text-right">
+            <div class="col-xs-2 lead text-right">
                 <b>Notebook:</b>
             </div>
-            <div class="col-xs-9 lead">
+            <div class="col-xs-10 lead">
                 {{ object.notebook }}, page {{ object.notebook_page }}
             </div>
         </div>
@@ -81,10 +81,10 @@
 
     {% if object.notes %}
         <div class="row">
-            <div class="col-xs-3 lead text-right">
+            <div class="col-xs-2 lead text-right">
                 <b>Notes:</b>
             </div>
-            <div class="col-xs-9 lead">
+            <div class="col-xs-10 lead">
                 {{ object.notes }}
             </div>
         </div>
