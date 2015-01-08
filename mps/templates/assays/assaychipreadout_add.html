@@ -44,11 +44,19 @@
         <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Add Another</button>
     </h1>
 
-    {% if form.another.value and not form.errors and not formset.non_form_errors%}
+    {% if form.another.value and not form.errors and not formset.non_form_errors and formset.is_valid %}
         <div class="alert alert-success" role="alert">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
             <span class="sr-only">Success:</span>
             Successful Submission
+        </div>
+    {% endif %}
+
+    {% if formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ formset.non_form_errors }}
         </div>
     {% endif %}
 
@@ -131,21 +139,18 @@
     {{ formset.management_form }}
     <legend>Assays</legend>
 
-{# Need to refactor display of formset errors #}
-{#    {% if formset.errors %}#}
-{#        <div class="alert alert-danger" role="alert">#}
-{#            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
-{#            <span class="sr-only">Error:</span>#}
-{#            Missing Fields#}
-{#        </div>#}
-{#    {% endif %}#}
-
-    {% if formset.non_form_errors %}
-        <div class="alert alert-danger" role="alert">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            <span class="sr-only">Error:</span>
-            {{ formset.non_form_errors }}
-        </div>
+    {% if formset.errors %}
+        {% for dict in formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
     {% endif %}
 
     <a id="add_button" class="btn btn-success" role="button">Add Assay</a>
