@@ -95,19 +95,19 @@
 
         {#    <p>Study: {{ form.assay_device_readout }}</p>#}
 
-        {% if form.errors %}
-            {% for field in form %}
-                {% if field.errors %}
-                    {% for error in field.errors %}
-                        <div class="alert alert-danger" role="alert">
-                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                            <span class="sr-only">Error:</span>
-                            {{field.label}}: {{error}}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
+{#        {% if form.errors %}#}
+{#            {% for field in form %}#}
+{#                {% if field.errors %}#}
+{#                    {% for error in field.errors %}#}
+{#                        <div class="alert alert-danger" role="alert">#}
+{#                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                            <span class="sr-only">Error:</span>#}
+{#                            {{field.label}}: {{error}}#}
+{#                        </div>#}
+{#                    {% endfor %}#}
+{#                {% endif %}#}
+{#            {% endfor %}#}
+{#        {% endif %}#}
 
     {#    <div class="form-group">#}
     {#        <label for="study" class="col-sm-2 control-label">Study</label>#}
@@ -115,6 +115,16 @@
     {#          {{ form.assay_device_readout }}#}
     {#        </div>#}
     {#    </div>#}
+
+        {% if form.chip_setup.errors %}
+            {% for error in form.chip_setup.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    {{error}}
+                </div>
+            {% endfor %}
+        {% endif %}
 
         <div class="form-group has-error">
             <label for="chip_setup" class="col-sm-2 control-label">Setup</label>
@@ -127,11 +137,17 @@
         <legend>Results</legend>
 
         {% if formset.errors %}
-            <div class="alert alert-danger" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Error:</span>
-                Missing Fields
-            </div>
+            {% for dict in formset.errors %}
+                {% for key,value in dict.items %}
+                    {% if key %}
+                        <div class="alert alert-danger" role="alert">
+                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                            <span class="sr-only">Error:</span>
+                            {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
         {% endif %}
 
         <a id="add_button" class="btn btn-success" role="button">Add Result</a>
