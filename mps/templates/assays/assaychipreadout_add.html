@@ -52,14 +52,6 @@
         </div>
     {% endif %}
 
-    {% if formset.non_form_errors %}
-        <div class="alert alert-danger" role="alert">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            <span class="sr-only">Error:</span>
-            {{ formset.non_form_errors }}
-        </div>
-    {% endif %}
-
     {{ form.another.as_hidden }}
 
     <legend>Readout Details</legend>
@@ -73,12 +65,32 @@
 {#    <p>Notes: {{ form.notes }}</p>#}
 {#    <p>File: {{ form.file }}</p>#}
 
+    {% if form.chip_setup.errors %}
+        {% for error in form.chip_setup.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="form-group has-error">
         <label for="chip_setup" class="col-sm-2 control-label">Setup</label>
         <div class="col-sm-10">
           {{ form.chip_setup }}
         </div>
     </div>
+
+    {% if form.timeunit.errors %}
+        {% for error in form.timeunit.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <div class="form-group has-error">
         <label for="timeunit" class="col-sm-2 control-label">Time Unit</label>
@@ -138,6 +150,14 @@
 
     {{ formset.management_form }}
     <legend>Assays</legend>
+
+    {% if formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ formset.non_form_errors }}
+        </div>
+    {% endif %}
 
     {% if formset.errors %}
         {% for dict in formset.errors %}
