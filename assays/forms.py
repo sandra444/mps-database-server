@@ -18,6 +18,9 @@ class AssayChipReadoutForm(forms.ModelForm):
 
     class Meta(object):
         model = AssayChipReadout
+        widgets = {
+            'notebook_page': forms.TextInput(attrs={'size': 5}),
+        }
         exclude = ('created_by','modified_by','signed_off_by','signed_off_date','locked', 'group')
 
 class AssayChipSetupForm(forms.ModelForm):
