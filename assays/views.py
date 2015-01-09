@@ -18,6 +18,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
 from mps.filters import *
+from django.db.models import Q
 
 #TODO Refactor imports
 
@@ -121,7 +122,7 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         # Get group selection possibilities
-        groups = self.request.user.groups.all()
+        groups = self.request.user.groups.filter(~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
         context = super(AssayRunAdd, self).get_context_data(**kwargs)
         context['groups'] = groups
         return context
@@ -202,13 +203,17 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         formset = context['formset']
         # get user via self.request.user
         if formset.is_valid():
+            data = form.cleaned_data
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
             self.object.save()
             formset.instance = self.object
             formset.save()
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            if data['another']:
+                return self.render_to_response(self.get_context_data(form=form))
+            else:
+                return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -256,6 +261,7 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         formset = context['formset']
         # get user via self.request.user
         if formset.is_valid():
+            data = form.cleaned_data
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
@@ -265,7 +271,10 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
             if formset.__dict__['files']:
                 file = formset.__dict__['files']['file']
                 parseChipCSV(self.object,file)
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            if data['another']:
+                return self.render_to_response(self.get_context_data(form=form))
+            else:
+                return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
 

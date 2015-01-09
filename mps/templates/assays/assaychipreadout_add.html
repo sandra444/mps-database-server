@@ -38,7 +38,21 @@
 
 <form enctype="multipart/form-data" class="form-horizontal" method="post" >
     {% csrf_token %}
-    <h1>Add Chip Readout <button type="submit" class="btn btn-primary">Submit</button></h1>
+    <h1>
+        Add Chip Readout
+        <button type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
+        <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Add Another</button>
+    </h1>
+
+    {% if form.another.value and form.is_valid and formset.is_valid %}
+        <div class="alert alert-success" role="alert">
+            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            <span class="sr-only">Success:</span>
+            Successful Submission
+        </div>
+    {% endif %}
+
+    {{ form.another.as_hidden }}
 
     <legend>Readout Details</legend>
 {#    <p>Setup: {{ form.chip_setup }}</p>#}
@@ -51,12 +65,32 @@
 {#    <p>Notes: {{ form.notes }}</p>#}
 {#    <p>File: {{ form.file }}</p>#}
 
+    {% if form.chip_setup.errors %}
+        {% for error in form.chip_setup.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="form-group has-error">
         <label for="chip_setup" class="col-sm-2 control-label">Setup</label>
         <div class="col-sm-10">
           {{ form.chip_setup }}
         </div>
     </div>
+
+    {% if form.timeunit.errors %}
+        {% for error in form.timeunit.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <div class="form-group has-error">
         <label for="timeunit" class="col-sm-2 control-label">Time Unit</label>
@@ -65,12 +99,32 @@
         </div>
     </div>
 
+    {% if form.treatment_time_length.errors %}
+        {% for error in form.treatment_time_length.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="form-group">
         <label for="treatment_time_length" class="col-sm-2 control-label">Treatment Time Length</label>
         <div class="col-sm-10">
           {{ form.treatment_time_length }}
         </div>
     </div>
+
+    {% if form.readout_start_time.errors %}
+        {% for error in form.readout_start_time.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <div class="form-group">
         <label for="readout_start_time" class="col-sm-2 control-label">Readout Start Time</label>
@@ -79,17 +133,22 @@
         </div>
     </div>
 
+    {% if form.notebook_page.errors %}
+        {% for error in form.notebook_page.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="form-group">
         <label for="notebook" class="col-sm-2 control-label">Notebook</label>
         <div class="col-sm-10">
-          {{ form.notebook }}
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label for="notebook_page" class="col-sm-2 control-label">Notebook Page</label>
-        <div class="col-sm-10">
-          {{ form.notebook_page }}
+            {{ form.notebook }}
+            <label for="notebook_page" style="padding-left: 20px;padding-right: 10px;">Notebook Page</label>
+            {{ form.notebook_page }}
         </div>
     </div>
 
@@ -107,6 +166,16 @@
 {#        </div>#}
 {#    </div>#}
 
+    {% if form.file.errors %}
+        {% for error in form.file.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="form-group">
         <label for="file" class="col-sm-2 control-label">File</label>
         <div class="col-sm-10">
@@ -117,20 +186,26 @@
     {{ formset.management_form }}
     <legend>Assays</legend>
 
-    {% if formset.errors %}
-        <div class="alert alert-danger" role="alert">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            <span class="sr-only">Error:</span>
-            Missing Fields
-        </div>
-    {% endif %}
-
     {% if formset.non_form_errors %}
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
             <span class="sr-only">Error:</span>
             {{ formset.non_form_errors }}
         </div>
+    {% endif %}
+
+    {% if formset.errors %}
+        {% for dict in formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
     {% endif %}
 
     <a id="add_button" class="btn btn-success" role="button">Add Assay</a>

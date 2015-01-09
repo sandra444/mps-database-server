@@ -1,19 +1,66 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <legend><h1>Organ Chip Study: {{ object.assay_run_id}}</h1></legend>
+    <legend><h1>Organ Chip Study: {{ object.assay_run_id }}</h1></legend>
 
-    <div class="container-fluid">
-        <div class="col-xs-12">
-        <p><b>Name:</b> {{ object.name }}</p>
-        <p><b>Study Types:</b> {{ object.study_types }}</p>
-        <p><b>Center Name:</b> {{ object.center_id }}</p>
-        <p><b>Start Date:</b> {{ object.start_date }}</p>
-        {% if object.description %}
-            <p><b>Description:</b> {{ object.description }}</p>
-        {% endif %}
+    {#    <div class="container-fluid">#}
+    {#        <div class="col-xs-12">#}
+    {#        <p><b>Name:</b> {{ object.name }}</p>#}
+    {#        <p><b>Study Types:</b> {{ object.study_types }}</p>#}
+    {#        <p><b>Center Name:</b> {{ object.center_id }}</p>#}
+    {#        <p><b>Start Date:</b> {{ object.start_date }}</p>#}
+    {#        {% if object.description %}#}
+    {#            <p><b>Description:</b> {{ object.description }}</p>#}
+    {#        {% endif %}#}
+    {#        </div>#}
+    {#    </div>#}
+
+    <div class="row">
+        <div class="col-xs-2 lead text-right">
+            <b>Name:</b>
+        </div>
+        <div class="col-xs-10 lead">
+            {{ object.name }}
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-xs-2 lead text-right">
+            <b>Types:</b>
+        </div>
+        <div class="col-xs-10 lead">
+            {{ object.study_types }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-2 lead text-right">
+            <b>Center:</b>
+        </div>
+        <div class="col-xs-10 lead">
+            {{ object.center_id }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-2 lead text-right">
+            <b>Start Date:</b>
+        </div>
+        <div class="col-xs-10 lead">
+            {{ object.start_date }}
+        </div>
+    </div>
+
+    {% if object.description %}
+        <div class="row">
+            <div class="col-xs-2 lead text-right">
+                <b>Description:</b>
+            </div>
+            <div class="col-xs-10 lead">
+                {{ object.description }}
+            </div>
+        </div>
+    {% endif %}
 
     {% if object.file %}
         <legend><b>Bulk Upload File</b></legend>
@@ -21,8 +68,8 @@
         <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
     {% endif %}
 
-    <script>
-        $("p").addClass("lead");
-    </script>
+    {#    <script>#}
+    {#        $("p").addClass("lead");#}
+    {#    </script>#}
 
 {% endblock %}

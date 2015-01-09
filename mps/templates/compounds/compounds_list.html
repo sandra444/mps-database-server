@@ -11,6 +11,7 @@
                 <tr>
                     <th>Name</th>
                     <th>CHEMBL ID</th>
+                    <th>Synonyms</th>
                     <th>Known Drug</th>
 {#                    <th>Last Update</th>#}
                     <th>Image</th>
@@ -21,6 +22,7 @@
                 <tr>
                     <th>Name</th>
                     <th>CHEMBL ID</th>
+                    <th>Synonyms</th>
                     <th>Known Drug</th>
 {#                    <th>Last Update</th>#}
                     <th>Image</th>
@@ -32,6 +34,7 @@
                 <tr class="compound" id={{ compound.id }} name={{ compound.name }}>
                     <td><a href="{{ compound.id }}">{{ compound.name }}</a></td>
                     <td><a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.chemblid }}">{{ compound.chemblid }}</a></td>
+                    <td>{{ compound.synonyms }}</td>
                     <td>{{ compound.known_drug }}</td>
 {#                    <td>{{ compound.last_update }}</td>#}
                     <td><img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}"></td>
@@ -45,7 +48,15 @@
         $(document).ready(function() {
             $('#compounds').DataTable({
                 "aoColumnDefs": [
-                    { "bSortable": false, "aTargets": [3] }
+                    {
+                        "bSortable": false,
+                        "aTargets": [4]
+                    },
+                    {
+                        "targets": [2],
+                        "visible": false,
+                        "searchable": true
+                    }
                 ],
                 "iDisplayLength": 25
                 // If one wants to display top and bottom

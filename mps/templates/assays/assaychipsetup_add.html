@@ -26,7 +26,21 @@
 
 <form class="form-horizontal" method="post" >
     {% csrf_token %}
-    <h1>Assay Chip Setup <button type="submit" class="btn btn-primary">Submit</button></h1>
+    <h1>
+        Assay Chip Setup
+        <button type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
+        <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Add Another</button>
+    </h1>
+
+    {% if form.another.value and form.is_valid and formset.is_valid %}
+        <div class="alert alert-success" role="alert">
+            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            <span class="sr-only">Success:</span>
+            Successful Submission
+        </div>
+    {% endif %}
+
+    {{ form.another.as_hidden }}
 
     <legend>Chip Setup Details</legend>
 {#    <p>Study: {{ form.assay_run_id }}</p>#}
@@ -41,19 +55,19 @@
 {#    <p>Notebook Page: {{ form.notebook_page }}</p>#}
 {#    <p>Notes: {{ form.notes }}</p>#}
 
-    {% if form.errors %}
-        {% for field in form %}
-            {% if field.errors %}
-                {% for error in field.errors %}
-                    <div class="alert alert-danger" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
-                        {{field.label}}: {{error}}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endfor %}
-    {% endif %}
+{#    {% if form.errors %}#}
+{#        {% for field in form %}#}
+{#            {% if field.errors %}#}
+{#                {% for error in field.errors %}#}
+{#                    <div class="alert alert-danger" role="alert">#}
+{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                        <span class="sr-only">Error:</span>#}
+{#                        {{field.label}}: {{error}}#}
+{#                    </div>#}
+{#                {% endfor %}#}
+{#            {% endif %}#}
+{#        {% endfor %}#}
+{#    {% endif %}#}
 
 {#    <div class="form-group">#}
 {#        <label for="assay_run_id" class="col-sm-2 control-label">Organ Chip Study ID</label>#}
@@ -62,12 +76,32 @@
 {#        </div>#}
 {#    </div>#}
 
+    {% if form.setup_date.errors %}
+        {% for error in form.setup_date.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="form-group has-error">
         <label for="setup_date" class="col-sm-2 control-label">Setup Date</label>
         <div class="col-sm-10">
           {{ form.setup_date }} [yyyy-mm-dd]
         </div>
     </div>
+
+    {% if form.device.errors %}
+        {% for error in form.device.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <div class="form-group has-error">
         <label for="device" class="col-sm-2 control-label">Organ Chip Name</label>
@@ -76,6 +110,16 @@
         </div>
     </div>
 
+    {% if form.assay_chip_id.errors %}
+        {% for error in form.assay_chip_id.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="form-group has-error">
         <label for="assay_chip_id" class="col-sm-2 control-label">Chip ID/Barcode</label>
         <div class="col-sm-10">
@@ -83,12 +127,32 @@
         </div>
     </div>
 
+    {% if form.chip_test_type.errors %}
+        {% for error in form.chip_test_type.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="form-group has-error">
         <label for="chip_test_type" class="col-sm-2 control-label">Test Type</label>
         <div class="col-sm-10">
           {{ form.chip_test_type }}
         </div>
     </div>
+
+    {% if form.concentration.errors %}
+        {% for error in form.concentration.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <div class="form-group">
         <label for="compound" class="col-sm-2 control-label">Compound</label>
@@ -107,6 +171,16 @@
           {{ form.scientist }}
         </div>
     </div>
+
+    {% if form.notebook_page.errors %}
+        {% for error in form.notebook_page.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <div class="form-group">
         <label for="notebook" class="col-sm-2 control-label">Notebook</label>
@@ -135,11 +209,17 @@
     <legend>Model Cells</legend>
 
     {% if formset.errors %}
-        <div class="alert alert-danger" role="alert">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            <span class="sr-only">Error:</span>
-            Missing Fields
-        </div>
+        {% for dict in formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
     {% endif %}
 
     <a id="add_button" class="btn btn-success" role="button">Add Cell Type</a> <span>Click a magnifying glass to see a list of available cell samples:</span>
