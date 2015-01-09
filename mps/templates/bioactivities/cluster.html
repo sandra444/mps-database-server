@@ -5,6 +5,18 @@
 <script src="{% static "bioactivities/cluster.js" %}"></script>
 {% endblock %}
 
+{#        <div hidden class="row">#}
+{#            <div class="alert alert-danger" role="alert" id="error_message">#}
+{#                <p>#}
+{#                    The server could not find the result to your request.#}
+{#                </p>#}
+{##}
+{#                <p>#}
+{#                    Please try a different query.#}
+{#                </p>#}
+{#            </div>#}
+{#        </div>#}
+
 {% block content %}
 
     <script>
@@ -21,12 +33,12 @@
         }
     </style>
 
-    <div class="container">
+    <div class="container" id="selection">
         <div class="row">
             <div class="col-xs-12">
                 <div class="text-center">
                     {% block submit %}
-                    <button class="btn btn-xlarge btn-primary text-center">
+                    <button class="btn btn-xlarge btn-primary text-center" id="submit">
                         Generate Dendrogram
                     </button>
                     {% endblock %}
@@ -34,17 +46,6 @@
             </div>
         </div>
         <hr>
-        <div hidden class="row">
-            <div class="alert alert-danger" role="alert" id="error_message">
-                <p>
-                    The server could not find the result to your request.
-                </p>
-
-                <p>
-                    Please try a different query.
-                </p>
-            </div>
-        </div>
 
         <div class="row text-center">
             <div class="col-xs-4 col-xs-offset-2">
@@ -290,8 +291,49 @@
     </div>
 
     {% block graphic %}
-        <div id="cluster">
+        <style>
+        @-ms-viewport {
+          width: device-width;
+        }
+
+        .node circle {
+          fill: #fff;
+          stroke: steelblue;
+          stroke-width: 1.5px;
+        }
+
+        .node {
+          font: 10px sans-serif;
+        }
+
+        .node-s circle {
+          fill: steelblue;
+          stroke: #fff;
+          stroke-width: 2px;
+        }
+
+        .node-s {
+          font: 10px serif;
+          font-weight: bold;
+        }
+
+        .link {
+          fill: none;
+          stroke: #ccc;
+          stroke-width: 1.5px;
+        }
+        </style>
+
+        <div class="container">
+            <div id="query" class="col-xs-3 affix">
+            </div>
+            <div id="cluster" class="col-xs-6 col-xs-offset-3">
+            </div>
+            <div id="compound" class="col-xs-3 col-xs-offset-9 affix">
+            </div>
         </div>
+
+        <div id="spinner"></div>
     {% endblock %}
 
 {% endblock %}

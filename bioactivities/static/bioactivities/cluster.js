@@ -198,6 +198,50 @@ $(document).ready(function () {
 //                    $scope.error_message_visible = true;
 //                }
 //            );
+
+        // Get bioactivities
+        $("#bioactivities input[type='checkbox']:checked").each( function() {
+            bioactivities_filter.push({"name":this.value, "is_selected":this.checked});
+        });
+
+        // Get targets
+        $("#targets input[type='checkbox']:checked").each( function() {
+            targets_filter.push({"name":this.value, "is_selected":this.checked});
+        });
+
+        // Get compounds
+        $("#compounds input[type='checkbox']:checked").each( function() {
+            compounds_filter.push({"name":this.value, "is_selected":this.checked});
+        });
+
+        // Hide Selection html
+        $('#selection').prop('hidden',true);
+
+        $.ajax({
+            url:  '/bioactivities/gen_cluster/',
+            type: 'POST',
+            contentType: 'application/json',
+            // Remember to convert to string
+            data: JSON.stringify({
+                'bioactivities_filter': bioactivities_filter,
+                'targets_filter': targets_filter,
+                'compounds_filter': compounds_filter,
+                'target_types_filter': target_types,
+                'organisms_filter': organisms,
+                'normalize_bioactivities': normalize_bioactivities,
+                'metric': metric,
+                'method': method,
+                'chemical_properties': chemical_properties
+            }),
+            success: function (json) {
+                console.log(json);
+                cluster(json.data_json, json.bioactivities, json.compounds);
+
+            },
+            error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
     }
 
     function refresh() {
@@ -480,5 +524,13 @@ $(document).ready(function () {
     var compounds = [];
     var bioactivities = [];
 
+    var targets_filter = [];
+    var compounds_filter = [];
+    var bioactivities_filter = [];
+
     refresh();
+
+    $('#submit').click(function(evt) {
+        submit();
+    });
 });
