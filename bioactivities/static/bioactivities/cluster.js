@@ -133,7 +133,9 @@ $(document).ready(function () {
         d3.select(self.frameElement).style("height", height + "px");
 
         // Display the original query in terms of what bioactivity-target pairs were used
-        var query = "<div style='width: 100%;height: 600px !important;overflow: scroll;'><table class='table table-striped'><thead><tr><td><b>Target</b></td><td><b>Bioactivity</b></td></tr></thead>";
+        var queryHeight = 600;
+        var queryWidth = $('#query_box').width();
+        var query = "<div style='width:" + queryWidth + "px; height: "+ queryHeight + "px;!important;overflow: scroll;'><table class='table table-striped'><thead><tr><td><b>Target</b></td><td><b>Bioactivity</b></td></tr></thead>";
 
         for (var i in bioactivities){
             bioactivity = bioactivities[i].split('_');
