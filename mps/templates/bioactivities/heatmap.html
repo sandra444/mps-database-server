@@ -1,0 +1,42 @@
+{% extends "bioactivities/cluster.html" %}
+{% load staticfiles %}
+
+{% block submit %}
+    <button class="btn btn-xlarge btn-primary text-center">
+        Generate Heatmap
+    </button>
+{% endblock %}
+
+{% block extra_row %}
+    <hr>
+    <div class="row text-center">
+        <div class="col-xs-4 col-xs-offset-2">
+            <label>Method
+                <select class="form-control" ng-model="method" ng-change="new_method(method)">
+                    <option>single</option>
+                    <option>complete</option>
+                    <option>average</option>
+                    <option>weighted</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="col-xs-4">
+            <label>Metric
+                <select class="form-control" ng-model="metric" ng-change="new_metric(metric)">
+                    <option>euclidean</option>
+                    <option>cosine</option>
+                    <option>cityblock</option>
+                    <option>correlation</option>
+                    <option>minkowski</option>
+                </select>
+            </label>
+        </div>
+    </div>
+    <hr>
+{% endblock %}
+
+{% block graphic %}
+    <div id="heatmap">
+    </div>
+{% endblock %}
