@@ -1,6 +1,10 @@
 {% extends "bioactivities/cluster.html" %}
 {% load staticfiles %}
 
+{% block load %}
+<script src="{% static "bioactivities/render_heatmap.js" %}"></script>
+{% endblock %}
+
 {% block submit %}
     <button class="btn btn-xlarge btn-primary text-center" id="submit">
         Generate Heatmap
@@ -9,34 +13,45 @@
 
 {% block extra_row %}
     <hr>
-    <div class="row text-center">
-        <div class="col-xs-4 col-xs-offset-2">
-            <label>Method
-                <select class="form-control" ng-model="method" ng-change="new_method(method)">
-                    <option>single</option>
-                    <option>complete</option>
-                    <option>average</option>
-                    <option>weighted</option>
-                </select>
-            </label>
-        </div>
+        <div class="row text-center">
+            <div class="col-xs-6">
+                <label>Method
+                    <select id="method" class="form-control">
+                        <option selected>single</option>
+                        <option>complete</option>
+                        <option>average</option>
+                        <option>weighted</option>
+                    </select>
+                </label>
+            </div>
 
-        <div class="col-xs-4">
-            <label>Metric
-                <select class="form-control" ng-model="metric" ng-change="new_metric(metric)">
-                    <option>euclidean</option>
-                    <option>cosine</option>
-                    <option>cityblock</option>
-                    <option>correlation</option>
-                    <option>minkowski</option>
-                </select>
-            </label>
+            <div class="col-xs-6">
+                <label>Metric
+                    <select id="metric" class="form-control">
+                        <option selected>euclidean</option>
+                        <option>cosine</option>
+                        <option>cityblock</option>
+                        <option>correlation</option>
+                        <option>minkowski</option>
+                    </select>
+                </label>
+            </div>
         </div>
-    </div>
     <hr>
 {% endblock %}
 
 {% block graphic %}
-    <div id="heatmap">
+    <div class="container-fluid">
+        <div ng-if="heatmap_data_csv">
+            <div id="download" class="container text-center">
+                <a class="btn btn-xlarge btn-primary btn-lg">Download Heatmap</a>
+            </div>
+            <div id="heatmap" style='overflow:auto; width:100%; height:100%;'>
+            </div>
+            <div id="heatmap_legend">
+            </div>
+        </div>
     </div>
+
+    <div id="spinner"></div>
 {% endblock %}
