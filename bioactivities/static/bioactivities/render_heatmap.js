@@ -794,10 +794,10 @@ $(document).ready(function () {
     });
 
     // Initial truth normalize
-    var normalize_bioactivities = $('#normalize_bioactivities').val();
+    var normalize_bioactivities = $('#normalize_bioactivities').prop('checked');
     // Listen normalize
     $('#normalize_bioactivities').change(function(evt) {
-        normalize_bioactivities = $('#normalize_bioactivities').val();
+        normalize_bioactivities = $('#normalize_bioactivities').prop('checked');
     });
 
     // Initial metric
