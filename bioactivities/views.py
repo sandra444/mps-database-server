@@ -3,6 +3,7 @@
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render_to_response
+from django.template import RequestContext
 
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
@@ -166,7 +167,9 @@ def gen_cluster(request):
         return HttpResponse()
 
 def view_cluster(request):
-    return render_to_response('bioactivities/cluster.html')
+    c = RequestContext(request)
+    return render_to_response('bioactivities/cluster.html', c)
 
 def view_heatmap(request):
-    return render_to_response('bioactivities/heatmap.html')
+    c = RequestContext(request)
+    return render_to_response('bioactivities/heatmap.html', c)
