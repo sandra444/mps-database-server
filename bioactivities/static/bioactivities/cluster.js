@@ -7,15 +7,11 @@ $(document).ready(function () {
         // Hide error
         $('#error_message').prop('hidden',true);
 
-//        console.log(cluster_data_json);
-
         // Clear old (if present)
         $('#cluster').html('');
-//        console.log($('#cluster').html());
         $('#query').html('');
-//        console.log($('#query').html());
         $('#compound').html('');
-//        console.log($('#compound').html());
+
 
         var height = null;
         var find = Object.keys(compounds).length;

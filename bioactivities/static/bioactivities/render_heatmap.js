@@ -7,13 +7,12 @@ $(document).ready(function () {
         // Hide error
         $('#error_message').prop('hidden',true);
 
-//        console.log(heatmap_data_csv);
-
         // Clear old (if present)
         $('#heatmap').html('');
         $('#heatmap_legend').html('');
-//        console.log($('#heatmap').html());
-//        console.log($('#heatmap_legend').html());
+
+        // Add href to download link
+        $("#download").attr("href", heatmap_data_csv);
 
         var margin = { top: 650, right: 50, bottom: 50, left: 125 };
         var cell_size = 10;
