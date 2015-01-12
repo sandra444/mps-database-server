@@ -3,6 +3,7 @@
 
 {% block load %}
 <script src="{% static "bioactivities/render_heatmap.js" %}"></script>
+<script src="{% static "js/spin.min.js" %}"></script>
 {% endblock %}
 
 {% block submit %}
@@ -41,7 +42,7 @@
 {% endblock %}
 
 {% block graphic %}
-    <div class="container-fluid">
+    <div hidden id="graphic" class="container-fluid">
         <div ng-if="heatmap_data_csv">
             <div id="download" class="container text-center">
                 <a class="btn btn-xlarge btn-primary btn-lg">Download Heatmap</a>

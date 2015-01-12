@@ -3,19 +3,8 @@
 
 {% block load %}
 <script src="{% static "bioactivities/cluster.js" %}"></script>
+<script src="{% static "js/spin.min.js" %}"></script>
 {% endblock %}
-
-{#        <div hidden class="row">#}
-{#            <div class="alert alert-danger" role="alert" id="error_message">#}
-{#                <p>#}
-{#                    The server could not find the result to your request.#}
-{#                </p>#}
-{##}
-{#                <p>#}
-{#                    Please try a different query.#}
-{#                </p>#}
-{#            </div>#}
-{#        </div>#}
 
 {% block content %}
 
@@ -32,6 +21,20 @@
             margin: 0;
         }
     </style>
+
+    {% block error %}
+        <div class="row">
+            <div hidden class="alert alert-danger" role="alert" id="error_message">
+                <p>
+                    The server could not find the result to your request.
+                </p>
+
+                <p>
+                    Please try a different query.
+                </p>
+            </div>
+        </div>
+    {% endblock %}
 
     <div class="container" id="selection">
         <div class="row">
@@ -324,7 +327,7 @@
         }
         </style>
 
-        <div class="container-fluid">
+        <div hidden id="graphic" class="container-fluid">
             <div id="query_box" class="col-xs-3">
                 <div id="query" class="affix"></div>
             </div>
@@ -334,6 +337,34 @@
                 <div id="compound" class="affix"></div>
             </div>
         </div>
+
+    {% endblock %}
+
+    {% block spinner %}
+        <script>
+            // define a spinner but do not show it yet
+
+        window.spinner = new Spinner(
+            {
+                lines: 11, // The number of lines to draw
+                length: 40, // The length of each line
+                width: 15, // The line thickness
+                radius: 42, // The radius of the inner circle
+                corners: 1, // Corner roundness (0..1)
+                rotate: 0, // The rotation offset
+                direction: 1, // 1: clockwise, -1: counterclockwise
+                color: '#000', // #rgb or #rrggbb or array of colors
+                speed: 1.2, // Rounds per second
+                trail: 100, // Afterglow percentage
+                shadow: true, // Whether to render a shadow
+                hwaccel: true, // Whether to use hardware acceleration
+                className: 'spinner', // The CSS class to assign to the spinner
+                zIndex: 2e9, // The z-index (defaults to 2000000000)
+                top: '50%', // Top position relative to parent
+                left: '50%' // Left position relative to parent
+            }
+        );
+        </script>
 
         <div id="spinner"></div>
     {% endblock %}

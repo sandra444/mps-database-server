@@ -1,6 +1,9 @@
 $(document).ready(function () {
 
     function cluster(cluster_data_json, bioactivities, compounds) {
+        
+        // Show graphic
+        $('#graphic').prop('hidden',false);
 
         var height = null;
         var find = Object.keys(compounds).length;
@@ -215,9 +218,16 @@ $(document).ready(function () {
         $("#compounds input[type='checkbox']:checked").each( function() {
             compounds_filter.push({"name":this.value, "is_selected":this.checked});
         });
-
+        
         // Hide Selection html
         $('#selection').prop('hidden',true);
+        // Hide error
+        $('#error_message').prop('hidden',true);
+        
+        // Show spinner
+        window.spinner.spin(
+            document.getElementById("spinner")
+        );
 
         $.ajax({
             url:  '/bioactivities/gen_cluster/',
@@ -236,12 +246,32 @@ $(document).ready(function () {
                 'chemical_properties': chemical_properties
             }),
             success: function (json) {
-                console.log(json);
-                cluster(json.data_json, json.bioactivities, json.compounds);
+                // Stop spinner
+                window.spinner.stop();
+                //console.log(json);
+                
+                if (json.data_json) {
+                    //console.log(json);
+                    cluster(json.data_json, json.bioactivities, json.compounds);
+                }
+                else {
+                    // Show error
+                    $('#error_message').prop('hidden',false);
+                    // Show Selection
+                    $('#selection').prop('hidden',false);
+                }
 
             },
             error: function (xhr, errmsg, err) {
+                // Stop spinner
+                window.spinner.stop();
+                
                 console.log(xhr.status + ": " + xhr.responseText);
+                
+                // Show error
+                $('#error_message').prop('hidden',false);
+                // Show Selection
+                $('#selection').prop('hidden',false);
             }
         });
     }
@@ -366,8 +396,14 @@ $(document).ready(function () {
     }
 
     // Currently testing, should grab these with a function in refresh (KEEP THIS FORMAT)
-    var target_types = [{"name":"Cell-Line","is_selected":false},{"name":"Organism","is_selected":false},{"name":"Single Protein","is_selected":true},{"name":"Tissue","is_selected":false}];
-    var organisms = [{"name":"Homo Sapiens","is_selected":true},{"name":"Rattus Norvegicus","is_selected":true},{"name":"Canis Lupus Familiaris","is_selected":false}];
+    var target_types = [];
+    var organisms = [];
+    $("#control_target_types input[type='checkbox']:checked").each( function() {
+        target_types.push({"name":this.value, "is_selected":this.checked});
+    });
+    $("#control_organisms input[type='checkbox']:checked").each( function() {
+        organisms.push({"name":this.value, "is_selected":this.checked});
+    });
 
     // Functions to acquire new lists for target_types
     var control_target_types = $("#control_target_types input[type='checkbox']");

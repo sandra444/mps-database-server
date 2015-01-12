@@ -8,7 +8,7 @@ import os
 import settings
 
 def main(request):
-    return HttpResponse(open(os.path.join(settings.STATIC_ROOT, 'mps.html')))
+    return render_to_response('index.html')
 
 def login(request):
     if request.user.is_active:
