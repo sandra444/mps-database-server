@@ -350,7 +350,7 @@ $(document).ready(function () {
                 $('#targets').html('');
                 // Add targets
                 for (var i in targets) {
-                    var row = "<tr>";
+                    var row = "<tr id='" + targets[i].name.replace(/ /g,"_") + "'>";
                     row += "<td>" + "<input type='checkbox' value='" + targets[i].name + "'></td>";
                     row += "<td>" + targets[i].name + "</td>";
                     $('#targets').append( row );
@@ -363,7 +363,8 @@ $(document).ready(function () {
                 $('#compounds').html('');
                 // Add compounds
                 for (var i in compounds) {
-                    var row = "<tr>";
+                    // Note added 'c' to avoid confusion with graphic
+                    var row = "<tr id='c" + compounds[i].name.replace(/ /g,"_") + "'>";
                     row += "<td>" + "<input type='checkbox' value='" + compounds[i].name + "'></td>";
                     row += "<td>" + compounds[i].name + "</td>";
                     $('#compounds').append( row );
@@ -376,7 +377,7 @@ $(document).ready(function () {
                 $('#bioactivities').html('');
                 // Add targets
                 for (var i in bioactivities) {
-                    var row = "<tr>";
+                    var row = "<tr id='" + bioactivities[i].name.replace(/ /g,"_") + "'>";
                     row += "<td>" + "<input type='checkbox' value='" + bioactivities[i].name + "'></td>";
                     row += "<td>" + bioactivities[i].name + "</td>";
                     $('#bioactivities').append(row);
@@ -594,4 +595,55 @@ $(document).ready(function () {
         $('#graphic').prop('hidden',true);
         $('#selection').prop('hidden',false)
     });
+
+    var bioactivity_search = $('#bioactivity_filter');
+    var target_search = $('#target_filter');
+    var compound_search = $('#compound_filter');
+
+    var bioactivity_string = bioactivity_search.val().toLowerCase().replace(/ /g,"_");
+    var target_string = target_search.val().toLowerCase().replace(/ /g,"_");
+    var compound_string = 'c' + compound_search.val().toLowerCase().replace(/ /g,"_");
+
+    // When the bioactivity search changes
+    bioactivity_search.on('input',function() {
+        bioactivity_string = bioactivity_search.val().toLowerCase().replace(/ /g,"_");
+
+        $("#bioactivities tr").each(function() {
+            if (this.id.toLowerCase().indexOf(bioactivity_string) > -1) {
+                this.hidden = false;
+            }
+            else {
+                this.hidden = true;
+            }
+        });
+    }).trigger('input');
+
+    // When the target search changes
+    target_search.on('input',function() {
+        target_string = target_search.val().toLowerCase().replace(/ /g,"_");
+
+        $("#targets tr").each(function() {
+            if (this.id.toLowerCase().indexOf(target_string) > -1) {
+                this.hidden = false;
+            }
+            else {
+                this.hidden = true;
+            }
+        });
+    }).trigger('input');
+
+    // When the compound search changes
+    compound_search.on('input',function() {
+        // Note added 'c' to avoid confusion with graphic
+        compound_string = 'c' + compound_search.val().toLowerCase().replace(/ /g,"_");
+
+        $("#compounds tr").each(function() {
+            if (this.id.toLowerCase().indexOf(compound_string) > -1) {
+                this.hidden = false;
+            }
+            else {
+                this.hidden = true;
+            }
+        });
+    }).trigger('input');
 });
