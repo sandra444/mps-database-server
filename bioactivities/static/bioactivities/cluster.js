@@ -1,9 +1,21 @@
 $(document).ready(function () {
 
     function cluster(cluster_data_json, bioactivities, compounds) {
-        
+
         // Show graphic
         $('#graphic').prop('hidden',false);
+        // Hide error
+        $('#error_message').prop('hidden',true);
+
+//        console.log(cluster_data_json);
+
+        // Clear old (if present)
+        $('#cluster').html('');
+//        console.log($('#cluster').html());
+        $('#query').html('');
+//        console.log($('#query').html());
+        $('#compound').html('');
+//        console.log($('#compound').html());
 
         var height = null;
         var find = Object.keys(compounds).length;
@@ -204,6 +216,11 @@ $(document).ready(function () {
 //                }
 //            );
 
+        // Clear all filters
+        bioactivities_filter = [];
+        targets_filter = [];
+        compounds_filter = [];
+
         // Get bioactivities
         $("#bioactivities input[type='checkbox']:checked").each( function() {
             bioactivities_filter.push({"name":this.value, "is_selected":this.checked});
@@ -218,12 +235,12 @@ $(document).ready(function () {
         $("#compounds input[type='checkbox']:checked").each( function() {
             compounds_filter.push({"name":this.value, "is_selected":this.checked});
         });
-        
+
         // Hide Selection html
         $('#selection').prop('hidden',true);
         // Hide error
         $('#error_message').prop('hidden',true);
-        
+
         // Show spinner
         window.spinner.spin(
             document.getElementById("spinner")
@@ -249,7 +266,7 @@ $(document).ready(function () {
                 // Stop spinner
                 window.spinner.stop();
                 //console.log(json);
-                
+
                 if (json.data_json) {
                     //console.log(json);
                     cluster(json.data_json, json.bioactivities, json.compounds);
@@ -265,9 +282,9 @@ $(document).ready(function () {
             error: function (xhr, errmsg, err) {
                 // Stop spinner
                 window.spinner.stop();
-                
+
                 console.log(xhr.status + ": " + xhr.responseText);
-                
+
                 // Show error
                 $('#error_message').prop('hidden',false);
                 // Show Selection
@@ -570,5 +587,11 @@ $(document).ready(function () {
 
     $('#submit').click(function(evt) {
         submit();
+    });
+
+    // Return to selection
+    $('#back').click(function(evt) {
+        $('#graphic').prop('hidden',true);
+        $('#selection').prop('hidden',false)
     });
 });

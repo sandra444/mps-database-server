@@ -7,6 +7,14 @@ $(document).ready(function () {
         // Hide error
         $('#error_message').prop('hidden',true);
 
+//        console.log(heatmap_data_csv);
+
+        // Clear old (if present)
+        $('#heatmap').html('');
+        $('#heatmap_legend').html('');
+//        console.log($('#heatmap').html());
+//        console.log($('#heatmap_legend').html());
+
         var margin = { top: 650, right: 50, bottom: 50, left: 125 };
         var cell_size = 10;
         var legend_element_width = cell_size * 3;
@@ -481,6 +489,11 @@ $(document).ready(function () {
 
     function submit() {
 
+        // Clear all filters
+        bioactivities_filter = [];
+        targets_filter = [];
+        compounds_filter = [];
+
         // Get bioactivities
         $("#bioactivities input[type='checkbox']:checked").each( function() {
             bioactivities_filter.push({"name":this.value, "is_selected":this.checked});
@@ -495,12 +508,12 @@ $(document).ready(function () {
         $("#compounds input[type='checkbox']:checked").each( function() {
             compounds_filter.push({"name":this.value, "is_selected":this.checked});
         });
-        
+
         // Hide Selection html
         $('#selection').prop('hidden',true);
         // Hide error
         $('#error_message').prop('hidden',true);
-        
+
         // Show spinner
         window.spinner.spin(
             document.getElementById("spinner")
@@ -524,7 +537,7 @@ $(document).ready(function () {
             success: function (json) {
                 // Stop spinner
                 window.spinner.stop();
-                
+
                 if (json.data_csv) {
                     //console.log(json);
                     heatmap(json.data_csv, json.row_order, json.col_order);
@@ -539,9 +552,9 @@ $(document).ready(function () {
             error: function (xhr, errmsg, err) {
                 // Stop spinner
                 window.spinner.stop();
-                
+
                 console.log(xhr.status + ": " + xhr.responseText);
-                
+
                 // Show error
                 $('#error_message').prop('hidden',false);
                 // Show Selection
@@ -814,6 +827,12 @@ $(document).ready(function () {
 
     $('#submit').click(function(evt) {
         submit();
+    });
+
+    // Return to selection
+    $('#back').click(function(evt) {
+        $('#graphic').prop('hidden',true);
+        $('#selection').prop('hidden',false)
     });
 });
 
