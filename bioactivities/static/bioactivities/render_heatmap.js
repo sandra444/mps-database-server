@@ -568,11 +568,6 @@ $(document).ready(function () {
         // Disable everything
         $(":input").prop("disabled",true);
 
-        // Reset select all boxes
-        $("#all_bioactivities").prop('checked',false);
-        $("#all_targets").prop('checked',false);
-        $("#all_compounds").prop('checked',false);
-
         $.ajax({
             url:  '/bioactivities/all_data',
             type: "GET",
@@ -628,6 +623,11 @@ $(document).ready(function () {
                     row += "<td>" + bioactivities[i].name + "</td>";
                     $('#bioactivities').append(row);
                 }
+
+                // Reset select all boxes
+                $("#all_bioactivities").prop('checked',false);
+                $("#all_targets").prop('checked',false);
+                $("#all_compounds").prop('checked',false);
 
                 // Enable everything
                 $(":input").prop("disabled",false);
@@ -740,7 +740,7 @@ $(document).ready(function () {
     });
 
     $("body").on( "change", "#bioactivities input[type='checkbox']", function(event) {
-        if ($("#bioactivities input[type='checkbox']:checked").length == $("#bioactivities input[type='checkbox']").length) {
+        if ($("#bioactivities input[type='checkbox']:checked:visible").length == $("#bioactivities input[type='checkbox']:visible").length) {
             $('#all_bioactivities').prop('checked', true);
         }
         else {
@@ -759,7 +759,7 @@ $(document).ready(function () {
     });
 
     $("body").on( "change", "#targets input[type='checkbox']", function(event) {
-        if ($("#targets input[type='checkbox']:checked").length == $("#targets input[type='checkbox']").length) {
+        if ($("#targets input[type='checkbox']:checked:visible").length == $("#targets input[type='checkbox']:visible").length) {
             $('#all_targets').prop('checked', true);
         }
         else {
@@ -778,7 +778,7 @@ $(document).ready(function () {
     });
 
     $("body").on( "change", "#compounds input[type='checkbox']", function(event) {
-        if ($("#compounds input[type='checkbox']:checked").length == $("#compounds input[type='checkbox']").length) {
+        if ($("#compounds input[type='checkbox']:checked:visible").length == $("#compounds input[type='checkbox']:visible").length) {
             $('#all_compounds').prop('checked', true);
         }
         else {
@@ -855,6 +855,14 @@ $(document).ready(function () {
                 this.hidden = true;
             }
         });
+
+        // Check or uncheck all as necessary
+        if ($("#bioactivities input[type='checkbox']:checked:visible").length == $("#bioactivities input[type='checkbox']:visible").length) {
+            $('#all_bioactivities').prop('checked', true);
+        }
+        else {
+            $('#all_bioactivities').prop('checked', false);
+        }
     }).trigger('input');
 
     // When the target search changes
@@ -869,6 +877,14 @@ $(document).ready(function () {
                 this.hidden = true;
             }
         });
+
+        // Check or uncheck all as necessary
+        if ($("#targets input[type='checkbox']:checked:visible").length == $("#targets input[type='checkbox']:visible").length) {
+            $('#all_targets').prop('checked', true);
+        }
+        else {
+            $('#all_targets').prop('checked', false);
+        }
     }).trigger('input');
 
     // When the compound search changes
@@ -883,6 +899,14 @@ $(document).ready(function () {
                 this.hidden = true;
             }
         });
+
+        // Check or uncheck all as necessary
+        if ($("#compounds input[type='checkbox']:checked:visible").length == $("#compounds input[type='checkbox']:visible").length) {
+            $('#all_compounds').prop('checked', true);
+        }
+        else {
+            $('#all_compounds').prop('checked', false);
+        }
     }).trigger('input');
 });
 
