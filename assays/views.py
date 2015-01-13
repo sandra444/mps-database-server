@@ -20,7 +20,7 @@ from django.utils.decorators import method_decorator
 from mps.filters import *
 from django.db.models import Q
 
-#TODO Refactor imports
+# TODO Refactor imports
 
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
@@ -49,7 +49,7 @@ class UserIndex(LoginRequiredMixin, ListView):
     template_name = 'assays/index.html'
 
     def get_context_data(self, request, **kwargs):
-        self.object_list = AssayRun.objects.filter(created_by=request.user)
+        self.object_list = AssayRun.objects.filter(created_by=request.user).prefetch_related('created_by')
         return super(UserIndex, self).get_context_data(**kwargs)
 
     def get(self, request, **kwargs):
@@ -70,13 +70,13 @@ class GroupIndex(LoginRequiredMixin, ListView):
         # groups = request.user.groups.values_list('name',flat=True)
         # users = Group.objects.get(name=groups[0]).user_set.all()
         # if len(groups) > 1:
-        #     for group in groups[1:]:
-        #         current_users = Group.objects.get(name=group).user_set.all()
-        #         users = current_users | users
+        # for group in groups[1:]:
+        # current_users = Group.objects.get(name=group).user_set.all()
+        # users = current_users | users
         # self.object_list = AssayRun.objects.filter(created_by=users)
         groups = request.user.groups.values_list('pk', flat=True)
         groups = Group.objects.filter(pk__in=groups)
-        self.object_list = AssayRun.objects.filter(group__in=groups)
+        self.object_list = AssayRun.objects.filter(group__in=groups).prefetch_related('created_by')
         return super(GroupIndex, self).get_context_data(**kwargs)
 
     def get(self, request, **kwargs):
@@ -103,9 +103,17 @@ class StudyIndex(LoginRequiredMixin, ListView):
             raise PermissionDenied()
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
-        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset)
-        context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups'])
-        context['results'] = AssayTestResult.objects.filter(chip_setup=context['setups'])
+        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset).prefetch_related('assay_run_id',
+                                                                                                       'device',
+                                                                                                       'compound',
+                                                                                                       'unit',
+                                                                                                       'created_by')
+        context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
+            'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
+                                                                   'chip_setup__unit')
+        context['results'] = AssayTestResult.objects.filter(chip_setup=context['setups']).prefetch_related('chip_setup',
+                                                                                                           'created_by').select_related(
+            'chip_setup__compound', 'chip_setup__unit')
         return self.render_to_response(context)
 
 
@@ -142,7 +150,7 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             # In order to display errors properly, make sure they are added to POST
-            #form['errors'] = form.errors
+            # form['errors'] = form.errors
             return self.render_to_response(self.get_context_data(form=form))
 
     def get(self, request, **kwargs):
