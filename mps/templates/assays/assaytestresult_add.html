@@ -50,12 +50,6 @@
             var inlineOptions = "";
             var setupOptions = "";
 
-            // Get value for study
-            $.when(whittle('assay_run_id', {{ study }}, 'AssayChipSetup', '', '')).then(function (data) {
-                $('#id_chip_setup').html(data);
-                $('#id_chip_setup').val(setupVal);
-            });
-
             // Initial inline whittle
             $.when(whittle('chip_setup',setup.val(),'AssayChipReadout','AssayChipReadoutAssay','readout_id')).then(function(data) {
                 inlineOptions = data;

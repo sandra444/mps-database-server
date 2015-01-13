@@ -206,11 +206,11 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = AssayChipCellsFormset(self.request.POST)
-            context['study'] = self.kwargs.get('study_id')
+            # context['study'] = self.kwargs.get('study_id')
             context['cellsamples'] = cellsamples
         else:
             context['formset'] = AssayChipCellsFormset()
-            context['study'] = self.kwargs.get('study_id')
+            # context['study'] = self.kwargs.get('study_id')
             context['cellsamples'] = cellsamples
         return context
 
@@ -267,18 +267,31 @@ ACRAFormSet = inlineformset_factory(AssayChipReadout, AssayChipReadoutAssay, for
                                     extra=1)
 
 
-class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
+class AssayChipReadoutAdd(LoginRequiredMixin, CreateView):
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
+
+    def get(self, request, **kwargs):
+        self.object = None
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        if not has_group(request.user, study.group):
+            raise PermissionDenied()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        form.fields['chip_setup'].queryset = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'device',
+            'compound', 'unit',
+            'created_by')
+        return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
         context = super(AssayChipReadoutAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = ACRAFormSet(self.request.POST, self.request.FILES)
-            context['study'] = self.kwargs.get('study_id')
+            # context['study'] = self.kwargs.get('study_id')
         else:
             context['formset'] = ACRAFormSet()
-            context['study'] = self.kwargs.get('study_id')
+            # context['study'] = self.kwargs.get('study_id')
         return context
 
     def form_valid(self, form):
@@ -334,18 +347,31 @@ TestResultFormSet = inlineformset_factory(AssayTestResult, AssayResult, formset=
                                           widgets={'value': forms.TextInput(attrs={'size': 10}), })
 
 
-class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
+class AssayTestResultAdd(LoginRequiredMixin, CreateView):
     template_name = 'assays/assaytestresult_add.html'
     form_class = AssayResultForm
+
+    def get(self, request, **kwargs):
+        self.object = None
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        if not has_group(request.user, study.group):
+            raise PermissionDenied()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        form.fields['chip_setup'].queryset = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'device',
+            'compound', 'unit',
+            'created_by')
+        return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
         context = super(AssayTestResultAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = TestResultFormSet(self.request.POST)
-            context['study'] = self.kwargs.get('study_id')
+            # context['study'] = self.kwargs.get('study_id')
         else:
             context['formset'] = TestResultFormSet()
-            context['study'] = self.kwargs.get('study_id')
+            # context['study'] = self.kwargs.get('study_id')
         return context
 
     def form_valid(self, form):
