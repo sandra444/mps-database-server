@@ -199,7 +199,10 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         groups = self.request.user.groups.values_list('id', flat=True)
-        cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date')
+        cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
+            'cell_type',
+            'supplier',
+        ).select_related('cell_type__cell_subtype')
         context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = AssayChipCellsFormset(self.request.POST)
