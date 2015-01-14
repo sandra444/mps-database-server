@@ -31,7 +31,7 @@
             {% for readout in object_list %}
                 <tr class="compound" id={{ readout.id }} name={{ readout.id }}>
                     <td><a href="{{ readout.id }}">{{ readout.id }}</a></td>
-                    <td>{{ readout.chip_setup }}</td>
+                    <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}">{{ readout.chip_setup }}</a></td>
                     <td>{{ readout.readout_start_time }}</td>
                     <td>{{ readout.created_by }}</td>
 {#                    <td>{{ compound.group }}</td>#}

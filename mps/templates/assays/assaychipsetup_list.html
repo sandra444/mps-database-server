@@ -34,7 +34,7 @@
             {% for setup in object_list %}
                 <tr class="compound" id={{ setup.id }} name={{ setup.id }}>
                     <td><a href="{{ setup.id }}">{{ setup.assay_chip_id }}</a></td>
-                    <td><a href="{{ setup.id }}">{{ setup.assay_run_id }}</a></td>
+                    <td><a href="/assays/organchipstudy/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.device }}</td>
                     <td>{{ setup.chip_test_type }}</td>
