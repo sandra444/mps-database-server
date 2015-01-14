@@ -3,6 +3,7 @@ from django.views.generic import ListView, DetailView, CreateView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from .forms import CompoundForm
 
 
 class CompoundsList(ListView):
@@ -28,7 +29,7 @@ class CompoundsDetail(DetailView):
 
 
 class CompoundsAdd(CreateView):
-    model = Compound
+    form_class = CompoundForm
     template_name = 'compounds/compounds_add.html'
 
     # Custom dispatch (achieve same as GET in assay views

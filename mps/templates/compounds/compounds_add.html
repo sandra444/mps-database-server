@@ -62,19 +62,34 @@
         </div>
     </div>
 
-    <legend>Molecular Identifiers</legend>
+    <legend>Drug/Drug-like Properties</legend>
 
     <div class="form-group">
-        <label for="smiles" class="col-sm-2 control-label">Smiles</label>
-        <div class="col-sm-10">
-          {{ form.smiles }}
+        <label for="known_drug" class="col-sm-2 control-label">Known Drug</label>
+        <div class="col-sm-1">
+          {{ form.known_drug }}
+        </div>
+
+        <label for="medchem_friendly" class="col-sm-2 control-label">Medchem Friendly</label>
+        <div class="col-sm-1">
+          {{ form.medchem_friendly }}
+        </div>
+
+        <label for="ro3_passes" class="col-sm-2 control-label">Passes Rule of 3</label>
+        <div class="col-sm-1">
+          {{ form.ro3_passes }}
+        </div>
+
+        <label for="ro5_violations" class="col-sm-2 control-label">Rule of 5 Violations</label>
+        <div class="col-sm-1">
+          {{ form.ro5_violations }}
         </div>
     </div>
 
     <div class="form-group">
-        <label for="synonyms" class="col-sm-2 control-label">Synonyms</label>
+        <label for="species" class="col-sm-2 control-label">Species</label>
         <div class="col-sm-10">
-          {{ form.synonyms }}
+          {{ form.species }}
         </div>
     </div>
 
@@ -136,40 +151,19 @@
         </div>
     </div>
 
-    <legend>Drug/Drug-like Properties</legend>
+    <legend>Molecular Identifiers</legend>
 
     <div class="form-group">
-        <label for="known_drug" class="col-sm-2 control-label">Known Drug</label>
+        <label for="smiles" class="col-sm-2 control-label">Smiles</label>
         <div class="col-sm-10">
-          {{ form.known_drug }}
+          {{ form.smiles }}
         </div>
     </div>
 
     <div class="form-group">
-        <label for="medchem_friendly" class="col-sm-2 control-label">Medchem Friendly</label>
+        <label for="synonyms" class="col-sm-2 control-label">Synonyms</label>
         <div class="col-sm-10">
-          {{ form.medchem_friendly }}
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label for="ro5_violations" class="col-sm-2 control-label">Rule of 5 Violations</label>
-        <div class="col-sm-10">
-          {{ form.ro5_violations }}
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label for="ro3_passes" class="col-sm-2 control-label">Rule of 3 Passes</label>
-        <div class="col-sm-10">
-          {{ form.ro3_passes }}
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label for="species" class="col-sm-2 control-label">Species</label>
-        <div class="col-sm-10">
-          {{ form.species }}
+          {{ form.synonyms }}
         </div>
     </div>
 

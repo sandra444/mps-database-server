@@ -31,6 +31,20 @@
 
     </div>
 
+    <legend>Drug/Drug-like Properties</legend>
+
+    <div class="container-fluid">
+
+        <div class="col-xs-12">
+            <p><b>Known Drug:</b> {{ object.known_drug }}</p>
+            <p><b>Med Chem Friendly:</b> {{ object.medchem_friendly }}</p>
+            <p><b>Passes of Rule of 3:</b> {{ object.ro3_passes }}</p>
+            <p><b>Rule of 5 Violations:</b> {{ object.ro5_violations }}</p>
+            <p><b>Molecular Species:</b> {{ object.species }}</p>
+        </div>
+
+    </div>
+
     <legend>Molecular Properties</legend>
 
     <div class="container-fluid">
@@ -47,19 +61,6 @@
 
     </div>
 
-    <legend>Drug/Drug-like Properties</legend>
-
-    <div class="container-fluid">
-
-        <div class="col-xs-12">
-            <p><b>Known Drug:</b> {{ object.known_drug }}</p>
-            <p><b>Med Chem Friendly:</b> {{ object.medchem_friendly }}</p>
-            <p><b>Passes of Rule of 3:</b> {{ object.ro3_passes }}</p>
-            <p><b>Rule of 5 Violations:</b> {{ object.ro5_violations }}</p>
-            <p><b>Molecular Species:</b> {{ object.species }}</p>
-        </div>
-
-    </div>
     <script>
         $("p").addClass("lead");
     </script>
