@@ -23,17 +23,27 @@
 
     </div>
 
-    <legend>Synonyms</legend>
+    <legend>Synonyms
+        <button class="btn btn-info" type="button" data-toggle="collapse"
+                data-target="#synonyms" aria-expanded="false" aria-controls="synonyms">
+            Show
+        </button>
+    </legend>
 
-    <div class="container-fluid">
+    <div id='synonyms' class="collapse container-fluid">
 
         <p>{{ object.synonyms }}</p>
 
     </div>
 
-    <legend>Drug/Drug-like Properties</legend>
+    <legend>Drug/Drug-like Properties
+        <button class="btn btn-info" type="button" data-toggle="collapse"
+                data-target="#drug_properties" aria-expanded="false" aria-controls="drug_properties">
+                Show
+        </button>
+    </legend>
 
-    <div class="container-fluid">
+    <div id='drug_properties' class="collapse container-fluid">
 
         <div class="col-xs-12">
             <p><b>Known Drug:</b> {{ object.known_drug }}</p>
@@ -45,9 +55,14 @@
 
     </div>
 
-    <legend>Molecular Properties</legend>
+    <legend>Molecular Properties
+        <button class="btn btn-info" type="button" data-toggle="collapse"
+                data-target="#molecular_properties" aria-expanded="false" aria-controls="molecular_properties">
+                Show
+        </button>
+    </legend>
 
-    <div class="container-fluid">
+    <div id='molecular_properties' class="collapse container-fluid">
 
         <div class="col-xs-12">
             <p><b>Molecular Weight:</b> {{ object.molecular_weight }}</p>
