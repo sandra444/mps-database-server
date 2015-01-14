@@ -154,6 +154,14 @@
         {% endfor %}
     {% endif %}
 
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
     <div class="form-group">
         <label for="compound" class="col-sm-2 control-label">Compound</label>
         <div class="col-sm-10" style="float:left; display:inline; overflow:none; white-space:nowrap;">

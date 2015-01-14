@@ -36,6 +36,18 @@ class AssayChipSetupForm(forms.ModelForm):
         # Assay Run ID is always bound to the parent Study
         exclude = ('assay_run_id','group')
 
+    def clean(self):
+        super(forms.ModelForm, self).clean()
+        # Don't need to perform this check if no test type
+        if 'chip_test_type' in self.cleaned_data:
+            type = self.cleaned_data['chip_test_type']
+            compound = self.cleaned_data['compound']
+            concentration = self.cleaned_data['concentration']
+            unit = self.cleaned_data['unit']
+            if type == 'compound' and (not compound or not concentration or not unit):
+                raise forms.ValidationError('Please complete all data for compound.')
+        return self.cleaned_data
+
 class AssayChipCellsInlineFormset(forms.models.BaseInlineFormSet):
 
     class Meta(object):
