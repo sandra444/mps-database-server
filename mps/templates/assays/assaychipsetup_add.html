@@ -230,6 +230,14 @@
         {% endfor %}
     {% endif %}
 
+    {% if formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ formset.non_form_errors }}
+        </div>
+    {% endif %}
+
     <a id="add_button" class="btn btn-success" role="button">Add Cell Type</a> <span>Click a magnifying glass to see a list of available cell samples:</span>
     <table class="table table-striped cells" id="assaychipcells_set-group" name="inlines">
         <thead>
