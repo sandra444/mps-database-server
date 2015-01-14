@@ -58,6 +58,10 @@
                 // If one wants to display top and bottom
                 //"sDom": '<"wrapper"lfptip>'
             });
+
+            // Swap positions of filter and length selection
+            $('.dataTables_filter').css('float','left');
+            $('.dataTables_length').css('float','right');
         });
     </script>
 {% endblock %}

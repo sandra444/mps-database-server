@@ -51,6 +51,10 @@
             $('#setups').DataTable( {
                 "iDisplayLength": 50
             });
+
+            // Swap positions of filter and length selection
+            $('.dataTables_filter').css('float','left');
+            $('.dataTables_length').css('float','right');
         });
     </script>
 {% endblock %}
