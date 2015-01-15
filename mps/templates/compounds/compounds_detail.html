@@ -13,6 +13,7 @@
 
         <div class="col-xs-6">
             <p><b>ChEMBL ID:</b> <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ object.chemblid }}">{{ object.chemblid }}</a></p>
+            <p><b>InChI Key:</b> {{ object.inchikey }}</p>
             <p><b>Smiles:</b> {{ object.smiles }}</p>
             <p><b>Molecular Formula:</b> {{ object.molecular_formula }}</p>
         </div>
@@ -43,15 +44,66 @@
         </button>
     </legend>
 
-    <div id='drug_properties' class="collapse container-fluid">
+    <div id='drug_properties' class="collapse">
 
-        <div class="col-xs-12">
-            <p><b>Known Drug:</b> {{ object.known_drug }}</p>
-            <p><b>Med Chem Friendly:</b> {{ object.medchem_friendly }}</p>
-            <p><b>Passes of Rule of 3:</b> {{ object.ro3_passes }}</p>
-            <p><b>Rule of 5 Violations:</b> {{ object.ro5_violations }}</p>
-            <p><b>Molecular Species:</b> {{ object.species }}</p>
+        <div class="row">
+            <div class="col-xs-2 lead text-right">
+                <b>Known Drug:</b>
+            </div>
+            <div class="col-xs-1 lead">
+                {% if object.known_drug %}
+                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                {% else %}
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                {% endif %}
+            </div>
+
+            <div class="col-xs-2 lead text-right">
+                <b>Med Chem Friendly:</b>
+            </div>
+            <div class="col-xs-1 lead">
+                {% if object.medchem_friendly %}
+                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                {% else %}
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                {% endif %}
+            </div>
+
+            <div class="col-xs-2 lead text-right">
+                <b>Passes of Rule of 3:</b>
+            </div>
+            <div class="col-xs-1 lead">
+                {% if object.ro3_passes %}
+                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                {% else %}
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                {% endif %}
+            </div>
+
+            <div class="col-xs-2 lead text-right">
+                <b>Rule of 5 Violations:</b>
+            </div>
+            <div class="col-xs-1 lead">
+                {{ object.ro5_violations }}
+            </div>
         </div>
+
+        <div class="row">
+            <div class="col-xs-2 lead text-right">
+                <b>Molecular Species:</b>
+            </div>
+            <div class="col-xs-10 lead">
+                {{ object.species }}
+            </div>
+        </div>
+
+{#        <div class="col-xs-12">#}
+{#            <p><b>Known Drug:</b> {{ object.known_drug }}</p>#}
+{#            <p><b>Med Chem Friendly:</b> {{ object.medchem_friendly }}</p>#}
+{#            <p><b>Passes of Rule of 3:</b> {{ object.ro3_passes }}</p>#}
+{#            <p><b>Rule of 5 Violations:</b> {{ object.ro5_violations }}</p>#}
+{#            <p><b>Molecular Species:</b> {{ object.species }}</p>#}
+{#        </div>#}
 
     </div>
 
@@ -62,17 +114,79 @@
         </button>
     </legend>
 
-    <div id='molecular_properties' class="collapse container-fluid">
+    <div id='molecular_properties' class="collapse">
 
-        <div class="col-xs-12">
-            <p><b>Molecular Weight:</b> {{ object.molecular_weight }}</p>
-            <p><b>Rotatable Bonds:</b> {{ object.rotatable_bonds }}</p>
-            <p><b>Acidic pKa:</b> {{ object.acidic_pka }}</p>
-            <p><b>Basic pKa:</b> {{ object.basic_pka }}</p>
-            <p><b>LogP:</b> {{ object.logp }}</p>
-            <p><b>LogD:</b> {{ object.logd }}</p>
-            <p><b>ALogP:</b> {{ object.alogp }}</p>
+        <div class="row">
+            <div class="col-xs-2 lead text-right">
+                <b>Molecular Weight:</b>
+            </div>
+            <div class="col-xs-10 lead">
+                {{ object.molecular_weight }}
+            </div>
         </div>
+
+        <div class="row">
+            <div class="col-xs-2 lead text-right">
+                <b>Rotatable Bonds:</b>
+            </div>
+            <div class="col-xs-10 lead">
+                {{ object.rotatable_bonds }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-2 lead text-right">
+                <b>Acidic pKa:</b>
+            </div>
+            <div class="col-xs-10 lead">
+                {{ object.acidic_pka }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-2 lead text-right">
+                <b>Basic pKa:</b>
+            </div>
+            <div class="col-xs-10 lead">
+                {{ object.basic_pka }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-2 lead text-right">
+                <b>LogP:</b>
+            </div>
+            <div class="col-xs-10 lead">
+                {{ object.logp }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-2 lead text-right">
+                <b>LogD:</b>
+            </div>
+            <div class="col-xs-10 lead">
+                {{ object.logd }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-2 lead text-right">
+                <b>ALogP:</b>
+            </div>
+            <div class="col-xs-10 lead">
+                {{ object.alogp }}
+            </div>
+        </div>
+{#        <div class="col-xs-12">#}
+{#            <p><b>Molecular Weight:</b> {{ object.molecular_weight }}</p>#}
+{#            <p><b>Rotatable Bonds:</b> {{ object.rotatable_bonds }}</p>#}
+{#            <p><b>Acidic pKa:</b> {{ object.acidic_pka }}</p>#}
+{#            <p><b>Basic pKa:</b> {{ object.basic_pka }}</p>#}
+{#            <p><b>LogP:</b> {{ object.logp }}</p>#}
+{#            <p><b>LogD:</b> {{ object.logd }}</p>#}
+{#            <p><b>ALogP:</b> {{ object.alogp }}</p>#}
+{#        </div>#}
 
     </div>
 
