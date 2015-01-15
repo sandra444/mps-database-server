@@ -48,14 +48,18 @@
         </div>
     </div>
 
+    {% if object.compound %}
+
     <div class="row">
         <div class="col-xs-2 lead text-right">
             <b>Compound:</b>
         </div>
         <div class="col-xs-10 lead">
-            {{ object.compound }} {{ object.concentration }} ({{ object.unit }})
+            {{ object.compound }} {{ object.concentration }} {{ object.unit }}
         </div>
     </div>
+
+    {% endif %}
 
     {% if object.scientist %}
         <div class="row">

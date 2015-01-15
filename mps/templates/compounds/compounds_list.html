@@ -12,6 +12,9 @@
                     <th>Name</th>
                     <th>CHEMBL ID</th>
                     <th>Synonyms</th>
+                    <th>Molecular Weight</th>
+                    <th>LogP</th>
+                    <th>Rule of 5 Violations</th>
                     <th>Known Drug</th>
 {#                    <th>Last Update</th>#}
                     <th>Image</th>
@@ -23,6 +26,9 @@
                     <th>Name</th>
                     <th>CHEMBL ID</th>
                     <th>Synonyms</th>
+                    <th>Molecular Weight</th>
+                    <th>LogP</th>
+                    <th>Rule of 5 Violations</th>
                     <th>Known Drug</th>
 {#                    <th>Last Update</th>#}
                     <th>Image</th>
@@ -35,6 +41,9 @@
                     <td><a href="{{ compound.id }}">{{ compound.name }}</a></td>
                     <td><a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.chemblid }}">{{ compound.chemblid }}</a></td>
                     <td>{{ compound.synonyms }}</td>
+                    <td>{{ compound.molecular_weight }}</td>
+                    <td>{{ compound.logp }}</td>
+                    <td>{{ compound.ro5_violations }}</td>
                     <td>{{ compound.known_drug }}</td>
 {#                    <td>{{ compound.last_update }}</td>#}
                     <td><img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}"></td>
@@ -50,7 +59,7 @@
                 "aoColumnDefs": [
                     {
                         "bSortable": false,
-                        "aTargets": [4]
+                        "aTargets": [7]
                     },
                     {
                         "targets": [2],
@@ -62,6 +71,10 @@
                 // If one wants to display top and bottom
                 //"sDom": '<"wrapper"lfptip>'
             });
+
+            // Swap positions of filter and length selection
+            $('.dataTables_filter').css('float','left');
+            $('.dataTables_length').css('float','right');
         });
     </script>
 {% endblock %}

@@ -2,6 +2,8 @@
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render_to_response
+from django.template import RequestContext
 
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
@@ -163,3 +165,11 @@ def gen_cluster(request):
     else:
         logging.debug('Final JSON response step failed: result has no data')
         return HttpResponse()
+
+def view_cluster(request):
+    c = RequestContext(request)
+    return render_to_response('bioactivities/cluster.html', c)
+
+def view_heatmap(request):
+    c = RequestContext(request)
+    return render_to_response('bioactivities/heatmap.html', c)

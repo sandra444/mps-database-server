@@ -444,19 +444,24 @@ def heatmap(request):
     # Small numbers appear to trigger a quirk in Scipy (removing them most expedient solution)
     distMat[abs(distMat)<1e-10] = 0.0
 
+    row_leaves = valid_compounds
+    col_leaves = frame
+
     # Cluster hierarchicaly using scipy
-    clusters = scipy.cluster.hierarchy.linkage(distMat, method=method)
-    dendro = scipy.cluster.hierarchy.dendrogram(clusters, orientation='right', no_plot=True)
-    row_leaves = [valid_compounds[i] for i in dendro['leaves']]
+    if distMat.any():
+        clusters = scipy.cluster.hierarchy.linkage(distMat, method=method)
+        dendro = scipy.cluster.hierarchy.dendrogram(clusters, orientation='right', no_plot=True)
+        row_leaves = [valid_compounds[i] for i in dendro['leaves']]
 
     # For *Columns*
 
     distMat = scipy.spatial.distance.pdist(dataMatrix.T, metric=metric)
     distMat[abs(distMat)<1e-10] = 0.0
 
-    clusters = scipy.cluster.hierarchy.linkage(distMat, method=method)
-    dendro = scipy.cluster.hierarchy.dendrogram(clusters, orientation='right', no_plot=True)
-    col_leaves = [frame[i] for i in dendro['leaves']]
+    if distMat.any():
+        clusters = scipy.cluster.hierarchy.linkage(distMat, method=method)
+        dendro = scipy.cluster.hierarchy.dendrogram(clusters, orientation='right', no_plot=True)
+        col_leaves = [frame[i] for i in dendro['leaves']]
 
     # return the paths to each respective filetype as a JSON
     return {

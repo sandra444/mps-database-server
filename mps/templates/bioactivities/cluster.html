@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block load %}
+<script src="{% static "bioactivities/cluster.js" %}"></script>
+<script src="{% static "js/spin.min.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+    <script>
+        $(':input[type=number]').on('mousewheel', function (e) {
+            e.preventDefault();
+        });
+    </script>
+
+    <style>
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+
+    {% block error %}
+        <div class="row">
+            <div hidden class="alert alert-danger" role="alert" id="error_message">
+                <p>
+                    The server could not find the result to your request.
+                </p>
+
+                <p>
+                    Please try a different query.
+                </p>
+            </div>
+        </div>
+    {% endblock %}
+
+    <div class="container" id="selection">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="text-center">
+                    {% block submit %}
+                    <button class="btn btn-xlarge btn-primary text-center" id="submit">
+                        Generate Dendrogram
+                    </button>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+        <hr>
+
+        <div class="row text-center">
+            <div class="col-xs-4 col-xs-offset-2">
+                <label>Normalize Bioactivities
+                    <input id="normalize_bioactivities" type="checkbox" checked>
+                </label>
+            </div>
+
+            <div class="col-xs-4">
+                <label>Minimum Feature Count Per Record
+                    <input id="minimum_feature_count" type="number" value="10">
+                    <button id="apply_minimum_feature_count">Apply</button>
+                </label>
+            </div>
+        </div>
+        {% block extra_row %}
+            <hr>
+            <div class="row text-center">
+                <div class="col-xs-4">
+                    <label>Use Chemical Properties
+                        <input id="chemical_properties" type="checkbox">
+                    </label>
+                </div>
+                <div class="col-xs-4">
+                    <label>Method
+                        <select id="method" class="form-control">
+                            <option selected>single</option>
+                            <option>complete</option>
+                            <option>average</option>
+                            <option>weighted</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="col-xs-4">
+                    <label>Metric
+                        <select id="metric" class="form-control">
+                            <option selected>euclidean</option>
+                            <option>cosine</option>
+                            <option>cityblock</option>
+                            <option>correlation</option>
+                            <option>minkowski</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+            <hr>
+        {% endblock %}
+        <div class="row">
+            <div class="col-xs-4 col-xs-offset-2">
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered
+                            table-condensed">
+
+                        <thead>
+                            <th>
+                                <input id="all_target_types" type="checkbox">
+                            </th>
+                            <th>
+                                Select Target Types
+                            </th>
+                        </thead>
+
+                        <tbody id="control_target_types">
+                            <tr>
+                                <td>
+                                    <input value="Cell-Line" id="Cell-Line" type="checkbox">
+                                </td>
+                                <td>
+                                    Cell-Line
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="Organism" id="Organism" type="checkbox">
+                                </td>
+                                <td>
+                                    Organism
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="Single Protein" id="Single_Protein" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    Single Protein
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="Tissue" id="Tissue" type="checkbox">
+                                </td>
+                                <td>
+                                    Tissue
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+            <div class="col-xs-4">
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered
+                            table-condensed">
+
+                        <thead>
+                            <th>
+                                <input id="all_organisms" type="checkbox">
+                            </th>
+                            <th>
+                                Select Organisms
+                            </th>
+                        </thead>
+
+                        <tbody id="control_organisms">
+                            <tr>
+                                <td>
+                                    <input value="Canis Lupus Familiaris" id="Canis_Lupus_Familiaris" type="checkbox">
+                                </td>
+                                <td>
+                                    Canis Lupus Familiaris
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="Homo Sapiens" id="Homo_Sapiens" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    Homo Sapiens
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="Rattus Norvegicus" id="Rattus_Norvegicus" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    Rattus Norvegicus
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-xs-4">
+
+                <p class="text-center">
+                    <label>
+                        Bioactivities Filter:
+                        <input id="bioactivity_filter">
+                    </label>
+                </p>
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered
+                            table-condensed">
+
+                        <thead>
+                            <th>
+                                <input id="all_bioactivities" type="checkbox">
+                            </th>
+                            <th>
+                                Select Bioactivities
+                            </th>
+                        </thead>
+
+                        <tbody id="bioactivities">
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+            <div class="col-xs-4">
+
+                <label>
+                    <p class="text-center">
+                        Targets Filter:
+                        <input id="target_filter">
+                    </p>
+                </label>
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered
+                            table-condensed">
+
+                        <thead>
+                            <th>
+                                <input id="all_targets" type="checkbox">
+                            </th>
+                            <th>
+                                Select Targets
+                            </th>
+                        </thead>
+
+                        <tbody id="targets">
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-4">
+
+                <label>
+                    <p class="text-center">
+                        Compounds Filter:
+                        <input id="compound_filter">
+                    </p>
+                </label>
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered
+                            table-condensed">
+
+                        <thead>
+                            <th>
+                                <input id="all_compounds" type="checkbox">
+                            </th>
+                            <th>
+                                Select Compounds
+                            </th>
+                        </thead>
+
+                        <tbody id="compounds">
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% block graphic %}
+        <style>
+        @-ms-viewport {
+          width: device-width;
+        }
+
+        .node circle {
+          fill: #fff;
+          stroke: steelblue;
+          stroke-width: 1.5px;
+        }
+
+        .node {
+          font: 10px sans-serif;
+        }
+
+        .node-s circle {
+          fill: steelblue;
+          stroke: #fff;
+          stroke-width: 2px;
+        }
+
+        .node-s {
+          font: 10px serif;
+          font-weight: bold;
+        }
+
+        .link {
+          fill: none;
+          stroke: #ccc;
+          stroke-width: 1.5px;
+        }
+        </style>
+
+        <div hidden id="graphic" class="container-fluid">
+            <div class="row text-center">
+                <button id="back" class="btn btn-xlarge btn-info">
+                    <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+                    Back to Selection
+                </button>
+            </div>
+            <div id="query_box" class="col-xs-3">
+                <div id="query" class="affix"></div>
+            </div>
+            <div id="cluster" class="col-xs-6">
+            </div>
+            <div class="col-xs-3">
+                <div id="compound" class="affix"></div>
+            </div>
+        </div>
+
+    {% endblock %}
+
+    {% block spinner %}
+        <script>
+            // define a spinner but do not show it yet
+
+        window.spinner = new Spinner(
+            {
+                lines: 11, // The number of lines to draw
+                length: 40, // The length of each line
+                width: 15, // The line thickness
+                radius: 42, // The radius of the inner circle
+                corners: 1, // Corner roundness (0..1)
+                rotate: 0, // The rotation offset
+                direction: 1, // 1: clockwise, -1: counterclockwise
+                color: '#000', // #rgb or #rrggbb or array of colors
+                speed: 1.2, // Rounds per second
+                trail: 100, // Afterglow percentage
+                shadow: true, // Whether to render a shadow
+                hwaccel: true, // Whether to use hardware acceleration
+                className: 'spinner', // The CSS class to assign to the spinner
+                zIndex: 2e9, // The z-index (defaults to 2000000000)
+                top: '50%', // Top position relative to parent
+                left: '50%' // Left position relative to parent
+            }
+        );
+        </script>
+
+        <div id="spinner"></div>
+    {% endblock %}
+
+{% endblock %}

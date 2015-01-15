@@ -1,0 +1,60 @@
+{% extends "bioactivities/cluster.html" %}
+{% load staticfiles %}
+
+{% block load %}
+<script src="{% static "bioactivities/render_heatmap.js" %}"></script>
+<script src="{% static "js/spin.min.js" %}"></script>
+{% endblock %}
+
+{% block submit %}
+    <button class="btn btn-xlarge btn-primary text-center" id="submit">
+        Generate Heatmap
+    </button>
+{% endblock %}
+
+{% block extra_row %}
+    <hr>
+        <div class="row text-center">
+            <div class="col-xs-6">
+                <label>Method
+                    <select id="method" class="form-control">
+                        <option selected>single</option>
+                        <option>complete</option>
+                        <option>average</option>
+                        <option>weighted</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="col-xs-6">
+                <label>Metric
+                    <select id="metric" class="form-control">
+                        <option selected>euclidean</option>
+                        <option>cosine</option>
+                        <option>cityblock</option>
+                        <option>correlation</option>
+                        <option>minkowski</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+    <hr>
+{% endblock %}
+
+{% block graphic %}
+    <div hidden id="graphic" class="container-fluid">
+        <div class="row text-center">
+            <button id="back" class="btn btn-xlarge btn-info">
+                <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+                Back to Selection
+            </button>
+            <a id="download" class="btn btn-xlarge btn-primary">Download Heatmap</a>
+        </div>
+        <div id="heatmap" style='overflow:auto; width:100%; height:100%;'>
+        </div>
+        <div id="heatmap_legend">
+        </div>
+    </div>
+
+    <div id="spinner"></div>
+{% endblock %}

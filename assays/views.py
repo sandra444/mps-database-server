@@ -12,7 +12,7 @@ from django.views.generic.edit import CreateView
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
-#from django.http import Http404
+# from django.http import Http404
 # May be useful later
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -20,7 +20,7 @@ from django.utils.decorators import method_decorator
 from mps.filters import *
 from django.db.models import Q
 
-#TODO Refactor imports
+# TODO Refactor imports
 
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
@@ -42,17 +42,18 @@ class StudyAccessMixin(object):
         form = self.get_form(form_class)
         return self.render_to_response(self.get_context_data(form=form))
 
+
 # Class-based views for indexes
-class UserIndex(LoginRequiredMixin,ListView):
+class UserIndex(LoginRequiredMixin, ListView):
     context_object_name = 'user_index'
     template_name = 'assays/index.html'
 
     def get_context_data(self, request, **kwargs):
-        self.object_list = AssayRun.objects.filter(created_by=request.user)
+        self.object_list = AssayRun.objects.filter(created_by=request.user).prefetch_related('created_by')
         return super(UserIndex, self).get_context_data(**kwargs)
 
     def get(self, request, **kwargs):
-        if len(request.user.groups.values_list('pk',flat=True)) == 0:
+        if len(request.user.groups.values_list('pk', flat=True)) == 0:
             raise PermissionDenied()
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
@@ -60,7 +61,7 @@ class UserIndex(LoginRequiredMixin,ListView):
         return self.render_to_response(context)
 
 
-class GroupIndex(LoginRequiredMixin,ListView):
+class GroupIndex(LoginRequiredMixin, ListView):
     context_object_name = 'group_index'
     template_name = 'assays/index.html'
 
@@ -69,17 +70,17 @@ class GroupIndex(LoginRequiredMixin,ListView):
         # groups = request.user.groups.values_list('name',flat=True)
         # users = Group.objects.get(name=groups[0]).user_set.all()
         # if len(groups) > 1:
-        #     for group in groups[1:]:
-        #         current_users = Group.objects.get(name=group).user_set.all()
-        #         users = current_users | users
+        # for group in groups[1:]:
+        # current_users = Group.objects.get(name=group).user_set.all()
+        # users = current_users | users
         # self.object_list = AssayRun.objects.filter(created_by=users)
-        groups = request.user.groups.values_list('pk',flat=True)
+        groups = request.user.groups.values_list('pk', flat=True)
         groups = Group.objects.filter(pk__in=groups)
-        self.object_list = AssayRun.objects.filter(group__in=groups)
+        self.object_list = AssayRun.objects.filter(group__in=groups).prefetch_related('created_by')
         return super(GroupIndex, self).get_context_data(**kwargs)
 
     def get(self, request, **kwargs):
-        if len(request.user.groups.values_list('pk',flat=True)) == 0:
+        if len(request.user.groups.values_list('pk', flat=True)) == 0:
             raise PermissionDenied()
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
@@ -87,7 +88,7 @@ class GroupIndex(LoginRequiredMixin,ListView):
         return self.render_to_response(context)
 
 
-class StudyIndex(LoginRequiredMixin,ListView):
+class StudyIndex(LoginRequiredMixin, ListView):
     context_object_name = 'study_index'
     template_name = 'assays/study_index.html'
 
@@ -102,9 +103,17 @@ class StudyIndex(LoginRequiredMixin,ListView):
             raise PermissionDenied()
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
-        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset)
-        context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups'])
-        context['results'] = AssayTestResult.objects.filter(chip_setup=context['setups'])
+        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset).prefetch_related('assay_run_id',
+                                                                                                       'device',
+                                                                                                       'compound',
+                                                                                                       'unit',
+                                                                                                       'created_by')
+        context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
+            'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
+                                                                   'chip_setup__unit')
+        context['results'] = AssayTestResult.objects.filter(chip_setup=context['setups']).prefetch_related('chip_setup',
+                                                                                                           'created_by').select_related(
+            'chip_setup__compound', 'chip_setup__unit')
         return self.render_to_response(context)
 
 
@@ -113,7 +122,9 @@ class AssayRunList(LoginRequiredMixin, ListView):
     model = AssayRun
 
     def get_queryset(self):
-        return AssayRun.objects.filter(restricted=False) | AssayRun.objects.filter(group__in=self.request.user.groups.all())
+        return AssayRun.objects.filter(restricted=False).prefetch_related('center_id',
+                                                                          'created_by') | AssayRun.objects.filter(
+            group__in=self.request.user.groups.all()).prefetch_related('center_id', 'created_by')
 
 
 class AssayRunAdd(LoginRequiredMixin, CreateView):
@@ -122,7 +133,8 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         # Get group selection possibilities
-        groups = self.request.user.groups.filter(~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
+        groups = self.request.user.groups.filter(
+            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
         context = super(AssayRunAdd, self).get_context_data(**kwargs)
         context['groups'] = groups
         return context
@@ -138,12 +150,12 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             # In order to display errors properly, make sure they are added to POST
-            #form['errors'] = form.errors
+            # form['errors'] = form.errors
             return self.render_to_response(self.get_context_data(form=form))
 
     def get(self, request, **kwargs):
         self.object = None
-        if len(request.user.groups.values_list('pk',flat=True)) == 0:
+        if len(request.user.groups.values_list('pk', flat=True)) == 0:
             raise PermissionDenied()
         form_class = self.get_form_class()
         form = self.get_form(form_class)
@@ -166,12 +178,17 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
     model = AssayChipSetup
 
     def get_queryset(self):
-        return AssayChipSetup.objects.filter(assay_run_id__restricted=False) | AssayChipSetup.objects.filter(assay_run_id__group__in=self.request.user.groups.all())
+        return AssayChipSetup.objects.filter(assay_run_id__restricted=False).prefetch_related('assay_run_id', 'device',
+                                                                                              'compound', 'unit',
+                                                                                              'created_by') | AssayChipSetup.objects.filter(
+            assay_run_id__group__in=self.request.user.groups.all()).prefetch_related('assay_run_id', 'device',
+                                                                                     'compound', 'unit', 'created_by')
 
 
-AssayChipCellsFormset = inlineformset_factory(AssayChipSetup,AssayChipCells, formset=AssayChipCellsInlineFormset, extra=1,
-                                              widgets = {'cellsample_density': forms.TextInput(attrs={'size': 5}),
-                                                         'cell_passage': forms.TextInput(attrs={'size': 5}),})
+AssayChipCellsFormset = inlineformset_factory(AssayChipSetup, AssayChipCells, formset=AssayChipCellsInlineFormset,
+                                              extra=1,
+                                              widgets={'cellsample_density': forms.TextInput(attrs={'size': 5}),
+                                                       'cell_passage': forms.TextInput(attrs={'size': 5}), })
 
 
 class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
@@ -181,16 +198,19 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     form_class = AssayChipSetupForm
 
     def get_context_data(self, **kwargs):
-        groups = self.request.user.groups.values_list('id',flat=True)
-        cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date')
+        groups = self.request.user.groups.values_list('id', flat=True)
+        cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
+            'cell_type',
+            'supplier',
+        ).select_related('cell_type__cell_subtype')
         context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = AssayChipCellsFormset(self.request.POST)
-            context['study'] = self.kwargs.get('study_id')
+            # context['study'] = self.kwargs.get('study_id')
             context['cellsamples'] = cellsamples
         else:
             context['formset'] = AssayChipCellsFormset()
-            context['study'] = self.kwargs.get('study_id')
+            # context['study'] = self.kwargs.get('study_id')
             context['cellsamples'] = cellsamples
         return context
 
@@ -234,23 +254,44 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
     model = AssayChipReadout
 
     def get_queryset(self):
-        return AssayChipReadout.objects.filter(chip_setup__assay_run_id__restricted=False) | AssayChipReadout.objects.filter(chip_setup__assay_run_id__group__in=self.request.user.groups.all())
+        return AssayChipReadout.objects.filter(chip_setup__assay_run_id__restricted=False).prefetch_related(
+            'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
+                                                                   'chip_setup__unit') | AssayChipReadout.objects.filter(
+            chip_setup__assay_run_id__group__in=self.request.user.groups.all()).prefetch_related('chip_setup',
+                                                                                                 'timeunit',
+                                                                                                 'created_by').select_related(
+            'chip_setup__compound', 'chip_setup__unit')
 
-ACRAFormSet = inlineformset_factory(AssayChipReadout,AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset, extra=1)
+
+ACRAFormSet = inlineformset_factory(AssayChipReadout, AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset,
+                                    extra=1)
 
 
-class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
+class AssayChipReadoutAdd(LoginRequiredMixin, CreateView):
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
+
+    def get(self, request, **kwargs):
+        self.object = None
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        if not has_group(request.user, study.group):
+            raise PermissionDenied()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        form.fields['chip_setup'].queryset = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'device',
+            'compound', 'unit',
+            'created_by')
+        return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
         context = super(AssayChipReadoutAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = ACRAFormSet(self.request.POST, self.request.FILES)
-            context['study'] = self.kwargs.get('study_id')
+            # context['study'] = self.kwargs.get('study_id')
         else:
             context['formset'] = ACRAFormSet()
-            context['study'] = self.kwargs.get('study_id')
+            # context['study'] = self.kwargs.get('study_id')
         return context
 
     def form_valid(self, form):
@@ -270,7 +311,7 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
             formset.save()
             if formset.__dict__['files']:
                 file = formset.__dict__['files']['file']
-                parseChipCSV(self.object,file)
+                parseChipCSV(self.object, file)
             if data['another']:
                 return self.render_to_response(self.get_context_data(form=form))
             else:
@@ -284,7 +325,8 @@ class AssayChipReadoutDetail(LoginRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.chip_setup.assay_run_id.restricted and not has_group(request.user, self.object.chip_setup.assay_run_id.group):
+        if self.object.chip_setup.assay_run_id.restricted and not has_group(request.user,
+                                                                            self.object.chip_setup.assay_run_id.group):
             raise PermissionDenied
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
@@ -295,24 +337,41 @@ class AssayTestResultList(LoginRequiredMixin, ListView):
     model = AssayTestResult
 
     def get_queryset(self):
-        return AssayTestResult.objects.filter(assay_device_readout__restricted=False) | AssayTestResult.objects.filter(assay_device_readout__group__in=self.request.user.groups.all())
+        return AssayTestResult.objects.filter(assay_device_readout__restricted=False).prefetch_related(
+            'assay_device_readout', 'chip_setup', 'created_by') | AssayTestResult.objects.filter(
+            assay_device_readout__group__in=self.request.user.groups.all()).prefetch_related('assay_device_readout',
+                                                                                             'chip_setup', 'created_by')
 
 
-TestResultFormSet = inlineformset_factory(AssayTestResult,AssayResult, formset=TestResultInlineFormset, extra=1,
-                                              widgets = {'value': forms.TextInput(attrs={'size': 10}),})
+TestResultFormSet = inlineformset_factory(AssayTestResult, AssayResult, formset=TestResultInlineFormset, extra=1,
+                                          widgets={'value': forms.TextInput(attrs={'size': 10}), })
 
-class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
+
+class AssayTestResultAdd(LoginRequiredMixin, CreateView):
     template_name = 'assays/assaytestresult_add.html'
     form_class = AssayResultForm
+
+    def get(self, request, **kwargs):
+        self.object = None
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        if not has_group(request.user, study.group):
+            raise PermissionDenied()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        form.fields['chip_setup'].queryset = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'device',
+            'compound', 'unit',
+            'created_by')
+        return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
         context = super(AssayTestResultAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = TestResultFormSet(self.request.POST)
-            context['study'] = self.kwargs.get('study_id')
+            # context['study'] = self.kwargs.get('study_id')
         else:
             context['formset'] = TestResultFormSet()
-            context['study'] = self.kwargs.get('study_id')
+            # context['study'] = self.kwargs.get('study_id')
         return context
 
     def form_valid(self, form):
@@ -340,7 +399,8 @@ class AssayTestResultDetail(LoginRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.assay_device_readout.restricted and not has_group(request.user, self.object.assay_device_readout.group):
+        if self.object.assay_device_readout.restricted and not has_group(request.user,
+                                                                         self.object.assay_device_readout.group):
             raise PermissionDenied
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)

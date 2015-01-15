@@ -48,13 +48,6 @@
             var setup = $('#id_chip_setup');
             var setupVal = setup.val();
             var inlineOptions = "";
-            var setupOptions = "";
-
-            // Get value for study
-            $.when(whittle('assay_run_id', {{ study }}, 'AssayChipSetup', '', '')).then(function (data) {
-                $('#id_chip_setup').html(data);
-                $('#id_chip_setup').val(setupVal);
-            });
 
             // Initial inline whittle
             $.when(whittle('chip_setup',setup.val(),'AssayChipReadout','AssayChipReadoutAssay','readout_id')).then(function(data) {
@@ -78,7 +71,7 @@
 
             // Resolve deletion error frontent
             // This selector will check all items with DELETE in the name, including newly created ones
-            $( "body" ).on( "click", "input[name*='DELETE']", function(event) {
+            $("body").on("click", "input[name*='DELETE']", function(event) {
                 $.when(whittle('chip_setup',setup.val(),'AssayChipReadout','AssayChipReadoutAssay','readout_id')).then(function(data) {
                     inlineOptions = data;
                     changeAll(false);
@@ -167,14 +160,35 @@
             <tbody>
                 {% for result in formset %}
                     <tr class="inline" id="results-{{ forloop.counter0 }}">
-                        <td>{{ result.assay_name }}</td>
-                        <td>{{ result.result }}</td>
-                        <td>{{ result.result_function }}</td>
-                        <td>{{ result.result_type }}</td>
-                        <td>{{ result.value }}</td>
-                        <td>{{ result.test_unit }}</td>
-                        <td>{{ result.severity }}</td>
-                        <td>{{ result.DELETE }}</td>
+                        <td>
+                            <select id="id_assayresult_set-{{ forloop.counter0 }}-assay_name" name="assayresult_set-{{ forloop.counter0 }}-assay_name">
+                                <option value="">---------</option>
+                                {% if result.assay_name.value %}
+                                    <option selected value="{{ result.assay_name.value }}">---------</option>
+                                {% endif %}
+                            </select>
+                        </td>
+                        <td>
+                            {{ result.result }}
+                        </td>
+                        <td>
+                            {{ result.result_function }}
+                        </td>
+                        <td>
+                            {{ result.result_type }}
+                        </td>
+                        <td>
+                            {{ result.value }}
+                        </td>
+                        <td>
+                            {{ result.test_unit }}
+                        </td>
+                        <td>
+                            {{ result.severity }}
+                        </td>
+                        <td>
+                            {{ result.DELETE }}
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
