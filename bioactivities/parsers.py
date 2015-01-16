@@ -202,7 +202,7 @@ def fetch_all_standard_bioactivities_data(
             if value <= 0:
                 continue
 
-            value = np.log(value)
+            value = np.log10(value)
 
         result.append(
             {
