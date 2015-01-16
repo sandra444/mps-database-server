@@ -172,45 +172,6 @@ $(document).ready(function () {
     }
 
     function submit() {
-//        $http(
-//                {
-//                    url: '/bioactivities/gen_cluster/',
-//                    method: 'POST',
-//                    data: {
-//                        'bioactivities_filter': get_bioactivities_filter,
-//                        'targets_filter': get_targets_filter,
-//                        'compounds_filter': get_compounds_filter,
-//                        'target_types_filter': target_types_filter,
-//                        'organisms_filter': organisms_filter,
-//                        'normalize_bioactivities': normalize_bioactivities,
-//                        'metric': get_metric,
-//                        'method': get_method,
-//                        'chemical_properties': get_chemical_properties
-//                    },
-//                    headers: {
-//                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-//                    }
-//                }
-//            ).success(
-//                function (data) {
-//                    window.spinner.stop();
-//                    if (data["data_json"] != undefined) {
-//                        $scope.cluster_data_json = data["data_json"];
-//                        $scope.bioactivities = data["bioactivities"];
-//                        $scope.compounds = data["compounds"];
-//                        window.d3_cluster_render($scope.cluster_data_json,$scope.bioactivities,$scope.compounds);
-//
-//                    } else {
-//                        $scope.error_message_visible = true;
-//                        window.spinner.stop();
-//                    }
-//                }
-//            ).error(
-//                function () {
-//                    window.spinner.stop();
-//                    $scope.error_message_visible = true;
-//                }
-//            );
 
         // Clear all filters
         bioactivities_filter = [];
@@ -253,6 +214,7 @@ $(document).ready(function () {
                 'compounds_filter': compounds_filter,
                 'target_types_filter': target_types,
                 'organisms_filter': organisms,
+                'log_scale': log_scale,
                 'normalize_bioactivities': normalize_bioactivities,
                 'metric': metric,
                 'method': method,
@@ -290,29 +252,6 @@ $(document).ready(function () {
     }
 
     function refresh() {
-//        promise: function() {
-//                return $http({
-//                    method: 'GET',
-//                    params: {
-//                        'target_types': JSON.stringify(target_types),
-//                        'organisms': JSON.stringify(organisms)
-//                    },
-//                    url: '/bioactivities/all_data'
-//                })
-//                .then(function(response) {
-//                    min_feat_count = $rootScope.min_feat_count ? $rootScope.min_feat_count : 10;
-//                    if (typeof response.data === 'object') {
-//                        targets = get_list(response.data.targets);
-//                        compounds = get_list(response.data.compounds);
-//                        bioactivities = get_list(response.data.bioactivities);
-//                        return response.data
-//                    } else {
-//                        return $q.reject(response.data);
-//                    }
-//                }, function(response) {
-//                    return $q.reject(response.data);
-//                });
-//            }
 
         // Disable everything
         $(":input").prop("disabled",true);
@@ -542,6 +481,13 @@ $(document).ready(function () {
     $('#apply_minimum_feature_count').click(function(evt) {
         min_feat_count = $('#minimum_feature_count').val();
         refresh();
+    });
+
+    // Initial truth log scale
+    var log_scale = $('#log_scale').prop('checked');
+    // Listen log_scale
+    $('#log_scale').change(function(evt) {
+        log_scale = $('#log_scale').prop('checked');
     });
 
     // Initial truth normalize

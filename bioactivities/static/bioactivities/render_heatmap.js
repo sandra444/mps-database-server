@@ -529,6 +529,7 @@ $(document).ready(function () {
                 'compounds_filter': compounds_filter,
                 'target_types_filter': target_types,
                 'organisms_filter': organisms,
+                'log_scale': log_scale,
                 'normalize_bioactivities': normalize_bioactivities,
                 'metric': metric,
                 'method': method
@@ -791,6 +792,13 @@ $(document).ready(function () {
     $('#apply_minimum_feature_count').click(function(evt) {
         min_feat_count = $('#minimum_feature_count').val();
         refresh();
+    });
+
+    // Initial truth log scale
+    var log_scale = $('#log_scale').prop('checked');
+    // Listen log_scale
+    $('#log_scale').change(function(evt) {
+        log_scale = $('#log_scale').prop('checked');
     });
 
     // Initial truth normalize
