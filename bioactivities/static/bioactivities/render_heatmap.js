@@ -843,8 +843,6 @@ $(document).ready(function () {
     // Return to selection
     $('#back').click(function(evt) {
         document.location.hash = "";
-        $('#graphic').prop('hidden',true);
-        $('#selection').prop('hidden',false)
     });
 
     var bioactivity_search = $('#bioactivity_filter');
@@ -921,7 +919,7 @@ $(document).ready(function () {
         }
     }).trigger('input');
 
-    var hashChange = function() {
+    function hashChange() {
 
         if (document.location.hash == "") {
             $('#graphic').prop('hidden',true);
@@ -932,7 +930,7 @@ $(document).ready(function () {
             $('#graphic').prop('hidden',false);
             $('#selection').prop('hidden',true)
         }
-    };
+    }
 
     //This will call the hashchange function whenever the hashchanges (does not work on outdated versions of IE)
     window.onhashchange = hashChange;
