@@ -15,6 +15,9 @@ import scipy.cluster
 import numpy as np
 
 from compounds.models import Compound
+from .models import Bioactivity
+
+from django.core import serializers
 
 def generate_record_frequency_data(query):
     result = {}
@@ -773,3 +776,86 @@ def cluster(request):
     #     # json filepath for the data
     #     'data_json': data_json_relpath
     # }
+
+def table(request):
+    if len(request.body) == 0:
+        return {'error': 'empty request body'}
+
+    # convert data sent in request to a dict data type from a string data type
+    request_filter = json.loads(request.body)
+
+    desired_targets = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'targets_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_compounds = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'compounds_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_bioactivities = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'bioactivities_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_target_types = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'target_types_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_organisms = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'organisms_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    # Filter based on compound
+    q = Bioactivity.objects.filter(compound__name__in=desired_compounds)
+    # Filter based on targets
+    q = q.filter(target__name__in=desired_targets)
+    # Filter based on standardized bioactivity name
+    q = q.filter(standard_name__in=desired_bioactivities)
+
+    # # Filter based on organism
+    # q = q.filter(target__organism__in=desired_organisms)
+    # # Filter based on target type
+    # q = q.filter(target__target_type__in=desired_target_types
+
+    # Prefetch all foreign keys
+    # q = q.prefetch_related('assay', 'compound', 'parent_compound', 'target', 'created_by')
+
+    data = serializers.serialize('json', list(q))
+
+    # data = serializers.serialize('json', list(q), fields=('assay','compound','target','standard_name', 'operator',
+    #                                                       'units', 'value', 'standardized_units', 'standardized_value'
+    #                                                       'chemblid', 'bioactivity_type'))
+
+    return {
+        # json data
+        'data_json': data,
+    }

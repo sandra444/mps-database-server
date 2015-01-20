@@ -49,28 +49,27 @@
             </div>
         </div>
         <hr>
-
-        <div class="row text-center">
-            <div class="col-xs-4">
-                <label>Log Scale
-                    <input title="Currently excludes 0 and negative values" id="log_scale" type="checkbox">
-                </label>
-            </div>
-
-            <div class="col-xs-4">
-                <label>Normalize Bioactivities
-                    <input title="Normalizes to range 0.0001 to 1.0" id="normalize_bioactivities" type="checkbox" checked>
-                </label>
-            </div>
-
-            <div class="col-xs-4">
-                <label>Minimum Feature Count Per Record
-                    <input id="minimum_feature_count" type="number" value="10">
-                    <button id="apply_minimum_feature_count">Apply</button>
-                </label>
-            </div>
-        </div>
         {% block extra_row %}
+            <div class="row text-center">
+                <div class="col-xs-4">
+                    <label>Log Scale
+                        <input title="Currently excludes 0 and negative values" id="log_scale" type="checkbox">
+                    </label>
+                </div>
+
+                <div class="col-xs-4">
+                    <label>Normalize Bioactivities
+                        <input title="Normalizes to range 0.0001 to 1.0" id="normalize_bioactivities" type="checkbox" checked>
+                    </label>
+                </div>
+
+                <div class="col-xs-4">
+                    <label>Minimum Feature Count Per Record
+                        <input id="minimum_feature_count" type="number" value="10">
+                        <button id="apply_minimum_feature_count">Apply</button>
+                    </label>
+                </div>
+            </div>
             <hr>
             <div class="row text-center">
                 <div class="col-xs-4">

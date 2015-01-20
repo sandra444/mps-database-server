@@ -148,8 +148,8 @@ def list_of_all_data_in_bioactivities(request):
 def gen_heatmap(request):
     result = heatmap(request)
     if result:
-        logging.debug('Final JSON response step: returning JSON response'
-                      ' with heatmap result')
+        # logging.debug('Final JSON response step: returning JSON response'
+        #               ' with heatmap result')
         return JSONResponse(result)
     else:
         logging.debug('Final JSON response step failed: result has no data')
@@ -159,8 +159,19 @@ def gen_heatmap(request):
 def gen_cluster(request):
     result = cluster(request)
     if result:
-        logging.debug('Final JSON response step: returning JSON response'
-                      ' with heatmap result')
+        # logging.debug('Final JSON response step: returning JSON response'
+        #               ' with heatmap result')
+        return JSONResponse(result)
+    else:
+        logging.debug('Final JSON response step failed: result has no data')
+        return HttpResponse()
+
+@csrf_exempt
+def gen_table(request):
+    result = table(request)
+    if result:
+        # logging.debug('Final JSON response step: returning JSON response'
+        #               ' with heatmap result')
         return JSONResponse(result)
     else:
         logging.debug('Final JSON response step failed: result has no data')
@@ -173,3 +184,7 @@ def view_cluster(request):
 def view_heatmap(request):
     c = RequestContext(request)
     return render_to_response('bioactivities/heatmap.html', c)
+
+def view_table(request):
+    c = RequestContext(request)
+    return render_to_response('bioactivities/table.html', c)
