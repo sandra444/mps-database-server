@@ -225,11 +225,10 @@ $(document).ready(function () {
                 window.spinner.stop();
                 //console.log(json);
 
-                document.location.hash = "display";
-
                 if (json.data_json) {
                     //console.log(json);
                     cluster(json.data_json, json.bioactivities, json.compounds);
+                    document.location.hash = "display";
                 }
                 else {
                     // Show error

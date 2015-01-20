@@ -538,11 +538,11 @@ $(document).ready(function () {
                 // Stop spinner
                 window.spinner.stop();
 
-                document.location.hash = "display";
-
                 if (json.data_csv) {
                     //console.log(json);
                     heatmap(json.data_csv, json.row_order, json.col_order);
+
+                    document.location.hash = "display";
                 }
                 else {
                     // Show error
