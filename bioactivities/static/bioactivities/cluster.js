@@ -225,6 +225,8 @@ $(document).ready(function () {
                 window.spinner.stop();
                 //console.log(json);
 
+                document.location.hash = "display";
+
                 if (json.data_json) {
                     //console.log(json);
                     cluster(json.data_json, json.bioactivities, json.compounds);
@@ -347,6 +349,8 @@ $(document).ready(function () {
         }
         return result;
     }
+
+    document.location.hash = "";
 
     // Currently testing, should grab these with a function in refresh (KEEP THIS FORMAT)
     var target_types = [];
@@ -534,6 +538,7 @@ $(document).ready(function () {
 
     // Return to selection
     $('#back').click(function(evt) {
+        document.location.hash = "";
         $('#graphic').prop('hidden',true);
         $('#selection').prop('hidden',false)
     });
@@ -612,4 +617,20 @@ $(document).ready(function () {
             $('#all_compounds').prop('checked', false);
         }
     }).trigger('input');
+
+    var hashChange = function() {
+
+        if (document.location.hash == "") {
+            $('#graphic').prop('hidden',true);
+            $('#selection').prop('hidden',false)
+        }
+
+        else {
+            $('#graphic').prop('hidden',false);
+            $('#selection').prop('hidden',true)
+        }
+    };
+
+    //This will call the hashchange function whenever the hashchanges (does not work on outdated versions of IE)
+    window.onhashchange = hashChange;
 });

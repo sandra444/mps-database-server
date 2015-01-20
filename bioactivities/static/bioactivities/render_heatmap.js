@@ -538,6 +538,8 @@ $(document).ready(function () {
                 // Stop spinner
                 window.spinner.stop();
 
+                document.location.hash = "display";
+
                 if (json.data_csv) {
                     //console.log(json);
                     heatmap(json.data_csv, json.row_order, json.col_order);
@@ -658,6 +660,8 @@ $(document).ready(function () {
         }
         return result;
     }
+
+    document.location.hash = "";
 
     // Currently testing, should grab these with a function in refresh (KEEP THIS FORMAT)
     var target_types = [];
@@ -838,6 +842,7 @@ $(document).ready(function () {
 
     // Return to selection
     $('#back').click(function(evt) {
+        document.location.hash = "";
         $('#graphic').prop('hidden',true);
         $('#selection').prop('hidden',false)
     });
@@ -915,5 +920,21 @@ $(document).ready(function () {
             $('#all_compounds').prop('checked', false);
         }
     }).trigger('input');
+
+    var hashChange = function() {
+
+        if (document.location.hash == "") {
+            $('#graphic').prop('hidden',true);
+            $('#selection').prop('hidden',false)
+        }
+
+        else {
+            $('#graphic').prop('hidden',false);
+            $('#selection').prop('hidden',true)
+        }
+    };
+
+    //This will call the hashchange function whenever the hashchanges (does not work on outdated versions of IE)
+    window.onhashchange = hashChange;
 });
 
