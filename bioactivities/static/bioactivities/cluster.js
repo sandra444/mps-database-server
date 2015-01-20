@@ -228,7 +228,7 @@ $(document).ready(function () {
                 if (json.data_json) {
                     //console.log(json);
                     cluster(json.data_json, json.bioactivities, json.compounds);
-                    document.location.hash = "display";
+//                    document.location.hash = "display";
                 }
                 else {
                     // Show error
@@ -349,7 +349,8 @@ $(document).ready(function () {
         return result;
     }
 
-    document.location.hash = "";
+//    // Initial hash change
+//    document.location.hash = "";
 
     // Currently testing, should grab these with a function in refresh (KEEP THIS FORMAT)
     var target_types = [];
@@ -537,7 +538,14 @@ $(document).ready(function () {
 
     // Return to selection
     $('#back').click(function(evt) {
-        document.location.hash = "";
+        $('#graphic').prop('hidden',true);
+        $('#selection').prop('hidden',false);
+//        document.location.hash = "";
+//        //Why does microsoft want me to suffer?
+//        if (browser.isIE && browser.verIE >= 11) {
+//            $('#graphic').prop('hidden',true);
+//            $('#selection').prop('hidden',false)
+//        }
     });
 
     var bioactivity_search = $('#bioactivity_filter');
@@ -615,19 +623,19 @@ $(document).ready(function () {
         }
     }).trigger('input');
 
-    function hashChange() {
-
-        if (document.location.hash == "") {
-            $('#graphic').prop('hidden',true);
-            $('#selection').prop('hidden',false)
-        }
-
-        else {
-            $('#graphic').prop('hidden',false);
-            $('#selection').prop('hidden',true)
-        }
-    }
-
-    //This will call the hashchange function whenever the hashchanges (does not work on outdated versions of IE)
-    window.onhashchange = hashChange;
+//    function hashChange() {
+//
+//        if (document.location.hash == "") {
+//            $('#graphic').prop('hidden',true);
+//            $('#selection').prop('hidden',false)
+//        }
+//
+//        else {
+//            $('#graphic').prop('hidden',false);
+//            $('#selection').prop('hidden',true)
+//        }
+//    }
+//
+//    //This will call the hashchange function whenever the hashchanges (does not work on outdated versions of IE)
+//    window.onhashchange = hashChange;
 });
