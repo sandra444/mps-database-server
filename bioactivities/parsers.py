@@ -777,6 +777,9 @@ def cluster(request):
     #     'data_json': data_json_relpath
     # }
 
+def cap_first(string):
+    return string[0].upper() + string[1:].lower()
+
 def table(request):
     if len(request.body) == 0:
         return {'error': 'empty request body'}
@@ -817,7 +820,7 @@ def table(request):
     desired_target_types = [
         x.get(
             'name'
-        ) for x in request_filter.get(
+        ).upper() for x in request_filter.get(
             'target_types_filter'
         ) if x.get(
             'is_selected'
@@ -825,9 +828,9 @@ def table(request):
     ]
 
     desired_organisms = [
-        x.get(
+        cap_first(x.get(
             'name'
-        ) for x in request_filter.get(
+        )) for x in request_filter.get(
             'organisms_filter'
         ) if x.get(
             'is_selected'
@@ -836,24 +839,39 @@ def table(request):
 
     # Filter based on compound
     q = Bioactivity.objects.filter(compound__name__in=desired_compounds)
+
+    # Filter based on organism
+    q = q.filter(target__organism__in=desired_organisms)
+    # Filter based on target type
+    q = q.filter(target__target_type__in=desired_target_types)
+
     # Filter based on targets
     q = q.filter(target__name__in=desired_targets)
     # Filter based on standardized bioactivity name
     q = q.filter(standard_name__in=desired_bioactivities)
 
-    # # Filter based on organism
-    # q = q.filter(target__organism__in=desired_organisms)
-    # # Filter based on target type
-    # q = q.filter(target__target_type__in=desired_target_types
-
     # Prefetch all foreign keys
-    # q = q.prefetch_related('assay', 'compound', 'parent_compound', 'target', 'created_by')
+    q = q.prefetch_related('assay', 'compound', 'parent_compound', 'target', 'created_by')
 
-    data = serializers.serialize('json', list(q))
+    data = []
 
-    # data = serializers.serialize('json', list(q), fields=('assay','compound','target','standard_name', 'operator',
-    #                                                       'units', 'value', 'standardized_units', 'standardized_value'
-    #                                                       'chemblid', 'bioactivity_type'))
+    for bioactivity in q:
+        obj = {
+            'id': bioactivity.pk,
+            'compound': bioactivity.compound.name,
+            'target': bioactivity.target.name,
+            'organism': bioactivity.target.organism,
+            'standard_name': bioactivity.standard_name,
+            'operator': bioactivity.operator,
+            'standardized_value': bioactivity.standardized_value,
+            'standardized_units': bioactivity.standardized_units,
+            'chemblid': bioactivity.assay.chemblid,
+            'bioactivity_type': bioactivity.bioactivity_type,
+            'value': bioactivity.value,
+            'units': bioactivity.units,
+        }
+        data.append(obj)
+
 
     return {
         # json data

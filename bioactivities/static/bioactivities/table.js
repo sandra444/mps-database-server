@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-    function table(table_data_json) {
+    function table(data) {
 
         // Show graphic
         $('#graphic').prop('hidden',false);
@@ -10,6 +10,32 @@ $(document).ready(function () {
         // Clear old (if present)
         $('#table').html('');
 
+        for (var i in data) {
+            var bio = data[i];
+            //console.log(bio);
+            var row = "<tr>";
+            row += "<td>" + bio.compound + "</td>";
+            row += "<td>" + bio.target + "</td>";
+            row += "<td>" + bio.organism + "</td>";
+            row += "<td>" + bio.standard_name + "</td>";
+            row += "<td>" + bio.operator + "</td>";
+            row += "<td>" + bio.standardized_value + "</td>";
+            row += "<td>" + bio.standardized_units + "</td>";
+            row += "<td>" + bio.chemblid + "</td>";
+            row += "<td>" + bio.bioactivity_type + "</td>";
+            row += "<td>" + bio.value + "</td>";
+            row += "<td>" + bio.units + "</td>";
+            row += "</tr>";
+            $('#table').append(row);
+        }
+
+            $('#full').DataTable({
+                "iDisplayLength": 100
+            });
+
+            // Swap positions of filter and length selection
+            $('.dataTables_filter').css('float','left');
+            $('.dataTables_length').css('float','right');
     }
 
     function submit() {
@@ -62,7 +88,7 @@ $(document).ready(function () {
                 //console.log(json);
 
                 if (json.data_json) {
-                    console.log(json);
+                    //console.log(json);
                     table(json.data_json);
 //                    document.location.hash = "display";
                 }
