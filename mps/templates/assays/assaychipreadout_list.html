@@ -9,7 +9,7 @@
         <table id="readouts" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>Readout ID</th>
                     <th>Chip Setup</th>
                     <th>Readout Date</th>
                     <th>Creator</th>
@@ -19,7 +19,7 @@
 
             <tfoot>
                 <tr>
-                    <th>ID</th>
+                    <th>Readout ID</th>
                     <th>Chip Setup</th>
                     <th>Readout Date</th>
                     <th>Creator</th>
@@ -32,7 +32,12 @@
                 <tr class="compound" id={{ readout.id }} name={{ readout.id }}>
                     <td><a href="{{ readout.id }}">{{ readout.id }}</a></td>
                     <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}">{{ readout.chip_setup }}</a></td>
-                    <td>{{ readout.readout_start_time }}</td>
+                    {% if readout.readout_start_time != None %}
+                        <td>{{ readout.readout_start_time }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+{#                    <td>{{ readout.readout_start_time }}</td>#}
                     <td>{{ readout.created_by }}</td>
 {#                    <td>{{ compound.group }}</td>#}
                 </tr>

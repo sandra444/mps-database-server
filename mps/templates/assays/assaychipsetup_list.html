@@ -13,7 +13,7 @@
                     <th>Organ Chip Study</th>
                     <th>Date</th>
                     <th>Organ Chip Name</th>
-                    <th>Chip Test Type</th>
+{#                    <th>Chip Test Type</th>#}
                     <th>Compound</th>
                     <th>Creator</th>
                 </tr>
@@ -24,7 +24,7 @@
                     <th>Chip ID / Barcode</th>
                     <th>Organ Chip Study</th>
                     <th>Date</th>
-                    <th>Chip Test Type</th>
+{#                    <th>Chip Test Type</th>#}
                     <th>Compound</th>
                     <th>Creator</th>
                 </tr>
@@ -37,8 +37,13 @@
                     <td><a href="/assays/organchipstudy/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.device }}</td>
-                    <td>{{ setup.chip_test_type }}</td>
-                    <td>{{ setup.compound }}</td>
+{#                    <td>{{ setup.chip_test_type }}</td>#}
+                    {% if setup.compound != None %}
+                        <td>{{ setup.compound }}</td>
+                    {% else %}
+                        <td>-control-</td>
+                    {% endif %}
+{#                    <td>{{ setup.compound }}</td>#}
                     <td>{{ setup.created_by }}</td>
                 </tr>
             {% endfor %}
