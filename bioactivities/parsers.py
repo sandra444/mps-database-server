@@ -777,6 +777,7 @@ def cluster(request):
     #     'data_json': data_json_relpath
     # }
 
+# Function to adhere to organism naming convention
 def cap_first(string):
     return string[0].upper() + string[1:].lower()
 
@@ -866,9 +867,9 @@ def table(request):
             'standardized_value': bioactivity.standardized_value,
             'standardized_units': bioactivity.standardized_units,
             'chemblid': bioactivity.assay.chemblid,
-            'bioactivity_type': bioactivity.bioactivity_type,
-            'value': bioactivity.value,
-            'units': bioactivity.units,
+            # 'bioactivity_type': bioactivity.bioactivity_type,
+            # 'value': bioactivity.value,
+            # 'units': bioactivity.units,
         }
         data.append(obj)
 

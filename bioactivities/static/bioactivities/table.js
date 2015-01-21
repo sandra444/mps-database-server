@@ -21,10 +21,10 @@ $(document).ready(function () {
             row += "<td>" + bio.operator + "</td>";
             row += "<td>" + bio.standardized_value + "</td>";
             row += "<td>" + bio.standardized_units + "</td>";
-            row += "<td>" + bio.chemblid + "</td>";
-            row += "<td>" + bio.bioactivity_type + "</td>";
-            row += "<td>" + bio.value + "</td>";
-            row += "<td>" + bio.units + "</td>";
+            row += "<td><a href='https://www.ebi.ac.uk/chembl/assay/inspect/"+bio.chemblid+"'>" + bio.chemblid + "</a></td>";
+//            row += "<td>" + bio.bioactivity_type + "</td>";
+//            row += "<td>" + bio.value + "</td>";
+//            row += "<td>" + bio.units + "</td>";
             row += "</tr>";
             $('#table').append(row);
         }
