@@ -36,7 +36,9 @@
             <b>Setup:</b>
         </div>
         <div class="col-xs-10 lead">
-            {{ object.chip_setup }}
+            <a href="/assays/assaychipsetup/{{ object.chip_setup.id }}">
+                {{ object.chip_setup }}
+            </a>
         </div>
     </div>
 
@@ -45,7 +47,11 @@
             <b>Time:</b>
         </div>
         <div class="col-xs-10 lead">
-            {{ object.treatment_time_length }} {{ object.timeunit }}
+            {% if object.treatment_time_length != None %}
+                {{ object.treatment_time_length }} {{ object.timeunit }}
+            {% else %}
+                In {{ object.timeunit }}
+            {% endif %}
         </div>
     </div>
 
