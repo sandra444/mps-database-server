@@ -8,6 +8,7 @@ $(document).ready(function () {
         $('#error_message').prop('hidden',true);
 
         // Clear old (if present)
+        $('#full').dataTable().fnDestroy();
         $('#table').html('');
 
         for (var i in data) {
@@ -29,13 +30,15 @@ $(document).ready(function () {
             $('#table').append(row);
         }
 
-            $('#full').DataTable({
-                "iDisplayLength": 100
-            });
+        $('#full').DataTable({
+            "iDisplayLength": 100,
+            // Needed to destroy old table
+            "bDestroy": true
+        });
 
-            // Swap positions of filter and length selection
-            $('.dataTables_filter').css('float','left');
-            $('.dataTables_length').css('float','right');
+        // Swap positions of filter and length selection
+        $('.dataTables_filter').css('float','left');
+        $('.dataTables_length').css('float','right');
     }
 
     function submit() {
