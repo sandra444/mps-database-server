@@ -45,9 +45,24 @@
                     <td>{{ finding.drug_trial.get_trial_type_display }}</td>
                     <td>{{ finding.finding_name }}</td>
                     <td>{{ finding.get_result_display }}</td>
-                    <td>{{ finding.percent_max }}</td>
-                    <td>{{ finding.value }}</td>
-                    <td>{{ finding.value_units }}</td>
+                    {% if finding.percent_max != None %}
+                        <td>{{ finding.percent_max }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if finding.value != None %}
+                        <td>{{ finding.value }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if finding.value_units != None %}
+                        <td>{{ finding.value_units }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+{#                    <td>{{ finding.percent_max }}</td>#}
+{#                    <td>{{ finding.value }}</td>#}
+{#                    <td>{{ finding.value_units }}</td>#}
                 </tr>
             {% endfor %}
             </tbody>

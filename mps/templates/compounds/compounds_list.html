@@ -41,10 +41,25 @@
                     <td><a href="{{ compound.id }}">{{ compound.name }}</a></td>
                     <td><a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.chemblid }}">{{ compound.chemblid }}</a></td>
                     <td>{{ compound.synonyms }}</td>
-                    <td>{{ compound.molecular_weight }}</td>
-                    <td>{{ compound.logp }}</td>
-                    <td>{{ compound.ro5_violations }}</td>
+                    {% if compound.molecular_weight != None %}
+                        <td>{{ compound.molecular_weight }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if compound.logp != None %}
+                        <td>{{ compound.logp }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if compound.ro5_violations != None %}
+                        <td>{{ compound.ro5_violations }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
                     <td>{{ compound.known_drug }}</td>
+{#                    <td>{{ compound.molecular_weight }}</td>#}
+{#                    <td>{{ compound.logp }}</td>#}
+{#                    <td>{{ compound.ro5_violations }}</td>#}
 {#                    <td>{{ compound.last_update }}</td>#}
                     <td><img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}"></td>
                 </tr>
