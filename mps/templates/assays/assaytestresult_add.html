@@ -122,7 +122,17 @@
         <div class="form-group has-error">
             <label for="chip_setup" class="col-sm-2 control-label">Setup</label>
             <div class="col-sm-10">
-              {{ form.chip_setup }}
+                <select id="id_chip_setup" name="chip_setup">
+                    <option value="">---------</option>
+                    {% for setup in setups %}
+                        {# It is necessary to coerce the forms value into an integer for this compare #}
+                        {% if setup.id|add:"0" == form.chip_setup.value|add:"0" %}
+                            <option value={{ setup.id }} selected>{{ setup }}</option>
+                        {% else %}
+                            <option value={{ setup.id }}>{{ setup }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
             </div>
         </div>
 

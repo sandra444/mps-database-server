@@ -278,19 +278,24 @@ class AssayChipReadoutAdd(LoginRequiredMixin, CreateView):
             raise PermissionDenied()
         form_class = self.get_form_class()
         form = self.get_form(form_class)
-        form.fields['chip_setup'].queryset = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
-            'assay_run_id', 'device',
-            'compound', 'unit',
-            'created_by')
         return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
+        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'device',
+            'compound', 'unit',
+            'created_by').exclude(id__in=list(set(exclude_list)))
+
         context = super(AssayChipReadoutAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = ACRAFormSet(self.request.POST, self.request.FILES)
+            context['setups'] = setups
             # context['study'] = self.kwargs.get('study_id')
         else:
             context['formset'] = ACRAFormSet()
+            context['setups'] = setups
             # context['study'] = self.kwargs.get('study_id')
         return context
 
@@ -358,19 +363,23 @@ class AssayTestResultAdd(LoginRequiredMixin, CreateView):
             raise PermissionDenied()
         form_class = self.get_form_class()
         form = self.get_form(form_class)
-        form.fields['chip_setup'].queryset = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
-            'assay_run_id', 'device',
-            'compound', 'unit',
-            'created_by')
         return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
+        'assay_run_id', 'device',
+        'compound', 'unit',
+        'created_by')
+
         context = super(AssayTestResultAdd, self).get_context_data(**kwargs)
         if self.request.POST:
-            context['formset'] = TestResultFormSet(self.request.POST)
+            context['formset'] = TestResultFormSet(self.request.POST, self.request.FILES)
+            context['setups'] = setups
             # context['study'] = self.kwargs.get('study_id')
         else:
             context['formset'] = TestResultFormSet()
+            context['setups'] = setups
             # context['study'] = self.kwargs.get('study_id')
         return context
 
