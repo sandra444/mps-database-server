@@ -860,6 +860,7 @@ def table(request):
         obj = {
             'id': bioactivity.pk,
             'compound': bioactivity.compound.name,
+            'compoundid': bioactivity.compound.id,
             'target': bioactivity.target.name,
             'organism': bioactivity.target.organism,
             'standard_name': bioactivity.standard_name,

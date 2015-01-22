@@ -15,7 +15,7 @@ $(document).ready(function () {
             var bio = data[i];
             //console.log(bio);
             var row = "<tr>";
-            row += "<td>" + bio.compound + "</td>";
+            row += "<td><a href='/compounds/"+bio.compoundid+"'>" + bio.compound + "</a></td>";
             row += "<td>" + bio.target + "</td>";
             row += "<td>" + bio.organism + "</td>";
             row += "<td>" + bio.standard_name + "</td>";
