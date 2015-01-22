@@ -52,6 +52,8 @@
         </div>
         {% endif %}
 
+        {% if not setup %}
+
         <legend><h2>Readouts
             {% if setups.count == 0 %}
                 <div hidden id="readout_alert" class="alert alert-warning" role="alert">
@@ -160,6 +162,8 @@
         <div class="alert alert-warning" role="alert">
             No chip results exist for this study
         </div>
+        {% endif %}
+
         {% endif %}
 
     </div>
