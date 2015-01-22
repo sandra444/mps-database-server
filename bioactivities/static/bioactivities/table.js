@@ -96,6 +96,9 @@ $(document).ready(function () {
 //                    document.location.hash = "display";
                 }
                 else {
+                    if (json.error) {
+                        $('#error').html(json.error);
+                    }
                     // Show error
                     $('#error_message').prop('hidden',false);
                     // Show Selection

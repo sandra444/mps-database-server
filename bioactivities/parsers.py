@@ -325,6 +325,18 @@ def heatmap(request):
         ) is True
     ]
 
+    # throw error if no compounds are selected
+    if len(desired_compounds) < 1:
+        return {'error': 'Select at least one compound.'}
+
+    # throw error if no targets are selected
+    if len(desired_targets) < 1:
+        return {'error': 'Select at least one target.'}
+
+    # throw error if no bioactivities are selected
+    if len(desired_bioactivities) < 1:
+        return {'error': 'Select at least one bioactivity.'}
+
     log_scale = request_filter.get('log_scale')
     normalized = request_filter.get('normalize_bioactivities')
 
@@ -837,6 +849,22 @@ def table(request):
             'is_selected'
         ) is True
     ]
+
+    # throw error if no compounds are selected
+    if len(desired_compounds) < 1:
+        return {'error': 'Select at least one compound.'}
+
+    # throw error if no targets are selected
+    if len(desired_targets) < 1:
+        return {'error': 'Select at least one target.'}
+
+    # throw error if no bioactivities are selected
+    if len(desired_bioactivities) < 1:
+        return {'error': 'Select at least one bioactivity.'}
+
+    # throw error for very large queries
+    if len(desired_bioactivities) > 285 or len(desired_targets) > 200 and len(desired_compounds) > 30:
+        return {'error': 'Your query is very large, please make fewer selections.'}
 
     # Filter based on compound
     q = Bioactivity.objects.filter(compound__name__in=desired_compounds)
