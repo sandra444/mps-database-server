@@ -267,18 +267,9 @@ ACRAFormSet = inlineformset_factory(AssayChipReadout, AssayChipReadoutAssay, for
                                     extra=1)
 
 
-class AssayChipReadoutAdd(LoginRequiredMixin, CreateView):
+class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
-
-    def get(self, request, **kwargs):
-        self.object = None
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        if not has_group(request.user, study.group):
-            raise PermissionDenied()
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
@@ -352,18 +343,9 @@ TestResultFormSet = inlineformset_factory(AssayTestResult, AssayResult, formset=
                                           widgets={'value': forms.TextInput(attrs={'size': 10}), })
 
 
-class AssayTestResultAdd(LoginRequiredMixin, CreateView):
+class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     template_name = 'assays/assaytestresult_add.html'
     form_class = AssayResultForm
-
-    def get(self, request, **kwargs):
-        self.object = None
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        if not has_group(request.user, study.group):
-            raise PermissionDenied()
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
