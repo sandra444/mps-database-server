@@ -15,7 +15,7 @@ def main(request):
 def login(request):
     # Don't allow a user to try to log in twice
     if request.user.is_active:
-        return HttpResponseRedirect("/accounts/logout")
+        return HttpResponseRedirect("/")
     c = RequestContext(request)
     c.update(csrf(request))
     c.update({'next':request.GET.get('next', '')})

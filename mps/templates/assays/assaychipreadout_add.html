@@ -100,6 +100,23 @@
         </div>
     </div>
 
+    {% if form.readout_start_time.errors %}
+        {% for error in form.readout_start_time.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="form-group has-error">
+        <label for="readout_start_time" class="col-sm-2 control-label">Readout Start Date</label>
+        <div class="col-sm-10">
+          {{ form.readout_start_time }} [yyyy-mm-dd]
+        </div>
+    </div>
+
     {% if form.treatment_time_length.errors %}
         {% for error in form.treatment_time_length.errors %}
             <div class="alert alert-danger" role="alert">
@@ -114,23 +131,6 @@
         <label for="treatment_time_length" class="col-sm-2 control-label">Treatment Time Length</label>
         <div class="col-sm-10">
           {{ form.treatment_time_length }}
-        </div>
-    </div>
-
-    {% if form.readout_start_time.errors %}
-        {% for error in form.readout_start_time.errors %}
-            <div class="alert alert-danger" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Error:</span>
-                {{error}}
-            </div>
-        {% endfor %}
-    {% endif %}
-
-    <div class="form-group">
-        <label for="readout_start_time" class="col-sm-2 control-label">Readout Start Time</label>
-        <div class="col-sm-10">
-          {{ form.readout_start_time }} [yyyy-mm-dd]
         </div>
     </div>
 
