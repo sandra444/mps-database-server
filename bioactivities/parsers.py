@@ -57,17 +57,10 @@ def generate_list_of_all_bioactivities_in_bioactivities():
     # Note that this query does not exclude all negative standardized_values
     # This is the case because it selects ONLY THE NAMES of bioactivities
     # If a bioactivity name is associated with both positive and negative values, those negative values will be included
-    # cursor.execute(
-    #     'SELECT bioactivities_bioactivity.standard_name '
-    #     'FROM bioactivities_bioactivity '
-    #     'WHERE bioactivities_bioactivity.standardized_value>0;'
-    # )
-
-    # Contrived way of acquiring all bioactivities
     cursor.execute(
         'SELECT bioactivities_bioactivity.standard_name '
         'FROM bioactivities_bioactivity '
-        'WHERE bioactivities_bioactivity.standardized_value>-999999999;'
+        'WHERE bioactivities_bioactivity.standardized_value>0;'
     )
 
     result = generate_record_frequency_data(cursor.fetchall())
