@@ -14,7 +14,22 @@
             <b>Setup:</b>
         </div>
         <div class="col-xs-10 lead">
-            {{ object.chip_setup }}
+            <a href="/assays/assaychipsetup/{{ object.chip_setup.id }}">
+                {{ object.chip_setup }}
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-2 lead text-right">
+            <b>Readout:</b>
+        </div>
+        <div class="col-xs-10 lead">
+            {% with object.assayresult_set.all|first as current %}
+                <a href="/assays/assaychipreadout/{{ current.assay_name.readout_id.id }}">
+                    {{ current.assay_name.readout_id.id }}
+                </a>
+            {% endwith %}
         </div>
     </div>
 
@@ -22,14 +37,14 @@
 
     <table class="table table-striped">
         <thead>
-        <tr style="font-weight:bold;">
-            <td>Assay</td>
-            <td>Pos/Neg</td>
-            <td>Function</td>
-            <td>Measure</td>
-            <td>Value</td>
-            <td>Test Unit</td>
-            <td>Severity</td>
+        <tr>
+            <th>Assay</th>
+            <th>Pos/Neg</th>
+            <th>Function</th>
+            <th>Measure</th>
+            <th>Value</th>
+            <th>Test Unit</th>
+            <th>Severity</th>
         </tr>
         </thead>
         <tbody>

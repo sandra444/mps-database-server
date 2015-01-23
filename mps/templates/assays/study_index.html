@@ -4,11 +4,11 @@
 {% block content %}
 
     <div class="container" style="padding-bottom: 50px">
-        <div class="alert alert-info" role="alert">
+        <div class="well">
             <h1 align="center">Study: {{ object_list.0.assay_run_id }}</h1>
         </div>
 
-        <legend><h2>Setups  <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Setup</a></h2></legend>
+        <legend><h2>Setups  <a href="assaychipsetup/add{{ setup }}" class="btn btn-success" role="button">Add Setup</a></h2></legend>
 
         {% if setups %}
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
@@ -51,6 +51,8 @@
             No chip setups exist for this study
         </div>
         {% endif %}
+
+        {% if not setup %}
 
         <legend><h2>Readouts
             {% if setups.count == 0 %}
@@ -160,6 +162,8 @@
         <div class="alert alert-warning" role="alert">
             No chip results exist for this study
         </div>
+        {% endif %}
+
         {% endif %}
 
     </div>

@@ -25,7 +25,7 @@
     {% block error %}
         <div class="row">
             <div hidden class="alert alert-danger" role="alert" id="error_message">
-                <p>
+                <p id="error">
                     The server could not find the result to your request.
                 </p>
 
@@ -49,36 +49,41 @@
             </div>
         </div>
         <hr>
-
-        <div class="row text-center">
-            <div class="col-xs-4 col-xs-offset-2">
-                <label>Normalize Bioactivities
-                    <input id="normalize_bioactivities" type="checkbox" checked>
-                </label>
-            </div>
-
-            <div class="col-xs-4">
-                <label>Minimum Feature Count Per Record
-                    <input id="minimum_feature_count" type="number" value="10">
-                    <button id="apply_minimum_feature_count">Apply</button>
-                </label>
-            </div>
-        </div>
         {% block extra_row %}
+            <div class="row text-center">
+                <div class="col-xs-4">
+                    <label>Log Scale
+                        <input title="Currently excludes 0 and negative values" id="log_scale" type="checkbox">
+                    </label>
+                </div>
+
+                <div class="col-xs-4">
+                    <label>Normalize Bioactivities
+                        <input title="Normalizes to range 0.0001 to 1.0" id="normalize_bioactivities" type="checkbox" checked>
+                    </label>
+                </div>
+
+                <div class="col-xs-4">
+                    <label>Minimum Feature Count Per Record
+                        <input id="minimum_feature_count" type="number" value="10">
+                        <button id="apply_minimum_feature_count">Apply</button>
+                    </label>
+                </div>
+            </div>
             <hr>
             <div class="row text-center">
                 <div class="col-xs-4">
                     <label>Use Chemical Properties
-                        <input id="chemical_properties" type="checkbox">
+                        <input id="chemical_properties" type="checkbox" checked>
                     </label>
                 </div>
                 <div class="col-xs-4">
                     <label>Method
                         <select id="method" class="form-control">
-                            <option selected>single</option>
-                            <option>complete</option>
-                            <option>average</option>
-                            <option>weighted</option>
+                            <option selected title="Performs single/min/nearest linkage">single</option>
+                            <option title="Performs complete/max/farthest point linkage">complete</option>
+                            <option title="Performs average/UPGMA (Unweighted Pair Group Method with Arithmetic Mean) linkage">average</option>
+                            <option title="Performs weighted/WPGMA (Weighted Pair Group Method with Arithmetic Mean) linkage">weighted</option>
                         </select>
                     </label>
                 </div>
@@ -86,11 +91,11 @@
                 <div class="col-xs-4">
                     <label>Metric
                         <select id="metric" class="form-control">
-                            <option selected>euclidean</option>
-                            <option>cosine</option>
-                            <option>cityblock</option>
-                            <option>correlation</option>
-                            <option>minkowski</option>
+                            <option selected title="The ordinary distance in n-dimensional space">euclidean</option>
+                            <option title="Normalized scalar product without subtracting the mean value">cosine</option>
+                            <option title="Manhattan distance, L1 distance, rectilinear distance">cityblock</option>
+                            <option title="Subtract the mean value of the coordinates, normalize and take the scalar product">correlation</option>
+                            <option title="A generalization of both the Euclidean distance and the Cityblock distance">minkowski</option>
                         </select>
                     </label>
                 </div>
@@ -233,12 +238,12 @@
             </div>
             <div class="col-xs-4">
 
-                <label>
-                    <p class="text-center">
-                        Targets Filter:
+                <p class="text-center">
+                    <label>
+                        Targets Filter:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
                         <input id="target_filter">
-                    </p>
-                </label>
+                    </label>
+                </p>
 
                 <div class="table-responsive">
 
@@ -263,12 +268,12 @@
 
             <div class="col-xs-4">
 
-                <label>
-                    <p class="text-center">
-                        Compounds Filter:
+                <p class="text-center">
+                    <label>
+                        Compounds Filter:&nbsp&nbsp&nbsp&nbsp
                         <input id="compound_filter">
-                    </p>
-                </label>
+                    </label>
+                </p>
 
                 <div class="table-responsive">
 
@@ -334,6 +339,9 @@
                     Back to Selection
                 </button>
             </div>
+
+            <hr>
+
             <div id="query_box" class="col-xs-3">
                 <div id="query" class="affix"></div>
             </div>

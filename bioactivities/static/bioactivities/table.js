@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-    function cluster(cluster_data_json, bioactivities, compounds) {
+    function table(data) {
 
         // Show graphic
         $('#graphic').prop('hidden',false);
@@ -8,167 +8,37 @@ $(document).ready(function () {
         $('#error_message').prop('hidden',true);
 
         // Clear old (if present)
-        $('#cluster').html('');
-        $('#query').html('');
-        $('#compound').html('');
+        $('#full').dataTable().fnDestroy();
+        $('#table').html('');
 
-
-        var height = null;
-        var find = Object.keys(compounds).length;
-
-        if (find < 11) {
-            height = 600;
-        }
-        else if (find < 20) {
-            height = 800;
-        }
-        else if (find < 50) {
-            height = 1000;
-        }
-        else if (find < 80) {
-            height = 1600;
-        }
-        else {
-            height = 2000;
+        for (var i in data) {
+            var bio = data[i];
+            //console.log(bio);
+            var row = "<tr>";
+            row += "<td><a href='/compounds/"+bio.compoundid+"'>" + bio.compound + "</a></td>";
+            row += "<td>" + bio.target + "</td>";
+            row += "<td>" + bio.organism + "</td>";
+            row += "<td>" + bio.standard_name + "</td>";
+            row += "<td>" + bio.operator + "</td>";
+            row += "<td>" + bio.standardized_value + "</td>";
+            row += "<td>" + bio.standardized_units + "</td>";
+            row += "<td><a href='https://www.ebi.ac.uk/chembl/assay/inspect/"+bio.chemblid+"'>" + bio.chemblid + "</a></td>";
+//            row += "<td>" + bio.bioactivity_type + "</td>";
+//            row += "<td>" + bio.value + "</td>";
+//            row += "<td>" + bio.units + "</td>";
+            row += "</tr>";
+            $('#table').append(row);
         }
 
-        var width = $("#cluster").width();
-
-        var cluster = d3.layout.cluster()
-            .size([height, width - 160]);
-
-        var diagonal = d3.svg.diagonal()
-            .projection(function (d) {
-                return [d.y, d.x];
-            });
-
-        var svg = d3.select("#cluster").append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .append("g")
-            .attr("transform", "translate(40,0)");
-
-        var root = cluster_data_json;
-
-        var nodes = cluster.nodes(root),
-            links = cluster.links(nodes);
-
-        var link = svg.selectAll(".link")
-            .data(links)
-            .enter().append("path")
-            .attr("class", "link")
-            .attr("d", diagonal);
-
-        var node = svg.selectAll(".node")
-            .data(nodes)
-            .enter().append("g")
-            .attr("class", "node")
-            .attr("id", function (d) {
-                return d.name.replace(/\s/g, "");
-            })
-            .attr("transform", function (d) {
-                return "translate(" + d.y + "," + d.x + ")";
-            });
-
-        node.append("circle")
-            .attr("r", 4.5);
-
-        node.on("mouseover", function (d) {
-            var recurse = function(node) {
-                // Change the class to selected node
-                $('#'+node.name.replace(/\s/g, "")).attr('class', 'node-s');
-
-                // Stop at leaves
-                if (!node.children) {
-                    return;
-                }
-                // For nodes with children
-                else {
-                    for (var child in node.children) {
-                        recurse(node.children[child]);
-                    }
-                }
-            };
-            recurse(d);
+        $('#full').DataTable({
+            "iDisplayLength": 100,
+            // Needed to destroy old table
+            "bDestroy": true
         });
 
-        node.on("mouseout", function (d) {
-            node.attr("class", "node");
-        });
-
-        node.on("click", function (d) {
-            $('#compound').html("");
-            var names = d.name.split('\n');
-            var box = "";
-            for (var i  in names){
-                if (compounds[names[i]]){
-                    var com = compounds[names[i]];
-                    var box = box = "<div id='com" + i + "' class='thumbnail text-center'>";
-                    box += '<button id="X' + i + '" type="button" class="btn-xs btn-danger">X</button>';
-                    box += "<img src='https://www.ebi.ac.uk/chembldb/compound/displayimage/"+ com.CHEMBL + "' class='img-polaroid'>";
-                    box += "<strong>" + com.name + "</strong><br>";
-                    box += "Known Drug: ";
-                    box += com.knownDrug ? "<span class='glyphicon glyphicon-ok'></span><br>" : "<span class='glyphicon glyphicon-remove'></span><br>";
-                    box += "Passes Rule of 3: ";
-                    box += com.ro3 ? "<span class='glyphicon glyphicon-ok'></span><br>" : "<span class='glyphicon glyphicon-remove'></span><br>";
-                    box += "Rule of 5 Violations: " + com.ro5 + "<br>";
-                    box += "Species: " + com.species;
-                    box += "</div>";
-                    $('#compound').prepend(box);
-                }
-                // Break at 10
-                if (i >= 9){
-                    break;
-                }
-            }
-        });
-
-        //Titles for hovering
-        node.append("title")
-            .text(function (d) {
-                return d.name.indexOf("\n") > -1 ? "" : d.name;
-        });
-
-        node.append("text")
-            .attr("dx", function (d) {
-                return d.children ? -8 : 8;
-            })
-            .attr("dy", 3)
-            .style("text-anchor", function (d) {
-                return d.children ? "end" : "start";
-            })
-            .text(function (d) {
-                return d.name.indexOf("\n") > -1 ? "" : d.name;
-            });
-
-        d3.select(self.frameElement).style("height", height + "px");
-
-        // Display the original query in terms of what bioactivity-target pairs were used
-        var queryHeight = 600;
-        var queryWidth = $('#query_box').width();
-        var query = "<div style='width:" + queryWidth + "px; height: "+ queryHeight + "px;!important;overflow: scroll;'><table class='table table-striped'><thead><tr><td><b>Target</b></td><td><b>Bioactivity</b></td></tr></thead>";
-
-        for (var i in bioactivities){
-            bioactivity = bioactivities[i].split('_');
-            query += "<tr><td>"+bioactivity[0]+"</td><td>"+bioactivity[1]+"</td></tr>";
-        }
-
-        query += "</table></div>";
-
-        $('#query').html(query);
-
-        $('#compound').html('<div id="com" class="thumbnail text-center">Click a node or compound name to view additional information</div>');
-
-        $(function () {
-            $(document).on("click", function (e) {
-                if (e.target.id.indexOf("X") > -1) {
-                    var num = e.target.id.replace( /^\D+/g, '');
-                    $("#com" + num).remove();
-                    e.stopPropagation();
-                    return false;
-                }
-            });
-        });
+        // Swap positions of filter and length selection
+        $('.dataTables_filter').css('float','left');
+        $('.dataTables_length').css('float','right');
     }
 
     function submit() {
@@ -204,7 +74,7 @@ $(document).ready(function () {
         );
 
         $.ajax({
-            url:  '/bioactivities/gen_cluster/',
+            url:  '/bioactivities/gen_table/',
             type: 'POST',
             contentType: 'application/json',
             // Remember to convert to string
@@ -213,12 +83,7 @@ $(document).ready(function () {
                 'targets_filter': targets_filter,
                 'compounds_filter': compounds_filter,
                 'target_types_filter': target_types,
-                'organisms_filter': organisms,
-                'log_scale': log_scale,
-                'normalize_bioactivities': normalize_bioactivities,
-                'metric': metric,
-                'method': method,
-                'chemical_properties': chemical_properties
+                'organisms_filter': organisms
             }),
             success: function (json) {
                 // Stop spinner
@@ -227,7 +92,7 @@ $(document).ready(function () {
 
                 if (json.data_json) {
                     //console.log(json);
-                    cluster(json.data_json, json.bioactivities, json.compounds);
+                    table(json.data_json);
 //                    document.location.hash = "display";
                 }
                 else {
@@ -273,9 +138,6 @@ $(document).ready(function () {
                 targets = get_list(json.targets);
                 compounds = get_list(json.compounds);
                 bioactivities = get_list(json.bioactivities);
-                //console.log(targets);
-                //console.log(compounds);
-                //console.log(bioactivities);
 
                 // Case INSENSITIVE sort
                 targets = _.sortBy(targets, function (i) { return i.name.toLowerCase(); });
@@ -488,41 +350,6 @@ $(document).ready(function () {
     $('#apply_minimum_feature_count').click(function(evt) {
         min_feat_count = $('#minimum_feature_count').val();
         refresh();
-    });
-
-    // Initial truth log scale
-    var log_scale = $('#log_scale').prop('checked');
-    // Listen log_scale
-    $('#log_scale').change(function(evt) {
-        log_scale = $('#log_scale').prop('checked');
-    });
-
-    // Initial truth normalize
-    var normalize_bioactivities = $('#normalize_bioactivities').prop('checked');
-    // Listen normalize
-    $('#normalize_bioactivities').change(function(evt) {
-        normalize_bioactivities = $('#normalize_bioactivities').prop('checked');
-    });
-
-    // Initial truth chem properties
-    var chemical_properties = $('#chemical_properties').prop('checked');
-    // Listen chemical properties
-    $('#chemical_properties').change(function(evt) {
-        chemical_properties = $('#chemical_properties').prop('checked');
-    });
-
-    // Initial metric
-    var metric = $('#metric').val();
-    // Listen metric
-    $('#metric').change(function(evt) {
-        metric = $('#metric').val();
-    });
-
-    // Initial method
-    var method = $('#method').val();
-    // Listen method
-    $('#method').change(function(evt) {
-        method = $('#method').val();
     });
 
     var targets = [];

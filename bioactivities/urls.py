@@ -27,4 +27,8 @@ urlpatterns = patterns('bioactivities.views',
                            'gen_cluster'),
                        url(r'^bioactivities/cluster/$',
                            'view_cluster'),
+                       url(r'^bioactivities/gen_table/$',
+                           'gen_table'),
+                       url(r'^bioactivities/table/$',
+                           'view_table')
                        )

@@ -13,20 +13,26 @@ def main(request):
     return render_to_response('index.html', c)
 
 def login(request):
+    # Don't allow a user to try to log in twice
     if request.user.is_active:
-        return HttpResponseRedirect("/accounts/logout")
+        return HttpResponseRedirect("/")
     c = RequestContext(request)
     c.update(csrf(request))
+    c.update({'next':request.GET.get('next', '')})
     return render_to_response('login.html', c)
 
 def auth_view(request):
     username = request.POST.get('username', '')
     password = request.POST.get('password', '')
+    next = request.POST.get('next', '')
     user = auth.authenticate(username=username, password=password)
 
     if user is not None:
         auth.login(request, user)
-        return HttpResponseRedirect('/accounts/loggedin')
+        if next:
+            return HttpResponseRedirect(next)
+        else:
+            return HttpResponseRedirect('/accounts/loggedin')
     else:
         return HttpResponseRedirect('/accounts/invalid')
 

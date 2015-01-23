@@ -559,7 +559,7 @@ class AssayChipReadout(RestrictedModel):
     treatment_time_length = models.FloatField(verbose_name='Assay Treatment Duration',
                                               blank=True, null=True)
 
-    readout_start_time = models.DateField(verbose_name='Readout Start Date', blank=True, null=True, help_text="YYYY-MM-DD")
+    readout_start_time = models.DateField(verbose_name='Readout Start Date', help_text="YYYY-MM-DD")
 
     notebook = models.CharField(max_length=256, blank=True, null=True)
     notebook_page = models.IntegerField(blank=True, null=True)

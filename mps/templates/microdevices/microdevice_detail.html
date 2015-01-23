@@ -9,58 +9,176 @@
 
     <legend><h1>{{ object.device_name }}</h1></legend>
 
-    <div class="container-fluid">
-
-        <div class="col-xs-6">
-            <p><b>Center:</b> {{ object.center }}</p>
-            <p><b>Organ:</b> {{ object.organ }}</p>
-            <p><b>Device Image:</b> <img src="/media/{{ object.device_image }}"></p>
-            <p><b>Description:</b> {{ object.description }}</p>
+    <div class="row">
+        <div class="col-xs-3 lead text-right">
+            <b>Center:</b>
         </div>
-
-        <div class="col-xs-6">
-            <p><b>Manufacturer:</b> {{ object.manufacturer }}</p>
-            <p><b>Version Catalog:</b> {{ object.barcode }}</p>
-            <p><b>Device Cross Section:</b> <img src="/media/{{ object.device_cross_section_image }}"></p>
+        <div class="col-xs-3 lead">
+            {% if object.center != None %}
+                {{ object.center }}
+            {% else %}
+                Unspecified
+            {% endif %}
         </div>
-
+        <div class="col-xs-3 lead text-right">
+            <b>Manufacturer:</b>
+        </div>
+        <div class="col-xs-3 lead">
+            {% if object.manufacturer != None %}
+                {{ object.manufacturer }}
+            {% else %}
+                Unspecified
+            {% endif %}
+        </div>
     </div>
+
+    <div class="row">
+        <div class="col-xs-3 lead text-right">
+            <b>Organ:</b>
+        </div>
+        <div class="col-xs-3 lead">
+            {% if object.organ != None %}
+                {{ object.organ }}
+            {% else %}
+                Unspecified
+            {% endif %}
+        </div>
+        <div class="col-xs-3 lead text-right">
+            <b>Version Catalog:</b>
+        </div>
+        <div class="col-xs-3 lead">
+            {% if object.barcode != None %}
+                {{ object.barcode }}
+            {% else %}
+                Unspecified
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-3 lead text-right">
+            <b>Device Image:</b>
+        </div>
+        <div class="col-xs-3 lead">
+            {% if object.device_image %}
+                <img src="/media/{{ object.device_image }}">
+            {% else %}
+                No Image Available
+            {% endif %}
+        </div>
+        <div class="col-xs-3 lead text-right">
+            <b>Device Cross Section:</b>
+        </div>
+        <div class="col-xs-3 lead">
+            {% if object.device_cross_section_image %}
+                <img src="/media/{{ object.device_cross_section_image }}">
+            {% else %}
+                No Image Available
+            {% endif %}
+        </div>
+    </div>
+
+    {# Description #}
+    {% if object.description %}
+        <div class="row">
+            <div class="col-xs-3 lead text-right">
+                <b>Description:</b>
+            </div>
+            <div class="col-xs-9 lead">
+                {{ object.description }}
+            </div>
+        </div>
+    {% endif %}
+
+{#    <div class="container-fluid">#}
+{##}
+{#        <div class="col-xs-6">#}
+{#            <p><b>Center:</b> {{ object.center }}</p>#}
+{#            <p><b>Organ:</b> {{ object.organ }}</p>#}
+{#            <p><b>Device Image:</b> <img src="/media/{{ object.device_image }}"></p>#}
+{#            <p><b>Description:</b> {{ object.description }}</p>#}
+{#        </div>#}
+{##}
+{#        <div class="col-xs-6">#}
+{#            <p><b>Manufacturer:</b> {{ object.manufacturer }}</p>#}
+{#            <p><b>Version Catalog:</b> {{ object.barcode }}</p>#}
+{#            <p><b>Device Cross Section:</b> <img src="/media/{{ object.device_cross_section_image }}"></p>#}
+{#        </div>#}
+{##}
+{#    </div>#}
 
     <legend>Dimensions</legend>
 
-    <div class="container-fluid">
-
-        <div class="col-xs-12">
-            <p><b>Dimensions:</b> {{ object.device_width }} mm X {{ object.device_width }} mm X {{ object.device_thickness }} mm</p>
+    <div class="row">
+        <div class="col-xs-3 lead text-right">
+            <b>Dimensions:</b>
         </div>
-
-{#            <div class="col-xs-4">#}
-{#                <p><b>Width:</b> {{ object.device_width }} {{ object.device_size_unit }}</p>#}
-{#            </div>#}
-{##}
-{#            <div class="col-xs-4">#}
-{#                <p><b>Length:</b> {{ object.device_length }} {{ object.device_size_unit }}</p>#}
-{#            </div>#}
-{##}
-{#            <div class="col-xs-4">#}
-{#                <p><b>Thickness:</b> {{ object.device_thickness }} {{ object.device_size_unit }}</p>#}
-{#            </div>#}
-
-        <div class="col-xs-6">
-            <p><b>Substrate Material:</b> {{ object.substrate_material }}</p>
-        </div>
-
-        <div class="col-xs-6">
-            <p><b>Substrate Thickness:</b> {{ object.substrate_thickness }} um</p>
-        </div>
-
-        <div class="col-xs-12">
-            <p><b>Fluid Volume:</b> {{ object.device_fluid_volume }} {{ object.device_fluid_volume_unit }}</p>
+        <div class="col-xs-9 lead">
+            {% if object.device_width and object.device_width and object.device_thickness %}
+                {{ object.device_width }} mm X {{ object.device_width }} mm X {{ object.device_thickness }} mm
+            {% else %}
+                Unspecified
+            {% endif %}
         </div>
     </div>
 
-    <script>
-        $("p").addClass("lead");
-    </script>
+    <div class="row">
+        <div class="col-xs-3 lead text-right">
+            <b>Substrate Material:</b>
+        </div>
+        <div class="col-xs-3 lead">
+            {% if object.substrate_material %}
+                {{ object.substrate_material }}
+            {% else %}
+                Unspecified
+            {% endif %}
+        </div>
+        <div class="col-xs-3 lead text-right">
+            <b>Substrate Thickness:</b>
+        </div>
+        <div class="col-xs-3 lead">
+            {% if object.substrate_thickness %}
+                {{ object.substrate_thickness }} um
+            {% else %}
+                Unspecified
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-3 lead text-right">
+            <b>Fluid Volume:</b>
+        </div>
+        <div class="col-xs-9 lead">
+            {% if object.device_fluid_volume and object.device_fluid_volume_unit %}
+                {{ object.device_fluid_volume }} {{ object.device_fluid_volume_unit }}
+            {% else %}
+                Unspecified
+            {% endif %}
+        </div>
+    </div>
+
+{#    <div class="container-fluid">#}
+{##}
+{#        <div class="col-xs-12">#}
+{#            <p><b>Dimensions:</b> {{ object.device_width }} mm X {{ object.device_width }} mm X {{ object.device_thickness }} mm</p>#}
+{#        </div>#}
+{##}
+{#        <div class="col-xs-6">#}
+{#            <p><b>Substrate Material:</b> {{ object.substrate_material }}</p>#}
+{#        </div>#}
+{##}
+{#        <div class="col-xs-6">#}
+{#            <p><b>Substrate Thickness:</b> {{ object.substrate_thickness }} um</p>#}
+{#        </div>#}
+{##}
+{#        <div class="col-xs-12">#}
+{#            <p><b>Fluid Volume:</b> {{ object.device_fluid_volume }} {{ object.device_fluid_volume_unit }}</p>#}
+{#        </div>#}
+{#    </div>#}
+
+{#    <script>#}
+{#        $("p").addClass("lead");#}
+{#    </script>#}
 {% endblock %}
 

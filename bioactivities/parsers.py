@@ -15,6 +15,9 @@ import scipy.cluster
 import numpy as np
 
 from compounds.models import Compound
+from .models import Bioactivity
+
+from django.core import serializers
 
 def generate_record_frequency_data(query):
     result = {}
@@ -51,6 +54,9 @@ def generate_list_of_all_data_in_bioactivities(organisms, targets):
 def generate_list_of_all_bioactivities_in_bioactivities():
     cursor = connection.cursor()
 
+    # Note that this query does not exclude all negative standardized_values
+    # This is the case because it selects ONLY THE NAMES of bioactivities
+    # If a bioactivity name is associated with both positive and negative values, those negative values will be included
     cursor.execute(
         'SELECT bioactivities_bioactivity.standard_name '
         'FROM bioactivities_bioactivity '
@@ -129,12 +135,14 @@ def fetch_all_standard_bioactivities_data(
         desired_compounds,
         desired_targets,
         desired_bioactivities,
-        normalized
+        normalized,
+        log_scale
 ):
     # using values for now, FUTURE: use standardized_values
     #Appears to be using standardized_values now
     cursor = connection.cursor()
 
+    # Please note that normalization now goes from 0.0001 to 1
     cursor.execute(
         'SELECT compound,target,tbl.bioactivity,AVG(value) as value,units,'
         'AVG(norm_value) as norm_value,organism,target_type '
@@ -146,7 +154,7 @@ def fetch_all_standard_bioactivities_data(
         'bioactivities_target.organism, '
         'bioactivities_target.target_type,'
         'CASE WHEN agg_tbl.max_value-agg_tbl.min_value <> 0 '
-        'THEN (standardized_value-agg_tbl.min_value)/(agg_tbl.max_value-agg_tbl.min_value) ELSE 1 END as norm_value '
+        'THEN (0.9999)*((standardized_value-agg_tbl.min_value)/(agg_tbl.max_value-agg_tbl.min_value)) + 0.0001 ELSE 1 END as norm_value '
         'FROM bioactivities_bioactivity '
         'INNER JOIN compounds_compound '
         'ON bioactivities_bioactivity.compound_id=compounds_compound.id '
@@ -170,11 +178,6 @@ def fetch_all_standard_bioactivities_data(
 
     result = []
 
-    norm = 3
-
-    if normalized:
-        norm = 5
-
     for q in query:
 
         if q[0] not in desired_compounds:
@@ -185,12 +188,24 @@ def fetch_all_standard_bioactivities_data(
         if q[2] not in desired_bioactivities:
             continue
 
+        value = q[3]
+
+        if normalized:
+            value = q[5]
+
+        # Please note that negative and zero values ARE EXCLUDED
+        if log_scale:
+            if value <= 0:
+                continue
+
+            value = np.log10(value)
+
         result.append(
             {
                 'compound': q[0],
                 'target': q[1],
                 'bioactivity': q[2],
-                'value': q[norm]
+                'value': value
             }
         )
 
@@ -303,6 +318,19 @@ def heatmap(request):
         ) is True
     ]
 
+    # throw error if no compounds are selected
+    if len(desired_compounds) < 1:
+        return {'error': 'Select at least one compound.'}
+
+    # throw error if no targets are selected
+    if len(desired_targets) < 1:
+        return {'error': 'Select at least one target.'}
+
+    # throw error if no bioactivities are selected
+    if len(desired_bioactivities) < 1:
+        return {'error': 'Select at least one bioactivity.'}
+
+    log_scale = request_filter.get('log_scale')
     normalized = request_filter.get('normalize_bioactivities')
 
     method = str(request_filter.get('method'))
@@ -312,7 +340,8 @@ def heatmap(request):
         desired_compounds,
         desired_targets,
         desired_bioactivities,
-        normalized
+        normalized,
+        log_scale
     )
 
     if not all_std_bioactivities:
@@ -513,6 +542,7 @@ def cluster(request):
     if len(desired_compounds) < 2:
         return {'error': 'require more than one compound to cluster'}
 
+    log_scale = request_filter.get('log_scale')
     normalized = request_filter.get('normalize_bioactivities')
 
     # Whether or not to use chemical properties
@@ -525,7 +555,8 @@ def cluster(request):
         desired_compounds,
         desired_targets,
         desired_bioactivities,
-        normalized
+        normalized,
+        log_scale
     )
 
     # Should throw error only if no chemical_properties and no bioactivities
@@ -674,7 +705,7 @@ def cluster(request):
         # it makes for cleaner JSON
         del n["node_id"]
 
-        # Labeling convention: "-"-separated leaf names
+        # Labeling convention: new-line separated leaf names
         n["name"] = name = "\n".join(sorted(map(str, leafNames)))
 
         return leafNames
@@ -750,3 +781,122 @@ def cluster(request):
     #     # json filepath for the data
     #     'data_json': data_json_relpath
     # }
+
+# Function to adhere to organism naming convention
+def cap_first(string):
+    return string[0].upper() + string[1:].lower()
+
+def table(request):
+    if len(request.body) == 0:
+        return {'error': 'empty request body'}
+
+    # convert data sent in request to a dict data type from a string data type
+    request_filter = json.loads(request.body)
+
+    desired_targets = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'targets_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_compounds = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'compounds_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_bioactivities = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'bioactivities_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_target_types = [
+        x.get(
+            'name'
+        ).upper() for x in request_filter.get(
+            'target_types_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_organisms = [
+        cap_first(x.get(
+            'name'
+        )) for x in request_filter.get(
+            'organisms_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    # throw error if no compounds are selected
+    if len(desired_compounds) < 1:
+        return {'error': 'Select at least one compound.'}
+
+    # throw error if no targets are selected
+    if len(desired_targets) < 1:
+        return {'error': 'Select at least one target.'}
+
+    # throw error if no bioactivities are selected
+    if len(desired_bioactivities) < 1:
+        return {'error': 'Select at least one bioactivity.'}
+
+    # throw error for very large queries
+    if len(desired_bioactivities) > 285 or len(desired_targets) > 200 and len(desired_compounds) > 30:
+        return {'error': 'Your query is very large, please make fewer selections.'}
+
+    # Filter based on compound
+    q = Bioactivity.objects.filter(compound__name__in=desired_compounds)
+
+    # Filter based on organism
+    q = q.filter(target__organism__in=desired_organisms)
+    # Filter based on target type
+    q = q.filter(target__target_type__in=desired_target_types)
+
+    # Filter based on targets
+    q = q.filter(target__name__in=desired_targets)
+    # Filter based on standardized bioactivity name
+    q = q.filter(standard_name__in=desired_bioactivities)
+
+    # Prefetch all foreign keys
+    q = q.prefetch_related('assay', 'compound', 'parent_compound', 'target', 'created_by')
+
+    data = []
+
+    for bioactivity in q:
+        obj = {
+            'id': bioactivity.pk,
+            'compound': bioactivity.compound.name,
+            'compoundid': bioactivity.compound.id,
+            'target': bioactivity.target.name,
+            'organism': bioactivity.target.organism,
+            'standard_name': bioactivity.standard_name,
+            'operator': bioactivity.operator,
+            'standardized_value': bioactivity.standardized_value,
+            'standardized_units': bioactivity.standardized_units,
+            'chemblid': bioactivity.assay.chemblid,
+            # 'bioactivity_type': bioactivity.bioactivity_type,
+            # 'value': bioactivity.value,
+            # 'units': bioactivity.units,
+        }
+        data.append(obj)
+
+
+    return {
+        # json data
+        'data_json': data,
+    }

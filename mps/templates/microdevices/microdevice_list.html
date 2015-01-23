@@ -31,9 +31,24 @@
             {% for microdevice in object_list %}
                 <tr class="microdevice" id={{ microdevice.id }} name={{ microdevice.device_name }}>
                     <td><a href="{{ microdevice.id }}">{{ microdevice.device_name }}</a></td>
-                    <td>{{ microdevice.organ }}</td>
-                    <td>{{ microdevice.center }}</td>
-                    <td>{{ microdevice.manufacturer }}</td>
+                    {% if microdevice.organ != None %}
+                        <td>{{ microdevice.organ }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if microdevice.center != None %}
+                        <td>{{ microdevice.center }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if microdevice.manufacturer != None %}
+                        <td>{{ microdevice.manufacturer }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+{#                    <td>{{ microdevice.organ }}</td>#}
+{#                    <td>{{ microdevice.center }}</td>#}
+{#                    <td>{{ microdevice.manufacturer }}</td>#}
                     <td>{{ microdevice.description }}</td>
                 </tr>
             {% endfor %}

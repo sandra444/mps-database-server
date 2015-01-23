@@ -36,7 +36,9 @@
             <b>Setup:</b>
         </div>
         <div class="col-xs-10 lead">
-            {{ object.chip_setup }}
+            <a href="/assays/assaychipsetup/{{ object.chip_setup.id }}">
+                {{ object.chip_setup }}
+            </a>
         </div>
     </div>
 
@@ -45,7 +47,11 @@
             <b>Time:</b>
         </div>
         <div class="col-xs-10 lead">
-            {{ object.treatment_time_length }} {{ object.timeunit }}
+            {% if object.treatment_time_length != None %}
+                {{ object.treatment_time_length }} {{ object.timeunit }}
+            {% else %}
+                In {{ object.timeunit }}
+            {% endif %}
         </div>
     </div>
 
@@ -90,11 +96,11 @@
         <legend><b>Assays</b></legend>
         <table class="table table-striped">
             <thead>
-            <tr style="font-weight:bold;">
-                <td>Assay</td>
-                <td>Object of Interest</td>
-                <td>Reader</td>
-                <td>Readout Unit</td>
+            <tr>
+                <th>Assay</th>
+                <th>Object of Interest</th>
+                <th>Reader</th>
+                <th>Readout Unit</th>
             </tr>
             </thead>
             <tbody>

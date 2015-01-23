@@ -529,6 +529,7 @@ $(document).ready(function () {
                 'compounds_filter': compounds_filter,
                 'target_types_filter': target_types,
                 'organisms_filter': organisms,
+                'log_scale': log_scale,
                 'normalize_bioactivities': normalize_bioactivities,
                 'metric': metric,
                 'method': method
@@ -540,8 +541,12 @@ $(document).ready(function () {
                 if (json.data_csv) {
                     //console.log(json);
                     heatmap(json.data_csv, json.row_order, json.col_order);
+//                    document.location.hash = "display";
                 }
                 else {
+                    if (json.error) {
+                        $('#error').html(json.error);
+                    }
                     // Show error
                     $('#error_message').prop('hidden',false);
                     // Show Selection
@@ -657,6 +662,9 @@ $(document).ready(function () {
         }
         return result;
     }
+
+//   // Initial hash change
+//    document.location.hash = "";
 
     // Currently testing, should grab these with a function in refresh (KEEP THIS FORMAT)
     var target_types = [];
@@ -793,6 +801,13 @@ $(document).ready(function () {
         refresh();
     });
 
+    // Initial truth log scale
+    var log_scale = $('#log_scale').prop('checked');
+    // Listen log_scale
+    $('#log_scale').change(function(evt) {
+        log_scale = $('#log_scale').prop('checked');
+    });
+
     // Initial truth normalize
     var normalize_bioactivities = $('#normalize_bioactivities').prop('checked');
     // Listen normalize
@@ -831,7 +846,13 @@ $(document).ready(function () {
     // Return to selection
     $('#back').click(function(evt) {
         $('#graphic').prop('hidden',true);
-        $('#selection').prop('hidden',false)
+        $('#selection').prop('hidden',false);
+//        document.location.hash = "";
+//        // Why does microsoft want me to suffer?
+//        if (browser.isIE && browser.verIE >= 11) {
+//            $('#graphic').prop('hidden',true);
+//            $('#selection').prop('hidden',false)
+//        }
     });
 
     var bioactivity_search = $('#bioactivity_filter');
@@ -907,5 +928,21 @@ $(document).ready(function () {
             $('#all_compounds').prop('checked', false);
         }
     }).trigger('input');
+
+//    function hashChange() {
+//
+//        if (document.location.hash == "") {
+//            $('#graphic').prop('hidden',true);
+//            $('#selection').prop('hidden',false)
+//        }
+//
+//        else {
+//            $('#graphic').prop('hidden',false);
+//            $('#selection').prop('hidden',true)
+//        }
+//    }
+//
+//    //This will call the hashchange function whenever the hashchanges (does not work on outdated versions of IE)
+//    window.onhashchange = hashChange;
 });
 
