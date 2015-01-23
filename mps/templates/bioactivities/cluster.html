@@ -82,8 +82,8 @@
                         <select id="method" class="form-control">
                             <option selected title="Performs single/min/nearest linkage">single</option>
                             <option title="Performs complete/max/farthest point linkage">complete</option>
-                            <option title="Performs average/UPGMA linkage">average</option>
-                            <option title="Performs weighted/WPGMA linkage">weighted</option>
+                            <option title="Performs average/UPGMA (Unweighted Pair Group Method with Arithmetic Mean) linkage">average</option>
+                            <option title="Performs weighted/WPGMA (Weighted Pair Group Method with Arithmetic Mean) linkage">weighted</option>
                         </select>
                     </label>
                 </div>
@@ -91,11 +91,11 @@
                 <div class="col-xs-4">
                     <label>Metric
                         <select id="metric" class="form-control">
-                            <option selected title="Computes the Euclidean distance">euclidean</option>
-                            <option title="Computes the Cosine distance">cosine</option>
-                            <option title="Computes the City Block (Manhattan) distance">cityblock</option>
-                            <option title="Computes the correlation distance">correlation</option>
-                            <option title="Computes the Minkowski distance">minkowski</option>
+                            <option selected title="The ordinary distance in n-dimensional space">euclidean</option>
+                            <option title="Normalized scalar product without subtracting the mean value">cosine</option>
+                            <option title="Manhattan distance, L1 distance, rectilinear distance">cityblock</option>
+                            <option title="Subtract the mean value of the coordinates, normalize and take the scalar product">correlation</option>
+                            <option title="A generalization of both the Euclidean distance and the Cityblock distance">minkowski</option>
                         </select>
                     </label>
                 </div>
