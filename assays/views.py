@@ -382,7 +382,7 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
 
         context = super(AssayTestResultAdd, self).get_context_data(**kwargs)
         if self.request.POST:
-            context['formset'] = TestResultFormSet(self.request.POST, self.request.FILES)
+            context['formset'] = TestResultFormSet(self.request.POST)
             context['setups'] = setups
             # context['study'] = self.kwargs.get('study_id')
         else:
