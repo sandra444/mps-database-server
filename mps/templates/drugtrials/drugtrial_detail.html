@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <legend><h1>Drug Trial ID #{{ trial.id }}</h1></legend>
+
+    <div class="col-xs-9">
+        <div class="row">
+            <div class="col-xs-4 lead text-right">
+                <b>Compound:</b>
+            </div>
+            <div class="col-xs-8 lead">
+                <a href="/compounds/{{ trial.compound.id }}">{{ trial.compound }}</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 lead text-right">
+                <b>Trial Type:</b>
+            </div>
+            <div class="col-xs-8 lead">
+                {{ trial.get_trial_type_display }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 lead text-right">
+                <b>Trial Sub Type:</b>
+            </div>
+            <div class="col-xs-8 lead">
+                {{ trial.get_trial_sub_type_display }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 lead text-right">
+                <b>Participant Species:</b>
+            </div>
+            <div class="col-xs-8 lead">
+                {{ trial.species }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 lead text-right">
+                <b>Source:</b>
+            </div>
+            <div class="col-xs-8 lead">
+                {{ trial.source }}
+            </div>
+        </div>
+        {% if trial.source_link %}
+        <div class="row">
+            <div class="col-xs-4 lead text-right">
+                <b>Source Link:</b>
+            </div>
+            <div class="col-xs-8">
+                <a href="{{ trial.source_link }}">{{ trial.source_link }}</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+     <div class="col-xs-3">
+        <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ trial.compound.chemblid }}">
+     </div>
+
+
+    <legend><b>Findings</b></legend>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Finding</th>
+            <th>+/-</th>
+            <th>Max Affected</th>
+            <th>Value</th>
+            <th>Value Units</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for result in results %}
+            <tr>
+                <td>{{ result.finding_name }}</td>
+                <td>{{ result.get_result_display }}</td>
+                {% if result.percent_max != None %}
+                    <td>{{ result.percent_max }}</td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+                {% if result.value != None %}
+                    <td>{{ result.value }}</td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+                {% if result.value_units != None %}
+                    <td>{{ result.value_units }}</td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
