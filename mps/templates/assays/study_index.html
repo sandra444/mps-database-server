@@ -8,7 +8,7 @@
             <h1 align="center">Study: {{ object_list.0.assay_run_id }}</h1>
         </div>
 
-        <legend><h2>Setups  <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Setup</a></h2></legend>
+        <legend><h2>Setups  <a href="assaychipsetup/add{{ setup }}" class="btn btn-success" role="button">Add Setup</a></h2></legend>
 
         {% if setups %}
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">

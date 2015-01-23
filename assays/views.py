@@ -126,7 +126,7 @@ class StudyIndex(LoginRequiredMixin, ListView):
             'chip_setup__compound', 'chip_setup__unit')
         # Check if this is setup only; if so add to add respective URLS
         if request.GET.get('setup', ''):
-            context['setup'] = True
+            context['setup'] = '/?setup=1'
         else:
             context['setup'] = ''
         return self.render_to_response(context)
@@ -238,6 +238,9 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         return context
 
     def form_valid(self, form):
+        url_add = ''
+        if self.request.GET.get('setup', ''):
+            url_add = '?setup=1'
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.assay_run_id = study
         form.instance.group = study.group
@@ -256,7 +259,7 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
             if data['another']:
                 return self.render_to_response(self.get_context_data(form=form))
             else:
-                return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+                return redirect(self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
