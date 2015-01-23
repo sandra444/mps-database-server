@@ -37,7 +37,7 @@
             {% for finding in object_list %}
                 <tr class="finding" id={{ finding.id }}>
                     <td>
-                        <a href="/admin/drugtrials/drugtrial/{{ finding.drug_trial.id }}">
+                        <a href="/drugtrials/{{ finding.drug_trial.id }}">
                             {{ finding.drug_trial.compound }}
                         </a>
                     </td>
