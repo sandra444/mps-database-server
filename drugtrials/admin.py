@@ -131,7 +131,22 @@ class DrugTrialAdmin(LockableAdmin):
     actions = ['update_fields']
     raw_id_fields = ('compound',)
     readonly_fields = ['created_on', 'created_by', 'modified_by',
-                       'modified_on', 'drug_display']
+                       'modified_on', 'drug_display', 'figure1_display', 'figure2_display']
+
+    # Display figures
+    def figure1_display(self, obj):
+        if obj.id and obj.figure1:
+            return '<img src="%s">' % \
+                   obj.figure1.url
+        return ''
+
+    def figure2_display(self, obj):
+        if obj.id and obj.figure2:
+            return '<img src="%s">' % \
+                   obj.figure2.url
+        return ''
+    figure1_display.allow_tags = True
+    figure2_display.allow_tags = True
 
     def drug_display(self, obj):
 
@@ -149,9 +164,10 @@ class DrugTrialAdmin(LockableAdmin):
     fieldsets = (
         (None, {
             'fields': (('compound', 'title'),
-                       'drug_display',
+                       ('drug_display', 'figure1_display', 'figure2_display',),
                        ('trial_type', 'trial_sub_type', 'trial_date'),
-                       ('condition', 'description',),)
+                       ('condition', 'description',),
+                       ('figure1', 'figure2',),)
         }),
         ('Participants', {
             'fields': (
