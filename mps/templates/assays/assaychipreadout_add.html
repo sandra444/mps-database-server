@@ -83,23 +83,6 @@
         </div>
     </div>
 
-    {% if form.timeunit.errors %}
-        {% for error in form.timeunit.errors %}
-            <div class="alert alert-danger" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Error:</span>
-                {{error}}
-            </div>
-        {% endfor %}
-    {% endif %}
-
-    <div class="form-group has-error">
-        <label for="timeunit" class="col-sm-2 control-label">Time Unit</label>
-        <div class="col-sm-10">
-          {{ form.timeunit }}
-        </div>
-    </div>
-
     {% if form.readout_start_time.errors %}
         {% for error in form.readout_start_time.errors %}
             <div class="alert alert-danger" role="alert">
@@ -114,6 +97,23 @@
         <label for="readout_start_time" class="col-sm-2 control-label">Readout Start Date</label>
         <div class="col-sm-10">
           {{ form.readout_start_time }} [yyyy-mm-dd]
+        </div>
+    </div>
+
+    {% if form.timeunit.errors %}
+        {% for error in form.timeunit.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="form-group has-error">
+        <label for="timeunit" class="col-sm-2 control-label">Time Unit</label>
+        <div class="col-sm-10">
+          {{ form.timeunit }}
         </div>
     </div>
 
@@ -178,7 +178,7 @@
     {% endif %}
 
     <div class="form-group">
-        <label for="file" class="col-sm-2 control-label">File</label>
+        <label for="file" class="col-sm-2 control-label">.csv Data File</label>
         <div class="col-sm-10">
           {{ form.file }}
         </div>
