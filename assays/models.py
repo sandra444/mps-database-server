@@ -339,7 +339,7 @@ class AssayTestResult(RestrictedModel):
             ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
         ))
         if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
-            return SEVERITY_SCORE[AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].severity]
+            return SEVERITY_SCORE.get(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].severity, 'None')
         return ''
 
     def get_absolute_url(self):
