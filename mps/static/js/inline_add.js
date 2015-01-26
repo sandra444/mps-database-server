@@ -22,6 +22,15 @@ $(document).ready(function () {
         // Use a regex to get the desired ID number
         // var thenum = thestring.match(/\d+$/)[0];
         var id = parseInt(event.target.id.match(/\d+/)[0]);
+
+        // Prevent user from removing ALL inlines (can cause unexpected behavior)
+        if ($("input[name*='DELETE']").length < 2) {
+            // Uncheck
+            $("input[name*='DELETE']").prop('checked', false);
+            return;
+        }
+
+        // Remove the element
         $('#'+title+'-'+id).remove();
 
         // Need to find way to correctly decrement TOTAL_FORMS and next_id to avoid conflict

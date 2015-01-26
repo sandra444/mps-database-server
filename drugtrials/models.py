@@ -65,6 +65,10 @@ class DrugTrial(LockableModel):
     source = models.ForeignKey(TrialSource)
     compound = models.ForeignKey('compounds.Compound')
 
+    # Figures
+    figure1 = models.ImageField(upload_to='figures', null=True, blank=True)
+    figure2 = models.ImageField(upload_to='figures', null=True, blank=True)
+
     # Participant Information
 
     species = models.ForeignKey(Species,
