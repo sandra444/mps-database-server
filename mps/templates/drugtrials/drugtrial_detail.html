@@ -56,6 +56,26 @@
             </div>
         </div>
         {% endif %}
+        {% if trial.figure1 %}
+        <div class="row">
+            <div class="col-xs-4 lead text-right">
+                <b>Figure 1:</b>
+            </div>
+            <div class="col-xs-8">
+                <img src="/media/{{ trial.figure1 }}">
+            </div>
+        </div>
+        {% endif %}
+        {% if trial.figure2 %}
+        <div class="row">
+            <div class="col-xs-4 lead text-right">
+                <b>Figure 2:</b>
+            </div>
+            <div class="col-xs-8">
+                <img src="/media/{{ trial.figure2 }}">
+            </div>
+        </div>
+        {% endif %}
     </div>
 
      <div class="col-xs-3">

@@ -84,10 +84,11 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
     <div class="form-group has-error">
-        <label for="setup_date" class="col-sm-2 control-label">Setup Date</label>
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="setup_date" class="col-sm-2 control-label">Setup Date*</label>
         <div class="col-sm-10">
           {{ form.setup_date }} [yyyy-mm-dd]
         </div>
@@ -101,10 +102,11 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
     <div class="form-group has-error">
-        <label for="device" class="col-sm-2 control-label">Organ Chip Name</label>
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="device" class="col-sm-2 control-label">Organ Chip Name*</label>
         <div class="col-sm-10">
           {{ form.device }}
         </div>
@@ -118,10 +120,11 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
     <div class="form-group has-error">
-        <label for="assay_chip_id" class="col-sm-2 control-label">Chip ID/Barcode</label>
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="assay_chip_id" class="col-sm-2 control-label">Chip ID/Barcode*</label>
         <div class="col-sm-10">
           {{ form.assay_chip_id }}
         </div>
@@ -135,10 +138,11 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
     <div class="form-group has-error">
-        <label for="chip_test_type" class="col-sm-2 control-label">Test Type</label>
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="chip_test_type" class="col-sm-2 control-label">Test Type*</label>
         <div class="col-sm-10">
           {{ form.chip_test_type }}
         </div>
@@ -160,9 +164,10 @@
             <span class="sr-only">Error:</span>
             {{ form.non_field_errors }}
         </div>
-    {% endif %}
-
+    <div class="form-group has-error">
+    {% else %}
     <div class="form-group">
+    {% endif %}
         <label for="compound" class="col-sm-2 control-label">Compound</label>
         <div class="col-sm-10" style="float:left; display:inline; overflow:none; white-space:nowrap;">
             {{ form.compound }}
@@ -188,9 +193,10 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
+    <div class="form-group has-error">
+    {% else %}
     <div class="form-group">
+    {% endif %}
         <label for="notebook" class="col-sm-2 control-label">Notebook</label>
         <div class="col-sm-10">
             {{ form.notebook }}

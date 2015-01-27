@@ -117,6 +117,8 @@ class FindingResultInline(admin.TabularInline):
 
 class DrugTrialAdmin(LockableAdmin):
 
+    form = DrugTrialForm
+
     class Media(object):
         js = ('js/inline_fix.js',)
 
