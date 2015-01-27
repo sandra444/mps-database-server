@@ -210,7 +210,7 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
 
 AssayChipCellsFormset = inlineformset_factory(AssayChipSetup, AssayChipCells, formset=AssayChipCellsInlineFormset,
                                               extra=1,
-                                              widgets={'cellsample_density': forms.TextInput(attrs={'style':'width:75px;','type':'number',}),
+                                              widgets={'cellsample_density': forms.NumberInput(attrs={'style':'width:75px;',}),
                                                        'cell_passage': forms.TextInput(attrs={'size': 5}), })
 
 
