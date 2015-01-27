@@ -366,7 +366,7 @@ class AssayTestResultList(LoginRequiredMixin, ListView):
 
 
 TestResultFormSet = inlineformset_factory(AssayTestResult, AssayResult, formset=TestResultInlineFormset, extra=1,
-                                          widgets={'value': forms.TextInput(attrs={'style':'width:100px;','type':'number',}), })
+                                          widgets={'value': forms.NumberInput(attrs={'style':'width:100px;',}), })
 
 
 class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
