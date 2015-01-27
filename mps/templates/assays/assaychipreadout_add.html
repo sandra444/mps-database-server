@@ -64,10 +64,11 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
     <div class="form-group has-error">
-        <label for="chip_setup" class="col-sm-2 control-label">Setup</label>
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="chip_setup" class="col-sm-2 control-label">Setup*</label>
         <div class="col-sm-10">
           <select id="id_chip_setup" name="chip_setup">
             <option value="">---------</option>
@@ -91,10 +92,11 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
     <div class="form-group has-error">
-        <label for="readout_start_time" class="col-sm-2 control-label">Readout Start Date</label>
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="readout_start_time" class="col-sm-2 control-label">Readout Start Date*</label>
         <div class="col-sm-10">
           {{ form.readout_start_time }} [yyyy-mm-dd]
         </div>
@@ -108,10 +110,11 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
     <div class="form-group has-error">
-        <label for="timeunit" class="col-sm-2 control-label">Time Unit</label>
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="timeunit" class="col-sm-2 control-label">Time Unit*</label>
         <div class="col-sm-10">
           {{ form.timeunit }}
         </div>
@@ -125,9 +128,10 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
+    <div class="form-group has-error">
+    {% else %}
     <div class="form-group">
+    {% endif %}
         <label for="treatment_time_length" class="col-sm-2 control-label">Treatment Time Length</label>
         <div class="col-sm-10">
           {{ form.treatment_time_length }}
@@ -142,9 +146,10 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
+    <div class="form-group has-error">
+    {% else %}
     <div class="form-group">
+    {% endif %}
         <label for="notebook" class="col-sm-2 control-label">Notebook</label>
         <div class="col-sm-10">
             {{ form.notebook }}
@@ -175,9 +180,10 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
+    <div class="form-group has-error">
+    {% else %}
     <div class="form-group">
+    {% endif %}
         <label for="file" class="col-sm-2 control-label">.csv Data File</label>
         <div class="col-sm-10">
           {{ form.file }}

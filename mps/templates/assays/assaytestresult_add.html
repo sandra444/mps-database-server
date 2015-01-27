@@ -117,10 +117,11 @@
                     {{error}}
                 </div>
             {% endfor %}
-        {% endif %}
-
-        <div class="form-group has-error">
-            <label for="chip_setup" class="col-sm-2 control-label">Setup</label>
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+            <label for="chip_setup" class="col-sm-2 control-label">Setup*</label>
             <div class="col-sm-10">
                 <select id="id_chip_setup" name="chip_setup">
                     <option value="">---------</option>

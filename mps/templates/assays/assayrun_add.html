@@ -54,10 +54,11 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
     <div class="form-group has-error">
-        <label for="center_id" class="col-sm-2 control-label">Center Name</label>
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="center_id" class="col-sm-2 control-label">Center Name*</label>
         <div class="col-sm-10">
           {{ form.center_id }}
         </div>
@@ -69,10 +70,11 @@
             <span class="sr-only">Error:</span>
             {{ form.non_field_errors }}
         </div>
-    {% endif %}
-
     <div class="form-group has-error">
-        <label for="study_type" class="col-sm-2 control-label">Study Types</label>
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="study_type" class="col-sm-2 control-label">Study Types*</label>
         <div class="col-sm-10">
             <label for="toxicity" style="padding-right: 10px;">Toxicity</label>
               {{ form.toxicity }}
@@ -91,10 +93,11 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
     <div class="form-group has-error">
-        <label for="study_name" class="col-sm-2 control-label">Study Name</label>
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="study_name" class="col-sm-2 control-label">Study Name*</label>
         <div class="col-sm-10">
           {{ form.name }}
         </div>
@@ -108,10 +111,11 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
     <div class="form-group has-error">
-        <label for="start_date" class="col-sm-2 control-label">Start Date</label>
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="start_date" class="col-sm-2 control-label">Start Date*</label>
         <div class="col-sm-10">
           {{ form.start_date }} [yyyy-mm-dd]
         </div>
@@ -139,10 +143,11 @@
                 {{error}}
             </div>
         {% endfor %}
-    {% endif %}
-
     <div class="form-group has-error">
-        <label for="group" class="col-sm-2 control-label">Group</label>
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="group" class="col-sm-2 control-label">Group*</label>
         <div class="col-sm-10">
           <select id="id_group" name="group">
             <option value="">---------</option>
