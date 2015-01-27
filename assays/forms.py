@@ -19,7 +19,8 @@ class AssayChipReadoutForm(forms.ModelForm):
     class Meta(object):
         model = AssayChipReadout
         widgets = {
-            'notebook_page': forms.TextInput(attrs={'size': 5}),
+            'notebook_page': forms.TextInput(attrs={'style':'width:50px;','type':'number',}),
+            'treatment_time_length': forms.TextInput(attrs={'style':'width:174px;','type':'number',}),
         }
         exclude = ('created_by','modified_by','signed_off_by','signed_off_date','locked', 'group')
 
@@ -30,8 +31,8 @@ class AssayChipSetupForm(forms.ModelForm):
     class Meta(object):
         model = AssayChipSetup
         widgets = {
-            'concentration': forms.TextInput(attrs={'size': 5}),
-            'notebook_page': forms.TextInput(attrs={'size': 5}),
+            'concentration': forms.TextInput(attrs={'style':'width:50px;','type':'number',}),
+            'notebook_page': forms.TextInput(attrs={'style':'width:50px;','type':'number',}),
         }
         # Assay Run ID is always bound to the parent Study
         exclude = ('assay_run_id','group')
