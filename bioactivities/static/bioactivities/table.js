@@ -1,5 +1,14 @@
 $(document).ready(function () {
 
+    // CSV string converted to file via URI
+    var csv = '';
+    var download = $('#download');
+
+    // Function for placing double quotes to keep commas
+    function q(string) {
+        return '"' + string + '"';
+    }
+
     function table(data) {
 
         // Show graphic
@@ -11,9 +20,13 @@ $(document).ready(function () {
         $('#full').dataTable().fnDestroy();
         $('#table').html('');
 
+        csv = 'Compound,Target,Organism,Standard Name,Operator,Standard Value, Standard Units, ChEMBL Link\n\r';
+
         for (var i in data) {
             var bio = data[i];
             //console.log(bio);
+
+            // Set up the table
             var row = "<tr>";
             row += "<td><a href='/compounds/"+bio.compoundid+"'>" + bio.compound + "</a></td>";
             row += "<td>" + bio.target + "</td>";
@@ -28,7 +41,16 @@ $(document).ready(function () {
 //            row += "<td>" + bio.units + "</td>";
             row += "</tr>";
             $('#table').append(row);
+
+            // Set up the csv
+            // Double quote everything but standard value
+            csv += [q(bio.compound),q(bio.target),q(bio.organism),q(bio.standard_name),q(bio.operator),bio.standardized_value,q(bio.standardized_units),q(bio.chemblid),'\n\r'].join(',');
+
         }
+
+        // Set up download link
+        download.attr('href','data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
+        download.attr('download', 'bioactivity_table.csv');
 
         $('#full').DataTable({
             "iDisplayLength": 100,
