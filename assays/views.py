@@ -210,7 +210,7 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
 
 AssayChipCellsFormset = inlineformset_factory(AssayChipSetup, AssayChipCells, formset=AssayChipCellsInlineFormset,
                                               extra=1,
-                                              widgets={'cellsample_density': forms.TextInput(attrs={'size': 5}),
+                                              widgets={'cellsample_density': forms.NumberInput(attrs={'style':'width:75px;',}),
                                                        'cell_passage': forms.TextInput(attrs={'size': 5}), })
 
 
@@ -366,7 +366,7 @@ class AssayTestResultList(LoginRequiredMixin, ListView):
 
 
 TestResultFormSet = inlineformset_factory(AssayTestResult, AssayResult, formset=TestResultInlineFormset, extra=1,
-                                          widgets={'value': forms.TextInput(attrs={'size': 10}), })
+                                          widgets={'value': forms.NumberInput(attrs={'style':'width:100px;',}), })
 
 
 class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):

@@ -4,7 +4,7 @@
 {% block content %}
 
     <div style="padding-bottom: 50px">
-        <h2 align="center">Microdevices</h2>
+        <legend><h2>Microdevices</h2></legend>
 
         <table id="microdevices" class="display" cellspacing="0" width="100%">
             <thead>
@@ -28,28 +28,49 @@
             </tfoot>
 
             <tbody>
-            {% for microdevice in object_list %}
+            {% for microdevice in devices %}
                 <tr class="microdevice" id={{ microdevice.id }} name={{ microdevice.device_name }}>
-                    <td><a href="{{ microdevice.id }}">{{ microdevice.device_name }}</a></td>
-                    {% if microdevice.organ != None %}
-                        <td>{{ microdevice.organ }}</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-                    {% if microdevice.center != None %}
-                        <td>{{ microdevice.center }}</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-                    {% if microdevice.manufacturer != None %}
-                        <td>{{ microdevice.manufacturer }}</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-{#                    <td>{{ microdevice.organ }}</td>#}
-{#                    <td>{{ microdevice.center }}</td>#}
-{#                    <td>{{ microdevice.manufacturer }}</td>#}
-                    <td>{{ microdevice.description }}</td>
+                    <td><a href="device/{{ microdevice.id }}">{{ microdevice.device_name }}</a></td>
+                    <td>{{ microdevice.organ|default_if_none:"" }}</td>
+                    <td>{{ microdevice.center|default_if_none:"" }}</td>
+                    <td>{{ microdevice.manufacturer|default_if_none:"" }}</td>
+                    <td>{{ microdevice.description|default_if_none:"" }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <legend><h2>Organ Models</h2></legend>
+
+        <table id="models" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Model Name</th>
+                    <th>Device</th>
+                    <th>Organ</th>
+                    <th>Center</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Model Name</th>
+                    <th>Device</th>
+                    <th>Organ</th>
+                    <th>Center</th>
+                    <th>Description</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for model in models %}
+                <tr class="model" id={{ model.id }} name={{ model.device_name }}>
+                    <td><a href="model/{{ model.id }}">{{ model.model_name }}</a></td>
+                    <td><a href="device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
+                    <td>{{ model.organ|default_if_none:"" }}</td>
+                    <td>{{ model.center|default_if_none:"" }}</td>
+                    <td>{{ model.description }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -59,14 +80,13 @@
     <script>
         $(document).ready(function() {
             $('#microdevices').DataTable({
-                "iDisplayLength": 25
-                // If one wants to display top and bottom
-                //"sDom": '<"wrapper"lfptip>'
+                "iDisplayLength": 100,
+                "sDom": '<"wrapper"t>'
             });
-
-            // Swap positions of filter and length selection
-            $('.dataTables_filter').css('float','left');
-            $('.dataTables_length').css('float','right');
+            $('#models').DataTable({
+                "iDisplayLength": 100,
+                "sDom": '<"wrapper"t>'
+            });
         });
     </script>
 {% endblock %}

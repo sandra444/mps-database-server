@@ -47,7 +47,7 @@ var MODELS = {
         'Functions': [6, 'Functions', 3, true],
         'Assay plate test results' : [11, 'Plate Results', 0],
         'Plate Readouts': [12, 'Plate Readouts', 1],
-        'Assay models': [28, 'Model Assays', 0],
+        'Assay models': [28, 'Assay Models', 0],
         'Assay model types': [30, 'Assay Types', 1, true],
         'Assay layouts': [14, 'Assay Layouts', 2],
         'Assay base layouts': [16, 'Base Layouts', 3],

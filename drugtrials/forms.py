@@ -5,7 +5,7 @@ class DrugTrialForm(forms.ModelForm):
     class Meta(object):
         widgets = {
                 'description': forms.Textarea(attrs={'size':50, 'rows': 10}),
-                'condition': forms.Textarea(attrs={'size':50, 'rows': 5}),
+                'condition': forms.Textarea(attrs={'size':50, 'rows': 10}),
         }
 
 class TestResultForm(forms.ModelForm):

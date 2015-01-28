@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <legend><h1>{{ model.model_name }}</h1></legend>
+
+    <div class="row">
+        <div class="col-xs-2 lead text-right">
+            <b>Center:</b>
+        </div>
+        <div class="col-xs-10 lead">
+            {{ model.center|default:'Unspecified' }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-2 lead text-right">
+            <b>Organ:</b>
+        </div>
+        <div class="col-xs-4 lead">
+            {{ model.organ|default:'Unspecified' }}
+        </div>
+        <div class="col-xs-2 lead text-right">
+            <b>Device:</b>
+        </div>
+        <div class="col-xs-4 lead">
+            {{ model.device|default:'Unspecified' }}
+        </div>
+    </div>
+
+    {% if model.description %}
+    <div class="row">
+        <div class="col-xs-2 lead text-right">
+            <b>Description:</b>
+        </div>
+        <div class="col-xs-10 lead">
+            {{ model.description }}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if assays %}
+    <legend><b>Validated Assays</b></legend>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Assay Name</th>
+            <th>Assay Type</th>
+            <th>Test Type</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for assay in assays %}
+            <tr>
+                <td>{{ assay.assay.assay_name }}</td>
+                <td>{{ assay.assay.assay_type }}</td>
+                <td>{{ assay.assay.test_type }}</td>
+                <td>{{ assay.assay.assay_description }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+{% endblock %}

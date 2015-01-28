@@ -4,7 +4,6 @@ from django.db import models
 
 from mps.base.models import LockableModel
 
-
 class MicrophysiologyCenter(LockableModel):
     class Meta(object):
         ordering = ('center_name', )
@@ -76,16 +75,16 @@ class OrganModel(LockableModel):
 
     model_name = models.CharField(max_length=200)
     organ = models.ForeignKey('cellsamples.Organ')
-    cell_type = models.ManyToManyField(
-        'cellsamples.CellType', related_name='organmodels', null=True, blank=True)
     center = models.ForeignKey(MicrophysiologyCenter, null=True, blank=True)
     device = models.ForeignKey(Microdevice, null=True, blank=True)
     description = models.CharField(max_length=400, null=True, blank=True)
 
-    def cell_types(self):
-        return u', '.join([a.cell_type for a in self.cell_type.all()])
-    cell_types.short_description = "Cell Types"
-
     def __unicode__(self):
 
         return self.model_name
+
+
+class ValidatedAssay(models.Model):
+    # Validated assays for an organ model used in inline
+    organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model')
+    assay = models.ForeignKey('assays.AssayModel', verbose_name='Assay Model')

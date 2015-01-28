@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <style>
-    p {
-        word-wrap: break-word;
-    }
-    </style>
+{#    <style>#}
+{#    p {#}
+{#        word-wrap: break-word;#}
+{#    }#}
+{#    </style>#}
 
     <legend><h1>{{ object.device_name }}</h1></legend>
 
@@ -14,21 +14,13 @@
             <b>Center:</b>
         </div>
         <div class="col-xs-3 lead">
-            {% if object.center != None %}
-                {{ object.center }}
-            {% else %}
-                Unspecified
-            {% endif %}
+            {{ object.center|default:'Unspecified' }}
         </div>
         <div class="col-xs-3 lead text-right">
             <b>Manufacturer:</b>
         </div>
         <div class="col-xs-3 lead">
-            {% if object.manufacturer != None %}
-                {{ object.manufacturer }}
-            {% else %}
-                Unspecified
-            {% endif %}
+            {{ object.manufacturer|default:'Unspecified' }}
         </div>
     </div>
 
@@ -37,21 +29,13 @@
             <b>Organ:</b>
         </div>
         <div class="col-xs-3 lead">
-            {% if object.organ != None %}
-                {{ object.organ }}
-            {% else %}
-                Unspecified
-            {% endif %}
+            {{ object.organ|default:'Unspecified' }}
         </div>
         <div class="col-xs-3 lead text-right">
             <b>Version Catalog:</b>
         </div>
         <div class="col-xs-3 lead">
-            {% if object.barcode != None %}
-                {{ object.barcode }}
-            {% else %}
-                Unspecified
-            {% endif %}
+            {{ object.barcode|default:'Unspecified' }}
         </div>
     </div>
 
@@ -130,21 +114,13 @@
             <b>Substrate Material:</b>
         </div>
         <div class="col-xs-3 lead">
-            {% if object.substrate_material %}
-                {{ object.substrate_material }}
-            {% else %}
-                Unspecified
-            {% endif %}
+            {{ object.substrate_material|default:'Unspecified' }}
         </div>
         <div class="col-xs-3 lead text-right">
             <b>Substrate Thickness:</b>
         </div>
         <div class="col-xs-3 lead">
-            {% if object.substrate_thickness %}
-                {{ object.substrate_thickness }} um
-            {% else %}
-                Unspecified
-            {% endif %}
+            {{ object.substrate_thickness|default:'Unspecified' }}
         </div>
     </div>
 
@@ -153,11 +129,7 @@
             <b>Fluid Volume:</b>
         </div>
         <div class="col-xs-9 lead">
-            {% if object.device_fluid_volume and object.device_fluid_volume_unit %}
-                {{ object.device_fluid_volume }} {{ object.device_fluid_volume_unit }}
-            {% else %}
-                Unspecified
-            {% endif %}
+            {{ object.device_fluid_volume|default:'Unspecified' }}
         </div>
     </div>
 
