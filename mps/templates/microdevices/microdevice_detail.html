@@ -56,7 +56,11 @@
             <b>Device Image:</b>
         </div>
         <div class="col-xs-9 lead">
-            {{ object.device_image|default:'No Image Available' }}
+            {% if object.device_image %}
+                <img src="/media/{{ object.device_image }}">
+            {% else %}
+                No Image Available
+            {% endif %}
         </div>
     </div>
 
@@ -65,7 +69,11 @@
             <b>Device Cross Section:</b>
         </div>
         <div class="col-xs-9 lead">
-            {{ object.device_cross_section_image|default:'No Image Available' }}
+            {% if object.device_cross_section_image %}
+                <img src="/media/{{ object.device_cross_section_image }}">
+            {% else %}
+                No Image Available
+            {% endif %}
         </div>
     </div>
 
