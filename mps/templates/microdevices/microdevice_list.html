@@ -30,7 +30,7 @@
             <tbody>
             {% for microdevice in devices %}
                 <tr class="microdevice" id={{ microdevice.id }} name={{ microdevice.device_name }}>
-                    <td><a href="{{ microdevice.id }}">{{ microdevice.device_name }}</a></td>
+                    <td><a href="device/{{ microdevice.id }}">{{ microdevice.device_name }}</a></td>
                     <td>{{ microdevice.organ|default_if_none:"" }}</td>
                     <td>{{ microdevice.center|default_if_none:"" }}</td>
                     <td>{{ microdevice.manufacturer|default_if_none:"" }}</td>
@@ -66,8 +66,8 @@
             <tbody>
             {% for model in models %}
                 <tr class="model" id={{ model.id }} name={{ model.device_name }}>
-                    <td><a href="{{ model.id }}">{{ model.model_name }}</a></td>
-                    <td><a href="{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
+                    <td><a href="model/{{ model.id }}">{{ model.model_name }}</a></td>
+                    <td><a href="device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
                     <td>{{ model.organ|default_if_none:"" }}</td>
                     <td>{{ model.center|default_if_none:"" }}</td>
                     <td>{{ model.description }}</td>

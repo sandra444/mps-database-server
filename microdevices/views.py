@@ -1,6 +1,6 @@
-from microdevices.models import Microdevice, OrganModel
+from microdevices.models import Microdevice, OrganModel, ValidatedAssay
 from django.views.generic import DetailView
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 # class MicrodeviceList(ListView):
@@ -20,6 +20,18 @@ def microdevice_list(request, *args, **kwargs):
 
     return render_to_response('microdevices/microdevice_list.html', c)
 
+def organ_model_detail(request, *args, **kwargs):
+    c = RequestContext(request)
+
+    model = get_object_or_404(OrganModel, pk=kwargs.get('pk'))
+    assays = ValidatedAssay.objects.prefetch_related('assay','assay__assay_type').all()
+
+    c.update({
+        'model': model,
+        'assays': assays,
+    })
+
+    return render_to_response('microdevices/organ_model_detail.html', c)
 
 class MicrodeviceDetail(DetailView):
     model = Microdevice
