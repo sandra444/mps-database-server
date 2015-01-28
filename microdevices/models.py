@@ -83,6 +83,7 @@ class OrganModel(LockableModel):
 
         return self.model_name
 
+
 class ValidatedAssay(models.Model):
     # Validated assays for an organ model used in inline
     organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model')
