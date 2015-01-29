@@ -100,21 +100,9 @@
             <tr>
                 <td>{{ result.finding_name }}</td>
                 <td>{{ result.get_result_display }}</td>
-                {% if result.percent_max != None %}
-                    <td>{{ result.percent_max }}</td>
-                {% else %}
-                    <td></td>
-                {% endif %}
-                {% if result.value != None %}
-                    <td>{{ result.value }}</td>
-                {% else %}
-                    <td></td>
-                {% endif %}
-                {% if result.value_units != None %}
-                    <td>{{ result.value_units }}</td>
-                {% else %}
-                    <td></td>
-                {% endif %}
+                <td>{{ result.percent_max|default_if_none:"" }}</td>
+                <td>{{ result.value|default_if_none:"" }}</td>
+                <td>{{ result.value_units|default_if_none:"" }}</td>
             </tr>
         {% endfor %}
         </tbody>
