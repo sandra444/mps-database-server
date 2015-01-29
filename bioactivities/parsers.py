@@ -877,7 +877,7 @@ def table(request):
 
     data = []
 
-        # generate a unique full path for data and rows and columns information
+    # generate a unique full path for data and rows and columns information
     data_hash = hashlib.sha512(
         str(request_filter)
     ).hexdigest()[:10]

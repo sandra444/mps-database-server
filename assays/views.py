@@ -193,6 +193,17 @@ class AssayRunDetail(LoginRequiredMixin, DetailView):
         if self.object.restricted and not has_group(request.user, self.object.group):
             raise PermissionDenied
         context = self.get_context_data(object=self.object)
+        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object).prefetch_related('assay_run_id',
+                                                                                                       'device',
+                                                                                                       'compound',
+                                                                                                       'unit',
+                                                                                                       'created_by')
+        context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
+            'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
+                                                                   'chip_setup__unit')
+        context['results'] = AssayTestResult.objects.filter(chip_setup=context['setups']).prefetch_related('chip_setup',
+                                                                                                           'created_by').select_related(
+            'chip_setup__compound', 'chip_setup__unit')
         return self.render_to_response(context)
 
 
