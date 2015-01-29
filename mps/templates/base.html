@@ -67,20 +67,20 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/">MPS</a>
+          <a title="Click to return to homepage" class="navbar-brand" href="/">MPS</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li><a href="/admin">Admin</a></li>
-            <li class="dropdown">
+            <li title="Administrative interface for authorized users only"><a href="/admin">Admin</a></li>
+            <li title="Add or view assay data" class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Assays<span class="caret"></span></a>
                 <ul class="dropdown-menu" role="menu">
                   <li class="dropdown-header">Add/Edit Studies</li>
-                  <li><a href="/assays/user_index">My Studies</a></li>
-                  <li><a href="/assays/group_index">Group Studies</a></li>
+                  <li title="Index of all the studies created by you"><a href="/assays/user_index">My Studies</a></li>
+                  <li title="Index of all the studies created by groups you are a member of"><a href="/assays/group_index">Group Studies</a></li>
                   <li class="divider"></li>
 {#                  Old List/Detail views, consider removing soon#}
-                  <li class="dropdown-header">View All Public Data</li>
+                  <li title="Lists all public data (does not contain add interface)" class="dropdown-header">View All Public Data</li>
                   <li><a href="/assays/organchipstudy">Studies</a></li>
                   <li><a href="/assays/assaychipsetup">Setups</a></li>
                   <li><a href="/assays/assaychipreadout">Readouts</a></li>
@@ -104,7 +104,7 @@
 {#                <li><a href="/assays/assaytestresult/add">Add Result</a></li>#}
 {#              </ul>#}
             </li>
-            <li class="dropdown">
+            <li title="View or add compounds" class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Compounds<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                       <li><a href="/compounds/">View Compounds</a></li>
@@ -113,22 +113,22 @@
                       <li><a href="/compounds/add">Add Compound</a></li>
                   </ul>
             </li>
-            <li><a href="/microdevices">Devices</a></li>
-            <li><a href="/drugtrials">Drug Trials</a></li>
+            <li title="View microdevices and organ models"><a href="/microdevices">Devices</a></li>
+            <li title="View curated drug trial data"><a href="/drugtrials">Drug Trials</a></li>
 {#                <li><a href="/bioactivities/heatmap">Heatmap</a></li>#}
 {#                <li><a href="/bioactivities/cluster">Cluster</a></li>#}
-              <li class="dropdown">
+              <li title="Analyze bioactivity data" class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Bioactivities<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
-                      <li><a href="/bioactivities/table">View Bioactivities</a></li>
-                      <li><a href="/bioactivities/heatmap">Heatmap</a></li>
-                      <li><a href="/bioactivities/cluster">Cluster</a></li>
+                      <li title="View a table of bioactivities based on your selection"><a href="/bioactivities/table">View Bioactivities</a></li>
+                      <li title="Generate a heatmap for selected bioactivity data"><a href="/bioactivities/heatmap">Heatmap</a></li>
+                      <li title="Generate a dendrogram for selected compound/bioactivity data"><a href="/bioactivities/cluster">Cluster</a></li>
                   </ul>
               </li>
               </ul>
           <ul class="nav navbar-nav navbar-right">
               {% if user.is_active %}
-              <li class="dropdown">
+              <li title="Click to log out or change password" class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Profile<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                       <li><a href="/accounts/logout">Log Out</a></li>
