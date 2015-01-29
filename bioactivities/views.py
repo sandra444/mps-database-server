@@ -188,3 +188,7 @@ def view_heatmap(request):
 def view_table(request):
     c = RequestContext(request)
     return render_to_response('bioactivities/table.html', c)
+
+def view_model(request):
+    c = RequestContext(request)
+    return render_to_response('bioactivities/model.html', c)
