@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<h1>Work in Progress:</h1>
+<h2>This is an example page for predictive modelling.</h2>
+<hr>
+
+<div id="chart"></div>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+  google.load("visualization", "1", {packages:["corechart"]});
+  google.setOnLoadCallback(drawChart);
+  function drawChart() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('number', 'X');
+    data.addColumn('number', 'Liver toxic (training)');
+    data.addColumn('number', 'Liver nontoxic (training)');
+    data.addColumn('number', 'Liver toxic (test)');
+    data.addColumn('number', 'Liver nontoxic (test)');
+    data.addColumn('number', 'Y');
+    //data.addColumn('number', 'U');
+    //data.addColumn('number', 'D');
+    var nums = [[-0.23, -1.59],
+      [-1.02, 0.24],
+      [-0.13, -2.97],
+      [-1.04, -2.15],
+      [-2.10, -1.58],
+      [-1.85, -0.54],
+      [-1.23, -1.87],
+      [-1.55, -1.66],
+      [-0.50, -2.20],
+      [-1.68, -2.85],
+      [-4.55, -1.34],
+      [-1.13, -2.74],
+      [0.26, -3.45],
+      [-1.95, -2.18],
+      [-0.46, -0.53],
+      [0.15, 0.37],
+      [-0.88, -1.98],
+      [-0.34, 0.15],
+      [1.23, 1.20],
+      [-0.38, -0.30],
+      [-1.04, -1.42],
+      [-1.70, 1.95],
+      [-0.50, -0.43],
+      [-1.25, 0.77],
+      [-1.61, -0.21],
+      [-0.89, 0.38],
+      [-0.51, -1.18],
+      [1.97, 2.42],
+      [2.06, 2.30],
+      [1.36, 1.63],
+      [1.32, 1.64],
+      [1.18, 0.27],
+      [2.17, 1.59],
+      [0.36, 2.46],
+      [1.09, 2.05],
+      [2.72, 2.12],
+      [3.13, 0.76],
+      [2.40, 1.31],
+      [1.12, 1.42],
+      [1.68, 2.05],
+      [0.83, 2.90],
+      [2.46, 0.46]];
+      for (var i = 0; i < 21; ++i) {
+        if (i % 4 == 0)
+          data.addRow([nums[i][0], null, null, nums[i][1], null, null])//, null, null]);
+        else
+          data.addRow([nums[i][0], nums[i][1], null, null, null, null])//, null, null]);
+      }
+      for (var i = 21; i < 42; i++) {
+        if (i % 4 == 0)
+          data.addRow([nums[i][0], null, null, null, nums[i][1], null])//, null, null]);
+        else
+          data.addRow([nums[i][0], null, nums[i][1], null, null, null])//, null, null]);
+      }
+      var xx = [-5.        , -4.79, -4.59, -4.38 , -4.18,
+       -3.97, -3.77 , -3.57, -3.36, -3.16,
+       -2.95, -2.75, -2.55, -2.34, -2.14,
+       -1.93, -1.73, -1.53, -1.32, -1.12,
+       -0.91, -0.71, -0.51, -0.30, -0.10,
+        0.10,  0.30,  0.51,  0.71,  0.91,
+        1.12,  1.32,  1.53,  1.73,  1.93,
+        2.14,  2.34,  2.55,  2.75,  2.95,
+        3.16,  3.36,  3.57,  3.77 ,  3.97,
+        4.18,  4.38 ,  4.59,  4.79,  5.        ];
+      var yy = [ 1.61,  1.53,  1.46 ,  1.39,  1.32,
+        1.24,  1.17,  1.10,  1.02,  0.95,
+        0.88,  0.81,  0.73,  0.66,  0.59,
+        0.52 ,  0.44,  0.37,  0.30,  0.22,
+        0.15,  0.08,  0.01, -0.06, -0.13,
+       -0.20, -0.27, -0.35, -0.42 , -0.49,
+       -0.57, -0.64, -0.71, -0.78  , -0.86,
+       -0.93, -1.00, -1.08, -1.15, -1.22,
+       -1.29, -1.37 , -1.44, -1.51, -1.58,
+       -1.66, -1.73 , -1.80, -1.88, -1.95];
+      var yy_up = [  3.12,   3.05,   2.97,
+         2.90,   2.83,   2.76,
+         2.68,   2.61,   2.54,
+         2.47,   2.39,   2.32,
+         2.25,   2.17,   2.10,
+         2.03,   1.96,   1.88,
+         1.81,   1.74,   1.66,
+         1.59,   1.52,   1.45,
+         1.37,   1.30,   1.23,
+         1.16,   1.08,   1.01,
+         0.94,   0.86,   0.79,
+         0.72,   0.65,   0.57,
+         0.50,   0.43,   0.36,
+         0.28,   0.21,   0.14,
+         0.069,  -0.003,  -0.07,
+        -0.14,  -0.22,  -0.29,
+        -0.36,  -0.43];
+      var yy_down = [ 0.09,  0.02, -0.04, -0.11, -0.19,
+       -0.26, -0.33, -0.41, -0.48, -0.55,
+       -0.62 , -0.70, -0.77, -0.84, -0.92,
+       -0.99, -1.06, -1.13, -1.21, -1.28,
+       -1.35, -1.42, -1.50, -1.57 , -1.64,
+       -1.72, -1.79, -1.86, -1.93, -2.01,
+       -2.08, -2.15, -2.22, -2.30, -2.37,
+       -2.44, -2.52 , -2.59, -2.66, -2.73,
+       -2.81, -2.88, -2.95, -3.02, -3.10,
+       -3.17, -3.24, -3.32, -3.39, -3.46 ];
+
+      for (var i = 1; i < 49; ++i) {
+        data.addRow([xx[i], null, null, null, null, yy[i]])//, null, null])
+      }
+      //for (var i = 1; i < 49; i++) {
+      //  data.addRow([xx[i], null, null, null, null, null, yy_up[i], null])
+      //}
+      //for (var i = 1; i < 49; i++) {
+      //  data.addRow([xx[i], null, null, null, null, null, null, yy_down[i]])
+      //}
+
+    var labels=["Gentamicin A",
+"Kanamycin",
+"Amoxicillin",
+"Gatifloxacin",
+"Clinafloxacin",
+"Levofloxacin",
+"Sparfloxacin",
+"Erythromycin",
+"Josamycin",
+"Tetracycline",
+"Demeclocycline",
+"Itraconazole",
+"Posaconazole",
+"Buspirone",
+"Ranitidine",
+"Miconazole",
+"Tobramycin",
+"Ciprofloxacin",
+"Trovafloxacin",
+"Temafloxacin",
+"Azithromycin",
+"Troleandomycin",
+"Linezolid",
+"Sulfamethoxazole",
+"Nefazodone",
+"Nimesulide",
+"Troglitazone",
+"Ketoconazole",
+"Chloramphenicol",
+"Clotrimazole",
+"Telithromycin",
+"Clarithromycin",
+"Erythromycin Estolate",
+"Doxycycline",
+"Methacycline",
+"Fluconazole",
+"Voriconazole",
+"Chlorpromazine",
+"Cyclosporine",
+"Tamoxifen",
+"Menadione",
+"Amiodarone"];
+
+    var options = {
+      title: 'SVM model - 42 compounds',
+      hAxis: {title: 'PC1'},
+      vAxis: {title: 'PC2'},
+      series: {0: {type: "line", color: 'red', pointSize: 10},
+               1: {type: "line", color: 'blue', pointSize: 10},
+               2: {type: "line", color: 'pink', pointSize: 10},
+               3: {type: "line", color: 'cyan', pointSize: 10},
+               4: {type: "line", color: 'black', visibleInLegend: false, lineWidth: 4, pointSize: 0}}
+    };
+               //5: {type: "line", color: 'black', visibleInLegend: false, lineWidth: 0, pointSize: 1},
+               //6: {type: "line", color: 'black', visibleInLegend: false, lineWidth: 0, pointSize: 1}}
+    function selectHandler() {
+      $('#show').html('');
+      var selectedItem = chart.getSelection()[0];
+      if (selectedItem.row < 42) {
+        var label = labels[selectedItem.row];
+        var tox = liver[label.toLowerCase()];
+        var add = "<br>Animal liver toxicity: ";
+        if (tox[8]) {
+          add += "<span class='glyphicon glyphicon-ok'></span>";
+        } else {
+          add += "<span class='glyphicon glyphicon-remove'></span>";
+        }
+        add += "<br>Human liver toxicity: ";
+        if (tox[9]) {
+          add += "<span class='glyphicon glyphicon-ok'></span>";
+        } else {
+          add += "<span class='glyphicon glyphicon-remove'></span>";
+        }
+        $('#show').prepend('<div class="thumbnail span2 text-center"><img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/' + chembl[label.toLowerCase()] + '" class="img-polaroid"><strong>' + label.toLowerCase() + '</strong>' + add + '</div>')
+      }
+    }
+    var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+    google.visualization.events.addListener(chart, 'select', selectHandler);
+    chart.draw(data, options);
+  }
+</script>
+
+<div class="span9">
+  <h2>SVM using data from Liver Device</h2>
+  <div id="chart_div" style="width: 700px; height: 500px;"></div>
+</div>
+<div id="show" class="text-center">
+</div>
+
+<script type="text/JavaScript">
+
+var chembl = {'erythromycin estolate': 'CHEMBL2218877', 'tobramycin': 'CHEMBL1747', 'chloramphenicol': 'CHEMBL130', 'troleandomycin': 'CHEMBL564085', 'menadione': 'CHEMBL590', 'nefazodone': 'CHEMBL623', 'temafloxacin': 'CHEMBL277100', 'ciprofloxacin': 'CHEMBL8', 'sulfamethoxazole': 'CHEMBL443', 'levofloxacin': 'CHEMBL33', 'sparfloxacin': 'CHEMBL850', 'methacycline': 'CHEMBL124506', 'ketoconazole': 'CHEMBL75', 'fluconazole': 'CHEMBL106', 'nimesulide': 'CHEMBL56367', 'tamoxifen': 'CHEMBL83', 'trovafloxacin': 'CHEMBL428', 'demeclocycline': 'CHEMBL1617341', 'chlorpromazine': 'CHEMBL71', 'clinafloxacin': 'CHEMBL278255', 'gatifloxacin': 'CHEMBL31', 'doxycycline': 'CHEMBL1433', 'buspirone': 'CHEMBL49', 'tetracycline': 'CHEMBL1440', 'josamycin': 'CHEMBL224436', 'linezolid': 'CHEMBL126', 'troglitazone': 'CHEMBL408', 'clarithromycin': 'CHEMBL1741', 'itraconazole': 'CHEMBL22587', 'ranitidine': 'CHEMBL512', 'miconazole': 'CHEMBL91', 'gentamicin a': 'CHEMBL7225', 'clotrimazole': 'CHEMBL104', 'telithromycin': 'CHEMBL1136', 'amoxicillin': 'CHEMBL1082', 'cyclosporine': 'CHEMBL160', 'voriconazole': 'CHEMBL638', 'amiodarone': 'CHEMBL633', 'erythromycin': 'CHEMBL532', 'kanamycin': 'CHEMBL1384', 'azithromycin': 'CHEMBL529', 'posaconazole': 'CHEMBL1397'};
+var liver = {
+   "gentamicin a": [21.1,10000.0,10000.0,10000.0,343.0,10000.0,461.0,10000.0,0.0,0.0],
+   "tobramycin": [21.5,323.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,1.0],
+   "kanamycin": [8.4,855.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,0.0],
+   "ketoconazole": [11.4,21.0,10000.0,10000.0,13.5,10000.0,10000.0,69.6422,1.0,1.0],
+   "chloramphenicol": [31.1,10000.0,10000.0,10000.0,85.0,10000.0,10000.0,10000.0,1.0,1.0],
+   "amoxicillin": [41.2,148.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,0.0],
+   "ciprofloxacin": [12.2,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,1.0],
+   "gatifloxacin": [4.5,10000.0,1210.0,10000.0,233.0,10000.0,10000.0,1100.0,0.0,0.0],
+   "clinafloxacin": [2.5,10000.0,247.0,10000.0,114.0,10000.0,10000.0,1070.0,0.0,0.0],
+   "trovafloxacin": [2.2,10000.0,402.0,10000.0,6.12,10000.0,10000.0,75.5,0.0,1.0],
+   "temafloxacin": [3.7,10000.0,10000.0,10000.0,377.0,10000.0,326.0,1660.0,0.0,1.0],
+   "levofloxacin": [5.8,10000.0,10000.0,901.0,1200.0,10000.0,10000.0,1240.0,0.0,0.0],
+   "sparfloxacin": [3.7,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,0.0],
+   "clotrimazole": [0.04,10000.0,10000.0,10000.0,11.3508,10000.0,10000.0,10000.0,1.0,1.0],
+   "miconazole": [2.5,10000.0,51.9589,10000.0,18.9685,10000.0,10000.0,55.3822,1.0,0.0],
+   "telithromycin": [2.4,217.0,10000.0,10000.0,10000.0,201.0,10000.0,10000.0,1.0,1.0],
+   "azithromycin": [1.4,151.0,853.822,10000.0,21.4,10000.0,21.9,19.6,0.0,1.0],
+   "erythromycin": [8.3,490.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,0.0],
+   "josamycin": [3.9,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,0.0],
+   "clarithromycin": [2.8,76.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,1.0,1.0],
+   "erythromycin estolate": [3.2,40.0,110.5382,10000.0,57.7,130.5382,318.0,42.9,1.0,1.0],
+   "troleandomycin": [2.6,41.0,10000.0,414.0,222.0,10000.0,10000.0,108.0,0.0,1.0],
+   "linezolid": [62.8,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,1.0],
+   "sulfamethoxazole": [237.3,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,1.0],
+   "doxycycline": [22.6,136.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,1.0,1.0],
+   "tetracycline": [9.4,60.5,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,0.0],
+   "demeclocycline": [1.3,25.0,179.0,66.9,179.0,10000.0,323.0,131.0,0.0,0.0],
+   "methacycline": [2.5,45.6,165.0,76.4,156.0,386.0,10000.0,10000.0,1.0,1.0],
+   "fluconazole": [49.1,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,1.0,1.0],
+   "voriconazole": [7.3,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,1.0,1.0],
+   "itraconazole": [3.3,44.4,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,0.0],
+   "posaconazole": [4.2,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,0.0],
+   "chlorpromazine": [0.9,10000.0,10000.0,10000.0,8.2,190.345,42.9419,19.0345,1.0,1.0],
+   "nefazodone": [0.9,10000.0,10000.0,83.4567,12.7306,176.0717,26.337,49.8725,0.0,1.0],
+   "cyclosporine": [0.8,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,1.0,1.0],
+   "nimesulide": [20.5,10000.0,10000.0,104.161,225.658,317.5812,139.073,308.611,0.0,1.0],
+   "tamoxifen": [0.2,10000.0,10000.0,10000.0,80.6995,98.07,10000.0,28.1321,1.0,1.0],
+   "menadione": [5.4,436.0,400.0,75.0,30.6995,10000.0,10000.0,48.1321,1.0,1.0],
+   "amiodarone": [0.9,10000.0,33.1,99.6,7.69,95.6822,120.8477,62.6463,1.0,1.0],
+   "buspirone": [0.0001,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,0.0],
+   "ranitidine": [4.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,0.0],
+   "troglitazone": [0.01,28.0,43.0,61.0,12.3,108.0,10000.0,10000.0,0.0,1.0]}
+</script>
+
+{% endblock %}

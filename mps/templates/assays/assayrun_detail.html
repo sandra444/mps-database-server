@@ -68,8 +68,106 @@
         <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
     {% endif %}
 
-    {#    <script>#}
-    {#        $("p").addClass("lead");#}
-    {#    </script>#}
+    <legend><h2>Setups</h2></legend>
+
+    {% if setups %}
+        <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Chip ID / Barcode</th>
+                    <th>Date</th>
+                    <th>Organ Chip Name</th>
+                    <th>Chip Test Type</th>
+                    <th>Compound</th>
+                    <th>Creator</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for setup in setups %}
+                <tr id={{ setup.id }} name={{ setup.id }}>
+                    <td><a href="/assays/assaychipsetup/{{ setup.id }}">{{ setup.assay_chip_id }}</a></td>
+                    <td>{{ setup.setup_date }}</td>
+                    <td>{{ setup.device }}</td>
+                    <td>{{ setup.chip_test_type }}</td>
+                    <td>{{ setup.compound }}</td>
+                    <td>{{ setup.created_by }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No chip setups exist for this study
+        </div>
+        {% endif %}
+
+        <legend><h2>Readouts</h2></legend>
+
+        {% if readouts %}
+        <table id="readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Readout ID</th>
+                    <th>Chip Setup</th>
+                    <th>Readout Date</th>
+                    <th>Creator</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for readout in readouts %}
+                <tr id={{ readout.id }} name={{ readout.id }}>
+                    <td><a href="/assays/assaychipreadout/{{ readout.id }}">{{ readout.id }}</a></td>
+                    <td>{{ readout.chip_setup }}</td>
+                    <td>{{ readout.readout_start_time }}</td>
+                    <td>{{ readout.created_by }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No chip readouts exist for this study
+        </div>
+        {% endif %}
+
+        <legend><h2>Results</h2></legend>
+
+        {% if results %}
+        <table id="results" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Chip Setup</th>
+                    <th>Assay</th>
+                    <th>Result</th>
+                    <th>Result Function</th>
+                    <th>Result Type</th>
+                    <th>Severity</th>
+                    <th>Creator</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for result in results %}
+                <tr id={{ result.id }} name={{ result.id }}>
+                    <td><a href="/assays/assaytestresult/{{ result.id }}">{{ result.chip_setup }}</a></td>
+                    {% with result.assayresult_set.all|first as current %}
+                        <td>{{ current.assay_name }}</td>
+                        <td>{{ current.get_result_display }}</td>
+                        <td>{{ current.result_function }}</td>
+                        <td>{{ current.result_type }}</td>
+                        <td>{{ current.get_severity_display }}</td>
+                    {% endwith %}
+                    <td>{{ result.created_by }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No chip results exist for this study
+        </div>
+        {% endif %}
 
 {% endblock %}

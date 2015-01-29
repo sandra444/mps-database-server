@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-    function table(data) {
+    function table(data, link) {
 
         // Show graphic
         $('#graphic').prop('hidden',false);
@@ -10,6 +10,11 @@ $(document).ready(function () {
         // Clear old (if present)
         $('#full').dataTable().fnDestroy();
         $('#table').html('');
+
+        // Set href
+        $('#download').attr('href',link);
+
+        csv = 'Compound,Target,Organism,Standard Name,Operator,Standard Value, Standard Units, ChEMBL Link\n\r';
 
         for (var i in data) {
             var bio = data[i];
@@ -92,7 +97,7 @@ $(document).ready(function () {
 
                 if (json.data_json) {
                     //console.log(json);
-                    table(json.data_json);
+                    table(json.data_json, json.table_link);
 //                    document.location.hash = "display";
                 }
                 else {

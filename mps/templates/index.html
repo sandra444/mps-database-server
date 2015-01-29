@@ -17,7 +17,7 @@
         </div>
         <div class="row">
             <div class="col-md-3">
-                <div class="well">
+                <div title="View microdevices and organ models" class="well">
                     <a href="/microdevices/">
                         <img src="/static/img/liver_model.png"
                              style="height: 80px;">
@@ -31,7 +31,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="well">
+                <div title="View curated drug trial data" class="well">
                     <a href="/drugtrials/">
                         <img src="/static/img/button_trials.png"
                              style="height: 80px;">
@@ -45,7 +45,7 @@
                 </div>
             </div>
                 <div class="col-md-3">
-                    <div class="well">
+                    <div title="View a table of bioactivities based on your selection" class="well">
                         <a href="/bioactivities/table/">
                             <img src="/static/img/button_addcompound.png"
                                  style="height: 80px;">
@@ -59,7 +59,7 @@
                     </div>
                 </div>
             <div class="col-md-3">
-                <div class="well">
+                <div title="View or add compounds" class="well">
                     <a href="/compounds/">
                         <img src="/static/img/button_browse.png"
                              style="height: 80px;">
@@ -80,7 +80,7 @@
         </div>
         <div class="row">
             <div class="col-md-4">
-                <div class="well">
+                <div title="Initial data entry: add studies and setups" class="well">
                     <a href="/assays/user_index/?setup=1">
                         <img src="/static/img/button_study.png"
                              style="height: 80px;">
@@ -94,7 +94,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="well">
+                <div title="Add studies, setups, readouts, and results" class="well">
                     <a href="/assays/group_index">
                         <img src="/static/img/button_import.png"
                              style="height: 80px;">
@@ -105,15 +105,15 @@
                             Upload Assay Data <span class="caret"></span>
                           </button>
                           <ul class="dropdown-menu" role="menu">
-                            <li><a href="/assays/user_index">My Studies</a></li>
-                            <li><a href="/assays/group_index">Group Studies</a></li>
+                            <li title="Index of all the studies created by you"><a href="/assays/user_index">My Studies</a></li>
+                            <li title="Index of all the studies created by groups you are a member of"><a href="/assays/group_index">Group Studies</a></li>
                           </ul>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="well">
+                <div title="Lists all public data (does not contain add interface)" class="well">
                     <a href="/assays/organchipstudy">
                         <img src="/static/img/button_chip.png"
                              style="height: 80px;">
@@ -141,7 +141,7 @@
         </div>
         <div class="row">
             <div class="col-md-4">
-                <div class="well">
+                <div title="Generate a heatmap for selected bioactivity data" class="well">
                     <a href="/bioactivities/heatmap">
                         <img src="/static/img/button_heatmap.png"
                              style="height: 80px;">
@@ -155,7 +155,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="well">
+                <div title="Generate a dendrogram for selected compound/bioactivity data" class="well">
                     <a href="/bioactivities/cluster">
                         <img src="/static/img/button_cluster.png"
                              style="height: 80px;">
@@ -170,13 +170,13 @@
             </div>
 
             <div class="col-md-4">
-                <div class="well">
-                    <a href="/#/">
+                <div title="This feature is still in development" class="well">
+                    <a href="/bioactivities/model/">
                         <img src="/static/img/button_predictive.png"
                              style="height: 80px;">
                     </a>
                     <div class="caption">
-                        <a href="/#/"
+                        <a href="/bioactivities/model/"
                            class="btn btn-danger btn-large">
                         Modeling
                         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
