@@ -55,7 +55,7 @@
             <b>Compound:</b>
         </div>
         <div class="col-xs-10 lead">
-            {{ object.compound }} {{ object.concentration }} {{ object.unit }}
+            <a href="/compounds/{{ object.compound.id }}">{{ object.compound }}</a> {{ object.concentration }} {{ object.unit }}
         </div>
     </div>
 
