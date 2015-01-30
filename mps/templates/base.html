@@ -73,7 +73,7 @@
           <ul class="nav navbar-nav">
             <li title="Administrative interface for authorized users only"><a href="/admin">Admin</a></li>
             <li title="Add or view assay data" class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Assays<span class="caret"></span></a>
+              <a class="dropdown-toggle" data-toggle="dropdown">Assays<span class="caret"></span></a>
                 <ul class="dropdown-menu" role="menu">
                   <li class="dropdown-header">Add/Edit Studies</li>
                   <li title="Index of all the studies created by you"><a href="/assays/user_index">My Studies</a></li>
@@ -105,7 +105,7 @@
 {#              </ul>#}
             </li>
             <li title="View or add compounds" class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Compounds<span class="caret"></span></a>
+                <a class="dropdown-toggle" data-toggle="dropdown">Compounds<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                       <li><a href="/compounds/">View Compounds</a></li>
                       <li class="divider"></li>
@@ -118,7 +118,7 @@
 {#                <li><a href="/bioactivities/heatmap">Heatmap</a></li>#}
 {#                <li><a href="/bioactivities/cluster">Cluster</a></li>#}
               <li title="Analyze bioactivity data" class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Bioactivities<span class="caret"></span></a>
+                <a class="dropdown-toggle" data-toggle="dropdown">Bioactivities<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                       <li title="View a table of bioactivities based on your selection"><a href="/bioactivities/table">View Bioactivities</a></li>
                       <li title="Generate a heatmap for selected bioactivity data"><a href="/bioactivities/heatmap">Heatmap</a></li>
@@ -129,7 +129,7 @@
           <ul class="nav navbar-nav navbar-right">
               {% if user.is_active %}
               <li title="Click to log out or change password" class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Profile<span class="caret"></span></a>
+                <a class="dropdown-toggle" data-toggle="dropdown">Profile<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                       <li><a href="/accounts/logout">Log Out</a></li>
                       <li><a href="/password_change">Change Password</a></li>
