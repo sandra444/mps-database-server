@@ -68,13 +68,13 @@
         <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
     {% endif %}
 
-    <legend><h2>Setups</h2></legend>
+    <legend><h2>Chip Setups</h2></legend>
 
     {% if setups %}
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th>Chip ID / Barcode</th>
+                    <th>Chip Setup ID / Barcode</th>
                     <th>Date</th>
                     <th>Organ Chip Name</th>
                     <th>Chip Test Type</th>
@@ -102,13 +102,13 @@
         </div>
         {% endif %}
 
-        <legend><h2>Readouts</h2></legend>
+        <legend><h2>Chip Readouts</h2></legend>
 
         {% if readouts %}
         <table id="readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th>Readout ID</th>
+                    <th>Chip Readout ID</th>
                     <th>Chip Setup</th>
                     <th>Readout Date</th>
                     <th>Creator</th>
@@ -119,7 +119,7 @@
             {% for readout in readouts %}
                 <tr id={{ readout.id }} name={{ readout.id }}>
                     <td><a href="/assays/assaychipreadout/{{ readout.id }}">{{ readout.id }}</a></td>
-                    <td>{{ readout.chip_setup }}</td>
+                    <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}">{{ readout.chip_setup }}</a></td>
                     <td>{{ readout.readout_start_time }}</td>
                     <td>{{ readout.created_by }}</td>
                 </tr>
@@ -132,15 +132,15 @@
         </div>
         {% endif %}
 
-        <legend><h2>Results</h2></legend>
+        <legend><h2>Chip Results</h2></legend>
 
         {% if results %}
         <table id="results" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th>Result Set ID</th>
-                    <th>Setup</th>
-                    <th>Readout ID</th>
+                    <th>Chip Test Results ID</th>
+                    <th>Chip Setup</th>
+                    <th>Chip Readout ID</th>
                     <th>Assay</th>
                     <th>Result</th>
                     <th>Result Function</th>

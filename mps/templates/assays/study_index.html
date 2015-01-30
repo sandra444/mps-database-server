@@ -8,13 +8,13 @@
             <h1 align="center">Study: {{ object_list.0.assay_run_id }}</h1>
         </div>
 
-        <legend><h2>Setups  <a href="assaychipsetup/add{{ setup }}" class="btn btn-success" role="button">Add Setup</a></h2></legend>
+        <legend><h2>Chip Setups  <a href="assaychipsetup/add{{ setup }}" class="btn btn-success" role="button">Add Setup</a></h2></legend>
 
         {% if setups %}
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th>Chip ID / Barcode</th>
+                    <th>Chip Setup ID / Barcode</th>
                     <th>Date</th>
                     <th>Organ Chip Name</th>
                     <th>Chip Test Type</th>
@@ -54,7 +54,7 @@
 
         {% if not setup %}
 
-        <legend><h2>Readouts
+        <legend><h2>Chip Readouts
             {% if setups.count == 0 %}
                 <div hidden id="readout_alert" class="alert alert-warning" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -71,7 +71,7 @@
         <table id="readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th>Readout ID</th>
+                    <th>Chip Readout ID</th>
                     <th>Chip Setup</th>
                     <th>Readout Date</th>
                     <th>Creator</th>
@@ -91,7 +91,7 @@
             {% for readout in readouts %}
                 <tr id={{ readout.id }} name={{ readout.id }}>
                     <td><a href="/assays/assaychipreadout/{{ readout.id }}">{{ readout.id }}</a></td>
-                    <td>{{ readout.chip_setup }}</td>
+                    <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}">{{ readout.chip_setup }}</a></td>
                     <td>{{ readout.readout_start_time }}</td>
                     <td>{{ readout.created_by }}</td>
                 </tr>
@@ -104,7 +104,7 @@
         </div>
         {% endif %}
 
-        <legend><h2>Results
+        <legend><h2>Chip Results
             {% if readouts.count == 0 %}
                 <div hidden id="result_alert" class="alert alert-warning" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -121,9 +121,9 @@
         <table id="results" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th>Result Set ID</th>
-                    <th>Setup</th>
-                    <th>Readout ID</th>
+                    <th>Chip Test Results ID</th>
+                    <th>Chip Setup</th>
+                    <th>Chip Readout ID</th>
                     <th>Assay</th>
                     <th>Result</th>
                     <th>Result Function</th>
