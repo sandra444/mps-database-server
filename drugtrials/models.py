@@ -61,7 +61,7 @@ class DrugTrial(LockableModel):
         ordering = ('compound', 'species', )
 
     title = models.CharField(max_length=255, blank=True, null=True)
-    condition = models.CharField(max_length=1000, blank=True, null=True)
+    condition = models.CharField(max_length=1400, blank=True, null=True)
     source = models.ForeignKey(TrialSource)
     compound = models.ForeignKey('compounds.Compound')
 
@@ -120,7 +120,7 @@ class DrugTrial(LockableModel):
     trial_sub_type = models.CharField(max_length=1,
                                       choices=TRIALSUBTYPES, default='C')
     trial_date = models.DateField(blank=True, null=True)
-    description = models.CharField(max_length=1000, blank=True, null=True)
+    description = models.CharField(max_length=1400, blank=True, null=True)
     source_link = models.URLField(blank=True, null=True)
     references = models.CharField(max_length=400, null=True,
                                   verbose_name='Trial ID/Reference')
