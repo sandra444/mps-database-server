@@ -4,50 +4,15 @@
 {% block content %}
 
     <div style="padding-bottom: 50px">
-        <legend><h2>Microdevices</h2></legend>
-
-        <table id="microdevices" class="display" cellspacing="0" width="100%">
-            <thead>
-                <tr>
-                    <th>Device Name</th>
-                    <th>Organ</th>
-                    <th>Center</th>
-                    <th>Manufacturer</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-
-            <tfoot>
-                <tr>
-                    <th>Device Name</th>
-                    <th>Organ</th>
-                    <th>Center</th>
-                    <th>Manufacturer</th>
-                    <th>Description</th>
-                </tr>
-            </tfoot>
-
-            <tbody>
-            {% for microdevice in devices %}
-                <tr class="microdevice" id={{ microdevice.id }} name={{ microdevice.device_name }}>
-                    <td><a href="device/{{ microdevice.id }}">{{ microdevice.device_name }}</a></td>
-                    <td>{{ microdevice.organ|default_if_none:"" }}</td>
-                    <td>{{ microdevice.center|default_if_none:"" }}</td>
-                    <td>{{ microdevice.manufacturer|default_if_none:"" }}</td>
-                    <td>{{ microdevice.description|default_if_none:"" }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
 
         <legend><h2>Organ Models</h2></legend>
 
         <table id="models" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>Organ</th>
                     <th>Model Name</th>
                     <th>Device</th>
-                    <th>Organ</th>
                     <th>Center</th>
                     <th>Description</th>
                 </tr>
@@ -55,9 +20,9 @@
 
             <tfoot>
                 <tr>
+                    <th>Organ</th>
                     <th>Model Name</th>
                     <th>Device</th>
-                    <th>Organ</th>
                     <th>Center</th>
                     <th>Description</th>
                 </tr>
@@ -66,15 +31,52 @@
             <tbody>
             {% for model in models %}
                 <tr class="model" id={{ model.id }} name={{ model.device_name }}>
+                    <td><a href="model/{{ model.id }}">{{ model.organ|default_if_none:"" }}</a></td>
                     <td><a href="model/{{ model.id }}">{{ model.model_name }}</a></td>
                     <td><a href="device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
-                    <td>{{ model.organ|default_if_none:"" }}</td>
                     <td>{{ model.center|default_if_none:"" }}</td>
                     <td>{{ model.description }}</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
+
+        <legend><h2>Microdevices</h2></legend>
+
+        <table id="microdevices" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Device Name</th>
+                    <th>Manufacturer</th>
+                    <th>Center</th>
+                    <th>Organ</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Device Name</th>
+                    <th>Manufacturer</th>
+                    <th>Center</th>
+                    <th>Organ</th>
+                    <th>Description</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for microdevice in devices %}
+                <tr class="microdevice" id={{ microdevice.id }} name={{ microdevice.device_name }}>
+                    <td><a href="device/{{ microdevice.id }}">{{ microdevice.device_name }}</a></td>
+                    <td>{{ microdevice.manufacturer|default_if_none:"" }}</td>
+                    <td>{{ microdevice.center|default_if_none:"" }}</td>
+                    <td>{{ microdevice.organ|default_if_none:"" }}</td>
+                    <td>{{ microdevice.description|default_if_none:"" }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
     </div>
 
     <script>
