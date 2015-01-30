@@ -14,8 +14,6 @@ $(document).ready(function () {
         // Set href
         $('#download').attr('href',link);
 
-        csv = 'Compound,Target,Organism,Standard Name,Operator,Standard Value, Standard Units, ChEMBL Link\n\r';
-
         for (var i in data) {
             var bio = data[i];
             //console.log(bio);

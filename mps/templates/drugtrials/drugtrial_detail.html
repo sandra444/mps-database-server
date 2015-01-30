@@ -56,6 +56,28 @@
             </div>
         </div>
         {% endif %}
+        {% if trial.condition %}
+        <div class="row">
+            <div class="col-xs-4 lead text-right">
+                <b>Condition:</b>
+            </div>
+            <div class="col-xs-8">
+                {{ trial.condition }}
+            </div>
+        </div>
+        {# Entra break #}
+        <br>
+        {% endif %}
+        {% if trial.description %}
+        <div class="row">
+            <div class="col-xs-4 lead text-right">
+                <b>Description:</b>
+            </div>
+            <div class="col-xs-8">
+                {{ trial.description }}
+            </div>
+        </div>
+        {% endif %}
         {% if trial.figure1 %}
         <div class="row">
             <div class="col-xs-4 lead text-right">

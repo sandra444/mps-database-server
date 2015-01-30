@@ -121,9 +121,17 @@ class StudyIndex(LoginRequiredMixin, ListView):
         context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
             'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
                                                                    'chip_setup__unit')
-        context['results'] = AssayTestResult.objects.filter(chip_setup=context['setups']).prefetch_related('chip_setup',
-                                                                                                           'created_by').select_related(
-            'chip_setup__compound', 'chip_setup__unit')
+        context['results'] = AssayResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function', 'result_type',
+                                                    'test_unit').select_related('assay_result__assay_device_readout',
+                                                                                'assay_result__chip_setup',
+                                                                                'assay_result__chip_setup__compound',
+                                                                                'assay_result__chip_setup__unit',
+                                                                                'assay_name__readout_id',
+                                                                                'assay_name__assay_id',
+                                                                                'assay_name__reader_id',
+                                                                                'assay_name__readout_unit',
+                                                                                'assay_result__created_by').filter(assay_result__chip_setup=context['setups'])
+
         # Check if this is setup only; if so add to add respective URLS
         if request.GET.get('setup', ''):
             context['setup'] = '/?setup=1'
@@ -154,7 +162,7 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
         context['groups'] = groups
         # Check if this is setup only; if so add to add respective URLS
         # if self.request.GET.get('setup', ''):
-        #     context['setup'] = '/?setup=1'
+        # context['setup'] = '/?setup=1'
         # else:
         #     context['setup'] = ''
         return context
@@ -170,7 +178,8 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Study
             self.object.save()
-            return redirect(self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
+            return redirect(
+                self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
         else:
             # In order to display errors properly, make sure they are added to POST
             # form['errors'] = form.errors
@@ -194,16 +203,23 @@ class AssayRunDetail(LoginRequiredMixin, DetailView):
             raise PermissionDenied
         context = self.get_context_data(object=self.object)
         context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object).prefetch_related('assay_run_id',
-                                                                                                       'device',
-                                                                                                       'compound',
-                                                                                                       'unit',
-                                                                                                       'created_by')
+                                                                                                     'device',
+                                                                                                     'compound',
+                                                                                                     'unit',
+                                                                                                     'created_by')
         context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
             'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
                                                                    'chip_setup__unit')
-        context['results'] = AssayTestResult.objects.filter(chip_setup=context['setups']).prefetch_related('chip_setup',
-                                                                                                           'created_by').select_related(
-            'chip_setup__compound', 'chip_setup__unit')
+        context['results'] = AssayResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function', 'result_type',
+                                                    'test_unit').select_related('assay_result__assay_device_readout',
+                                                                                'assay_result__chip_setup',
+                                                                                'assay_result__chip_setup__compound',
+                                                                                'assay_result__chip_setup__unit',
+                                                                                'assay_name__readout_id',
+                                                                                'assay_name__assay_id',
+                                                                                'assay_name__reader_id',
+                                                                                'assay_name__readout_unit',
+                                                                                'assay_result__created_by').filter(assay_result__chip_setup=context['setups'])
         return self.render_to_response(context)
 
 
@@ -221,8 +237,9 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
 
 AssayChipCellsFormset = inlineformset_factory(AssayChipSetup, AssayChipCells, formset=AssayChipCellsInlineFormset,
                                               extra=1,
-                                              widgets={'cellsample_density': forms.NumberInput(attrs={'style':'width:75px;',}),
-                                                       'cell_passage': forms.TextInput(attrs={'size': 5}), })
+                                              widgets={
+                                              'cellsample_density': forms.NumberInput(attrs={'style': 'width:75px;', }),
+                                              'cell_passage': forms.TextInput(attrs={'size': 5}), })
 
 
 class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
@@ -270,7 +287,8 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
             if data['another']:
                 return self.render_to_response(self.get_context_data(form=form))
             else:
-                return redirect(self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
+                return redirect(
+                    self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -367,17 +385,27 @@ class AssayChipReadoutDetail(LoginRequiredMixin, DetailView):
 
 # Class-based views for studies
 class AssayTestResultList(LoginRequiredMixin, ListView):
-    model = AssayTestResult
+    # model = AssayTestResult
+    template_name = 'assays/assaytestresult_list.html'
 
     def get_queryset(self):
-        return AssayTestResult.objects.filter(assay_device_readout__restricted=False).prefetch_related(
-            'assay_device_readout', 'chip_setup', 'created_by') | AssayTestResult.objects.filter(
-            assay_device_readout__group__in=self.request.user.groups.all()).prefetch_related('assay_device_readout',
-                                                                                             'chip_setup', 'created_by')
+        initial_query = AssayResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function', 'result_type',
+                                                    'test_unit').select_related('assay_result__assay_device_readout',
+                                                                                'assay_result__chip_setup',
+                                                                                'assay_result__chip_setup__compound',
+                                                                                'assay_result__chip_setup__unit',
+                                                                                'assay_name__readout_id',
+                                                                                'assay_name__assay_id',
+                                                                                'assay_name__reader_id',
+                                                                                'assay_name__readout_unit',
+                                                                                'assay_result__created_by')
+
+        return initial_query.filter(assay_result__assay_device_readout__restricted=False) | \
+               initial_query.filter(assay_result__assay_device_readout__group__in=self.request.user.groups.all())
 
 
 TestResultFormSet = inlineformset_factory(AssayTestResult, AssayResult, formset=TestResultInlineFormset, extra=1,
-                                          widgets={'value': forms.NumberInput(attrs={'style':'width:100px;',}), })
+                                          widgets={'value': forms.NumberInput(attrs={'style': 'width:100px;', }), })
 
 
 class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
@@ -387,9 +415,9 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     def get_context_data(self, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
-        'assay_run_id', 'device',
-        'compound', 'unit',
-        'created_by')
+            'assay_run_id', 'device',
+            'compound', 'unit',
+            'created_by')
 
         context = super(AssayTestResultAdd, self).get_context_data(**kwargs)
         if self.request.POST:
