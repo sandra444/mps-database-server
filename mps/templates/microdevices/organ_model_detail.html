@@ -24,7 +24,11 @@
             <b>Device:</b>
         </div>
         <div class="col-xs-4 lead">
-            {{ model.device|default:'Unspecified' }}
+            {% if model.device.id %}
+                <a href="/microdevices/device/{{ model.device.id }}">{{ model.device }}</a>
+            {% else %}
+                Unspecified
+            {% endif %}
         </div>
     </div>
 
