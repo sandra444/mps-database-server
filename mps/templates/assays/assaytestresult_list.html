@@ -9,6 +9,7 @@
         <table id="results" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>Result Set ID</th>
                     <th>Study</th>
                     <th>Setup</th>
                     <th>Readout ID</th>
@@ -23,6 +24,7 @@
 
             <tfoot>
                 <tr>
+                    <th>Result Set ID</th>
                     <th>Study</th>
                     <th>Setup</th>
                     <th>Readout ID</th>
@@ -38,7 +40,8 @@
             <tbody>
             {% for result in object_list %}
                 <tr class="result" id={{ result.id }} name={{ result.id }}>
-                    <td><a href="{{ result.assay_result.id }}">{{ result.assay_result.assay_device_readout }}</a></td>
+                    <td><a href="{{ result.assay_result.id }}">{{ result.assay_result.id }}</a></td>
+                    <td><a href="{{ result.assay_result.assay_device_readout.id }}">{{ result.assay_result.assay_device_readout }}</a></td>
                     <td><a href="/assays/assaychipsetup/{{ result.assay_result.chip_setup.id }}">{{ result.assay_result.chip_setup }}</a></td>
                     <td>
                         <a href="/assays/assaychipreadout/{{ result.assay_name.readout_id.id }}">
