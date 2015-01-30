@@ -41,7 +41,7 @@
             {% for result in object_list %}
                 <tr class="result" id={{ result.id }} name={{ result.id }}>
                     <td><a href="{{ result.assay_result.id }}">{{ result.assay_result.id }}</a></td>
-                    <td><a href="{{ result.assay_result.assay_device_readout.id }}">{{ result.assay_result.assay_device_readout }}</a></td>
+                    <td><a href="/assays/organchipstudy/{{ result.assay_result.assay_device_readout.id }}">{{ result.assay_result.assay_device_readout }}</a></td>
                     <td><a href="/assays/assaychipsetup/{{ result.assay_result.chip_setup.id }}">{{ result.assay_result.chip_setup }}</a></td>
                     <td>
                         <a href="/assays/assaychipreadout/{{ result.assay_name.readout_id.id }}">
