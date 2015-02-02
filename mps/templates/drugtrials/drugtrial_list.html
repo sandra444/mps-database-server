@@ -69,7 +69,9 @@
         $(document).ready(function() {
             $('#drugtrials').DataTable({
                 "iDisplayLength": 50,
-                "deferRender": true
+                "deferRender": true,
+                // Initially sort on compound, not arbitrary ID
+                "order": [[ 1, "asc" ]]
                 // If one wants to display top and bottom
                 //"sDom": '<"wrapper"lfptip>'
             });

@@ -82,7 +82,9 @@
     <script>
         $(document).ready(function() {
             $('#results').DataTable( {
-                "iDisplayLength": 50
+                "iDisplayLength": 50,
+                // Initially sort on study not arbitrary ID
+                "order": [[ 1, "asc" ]]
             });
 
             // Swap positions of filter and length selection
