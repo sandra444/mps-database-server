@@ -13,8 +13,12 @@ def main(request):
     return render_to_response('index.html', c)
 
 def login(request):
+    next = request.GET.get('next', '')
     # Don't allow a user to try to log in twice
     if request.user.is_active:
+        # Redirect if already logged in and next in GET
+        if next:
+            return HttpResponseRedirect(next)
         return HttpResponseRedirect("/")
     c = RequestContext(request)
     c.update(csrf(request))
