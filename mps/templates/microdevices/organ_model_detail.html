@@ -5,7 +5,7 @@
     <legend><h1>{{ model.model_name }}</h1></legend>
 
     <div class="row">
-        <div class="col-sm-2 lead text-left">
+        <div class="col-sm-2 lead">
             <b>Center:</b>
         </div>
         <div class="col-sm-10 lead">
@@ -14,13 +14,13 @@
     </div>
 
     <div class="row">
-        <div class="col-sm-2 lead text-left">
+        <div class="col-sm-2 lead">
             <b>Organ:</b>
         </div>
         <div class="col-sm-4 lead">
             {{ model.organ|default:'Unspecified' }}
         </div>
-        <div class="col-sm-2 lead text-left">
+        <div class="col-sm-2 lead">
             <b>Device:</b>
         </div>
         <div class="col-sm-4 lead">
@@ -34,7 +34,7 @@
 
     {% if model.description %}
     <div class="row">
-        <div class="col-sm-2 lead text-left">
+        <div class="col-sm-2 lead">
             <b>Description:</b>
         </div>
         <div class="col-sm-10 lead">

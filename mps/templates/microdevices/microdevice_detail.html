@@ -10,13 +10,13 @@
     <legend><h1>{{ object.device_name }}</h1></legend>
 
     <div class="row">
-        <div class="col-sm-3 lead text-left">
+        <div class="col-sm-3 lead">
             <b>Center:</b>
         </div>
         <div class="col-sm-3 lead">
             {{ object.center|default:'Unspecified' }}
         </div>
-        <div class="col-sm-3 lead text-left">
+        <div class="col-sm-3 lead">
             <b>Manufacturer:</b>
         </div>
         <div class="col-sm-3 lead">
@@ -25,13 +25,13 @@
     </div>
 
     <div class="row">
-        <div class="col-sm-3 lead text-left">
+        <div class="col-sm-3 lead">
             <b>Organ:</b>
         </div>
         <div class="col-sm-3 lead">
             {{ object.organ|default:'Unspecified' }}
         </div>
-        <div class="col-sm-3 lead text-left">
+        <div class="col-sm-3 lead">
             <b>Version Catalog:</b>
         </div>
         <div class="col-sm-3 lead">
@@ -42,7 +42,7 @@
     {# Description #}
     {% if object.description %}
         <div class="row">
-            <div class="col-sm-3 lead text-left">
+            <div class="col-sm-3 lead">
                 <b>Description:</b>
             </div>
             <div class="col-sm-9 lead">
@@ -52,7 +52,7 @@
     {% endif %}
 
     <div class="row">
-        <div class="col-sm-3 lead text-left">
+        <div class="col-sm-3 lead">
             <b>Device Image:</b>
         </div>
         <div class="col-sm-9 lead">
@@ -65,7 +65,7 @@
     </div>
 
     <div class="row">
-        <div class="col-sm-3 lead text-left">
+        <div class="col-sm-3 lead">
             <b>Device Cross Section:</b>
         </div>
         <div class="col-sm-9 lead">
@@ -97,7 +97,7 @@
     <legend>Dimensions</legend>
 
     <div class="row">
-        <div class="col-sm-3 lead text-left">
+        <div class="col-sm-3 lead">
             <b>Dimensions:</b>
         </div>
         <div class="col-sm-9 lead">
@@ -110,13 +110,13 @@
     </div>
 
     <div class="row">
-        <div class="col-sm-3 lead text-left">
+        <div class="col-sm-3 lead">
             <b>Substrate Material:</b>
         </div>
         <div class="col-sm-3 lead">
             {{ object.substrate_material|default:'Unspecified' }}
         </div>
-        <div class="col-sm-3 lead text-left">
+        <div class="col-sm-3 lead">
             <b>Substrate Thickness:</b>
         </div>
         <div class="col-sm-3 lead">
@@ -125,7 +125,7 @@
     </div>
 
     <div class="row">
-        <div class="col-sm-3 lead text-left">
+        <div class="col-sm-3 lead">
             <b>Fluid Volume:</b>
         </div>
         <div class="col-sm-9 lead">
