@@ -9,6 +9,7 @@
         <table id="drugtrials" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>Drug Trial ID</th>
                     <th>Compound</th>
                     <th>Species</th>
                     <th>Trial Type</th>
@@ -22,6 +23,7 @@
 
             <tfoot>
                 <tr>
+                    <th>Drug Trial ID</th>
                     <th>Compound</th>
                     <th>Species</th>
                     <th>Trial Type</th>
@@ -38,6 +40,11 @@
                 <tr class="finding" id={{ finding.id }}>
                     <td>
                         <a href="/drugtrials/{{ finding.drug_trial.id }}">
+                            {{ finding.drug_trial.id }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/compounds/{{ finding.drug_trial.compound.id }}">
                             {{ finding.drug_trial.compound }}
                         </a>
                     </td>
