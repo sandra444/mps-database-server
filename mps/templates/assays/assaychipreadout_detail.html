@@ -17,7 +17,7 @@
     <legend><h1>Chip Readout ID# {{ object.id }}</h1></legend>
 
     {#    <div class="container-fluid">#}
-    {#        <div class="col-xs-12">#}
+    {#        <div class="col-sm-12">#}
     {#        <p><b>Setup:</b> {{ object.chip_setup }}</p>#}
     {#        <p><b>Time Unit:</b> {{ object.timeunit }}</p>#}
     {#        <p><b>Treatment Time Length:</b> {{ object.treatment_time_length }}</p>#}
@@ -32,10 +32,10 @@
     {#    </div>#}
 
     <div class="row">
-        <div class="col-xs-2 lead text-right">
+        <div class="col-sm-2 lead text-left">
             <b>Setup:</b>
         </div>
-        <div class="col-xs-10 lead">
+        <div class="col-sm-10 lead">
             <a href="/assays/assaychipsetup/{{ object.chip_setup.id }}">
                 {{ object.chip_setup }}
             </a>
@@ -43,10 +43,10 @@
     </div>
 
     <div class="row">
-        <div class="col-xs-2 lead text-right">
+        <div class="col-sm-2 lead text-left">
             <b>Time:</b>
         </div>
-        <div class="col-xs-10 lead">
+        <div class="col-sm-10 lead">
             {% if object.treatment_time_length != None %}
                 {{ object.treatment_time_length }} {{ object.timeunit }}
             {% else %}
@@ -56,20 +56,20 @@
     </div>
 
     <div class="row">
-        <div class="col-xs-2 lead text-right">
+        <div class="col-sm-2 lead text-left">
             <b>Start Date:</b>
         </div>
-        <div class="col-xs-10 lead">
+        <div class="col-sm-10 lead">
             {{ object.readout_start_time }}
         </div>
     </div>
 
     {% if object.notebook %}
         <div class="row">
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>Notebook:</b>
             </div>
-            <div class="col-xs-10 lead">
+            <div class="col-sm-10 lead">
                 {{ object.notebook }}, page {{ object.notebook_page }}
             </div>
         </div>
@@ -77,10 +77,10 @@
 
     {% if object.notes %}
         <div class="row">
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>Notes:</b>
             </div>
-            <div class="col-xs-10 lead">
+            <div class="col-sm-10 lead">
                 {{ object.notes }}
             </div>
         </div>

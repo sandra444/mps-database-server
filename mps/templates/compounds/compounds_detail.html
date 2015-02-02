@@ -9,59 +9,59 @@
 
     <legend><h1>{{ object.name}}</h1></legend>
 
-    <div class="col-xs-7">
+    <div class="col-sm-7">
         <div class="row">
-            <div class="col-xs-3 lead text-right">
+            <div class="col-sm-3 lead text-left">
                 <b>ChEMBL ID:</b>
             </div>
-            <div class="col-xs-9 lead">
+            <div class="col-sm-9 lead">
                 <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ object.chemblid }}">{{ object.chemblid }}</a>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-xs-3 lead text-right">
+            <div class="col-sm-3 lead text-left">
                 <b>InChI Key:</b>
             </div>
-            <div class="col-xs-9 lead">
+            <div class="col-sm-9 lead">
                 {{ object.inchikey }}
             </div>
         </div>
 
         <div class="row">
-            <div class="col-xs-3 lead text-right">
+            <div class="col-sm-3 lead text-left">
                 <b>Molecular Formula:</b>
             </div>
-            <div class="col-xs-9 lead">
+            <div class="col-sm-9 lead">
                 {{ object.molecular_formula }}
             </div>
         </div>
 
         <div class="row">
-            <div class="col-xs-3 lead text-right">
+            <div class="col-sm-3 lead text-left">
                 <b>Smiles:</b>
             </div>
-            <div class="col-xs-9 lead">
+            <div class="col-sm-9 lead">
                 {{ object.smiles }}
             </div>
         </div>
 
     </div>
 
-    <div class="col-xs-5">
+    <div class="col-sm-5">
         <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.chemblid }}">
     </div>
 
 {#    <div class="container-fluid">#}
 {##}
-{#        <div class="col-xs-6">#}
+{#        <div class="col-sm-6">#}
 {#            <p><b>ChEMBL ID:</b> <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ object.chemblid }}">{{ object.chemblid }}</a></p>#}
 {#            <p><b>InChI Key:</b> {{ object.inchikey }}</p>#}
 {#            <p><b>Smiles:</b> {{ object.smiles }}</p>#}
 {#            <p><b>Molecular Formula:</b> {{ object.molecular_formula }}</p>#}
 {#        </div>#}
 {##}
-{#        <div class="col-xs-6">#}
+{#        <div class="col-sm-6">#}
 {#            <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.chemblid }}">#}
 {#        </div>#}
 {##}
@@ -90,10 +90,10 @@
     <div id='drug_properties' class="collapse">
 
         <div class="row">
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>Known Drug:</b>
             </div>
-            <div class="col-xs-1 lead">
+            <div class="col-sm-1 lead">
                 {% if object.known_drug %}
                     <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
                 {% else %}
@@ -101,10 +101,10 @@
                 {% endif %}
             </div>
 
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>Med Chem Friendly:</b>
             </div>
-            <div class="col-xs-1 lead">
+            <div class="col-sm-1 lead">
                 {% if object.medchem_friendly %}
                     <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
                 {% else %}
@@ -112,10 +112,10 @@
                 {% endif %}
             </div>
 
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>Passes of Rule of 3:</b>
             </div>
-            <div class="col-xs-1 lead">
+            <div class="col-sm-1 lead">
                 {% if object.ro3_passes %}
                     <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
                 {% else %}
@@ -123,24 +123,24 @@
                 {% endif %}
             </div>
 
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>Rule of 5 Violations:</b>
             </div>
-            <div class="col-xs-1 lead">
+            <div class="col-sm-1 lead">
                 {{ object.ro5_violations }}
             </div>
         </div>
 
         <div class="row">
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>Molecular Species:</b>
             </div>
-            <div class="col-xs-10 lead">
+            <div class="col-sm-10 lead">
                 {{ object.species }}
             </div>
         </div>
 
-{#        <div class="col-xs-12">#}
+{#        <div class="col-sm-12">#}
 {#            <p><b>Known Drug:</b> {{ object.known_drug }}</p>#}
 {#            <p><b>Med Chem Friendly:</b> {{ object.medchem_friendly }}</p>#}
 {#            <p><b>Passes of Rule of 3:</b> {{ object.ro3_passes }}</p>#}
@@ -160,68 +160,68 @@
     <div id='molecular_properties' class="collapse">
 
         <div class="row">
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>Molecular Weight:</b>
             </div>
-            <div class="col-xs-10 lead">
+            <div class="col-sm-10 lead">
                 {{ object.molecular_weight }}
             </div>
         </div>
 
         <div class="row">
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>Rotatable Bonds:</b>
             </div>
-            <div class="col-xs-10 lead">
+            <div class="col-sm-10 lead">
                 {{ object.rotatable_bonds }}
             </div>
         </div>
 
         <div class="row">
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>Acidic pKa:</b>
             </div>
-            <div class="col-xs-10 lead">
+            <div class="col-sm-10 lead">
                 {{ object.acidic_pka }}
             </div>
         </div>
 
         <div class="row">
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>Basic pKa:</b>
             </div>
-            <div class="col-xs-10 lead">
+            <div class="col-sm-10 lead">
                 {{ object.basic_pka }}
             </div>
         </div>
 
         <div class="row">
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>LogP:</b>
             </div>
-            <div class="col-xs-10 lead">
+            <div class="col-sm-10 lead">
                 {{ object.logp }}
             </div>
         </div>
 
         <div class="row">
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>LogD:</b>
             </div>
-            <div class="col-xs-10 lead">
+            <div class="col-sm-10 lead">
                 {{ object.logd }}
             </div>
         </div>
 
         <div class="row">
-            <div class="col-xs-2 lead text-right">
+            <div class="col-sm-2 lead text-left">
                 <b>ALogP:</b>
             </div>
-            <div class="col-xs-10 lead">
+            <div class="col-sm-10 lead">
                 {{ object.alogp }}
             </div>
         </div>
-{#        <div class="col-xs-12">#}
+{#        <div class="col-sm-12">#}
 {#            <p><b>Molecular Weight:</b> {{ object.molecular_weight }}</p>#}
 {#            <p><b>Rotatable Bonds:</b> {{ object.rotatable_bonds }}</p>#}
 {#            <p><b>Acidic pKa:</b> {{ object.acidic_pka }}</p>#}
