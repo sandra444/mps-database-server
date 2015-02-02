@@ -5,105 +5,108 @@
 
     <legend><h1>Drug Trial ID #{{ trial.id }}</h1></legend>
 
-    <div class="col-sm-9">
-        <div class="row">
-            <div class="col-sm-4 lead text-right-responsive">
-                <b>Compound:</b>
+    <div class="row">
+
+        <div class="col-sm-9">
+            <div class="row">
+                <div class="col-sm-4 lead text-right-responsive">
+                    <b>Compound:</b>
+                </div>
+                <div class="col-sm-8 lead">
+                    <a href="/compounds/{{ trial.compound.id }}">{{ trial.compound }}</a>
+                </div>
             </div>
-            <div class="col-sm-8 lead">
-                <a href="/compounds/{{ trial.compound.id }}">{{ trial.compound }}</a>
+            <div class="row">
+                <div class="col-sm-4 lead text-right-responsive">
+                    <b>Trial Type:</b>
+                </div>
+                <div class="col-sm-8 lead">
+                    {{ trial.get_trial_type_display }}
+                </div>
             </div>
+            <div class="row">
+                <div class="col-sm-4 lead text-right-responsive">
+                    <b>Trial Sub Type:</b>
+                </div>
+                <div class="col-sm-8 lead">
+                    {{ trial.get_trial_sub_type_display }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 lead text-right-responsive">
+                    <b>Participant Species:</b>
+                </div>
+                <div class="col-sm-8 lead">
+                    {{ trial.species }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 lead text-right-responsive">
+                    <b>Source:</b>
+                </div>
+                <div class="col-sm-8 lead">
+                    {{ trial.source }}
+                </div>
+            </div>
+            {% if trial.source_link %}
+            <div class="row">
+                <div class="col-sm-4 lead text-right-responsive">
+                    <b>Source Link:</b>
+                </div>
+                <div class="col-sm-8">
+                    <a href="{{ trial.source_link }}">{{ trial.source_link }}</a>
+                </div>
+            </div>
+            {% endif %}
+            {% if trial.condition %}
+            <div class="row">
+                <div class="col-sm-4 lead text-right-responsive">
+                    <b>Condition:</b>
+                </div>
+                <div class="col-sm-8">
+                    {{ trial.condition }}
+                </div>
+            </div>
+            {# Entra break #}
+            <br>
+            {% endif %}
+            {% if trial.description %}
+            <div class="row">
+                <div class="col-sm-4 lead text-right-responsive">
+                    <b>Description:</b>
+                </div>
+                <div class="col-sm-8">
+                    {{ trial.description }}
+                </div>
+            </div>
+            {% endif %}
+            {% if trial.figure1 %}
+            <div class="row">
+                <div class="col-sm-4 lead text-right-responsive">
+                    <b>Figure 1:</b>
+                </div>
+                <div class="col-sm-8">
+                    <img src="/media/{{ trial.figure1 }}">
+                </div>
+            </div>
+            {% endif %}
+            {% if trial.figure2 %}
+            <div class="row">
+                <div class="col-sm-4 lead text-right-responsive">
+                    <b>Figure 2:</b>
+                </div>
+                <div class="col-sm-8">
+                    <img src="/media/{{ trial.figure2 }}">
+                </div>
+            </div>
+            {% endif %}
         </div>
-        <div class="row">
-            <div class="col-sm-4 lead text-right-responsive">
-                <b>Trial Type:</b>
-            </div>
-            <div class="col-sm-8 lead">
-                {{ trial.get_trial_type_display }}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-4 lead text-right-responsive">
-                <b>Trial Sub Type:</b>
-            </div>
-            <div class="col-sm-8 lead">
-                {{ trial.get_trial_sub_type_display }}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-4 lead text-right-responsive">
-                <b>Participant Species:</b>
-            </div>
-            <div class="col-sm-8 lead">
-                {{ trial.species }}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-4 lead text-right-responsive">
-                <b>Source:</b>
-            </div>
-            <div class="col-sm-8 lead">
-                {{ trial.source }}
-            </div>
-        </div>
-        {% if trial.source_link %}
-        <div class="row">
-            <div class="col-sm-4 lead text-right-responsive">
-                <b>Source Link:</b>
-            </div>
-            <div class="col-sm-8">
-                <a href="{{ trial.source_link }}">{{ trial.source_link }}</a>
-            </div>
-        </div>
-        {% endif %}
-        {% if trial.condition %}
-        <div class="row">
-            <div class="col-sm-4 lead text-right-responsive">
-                <b>Condition:</b>
-            </div>
-            <div class="col-sm-8">
-                {{ trial.condition }}
-            </div>
-        </div>
-        {# Entra break #}
-        <br>
-        {% endif %}
-        {% if trial.description %}
-        <div class="row">
-            <div class="col-sm-4 lead text-right-responsive">
-                <b>Description:</b>
-            </div>
-            <div class="col-sm-8">
-                {{ trial.description }}
-            </div>
-        </div>
-        {% endif %}
-        {% if trial.figure1 %}
-        <div class="row">
-            <div class="col-sm-4 lead text-right-responsive">
-                <b>Figure 1:</b>
-            </div>
-            <div class="col-sm-8">
-                <img src="/media/{{ trial.figure1 }}">
-            </div>
-        </div>
-        {% endif %}
-        {% if trial.figure2 %}
-        <div class="row">
-            <div class="col-sm-4 lead text-right-responsive">
-                <b>Figure 2:</b>
-            </div>
-            <div class="col-sm-8">
-                <img src="/media/{{ trial.figure2 }}">
-            </div>
-        </div>
-        {% endif %}
+
+         <div class="col-sm-3">
+            <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ trial.compound.chemblid }}">
+         </div>
+
     </div>
-
-     <div class="col-sm-3">
-        <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ trial.compound.chemblid }}">
-     </div>
-
 
     <legend><b>Findings</b></legend>
 
