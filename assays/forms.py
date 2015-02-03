@@ -12,6 +12,14 @@ class AssayResultForm(forms.ModelForm):
         }
         exclude = ('assay_device_readout','group',)
 
+    def clean(self):
+        super(forms.ModelForm, self).clean()
+
+        if AssayTestResult.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
+            raise forms.ValidationError('A readout for the given setup already exists!')
+
+        return self.cleaned_data
+
 class AssayChipReadoutForm(forms.ModelForm):
 
     another = forms.BooleanField(required=False)
@@ -23,6 +31,14 @@ class AssayChipReadoutForm(forms.ModelForm):
             'treatment_time_length': forms.NumberInput(attrs={'style':'width:174px;',}),
         }
         exclude = ('created_by','modified_by','signed_off_by','signed_off_date','locked', 'group')
+
+    def clean(self):
+        super(forms.ModelForm, self).clean()
+
+        if AssayChipReadout.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
+            raise forms.ValidationError('A readout for the given setup already exists!')
+
+        return self.cleaned_data
 
 class AssayChipSetupForm(forms.ModelForm):
 
