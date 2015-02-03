@@ -370,6 +370,15 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
+    # Redirect when there are no available setups
+    def render_to_response(self, context):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+        if not context.get('setups',''):
+            return redirect('/assays/'+str(study.id))
+
+        return super(AssayChipReadoutAdd, self).render_to_response(context)
+
 
 class AssayChipReadoutDetail(LoginRequiredMixin, DetailView):
     model = AssayChipReadout
@@ -449,6 +458,15 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+    # Redirect when there are no available setups
+    def render_to_response(self, context):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+        if not context.get('setups',''):
+            return redirect('/assays/'+str(study.id))
+
+        return super(AssayTestResultAdd, self).render_to_response(context)
 
 
 class AssayTestResultDetail(LoginRequiredMixin, DetailView):
