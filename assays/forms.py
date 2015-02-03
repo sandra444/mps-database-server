@@ -15,7 +15,7 @@ class AssayResultForm(forms.ModelForm):
     def clean(self):
         super(forms.ModelForm, self).clean()
 
-        if AssayTestResult.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
+        if 'chip_setup' in self.cleaned_data and AssayTestResult.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
             raise forms.ValidationError('A readout for the given setup already exists!')
 
         return self.cleaned_data
@@ -35,7 +35,7 @@ class AssayChipReadoutForm(forms.ModelForm):
     def clean(self):
         super(forms.ModelForm, self).clean()
 
-        if AssayChipReadout.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
+        if 'chip_setup' in self.cleaned_data and AssayChipReadout.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
             raise forms.ValidationError('A readout for the given setup already exists!')
 
         return self.cleaned_data
