@@ -414,10 +414,11 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        exclude_list = AssayTestResult.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'device',
             'compound', 'unit',
-            'created_by')
+            'created_by').exclude(id__in=list(set(exclude_list)))
 
         context = super(AssayTestResultAdd, self).get_context_data(**kwargs)
         if self.request.POST:
