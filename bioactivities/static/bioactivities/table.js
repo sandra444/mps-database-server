@@ -97,6 +97,15 @@ $(document).ready(function () {
                     //console.log(json);
                     table(json.data_json, json.table_link);
 //                    document.location.hash = "display";
+
+                    if (json.length > 5000) {
+                        $('#overflow').prop('hidden', false);
+                        $('#length').html('Displaying 5000 of ' + json.length);
+                    }
+                    else {
+                        $('#overflow').prop('hidden', true);
+                        $('#length').html('');
+                    }
                 }
                 else {
                     if (json.error) {
