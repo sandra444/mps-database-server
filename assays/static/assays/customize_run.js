@@ -53,7 +53,7 @@ $(document).ready(function () {
         }
 
         var selected = [];
-        for (var i=0; i<3; i++) {
+        for (var i=0; i<types.length; i++) {
             var val = types[i];
             if (val){
                 selected.push(val);
@@ -63,6 +63,7 @@ $(document).ready(function () {
         set_data();
     }
 
+    // Middleware token for AJAX call
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     var data = [
@@ -72,13 +73,18 @@ $(document).ready(function () {
         []
     ];
 
-    var types = ['','',''];
+    // Keep types same length as number of study types
+    var types = ['','','',''];
 
+    // Individual selectors for booleans
     var tox = $('#id_toxicity');
     var eff = $('#id_efficacy');
     var dm = $('#id_disease');
-    var type_selectors = [tox,eff,dm];
-    var fills = ['TOX','EFF','DM'];
+    var cc = $('#id_cell_characterization');
+    // Array of selectors
+    var type_selectors = [tox,eff,dm,cc];
+    // Array of abbreviations
+    var fills = ['TOX','EFF','DM','CC'];
 
     var date = $('#id_start_date');
     var center = $('#id_center_id');
@@ -108,8 +114,14 @@ $(document).ready(function () {
         get_types();
     });
 
+    cc.change(function (evt) {
+        get_types();
+    });
+
     date.data("value", date.val());
 
+
+    // Set interval to regularly check for new date
     setInterval(function () {
         var date_data = date.data("value"),
             val = date.val();
