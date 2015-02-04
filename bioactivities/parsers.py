@@ -856,8 +856,8 @@ def table(request):
         return {'error': 'Select at least one bioactivity.'}
 
     # throw error for very large queries
-    if len(desired_bioactivities) > 285 or len(desired_targets) > 200 or 'Rattus norvegicus' in desired_targets and len(desired_compounds) > 15:
-        return {'error': 'Your query is very large, please make fewer selections.'}
+    if 'Rattus norvegicus' in desired_targets and len(desired_compounds) >= 15:
+        return {'error': 'Many bioactivities are listed with Rattus norvegicus as a target, either deselect it or choose fewer than 15 compounds.'}
 
     # Filter based on compound
     q = Bioactivity.objects.filter(compound__name__in=desired_compounds)
