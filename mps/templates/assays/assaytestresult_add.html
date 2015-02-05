@@ -171,6 +171,12 @@
             <tbody>
                 {% for result in formset %}
                     <tr class="inline" id="results-{{ forloop.counter0 }}">
+                        {# Hidden input for Update (need id to associate) #}
+                        {% if result.id.value %}
+                        <td class="original" hidden>
+                            <input type="hidden" id="id_assayresult_set-{{ forloop.counter0 }}-id" name="assayresult_set-{{ forloop.counter0 }}-id" value="{{ result.id.value }}">
+                        </td>
+                        {% endif %}
                         <td>
                             <select id="id_assayresult_set-{{ forloop.counter0 }}-assay_name" name="assayresult_set-{{ forloop.counter0 }}-assay_name">
                                 <option value="">---------</option>

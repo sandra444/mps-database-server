@@ -105,7 +105,8 @@
         {% endif %}
 
         <legend><h2>Chip Results
-            {% if readouts.count == 0 or setups.count == results.count%}
+            {# Later should add condition for when not enough readouts or setups #}
+            {% if readouts.count == 0 %}
                 <div hidden id="result_alert" class="alert alert-warning" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Warning:</span>
@@ -147,7 +148,7 @@
             <tbody>
             {% for result in results %}
                 <tr class="result" id={{ result.id }} name={{ result.id }}>
-                    <td><a href="/assays/assaytestresult/{{ result.assay_result.id }}">{{ result.assay_result.id }}</a></td>
+                    <td><a href="assaytestresult/{{ result.assay_result.id }}">{{ result.assay_result.id }}</a></td>
                     <td><a href="/assays/assaychipsetup/{{ result.assay_result.chip_setup.id }}">{{ result.assay_result.chip_setup }}</a></td>
                     <td>
                         <a href="/assays/assaychipreadout/{{ result.assay_name.readout_id.id }}">
