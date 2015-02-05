@@ -304,6 +304,66 @@ class AssayChipSetupDetail(LoginRequiredMixin, DetailView):
         return self.render_to_response(context)
 
 
+class AssayChipSetupUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
+    model = AssayChipSetup
+    template_name = 'assays/assaychipsetup_add.html'
+    form_class = AssayChipSetupForm
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+
+        groups = self.request.user.groups.values_list('id', flat=True)
+        cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
+            'cell_type',
+            'supplier',
+        ).select_related('cell_type__cell_subtype')
+
+        # Render form
+        formset = AssayChipCellsFormset(instance=self.object)
+        return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                cellsamples = cellsamples))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        form = self.form_class(self.request.POST, instance=self.object)
+        formset = AssayChipCellsFormset(self.request.POST, instance=form.instance)
+
+        # TODO refactor redundant code here; testing for now
+
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+        groups = self.request.user.groups.values_list('id', flat=True)
+        cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
+            'cell_type',
+            'supplier',
+        ).select_related('cell_type__cell_subtype')
+
+        form.instance.assay_device_readout = study
+        form.instance.group = study.group
+        form.instance.restricted = study.restricted
+
+        if form.is_valid() and formset.is_valid():
+            self.object = form.save()
+            # TODO maintain original created by
+            # Just change created by as well for now
+            self.object.modified_by = self.object.created_by = self.request.user
+            # Save overall test result
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                cellsamples = cellsamples))
+
+
 # Class based views for readouts
 class AssayChipReadoutList(LoginRequiredMixin, ListView):
     model = AssayChipReadout

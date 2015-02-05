@@ -10,7 +10,7 @@ urlpatterns = patterns('',
     # The main page for a study
     url(r'^assays/(?P<study_id>[0-9]+)/$', StudyIndex.as_view(), name='study_index'),
     # # Change pages for respective models
-    # url(r'^assays/(?P<study_id>[0-9]+)/assaychipsetup/(?P<pk>[0-9]+)/$', XXX),
+    url(r'^assays/(?P<study_id>[0-9]+)/assaychipsetup/(?P<pk>[0-9]+)/$', AssayChipSetupUpdate.as_view(), name='setup_update'),
     url(r'^assays/(?P<study_id>[0-9]+)/assaychipreadout/(?P<pk>[0-9]+)/$', AssayChipReadoutUpdate.as_view(), name='readout_update'),
     url(r'^assays/(?P<study_id>[0-9]+)/assaytestresult/(?P<pk>[0-9]+)/$', AssayTestResultUpdate.as_view(), name='result_update'),
     # # Add pages for respective models
