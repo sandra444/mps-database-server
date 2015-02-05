@@ -276,7 +276,7 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
-        if formset.is_valid():
+        if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
@@ -352,7 +352,7 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
-        if formset.is_valid():
+        if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
@@ -448,7 +448,7 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
-        if formset.is_valid():
+        if form.is_valid() and formset.is_valid():
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
