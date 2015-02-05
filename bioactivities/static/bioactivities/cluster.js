@@ -117,9 +117,9 @@ $(document).ready(function () {
                     $('#compound').prepend(box);
                 }
                 // Break at 10
-                if (i >= 9){
-                    break;
-                }
+//                if (i >= 9){
+//                    break;
+//                }
             }
         });
 
