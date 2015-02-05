@@ -305,7 +305,7 @@ class AssayTestResult(RestrictedModel):
     assay_device_readout = models.ForeignKey('assays.AssayRun',
                                              verbose_name='Organ Chip Study')
     chip_setup = models.ForeignKey('assays.AssayChipSetup',
-                                             verbose_name='Chip Setup')
+                                             verbose_name='Chip Setup', unique=True)
     def __unicode__(self):
         return u'{}:{}'.format(self.assay_device_readout,self.chip_setup)
 
@@ -556,7 +556,7 @@ class AssayChipReadout(RestrictedModel):
         verbose_name = 'Chip Readout'
         ordering = ('chip_setup',)
 
-    chip_setup = models.ForeignKey(AssayChipSetup, null=True)
+    chip_setup = models.ForeignKey(AssayChipSetup, null=True, unique=True)
 
     timeunit = models.ForeignKey(TimeUnits, default=3)
     treatment_time_length = models.FloatField(verbose_name='Assay Treatment Duration',
