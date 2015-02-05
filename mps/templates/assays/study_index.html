@@ -90,7 +90,7 @@
             <tbody>
             {% for readout in readouts %}
                 <tr id={{ readout.id }} name={{ readout.id }}>
-                    <td><a href="/assays/assaychipreadout/{{ readout.id }}">{{ readout.id }}</a></td>
+                    <td><a href="assaychipreadout/{{ readout.id }}">{{ readout.id }}</a></td>
                     <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}">{{ readout.chip_setup }}</a></td>
                     <td>{{ readout.readout_start_time }}</td>
                     <td>{{ readout.created_by }}</td>

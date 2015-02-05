@@ -229,6 +229,12 @@
         <tbody>
             {% for assay in formset %}
                 <tr class="inline" id="assay-{{ forloop.counter0 }}">
+                    {# Hidden input for Update (need id to associate) #}
+                    {% if assay.id.value %}
+                    <td class="original" hidden>
+                        <input id="id_assaychipreadoutassay_set-{{ forloop.counter0 }}-id" name="assaychipreadoutassay_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ assay.id.value }}">
+                    </td>
+                    {% endif %}
                     <td>{{ assay.assay_id }}</td>
                     <td>{{ assay.object_type }}</td>
                     <td>{{ assay.reader_id }}</td>
