@@ -9,6 +9,8 @@ urlpatterns = patterns('',
     url(r'^assays/group_index/$', GroupIndex.as_view(), name='group_index'),
     # The main page for a study
     url(r'^assays/(?P<study_id>[0-9]+)/$', StudyIndex.as_view(), name='study_index'),
+    # Update page for studies
+    url(r'^assays/(?P<pk>[0-9]+)/update/$', AssayRunUpdate.as_view(), name='study-update'),
     # # Change pages for respective models
     url(r'^assays/(?P<study_id>[0-9]+)/assaychipsetup/(?P<pk>[0-9]+)/$', AssayChipSetupUpdate.as_view(), name='setup_update'),
     url(r'^assays/(?P<study_id>[0-9]+)/assaychipreadout/(?P<pk>[0-9]+)/$', AssayChipReadoutUpdate.as_view(), name='readout_update'),

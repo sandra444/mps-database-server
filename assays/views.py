@@ -223,6 +223,53 @@ class AssayRunDetail(LoginRequiredMixin, DetailView):
         return self.render_to_response(context)
 
 
+class AssayRunUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
+    model = AssayRun
+    template_name = 'assays/assayrun_add.html'
+    form_class = AssayRunForm
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+
+        # Get group selection possibilities
+        groups = self.request.user.groups.filter(
+            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
+
+        return self.render_to_response(
+            self.get_context_data(form=form,
+                                  groups=groups))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        form = self.form_class(self.request.POST, instance=self.object)
+
+        # TODO refactor redundant code here; testing for now
+
+        # Get group selection possibilities
+        groups = self.request.user.groups.filter(
+            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
+
+
+        if form.is_valid():
+            url_add = ''
+            if self.request.GET.get('setup', ''):
+                url_add = '?setup=1'
+            self.object = form.save()
+            # TODO maintain original created by
+            # Just change created by as well for now
+            self.object.modified_by = self.object.created_by = self.request.user
+            # Save study
+            self.object.save()
+            return redirect(self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(
+            self.get_context_data(form=form,
+                                  groups=groups))
+
+
 # Class based view for chip setups
 class AssayChipSetupList(LoginRequiredMixin, ListView):
     model = AssayChipSetup
@@ -304,8 +351,6 @@ class AssayChipSetupDetail(LoginRequiredMixin, DetailView):
         return self.render_to_response(context)
 
 
-# TODO add handler for GET setup (the initial workflow page thing)
-# TODO hide "Save and add another" when updating Setups and readouts
 class AssayChipSetupUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
@@ -346,7 +391,7 @@ class AssayChipSetupUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
             'supplier',
         ).select_related('cell_type__cell_subtype')
 
-        form.instance.assay_device_readout = study
+        form.instance.assay_run_id = study
         form.instance.group = study.group
         form.instance.restricted = study.restricted
 
@@ -358,7 +403,7 @@ class AssayChipSetupUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
             # TODO maintain original created by
             # Just change created by as well for now
             self.object.modified_by = self.object.created_by = self.request.user
-            # Save overall test result
+            # Save overall setup result
             self.object.save()
             formset.instance = self.object
             formset.save()
@@ -500,7 +545,6 @@ class AssayChipReadoutUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
             'compound', 'unit',
             'created_by').exclude(id__in=list(set(exclude_list))) | AssayChipSetup.objects.filter(pk=self.object.chip_setup.id)
 
-        form.instance.assay_device_readout = study
         form.instance.group = study.group
         form.instance.restricted = study.restricted
 
@@ -509,7 +553,7 @@ class AssayChipReadoutUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
             # TODO maintain original created by
             # Just change created by as well for now
             self.object.modified_by = self.object.created_by = self.request.user
-            # Save overall test result
+            # Save overall readout result
             self.object.save()
             formset.instance = self.object
             formset.save()
