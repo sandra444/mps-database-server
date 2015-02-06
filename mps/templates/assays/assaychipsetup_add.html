@@ -268,7 +268,7 @@
                     </td>
                     {% endif %}
                     <td><input readonly=true id="id_assaychipcells_set-{{ forloop.counter0 }}-cell_sample"
-                               name="assaychipcells_set-{{ forloop.counter0 }}-cell_sample" size="5" value={{ cell.cell_sample.value }}>
+                               name="assaychipcells_set-{{ forloop.counter0 }}-cell_sample" size="5" value={{ cell.cell_sample.value|default_if_none:'' }}>
                         <span id='search-{{ forloop.counter0 }}-' class="glyphicon glyphicon-search" aria-hidden="true"></span>
                     </td>
                     <td>{{ cell.cell_biosensor }}</td>

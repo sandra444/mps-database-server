@@ -256,8 +256,8 @@ class AssayRunUpdate(LoginRequiredMixin, UpdateView):
         groups = self.request.user.groups.filter(
             ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
 
-
         if form.is_valid():
+            # Add to url if setup only
             url_add = ''
             if self.request.GET.get('setup', ''):
                 url_add = '?setup=1'
