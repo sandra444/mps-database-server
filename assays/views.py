@@ -612,7 +612,7 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     form_class = AssayResultForm
 
     def get_context_data(self, **kwargs):
-        study = self.object.assay_device_readout
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         exclude_list = AssayTestResult.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'device',
@@ -712,7 +712,7 @@ class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
 
         # TODO refactor redundant code here; testing for now
 
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        study = self.object.assay_device_readout
         exclude_list = AssayTestResult.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
 
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
