@@ -223,7 +223,7 @@ class AssayRunDetail(LoginRequiredMixin, DetailView):
         return self.render_to_response(context)
 
 
-class AssayRunUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
+class AssayRunUpdate(LoginRequiredMixin, UpdateView):
     model = AssayRun
     template_name = 'assays/assayrun_add.html'
     form_class = AssayRunForm
@@ -232,6 +232,10 @@ class AssayRunUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
         self.object = self.get_object()
         form_class = self.get_form_class()
         form = self.get_form(form_class)
+
+        # Deny access if not the proper group
+        if not has_group(request.user, self.object.group):
+            raise PermissionDenied()
 
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
@@ -351,7 +355,7 @@ class AssayChipSetupDetail(LoginRequiredMixin, DetailView):
         return self.render_to_response(context)
 
 
-class AssayChipSetupUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
+class AssayChipSetupUpdate(LoginRequiredMixin, UpdateView):
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
     form_class = AssayChipSetupForm
@@ -360,6 +364,11 @@ class AssayChipSetupUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
         self.object = self.get_object()
         form_class = self.get_form_class()
         form = self.get_form(form_class)
+
+        # Deny access to those without correct group
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        if not has_group(request.user, study.group):
+            raise PermissionDenied()
 
         groups = self.request.user.groups.values_list('id', flat=True)
         cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
@@ -503,7 +512,7 @@ class AssayChipReadoutDetail(LoginRequiredMixin, DetailView):
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
 
-class AssayChipReadoutUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
+class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
     model = AssayChipReadout
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
@@ -513,7 +522,11 @@ class AssayChipReadoutUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
 
+        # Deny access to those without correct group
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        if not has_group(request.user, study.group):
+            raise PermissionDenied()
+
         exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
 
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
@@ -655,7 +668,7 @@ class AssayTestResultDetail(LoginRequiredMixin, DetailView):
         return self.render_to_response(context)
 
 
-class AssayTestResultUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
+class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
     model = AssayTestResult
     template_name = 'assays/assaytestresult_add.html'
     form_class = AssayResultForm
@@ -667,7 +680,11 @@ class AssayTestResultUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
 
+        # Deny access to those without correct group
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        if not has_group(request.user, study.group):
+            raise PermissionDenied()
+
         exclude_list = AssayTestResult.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
 
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
