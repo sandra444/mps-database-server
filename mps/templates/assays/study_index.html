@@ -40,7 +40,7 @@
             <tbody>
             {% for setup in setups %}
                 <tr id={{ setup.id }} name={{ setup.id }}>
-                    <td><a href="/assays/assaychipsetup/{{ setup.id }}/update/{{ setup_only }}">{{ setup.assay_chip_id }}</a></td>
+                    <td><a href="/assays/assaychipsetup/{{ setup.id }}/update{{ setup_only }}">{{ setup.assay_chip_id }}</a></td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.device }}</td>
                     <td>{{ setup.chip_test_type }}</td>

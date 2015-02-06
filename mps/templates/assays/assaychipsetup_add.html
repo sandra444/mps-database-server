@@ -264,7 +264,7 @@
                     {# Hidden input for Update (need id to associate) #}
                     {% if cell.id.value %}
                     <td class="original" hidden>
-                        <input id="id_assaychipcells_set-0-id" name="assaychipcells_set-0-id" type="hidden" value="{{ cell.id.value }}">
+                        <input id="id_assaychipcells_set-{{ forloop.counter0 }}-id" name="assaychipcells_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ cell.id.value }}">
                     </td>
                     {% endif %}
                     <td><input readonly=true id="id_assaychipcells_set-{{ forloop.counter0 }}-cell_sample"
