@@ -403,13 +403,15 @@ class AssayChipSetupUpdate(LoginRequiredMixin, UpdateView):
 
         form.instance.assay_run_id = study
         form.instance.group = study.group
-        form.instance.restricted = study.restricted
+        # form.instance.restricted = study.restricted
 
         if form.is_valid() and formset.is_valid():
             url_add = ''
             if self.request.GET.get('setup', ''):
                 url_add = '?setup=1'
             self.object = form.save()
+            # Set restricted
+            self.object.restricted = study.restricted
             # TODO maintain original created by
             # Just change created by as well for now
             self.object.modified_by = self.object.created_by = self.request.user
@@ -562,10 +564,12 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
             'created_by').exclude(id__in=list(set(exclude_list))) | AssayChipSetup.objects.filter(pk=self.object.chip_setup.id)
 
         form.instance.group = study.group
-        form.instance.restricted = study.restricted
+        # form.instance.restricted = study.restricted
 
         if form.is_valid() and formset.is_valid():
             self.object = form.save()
+            # Set restricted
+            self.object.restricted = study.restricted
             # TODO maintain original created by
             # Just change created by as well for now
             self.object.modified_by = self.object.created_by = self.request.user
@@ -722,10 +726,13 @@ class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
 
         form.instance.assay_device_readout = study
         form.instance.group = study.group
-        form.instance.restricted = study.restricted
+        # Setting restricted in the form does not work for some reason
+        # form.instance.restricted = study.restricted
 
         if form.is_valid() and formset.is_valid():
             self.object = form.save()
+            # Set restricted
+            self.object.restricted = study.restricted
             # TODO maintain original created by
             # Just change created by as well for now
             self.object.modified_by = self.object.created_by = self.request.user
