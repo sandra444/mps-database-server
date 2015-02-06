@@ -4,7 +4,7 @@
 {% block content %}
 
     <div style="padding-bottom: 50px">
-        <legend><h1>{{ title }}    <a href="/assays/organchipstudy/add{{ setup }}" class="btn btn-success" role="button">Add Study</a></h1></legend>
+        <legend><h1>{{ title }}    <a href="/assays/organchipstudy/add{{ setup_only }}" class="btn btn-success" role="button">Add Study</a></h1></legend>
 
         <table id="studies" class="display" cellspacing="0" width="100%">
             <thead>
@@ -30,7 +30,7 @@
             <tbody>
             {% for study in object_list %}
                 <tr class="compound" id={{ study.id }} name={{ study.id }}>
-                    <td><a href="/assays/{{ study.id }}{{ setup }}">{{ study.assay_run_id }}</a></td>
+                    <td><a href="/assays/{{ study.id }}{{ setup_only }}">{{ study.assay_run_id }}</a></td>
                     <td>{{ study.study_types }}</td>
                     <td>{{ study.start_date }}</td>
                     <td>{{ study.description }}</td>

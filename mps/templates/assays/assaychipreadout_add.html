@@ -32,7 +32,9 @@
     <h1>
         Add Chip Readout
         <button type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
-        <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Add Another</button>
+        {% if not update %}
+            <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Add Another</button>
+        {% endif %}
     </h1>
 
     {% if form.another.value and form.is_valid and formset.is_valid %}

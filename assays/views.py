@@ -60,9 +60,9 @@ class UserIndex(LoginRequiredMixin, ListView):
         context['title'] = 'User Study Index'
         # Check if this is setup only; if so add to add respective URLS
         if request.GET.get('setup', ''):
-            context['setup'] = '/?setup=1'
+            context['setup_only'] = '/?setup=1'
         else:
-            context['setup'] = ''
+            context['setup_only'] = ''
         return self.render_to_response(context)
 
 
@@ -92,9 +92,9 @@ class GroupIndex(LoginRequiredMixin, ListView):
         context['title'] = 'Group Study Index'
         # Check if this is setup only; if so add to add respective URLS
         if request.GET.get('setup', ''):
-            context['setup'] = '/?setup=1'
+            context['setup_only'] = '/?setup=1'
         else:
-            context['setup'] = ''
+            context['setup_only'] = ''
         return self.render_to_response(context)
 
 
@@ -134,9 +134,9 @@ class StudyIndex(LoginRequiredMixin, ListView):
 
         # Check if this is setup only; if so add to add respective URLS
         if request.GET.get('setup', ''):
-            context['setup'] = '/?setup=1'
+            context['setup_only'] = '/?setup=1'
         else:
-            context['setup'] = ''
+            context['setup_only'] = ''
         return self.render_to_response(context)
 
 
@@ -162,9 +162,9 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
         context['groups'] = groups
         # Check if this is setup only; if so add to add respective URLS
         # if self.request.GET.get('setup', ''):
-        # context['setup'] = '/?setup=1'
+        # context['setup_only'] = '/?setup=1'
         # else:
-        #     context['setup'] = ''
+        #     context['setup_only'] = ''
         return context
 
     # Test form validity
@@ -304,6 +304,8 @@ class AssayChipSetupDetail(LoginRequiredMixin, DetailView):
         return self.render_to_response(context)
 
 
+# TODO add handler for GET setup (the initial workflow page thing)
+# TODO hide "Save and add another" when updating Setups and readouts
 class AssayChipSetupUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
@@ -325,7 +327,8 @@ class AssayChipSetupUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
         return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
-                                cellsamples = cellsamples))
+                                cellsamples = cellsamples,
+                                update = True))
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -348,6 +351,9 @@ class AssayChipSetupUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
         form.instance.restricted = study.restricted
 
         if form.is_valid() and formset.is_valid():
+            url_add = ''
+            if self.request.GET.get('setup', ''):
+                url_add = '?setup=1'
             self.object = form.save()
             # TODO maintain original created by
             # Just change created by as well for now
@@ -356,12 +362,13 @@ class AssayChipSetupUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
             self.object.save()
             formset.instance = self.object
             formset.save()
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            return redirect(self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
-                                cellsamples = cellsamples))
+                                cellsamples = cellsamples,
+                                update = True))
 
 
 # Class based views for readouts
@@ -474,7 +481,8 @@ class AssayChipReadoutUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
         return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
-                                setups = setups))
+                                setups = setups,
+                                update=True))
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -510,7 +518,8 @@ class AssayChipReadoutUpdate(LoginRequiredMixin,StudyAccessMixin, UpdateView):
             return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
-                                setups = setups))
+                                setups = setups,
+                                update=True))
 
 
 # Class-based views for studies
