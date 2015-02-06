@@ -12,9 +12,9 @@ urlpatterns = patterns('',
     # Update page for studies
     url(r'^assays/(?P<pk>[0-9]+)/update/$', AssayRunUpdate.as_view(), name='study-update'),
     # # Change pages for respective models
-    url(r'^assays/(?P<study_id>[0-9]+)/assaychipsetup/(?P<pk>[0-9]+)/$', AssayChipSetupUpdate.as_view(), name='setup_update'),
-    url(r'^assays/(?P<study_id>[0-9]+)/assaychipreadout/(?P<pk>[0-9]+)/$', AssayChipReadoutUpdate.as_view(), name='readout_update'),
-    url(r'^assays/(?P<study_id>[0-9]+)/assaytestresult/(?P<pk>[0-9]+)/$', AssayTestResultUpdate.as_view(), name='result_update'),
+    url(r'^assays/assaychipsetup/(?P<pk>[0-9]+)/update/$', AssayChipSetupUpdate.as_view(), name='setup_update'),
+    url(r'^assays/assaychipreadout/(?P<pk>[0-9]+)/update/$', AssayChipReadoutUpdate.as_view(), name='readout_update'),
+    url(r'^assays/assaytestresult/(?P<pk>[0-9]+)/update/$', AssayTestResultUpdate.as_view(), name='result_update'),
     # # Add pages for respective models
     url(r'^assays/(?P<study_id>[0-9]+)/assaychipsetup/add/$', AssayChipSetupAdd.as_view(), name='setup_add'),
     url(r'^assays/(?P<study_id>[0-9]+)/assaychipreadout/add/$', AssayChipReadoutAdd.as_view(), name='readout_add'),

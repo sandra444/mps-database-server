@@ -365,8 +365,9 @@ class AssayChipSetupUpdate(LoginRequiredMixin, UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
 
+        study = self.object.assay_run_id
+
         # Deny access to those without correct group
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         if not has_group(request.user, study.group):
             raise PermissionDenied()
 
@@ -392,7 +393,7 @@ class AssayChipSetupUpdate(LoginRequiredMixin, UpdateView):
 
         # TODO refactor redundant code here; testing for now
 
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        study = self.object.assay_run_id
 
         groups = self.request.user.groups.values_list('id', flat=True)
         cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
@@ -522,8 +523,10 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
 
+        # Get study
+        study = self.object.chip_setup.assay_run_id
+
         # Deny access to those without correct group
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         if not has_group(request.user, study.group):
             raise PermissionDenied()
 
@@ -550,7 +553,7 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
 
         # TODO refactor redundant code here; testing for now
 
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        study = self.object.chip_setup.assay_run_id
         exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
 
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
@@ -609,7 +612,7 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
     form_class = AssayResultForm
 
     def get_context_data(self, **kwargs):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        study = self.object.assay_device_readout
         exclude_list = AssayTestResult.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'device',
@@ -680,8 +683,10 @@ class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
 
+        # 404 if respective study does not exist
+        study = self.object.assay_device_readout
+
         # Deny access to those without correct group
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         if not has_group(request.user, study.group):
             raise PermissionDenied()
 
