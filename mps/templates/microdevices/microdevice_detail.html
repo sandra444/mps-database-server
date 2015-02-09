@@ -120,7 +120,12 @@
             <b>Substrate Thickness:</b>
         </div>
         <div class="col-sm-3 lead">
-            {{ object.substrate_thickness|default:'Unspecified' }}
+            {% if object.substrate_thickness %}
+                {# Specify that substrate thickness is in micrometers #}
+                {{ object.substrate_thickness }} µm
+            {% else %}
+                Unspecified
+            {% endif %}
         </div>
     </div>
 
