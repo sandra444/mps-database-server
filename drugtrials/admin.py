@@ -104,11 +104,11 @@ admin.site.register(TrialSource, TrialSourceAdmin)
 class FindingResultInline(admin.TabularInline):
     model = FindingResult
     form = FindingResultForm
+    raw_id_fields = ('finding_name',)
     verbose_name = 'Organ Finding'
     verbose_name_plural = 'Organ Findings'
-    fields = (('finding_name', 'finding_time', 'time_units',
-               'result', 'severity', 'percent_min', 'percent_max', 'value', 'value_units',
-               'descriptor',),)
+    fields = ('finding_name', 'descriptor', 'finding_time', 'time_units',
+               'result', 'severity', 'frequency', 'value', 'value_units',)
     extra = 0
 
     class Media(object):

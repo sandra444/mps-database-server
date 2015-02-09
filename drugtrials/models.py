@@ -290,6 +290,12 @@ class TestResult(models.Model):
     def __unicode__(self):
         return u''
 
+FREQUENCIES = (
+    ('>= 10%','>= 10% - Very Common'), ('1 - < 10%', '>= 1% & < 10% - Common'),
+    ('0.1 - < 1%', '>= 0.1% & < 1% - Uncommon'), ('0.01 - < 0.1%', '>= 0.01% & < 0.1% - Rare'),
+    ('< 0.01%', '< 0.01% - Very Rare')
+)
+
 
 class FindingResult(models.Model):
 
@@ -314,13 +320,20 @@ class FindingResult(models.Model):
                                 blank=True,
                                 null=True)
 
+    # May drop percent_min later, hide for now
     percent_min = models.FloatField(blank=True,
                                     null=True,
                                     verbose_name='Min Affected (% Population)')
 
+    # May drop percent_max later, hide for now
     percent_max = models.FloatField(blank=True,
                                     null=True,
                                     verbose_name='Max Affected (% Population)')
+
+    frequency = models.CharField(choices=FREQUENCIES,
+                                 max_length=25,
+                                 blank=True,
+                                 null=True,)
 
     descriptor = models.ForeignKey(ResultDescriptor, blank=True, null=True)
 

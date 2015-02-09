@@ -9,12 +9,15 @@
         <table id="drugtrials" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>Drug Trial ID</th>
                     <th>Compound</th>
                     <th>Species</th>
                     <th>Trial Type</th>
                     <th>Finding</th>
+                    <th>Descriptor</th>
                     <th>+/-</th>
-                    <th>Max Affected</th>
+{#                    <th>Max Affected</th>#}
+                    <th>Frequency</th>
                     <th>Value</th>
                     <th>Value Units</th>
                 </tr>
@@ -22,12 +25,15 @@
 
             <tfoot>
                 <tr>
+                    <th>Drug Trial ID</th>
                     <th>Compound</th>
                     <th>Species</th>
                     <th>Trial Type</th>
                     <th>Finding</th>
+                    <th>Descriptor</th>
                     <th>+/-</th>
-                    <th>Max Affected</th>
+{#                    <th>Max Affected</th>#}
+                    <th>Frequency</th>
                     <th>Value</th>
                     <th>Value Units</th>
                 </tr>
@@ -38,14 +44,21 @@
                 <tr class="finding" id={{ finding.id }}>
                     <td>
                         <a href="/drugtrials/{{ finding.drug_trial.id }}">
+                            {{ finding.drug_trial.id }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/compounds/{{ finding.drug_trial.compound.id }}">
                             {{ finding.drug_trial.compound }}
                         </a>
                     </td>
                     <td>{{ finding.drug_trial.species }}</td>
                     <td>{{ finding.drug_trial.get_trial_type_display }}</td>
                     <td>{{ finding.finding_name }}</td>
+                    <td>{{ finding.descriptor|default_if_none:"" }}</td>
                     <td>{{ finding.get_result_display }}</td>
-                    <td>{{ finding.percent_max|default_if_none:"" }}</td>
+{#                    <td>{{ finding.percent_max|default_if_none:"" }}</td>#}
+                    <td>{{ finding.frequency|default_if_none:"" }}</td>
                     <td>{{ finding.value|default_if_none:"" }}</td>
                     <td>{{ finding.value_units|default_if_none:"" }}</td>
 
@@ -62,7 +75,9 @@
         $(document).ready(function() {
             $('#drugtrials').DataTable({
                 "iDisplayLength": 50,
-                "deferRender": true
+                "deferRender": true,
+                // Initially sort on compound, not arbitrary ID
+                "order": [[ 1, "asc" ], [ 0, "asc"]]
                 // If one wants to display top and bottom
                 //"sDom": '<"wrapper"lfptip>'
             });
