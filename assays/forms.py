@@ -91,3 +91,17 @@ class TestResultInlineFormset(forms.models.BaseInlineFormSet):
 
     class Meta(object):
         model = AssayResult
+
+    def clean(self):
+        forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
+
+        # Number of results
+        results = 0
+        for form in forms_data:
+            try:
+                if form.cleaned_data:
+                    results += 1
+            except AttributeError:
+                pass
+        if results < 1:
+            raise forms.ValidationError('You must have at least one result.')
