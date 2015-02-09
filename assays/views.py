@@ -566,9 +566,6 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
             self.object = form.save()
             # Set restricted
             self.object.restricted = study.restricted
-            # Set File
-            if formset.__dict__.get('files','').get('file',''):
-                self.object.file = formset.__dict__.get('files','').get('file','')
             # TODO maintain original created by
             # Just change created by as well for now
             self.object.modified_by = self.object.created_by = self.request.user
