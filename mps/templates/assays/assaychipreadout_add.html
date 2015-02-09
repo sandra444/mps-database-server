@@ -27,6 +27,11 @@
     });
 </script>
 
+{# The presence of this hidden div tells the inline add script to change its delete behavior #}
+{% if update %}
+    <div hidden id="update"></div>
+{% endif %}
+
 <form enctype="multipart/form-data" class="form-horizontal" method="post" >
     {% csrf_token %}
     <h1>

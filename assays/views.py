@@ -718,7 +718,8 @@ class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
         return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
-                                setups = setups))
+                                setups = setups,
+                                update = True))
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -760,4 +761,5 @@ class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
             return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
-                                setups = setups))
+                                setups = setups,
+                                update = True))
