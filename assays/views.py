@@ -245,6 +245,7 @@ class AssayRunUpdate(LoginRequiredMixin, UpdateView):
         self.object = self.get_object()
 
         form = self.form_class(self.request.POST, instance=self.object)
+        created_by = form.instance.created_by
 
         # TODO refactor redundant code here; testing for now
 
@@ -258,9 +259,10 @@ class AssayRunUpdate(LoginRequiredMixin, UpdateView):
             if self.request.GET.get('setup', ''):
                 url_add = '?setup=1'
             self.object = form.save()
-            # TODO maintain original created by
-            # Just change created by as well for now
-            self.object.modified_by = self.object.created_by = self.request.user
+            # TODO refactor original created by
+            # Explicitly set created_by
+            self.object.created_by = created_by
+            self.object.modified_by = self.request.user
             # Save study
             self.object.save()
             return redirect(self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
@@ -385,6 +387,8 @@ class AssayChipSetupUpdate(LoginRequiredMixin, UpdateView):
         self.object = self.get_object()
 
         form = self.form_class(self.request.POST, instance=self.object)
+        created_by = form.instance.created_by
+
         formset = AssayChipCellsFormset(self.request.POST, instance=form.instance)
 
         # TODO refactor redundant code here; testing for now
@@ -408,9 +412,10 @@ class AssayChipSetupUpdate(LoginRequiredMixin, UpdateView):
             self.object = form.save()
             # Set restricted
             self.object.restricted = study.restricted
-            # TODO maintain original created by
-            # Just change created by as well for now
-            self.object.modified_by = self.object.created_by = self.request.user
+            # TODO refactor original created by
+            # Explicitly set created_by
+            self.object.created_by = created_by
+            self.object.modified_by = self.request.user
             # Save overall setup result
             self.object.save()
             formset.instance = self.object
@@ -547,6 +552,8 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
         self.object = self.get_object()
 
         form = self.form_class(self.request.POST, self.request.FILES, instance=self.object)
+        created_by = form.instance.created_by
+
         formset = ACRAFormSet(self.request.POST, self.request.FILES, instance=form.instance)
 
         # TODO refactor redundant code here; testing for now
@@ -566,9 +573,10 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
             self.object = form.save()
             # Set restricted
             self.object.restricted = study.restricted
-            # TODO maintain original created by
-            # Just change created by as well for now
-            self.object.modified_by = self.object.created_by = self.request.user
+            # TODO refactor original created by
+            # Explicitly set created_by
+            self.object.created_by = created_by
+            self.object.modified_by = self.request.user
             # Save overall readout result
             self.object.save()
             formset.instance = self.object
@@ -716,6 +724,8 @@ class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
         self.object = self.get_object()
 
         form = self.form_class(self.request.POST, instance=self.object)
+        created_by = form.instance.created_by
+
         formset = TestResultFormSet(self.request.POST, instance=form.instance)
 
         # TODO refactor redundant code here; testing for now
@@ -737,9 +747,10 @@ class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
             self.object = form.save()
             # Set restricted
             self.object.restricted = study.restricted
-            # TODO maintain original created by
-            # Just change created by as well for now
-            self.object.modified_by = self.object.created_by = self.request.user
+            # TODO refactor original created by
+            # Explicitly set created_by
+            self.object.created_by = created_by
+            self.object.modified_by = self.request.user
             # Save overall test result
             self.object.save()
             formset.instance = self.object
