@@ -113,8 +113,7 @@ class StudyIndex(LoginRequiredMixin, ListView):
             raise PermissionDenied()
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
-        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset).prefetch_related('assay_run_id',
-                                                                                                       'device',
+        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset).prefetch_related('device',
                                                                                                        'compound',
                                                                                                        'unit',
                                                                                                        'created_by')
@@ -122,14 +121,11 @@ class StudyIndex(LoginRequiredMixin, ListView):
             'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
                                                                    'chip_setup__unit')
         context['results'] = AssayResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function', 'result_type',
-                                                    'test_unit').select_related('assay_result__assay_device_readout',
-                                                                                'assay_result__chip_setup',
+                                                    'test_unit').select_related('assay_result__chip_setup',
                                                                                 'assay_result__chip_setup__compound',
                                                                                 'assay_result__chip_setup__unit',
                                                                                 'assay_name__readout_id',
                                                                                 'assay_name__assay_id',
-                                                                                'assay_name__reader_id',
-                                                                                'assay_name__readout_unit',
                                                                                 'assay_result__created_by').filter(assay_result__chip_setup=context['setups'])
 
         # Check if this is setup only; if so add to add respective URLS
