@@ -546,7 +546,7 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
 
-        form = self.form_class(self.request.POST, instance=self.object)
+        form = self.form_class(self.request.POST, self.request.FILES, instance=self.object)
         formset = ACRAFormSet(self.request.POST, self.request.FILES, instance=form.instance)
 
         # TODO refactor redundant code here; testing for now
@@ -567,7 +567,8 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
             # Set restricted
             self.object.restricted = study.restricted
             # Set File
-            self.object.file = formset.__dict__.get('files','').get('file','')
+            if formset.__dict__.get('files','').get('file',''):
+                self.object.file = formset.__dict__.get('files','').get('file','')
             # TODO maintain original created by
             # Just change created by as well for now
             self.object.modified_by = self.object.created_by = self.request.user
@@ -576,12 +577,13 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
             formset.instance = self.object
             formset.save()
             # Save file if it exists
-            if formset.__dict__['files']:
-                file = formset.__dict__['files']['file']
+            if formset.__dict__.get('files','').get('file',''):
+                file = formset.__dict__.get('files','').get('file','')
                 parseChipCSV(self.object, file)
             # Clear data if clear is checked
-            else:
+            if self.request.POST.get('file-clear',''):
                 removeExistingChip(self.object)
+            # Otherwise do nothing (the file remained the same)
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(
