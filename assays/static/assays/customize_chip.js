@@ -39,8 +39,8 @@ $(document).ready(function () {
     }
 
     function getReadoutValue() {
-        // Admin
-        if($('.historylink')[0]) {
+        // Admin (check by looking for content-main ID)
+        if($('#content-main')[0]) {
             try {
                 return Math.floor($('.historylink').attr('href').split('/')[4]);
             }
