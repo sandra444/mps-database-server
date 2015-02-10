@@ -114,8 +114,9 @@
         <thead>
         <tr>
             <th>Finding</th>
+            <th>Descriptor</th>
             <th>+/-</th>
-            <th>Max Affected</th>
+            <th>Frequency</th>
             <th>Value</th>
             <th>Value Units</th>
         </tr>
@@ -124,8 +125,9 @@
         {% for result in results %}
             <tr>
                 <td>{{ result.finding_name }}</td>
+                <td>{{ result.descriptor|default_if_none:"" }}</td>
                 <td>{{ result.get_result_display }}</td>
-                <td>{{ result.percent_max|default_if_none:"" }}</td>
+                <td>{{ result.frequency|default_if_none:"" }}</td>
                 <td>{{ result.value|default_if_none:"" }}</td>
                 <td>{{ result.value_units|default_if_none:"" }}</td>
             </tr>

@@ -14,8 +14,10 @@
                     <th>Species</th>
                     <th>Trial Type</th>
                     <th>Finding</th>
+                    <th>Descriptor</th>
                     <th>+/-</th>
-                    <th>Max Affected</th>
+{#                    <th>Max Affected</th>#}
+                    <th>Frequency</th>
                     <th>Value</th>
                     <th>Value Units</th>
                 </tr>
@@ -28,8 +30,10 @@
                     <th>Species</th>
                     <th>Trial Type</th>
                     <th>Finding</th>
+                    <th>Descriptor</th>
                     <th>+/-</th>
-                    <th>Max Affected</th>
+{#                    <th>Max Affected</th>#}
+                    <th>Frequency</th>
                     <th>Value</th>
                     <th>Value Units</th>
                 </tr>
@@ -51,8 +55,10 @@
                     <td>{{ finding.drug_trial.species }}</td>
                     <td>{{ finding.drug_trial.get_trial_type_display }}</td>
                     <td>{{ finding.finding_name }}</td>
+                    <td>{{ finding.descriptor|default_if_none:"" }}</td>
                     <td>{{ finding.get_result_display }}</td>
-                    <td>{{ finding.percent_max|default_if_none:"" }}</td>
+{#                    <td>{{ finding.percent_max|default_if_none:"" }}</td>#}
+                    <td>{{ finding.frequency|default_if_none:"" }}</td>
                     <td>{{ finding.value|default_if_none:"" }}</td>
                     <td>{{ finding.value_units|default_if_none:"" }}</td>
 
