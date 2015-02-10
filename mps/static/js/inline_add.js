@@ -30,6 +30,11 @@ $(document).ready(function () {
             return;
         }
 
+        // Exit the function if this is an update page (known via hidden div)
+        if ($('#update')[0]) {
+            return;
+        }
+
         // Remove the element
         $('#'+title+'-'+id).remove();
 

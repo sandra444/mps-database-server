@@ -167,6 +167,9 @@ class Bioactivity(LockableModel):
     reference = models.TextField(blank=True, null=True)
     name_in_reference = models.TextField(blank=True, null=True)
 
+    # Use ChEMBL Assay Type to clarify unclear names like "Activity"
+    chembl_assay_type = models.TextField(blank=True, null=True, default='')
+
     def organism(self):
         return self.target.organism
 

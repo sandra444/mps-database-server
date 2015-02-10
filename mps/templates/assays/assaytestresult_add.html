@@ -80,6 +80,11 @@
         });
     </script>
 
+    {# The presence of this hidden div tells the inline add script to change its delete behavior #}
+    {% if update %}
+        <div hidden id="update"></div>
+    {% endif %}
+
     <form class="form-horizontal" method="post" >
         {% csrf_token %}
         <h1>Add Chip Test Results <button type="submit" class="btn btn-primary">Submit</button></h1>
@@ -140,6 +145,14 @@
         {{ formset.management_form }}
         <legend>Results</legend>
 
+        {% if formset.non_form_errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{ formset.non_form_errors }}
+            </div>
+        {% endif %}
+
         {% if formset.errors %}
             {% for dict in formset.errors %}
                 {% for key,value in dict.items %}
@@ -171,6 +184,12 @@
             <tbody>
                 {% for result in formset %}
                     <tr class="inline" id="results-{{ forloop.counter0 }}">
+                        {# Hidden input for Update (need id to associate) #}
+                        {% if result.id.value %}
+                        <td class="original" hidden>
+                            <input type="hidden" id="id_assayresult_set-{{ forloop.counter0 }}-id" name="assayresult_set-{{ forloop.counter0 }}-id" value="{{ result.id.value }}">
+                        </td>
+                        {% endif %}
                         <td>
                             <select id="id_assayresult_set-{{ forloop.counter0 }}-assay_name" name="assayresult_set-{{ forloop.counter0 }}-assay_name">
                                 <option value="">---------</option>

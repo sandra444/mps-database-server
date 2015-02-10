@@ -16,7 +16,7 @@ PHYSICAL_UNIT_TYPES = (
 )
 
 types = (
-    ('TOX', 'Toxicity'), ('DM', 'Disease'), ('EFF', 'Efficacy')
+    ('TOX', 'Toxicity'), ('DM', 'Disease'), ('EFF', 'Efficacy'), ('CC', 'Cell Characterization')
 )
 
 
@@ -305,7 +305,7 @@ class AssayTestResult(RestrictedModel):
     assay_device_readout = models.ForeignKey('assays.AssayRun',
                                              verbose_name='Organ Chip Study')
     chip_setup = models.ForeignKey('assays.AssayChipSetup',
-                                             verbose_name='Chip Setup')
+                                             verbose_name='Chip Setup', unique=True)
     def __unicode__(self):
         return u'{}:{}'.format(self.assay_device_readout,self.chip_setup)
 
@@ -425,6 +425,7 @@ class AssayRun(RestrictedModel):
     toxicity = models.BooleanField(default=False)
     efficacy = models.BooleanField(default=False)
     disease = models.BooleanField(default=False)
+    cell_characterization = models.BooleanField(default=False)
     name = models.TextField(default='Study-01',verbose_name='Study Name',
                             help_text='Name-###')
     start_date = models.DateField(help_text='YYYY-MM-DD')
@@ -443,6 +444,8 @@ class AssayRun(RestrictedModel):
             types += 'EFF '
         if self.disease:
             types += 'DM '
+        if self.cell_characterization:
+            types += 'CC '
         return u'{0}'.format(types)
 
     def __unicode__(self):
@@ -553,7 +556,7 @@ class AssayChipReadout(RestrictedModel):
         verbose_name = 'Chip Readout'
         ordering = ('chip_setup',)
 
-    chip_setup = models.ForeignKey(AssayChipSetup, null=True)
+    chip_setup = models.ForeignKey(AssayChipSetup, null=True, unique=True)
 
     timeunit = models.ForeignKey(TimeUnits, default=3)
     treatment_time_length = models.FloatField(verbose_name='Assay Treatment Duration',

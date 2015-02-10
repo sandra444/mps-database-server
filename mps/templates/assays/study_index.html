@@ -5,10 +5,14 @@
 
     <div style="padding-bottom: 50px">
         <div class="well">
-            <h1 align="center">Study: {{ object_list.0.assay_run_id }}</h1>
+            <h1 align="center">
+                Study: {{ object_list.0.assay_run_id }}
+                <br>
+                <a href="update{{ setup_only }}" class="btn btn-primary" role="button">Update Study</a>
+            </h1>
         </div>
 
-        <legend><h2>Chip Setups  <a href="assaychipsetup/add{{ setup }}" class="btn btn-success" role="button">Add Setup</a></h2></legend>
+        <legend><h2>Chip Setups  <a href="assaychipsetup/add{{ setup_only }}" class="btn btn-success" role="button">Add Setup</a></h2></legend>
 
         {% if setups %}
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
@@ -36,7 +40,7 @@
             <tbody>
             {% for setup in setups %}
                 <tr id={{ setup.id }} name={{ setup.id }}>
-                    <td><a href="/assays/assaychipsetup/{{ setup.id }}">{{ setup.assay_chip_id }}</a></td>
+                    <td><a href="/assays/assaychipsetup/{{ setup.id }}/update{{ setup_only }}">{{ setup.assay_chip_id }}</a></td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.device }}</td>
                     <td>{{ setup.chip_test_type }}</td>
@@ -52,10 +56,10 @@
         </div>
         {% endif %}
 
-        {% if not setup %}
+        {% if not setup_only %}
 
         <legend><h2>Chip Readouts
-            {% if setups.count == 0 %}
+            {% if setups.count == 0 or setups.count == readouts.count%}
                 <div hidden id="readout_alert" class="alert alert-warning" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Warning:</span>
@@ -90,7 +94,7 @@
             <tbody>
             {% for readout in readouts %}
                 <tr id={{ readout.id }} name={{ readout.id }}>
-                    <td><a href="/assays/assaychipreadout/{{ readout.id }}">{{ readout.id }}</a></td>
+                    <td><a href="/assays/assaychipreadout/{{ readout.id }}/update/">{{ readout.id }}</a></td>
                     <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}">{{ readout.chip_setup }}</a></td>
                     <td>{{ readout.readout_start_time }}</td>
                     <td>{{ readout.created_by }}</td>
@@ -105,7 +109,8 @@
         {% endif %}
 
         <legend><h2>Chip Results
-            {% if readouts.count == 0 %}
+            {# Later should add condition for when not enough readouts or setups #}
+            {% if readouts.count == 0 or number_of_results == readouts.count %}
                 <div hidden id="result_alert" class="alert alert-warning" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Warning:</span>
@@ -147,7 +152,7 @@
             <tbody>
             {% for result in results %}
                 <tr class="result" id={{ result.id }} name={{ result.id }}>
-                    <td><a href="/assays/assaytestresult/{{ result.assay_result.id }}">{{ result.assay_result.id }}</a></td>
+                    <td><a href="/assays/assaytestresult/{{ result.assay_result.id }}/update/">{{ result.assay_result.id }}</a></td>
                     <td><a href="/assays/assaychipsetup/{{ result.assay_result.chip_setup.id }}">{{ result.assay_result.chip_setup }}</a></td>
                     <td>
                         <a href="/assays/assaychipreadout/{{ result.assay_name.readout_id.id }}">

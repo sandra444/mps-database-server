@@ -12,6 +12,16 @@ class AssayResultForm(forms.ModelForm):
         }
         exclude = ('assay_device_readout','group',)
 
+    # Set chip setup to unique instead of throwing error in validation
+    # def clean(self):
+    #     super(forms.ModelForm, self).clean()
+    #     raise Exception(self.cleaned_data)
+    #
+    #     if 'chip_setup' in self.cleaned_data and AssayTestResult.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
+    #         raise forms.ValidationError('A readout for the given setup already exists!')
+    #
+    #     return self.cleaned_data
+
 class AssayChipReadoutForm(forms.ModelForm):
 
     another = forms.BooleanField(required=False)
@@ -23,6 +33,15 @@ class AssayChipReadoutForm(forms.ModelForm):
             'treatment_time_length': forms.NumberInput(attrs={'style':'width:174px;',}),
         }
         exclude = ('created_by','modified_by','signed_off_by','signed_off_date','locked', 'group')
+
+    # Set chip setup to unique instead of throwing error in validation
+    # def clean(self):
+    #     super(forms.ModelForm, self).clean()
+    #
+    #     if 'chip_setup' in self.cleaned_data and AssayChipReadout.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
+    #         raise forms.ValidationError('A readout for the given setup already exists!')
+    #
+    #     return self.cleaned_data
 
 class AssayChipSetupForm(forms.ModelForm):
 
@@ -72,3 +91,17 @@ class TestResultInlineFormset(forms.models.BaseInlineFormSet):
 
     class Meta(object):
         model = AssayResult
+
+    def clean(self):
+        forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
+
+        # Number of results
+        results = 0
+        for form in forms_data:
+            try:
+                if form.cleaned_data:
+                    results += 1
+            except AttributeError:
+                pass
+        if results < 1:
+            raise forms.ValidationError('You must have at least one result.')

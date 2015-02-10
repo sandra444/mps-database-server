@@ -5,25 +5,25 @@
     <legend><h1>{{ model.model_name }}</h1></legend>
 
     <div class="row">
-        <div class="col-xs-2 lead text-right">
+        <div class="col-sm-2 lead text-right-responsive">
             <b>Center:</b>
         </div>
-        <div class="col-xs-10 lead">
+        <div class="col-sm-10 lead">
             {{ model.center|default:'Unspecified' }}
         </div>
     </div>
 
     <div class="row">
-        <div class="col-xs-2 lead text-right">
+        <div class="col-sm-2 lead text-right-responsive">
             <b>Organ:</b>
         </div>
-        <div class="col-xs-4 lead">
+        <div class="col-sm-4 lead">
             {{ model.organ|default:'Unspecified' }}
         </div>
-        <div class="col-xs-2 lead text-right">
+        <div class="col-sm-2 lead text-right-responsive">
             <b>Device:</b>
         </div>
-        <div class="col-xs-4 lead">
+        <div class="col-sm-4 lead">
             {% if model.device.id %}
                 <a href="/microdevices/device/{{ model.device.id }}">{{ model.device }}</a>
             {% else %}
@@ -34,10 +34,10 @@
 
     {% if model.description %}
     <div class="row">
-        <div class="col-xs-2 lead text-right">
+        <div class="col-sm-2 lead text-right-responsive">
             <b>Description:</b>
         </div>
-        <div class="col-xs-10 lead">
+        <div class="col-sm-10 lead">
             {{ model.description }}
         </div>
     </div>

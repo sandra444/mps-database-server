@@ -308,6 +308,7 @@ class BioactivityAdmin(LockableAdmin):
         'standardized_units',
         'chembl_link',
         'bioactivity_type',
+        'chembl_assay_type',
         'value',
         'units',
         'locked'
@@ -320,7 +321,7 @@ class BioactivityAdmin(LockableAdmin):
     fieldsets = (
         (None, {
             'fields': (('compound', 'assay'), 'bioactivity_display', ('target', 'target_confidence'),
-                       ('bioactivity_type', 'value', 'units'),
+                       ('bioactivity_type', 'chembl_assay_type', 'value', 'units'),
                        ('standard_name', 'standardized_value', 'standardized_units'),
                        ('activity_comment', 'reference', 'name_in_reference'), 'locked',
                        ('created_by', 'created_on'), ('modified_by', 'modified_on'),

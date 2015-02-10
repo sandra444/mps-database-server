@@ -49,7 +49,9 @@
     <script>
         $(document).ready(function() {
             $('#readouts').DataTable( {
-                "iDisplayLength": 50
+                "iDisplayLength": 50,
+                // Initially sort on setup not arbitrary ID
+                "order": [[ 1, "asc" ]]
             });
 
             // Swap positions of filter and length selection

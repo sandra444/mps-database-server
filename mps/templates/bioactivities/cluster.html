@@ -38,14 +38,12 @@
 
     <div id="selection">
         <div class="row">
-            <div class="col-xs-12">
-                <div class="text-center">
-                    {% block submit %}
-                    <button class="btn btn-xlarge btn-primary text-center" id="submit">
-                        Generate Dendrogram
-                    </button>
-                    {% endblock %}
-                </div>
+            <div class="text-center">
+                {% block submit %}
+                <button class="btn btn-xlarge btn-primary text-center" id="submit">
+                    Generate Dendrogram
+                </button>
+                {% endblock %}
             </div>
         </div>
         <hr>
@@ -348,7 +346,8 @@
             <div id="cluster" class="col-xs-6">
             </div>
             <div class="col-xs-3">
-                <div id="compound" class="affix"></div>
+                {# Magic number height of 600 in style #}
+                <div id="compound" class="affix pre-scrollable" style="max-height:600px; height:600px"></div>
             </div>
         </div>
 

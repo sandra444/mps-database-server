@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from django.views.generic import ListView, CreateView, DetailView
+from django.views.generic import ListView, CreateView, DetailView, UpdateView
 from assays.models import *
 from cellsamples.models import CellSample
 from assays.admin import *
@@ -60,9 +60,9 @@ class UserIndex(LoginRequiredMixin, ListView):
         context['title'] = 'User Study Index'
         # Check if this is setup only; if so add to add respective URLS
         if request.GET.get('setup', ''):
-            context['setup'] = '/?setup=1'
+            context['setup_only'] = '/?setup=1'
         else:
-            context['setup'] = ''
+            context['setup_only'] = ''
         return self.render_to_response(context)
 
 
@@ -92,9 +92,9 @@ class GroupIndex(LoginRequiredMixin, ListView):
         context['title'] = 'Group Study Index'
         # Check if this is setup only; if so add to add respective URLS
         if request.GET.get('setup', ''):
-            context['setup'] = '/?setup=1'
+            context['setup_only'] = '/?setup=1'
         else:
-            context['setup'] = ''
+            context['setup_only'] = ''
         return self.render_to_response(context)
 
 
@@ -113,8 +113,7 @@ class StudyIndex(LoginRequiredMixin, ListView):
             raise PermissionDenied()
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
-        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset).prefetch_related('assay_run_id',
-                                                                                                       'device',
+        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset).prefetch_related('device',
                                                                                                        'compound',
                                                                                                        'unit',
                                                                                                        'created_by')
@@ -122,21 +121,20 @@ class StudyIndex(LoginRequiredMixin, ListView):
             'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
                                                                    'chip_setup__unit')
         context['results'] = AssayResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function', 'result_type',
-                                                    'test_unit').select_related('assay_result__assay_device_readout',
-                                                                                'assay_result__chip_setup',
+                                                    'test_unit').select_related('assay_result__chip_setup',
                                                                                 'assay_result__chip_setup__compound',
                                                                                 'assay_result__chip_setup__unit',
                                                                                 'assay_name__readout_id',
                                                                                 'assay_name__assay_id',
-                                                                                'assay_name__reader_id',
-                                                                                'assay_name__readout_unit',
                                                                                 'assay_result__created_by').filter(assay_result__chip_setup=context['setups'])
+
+        context['number_of_results'] = AssayTestResult.objects.filter(chip_setup=context['setups']).count()
 
         # Check if this is setup only; if so add to add respective URLS
         if request.GET.get('setup', ''):
-            context['setup'] = '/?setup=1'
+            context['setup_only'] = '/?setup=1'
         else:
-            context['setup'] = ''
+            context['setup_only'] = ''
         return self.render_to_response(context)
 
 
@@ -162,9 +160,9 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
         context['groups'] = groups
         # Check if this is setup only; if so add to add respective URLS
         # if self.request.GET.get('setup', ''):
-        # context['setup'] = '/?setup=1'
+        # context['setup_only'] = '/?setup=1'
         # else:
-        #     context['setup'] = ''
+        #     context['setup_only'] = ''
         return context
 
     # Test form validity
@@ -223,6 +221,59 @@ class AssayRunDetail(LoginRequiredMixin, DetailView):
         return self.render_to_response(context)
 
 
+class AssayRunUpdate(LoginRequiredMixin, UpdateView):
+    model = AssayRun
+    template_name = 'assays/assayrun_add.html'
+    form_class = AssayRunForm
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+
+        # Deny access if not the proper group
+        if not has_group(request.user, self.object.group):
+            raise PermissionDenied()
+
+        # Get group selection possibilities
+        groups = self.request.user.groups.filter(
+            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
+
+        return self.render_to_response(
+            self.get_context_data(form=form,
+                                  groups=groups))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        form = self.form_class(self.request.POST, instance=self.object)
+        created_by = form.instance.created_by
+
+        # TODO refactor redundant code here; testing for now
+
+        # Get group selection possibilities
+        groups = self.request.user.groups.filter(
+            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
+
+        if form.is_valid():
+            # Add to url if setup only
+            url_add = ''
+            if self.request.GET.get('setup', ''):
+                url_add = '?setup=1'
+            self.object = form.save()
+            # TODO refactor original created by
+            # Explicitly set created_by
+            self.object.created_by = created_by
+            self.object.modified_by = self.request.user
+            # Save study
+            self.object.save()
+            return redirect(self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(
+            self.get_context_data(form=form,
+                                  groups=groups))
+
+
 # Class based view for chip setups
 class AssayChipSetupList(LoginRequiredMixin, ListView):
     model = AssayChipSetup
@@ -276,7 +327,7 @@ class AssayChipSetupAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
-        if formset.is_valid():
+        if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
@@ -302,6 +353,82 @@ class AssayChipSetupDetail(LoginRequiredMixin, DetailView):
             raise PermissionDenied
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
+
+
+class AssayChipSetupUpdate(LoginRequiredMixin, UpdateView):
+    model = AssayChipSetup
+    template_name = 'assays/assaychipsetup_add.html'
+    form_class = AssayChipSetupForm
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+
+        study = self.object.assay_run_id
+
+        # Deny access to those without correct group
+        if not has_group(request.user, study.group):
+            raise PermissionDenied()
+
+        groups = self.request.user.groups.values_list('id', flat=True)
+        cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
+            'cell_type',
+            'supplier',
+        ).select_related('cell_type__cell_subtype')
+
+        # Render form
+        formset = AssayChipCellsFormset(instance=self.object)
+        return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                cellsamples = cellsamples,
+                                update = True))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        form = self.form_class(self.request.POST, instance=self.object)
+        created_by = form.instance.created_by
+
+        formset = AssayChipCellsFormset(self.request.POST, instance=form.instance)
+
+        # TODO refactor redundant code here; testing for now
+
+        study = self.object.assay_run_id
+
+        groups = self.request.user.groups.values_list('id', flat=True)
+        cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
+            'cell_type',
+            'supplier',
+        ).select_related('cell_type__cell_subtype')
+
+        form.instance.assay_run_id = study
+        form.instance.group = study.group
+        # form.instance.restricted = study.restricted
+
+        if form.is_valid() and formset.is_valid():
+            url_add = ''
+            if self.request.GET.get('setup', ''):
+                url_add = '?setup=1'
+            self.object = form.save()
+            # Set restricted
+            self.object.restricted = study.restricted
+            # TODO refactor original created by
+            # Explicitly set created_by
+            self.object.created_by = created_by
+            self.object.modified_by = self.request.user
+            # Save overall setup result
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            return redirect(self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                cellsamples = cellsamples,
+                                update = True))
 
 
 # Class based views for readouts
@@ -352,7 +479,7 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
-        if formset.is_valid():
+        if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
@@ -370,6 +497,15 @@ class AssayChipReadoutAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
+    # Redirect when there are no available setups
+    def render_to_response(self, context):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+        if not context.get('setups',''):
+            return redirect('/assays/'+str(study.id))
+
+        return super(AssayChipReadoutAdd, self).render_to_response(context)
+
 
 class AssayChipReadoutDetail(LoginRequiredMixin, DetailView):
     model = AssayChipReadout
@@ -381,6 +517,87 @@ class AssayChipReadoutDetail(LoginRequiredMixin, DetailView):
             raise PermissionDenied
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
+
+class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
+    model = AssayChipReadout
+    template_name = 'assays/assaychipreadout_add.html'
+    form_class = AssayChipReadoutForm
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+
+        # Get study
+        study = self.object.chip_setup.assay_run_id
+
+        # Deny access to those without correct group
+        if not has_group(request.user, study.group):
+            raise PermissionDenied()
+
+        exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
+
+        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'device',
+            'compound', 'unit',
+            'created_by').exclude(id__in=list(set(exclude_list))) | AssayChipSetup.objects.filter(pk=self.object.chip_setup.id)
+
+        # Render form
+        formset = ACRAFormSet(instance=self.object)
+        return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                setups = setups,
+                                update=True))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        form = self.form_class(self.request.POST, self.request.FILES, instance=self.object)
+        created_by = form.instance.created_by
+
+        formset = ACRAFormSet(self.request.POST, self.request.FILES, instance=form.instance)
+
+        # TODO refactor redundant code here; testing for now
+
+        study = self.object.chip_setup.assay_run_id
+        exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
+
+        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'device',
+            'compound', 'unit',
+            'created_by').exclude(id__in=list(set(exclude_list))) | AssayChipSetup.objects.filter(pk=self.object.chip_setup.id)
+
+        form.instance.group = study.group
+        # form.instance.restricted = study.restricted
+
+        if form.is_valid() and formset.is_valid():
+            self.object = form.save()
+            # Set restricted
+            self.object.restricted = study.restricted
+            # TODO refactor original created by
+            # Explicitly set created_by
+            self.object.created_by = created_by
+            self.object.modified_by = self.request.user
+            # Save overall readout result
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            # Save file if it exists
+            if formset.__dict__.get('files','').get('file',''):
+                file = formset.__dict__.get('files','').get('file','')
+                parseChipCSV(self.object, file)
+            # Clear data if clear is checked
+            if self.request.POST.get('file-clear',''):
+                removeExistingChip(self.object)
+            # Otherwise do nothing (the file remained the same)
+            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                setups = setups,
+                                update=True))
 
 
 # Class-based views for studies
@@ -414,10 +631,11 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        exclude_list = AssayTestResult.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'device',
             'compound', 'unit',
-            'created_by')
+            'created_by').exclude(id__in=list(set(exclude_list)))
 
         context = super(AssayTestResultAdd, self).get_context_data(**kwargs)
         if self.request.POST:
@@ -438,16 +656,25 @@ class AssayTestResultAdd(LoginRequiredMixin, StudyAccessMixin, CreateView):
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
-        if formset.is_valid():
+        if form.is_valid() and formset.is_valid():
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
-            # Save Chip Readout
+            # Save overall test result
             self.object.save()
             formset.instance = self.object
             formset.save()
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+    # Redirect when there are no available setups
+    def render_to_response(self, context):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+        if not context.get('setups',''):
+            return redirect('/assays/'+str(study.id))
+
+        return super(AssayTestResultAdd, self).render_to_response(context)
 
 
 class AssayTestResultDetail(LoginRequiredMixin, DetailView):
@@ -460,3 +687,81 @@ class AssayTestResultDetail(LoginRequiredMixin, DetailView):
             raise PermissionDenied
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
+
+
+class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
+    model = AssayTestResult
+    template_name = 'assays/assaytestresult_add.html'
+    form_class = AssayResultForm
+
+    # Alternative (cleaner?) method
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+
+        # 404 if respective study does not exist
+        study = self.object.assay_device_readout
+
+        # Deny access to those without correct group
+        if not has_group(request.user, study.group):
+            raise PermissionDenied()
+
+        exclude_list = AssayTestResult.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
+
+        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'device',
+            'compound', 'unit',
+            'created_by').exclude(id__in=list(set(exclude_list))) | AssayChipSetup.objects.filter(pk=self.object.chip_setup.id)
+
+        # Render form
+        formset = TestResultFormSet(instance=self.object)
+        return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                setups = setups,
+                                update = True))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        form = self.form_class(self.request.POST, instance=self.object)
+        created_by = form.instance.created_by
+
+        formset = TestResultFormSet(self.request.POST, instance=form.instance)
+
+        # TODO refactor redundant code here; testing for now
+
+        study = self.object.assay_device_readout
+        exclude_list = AssayTestResult.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
+
+        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'device',
+            'compound', 'unit',
+            'created_by').exclude(id__in=list(set(exclude_list))) | AssayChipSetup.objects.filter(pk=self.object.chip_setup.id)
+
+        form.instance.assay_device_readout = study
+        form.instance.group = study.group
+        # Setting restricted in the form does not work for some reason
+        # form.instance.restricted = study.restricted
+
+        if form.is_valid() and formset.is_valid():
+            self.object = form.save()
+            # Set restricted
+            self.object.restricted = study.restricted
+            # TODO refactor original created by
+            # Explicitly set created_by
+            self.object.created_by = created_by
+            self.object.modified_by = self.request.user
+            # Save overall test result
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                setups = setups,
+                                update = True))
