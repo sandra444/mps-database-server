@@ -582,6 +582,10 @@ def parseChipCSV(currentChipReadout, file):
         # rowValue holds all of the row elements
         # rowID is the index of the current row from top to bottom
 
+        # Skip any row with insufficient commas
+        if len(rowValue) < 4:
+            continue
+
         # Skip any row with incomplete data and first row (header) for now
         if not rowValue[0] or not rowValue[1] or not rowValue[2] or rowID == 0:
             continue
@@ -775,10 +779,17 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
             unique = {}
 
             for line in datalist[1:]:
+
+                # Some lines may not be long enough (have sufficient commas), ignore such lines
+                # Some lines may be empty or incomplete, ignore these as well
+                if len(line) < 4 or not line[0] or not line[1] or not line[2]:
+                    continue
+
                 time = line[0]
                 assay = line[1]
                 field = line[2]
                 val = line[3]
+                # Raise error when an assay does not exist
                 if assay not in assays:
                     raise forms.ValidationError(
                         'No assay with the name "%s" exists; please change your file or add this assay' % assay)
@@ -789,7 +800,9 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
                         'File contains duplicate reading %s' % str((time,assay,field)))
                 # Check every value to make sure it can resolve to a float
                 try:
-                    float(val)
+                    # Keep empty strings, though they technically can not be converted to floats
+                    if val != '':
+                        float(val)
                 except:
                     raise forms.ValidationError(
                             'The value "%s" is invalid; please make sure all values are numerical' % str(val))

@@ -117,13 +117,13 @@ $(document).ready(function () {
         table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Assay</th><th>Object</th><th>Data</th></tr>" : "";
 
         for (var i in lines) {
-            if (i == 0 && !exist || (!lines[i][0] && !lines[i][1] && !lines[i][2] && !lines[i][3])){
+            if ((i == 0 && !exist) || (!lines[i][0] || !lines[i][1] || !lines[i][2])) {
                 table += "<tr style='background: #FF2400'>";
             }
-            else if (lines[i][3] == 'None'){
+            else if (lines[i][3] == 'None') {
                 table += "<tr style='background: #606060'>";
             }
-            else{
+            else {
                 table += "<tr>";
             }
             table += "<th>" + lines[i][0] + "</th>";
@@ -140,7 +140,7 @@ $(document).ready(function () {
         var assays = {};
 
         for (var i in lines) {
-            if (!lines[i][1] || (i == 0 && !exist)) {
+            if (!lines[i][0] || !lines[i][1] || !lines[i][2] || (i == 0 && !exist)) {
                 continue;
             }
 
@@ -152,7 +152,7 @@ $(document).ready(function () {
                 assays[lines[i][1]][lines[i][2]] = {'time':[], 'data':[]};
             }
 
-            if (lines[i][3] && lines[i][3] != 'None') {
+            if (assays[lines[i][1]][lines[i][2]] && lines[i][3] && lines[i][3] != 'None') {
                 assays[lines[i][1]][lines[i][2]].time.push(lines[i][0]);
                 assays[lines[i][1]][lines[i][2]].data.push(lines[i][3]);
             }
