@@ -128,6 +128,8 @@ class StudyIndex(LoginRequiredMixin, ListView):
                                                                                 'assay_name__assay_id',
                                                                                 'assay_result__created_by').filter(assay_result__chip_setup=context['setups'])
 
+        context['number_of_results'] = AssayTestResult.objects.filter(chip_setup=context['setups']).count()
+
         # Check if this is setup only; if so add to add respective URLS
         if request.GET.get('setup', ''):
             context['setup_only'] = '/?setup=1'

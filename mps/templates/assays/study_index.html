@@ -110,7 +110,7 @@
 
         <legend><h2>Chip Results
             {# Later should add condition for when not enough readouts or setups #}
-            {% if readouts.count == 0 %}
+            {% if readouts.count == 0 or number_of_results == readouts.count %}
                 <div hidden id="result_alert" class="alert alert-warning" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Warning:</span>
