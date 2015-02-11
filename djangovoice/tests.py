@@ -46,7 +46,8 @@ class FeedbackTestCase(TestCase):
         self.login_form_does_not_work = Feedback.objects.create(
             type=feedback_type,
             title='Login form does not work.',
-            description='What a fucking test...',
+            # XD
+            description='What a superb test...',
             anonymous=False,
             private=True,
             user=feedback_user)
