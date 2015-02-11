@@ -188,6 +188,11 @@ INSTALLED_APPS = (
     # Django admin alphabetical filter
     'alphafilter',
 
+    # Djangovoice for feedback
+    'django.contrib.comments',
+    'qhonuskan_votes',
+    'djangovoice',
+
     # MPS applications:
     'cellsamples',
     'compounds',
