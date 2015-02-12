@@ -50,6 +50,9 @@
 {#                  <a href="{{ object.user.get_absolute_url }}" class="avatar" title="{% trans "View profile" %}">#}
 {#                    {% get_user_image object.user 15 %}#}
 {#                  </a>#}
+                    <a class="avatar">
+                      {% get_user_image object.user 15 %}
+                    </a>
 {#                  Links to user pages are dead at the moment, may make this view later#}
 {#                  <a href="{{ object.user.get_absolute_url }}" title="View profile">#}
                     <a>
