@@ -4,6 +4,8 @@
 
 <h4>{% trans "Status" %}</h4>
 {% get_status_list list %}
+{# Added get_type_list to acquire list of types in sidebar (previously blank) #}
+{% get_type_list list %}
 
 <ul>
   <li{% ifequal status "all" %} class="active"{% endifequal %}>
