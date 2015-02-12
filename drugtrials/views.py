@@ -8,14 +8,14 @@ class DrugTrialList(ListView):
     template_name = 'drugtrials/drugtrial_list.html'
 
     def get_queryset(self):
-        queryset = FindingResult.objects.prefetch_related('drug_trial','finding_name', 'value_units').select_related('drug_trial__compound', 'drug_trial__species', 'finding_name__organ', 'finding_name__finding_type').all()
+        queryset = FindingResult.objects.prefetch_related('drug_trial', 'descriptor', 'finding_name', 'value_units').select_related('drug_trial__compound', 'drug_trial__species', 'finding_name__organ', 'finding_name__finding_type').all()
         return queryset
 
 def drug_trial_detail(request, *args, **kwargs):
     c = RequestContext(request)
 
     trial = get_object_or_404(DrugTrial, pk=kwargs.get('pk'))
-    results = FindingResult.objects.filter(drug_trial=trial).prefetch_related('drug_trial','finding_name', 'value_units').select_related('drug_trial__compound', 'drug_trial__species', 'finding_name__organ', 'finding_name__finding_type')
+    results = FindingResult.objects.filter(drug_trial=trial).prefetch_related('drug_trial', 'descriptor', 'finding_name', 'value_units').select_related('drug_trial__compound', 'drug_trial__species', 'finding_name__organ', 'finding_name__finding_type')
 
     c.update({
         'trial': trial,
