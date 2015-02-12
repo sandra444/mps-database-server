@@ -273,9 +273,11 @@ $(document).ready(function () {
                 targets = get_list(json.targets);
                 compounds = get_list(json.compounds);
                 bioactivities = get_list(json.bioactivities);
+                drugtrials = get_list(json.drugtrials);
                 //console.log(targets);
                 //console.log(compounds);
                 //console.log(bioactivities);
+                console.log(drugtrials);
 
                 // Case INSENSITIVE sort
                 targets = _.sortBy(targets, function (i) { return i.name.toLowerCase(); });

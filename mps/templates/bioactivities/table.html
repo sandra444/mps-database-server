@@ -22,6 +22,99 @@
     <hr>
 {% endblock %}
 
+{% block selections %}
+    <div class="row">
+        <div class="col-xs-4">
+
+            <p class="text-center">
+                <label>
+                    Bioactivities Filter:
+                    <input id="bioactivity_filter">
+                </label>
+            </p>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered
+                        table-condensed">
+
+                    <thead>
+                        <th>
+                            <input id="all_bioactivities" type="checkbox">
+                        </th>
+                        <th>
+                            Select Bioactivities
+                        </th>
+                    </thead>
+
+                    <tbody id="bioactivities">
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+        <div class="col-xs-4">
+
+            <p class="text-center">
+                <label>
+                    Targets Filter:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                    <input id="target_filter">
+                </label>
+            </p>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered
+                        table-condensed">
+
+                    <thead>
+                        <th>
+                            <input id="all_targets" type="checkbox">
+                        </th>
+                        <th>
+                            Select Targets
+                        </th>
+                    </thead>
+
+                    <tbody id="targets">
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+        <div class="col-xs-4">
+
+            <p class="text-center">
+                <label>
+                    Compounds Filter:&nbsp&nbsp&nbsp&nbsp
+                    <input id="compound_filter">
+                </label>
+            </p>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered
+                        table-condensed">
+
+                    <thead>
+                        <th>
+                            <input id="all_compounds" type="checkbox">
+                        </th>
+                        <th>
+                            Select Compounds
+                        </th>
+                    </thead>
+
+                    <tbody id="compounds">
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
 {% block graphic %}
     <div hidden id="graphic" style="padding-bottom: 50px">
         <div class="row text-center">

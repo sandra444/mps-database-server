@@ -43,10 +43,12 @@ def generate_list_of_all_data_in_bioactivities(organisms, targets):
     bioactivities_data = generate_list_of_all_bioactivities_in_bioactivities()
     compounds_data = generate_list_of_all_compounds_in_bioactivities()
     targets_data = generate_list_of_all_targets_in_bioactivities(organisms, targets)
+    drugtrial_data = generate_list_of_all_drugtrials()
 
     result = {'bioactivities':bioactivities_data,
               'compounds':compounds_data,
-              'targets':targets_data
+              'targets':targets_data,
+              'drugtrials': drugtrial_data
             }
 
     return result
@@ -114,6 +116,23 @@ def generate_list_of_all_targets_in_bioactivities(organisms, targets):
 
     return result
 
+# Worry about filtering by organism later
+# FK for organism is a little odd right now
+def generate_list_of_all_drugtrials():
+    cursor = connection.cursor()
+
+    cursor.execute(
+        'SELECT drugtrials_finding.finding_name '
+        'FROM drugtrials_finding '
+        'INNER JOIN drugtrials_findingresult '
+        'ON drugtrials_finding.id=drugtrials_findingresult.finding_name_id '
+        'WHERE drugtrials_findingresult.value IS NOT NULL;'
+    )
+
+    result = generate_record_frequency_data(cursor.fetchall())
+    cursor.close()
+
+    return result
 
 def generate_list_of_all_compounds_in_bioactivities():
     cursor = connection.cursor()
@@ -214,29 +233,71 @@ def fetch_all_standard_bioactivities_data(
     return result
 
 
-def fetch_all_standard_drugtrials_data():
-    # using values for now, FUTURE: use standardized_values
+def fetch_all_standard_drugtrials_data(
+        desired_compounds,
+        desired_drugtrials,
+        normalized,
+        log_scale
+):
+
     cursor = connection.cursor()
 
     # TODO: FIXME
-    cursor.execute(
-        ''
-    )
+    # Nonstandard values?
+    # Please note that normalization now goes from 0.0001 to 1
+    # cursor.execute(
+    #     'SELECT compound,tbl.findingresult,AVG(value) as value,units,'
+    #     'AVG(norm_value) as norm_value,organism '
+    #     'FROM ( '
+    #     'SELECT compounds_compound.name as compound, '
+    #     'drugtrials_findingresult.finding_name.finding_name as findingresult, '
+    #     'drugtrials_findingresult.value as value,drugtrials_findingresult.value_units as units, '
+    #     'drugtrials_findingresult.drug_trial.organism, '
+    #     'CASE WHEN agg_tbl.max_value-agg_tbl.min_value <> 0 '
+    #     'THEN (0.9999)*((value-agg_tbl.min_value)/(agg_tbl.max_value-agg_tbl.min_value)) + 0.0001 ELSE 1 END as norm_value '
+    #     'FROM drugtrials_drugtrial '
+    #     'INNER JOIN compounds_compound '
+    #     'ON drugtrials_drugtrial.compound.id=compounds_compound.id '
+    #     'INNER JOIN '
+    #     '(SELECT drugtrials_findingresult.finding_name.finding_name ,'
+    #     'MAX(value) as max_value,MIN(value) as min_value '
+    #     'FROM drugtrials_findingresult '
+    #     'GROUP BY drugtrials_findingresult.finding_name.finding_name '
+    #     ') as agg_tbl ON drugtrials_findingresult.finding_name.finding_name = agg_tbl.finding_name.finding_name '
+    #     ') as tbl '
+    #     ' GROUP BY compound,tbl.findingresult,units,organism'
+    #     'HAVING AVG(value) IS NOT NULL ;'
+    # )
 
-    # bioactivity is a tuple:
-    # (compound name, target name, the bioactivity, value)
-    # (0            , 1          , 2              , 3    )
     query = cursor.fetchall()
 
     result = []
 
+    # What to do about returned dic?
     for q in query:
+
+        if q[0] not in desired_compounds:
+            continue
+        if q[1] not in desired_drugtrials:
+            continue
+
+        value = q[2]
+
+        if normalized:
+            value = q[4]
+
+        # Please note that negative and zero values ARE EXCLUDED
+        if log_scale:
+            if value <= 0:
+                continue
+
+            value = np.log10(value)
+
         result.append(
             {
                 'compound': q[0],
-                'target': q[1],
-                'bioactivity': q[2],
-                'value': q[3]
+                'findingresult': q[1],
+                'value': value
             }
         )
 
