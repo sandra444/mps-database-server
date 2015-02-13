@@ -218,6 +218,7 @@ $(document).ready(function () {
                 'bioactivities_filter': bioactivities_filter,
                 'targets_filter': targets_filter,
                 'compounds_filter': compounds_filter,
+                'drugtrials_filter': drugtrials_filter,
                 'target_types_filter': target_types,
                 'organisms_filter': organisms,
                 'log_scale': log_scale,
@@ -581,7 +582,7 @@ $(document).ready(function () {
     search_filter(target_search,target_string,'targets','');
 
     // When the compound search changes
-    search_filter(compound_search,compound_string,'compounds','');
+    search_filter(compound_search,compound_string,'compounds','c');
 
     // When the drugtrial search changes
     search_filter(drugtrial_search,drugtrial_string,'drugtrials','');
