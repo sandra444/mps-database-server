@@ -635,6 +635,16 @@ def cluster(request):
         ) is True
     ]
 
+    desired_drugtrials = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'drugtrials_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
     # throw error if only one compound is selected (can not cluster just one)
     if len(desired_compounds) < 2:
         return {'error': 'require more than one compound to cluster'}
@@ -656,11 +666,16 @@ def cluster(request):
         log_scale
     )
 
+    all_std_drugtrial = fetch_all_standard_drugtrials_data(
+        desired_compounds,
+        desired_drugtrials,
+        normalized,
+        log_scale
+    )
+
     # Should throw error only if no chemical_properties and no bioactivities
-    if not all_std_bioactivities and not chemical_properties:
+    if not all_std_drugtrial and not all_std_bioactivities and not chemical_properties:
         return {'error': 'no standard bioactivities'}
-    if len(all_std_bioactivities) == 0 and not chemical_properties:
-        return {'error': 'standard bioactivities zero length'}
 
     # Initially all compounds are valid
     valid_compounds = list(desired_compounds)
@@ -669,29 +684,41 @@ def cluster(request):
     # List of all unique bioactivities
     bioactivities = {}
 
-    if len(all_std_bioactivities) != 0:
-        bioactivities_data = pandas.DataFrame(
-            all_std_bioactivities,
-            columns=['compound', 'target', 'bioactivity', 'value']
-        ).fillna(0)
+    if len(all_std_bioactivities) != 0 or len(all_std_drugtrial) != 0:
 
-        pivoted_data = pandas.pivot_table(
-            bioactivities_data,
-            values='value',
-            cols=['target', 'bioactivity'],
-            rows='compound'
-        )
+        if len(all_std_bioactivities) != 0:
+            bioactivities_data = pandas.DataFrame(
+                all_std_bioactivities,
+                columns=['compound', 'target', 'bioactivity', 'value']
+            ).fillna(0)
 
-        unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
+            pivoted_data = pandas.pivot_table(
+                bioactivities_data,
+                values='value',
+                cols=['target', 'bioactivity'],
+                rows='compound'
+            )
 
-        unwound_data['target_bioactivity_pair'] = \
-            unwound_data['target'] + '_ ' + unwound_data['bioactivity']
+            unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
 
-        del unwound_data['target']
-        del unwound_data['bioactivity']
+            unwound_data['target_bioactivity_pair'] = \
+                unwound_data['target'] + '_ ' + unwound_data['bioactivity']
 
-        data_order = ['compound', 'target_bioactivity_pair', 'value']
-        rearranged_data = unwound_data[data_order].values.tolist()
+            del unwound_data['target']
+            del unwound_data['bioactivity']
+
+            data_order = ['compound', 'target_bioactivity_pair', 'value']
+            rearranged_data = unwound_data[data_order]
+
+        else:
+            rearranged_data = pandas.DataFrame()
+
+        if all_std_drugtrial:
+            drugtrial_df = pandas.DataFrame(all_std_drugtrial, columns=['compound', 'target_bioactivity_pair', 'value'])
+
+            rearranged_data = rearranged_data.append(drugtrial_df)
+
+        rearranged_data = rearranged_data.values.tolist()
 
         # Initial dictionary before final data
         initial_dic = dic()
@@ -740,15 +767,18 @@ def cluster(request):
              'ro5_violations',
              'ro3_passes']
 
+    # list of dics of compounds (creating this prevents excessive calls to the database
+    compound_data = Compound.objects.filter(name__in=valid_compounds).values()
+
     # This section is in dire need of refactoring
     # Update values for chemical properties (if chemical_properties)
     if chemical_properties:
         for prop in props:
             values = []
-            for compound in valid_compounds:
+            for compound in compound_data:
                 # Get data for prop here
                 # This is a rather inefficient means of acquiring data
-                values.append(Compound.objects.get(name=compound).__dict__.get(prop))
+                values.append(compound.get(prop,None))
             # Get median from list after excluding all None values
             median = np.median(np.array([value for value in values if value != None]))
             # Convert values such that there are no None values
@@ -817,14 +847,13 @@ def cluster(request):
 
     compounds = {}
 
-    for compound in desired_compounds:
-        compound = Compound.objects.get(name=compound)
-        CHEMBL = compound.chemblid
-        name = compound.name
-        known_drug = compound.known_drug
-        ro3 = compound.ro3_passes
-        ro5 = compound.ro5_violations
-        species = compound.species
+    for compound in compound_data:
+        CHEMBL = compound.get('chemblid')
+        name = compound.get('name')
+        known_drug = compound.get('known_drug')
+        ro3 = compound.get('ro3_passes')
+        ro5 = compound.get('ro5_violations')
+        species = compound.get('species')
         data ={
             'CHEMBL': CHEMBL,
             'name': name,

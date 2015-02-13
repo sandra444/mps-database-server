@@ -2,8 +2,8 @@ $(document).ready(function () {
 
     function heatmap(heatmap_data_csv, row_order, col_order) {
 
-        console.log(row_order);
-        console.log(col_order);
+        //console.log(row_order);
+        //console.log(col_order);
 
         // Show graphic
         $('#graphic').prop('hidden',false);
