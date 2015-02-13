@@ -16,6 +16,7 @@ import numpy as np
 
 from compounds.models import Compound
 from .models import Bioactivity
+from drugtrials.models import FindingResult
 
 from django.core import serializers
 
@@ -240,70 +241,83 @@ def fetch_all_standard_drugtrials_data(
         log_scale
 ):
 
-    cursor = connection.cursor()
-
     # TODO: FIXME
     # Nonstandard values?
     # Please note that normalization now goes from 0.0001 to 1
-    # cursor.execute(
-    #     'SELECT compound,tbl.findingresult,AVG(value) as value,units,'
-    #     'AVG(norm_value) as norm_value,organism '
-    #     'FROM ( '
-    #     'SELECT compounds_compound.name as compound, '
-    #     'drugtrials_findingresult.finding_name.finding_name as findingresult, '
-    #     'drugtrials_findingresult.value as value,drugtrials_findingresult.value_units as units, '
-    #     'drugtrials_findingresult.drug_trial.organism, '
-    #     'CASE WHEN agg_tbl.max_value-agg_tbl.min_value <> 0 '
-    #     'THEN (0.9999)*((value-agg_tbl.min_value)/(agg_tbl.max_value-agg_tbl.min_value)) + 0.0001 ELSE 1 END as norm_value '
-    #     'FROM drugtrials_drugtrial '
-    #     'INNER JOIN compounds_compound '
-    #     'ON drugtrials_drugtrial.compound.id=compounds_compound.id '
-    #     'INNER JOIN '
-    #     '(SELECT drugtrials_findingresult.finding_name.finding_name ,'
-    #     'MAX(value) as max_value,MIN(value) as min_value '
-    #     'FROM drugtrials_findingresult '
-    #     'GROUP BY drugtrials_findingresult.finding_name.finding_name '
-    #     ') as agg_tbl ON drugtrials_findingresult.finding_name.finding_name = agg_tbl.finding_name.finding_name '
-    #     ') as tbl '
-    #     ' GROUP BY compound,tbl.findingresult,units,organism'
-    #     'HAVING AVG(value) IS NOT NULL ;'
-    # )
 
-    query = cursor.fetchall()
+    results = []
 
-    result = []
+    for finding in desired_drugtrials:
 
-    # What to do about returned dic?
-    for q in query:
+        drugtrial_data = FindingResult.objects.filter(finding_name__finding_name=finding,value__isnull=False)
+        #average = 0
+        min = 999999999
+        max = -999999999
 
-        if q[0] not in desired_compounds:
-            continue
-        if q[1] not in desired_drugtrials:
-            continue
+        for result in drugtrial_data:
+            value = result.value
+            #average += value
+            if value < min:
+                min = value
+            if value > max:
+                max = value
 
-        value = q[2]
+        #average = average / len(drugtrial_data)
 
-        if normalized:
-            value = q[4]
+        for result in drugtrial_data:
+            compound = result.drug_trial.compound.name
 
-        # Please note that negative and zero values ARE EXCLUDED
-        if log_scale:
-            if value <= 0:
-                continue
+            findingresult = result.finding_name.finding_name
 
-            value = np.log10(value)
+            value = result.value
 
-        result.append(
-            {
-                'compound': q[0],
-                'findingresult': q[1],
-                'value': value
-            }
-        )
+            if normalized:
+                try:
+                    value = (0.9999)*((value-min)/(max-min)) + 0.0001
+                except:
+                    value = 1
 
-    cursor.close()
+            # Please note that negative and zero values ARE EXCLUDED
+            if log_scale:
+                if value <= 0:
+                    continue
 
-    return result
+                value = np.log10(value)
+
+            results.append(
+                {
+                    'compound': compound,
+                    # Testing for now (contrived name)
+                    'target_bioactivity_pair': findingresult,
+                    'value': value
+                }
+            )
+
+
+    # # What to do about returned dic?
+    # for q in query:
+    #
+    #     value = q[2]
+    #
+    #     if normalized:
+    #         value = q[4]
+    #
+    #     # Please note that negative and zero values ARE EXCLUDED
+    #     if log_scale:
+    #         if value <= 0:
+    #             continue
+    #
+    #         value = np.log10(value)
+    #
+    #     result.append(
+    #         {
+    #             'compound': q[0],
+    #             'findingresult': q[1],
+    #             'value': value
+    #         }
+    #     )
+
+    return results
 
 
 def fetch_all_standard_mps_assay_data():
@@ -379,6 +393,16 @@ def heatmap(request):
         ) is True
     ]
 
+    desired_drugtrials = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'drugtrials_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
     # throw error if no compounds are selected
     if len(desired_compounds) < 1:
         return {'error': 'Select at least one compound.'}
@@ -401,6 +425,13 @@ def heatmap(request):
         desired_compounds,
         desired_targets,
         desired_bioactivities,
+        normalized,
+        log_scale
+    )
+
+    all_std_drugtrial = fetch_all_standard_drugtrials_data(
+        desired_compounds,
+        desired_drugtrials,
         normalized,
         log_scale
     )
@@ -432,6 +463,11 @@ def heatmap(request):
 
     data_order = ['compound', 'target_bioactivity_pair', 'value']
     rearranged_data = unwound_data[data_order]
+
+    if all_std_drugtrial:
+        drugtrial_df = pandas.DataFrame(all_std_drugtrial, columns=['compound', 'target_bioactivity_pair', 'value'])
+
+        rearranged_data = rearranged_data.append(drugtrial_df)
 
     # try to make heatmap folder and ignore the exception if the folder exists
     try:
@@ -474,7 +510,7 @@ def heatmap(request):
     )
 
     # Make rearranged values into a list for cluster
-    rearranged_data = unwound_data[data_order].values.tolist()
+    rearranged_data = rearranged_data.values.tolist()
 
     # Initially all compounds are valid
     valid_compounds = list(desired_compounds)
@@ -704,12 +740,14 @@ def cluster(request):
              'ro5_violations',
              'ro3_passes']
 
+    # This section is in dire need of refactoring
     # Update values for chemical properties (if chemical_properties)
     if chemical_properties:
         for prop in props:
             values = []
             for compound in valid_compounds:
                 # Get data for prop here
+                # This is a rather inefficient means of acquiring data
                 values.append(Compound.objects.get(name=compound).__dict__.get(prop))
             # Get median from list after excluding all None values
             median = np.median(np.array([value for value in values if value != None]))
