@@ -731,14 +731,20 @@ def cluster(request):
             if bioactivity not in bioactivities:
                 bioactivities[bioactivity] = True
 
+        # Only grab valid compounds (TEST)
+        if not chemical_properties:
+            valid_compounds = [compound for compound in desired_compounds if compound in initial_dic]
+        else:
+            valid_compounds = desired_compounds
+
         # Fill in missing data with zeroes
         for bioactivity in bioactivities:
-            for compound in initial_dic:
+            for compound in valid_compounds:
+                # For when absolutely no drugtrial or bioactivity data exists for the compound
+                if not compound in initial_dic:
+                    initial_dic[compound][bioactivity] = None
                 if not bioactivity in initial_dic[compound]:
                     initial_dic[compound][bioactivity] = None
-
-        # Only grab valid compounds (TEST)
-        valid_compounds = [compound for compound in desired_compounds if compound in initial_dic]
 
         # Rearrange for final data
         data['compounds'] = valid_compounds
