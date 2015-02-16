@@ -588,6 +588,11 @@ def heatmap(request):
                 values.append(initial_dic[compound][bioactivity])
             # Get median from list after excluding all None values
             median = np.median(np.array([value for value in values if value != None]))
+            maximum = max(values)
+
+            # Avoid anomalies by arbitrarily putting median to 10% when max == median
+            if median == maximum:
+                median = median * 0.1
             # Convert values such that there are no None values
             values = [value if value != None else median for value in values]
             data.update({bioactivity:values})
@@ -804,6 +809,11 @@ def cluster(request):
                 values.append(initial_dic[compound][bioactivity])
             # Get median from list after excluding all None values
             median = np.median(np.array([value for value in values if value != None]))
+            maximum = max(values)
+
+            # Avoid anomalies by arbitrarily putting median to 10% when max == median
+            if median == maximum:
+                median = median * 0.1
             # Convert values such that there are no None values
             values = [value if value != None else median for value in values]
             data.update({bioactivity:values})
@@ -832,6 +842,12 @@ def cluster(request):
                 values.append(compound.get(prop,None))
             # Get median from list after excluding all None values
             median = np.median(np.array([value for value in values if value != None]))
+            maximum = max(values)
+
+            # Avoid anomalies by arbitrarily putting median to 10% when max == median
+            if median == maximum:
+                median = median * 0.1
+
             # Convert values such that there are no None values
             values = [value if value != None else median for value in values]
             data.update({prop:values})
