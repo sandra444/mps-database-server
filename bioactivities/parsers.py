@@ -404,16 +404,12 @@ def heatmap(request):
     ]
 
     # throw error if no compounds are selected
-    if len(desired_compounds) < 1:
+    if not desired_compounds:
         return {'error': 'Select at least one compound.'}
 
-    # throw error if no targets are selected
-    if len(desired_targets) < 1:
-        return {'error': 'Select at least one target.'}
-
-    # throw error if no bioactivities are selected
-    if len(desired_bioactivities) < 1:
-        return {'error': 'Select at least one bioactivity.'}
+    # throw error if no drugtrials or no pairs are chosen
+    if not desired_bioactivities and not desired_targets and not desired_drugtrials:
+        return {'error': 'Select at least one target and at least one bioactivity or at least one drugtrial.'}
 
     log_scale = request_filter.get('log_scale')
     normalized = request_filter.get('normalize_bioactivities')
@@ -436,33 +432,35 @@ def heatmap(request):
         log_scale
     )
 
-    if not all_std_bioactivities:
-        return {'error': 'no standard bioactivities'}
-    if len(all_std_bioactivities) == 0:
-        return {'error': 'standard bioactivities zero length'}
+    if not all_std_bioactivities and not all_std_drugtrial:
+        return {'error': 'no standard bioactivities or drugtrial data'}
 
-    bioactivities_data = pandas.DataFrame(
-        all_std_bioactivities,
-        columns=['compound', 'target', 'bioactivity', 'value']
-    ).fillna(0)
+    if all_std_bioactivities:
+        bioactivities_data = pandas.DataFrame(
+            all_std_bioactivities,
+            columns=['compound', 'target', 'bioactivity', 'value']
+        ).fillna(0)
 
-    pivoted_data = pandas.pivot_table(
-        bioactivities_data,
-        values='value',
-        cols=['target', 'bioactivity'],
-        rows='compound'
-    )
+        pivoted_data = pandas.pivot_table(
+            bioactivities_data,
+            values='value',
+            cols=['target', 'bioactivity'],
+            rows='compound'
+        )
 
-    unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
+        unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
 
-    unwound_data['target_bioactivity_pair'] = \
-        unwound_data['target'] + '_ ' + unwound_data['bioactivity']
+        unwound_data['target_bioactivity_pair'] = \
+            unwound_data['target'] + '_ ' + unwound_data['bioactivity']
 
-    del unwound_data['target']
-    del unwound_data['bioactivity']
+        del unwound_data['target']
+        del unwound_data['bioactivity']
 
-    data_order = ['compound', 'target_bioactivity_pair', 'value']
-    rearranged_data = unwound_data[data_order]
+        data_order = ['compound', 'target_bioactivity_pair', 'value']
+        rearranged_data = unwound_data[data_order]
+
+    else:
+        rearranged_data = pandas.DataFrame()
 
     if all_std_drugtrial:
         drugtrial_df = pandas.DataFrame(all_std_drugtrial, columns=['compound', 'target_bioactivity_pair', 'value'])
@@ -519,7 +517,7 @@ def heatmap(request):
     # List of all unique bioactivities
     bioactivities = {}
 
-    if len(all_std_bioactivities) != 0:
+    if all_std_bioactivities or all_std_drugtrial:
 
         # Initial dictionary before final data
         initial_dic = dic()
@@ -534,7 +532,7 @@ def heatmap(request):
             if bioactivity not in bioactivities:
                 bioactivities[bioactivity] = True
 
-        # Fill in missing data with zeroes
+        # Fill in missing data with None
         for bioactivity in bioactivities:
             for compound in initial_dic:
                 if not bioactivity in initial_dic[compound]:
@@ -562,7 +560,7 @@ def heatmap(request):
     # For *Rows*
 
     # Determine distances (default is Euclidean)
-    # The data frame should encompass all of the bioactivities
+    # The data frame should encompass all of the bioactivities and drugtrials
     frame = [bioactivity for bioactivity in bioactivities]
     dataMatrix = np.array(df[frame])
     distMat = scipy.spatial.distance.pdist(dataMatrix, metric=metric)
@@ -684,9 +682,9 @@ def cluster(request):
     # List of all unique bioactivities
     bioactivities = {}
 
-    if len(all_std_bioactivities) != 0 or len(all_std_drugtrial) != 0:
+    if all_std_bioactivities or all_std_drugtrial:
 
-        if len(all_std_bioactivities) != 0:
+        if all_std_bioactivities:
             bioactivities_data = pandas.DataFrame(
                 all_std_bioactivities,
                 columns=['compound', 'target', 'bioactivity', 'value']
@@ -770,7 +768,6 @@ def cluster(request):
     # list of dics of compounds (creating this prevents excessive calls to the database
     compound_data = Compound.objects.filter(name__in=valid_compounds).values()
 
-    # This section is in dire need of refactoring
     # Update values for chemical properties (if chemical_properties)
     if chemical_properties:
         for prop in props:
