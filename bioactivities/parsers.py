@@ -249,7 +249,7 @@ def fetch_all_standard_drugtrials_data(
 
     for finding in desired_drugtrials:
 
-        drugtrial_data = FindingResult.objects.filter(finding_name__finding_name=finding,value__isnull=False)
+        drugtrial_data = FindingResult.objects.filter(finding_name__finding_name=finding,value__isnull=False,drug_trial__compound__name__in=desired_compounds)
         #average = 0
         min = 999999999
         max = -999999999
