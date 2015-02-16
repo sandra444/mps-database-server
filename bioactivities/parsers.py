@@ -44,7 +44,7 @@ def generate_list_of_all_data_in_bioactivities(organisms, targets):
     bioactivities_data = generate_list_of_all_bioactivities_in_bioactivities()
     compounds_data = generate_list_of_all_compounds_in_bioactivities()
     targets_data = generate_list_of_all_targets_in_bioactivities(organisms, targets)
-    drugtrial_data = generate_list_of_all_drugtrials()
+    drugtrial_data = generate_list_of_all_drugtrials(organisms)
 
     result = {'bioactivities':bioactivities_data,
               'compounds':compounds_data,
@@ -119,19 +119,34 @@ def generate_list_of_all_targets_in_bioactivities(organisms, targets):
 
 # Worry about filtering by organism later
 # FK for organism is a little odd right now
-def generate_list_of_all_drugtrials():
-    cursor = connection.cursor()
+def generate_list_of_all_drugtrials(desired_organisms):
 
-    cursor.execute(
-        'SELECT drugtrials_finding.finding_name '
-        'FROM drugtrials_finding '
-        'INNER JOIN drugtrials_findingresult '
-        'ON drugtrials_finding.id=drugtrials_findingresult.finding_name_id '
-        'WHERE drugtrials_findingresult.value IS NOT NULL;'
-    )
+    # TODO
+    # This requires refactoring, magic conversion tables are not good practice
+    organisms = {
+        'Homo Sapiens': 'Human',
+        'Rattus Norvegicus': 'Rat',
+        'Canis Lupus Familiaris': 'Dog'
+    }
 
-    result = generate_record_frequency_data(cursor.fetchall())
-    cursor.close()
+    desired_organisms = [organisms.get(organism,'') for organism in desired_organisms]
+
+    result = FindingResult.objects.filter(value__isnull=False,drug_trial__species__species_name__in=desired_organisms).values_list('finding_name__finding_name', flat=True)
+
+    result = generate_record_frequency_data(result)
+
+    # cursor = connection.cursor()
+    #
+    # cursor.execute(
+    #     'SELECT drugtrials_finding.finding_name '
+    #     'FROM drugtrials_finding '
+    #     'INNER JOIN drugtrials_findingresult '
+    #     'ON drugtrials_finding.id=drugtrials_findingresult.finding_name_id '
+    #     'WHERE drugtrials_findingresult.value IS NOT NULL;'
+    # )
+    #
+    # result = generate_record_frequency_data(cursor.fetchall())
+    # cursor.close()
 
     return result
 
@@ -237,9 +252,20 @@ def fetch_all_standard_bioactivities_data(
 def fetch_all_standard_drugtrials_data(
         desired_compounds,
         desired_drugtrials,
+        desired_organisms,
         normalized,
         log_scale
 ):
+
+    # TODO
+    # This requires refactoring, magic conversion tables are not good practice
+    organisms = {
+        'Homo Sapiens': 'Human',
+        'Rattus Norvegicus': 'Rat',
+        'Canis Lupus Familiaris': 'Dog'
+    }
+
+    desired_organisms = [organisms.get(organism,'') for organism in desired_organisms]
 
     # TODO: FIXME
     # Nonstandard values?
@@ -249,7 +275,7 @@ def fetch_all_standard_drugtrials_data(
 
     for finding in desired_drugtrials:
 
-        drugtrial_data = FindingResult.objects.filter(finding_name__finding_name=finding,value__isnull=False,drug_trial__compound__name__in=desired_compounds)
+        drugtrial_data = FindingResult.objects.filter(finding_name__finding_name=finding,value__isnull=False,drug_trial__compound__name__in=desired_compounds,drug_trial__species__species_name__in=desired_organisms)
         #average = 0
         min = 999999999
         max = -999999999
@@ -403,6 +429,16 @@ def heatmap(request):
         ) is True
     ]
 
+    desired_organisms = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'organisms_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
     # throw error if no compounds are selected
     if not desired_compounds:
         return {'error': 'Select at least one compound.'}
@@ -428,6 +464,7 @@ def heatmap(request):
     all_std_drugtrial = fetch_all_standard_drugtrials_data(
         desired_compounds,
         desired_drugtrials,
+        desired_organisms,
         normalized,
         log_scale
     )
@@ -643,6 +680,16 @@ def cluster(request):
         ) is True
     ]
 
+    desired_organisms = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'organisms_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
     # throw error if only one compound is selected (can not cluster just one)
     if len(desired_compounds) < 2:
         return {'error': 'require more than one compound to cluster'}
@@ -667,6 +714,7 @@ def cluster(request):
     all_std_drugtrial = fetch_all_standard_drugtrials_data(
         desired_compounds,
         desired_drugtrials,
+        desired_organisms,
         normalized,
         log_scale
     )
