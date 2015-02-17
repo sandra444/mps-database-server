@@ -28,11 +28,11 @@ class URLFieldWidget(AdminURLFieldWidget):
             u'</div>' \
             u'<div style="float: right; z-index: 10;' \
             u' margin-top: -3em; margin-right: -25em;">' \
-            u'<input type="button" onclick="window.open(document.getElementById(\'{1}\').value, \'_newtab\');" ' \
-            u'value="Open Link in New Tab">' \
-            u'<input type="button" onclick="window.open(document.getElementById(\'{1}\').value, \'win\', ' \
+            u'<button type="button" onclick="window.open(document.getElementById(\'{1}\').value, \'_newtab\');" ' \
+            u'>Open Link in New Tab</button>' \
+            u'<button type="button" onclick="window.open(document.getElementById(\'{1}\').value, \'win\', ' \
             u'\'toolbars=0,width=800,height=800,left=200,top=200,scrollbars=1,resizable=1\');" ' \
-            u'value="Open Link in New Window">' \
+            u'>Open Link in New Window</button>' \
             u'</div>' \
             u'</div>'.format(widget, attrs['id'])
 

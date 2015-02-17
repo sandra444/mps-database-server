@@ -72,7 +72,7 @@
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li title="Administrative interface for authorized users only"><a href="/admin">Admin</a></li>
-            <li title="Add or view assay data" class="dropdown">
+            <li title="Add, edit, or view assay data" class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown">Assays<span class="caret"></span></a>
                 <ul class="dropdown-menu" role="menu">
                   <li class="dropdown-header">Add/Edit Studies</li>
@@ -125,6 +125,7 @@
                       <li><a href="/compounds/add">Add Compound</a></li>
                   </ul>
               </li>
+              <li title="Give feedback, ask questions, or view the knowledge base"><a style="color: rgb(0,0,255)" href="/feedback">Feedback</a></li>
               </ul>
           <ul class="nav navbar-nav navbar-right">
               {% if user.is_active %}
@@ -176,8 +177,9 @@
                 </div>
                 <div class="col-xs-3">
                     <span class="pull-right">
-                    <a href="https://github.com/UPDDI">Contribute on Github</a>
-                    <br>
+                        <a href="/feedback/">Give Feedback</a>
+                        <br>
+                        <a href="https://github.com/UPDDI">Contribute on Github</a>
 {#                    Add about section later#}
 {#                    <a href="#/about">About the MPS Project</a>#}
                 </span>

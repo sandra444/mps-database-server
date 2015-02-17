@@ -177,6 +177,7 @@ $(document).ready(function () {
         bioactivities_filter = [];
         targets_filter = [];
         compounds_filter = [];
+        drugtrials_filter = [];
 
         // Get bioactivities
         $("#bioactivities input[type='checkbox']:checked").each( function() {
@@ -191,6 +192,11 @@ $(document).ready(function () {
         // Get compounds
         $("#compounds input[type='checkbox']:checked").each( function() {
             compounds_filter.push({"name":this.value, "is_selected":this.checked});
+        });
+
+        // Get drugtrials
+        $("#drugtrials input[type='checkbox']:checked").each( function() {
+            drugtrials_filter.push({"name":this.value, "is_selected":this.checked});
         });
 
         // Hide Selection html
@@ -212,6 +218,7 @@ $(document).ready(function () {
                 'bioactivities_filter': bioactivities_filter,
                 'targets_filter': targets_filter,
                 'compounds_filter': compounds_filter,
+                'drugtrials_filter': drugtrials_filter,
                 'target_types_filter': target_types,
                 'organisms_filter': organisms,
                 'log_scale': log_scale,
@@ -255,6 +262,46 @@ $(document).ready(function () {
         });
     }
 
+    // Get a list for checkboxes from returned AJAX data
+    function get_list(data) {
+        if (!data || data.length == 0) {
+            return [];
+        }
+
+        var result = [];
+        var i;
+        for (i = 0; i < data.length; i += 1) {
+            if (data[i][1] >= min_feat_count) {
+                result.push({
+                    name: data[i][0],
+                    is_selected: false
+                });
+            }
+        }
+
+        // Case insensitive sort
+        result = _.sortBy(result, function (i) { return i.name.toLowerCase(); });
+
+        return result;
+    }
+
+    // Function to reset the rows after refresh
+    function reset_rows(name,list,add) {
+        // Clear current
+        $('#' + name).html('');
+        // Add from list
+        for (var i in list) {
+            // Note added 'c' to avoid confusion with graphic
+            var row = "<tr id='" + add + list[i].name.replace(/ /g,"_") + "'>";
+            row += "<td>" + "<input type='checkbox' value='" + list[i].name + "'></td>";
+            row += "<td>" + list[i].name + "</td>";
+            $('#' + name).append( row );
+        }
+
+        // Reset select all box
+        $("#all_" + name).prop('checked',false);
+    }
+
     function refresh() {
 
         // Disable everything
@@ -273,54 +320,23 @@ $(document).ready(function () {
                 targets = get_list(json.targets);
                 compounds = get_list(json.compounds);
                 bioactivities = get_list(json.bioactivities);
+                drugtrials = get_list(json.drugtrials);
                 //console.log(targets);
                 //console.log(compounds);
                 //console.log(bioactivities);
+                //console.log(drugtrials);
 
-                // Case INSENSITIVE sort
-                targets = _.sortBy(targets, function (i) { return i.name.toLowerCase(); });
+                // Clear bioactivities
+                reset_rows('bioactivities',bioactivities,'');
 
                 // Clear targets
-                $('#targets').html('');
-                // Add targets
-                for (var i in targets) {
-                    var row = "<tr id='" + targets[i].name.replace(/ /g,"_") + "'>";
-                    row += "<td>" + "<input type='checkbox' value='" + targets[i].name + "'></td>";
-                    row += "<td>" + targets[i].name + "</td>";
-                    $('#targets').append( row );
-                }
-
-                // Case INSENSITIVE sort
-                compounds = _.sortBy(compounds, function (i) { return i.name.toLowerCase(); });
+                reset_rows('targets',targets,'');
 
                 // Clear compounds
-                $('#compounds').html('');
-                // Add compounds
-                for (var i in compounds) {
-                    // Note added 'c' to avoid confusion with graphic
-                    var row = "<tr id='c" + compounds[i].name.replace(/ /g,"_") + "'>";
-                    row += "<td>" + "<input type='checkbox' value='" + compounds[i].name + "'></td>";
-                    row += "<td>" + compounds[i].name + "</td>";
-                    $('#compounds').append( row );
-                }
+                reset_rows('compounds',compounds,'c');
 
-                // Case INSENSITIVE sort
-                bioactivities = _.sortBy(bioactivities, function (i) { return i.name.toLowerCase(); });
-
-                // Clear targets
-                $('#bioactivities').html('');
-                // Add targets
-                for (var i in bioactivities) {
-                    var row = "<tr id='" + bioactivities[i].name.replace(/ /g,"_") + "'>";
-                    row += "<td>" + "<input type='checkbox' value='" + bioactivities[i].name + "'></td>";
-                    row += "<td>" + bioactivities[i].name + "</td>";
-                    $('#bioactivities').append(row);
-                }
-
-                // Reset select all boxes
-                $("#all_bioactivities").prop('checked',false);
-                $("#all_targets").prop('checked',false);
-                $("#all_compounds").prop('checked',false);
+                // Clear drugtrials
+                reset_rows('drugtrials',drugtrials,'');
 
                 // Enable everything
                 $(":input").prop("disabled",false);
@@ -332,24 +348,6 @@ $(document).ready(function () {
                 $(":input").prop("disabled",false);
             }
         });
-    }
-
-    function get_list(data) {
-        if (!data || data.length == 0){
-            return [];
-        }
-
-        var result = [];
-        var i;
-        for (i = 0; i < data.length; i += 1) {
-            if (data[i][1] >= min_feat_count) {
-                result.push({
-                    name: data[i][0],
-                    is_selected: false
-                });
-            }
-        }
-        return result;
     }
 
 //    // Initial hash change
@@ -425,62 +423,43 @@ $(document).ready(function () {
         control_organisms.first().trigger('change');
     });
 
-    // Change all bioactivities
-    $('#all_bioactivities').change(function(evt) {
-        if (this.checked) {
-            $("#bioactivities input[type='checkbox']:visible").prop('checked', true);
-        }
-        else {
-            $("#bioactivities input[type='checkbox']:visible").prop('checked', false);
-        }
-    });
+    // Function to refactor redundant code
+    // Name is the general selector without #
+    function track_selections(name) {
+        // Check to see if the "select all" button has been clicked
+        $('#all_' + name).change(function(evt) {
+            // If the "all" box is checked, select all visible checkboxes
+            if (this.checked) {
+                $("#" + name + " input[type='checkbox']:visible").prop('checked', true);
+            }
+            // Otherwise deselect all checkboxes
+            else {
+                $("#" + name + " input[type='checkbox']:visible").prop('checked', false);
+            }
+        });
 
-    $("body").on( "change", "#bioactivities input[type='checkbox']", function(event) {
-        if ($("#bioactivities input[type='checkbox']:checked:visible").length == $("#bioactivities input[type='checkbox']:visible").length) {
-            $('#all_bioactivities').prop('checked', true);
-        }
-        else {
-            $('#all_bioactivities').prop('checked', false);
-        }
-    });
+        // Track when any row checkbox is clicked and discern whether all visible check boxes are checked, if so then check the "all" box
+        $("body").on( "change", "#" + name + " input[type='checkbox']", function(event) {
+            if ($("#" + name + " input[type='checkbox']:checked:visible").length == $("#" + name + " input[type='checkbox']:visible").length) {
+                $('#all_' + name).prop('checked', true);
+            }
+            else {
+                $('#all_' + name).prop('checked', false);
+            }
+        });
+    }
+
+    // Change all bioactivities
+    track_selections('bioactivities');
 
     // Change all targets
-    $('#all_targets').change(function(evt) {
-        if (this.checked) {
-            $("#targets input[type='checkbox']:visible").prop('checked', true);
-        }
-        else {
-            $("#targets input[type='checkbox']:visible").prop('checked', false);
-        }
-    });
-
-    $("body").on( "change", "#targets input[type='checkbox']", function(event) {
-        if ($("#targets input[type='checkbox']:checked:visible").length == $("#targets input[type='checkbox']:visible").length) {
-            $('#all_targets').prop('checked', true);
-        }
-        else {
-            $('#all_targets').prop('checked', false);
-        }
-    });
+    track_selections('targets');
 
     // Change all compounds
-    $('#all_compounds').change(function(evt) {
-        if (this.checked) {
-            $("#compounds input[type='checkbox']:visible").prop('checked', true);
-        }
-        else {
-            $("#compounds input[type='checkbox']:visible").prop('checked', false);
-        }
-    });
+    track_selections('compounds');
 
-    $("body").on( "change", "#compounds input[type='checkbox']", function(event) {
-        if ($("#compounds input[type='checkbox']:checked:visible").length == $("#compounds input[type='checkbox']:visible").length) {
-            $('#all_compounds').prop('checked', true);
-        }
-        else {
-            $('#all_compounds').prop('checked', false);
-        }
-    });
+    // Change all drugtrials
+    track_selections('drugtrials');
 
     // Initial min_feature count
     var min_feat_count = $('#minimum_feature_count').val();
@@ -528,10 +507,12 @@ $(document).ready(function () {
     var targets = [];
     var compounds = [];
     var bioactivities = [];
+    var drugtrials = [];
 
     var targets_filter = [];
     var compounds_filter = [];
     var bioactivities_filter = [];
+    var drugtrials_filter = [];
 
     refresh();
 
@@ -554,77 +535,57 @@ $(document).ready(function () {
     var bioactivity_search = $('#bioactivity_filter');
     var target_search = $('#target_filter');
     var compound_search = $('#compound_filter');
+    var drugtrial_search = $('#drugtrial_filter');
 
     var bioactivity_string = bioactivity_search.val().toLowerCase().replace(/ /g,"_");
     var target_string = target_search.val().toLowerCase().replace(/ /g,"_");
+    // Note added 'c' to compound string
     var compound_string = 'c' + compound_search.val().toLowerCase().replace(/ /g,"_");
+    var drugtrial_string = drugtrial_search.val().toLowerCase().replace(/ /g,"_");
+
+    // Function to reduce code
+    // search = selector for search filter
+    // string = the string typed into the input box
+    // selector = the string (no #) to identify what is being acted on
+    // add = string to add to the search values (used for compounds)
+    function search_filter(search,string,selector,add) {
+        search.on('input',function() {
+        // Note the added 'c' to avoid confusion in compounds
+        string = add + search.val().toLowerCase().replace(/ /g,"_");
+
+        // For every row in the given table
+        $("#" + selector + " tr").each(function() {
+                // If the row contains the requested string, do not hide it
+                if (this.id.toLowerCase().indexOf(string) > -1) {
+                    this.hidden = false;
+                }
+                // If it does not contain the string hide it
+                else {
+                    this.hidden = true;
+                }
+            });
+
+            // Check or uncheck all as necessary
+            if ($("#" + selector + " input[type='checkbox']:checked:visible").length == $("#" + selector + " input[type='checkbox']:visible").length) {
+                $('#all_' + selector).prop('checked', true);
+            }
+            else {
+                $('#all_' + selector).prop('checked', false);
+            }
+        }).trigger('input');
+    }
 
     // When the bioactivity search changes
-    bioactivity_search.on('input',function() {
-        bioactivity_string = bioactivity_search.val().toLowerCase().replace(/ /g,"_");
-
-        $("#bioactivities tr").each(function() {
-            if (this.id.toLowerCase().indexOf(bioactivity_string) > -1) {
-                this.hidden = false;
-            }
-            else {
-                this.hidden = true;
-            }
-        });
-
-        // Check or uncheck all as necessary
-        if ($("#bioactivities input[type='checkbox']:checked:visible").length == $("#bioactivities input[type='checkbox']:visible").length) {
-            $('#all_bioactivities').prop('checked', true);
-        }
-        else {
-            $('#all_bioactivities').prop('checked', false);
-        }
-    }).trigger('input');
+    search_filter(bioactivity_search,bioactivity_string,'bioactivities','');
 
     // When the target search changes
-    target_search.on('input',function() {
-        target_string = target_search.val().toLowerCase().replace(/ /g,"_");
-
-        $("#targets tr").each(function() {
-            if (this.id.toLowerCase().indexOf(target_string) > -1) {
-                this.hidden = false;
-            }
-            else {
-                this.hidden = true;
-            }
-        });
-
-        // Check or uncheck all as necessary
-        if ($("#targets input[type='checkbox']:checked:visible").length == $("#targets input[type='checkbox']:visible").length) {
-            $('#all_targets').prop('checked', true);
-        }
-        else {
-            $('#all_targets').prop('checked', false);
-        }
-    }).trigger('input');
+    search_filter(target_search,target_string,'targets','');
 
     // When the compound search changes
-    compound_search.on('input',function() {
-        // Note the added 'c' to avoid confusion
-        compound_string = 'c' + compound_search.val().toLowerCase().replace(/ /g,"_");
+    search_filter(compound_search,compound_string,'compounds','c');
 
-        $("#compounds tr").each(function() {
-            if (this.id.toLowerCase().indexOf(compound_string) > -1) {
-                this.hidden = false;
-            }
-            else {
-                this.hidden = true;
-            }
-        });
-
-        // Check or uncheck all as necessary
-        if ($("#compounds input[type='checkbox']:checked:visible").length == $("#compounds input[type='checkbox']:visible").length) {
-            $('#all_compounds').prop('checked', true);
-        }
-        else {
-            $('#all_compounds').prop('checked', false);
-        }
-    }).trigger('input');
+    // When the drugtrial search changes
+    search_filter(drugtrial_search,drugtrial_string,'drugtrials','');
 
 //    function hashChange() {
 //

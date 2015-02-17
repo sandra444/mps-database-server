@@ -16,6 +16,7 @@ import numpy as np
 
 from compounds.models import Compound
 from .models import Bioactivity
+from drugtrials.models import FindingResult
 
 from django.core import serializers
 
@@ -43,10 +44,12 @@ def generate_list_of_all_data_in_bioactivities(organisms, targets):
     bioactivities_data = generate_list_of_all_bioactivities_in_bioactivities()
     compounds_data = generate_list_of_all_compounds_in_bioactivities()
     targets_data = generate_list_of_all_targets_in_bioactivities(organisms, targets)
+    drugtrial_data = generate_list_of_all_drugtrials(organisms)
 
     result = {'bioactivities':bioactivities_data,
               'compounds':compounds_data,
-              'targets':targets_data
+              'targets':targets_data,
+              'drugtrials': drugtrial_data
             }
 
     return result
@@ -114,6 +117,38 @@ def generate_list_of_all_targets_in_bioactivities(organisms, targets):
 
     return result
 
+# Worry about filtering by organism later
+# FK for organism is a little odd right now
+def generate_list_of_all_drugtrials(desired_organisms):
+
+    # TODO
+    # This requires refactoring, magic conversion tables are not good practice
+    organisms = {
+        'Homo Sapiens': 'Human',
+        'Rattus Norvegicus': 'Rat',
+        'Canis Lupus Familiaris': 'Dog'
+    }
+
+    desired_organisms = [organisms.get(organism,'') for organism in desired_organisms]
+
+    result = FindingResult.objects.filter(value__isnull=False,drug_trial__species__species_name__in=desired_organisms).values_list('finding_name__finding_name', flat=True)
+
+    result = generate_record_frequency_data(result)
+
+    # cursor = connection.cursor()
+    #
+    # cursor.execute(
+    #     'SELECT drugtrials_finding.finding_name '
+    #     'FROM drugtrials_finding '
+    #     'INNER JOIN drugtrials_findingresult '
+    #     'ON drugtrials_finding.id=drugtrials_findingresult.finding_name_id '
+    #     'WHERE drugtrials_findingresult.value IS NOT NULL;'
+    # )
+    #
+    # result = generate_record_frequency_data(cursor.fetchall())
+    # cursor.close()
+
+    return result
 
 def generate_list_of_all_compounds_in_bioactivities():
     cursor = connection.cursor()
@@ -214,35 +249,101 @@ def fetch_all_standard_bioactivities_data(
     return result
 
 
-def fetch_all_standard_drugtrials_data():
-    # using values for now, FUTURE: use standardized_values
-    cursor = connection.cursor()
+def fetch_all_standard_drugtrials_data(
+        desired_compounds,
+        desired_drugtrials,
+        desired_organisms,
+        normalized,
+        log_scale
+):
+
+    # TODO
+    # This requires refactoring, magic conversion tables are not good practice
+    organisms = {
+        'Homo Sapiens': 'Human',
+        'Rattus Norvegicus': 'Rat',
+        'Canis Lupus Familiaris': 'Dog'
+    }
+
+    desired_organisms = [organisms.get(organism,'') for organism in desired_organisms]
 
     # TODO: FIXME
-    cursor.execute(
-        ''
-    )
+    # Nonstandard values?
+    # Please note that normalization now goes from 0.0001 to 1
 
-    # bioactivity is a tuple:
-    # (compound name, target name, the bioactivity, value)
-    # (0            , 1          , 2              , 3    )
-    query = cursor.fetchall()
+    results = []
 
-    result = []
+    for finding in desired_drugtrials:
 
-    for q in query:
-        result.append(
-            {
-                'compound': q[0],
-                'target': q[1],
-                'bioactivity': q[2],
-                'value': q[3]
-            }
-        )
+        drugtrial_data = FindingResult.objects.filter(finding_name__finding_name=finding,value__isnull=False,drug_trial__compound__name__in=desired_compounds,drug_trial__species__species_name__in=desired_organisms)
+        #average = 0
+        min = 999999999
+        max = -999999999
 
-    cursor.close()
+        for result in drugtrial_data:
+            value = result.value
+            #average += value
+            if value < min:
+                min = value
+            if value > max:
+                max = value
 
-    return result
+        #average = average / len(drugtrial_data)
+
+        for result in drugtrial_data:
+            compound = result.drug_trial.compound.name
+
+            findingresult = result.finding_name.finding_name
+
+            value = result.value
+
+            if normalized:
+                try:
+                    value = (0.9999)*((value-min)/(max-min)) + 0.0001
+                except:
+                    value = 1
+
+            # Please note that negative and zero values ARE EXCLUDED
+            if log_scale:
+                if value <= 0:
+                    continue
+
+                value = np.log10(value)
+
+            results.append(
+                {
+                    'compound': compound,
+                    # Testing for now (contrived name)
+                    'target_bioactivity_pair': findingresult,
+                    'value': value
+                }
+            )
+
+
+    # # What to do about returned dic?
+    # for q in query:
+    #
+    #     value = q[2]
+    #
+    #     if normalized:
+    #         value = q[4]
+    #
+    #     # Please note that negative and zero values ARE EXCLUDED
+    #     if log_scale:
+    #         if value <= 0:
+    #             continue
+    #
+    #         value = np.log10(value)
+    #
+    #     result.append(
+    #         {
+    #             'compound': q[0],
+    #             'findingresult': q[1],
+    #             'value': value
+    #         }
+    #     )
+
+    return results
 
 
 def fetch_all_standard_mps_assay_data():
@@ -318,17 +419,33 @@ def heatmap(request):
         ) is True
     ]
 
+    desired_drugtrials = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'drugtrials_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_organisms = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'organisms_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
     # throw error if no compounds are selected
-    if len(desired_compounds) < 1:
+    if not desired_compounds:
         return {'error': 'Select at least one compound.'}
 
-    # throw error if no targets are selected
-    if len(desired_targets) < 1:
-        return {'error': 'Select at least one target.'}
-
-    # throw error if no bioactivities are selected
-    if len(desired_bioactivities) < 1:
-        return {'error': 'Select at least one bioactivity.'}
+    # throw error if no drugtrials or no pairs are chosen
+    if not desired_bioactivities and not desired_targets and not desired_drugtrials:
+        return {'error': 'Select at least one target and at least one bioactivity or at least one drugtrial.'}
 
     log_scale = request_filter.get('log_scale')
     normalized = request_filter.get('normalize_bioactivities')
@@ -344,33 +461,48 @@ def heatmap(request):
         log_scale
     )
 
-    if not all_std_bioactivities:
-        return {'error': 'no standard bioactivities'}
-    if len(all_std_bioactivities) == 0:
-        return {'error': 'standard bioactivities zero length'}
-
-    bioactivities_data = pandas.DataFrame(
-        all_std_bioactivities,
-        columns=['compound', 'target', 'bioactivity', 'value']
-    ).fillna(0)
-
-    pivoted_data = pandas.pivot_table(
-        bioactivities_data,
-        values='value',
-        cols=['target', 'bioactivity'],
-        rows='compound'
+    all_std_drugtrial = fetch_all_standard_drugtrials_data(
+        desired_compounds,
+        desired_drugtrials,
+        desired_organisms,
+        normalized,
+        log_scale
     )
 
-    unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
+    if not all_std_bioactivities and not all_std_drugtrial:
+        return {'error': 'no standard bioactivities or drugtrial data'}
 
-    unwound_data['target_bioactivity_pair'] = \
-        unwound_data['target'] + '_ ' + unwound_data['bioactivity']
+    if all_std_bioactivities:
+        bioactivities_data = pandas.DataFrame(
+            all_std_bioactivities,
+            columns=['compound', 'target', 'bioactivity', 'value']
+        ).fillna(0)
 
-    del unwound_data['target']
-    del unwound_data['bioactivity']
+        pivoted_data = pandas.pivot_table(
+            bioactivities_data,
+            values='value',
+            cols=['target', 'bioactivity'],
+            rows='compound'
+        )
 
-    data_order = ['compound', 'target_bioactivity_pair', 'value']
-    rearranged_data = unwound_data[data_order]
+        unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
+
+        unwound_data['target_bioactivity_pair'] = \
+            unwound_data['target'] + '_ ' + unwound_data['bioactivity']
+
+        del unwound_data['target']
+        del unwound_data['bioactivity']
+
+        data_order = ['compound', 'target_bioactivity_pair', 'value']
+        rearranged_data = unwound_data[data_order]
+
+    else:
+        rearranged_data = pandas.DataFrame()
+
+    if all_std_drugtrial:
+        drugtrial_df = pandas.DataFrame(all_std_drugtrial, columns=['compound', 'target_bioactivity_pair', 'value'])
+
+        rearranged_data = rearranged_data.append(drugtrial_df)
 
     # try to make heatmap folder and ignore the exception if the folder exists
     try:
@@ -413,7 +545,7 @@ def heatmap(request):
     )
 
     # Make rearranged values into a list for cluster
-    rearranged_data = unwound_data[data_order].values.tolist()
+    rearranged_data = rearranged_data.values.tolist()
 
     # Initially all compounds are valid
     valid_compounds = list(desired_compounds)
@@ -422,7 +554,7 @@ def heatmap(request):
     # List of all unique bioactivities
     bioactivities = {}
 
-    if len(all_std_bioactivities) != 0:
+    if all_std_bioactivities or all_std_drugtrial:
 
         # Initial dictionary before final data
         initial_dic = dic()
@@ -437,7 +569,7 @@ def heatmap(request):
             if bioactivity not in bioactivities:
                 bioactivities[bioactivity] = True
 
-        # Fill in missing data with zeroes
+        # Fill in missing data with None
         for bioactivity in bioactivities:
             for compound in initial_dic:
                 if not bioactivity in initial_dic[compound]:
@@ -456,6 +588,11 @@ def heatmap(request):
                 values.append(initial_dic[compound][bioactivity])
             # Get median from list after excluding all None values
             median = np.median(np.array([value for value in values if value != None]))
+            maximum = max(values)
+
+            # Avoid anomalies by arbitrarily putting median to 10% when max == median
+            if median == maximum:
+                median = median * 0.1
             # Convert values such that there are no None values
             values = [value if value != None else median for value in values]
             data.update({bioactivity:values})
@@ -465,7 +602,7 @@ def heatmap(request):
     # For *Rows*
 
     # Determine distances (default is Euclidean)
-    # The data frame should encompass all of the bioactivities
+    # The data frame should encompass all of the bioactivities and drugtrials
     frame = [bioactivity for bioactivity in bioactivities]
     dataMatrix = np.array(df[frame])
     distMat = scipy.spatial.distance.pdist(dataMatrix, metric=metric)
@@ -538,6 +675,26 @@ def cluster(request):
         ) is True
     ]
 
+    desired_drugtrials = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'drugtrials_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_organisms = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'organisms_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
     # throw error if only one compound is selected (can not cluster just one)
     if len(desired_compounds) < 2:
         return {'error': 'require more than one compound to cluster'}
@@ -547,6 +704,11 @@ def cluster(request):
 
     # Whether or not to use chemical properties
     chemical_properties = request_filter.get('chemical_properties')
+
+    # throw error if no drugtrials or no pairs are chosen and chemical properties is not checked
+    if (not desired_bioactivities or not desired_targets) and not desired_drugtrials and not chemical_properties:
+        return {'error': 'Select at least one target and at least one bioactivity or at least one drugtrial.'}
+
 
     method = str(request_filter.get('method'))
     metric = str(request_filter.get('metric'))
@@ -559,11 +721,17 @@ def cluster(request):
         log_scale
     )
 
+    all_std_drugtrial = fetch_all_standard_drugtrials_data(
+        desired_compounds,
+        desired_drugtrials,
+        desired_organisms,
+        normalized,
+        log_scale
+    )
+
     # Should throw error only if no chemical_properties and no bioactivities
-    if not all_std_bioactivities and not chemical_properties:
+    if not all_std_drugtrial and not all_std_bioactivities and not chemical_properties:
         return {'error': 'no standard bioactivities'}
-    if len(all_std_bioactivities) == 0 and not chemical_properties:
-        return {'error': 'standard bioactivities zero length'}
 
     # Initially all compounds are valid
     valid_compounds = list(desired_compounds)
@@ -572,29 +740,41 @@ def cluster(request):
     # List of all unique bioactivities
     bioactivities = {}
 
-    if len(all_std_bioactivities) != 0:
-        bioactivities_data = pandas.DataFrame(
-            all_std_bioactivities,
-            columns=['compound', 'target', 'bioactivity', 'value']
-        ).fillna(0)
+    if all_std_bioactivities or all_std_drugtrial:
 
-        pivoted_data = pandas.pivot_table(
-            bioactivities_data,
-            values='value',
-            cols=['target', 'bioactivity'],
-            rows='compound'
-        )
+        if all_std_bioactivities:
+            bioactivities_data = pandas.DataFrame(
+                all_std_bioactivities,
+                columns=['compound', 'target', 'bioactivity', 'value']
+            ).fillna(0)
 
-        unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
+            pivoted_data = pandas.pivot_table(
+                bioactivities_data,
+                values='value',
+                cols=['target', 'bioactivity'],
+                rows='compound'
+            )
 
-        unwound_data['target_bioactivity_pair'] = \
-            unwound_data['target'] + '_ ' + unwound_data['bioactivity']
+            unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
 
-        del unwound_data['target']
-        del unwound_data['bioactivity']
+            unwound_data['target_bioactivity_pair'] = \
+                unwound_data['target'] + '_ ' + unwound_data['bioactivity']
 
-        data_order = ['compound', 'target_bioactivity_pair', 'value']
-        rearranged_data = unwound_data[data_order].values.tolist()
+            del unwound_data['target']
+            del unwound_data['bioactivity']
+
+            data_order = ['compound', 'target_bioactivity_pair', 'value']
+            rearranged_data = unwound_data[data_order]
+
+        else:
+            rearranged_data = pandas.DataFrame()
+
+        if all_std_drugtrial:
+            drugtrial_df = pandas.DataFrame(all_std_drugtrial, columns=['compound', 'target_bioactivity_pair', 'value'])
+
+            rearranged_data = rearranged_data.append(drugtrial_df)
+
+        rearranged_data = rearranged_data.values.tolist()
 
         # Initial dictionary before final data
         initial_dic = dic()
@@ -609,14 +789,20 @@ def cluster(request):
             if bioactivity not in bioactivities:
                 bioactivities[bioactivity] = True
 
+        # Only grab valid compounds (TEST)
+        if not chemical_properties:
+            valid_compounds = [compound for compound in desired_compounds if compound in initial_dic]
+        else:
+            valid_compounds = desired_compounds
+
         # Fill in missing data with zeroes
         for bioactivity in bioactivities:
-            for compound in initial_dic:
+            for compound in valid_compounds:
+                # For when absolutely no drugtrial or bioactivity data exists for the compound
+                if not compound in initial_dic:
+                    initial_dic[compound][bioactivity] = None
                 if not bioactivity in initial_dic[compound]:
                     initial_dic[compound][bioactivity] = None
-
-        # Only grab valid compounds (TEST)
-        valid_compounds = [compound for compound in desired_compounds if compound in initial_dic]
 
         # Rearrange for final data
         data['compounds'] = valid_compounds
@@ -628,6 +814,11 @@ def cluster(request):
                 values.append(initial_dic[compound][bioactivity])
             # Get median from list after excluding all None values
             median = np.median(np.array([value for value in values if value != None]))
+            maximum = max(values)
+
+            # Avoid anomalies by arbitrarily putting median to 10% when max == median
+            if median == maximum:
+                median = median * 0.1
             # Convert values such that there are no None values
             values = [value if value != None else median for value in values]
             data.update({bioactivity:values})
@@ -643,15 +834,25 @@ def cluster(request):
              'ro5_violations',
              'ro3_passes']
 
+    # list of dics of compounds (creating this prevents excessive calls to the database
+    compound_data = Compound.objects.filter(name__in=valid_compounds).values()
+
     # Update values for chemical properties (if chemical_properties)
     if chemical_properties:
         for prop in props:
             values = []
-            for compound in valid_compounds:
+            for compound in compound_data:
                 # Get data for prop here
-                values.append(Compound.objects.get(name=compound).__dict__.get(prop))
+                # This is a rather inefficient means of acquiring data
+                values.append(compound.get(prop,None))
             # Get median from list after excluding all None values
             median = np.median(np.array([value for value in values if value != None]))
+            maximum = max(values)
+
+            # Avoid anomalies by arbitrarily putting median to 10% when max == median
+            if median == maximum:
+                median = median * 0.1
+
             # Convert values such that there are no None values
             values = [value if value != None else median for value in values]
             data.update({prop:values})
@@ -718,14 +919,13 @@ def cluster(request):
 
     compounds = {}
 
-    for compound in desired_compounds:
-        compound = Compound.objects.get(name=compound)
-        CHEMBL = compound.chemblid
-        name = compound.name
-        known_drug = compound.known_drug
-        ro3 = compound.ro3_passes
-        ro5 = compound.ro5_violations
-        species = compound.species
+    for compound in compound_data:
+        CHEMBL = compound.get('chemblid')
+        name = compound.get('name')
+        known_drug = compound.get('known_drug')
+        ro3 = compound.get('ro3_passes')
+        ro5 = compound.get('ro5_violations')
+        species = compound.get('species')
         data ={
             'CHEMBL': CHEMBL,
             'name': name,
