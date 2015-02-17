@@ -705,6 +705,11 @@ def cluster(request):
     # Whether or not to use chemical properties
     chemical_properties = request_filter.get('chemical_properties')
 
+    # throw error if no drugtrials or no pairs are chosen and chemical properties is not checked
+    if (not desired_bioactivities or not desired_targets) and not desired_drugtrials and not chemical_properties:
+        return {'error': 'Select at least one target and at least one bioactivity or at least one drugtrial.'}
+
+
     method = str(request_filter.get('method'))
     metric = str(request_filter.get('metric'))
 
