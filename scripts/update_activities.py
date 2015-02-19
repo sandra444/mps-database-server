@@ -8,7 +8,7 @@ from compounds.models import Compound, chembl_compound
 from bioactivities.models import Assay, Target, Bioactivity
 from bioactivities.models import chembl_target, chembl_assay
 
-from bioservices import ChEMBLdb
+from bioservices import ChEMBL as ChEMBLdb
 from bioservices.services import BioServicesError
 
 FIELDS = {
@@ -64,7 +64,7 @@ def run(days=180):
              datetime.timedelta(days)):
             ncomp += 1
 
-            try:            
+            try:
                 acts = chembl.get_compounds_activities(str(compound.chemblid))
             except BioServicesError:
                 continue
