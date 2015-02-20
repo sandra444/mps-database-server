@@ -56,9 +56,11 @@ $(document).ready(function () {
             var current = $('#'+title+'-'+i);
 
             // Need to update values before creating the replacement text
+            // Add values to input
             $('#'+ title +'-'+ i + ' input').each(function () {
                 $(this).attr("value", this.value);
             });
+            // Add selected attribute to selected option of each select
             $('#'+ title +'-'+ i + ' select').each(function (){
                 //console.log(this.id);
                 $('#' + this.id + ' option[value="' + $(this).val() + '"]').attr("selected", true);
