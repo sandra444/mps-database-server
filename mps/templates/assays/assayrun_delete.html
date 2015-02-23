@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    {# Perhaps links to delete pages can be placed in the update page, similar to the admin #}
+    {# It would be nice to display all children that will be deleted, again, something like in the admin #}
+
+    <form method="post">{% csrf_token %}
+        <h3 style="color: #FF0000">Are you sure you want to delete "{{ object }}" ?</h3>
+
+        <button type="submit" class="btn btn-danger">Confirm Deletion</button>
+    </form>
+
+{% endblock %}

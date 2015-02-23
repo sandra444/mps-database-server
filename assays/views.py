@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from django.views.generic import ListView, CreateView, DetailView, UpdateView
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from assays.models import *
 from cellsamples.models import CellSample
 from assays.admin import *
@@ -8,7 +8,7 @@ from assays.forms import *
 from django import forms
 
 from django.forms.models import inlineformset_factory
-from django.views.generic.edit import CreateView
+# from django.views.generic.edit import CreateView
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
@@ -272,6 +272,26 @@ class AssayRunUpdate(LoginRequiredMixin, UpdateView):
             return self.render_to_response(
             self.get_context_data(form=form,
                                   groups=groups))
+
+
+class AssayRunDelete(LoginRequiredMixin, DeleteView):
+    model = AssayRun
+    template_name = 'assays/assayrun_delete.html'
+    success_url = '/'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        # Deny access if not the CREATOR
+        # Note the call for request.user.is_authenticated
+        # Interestingly, Django wraps request.user until it is accessed
+        # Thus, to perform this comparison it is necessary to access request.user via authentication
+        # (It may be more robust to call this elsewhere as well)
+        if not request.user.is_authenticated() or request.user != self.object.created_by:
+            raise PermissionDenied()
+
+        return self.render_to_response(
+            self.get_context_data())
 
 
 # Class based view for chip setups

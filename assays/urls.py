@@ -11,6 +11,8 @@ urlpatterns = patterns('',
     url(r'^assays/(?P<study_id>[0-9]+)/$', StudyIndex.as_view(), name='study_index'),
     # Update page for studies
     url(r'^assays/(?P<pk>[0-9]+)/update/$', AssayRunUpdate.as_view(), name='study-update'),
+    # Delete view for studies
+    url(r'^assays/(?P<pk>[0-9]+)/delete/$', AssayRunDelete.as_view(), name='study-delete'),
     # # Change pages for respective models
     url(r'^assays/assaychipsetup/(?P<pk>[0-9]+)/update/$', AssayChipSetupUpdate.as_view(), name='setup_update'),
     url(r'^assays/assaychipreadout/(?P<pk>[0-9]+)/update/$', AssayChipReadoutUpdate.as_view(), name='readout_update'),
