@@ -32,7 +32,7 @@ class CellSampleAdd(LoginRequiredMixin, CreateView):
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Cell Sample
             self.object.save()
-            return redirect('/')
+            return redirect('/cellsamples/cellsample')
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -80,9 +80,9 @@ class CellSampleUpdate(LoginRequiredMixin, UpdateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 class CellSampleList(ListView):
-    #model = FindingResult
     template_name = 'cellsamples/cellsample_list.html'
 
     def get_queryset(self):
-        queryset = CellSample.objects.prefetch_related('cell_type', 'supplier').select_related('cell_type__cell_subtype', 'cell_type__organ').all()
+        groups = self.request.user.groups.values_list('id', flat=True)
+        queryset = CellSample.objects.filter(group__in=groups).prefetch_related('cell_type', 'supplier').select_related('cell_type__cell_subtype', 'cell_type__organ')
         return queryset
