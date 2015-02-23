@@ -134,7 +134,7 @@
             <b>Fluid Volume:</b>
         </div>
         <div class="col-sm-9 lead">
-            {{ object.device_fluid_volume|default:'Unspecified' }}
+            {{ object.device_fluid_volume|default:'Unspecified' }} {{ object.device_fluid_volume_unit|default:'' }}
         </div>
     </div>
 
