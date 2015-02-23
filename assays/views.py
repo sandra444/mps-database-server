@@ -197,8 +197,11 @@ class AssayRunDetail(LoginRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.restricted and not has_group(request.user, self.object.group):
-            raise PermissionDenied
+        # If user CAN edit the item, redirect to the respective edit page
+        if has_group(request.user, self.object.group):
+            return redirect('/assays/' + str(self.object.id))
+        elif self.object.restricted:
+            raise PermissionDenied()
         context = self.get_context_data(object=self.object)
         context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object).prefetch_related('assay_run_id',
                                                                                                      'device',
@@ -369,8 +372,13 @@ class AssayChipSetupDetail(LoginRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.assay_run_id.restricted and not has_group(request.user, self.object.assay_run_id.group):
-            raise PermissionDenied
+        # If user CAN edit the item, redirect to the respective edit page
+        if has_group(request.user, self.object.assay_run_id.group):
+            return HttpResponseRedirect('update/')
+        elif self.object.assay_run_id.restricted:
+            raise PermissionDenied()
+        # if self.object.assay_run_id.restricted and not has_group(request.user, self.object.assay_run_id.group):
+        #     raise PermissionDenied
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
 
@@ -532,9 +540,14 @@ class AssayChipReadoutDetail(LoginRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.chip_setup.assay_run_id.restricted and not has_group(request.user,
-                                                                            self.object.chip_setup.assay_run_id.group):
-            raise PermissionDenied
+        # If user CAN edit the item, redirect to the respective edit page
+        if has_group(request.user,self.object.chip_setup.assay_run_id.group):
+            return HttpResponseRedirect('update/')
+        elif self.object.chip_setup.assay_run_id.restricted:
+            raise PermissionDenied()
+        # if self.object.chip_setup.assay_run_id.restricted and not has_group(request.user,
+        #                                                                     self.object.chip_setup.assay_run_id.group):
+        #     raise PermissionDenied
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
 
@@ -702,9 +715,14 @@ class AssayTestResultDetail(LoginRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.assay_device_readout.restricted and not has_group(request.user,
-                                                                         self.object.assay_device_readout.group):
-            raise PermissionDenied
+        # If user CAN edit the item, redirect to the respective edit page
+        if has_group(request.user,self.object.assay_device_readout.group):
+            return HttpResponseRedirect('update/')
+        elif self.object.assay_device_readout.restricted:
+            raise PermissionDenied()
+        # if self.object.assay_device_readout.restricted and not has_group(request.user,
+        #                                                                  self.object.assay_device_readout.group):
+        #     raise PermissionDenied
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
 
