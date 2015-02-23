@@ -79,35 +79,15 @@
                   <li title="Index of all the studies created by you"><a href="/assays/user_index">My Studies</a></li>
                   <li title="Index of all the studies created by groups you are a member of"><a href="/assays/group_index">Group Studies</a></li>
                   <li class="divider"></li>
-{#                  Old List/Detail views, consider removing soon#}
                   <li title="Lists all public data (does not contain add interface)" class="dropdown-header">View All Public Data</li>
                   <li><a href="/assays/organchipstudy">Studies</a></li>
                   <li><a href="/assays/assaychipsetup">Setups</a></li>
                   <li><a href="/assays/assaychipreadout">Readouts</a></li>
                   <li><a href="/assays/assaytestresult">Results</a></li>
                 </ul>
-{#              <ul class="dropdown-menu" role="menu">#}
-{#                <li class="dropdown-header">Organ Chip Study</li>#}
-{#                <li><a href="/assays/organchipstudy">View Studies</a></li>#}
-{#                <li><a href="/assays/organchipstudy/add">Add Study</a></li>#}
-{#                <li class="divider"></li>#}
-{#                <li class="dropdown-header">Chip Setup</li>#}
-{#                <li><a href="/assays/assaychipsetup">View Setups</a></li>#}
-{#                <li><a href="/assays/assaychipsetup/add">Add Setup</a></li>#}
-{#                <li class="divider"></li>#}
-{#                <li class="dropdown-header">Chip Readout</li>#}
-{#                <li><a href="/assays/assaychipreadout">View Readouts</a></li>#}
-{#                <li><a href="/assays/assaychipreadout/add">Add Readout</a></li>#}
-{#                <li class="divider"></li>#}
-{#                <li class="dropdown-header">Chip Test Result</li>#}
-{#                <li><a href="/assays/assaytestresult">View Results</a></li>#}
-{#                <li><a href="/assays/assaytestresult/add">Add Result</a></li>#}
-{#              </ul>#}
             </li>
             <li title="View organ models and microdevices"><a href="/microdevices">Models</a></li>
             <li title="View curated drug trial data"><a href="/drugtrials">Drug Trials</a></li>
-{#                <li><a href="/bioactivities/heatmap">Heatmap</a></li>#}
-{#                <li><a href="/bioactivities/cluster">Cluster</a></li>#}
               <li title="Analyze bioactivity data" class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown">Bioactivities<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
@@ -125,7 +105,7 @@
                       <li><a href="/compounds/add">Add Compound</a></li>
                   </ul>
               </li>
-              <li title="Give feedback, ask questions, or view the knowledge base"><a style="color: rgb(0,0,255)" href="/feedback">Feedback</a></li>
+              <li title="Give feedback, ask questions, or view the knowledge base"><a style="color: rgb(0,0,255)" onclick="window.open('/feedback/', 'win', 'toolbars=0,width=920,height=840,left=200,top=200,scrollbars=1,resizable=1')">Feedback</a></li>
               </ul>
           <ul class="nav navbar-nav navbar-right">
               {% if user.is_active %}
@@ -177,7 +157,7 @@
                 </div>
                 <div class="col-xs-3">
                     <span class="pull-right">
-                        <a href="/feedback/">Give Feedback</a>
+                        <a onclick="window.open('/feedback/', 'win', 'toolbars=0,width=920,height=840,left=200,top=200,scrollbars=1,resizable=1')">Give Feedback</a>
                         <br>
                         <a href="https://github.com/UPDDI">Contribute on Github</a>
 {#                    Add about section later#}
