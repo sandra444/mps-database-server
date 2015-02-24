@@ -461,8 +461,9 @@ class AssayChipSetupUpdate(LoginRequiredMixin, UpdateView):
 class AssayChipSetupDelete(LoginRequiredMixin, DeleteView):
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_delete.html'
-    # Need to think a bit about success_url
-    success_url = '/'
+
+    def get_success_url(self):
+        return '/assays/' + str(self.object.assay_run_id.id)
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -652,8 +653,9 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
 class AssayChipReadoutDelete(LoginRequiredMixin, DeleteView):
     model = AssayChipReadout
     template_name = 'assays/assaychipreadout_delete.html'
-    # Need to think a bit about success_url
-    success_url = '/'
+
+    def get_success_url(self):
+        return '/assays/' + str(self.object.chip_setup.assay_run_id.id)
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -841,8 +843,9 @@ class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
 class AssayTestResultDelete(LoginRequiredMixin, DeleteView):
     model = AssayTestResult
     template_name = 'assays/assaytestresult_delete.html'
-    # Need to think a bit about success_url
-    success_url = '/'
+
+    def get_success_url(self):
+        return '/assays/' + str(self.object.assay_device_readout.id)
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
