@@ -846,6 +846,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
     list_per_page = 100
     list_display = ('id',
                     'chip_setup',
+                    'assays',
                     'readout_start_time',
                     )
 

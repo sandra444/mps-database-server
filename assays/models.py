@@ -574,6 +574,15 @@ class AssayChipReadout(RestrictedModel):
                                                              '; Gray = Reading with null value'
                                                              ' ***Uploading overwrites old data***')
 
+    # Get a list of every assay for list view
+    def assays(self):
+        list_of_assays = []
+        assays = AssayChipReadoutAssay.objects.filter(readout_id=self.id).prefetch_related('assay_id','reader_id', 'readout_unit')
+        for assay in assays:
+            list_of_assays.append(str(assay))
+        # Convert to unicode for consistency
+        return u'{0}'.format(", ".join(list_of_assays))
+
     def assay_chip_name(self):
         return u'{0}'.format(AssayChipSetup.assay_chip_id)
 
