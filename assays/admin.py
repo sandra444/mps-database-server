@@ -846,7 +846,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
     list_per_page = 100
     list_display = ('id',
                     'chip_setup',
-                    'assays',
+
                     'readout_start_time',
                     )
 
@@ -859,6 +859,8 @@ class AssayChipReadoutAdmin(LockableAdmin):
                 'fields': (
                     (
                         'chip_setup'
+                # TODO ALTHOUGH IT SEEMS REDUNDANT, IT MAKES SENSE TO TIE TEST RESULTS TO A READOUT SO THEY DELETE TOGETHER
+                        #'chip_setup', 'chip_readout',
                     ),
                 )
             }
