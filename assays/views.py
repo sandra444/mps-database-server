@@ -293,8 +293,18 @@ class AssayRunDelete(LoginRequiredMixin, DeleteView):
         if not request.user.is_authenticated() or request.user != self.object.created_by:
             raise PermissionDenied()
 
-        return self.render_to_response(
-            self.get_context_data())
+        context = self.get_context_data()
+
+        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object.id).prefetch_related('compound','unit')
+        context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups'])
+        context['results'] = AssayTestResult.objects.filter(chip_setup=context['setups'])
+
+        # Check if this is setup only; if so add to add respective URLS; I Guess
+        # if request.GET.get('setup', ''):
+        #     context['setup_only'] = '/?setup=1'
+        # else:
+        #     context['setup_only'] = ''
+        return self.render_to_response(context)
 
 
 # Class based view for chip setups
@@ -472,8 +482,17 @@ class AssayChipSetupDelete(LoginRequiredMixin, DeleteView):
         if not request.user.is_authenticated() or request.user != self.object.created_by:
             raise PermissionDenied()
 
-        return self.render_to_response(
-            self.get_context_data())
+        context = self.get_context_data()
+
+        context['readouts'] = AssayChipReadout.objects.filter(chip_setup=self.object)
+        context['results'] = AssayTestResult.objects.filter(chip_setup=self.object)
+
+        # Check if this is setup only; if so add to add respective URLS; I Guess
+        # if request.GET.get('setup', ''):
+        #     context['setup_only'] = '/?setup=1'
+        # else:
+        #     context['setup_only'] = ''
+        return self.render_to_response(context)
 
 
 # Class based views for readouts
@@ -664,8 +683,11 @@ class AssayChipReadoutDelete(LoginRequiredMixin, DeleteView):
         if not request.user.is_authenticated() or request.user != self.object.created_by:
             raise PermissionDenied()
 
-        return self.render_to_response(
-            self.get_context_data())
+        context = self.get_context_data()
+
+        context['results'] = AssayTestResult.objects.filter(chip_setup=self.object.chip_setup)
+
+        return self.render_to_response(context)
 
 
 # Class-based views for studies
@@ -853,6 +875,9 @@ class AssayTestResultDelete(LoginRequiredMixin, DeleteView):
         # Deny access if not the CREATOR
         if not request.user.is_authenticated() or request.user != self.object.created_by:
             raise PermissionDenied()
+
+        # Consider adding context to see each individual result?
+        # User will see this anyway in update (assuming they don't jump straight to delete via URL)
 
         return self.render_to_response(
             self.get_context_data())

@@ -6,7 +6,38 @@
     {# It would be nice to display all children that will be deleted, again, something like in the admin #}
 
     <form method="post">{% csrf_token %}
-        <h3 style="color: #FF0000">Are you sure you want to delete the Study:<br><b>{{ object }}</b>?</h3>
+        <h2 style="color: #FF0000">Are you sure you want to delete the Study:<br><b>{{ object }}</b>?</h2>
+
+        <hr>
+
+        {% if setups %}
+            <h4 style="color: #FF0000">Deleting this Study will delete the following Setups:</h4>
+            <ul>
+                {% for setup in setups %}
+                    <li>{{ setup }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if readouts %}
+            <h4 style="color: #FF0000">Deleting this Study will delete the following Readouts:</h4>
+            <ul>
+                {% for readout in readouts %}
+                    <li>Readout ID #{{ readout.id }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if results %}
+            <h4 style="color: #FF0000">Deleting this Study will delete the following Test Results:</h4>
+            <ul>
+                {% for result in results %}
+                    <li>Test Result ID #{{ result.id }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <br>
 
         <button type="submit" class="btn btn-danger">Confirm Deletion</button>
     </form>
