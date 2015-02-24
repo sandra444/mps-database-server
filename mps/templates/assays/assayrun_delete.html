@@ -6,7 +6,7 @@
     {# It would be nice to display all children that will be deleted, again, something like in the admin #}
 
     <form method="post">{% csrf_token %}
-        <h3 style="color: #FF0000">Are you sure you want to delete "{{ object }}" ?</h3>
+        <h3 style="color: #FF0000">Are you sure you want to delete the Study:<br><b>{{ object }}</b>?</h3>
 
         <button type="submit" class="btn btn-danger">Confirm Deletion</button>
     </form>

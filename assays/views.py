@@ -280,7 +280,7 @@ class AssayRunUpdate(LoginRequiredMixin, UpdateView):
 class AssayRunDelete(LoginRequiredMixin, DeleteView):
     model = AssayRun
     template_name = 'assays/assayrun_delete.html'
-    success_url = '/'
+    success_url = '/assays/user_index/'
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -458,6 +458,22 @@ class AssayChipSetupUpdate(LoginRequiredMixin, UpdateView):
                                 cellsamples = cellsamples,
                                 update = True))
 
+class AssayChipSetupDelete(LoginRequiredMixin, DeleteView):
+    model = AssayChipSetup
+    template_name = 'assays/assaychipsetup_delete.html'
+    # Need to think a bit about success_url
+    success_url = '/'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        # Deny access if not the CREATOR
+        if not request.user.is_authenticated() or request.user != self.object.created_by:
+            raise PermissionDenied()
+
+        return self.render_to_response(
+            self.get_context_data())
+
 
 # Class based views for readouts
 class AssayChipReadoutList(LoginRequiredMixin, ListView):
@@ -633,6 +649,23 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
                                 update=True))
 
 
+class AssayChipReadoutDelete(LoginRequiredMixin, DeleteView):
+    model = AssayChipReadout
+    template_name = 'assays/assaychipreadout_delete.html'
+    # Need to think a bit about success_url
+    success_url = '/'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        # Deny access if not the CREATOR
+        if not request.user.is_authenticated() or request.user != self.object.created_by:
+            raise PermissionDenied()
+
+        return self.render_to_response(
+            self.get_context_data())
+
+
 # Class-based views for studies
 class AssayTestResultList(LoginRequiredMixin, ListView):
     # model = AssayTestResult
@@ -803,3 +836,20 @@ class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
                                 formset = formset,
                                 setups = setups,
                                 update = True))
+
+
+class AssayTestResultDelete(LoginRequiredMixin, DeleteView):
+    model = AssayTestResult
+    template_name = 'assays/assaytestresult_delete.html'
+    # Need to think a bit about success_url
+    success_url = '/'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        # Deny access if not the CREATOR
+        if not request.user.is_authenticated() or request.user != self.object.created_by:
+            raise PermissionDenied()
+
+        return self.render_to_response(
+            self.get_context_data())

@@ -21,6 +21,10 @@ urlpatterns = patterns('',
     url(r'^assays/(?P<study_id>[0-9]+)/assaychipsetup/add/$', AssayChipSetupAdd.as_view(), name='setup_add'),
     url(r'^assays/(?P<study_id>[0-9]+)/assaychipreadout/add/$', AssayChipReadoutAdd.as_view(), name='readout_add'),
     url(r'^assays/(?P<study_id>[0-9]+)/assaytestresult/add/$', AssayTestResultAdd.as_view(), name='result_add'),
+    # # Delete pages for respective models
+    url(r'^assays/assaychipsetup/(?P<pk>[0-9]+)/delete/$', AssayChipSetupDelete.as_view(), name='setup_delete'),
+    url(r'^assays/assaychipreadout/(?P<pk>[0-9]+)/delete/$', AssayChipReadoutDelete.as_view(), name='readout_delete'),
+    url(r'^assays/assaytestresult/(?P<pk>[0-9]+)/delete/$', AssayTestResultDelete.as_view(), name='result_delete'),
 
     # Original URLS: Add views to be replaced by new interface
     # TODO limit list and detail views to unrestricted models
