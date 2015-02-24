@@ -302,10 +302,17 @@ class AssayTestResult(RestrictedModel):
 #   Results calculated from Raw Chip Data
     class Meta(object):
         verbose_name = 'Chip Result'
+
+    # This, at some point, should probably be renamed
     assay_device_readout = models.ForeignKey('assays.AssayRun',
                                              verbose_name='Organ Chip Study')
+
     chip_setup = models.ForeignKey('assays.AssayChipSetup',
                                              verbose_name='Chip Setup', unique=True)
+
+    # TODO ALTHOUGH IT SEEMS REDUNDANT, IT MAKES SENSE TO TIE TEST RESULTS TO A READOUT SO THEY DELETE TOGETHER
+    # chip_readout =  models.ForeignKey('assays.AssayChipReadout', verbose_name='Chip Readout')
+
     def __unicode__(self):
         return u'{}:{}'.format(self.assay_device_readout,self.chip_setup)
 

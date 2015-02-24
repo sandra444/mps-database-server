@@ -98,22 +98,30 @@ class GroupIndex(LoginRequiredMixin, ListView):
         return self.render_to_response(context)
 
 
-class StudyIndex(LoginRequiredMixin, ListView):
+# It does not make much sense for the StudyIndex to be a ListView, use DetailView instead
+class StudyIndex(LoginRequiredMixin, DetailView):
+    model = AssayRun
     context_object_name = 'study_index'
     template_name = 'assays/study_index.html'
 
-    def get_context_data(self, request, **kwargs):
-        # Use kwargs to grab info from the URL
-        self.object_list = AssayRun.objects.filter(pk=self.kwargs['study_id'])
-        return super(StudyIndex, self).get_context_data(**kwargs)
+    # def get_context_data(self, request, **kwargs):
+    #     # Use kwargs to grab info from the URL
+    #     self.object_list = AssayRun.objects.filter(pk=self.kwargs['study_id'])
+    #     return super(StudyIndex, self).get_context_data(**kwargs)
 
     def get(self, request, **kwargs):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        if not has_group(request.user, study.group):
+        # study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+        self.object = self.get_object()
+
+        if not has_group(request.user, self.object.group):
             raise PermissionDenied()
-        context = self.get_context_data(request, **kwargs)
-        self.queryset = self.object_list
-        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset).prefetch_related('device',
+
+        context = self.get_context_data()
+
+        # self.queryset = self.object_list
+
+        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object).prefetch_related('device',
                                                                                                        'compound',
                                                                                                        'unit',
                                                                                                        'created_by')
@@ -244,7 +252,8 @@ class AssayRunUpdate(LoginRequiredMixin, UpdateView):
 
         return self.render_to_response(
             self.get_context_data(form=form,
-                                  groups=groups))
+                                  groups=groups,
+                                  update=True))
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -274,7 +283,8 @@ class AssayRunUpdate(LoginRequiredMixin, UpdateView):
         else:
             return self.render_to_response(
             self.get_context_data(form=form,
-                                  groups=groups))
+                                  groups=groups,
+                                  update=True))
 
 
 class AssayRunDelete(LoginRequiredMixin, DeleteView):

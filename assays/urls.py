@@ -8,7 +8,7 @@ urlpatterns = patterns('',
     # User can view all group studies
     url(r'^assays/group_index/$', GroupIndex.as_view(), name='group_index'),
     # The main page for a study
-    url(r'^assays/(?P<study_id>[0-9]+)/$', StudyIndex.as_view(), name='study_index'),
+    url(r'^assays/(?P<pk>[0-9]+)/$', StudyIndex.as_view(), name='study_index'),
     # Update page for studies
     url(r'^assays/(?P<pk>[0-9]+)/update/$', AssayRunUpdate.as_view(), name='study-update'),
     # Delete view for studies
