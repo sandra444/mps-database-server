@@ -9,18 +9,18 @@
         <table id="celltypes" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>Organ</th>
                     <th>Cell Type</th>
                     <th>Cell Subtype</th>
-                    <th>Organ</th>
                     <th>Species</th>
                 </tr>
             </thead>
 
             <tfoot>
                 <tr>
+                    <th>Organ</th>
                     <th>Cell Type</th>
                     <th>Cell Subtype</th>
-                    <th>Organ</th>
                     <th>Species</th>
                 </tr>
             </tfoot>
@@ -28,9 +28,9 @@
             <tbody>
             {% for celltype in object_list %}
                 <tr class="cellsample" id={{ celltype.id }} name={{ celltype }}>
-                    <td><a href="{{ celltype.id }}">{{ celltype }}</a></td>
+                    <td><a href="{{ celltype.id }}">{{ celltype.organ }}</a></td>
+                    <td><a href="{{ celltype.id }}">{{ celltype.cell_type }}</a></td>
                     <td>{{ celltype.cell_subtype }}</td>
-                    <td>{{ celltype.organ }}</td>
                     <td>{{ celltype.species }}</td>
                 </tr>
             {% endfor %}
@@ -43,7 +43,7 @@
             $('#celltypes').DataTable({
                 "iDisplayLength": 50,
                 // Initially sort on organ
-                "order": [ 2, "asc" ]
+                "order": [ 0, "asc" ]
                 // If one wants to display top and bottom
                 //"sDom": '<"wrapper"lfptip>'
             });
