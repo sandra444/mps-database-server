@@ -124,7 +124,7 @@ class CellSample(RestrictedModel):
 
     # ISOLATION
 
-    isolation_datetime = models.DateTimeField("Isolation",blank=True,
+    isolation_datetime = models.DateField("Isolation",blank=True,
                                               null=True)
     isolation_method = models.CharField("Method", max_length=255,
                                         blank=True)
