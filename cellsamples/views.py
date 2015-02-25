@@ -64,7 +64,7 @@ class CellSampleUpdate(LoginRequiredMixin, UpdateView):
         # get user via self.request.user
         if form.is_valid():
             self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
+            self.object.modified_by = self.request.user
             # Save Cell Sample
             self.object.save()
             return redirect('/cellsamples/cellsample')
@@ -85,4 +85,63 @@ class CellSampleList(ListView):
     def get_queryset(self):
         groups = self.request.user.groups.values_list('id', flat=True)
         queryset = CellSample.objects.filter(group__in=groups).prefetch_related('cell_type', 'supplier').select_related('cell_type__cell_subtype', 'cell_type__organ')
+        return queryset
+
+
+class CellTypeAdd(LoginRequiredMixin, CreateView):
+    template_name = 'cellsamples/celltype_add.html'
+    form_class = CellTypeForm
+
+    # Test form validity
+    def form_valid(self, form):
+        # get user via self.request.user
+        if form.is_valid():
+            self.object = form.save()
+            self.object.modified_by = self.object.created_by = self.request.user
+            # Save Cell Sample
+            self.object.save()
+            return redirect('/cellsamples/celltype')
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+    def get(self, request, **kwargs):
+        self.object = None
+        if len(request.user.groups.values_list('pk', flat=True)) == 0:
+            raise PermissionDenied()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        return self.render_to_response(self.get_context_data(form=form))
+
+
+# Note that updating a model clears technically blank fields (exclude in form to avoid this)
+class CellTypeUpdate(LoginRequiredMixin, UpdateView):
+    model = CellType
+    template_name = 'cellsamples/celltype_add.html'
+    form_class = CellTypeForm
+
+    # Test form validity
+    def form_valid(self, form):
+        # get user via self.request.user
+        if form.is_valid():
+            self.object = form.save()
+            self.object.modified_by = self.request.user
+            # Save Cell Sample
+            self.object.save()
+            return redirect('/cellsamples/celltype')
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+    def get(self, request, **kwargs):
+        self.object = self.get_object()
+        if len(request.user.groups.values_list('pk', flat=True)) == 0:
+            raise PermissionDenied()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        return self.render_to_response(self.get_context_data(form=form))
+
+class CellTypeList(ListView):
+    template_name = 'cellsamples/celltype_list.html'
+
+    def get_queryset(self):
+        queryset = CellType.objects.all().prefetch_related('cell_subtype','organ')
         return queryset

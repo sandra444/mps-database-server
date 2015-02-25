@@ -7,4 +7,7 @@ urlpatterns = patterns('',
     url(r'^cellsamples/cellsample/add/$', CellSampleAdd.as_view(), name='cellsample_add'),
     url(r'^cellsamples/cellsample/$', CellSampleList.as_view(), name='cellsample_list'),
     url(r'^cellsamples/cellsample/(?P<pk>[0-9]+)/$', CellSampleUpdate.as_view(), name='cellsample_update'),
+    url(r'^cellsamples/celltype/add/$', CellTypeAdd.as_view(), name='cellsample_add'),
+    url(r'^cellsamples/celltype/$', CellTypeList.as_view(), name='cellsample_list'),
+    url(r'^cellsamples/celltype/(?P<pk>[0-9]+)/$', CellTypeUpdate.as_view(), name='cellsample_update'),
 )

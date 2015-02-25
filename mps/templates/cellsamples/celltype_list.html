@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div style="padding-bottom: 50px">
+        <h2 align="center">Cell Types <a href="/cellsamples/celltype/add/" class="btn btn-success" role="button">Add Cell Type</a></h2>
+
+        <table id="celltypes" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Cell Type</th>
+                    <th>Cell Subtype</th>
+                    <th>Organ</th>
+                    <th>Species</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Cell Type</th>
+                    <th>Cell Subtype</th>
+                    <th>Organ</th>
+                    <th>Species</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for celltype in object_list %}
+                <tr class="cellsample" id={{ celltype.id }} name={{ celltype }}>
+                    <td><a href="{{ celltype.id }}">{{ celltype }}</a></td>
+                    <td>{{ celltype.cell_subtype }}</td>
+                    <td>{{ celltype.organ }}</td>
+                    <td>{{ celltype.species }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#celltypes').DataTable({
+                "iDisplayLength": 50,
+                // Initially sort on organ
+                "order": [ 2, "asc" ]
+                // If one wants to display top and bottom
+                //"sDom": '<"wrapper"lfptip>'
+            });
+
+            // Swap positions of filter and length selection
+            $('.dataTables_filter').css('float','left');
+            $('.dataTables_length').css('float','right');
+        });
+    </script>
+{% endblock %}
