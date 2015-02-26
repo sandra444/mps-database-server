@@ -4,10 +4,9 @@ from django.views.generic import ListView, CreateView, UpdateView
 from .models import *
 from .forms import *
 # Best practice would be to put this in base or something of that sort (avoid spaghetti code)
-from assays.views import LoginRequiredMixin
+from assays.views import LoginRequiredMixin, PermissionDenied
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import Group
-from django.core.exceptions import PermissionDenied
 
 from mps.filters import *
 from django.db.models import Q
@@ -39,7 +38,7 @@ class CellSampleAdd(LoginRequiredMixin, CreateView):
     def get(self, request, **kwargs):
         self.object = None
         if len(request.user.groups.values_list('pk', flat=True)) == 0:
-            raise PermissionDenied()
+            return PermissionDenied(request, 'You must be a member of at least one group')
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         return self.render_to_response(self.get_context_data(form=form))
@@ -74,7 +73,7 @@ class CellSampleUpdate(LoginRequiredMixin, UpdateView):
     def get(self, request, **kwargs):
         self.object = self.get_object()
         if not has_group(request.user, self.object.group):
-            raise PermissionDenied()
+            return PermissionDenied(request,'You must be a member of ' + str(self.object.group))
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         return self.render_to_response(self.get_context_data(form=form))
@@ -107,7 +106,7 @@ class CellTypeAdd(LoginRequiredMixin, CreateView):
     def get(self, request, **kwargs):
         self.object = None
         if len(request.user.groups.values_list('pk', flat=True)) == 0:
-            raise PermissionDenied()
+            return PermissionDenied(request, 'You must be a member of at least one group')
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         return self.render_to_response(self.get_context_data(form=form))
@@ -134,7 +133,7 @@ class CellTypeUpdate(LoginRequiredMixin, UpdateView):
     def get(self, request, **kwargs):
         self.object = self.get_object()
         if len(request.user.groups.values_list('pk', flat=True)) == 0:
-            raise PermissionDenied()
+            return PermissionDenied(request, 'You must be a member of at least one group')
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         return self.render_to_response(self.get_context_data(form=form))

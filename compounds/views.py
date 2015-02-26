@@ -2,7 +2,7 @@ from .models import Compound
 from django.views.generic import ListView, DetailView, CreateView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from assays.views import PermissionDenied
 from .forms import CompoundForm
 
 
@@ -36,7 +36,7 @@ class CompoundsAdd(CreateView):
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         if len(request.user.groups.values_list('pk',flat=True)) == 0:
-            raise PermissionDenied()
+            return PermissionDenied(request,'You must be a member of at least one group')
         return super(CompoundsAdd, self).dispatch(request, *args, **kwargs)
 
 

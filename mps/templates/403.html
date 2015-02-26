@@ -2,6 +2,8 @@
 {% load staticfiles %}
 
 {% block content %}
-    <h1 style="color: #FF0000">403 Forbidden Error:</h1>
-    <h2 style="color: #FF0000">You do not have permission to view this page.</h2>
+    <h1 style="color: #FF0000">403 Forbidden Error</h1>
+    <hr>
+    <h3>You do not have permission to view this page:</h3>
+    <h2 style="color: #FF0000">{{ message }}</h2>
 {% endblock %}
