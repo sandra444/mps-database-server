@@ -642,7 +642,7 @@ class AssayChipSetupAdmin(LockableAdmin):
     list_per_page = 100
     list_display = ('assay_chip_id', 'assay_run_id', 'setup_date',
                     'device', 'chip_test_type',
-                    'compound', )
+                    'compound', 'scientist')
 
     search_fields = ['assay_chip_id']
     fieldsets = (
@@ -848,6 +848,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
                     'chip_setup',
 
                     'readout_start_time',
+                    'scientist'
                     )
 
     list_display_links = ('id', 'chip_setup',

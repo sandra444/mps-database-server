@@ -12,6 +12,7 @@
                     <th>Chip Readout ID</th>
                     <th>Chip Setup</th>
                     <th>Readout Date</th>
+                    <th>Scientist</th>
                     <th>Creator</th>
 {#                    <th>Group</th>#}
                 </tr>
@@ -22,6 +23,7 @@
                     <th>Chip Readout ID</th>
                     <th>Chip Setup</th>
                     <th>Readout Date</th>
+                    <th>Scientist</th>
                     <th>Creator</th>
 {#                    <th>Group</th>#}
                 </tr>
@@ -37,6 +39,7 @@
                     {% else %}
                         <td></td>
                     {% endif %}
+                    <td>{{ readout.scientist }}</td>
 {#                    <td>{{ readout.readout_start_time }}</td>#}
                     <td>{{ readout.created_by }}</td>
 {#                    <td>{{ compound.group }}</td>#}
