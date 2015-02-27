@@ -117,7 +117,7 @@ $(document).ready(function () {
         table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Assay</th><th>Object</th><th>Data</th></tr>" : "";
 
         for (var i in lines) {
-            if ((i == 0 && !exist) || (!lines[i][0] || !lines[i][1] || !lines[i][2])) {
+            if ((i == 0 && !exist) || (!lines[i][0] || !lines[i][1] || !lines[i][2] || !lines[i][3])) {
                 table += "<tr style='background: #FF2400'>";
             }
             else if (lines[i][3] == 'None') {

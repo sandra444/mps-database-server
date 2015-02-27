@@ -587,7 +587,7 @@ def parseChipCSV(currentChipReadout, file):
             continue
 
         # Skip any row with incomplete data and first row (header) for now
-        if not rowValue[0] or not rowValue[1] or not rowValue[2] or rowID == 0:
+        if not rowValue[0] or not rowValue[1] or not rowValue[2] or rowID == 0 or rowValue[3] is '':
             continue
 
         assay = AssayModel.objects.get(assay_name=rowValue[1])
@@ -595,8 +595,9 @@ def parseChipCSV(currentChipReadout, file):
         val = rowValue[3]
         time = rowValue[0]
 
-        if not val:
-            val = None
+        # Originally permitted none values, will now ignore empty values
+        # if not val:
+        #     val = None
 
         #How to parse Chip data
         AssayChipRawData(
@@ -860,8 +861,6 @@ class AssayChipReadoutAdmin(LockableAdmin):
                 'fields': (
                     (
                         'chip_setup'
-                # TODO ALTHOUGH IT SEEMS REDUNDANT, IT MAKES SENSE TO TIE TEST RESULTS TO A READOUT SO THEY DELETE TOGETHER
-                        #'chip_setup', 'chip_readout',
                     ),
                 )
             }
@@ -1221,6 +1220,8 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
+# TODO CHANGE TO USE SETUP IN LIEU OF READOUT ID
+# TODO CHANGE TO REMOVE PREVIOUS DATA
 def parseRunCSV(currentRun, file):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
@@ -1247,7 +1248,11 @@ def parseRunCSV(currentRun, file):
                 assay = AssayModel.objects.get(assay_name=rowValue[1])
 
                 if not val:
-                    val = None
+                    continue
+
+                # Originally did not ignore empty cells; does now
+                # if not val:
+                #     val = None
 
                 #How to parse Chip data
                 AssayChipRawData(
@@ -1269,13 +1274,14 @@ class AssayRunForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 3}),
         }
 
+    # TODO CLEAN TO USE SETUP IN LIEU OF READOUT ID
     def clean(self):
         """Validate unique, existing Chip Readout IDs"""
 
         # clean the form data, before validation
         data = super(AssayRunForm, self).clean()
 
-        if not any([data['toxicity'],data['efficacy'],data['disease']]):
+        if not any([data['toxicity'],data['efficacy'],data['disease'],data['cell_characterization']]):
             raise forms.ValidationError('Please select at least one study type')
 
         if data['assay_run_id'].startswith('-'):
