@@ -297,10 +297,17 @@ class AssayRunUpdate(LoginRequiredMixin, UpdateView):
                                   update=True))
 
 
-class AssayRunDelete(LoginRequiredMixin, DeleteView):
+class AssayRunDelete(DeleteView):
     model = AssayRun
     template_name = 'assays/assayrun_delete.html'
     success_url = '/assays/user_index/'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.request.user.is_authenticated() or self.request.user != self.object.created_by:
+            return PermissionDenied(self.request,'You can only delete entries that you have created')
+        return super(AssayRunDelete, self).dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -492,9 +499,16 @@ class AssayChipSetupUpdate(LoginRequiredMixin, UpdateView):
                                 cellsamples = cellsamples,
                                 update = True))
 
-class AssayChipSetupDelete(LoginRequiredMixin, DeleteView):
+class AssayChipSetupDelete(DeleteView):
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_delete.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.request.user.is_authenticated() or self.request.user != self.object.created_by:
+            return PermissionDenied(self.request,'You can only delete entries that you have created')
+        return super(AssayChipSetupDelete, self).dispatch(*args, **kwargs)
 
     def get_success_url(self):
         return '/assays/' + str(self.object.assay_run_id.id)
@@ -697,9 +711,16 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
                                 update=True))
 
 
-class AssayChipReadoutDelete(LoginRequiredMixin, DeleteView):
+class AssayChipReadoutDelete(DeleteView):
     model = AssayChipReadout
     template_name = 'assays/assaychipreadout_delete.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.request.user.is_authenticated() or self.request.user != self.object.created_by:
+            return PermissionDenied(self.request,'You can only delete entries that you have created')
+        return super(AssayChipReadoutDelete, self).dispatch(*args, **kwargs)
 
     def get_success_url(self):
         return '/assays/' + str(self.object.chip_setup.assay_run_id.id)
@@ -894,9 +915,16 @@ class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
                                 update = True))
 
 
-class AssayTestResultDelete(LoginRequiredMixin, DeleteView):
+class AssayTestResultDelete(DeleteView):
     model = AssayTestResult
     template_name = 'assays/assaytestresult_delete.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.request.user.is_authenticated() or self.request.user != self.object.created_by:
+            return PermissionDenied(self.request,'You can only delete entries that you have created')
+        return super(AssayTestResultDelete, self).dispatch(*args, **kwargs)
 
     def get_success_url(self):
         return '/assays/' + str(self.object.assay_device_readout.id)
