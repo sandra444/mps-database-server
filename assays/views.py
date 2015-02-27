@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from django.views.generic import ListView, CreateView, DetailView, UpdateView
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from assays.models import *
 from cellsamples.models import CellSample
 from assays.admin import *
@@ -8,10 +8,10 @@ from assays.forms import *
 from django import forms
 
 from django.forms.models import inlineformset_factory
-from django.views.generic.edit import CreateView
-from django.shortcuts import redirect, get_object_or_404
+# from django.views.generic.edit import CreateView
+from django.shortcuts import redirect, get_object_or_404, render_to_response
 from django.contrib.auth.models import Group
-from django.core.exceptions import PermissionDenied
+#from django.core.exceptions import PermissionDenied
 # from django.http import Http404
 # May be useful later
 from django.contrib.auth.decorators import login_required
@@ -20,10 +20,20 @@ from django.utils.decorators import method_decorator
 from mps.filters import *
 from django.db.models import Q
 
+from django.template import RequestContext, loader
+from django.http import HttpResponseForbidden
+
 # TODO Refactor imports
 
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
+# This function will take a string a render 403.html with that string as context
+def PermissionDenied(request, message):
+    template = loader.get_template('403.html')
+    context = RequestContext(request, {
+        'message': message
+    })
+    return HttpResponseForbidden(template.render(context))
 
 # Add this mixin via multiple-inheritance and you need not change the dispatch every time
 class LoginRequiredMixin(object):
@@ -37,7 +47,7 @@ class StudyAccessMixin(object):
         self.object = None
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         if not has_group(request.user, study.group):
-            raise PermissionDenied()
+            return PermissionDenied(request,'You must be a member of the group ' + str(study.group))
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         return self.render_to_response(self.get_context_data(form=form))
@@ -54,7 +64,7 @@ class UserIndex(LoginRequiredMixin, ListView):
 
     def get(self, request, **kwargs):
         if len(request.user.groups.values_list('pk', flat=True)) == 0:
-            raise PermissionDenied()
+            return PermissionDenied(request,'You must be a member of at least one group')
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
         context['title'] = 'User Study Index'
@@ -86,7 +96,7 @@ class GroupIndex(LoginRequiredMixin, ListView):
 
     def get(self, request, **kwargs):
         if len(request.user.groups.values_list('pk', flat=True)) == 0:
-            raise PermissionDenied()
+            return PermissionDenied(request,'You must be a member of at least one group')
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
         context['title'] = 'Group Study Index'
@@ -98,22 +108,30 @@ class GroupIndex(LoginRequiredMixin, ListView):
         return self.render_to_response(context)
 
 
-class StudyIndex(LoginRequiredMixin, ListView):
+# It does not make much sense for the StudyIndex to be a ListView, use DetailView instead
+class StudyIndex(LoginRequiredMixin, DetailView):
+    model = AssayRun
     context_object_name = 'study_index'
     template_name = 'assays/study_index.html'
 
-    def get_context_data(self, request, **kwargs):
-        # Use kwargs to grab info from the URL
-        self.object_list = AssayRun.objects.filter(pk=self.kwargs['study_id'])
-        return super(StudyIndex, self).get_context_data(**kwargs)
+    # def get_context_data(self, request, **kwargs):
+    #     # Use kwargs to grab info from the URL
+    #     self.object_list = AssayRun.objects.filter(pk=self.kwargs['study_id'])
+    #     return super(StudyIndex, self).get_context_data(**kwargs)
 
     def get(self, request, **kwargs):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        if not has_group(request.user, study.group):
-            raise PermissionDenied()
-        context = self.get_context_data(request, **kwargs)
-        self.queryset = self.object_list
-        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.queryset).prefetch_related('device',
+        # study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+        self.object = self.get_object()
+
+        if not has_group(request.user, self.object.group):
+            return PermissionDenied(request,'You must be a member of the group ' + str(self.object.group))
+
+        context = self.get_context_data()
+
+        # self.queryset = self.object_list
+
+        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object).prefetch_related('device',
                                                                                                        'compound',
                                                                                                        'unit',
                                                                                                        'created_by')
@@ -186,7 +204,7 @@ class AssayRunAdd(LoginRequiredMixin, CreateView):
     def get(self, request, **kwargs):
         self.object = None
         if len(request.user.groups.values_list('pk', flat=True)) == 0:
-            raise PermissionDenied()
+            return PermissionDenied(request,'You must be a member of at least one group')
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         return self.render_to_response(self.get_context_data(form=form))
@@ -197,8 +215,11 @@ class AssayRunDetail(LoginRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.restricted and not has_group(request.user, self.object.group):
-            raise PermissionDenied
+        # If user CAN edit the item, redirect to the respective edit page
+        if has_group(request.user, self.object.group):
+            return redirect('/assays/' + str(self.object.id))
+        elif self.object.restricted:
+            return PermissionDenied(request,'You must be a member of the group ' + str(self.object.group))
         context = self.get_context_data(object=self.object)
         context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object).prefetch_related('assay_run_id',
                                                                                                      'device',
@@ -233,7 +254,7 @@ class AssayRunUpdate(LoginRequiredMixin, UpdateView):
 
         # Deny access if not the proper group
         if not has_group(request.user, self.object.group):
-            raise PermissionDenied()
+            return PermissionDenied(request,'You must be a member of the group ' + str(self.object.group))
 
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
@@ -241,7 +262,8 @@ class AssayRunUpdate(LoginRequiredMixin, UpdateView):
 
         return self.render_to_response(
             self.get_context_data(form=form,
-                                  groups=groups))
+                                  groups=groups,
+                                  update=True))
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -271,7 +293,45 @@ class AssayRunUpdate(LoginRequiredMixin, UpdateView):
         else:
             return self.render_to_response(
             self.get_context_data(form=form,
-                                  groups=groups))
+                                  groups=groups,
+                                  update=True))
+
+
+class AssayRunDelete(DeleteView):
+    model = AssayRun
+    template_name = 'assays/assayrun_delete.html'
+    success_url = '/assays/user_index/'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.request.user.is_authenticated() or self.request.user != self.object.created_by:
+            return PermissionDenied(self.request,'You can only delete entries that you have created')
+        return super(AssayRunDelete, self).dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        # Deny access if not the CREATOR
+        # Note the call for request.user.is_authenticated
+        # Interestingly, Django wraps request.user until it is accessed
+        # Thus, to perform this comparison it is necessary to access request.user via authentication
+        # (It may be more robust to call this elsewhere as well)
+        if not request.user.is_authenticated() or request.user != self.object.created_by:
+            return PermissionDenied(request,'You can only delete entries that you have created')
+
+        context = self.get_context_data()
+
+        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object.id).prefetch_related('compound','unit')
+        context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups'])
+        context['results'] = AssayTestResult.objects.filter(chip_setup=context['setups'])
+
+        # Check if this is setup only; if so add to add respective URLS; I Guess
+        # if request.GET.get('setup', ''):
+        #     context['setup_only'] = '/?setup=1'
+        # else:
+        #     context['setup_only'] = ''
+        return self.render_to_response(context)
 
 
 # Class based view for chip setups
@@ -349,8 +409,17 @@ class AssayChipSetupDetail(LoginRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.assay_run_id.restricted and not has_group(request.user, self.object.assay_run_id.group):
-            raise PermissionDenied
+
+        # Get study
+        study = self.object.assay_run_id
+
+        # If user CAN edit the item, redirect to the respective edit page
+        if has_group(request.user, study.group):
+            return HttpResponseRedirect('update/')
+        elif self.object.assay_run_id.restricted:
+            return PermissionDenied(request,'You must be a member of the group ' + str(study.group))
+        # if self.object.assay_run_id.restricted and not has_group(request.user, self.object.assay_run_id.group):
+        #     raise PermissionDenied
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
 
@@ -369,7 +438,7 @@ class AssayChipSetupUpdate(LoginRequiredMixin, UpdateView):
 
         # Deny access to those without correct group
         if not has_group(request.user, study.group):
-            raise PermissionDenied()
+            return PermissionDenied(request,'You must be a member of the group ' + str(study.group))
 
         groups = self.request.user.groups.values_list('id', flat=True)
         cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
@@ -429,6 +498,39 @@ class AssayChipSetupUpdate(LoginRequiredMixin, UpdateView):
                                 formset = formset,
                                 cellsamples = cellsamples,
                                 update = True))
+
+class AssayChipSetupDelete(DeleteView):
+    model = AssayChipSetup
+    template_name = 'assays/assaychipsetup_delete.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.request.user.is_authenticated() or self.request.user != self.object.created_by:
+            return PermissionDenied(self.request,'You can only delete entries that you have created')
+        return super(AssayChipSetupDelete, self).dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        return '/assays/' + str(self.object.assay_run_id.id)
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        # Deny access if not the CREATOR
+        if not request.user.is_authenticated() or request.user != self.object.created_by:
+            return PermissionDenied(request,'You can only delete entries that you have created')
+
+        context = self.get_context_data()
+
+        context['readouts'] = AssayChipReadout.objects.filter(chip_setup=self.object)
+        context['results'] = AssayTestResult.objects.filter(chip_setup=self.object)
+
+        # Check if this is setup only; if so add to add respective URLS; I Guess
+        # if request.GET.get('setup', ''):
+        #     context['setup_only'] = '/?setup=1'
+        # else:
+        #     context['setup_only'] = ''
+        return self.render_to_response(context)
 
 
 # Class based views for readouts
@@ -512,9 +614,18 @@ class AssayChipReadoutDetail(LoginRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.chip_setup.assay_run_id.restricted and not has_group(request.user,
-                                                                            self.object.chip_setup.assay_run_id.group):
-            raise PermissionDenied
+
+        # Get study
+        study = self.object.chip_setup.assay_run_id
+
+        # If user CAN edit the item, redirect to the respective edit page
+        if has_group(request.user,study.group):
+            return HttpResponseRedirect('update/')
+        elif self.object.chip_setup.assay_run_id.restricted:
+            return PermissionDenied(request,'You must be a member of the group ' + str(study.group))
+        # if self.object.chip_setup.assay_run_id.restricted and not has_group(request.user,
+        #                                                                     self.object.chip_setup.assay_run_id.group):
+        #     raise PermissionDenied
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
 
@@ -533,7 +644,7 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
 
         # Deny access to those without correct group
         if not has_group(request.user, study.group):
-            raise PermissionDenied()
+            return PermissionDenied(request,'You must be a member of the group ' + str(study.group))
 
         exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
 
@@ -598,6 +709,34 @@ class AssayChipReadoutUpdate(LoginRequiredMixin, UpdateView):
                                 formset = formset,
                                 setups = setups,
                                 update=True))
+
+
+class AssayChipReadoutDelete(DeleteView):
+    model = AssayChipReadout
+    template_name = 'assays/assaychipreadout_delete.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.request.user.is_authenticated() or self.request.user != self.object.created_by:
+            return PermissionDenied(self.request,'You can only delete entries that you have created')
+        return super(AssayChipReadoutDelete, self).dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        return '/assays/' + str(self.object.chip_setup.assay_run_id.id)
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        # Deny access if not the CREATOR
+        if not request.user.is_authenticated() or request.user != self.object.created_by:
+            return PermissionDenied(request,'You can only delete entries that you have created')
+
+        context = self.get_context_data()
+
+        context['results'] = AssayTestResult.objects.filter(chip_setup=self.object.chip_setup)
+
+        return self.render_to_response(context)
 
 
 # Class-based views for studies
@@ -682,9 +821,18 @@ class AssayTestResultDetail(LoginRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.assay_device_readout.restricted and not has_group(request.user,
-                                                                         self.object.assay_device_readout.group):
-            raise PermissionDenied
+
+        # Get study
+        study = self.object.assay_device_readout
+
+        # If user CAN edit the item, redirect to the respective edit page
+        if has_group(request.user,study.group):
+            return HttpResponseRedirect('update/')
+        elif self.object.assay_device_readout.restricted:
+            return PermissionDenied(request,'You must be a member of the group ' + str(study.group))
+        # if self.object.assay_device_readout.restricted and not has_group(request.user,
+        #                                                                  self.object.assay_device_readout.group):
+        #     raise PermissionDenied
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
 
@@ -706,7 +854,7 @@ class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
 
         # Deny access to those without correct group
         if not has_group(request.user, study.group):
-            raise PermissionDenied()
+            return PermissionDenied(request,'You must be a member of the group ' + str(self.object.group))
 
         exclude_list = AssayTestResult.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
 
@@ -765,3 +913,31 @@ class AssayTestResultUpdate(LoginRequiredMixin, UpdateView):
                                 formset = formset,
                                 setups = setups,
                                 update = True))
+
+
+class AssayTestResultDelete(DeleteView):
+    model = AssayTestResult
+    template_name = 'assays/assaytestresult_delete.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.request.user.is_authenticated() or self.request.user != self.object.created_by:
+            return PermissionDenied(self.request,'You can only delete entries that you have created')
+        return super(AssayTestResultDelete, self).dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        return '/assays/' + str(self.object.assay_device_readout.id)
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        # Deny access if not the CREATOR
+        if not request.user.is_authenticated() or request.user != self.object.created_by:
+            return PermissionDenied(request,'You can only delete entries that you have created')
+
+        # Consider adding context to see each individual result?
+        # User will see this anyway in update (assuming they don't jump straight to delete via URL)
+
+        return self.render_to_response(
+            self.get_context_data())

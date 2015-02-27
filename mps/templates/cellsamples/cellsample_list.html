@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div style="padding-bottom: 50px">
+        <h2 align="center">Cell Samples <a href="/cellsamples/cellsample/add/" class="btn btn-success" role="button">Add Cell Sample</a></h2>
+
+        <table id="cellsamples" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>ID #</th>
+                    <th>Receipt Date</th>
+                    <th>Barcode/Lot #</th>
+                    <th>Cell Type</th>
+                    <th>Cell Source</th>
+                    <th>Supplier</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>ID #</th>
+                    <th>Receipt Date</th>
+                    <th>Barcode/Lot #</th>
+                    <th>Cell Type</th>
+                    <th>Cell Source</th>
+                    <th>Supplier</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for cellsample in object_list %}
+                <tr class="cellsample" id={{ cellsample.id }} name={{ cellsample }}>
+                    {# May seem odd, but including the id can help demystify the ID that appears in add interface #}
+                    <td><a href="{{ cellsample.id }}">{{ cellsample.id }}</a></td>
+                    {# Adding a link to this row converts it from date to HTML = Really, REALLY annoying #}
+                    <td>{{ cellsample.receipt_date }}</td>
+                    <td>{{ cellsample.barcode }}</td>
+                    <td><a href="/cellsamples/celltype/{{ cellsample.cell_type.id }}">{{ cellsample.cell_type }}</a></td>
+                    <td>{{ cellsample.cell_source }}</td>
+                    <td>{{ cellsample.supplier }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#cellsamples').DataTable({
+                "iDisplayLength": 50,
+                // Initially sort on receipt date
+                "order": [ 1, "desc" ]
+                // If one wants to display top and bottom
+                //"sDom": '<"wrapper"lfptip>'
+            });
+
+            // Swap positions of filter and length selection
+            $('.dataTables_filter').css('float','left');
+            $('.dataTables_length').css('float','right');
+        });
+    </script>
+{% endblock %}

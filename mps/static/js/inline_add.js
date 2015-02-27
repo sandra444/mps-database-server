@@ -6,12 +6,13 @@ $(document).ready(function () {
     var inlines = $('.inline');
     var next_id = inlines.length;
     var title = $('.inline')[0].id.split('-')[0];
-    var add = $('.inline:first').html();
+    var add = $('.inline:last').html();
 
     $('#add_button').click(function() {
         var tag = '<tr class="inline" id="' + title + '-' + next_id + '">';
         // Use a regular expression to replace all the places where ID is needed
-        $(tag).appendTo($("table[name='inlines']")).html(add.replace(new RegExp('-0-', 'g'),'-'+next_id+'-'));
+        // In case the RegExp looks a little obfuscated, it means to replace any number of digits that fall between two hyphens
+        $(tag).appendTo($("table[name='inlines']")).html(add.replace(/\-\d+\-/g,'-'+ next_id +'-'));
         next_id += 1;
         // Set the hidden TOTAL_FORMS to be incremented, otherwise won't bother reading other inline
         $("input[id*='TOTAL_FORMS']").val(""+next_id);
@@ -31,7 +32,10 @@ $(document).ready(function () {
         }
 
         // Exit the function if this is an update page (known via hidden div)
-        if ($('#update')[0]) {
+        // Really should just check if original class exists for the given row
+        // Continue only if original class does not exist in the row
+        // TODO scrap odd update hidden div thing
+        if ($('#' + title + '-' + id + ' .original')[0]) {
             return;
         }
 
@@ -49,11 +53,26 @@ $(document).ready(function () {
 
         var end = inlines.length;
         for (var i=id+1; i<=end; i++){
+            var current = $('#'+title+'-'+i);
+
+            // Need to update values before creating the replacement text
+            // Add values to input
+            $('#'+ title +'-'+ i + ' input').each(function () {
+                $(this).attr("value", this.value);
+            });
+            // Add selected attribute to selected option of each select
+            $('#'+ title +'-'+ i + ' select').each(function (){
+                //console.log(this.id);
+                $('#' + this.id + ' option[value="' + $(this).val() + '"]').attr("selected", true);
+            });
+
+            var replacement = current.html().replace(/\-\d+\-/g,'-'+ (i-1) +'-');
+            //console.log(replacement);
             //console.log("Iter:" + i);
             var tag = '<tr class="inline" id="' + title + '-' + (i-1) + '">';
-            $(tag).appendTo($("table[name='inlines']")).html(add.replace(new RegExp('-0-', 'g'),'-'+ (i-1) +'-'));
+            $(tag).appendTo($("table[name='inlines']")).html(replacement);
             // Remove old
-            $('#'+title+'-'+i).remove();
+            current.remove();
         }
     });
 });

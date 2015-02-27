@@ -14,7 +14,7 @@ from cellsamples.models import *
 
 class CellTypeAdmin(LockableAdmin):
     save_on_top = True
-    list_display = ('cell_name', 'organ')
+    list_display = ('organ', 'cell_type', 'cell_subtype', 'species')
 
     fieldsets = (
         (
@@ -115,8 +115,8 @@ class CellSampleAdmin(LockableAdmin):
 
     save_on_top = True
     list_per_page = 300
-    list_display = ('receipt_date','cell_type', 'cell_source',
-                    'supplier', 'barcode',
+    list_display = ('receipt_date','barcode','cell_type', 'cell_source',
+                    'supplier',
                     'locked')
 
     search_fields = ['cell_type__cell_type',

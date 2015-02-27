@@ -6,7 +6,7 @@
     <div style="padding-bottom: 50px">
         <div class="well">
             <h1 align="center">
-                Study: {{ object_list.0.assay_run_id }}
+                Study: {{ object }}
                 <br>
                 <a href="update{{ setup_only }}" class="btn btn-primary" role="button">Update Study</a>
             </h1>
@@ -95,7 +95,7 @@
             {% for readout in readouts %}
                 <tr id={{ readout.id }} name={{ readout.id }}>
                     <td><a href="/assays/assaychipreadout/{{ readout.id }}/update/">{{ readout.id }}</a></td>
-                    <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}">{{ readout.chip_setup }}</a></td>
+                    <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}/update/">{{ readout.chip_setup }}</a></td>
                     <td>{{ readout.readout_start_time }}</td>
                     <td>{{ readout.created_by }}</td>
                 </tr>
@@ -153,9 +153,9 @@
             {% for result in results %}
                 <tr class="result" id={{ result.id }} name={{ result.id }}>
                     <td><a href="/assays/assaytestresult/{{ result.assay_result.id }}/update/">{{ result.assay_result.id }}</a></td>
-                    <td><a href="/assays/assaychipsetup/{{ result.assay_result.chip_setup.id }}">{{ result.assay_result.chip_setup }}</a></td>
+                    <td><a href="/assays/assaychipsetup/{{ result.assay_result.chip_setup.id }}/update/">{{ result.assay_result.chip_setup }}</a></td>
                     <td>
-                        <a href="/assays/assaychipreadout/{{ result.assay_name.readout_id.id }}">
+                        <a href="/assays/assaychipreadout/{{ result.assay_name.readout_id.id }}/update/">
                         {{ result.assay_name.readout_id.id }}
                         </a>
                     </td>

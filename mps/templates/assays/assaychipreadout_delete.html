@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <form method="post">{% csrf_token %}
+        <h3 style="color: #FF0000">Are you sure you want to delete Chip Readout: <b>ID #{{ object.id }}</b>?</h3>
+
+        <hr>
+
+        {# Currently this is a 1-1 relationship, but it might change #}
+        {% if results %}
+            <h4 style="color: #FF0000">Deleting this Readout will delete the following Test Results:</h4>
+            <ul>
+                {% for result in results %}
+                    <li>Test Result ID #{{ result.id }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <br>
+
+        <button type="submit" class="btn btn-danger">Confirm Deletion</button>
+    </form>
+
+{% endblock %}

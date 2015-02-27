@@ -24,7 +24,7 @@ def organ_model_detail(request, *args, **kwargs):
     c = RequestContext(request)
 
     model = get_object_or_404(OrganModel, pk=kwargs.get('pk'))
-    assays = ValidatedAssay.objects.prefetch_related('assay','assay__assay_type').all()
+    assays = ValidatedAssay.objects.filter(organ_model=model).prefetch_related('assay','assay__assay_type')
 
     c.update({
         'model': model,

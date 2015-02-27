@@ -302,10 +302,17 @@ class AssayTestResult(RestrictedModel):
 #   Results calculated from Raw Chip Data
     class Meta(object):
         verbose_name = 'Chip Result'
+
+    # This, at some point, should probably be renamed
     assay_device_readout = models.ForeignKey('assays.AssayRun',
                                              verbose_name='Organ Chip Study')
+
     chip_setup = models.ForeignKey('assays.AssayChipSetup',
                                              verbose_name='Chip Setup', unique=True)
+
+    # TODO ALTHOUGH IT SEEMS REDUNDANT, IT MAKES SENSE TO TIE TEST RESULTS TO A READOUT SO THEY DELETE TOGETHER
+    # chip_readout =  models.ForeignKey('assays.AssayChipReadout', verbose_name='Chip Readout')
+
     def __unicode__(self):
         return u'{}:{}'.format(self.assay_device_readout,self.chip_setup)
 
@@ -573,6 +580,15 @@ class AssayChipReadout(RestrictedModel):
                                                              ' Red = Line that will not be read'
                                                              '; Gray = Reading with null value'
                                                              ' ***Uploading overwrites old data***')
+
+    # Get a list of every assay for list view
+    def assays(self):
+        list_of_assays = []
+        assays = AssayChipReadoutAssay.objects.filter(readout_id=self.id).prefetch_related('assay_id','reader_id', 'readout_unit')
+        for assay in assays:
+            list_of_assays.append(str(assay))
+        # Convert to unicode for consistency
+        return u'{0}'.format(", ".join(list_of_assays))
 
     def assay_chip_name(self):
         return u'{0}'.format(AssayChipSetup.assay_chip_id)

@@ -29,19 +29,57 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div title="View curated drug trial data" class="well">
+                <div title="View curated drug trials and chemical data" class="well">
                     <a href="/drugtrials/">
-                        <img src="/static/img/button_trials.png"
+                        <img src="/static/img/button_browse.png"
                              style="height: 80px;">
                     </a>
                     <div class="caption">
-                        <a href="/drugtrials/"
-                           class="btn btn-primary btn-large">
-                        View Drug Trials
-                        </a>
+                        <div class="btn-group">
+                        <button type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            View Compounds <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a href="/drugtrials/">View Drug Trials</a></li>
+                            <li><a href="/compounds/">View Chemical Data</a></li>
+                          </ul>
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="col-md-3">
+                <div title="View cell samples and cell types" class="well">
+                    <a href="/cellsamples/cellsample/">
+                        <img src="/static/img/button_cell.png"
+                             style="height: 80px;">
+                    </a>
+                    <div class="caption">
+                        <div class="btn-group">
+                        <button type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            View Cell Samples <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a href="/cellsamples/cellsample/">View Cell Samples</a></li>
+                            <li><a href="/cellsamples/celltype/">View Cell Types</a></li>
+                          </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{#            <div class="col-md-3">#}
+{#                <div title="View curated drug trial data" class="well">#}
+{#                    <a href="/drugtrials/">#}
+{#                        <img src="/static/img/button_trials.png"#}
+{#                             style="height: 80px;">#}
+{#                    </a>#}
+{#                    <div class="caption">#}
+{#                        <a href="/drugtrials/"#}
+{#                           class="btn btn-primary btn-large">#}
+{#                        View Drug Trials#}
+{#                        </a>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
                 <div class="col-md-3">
                     <div title="View a table of bioactivities based on your selection" class="well">
                         <a href="/bioactivities/table/">
@@ -56,20 +94,20 @@
                         </div>
                     </div>
                 </div>
-            <div class="col-md-3">
-                <div title="View or add compounds" class="well">
-                    <a href="/compounds/">
-                        <img src="/static/img/button_browse.png"
-                             style="height: 80px;">
-                    </a>
-                    <div class="caption">
-                        <a href="/compounds/"
-                           class="btn btn-primary btn-large">
-                        View Compounds
-                        </a>
-                    </div>
-                </div>
-            </div>
+{#            <div class="col-md-3">#}
+{#                <div title="View or add compounds" class="well">#}
+{#                    <a href="/compounds/">#}
+{#                        <img src="/static/img/button_browse.png"#}
+{#                             style="height: 80px;">#}
+{#                    </a>#}
+{#                    <div class="caption">#}
+{#                        <a href="/compounds/"#}
+{#                           class="btn btn-primary btn-large">#}
+{#                        View Compounds#}
+{#                        </a>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
         </div>
         <div class="row">
             <h3>Perform Studies</h3>
@@ -109,7 +147,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div title="Lists all public data (does not contain add interface)" class="well">
+                <div title="Lists all public data" class="well">
                     <a href="/assays/organchipstudy">
                         <img src="/static/img/button_chip.png"
                              style="height: 80px;">

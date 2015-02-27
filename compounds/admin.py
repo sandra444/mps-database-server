@@ -5,7 +5,7 @@ from django import forms
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
-from bioservices import ChEMBLdb
+from bioservices import ChEMBL as ChEMBLdb
 
 from compounds.resource import CompoundResource
 from mps.base.admin import LockableAdmin

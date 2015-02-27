@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <form method="post">{% csrf_token %}
+        <h3 style="color: #FF0000">Are you sure you want to delete Test Results: <b>ID #{{ object.id }}</b>?</h3>
+
+        <hr>
+
+        <br>
+
+        <button type="submit" class="btn btn-danger">Confirm Deletion</button>
+    </form>
+
+{% endblock %}

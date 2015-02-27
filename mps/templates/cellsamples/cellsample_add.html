@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<script>
+    $(function() {
+        var date = $("#id_receipt_date");
+        var curr_date = date.val();
+        //Add datepicker to receipt date
+        date.datepicker();
+        date.datepicker("option","dateFormat","yy-mm-dd");
+        date.datepicker("setDate" , curr_date);
+
+        var isolation = $("#id_isolation_datetime");
+        var curr_isolation = isolation.val();
+        //Add datepicker to isolation
+        isolation.datepicker();
+        isolation.datepicker("option","dateFormat","yy-mm-dd");
+        isolation.datepicker("setDate" , curr_date);
+    });
+</script>
+
+<form enctype="multipart/form-data" class="form-horizontal" method="post" >
+    {% csrf_token %}
+    <h1>Add Cell Sample <button type="submit" class="btn btn-primary">Submit</button></h1>
+
+    <legend>Cell Sample Details</legend>
+
+    {% if form.cell_type.errors %}
+        {% for error in form.cell_type.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="cell_type" class="col-sm-2 control-label">Cell Type*</label>
+        <div class="col-sm-10">
+          {{ form.cell_type }}
+        </div>
+    </div>
+
+    {% if form.cell_source.errors %}
+        {% for error in form.cell_source.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="cell_source" class="col-sm-2 control-label">Cell Source</label>
+        <div class="col-sm-10">
+          {{ form.cell_source }}
+        </div>
+    </div>
+
+    {% if form.receipt_date.errors %}
+        {% for error in form.receipt_date.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="receipt_date" class="col-sm-2 control-label">Receipt Date*</label>
+        <div class="col-sm-10">
+          {{ form.receipt_date }}
+        </div>
+    </div>
+
+    <legend>Group Access</legend>
+
+    {% if form.group.errors %}
+        {% for error in form.group.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="group" class="col-sm-2 control-label">Group*</label>
+        <div class="col-sm-10">
+          <select id="id_group" name="group">
+            <option value="">---------</option>
+            {% for group in groups %}
+              {# It is necessary to coerce the forms value into an integer for this compare #}
+              {% if group.id|add:"0" == form.group.value|add:"0" %}
+                <option value={{ group.id }} selected>{{ group.name }}</option>
+              {% else %}
+                <option value={{ group.id }}>{{ group.name }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+    </div>
+
+    <legend>Supplier Information</legend>
+
+    {% if form.supplier.errors %}
+        {% for error in form.supplier.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="supplier" class="col-sm-2 control-label">Supplier*</label>
+        <div class="col-sm-10">
+          {{ form.supplier }}
+        </div>
+    </div>
+
+    {% if form.product_id.errors %}
+        {% for error in form.product_id.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="product_id" class="col-sm-2 control-label">Product ID</label>
+        <div class="col-sm-10">
+          {{ form.product_id }}
+        </div>
+    </div>
+
+    {% if form.barcode.errors %}
+        {% for error in form.barcode.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="barcode" class="col-sm-2 control-label">Barcode/Lot #</label>
+        <div class="col-sm-10">
+          {{ form.barcode }}
+        </div>
+    </div>
+
+    {% if form.cell_image.errors %}
+        {% for error in form.cell_image.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="cell_image" class="col-sm-2 control-label">Cell Image</label>
+        <div class="col-sm-10">
+          {{ form.cell_image }}
+        </div>
+    </div>
+
+    {% if form.notes.errors %}
+        {% for error in form.notes.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="notes" class="col-sm-2 control-label">Notes</label>
+        <div class="col-sm-10">
+          {{ form.notes }}
+        </div>
+    </div>
+
+    <legend>Isolation Information</legend>
+
+    {# Dealing with datetime fields is more than a little awkward on the front end #}
+    {# Currently requires format: yyyy-mm-dd<SPACE>hh:mm:ss (in military time, no less) #}
+    {% if form.isolation_datetime.errors %}
+        {% for error in form.isolation_datetime.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="isolation_datetime" class="col-sm-2 control-label">Isolation</label>
+        <div class="col-sm-10">
+          {{ form.isolation_datetime }}
+        </div>
+    </div>
+
+    {% if form.isolation_method.errors %}
+        {% for error in form.isolation_method.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="isolation_method" class="col-sm-2 control-label">Method</label>
+        <div class="col-sm-10">
+          {{ form.isolation_method }}
+        </div>
+    </div>
+
+    {% if form.isolation_notes.errors %}
+        {% for error in form.isolation_notes.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="isolation_notes" class="col-sm-2 control-label">Notes</label>
+        <div class="col-sm-10">
+          {{ form.isolation_notes }}
+        </div>
+    </div>
+
+    <legend>Cell Viability</legend>
+
+    {% if form.viable_count.errors %}
+        {% for error in form.viable_count.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="viable_count" class="col-sm-2 control-label">Viable Count</label>
+        <div class="col-sm-10">
+          {{ form.viable_count }}
+        </div>
+    </div>
+
+    {% if form.viable_count_unit.errors %}
+        {% for error in form.viable_count_unit.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="viable_count" class="col-sm-2 control-label">Viable Count Unit</label>
+        <div class="col-sm-10">
+          {{ form.viable_count_unit }}
+        </div>
+    </div>
+
+    {% if form.percent_viability.errors %}
+        {% for error in form.percent_viability.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="percent_viability" class="col-sm-2 control-label">Percent Viability</label>
+        <div class="col-sm-10">
+          {{ form.percent_viability }}
+        </div>
+    </div>
+
+    <legend>Patient Information</legend>
+
+    {% if form.patient_age.errors %}
+        {% for error in form.patient_age.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="patient_age" class="col-sm-2 control-label">Patient Age</label>
+        <div class="col-sm-10">
+          {{ form.patient_age }}
+        </div>
+    </div>
+
+    {% if form.patient_gender.errors %}
+        {% for error in form.patient_gender.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="patient_gender" class="col-sm-2 control-label">Patient Gender</label>
+        <div class="col-sm-10">
+          {{ form.patient_gender }}
+        </div>
+    </div>
+
+    {% if form.patient_condition.errors %}
+        {% for error in form.patient_condition.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="patient_condition" class="col-sm-2 control-label">Patient Condition</label>
+        <div class="col-sm-10">
+          {{ form.patient_condition }}
+        </div>
+    </div>
+{% endblock %}
