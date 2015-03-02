@@ -21,7 +21,7 @@
 <form enctype="multipart/form-data" class="form-horizontal" method="post" >
     {% csrf_token %}
     {{ formset.management_form }}
-    <h1>Add Organ Chip Study <button type="submit" class="btn btn-primary">Submit</button>
+    <h1>Organ Chip Study <button type="submit" class="btn btn-primary">Submit</button>
 
     {% if update %}
         <a role="button" class="btn btn-danger pull-right" href="/assays/{{ object.id }}/delete/">Delete</a>

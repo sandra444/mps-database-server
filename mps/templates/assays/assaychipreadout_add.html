@@ -35,7 +35,7 @@
 <form enctype="multipart/form-data" class="form-horizontal" method="post" >
     {% csrf_token %}
     <h1>
-        Add Chip Readout
+        Chip Readout
         <button type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
         {% if not update %}
             <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Add Another</button>
