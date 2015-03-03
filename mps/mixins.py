@@ -71,6 +71,10 @@ class CreatorRequiredMixin(object):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         self.object = self.get_object()
+        # Deny access if not the CREATOR
+        # Note the call for request.user.is_authenticated
+        # Interestingly, Django wraps request.user until it is accessed
+        # Thus, to perform this comparison it is necessary to access request.user via authentication
         if not self.request.user.is_authenticated() or self.request.user != self.object.created_by:
             return PermissionDenied(self.request,'You can only delete entries that you have created')
         return super(CreatorRequiredMixin, self).dispatch(*args, **kwargs)
