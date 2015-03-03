@@ -100,9 +100,23 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
                                                                                                        'compound',
                                                                                                        'unit',
                                                                                                        'created_by')
-        context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
+        readouts = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
             'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
                                                                    'chip_setup__unit')
+
+        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
+        related_assays_map = {}
+
+        for assay in related_assays:
+            # start appending to a list keyed by the readout ID for all related images
+            related_assays_map.setdefault(assay.readout_id.id, []).append(assay)
+
+        for readout in readouts:
+            # set an attribute on the readout that is the list created above
+            readout.related_assays = related_assays_map.get(readout.id)
+
+        context['readouts'] = readouts
+
         context['results'] = AssayResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function', 'result_type',
                                                     'test_unit').select_related('assay_result__chip_setup',
                                                                                 'assay_result__chip_setup__compound',
@@ -202,9 +216,23 @@ class AssayRunDetail(DetailView):
                                                                                                      'compound',
                                                                                                      'unit',
                                                                                                      'created_by')
-        context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
+        readouts = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
             'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
                                                                    'chip_setup__unit')
+
+        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
+        related_assays_map = {}
+
+        for assay in related_assays:
+            # start appending to a list keyed by the readout ID for all related images
+            related_assays_map.setdefault(assay.readout_id.id, []).append(assay)
+
+        for readout in readouts:
+            # set an attribute on the readout that is the list created above
+            readout.related_assays = related_assays_map.get(readout.id)
+
+        context['readouts'] = readouts
+
         context['results'] = AssayResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function', 'result_type',
                                                     'test_unit').select_related('assay_result__assay_device_readout',
                                                                                 'assay_result__chip_setup',
@@ -512,13 +540,26 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
     model = AssayChipReadout
 
     def get_queryset(self):
-        return AssayChipReadout.objects.filter(chip_setup__assay_run_id__restricted=False).prefetch_related(
+        readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id__restricted=False).prefetch_related(
             'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
                                                                    'chip_setup__unit') | AssayChipReadout.objects.filter(
             chip_setup__assay_run_id__group__in=self.request.user.groups.all()).prefetch_related('chip_setup',
                                                                                                  'timeunit',
                                                                                                  'created_by').select_related(
             'chip_setup__compound', 'chip_setup__unit')
+
+        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
+        related_assays_map = {}
+
+        for assay in related_assays:
+            # start appending to a list keyed by the readout ID for all related images
+            related_assays_map.setdefault(assay.readout_id.id, []).append(assay)
+
+        for readout in readouts:
+            # set an attribute on the readout that is the list created above
+            readout.related_assays = related_assays_map.get(readout.id)
+
+        return readouts
 
 
 ACRAFormSet = inlineformset_factory(AssayChipReadout, AssayChipReadoutAssay, formset=AssayChipReadoutInlineFormset,

@@ -77,6 +77,7 @@
                 <tr>
                     <th>Chip Readout ID</th>
                     <th>Chip Setup</th>
+                    <th>Assays</th>
                     <th>Readout Date</th>
                     <th>Creator</th>
                 </tr>
@@ -96,6 +97,11 @@
                 <tr id={{ readout.id }} name={{ readout.id }}>
                     <td><a href="/assays/assaychipreadout/{{ readout.id }}/update/">{{ readout.id }}</a></td>
                     <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}/update/">{{ readout.chip_setup }}</a></td>
+                    <td>
+                        {% for assay in readout.related_assays %}
+                            {{ assay }}
+                        {% endfor %}
+                    </td>
                     <td>{{ readout.readout_start_time }}</td>
                     <td>{{ readout.created_by }}</td>
                 </tr>
