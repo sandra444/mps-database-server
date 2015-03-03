@@ -84,14 +84,9 @@
 
     </div>
 
-    <legend>Drug/Drug-like Properties
-        <button class="btn btn-info" type="button" data-toggle="collapse"
-                data-target="#drug_properties" aria-expanded="false" aria-controls="drug_properties">
-            Show
-        </button>
-    </legend>
+    <legend>Drug/Drug-like Properties</legend>
 
-    <div id='drug_properties' class="collapse">
+    <div id='drug_properties'>
 
         <div class="row">
             <div class="col-sm-2 lead text-right-responsive">
@@ -154,29 +149,22 @@
 
     </div>
 
-    <legend>Molecular Properties
-        <button class="btn btn-info" type="button" data-toggle="collapse"
-                data-target="#molecular_properties" aria-expanded="false" aria-controls="molecular_properties">
-            Show
-        </button>
-    </legend>
+    <legend>Molecular Properties</legend>
 
-    <div id='molecular_properties' class="collapse">
+    <div id='molecular_properties'>
 
         <div class="row">
             <div class="col-sm-2 lead text-right-responsive">
                 <b>Molecular Weight:</b>
             </div>
-            <div class="col-sm-10 lead">
+            <div class="col-sm-2 lead">
                 {{ object.molecular_weight }}
             </div>
-        </div>
 
-        <div class="row">
             <div class="col-sm-2 lead text-right-responsive">
                 <b>Rotatable Bonds:</b>
             </div>
-            <div class="col-sm-10 lead">
+            <div class="col-sm-6 lead">
                 {{ object.rotatable_bonds }}
             </div>
         </div>
@@ -185,16 +173,14 @@
             <div class="col-sm-2 lead text-right-responsive">
                 <b>Acidic pKa:</b>
             </div>
-            <div class="col-sm-10 lead">
+            <div class="col-sm-2 lead">
                 {{ object.acidic_pka }}
             </div>
-        </div>
 
-        <div class="row">
             <div class="col-sm-2 lead text-right-responsive">
                 <b>Basic pKa:</b>
             </div>
-            <div class="col-sm-10 lead">
+            <div class="col-sm-6 lead">
                 {{ object.basic_pka }}
             </div>
         </div>
@@ -203,41 +189,23 @@
             <div class="col-sm-2 lead text-right-responsive">
                 <b>LogP:</b>
             </div>
-            <div class="col-sm-10 lead">
+            <div class="col-sm-2 lead">
                 {{ object.logp }}
             </div>
-        </div>
 
-        <div class="row">
             <div class="col-sm-2 lead text-right-responsive">
                 <b>LogD:</b>
             </div>
-            <div class="col-sm-10 lead">
+            <div class="col-sm-2 lead">
                 {{ object.logd }}
             </div>
-        </div>
 
-        <div class="row">
             <div class="col-sm-2 lead text-right-responsive">
                 <b>ALogP:</b>
             </div>
-            <div class="col-sm-10 lead">
+            <div class="col-sm-2 lead">
                 {{ object.alogp }}
             </div>
         </div>
-{#        <div class="col-sm-12">#}
-{#            <p><b>Molecular Weight:</b> {{ object.molecular_weight }}</p>#}
-{#            <p><b>Rotatable Bonds:</b> {{ object.rotatable_bonds }}</p>#}
-{#            <p><b>Acidic pKa:</b> {{ object.acidic_pka }}</p>#}
-{#            <p><b>Basic pKa:</b> {{ object.basic_pka }}</p>#}
-{#            <p><b>LogP:</b> {{ object.logp }}</p>#}
-{#            <p><b>LogD:</b> {{ object.logd }}</p>#}
-{#            <p><b>ALogP:</b> {{ object.alogp }}</p>#}
-{#        </div>#}
-
     </div>
-
-{#    <script>#}
-{#        $("p").addClass("lead");#}
-{#    </script>#}
 {% endblock %}
