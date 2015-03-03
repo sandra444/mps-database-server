@@ -263,7 +263,8 @@ $(document).ready(function () {
     }
 
     // Get a list for checkboxes from returned AJAX data
-    function get_list(data) {
+    // Min is a boolean value to see if data should be restricted on min_feat_count
+    function get_list(data, min) {
         if (!data || data.length == 0) {
             return [];
         }
@@ -271,7 +272,8 @@ $(document).ready(function () {
         var result = [];
         var i;
         for (i = 0; i < data.length; i += 1) {
-            if (data[i][1] >= min_feat_count) {
+            // Consider refactor for min_feat_count restriction
+            if (!min || data[i][1] >= min_feat_count) {
                 result.push({
                     name: data[i][0],
                     is_selected: false
@@ -317,10 +319,10 @@ $(document).ready(function () {
             },
             success: function (json) {
                 //console.log(json);
-                targets = get_list(json.targets);
-                compounds = get_list(json.compounds);
-                bioactivities = get_list(json.bioactivities);
-                drugtrials = get_list(json.drugtrials);
+                targets = get_list(json.targets, true);
+                compounds = get_list(json.compounds, true);
+                bioactivities = get_list(json.bioactivities, true);
+                drugtrials = get_list(json.drugtrials, false);
                 //console.log(targets);
                 //console.log(compounds);
                 //console.log(bioactivities);
