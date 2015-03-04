@@ -583,16 +583,16 @@ def parseChipCSV(currentChipReadout, file):
         # rowID is the index of the current row from top to bottom
 
         # Skip any row with insufficient commas
-        if len(rowValue) < 4:
+        if len(rowValue) < 6:
             continue
 
         # Skip any row with incomplete data and first row (header) for now
-        if not rowValue[0] or not rowValue[1] or not rowValue[2] or rowID == 0 or rowValue[3] is '':
+        if rowID == 0 or not all(rowValue) or rowValue[4] is '':
             continue
 
-        assay = AssayModel.objects.get(assay_name=rowValue[1])
-        field = rowValue[2]
-        val = rowValue[3]
+        assay = AssayModel.objects.get(assay_name=rowValue[2])
+        field = rowValue[3]
+        val = rowValue[4]
         time = rowValue[0]
 
         # Originally permitted none values, will now ignore empty values
@@ -742,14 +742,15 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
     def clean(self):
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
-        # List of assay names from inline
-        assays = []
+        # Dic of assay names from inline
+        assays = {}
         for form in forms_data:
             try:
                 if form.cleaned_data:
                     assay_name = form.cleaned_data.get('assay_id').assay_name
+                    unit = form.cleaned_data.get('readout_unit').readout_unit
                     if assay_name not in assays:
-                        assays.append(assay_name)
+                        assays.update({assay_name:unit})
                     else:
                         raise forms.ValidationError(
                             'Duplicate assays are not permitted; please blank out or change the duplicate')
@@ -776,6 +777,9 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
             datareader = csv.reader(test_file, delimiter=',')
             datalist = list(datareader)
 
+            # Tedious way of getting timeunit; probably should refactor
+            readout_time_unit = TimeUnits.objects.get(id=self.data.get('timeunit')).unit
+
             # All unique rows based on ('assay_id', 'field_id', 'elapsed_time')
             unique = {}
 
@@ -783,17 +787,28 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
 
                 # Some lines may not be long enough (have sufficient commas), ignore such lines
                 # Some lines may be empty or incomplete, ignore these as well
-                if len(line) < 4 or not line[0] or not line[1] or not line[2]:
+                if len(line) < 6 or not line[0] or not line[2] or not line[3]:
                     continue
 
                 time = line[0]
-                assay = line[1]
-                field = line[2]
-                val = line[3]
+                time_unit = line[1].strip().lower()
+                assay = line[2]
+                field = line[3]
+                val = line[4]
+                val_unit = line[5].strip()
                 # Raise error when an assay does not exist
                 if assay not in assays:
                     raise forms.ValidationError(
                         'No assay with the name "%s" exists; please change your file or add this assay' % assay)
+                # Raise error if val_unit not equal to one listed in ACRA
+                if val_unit != assays.get(assay,''):
+                    raise forms.ValidationError(
+                        'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+                # Fail if time unit does not match
+                # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
+                if time_unit[0] != readout_time_unit[0]:
+                    raise forms.ValidationError(
+                        'The time unit "%s" does not correspond with the selected readout time unit of "%s"' % (time_unit, readout_time_unit))
                 if (time,assay,field) not in unique:
                     unique.update({(time,assay,field):True})
                 else:

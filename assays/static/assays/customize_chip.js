@@ -1,8 +1,23 @@
 $(document).ready(function () {
 
+    // Function to repeat a string num number of times
+    function repeat(str, num) {
+        return (new Array(num+1)).join(str);
+    }
+
+    function isTrue(element, index, array) {
+        if (!element) {
+            return false;
+        }
+        else {
+            return true;
+        }
+
+    }
+
     function addChart(id,name) {
 
-        $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 10%;margin-left: -100%px;">')
+        $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 5%;margin-left: -100%px;">')
             .appendTo('#extra');
 
         charts.push(
@@ -114,22 +129,24 @@ $(document).ready(function () {
         //Make table
         var table = exist ? "<table class='layout-table' style='width: 100%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 100%;'><tbody>";
 
-        table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Assay</th><th>Object</th><th>Data</th></tr>" : "";
+        table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th></tr>" : "";
 
         for (var i in lines) {
-            if ((i == 0 && !exist) || (!lines[i][0] || !lines[i][1] || !lines[i][2] || !lines[i][3])) {
+            var every = lines[i].every(isTrue);
+
+            if ((i == 0 && !exist) || !every) {
                 table += "<tr style='background: #FF2400'>";
             }
-            else if (lines[i][3] == 'None') {
+            else if (lines[i][4] == 'None') {
                 table += "<tr style='background: #606060'>";
             }
             else {
                 table += "<tr>";
             }
-            table += "<th>" + lines[i][0] + "</th>";
-            table += "<th>" + lines[i][1] + "</th>";
-            table += "<th>" + lines[i][2] + "</th>";
-            table += "<th>" + lines[i][3] + "</th>";
+
+            for (var j=0; j<6; j++) {
+                table += "<th>" + lines[i][j] + "</th>";
+            }
             table += "</tr>";
         }
 
@@ -140,21 +157,21 @@ $(document).ready(function () {
         var assays = {};
 
         for (var i in lines) {
-            if (!lines[i][0] || !lines[i][1] || !lines[i][2] || (i == 0 && !exist)) {
+            if (!lines[i][0] || !lines[i][2] || !lines[i][3] || (i == 0 && !exist)) {
                 continue;
             }
 
-            if (!assays[lines[i][1]]) {
-                assays[lines[i][1]] = {};
+            if (!assays[lines[i][2]]) {
+                assays[lines[i][2]] = {};
             }
 
-            if (lines[i][2] && lines[i][2] != 'None' && !assays[lines[i][1]][lines[i][2]]) {
-                assays[lines[i][1]][lines[i][2]] = {'time':[], 'data':[]};
+            if (lines[i][3] && lines[i][3] != 'None' && !assays[lines[i][2]][lines[i][3]]) {
+                assays[lines[i][2]][lines[i][3]] = {'time':[], 'data':[]};
             }
 
-            if (assays[lines[i][1]][lines[i][2]] && lines[i][3] && lines[i][3] != 'None') {
-                assays[lines[i][1]][lines[i][2]].time.push(lines[i][0]);
-                assays[lines[i][1]][lines[i][2]].data.push(lines[i][3]);
+            if (assays[lines[i][2]][lines[i][3]] && lines[i][4] && lines[i][4] != 'None') {
+                assays[lines[i][2]][lines[i][3]].time.push(lines[i][0]);
+                assays[lines[i][2]][lines[i][3]].data.push(lines[i][4]);
             }
         }
 
@@ -193,9 +210,9 @@ $(document).ready(function () {
     var id = getReadoutValue();
 
     var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
-            "<tr style='background: #FF2400'><th>Time</th><th>Assay</th><th>Object</th><th>Data</th></tr>" +
-            "<tr><th><br><br></th><th><br><br></th><th><br><br></th><th><br><br></th>" +
-            "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
+            "<tr style='background: #FF2400'><th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th></tr>" +
+            "<tr>" + repeat('<th><br><br></th>',6) + "</tr>" +
+            "<tr>" + repeat('<th><br><br></th>',6) + "</tr>" +
             "</tbody></table>";
 
     if ($('#assaychipreadoutassay_set-group')[0] != undefined) {
@@ -203,7 +220,7 @@ $(document).ready(function () {
             .appendTo('body');
         $("#extra").insertAfter($("#assaychipreadoutassay_set-group")[0]);
 
-        $('<div id="csv_table" style="width: 20%;float: left;margin-left: 10%;">')
+        $('<div id="csv_table" style="width: 30%;float: left;margin-left: 5%;">')
             .appendTo('#extra').html(add);
 
         var charts = [];
