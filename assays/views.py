@@ -524,6 +524,10 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
+
+            # Get headers
+            headers = int(data.get('headers'))
+
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
@@ -532,7 +536,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             formset.save()
             if formset.__dict__['files']:
                 file = formset.__dict__['files']['file']
-                parseChipCSV(self.object, file)
+                parseChipCSV(self.object, file, headers)
             if data['another']:
                 return self.render_to_response(self.get_context_data(form=form))
             else:
@@ -603,6 +607,11 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
         # form.instance.restricted = study.restricted
 
         if form.is_valid() and formset.is_valid():
+            data = form.cleaned_data
+
+            # Get headers
+            headers = int(data.get('headers'))
+
             self.object = form.save()
             # Set restricted
             self.object.restricted = study.restricted
@@ -617,7 +626,7 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Save file if it exists
             if formset.__dict__.get('files','').get('file',''):
                 file = formset.__dict__.get('files','').get('file','')
-                parseChipCSV(self.object, file)
+                parseChipCSV(self.object, file, headers)
             # Clear data if clear is checked
             if self.request.POST.get('file-clear',''):
                 removeExistingChip(self.object)

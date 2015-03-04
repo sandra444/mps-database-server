@@ -115,6 +115,15 @@ $(document).ready(function () {
             return;
         }
 
+        // Update headers
+        headers = Math.floor($('#id_headers').val());
+
+        // Crash if the first time is not numeric
+        if (isNaN(headers)) {
+            alert("Please make sure you choose a valid number for number of header rows.");
+            return;
+        }
+
         var all = csv.split('\n');
         var lines = [];
 
@@ -134,7 +143,7 @@ $(document).ready(function () {
         for (var i in lines) {
             var every = lines[i].every(isTrue);
 
-            if ((i == 0 && !exist) || !every) {
+            if ((i < headers && !exist) || !every) {
                 table += "<tr style='background: #FF2400'>";
             }
             else if (lines[i][4] == 'None') {
@@ -157,7 +166,14 @@ $(document).ready(function () {
         var assays = {};
 
         for (var i in lines) {
-            if (!lines[i][0] || !lines[i][2] || !lines[i][3] || (i == 0 && !exist)) {
+
+            // Crash if the time or value are not numeric
+            if (isNaN(lines[headers][0]) || isNaN(lines[headers][4])) {
+                alert("Improperly Configured: Please check your file and the number of header rows selected.");
+                return;
+            }
+
+            if (!lines[i][0] || !lines[i][2] || !lines[i][3] || (i < headers && !exist)) {
                 continue;
             }
 
@@ -208,6 +224,8 @@ $(document).ready(function () {
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     var id = getReadoutValue();
+
+    var headers = +$('#id_headers').val();
 
     var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
             "<tr style='background: #FF2400'><th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th></tr>" +

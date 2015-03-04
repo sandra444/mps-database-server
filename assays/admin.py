@@ -572,13 +572,14 @@ def removeExistingChip(currentChipReadout):
             readout.delete()
     return
 
-def parseChipCSV(currentChipReadout, file):
+def parseChipCSV(currentChipReadout, file, headers):
     removeExistingChip(currentChipReadout)
 
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
 
-    for rowID, rowValue in enumerate(datalist):
+    # Only take values from headers onward
+    for rowID, rowValue in enumerate(datalist[headers:]):
         # rowValue holds all of the row elements
         # rowID is the index of the current row from top to bottom
 
@@ -586,8 +587,8 @@ def parseChipCSV(currentChipReadout, file):
         if len(rowValue) < 6:
             continue
 
-        # Skip any row with incomplete data and first row (header) for now
-        if rowID == 0 or not all(rowValue) or rowValue[4] is '':
+        # Skip any row with incomplete data
+        if not all(rowValue) or rowValue[4] is '':
             continue
 
         assay = AssayModel.objects.get(assay_name=rowValue[2])
@@ -740,6 +741,15 @@ admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 
 class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
     def clean(self):
+
+        headers = 0
+
+        # Throw error if headers is not valid
+        try:
+            headers = int(self.data.get('headers',''))
+        except:
+            raise forms.ValidationError('Please make number of headers a valid number')
+
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
         # Dic of assay names from inline
@@ -783,7 +793,8 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
             # All unique rows based on ('assay_id', 'field_id', 'elapsed_time')
             unique = {}
 
-            for line in datalist[1:]:
+            # Read headers going onward
+            for line in datalist[headers:]:
 
                 # Some lines may not be long enough (have sufficient commas), ignore such lines
                 # Some lines may be empty or incomplete, ignore these as well
@@ -842,6 +853,9 @@ class AssayChipReadoutInline(admin.TabularInline):
 
 # ChipReadout validation occurs in the inline formset
 class AssayChipReadoutForm(forms.ModelForm):
+
+    headers = forms.CharField(required=True)
+
     class Meta(object):
         model = AssayChipReadout
 
@@ -888,6 +902,9 @@ class AssayChipReadoutAdmin(LockableAdmin):
                     ),
                     (
                         'file',
+                    ),
+                    (
+                        'headers',
                     ),
                 )
             }
@@ -949,6 +966,8 @@ class AssayChipReadoutAdmin(LockableAdmin):
     def save_related(self, request, form, formsets, change):
         obj = form.instance
 
+        headers = int(form.data.get('headers'))
+
         if change:
             obj.modified_by = request.user
 
@@ -962,7 +981,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parseChipCSV(obj, request.FILES['file'])
+            parseChipCSV(obj, request.FILES['file'], headers)
 
         #Need to delete entries when a file is cleared
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':

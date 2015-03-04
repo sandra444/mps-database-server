@@ -205,6 +205,24 @@
         </div>
     </div>
 
+{#    {% if form.headers.errors %}#}
+{#        {% for error in form.headers.errors %}#}
+{#            <div class="alert alert-danger" role="alert">#}
+{#                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                <span class="sr-only">Error:</span>#}
+{#                {{error}}#}
+{#            </div>#}
+{#        {% endfor %}#}
+{#    <div class="form-group has-error">#}
+{#    {% else %}#}
+    <div class="form-group">
+{#    {% endif %}#}
+        <label for="headers" class="col-sm-2 control-label">Number of Header Rows</label>
+        <div class="col-sm-10">
+          <input id="id_headers" name="headers" style="width:50px;" value="{{ form.headers.value|default:"1" }}">
+        </div>
+    </div>
+
     {{ formset.management_form }}
     <legend>Assays</legend>
 
