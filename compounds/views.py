@@ -27,6 +27,24 @@ class CompoundsDetail(DetailView):
     model = Compound
     template_name = 'compounds/compounds_detail.html'
 
+    def get_context_data(self, **kwargs):
+        compounds = list(Compound.objects.all().order_by('name').values_list('id', flat=True))
+        current = compounds.index(int(self.kwargs.get('pk')))
+
+        if current == 0:
+            previous = compounds[-1]
+        else:
+            previous = compounds[current - 1]
+        if current == len(compounds)-1:
+            next = compounds[0]
+        else:
+            next = compounds[current + 1]
+
+        context = super(CompoundsDetail, self).get_context_data(**kwargs)
+
+        context.update({'previous':previous, 'next':next})
+        return context
+
 
 class CompoundsAdd(OneGroupRequiredMixin, CreateView):
     form_class = CompoundForm

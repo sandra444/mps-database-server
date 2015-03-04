@@ -7,7 +7,18 @@
     }
     </style>
 
-    <legend><h1>{{ object.name}}</h1></legend>
+    <legend>
+        <h1>{{ object.name}}
+        <a href="/compounds/{{ next }}" class="btn btn-primary btn-large pull-right">
+            <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+            Next
+        </a>
+        <a href="/compounds/{{ previous }}" class="btn btn-primary btn-large pull-right">
+            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+            Previous
+        </a>
+        </h1>
+    </legend>
 
     <div class="row">
 
