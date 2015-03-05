@@ -225,7 +225,7 @@ $(document).ready(function () {
 
     var id = getReadoutValue();
 
-    var headers = +$('#id_headers').val();
+    var headers = Math.floor($('#id_headers').val());
 
     var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
             "<tr style='background: #FF2400'><th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th></tr>" +
