@@ -219,7 +219,7 @@
 {#    {% endif %}#}
         <label for="headers" class="col-sm-2 control-label">Number of Header Rows</label>
         <div class="col-sm-10">
-          <input id="id_headers" name="headers" style="width:50px;" value="{{ form.headers.value|default:"1" }}">
+          <input id="id_headers" type="number" name="headers" style="width:50px;" value="{{ form.headers.value|default:"1" }}">
         </div>
     </div>
 

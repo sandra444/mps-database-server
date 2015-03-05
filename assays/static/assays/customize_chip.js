@@ -167,14 +167,14 @@ $(document).ready(function () {
 
         for (var i in lines) {
 
-            // Crash if the time or value are not numeric
-            if (isNaN(lines[headers][0]) || isNaN(lines[headers][4])) {
-                alert("Improperly Configured: Please check your file and the number of header rows selected.");
-                return;
-            }
-
             if (!lines[i][0] || !lines[i][2] || !lines[i][3] || (i < headers && !exist)) {
                 continue;
+            }
+
+            // Crash if the time or value are not numeric
+            if (isNaN(lines[i][0]) || isNaN(lines[i][4])) {
+                alert("Improperly Configured: Please check your file and the number of header rows selected.");
+                return;
             }
 
             if (!assays[lines[i][2]]) {
@@ -221,6 +221,22 @@ $(document).ready(function () {
         }
     };
 
+    var refresh = function() {
+        resetChart();
+        var file = $('#id_file')[0].files[0];
+        if (file) {
+            getText(file);
+        }
+        else {
+            if (id) {
+               getReadout()
+            }
+            else {
+                $('#csv_table').html(add);
+            }
+        }
+    };
+
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     var id = getReadoutValue();
@@ -249,18 +265,12 @@ $(document).ready(function () {
     }
 
     $('#id_file').change(function(evt) {
-        resetChart();
-        var file = $('#id_file')[0].files[0];
-        if (file) {
-            getText(file);
-        }
-        else{
-            if (id) {
-               getReadout()
-            }
-            else {
-                $('#csv_table').html(add);
-            }
+        refresh();
+    });
+
+    $('#id_headers').change(function(evt) {
+        if ($('#id_file')[0].files[0]) {
+            refresh();
         }
     });
 });
