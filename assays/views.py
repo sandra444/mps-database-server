@@ -534,8 +534,8 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             self.object.save()
             formset.instance = self.object
             formset.save()
-            if formset.__dict__['files']:
-                file = formset.__dict__['files']['file']
+            if formset.files.get('file',''):
+                file = formset.files.get('file','')
                 parseChipCSV(self.object, file, headers)
             if data['another']:
                 return self.render_to_response(self.get_context_data(form=form))
@@ -624,8 +624,8 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             formset.instance = self.object
             formset.save()
             # Save file if it exists
-            if formset.__dict__.get('files','').get('file',''):
-                file = formset.__dict__.get('files','').get('file','')
+            if formset.files.get('file',''):
+                file = formset.files.get('file','')
                 parseChipCSV(self.object, file, headers)
             # Clear data if clear is checked
             if self.request.POST.get('file-clear',''):

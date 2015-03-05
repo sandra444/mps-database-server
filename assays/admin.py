@@ -748,7 +748,7 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
         try:
             headers = int(self.data.get('headers',''))
         except:
-            raise forms.ValidationError('Please make number of headers a valid number')
+            raise forms.ValidationError('Please make number of headers a valid number.')
 
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
@@ -772,18 +772,47 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
         """Validate unique, existing Chip Readout IDs"""
 
         # Very unusual way of getting parent data; seems to work; TEST to be sure
+        # Although using the object dict is useful for fast debugging, dot notation is the obviously correct choice
 
-        if self.instance.__dict__['file']:
-            data = self.instance.__dict__
-            test_file = data['file']
-        elif not forms_data[-1].__dict__['files']:
-            test_file = None
-        else:
-            data = forms_data[-1].__dict__
-            test_file = data['files']['file']
+        # if self.instance.__dict__['file']:
+        #     data = self.instance.__dict__
+        #     test_file = data['file']
+        # elif not forms_data[-1].__dict__['files']:
+        #     test_file = None
+        # else:
+        #     data = forms_data[-1].__dict__
+        #     test_file = data['files']['file']\
 
-        # Check to make sure there is a file
-        if test_file:
+        # If there is already a file in the database and it is not being replaced or cleared (check for clear is implicit)
+        if self.instance.file and not forms_data[-1].files:
+            new_time_unit = self.instance.timeunit
+            old_time_unit = AssayChipReadout.objects.get(id=self.instance.id).timeunit
+
+            # Fail if time unit does not match
+            if new_time_unit != old_time_unit:
+                raise forms.ValidationError(
+                    'The time unit "%s" does not correspond with the selected readout time unit of "%s"' % (new_time_unit, old_time_unit))
+
+            saved_data = AssayChipRawData.objects.filter(assay_chip_id=self.instance).prefetch_related('assay_id')
+
+            for raw in saved_data:
+
+                assay = raw.assay_id.assay_id.assay_name
+                val_unit = raw.assay_id.readout_unit.readout_unit
+
+                # Raise error when an assay does not exist
+                if assay not in assays:
+                    raise forms.ValidationError(
+                        'You can not remove the assay "%s" because it is in your uploaded data.' % assay)
+                # Raise error if val_unit not equal to one listed in ACRA
+                if val_unit != assays.get(assay,''):
+                    raise forms.ValidationError(
+                        'The current value unit "%s" does not correspond with the readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+
+        # If there is a new file
+        if forms_data[-1].files:
+            test_file = forms_data[-1].files.get('file','')
+
             datareader = csv.reader(test_file, delimiter=',')
             datalist = list(datareader)
 
