@@ -17,7 +17,7 @@ def drug_trial_detail(request, *args, **kwargs):
     trial = get_object_or_404(DrugTrial, pk=kwargs.get('pk'))
     results = FindingResult.objects.filter(drug_trial=trial).prefetch_related('drug_trial', 'descriptor', 'finding_name', 'value_units').select_related('drug_trial__compound', 'drug_trial__species', 'finding_name__organ', 'finding_name__finding_type')
 
-    trials = list(DrugTrial.objects.all().order_by('compound').values_list('id', flat=True))
+    trials = list(DrugTrial.objects.all().order_by('compound','id').values_list('id', flat=True))
     current = trials.index(int(kwargs.get('pk')))
 
     if current == 0:
