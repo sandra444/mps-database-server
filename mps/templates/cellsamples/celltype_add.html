@@ -1,11 +1,20 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block load %}
+    <script src="{% static "compounds/customize_admin.js" %}"></script>
+    <script src="{% static "js/enter_override.js" %}"></script>
+{% endblock %}
+
 {% block content %}
 
 <form enctype="multipart/form-data" class="form-horizontal" method="post" >
     {% csrf_token %}
-    <h1>Cell Type <button type="submit" class="btn btn-primary">Submit</button></h1>
+    <h1>
+        Cell Type
+
+        <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+    </h1>
 
     <legend>Cell Type Details</legend>
 

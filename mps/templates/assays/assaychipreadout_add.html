@@ -2,9 +2,10 @@
 {% load static %}
 
 {% block load %}
-<script src="{% static "js/inline_add.js" %}"></script>
-<script src="{% static "js/cookies.js" %}"></script>
-<script src="{% static "assays/customize_chip.js" %}"></script>
+    <script src="{% static "js/inline_add.js" %}"></script>
+    <script src="{% static "js/cookies.js" %}"></script>
+    <script src="{% static "assays/customize_chip.js" %}"></script>
+    <script src="{% static "js/enter_override.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -36,7 +37,9 @@
     {% csrf_token %}
     <h1>
         Chip Readout
-        <button type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
+
+        <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
+
         {% if not update %}
             <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Add Another</button>
         {% endif %}
