@@ -167,7 +167,9 @@ $(document).ready(function () {
 
         for (var i in lines) {
 
-            if (!lines[i][0] || !lines[i][2] || !lines[i][3] || (i < headers && !exist)) {
+            var every = lines[i].every(isTrue);
+
+            if (!every || (i < headers && !exist)) {
                 continue;
             }
 

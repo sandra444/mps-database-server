@@ -588,7 +588,7 @@ def parseChipCSV(currentChipReadout, file, headers):
             continue
 
         # Skip any row with incomplete data
-        if not all(rowValue) or rowValue[4] is '':
+        if not all(rowValue):
             continue
 
         assay = AssayModel.objects.get(assay_name=rowValue[2])
@@ -752,7 +752,7 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
 
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
-        # Dic of assay names from inline
+        # Dic of assay names from inline with respective unit as value
         assays = {}
         for form in forms_data:
             try:
@@ -827,7 +827,7 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
 
                 # Some lines may not be long enough (have sufficient commas), ignore such lines
                 # Some lines may be empty or incomplete, ignore these as well
-                if len(line) < 6 or not line[0] or not line[2] or not line[3]:
+                if len(line) < 6 or not all(line):
                     continue
 
                 time = line[0]
