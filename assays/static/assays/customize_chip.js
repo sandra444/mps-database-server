@@ -115,8 +115,11 @@ $(document).ready(function () {
             return;
         }
 
-        // Update headers
-        headers = Math.floor($('#id_headers').val());
+        // Check if headers exists (it doesn't in detail)
+        if ($('#id_headers')[0]) {
+            // Update headers
+            headers = Math.floor($('#id_headers').val());
+        }
 
         // Crash if the first time is not numeric
         if (isNaN(headers)) {
@@ -243,7 +246,11 @@ $(document).ready(function () {
 
     var id = getReadoutValue();
 
-    var headers = Math.floor($('#id_headers').val());
+    var headers = 0;
+
+    if ($('#id_headers')[0]) {
+        headers = Math.floor($('#id_headers').val());
+    }
 
     var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
             "<tr style='background: #FF2400'><th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th></tr>" +
@@ -270,11 +277,13 @@ $(document).ready(function () {
         refresh();
     });
 
-    $('#id_headers').change(function(evt) {
-        if ($('#id_file')[0].files[0]) {
-            refresh();
-        }
-    });
+    if ($('#id_headers')[0]) {
+        $('#id_headers').change(function (evt) {
+            if ($('#id_file')[0].files[0]) {
+                refresh();
+            }
+        });
+    }
 });
 
 
