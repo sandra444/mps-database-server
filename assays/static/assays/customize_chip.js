@@ -15,7 +15,7 @@ $(document).ready(function () {
 
     }
 
-    function addChart(id,name) {
+    function addChart(id,name,timeUnits,valueUnits) {
 
         $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 5%;margin-left: -100%px;">')
             .appendTo('#extra');
@@ -31,13 +31,13 @@ $(document).ready(function () {
                 axis: {
                     x: {
                         label: {
-                            text: 'Time',
+                            text: 'Time (' + timeUnits + ')',
                             position: 'outer-center'
                         }
                     },
                     y: {
                         label: {
-                            text: name,
+                            text: name + ' (' + valueUnits + ')',
                             position: 'outer-middle'
                         }
                     }
@@ -167,6 +167,8 @@ $(document).ready(function () {
 
         //Make chart
         var assays = {};
+        var valueUnits = {};
+        var timeUnits = {};
 
         for (var i in lines) {
 
@@ -193,12 +195,15 @@ $(document).ready(function () {
             if (assays[lines[i][2]][lines[i][3]] && lines[i][4] && lines[i][4] != 'None') {
                 assays[lines[i][2]][lines[i][3]].time.push(lines[i][0]);
                 assays[lines[i][2]][lines[i][3]].data.push(lines[i][4]);
+
+                valueUnits[lines[i][2]] = lines[i][5];
+                timeUnits[lines[i][2]] = lines[i][1];
             }
         }
 
         var chart = 0;
         for (var assay in assays) {
-            addChart(chart,assay);
+            addChart(chart,assay,timeUnits[assay],valueUnits[assay]);
 
             var xs = {};
             var num = 1;
