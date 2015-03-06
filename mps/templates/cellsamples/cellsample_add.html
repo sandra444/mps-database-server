@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block load %}
+    <script src="{% static "js/enter_override.js" %}"></script>
+{% endblock %}
+
 {% block content %}
 <script>
     $(function() {
@@ -22,7 +26,11 @@
 
 <form enctype="multipart/form-data" class="form-horizontal" method="post" >
     {% csrf_token %}
-    <h1>Add Cell Sample <button type="submit" class="btn btn-primary">Submit</button></h1>
+    <h1>
+        Cell Sample
+
+        <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+    </h1>
 
     <legend>Cell Sample Details</legend>
 

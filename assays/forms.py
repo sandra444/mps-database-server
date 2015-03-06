@@ -15,7 +15,6 @@ class AssayResultForm(forms.ModelForm):
     # Set chip setup to unique instead of throwing error in validation
     # def clean(self):
     #     super(forms.ModelForm, self).clean()
-    #     raise Exception(self.cleaned_data)
     #
     #     if 'chip_setup' in self.cleaned_data and AssayTestResult.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
     #         raise forms.ValidationError('A readout for the given setup already exists!')
@@ -25,6 +24,7 @@ class AssayResultForm(forms.ModelForm):
 class AssayChipReadoutForm(forms.ModelForm):
 
     another = forms.BooleanField(required=False)
+    headers = forms.CharField(required=True)
 
     class Meta(object):
         model = AssayChipReadout
@@ -34,8 +34,9 @@ class AssayChipReadoutForm(forms.ModelForm):
         }
         exclude = ('created_by','modified_by','signed_off_by','signed_off_date','locked', 'group')
 
-    # Set chip setup to unique instead of throwing error in validation
+
     # def clean(self):
+        # Set chip setup to unique instead of throwing error in validation
     #     super(forms.ModelForm, self).clean()
     #
     #     if 'chip_setup' in self.cleaned_data and AssayChipReadout.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):

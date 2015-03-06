@@ -2,9 +2,10 @@
 {% load static %}
 
 {% block load %}
-<script src="{% static "js/inline_add.js" %}"></script>
-<script src="{% static "js/cookies.js" %}"></script>
-<script src="{% static "js/whittle.js" %}"></script>
+    <script src="{% static "js/inline_add.js" %}"></script>
+    <script src="{% static "js/cookies.js" %}"></script>
+    <script src="{% static "js/whittle.js" %}"></script>
+    <script src="{% static "js/enter_override.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -87,11 +88,14 @@
 
     <form class="form-horizontal" method="post" >
         {% csrf_token %}
-        <h1>Add Chip Test Results <button type="submit" class="btn btn-primary">Submit</button>
+        <h1>
+            Chip Test Results
 
-        {% if update %}
-            <a role="button" class="btn btn-danger pull-right" href="/assays/assaytestresult/{{ object.id }}/delete/">Delete</a>
-        {% endif %}
+            <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+
+            {% if update %}
+                <a role="button" class="btn btn-danger pull-right" href="/assays/assaytestresult/{{ object.id }}/delete/">Delete</a>
+            {% endif %}
         </h1>
 
         <legend>Test Results</legend>

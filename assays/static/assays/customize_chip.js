@@ -1,8 +1,23 @@
 $(document).ready(function () {
 
-    function addChart(id,name) {
+    // Function to repeat a string num number of times
+    function repeat(str, num) {
+        return (new Array(num+1)).join(str);
+    }
 
-        $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 10%;margin-left: -100%px;">')
+    function isTrue(element, index, array) {
+        if (!element) {
+            return false;
+        }
+        else {
+            return true;
+        }
+
+    }
+
+    function addChart(id,name,timeUnits,valueUnits) {
+
+        $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 5%;margin-left: -100%px;">')
             .appendTo('#extra');
 
         charts.push(
@@ -16,13 +31,13 @@ $(document).ready(function () {
                 axis: {
                     x: {
                         label: {
-                            text: 'Time',
+                            text: 'Time (' + timeUnits + ')',
                             position: 'outer-center'
                         }
                     },
                     y: {
                         label: {
-                            text: name,
+                            text: name + ' (' + valueUnits + ')',
                             position: 'outer-middle'
                         }
                     }
@@ -100,6 +115,18 @@ $(document).ready(function () {
             return;
         }
 
+        // Check if headers exists (it doesn't in detail)
+        if ($('#id_headers')[0]) {
+            // Update headers
+            headers = Math.floor($('#id_headers').val());
+        }
+
+        // Crash if the first time is not numeric
+        if (isNaN(headers)) {
+            alert("Please make sure you choose a valid number for number of header rows.");
+            return;
+        }
+
         var all = csv.split('\n');
         var lines = [];
 
@@ -114,22 +141,24 @@ $(document).ready(function () {
         //Make table
         var table = exist ? "<table class='layout-table' style='width: 100%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 100%;'><tbody>";
 
-        table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Assay</th><th>Object</th><th>Data</th></tr>" : "";
+        table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th></tr>" : "";
 
         for (var i in lines) {
-            if ((i == 0 && !exist) || (!lines[i][0] || !lines[i][1] || !lines[i][2] || !lines[i][3])) {
+            var every = lines[i].every(isTrue);
+
+            if ((i < headers && !exist) || !every) {
                 table += "<tr style='background: #FF2400'>";
             }
-            else if (lines[i][3] == 'None') {
+            else if (lines[i][4] == 'None') {
                 table += "<tr style='background: #606060'>";
             }
             else {
                 table += "<tr>";
             }
-            table += "<th>" + lines[i][0] + "</th>";
-            table += "<th>" + lines[i][1] + "</th>";
-            table += "<th>" + lines[i][2] + "</th>";
-            table += "<th>" + lines[i][3] + "</th>";
+
+            for (var j=0; j<6; j++) {
+                table += "<th>" + lines[i][j] + "</th>";
+            }
             table += "</tr>";
         }
 
@@ -138,29 +167,43 @@ $(document).ready(function () {
 
         //Make chart
         var assays = {};
+        var valueUnits = {};
+        var timeUnits = {};
 
         for (var i in lines) {
-            if (!lines[i][0] || !lines[i][1] || !lines[i][2] || (i == 0 && !exist)) {
+
+            var every = lines[i].every(isTrue);
+
+            if (!every || (i < headers && !exist)) {
                 continue;
             }
 
-            if (!assays[lines[i][1]]) {
-                assays[lines[i][1]] = {};
+            // Crash if the time or value are not numeric
+            if (isNaN(lines[i][0]) || isNaN(lines[i][4])) {
+                alert("Improperly Configured: Please check your file and the number of header rows selected.");
+                return;
             }
 
-            if (lines[i][2] && lines[i][2] != 'None' && !assays[lines[i][1]][lines[i][2]]) {
-                assays[lines[i][1]][lines[i][2]] = {'time':[], 'data':[]};
+            if (!assays[lines[i][2]]) {
+                assays[lines[i][2]] = {};
             }
 
-            if (assays[lines[i][1]][lines[i][2]] && lines[i][3] && lines[i][3] != 'None') {
-                assays[lines[i][1]][lines[i][2]].time.push(lines[i][0]);
-                assays[lines[i][1]][lines[i][2]].data.push(lines[i][3]);
+            if (lines[i][3] && lines[i][3] != 'None' && !assays[lines[i][2]][lines[i][3]]) {
+                assays[lines[i][2]][lines[i][3]] = {'time':[], 'data':[]};
+            }
+
+            if (assays[lines[i][2]][lines[i][3]] && lines[i][4] && lines[i][4] != 'None') {
+                assays[lines[i][2]][lines[i][3]].time.push(lines[i][0]);
+                assays[lines[i][2]][lines[i][3]].data.push(lines[i][4]);
+
+                valueUnits[lines[i][2]] = lines[i][5];
+                timeUnits[lines[i][2]] = lines[i][1];
             }
         }
 
         var chart = 0;
         for (var assay in assays) {
-            addChart(chart,assay);
+            addChart(chart,assay,timeUnits[assay],valueUnits[assay]);
 
             var xs = {};
             var num = 1;
@@ -188,14 +231,36 @@ $(document).ready(function () {
         }
     };
 
+    var refresh = function() {
+        resetChart();
+        var file = $('#id_file')[0].files[0];
+        if (file) {
+            getText(file);
+        }
+        else {
+            if (id) {
+               getReadout()
+            }
+            else {
+                $('#csv_table').html(add);
+            }
+        }
+    };
+
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     var id = getReadoutValue();
 
+    var headers = 0;
+
+    if ($('#id_headers')[0]) {
+        headers = Math.floor($('#id_headers').val());
+    }
+
     var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
-            "<tr style='background: #FF2400'><th>Time</th><th>Assay</th><th>Object</th><th>Data</th></tr>" +
-            "<tr><th><br><br></th><th><br><br></th><th><br><br></th><th><br><br></th>" +
-            "</tr><tr><th><br><br></th><th><br><br></th><th><br><br></th><th><br><br></th></tr>" +
+            "<tr style='background: #FF2400'><th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th></tr>" +
+            "<tr>" + repeat('<th><br><br></th>',6) + "</tr>" +
+            "<tr>" + repeat('<th><br><br></th>',6) + "</tr>" +
             "</tbody></table>";
 
     if ($('#assaychipreadoutassay_set-group')[0] != undefined) {
@@ -203,7 +268,7 @@ $(document).ready(function () {
             .appendTo('body');
         $("#extra").insertAfter($("#assaychipreadoutassay_set-group")[0]);
 
-        $('<div id="csv_table" style="width: 20%;float: left;margin-left: 10%;">')
+        $('<div id="csv_table" style="width: 30%;float: left;margin-left: 5%;">')
             .appendTo('#extra').html(add);
 
         var charts = [];
@@ -214,20 +279,16 @@ $(document).ready(function () {
     }
 
     $('#id_file').change(function(evt) {
-        resetChart();
-        var file = $('#id_file')[0].files[0];
-        if (file) {
-            getText(file);
-        }
-        else{
-            if (id) {
-               getReadout()
-            }
-            else {
-                $('#csv_table').html(add);
-            }
-        }
+        refresh();
     });
+
+    if ($('#id_headers')[0]) {
+        $('#id_headers').change(function (evt) {
+            if ($('#id_file')[0].files[0]) {
+                refresh();
+            }
+        });
+    }
 });
 
 

@@ -572,27 +572,28 @@ def removeExistingChip(currentChipReadout):
             readout.delete()
     return
 
-def parseChipCSV(currentChipReadout, file):
+def parseChipCSV(currentChipReadout, file, headers):
     removeExistingChip(currentChipReadout)
 
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
 
-    for rowID, rowValue in enumerate(datalist):
+    # Only take values from headers onward
+    for rowID, rowValue in enumerate(datalist[headers:]):
         # rowValue holds all of the row elements
         # rowID is the index of the current row from top to bottom
 
         # Skip any row with insufficient commas
-        if len(rowValue) < 4:
+        if len(rowValue) < 6:
             continue
 
-        # Skip any row with incomplete data and first row (header) for now
-        if not rowValue[0] or not rowValue[1] or not rowValue[2] or rowID == 0 or rowValue[3] is '':
+        # Skip any row with incomplete data
+        if not all(rowValue):
             continue
 
-        assay = AssayModel.objects.get(assay_name=rowValue[1])
-        field = rowValue[2]
-        val = rowValue[3]
+        assay = AssayModel.objects.get(assay_name=rowValue[2])
+        field = rowValue[3]
+        val = rowValue[4]
         time = rowValue[0]
 
         # Originally permitted none values, will now ignore empty values
@@ -740,16 +741,26 @@ admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 
 class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
     def clean(self):
+
+        headers = 0
+
+        # Throw error if headers is not valid
+        try:
+            headers = int(self.data.get('headers',''))
+        except:
+            raise forms.ValidationError('Please make number of headers a valid number.')
+
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
-        # List of assay names from inline
-        assays = []
+        # Dic of assay names from inline with respective unit as value
+        assays = {}
         for form in forms_data:
             try:
                 if form.cleaned_data:
                     assay_name = form.cleaned_data.get('assay_id').assay_name
+                    unit = form.cleaned_data.get('readout_unit').readout_unit
                     if assay_name not in assays:
-                        assays.append(assay_name)
+                        assays.update({assay_name:unit})
                     else:
                         raise forms.ValidationError(
                             'Duplicate assays are not permitted; please blank out or change the duplicate')
@@ -761,39 +772,83 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
         """Validate unique, existing Chip Readout IDs"""
 
         # Very unusual way of getting parent data; seems to work; TEST to be sure
+        # Although using the object dict is useful for fast debugging, dot notation is the obviously correct choice
 
-        if self.instance.__dict__['file']:
-            data = self.instance.__dict__
-            test_file = data['file']
-        elif not forms_data[-1].__dict__['files']:
-            test_file = None
-        else:
-            data = forms_data[-1].__dict__
-            test_file = data['files']['file']
+        # if self.instance.__dict__['file']:
+        #     data = self.instance.__dict__
+        #     test_file = data['file']
+        # elif not forms_data[-1].__dict__['files']:
+        #     test_file = None
+        # else:
+        #     data = forms_data[-1].__dict__
+        #     test_file = data['files']['file']\
 
-        # Check to make sure there is a file
-        if test_file:
+        # If there is already a file in the database and it is not being replaced or cleared (check for clear is implicit)
+        if self.instance.file and not forms_data[-1].files:
+            new_time_unit = self.instance.timeunit
+            old_time_unit = AssayChipReadout.objects.get(id=self.instance.id).timeunit
+
+            # Fail if time unit does not match
+            if new_time_unit != old_time_unit:
+                raise forms.ValidationError(
+                    'The time unit "%s" does not correspond with the selected readout time unit of "%s"' % (new_time_unit, old_time_unit))
+
+            saved_data = AssayChipRawData.objects.filter(assay_chip_id=self.instance).prefetch_related('assay_id')
+
+            for raw in saved_data:
+
+                assay = raw.assay_id.assay_id.assay_name
+                val_unit = raw.assay_id.readout_unit.readout_unit
+
+                # Raise error when an assay does not exist
+                if assay not in assays:
+                    raise forms.ValidationError(
+                        'You can not remove the assay "%s" because it is in your uploaded data.' % assay)
+                # Raise error if val_unit not equal to one listed in ACRA
+                if val_unit != assays.get(assay,''):
+                    raise forms.ValidationError(
+                        'The current value unit "%s" does not correspond with the readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+
+        # If there is a new file
+        if forms_data[-1].files:
+            test_file = forms_data[-1].files.get('file','')
+
             datareader = csv.reader(test_file, delimiter=',')
             datalist = list(datareader)
+
+            # Tedious way of getting timeunit; probably should refactor
+            readout_time_unit = TimeUnits.objects.get(id=self.data.get('timeunit')).unit
 
             # All unique rows based on ('assay_id', 'field_id', 'elapsed_time')
             unique = {}
 
-            for line in datalist[1:]:
+            # Read headers going onward
+            for line in datalist[headers:]:
 
                 # Some lines may not be long enough (have sufficient commas), ignore such lines
                 # Some lines may be empty or incomplete, ignore these as well
-                if len(line) < 4 or not line[0] or not line[1] or not line[2]:
+                if len(line) < 6 or not all(line):
                     continue
 
                 time = line[0]
-                assay = line[1]
-                field = line[2]
-                val = line[3]
+                time_unit = line[1].strip().lower()
+                assay = line[2]
+                field = line[3]
+                val = line[4]
+                val_unit = line[5].strip()
                 # Raise error when an assay does not exist
                 if assay not in assays:
                     raise forms.ValidationError(
                         'No assay with the name "%s" exists; please change your file or add this assay' % assay)
+                # Raise error if val_unit not equal to one listed in ACRA
+                if val_unit != assays.get(assay,''):
+                    raise forms.ValidationError(
+                        'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+                # Fail if time unit does not match
+                # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
+                if time_unit[0] != readout_time_unit[0]:
+                    raise forms.ValidationError(
+                        'The time unit "%s" does not correspond with the selected readout time unit of "%s"' % (time_unit, readout_time_unit))
                 if (time,assay,field) not in unique:
                     unique.update({(time,assay,field):True})
                 else:
@@ -827,6 +882,9 @@ class AssayChipReadoutInline(admin.TabularInline):
 
 # ChipReadout validation occurs in the inline formset
 class AssayChipReadoutForm(forms.ModelForm):
+
+    headers = forms.CharField(required=True)
+
     class Meta(object):
         model = AssayChipReadout
 
@@ -847,7 +905,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
     list_per_page = 100
     list_display = ('id',
                     'chip_setup',
-
+                    'assays',
                     'readout_start_time',
                     'scientist'
                     )
@@ -873,6 +931,9 @@ class AssayChipReadoutAdmin(LockableAdmin):
                     ),
                     (
                         'file',
+                    ),
+                    (
+                        'headers',
                     ),
                 )
             }
@@ -934,6 +995,8 @@ class AssayChipReadoutAdmin(LockableAdmin):
     def save_related(self, request, form, formsets, change):
         obj = form.instance
 
+        headers = int(form.data.get('headers'))
+
         if change:
             obj.modified_by = request.user
 
@@ -947,7 +1010,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parseChipCSV(obj, request.FILES['file'])
+            parseChipCSV(obj, request.FILES['file'], headers)
 
         #Need to delete entries when a file is cleared
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':

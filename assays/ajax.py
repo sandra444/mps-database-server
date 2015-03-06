@@ -275,10 +275,14 @@ def fetch_chip_readout(request):
 
     chip_data = AssayChipRawData.objects.filter(assay_chip_id=chip_id).order_by('assay_id','elapsed_time')
 
+    time_unit = AssayChipReadout.objects.filter(id=chip_id)[0].timeunit
+
     csv = ""
 
     for raw in chip_data:
         csv += str(raw.elapsed_time) + ','
+        # Add time unit
+        csv += str(time_unit) + ','
         csv += str(raw.assay_id.assay_id.assay_name) + ','
         csv += str(raw.field_id) + ','
         # Format to two decimal places
@@ -290,7 +294,9 @@ def fetch_chip_readout(request):
             value = str(value)
         # Get rid of trailing zero and decimal if necessary
         value = value.rstrip('0').rstrip('.') if '.' in value else value
-        csv += value + '\n'
+        csv += value + ','
+        # Add value unit
+        csv += str(raw.assay_id.readout_unit) + '\n'
 
     data = {}
 
