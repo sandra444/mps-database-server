@@ -35,7 +35,7 @@ class UserIndex(OneGroupRequiredMixin, ListView):
     def get(self, request, **kwargs):
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
-        context['title'] = 'User Study Index'
+        context['title'] = request.user.username + "'s Studies"
         # Check if this is setup only; if so add to add respective URLS
         if request.GET.get('setup', ''):
             context['setup_only'] = '/?setup=1'
