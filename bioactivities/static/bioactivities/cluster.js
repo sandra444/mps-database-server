@@ -108,9 +108,9 @@ $(document).ready(function () {
                     box += "<img src='https://www.ebi.ac.uk/chembldb/compound/displayimage/"+ com.CHEMBL + "' class='img-polaroid'>";
                     box += "<strong>" + com.name + "</strong><br>";
                     box += "Known Drug: ";
-                    box += com.knownDrug ? "<span class='glyphicon glyphicon-ok'></span><br>" : "<span class='glyphicon glyphicon-remove'></span><br>";
+                    box += com.knownDrug ? "<span class='glyphicon glyphicon-ok text-success'></span><br>" : "<span class='glyphicon glyphicon-remove text-danger'></span><br>";
                     box += "Passes Rule of 3: ";
-                    box += com.ro3 ? "<span class='glyphicon glyphicon-ok'></span><br>" : "<span class='glyphicon glyphicon-remove'></span><br>";
+                    box += com.ro3 ? "<span class='glyphicon glyphicon-ok text-success'></span><br>" : "<span class='glyphicon glyphicon-remove text-danger'></span><br>";
                     box += "Rule of 5 Violations: " + com.ro5 + "<br>";
                     box += "Species: " + com.species;
                     box += "</div>";
