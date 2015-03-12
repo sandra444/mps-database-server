@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div style="padding-bottom: 50px">
+        <h2 align="center">Adverse Events</h2>
+
+        <table id="adverse_events" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Compound</th>
+                    <th>Event</th>
+                    <th>Frequency</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Compound</th>
+                    <th>Event</th>
+                    <th>Frequency</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for adverse_event in object_list %}
+                <tr class="adverse_event" id={{ adverse_event.id }} name={{ adverse_event }}>
+                    <td><a href="{{ adverse_event.compound.id }}">{{ adverse_event.compound.compound }}</a></td>
+                    <td>{{ adverse_event.event }}</td>
+                    <td>{{ adverse_event.frequency }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#adverse_events').DataTable({
+                "iDisplayLength": 50,
+                // If one wants to display top and bottom
+                //"sDom": '<"wrapper"lfptip>'
+            });
+
+            // Swap positions of filter and length selection
+            $('.dataTables_filter').css('float','left');
+            $('.dataTables_length').css('float','right');
+        });
+    </script>
+{% endblock %}
+

@@ -343,3 +343,23 @@ class FindingResult(models.Model):
 
     def __unicode__(self):
         return u''
+
+
+# TODO think of a better name
+class OpenFDACompound(LockableModel):
+
+    compound = models.ForeignKey('compounds.Compound')
+
+    def __unicode__(self):
+        return u'{}'.format(self.compound.name)
+
+
+class AdverseEvent(models.Model):
+
+    # AdverseEvents are inlines in OpenFDACompound (name subject to change)
+    compound = models.ForeignKey('OpenFDACompound')
+    event = models.CharField(max_length=100)
+    frequency = models.IntegerField()
+
+    def __unicode__(self):
+        return u'{}:{}'.format(self.compound,self.event)
