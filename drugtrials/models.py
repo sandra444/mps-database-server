@@ -345,6 +345,15 @@ class FindingResult(models.Model):
         return u''
 
 
+class AdverseEvent(models.Model):
+
+    event = models.CharField(max_length=100)
+    organ = models.ForeignKey(Organ, blank=True, null=True)
+
+    def __unicode__(self):
+        return u'{}'.format(self.event)
+
+
 # TODO think of a better name
 class OpenFDACompound(LockableModel):
 
@@ -354,12 +363,13 @@ class OpenFDACompound(LockableModel):
         return u'{}'.format(self.compound.name)
 
 
-class AdverseEvent(models.Model):
+class CompoundAdverseEvent(models.Model):
 
     # AdverseEvents are inlines in OpenFDACompound (name subject to change)
     compound = models.ForeignKey('OpenFDACompound')
-    event = models.CharField(max_length=100)
+    event = models.ForeignKey(AdverseEvent)
     frequency = models.IntegerField()
 
     def __unicode__(self):
         return u'{}:{}'.format(self.compound,self.event)
+

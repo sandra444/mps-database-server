@@ -1,5 +1,5 @@
 from compounds.models import Compound
-from drugtrials.models import OpenFDACompound, AdverseEvent
+from drugtrials.models import OpenFDACompound, CompoundAdverseEvent, AdverseEvent
 
 import urllib, json
 
@@ -40,6 +40,8 @@ def get_event_frequency(generic_name):
         return []
 
 def run():
+    # existing = dict.fromkeys(AdverseEvent.objects.all().values_list('event', flat=True), True)
+
     for compound in Compound.objects.all():
         events = get_event_frequency(compound.name)
 
@@ -49,7 +51,7 @@ def run():
                 compound_model = OpenFDACompound.objects.get(compound=compound)
 
                 # Delete all old adverse events
-                adverse_events = AdverseEvent.objects.filter(compound=compound_model)
+                adverse_events = CompoundAdverseEvent.objects.filter(compound=compound_model)
 
                 for adverse_event in adverse_events:
                     if adverse_event.compound.id == compound_model.id:
@@ -61,7 +63,18 @@ def run():
                 compound_model.save()
 
             for event in events:
-                adverse_event = event[0]
+                # Replace ^ with '
+                adverse_event = event[0].replace('^',"'")
                 frequency = event[1]
-                adverse_event_model = AdverseEvent(compound=compound_model,event=adverse_event,frequency=frequency)
+
+                # if adverse_event not in existing:
+                try:
+                    adverse_event_model = AdverseEvent.objects.get(event=adverse_event)
+
+                except:
+                    adverse_event_model = AdverseEvent(event=adverse_event)
+                    adverse_event_model.save()
+                    # existing.update({adverse_event:True})
+
+                adverse_event_model = CompoundAdverseEvent(compound=compound_model,event=adverse_event_model,frequency=frequency)
                 adverse_event_model.save()
