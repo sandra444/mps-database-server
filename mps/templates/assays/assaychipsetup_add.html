@@ -162,6 +162,12 @@
         </div>
     </div>
 
+    <div id="control_warning" hidden class="alert alert-warning" role="alert">
+        <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+        <span class="sr-only">Warning:</span>
+        Compound selected for a control chip
+    </div>
+
     {% if form.concentration.errors %}
         {% for error in form.concentration.errors %}
             <div class="alert alert-danger" role="alert">
@@ -361,23 +367,53 @@
 {#        });#}
 {#    });#}
 
-    $('.cellsample').click( function(evt) {
-        var cellsampleId = $(this).attr("id");
-        var selectedInput = $('#id_assaychipcells_set-'+ id + '-cell_sample');
-        selectedInput.prop('value', cellsampleId);
-        $('#dialog').dialog('close');
-    });
+    $(function() {
+        var test_type_selector = $('#id_chip_test_type');
+        var compound_selector = $('#id_compound');
 
-    $('#cellsamples').DataTable({
-        "iDisplayLength": 50,
-        // Initially sort on receipt date
-        "order": [ 0, "desc" ],
-        // If one wants to display top and bottom
-        "sDom": '<"wrapper"fti>'
-    });
+        var test_type = test_type_selector.val();
+        var compound = compound_selector.val();
 
-    // Move filter to left
-    $('.dataTables_filter').css('float','left');
+        test_type_selector.change(function() {
+            test_type = test_type_selector.val();
+
+            if (test_type == 'control' && compound) {
+                $('#control_warning').prop('hidden',false);
+            }
+            else{
+                $('#control_warning').prop('hidden',true);
+            }
+        });
+
+        compound_selector.change(function() {
+            compound = compound_selector.val();
+
+            if (test_type == 'control' && compound) {
+                $('#control_warning').prop('hidden',false);
+            }
+            else{
+                $('#control_warning').prop('hidden',true);
+            }
+        });
+
+        $('.cellsample').click(function (evt) {
+            var cellsampleId = $(this).attr("id");
+            var selectedInput = $('#id_assaychipcells_set-' + id + '-cell_sample');
+            selectedInput.prop('value', cellsampleId);
+            $('#dialog').dialog('close');
+        });
+
+        $('#cellsamples').DataTable({
+            "iDisplayLength": 50,
+            // Initially sort on receipt date
+            "order": [ 0, "desc" ],
+            // If one wants to display top and bottom
+            "sDom": '<"wrapper"fti>'
+        });
+
+        // Move filter to left
+        $('.dataTables_filter').css('float', 'left');
+    });
 </script>
 
 {% endblock %}
