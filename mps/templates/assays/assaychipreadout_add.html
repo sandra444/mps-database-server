@@ -41,7 +41,7 @@
         <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
 
         {% if not update %}
-            <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Add Another</button>
+            <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Clone</button>
         {% endif %}
 
         {% if update %}
@@ -53,7 +53,7 @@
         <div class="alert alert-success" role="alert">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
             <span class="sr-only">Success:</span>
-            Successful Submission
+            Successful Submission and Clone
         </div>
     {% endif %}
 

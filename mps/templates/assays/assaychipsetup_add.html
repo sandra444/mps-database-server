@@ -37,9 +37,7 @@
 
         <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
 
-        {% if not update %}
-            <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Add Another</button>
-        {% endif %}
+        <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Clone</button>
 
         {% if update %}
             <a role="button" class="btn btn-danger pull-right" href="/assays/assaychipsetup/{{ object.id }}/delete/">Delete</a>
@@ -50,7 +48,7 @@
         <div class="alert alert-success" role="alert">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
             <span class="sr-only">Success:</span>
-            Successful Submission
+            Successful Submission and Clone
         </div>
     {% endif %}
 
@@ -165,7 +163,7 @@
     <div id="control_warning" hidden class="alert alert-warning" role="alert">
         <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
         <span class="sr-only">Warning:</span>
-        Compound selected for a control chip
+        Warning: Compound selected for a control chip
     </div>
 
     {% if form.concentration.errors %}
@@ -368,32 +366,32 @@
 {#    });#}
 
     $(function() {
+
+        function toggle_warning() {
+            if (test_type == 'control' && compound) {
+                $('#control_warning').prop('hidden',false);
+            }
+            else{
+                $('#control_warning').prop('hidden',true);
+            }
+        }
+
         var test_type_selector = $('#id_chip_test_type');
         var compound_selector = $('#id_compound');
 
         var test_type = test_type_selector.val();
         var compound = compound_selector.val();
 
+        toggle_warning();
+
         test_type_selector.change(function() {
             test_type = test_type_selector.val();
-
-            if (test_type == 'control' && compound) {
-                $('#control_warning').prop('hidden',false);
-            }
-            else{
-                $('#control_warning').prop('hidden',true);
-            }
+            toggle_warning();
         });
 
         compound_selector.change(function() {
             compound = compound_selector.val();
-
-            if (test_type == 'control' && compound) {
-                $('#control_warning').prop('hidden',false);
-            }
-            else{
-                $('#control_warning').prop('hidden',true);
-            }
+            toggle_warning();
         });
 
         $('.cellsample').click(function (evt) {

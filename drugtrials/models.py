@@ -365,7 +365,7 @@ class OpenFDACompound(LockableModel):
 
 class CompoundAdverseEvent(models.Model):
 
-    # AdverseEvents are inlines in OpenFDACompound (name subject to change)
+    # CompoundAdverseEvents are inlines in OpenFDACompound (name subject to change)
     compound = models.ForeignKey('OpenFDACompound')
     event = models.ForeignKey(AdverseEvent)
     frequency = models.IntegerField()

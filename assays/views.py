@@ -314,11 +314,26 @@ AssayChipCellsFormset = inlineformset_factory(AssayChipSetup, AssayChipCells, fo
                                               'cell_passage': forms.TextInput(attrs={'size': 5}), })
 
 
-class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
+# TODO REFACTOR THE WAY CLONING IS HANDLED
+class AssayChipSetupAdd(CreateView):
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
     # May want to define form with initial here
     form_class = AssayChipSetupForm
+
+    # Due to the ability to clone, AssayChipSetupAdd is an exception to normal StudyGroupRequired permission
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        if not has_group(self.request.user, study.group):
+            return PermissionDenied(self.request,'You must be a member of the group ' + str(study.group))
+
+        if self.request.GET.get('clone',''):
+            clone = get_object_or_404(AssayChipSetup, pk=self.request.GET.get('clone',''))
+            if not has_group(self.request.user, clone.assay_run_id.group):
+                return PermissionDenied(self.request,'You must be a member of the group ' + str(clone.assay_run_id.group) + ' to clone this setup')
+
+        return super(AssayChipSetupAdd, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         groups = self.request.user.groups.values_list('id', flat=True)
@@ -327,12 +342,39 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
             'supplier',
         ).select_related('cell_type__cell_subtype')
         context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
+
         if self.request.POST:
             context['formset'] = AssayChipCellsFormset(self.request.POST)
-            context['cellsamples'] = cellsamples
+
+        elif self.request.GET.get('clone',''):
+            pk = self.request.GET.get('clone','')
+            clone_setup = AssayChipSetup.objects.filter(id=pk).values()[0]
+            # Drop downs are a pain in the face: they require being specifically set to an integer value (ID)
+            clone_setup['device'] = clone_setup['device_id']
+            clone_setup['compound'] = clone_setup['compound_id']
+            clone_setup['unit'] = clone_setup['unit_id']
+            clone_cellsamples = AssayChipCells.objects.filter(assay_chip=pk).values()
+            context['form'] = AssayChipSetupForm(initial=clone_setup)
+
+            # Stupid resolution to an equally absurd problem (can you tell I'm peeved?)
+            AssayChipCellsFormset2 = inlineformset_factory(AssayChipSetup, AssayChipCells, formset=AssayChipCellsInlineFormset,
+                                              extra=len(clone_cellsamples),
+                                              widgets={
+                                              'cellsample_density': forms.NumberInput(attrs={'style': 'width:75px;', }),
+                                              'cell_passage': forms.TextInput(attrs={'size': 5}), })
+
+            for index in range(len(clone_cellsamples)):
+                clone_cellsamples[index]['cell_biosensor'] = clone_cellsamples[index]['cell_biosensor_id']
+                clone_cellsamples[index]['cell_sample'] = CellSample.objects.get(pk=clone_cellsamples[index]['cell_sample_id'])
+
+            context['formset'] = AssayChipCellsFormset2(initial=clone_cellsamples)
+
         else:
             context['formset'] = AssayChipCellsFormset()
-            context['cellsamples'] = cellsamples
+
+        # Cellsamples will always be the same
+        context['cellsamples'] = cellsamples
+
         return context
 
     def form_valid(self, form):
@@ -367,6 +409,7 @@ class AssayChipSetupDetail(DetailRedirectMixin,DetailView):
     model = AssayChipSetup
 
 
+# TODO IMPROVE METHOD FOR CLONING
 class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
@@ -416,6 +459,7 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         # form.instance.restricted = study.restricted
 
         if form.is_valid() and formset.is_valid():
+            data = form.cleaned_data
             url_add = ''
             if self.request.GET.get('setup', ''):
                 url_add = '?setup=1'
@@ -430,7 +474,11 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             self.object.save()
             formset.instance = self.object
             formset.save()
-            return redirect(self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
+            if data['another']:
+                return redirect(self.object.get_absolute_url() + 'assaychipsetup/add/' + '?clone=' + str(self.object.id))
+            else:
+                return redirect(
+                    self.object.get_absolute_url() + url_add)
         else:
             return self.render_to_response(
             self.get_context_data(form=form,
@@ -507,12 +555,14 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
         context = super(AssayChipReadoutAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = ACRAFormSet(self.request.POST, self.request.FILES)
-            context['setups'] = setups
             # context['study'] = self.kwargs.get('study_id')
         else:
             context['formset'] = ACRAFormSet()
-            context['setups'] = setups
             # context['study'] = self.kwargs.get('study_id')
+
+        # Setups is the same regardless of if POST, GET, etc.
+        context['setups'] = setups
+
         return context
 
     def form_valid(self, form):
@@ -631,7 +681,7 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             if self.request.POST.get('file-clear',''):
                 removeExistingChip(self.object)
             # Otherwise do nothing (the file remained the same)
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(
             self.get_context_data(form=form,
