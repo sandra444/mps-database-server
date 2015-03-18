@@ -22,6 +22,24 @@
         dialog.dialog();
         dialog.dialog('close');
         dialog.removeProp('hidden');
+
+        var warning = $('#warning');
+        warning.dialog({
+            height:200,
+            modal: true,
+            buttons: {
+            Yes: function() {
+                $(this).dialog("close");
+                },
+            No: function() {
+                $('#id_chip_test_type').val('compound');
+                $('#id_chip_test_type').trigger('change');
+                $(this).dialog("close");
+                }
+            }
+        });
+        warning.dialog('close');
+        warning.removeProp('hidden');
     });
 </script>
 
@@ -343,6 +361,13 @@
     </table>
 </div>
 
+<div hidden id="warning" title="Compound in Control Chip">
+    <p>
+        <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+        Are you sure you want to add a compound to a control chip?
+    </p>
+</div>
+
 <script>
     // Global variables are in poor taste
     var id = null;
@@ -367,9 +392,12 @@
 
     $(function() {
 
-        function toggle_warning() {
+        function toggle_warning(first) {
             if (test_type == 'control' && compound) {
                 $('#control_warning').prop('hidden',false);
+                if (!first) {
+                    $('#warning').dialog('open');
+                }
             }
             else{
                 $('#control_warning').prop('hidden',true);
@@ -382,16 +410,16 @@
         var test_type = test_type_selector.val();
         var compound = compound_selector.val();
 
-        toggle_warning();
+        toggle_warning(true);
 
         test_type_selector.change(function() {
             test_type = test_type_selector.val();
-            toggle_warning();
+            toggle_warning(false);
         });
 
         compound_selector.change(function() {
             compound = compound_selector.val();
-            toggle_warning();
+            toggle_warning(false);
         });
 
         $('.cellsample').click(function (evt) {
