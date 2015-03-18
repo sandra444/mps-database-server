@@ -23,7 +23,7 @@
     {% csrf_token %}
     {{ formset.management_form }}
     <h1>
-        Organ Chip Study
+        Study
 
         <button id="submit" type="submit" class="btn btn-primary">Submit</button>
 
@@ -32,12 +32,12 @@
         {% endif %}
     </h1>
 
-    <legend>Organ Chip Study Details</legend>
-{#    <p>Center Name: {{ form.center_id }}</p>#}
+    <legend>Study Details</legend>
+{#    <p>Center(s): {{ form.center_id }}</p>#}
 {#    <p>Toxicity: {{ form.toxicity }} Disease: {{ form.disease }} Efficacy: {{ form.efficacy }}</p>#}
 {#    <p>Study Name: {{ form.name }}</p>#}
 {#    <p>Start Date: {{ form.start_date }}</p>#}
-{#    <p>Organ Chip Study ID: {{ form.assay_run_id }}</p>#}
+{#    <p>Study ID: {{ form.assay_run_id }}</p>#}
 {#    <p>Description: {{ form.description }}</p>#}
 
 
@@ -67,7 +67,7 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="center_id" class="col-sm-2 control-label">Center Name*</label>
+        <label for="center_id" class="col-sm-2 control-label">Center(s)*</label>
         <div class="col-sm-10">
           {{ form.center_id }}
         </div>
@@ -144,7 +144,7 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="assay_run_id" class="col-sm-2 control-label">Organ Chip Study ID</label>
+        <label for="assay_run_id" class="col-sm-2 control-label">Study ID</label>
         <div class="col-sm-10">
           {{ form.assay_run_id }}
         </div>

@@ -427,7 +427,7 @@ class AssayRun(RestrictedModel):
         ordering = ('assay_run_id', )
 
     #help_text subject to change
-    center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center Name')
+    center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center(s)')
     # Study type now multiple boolean fields; May need to add more in the future
     toxicity = models.BooleanField(default=False)
     efficacy = models.BooleanField(default=False)
@@ -436,7 +436,7 @@ class AssayRun(RestrictedModel):
     name = models.TextField(default='Study-01',verbose_name='Study Name',
                             help_text='Name-###')
     start_date = models.DateField(help_text='YYYY-MM-DD')
-    assay_run_id = models.TextField(unique=True, verbose_name='Organ Chip Study ID',
+    assay_run_id = models.TextField(unique=True, verbose_name='Study ID',
                                     help_text="Standard format 'CenterID-YYYY-MM-DD-Name-###'")
     description = models.TextField(blank=True, null=True)
 
@@ -501,7 +501,7 @@ class AssayChipSetup(RestrictedModel):
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
     setup_date = models.DateField(help_text='YYYY-MM-DD')
-    device = models.ForeignKey(OrganModel, verbose_name = 'Organ Chip Name')
+    device = models.ForeignKey(OrganModel, verbose_name = 'Organ Model Name')
     # the unique chip identifier
     # can be a barcode or a hand written identifier
     assay_chip_id = models.CharField(max_length=512,

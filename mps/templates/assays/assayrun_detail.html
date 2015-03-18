@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <legend><h1>Organ Chip Study: {{ object.assay_run_id }}</h1></legend>
+    <legend><h1>Study: {{ object.assay_run_id }}</h1></legend>
 
     {#    <div class="container-fluid">#}
     {#        <div class="col-sm-12">#}
     {#        <p><b>Name:</b> {{ object.name }}</p>#}
     {#        <p><b>Study Types:</b> {{ object.study_types }}</p>#}
-    {#        <p><b>Center Name:</b> {{ object.center_id }}</p>#}
+    {#        <p><b>Center(s):</b> {{ object.center_id }}</p>#}
     {#        <p><b>Start Date:</b> {{ object.start_date }}</p>#}
     {#        {% if object.description %}#}
     {#            <p><b>Description:</b> {{ object.description }}</p>#}
@@ -76,7 +76,7 @@
                 <tr>
                     <th>Chip Setup ID / Barcode</th>
                     <th>Date</th>
-                    <th>Organ Chip Name</th>
+                    <th>Organ Model Name</th>
                     <th>Chip Test Type</th>
                     <th>Compound</th>
                     <th>Creator</th>

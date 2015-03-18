@@ -74,7 +74,7 @@
 
     <legend>Chip Setup Details</legend>
 {#    <p>Study: {{ form.assay_run_id }}</p>#}
-{#    <p>Organ Chip Name: {{ form.device }}</p>#}
+{#    <p>Organ Model Name: {{ form.device }}</p>#}
 {#    <p>Chip ID/ Barcode: {{ form.assay_chip_id }}</p>#}
 {#    <p>Test Type: {{ form.chip_test_type }}</p>#}
 {#    <p>Compound: {{ form.compound }}</p>#}
@@ -100,7 +100,7 @@
 {#    {% endif %}#}
 
 {#    <div class="form-group">#}
-{#        <label for="assay_run_id" class="col-sm-2 control-label">Organ Chip Study ID</label>#}
+{#        <label for="assay_run_id" class="col-sm-2 control-label">Study ID</label>#}
 {#        <div class="col-sm-10">#}
 {#          {{ form.assay_run_id }}#}
 {#        </div>#}
@@ -136,7 +136,7 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="device" class="col-sm-2 control-label">Organ Chip Name*</label>
+        <label for="device" class="col-sm-2 control-label">Organ Model Name*</label>
         <div class="col-sm-10">
           {{ form.device }}
         </div>
