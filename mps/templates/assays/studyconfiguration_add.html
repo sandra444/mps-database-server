@@ -3,6 +3,7 @@
 
 {% block load %}
     <script src="{% static "js/inline_add.js" %}"></script>
+    <script src="{% static "assays/customize_configuration.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
 {% endblock %}
 
@@ -127,7 +128,7 @@
             </thead>
             <tbody>
                 {% for model in formset %}
-                    <tr class="inline" id="studymodels-{{ forloop.counter0 }}">
+                    <tr class="inline" id="studymodel_set-{{ forloop.counter0 }}">
                         {# Hidden input for Update (need id to associate) #}
                         {% if model.id.value %}
                         <td class="original" hidden>
