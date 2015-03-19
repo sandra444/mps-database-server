@@ -11,6 +11,7 @@
                 <tr>
                     <th>Study ID</th>
                     <th>Study Types</th>
+                    <th>Study Configuration</th>
                     <th>Start Date</th>
                     <th>Description</th>
                     <th>Creator</th>
@@ -21,6 +22,7 @@
                 <tr>
                     <th>Study ID</th>
                     <th>Study Types</th>
+                    <th>Study Configuration</th>
                     <th>Start Date</th>
                     <th>Description</th>
                     <th>Creator</th>
@@ -32,6 +34,7 @@
                 <tr class="compound" id={{ study.id }} name={{ study.id }}>
                     <td><a href="{{ study.id }}">{{ study.assay_run_id }}</a></td>
                     <td>{{ study.study_types }}</td>
+                    <td>{{ study.study_configuration }}</td>
                     <td>{{ study.start_date }}</td>
                     <td>{{ study.description }}</td>
                     <td>{{ study.created_by }}</td>
@@ -46,7 +49,7 @@
             $('#studies').DataTable( {
                 "iDisplayLength": 50,
                 // Initially sort on start date (descending), not ID
-                "order": [ 2, "desc" ]
+                "order": [ 3, "desc" ]
             });
 
             // Swap positions of filter and length selection

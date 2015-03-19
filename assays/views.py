@@ -707,7 +707,7 @@ class AssayChipReadoutDelete(CreatorRequiredMixin, DeleteView):
         return self.render_to_response(context)
 
 
-# Class-based views for studies
+# Class-based views for test results
 class AssayTestResultList(LoginRequiredMixin, ListView):
     # model = AssayTestResult
     template_name = 'assays/assaytestresult_list.html'
@@ -866,3 +866,88 @@ class AssayTestResultDelete(CreatorRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return '/assays/' + str(self.object.assay_device_readout.id)
+
+
+# Class-based views for study configuration
+class StudyConfigurationList(LoginRequiredMixin, ListView):
+    model = StudyConfiguration
+    template_name = 'assays/studyconfiguration_list.html'
+
+# FormSet for Study Models
+StudyModelFormSet = inlineformset_factory(StudyConfiguration, StudyModel, extra=1)
+
+
+class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
+    template_name = 'assays/studyconfiguration_add.html'
+    form_class = StudyConfigurationForm
+
+    def get_context_data(self, **kwargs):
+        context = super(StudyConfigurationAdd, self).get_context_data(**kwargs)
+
+        if self.request.POST:
+            context['formset'] = StudyModelFormSet(self.request.POST)
+        else:
+            context['formset'] = StudyModelFormSet()
+
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        formset = context['formset']
+        # get user via self.request.user
+        if form.is_valid() and formset.is_valid():
+            self.object = form.save()
+            self.object.modified_by = self.object.created_by = self.request.user
+            # Save overall configuration
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+
+class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
+    model = StudyConfiguration
+    template_name = 'assays/studyconfiguration_add.html'
+    form_class = StudyConfigurationForm
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+
+        # Render form
+        formset = StudyModelFormSet(instance=self.object)
+        return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                update = True))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        form = self.form_class(self.request.POST, instance=self.object)
+        created_by = form.instance.created_by
+
+        formset = StudyModelFormSet(self.request.POST, instance=form.instance)
+
+        # Setting restricted in the form does not work as it is not part of the form
+        # form.instance.restricted = study.restricted
+
+        if form.is_valid() and formset.is_valid():
+            self.object = form.save()
+            # TODO refactor original created by
+            # Explicitly set created_by
+            self.object.created_by = created_by
+            self.object.modified_by = self.request.user
+            # Save overall test result
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                update = True))

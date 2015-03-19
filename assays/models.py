@@ -420,6 +420,29 @@ class AssayPlateTestResult(LockableModel):
         return u''
 
 
+class StudyConfiguration(LockableModel):
+    # Length subject to change
+    name = models.CharField(max_length=50)
+    study_format = models.CharField(max_length=11, choices=(('individual','Individual'),('integrated','Integrated'),))
+    media_composition = models.CharField(max_length=1000, blank=True, null=True)
+    hardware_description = models.CharField(max_length=1000, blank=True, null=True)
+    # Subject to removal
+    # image = models.ImageField(upload_to="configuration",null=True, blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return "/assays/studyconfiguration/"
+
+class StudyModel(models.Model):
+    study_configuration = models.ForeignKey(StudyConfiguration)
+    organ = models.ForeignKey(OrganModel)
+    sequence_number = models.IntegerField()
+    # Subject to change
+    integration_mode = models.CharField(max_length=13, choices=(('0', 'Not Connected'),('1','Connected')))
+
+
 class AssayRun(RestrictedModel):
     class Meta(object):
         verbose_name = 'Organ Chip Study'
@@ -433,6 +456,8 @@ class AssayRun(RestrictedModel):
     efficacy = models.BooleanField(default=False)
     disease = models.BooleanField(default=False)
     cell_characterization = models.BooleanField(default=False)
+    # Subject to change
+    study_configuration = models.ForeignKey(StudyConfiguration, blank=True, null=True)
     name = models.TextField(default='Study-01',verbose_name='Study Name',
                             help_text='Name-###')
     start_date = models.DateField(help_text='YYYY-MM-DD')
@@ -475,9 +500,7 @@ class AssayChipRawData(models.Model):
 
 class AssayChipCells(models.Model):
 #   Individual cell parameters for CHIP setup used in inline
-    assay_chip = models.ForeignKey('AssayChipSetup',
-                                     blank=True,
-                                     null=True)
+    assay_chip = models.ForeignKey('AssayChipSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
     cell_biosensor = models.ForeignKey('cellsamples.Biosensor', null=True, blank=True)
     cellsample_density = models.FloatField(verbose_name='density', default=0)

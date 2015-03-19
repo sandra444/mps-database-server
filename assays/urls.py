@@ -2,7 +2,6 @@ from django.conf.urls import patterns, url
 from assays.views import *
 
 urlpatterns = patterns('',
-    # Proposed URLS:
     # User can view their studies
     url(r'^assays/user_index/$', UserIndex.as_view(), name='user_index'),
     # User can view all group studies
@@ -26,8 +25,10 @@ urlpatterns = patterns('',
     url(r'^assays/assaychipreadout/(?P<pk>[0-9]+)/delete/$', AssayChipReadoutDelete.as_view(), name='readout_delete'),
     url(r'^assays/assaytestresult/(?P<pk>[0-9]+)/delete/$', AssayTestResultDelete.as_view(), name='result_delete'),
 
-    # Original URLS: Add views to be replaced by new interface
-    # TODO limit list and detail views to unrestricted models
+    url(r'^assays/studyconfiguration/$', StudyConfigurationList.as_view(), name='studyconfiguration_list'),
+    url(r'^assays/studyconfiguration/add/$', StudyConfigurationAdd.as_view(), name='studyconfiguration_add'),
+    url(r'^assays/studyconfiguration/(?P<pk>[0-9]+)/$', StudyConfigurationUpdate.as_view(), name='studyconfiguration_update'),
+
     url(r'^assays/organchipstudy/$', AssayRunList.as_view(), name='study_list'),
     url(r'^assays/organchipstudy/add/$', AssayRunAdd.as_view(), name='study_add'),
     url(r'^assays/organchipstudy/(?P<pk>[0-9]+)/$', AssayRunDetail.as_view(), name='study_detail'),

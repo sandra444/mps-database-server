@@ -2,7 +2,7 @@ import csv
 
 from django.contrib import admin
 from django import forms
-from assays.forms import AssayResultForm
+from assays.forms import AssayResultForm, StudyConfigurationForm
 from django.http import HttpResponseRedirect
 
 from assays.models import *
@@ -1406,6 +1406,7 @@ class AssayRunAdmin(LockableAdmin):
                 'fields': (
                     'center_id',
                     ('toxicity', 'efficacy', 'disease', 'cell_characterization'),
+                    'study_configuration',
                     'start_date',
                     'name',
                     'description',
@@ -1461,3 +1462,55 @@ class AssayRunAdmin(LockableAdmin):
 
 
 admin.site.register(AssayRun, AssayRunAdmin)
+
+
+class StudyModelInline(admin.TabularInline):
+
+    model = StudyModel
+    verbose_name = 'Study Model'
+    fields = (
+        (
+            'organ', 'sequence_number', 'integration_mode',
+        ),
+    )
+    extra = 1
+
+    class Media(object):
+        css = {"all": ("css/hide_admin_original.css",)}
+
+
+class StudyConfigurationAdmin(LockableAdmin):
+    class Media(object):
+        js = ('js/inline_fix.js',)
+
+    form = StudyConfigurationForm
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('name', 'study_format',)
+    fieldsets = (
+        (
+            'Study Configuration', {
+                'fields': (
+                    'name',
+                    'study_format',
+                    'media_composition',
+                    'hardware_description',
+                    #'image',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+    inlines = [StudyModelInline]
+
+
+admin.site.register(StudyConfiguration, StudyConfigurationAdmin)
