@@ -11,6 +11,7 @@ $(document).ready(function () {
         for (var i in inlines) {
             // Get the organ
             var organ = $('#id_studymodel_set-'+ i +'-organ').val();
+            var organ_name = $( '#id_studymodel_set-'+ i +'-organ option:selected').text();
             // Get the sequence #
             var sequence = $('#id_studymodel_set-'+ i +'-sequence_number').val();
             // Get the integration mode (1 for connected and 0 for not connected)
@@ -18,7 +19,7 @@ $(document).ready(function () {
 
             // Only add complete nodes
             if (organ && sequence && connection) {
-                data.push({'organ': organ, 'sequence': sequence, 'connection': connection});
+                data.push({'organ': organ, 'sequence': sequence, 'connection': connection, 'organ_name': organ_name});
             }
         }
 
@@ -33,6 +34,8 @@ $(document).ready(function () {
         var nodes = getValues();
         var links = [];
 
+        var link_exists = {};
+
         // Get links
         for (var i=0; i < nodes.length-1; i++) {
             // Current model
@@ -42,7 +45,7 @@ $(document).ready(function () {
 
             // If the next model is in parallel
             if (current.sequence == next.sequence) {
-                links.push({'source':i, 'target':i+1, 'connection':1});
+                links.push({'source':i, 'target':i+1, 'connection':2});
             }
 
             // If next is not in parallel and is connection
@@ -55,12 +58,20 @@ $(document).ready(function () {
                 links.push({'source':i, 'target':i+1, 'connection':0});
             }
 
+            link_exists[i + ',' + (i+1)] = true;
+
             // Check to find any more models in parallel
-            for (var j=i+2; j < nodes.length; j++) {
+            for (var j=0; j < nodes.length; j++) {
+                if (j == i || link_exists[i + ',' + j] || link_exists[j + ',' + i]) {
+                    continue;
+                }
+
                 var further_node = nodes[j];
                 // If the next model is in parallel
                 if (current.sequence == further_node.sequence) {
-                    links.push({'source':i, 'target':i+1, 'connection':1});
+                    links.push({'source':i, 'target':j, 'connection':2});
+
+                    link_exists[i + ',' + j] = true;
                 }
             }
         }
@@ -76,8 +87,8 @@ $(document).ready(function () {
         var color = d3.scale.category20();
 
         var force = d3.layout.force()
-            .charge(-120)
-            .linkDistance(30)
+            .charge(-1500)
+            //.linkDistance(30)
             .size([width, height]);
 
         var svg = d3.select("#content").append("svg")
@@ -93,23 +104,30 @@ $(document).ready(function () {
             .data(links)
             .enter().append("line")
             .attr("class", "link")
-            .style('stroke', function(d) { return d.connection ? '#00FF00':'#FF0000' });
-            //.style("stroke-width", function(d) { return Math.sqrt(d.value); });
+            .style('stroke', function(d) { return d.connection ? '#00FF00':'#FF0000' })
+            .style("stroke-width", function(d) { return d.connection == 2 ? 2 : 0.5 });
 
         var gnodes = svg.selectAll('g.gnode')
             .data(nodes)
             .enter()
             .append('g')
-            .classed('gnode', true);
+            .classed('gnode', true)
+            // Putting force.drag here let's one pull by the label (very nice)
+            .call(force.drag);
 
         var node = gnodes.append("circle")
             .attr("class", "node")
             .attr("r", 5)
             .style("fill", function(d) { return color(d.organ); });
-            //.call(force.drag);
+
+        //Titles for hovering
+        gnodes.append("title")
+            .text(function (d) {
+            return d.sequence + ' : ' + d.organ_name;
+        });
 
         var labels = gnodes.append("text")
-            .text(function(d) { return d.sequence; });
+            .text(function(d) { return d.organ_name; });
 
         force.on("tick", function() {
             link.attr("x1", function(d) { return d.source.x; })
