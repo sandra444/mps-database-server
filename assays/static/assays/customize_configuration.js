@@ -42,7 +42,7 @@ $(document).ready(function () {
             var connection = Math.floor($('#id_studymodel_set-'+ i +'-integration_mode').val());
 
             // Only add complete nodes
-            if (label && organ && sequence && connection != undefined && output) {
+            if (label && organ && sequence) {
                 data.push({'label': label, 'organ': organ, 'sequence': sequence, 'connection': connection, 'organ_name': organ_name, 'output': output});
             }
         }
