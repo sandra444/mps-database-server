@@ -9,6 +9,12 @@
 
 {% block content %}
 
+    <style>
+        .link {
+            fill: none;
+        }
+    </style>
+
     <form class="form-horizontal" method="post" >
         {% csrf_token %}
         <h1>
@@ -120,8 +126,10 @@
         <table class="table table-striped studymodels" id="studymodel_set-group" name="inlines">
             <thead>
                 <tr>
+                    <th>Label</th>
                     <th>Organ</th>
                     <th>Sequence Number</th>
+                    <th>Output</th>
                     <th>Integration Mode</th>
                     <th>Delete</th>
                 </tr>
@@ -136,10 +144,16 @@
                         </td>
                         {% endif %}
                         <td>
+                            {{ model.label }}
+                        </td>
+                        <td>
                             {{ model.organ }}
                         </td>
                         <td>
                             {{ model.sequence_number }}
+                        </td>
+                        <td>
+                            {{ model.output }}
                         </td>
                         <td>
                             {{ model.integration_mode }}
@@ -153,11 +167,11 @@
         </table>
     </form>
 
-    <div class="row">
-        <span class="text-success col-sm-4">Green = Connected</span>
-        <span class="text-success lead col-sm-4">Green and Bold = Parallel</span>
-        <span class="text-danger col-sm-4">Red = Not Connected</span>
-    </div>
+    <p>
+        <span class="text-success">Green = Connected</span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span class="text-danger">Red = Not Connected</span>
+    </p>
 
     <p class="lead">Drag the circles or text to rearrange the graph</p>
 

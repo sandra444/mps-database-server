@@ -437,8 +437,10 @@ class StudyConfiguration(LockableModel):
 
 class StudyModel(models.Model):
     study_configuration = models.ForeignKey(StudyConfiguration)
+    label = models.CharField(max_length=1)
     organ = models.ForeignKey(OrganModel)
     sequence_number = models.IntegerField()
+    output = models.CharField(max_length=20)
     # Subject to change
     integration_mode = models.CharField(max_length=13, choices=(('0', 'Not Connected'),('1','Connected')))
 

@@ -1,6 +1,26 @@
 // This script will show a graphical representation of a study configuration
 $(document).ready(function () {
 
+    var data = getValues();
+
+    function changeOccurred(new_data) {
+
+        if (new_data.length != data.length) {
+           return true;
+        }
+
+        for (var i in data) {
+            for (var j in new_data[i]) {
+                if (new_data[i][j] != data[i][j]) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+
+    }
+
     function getValues() {
         // Selector for all inline rows
         var inlines = $("tr[id*='studymodel_set']");
@@ -9,17 +29,21 @@ $(document).ready(function () {
 
         // For every inline (i is the index)
         for (var i in inlines) {
+            // Get the label
+            var label = $('#id_studymodel_set-'+ i +'-label').val();
             // Get the organ
             var organ = $('#id_studymodel_set-'+ i +'-organ').val();
             var organ_name = $( '#id_studymodel_set-'+ i +'-organ option:selected').text();
             // Get the sequence #
             var sequence = $('#id_studymodel_set-'+ i +'-sequence_number').val();
+            // Get the outputs
+            var output = $('#id_studymodel_set-'+ i +'-output').val();
             // Get the integration mode (1 for connected and 0 for not connected)
-            var connection = $('#id_studymodel_set-'+ i +'-integration_mode').val();
+            var connection = Math.floor($('#id_studymodel_set-'+ i +'-integration_mode').val());
 
             // Only add complete nodes
-            if (organ && sequence && connection) {
-                data.push({'organ': organ, 'sequence': sequence, 'connection': connection, 'organ_name': organ_name});
+            if (label && organ && sequence && connection != undefined && output) {
+                data.push({'label': label, 'organ': organ, 'sequence': sequence, 'connection': connection, 'organ_name': organ_name, 'output': output});
             }
         }
 
@@ -31,47 +55,33 @@ $(document).ready(function () {
 
     function makeGraph() {
 
-        var nodes = getValues();
+        var nodes = $(data).slice();
         var links = [];
-
-        var link_exists = {};
+        var bilinks = [];
 
         // Get links
-        for (var i=0; i < nodes.length-1; i++) {
-            // Current model
-            var current = nodes[i];
-            // Next model
-            var next = nodes[i+1];
+        for (var i=0; i < data.length; i++) {
 
-            // If the next model is in parallel
-            if (current.sequence == next.sequence) {
-                links.push({'source':i, 'target':i+1, 'connection':2});
-            }
+            var source = data[i];
 
-            // If next is not in parallel and is connection
-            else if (next.connection == 1) {
-                links.push({'source':i, 'target':i+1, 'connection':1});
-            }
+            var outputs = source.output;
 
-            // If next is not in parallel and not connection
-            else {
-                links.push({'source':i, 'target':i+1, 'connection':0});
-            }
+            for (var j=0; j < data.length; j++) {
 
-            link_exists[i + ',' + (i+1)] = true;
-
-            // Check to find any more models in parallel
-            for (var j=0; j < nodes.length; j++) {
-                if (j == i || link_exists[i + ',' + j] || link_exists[j + ',' + i]) {
+                if (i == j) {
                     continue;
                 }
 
-                var further_node = nodes[j];
-                // If the next model is in parallel
-                if (current.sequence == further_node.sequence) {
-                    links.push({'source':i, 'target':j, 'connection':2});
+                var target = data[j];
+                var label = target.label;
+                var connection = target.connection;
 
-                    link_exists[i + ',' + j] = true;
+                var intermediate = {};
+
+                if (outputs.indexOf(label) > -1) {
+                    links.push({'source':source, 'target':intermediate }, {'source':intermediate, 'target':target });
+                    bilinks.push([source,intermediate,target,connection]);
+                    nodes.push(intermediate);
                 }
             }
         }
@@ -87,7 +97,7 @@ $(document).ready(function () {
         var color = d3.scale.category20();
 
         var force = d3.layout.force()
-            .charge(-1500)
+            .charge(-800)
             //.linkDistance(30)
             .size([width, height]);
 
@@ -101,14 +111,14 @@ $(document).ready(function () {
             .start();
 
         var link = svg.selectAll(".link")
-            .data(links)
-            .enter().append("line")
+            .data(bilinks)
+            .enter().append("path")
             .attr("class", "link")
-            .style('stroke', function(d) { return d.connection ? '#00FF00':'#FF0000' })
-            .style("stroke-width", function(d) { return d.connection == 2 ? 2 : 0.5 });
+            .style('stroke', function(d) { return d[3] ? '#00FF00':'#FF0000' })
+            .style("marker-end",  "url(#suit)");
 
         var gnodes = svg.selectAll('g.gnode')
-            .data(nodes)
+            .data(data)
             .enter()
             .append('g')
             .classed('gnode', true)
@@ -123,23 +133,60 @@ $(document).ready(function () {
         //Titles for hovering
         gnodes.append("title")
             .text(function (d) {
-            return d.sequence + ' : ' + d.organ_name;
+            return d.label + ' : ' + d.organ_name;
         });
 
         var labels = gnodes.append("text")
-            .text(function(d) { return d.organ_name; });
+            .text(function(d) { return d.label; });
 
         force.on("tick", function() {
-            link.attr("x1", function(d) { return d.source.x; })
-                .attr("y1", function(d) { return d.source.y; })
-                .attr("x2", function(d) { return d.target.x; })
-                .attr("y2", function(d) { return d.target.y; });
+            link.attr("d", function(d) {
+              return "M" + d[0].x + "," + d[0].y
+                  + "S" + d[1].x + "," + d[1].y
+                  + " " + d[2].x + "," + d[2].y;
+            });
 
             gnodes.attr("transform", function(d) {
                 return 'translate(' + [d.x, d.y] + ')';
             });
         });
+
+        //---Insert-------
+        svg.append("defs").selectAll("marker")
+            .data(["suit", "licensing", "resolved"])
+          .enter().append("marker")
+            .attr("id", function(d) { return d; })
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 25)
+            .attr("refY", 0)
+            .attr("markerWidth", 10)
+            .attr("markerHeight", 6)
+            .attr("orient", "auto")
+          .append("path")
+            .attr("d", "M0,-5L10,0L0,5 L10,0 L0, -5")
+            .style("stroke", "#0000FF")
+            .style("opacity", "1");
+        //---End Insert---
+    }
+
+    function refresh() {
+        var new_data = getValues();
+
+        if(changeOccurred(new_data)) {
+            data = new_data;
+            makeGraph();
+        }
     }
 
     makeGraph();
+
+    // Whenever one of the inputs change
+    $("body").on("change", "tr [id*='studymodel_set']", function(event) {
+        refresh();
+    });
+
+    // This selector will check all items with DELETE in the name, including newly created ones
+    $("body").on("click", "input[name*='DELETE']", function(event) {
+        refresh();
+    });
 });
