@@ -1,6 +1,16 @@
 // This script will show a graphical representation of a study configuration
 $(document).ready(function () {
 
+    // Find out if user is using IE
+    var ms_ie = false;
+    var ua = window.navigator.userAgent;
+    var old_ie = ua.indexOf('MSIE ');
+    var new_ie = ua.indexOf('Trident/');
+
+    if ((old_ie > -1) || (new_ie > -1)) {
+        ms_ie = true;
+    }
+
     var data = getValues();
 
     function changeOccurred(new_data) {
@@ -118,7 +128,7 @@ $(document).ready(function () {
             .enter().append("path")
             .attr("class", "link")
             .style('stroke', function(d) { return d[3] ? '#00FF00':'#FF0000' })
-            .style("marker-end",  "url(#arrow)");
+            .style("marker-end", function(d) { return ms_ie ? "":'url(#arrow)' });
 
         var gnodes = svg.selectAll('g.gnode')
             .data(data)
