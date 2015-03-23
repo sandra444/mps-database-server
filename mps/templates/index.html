@@ -4,21 +4,44 @@
 {% block content %}
 
     <style>
-    .btn-primary {
+    .btn {
         font-weight: bold;
+    }
+    h2 {
+        font-weight: bold;
+        background: -webkit-linear-gradient(#BBB, #111); /* For Safari 5.1 to 6.0 */
+        background: -o-linear-gradient(#BBB, #111); /* For Opera 11.1 to 12.0 */
+        background: -moz-linear-gradient(#BBB, #111);/* For Firefox 3.6 to 15 */
+        background: linear-gradient(#BBB, #111); /* Standard syntax (must be last) */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    #title {
+        border-style: outset;
+        border-color: #265a88;
+        background: #F8F8FF;
+{#        background: -webkit-linear-gradient(red, blue); /* For Safari 5.1 to 6.0 */#}
+{#        background: -o-linear-gradient(red, blue); /* For Opera 11.1 to 12.0 */#}
+{#        background: -moz-linear-gradient(red, blue); /* For Firefox 3.6 to 15 */#}
+{#        background: linear-gradient(red, blue); /* Standard syntax (must be last) */#}
     }
     </style>
 
     <div class="text-center">
+        <div id="title">
+            <div class="row">
+                <h2 style="color: #FFFFFF">Microphysiology Systems Database</h2>
+            </div>
+        </div>
         <div class="row">
-            <h3>Study Design</h3>
+            <h4>Study Design</h4>
         </div>
         <div class="row">
             <div class="col-md-3">
                 <div title="View organ models and microdevices" class="well">
                     <a href="/microdevices/">
                         <img src="/static/img/liver_model.png"
-                             style="height: 80px;">
+                             style="height: 70px;">
                     </a>
                     <div class="caption">
                         <a href="/microdevices/"
@@ -32,7 +55,7 @@
                 <div title="View curated drug trials and chemical data" class="well">
                     <a href="/drugtrials/">
                         <img src="/static/img/button_browse.png"
-                             style="height: 80px;">
+                             style="height: 70px;">
                     </a>
                     <div class="caption">
                         <div class="btn-group">
@@ -52,7 +75,7 @@
                 <div title="View cell samples and cell types" class="well">
                     <a href="/cellsamples/cellsample/">
                         <img src="/static/img/button_cell.png"
-                             style="height: 80px;">
+                             style="height: 70px;">
                     </a>
                     <div class="caption">
                         <div class="btn-group">
@@ -67,25 +90,11 @@
                     </div>
                 </div>
             </div>
-{#            <div class="col-md-3">#}
-{#                <div title="View curated drug trial data" class="well">#}
-{#                    <a href="/drugtrials/">#}
-{#                        <img src="/static/img/button_trials.png"#}
-{#                             style="height: 80px;">#}
-{#                    </a>#}
-{#                    <div class="caption">#}
-{#                        <a href="/drugtrials/"#}
-{#                           class="btn btn-primary btn-large">#}
-{#                        View Drug Trials#}
-{#                        </a>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
                 <div class="col-md-3">
                     <div title="View a table of bioactivities based on your selection" class="well">
                         <a href="/bioactivities/table/">
                             <img src="/static/img/button_addcompound.png"
-                                 style="height: 80px;">
+                                 style="height: 70px;">
                         </a>
                         <div class="caption">
                             <a href="/bioactivities/table/"
@@ -95,30 +104,16 @@
                         </div>
                     </div>
                 </div>
-{#            <div class="col-md-3">#}
-{#                <div title="View or add compounds" class="well">#}
-{#                    <a href="/compounds/">#}
-{#                        <img src="/static/img/button_browse.png"#}
-{#                             style="height: 80px;">#}
-{#                    </a>#}
-{#                    <div class="caption">#}
-{#                        <a href="/compounds/"#}
-{#                           class="btn btn-primary btn-large">#}
-{#                        View Compounds#}
-{#                        </a>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
         </div>
         <div class="row">
-            <h3>Perform Studies</h3>
+            <h4>Perform Studies</h4>
         </div>
         <div class="row">
             <div class="col-md-4">
                 <div title="Initial data entry: add/edit studies and setups" class="well">
                     <a href="/assays/user_index/?setup=1">
                         <img src="/static/img/button_study.png"
-                             style="height: 80px;">
+                             style="height: 70px;">
                     </a>
                     <div class="caption">
                         <a href="/assays/user_index/?setup=1"
@@ -132,7 +127,7 @@
                 <div title="Add/edit studies, setups, readouts, and results" class="well">
                     <a href="/assays/group_index">
                         <img src="/static/img/button_import.png"
-                             style="height: 80px;">
+                             style="height: 70px;">
                     </a>
                     <div class="caption">
                         <div class="btn-group">
@@ -151,7 +146,7 @@
                 <div title="Lists all public data" class="well">
                     <a href="/assays/organchipstudy">
                         <img src="/static/img/button_chip.png"
-                             style="height: 80px;">
+                             style="height: 70px;">
                     </a>
                     <div class="caption">
                         <div class="btn-group">
@@ -170,14 +165,14 @@
             </div>
         </div>
         <div class="row">
-            <h3>Data Analysis and Modeling</h3>
+            <h4>Data Analysis and Modeling</h4>
         </div>
         <div class="row">
             <div class="col-md-4">
                 <div title="Generate a heatmap for selected bioactivity data" class="well">
                     <a href="/bioactivities/heatmap">
                         <img src="/static/img/button_heatmap.png"
-                             style="height: 80px;">
+                             style="height: 70px;">
                     </a>
                     <div class="caption">
                         <a href="/bioactivities/heatmap"
@@ -191,7 +186,7 @@
                 <div title="Generate a dendrogram for selected compound/bioactivity data" class="well">
                     <a href="/bioactivities/cluster">
                         <img src="/static/img/button_cluster.png"
-                             style="height: 80px;">
+                             style="height: 70px;">
                     </a>
                     <div class="caption">
                         <a href="/bioactivities/cluster"
@@ -206,7 +201,7 @@
                 <div title="This feature is still in development" class="well">
                     <a href="/bioactivities/model/">
                         <img src="/static/img/button_predictive.png"
-                             style="height: 80px;">
+                             style="height: 70px;">
                     </a>
                     <div class="caption">
                         <a href="/bioactivities/model/"

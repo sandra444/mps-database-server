@@ -874,7 +874,10 @@ class StudyConfigurationList(LoginRequiredMixin, ListView):
     template_name = 'assays/studyconfiguration_list.html'
 
 # FormSet for Study Models
-StudyModelFormSet = inlineformset_factory(StudyConfiguration, StudyModel, extra=1)
+StudyModelFormSet = inlineformset_factory(StudyConfiguration, StudyModel, extra=1,
+                                              widgets={
+                                              'label': forms.TextInput(attrs={'size': 2, }),
+                                              'sequence_number': forms.TextInput(attrs={'size': 2}), })
 
 
 class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
