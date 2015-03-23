@@ -101,6 +101,9 @@ $(document).ready(function () {
             //.linkDistance(30)
             .size([width, height]);
 
+        var drag = force.drag()
+            .on("dragstart", dragstart);
+
         var svg = d3.select("#content").append("svg")
             .attr("width", width)
             .attr("height", height);
@@ -122,8 +125,8 @@ $(document).ready(function () {
             .enter()
             .append('g')
             .classed('gnode', true)
-            // Putting force.drag here let's one pull by the label (very nice)
-            .call(force.drag);
+            .on("dblclick", dblclick)
+            .call(drag);
 
         var node = gnodes.append("circle")
             .attr("class", "node")
@@ -177,6 +180,14 @@ $(document).ready(function () {
             .style("fill", "#0000FF")
             .style("opacity", "1");
         //---End Insert---
+
+        function dblclick(d) {
+          d3.select(this).classed("fixed", d.fixed = false);
+        }
+
+        function dragstart(d) {
+          d3.select(this).classed("fixed", d.fixed = true);
+        }
     }
 
     function refresh() {
@@ -198,5 +209,10 @@ $(document).ready(function () {
     // This selector will check all items with DELETE in the name, including newly created ones
     $("body").on("click", "input[name*='DELETE']", function(event) {
         refresh();
+    });
+
+    $('#reset').click( function(event) {
+        data = getValues();
+        makeGraph();
     });
 });
