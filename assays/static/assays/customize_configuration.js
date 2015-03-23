@@ -115,7 +115,7 @@ $(document).ready(function () {
             .enter().append("path")
             .attr("class", "link")
             .style('stroke', function(d) { return d[3] ? '#00FF00':'#FF0000' })
-            .style("marker-end",  "url(#suit)");
+            .style("marker-end",  "url(#arrow)");
 
         var gnodes = svg.selectAll('g.gnode')
             .data(data)
@@ -127,8 +127,10 @@ $(document).ready(function () {
 
         var node = gnodes.append("circle")
             .attr("class", "node")
-            .attr("r", 5)
-            .style("fill", function(d) { return color(d.organ); });
+            .attr("r", 9)
+            .style("fill", '#FDF5E6')
+            .style("stroke", function(d) { return color(d.organ); })
+            .style("stroke-width", 1.5);
 
         //Titles for hovering
         gnodes.append("title")
@@ -137,6 +139,11 @@ $(document).ready(function () {
         });
 
         var labels = gnodes.append("text")
+            .attr("x", 0)
+            // This attribute is necessary to "bump" the text down
+            // otherwise the bottom of the text is centered, not the text itself
+            .attr("dy", ".35em")
+            .attr("text-anchor", "middle")
             .text(function(d) { return d.label; });
 
         force.on("tick", function() {
@@ -151,11 +158,13 @@ $(document).ready(function () {
             });
         });
 
-        //---Insert-------
+        //---Insert for markers-------
+        // Just call url('#arrow') when you want this marker
         svg.append("defs").selectAll("marker")
-            .data(["suit", "licensing", "resolved"])
+            .data(["arrow"])
           .enter().append("marker")
             .attr("id", function(d) { return d; })
+            // It is possible that the negative value in this viewBox breaks IE
             .attr("viewBox", "0 -5 10 10")
             .attr("refX", 25)
             .attr("refY", 0)
@@ -163,8 +172,9 @@ $(document).ready(function () {
             .attr("markerHeight", 6)
             .attr("orient", "auto")
           .append("path")
-            .attr("d", "M0,-5L10,0L0,5 L10,0 L0, -5")
+            .attr("d", "M0,-5L10,0L0,5")
             .style("stroke", "#0000FF")
+            .style("fill", "#0000FF")
             .style("opacity", "1");
         //---End Insert---
     }
