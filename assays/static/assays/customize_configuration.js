@@ -104,7 +104,7 @@ $(document).ready(function () {
         var drag = force.drag()
             .on("dragstart", dragstart);
 
-        var svg = d3.select("#content").append("svg")
+        var svg = d3.select("#graph").append("svg")
             .attr("width", width)
             .attr("height", height);
 
