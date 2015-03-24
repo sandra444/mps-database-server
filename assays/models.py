@@ -2,7 +2,7 @@
 
 from django.db import models
 from microdevices.models import Microdevice, OrganModel
-from mps.base.models import LockableModel, RestrictedModel
+from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
 
 PHYSICAL_UNIT_TYPES = (
     (u'V', u'Volume'),
@@ -298,7 +298,7 @@ class AssayResultType(LockableModel):
         return self.assay_result_type
 
 
-class AssayTestResult(RestrictedModel):
+class AssayTestResult(FlaggableModel):
 #   Results calculated from Raw Chip Data
     class Meta(object):
         verbose_name = 'Chip Result'
@@ -518,7 +518,7 @@ class AssayChipCells(models.Model):
                                     default='-')
 
 
-class AssayChipSetup(RestrictedModel):
+class AssayChipSetup(FlaggableModel):
     # The configuration of a Chip for implementing an assay
     class Meta(object):
         verbose_name = 'Chip Setup'
@@ -583,7 +583,7 @@ class AssayChipReadoutAssay(models.Model):
         return u'{}'.format(self.assay_id)
 
 
-class AssayChipReadout(RestrictedModel):
+class AssayChipReadout(FlaggableModel):
     class Meta(object):
         verbose_name = 'Chip Readout'
         ordering = ('chip_setup',)

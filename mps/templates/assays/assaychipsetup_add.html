@@ -4,6 +4,7 @@
 {% block load %}
     <script src="{% static "js/inline_add.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/flag.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -43,11 +44,6 @@
     });
 </script>
 
-{# The presence of this hidden div tells the inline add script to change its delete behavior #}
-{#{% if update %}#}
-{#    <div hidden id="update"></div>#}
-{#{% endif %}#}
-
 <form class="form-horizontal" method="post" >
     {% csrf_token %}
     <h1>
@@ -56,6 +52,28 @@
         <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
 
         <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Clone</button>
+
+        {# Html for flagging for review #}
+        {% if form.flagged.value %}
+            {# If the model is flagged then display a danger flag and the notes #}
+            <a role='button' id="flag" class="btn btn-sm btn-danger" title="Flag for review">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            <a role='button' id="notes_for_flag" class="btn btn-sm btn-warning"
+                data-toggle="popover" title="Reason for Flag" data-content='{{ form.reason_for_flag }}'>
+                Notes
+            </a>
+        {% else %}
+            {# If the model is not flagged display a blue flag and no notes #}
+            <a role='button' id="flag" class="btn btn-sm" title="Flag for review">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            <a role='button' id="notes_for_flag" class="btn btn-sm btn-warning"
+                data-toggle="popover" title="Reason for Flag" data-content='{{ form.reason_for_flag }}'
+                style="display: none">
+                Notes
+            </a>
+        {% endif %}
 
         {% if update %}
             <a role="button" class="btn btn-danger pull-right" href="/assays/assaychipsetup/{{ object.id }}/delete/">Delete</a>
@@ -70,41 +88,15 @@
         </div>
     {% endif %}
 
+    {# Hidden: Used to indicate submit and clone #}
     {{ form.another.as_hidden }}
 
+    {# Hidden div for flagging the entry #}
+    <div hidden>
+        {{ form.flagged }}
+    </div>
+
     <legend>Chip Setup Details</legend>
-{#    <p>Study: {{ form.assay_run_id }}</p>#}
-{#    <p>Organ Model Name: {{ form.device }}</p>#}
-{#    <p>Chip ID/ Barcode: {{ form.assay_chip_id }}</p>#}
-{#    <p>Test Type: {{ form.chip_test_type }}</p>#}
-{#    <p>Compound: {{ form.compound }}</p>#}
-{#    <p>Concentration: {{ form.concentration }}</p>#}
-{#    <p>Concentration Unit: {{ form.unit }}</p>#}
-{#    <p>Scientist: {{ form.scientist }}</p>#}
-{#    <p>Notebook: {{ form.notebook }}</p>#}
-{#    <p>Notebook Page: {{ form.notebook_page }}</p>#}
-{#    <p>Notes: {{ form.notes }}</p>#}
-
-{#    {% if form.errors %}#}
-{#        {% for field in form %}#}
-{#            {% if field.errors %}#}
-{#                {% for error in field.errors %}#}
-{#                    <div class="alert alert-danger" role="alert">#}
-{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
-{#                        <span class="sr-only">Error:</span>#}
-{#                        {{field.label}}: {{error}}#}
-{#                    </div>#}
-{#                {% endfor %}#}
-{#            {% endif %}#}
-{#        {% endfor %}#}
-{#    {% endif %}#}
-
-{#    <div class="form-group">#}
-{#        <label for="assay_run_id" class="col-sm-2 control-label">Study ID</label>#}
-{#        <div class="col-sm-10">#}
-{#          {{ form.assay_run_id }}#}
-{#        </div>#}
-{#    </div>#}
 
     {% if form.setup_date.errors %}
         {% for error in form.setup_date.errors %}
@@ -247,13 +239,6 @@
           {{ form.notes }}
         </div>
     </div>
-
-{#    <div class="form-group">#}
-{#        <label for="group" class="col-sm-2 control-label">Group</label>#}
-{#        <div class="col-sm-10">#}
-{#          {{ form.group }}#}
-{#        </div>#}
-{#    </div>#}
 
     {{ formset.management_form }}
     <legend>Model Cells</legend>

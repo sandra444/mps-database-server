@@ -6,6 +6,7 @@
     <script src="{% static "js/cookies.js" %}"></script>
     <script src="{% static "assays/customize_chip.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/flag.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -40,6 +41,28 @@
 
         <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
 
+        {# Html for flagging for review #}
+        {% if form.flagged.value %}
+            {# If the model is flagged then display a danger flag and the notes #}
+            <a role='button' id="flag" class="btn btn-sm btn-danger" title="Flag for review">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            <a role='button' id="notes_for_flag" class="btn btn-sm btn-warning"
+                data-toggle="popover" title="Reason for Flag" data-content='{{ form.reason_for_flag }}'>
+                Notes
+            </a>
+        {% else %}
+            {# If the model is not flagged display a blue flag and no notes #}
+            <a role='button' id="flag" class="btn btn-sm" title="Flag for review">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            <a role='button' id="notes_for_flag" class="btn btn-sm btn-warning"
+                data-toggle="popover" title="Reason for Flag" data-content='{{ form.reason_for_flag }}'
+                style="display: none">
+                Notes
+            </a>
+        {% endif %}
+
         {% if not update %}
             <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Clone</button>
         {% endif %}
@@ -57,7 +80,13 @@
         </div>
     {% endif %}
 
+    {# Hidden: Used to indicate submit and clone #}
     {{ form.another.as_hidden }}
+
+    {# Hidden div for flagging the entry #}
+    <div hidden>
+        {{ form.flagged }}
+    </div>
 
     <legend>Readout Details</legend>
 {#    <p>Setup: {{ form.chip_setup }}</p>#}
