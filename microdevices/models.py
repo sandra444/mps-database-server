@@ -79,6 +79,9 @@ class OrganModel(LockableModel):
     device = models.ForeignKey(Microdevice, null=True, blank=True)
     description = models.CharField(max_length=400, null=True, blank=True)
 
+    protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
+                            blank=True, null=True, help_text='File detailing the protocols for this model')
+
     def __unicode__(self):
 
         return self.model_name

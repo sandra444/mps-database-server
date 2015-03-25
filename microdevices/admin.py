@@ -202,6 +202,9 @@ class OrganModelAdmin(LockableAdmin):
                     (
                         'organ', 'device', 'description',
                     ),
+                    (
+                        'protocol',
+                    ),
                 )
             }
         ),
