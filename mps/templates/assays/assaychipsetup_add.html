@@ -63,8 +63,7 @@
             <a role='button' id="flag" class="btn btn-sm btn-danger" title="Flag for review">
                 <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
             </a>
-            <a role='button' id="notes_for_flag" class="btn btn-sm btn-warning"
-                data-toggle="popover" title="Reason for Flag" data-content='{{ form.reason_for_flag }}'>
+            <a role='button' id="notes_for_flag" class="btn btn-sm btn-warning" title="Reason for Flag">
                 Notes
             </a>
         {% else %}
@@ -72,9 +71,7 @@
             <a role='button' id="flag" class="btn btn-sm" title="Flag for review">
                 <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
             </a>
-            <a role='button' id="notes_for_flag" class="btn btn-sm btn-warning"
-                data-toggle="popover" title="Reason for Flag" data-content='{{ form.reason_for_flag }}'
-                style="display: none">
+            <a role='button' id="notes_for_flag" class="btn btn-sm btn-warning" title="Reason for Flag" style="display: none">
                 Notes
             </a>
         {% endif %}
@@ -82,6 +79,11 @@
         {% if update %}
             <a role="button" class="btn btn-danger pull-right" href="/assays/assaychipsetup/{{ object.id }}/delete/">Delete</a>
         {% endif %}
+
+        <div class="form-group has-error">
+            <input class='small form-control' placeholder="Reason for Flag" id="id_reason_for_flag" maxlength="300"
+            name="reason_for_flag" type="text" style="display: none;" value="{{ form.reason_for_flag.value }}">
+        </div>
     </h1>
 
     {% if form.another.value and form.is_valid and formset.is_valid %}

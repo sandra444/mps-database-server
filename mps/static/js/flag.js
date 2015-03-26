@@ -4,8 +4,7 @@ $(document).ready(function () {
     var flag = $('#flag');
     var check = $("#id_flagged");
     var notes = $('#notes_for_flag');
-
-    $('[data-toggle="popover"]').popover({html : true});
+    var reason_for_flag = $('#id_reason_for_flag');
 
     flag.click( function() {
         var current_check = check.prop('checked');
@@ -17,5 +16,9 @@ $(document).ready(function () {
         else {
             flag.removeClass('btn-danger')
         }
+    });
+
+    notes.click( function() {
+        reason_for_flag.toggle('slow');
     });
 });
