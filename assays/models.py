@@ -527,10 +527,12 @@ class AssayChipSetup(FlaggableModel):
     assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
     setup_date = models.DateField(help_text='YYYY-MM-DD')
     device = models.ForeignKey(OrganModel, verbose_name = 'Organ Model Name')
+
+    variance = models.CharField(max_length=3000, verbose_name='Variance from Protocol', null=True, blank=True)
+
     # the unique chip identifier
     # can be a barcode or a hand written identifier
-    assay_chip_id = models.CharField(max_length=512,
-                                       verbose_name='Chip ID/ Barcode')
+    assay_chip_id = models.CharField(max_length=512, verbose_name='Chip ID/ Barcode')
 
     #Control => control, Compound => compound; Abbreviate? Capitalize?
     chip_test_type = models.CharField(max_length=8, choices=(("control","Control"),("compound","Compound")))

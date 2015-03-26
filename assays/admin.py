@@ -663,6 +663,9 @@ class AssayChipSetupAdmin(LockableAdmin):
                     (
                         'device', 'assay_chip_id',
                     ),
+                    (
+                        'variance',
+                    ),
                 )
             }
         ),
