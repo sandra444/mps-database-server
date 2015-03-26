@@ -119,7 +119,7 @@
 
             <div class="form-group has-error">
                 <input class='small form-control' placeholder="Reason for Flag" id="id_reason_for_flag" maxlength="300"
-                name="reason_for_flag" type="text" style="display: none;" value="{{ form.reason_for_flag.value }}">
+                name="reason_for_flag" type="text" style="display: none;" value="{{ form.reason_for_flag.value|default:'' }}">
             </div>
         </h1>
 

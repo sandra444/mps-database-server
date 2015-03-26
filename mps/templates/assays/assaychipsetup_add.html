@@ -82,7 +82,7 @@
 
         <div class="form-group has-error">
             <input class='small form-control' placeholder="Reason for Flag" id="id_reason_for_flag" maxlength="300"
-            name="reason_for_flag" type="text" style="display: none;" value="{{ form.reason_for_flag.value }}">
+            name="reason_for_flag" type="text" style="display: none;" value="{{ form.reason_for_flag.value|default:'' }}">
         </div>
     </h1>
 
@@ -137,6 +137,9 @@
         <label for="device" class="col-sm-2 control-label">Organ Model Name*</label>
         <div class="col-sm-10">
           {{ form.device }}
+          <span>
+            <a href="" id="protocol"></a>
+          </span>
         </div>
     </div>
 
@@ -400,6 +403,26 @@
 {#    });#}
 
     $(function() {
+
+        // safe converts the JSON passed to the context into something the JS compiler can read
+        var protocols = {{ protocols|safe }};
+
+        function display_protocol() {
+            if(protocols[$('#id_device').val()]) {
+                $('#protocol').html('Click here to view protocol')
+                        .prop('href','/media/' + protocols[$('#id_device').val()]);
+            }
+            else{
+                $('#protocol').html('')
+                        .prop('href','');
+            }
+        }
+
+        display_protocol();
+
+        $('#id_device').change( function() {
+            display_protocol();
+        });
 
         function toggle_warning(first) {
             if (test_type == 'control' && compound) {

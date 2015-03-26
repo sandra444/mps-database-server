@@ -19,6 +19,8 @@ from django.db.models import Q
 
 from mps.mixins import *
 
+import json
+
 # TODO Refactor imports
 
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
@@ -374,6 +376,8 @@ class AssayChipSetupAdd(CreateView):
 
         # Cellsamples will always be the same
         context['cellsamples'] = cellsamples
+        # Get protocols
+        context['protocols'] = json.dumps({ item['id']: item['protocol'] for item in OrganModel.objects.all().values() })
 
         return context
 
@@ -430,10 +434,15 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         # Render form
         formset = AssayChipCellsFormset(instance=self.object)
+
+        # Get protocols
+        protocols = json.dumps({ item['id']: item['protocol'] for item in OrganModel.objects.all().values() })
+
         return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
                                 cellsamples = cellsamples,
+                                protocols = protocols,
                                 update = True))
 
     def post(self, request, *args, **kwargs):
@@ -480,10 +489,15 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
                 return redirect(
                     self.object.get_absolute_url() + url_add)
         else:
+
+            # Get protocols
+            protocols = json.dumps({ item['id']: item['protocol'] for item in OrganModel.objects.all().values() })
+
             return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
                                 cellsamples = cellsamples,
+                                protocols = protocols,
                                 update = True))
 
 class AssayChipSetupDelete(CreatorRequiredMixin, DeleteView):
