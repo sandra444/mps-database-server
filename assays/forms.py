@@ -80,16 +80,17 @@ class AssayChipCellsInlineFormset(forms.models.BaseInlineFormSet):
     def clean(self):
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
+        # Does not require a minimum number of cellsamples at the moment
         # Number of cellsamples
-        cellsamples = 0
-        for form in forms_data:
-            try:
-                if form.cleaned_data:
-                    cellsamples += 1
-            except AttributeError:
-                pass
-        if cellsamples < 1:
-            raise forms.ValidationError('You must have at least one cellsample.')
+        # cellsamples = 0
+        # for form in forms_data:
+        #     try:
+        #         if form.cleaned_data:
+        #             cellsamples += 1
+        #     except AttributeError:
+        #         pass
+        # if cellsamples < 1:
+        #     raise forms.ValidationError('You must have at least one cellsample.')
 
 class TestResultInlineFormset(forms.models.BaseInlineFormSet):
 

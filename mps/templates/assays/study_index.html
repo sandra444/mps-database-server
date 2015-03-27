@@ -24,6 +24,7 @@
                     <th>Chip Test Type</th>
                     <th>Compound</th>
                     <th>Creator</th>
+                    <th>Flagged</th>
                 </tr>
             </thead>
 
@@ -46,6 +47,11 @@
                     <td>{{ setup.chip_test_type }}</td>
                     <td>{{ setup.compound }}</td>
                     <td>{{ setup.created_by }}</td>
+                    <td>
+                        {% if setup.flagged %}
+                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -80,6 +86,7 @@
                     <th>Assays</th>
                     <th>Readout Date</th>
                     <th>Creator</th>
+                    <th>Flagged</th>
                 </tr>
             </thead>
 
@@ -104,6 +111,11 @@
                     </td>
                     <td>{{ readout.readout_start_time }}</td>
                     <td>{{ readout.created_by }}</td>
+                    <td>
+                        {% if readout.flagged %}
+                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -141,6 +153,7 @@
                     <th>Result Type</th>
                     <th>Severity</th>
                     <th>Creator</th>
+                    <th>Flagged</th>
                 </tr>
             </thead>
 
@@ -171,6 +184,11 @@
                     <td>{{ result.result_type }}</td>
                     <td>{{ result.get_severity_display }}</td>
                     <td>{{ result.assay_result.created_by }}</td>
+                    <td>
+                        {% if result.assay_result.flagged %}
+                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>

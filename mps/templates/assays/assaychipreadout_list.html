@@ -15,6 +15,7 @@
                     <th>Readout Date</th>
                     <th>Scientist</th>
                     <th>Creator</th>
+                    <th>Flagged</th>
 {#                    <th>Group</th>#}
                 </tr>
             </thead>
@@ -27,13 +28,14 @@
                     <th>Readout Date</th>
                     <th>Scientist</th>
                     <th>Creator</th>
+                    <th>Flagged</th>
 {#                    <th>Group</th>#}
                 </tr>
             </tfoot>
 
             <tbody>
             {% for readout in object_list %}
-                <tr class="compound" id={{ readout.id }} name={{ readout.id }}>
+                <tr class="readout" id={{ readout.id }} name={{ readout.id }}>
                     <td><a href="{{ readout.id }}">{{ readout.id }}</a></td>
                     <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}">{{ readout.chip_setup }}</a></td>
                     <td>
@@ -47,9 +49,12 @@
                         <td></td>
                     {% endif %}
                     <td>{{ readout.scientist }}</td>
-{#                    <td>{{ readout.readout_start_time }}</td>#}
                     <td>{{ readout.created_by }}</td>
-{#                    <td>{{ compound.group }}</td>#}
+                    <td>
+                        {% if readout.flagged %}
+                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>

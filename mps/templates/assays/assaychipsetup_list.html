@@ -17,6 +17,7 @@
                     <th>Compound</th>
                     <th>Scientist</th>
                     <th>Creator</th>
+                    <th>Flagged</th>
                 </tr>
             </thead>
 
@@ -30,6 +31,7 @@
                     <th>Compound</th>
                     <th>Scientist</th>
                     <th>Creator</th>
+                    <th>Flagged</th>
                 </tr>
             </tfoot>
 
@@ -49,6 +51,11 @@
 {#                    <td>{{ setup.compound }}</td>#}
                     <td>{{ setup.scientist }}</td>
                     <td>{{ setup.created_by }}</td>
+                    <td>
+                        {% if setup.flagged %}
+                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
