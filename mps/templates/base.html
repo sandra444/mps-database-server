@@ -60,11 +60,13 @@
 
 </head>
 
-<style>
-    li a {
-        font-weight: bold;
-    }
-</style>
+{# A font-weight of bolder seems to render poorly in windows #}
+{# This does not solve that problem #}
+{#<style>#}
+{#    li a {#}
+{#        font-weight: bold;#}
+{#    }#}
+{#</style>#}
 
 <body>
     <!-- Fixed navbar -->
@@ -198,6 +200,11 @@
             </div>
         </footer>
     </div>
+
+    {# Crude solution to aesthetic issues in windows; refactor later #}
+    <script>
+        $('li a').css('font-weight','bold');
+    </script>
 
 </body>
 </html>
