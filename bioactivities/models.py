@@ -196,3 +196,25 @@ class BioactivityType(LockableModel):
     def __unicode__(self):
         return unicode(self.standard_name)
 
+
+class PubChemBioactivity(LockableModel):
+    assay_id = models.TextField(verbose_name="Assay ID")
+
+    # It makes sense just to add the PubChem CID to the compound then just use a FK
+    #compound_id = models.TextField(verbose_name="Compound ID")
+    compound = models.ForeignKey('compounds.Compound')
+
+    # May eventually make a table for PubChem targets
+    # In such an instance, change this to a FK
+    target = models.TextField(default='', verbose_name="Target", null=True, blank=True)
+
+    # Value is required
+    value = models.FloatField()
+
+    # Not required?
+    # TODO Consider making this a FK to bioactivity types
+    # TODO Or, perhaps we should make another table for PubChem types?
+    activity_name = models.TextField(default='', verbose_name="Activity Name", null=True, blank=True)
+
+    # Not required?
+    assay_name = models.TextField(default='', verbose_name="Assay Name", null=True, blank=True)

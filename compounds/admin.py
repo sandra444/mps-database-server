@@ -50,7 +50,7 @@ class CompoundAdmin(LockableAdmin):
     fieldsets = (
         (None, {
             'fields': (('name', 'image_display'),
-                       'chemblid', 'inchikey', 'last_update',)
+                       'chemblid', 'pubchemid', 'inchikey', 'last_update',)
         }),
         ('Molecular Identifiers', {
             'fields': ('smiles', 'synonyms')

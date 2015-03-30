@@ -387,3 +387,36 @@ class BioactivityTypeAdmin(LockableAdmin):
 
 
 admin.site.register(BioactivityType, BioactivityTypeAdmin)
+
+
+class PubChemBioactivityAdmin(LockableAdmin):
+    alphabet_filter = 'standard_name'
+    DEFAULT_ALPHABET = u'ABCDEFGHIJKLMNOPQRSTUVWXYZ%['
+
+    save_on_top = True
+    list_per_page = 50
+
+    list_display = (
+        'activity_name',
+        'compound',
+        'value',
+        'activity_name',
+        'assay_name',
+        'target',
+    )
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                'assay_id',
+                'compound',
+                'target',
+                'value',
+                'activity_name',
+                'assay_name'
+            )
+        }),
+    )
+
+
+admin.site.register(PubChemBioactivity, PubChemBioactivityAdmin)

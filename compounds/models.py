@@ -59,6 +59,9 @@ class Compound(LockableModel):
         help_text="Enter a ChEMBL id, e.g. CHEMBL25, and click Retrieve to "
                   "get compound information automatically.")
 
+    # Pubchem ID
+    pubchemid = models.CharField(verbose_name='PubChem ID', max_length=40, null=True, blank=True)
+
     # standard names/identifiers
     # Making this field unique causes issues if no InChI key can be found
     inchikey = models.CharField('InChI key', max_length=27,
