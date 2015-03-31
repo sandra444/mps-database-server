@@ -24,6 +24,15 @@
     <script src="{{ STATIC_URL }}djangovoice/js/libs/modernizr-2.5.3-respond-1.1.0.min.js "></script>
   </head>
 
+  <style>
+    header {
+        min-width: 900px;
+    }
+    #feedback-main-content {
+        min-width: 500px;
+    }
+  </style>
+
   <body>
     <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
     <header>
@@ -84,7 +93,7 @@
       </div>
     </header>
 
-    <div class="container-fluid">
+    <div id="feedback-main-content" class="container-fluid">
       <div class="row-fluid">
         <div class="span8">
           <div id="feedback">
