@@ -42,6 +42,9 @@ def get_event_frequency(generic_name):
 def run():
     # existing = dict.fromkeys(AdverseEvent.objects.all().values_list('event', flat=True), True)
 
+    # Delete all old adverse events
+    CompoundAdverseEvent.objects.all().delete()
+
     for compound in Compound.objects.all():
         events = get_event_frequency(compound.name)
 
@@ -51,11 +54,11 @@ def run():
                 compound_model = OpenFDACompound.objects.get(compound=compound)
 
                 # Delete all old adverse events
-                adverse_events = CompoundAdverseEvent.objects.filter(compound=compound_model)
-
-                for adverse_event in adverse_events:
-                    if adverse_event.compound.id == compound_model.id:
-                        adverse_event.delete()
+                # adverse_events = CompoundAdverseEvent.objects.filter(compound=compound_model)
+                #
+                # for adverse_event in adverse_events:
+                #     if adverse_event.compound.id == compound_model.id:
+                #         adverse_event.delete()
 
             # Make a new OpenFDACompound model if it does not already exist
             except:
@@ -67,14 +70,19 @@ def run():
                 adverse_event = event[0].replace('^',"'")
                 frequency = event[1]
 
-                # if adverse_event not in existing:
+                # Get adverse event if possible
                 try:
                     adverse_event_model = AdverseEvent.objects.get(event=adverse_event)
 
+                # if adverse_event does not exist
                 except:
                     adverse_event_model = AdverseEvent(event=adverse_event)
                     adverse_event_model.save()
                     # existing.update({adverse_event:True})
 
-                adverse_event_model = CompoundAdverseEvent(compound=compound_model,event=adverse_event_model,frequency=frequency)
-                adverse_event_model.save()
+                try:
+                    adverse_event_model = CompoundAdverseEvent(compound=compound_model,event=adverse_event_model,frequency=frequency)
+                    adverse_event_model.save()
+                    print "Success!"
+                except:
+                    print "Fail..."

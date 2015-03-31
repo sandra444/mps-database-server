@@ -4,7 +4,9 @@
 {% block content %}
 
     <legend>
-        <h1>Adverse Events for <a href="/compounds/{{ compound.compound.id }}">{{ compound }}</a>
+        <h1>Adverse Events for
+            <br>
+            <a href="/compounds/{{ compound.compound.id }}">{{ compound }}</a>
         <a href="/adverse_events/{{ next }}" class="btn btn-primary btn-large pull-right">
             <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
             Next

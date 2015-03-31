@@ -355,6 +355,9 @@ class AdverseEvent(models.Model):
 
 
 # TODO think of a better name
+# TODO what other fields should be placed here? Right now this is not a useful model
+# Theoretically, we would place usage information here, but that is difficult to acquire
+# If we can't think of anything, scrap this model before you put it on production
 class OpenFDACompound(LockableModel):
 
     compound = models.ForeignKey('compounds.Compound')
