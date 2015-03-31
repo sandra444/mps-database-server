@@ -198,6 +198,7 @@ class BioactivityType(LockableModel):
 
 
 class PubChemBioactivity(LockableModel):
+    # TextFields and CharFields have no performace benefits over eachother, but may want to use CharFields for clarity
     assay_id = models.TextField(verbose_name="Assay ID")
 
     # It makes sense just to add the PubChem CID to the compound then just use a FK
@@ -211,10 +212,27 @@ class PubChemBioactivity(LockableModel):
     # Value is required
     value = models.FloatField()
 
+    # Source is an optional field showing where PubChem pulled their data
+    source = models.TextField(default='', blank=True, null=True)
+
     # Not required?
     # TODO Consider making this a FK to bioactivity types
     # TODO Or, perhaps we should make another table for PubChem types?
-    activity_name = models.TextField(default='', verbose_name="Activity Name", null=True, blank=True)
+    activity_name = models.TextField(default='', verbose_name="Activity Name")
 
     # Not required?
     assay_name = models.TextField(default='', verbose_name="Assay Name", null=True, blank=True)
+
+
+# TODO PubChem Bioactivity Type? and PubChem targets
+# To following table may eventually be merged into the existing bioactivty type table
+# Deliberating, is it really worthwhile to make a model with only one field?
+#class PubChemBioactivityType(LockableModel):
+#    name = models.TextField(default='')
+
+# class PubChemTarget(LockableModel):
+#     name = models.TextField(help_text="Preferred target name.")
+#     synonyms = models.TextField(null=True, blank=True)
+#
+#     # external identifiers, not unique because does go with null on SQL server
+#     pubchemid = models.TextField('PubChem ID')

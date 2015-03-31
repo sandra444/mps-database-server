@@ -35,11 +35,13 @@ def get_bioactivities(name):
                 # The target is only sometimes listed
                 target = entry[7]
                 value = entry[8]
-                activity_name = entry[9]
+                # Please note that specifying the units as micromolar is superfluous and thus these strings are removed
+                activity_name = entry[9].replace(' (uM)','').replace('_uM','').replace('_MICROM','')
                 assay_name = entry[10]
 
+                # TODO Insert code to add/handle Bioactivity Types?
                 # Do not add outcome to returned data, assumed to be active
-                if AID and CID and outcome == "Active" and value:
+                if AID and CID and outcome == "Active" and value and activity_name:
 
                     if not AID in assays:
                         assays.update({AID: [len(activities)]})
@@ -64,11 +66,32 @@ def get_bioactivities(name):
         # Some entries might be empty thus check for assays
         if assays:
 
-            # If there are few enough assays for a URL
-            if len(assays) < 500:
-                flat_assays = ','.join([x for x in assays])
+            # flat_assays = ','.join([x for x in assays])
+            #
+            # assay_url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/assay/aid/{}/summary/json'.format(flat_assays)
+            # assay_response = urllib.urlopen(assay_url)
+            # assay_data = json.loads(assay_response.read())
+            # assay_data = assay_data.get('AssaySummaries').get('AssaySummary')
+            #
+            # for assay in assay_data:
+            #     aid = str(assay.get('AID'))
+            #     source = assay.get('SourceName')
+            #
+            #     activities_to_change = assays.get(aid)
+            #
+            #     for index in activities_to_change:
+            #         activities[index].update({'source':source})
 
-                assay_url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/assay/aid/{}/summary/json'.format(flat_assays)
+            all_assays = [x for x in assays]
+            flat_assays = []
+
+            # Need to split into a series of queries due to the limit on URL length
+            for i in range(0,len(all_assays),500):
+                batch = ','.join(all_assays[i:i+500])
+                flat_assays.append(batch)
+
+            for assay in flat_assays:
+                assay_url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/assay/aid/{}/summary/json'.format(assay)
                 assay_response = urllib.urlopen(assay_url)
                 assay_data = json.loads(assay_response.read())
                 assay_data = assay_data.get('AssaySummaries').get('AssaySummary')
@@ -82,28 +105,16 @@ def get_bioactivities(name):
                     for index in activities_to_change:
                         activities[index].update({'source':source})
 
-            else:
-                for assay in assays:
-                    assay_url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/assay/aid/{}/summary/json'.format(assay)
-                    assay_response = urllib.urlopen(assay_url)
-                    assay_data = json.loads(assay_response.read())
-                    assay_data = assay_data.get('AssaySummaries').get('AssaySummary')
-
-                    for assay in assay_data:
-                        aid = str(assay.get('AID'))
-                        source = assay.get('SourceName')
-
-                        activities_to_change = assays.get(aid)
-
-                        for index in activities_to_change:
-                            activities[index].update({'source':source})
-
         return activities
 
     else:
         return []
 
 def run():
+
+    # Remove all old bioactivities
+    PubChemBioactivity.objects.all().delete()
+
     success = 0
     fail = 0
     # TODO make pubchem bioactivity entries for each activity
@@ -112,7 +123,7 @@ def run():
         if activities:
             # Add CID to compound
             if not compound.pubchemid:
-                cid = activities[0].compound_id
+                cid = activities[0].get('compound_id')
                 compound.pubchemid = cid
                 compound.save()
 
@@ -123,6 +134,7 @@ def run():
                     'compound': compound,
                     'target': activity.get('target'),
                     'value': activity.get('value'),
+                    'source': activity.get('source'),
                     'activity_name': activity.get('activity_name'),
                     'assay_name': activity.get('assay_name')
                 }
