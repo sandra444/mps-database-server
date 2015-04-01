@@ -331,3 +331,24 @@ class AdverseEventAdmin(ImportExportModelAdmin):
 
 
 admin.site.register(AdverseEvent, AdverseEventAdmin)
+
+
+class OpenFDACompoundAdmin(ImportExportModelAdmin):
+
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('compound', 'black_box')
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'compound',
+                    'black_box',
+                    'warnings'
+                )
+            }
+        ),
+    )
+
+
+admin.site.register(OpenFDACompound, OpenFDACompoundAdmin)

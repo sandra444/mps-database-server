@@ -355,12 +355,14 @@ class AdverseEvent(models.Model):
 
 
 # TODO think of a better name
-# TODO what other fields should be placed here? Right now this is not a useful model
+# TODO what other fields should be placed here?
 # Theoretically, we would place usage information here, but that is difficult to acquire
 # If we can't think of anything, scrap this model before you put it on production
 class OpenFDACompound(LockableModel):
 
     compound = models.ForeignKey('compounds.Compound')
+    warnings = models.TextField(blank=True, null=True)
+    black_box = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u'{}'.format(self.compound.name)

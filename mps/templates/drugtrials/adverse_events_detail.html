@@ -20,7 +20,7 @@
 
     <div class="row">
 
-        <div class="col-sm-6">
+        <div class="col-sm-9">
             <div class="row">
                 <div class="col-sm-4 lead text-right-responsive">
                     <b>ChEMBL ID:</b>
@@ -31,13 +31,37 @@
             </div>
         </div>
 
-        <div class="col-sm-6">
+        <div class="col-sm-3">
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.compound.chemblid }}">
         </div>
 
     </div>
 
-    <legend><b>Events</b></legend>
+
+    {% if compound.warnings %}
+        <legend>
+            Warnings
+
+            {% if compound.black_box %}
+                <span title="This compound has a Black Box Warning" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            {% endif %}
+
+            <button class="btn btn-info" type="button" data-toggle="collapse"
+                data-target="#warnings" aria-expanded="false" aria-controls="warnings">
+                Show
+            </button>
+        </legend>
+
+        <div id="warnings" class="row collapse">
+            <blockquote>
+                <p>
+                    {{ compound.warnings }}
+                </p>
+            </blockquote>
+        </div>
+    {% endif %}
+
+    <legend><b>Reported Events</b></legend>
 
     <table class="table table-striped table-hover">
         <thead>

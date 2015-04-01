@@ -230,9 +230,16 @@ class PubChemBioactivity(LockableModel):
 #class PubChemBioactivityType(LockableModel):
 #    name = models.TextField(default='')
 
-# class PubChemTarget(LockableModel):
-#     name = models.TextField(help_text="Preferred target name.")
-#     synonyms = models.TextField(null=True, blank=True)
-#
-#     # external identifiers, not unique because does go with null on SQL server
-#     pubchemid = models.TextField('PubChem ID')
+
+# Apparently all PubChem targets are Single Proteins (or at least. point to a specific gene)
+class PubChemTarget(LockableModel):
+    name = models.TextField(default='', help_text="Preferred target name.")
+
+    # Species will likely be useful to have
+    organism = models.TextField(default='')
+
+    # May be difficult to acquire
+    #synonyms = models.TextField(null=True, blank=True)
+
+    # The GI is what is given by a PubChem assay
+    GI = models.TextField('NCBI GI')
