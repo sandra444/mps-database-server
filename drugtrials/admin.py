@@ -344,7 +344,8 @@ class OpenFDACompoundAdmin(ImportExportModelAdmin):
                 'fields': (
                     'compound',
                     'black_box',
-                    'warnings'
+                    'warnings',
+                    'nonclinical_toxicology',
                 )
             }
         ),

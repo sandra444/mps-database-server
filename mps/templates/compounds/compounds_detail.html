@@ -82,20 +82,22 @@
 {##}
 {#    </div>#}
 
-    <legend>Synonyms
-        <button class="btn btn-info" type="button" data-toggle="collapse"
-                data-target="#synonyms" aria-expanded="false" aria-controls="synonyms">
-            Show
-        </button>
-    </legend>
+    {% if object.synonyms %}
+        <legend>Synonyms
+            <button class="btn btn-info" type="button" data-toggle="collapse"
+                    data-target="#synonyms" aria-expanded="false" aria-controls="synonyms">
+                Show
+            </button>
+        </legend>
 
-    <div id='synonyms' class="row collapse">
-        <blockquote>
-            <p>
-                {{ object.synonyms }}
-            </p>
-        </blockquote>
-    </div>
+        <div id='synonyms' class="row collapse">
+            <blockquote>
+                <p>
+                    {{ object.synonyms }}
+                </p>
+            </blockquote>
+        </div>
+    {% endif %}
 
     <legend>Drug/Drug-like Properties</legend>
 

@@ -364,6 +364,14 @@ class OpenFDACompound(LockableModel):
     warnings = models.TextField(blank=True, null=True)
     black_box = models.BooleanField(default=False)
 
+    # Insights into non-human toxicology (can be useful)
+    nonclinical_toxicology = models.TextField(blank=True, null=True)
+
+    # Deemed less than useful
+    #clinical_studies = models.TextField(blank=True, null=True)
+    # Deemed less than useful
+    # laboratory_tests = models.TextField(blank=True, null=True)
+
     def __unicode__(self):
         return u'{}'.format(self.compound.name)
 
