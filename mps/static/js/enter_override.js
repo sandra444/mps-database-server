@@ -22,9 +22,12 @@ $(document).ready(function () {
 
     $(window).keydown(function(event){
         if(event.keyCode == 13) {
-          event.preventDefault();
-          dialogConfirm.dialog('open');
-          return false;
+            // Only perform the override if an input is focused
+            if($('input:focus')[0]) {
+                event.preventDefault();
+                dialogConfirm.dialog('open');
+                return false;
+            }
         }
     });
 });
