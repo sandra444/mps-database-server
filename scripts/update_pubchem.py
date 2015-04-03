@@ -59,6 +59,15 @@ def get_bioactivities(name):
                         except:
 
                             try:
+                                # Get URL of target organism for scrape
+                                url = "http://togows.dbcls.jp/entry/protein/{}/organism".format(target)
+                                # Make the http request
+                                response  = urllib.urlopen(url)
+                                # Get the webpage as text
+                                data = response.read()
+
+                                organism = data.strip().strip('.')
+
                                 # Get URL of target definition for scrape
                                 url = "http://togows.dbcls.jp/entry/protein/{}/definition".format(target)
                                 # Make the http request
@@ -73,14 +82,10 @@ def get_bioactivities(name):
                                     name = full.strip().strip('.')
                                 else:
                                     name = data.strip().strip('.')
-                                # Get URL of target organism for scrape
-                                url = "http://togows.dbcls.jp/entry/protein/{}/organism".format(target)
-                                # Make the http request
-                                response  = urllib.urlopen(url)
-                                # Get the webpage as text
-                                data = response.read()
 
-                                organism = data.strip().strip('.')
+                                # Remove superfluous organism in name (if it is already listed separately, what is the point?)
+                                if '[{}]'.format(organism) in name:
+                                    name = name.replace('[{}]'.format(organism), '').strip()
 
                                 entry = {
                                     'name': name,
