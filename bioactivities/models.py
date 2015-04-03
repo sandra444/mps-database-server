@@ -207,10 +207,10 @@ class PubChemBioactivity(LockableModel):
 
     # May eventually make a table for PubChem targets
     # In such an instance, change this to a FK
-    target = models.TextField(default='', verbose_name="Target", null=True, blank=True)
+    target = models.ForeignKey('PubChemTarget', default=None, verbose_name="Target", null=True, blank=True)
 
     # Value is required
-    value = models.FloatField()
+    value = models.FloatField(verbose_name="Value (uM)")
 
     # Source is an optional field showing where PubChem pulled their data
     source = models.TextField(default='', blank=True, null=True)
@@ -243,3 +243,6 @@ class PubChemTarget(LockableModel):
 
     # The GI is what is given by a PubChem assay
     GI = models.TextField('NCBI GI')
+
+    def __unicode__(self):
+        return unicode(self.name)

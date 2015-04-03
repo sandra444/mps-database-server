@@ -1,5 +1,5 @@
 from compounds.models import Compound
-from bioactivities.models import PubChemBioactivity
+from bioactivities.models import PubChemBioactivity, PubChemTarget
 
 import urllib, json
 
@@ -51,8 +51,59 @@ def get_bioactivities(name):
                     final_target = None
 
                     if target:
-                        # TODO code to insert target and set up FK
-                        final_target = target
+                        # If the target is in the database
+                        try:
+                            final_target = PubChemTarget.objects.get(GI=target)
+                            print "Found target!"
+                        # If the target is not in the database, create it
+                        except:
+
+                            try:
+                                # Get URL of target definition for scrape
+                                url = "http://togows.dbcls.jp/entry/protein/{}/definition".format(target)
+                                # Make the http request
+                                response  = urllib.urlopen(url)
+                                # Get the webpage as text
+                                data = response.read()
+
+                                # If the entry is annoying
+                                if 'RecName: Full=' in data:
+                                    full = data.split(';')[0]
+                                    full = full.replace('RecName: Full=', '')
+                                    name = full.strip().strip('.')
+                                else:
+                                    name = data.strip().strip('.')
+                                # Get URL of target organism for scrape
+                                url = "http://togows.dbcls.jp/entry/protein/{}/organism".format(target)
+                                # Make the http request
+                                response  = urllib.urlopen(url)
+                                # Get the webpage as text
+                                data = response.read()
+
+                                organism = data.strip().strip('.')
+
+                                entry = {
+                                    'name': name,
+                                    'organism': organism,
+                                    'GI': target,
+                                }
+
+                                target_model = PubChemTarget.objects.create(locked=True, **entry)
+                                final_target = target_model
+                                print "Created target!"
+
+                            except:
+
+                                entry = {
+                                    'name': '',
+                                    'organism': '',
+                                    'GI': target,
+                                }
+
+                                target_model = PubChemTarget.objects.create(locked=True, **entry)
+                                final_target = target_model
+
+                                print "Error processing target:", target
 
                     activities.append({
                         'assay_id': AID,

@@ -422,3 +422,29 @@ class PubChemBioactivityAdmin(LockableAdmin):
 
 
 admin.site.register(PubChemBioactivity, PubChemBioactivityAdmin)
+
+
+class PubChemTargetAdmin(LockableAdmin):
+    search_fields = ['name', 'organism', 'GI']
+
+    save_on_top = True
+    list_per_page = 50
+
+    list_display = (
+        'name',
+        'organism',
+        'GI',
+    )
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                'name',
+                'organism',
+                'GI',
+            )
+        }),
+    )
+
+
+admin.site.register(PubChemTarget, PubChemTargetAdmin)
