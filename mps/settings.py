@@ -190,7 +190,7 @@ INSTALLED_APPS = (
     'alphafilter',
 
     # Djangovoice for feedback
-    'django.contrib.comments',
+    'django_comments',
     'qhonuskan_votes',
     'djangovoice',
 
