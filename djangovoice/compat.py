@@ -8,6 +8,13 @@ if DJANGO_VERSION >= (1, 5):
     from django.contrib.auth import get_user_model
     User = get_user_model()
 
+elif DJANGO_VERSION >= (1, 7):
+    try:
+        from django.contrib.auth import get_user_model
+        User = settings.AUTH_USER_MODEL
+    except ImportError:
+        from django.contrib.auth.models import User
+
 else:
     from django.contrib.auth.models import User
 
