@@ -17,6 +17,7 @@ from io import BytesIO
 class AssayLayoutFormatForm(forms.ModelForm):
     class Meta(object):
         model = AssayLayoutFormat
+        exclude = ('',)
 
     def clean(self):
         """Validate size of rows/columns and corresponding label counts."""
@@ -897,6 +898,7 @@ class AssayChipReadoutForm(forms.ModelForm):
 
     class Meta(object):
         model = AssayChipReadout
+        exclude = ('',)
 
 class AssayChipReadoutAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
@@ -1360,6 +1362,7 @@ class AssayRunForm(forms.ModelForm):
             'name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
+        exclude = ('',)
 
     # TODO CLEAN TO USE SETUP IN LIEU OF READOUT ID
     def clean(self):

@@ -76,6 +76,7 @@ class AssayChipCellsInlineFormset(forms.models.BaseInlineFormSet):
 
     class Meta(object):
         model = AssayChipCells
+        exclude = ('',)
 
     def clean(self):
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
@@ -96,6 +97,7 @@ class TestResultInlineFormset(forms.models.BaseInlineFormSet):
 
     class Meta(object):
         model = AssayResult
+        exclude = ('',)
 
     def clean(self):
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
@@ -120,3 +122,4 @@ class StudyConfigurationForm(forms.ModelForm):
             'media_composition': forms.Textarea(attrs={'cols':50, 'rows': 3}),
             'hardware_description': forms.Textarea(attrs={'cols':50, 'rows': 3}),
         }
+        exclude = ('',)
