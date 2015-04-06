@@ -1,4 +1,4 @@
-from qhonuskan_votes.compat import patterns, url
+from django.conf.urls import patterns, url
 
 urlpatterns = patterns(
     'qhonuskan_votes.views',

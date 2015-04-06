@@ -168,7 +168,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
-    'south',
+# South is not supported in Django >= 1.7
+#    'south',
     'django_extensions',
 
     # django debug toolbar
@@ -340,3 +341,6 @@ def show_toolbar(request):
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': 'mps.settings.show_toolbar'
 }
+
+# A test runner to run unit tests
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'

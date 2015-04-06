@@ -1,7 +1,14 @@
 from django.db import models
 from django.utils.translation import pgettext
 from django.utils.translation import ugettext_lazy as _
-from djangovoice.compat import User
+
+from django.conf import settings
+try:
+    from django.contrib.auth import get_user_model
+    User = settings.AUTH_USER_MODEL
+except ImportError:
+    from django.contrib.auth.models import User
+
 from qhonuskan_votes.models import VotesField
 from qhonuskan_votes.models import ObjectsWithScoresManager
 
@@ -16,7 +23,8 @@ class Status(models.Model):
     slug = models.SlugField(max_length=500)
     default = models.BooleanField(
         blank=True,
-        help_text=_("New feedback will have this status"))
+        help_text=_("New feedback will have this status"),
+        default=False)
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0])
 
@@ -58,12 +66,14 @@ class Feedback(models.Model):
     type = models.ForeignKey(Type, verbose_name=_("Type"))
     anonymous = models.BooleanField(
         blank=True, verbose_name=_("Anonymous"),
-        help_text=_("Do not show who sent this"))
+        help_text=_("Do not show who sent this"),
+        default=False)
     private = models.BooleanField(
         verbose_name=_("Private"), blank=True,
         help_text=_(
             "Hide from public pages. Only site administrators will be able to "
-            "view and respond to this"))
+            "view and respond to this"),
+        default=False)
     user = models.ForeignKey(
         User, blank=True, null=True, verbose_name=_("User"))
     email = models.EmailField(
