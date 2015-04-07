@@ -6,7 +6,7 @@
     <div style="padding-bottom: 50px">
         <h2 align="center">Setups</h2>
 
-        <table id="setups" class="display" cellspacing="0" width="100%">
+        <table hidden id="setups" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Chip Setup ID / Barcode</th>
@@ -67,11 +67,9 @@
             $('#setups').DataTable( {
                 "iDisplayLength": 50
             });
-
-            // Swap positions of filter and length selection
-            $('.dataTables_filter').css('float','left');
-            $('.dataTables_length').css('float','right');
         });
     </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}
 
