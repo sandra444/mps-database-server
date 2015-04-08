@@ -19,6 +19,7 @@
                     <th>Result Type</th>
                     <th>Severity</th>
                     <th>Creator</th>
+                    <th>Group</th>
                     <th>Flagged</th>
                 </tr>
             </thead>
@@ -35,6 +36,7 @@
                     <th>Result Type</th>
                     <th>Severity</th>
                     <th>Creator</th>
+                    <th>Group</th>
                     <th>Flagged</th>
                 </tr>
             </tfoot>
@@ -56,6 +58,7 @@
                     <td>{{ result.result_type }}</td>
                     <td>{{ result.get_severity_display }}</td>
                     <td>{{ result.assay_result.created_by }}</td>
+                    <td>{{ result.assay_result.group }}</td>
                     <td>
                         {% if result.assay_result.flagged %}
                             <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>

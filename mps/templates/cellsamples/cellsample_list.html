@@ -15,6 +15,7 @@
                     <th>Cell Type</th>
                     <th>Cell Source</th>
                     <th>Supplier</th>
+                    <th>Group</th>
                 </tr>
             </thead>
 
@@ -26,6 +27,7 @@
                     <th>Cell Type</th>
                     <th>Cell Source</th>
                     <th>Supplier</th>
+                    <th>Group</th>
                 </tr>
             </tfoot>
 
@@ -40,6 +42,7 @@
                     <td><a href="/cellsamples/celltype/{{ cellsample.cell_type.id }}">{{ cellsample.cell_type }}</a></td>
                     <td>{{ cellsample.cell_source }}</td>
                     <td>{{ cellsample.supplier }}</td>
+                    <td>{{ cellsample.group }}</td>
                 </tr>
             {% endfor %}
             </tbody>

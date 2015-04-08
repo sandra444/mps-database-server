@@ -15,6 +15,7 @@
                     <th>Readout Date</th>
                     <th>Scientist</th>
                     <th>Creator</th>
+                    <th>Group</th>
                     <th>Flagged</th>
 {#                    <th>Group</th>#}
                 </tr>
@@ -28,6 +29,7 @@
                     <th>Readout Date</th>
                     <th>Scientist</th>
                     <th>Creator</th>
+                    <th>Group</th>
                     <th>Flagged</th>
 {#                    <th>Group</th>#}
                 </tr>
@@ -50,6 +52,7 @@
                     {% endif %}
                     <td>{{ readout.scientist }}</td>
                     <td>{{ readout.created_by }}</td>
+                    <td>{{ readout.group }}</td>
                     <td>
                         {% if readout.flagged %}
                             <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
