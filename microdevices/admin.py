@@ -20,6 +20,7 @@ class MicrophysiologyCenterAdmin(LockableAdmin):
                     'description',
                     'contact_person',
                     'center_website',
+                    'groups',
                 )
             }
         ),

@@ -132,9 +132,8 @@ class AssayRunList(LoginRequiredMixin, ListView):
     model = AssayRun
 
     def get_queryset(self):
-        return AssayRun.objects.filter(restricted=False).prefetch_related('center_id',
-                                                                          'created_by') | AssayRun.objects.filter(
-            group__in=self.request.user.groups.all()).prefetch_related('center_id', 'created_by')
+        return AssayRun.objects.filter(restricted=False).prefetch_related('created_by') | AssayRun.objects.filter(
+            group__in=self.request.user.groups.all()).prefetch_related('created_by')
 
 
 class AssayRunAdd(OneGroupRequiredMixin, CreateView):

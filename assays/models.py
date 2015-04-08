@@ -451,8 +451,9 @@ class AssayRun(RestrictedModel):
         verbose_name_plural = 'Organ Chip Studies'
         ordering = ('assay_run_id', )
 
-    #help_text subject to change
-    center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center(s)')
+    # Removed center_id for now: this field is basically for admins anyway
+    # May add center_id back later, but group mostly serves the same purpose
+    # center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center(s)')
     # Study type now multiple boolean fields; May need to add more in the future
     toxicity = models.BooleanField(default=False)
     efficacy = models.BooleanField(default=False)
