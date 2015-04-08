@@ -12,6 +12,7 @@
                     <th>Compound</th>
                     <th>Event</th>
                     <th>Frequency</th>
+                    <th>Black Box Warning</th>
                 </tr>
             </thead>
 
@@ -20,15 +21,21 @@
                     <th>Compound</th>
                     <th>Event</th>
                     <th>Frequency</th>
+                    <th>Black Box Warning</th>
                 </tr>
             </tfoot>
 
             <tbody>
             {% for adverse_event in object_list %}
-                <tr class="adverse_event" id={{ adverse_event.id }} name={{ adverse_event }}>
+                <tr class="adverse_event" id={{ adverse_event.id }}>
                     <td><a href="{{ adverse_event.compound.id }}">{{ adverse_event.compound.compound }}</a></td>
-                    <td>{{ adverse_event.event }}</td>
+                    <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
                     <td>{{ adverse_event.frequency }}</td>
+                    <td>
+                        {% if adverse_event.compound.black_box %}
+                            <span title="This compound has a Black Box Warning" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>

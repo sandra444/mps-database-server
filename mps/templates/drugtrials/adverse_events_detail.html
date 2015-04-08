@@ -29,6 +29,18 @@
                     <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.compound.chemblid }}">{{ compound.compound.chemblid }}</a>
                 </div>
             </div>
+
+            {% if compound.compound.pubchemid %}
+                <div class="row">
+                    <div class="col-sm-4 lead text-right-responsive">
+                        <b>PubChem ID:</b>
+                    </div>
+                    <div class="col-sm-8 lead">
+                        <a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ compound.compound.pubchemid }}">{{ compound.compound.pubchemid }}</a>
+                    </div>
+                </div>
+            {% endif %}
+
         </div>
 
         <div class="col-sm-3">
@@ -92,7 +104,7 @@
         <tbody>
         {% for adverse_event in events %}
             <tr>
-                <td>{{ adverse_event.event }}</td>
+                <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
                 <td>{{ adverse_event.frequency }}</td>
             </tr>
         {% endfor %}
