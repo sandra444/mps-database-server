@@ -40,7 +40,7 @@ def chembl_assay(chemblid):
 
         CHEMBL = ChEMBLdb()
 
-    data = CHEMBL.get_assay_by_chemblId(str(chemblid))['assay']
+    data = CHEMBL.get_assays_by_chemblId(str(chemblid))['assay']
 
     return {FIELDS[key]: value for key, value in data.items()
             if key in FIELDS}

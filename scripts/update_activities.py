@@ -69,66 +69,72 @@ def run(days=180):
             except BioServicesError:
                 continue
 
-            for act in acts['bioactivities']:
-                act = {FIELDS[key]: value for key, value in act.items()
-                        if key in FIELDS}
+            try:
+                for act in acts['bioactivities']:
+                    act = {FIELDS[key]: value for key, value in act.items()
+                            if key in FIELDS}
 
-                tid, aid, cid, pid = (act['target'], act['assay'],
-                    act['compound'], act['parent_compound'])
-                try:
-                    parent = Compound.objects.get(chemblid=pid)
-                except Compound.DoesNotExist:
+                    tid, aid, cid, pid = (act['target'], act['assay'],
+                        act['compound'], act['parent_compound'])
                     try:
-                        parent = Compound.objects.create(locked=True, **chembl_compound(pid))
-                    except ValueError:
-                        error += 1
-                        continue
-
-                try:
-                    target = Target.objects.get(chemblid=tid)
-                except Target.DoesNotExist:
-                    try:
-                        target = Target.objects.create(locked=True, **chembl_target(tid))
-                    except ValueError:
-                        error += 1
-                        continue
-
-                try:
-                    assay = Assay.objects.get(chemblid=aid)
-                except Assay.DoesNotExist:
-                    try:
-                        assay = Assay.objects.create(locked=True, **chembl_assay(aid))
-                    except ValueError:
-                        error += 1
-                        continue
-
-                try:
-                    activity = Bioactivity.objects.get(
-                        target=target, assay=assay, compound=compound)
-                except Bioactivity.DoesNotExist:
-
-                    (act['target'], act['assay'], act['compound'],
-                        act['parent_compound']) = (
-                        target, assay, compound, parent)
+                        parent = Compound.objects.get(chemblid=pid)
+                    except Compound.DoesNotExist:
+                        try:
+                            parent = Compound.objects.create(locked=True, **chembl_compound(pid))
+                        except ValueError:
+                            error += 1
+                            continue
 
                     try:
-                        ba = Bioactivity.objects.create(locked=True, **act)
-                    except ValueError:
-                        error += 1
-                    except Exception as err:
-                        for key, val in act.items():
-                            if isinstance(val, str):
-                                print('{}: ({}) {}'.format(key, len(val), val))
-                        raise err
+                        target = Target.objects.get(chemblid=tid)
+                    except Target.DoesNotExist:
+                        try:
+                            target = Target.objects.create(locked=True, **chembl_target(tid))
+                        except ValueError:
+                            error += 1
+                            continue
+
+                    try:
+                        assay = Assay.objects.get(chemblid=aid)
+                    except Assay.DoesNotExist:
+                        try:
+                            assay = Assay.objects.create(locked=True, **chembl_assay(aid))
+                        except ValueError:
+                            error += 1
+                            continue
+
+                    try:
+                        activity = Bioactivity.objects.get(
+                            target=target, assay=assay, compound=compound)
+                    except Bioactivity.DoesNotExist:
+
+                        (act['target'], act['assay'], act['compound'],
+                            act['parent_compound']) = (
+                            target, assay, compound, parent)
+
+                        try:
+                            ba = Bioactivity.objects.create(locked=True, **act)
+                        except ValueError:
+                            error += 1
+                        except Exception as err:
+                            for key, val in act.items():
+                                if isinstance(val, str):
+                                    print('{}: ({}) {}'.format(key, len(val), val))
+                            raise err
+                        else:
+                            count += 1
                     else:
-                        count += 1
-                else:
-                    skip += 1
+                        skip += 1
+            except:
+                print "An error occured:", compound.name, acts
+
             compound.last_update = datetime.date.today()
             compound.save()
 
     print('{} bioactivities were added, {} were found in the database, and '
           '{} failed due to value errors.'.format(count, skip, error))
 
-run(0)
+# Why is this call for run even in here?
+# Run is called when you use ./manage.py runscript, so this means that it is ran twice!
+#run(0)
 
