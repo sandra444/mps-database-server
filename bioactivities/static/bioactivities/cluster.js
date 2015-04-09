@@ -288,14 +288,15 @@ $(document).ready(function () {
     }
 
     // Function to reset the rows after refresh
+    // PLEASE BE CERTAIN TO ESCAPE CHARACTERS LIKE ' (for prime)
     function reset_rows(name,list,add) {
         // Clear current
         $('#' + name).html('');
         // Add from list
         for (var i in list) {
             // Note added 'c' to avoid confusion with graphic
-            var row = "<tr id='" + add + list[i].name.replace(/ /g,"_") + "'>";
-            row += "<td>" + "<input type='checkbox' value='" + list[i].name + "'></td>";
+            var row = "<tr id='" + add + list[i].name.replace(/ /g,"_").replace(/'/g,"&#39;") + "'>";
+            row += "<td>" + "<input type='checkbox' value='" + list[i].name.replace(/'/g,"&#39;") + "'></td>";
             row += "<td>" + list[i].name + "</td>";
             $('#' + name).append( row );
         }
