@@ -38,7 +38,8 @@ $(document).ready(function () {
 
             for (var i=0; i<limit; i++) {
                 html += "<tr>";
-                html += '<td>' + results[i].term + '</td><td>' + results[i].count + '</td>';
+                html += '<td><a href="https://en.wikipedia.org/wiki/' + results[i].term.toLowerCase() + '">' + results[i].term + '</a></td>';
+                html += '<td>' + results[i].count + '</td>';
                 html += '</tr>';
             }
 
