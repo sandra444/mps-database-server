@@ -81,6 +81,7 @@ def run(days=180):
                     except Compound.DoesNotExist:
                         try:
                             parent = Compound.objects.create(locked=True, **chembl_compound(pid))
+                            print "Added Compound:", parent.name
                         except ValueError:
                             error += 1
                             continue
@@ -134,7 +135,7 @@ def run(days=180):
     print('{} bioactivities were added, {} were found in the database, and '
           '{} failed due to value errors.'.format(count, skip, error))
 
-# Why is this call for run even in here?
-# Run is called when you use ./manage.py runscript, so this means that it is ran twice!
+# A second run is useful to catch newly added compounds,
+# but just calling run is somewhat inefficient (it would run through every compound again)
 #run(0)
 
