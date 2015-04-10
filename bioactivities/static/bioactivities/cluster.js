@@ -64,7 +64,8 @@ $(document).ready(function () {
             .enter().append("g")
             .attr("class", "node")
             .attr("id", function (d) {
-                return d.name.replace(/\s/g, "");
+                // Note removed characters
+                return d.name.replace(/\s/g, "").replace(/[',()\[\]]/g,'');
             })
             .attr("transform", function (d) {
                 return "translate(" + d.y + "," + d.x + ")";
@@ -76,7 +77,7 @@ $(document).ready(function () {
         node.on("mouseover", function (d) {
             var recurse = function(node) {
                 // Change the class to selected node
-                $('#'+node.name.replace(/\s/g, "")).attr('class', 'node-s');
+                $('#'+node.name.replace(/\s/g, "").replace(/[',()\[\]]/g,'')).attr('class', 'node-s');
 
                 // Stop at leaves
                 if (!node.children) {
