@@ -2,25 +2,13 @@
 {% load staticfiles %}
 
 {% block load %}
+<link href="{% static "bioactivities/cluster_style.css" %}" rel="stylesheet" type="text/css">
+<script src="{% static "bioactivities/filter.js" %}"></script>
 <script src="{% static "bioactivities/cluster.js" %}"></script>
 <script src="{% static "js/spin.min.js" %}"></script>
 {% endblock %}
 
 {% block content %}
-
-    <script>
-        $(':input[type=number]').on('mousewheel', function (e) {
-            e.preventDefault();
-        });
-    </script>
-
-    <style>
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-    </style>
 
     {% block error %}
         <div class="row">
@@ -332,38 +320,6 @@
     </div>
 
     {% block graphic %}
-        <style>
-        @-ms-viewport {
-          width: device-width;
-        }
-
-        .node circle {
-          fill: #fff;
-          stroke: steelblue;
-          stroke-width: 1.5px;
-        }
-
-        .node {
-          font: 10px sans-serif;
-        }
-
-        .node-s circle {
-          fill: steelblue;
-          stroke: #fff;
-          stroke-width: 2px;
-        }
-
-        .node-s {
-          font: 10px serif;
-          font-weight: bold;
-        }
-
-        .link {
-          fill: none;
-          stroke: #ccc;
-          stroke-width: 1.5px;
-        }
-        </style>
 
         <div hidden id="graphic">
             <div class="row text-center">
@@ -381,8 +337,7 @@
             <div id="cluster" class="col-xs-6">
             </div>
             <div class="col-xs-3">
-                {# Magic number height of 600 in style #}
-                <div id="compound" class="affix pre-scrollable" style="max-height:600px; height:600px"></div>
+                <div id="compound" class="affix pre-scrollable"></div>
             </div>
         </div>
 
