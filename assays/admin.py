@@ -1496,7 +1496,7 @@ class StudyModelInline(admin.TabularInline):
     verbose_name = 'Study Model'
     fields = (
         (
-            'organ', 'sequence_number', 'integration_mode',
+            'label', 'organ', 'sequence_number', 'output', 'integration_mode',
         ),
     )
     extra = 1

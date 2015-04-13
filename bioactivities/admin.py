@@ -393,6 +393,8 @@ class PubChemBioactivityAdmin(LockableAdmin):
     search_fields = ['compound__name', 'activity_name', 'assay_name', 'target', 'assay_id', 'source']
     list_filter = ['compound', ]
 
+    raw_id_fields = ("target",)
+
     save_on_top = True
     list_per_page = 50
 
