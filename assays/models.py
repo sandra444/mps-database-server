@@ -358,9 +358,7 @@ class AssayResult(models.Model):
     assay_name = models.ForeignKey('assays.AssayChipReadoutAssay',
                                    verbose_name='Assay')
 
-    assay_result = models.ForeignKey(AssayTestResult,
-                                     blank=True,
-                                     null=True)
+    assay_result = models.ForeignKey(AssayTestResult)
 
     result_function = models.ForeignKey(AssayResultFunction,
                                         blank=True,
