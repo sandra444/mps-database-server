@@ -6,7 +6,7 @@
     <div style="padding-bottom: 50px">
         <h2 align="center">Cell Samples <a href="/cellsamples/cellsample/add/" class="btn btn-success" role="button">Add Cell Sample</a></h2>
 
-        <table id="cellsamples" class="display" cellspacing="0" width="100%">
+        <table hidden id="cellsamples" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>ID #</th>
@@ -15,6 +15,7 @@
                     <th>Cell Type</th>
                     <th>Cell Source</th>
                     <th>Supplier</th>
+                    <th>Group</th>
                 </tr>
             </thead>
 
@@ -26,6 +27,7 @@
                     <th>Cell Type</th>
                     <th>Cell Source</th>
                     <th>Supplier</th>
+                    <th>Group</th>
                 </tr>
             </tfoot>
 
@@ -40,6 +42,7 @@
                     <td><a href="/cellsamples/celltype/{{ cellsample.cell_type.id }}">{{ cellsample.cell_type }}</a></td>
                     <td>{{ cellsample.cell_source }}</td>
                     <td>{{ cellsample.supplier }}</td>
+                    <td>{{ cellsample.group }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -55,10 +58,8 @@
                 // If one wants to display top and bottom
                 //"sDom": '<"wrapper"lfptip>'
             });
-
-            // Swap positions of filter and length selection
-            $('.dataTables_filter').css('float','left');
-            $('.dataTables_length').css('float','right');
         });
     </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

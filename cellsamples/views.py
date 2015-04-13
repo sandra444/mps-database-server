@@ -57,6 +57,7 @@ class CellSampleUpdate(ObjectGroupRequiredMixin, UpdateView):
             ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
         context = super(CellSampleUpdate, self).get_context_data(**kwargs)
         context['groups'] = groups
+        context['update'] = True
         return context
 
     # Test form validity
@@ -118,6 +119,11 @@ class CellTypeUpdate(OneGroupRequiredMixin, UpdateView):
     model = CellType
     template_name = 'cellsamples/celltype_add.html'
     form_class = CellTypeForm
+
+    def get_context_data(self, **kwargs):
+        context = super(CellTypeUpdate, self).get_context_data(**kwargs)
+        context['update'] = True
+        return context
 
     # Test form validity
     def form_valid(self, form):

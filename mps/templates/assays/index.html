@@ -6,7 +6,7 @@
     <div style="padding-bottom: 50px">
         <legend><h1>{{ title }}    <a href="/assays/organchipstudy/add{{ setup_only }}" class="btn btn-success" role="button">Add Study</a></h1></legend>
 
-        <table id="studies" class="display" cellspacing="0" width="100%">
+        <table hidden id="studies" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Study ID</th>
@@ -14,6 +14,7 @@
                     <th>Start Date</th>
                     <th>Description</th>
                     <th>Creator</th>
+                    <th>Group</th>
                 </tr>
             </thead>
 
@@ -24,6 +25,7 @@
                     <th>Start Date</th>
                     <th>Description</th>
                     <th>Creator</th>
+                    <th>Group</th>
                 </tr>
             </tfoot>
 
@@ -35,6 +37,7 @@
                     <td>{{ study.start_date }}</td>
                     <td>{{ study.description }}</td>
                     <td>{{ study.created_by }}</td>
+                    <td>{{ study.group }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -48,10 +51,8 @@
                 // Initially sort on start date (descending), not ID
                 "order": [ 2, "desc" ]
             });
-
-            // Swap positions of filter and length selection
-            $('.dataTables_filter').css('float','left');
-            $('.dataTables_length').css('float','right');
         });
     </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

@@ -47,20 +47,25 @@ def chembl_compound(chemblid):
 class Compound(LockableModel):
 
     #compound_id = AutoField(primary_key=True)
-    name = models.CharField(max_length=200,
+    # The name, rather than the chemblid and/or inchikey, is unique
+    name = models.CharField(max_length=200, unique=True,
         help_text="Preferred compound name.")
     synonyms = models.TextField(max_length=4000,
         null=True, blank=True)
 
     # external identifiers, not unique because does go with null on SQL server
     chemblid = models.CharField('ChEMBL ID', max_length=20,
-        null=True, blank=True, unique=True,
+        null=True, blank=True,
         help_text="Enter a ChEMBL id, e.g. CHEMBL25, and click Retrieve to "
                   "get compound information automatically.")
 
+    # Pubchem ID
+    pubchemid = models.CharField(verbose_name='PubChem ID', max_length=40, null=True, blank=True)
+
     # standard names/identifiers
+    # Making this field unique causes issues if no InChI key can be found
     inchikey = models.CharField('InChI key', max_length=27,
-        null=True, blank=True, unique=True,
+        null=True, blank=True,
         help_text="IUPAC standard InChI key for the compound")
     smiles = models.CharField(max_length=1000,
         null=True, blank=True,

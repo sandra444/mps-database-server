@@ -1072,8 +1072,10 @@ def table(request):
     # Filter based on standardized bioactivity name
     q = q.filter(standard_name__in=desired_bioactivities)
 
+    length = len(q)
+
     # Prefetch all foreign keys
-    q = q.prefetch_related('assay', 'compound', 'parent_compound', 'target', 'created_by')
+    q = q.prefetch_related('assay', 'compound', 'parent_compound', 'target', 'created_by')[:5000]
 
     data = []
 
@@ -1100,7 +1102,7 @@ def table(request):
     # write out our data lists into csv format
     data_csv_writer.writerow(['Compound','Target','Organism','Standard Name','Operator','Standard Value', 'Standard Units', 'ChEMBL ID'])
 
-    for bioactivity in q[:5000]:
+    for bioactivity in q:
 
         id = bioactivity.pk
         compound = bioactivity.compound.name
@@ -1140,8 +1142,6 @@ def table(request):
     data_csv_relpath = table_url_prefix + os.path.basename(
         data_csv_fullpath
     )
-
-    length = len(q)
 
     return {
         # json data

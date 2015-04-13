@@ -32,6 +32,17 @@
                 </div>
             </div>
 
+            {% if object.pubchemid %}
+                <div class="row">
+                    <div class="col-sm-3 lead text-right-responsive">
+                        <b>PubChem ID:</b>
+                    </div>
+                    <div class="col-sm-9 lead">
+                        <a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ object.pubchemid }}">{{ object.pubchemid }}</a>
+                    </div>
+                </div>
+            {% endif %}
+
             <div class="row">
                 <div class="col-sm-3 lead text-right-responsive">
                     <b>InChI Key:</b>
@@ -45,7 +56,7 @@
                 <div class="col-sm-3 lead text-right-responsive">
                     <b>Molecular Formula:</b>
                 </div>
-                <div class="col-sm-9 lead">
+                <div class="col-sm-9">
                     {{ object.molecular_formula }}
                 </div>
             </div>
@@ -54,7 +65,7 @@
                 <div class="col-sm-3 lead text-right-responsive">
                     <b>Smiles:</b>
                 </div>
-                <div class="col-sm-9 lead">
+                <div class="col-sm-9">
                     {{ object.smiles }}
                 </div>
             </div>
@@ -82,18 +93,22 @@
 {##}
 {#    </div>#}
 
-    <legend>Synonyms
-        <button class="btn btn-info" type="button" data-toggle="collapse"
-                data-target="#synonyms" aria-expanded="false" aria-controls="synonyms">
-            Show
-        </button>
-    </legend>
+    {% if object.synonyms %}
+        <legend>Synonyms
+            <button class="btn btn-info" type="button" data-toggle="collapse"
+                    data-target="#synonyms" aria-expanded="false" aria-controls="synonyms">
+                Show
+            </button>
+        </legend>
 
-    <div id='synonyms' class="collapse lead">
-
-        <p>{{ object.synonyms }}</p>
-
-    </div>
+        <div id='synonyms' class="row collapse">
+            <blockquote>
+                <p>
+                    {{ object.synonyms }}
+                </p>
+            </blockquote>
+        </div>
+    {% endif %}
 
     <legend>Drug/Drug-like Properties</legend>
 
@@ -105,9 +120,9 @@
             </div>
             <div class="col-sm-1 lead">
                 {% if object.known_drug %}
-                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                 {% else %}
-                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
                 {% endif %}
             </div>
 
@@ -116,9 +131,9 @@
             </div>
             <div class="col-sm-1 lead">
                 {% if object.medchem_friendly %}
-                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                 {% else %}
-                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
                 {% endif %}
             </div>
 
@@ -127,16 +142,16 @@
             </div>
             <div class="col-sm-1 lead">
                 {% if object.ro3_passes %}
-                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                 {% else %}
-                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
                 {% endif %}
             </div>
 
             <div class="col-sm-2 lead text-right-responsive">
                 <b>Rule of 5 Violations:</b>
             </div>
-            <div class="col-sm-1 lead">
+            <div class="col-sm-1 lead text-danger">
                 {{ object.ro5_violations }}
             </div>
         </div>

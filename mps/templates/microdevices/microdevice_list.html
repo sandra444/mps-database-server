@@ -7,7 +7,7 @@
 
         <legend><h2>Organ Models</h2></legend>
 
-        <table id="models" class="display" cellspacing="0" width="100%">
+        <table hidden id="models" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Organ</th>
@@ -43,7 +43,7 @@
 
         <legend><h2>Microdevices</h2></legend>
 
-        <table id="microdevices" class="display" cellspacing="0" width="100%">
+        <table hidden id="microdevices" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Device Name</th>
@@ -82,13 +82,15 @@
     <script>
         $(document).ready(function() {
             $('#microdevices').DataTable({
-                "iDisplayLength": 100,
+                "iDisplayLength": 200,
                 "sDom": '<"wrapper"t>'
             });
             $('#models').DataTable({
-                "iDisplayLength": 100,
+                "iDisplayLength": 200,
                 "sDom": '<"wrapper"t>'
             });
         });
     </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

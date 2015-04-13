@@ -6,14 +6,16 @@
     <div style="padding-bottom: 50px">
         <h2 align="center">Studies</h2>
 
-        <table id="studies" class="display" cellspacing="0" width="100%">
+        <table hidden id="studies" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Study ID</th>
                     <th>Study Types</th>
+                    <th>Study Configuration</th>
                     <th>Start Date</th>
                     <th>Description</th>
                     <th>Creator</th>
+                    <th>Group</th>
                 </tr>
             </thead>
 
@@ -21,9 +23,11 @@
                 <tr>
                     <th>Study ID</th>
                     <th>Study Types</th>
+                    <th>Study Configuration</th>
                     <th>Start Date</th>
                     <th>Description</th>
                     <th>Creator</th>
+                    <th>Group</th>
                 </tr>
             </tfoot>
 
@@ -32,9 +36,11 @@
                 <tr class="compound" id={{ study.id }} name={{ study.id }}>
                     <td><a href="{{ study.id }}">{{ study.assay_run_id }}</a></td>
                     <td>{{ study.study_types }}</td>
+                    <td>{{ study.study_configuration }}</td>
                     <td>{{ study.start_date }}</td>
                     <td>{{ study.description }}</td>
                     <td>{{ study.created_by }}</td>
+                    <td>{{ study.group }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -46,12 +52,10 @@
             $('#studies').DataTable( {
                 "iDisplayLength": 50,
                 // Initially sort on start date (descending), not ID
-                "order": [ 2, "desc" ]
+                "order": [ 3, "desc" ]
             });
-
-            // Swap positions of filter and length selection
-            $('.dataTables_filter').css('float','left');
-            $('.dataTables_length').css('float','right');
         });
     </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

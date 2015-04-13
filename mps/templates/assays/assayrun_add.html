@@ -19,11 +19,15 @@
     });
 </script>
 
-<form enctype="multipart/form-data" class="form-horizontal" method="post" >
+{% if update %}
+    <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post" >
+{% else %}
+    <form enctype="multipart/form-data" class="form-horizontal" method="post" >
+{% endif %}
     {% csrf_token %}
     {{ formset.management_form }}
     <h1>
-        Organ Chip Study
+        Study
 
         <button id="submit" type="submit" class="btn btn-primary">Submit</button>
 
@@ -32,31 +36,28 @@
         {% endif %}
     </h1>
 
-    <legend>Organ Chip Study Details</legend>
-{#    <p>Center Name: {{ form.center_id }}</p>#}
-{#    <p>Toxicity: {{ form.toxicity }} Disease: {{ form.disease }} Efficacy: {{ form.efficacy }}</p>#}
-{#    <p>Study Name: {{ form.name }}</p>#}
-{#    <p>Start Date: {{ form.start_date }}</p>#}
-{#    <p>Organ Chip Study ID: {{ form.assay_run_id }}</p>#}
-{#    <p>Description: {{ form.description }}</p>#}
+    <legend>Study Details</legend>
 
-
-{#    {% if form.errors %}#}
-{#        {% for field in form %}#}
-{#            {% if field.errors %}#}
-{#                {% for error in field.errors %}#}
-{#                    <div class="alert alert-danger" role="alert">#}
-{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
-{#                        <span class="sr-only">Error:</span>#}
-{#                        {{field.label}}: {{error}}#}
-{#                    </div>#}
-{#                {% endfor %}#}
-{#            {% endif %}#}
+{#    {% if form.center_id.errors %}#}
+{#        {% for error in form.center_id.errors %}#}
+{#            <div class="alert alert-danger" role="alert">#}
+{#                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                <span class="sr-only">Error:</span>#}
+{#                {{error}}#}
+{#            </div>#}
 {#        {% endfor %}#}
+{#    <div class="form-group has-error">#}
+{#    {% else %}#}
+{#    <div class="form-group">#}
 {#    {% endif %}#}
+{#        <label for="center_id" class="col-sm-2 control-label">Center(s)*</label>#}
+{#        <div class="col-sm-10">#}
+{#          {{ form.center_id }}#}
+{#        </div>#}
+{#    </div>#}
 
-    {% if form.center_id.errors %}
-        {% for error in form.center_id.errors %}
+    {% if form.group.errors %}
+        {% for error in form.group.errors %}
             <div class="alert alert-danger" role="alert">
                 <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                 <span class="sr-only">Error:</span>
@@ -67,9 +68,22 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="center_id" class="col-sm-2 control-label">Center Name*</label>
+        <label for="group" class="col-sm-2 control-label">Group*</label>
         <div class="col-sm-10">
-          {{ form.center_id }}
+          <select id="id_group" name="group">
+            {% if groups|length > 1 %}
+                <option value="">---------</option>
+            {% endif %}
+            {% for group in groups %}
+              {# It is necessary to coerce the forms value into an integer for this compare #}
+              {% if group.id|add:"0" == form.group.value|add:"0" %}
+                <option value={{ group.id }} selected>{{ group.name }}</option>
+              {% else %}
+                <option value={{ group.id }}>{{ group.name }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+          <span id="center_name"></span>
         </div>
     </div>
 
@@ -93,6 +107,24 @@
               {{ form.disease }}
             <label for="efficacy" style="padding-left: 20px;padding-right: 10px;">Cell Characterization</label>
               {{ form.cell_characterization }}
+        </div>
+    </div>
+
+    {% if form.study_configuration.errors %}
+        {% for error in form.study_configuration.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="study_configuration" class="col-sm-2 control-label">Study Configuration*</label>
+        <div class="col-sm-10">
+          {{ form.study_configuration }}
         </div>
     </div>
 
@@ -144,7 +176,7 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="assay_run_id" class="col-sm-2 control-label">Organ Chip Study ID</label>
+        <label for="assay_run_id" class="col-sm-2 control-label">Study ID</label>
         <div class="col-sm-10">
           {{ form.assay_run_id }}
         </div>
@@ -157,41 +189,6 @@
         </div>
     </div>
 
-    {% if form.group.errors %}
-        {% for error in form.group.errors %}
-            <div class="alert alert-danger" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Error:</span>
-                {{error}}
-            </div>
-        {% endfor %}
-    <div class="form-group has-error">
-    {% else %}
-    <div class="form-group">
-    {% endif %}
-        <label for="group" class="col-sm-2 control-label">Group*</label>
-        <div class="col-sm-10">
-          <select id="id_group" name="group">
-            <option value="">---------</option>
-            {% for group in groups %}
-              {# It is necessary to coerce the forms value into an integer for this compare #}
-              {% if group.id|add:"0" == form.group.value|add:"0" %}
-                <option value={{ group.id }} selected>{{ group.name }}</option>
-              {% else %}
-                <option value={{ group.id }}>{{ group.name }}</option>
-              {% endif %}
-            {% endfor %}
-          </select>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label for="restricted" class="col-sm-2 control-label">Restrict Access to Just This Group</label>
-        <div class="col-sm-10">
-          {{ form.restricted }}
-        </div>
-    </div>
-
 {#    <legend>Bulk Import</legend>#}
 {#    <div class="form-group">#}
 {#        <label for="file" class="col-sm-2 control-label">File</label>#}
@@ -199,6 +196,13 @@
 {#          {{ form.file }}#}
 {#        </div>#}
 {#    </div>#}
+
+    <div class="form-group">
+        <label for="restricted" class="col-sm-2 control-label">Restrict Access</label>
+        <div class="col-sm-10">
+          {{ form.restricted }}
+        </div>
+    </div>
 </form>
 
 {% endblock %}

@@ -6,7 +6,7 @@
     <div style="padding-bottom: 50px">
         <h2 align="center">Cell Types <a href="/cellsamples/celltype/add/" class="btn btn-success" role="button">Add Cell Type</a></h2>
 
-        <table id="celltypes" class="display" cellspacing="0" width="100%">
+        <table hidden id="celltypes" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Organ</th>
@@ -47,10 +47,8 @@
                 // If one wants to display top and bottom
                 //"sDom": '<"wrapper"lfptip>'
             });
-
-            // Swap positions of filter and length selection
-            $('.dataTables_filter').css('float','left');
-            $('.dataTables_length').css('float','right');
         });
     </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

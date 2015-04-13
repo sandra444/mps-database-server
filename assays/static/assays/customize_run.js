@@ -11,7 +11,7 @@ $(document).ready(function () {
     }
 
     function get_center_id() {
-        if (center.val()) {
+        if (group.val()) {
             $.ajax({
                 url: "/assays_ajax",
                 type: "POST",
@@ -22,13 +22,14 @@ $(document).ready(function () {
 
                     // First token is the var name within views.py
                     // Second token is the var name in this JS file
-                    id: center.val(),
+                    id: group.val(),
 
                     // Always pass the CSRF middleware token with every AJAX call
                     csrfmiddlewaretoken: middleware_token
                 },
                 success: function (json) {
                     data[0] = json.center_id;
+                    $('#center_name').html(json.center_name);
                     set_data();
                 },
                 error: function (xhr, errmsg, err) {
@@ -87,7 +88,7 @@ $(document).ready(function () {
     var fills = ['TOX','EFF','DM','CC'];
 
     var date = $('#id_start_date');
-    var center = $('#id_center_id');
+    var group = $('#id_group');
     var name = $('#id_name');
 
     //Need to have condition for adding vs. changing data
@@ -97,7 +98,7 @@ $(document).ready(function () {
     data[3] = name.val();
 
     //Needs an AJAX call to get centerID
-    center.change(function (evt) {
+    group.change(function (evt) {
         get_center_id();
     });
 

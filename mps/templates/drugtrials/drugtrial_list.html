@@ -6,7 +6,7 @@
     <div style="padding-bottom: 50px">
         <h2 align="center">Drug Trials</h2>
 
-        <table id="drugtrials" class="display" cellspacing="0" width="100%">
+        <table hidden id="drugtrials" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Drug Trial ID</th>
@@ -100,10 +100,8 @@
                     "targets": 7
                 }]
             });
-
-            // Swap positions of filter and length selection
-            $('.dataTables_filter').css('float','left');
-            $('.dataTables_length').css('float','right');
         });
     </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

@@ -15,6 +15,7 @@ class AssayForm(forms.ModelForm):
             'strain': forms.Textarea(attrs={'rows': 1}),
             'journal': forms.Textarea(attrs={'rows': 1}),
         }
+        exclude = ('',)
 
 
 class TargetsForm(forms.ModelForm):
@@ -32,3 +33,4 @@ class TargetsForm(forms.ModelForm):
             'uniprot_accession': forms.Textarea(attrs={'rows': 1}),
             'target_type': forms.Textarea(attrs={'rows': 1}),
         }
+        exclude = ('',)

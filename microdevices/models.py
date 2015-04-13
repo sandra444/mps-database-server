@@ -1,6 +1,7 @@
 # coding=utf-8
 
 from django.db import models
+from django.contrib.auth.models import Group
 
 from mps.base.models import LockableModel
 
@@ -13,6 +14,8 @@ class MicrophysiologyCenter(LockableModel):
     description = models.CharField(max_length=400, blank=True, null=True)
     contact_person = models.CharField(max_length=250, blank=True, null=True)
     center_website = models.URLField(blank=True, null=True)
+
+    groups = models.ManyToManyField(Group)
 
     def __unicode__(self):
         return self.center_name
@@ -79,11 +82,16 @@ class OrganModel(LockableModel):
     device = models.ForeignKey(Microdevice, null=True, blank=True)
     description = models.CharField(max_length=400, null=True, blank=True)
 
+    protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
+                            blank=True, null=True, help_text='File detailing the protocols for this model')
+
     def __unicode__(self):
 
         return self.model_name
 
-
+# It is somewhat odd that ValidatedAssays are inlines in lieu of a manytomany field
+# This was done originally so that additional fields could be added to a validated assay
+# If no new fields become apparent, it may be worthwhile to do away with inlines and move to M2M
 class ValidatedAssay(models.Model):
     # Validated assays for an organ model used in inline
     organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model')

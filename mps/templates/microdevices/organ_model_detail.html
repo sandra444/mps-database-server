@@ -46,6 +46,12 @@
     </div>
     {% endif %}
 
+    {% if model.protocol %}
+        <legend><b>Protocol File</b></legend>
+        <a class="lead" href="/media/{{ model.protocol }}">Click here to view/download protocols</a>
+        <br><br>
+    {% endif %}
+
     {% if assays %}
     <legend><b>Validated Assays</b></legend>
 

@@ -40,7 +40,7 @@ def chembl_assay(chemblid):
 
         CHEMBL = ChEMBLdb()
 
-    data = CHEMBL.get_assay_by_chemblId(str(chemblid))['assay']
+    data = CHEMBL.get_assays_by_chemblId(str(chemblid))['assay']
 
     return {FIELDS[key]: value for key, value in data.items()
             if key in FIELDS}
@@ -196,3 +196,53 @@ class BioactivityType(LockableModel):
     def __unicode__(self):
         return unicode(self.standard_name)
 
+
+class PubChemBioactivity(LockableModel):
+    # TextFields and CharFields have no performace benefits over eachother, but may want to use CharFields for clarity
+    assay_id = models.TextField(verbose_name="Assay ID")
+
+    # It makes sense just to add the PubChem CID to the compound then just use a FK
+    #compound_id = models.TextField(verbose_name="Compound ID")
+    compound = models.ForeignKey('compounds.Compound')
+
+    # May eventually make a table for PubChem targets
+    # In such an instance, change this to a FK
+    target = models.ForeignKey('PubChemTarget', default=None, verbose_name="Target", null=True, blank=True)
+
+    # Value is required
+    value = models.FloatField(verbose_name="Value (uM)")
+
+    # Source is an optional field showing where PubChem pulled their data
+    source = models.TextField(default='', blank=True, null=True)
+
+    # Not required?
+    # TODO Consider making this a FK to bioactivity types
+    # TODO Or, perhaps we should make another table for PubChem types?
+    activity_name = models.TextField(default='', verbose_name="Activity Name")
+
+    # Not required?
+    assay_name = models.TextField(default='', verbose_name="Assay Name", null=True, blank=True)
+
+
+# TODO PubChem Bioactivity Type? and PubChem targets
+# To following table may eventually be merged into the existing bioactivty type table
+# Deliberating, is it really worthwhile to make a model with only one field?
+#class PubChemBioactivityType(LockableModel):
+#    name = models.TextField(default='')
+
+
+# Apparently all PubChem targets are Single Proteins (or at least. point to a specific gene)
+class PubChemTarget(LockableModel):
+    name = models.TextField(default='', help_text="Preferred target name.")
+
+    # Species will likely be useful to have
+    organism = models.TextField(default='')
+
+    # May be difficult to acquire
+    #synonyms = models.TextField(null=True, blank=True)
+
+    # The GI is what is given by a PubChem assay
+    GI = models.TextField('NCBI GI')
+
+    def __unicode__(self):
+        return unicode(self.name)

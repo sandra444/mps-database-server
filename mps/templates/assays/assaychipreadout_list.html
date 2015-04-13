@@ -6,7 +6,7 @@
     <div style="padding-bottom: 50px">
         <h2 align="center">Readouts</h2>
 
-        <table id="readouts" class="display" cellspacing="0" width="100%">
+        <table hidden id="readouts" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Chip Readout ID</th>
@@ -15,6 +15,8 @@
                     <th>Readout Date</th>
                     <th>Scientist</th>
                     <th>Creator</th>
+                    <th>Group</th>
+                    <th>Flagged</th>
 {#                    <th>Group</th>#}
                 </tr>
             </thead>
@@ -27,13 +29,15 @@
                     <th>Readout Date</th>
                     <th>Scientist</th>
                     <th>Creator</th>
+                    <th>Group</th>
+                    <th>Flagged</th>
 {#                    <th>Group</th>#}
                 </tr>
             </tfoot>
 
             <tbody>
             {% for readout in object_list %}
-                <tr class="compound" id={{ readout.id }} name={{ readout.id }}>
+                <tr class="readout" id={{ readout.id }} name={{ readout.id }}>
                     <td><a href="{{ readout.id }}">{{ readout.id }}</a></td>
                     <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}">{{ readout.chip_setup }}</a></td>
                     <td>
@@ -47,9 +51,13 @@
                         <td></td>
                     {% endif %}
                     <td>{{ readout.scientist }}</td>
-{#                    <td>{{ readout.readout_start_time }}</td>#}
                     <td>{{ readout.created_by }}</td>
-{#                    <td>{{ compound.group }}</td>#}
+                    <td>{{ readout.group }}</td>
+                    <td>
+                        {% if readout.flagged %}
+                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -63,10 +71,8 @@
                 // Initially sort on setup not arbitrary ID
                 "order": [[ 1, "asc" ]]
             });
-
-            // Swap positions of filter and length selection
-            $('.dataTables_filter').css('float','left');
-            $('.dataTables_length').css('float','right');
         });
     </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

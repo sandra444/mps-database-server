@@ -6,7 +6,7 @@
     <div style="padding-bottom: 50px">
         <h2 align="center">Results</h2>
 
-        <table id="results" class="display" cellspacing="0" width="100%">
+        <table hidden id="results" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Chip Test Results ID</th>
@@ -19,6 +19,8 @@
                     <th>Result Type</th>
                     <th>Severity</th>
                     <th>Creator</th>
+                    <th>Group</th>
+                    <th>Flagged</th>
                 </tr>
             </thead>
 
@@ -34,6 +36,8 @@
                     <th>Result Type</th>
                     <th>Severity</th>
                     <th>Creator</th>
+                    <th>Group</th>
+                    <th>Flagged</th>
                 </tr>
             </tfoot>
 
@@ -54,6 +58,12 @@
                     <td>{{ result.result_type }}</td>
                     <td>{{ result.get_severity_display }}</td>
                     <td>{{ result.assay_result.created_by }}</td>
+                    <td>{{ result.assay_result.group }}</td>
+                    <td>
+                        {% if result.assay_result.flagged %}
+                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
 {#            {% for result in object_list %}#}
@@ -84,12 +94,10 @@
             $('#results').DataTable( {
                 "iDisplayLength": 50,
                 // Initially sort on study not arbitrary ID
-                "order": [[ 1, "asc" ]]
+                "order": [ 1, "asc" ]
             });
-
-            // Swap positions of filter and length selection
-            $('.dataTables_filter').css('float','left');
-            $('.dataTables_length').css('float','right');
         });
     </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

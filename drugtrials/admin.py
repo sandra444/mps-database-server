@@ -9,6 +9,8 @@ from drugtrials.models import *
 from drugtrials.resource import *
 from forms import *
 
+from import_export.admin import ImportExportModelAdmin
+
 
 class URLFieldWidget(AdminURLFieldWidget):
     def render(self, name, value, attrs=None):
@@ -309,3 +311,45 @@ class FindingAdmin(LockableAdmin):
 
 
 admin.site.register(Finding, FindingAdmin)
+
+
+class AdverseEventAdmin(ImportExportModelAdmin):
+
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('event', 'organ')
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'event',
+                    'organ',
+                )
+            }
+        ),
+    )
+
+
+admin.site.register(AdverseEvent, AdverseEventAdmin)
+
+
+class OpenFDACompoundAdmin(ImportExportModelAdmin):
+
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('compound', 'black_box')
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    'compound',
+                    'black_box',
+                    'warnings',
+                    'nonclinical_toxicology',
+                )
+            }
+        ),
+    )
+
+
+admin.site.register(OpenFDACompound, OpenFDACompoundAdmin)

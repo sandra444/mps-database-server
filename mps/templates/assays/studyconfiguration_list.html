@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div style="padding-bottom: 50px">
+        <h2 align="center">Study Configurations <a href="/assays/studyconfiguration/add/" class="btn btn-success" role="button">Add Configuration</a></h2>
+
+        <table hidden id="studyconfigurations" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Study Format</th>
+                    <th>Media Composition</th>
+                    <th>Hardware Description</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Name</th>
+                    <th>Study Format</th>
+                    <th>Media Composition</th>
+                    <th>Hardware Description</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for configuration in object_list %}
+                <tr class="studyconfiguration" id={{ configuration.id }} name={{ configuration.name }}>
+                    <td><a href="{{ configuration.id }}">{{ configuration.name }}</a></td>
+                    <td>{{ configuration.study_format }}</td>
+                    <td>{{ configuration.media_composition }}</td>
+                    <td>{{ configuration.hardware_description }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#studyconfigurations').DataTable( {
+                "iDisplayLength": 50
+            });
+        });
+    </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}

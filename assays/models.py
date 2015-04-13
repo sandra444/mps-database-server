@@ -2,7 +2,7 @@
 
 from django.db import models
 from microdevices.models import Microdevice, OrganModel
-from mps.base.models import LockableModel, RestrictedModel
+from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
 
 PHYSICAL_UNIT_TYPES = (
     (u'V', u'Volume'),
@@ -298,7 +298,7 @@ class AssayResultType(LockableModel):
         return self.assay_result_type
 
 
-class AssayTestResult(RestrictedModel):
+class AssayTestResult(FlaggableModel):
 #   Results calculated from Raw Chip Data
     class Meta(object):
         verbose_name = 'Chip Result'
@@ -358,9 +358,7 @@ class AssayResult(models.Model):
     assay_name = models.ForeignKey('assays.AssayChipReadoutAssay',
                                    verbose_name='Assay')
 
-    assay_result = models.ForeignKey(AssayTestResult,
-                                     blank=True,
-                                     null=True)
+    assay_result = models.ForeignKey(AssayTestResult)
 
     result_function = models.ForeignKey(AssayResultFunction,
                                         blank=True,
@@ -420,23 +418,51 @@ class AssayPlateTestResult(LockableModel):
         return u''
 
 
+class StudyConfiguration(LockableModel):
+    # Length subject to change
+    name = models.CharField(max_length=50)
+    study_format = models.CharField(max_length=11, choices=(('individual','Individual'),('integrated','Integrated'),))
+    media_composition = models.CharField(max_length=1000, blank=True, null=True)
+    hardware_description = models.CharField(max_length=1000, blank=True, null=True)
+    # Subject to removal
+    # image = models.ImageField(upload_to="configuration",null=True, blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return "/assays/studyconfiguration/"
+
+class StudyModel(models.Model):
+    study_configuration = models.ForeignKey(StudyConfiguration)
+    label = models.CharField(max_length=1)
+    organ = models.ForeignKey(OrganModel)
+    sequence_number = models.IntegerField()
+    output = models.CharField(max_length=20, blank=True, null=True)
+    # Subject to change
+    integration_mode = models.CharField(max_length=13, choices=(('0', 'Not Connected'),('1','Connected')))
+
+
 class AssayRun(RestrictedModel):
     class Meta(object):
         verbose_name = 'Organ Chip Study'
         verbose_name_plural = 'Organ Chip Studies'
         ordering = ('assay_run_id', )
 
-    #help_text subject to change
-    center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center Name')
+    # Removed center_id for now: this field is basically for admins anyway
+    # May add center_id back later, but group mostly serves the same purpose
+    # center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center(s)')
     # Study type now multiple boolean fields; May need to add more in the future
     toxicity = models.BooleanField(default=False)
     efficacy = models.BooleanField(default=False)
     disease = models.BooleanField(default=False)
     cell_characterization = models.BooleanField(default=False)
+    # Subject to change
+    study_configuration = models.ForeignKey(StudyConfiguration, blank=True, null=True)
     name = models.TextField(default='Study-01',verbose_name='Study Name',
                             help_text='Name-###')
     start_date = models.DateField(help_text='YYYY-MM-DD')
-    assay_run_id = models.TextField(unique=True, verbose_name='Organ Chip Study ID',
+    assay_run_id = models.TextField(unique=True, verbose_name='Study ID',
                                     help_text="Standard format 'CenterID-YYYY-MM-DD-Name-###'")
     description = models.TextField(blank=True, null=True)
 
@@ -475,9 +501,7 @@ class AssayChipRawData(models.Model):
 
 class AssayChipCells(models.Model):
 #   Individual cell parameters for CHIP setup used in inline
-    assay_chip = models.ForeignKey('AssayChipSetup',
-                                     blank=True,
-                                     null=True)
+    assay_chip = models.ForeignKey('AssayChipSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
     cell_biosensor = models.ForeignKey('cellsamples.Biosensor', null=True, blank=True)
     cellsample_density = models.FloatField(verbose_name='density', default=0)
@@ -493,7 +517,7 @@ class AssayChipCells(models.Model):
                                     default='-')
 
 
-class AssayChipSetup(RestrictedModel):
+class AssayChipSetup(FlaggableModel):
     # The configuration of a Chip for implementing an assay
     class Meta(object):
         verbose_name = 'Chip Setup'
@@ -501,11 +525,13 @@ class AssayChipSetup(RestrictedModel):
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
     setup_date = models.DateField(help_text='YYYY-MM-DD')
-    device = models.ForeignKey(OrganModel, verbose_name = 'Organ Chip Name')
+    device = models.ForeignKey(OrganModel, verbose_name = 'Organ Model Name')
+
+    variance = models.CharField(max_length=3000, verbose_name='Variance from Protocol', null=True, blank=True)
+
     # the unique chip identifier
     # can be a barcode or a hand written identifier
-    assay_chip_id = models.CharField(max_length=512,
-                                       verbose_name='Chip ID/ Barcode')
+    assay_chip_id = models.CharField(max_length=512, verbose_name='Chip ID/ Barcode')
 
     #Control => control, Compound => compound; Abbreviate? Capitalize?
     chip_test_type = models.CharField(max_length=8, choices=(("control","Control"),("compound","Compound")))
@@ -558,7 +584,7 @@ class AssayChipReadoutAssay(models.Model):
         return u'{}'.format(self.assay_id)
 
 
-class AssayChipReadout(RestrictedModel):
+class AssayChipReadout(FlaggableModel):
     class Meta(object):
         verbose_name = 'Chip Readout'
         ordering = ('chip_setup',)

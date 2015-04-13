@@ -8,7 +8,11 @@
 
 {% block content %}
 
-<form enctype="multipart/form-data" class="form-horizontal" method="post" >
+{% if update %}
+    <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
+{% else %}
+    <form class="form-horizontal" method="post" >
+{% endif %}
     {% csrf_token %}
     <h1>
         Cell Type

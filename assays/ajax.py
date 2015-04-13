@@ -247,19 +247,27 @@ def fetch_plate_info(request):
 def fetch_center_id(request):
     """Returns center ID for dynamic run form"""
 
-    center = request.POST.get('id')
+    group = request.POST.get('id')
 
-    if not center:
+    if not group:
         logger.error('center not present in request to fetch_assay_info')
         return HttpResponseServerError()
 
-    center_data = MicrophysiologyCenter.objects.get(id=center)
-
     data = {}
 
-    data.update({
-        'center_id': center_data.center_id,
-    })
+    try:
+        center_data = MicrophysiologyCenter.objects.filter(groups__id=group)[0]
+
+        data.update({
+            'center_id': center_data.center_id,
+            'center_name': center_data.center_name,
+        })
+
+    except:
+        data.update({
+            'center_id': '',
+            'center_name': '',
+        })
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")

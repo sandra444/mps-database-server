@@ -20,6 +20,7 @@ class MicrophysiologyCenterAdmin(LockableAdmin):
                     'description',
                     'contact_person',
                     'center_website',
+                    'groups',
                 )
             }
         ),
@@ -201,6 +202,9 @@ class OrganModelAdmin(LockableAdmin):
                     ),
                     (
                         'organ', 'device', 'description',
+                    ),
+                    (
+                        'protocol',
                     ),
                 )
             }

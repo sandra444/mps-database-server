@@ -3,15 +3,6 @@ from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from hashlib import md5
 
-if DJANGO_VERSION >= (1, 5):
-    # Django 1.5+ compatibility
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-
-else:
-    from django.contrib.auth.models import User
-
-
 if 'gravatar' in settings.INSTALLED_APPS:
     from gravatar.templatetags.gravatar_tags import gravatar_for_user
 

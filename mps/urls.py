@@ -28,7 +28,7 @@ urlpatterns = patterns('',
                        # url(r'^captcha/', include('captcha.urls')),
 
                        # Djangovoice for feedback
-                       url(r'^comments/', include('django.contrib.comments.urls')),
+                       url(r'^comments/', include('django_comments.urls')),
                        url(r'^feedback/', include('djangovoice.urls')),
 
                        # The frontend

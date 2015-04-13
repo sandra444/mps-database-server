@@ -1,0 +1,35 @@
+@-ms-viewport {
+  width: device-width;
+}
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.node {
+  font: 10px sans-serif;
+}
+
+.node-s circle {
+  fill: steelblue;
+  stroke: #fff;
+  stroke-width: 2px;
+}
+
+.node-s {
+  font: 10px serif;
+  font-weight: bold;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
+}
+
+#compound {
+    max-height:600px;
+    height:600px;
+}

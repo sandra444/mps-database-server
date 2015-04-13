@@ -1,5 +1,5 @@
 from django import forms
-from assays.models import AssayChipReadout, AssayChipSetup, AssayTestResult, AssayChipCells, AssayResult
+from assays.models import AssayChipReadout, AssayChipSetup, AssayTestResult, AssayChipCells, AssayResult, StudyConfiguration
 
 class AssayResultForm(forms.ModelForm):
     """Size the text input boxes"""
@@ -31,6 +31,7 @@ class AssayChipReadoutForm(forms.ModelForm):
         widgets = {
             'notebook_page': forms.NumberInput(attrs={'style':'width:50px;',}),
             'treatment_time_length': forms.NumberInput(attrs={'style':'width:174px;',}),
+            'notes': forms.Textarea(attrs={'cols':50, 'rows': 3}),
         }
         exclude = ('created_by','modified_by','signed_off_by','signed_off_date','locked', 'group')
 
@@ -53,6 +54,8 @@ class AssayChipSetupForm(forms.ModelForm):
         widgets = {
             'concentration': forms.NumberInput(attrs={'style':'width:50px;'}),
             'notebook_page': forms.NumberInput(attrs={'style':'width:50px;',}),
+            'notes': forms.Textarea(attrs={'cols':50, 'rows': 3}),
+            'variance': forms.Textarea(attrs={'cols':50, 'rows': 2}),
         }
         # Assay Run ID is always bound to the parent Study
         exclude = ('assay_run_id','group')
@@ -73,25 +76,28 @@ class AssayChipCellsInlineFormset(forms.models.BaseInlineFormSet):
 
     class Meta(object):
         model = AssayChipCells
+        exclude = ('',)
 
     def clean(self):
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
+        # Does not require a minimum number of cellsamples at the moment
         # Number of cellsamples
-        cellsamples = 0
-        for form in forms_data:
-            try:
-                if form.cleaned_data:
-                    cellsamples += 1
-            except AttributeError:
-                pass
-        if cellsamples < 1:
-            raise forms.ValidationError('You must have at least one cellsample.')
+        # cellsamples = 0
+        # for form in forms_data:
+        #     try:
+        #         if form.cleaned_data:
+        #             cellsamples += 1
+        #     except AttributeError:
+        #         pass
+        # if cellsamples < 1:
+        #     raise forms.ValidationError('You must have at least one cellsample.')
 
 class TestResultInlineFormset(forms.models.BaseInlineFormSet):
 
     class Meta(object):
         model = AssayResult
+        exclude = ('',)
 
     def clean(self):
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
@@ -106,3 +112,14 @@ class TestResultInlineFormset(forms.models.BaseInlineFormSet):
                 pass
         if results < 1:
             raise forms.ValidationError('You must have at least one result.')
+
+
+class StudyConfigurationForm(forms.ModelForm):
+
+    class Meta(object):
+        model = StudyConfiguration
+        widgets = {
+            'media_composition': forms.Textarea(attrs={'cols':50, 'rows': 3}),
+            'hardware_description': forms.Textarea(attrs={'cols':50, 'rows': 3}),
+        }
+        exclude = ('',)

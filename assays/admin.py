@@ -2,7 +2,7 @@ import csv
 
 from django.contrib import admin
 from django import forms
-from assays.forms import AssayResultForm
+from assays.forms import AssayResultForm, StudyConfigurationForm
 from django.http import HttpResponseRedirect
 
 from assays.models import *
@@ -17,6 +17,7 @@ from io import BytesIO
 class AssayLayoutFormatForm(forms.ModelForm):
     class Meta(object):
         model = AssayLayoutFormat
+        exclude = ('',)
 
     def clean(self):
         """Validate size of rows/columns and corresponding label counts."""
@@ -663,6 +664,9 @@ class AssayChipSetupAdmin(LockableAdmin):
                     (
                         'device', 'assay_chip_id',
                     ),
+                    (
+                        'variance',
+                    ),
                 )
             }
         ),
@@ -698,6 +702,13 @@ class AssayChipSetupAdmin(LockableAdmin):
                     (
                         'signed_off_by', 'signed_off_date'
                     ),
+                )
+            }
+        ),
+        (
+            'Flag for Review', {
+                'fields': (
+                    ('flagged', 'reason_for_flag',)
                 )
             }
         ),
@@ -887,6 +898,7 @@ class AssayChipReadoutForm(forms.ModelForm):
 
     class Meta(object):
         model = AssayChipReadout
+        exclude = ('',)
 
 class AssayChipReadoutAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
@@ -960,6 +972,13 @@ class AssayChipReadoutAdmin(LockableAdmin):
                     (
                         'signed_off_by', 'signed_off_date'
                     ),
+                )
+            }
+        ),
+        (
+            'Flag for Review', {
+                'fields': (
+                    ('flagged', 'reason_for_flag',)
                 )
             }
         ),
@@ -1219,6 +1238,13 @@ class AssayTestResultAdmin(LockableAdmin):
             }
         ),
         (
+            'Flag for Review', {
+                'fields': (
+                    ('flagged', 'reason_for_flag',)
+                )
+            }
+        ),
+        (
             'Group Access', {
                 'fields':(
                     'group','restricted'
@@ -1336,6 +1362,7 @@ class AssayRunForm(forms.ModelForm):
             'name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
+        exclude = ('',)
 
     # TODO CLEAN TO USE SETUP IN LIEU OF READOUT ID
     def clean(self):
@@ -1404,8 +1431,8 @@ class AssayRunAdmin(LockableAdmin):
         (
             'Study', {
                 'fields': (
-                    'center_id',
                     ('toxicity', 'efficacy', 'disease', 'cell_characterization'),
+                    'study_configuration',
                     'start_date',
                     'name',
                     'description',
@@ -1461,3 +1488,55 @@ class AssayRunAdmin(LockableAdmin):
 
 
 admin.site.register(AssayRun, AssayRunAdmin)
+
+
+class StudyModelInline(admin.TabularInline):
+
+    model = StudyModel
+    verbose_name = 'Study Model'
+    fields = (
+        (
+            'label', 'organ', 'sequence_number', 'output', 'integration_mode',
+        ),
+    )
+    extra = 1
+
+    class Media(object):
+        css = {"all": ("css/hide_admin_original.css",)}
+
+
+class StudyConfigurationAdmin(LockableAdmin):
+    class Media(object):
+        js = ('js/inline_fix.js',)
+
+    form = StudyConfigurationForm
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('name', 'study_format',)
+    fieldsets = (
+        (
+            'Study Configuration', {
+                'fields': (
+                    'name',
+                    'study_format',
+                    'media_composition',
+                    'hardware_description',
+                    #'image',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+    inlines = [StudyModelInline]
+
+
+admin.site.register(StudyConfiguration, StudyConfigurationAdmin)

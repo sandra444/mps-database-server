@@ -4,6 +4,7 @@
 {% block load %}
     <script src="{% static "js/inline_add.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/flag.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -22,73 +23,86 @@
         dialog.dialog();
         dialog.dialog('close');
         dialog.removeProp('hidden');
+
+        var warning = $('#warning');
+        warning.dialog({
+            height:200,
+            modal: true,
+            buttons: {
+            Yes: function() {
+                $(this).dialog("close");
+                },
+            No: function() {
+                $('#id_chip_test_type').val('compound');
+                $('#id_chip_test_type').trigger('change');
+                $(this).dialog("close");
+                }
+            }
+        });
+        warning.dialog('close');
+        warning.removeProp('hidden');
     });
 </script>
 
-{# The presence of this hidden div tells the inline add script to change its delete behavior #}
-{#{% if update %}#}
-{#    <div hidden id="update"></div>#}
-{#{% endif %}#}
-
-<form class="form-horizontal" method="post" >
+{% if update %}
+    <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
+{% else %}
+    <form class="form-horizontal" method="post" >
+{% endif %}
     {% csrf_token %}
     <h1>
         Chip Setup
 
         <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
 
-        {% if not update %}
-            <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Add Another</button>
+        <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Clone</button>
+
+        {# Html for flagging for review #}
+        {% if form.flagged.value %}
+            {# If the model is flagged then display a danger flag and the notes #}
+            <a role='button' id="flag" class="btn btn-sm btn-danger" title="Flag for review">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            <a role='button' id="notes_for_flag" class="btn btn-sm btn-warning" title="Reason for Flag">
+                Notes
+            </a>
+        {% else %}
+            {# If the model is not flagged display a blue flag and no notes #}
+            <a role='button' id="flag" class="btn btn-sm" title="Flag for review">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            <a role='button' id="notes_for_flag" class="btn btn-sm btn-warning" title="Reason for Flag" style="display: none">
+                Notes
+            </a>
         {% endif %}
 
         {% if update %}
             <a role="button" class="btn btn-danger pull-right" href="/assays/assaychipsetup/{{ object.id }}/delete/">Delete</a>
         {% endif %}
+
+        <div class="form-group has-error">
+            <input class='small form-control' placeholder="Reason for Flag" id="id_reason_for_flag" maxlength="300"
+            name="reason_for_flag" type="text" style="display: none;" value="{{ form.reason_for_flag.value|default:'' }}">
+        </div>
     </h1>
 
     {% if form.another.value and form.is_valid and formset.is_valid %}
         <div class="alert alert-success" role="alert">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
             <span class="sr-only">Success:</span>
-            Successful Submission
+            Successful Submission and Clone
         </div>
     {% endif %}
 
+    {# Hidden: Used to indicate submit and clone #}
     {{ form.another.as_hidden }}
 
+    {# Hidden div for flagging the entry #}
+    <div hidden>
+        {{ form.flagged }}
+    </div>
+
     <legend>Chip Setup Details</legend>
-{#    <p>Study: {{ form.assay_run_id }}</p>#}
-{#    <p>Organ Chip Name: {{ form.device }}</p>#}
-{#    <p>Chip ID/ Barcode: {{ form.assay_chip_id }}</p>#}
-{#    <p>Test Type: {{ form.chip_test_type }}</p>#}
-{#    <p>Compound: {{ form.compound }}</p>#}
-{#    <p>Concentration: {{ form.concentration }}</p>#}
-{#    <p>Concentration Unit: {{ form.unit }}</p>#}
-{#    <p>Scientist: {{ form.scientist }}</p>#}
-{#    <p>Notebook: {{ form.notebook }}</p>#}
-{#    <p>Notebook Page: {{ form.notebook_page }}</p>#}
-{#    <p>Notes: {{ form.notes }}</p>#}
-
-{#    {% if form.errors %}#}
-{#        {% for field in form %}#}
-{#            {% if field.errors %}#}
-{#                {% for error in field.errors %}#}
-{#                    <div class="alert alert-danger" role="alert">#}
-{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
-{#                        <span class="sr-only">Error:</span>#}
-{#                        {{field.label}}: {{error}}#}
-{#                    </div>#}
-{#                {% endfor %}#}
-{#            {% endif %}#}
-{#        {% endfor %}#}
-{#    {% endif %}#}
-
-{#    <div class="form-group">#}
-{#        <label for="assay_run_id" class="col-sm-2 control-label">Organ Chip Study ID</label>#}
-{#        <div class="col-sm-10">#}
-{#          {{ form.assay_run_id }}#}
-{#        </div>#}
-{#    </div>#}
 
     {% if form.setup_date.errors %}
         {% for error in form.setup_date.errors %}
@@ -120,9 +134,30 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="device" class="col-sm-2 control-label">Organ Chip Name*</label>
+        <label for="device" class="col-sm-2 control-label">Organ Model Name*</label>
         <div class="col-sm-10">
           {{ form.device }}
+          <span>
+            <a href="" id="protocol"></a>
+          </span>
+        </div>
+    </div>
+
+    {% if form.variance.errors %}
+        {% for error in form.variance.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="variance" class="col-sm-2 control-label">Variance from Protocol</label>
+        <div class="col-sm-10">
+          {{ form.variance }}
         </div>
     </div>
 
@@ -160,6 +195,12 @@
         <div class="col-sm-10">
           {{ form.chip_test_type }}
         </div>
+    </div>
+
+    <div id="control_warning" hidden class="alert alert-warning" role="alert">
+        <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+        <span class="sr-only">Warning:</span>
+        Warning: Compound selected for a control chip
     </div>
 
     {% if form.concentration.errors %}
@@ -226,13 +267,6 @@
         </div>
     </div>
 
-{#    <div class="form-group">#}
-{#        <label for="group" class="col-sm-2 control-label">Group</label>#}
-{#        <div class="col-sm-10">#}
-{#          {{ form.group }}#}
-{#        </div>#}
-{#    </div>#}
-
     {{ formset.management_form }}
     <legend>Model Cells</legend>
 
@@ -258,7 +292,7 @@
         </div>
     {% endif %}
 
-    <a id="add_button" class="btn btn-success" role="button">Add Cell Type</a> <span>Click a magnifying glass to see a list of available cell samples:</span>
+    <a id="add_button" class="btn btn-success" role="button">Add Cell Type</a> <span>Click a magnifying glass to see a list of available cell samples. Use 'e' for scientific notation: 1e3 = 1000.</span>
     <table class="table table-striped cells" id="assaychipcells_set-group" name="inlines">
         <thead>
             <tr>
@@ -281,7 +315,9 @@
                     {% endif %}
                     <td><input readonly=true id="id_assaychipcells_set-{{ forloop.counter0 }}-cell_sample"
                                name="assaychipcells_set-{{ forloop.counter0 }}-cell_sample" size="5" value={{ cell.cell_sample.value|default_if_none:'' }}>
-                        <span id='search-{{ forloop.counter0 }}-' class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                        <button id='search-{{ forloop.counter0 }}-' type="button" class="btn btn-xs btn-info" onclick="search(this)">
+                            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                        </button>
                     </td>
                     <td>{{ cell.cell_biosensor }}</td>
                     <td>{{ cell.cellsample_density }}</td>
@@ -302,6 +338,7 @@
     <table id="cellsamples" class="table table-striped table-hover">
             <thead>
                 <tr>
+                    <th>ID #</th>
                     <th>Receipt Date</th>
                     <th>Cell Type</th>
                     <th>Cell Source</th>
@@ -312,6 +349,7 @@
 
             <tfoot>
                 <tr>
+                    <th>ID #</th>
                     <th>Receipt Date</th>
                     <th>Cell Type</th>
                     <th>Cell Source</th>
@@ -323,6 +361,7 @@
             <tbody>
             {% for cellsample in cellsamples %}
                 <tr class="cellsample" id={{ cellsample.id }} name={{ cellsample.id }}>
+                    <td>{{ cellsample.id }}</td>
                     <td>{{ cellsample.receipt_date }}</td>
                     <td>{{ cellsample.cell_type }}</td>
                     <td>{{ cellsample.cell_source }}</td>
@@ -334,27 +373,105 @@
     </table>
 </div>
 
+<div hidden id="warning" title="Compound in Control Chip">
+    <p>
+        <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" style="float:left; margin:0 7px 20px 0;"></span>
+        Are you sure you want to add a compound to a control chip?
+    </p>
+</div>
+
 <script>
-$(function() {
+    // Global variables are in poor taste
     var id = null;
 
-    $("body").on( "click", "span[id*='search-']", function(event) {
-        event.preventDefault();
-        // Get ID of the clicked search
-        id = event.target.id.replace(/\D/g,'');
+    function search(elem) {
+        id = $(elem).attr("id").replace(/\D/g,'');
         $("#dialog").dialog({
-          width: 550,
-          height: 550
+          width: 635,
+          height: 635
         });
-    });
+    }
 
-    $('.cellsample').click( function(evt) {
-        var cellsampleId = $(this).attr("id");
-        var selectedInput = $('#id_assaychipcells_set-'+ id + '-cell_sample');
-        selectedInput.prop('value', cellsampleId);
-        $('#dialog').dialog('close');
+{#    $("body").on( "click", "span[id*='search-']", function(event) {#}
+{#        event.preventDefault();#}
+{#        // Get ID of the clicked search#}
+{#        id = event.target.id.replace(/\D/g,'');#}
+{#        $("#dialog").dialog({#}
+{#          width: 635,#}
+{#          height: 635#}
+{#        });#}
+{#    });#}
+
+    $(function() {
+
+        // safe converts the JSON passed to the context into something the JS compiler can read
+        var protocols = {{ protocols|safe }};
+
+        function display_protocol() {
+            if(protocols[$('#id_device').val()]) {
+                $('#protocol').html('Click here to view protocol')
+                        .prop('href','/media/' + protocols[$('#id_device').val()]);
+            }
+            else{
+                $('#protocol').html('')
+                        .prop('href','');
+            }
+        }
+
+        display_protocol();
+
+        $('#id_device').change( function() {
+            display_protocol();
+        });
+
+        function toggle_warning(first) {
+            if (test_type == 'control' && compound) {
+                $('#control_warning').prop('hidden',false);
+                if (!first) {
+                    $('#warning').dialog('open');
+                }
+            }
+            else{
+                $('#control_warning').prop('hidden',true);
+            }
+        }
+
+        var test_type_selector = $('#id_chip_test_type');
+        var compound_selector = $('#id_compound');
+
+        var test_type = test_type_selector.val();
+        var compound = compound_selector.val();
+
+        toggle_warning(true);
+
+        test_type_selector.change(function() {
+            test_type = test_type_selector.val();
+            toggle_warning(false);
+        });
+
+        compound_selector.change(function() {
+            compound = compound_selector.val();
+            toggle_warning(false);
+        });
+
+        $('.cellsample').click(function (evt) {
+            var cellsampleId = $(this).attr("id");
+            var selectedInput = $('#id_assaychipcells_set-' + id + '-cell_sample');
+            selectedInput.prop('value', cellsampleId);
+            $('#dialog').dialog('close');
+        });
+
+        $('#cellsamples').DataTable({
+            "iDisplayLength": 50,
+            // Initially sort on receipt date
+            "order": [ 0, "desc" ],
+            // If one wants to display top and bottom
+            "sDom": '<"wrapper"fti>'
+        });
+
+        // Move filter to left
+        $('.dataTables_filter').css('float', 'left');
     });
-});
 </script>
 
 {% endblock %}

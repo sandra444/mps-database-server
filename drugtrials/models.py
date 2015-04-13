@@ -343,3 +343,46 @@ class FindingResult(models.Model):
 
     def __unicode__(self):
         return u''
+
+
+class AdverseEvent(models.Model):
+
+    event = models.CharField(max_length=100)
+    organ = models.ForeignKey(Organ, blank=True, null=True)
+
+    def __unicode__(self):
+        return u'{}'.format(self.event)
+
+
+# TODO think of a better name
+# TODO what other fields should be placed here?
+# Theoretically, we would place usage information here, but that is difficult to acquire
+# If we can't think of anything, scrap this model before you put it on production
+class OpenFDACompound(LockableModel):
+
+    compound = models.ForeignKey('compounds.Compound')
+    warnings = models.TextField(blank=True, null=True)
+    black_box = models.BooleanField(default=False)
+
+    # Insights into non-human toxicology (can be useful)
+    nonclinical_toxicology = models.TextField(blank=True, null=True)
+
+    # Deemed less than useful
+    #clinical_studies = models.TextField(blank=True, null=True)
+    # Deemed less than useful
+    # laboratory_tests = models.TextField(blank=True, null=True)
+
+    def __unicode__(self):
+        return u'{}'.format(self.compound.name)
+
+
+class CompoundAdverseEvent(models.Model):
+
+    # CompoundAdverseEvents are inlines in OpenFDACompound (name subject to change)
+    compound = models.ForeignKey('OpenFDACompound')
+    event = models.ForeignKey(AdverseEvent)
+    frequency = models.IntegerField()
+
+    def __unicode__(self):
+        return u'{}:{}'.format(self.compound,self.event)
+
