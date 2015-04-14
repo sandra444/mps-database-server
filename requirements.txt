@@ -61,4 +61,4 @@ django-import-export
 django-alphafilter
 #django-simple-captcha
 #qhonuskan-votes
-django-comments
+django-contrib-comments

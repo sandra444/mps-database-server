@@ -1,216 +1,182 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+from django.conf import settings
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'Target'
-        db.create_table(u'bioactivities_target', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='target_created-by', null=True, to=orm['auth.User'])),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='target_modified-by', null=True, to=orm['auth.User'])),
-            ('modified_on', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=200)),
-            ('synonyms', self.gf('django.db.models.fields.TextField')(max_length=4000, null=True, blank=True)),
-            ('chemblid', self.gf('django.db.models.fields.CharField')(max_length=20, unique=True, null=True, blank=True)),
-            ('description', self.gf('django.db.models.fields.CharField')(max_length=400, null=True, blank=True)),
-            ('gene_names', self.gf('django.db.models.fields.CharField')(max_length=250, null=True, blank=True)),
-            ('organism', self.gf('django.db.models.fields.CharField')(max_length=100, null=True, blank=True)),
-            ('uniprot_accession', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
-            ('target_type', self.gf('django.db.models.fields.CharField')(max_length=100, null=True, blank=True)),
-            ('last_update', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
-        ))
-        db.send_create_signal(u'bioactivities', ['Target'])
+    dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('compounds', '0001_initial'),
+    ]
 
-        # Adding model 'Assay'
-        db.create_table(u'bioactivities_assay', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assay_created-by', null=True, to=orm['auth.User'])),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assay_modified-by', null=True, to=orm['auth.User'])),
-            ('modified_on', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('chemblid', self.gf('django.db.models.fields.CharField')(max_length=20, unique=True, null=True, blank=True)),
-            ('description', self.gf('django.db.models.fields.TextField')(max_length=1000, null=True, blank=True)),
-            ('organism', self.gf('django.db.models.fields.CharField')(max_length=100, null=True, blank=True)),
-            ('assay_type', self.gf('django.db.models.fields.CharField')(max_length=1)),
-            ('journal', self.gf('django.db.models.fields.CharField')(max_length=100, null=True, blank=True)),
-            ('strain', self.gf('django.db.models.fields.CharField')(max_length=100, null=True, blank=True)),
-            ('last_update', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
-        ))
-        db.send_create_signal(u'bioactivities', ['Assay'])
-
-        # Adding model 'Bioactivity'
-        db.create_table(u'bioactivities_bioactivity', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='bioactivity_created-by', null=True, to=orm['auth.User'])),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='bioactivity_modified-by', null=True, to=orm['auth.User'])),
-            ('modified_on', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('assay', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['bioactivities.Assay'])),
-            ('compound', self.gf('django.db.models.fields.related.ForeignKey')(related_name='bioactivity_compound', to=orm['compounds.Compound'])),
-            ('parent_compound', self.gf('django.db.models.fields.related.ForeignKey')(related_name='bioactivity_parent', to=orm['compounds.Compound'])),
-            ('target', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['bioactivities.Target'])),
-            ('target_confidence', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
-            ('bioactivity_type', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('operator', self.gf('django.db.models.fields.CharField')(max_length=20, null=True, blank=True)),
-            ('units', self.gf('django.db.models.fields.CharField')(max_length=40, null=True, blank=True)),
-            ('value', self.gf('django.db.models.fields.FloatField')(null=True, blank=True)),
-            ('standardized_units', self.gf('django.db.models.fields.CharField')(max_length=40, null=True, blank=True)),
-            ('standardized_value', self.gf('django.db.models.fields.FloatField')(null=True, blank=True)),
-            ('activity_comment', self.gf('django.db.models.fields.CharField')(max_length=250, null=True, blank=True)),
-            ('reference', self.gf('django.db.models.fields.CharField')(max_length=100, null=True, blank=True)),
-            ('name_in_reference', self.gf('django.db.models.fields.CharField')(max_length=100, null=True, blank=True)),
-        ))
-        db.send_create_signal(u'bioactivities', ['Bioactivity'])
-
-        # Adding unique constraint on 'Bioactivity', fields ['assay', 'target', 'compound']
-        db.create_unique(u'bioactivities_bioactivity', ['assay_id', 'target_id', 'compound_id'])
-
-
-    def backwards(self, orm):
-        # Removing unique constraint on 'Bioactivity', fields ['assay', 'target', 'compound']
-        db.delete_unique(u'bioactivities_bioactivity', ['assay_id', 'target_id', 'compound_id'])
-
-        # Deleting model 'Target'
-        db.delete_table(u'bioactivities_target')
-
-        # Deleting model 'Assay'
-        db.delete_table(u'bioactivities_assay')
-
-        # Deleting model 'Bioactivity'
-        db.delete_table(u'bioactivities_bioactivity')
-
-
-    models = {
-        u'auth.group': {
-            'Meta': {'object_name': 'Group'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'}),
-            'permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'})
-        },
-        u'auth.permission': {
-            'Meta': {'ordering': "(u'content_type__app_label', u'content_type__model', u'codename')", 'unique_together': "((u'content_type', u'codename'),)", 'object_name': 'Permission'},
-            'codename': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
-        },
-        u'auth.user': {
-            'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Group']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Permission']"}),
-            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
-        },
-        u'bioactivities.assay': {
-            'Meta': {'ordering': "('chemblid',)", 'object_name': 'Assay'},
-            'assay_type': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
-            'chemblid': ('django.db.models.fields.CharField', [], {'max_length': '20', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assay_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            'description': ('django.db.models.fields.TextField', [], {'max_length': '1000', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'journal': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'last_update': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assay_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
-            'organism': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'strain': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'})
-        },
-        u'bioactivities.bioactivity': {
-            'Meta': {'unique_together': "(('assay', 'target', 'compound'),)", 'object_name': 'Bioactivity'},
-            'activity_comment': ('django.db.models.fields.CharField', [], {'max_length': '250', 'null': 'True', 'blank': 'True'}),
-            'assay': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['bioactivities.Assay']"}),
-            'bioactivity_type': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'compound': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'bioactivity_compound'", 'to': u"orm['compounds.Compound']"}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'bioactivity_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'bioactivity_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
-            'name_in_reference': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'operator': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True', 'blank': 'True'}),
-            'parent_compound': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'bioactivity_parent'", 'to': u"orm['compounds.Compound']"}),
-            'reference': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'standardized_units': ('django.db.models.fields.CharField', [], {'max_length': '40', 'null': 'True', 'blank': 'True'}),
-            'standardized_value': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'target': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['bioactivities.Target']"}),
-            'target_confidence': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'units': ('django.db.models.fields.CharField', [], {'max_length': '40', 'null': 'True', 'blank': 'True'}),
-            'value': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'})
-        },
-        u'bioactivities.target': {
-            'Meta': {'ordering': "('name',)", 'object_name': 'Target'},
-            'chemblid': ('django.db.models.fields.CharField', [], {'max_length': '20', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'target_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            'description': ('django.db.models.fields.CharField', [], {'max_length': '400', 'null': 'True', 'blank': 'True'}),
-            'gene_names': ('django.db.models.fields.CharField', [], {'max_length': '250', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'last_update': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'target_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'organism': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'synonyms': ('django.db.models.fields.TextField', [], {'max_length': '4000', 'null': 'True', 'blank': 'True'}),
-            'target_type': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'uniprot_accession': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'})
-        },
-        u'compounds.compound': {
-            'Meta': {'ordering': "('name',)", 'object_name': 'Compound'},
-            'acidic_pka': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'alogp': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'basic_pka': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'chemblid': ('django.db.models.fields.CharField', [], {'max_length': '20', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'compound_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'inchikey': ('django.db.models.fields.CharField', [], {'max_length': '27', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
-            'known_drug': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_update': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'logd': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'logp': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'medchem_friendly': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'compound_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
-            'molecular_formula': ('django.db.models.fields.CharField', [], {'max_length': '40', 'null': 'True', 'blank': 'True'}),
-            'molecular_weight': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'ro3_passes': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'ro5_violations': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'rotatable_bonds': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'smiles': ('django.db.models.fields.CharField', [], {'max_length': '1000', 'null': 'True', 'blank': 'True'}),
-            'species': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
-            'synonyms': ('django.db.models.fields.TextField', [], {'max_length': '4000', 'null': 'True', 'blank': 'True'})
-        },
-        u'contenttypes.contenttype': {
-            'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
-            'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        }
-    }
-
-    complete_apps = ['bioactivities']
+    operations = [
+        migrations.CreateModel(
+            name='Assay',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('chemblid', models.TextField(help_text=b'Enter a ChEMBL id, e.g. CHEMBL1217643, and click Retrieve to get target information automatically.', unique=True, null=True, verbose_name=b'ChEMBL ID', blank=True)),
+                ('description', models.TextField(null=True, blank=True)),
+                ('organism', models.TextField(null=True, blank=True)),
+                ('assay_type', models.CharField(max_length=1, choices=[(b'B', b'Binding'), (b'F', b'Functional'), (b'A', b'ADMET')])),
+                ('journal', models.TextField(null=True, blank=True)),
+                ('strain', models.TextField(null=True, blank=True)),
+                ('last_update', models.DateField(help_text=b'Last time when activities associated with the assay were updated.', null=True, blank=True)),
+                ('created_by', models.ForeignKey(related_name='assay_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='assay_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('signed_off_by', models.ForeignKey(related_name='assay_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'ordering': ('chemblid',),
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Bioactivity',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('target_confidence', models.IntegerField(null=True, blank=True)),
+                ('bioactivity_type', models.TextField(null=True, verbose_name=b'name', blank=True)),
+                ('standard_name', models.TextField(null=True, blank=True)),
+                ('operator', models.TextField(null=True, blank=True)),
+                ('units', models.TextField(null=True, blank=True)),
+                ('value', models.FloatField(null=True, blank=True)),
+                ('standardized_units', models.TextField(null=True, verbose_name=b'std units', blank=True)),
+                ('standardized_value', models.FloatField(null=True, verbose_name=b'std vals', blank=True)),
+                ('activity_comment', models.TextField(null=True, blank=True)),
+                ('reference', models.TextField(null=True, blank=True)),
+                ('name_in_reference', models.TextField(null=True, blank=True)),
+                ('chembl_assay_type', models.TextField(default=b'', null=True, blank=True)),
+                ('assay', models.ForeignKey(to='bioactivities.Assay')),
+                ('compound', models.ForeignKey(related_name='bioactivity_compound', to='compounds.Compound')),
+                ('created_by', models.ForeignKey(related_name='bioactivity_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='bioactivity_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('parent_compound', models.ForeignKey(related_name='bioactivity_parent', to='compounds.Compound')),
+                ('signed_off_by', models.ForeignKey(related_name='bioactivity_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'ordering': ('compound', 'bioactivity_type'),
+                'verbose_name_plural': 'bioactivities',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='BioactivityType',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('chembl_bioactivity', models.TextField(default=b'')),
+                ('chembl_unit', models.TextField(default=b'')),
+                ('scale_factor', models.FloatField(default=1, null=True, blank=True)),
+                ('mass_flag', models.CharField(default=b'N', max_length=8, choices=[(b'Y', b'Yes'), (b'N', b'No')])),
+                ('standard_name', models.TextField(default=b'')),
+                ('description', models.TextField(default=b'')),
+                ('standard_unit', models.TextField(default=b'')),
+                ('created_by', models.ForeignKey(related_name='bioactivitytype_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='bioactivitytype_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('signed_off_by', models.ForeignKey(related_name='bioactivitytype_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'ordering': ('chembl_bioactivity', 'chembl_unit'),
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='PubChemBioactivity',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('assay_id', models.TextField(verbose_name=b'Assay ID')),
+                ('value', models.FloatField(verbose_name=b'Value (uM)')),
+                ('source', models.TextField(default=b'', null=True, blank=True)),
+                ('activity_name', models.TextField(default=b'', verbose_name=b'Activity Name')),
+                ('assay_name', models.TextField(default=b'', null=True, verbose_name=b'Assay Name', blank=True)),
+                ('compound', models.ForeignKey(to='compounds.Compound')),
+                ('created_by', models.ForeignKey(related_name='pubchembioactivity_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='pubchembioactivity_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('signed_off_by', models.ForeignKey(related_name='pubchembioactivity_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='PubChemTarget',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('name', models.TextField(default=b'', help_text=b'Preferred target name.')),
+                ('organism', models.TextField(default=b'')),
+                ('GI', models.TextField(verbose_name=b'NCBI GI')),
+                ('created_by', models.ForeignKey(related_name='pubchemtarget_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='pubchemtarget_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('signed_off_by', models.ForeignKey(related_name='pubchemtarget_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Target',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('name', models.TextField(help_text=b'Preferred target name.')),
+                ('synonyms', models.TextField(null=True, blank=True)),
+                ('chemblid', models.TextField(help_text=b'Enter a ChEMBL id, e.g. CHEMBL260, and click Retrieve to get target information automatically.', unique=True, null=True, verbose_name=b'ChEMBL ID', blank=True)),
+                ('description', models.TextField(null=True, blank=True)),
+                ('gene_names', models.TextField(null=True, blank=True)),
+                ('organism', models.TextField(null=True, blank=True)),
+                ('uniprot_accession', models.TextField(null=True, blank=True)),
+                ('target_type', models.TextField(null=True, blank=True)),
+                ('last_update', models.DateField(help_text=b'Last time when activities associated with the target were updated.', null=True, blank=True)),
+                ('created_by', models.ForeignKey(related_name='target_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='target_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('signed_off_by', models.ForeignKey(related_name='target_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'ordering': ('name',),
+            },
+            bases=(models.Model,),
+        ),
+        migrations.AddField(
+            model_name='pubchembioactivity',
+            name='target',
+            field=models.ForeignKey(default=None, blank=True, to='bioactivities.PubChemTarget', null=True, verbose_name=b'Target'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='bioactivity',
+            name='target',
+            field=models.ForeignKey(to='bioactivities.Target'),
+            preserve_default=True,
+        ),
+        migrations.AlterUniqueTogether(
+            name='bioactivity',
+            unique_together=set([('assay', 'target', 'compound')]),
+        ),
+    ]

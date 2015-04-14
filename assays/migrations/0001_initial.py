@@ -1,556 +1,491 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+from django.conf import settings
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'AssayModelType'
-        db.create_table(u'assays_assaymodeltype', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaymodeltype_created-by', null=True, to=orm['auth.User'])),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaymodeltype_modified-by', null=True, to=orm['auth.User'])),
-            ('modified_on', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('assay_type_name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=200)),
-            ('assay_type_description', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-        ))
-        db.send_create_signal(u'assays', ['AssayModelType'])
+    dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+    ]
 
-        # Adding model 'AssayModel'
-        db.create_table(u'assays_assaymodel', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaymodel_created-by', null=True, to=orm['auth.User'])),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaymodel_modified-by', null=True, to=orm['auth.User'])),
-            ('modified_on', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('assay_name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=200)),
-            ('assay_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['assays.AssayModelType'])),
-            ('version_number', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
-            ('assay_description', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('assay_protocol_file', self.gf('django.db.models.fields.files.FileField')(max_length=100, null=True, blank=True)),
-        ))
-        db.send_create_signal(u'assays', ['AssayModel'])
-
-        # Adding model 'AssayLayoutFormat'
-        db.create_table(u'assays_assaylayoutformat', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaylayoutformat_created-by', null=True, to=orm['auth.User'])),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaylayoutformat_modified-by', null=True, to=orm['auth.User'])),
-            ('modified_on', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('layout_format_name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=200)),
-            ('number_of_rows', self.gf('django.db.models.fields.IntegerField')()),
-            ('number_of_columns', self.gf('django.db.models.fields.IntegerField')()),
-            ('row_labels', self.gf('django.db.models.fields.CharField')(max_length=1000)),
-            ('column_labels', self.gf('django.db.models.fields.CharField')(max_length=1000)),
-        ))
-        db.send_create_signal(u'assays', ['AssayLayoutFormat'])
-
-        # Adding model 'AssayBaseLayout'
-        db.create_table(u'assays_assaybaselayout', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaybaselayout_created-by', null=True, to=orm['auth.User'])),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaybaselayout_modified-by', null=True, to=orm['auth.User'])),
-            ('modified_on', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('base_layout_name', self.gf('django.db.models.fields.CharField')(max_length=200)),
-            ('layout_format', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['assays.AssayLayoutFormat'])),
-        ))
-        db.send_create_signal(u'assays', ['AssayBaseLayout'])
-
-        # Adding model 'AssayWellType'
-        db.create_table(u'assays_assaywelltype', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaywelltype_created-by', null=True, to=orm['auth.User'])),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaywelltype_modified-by', null=True, to=orm['auth.User'])),
-            ('modified_on', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('well_type', self.gf('django.db.models.fields.CharField')(unique=True, max_length=200)),
-            ('well_description', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('background_color', self.gf('django.db.models.fields.CharField')(max_length=20)),
-        ))
-        db.send_create_signal(u'assays', ['AssayWellType'])
-
-        # Adding model 'AssayWell'
-        db.create_table(u'assays_assaywell', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaywell_created-by', null=True, to=orm['auth.User'])),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaywell_modified-by', null=True, to=orm['auth.User'])),
-            ('modified_on', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('base_layout', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['assays.AssayBaseLayout'])),
-            ('well_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['assays.AssayWellType'])),
-            ('row', self.gf('django.db.models.fields.CharField')(max_length=25)),
-            ('column', self.gf('django.db.models.fields.CharField')(max_length=25)),
-        ))
-        db.send_create_signal(u'assays', ['AssayWell'])
-
-        # Adding unique constraint on 'AssayWell', fields ['base_layout', 'row', 'column']
-        db.create_unique(u'assays_assaywell', ['base_layout_id', 'row', 'column'])
-
-        # Adding model 'AssayLayout'
-        db.create_table(u'assays_assaylayout', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaylayout_created-by', null=True, to=orm['auth.User'])),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaylayout_modified-by', null=True, to=orm['auth.User'])),
-            ('modified_on', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('layout_name', self.gf('django.db.models.fields.CharField')(max_length=200)),
-            ('base_layout', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['assays.AssayBaseLayout'])),
-        ))
-        db.send_create_signal(u'assays', ['AssayLayout'])
-
-        # Adding model 'AssayTimepoint'
-        db.create_table(u'assays_assaytimepoint', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('assay_layout', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['assays.AssayLayout'])),
-            ('timepoint', self.gf('django.db.models.fields.IntegerField')(default=0)),
-            ('row', self.gf('django.db.models.fields.CharField')(max_length=25)),
-            ('column', self.gf('django.db.models.fields.CharField')(max_length=25)),
-        ))
-        db.send_create_signal(u'assays', ['AssayTimepoint'])
-
-        # Adding model 'AssayCompound'
-        db.create_table(u'assays_assaycompound', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('assay_layout', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['assays.AssayLayout'])),
-            ('compound', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['compounds.Compound'])),
-            ('concentration', self.gf('django.db.models.fields.FloatField')(default=0)),
-            ('concentration_unit', self.gf('django.db.models.fields.CharField')(default='\xce\xbcM', max_length=64)),
-            ('row', self.gf('django.db.models.fields.CharField')(max_length=25)),
-            ('column', self.gf('django.db.models.fields.CharField')(max_length=25)),
-        ))
-        db.send_create_signal(u'assays', ['AssayCompound'])
-
-        # Adding model 'AssayReadout'
-        db.create_table(u'assays_assayreadout', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('assay_device_readout', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['assays.AssayDeviceReadout'])),
-            ('row', self.gf('django.db.models.fields.CharField')(max_length=25)),
-            ('column', self.gf('django.db.models.fields.CharField')(max_length=25)),
-            ('value', self.gf('django.db.models.fields.FloatField')()),
-        ))
-        db.send_create_signal(u'assays', ['AssayReadout'])
-
-        # Adding model 'AssayDeviceReadout'
-        db.create_table(u'assays_assaydevicereadout', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaydevicereadout_created-by', null=True, to=orm['auth.User'])),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assaydevicereadout_modified-by', null=True, to=orm['auth.User'])),
-            ('modified_on', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('assay_device_id', self.gf('django.db.models.fields.CharField')(max_length=512)),
-            ('cell_sample', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cellsamples.CellSample'])),
-            ('organ_name', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cellsamples.Organ'], null=True)),
-            ('cellsample_density', self.gf('django.db.models.fields.FloatField')(default=0)),
-            ('cellsample_density_unit', self.gf('django.db.models.fields.CharField')(default='ML', max_length=8)),
-            ('assay_name', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['assays.AssayModel'], null=True)),
-            ('assay_layout', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['assays.AssayLayout'])),
-            ('microdevice', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['microdevices.Microdevice'])),
-            ('reader_name', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['assays.AssayReader'])),
-            ('readout_unit', self.gf('django.db.models.fields.CharField')(default='RFU', max_length=16)),
-            ('readout_type', self.gf('django.db.models.fields.CharField')(default='E', max_length=2)),
-            ('timeunit', self.gf('django.db.models.fields.CharField')(default='minutes', max_length=16)),
-            ('treatment_time_length', self.gf('django.db.models.fields.FloatField')(null=True, blank=True)),
-            ('timepoint', self.gf('django.db.models.fields.FloatField')(null=True, blank=True)),
-            ('time_interval', self.gf('django.db.models.fields.FloatField')(null=True, blank=True)),
-            ('assay_timestamp', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('readout_timestamp', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('notebook', self.gf('django.db.models.fields.CharField')(max_length=256, null=True, blank=True)),
-            ('notebook_page', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
-            ('notes', self.gf('django.db.models.fields.CharField')(max_length=2048, null=True, blank=True)),
-            ('scientist', self.gf('django.db.models.fields.CharField')(max_length=100, null=True, blank=True)),
-            ('file', self.gf('django.db.models.fields.files.FileField')(max_length=100, null=True, blank=True)),
-        ))
-        db.send_create_signal(u'assays', ['AssayDeviceReadout'])
-
-        # Adding model 'AssayReader'
-        db.create_table(u'assays_assayreader', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assayreader_created-by', null=True, to=orm['auth.User'])),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='assayreader_modified-by', null=True, to=orm['auth.User'])),
-            ('modified_on', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('reader_name', self.gf('django.db.models.fields.CharField')(max_length=128)),
-            ('reader_type', self.gf('django.db.models.fields.CharField')(max_length=128)),
-        ))
-        db.send_create_signal(u'assays', ['AssayReader'])
-
-
-    def backwards(self, orm):
-        # Removing unique constraint on 'AssayWell', fields ['base_layout', 'row', 'column']
-        db.delete_unique(u'assays_assaywell', ['base_layout_id', 'row', 'column'])
-
-        # Deleting model 'AssayModelType'
-        db.delete_table(u'assays_assaymodeltype')
-
-        # Deleting model 'AssayModel'
-        db.delete_table(u'assays_assaymodel')
-
-        # Deleting model 'AssayLayoutFormat'
-        db.delete_table(u'assays_assaylayoutformat')
-
-        # Deleting model 'AssayBaseLayout'
-        db.delete_table(u'assays_assaybaselayout')
-
-        # Deleting model 'AssayWellType'
-        db.delete_table(u'assays_assaywelltype')
-
-        # Deleting model 'AssayWell'
-        db.delete_table(u'assays_assaywell')
-
-        # Deleting model 'AssayLayout'
-        db.delete_table(u'assays_assaylayout')
-
-        # Deleting model 'AssayTimepoint'
-        db.delete_table(u'assays_assaytimepoint')
-
-        # Deleting model 'AssayCompound'
-        db.delete_table(u'assays_assaycompound')
-
-        # Deleting model 'AssayReadout'
-        db.delete_table(u'assays_assayreadout')
-
-        # Deleting model 'AssayDeviceReadout'
-        db.delete_table(u'assays_assaydevicereadout')
-
-        # Deleting model 'AssayReader'
-        db.delete_table(u'assays_assayreader')
-
-
-    models = {
-        u'assays.assaybaselayout': {
-            'Meta': {'object_name': 'AssayBaseLayout'},
-            'base_layout_name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaybaselayout_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'layout_format': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['assays.AssayLayoutFormat']"}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaybaselayout_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'})
-        },
-        u'assays.assaycompound': {
-            'Meta': {'object_name': 'AssayCompound'},
-            'assay_layout': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['assays.AssayLayout']"}),
-            'column': ('django.db.models.fields.CharField', [], {'max_length': '25'}),
-            'compound': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['compounds.Compound']"}),
-            'concentration': ('django.db.models.fields.FloatField', [], {'default': '0'}),
-            'concentration_unit': ('django.db.models.fields.CharField', [], {'default': "'\\xce\\xbcM'", 'max_length': '64'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'row': ('django.db.models.fields.CharField', [], {'max_length': '25'})
-        },
-        u'assays.assaydevicereadout': {
-            'Meta': {'object_name': 'AssayDeviceReadout'},
-            'assay_device_id': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
-            'assay_layout': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['assays.AssayLayout']"}),
-            'assay_name': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['assays.AssayModel']", 'null': 'True'}),
-            'assay_timestamp': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            'cell_sample': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cellsamples.CellSample']"}),
-            'cellsample_density': ('django.db.models.fields.FloatField', [], {'default': '0'}),
-            'cellsample_density_unit': ('django.db.models.fields.CharField', [], {'default': "'ML'", 'max_length': '8'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaydevicereadout_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            'file': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'microdevice': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['microdevices.Microdevice']"}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaydevicereadout_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
-            'notebook': ('django.db.models.fields.CharField', [], {'max_length': '256', 'null': 'True', 'blank': 'True'}),
-            'notebook_page': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'notes': ('django.db.models.fields.CharField', [], {'max_length': '2048', 'null': 'True', 'blank': 'True'}),
-            'organ_name': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cellsamples.Organ']", 'null': 'True'}),
-            'reader_name': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['assays.AssayReader']"}),
-            'readout_timestamp': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            'readout_type': ('django.db.models.fields.CharField', [], {'default': "'E'", 'max_length': '2'}),
-            'readout_unit': ('django.db.models.fields.CharField', [], {'default': "'RFU'", 'max_length': '16'}),
-            'scientist': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'time_interval': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'timepoint': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'timeunit': ('django.db.models.fields.CharField', [], {'default': "'minutes'", 'max_length': '16'}),
-            'treatment_time_length': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'})
-        },
-        u'assays.assaylayout': {
-            'Meta': {'object_name': 'AssayLayout'},
-            'base_layout': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['assays.AssayBaseLayout']"}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaylayout_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'layout_name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaylayout_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'})
-        },
-        u'assays.assaylayoutformat': {
-            'Meta': {'object_name': 'AssayLayoutFormat'},
-            'column_labels': ('django.db.models.fields.CharField', [], {'max_length': '1000'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaylayoutformat_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'layout_format_name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '200'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaylayoutformat_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
-            'number_of_columns': ('django.db.models.fields.IntegerField', [], {}),
-            'number_of_rows': ('django.db.models.fields.IntegerField', [], {}),
-            'row_labels': ('django.db.models.fields.CharField', [], {'max_length': '1000'})
-        },
-        u'assays.assaymodel': {
-            'Meta': {'object_name': 'AssayModel'},
-            'assay_description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'assay_name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '200'}),
-            'assay_protocol_file': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'assay_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['assays.AssayModelType']"}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaymodel_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaymodel_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
-            'version_number': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'})
-        },
-        u'assays.assaymodeltype': {
-            'Meta': {'object_name': 'AssayModelType'},
-            'assay_type_description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'assay_type_name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '200'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaymodeltype_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaymodeltype_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'})
-        },
-        u'assays.assayreader': {
-            'Meta': {'object_name': 'AssayReader'},
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assayreader_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assayreader_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
-            'reader_name': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'reader_type': ('django.db.models.fields.CharField', [], {'max_length': '128'})
-        },
-        u'assays.assayreadout': {
-            'Meta': {'object_name': 'AssayReadout'},
-            'assay_device_readout': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['assays.AssayDeviceReadout']"}),
-            'column': ('django.db.models.fields.CharField', [], {'max_length': '25'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'row': ('django.db.models.fields.CharField', [], {'max_length': '25'}),
-            'value': ('django.db.models.fields.FloatField', [], {})
-        },
-        u'assays.assaytimepoint': {
-            'Meta': {'object_name': 'AssayTimepoint'},
-            'assay_layout': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['assays.AssayLayout']"}),
-            'column': ('django.db.models.fields.CharField', [], {'max_length': '25'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'row': ('django.db.models.fields.CharField', [], {'max_length': '25'}),
-            'timepoint': ('django.db.models.fields.IntegerField', [], {'default': '0'})
-        },
-        u'assays.assaywell': {
-            'Meta': {'unique_together': "[('base_layout', 'row', 'column')]", 'object_name': 'AssayWell'},
-            'base_layout': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['assays.AssayBaseLayout']"}),
-            'column': ('django.db.models.fields.CharField', [], {'max_length': '25'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaywell_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaywell_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
-            'row': ('django.db.models.fields.CharField', [], {'max_length': '25'}),
-            'well_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['assays.AssayWellType']"})
-        },
-        u'assays.assaywelltype': {
-            'Meta': {'object_name': 'AssayWellType'},
-            'background_color': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaywelltype_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'assaywelltype_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
-            'well_description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'well_type': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '200'})
-        },
-        u'auth.group': {
-            'Meta': {'object_name': 'Group'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'}),
-            'permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'})
-        },
-        u'auth.permission': {
-            'Meta': {'ordering': "(u'content_type__app_label', u'content_type__model', u'codename')", 'unique_together': "((u'content_type', u'codename'),)", 'object_name': 'Permission'},
-            'codename': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
-        },
-        u'auth.user': {
-            'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Group']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Permission']"}),
-            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
-        },
-        u'cellsamples.cellsample': {
-            'Meta': {'object_name': 'CellSample'},
-            'barcode': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'cell_image': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'cell_source': ('django.db.models.fields.CharField', [], {'default': "'Primary'", 'max_length': '20', 'null': 'True', 'blank': 'True'}),
-            'cell_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cellsamples.CellType']"}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'cellsample_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'isolation_datetime': ('django.db.models.fields.DateTimeField', [], {}),
-            'isolation_method': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'isolation_notes': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'cellsample_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
-            'notes': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'patient_age': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'patient_condition': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'patient_gender': ('django.db.models.fields.CharField', [], {'default': "'N'", 'max_length': '1', 'blank': 'True'}),
-            'percent_viability': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'product_id': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'receipt_date': ('django.db.models.fields.DateField', [], {}),
-            'supplier': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cellsamples.Supplier']"}),
-            'viable_count': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'viable_count_unit': ('django.db.models.fields.CharField', [], {'default': "'N'", 'max_length': '1', 'blank': 'True'})
-        },
-        u'cellsamples.cellsubtype': {
-            'Meta': {'object_name': 'CellSubtype'},
-            'cell_subtype': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
-        },
-        u'cellsamples.celltype': {
-            'Meta': {'ordering': "('cell_type',)", 'object_name': 'CellType'},
-            'cell_subtype': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cellsamples.CellSubtype']"}),
-            'cell_type': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'organ': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cellsamples.Organ']"}),
-            'species': ('django.db.models.fields.CharField', [], {'default': "'Human'", 'max_length': '10', 'null': 'True', 'blank': 'True'})
-        },
-        u'cellsamples.organ': {
-            'Meta': {'ordering': "('organ_name',)", 'object_name': 'Organ'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'organ_name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'})
-        },
-        u'cellsamples.supplier': {
-            'Meta': {'object_name': 'Supplier'},
-            'address': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
-            'phone': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'})
-        },
-        u'compounds.compound': {
-            'Meta': {'ordering': "('name',)", 'object_name': 'Compound'},
-            'acidic_pka': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'alogp': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'basic_pka': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'chemblid': ('django.db.models.fields.CharField', [], {'max_length': '20', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'compound_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'inchikey': ('django.db.models.fields.CharField', [], {'max_length': '27', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
-            'known_drug': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_update': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'logd': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'logp': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'medchem_friendly': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'compound_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
-            'molecular_formula': ('django.db.models.fields.CharField', [], {'max_length': '40', 'null': 'True', 'blank': 'True'}),
-            'molecular_weight': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'ro3_passes': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'ro5_violations': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'rotatable_bonds': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'smiles': ('django.db.models.fields.CharField', [], {'max_length': '1000', 'null': 'True', 'blank': 'True'}),
-            'species': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
-            'synonyms': ('django.db.models.fields.TextField', [], {'max_length': '4000', 'null': 'True', 'blank': 'True'})
-        },
-        u'contenttypes.contenttype': {
-            'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
-            'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        u'microdevices.manufacturer': {
-            'Manufacturer_website': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'Meta': {'object_name': 'Manufacturer'},
-            'contact_person': ('django.db.models.fields.CharField', [], {'max_length': '250', 'null': 'True', 'blank': 'True'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'manufacturer_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'manufacturer_name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'manufacturer_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'})
-        },
-        u'microdevices.microdevice': {
-            'Meta': {'object_name': 'Microdevice'},
-            'barcode': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'center': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['microdevices.MicrophysiologyCenter']", 'null': 'True', 'blank': 'True'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'microdevice_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            'description': ('django.db.models.fields.CharField', [], {'max_length': '400', 'null': 'True', 'blank': 'True'}),
-            'device_cross_section_image': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'device_fluid_volume': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'device_fluid_volume_unit': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'device_image': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'device_length': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'device_name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'device_size_unit': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'device_thickness': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'device_width': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'manufacturer': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['microdevices.Manufacturer']", 'null': 'True', 'blank': 'True'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'microdevice_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
-            'organ': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cellsamples.Organ']", 'null': 'True', 'blank': 'True'}),
-            'substrate_material': ('django.db.models.fields.CharField', [], {'max_length': '150', 'null': 'True', 'blank': 'True'}),
-            'substrate_thickness': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'})
-        },
-        u'microdevices.microphysiologycenter': {
-            'Meta': {'object_name': 'MicrophysiologyCenter'},
-            'center_name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'center_website': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'contact_person': ('django.db.models.fields.CharField', [], {'max_length': '250', 'null': 'True', 'blank': 'True'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'microphysiologycenter_created-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
-            'description': ('django.db.models.fields.CharField', [], {'max_length': '400', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'microphysiologycenter_modified-by'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'})
-        }
-    }
-
-    complete_apps = ['assays']
+    operations = [
+        migrations.CreateModel(
+            name='AssayBaseLayout',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('base_layout_name', models.CharField(max_length=200)),
+            ],
+            options={
+                'ordering': ('base_layout_name',),
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayChipCells',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('cellsample_density', models.FloatField(default=0, verbose_name=b'density')),
+                ('cellsample_density_unit', models.CharField(default=b'CP', max_length=8, verbose_name=b'Unit', choices=[(b'WE', b'cells / well'), (b'CP', b'cells / chip'), (b'ML', b'cells / mL'), (b'MM', b'cells / mm^2')])),
+                ('cell_passage', models.CharField(default=b'-', max_length=16, verbose_name=b'Passage#')),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayChipRawData',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('field_id', models.CharField(default=b'0', max_length=255)),
+                ('value', models.FloatField(null=True)),
+                ('elapsed_time', models.FloatField(default=0)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayChipReadout',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('restricted', models.BooleanField(default=True, help_text=b'Check box to restrict to selected group')),
+                ('flagged', models.BooleanField(default=False, help_text=b'Check box to flag for review')),
+                ('reason_for_flag', models.CharField(help_text=b'Reason for why this entry was flagged', max_length=300, null=True, blank=True)),
+                ('treatment_time_length', models.FloatField(null=True, verbose_name=b'Assay Treatment Duration', blank=True)),
+                ('readout_start_time', models.DateField(help_text=b'YYYY-MM-DD', verbose_name=b'Readout Start Date')),
+                ('notebook', models.CharField(max_length=256, null=True, blank=True)),
+                ('notebook_page', models.IntegerField(null=True, blank=True)),
+                ('notes', models.CharField(max_length=2048, null=True, blank=True)),
+                ('scientist', models.CharField(max_length=100, null=True, blank=True)),
+                ('file', models.FileField(help_text=b'Green = Data from database; Red = Line that will not be read; Gray = Reading with null value ***Uploading overwrites old data***', upload_to=b'csv', null=True, verbose_name=b'Data File', blank=True)),
+            ],
+            options={
+                'ordering': ('chip_setup',),
+                'verbose_name': 'Chip Readout',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayChipReadoutAssay',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('object_type', models.CharField(default=b'F', max_length=6, verbose_name=b'Object of Interest', choices=[(b'F', b'Field'), (b'C', b'Colony'), (b'O', b'Outflow'), (b'X', b'Other')])),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayChipSetup',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('restricted', models.BooleanField(default=True, help_text=b'Check box to restrict to selected group')),
+                ('flagged', models.BooleanField(default=False, help_text=b'Check box to flag for review')),
+                ('reason_for_flag', models.CharField(help_text=b'Reason for why this entry was flagged', max_length=300, null=True, blank=True)),
+                ('setup_date', models.DateField(help_text=b'YYYY-MM-DD')),
+                ('variance', models.CharField(max_length=3000, null=True, verbose_name=b'Variance from Protocol', blank=True)),
+                ('assay_chip_id', models.CharField(max_length=512, verbose_name=b'Chip ID/ Barcode')),
+                ('chip_test_type', models.CharField(max_length=8, choices=[(b'control', b'Control'), (b'compound', b'Compound')])),
+                ('concentration', models.FloatField(default=0, null=True, verbose_name=b'Conc.', blank=True)),
+                ('scientist', models.CharField(max_length=100, null=True, blank=True)),
+                ('notebook', models.CharField(max_length=256, null=True, blank=True)),
+                ('notebook_page', models.IntegerField(null=True, blank=True)),
+                ('notes', models.CharField(max_length=2048, null=True, blank=True)),
+            ],
+            options={
+                'ordering': ('-assay_chip_id', 'assay_run_id'),
+                'verbose_name': 'Chip Setup',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayCompound',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('concentration', models.FloatField(default=0)),
+                ('concentration_unit', models.CharField(default=b'\xce\xbcM', max_length=64)),
+                ('row', models.CharField(max_length=25)),
+                ('column', models.CharField(max_length=25)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayDeviceReadout',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('assay_device_id', models.CharField(max_length=512, verbose_name=b'Plate ID/ Barcode')),
+                ('cellsample_density', models.FloatField(default=0, verbose_name=b'density')),
+                ('cellsample_density_unit', models.CharField(default=b'ML', max_length=8, verbose_name=b'Unit', choices=[(b'WE', b'cells / well'), (b'ML', b'cells / mL'), (b'MM', b'cells / mm^2')])),
+                ('treatment_time_length', models.FloatField(null=True, verbose_name=b'Treatment Duration', blank=True)),
+                ('assay_start_time', models.DateField(help_text=b'YYYY-MM-DD', null=True, verbose_name=b'Start Date', blank=True)),
+                ('readout_start_time', models.DateField(help_text=b'YYYY-MM-DD', null=True, verbose_name=b'Readout Date', blank=True)),
+                ('notebook', models.CharField(max_length=256, null=True, blank=True)),
+                ('notebook_page', models.IntegerField(null=True, blank=True)),
+                ('notes', models.CharField(max_length=2048, null=True, blank=True)),
+                ('scientist', models.CharField(max_length=100, null=True, blank=True)),
+                ('file', models.FileField(upload_to=b'csv', null=True, verbose_name=b'Data File', blank=True)),
+            ],
+            options={
+                'ordering': ('assay_device_id', 'assay_name'),
+                'verbose_name': 'Plate Readout',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayLayout',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('layout_name', models.CharField(max_length=200)),
+            ],
+            options={
+                'ordering': ('layout_name',),
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayLayoutFormat',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('layout_format_name', models.CharField(unique=True, max_length=200)),
+                ('number_of_rows', models.IntegerField()),
+                ('number_of_columns', models.IntegerField()),
+                ('row_labels', models.CharField(help_text=b'Space separated list of unique labels, e.g. "A B C D ..." Number of items must match number of columns.', max_length=1000)),
+                ('column_labels', models.CharField(help_text=b'Space separated list of unique labels, e.g. "1 2 3 4 ...". Number of items must match number of columns.', max_length=1000)),
+            ],
+            options={
+                'ordering': ('layout_format_name',),
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayModel',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('assay_name', models.CharField(unique=True, max_length=200)),
+                ('version_number', models.CharField(max_length=200, null=True, verbose_name=b'Version', blank=True)),
+                ('assay_description', models.TextField(null=True, verbose_name=b'Description', blank=True)),
+                ('assay_protocol_file', models.FileField(upload_to=b'assays', null=True, verbose_name=b'Protocol File', blank=True)),
+                ('test_type', models.CharField(max_length=13, verbose_name=b'Test Type', choices=[(b'TOX', b'Toxicity'), (b'DM', b'Disease'), (b'EFF', b'Efficacy'), (b'CC', b'Cell Characterization')])),
+            ],
+            options={
+                'ordering': ('assay_name',),
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayModelType',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('assay_type_name', models.CharField(unique=True, max_length=200)),
+                ('assay_type_description', models.TextField(null=True, blank=True)),
+            ],
+            options={
+                'ordering': ('assay_type_name',),
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayPlateTestResult',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('assay_test_time', models.FloatField(null=True, verbose_name=b'Time', blank=True)),
+                ('result', models.CharField(default=b'1', max_length=8, verbose_name=b'Pos/Neg?', choices=[(b'0', b'Neg'), (b'1', b'Pos')])),
+                ('severity', models.CharField(default=b'-1', choices=[(b'-1', b'UNKNOWN'), (b'0', b'NEGATIVE'), (b'1', b'+'), (b'2', b'+ +'), (b'3', b'+ + +'), (b'4', b'+ + + +'), (b'5', b'+ + + + +')], max_length=5, blank=True, null=True, verbose_name=b'Severity')),
+                ('value', models.FloatField(null=True, blank=True)),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayReader',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('reader_name', models.CharField(max_length=128)),
+                ('reader_type', models.CharField(max_length=128)),
+            ],
+            options={
+                'ordering': ('reader_name',),
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayReadout',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('row', models.CharField(max_length=25)),
+                ('column', models.CharField(max_length=25)),
+                ('value', models.FloatField()),
+                ('elapsed_time', models.FloatField(default=0)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayResult',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('result', models.CharField(default=b'1', max_length=8, verbose_name=b'Pos/Neg?', choices=[(b'0', b'Neg'), (b'1', b'Pos')])),
+                ('severity', models.CharField(default=b'-1', choices=[(b'-1', b'UNKNOWN'), (b'0', b'NEGATIVE'), (b'1', b'+'), (b'2', b'+ +'), (b'3', b'+ + +'), (b'4', b'+ + + +'), (b'5', b'+ + + + +')], max_length=5, blank=True, null=True, verbose_name=b'Severity')),
+                ('value', models.FloatField(null=True, blank=True)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayResultFunction',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('function_name', models.CharField(unique=True, max_length=100)),
+                ('function_results', models.CharField(max_length=100, null=True, blank=True)),
+                ('description', models.CharField(max_length=200, null=True, blank=True)),
+            ],
+            options={
+                'ordering': ('function_name',),
+                'verbose_name': 'Function',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayResultType',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('assay_result_type', models.CharField(unique=True, max_length=100)),
+                ('description', models.CharField(max_length=200, null=True, blank=True)),
+            ],
+            options={
+                'ordering': ('assay_result_type',),
+                'verbose_name': 'Result type',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayRun',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('restricted', models.BooleanField(default=True, help_text=b'Check box to restrict to selected group')),
+                ('toxicity', models.BooleanField(default=False)),
+                ('efficacy', models.BooleanField(default=False)),
+                ('disease', models.BooleanField(default=False)),
+                ('cell_characterization', models.BooleanField(default=False)),
+                ('name', models.TextField(default=b'Study-01', help_text=b'Name-###', verbose_name=b'Study Name')),
+                ('start_date', models.DateField(help_text=b'YYYY-MM-DD')),
+                ('assay_run_id', models.TextField(help_text=b"Standard format 'CenterID-YYYY-MM-DD-Name-###'", unique=True, verbose_name=b'Study ID')),
+                ('description', models.TextField(null=True, blank=True)),
+                ('file', models.FileField(help_text=b'Do not upload until you have made each Chip Readout', upload_to=b'csv', null=True, verbose_name=b'Batch Data File', blank=True)),
+            ],
+            options={
+                'ordering': ('assay_run_id',),
+                'verbose_name': 'Organ Chip Study',
+                'verbose_name_plural': 'Organ Chip Studies',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayTestResult',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('restricted', models.BooleanField(default=True, help_text=b'Check box to restrict to selected group')),
+                ('flagged', models.BooleanField(default=False, help_text=b'Check box to flag for review')),
+                ('reason_for_flag', models.CharField(help_text=b'Reason for why this entry was flagged', max_length=300, null=True, blank=True)),
+            ],
+            options={
+                'verbose_name': 'Chip Result',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayTimepoint',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('timepoint', models.FloatField(default=0)),
+                ('row', models.CharField(max_length=25)),
+                ('column', models.CharField(max_length=25)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayWell',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('row', models.CharField(max_length=25)),
+                ('column', models.CharField(max_length=25)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssayWellType',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('well_type', models.CharField(unique=True, max_length=200)),
+                ('well_description', models.TextField(null=True, blank=True)),
+                ('background_color', models.CharField(help_text=b'Provide color code or name. You can pick one from: http://www.w3schools.com/html/html_colornames.asp', max_length=20)),
+            ],
+            options={
+                'ordering': ('well_type',),
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='PhysicalUnits',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('unit', models.CharField(max_length=256)),
+                ('description', models.CharField(max_length=256, null=True, blank=True)),
+                ('unit_type', models.CharField(default=b'C', max_length=2, choices=[('V', 'Volume'), ('C', 'Concentration'), ('M', 'Mass'), ('T', 'Time'), ('F', 'Frequency'), ('RA', 'Rate'), ('RE', 'Relative'), ('O', 'Other')])),
+            ],
+            options={
+                'ordering': ['unit_type', 'unit'],
+                'verbose_name_plural': 'Physical Units',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='ReadoutUnit',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('readout_unit', models.CharField(unique=True, max_length=512)),
+                ('description', models.CharField(max_length=512, null=True, blank=True)),
+            ],
+            options={
+                'ordering': ('readout_unit',),
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='StudyConfiguration',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('name', models.CharField(max_length=50)),
+                ('study_format', models.CharField(max_length=11, choices=[(b'individual', b'Individual'), (b'integrated', b'Integrated')])),
+                ('media_composition', models.CharField(max_length=1000, null=True, blank=True)),
+                ('hardware_description', models.CharField(max_length=1000, null=True, blank=True)),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='StudyModel',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('label', models.CharField(max_length=1)),
+                ('sequence_number', models.IntegerField()),
+                ('output', models.CharField(max_length=20, null=True, blank=True)),
+                ('integration_mode', models.CharField(max_length=13, choices=[(b'0', b'Not Connected'), (b'1', b'Connected')])),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='TimeUnits',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('unit', models.CharField(max_length=16)),
+                ('description', models.CharField(max_length=256, null=True, blank=True)),
+                ('unit_order', models.FloatField(default=0, verbose_name=b'Seconds')),
+                ('created_by', models.ForeignKey(related_name='timeunits_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='timeunits_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('signed_off_by', models.ForeignKey(related_name='timeunits_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'ordering': ['unit_order'],
+                'verbose_name_plural': 'Time Units',
+            },
+            bases=(models.Model,),
+        ),
+    ]
