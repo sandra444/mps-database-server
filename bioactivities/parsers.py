@@ -1072,7 +1072,7 @@ def table(request):
     # Filter based on standardized bioactivity name
     q = q.filter(standard_name__in=desired_bioactivities)
 
-    length = len(q)
+    length = q.count()
 
     # Prefetch all foreign keys
     q = q.prefetch_related('assay', 'compound', 'parent_compound', 'target', 'created_by')[:5000]
