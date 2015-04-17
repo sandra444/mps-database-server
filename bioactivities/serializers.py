@@ -1,12 +1,12 @@
 from rest_framework import serializers
 from bioactivities.models import Bioactivity
 
-
-class BioactivitiesSerializer(serializers.ModelSerializer):
-
-    class Meta(object):
-        model = Bioactivity
-        fields = ('compound', 'target',)
+# Old API
+# class BioactivitiesSerializer(serializers.ModelSerializer):
+#
+#     class Meta(object):
+#         model = Bioactivity
+#         fields = ('compound', 'target',)
 
     # pk = serializers.Field()  # Note: `Field` is an untyped read-only field.
     # title = serializers.CharField(required=False,

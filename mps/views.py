@@ -53,3 +53,4 @@ def logout(request):
     auth.logout(request)
     c = RequestContext(request)
     return render_to_response('logout.html', c)
+

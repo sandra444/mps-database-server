@@ -10,7 +10,8 @@ from rest_framework.parsers import JSONParser
 
 from bioactivities.models import *
 from bioactivities.parsers import *
-from bioactivities.serializers import BioactivitiesSerializer
+# Old API
+#from bioactivities.serializers import BioactivitiesSerializer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -31,56 +32,56 @@ class JSONResponse(HttpResponse):
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
 
-
-@csrf_exempt
-def bioactivities_list(request):
-    """
-    List all code snippets, or create a new Bioactivity.
-    """
-    if request.method == 'GET':
-        # data = Bioactivity.objects.all().select_related("compound")
-        data = Bioactivity.objects.raw(
-            'SELECT id,compound_id,bioactivity_type,value,'
-            'units FROM  bioactivities_bioactivity;'
-        )
-
-        serializer = BioactivitiesSerializer(data, many=True)
-        return JSONResponse(serializer.data)
-
-    elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = BioactivitiesSerializer(data=data)
-        if serializer.is_valid():
-            # serializer.save()    # do not save anything yet
-            return JSONResponse(serializer.data, status=201)
-        return JSONResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def bioactivities_detail(request, pk):
-    """
-    Retrieve, update or delete a Bioactivity.
-    """
-    try:
-        snippet = Bioactivity.objects.get(pk=pk)
-    except Bioactivity.DoesNotExist:
-        return HttpResponse(status=404)
-
-    if request.method == 'GET':
-        serializer = BioactivitiesSerializer(snippet)
-        return JSONResponse(serializer.data)
-
-    elif request.method == 'PUT':
-        data = JSONParser().parse(request)
-        serializer = BioactivitiesSerializer(snippet, data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JSONResponse(serializer.data)
-        return JSONResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
-        snippet.delete()
-        return HttpResponse(status=204)
+# Old API
+# @csrf_exempt
+# def bioactivities_list(request):
+#     """
+#     List all code snippets, or create a new Bioactivity.
+#     """
+#     if request.method == 'GET':
+#         # data = Bioactivity.objects.all().select_related("compound")
+#         data = Bioactivity.objects.raw(
+#             'SELECT id,compound_id,bioactivity_type,value,'
+#             'units FROM  bioactivities_bioactivity;'
+#         )
+#
+#         serializer = BioactivitiesSerializer(data, many=True)
+#         return JSONResponse(serializer.data)
+#
+#     elif request.method == 'POST':
+#         data = JSONParser().parse(request)
+#         serializer = BioactivitiesSerializer(data=data)
+#         if serializer.is_valid():
+#             # serializer.save()    # do not save anything yet
+#             return JSONResponse(serializer.data, status=201)
+#         return JSONResponse(serializer.errors, status=400)
+#
+#
+# @csrf_exempt
+# def bioactivities_detail(request, pk):
+#     """
+#     Retrieve, update or delete a Bioactivity.
+#     """
+#     try:
+#         snippet = Bioactivity.objects.get(pk=pk)
+#     except Bioactivity.DoesNotExist:
+#         return HttpResponse(status=404)
+#
+#     if request.method == 'GET':
+#         serializer = BioactivitiesSerializer(snippet)
+#         return JSONResponse(serializer.data)
+#
+#     elif request.method == 'PUT':
+#         data = JSONParser().parse(request)
+#         serializer = BioactivitiesSerializer(snippet, data=data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return JSONResponse(serializer.data)
+#         return JSONResponse(serializer.errors, status=400)
+#
+#     elif request.method == 'DELETE':
+#         snippet.delete()
+#         return HttpResponse(status=204)
 
 
 @csrf_exempt
