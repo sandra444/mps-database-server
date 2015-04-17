@@ -10,8 +10,7 @@ from rest_framework.parsers import JSONParser
 
 from bioactivities.models import *
 from bioactivities.parsers import *
-# Old API
-#from bioactivities.serializers import BioactivitiesSerializer
+from bioactivities.serializers import BioactivitiesSerializer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -31,6 +30,25 @@ class JSONResponse(HttpResponse):
         content = JSONRenderer().render(data)
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
+
+
+def bioactivities_list(request):
+    """
+    Retrieve, update or delete a Bioactivity.
+    """
+
+    if request.method == 'GET':
+        compound =  request.GET.get('compound', '')
+
+        if compound:
+            data = Bioactivity.objects.filter(compound__name__icontains=compound)[:5000]
+            serializer = BioactivitiesSerializer(data, many=True)
+            return JSONResponse(serializer.data)
+        else:
+            return HttpResponse(status=404)
+
+    else:
+        return HttpResponse(status=404)
 
 # Old API
 # @csrf_exempt

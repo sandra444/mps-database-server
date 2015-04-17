@@ -19,7 +19,7 @@ from django.db.models import Q
 
 from mps.mixins import *
 
-import json
+import ujson as json
 
 # TODO Refactor imports
 

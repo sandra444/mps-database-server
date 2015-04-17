@@ -7,9 +7,9 @@ Bioactivities URL router
 from django.conf.urls import patterns, url
 
 urlpatterns = patterns('bioactivities.views',
+                       url(r'^bioactivities/$',
+                           'bioactivities_list'),
                        # Old API
-                       # url(r'^bioactivities/$',
-                       #     'bioactivities_list'),
                        # url(r'^bioactivities/(?P<pk>[0-9]+)/$',
                        #     'bioactivities_detail'),
                        url(r'^bioactivities/all_bioactivities/$',
