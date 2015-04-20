@@ -15,7 +15,7 @@ def main(request):
             return search(request)
 
     else:
-        form = SearchForm()
+        form = SearchForm(initial={'app': 'Compounds'})
 
     c = RequestContext(request)
     c.update({'form':form})

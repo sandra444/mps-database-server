@@ -20,11 +20,16 @@
 
     <script>
         $(function() {
-             $('#search_options li').click(function(e){
-              var selected = $(this).text();
-              $('#current_search').html(selected);
-              $('#id_search_term').prop('placeholder', 'Search ' + selected);
-              $('#id_app').val(selected);
+            var initial = $('#id_app').val();
+
+            $('#current_search').html(initial);
+            $('#id_search_term').prop('placeholder', 'Search ' + initial);
+
+            $('#search_options li').click(function(e){
+               var selected = $(this).text();
+               $('#current_search').html(selected);
+               $('#id_search_term').prop('placeholder', 'Search ' + selected);
+               $('#id_app').val(selected);
             });
         });
     </script>
@@ -32,7 +37,8 @@
     <div class="row">
         <form action="/" method="post">
             {% csrf_token %}
-            <input hidden id="id_app" name="app" value="Compounds">
+            {{ form.app.as_hidden }}
+{#            <input hidden id="id_app" name="app" value="Compounds">#}
             <div class="input-group">
                 <div class="input-group-btn">
                     <button type="button" class="btn btn-default dropdown-toggle not-bold" data-toggle="dropdown" aria-expanded="false">
