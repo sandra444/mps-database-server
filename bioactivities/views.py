@@ -34,16 +34,46 @@ class JSONResponse(HttpResponse):
 
 def bioactivities_list(request):
     """
-    Retrieve, update or delete a Bioactivity.
+    Retrieve a list of Bioactivities
     """
 
     if request.method == 'GET':
         compound =  request.GET.get('compound', '')
+        target = request.GET.get('target','')
+        name = request.GET.get('name','')
 
-        if compound:
-            data = Bioactivity.objects.filter(compound__name__icontains=compound)[:5000]
-            serializer = BioactivitiesSerializer(data, many=True)
-            return JSONResponse(serializer.data)
+        # I might want to sort by multiple fields later
+        if any([compound,target,name]):
+            data = Bioactivity.objects.filter(standard_name__isnull=False,
+                                              standardized_units__isnull=False,
+                                              standardized_value__isnull=False).prefetch_related('compound',
+                                                                                                 'target',
+                                                                                                 'created_by').select_related('assay__chemblid')
+
+            if compound:
+                data = data.filter(compound__name__icontains=compound)
+
+            if target:
+                data = data.filter(target__name__icontains=target)
+
+            if name:
+                data = data.filter(standard_name__icontains=name)
+
+            length = data.count()
+
+            # Limit at 5000
+            bioactivities = data[:5000]
+
+            c = RequestContext(request)
+            c.update({
+                'bioactivities': bioactivities,
+                'compound': compound,
+                'target': target,
+                'name': name,
+                'length': length
+            })
+            return render_to_response('bioactivities/bioactivities_list.html', c)
+
         else:
             return HttpResponse(status=404)
 

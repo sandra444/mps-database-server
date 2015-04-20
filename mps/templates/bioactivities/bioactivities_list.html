@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div style="padding-bottom: 50px">
+        <div id='overflow' hidden class="row">
+            <div class="alert alert-warning" role="alert" id="error_message">
+                <p id="length">
+
+                </p>
+            </div>
+        </div>
+
+        <h2 align="center">Bioactivities
+
+            {% if compound %}
+            where compound contains "{{ compound }}"
+            {% endif %}
+
+            {% if target %}
+            where target contains "{{ target }}"
+            {% endif %}
+
+            {% if name %}
+            where name contains "{{ name }}"
+            {% endif %}
+
+        </h2>
+
+        <table hidden id="bioactivities" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Compound</th>
+                    <th>Target</th>
+                    <th>Organism</th>
+                    <th>Standard Name</th>
+                    <th>Operator</th>
+                    <th>Standard Value</th>
+                    <th>Standard Units</th>
+                    <th>ChEMBL Link</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Compound</th>
+                    <th>Target</th>
+                    <th>Organism</th>
+                    <th>Standard Name</th>
+                    <th>Operator</th>
+                    <th>Standard Value</th>
+                    <th>Standard Units</th>
+                    <th>ChEMBL Link</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for bioactivity in bioactivities %}
+                <tr>
+                    <td><a href="/compounds/{{ bioactivity.compound.id }}">{{ bioactivity.compound }}</a></td>
+                    <td>{{ bioactivity.target }}</td>
+                    <td>{{ bioactivity.organism }}</td>
+                    <td>{{ bioactivity.standard_name }}</td>
+                    <td>{{ bioactivity.operator }}</td>
+                    <td>{{ bioactivity.standardized_value }}</td>
+                    <td>{{ bioactivity.standardized_units }}</td>
+                    <td>{{ bioactivity.assay.chemblid }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#bioactivities').DataTable( {
+                "iDisplayLength": 50,
+                // Initially sort on start date (descending), not ID
+                "order": [[ 0, "asc" ], [ 1, "asc"], [ 3, "asc"]]
+            });
+
+            var length = {{ length|safe }};
+
+            if (length > 5000) {
+                $('#length').html('Displaying 5000 out of ' + length + ' entries');
+                $('#overflow').prop('hidden', false);
+            }
+        });
+    </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}
