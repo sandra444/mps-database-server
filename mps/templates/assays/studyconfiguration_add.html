@@ -17,12 +17,16 @@
 
     {% if update %}
         <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
+
+        <h1>
+            Edit Configuration {{ object.name }}
     {% else %}
         <form class="form-horizontal" method="post" >
+
+        <h1>
+            Add Study Configuration
     {% endif %}
         {% csrf_token %}
-        <h1>
-            Study Configuration
 
             <button id="submit" type="submit" class="btn btn-primary">Submit</button>
         </h1>

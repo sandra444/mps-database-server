@@ -46,12 +46,16 @@
 
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
+
+    <h1>
+        Edit {{ object }}
 {% else %}
     <form class="form-horizontal" method="post" >
+
+    <h1>
+        Add Chip Setup
 {% endif %}
     {% csrf_token %}
-    <h1>
-        Chip Setup
 
         <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
 

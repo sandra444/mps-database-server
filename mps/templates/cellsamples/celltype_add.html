@@ -10,12 +10,16 @@
 
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
+
+    <h1>
+        Edit {{ object }}
 {% else %}
     <form class="form-horizontal" method="post" >
+
+    <h1>
+        Add Cell Type
 {% endif %}
     {% csrf_token %}
-    <h1>
-        Cell Type
 
         <button id="submit" type="submit" class="btn btn-primary">Submit</button>
     </h1>
