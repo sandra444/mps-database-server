@@ -1,17 +1,28 @@
 // This script moves the filter and length widgets for a datatable and make the table visible after it loads
 $(document).ready(function() {
-    // Swap positions of filter and length selection
-    $('.dataTables_filter').css('float', 'left');
-    $('.dataTables_length').css('float', 'right');
 
-    // Clarify usage of search
-    $('.dataTables_filter').prop('title', 'Separate terms with a space to search multiple fields');
+    // Get URL parameters for auto search
+    function urlParam(name) {
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        if (results==null){
+           return null;
+        }
+        else{
+           return results[1] || 0;
+        }
+    }
+
+    // Swap positions of filter and length selection; clarify filter
+    $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
+    $('.dataTables_length').css('float', 'right');
 
     // Clarify usage of sort
     $('.sorting').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
     $('.sorting_asc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
     $('.sorting_desc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
 
+    // Perform auto search (from GET)
+    $('.dataTables_filter input').val(urlParam('search')).trigger($.Event("keyup", { keyCode: 13 }));
 
     // Reveal the table, as loading is complete
     $('table').prop('hidden', false)

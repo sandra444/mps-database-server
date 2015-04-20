@@ -3,13 +3,22 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import auth
 from django.core.context_processors import csrf
 from django.template import RequestContext
-# from forms import MyRegistrationForm
+from forms import SearchForm
 
 import os
 import settings
 
 def main(request):
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            return search(request)
+
+    else:
+        form = SearchForm()
+
     c = RequestContext(request)
+    c.update({'form':form})
     return render_to_response('index.html', c)
 
 def login(request):
@@ -53,4 +62,37 @@ def logout(request):
     auth.logout(request)
     c = RequestContext(request)
     return render_to_response('logout.html', c)
+
+def search(request):
+    app = request.POST.get('app','')
+    search_term = request.POST.get('search_term', '')
+
+    # If there is not a specified app or search term, just return to the home page
+    if not app or not search_term:
+        return HttpResponseRedirect('/')
+
+    elif app == 'Compounds':
+        return HttpResponseRedirect('compounds/?search={}'.format(search_term))
+
+    elif app == 'Drug Trials':
+        return HttpResponseRedirect('drugtrials/?search={}'.format(search_term))
+
+    elif app == 'Adverse Events':
+        return HttpResponseRedirect('adverse_events/?search={}'.format(search_term))
+
+    elif app == 'Bioactivities by Compound':
+        return HttpResponseRedirect('bioactivities/?compound={}'.format(search_term))
+
+    elif app == 'Bioactivities by Target':
+        return HttpResponseRedirect('bioactivities/?target={}'.format(search_term))
+
+    elif app == 'Bioactivities by Name':
+        return HttpResponseRedirect('bioactivities/?name={}'.format(search_term))
+
+    elif app == 'Studies':
+        return HttpResponseRedirect('/assays/organchipstudy/?search={}'.format(search_term))
+
+    # If, for whatever reason, invalid data is entered, just return to the home page
+    else:
+        return HttpResponseRedirect('/')
 

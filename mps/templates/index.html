@@ -10,7 +10,55 @@
     #title {
         background: #F8F8FF;
     }
+
+    {# deal with css bootstrap overide for buttons and dropdowns (may have been overzealous of me) #}
+    .not-bold {
+        font-size: 14px;
+        font-weight: normal;
+    }
     </style>
+
+    <script>
+        $(function() {
+             $('#search_options li').click(function(e){
+              var selected = $(this).text();
+              $('#current_search').html(selected);
+              $('#id_search_term').prop('placeholder', 'Search ' + selected);
+              $('#id_app').val(selected);
+            });
+        });
+    </script>
+
+    <div class="row">
+        <form action="/" method="post">
+            {% csrf_token %}
+            <input hidden id="id_app" name="app" value="Compounds">
+            <div class="input-group">
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default dropdown-toggle not-bold" data-toggle="dropdown" aria-expanded="false">
+                        <span id="current_search">Compounds</span>
+                        <span class="caret"></span></button>
+                    <ul id="search_options" class="dropdown-menu" role="menu">
+                      <li><a>Compounds</a></li>
+                      <li><a>Drug Trials</a></li>
+                      <li><a>Adverse Events</a></li>
+                      <li class="divider"></li>
+                      <li><a>Bioactivities by Compound</a></li>
+                      <li><a>Bioactivities by Target</a></li>
+                      <li><a>Bioactivities by Name</a></li>
+                      <li class="divider"></li>
+                      <li><a>Studies</a></li>
+                    </ul>
+              </div>
+            <input id="id_search_term" name="search_term" type="text" class="form-control" placeholder="Search Compounds">
+            <span class="input-group-btn">
+                <button class="btn btn-primary not-bold" type="submit">Search</button>
+            </span>
+        </div>
+        </form>
+    </div>
+
+    <br>
 
     <div class="text-center">
         <div class="row" id="title">
