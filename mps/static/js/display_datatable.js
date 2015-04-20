@@ -8,7 +8,7 @@ $(document).ready(function() {
            return null;
         }
         else{
-           return results[1] || 0;
+           return decodeURI(results[1]) || 0;
         }
     }
 
