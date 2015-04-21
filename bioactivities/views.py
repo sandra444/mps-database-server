@@ -12,6 +12,8 @@ from bioactivities.models import *
 from bioactivities.parsers import *
 from bioactivities.serializers import BioactivitiesSerializer
 
+from mps.views import SearchForm, search
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -235,7 +237,16 @@ def view_heatmap(request):
     return render_to_response('bioactivities/heatmap.html', c)
 
 def view_table(request):
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            return search(request)
+
+    else:
+        form = SearchForm(initial={'app': 'Bioactivities by Compound'})
+
     c = RequestContext(request)
+    c.update({'form':form})
     return render_to_response('bioactivities/table.html', c)
 
 def view_model(request):

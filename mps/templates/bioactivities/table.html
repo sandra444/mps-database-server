@@ -8,6 +8,57 @@
 {% endblock %}
 
 {% block submit %}
+    <style>
+        .not-bold {
+            font-size: 14px;
+            font-weight: normal;
+        }
+    </style>
+
+    <script>
+        $(function() {
+            var initial = $('#id_app').val();
+
+            $('#current_search').html(initial);
+            $('#id_search_term').prop('placeholder', 'Search ' + initial);
+
+            $('#search_options li').click(function(e){
+               var selected = $(this).text();
+               $('#current_search').html(selected);
+               $('#id_search_term').prop('placeholder', 'Search ' + selected);
+               $('#id_app').val(selected);
+            });
+        });
+    </script>
+
+    <legend><h1>Quick Search</h1></legend>
+
+    <div class="row">
+        <form action="/" method="post">
+            {% csrf_token %}
+            {{ form.app.as_hidden }}
+{#            <input hidden id="id_app" name="app" value="Compounds">#}
+            <div class="input-group">
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default dropdown-toggle not-bold" data-toggle="dropdown" aria-expanded="false">
+                        <span id="current_search">Bioactivities by Compound</span>
+                        <span class="caret"></span></button>
+                    <ul id="search_options" class="dropdown-menu" role="menu">
+                      <li><a>Bioactivities by Compound</a></li>
+                      <li><a>Bioactivities by Target</a></li>
+                      <li><a>Bioactivities by Name</a></li>
+                    </ul>
+                </div>
+            <input id="id_search_term" name="search_term" type="text" class="form-control" placeholder="Search Compounds">
+            <span class="input-group-btn">
+                <button class="btn btn-primary not-bold" type="submit">Search</button>
+            </span>
+        </div>
+        </form>
+    </div>
+
+    <legend><h1>Advanced Search</h1></legend>
+
     <button class="btn btn-xlarge btn-primary text-center" id="submit">
         Generate Table
     </button>
