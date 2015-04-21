@@ -65,7 +65,9 @@
                     <td>{{ bioactivity.operator }}</td>
                     <td>{{ bioactivity.standardized_value }}</td>
                     <td>{{ bioactivity.standardized_units }}</td>
-                    <td>{{ bioactivity.assay.chemblid }}</td>
+                    <td><a href="https://www.ebi.ac.uk/chembl/assay/inspect/{{ bioactivity.assay.chemblid }}">
+                        {{ bioactivity.assay.chemblid }}
+                    </a></td>
                 </tr>
             {% endfor %}
             </tbody>

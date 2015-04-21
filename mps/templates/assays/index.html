@@ -34,7 +34,7 @@
                 <tr class="compound" id={{ study.id }} name={{ study.id }}>
                     <td><a href="/assays/{{ study.id }}{{ setup_only }}">{{ study.assay_run_id }}</a></td>
                     <td>{{ study.study_types }}</td>
-                    <td>{{ study.start_date }}</td>
+                    <td>{{ study.start_date|date:"M d, Y" }}</td>
                     <td>{{ study.description }}</td>
                     <td>{{ study.created_by }}</td>
                     <td>{{ study.group }}</td>

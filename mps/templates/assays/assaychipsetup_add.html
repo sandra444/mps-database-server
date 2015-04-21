@@ -366,7 +366,7 @@
             {% for cellsample in cellsamples %}
                 <tr class="cellsample" id={{ cellsample.id }} name={{ cellsample.id }}>
                     <td>{{ cellsample.id }}</td>
-                    <td>{{ cellsample.receipt_date }}</td>
+                    <td>{{ cellsample.receipt_date|date:"M d, Y" }}</td>
                     <td>{{ cellsample.cell_type }}</td>
                     <td>{{ cellsample.cell_source }}</td>
                     <td>{{ cellsample.supplier }}</td>
