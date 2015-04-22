@@ -199,7 +199,7 @@ class BioactivityType(LockableModel):
 
 class PubChemBioactivity(LockableModel):
     # TextFields and CharFields have no performace benefits over eachother, but may want to use CharFields for clarity
-    assay_id = models.TextField(verbose_name="Assay ID")
+    assay = models.ForeignKey('PubChemAssay', blank=True, null=True)
 
     # It makes sense just to add the PubChem CID to the compound then just use a FK
     #compound_id = models.TextField(verbose_name="Compound ID")
@@ -212,16 +212,10 @@ class PubChemBioactivity(LockableModel):
     # Value is required
     value = models.FloatField(verbose_name="Value (uM)")
 
-    # Source is an optional field showing where PubChem pulled their data
-    source = models.TextField(default='', blank=True, null=True)
-
     # Not required?
     # TODO Consider making this a FK to bioactivity types
     # TODO Or, perhaps we should make another table for PubChem types?
     activity_name = models.TextField(default='', verbose_name="Activity Name")
-
-    # Not required?
-    assay_name = models.TextField(default='', verbose_name="Assay Name", null=True, blank=True)
 
 
 # TODO PubChem Bioactivity Type? and PubChem targets
@@ -231,7 +225,7 @@ class PubChemBioactivity(LockableModel):
 #    name = models.TextField(default='')
 
 
-# Apparently all PubChem targets are Single Proteins (or at least. point to a specific gene)
+# Apparently all PubChem targets are Single Proteins (or at least point to a specific gene)
 class PubChemTarget(LockableModel):
     name = models.TextField(default='', help_text="Preferred target name.")
 
@@ -246,3 +240,18 @@ class PubChemTarget(LockableModel):
 
     def __unicode__(self):
         return unicode(self.name)
+
+
+class PubChemAssay(LockableModel):
+    # Source is an optional field showing where PubChem pulled their data
+    source = models.TextField(default='', blank=True, null=True)
+
+    aid = models.TextField(verbose_name="Assay ID")
+
+    # Not required?
+    name = models.TextField(default='', verbose_name="Assay Name", null=True, blank=True)
+
+    description = models.TextField(blank=True, null=True)
+
+    def __unicode__(self):
+        return unicode(self.aid)

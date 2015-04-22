@@ -1,5 +1,5 @@
 from compounds.models import Compound
-from bioactivities.models import PubChemBioactivity, PubChemTarget
+from bioactivities.models import PubChemBioactivity, PubChemTarget, PubChemAssay
 
 import urllib, json
 
@@ -37,7 +37,6 @@ def get_bioactivities(name):
                 value = entry[8]
                 # Please note that specifying the units as micromolar is superfluous and thus these strings are removed
                 activity_name = entry[9].replace(' (uM)','').replace('_uM','').replace('_MICROM','')
-                assay_name = entry[10]
 
                 # TODO Insert code to add/handle Bioactivity Types?
                 # Do not add outcome to returned data, assumed to be active
@@ -111,32 +110,14 @@ def get_bioactivities(name):
                                 print "Error processing target:", target
 
                     activities.append({
-                        'assay_id': AID,
                         'compound_id': CID,
                         'target': final_target,
                         'value': value,
                         'activity_name': activity_name,
-                        'assay_name': assay_name
                     })
 
         # Some entries might be empty thus check for assays
         if assays:
-
-            # flat_assays = ','.join([x for x in assays])
-            #
-            # assay_url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/assay/aid/{}/summary/json'.format(flat_assays)
-            # assay_response = urllib.urlopen(assay_url)
-            # assay_data = json.loads(assay_response.read())
-            # assay_data = assay_data.get('AssaySummaries').get('AssaySummary')
-            #
-            # for assay in assay_data:
-            #     aid = str(assay.get('AID'))
-            #     source = assay.get('SourceName')
-            #
-            #     activities_to_change = assays.get(aid)
-            #
-            #     for index in activities_to_change:
-            #         activities[index].update({'source':source})
 
             all_assays = [x for x in assays]
             flat_assays = []
@@ -154,12 +135,31 @@ def get_bioactivities(name):
 
                 for assay in assay_data:
                     aid = str(assay.get('AID'))
-                    source = assay.get('SourceName')
+
+                    # Try to get an assay with this AID from the database
+                    try:
+                        assay_model = PubChemAssay.objects.get(aid=aid)
+                        print "Found assay!"
+
+                    except:
+                        source = assay.get('SourceName')
+                        name = assay.get('Name')
+                        description = '\n'.join(assay.get('Description')).strip()
+
+                        entry = {
+                            'aid': aid,
+                            'source': source,
+                            'name': name,
+                            'description': description
+                        }
+
+                        assay_model = PubChemAssay.objects.create(locked=True, **entry)
+                        print "Created assay!"
 
                     activities_to_change = assays.get(aid)
 
                     for index in activities_to_change:
-                        activities[index].update({'source':source})
+                        activities[index].update({'assay':assay_model})
 
         return activities
 
@@ -186,13 +186,11 @@ def run():
             for activity in activities:
                 # Add the bioactivity
                 entry = {
-                    'assay_id': activity.get('assay_id'),
+                    'assay': activity.get('assay'),
                     'compound': compound,
                     'target': activity.get('target'),
                     'value': activity.get('value'),
-                    'source': activity.get('source'),
-                    'activity_name': activity.get('activity_name'),
-                    'assay_name': activity.get('assay_name')
+                    'activity_name': activity.get('activity_name')
                 }
                 try:
                     PubChemBioactivity.objects.create(locked=True, **entry)
