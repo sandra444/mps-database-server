@@ -39,6 +39,7 @@ $(document).ready(function () {
         }
         else {
             data[0] = '';
+            $('#center_name').html('');
             set_data();
         }
     }
