@@ -103,6 +103,7 @@
             <tr>
                 <th>Event</th>
                 <th>Frequency</th>
+                <th>Organ</th>
             </tr>
         </thead>
         <tbody>
@@ -110,6 +111,7 @@
             <tr>
                 <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
                 <td>{{ adverse_event.frequency }}</td>
+                <td>{{ adverse_event.event.organ|default:"" }}</td>
             </tr>
         {% endfor %}
         </tbody>
