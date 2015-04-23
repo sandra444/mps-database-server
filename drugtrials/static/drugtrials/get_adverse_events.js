@@ -6,6 +6,9 @@ $(document).ready(function () {
     }
 
     function get_range() {
+        // Clear old (if present)
+        $('#ae_table').dataTable().fnDestroy();
+
         var date1= ISO_to_date($('#start_date').val());
         var date2= ISO_to_date($('#end_date').val());
 
@@ -44,14 +47,23 @@ $(document).ready(function () {
             }
 
             $('#ae_body').html(html);
+
+            $('#ae_table').DataTable( {
+                "iDisplayLength": 200,
+                "sDom": '<"wrapper"t>',
+                "order": [[ 1, "desc" ]],
+                // Needed to destroy old table
+                "bDestroy": true
+            });
+
             $('#ae_table').prop('hidden', false);
         })
         .fail(function() {
             $('#warning').prop('hidden', false);
-         });
+        });
     }
 
-    $('#submit').click(function(){
+    $('#submit').click(function() {
         $('#warning').prop('hidden', true);
         $('#ae_table').prop('hidden', true);
         get_range();
