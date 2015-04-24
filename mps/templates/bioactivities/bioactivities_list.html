@@ -34,11 +34,17 @@
                     <th>Compound</th>
                     <th>Target</th>
                     <th>Organism</th>
-                    <th>Standard Name</th>
-                    <th>Operator</th>
-                    <th>Standard Value</th>
-                    <th>Standard Units</th>
-                    <th>ChEMBL Link</th>
+                    {% if not pubchem %}
+                        <th>Standard Name</th>
+                        <th>Operator</th>
+                        <th>Standard Value</th>
+                        <th>Standard Units</th>
+                        <th>ChEMBL Link</th>
+                    {% else %}
+                        <th>Activity Name</th>
+                        <th>Value (μM)</th>
+                        <th>PubChem Link</th>
+                    {% endif %}
                 </tr>
             </thead>
 
@@ -47,11 +53,17 @@
                     <th>Compound</th>
                     <th>Target</th>
                     <th>Organism</th>
-                    <th>Standard Name</th>
-                    <th>Operator</th>
-                    <th>Standard Value</th>
-                    <th>Standard Units</th>
-                    <th>ChEMBL Link</th>
+                    {% if not pubchem %}
+                        <th>Standard Name</th>
+                        <th>Operator</th>
+                        <th>Standard Value</th>
+                        <th>Standard Units</th>
+                        <th>ChEMBL Link</th>
+                    {% else %}
+                        <th>Activity Name</th>
+                        <th>Value (μM)</th>
+                        <th>PubChem Link</th>
+                    {% endif %}
                 </tr>
             </tfoot>
 
@@ -59,15 +71,24 @@
             {% for bioactivity in bioactivities %}
                 <tr>
                     <td><a href="/compounds/{{ bioactivity.compound.id }}">{{ bioactivity.compound }}</a></td>
-                    <td>{{ bioactivity.target }}</td>
-                    <td>{{ bioactivity.organism }}</td>
-                    <td>{{ bioactivity.standard_name }}</td>
-                    <td>{{ bioactivity.operator }}</td>
-                    <td>{{ bioactivity.standardized_value }}</td>
-                    <td>{{ bioactivity.standardized_units }}</td>
-                    <td><a href="https://www.ebi.ac.uk/chembl/assay/inspect/{{ bioactivity.assay.chemblid }}">
-                        {{ bioactivity.assay.chemblid }}
-                    </a></td>
+                    <td>{{ bioactivity.target|default:'' }}</td>
+                    {% if not pubchem %}
+                        <td>{{ bioactivity.organism }}</td>
+                        <td>{{ bioactivity.standard_name }}</td>
+                        <td>{{ bioactivity.operator }}</td>
+                        <td>{{ bioactivity.standardized_value }}</td>
+                        <td>{{ bioactivity.standardized_units }}</td>
+                        <td><a href="https://www.ebi.ac.uk/chembl/assay/inspect/{{ bioactivity.assay.chemblid }}">
+                            {{ bioactivity.assay.chemblid }}
+                        </a></td>
+                    {% else %}
+                        <td>{{ bioactivity.target.organism|default:'' }}</td>
+                        <td>{{ bioactivity.activity_name }}</td>
+                        <td>{{ bioactivity.value }}</td>
+                        <td><a href="https://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?aid={{ bioactivity.assay.aid }}">
+                            {{ bioactivity.assay.aid|default:'' }}
+                        </a></td>
+                    {% endif %}
                 </tr>
             {% endfor %}
             </tbody>

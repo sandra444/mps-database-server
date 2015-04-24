@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -10,7 +10,7 @@ from rest_framework.parsers import JSONParser
 
 from bioactivities.models import *
 from bioactivities.parsers import *
-from bioactivities.serializers import BioactivitiesSerializer
+# from bioactivities.serializers import BioactivitiesSerializer
 
 from mps.views import SearchForm, search
 
@@ -43,44 +43,80 @@ def bioactivities_list(request):
         compound =  request.GET.get('compound', '')
         target = request.GET.get('target','')
         name = request.GET.get('name','')
+        pubchem = request.GET.get('pubchem', '')
 
-        # I might want to sort by multiple fields later
-        if any([compound,target,name]):
-            data = Bioactivity.objects.filter(standard_name__isnull=False,
-                                              standardized_units__isnull=False,
-                                              standardized_value__isnull=False).prefetch_related('compound',
-                                                                                                 'target',
-                                                                                                 'created_by').select_related('assay__chemblid')
+        # If pubchem not in GET
+        if not pubchem:
+            # I might want to sort by multiple fields later
+            if any([compound,target,name]):
+                data = Bioactivity.objects.filter(standard_name__isnull=False,
+                                                  standardized_units__isnull=False,
+                                                  standardized_value__isnull=False).prefetch_related('compound',
+                                                                                                     'target',
+                                                                                                     'created_by').select_related('assay__chemblid')
 
-            if compound:
-                data = data.filter(compound__name__icontains=compound)
+                if compound:
+                    data = data.filter(compound__name__icontains=compound)
 
-            if target:
-                data = data.filter(target__name__icontains=target)
+                if target:
+                    data = data.filter(target__name__icontains=target)
 
-            if name:
-                data = data.filter(standard_name__icontains=name)
+                if name:
+                    data = data.filter(standard_name__icontains=name)
 
-            length = data.count()
+                length = data.count()
 
-            # Limit at 5000
-            bioactivities = data[:5000]
+                # Limit at 5000
+                bioactivities = data[:5000]
 
-            c = RequestContext(request)
-            c.update({
-                'bioactivities': bioactivities,
-                'compound': compound,
-                'target': target,
-                'name': name,
-                'length': length
-            })
-            return render_to_response('bioactivities/bioactivities_list.html', c)
+                c = RequestContext(request)
+                c.update({
+                    'bioactivities': bioactivities,
+                    'compound': compound,
+                    'target': target,
+                    'name': name,
+                    'length': length
+                })
+                return render_to_response('bioactivities/bioactivities_list.html', c)
 
+            else:
+                raise Http404
+
+        # If pubchem in GET
         else:
-            return HttpResponse(status=404)
+            if any([compound,target,name]):
+                data = PubChemBioactivity.objects.all().prefetch_related('compound','target').select_related('assay__aid')
+
+                if compound:
+                    data = data.filter(compound__name__icontains=compound)
+
+                if target:
+                    data = data.filter(target__name__icontains=target)
+
+                if name:
+                    data = data.filter(activity_name__icontains=name)
+
+                length = data.count()
+
+                # Limit at 5000
+                bioactivities = data[:5000]
+
+                c = RequestContext(request)
+                c.update({
+                    'bioactivities': bioactivities,
+                    'compound': compound,
+                    'target': target,
+                    'name': name,
+                    'length': length,
+                    'pubchem': True
+                })
+                return render_to_response('bioactivities/bioactivities_list.html', c)
+
+            else:
+                raise Http404
 
     else:
-        return HttpResponse(status=404)
+        raise Http404
 
 # Old API
 # @csrf_exempt
