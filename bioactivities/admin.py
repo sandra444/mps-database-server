@@ -457,6 +457,8 @@ class PubChemAssayAdmin(LockableAdmin):
     list_display = (
         'aid',
         'name',
+        'target_type',
+        'organism',
         'source',
     )
 
@@ -465,6 +467,8 @@ class PubChemAssayAdmin(LockableAdmin):
             'fields': (
                 'aid',
                 'name',
+                'target_type',
+                'organism',
                 'source',
                 'description',
             )

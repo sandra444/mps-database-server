@@ -1,7 +1,8 @@
 from compounds.models import Compound
 from bioactivities.models import PubChemBioactivity, PubChemTarget, PubChemAssay
 
-import urllib, json
+import urllib
+import ujson as json
 
 # Call this with the command: ./manage.py runscript update_pubchem
 
@@ -136,6 +137,17 @@ def get_bioactivities(name):
                 for assay in assay_data:
                     aid = str(assay.get('AID'))
 
+                    comment = assay.get('Comment','')
+
+                    target_type = None
+                    organism = None
+
+                    for entry in comment:
+                        if entry.startswith('Target Type'):
+                            target_type = entry.split(': ')[-1].strip()
+                        elif entry.startswith('Organism'):
+                            organism = entry.split(': ')[-1].strip()
+
                     # Try to get an assay with this AID from the database
                     try:
                         assay_model = PubChemAssay.objects.get(aid=aid)
@@ -150,7 +162,9 @@ def get_bioactivities(name):
                             'aid': aid,
                             'source': source,
                             'name': name,
-                            'description': description
+                            'description': description,
+                            'target_type': target_type,
+                            'organism': organism
                         }
 
                         assay_model = PubChemAssay.objects.create(locked=True, **entry)

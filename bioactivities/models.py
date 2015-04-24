@@ -246,6 +246,13 @@ class PubChemAssay(LockableModel):
     # Source is an optional field showing where PubChem pulled their data
     source = models.TextField(default='', blank=True, null=True)
 
+    # Target type is not always listed: not required
+    target_type = models.TextField(default='', blank=True, null=True)
+
+    # Organism is not always listed: not required
+    organism = models.TextField(default='', blank=True, null=True)
+
+    # PubChem ID
     aid = models.TextField(verbose_name="Assay ID")
 
     # Not required?
