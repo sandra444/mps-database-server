@@ -24,49 +24,31 @@
 
         <div class="col-sm-7">
             <div class="row">
-                <div class="col-sm-3 lead text-right-responsive">
+                <div class="col-sm-4 lead text-right-responsive">
                     <b>ChEMBL ID:</b>
                 </div>
-                <div class="col-sm-9 lead">
+                <div class="col-sm-8 lead">
                     <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ object.chemblid }}">{{ object.chemblid }}</a>
                 </div>
             </div>
 
             {% if object.pubchemid %}
                 <div class="row">
-                    <div class="col-sm-3 lead text-right-responsive">
+                    <div class="col-sm-4 lead text-right-responsive">
                         <b>PubChem ID:</b>
                     </div>
-                    <div class="col-sm-9 lead">
+                    <div class="col-sm-8 lead">
                         <a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ object.pubchemid }}">{{ object.pubchemid }}</a>
                     </div>
                 </div>
             {% endif %}
 
             <div class="row">
-                <div class="col-sm-3 lead text-right-responsive">
-                    <b>InChI Key:</b>
-                </div>
-                <div class="col-sm-9 lead">
-                    {{ object.inchikey }}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-3 lead text-right-responsive">
+                <div class="col-sm-4 lead text-right-responsive">
                     <b>Molecular Formula:</b>
                 </div>
-                <div class="col-sm-9">
+                <div class="col-sm-8 lead">
                     {{ object.molecular_formula }}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-3 lead text-right-responsive">
-                    <b>Smiles:</b>
-                </div>
-                <div class="col-sm-9">
-                    {{ object.smiles }}
                 </div>
             </div>
 
@@ -77,21 +59,6 @@
         </div>
 
     </div>
-
-{#    <div class="container-fluid">#}
-{##}
-{#        <div class="col-sm-6">#}
-{#            <p><b>ChEMBL ID:</b> <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ object.chemblid }}">{{ object.chemblid }}</a></p>#}
-{#            <p><b>InChI Key:</b> {{ object.inchikey }}</p>#}
-{#            <p><b>Smiles:</b> {{ object.smiles }}</p>#}
-{#            <p><b>Molecular Formula:</b> {{ object.molecular_formula }}</p>#}
-{#        </div>#}
-{##}
-{#        <div class="col-sm-6">#}
-{#            <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.chemblid }}">#}
-{#        </div>#}
-{##}
-{#    </div>#}
 
     {% if object.synonyms %}
         <legend>Synonyms
@@ -105,6 +72,30 @@
             <blockquote>
                 <p>
                     {{ object.synonyms }}
+                </p>
+            </blockquote>
+        </div>
+    {% endif %}
+
+    {% if object.smiles or object.inchikey %}
+        <legend>SMILES and InChI
+            <button class="btn btn-info" type="button" data-toggle="collapse"
+                    data-target="#smiles" aria-expanded="false" aria-controls="synonyms">
+                Show
+            </button>
+        </legend>
+
+        <div id='smiles' class="row collapse">
+            <blockquote>
+                <footer>SMILES</footer>
+                <p>
+                    {{ object.smiles }}
+                </p>
+            </blockquote>
+            <blockquote>
+                <footer>InChI</footer>
+                <p>
+                    {{ object.inchikey }}
                 </p>
             </blockquote>
         </div>
