@@ -246,6 +246,8 @@ class PubChemAssay(LockableModel):
     # Source is an optional field showing where PubChem pulled their data
     source = models.TextField(default='', blank=True, null=True)
 
+    source_id = models.TextField(default='', blank=True, null=True)
+
     # Target type is not always listed: not required
     target_type = models.TextField(default='', blank=True, null=True)
 

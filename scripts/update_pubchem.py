@@ -155,12 +155,14 @@ def get_bioactivities(name):
 
                     except:
                         source = assay.get('SourceName')
+                        source_id = assay.get('SourceID')
                         name = assay.get('Name')
                         description = '\n'.join(assay.get('Description')).strip()
 
                         entry = {
                             'aid': aid,
                             'source': source,
+                            'source_id': source_id,
                             'name': name,
                             'description': description,
                             'target_type': target_type,

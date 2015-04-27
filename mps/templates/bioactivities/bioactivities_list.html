@@ -82,7 +82,7 @@
                             {{ bioactivity.assay.chemblid }}
                         </a></td>
                     {% else %}
-                        <td>{{ bioactivity.target.organism|default:'' }}</td>
+                        <td>{{ bioactivity.target.organism|default:bioactivity.assay.organism|default:'' }}</td>
                         <td>{{ bioactivity.activity_name }}</td>
                         <td>{{ bioactivity.value }}</td>
                         <td><a href="https://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?aid={{ bioactivity.assay.aid }}">

@@ -460,6 +460,7 @@ class PubChemAssayAdmin(LockableAdmin):
         'target_type',
         'organism',
         'source',
+        'source_id'
     )
 
     fieldsets = (
@@ -471,6 +472,7 @@ class PubChemAssayAdmin(LockableAdmin):
                 'organism',
                 'source',
                 'description',
+                'source_id'
             )
         }),
     )
