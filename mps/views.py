@@ -4,6 +4,7 @@ from django.contrib import auth
 from django.core.context_processors import csrf
 from django.template import RequestContext
 from forms import SearchForm
+from compounds.models import Compound
 
 import os
 import settings
@@ -18,7 +19,14 @@ def main(request):
         form = SearchForm(initial={'app': 'Compounds'})
 
     c = RequestContext(request)
-    c.update({'form':form})
+
+    compounds = [str(compound.name) for compound in Compound.objects.all()]
+
+    c.update({
+        'form': form,
+        'compounds': compounds
+    })
+
     return render_to_response('index.html', c)
 
 def login(request):

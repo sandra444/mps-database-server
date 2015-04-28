@@ -20,17 +20,57 @@
 
     <script>
         $(function() {
+            var compounds = {{ compounds|safe }};
+
             var initial = $('#id_app').val();
 
-            $('#current_search').html(initial);
-            $('#id_search_term').prop('placeholder', 'Search ' + initial);
+            if (initial == 'Bioactivities') {
+                $("#bioactivities_search").show();
+                $("#search_bar").hide();
+                $('#current_search').html('Compounds');
+                $('#id_search_term').prop('placeholder', 'Search ' + 'Compounds');
+            }
+
+            else {
+                if (initial == 'Compounds') {
+                    $("#id_search_term").autocomplete({
+                        source: compounds
+                    });
+                }
+
+                $('#current_search').html(initial);
+                $('#id_search_term').prop('placeholder', 'Search ' + initial);
+            }
 
             $('#search_options li').click(function(e){
-               var selected = $(this).text();
-               $('#current_search').html(selected);
-               $('#id_search_term').prop('placeholder', 'Search ' + selected);
-               $('#id_app').val(selected);
+                var selected = $(this).text();
+                $('#id_app').val(selected);
+
+                if (selected == 'Bioactivities') {
+                    $("#bioactivities_search").show("slow");
+                    $("#search_bar").hide("slow");
+                }
+                else {
+                    if (selected == 'Compounds') {
+                        $("#id_search_term").autocomplete({
+                            source: compounds
+                        });
+                    }
+                    else {
+                        $("#id_search_term").autocomplete({
+                            source: []
+                        });
+                    }
+                    $('#current_search').html(selected);
+                    $('#id_search_term').prop('placeholder', 'Search ' + selected);
+                }
             });
+
+            $('#back').click(function(){
+                $('#id_app').val($('#current_search').html());
+                $("#bioactivities_search").hide("slow");
+                $("#search_bar").show("slow");
+            })
         });
     </script>
 
@@ -39,7 +79,7 @@
             {% csrf_token %}
             {{ form.app.as_hidden }}
 {#            <input hidden id="id_app" name="app" value="Compounds">#}
-            <div class="input-group">
+            <div id="search_bar" class="input-group">
                 <div class="input-group-btn">
                     <button type="button" class="btn btn-default dropdown-toggle not-bold" data-toggle="dropdown" aria-expanded="false">
                         <span id="current_search">Compounds</span>
@@ -49,11 +89,9 @@
                       <li><a>Drug Trials</a></li>
                       <li><a>Adverse Events</a></li>
                       <li class="divider"></li>
-                      <li><a>Bioactivities by Compound</a></li>
-                      <li><a>Bioactivities by Target</a></li>
-                      <li><a>Bioactivities by Name</a></li>
-                      <li class="divider"></li>
                       <li><a>Studies</a></li>
+                      <li class="divider"></li>
+                      <li><a>Bioactivities</a></li>
                     </ul>
               </div>
             <input id="id_search_term" name="search_term" type="text" class="form-control" placeholder="Search Compounds">
@@ -61,6 +99,7 @@
                 <button class="btn btn-primary not-bold" type="submit">Search</button>
             </span>
         </div>
+        {% include 'bioactivities/bioactivities_search.html' with index=True%}
         </form>
     </div>
 

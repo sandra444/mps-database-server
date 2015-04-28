@@ -8,123 +8,15 @@
 {% endblock %}
 
 {% block submit %}
-    <style>
-        .not-bold {
-            font-size: 14px;
-            font-weight: normal;
-        }
-        .input-group-addon {
-            min-width:100px;
-            text-align:left;
-        }
-        {# Code snippet for fancy checkboxes: move to separate CSS file soon #}
-        .form-group input[type="checkbox"] {
-            display: none;
-        }
-
-        .form-group input[type="checkbox"] + .btn-group > label span {
-            width: 20px;
-        }
-
-        .form-group input[type="checkbox"] + .btn-group > label span:first-child {
-            display: none;
-        }
-        .form-group input[type="checkbox"] + .btn-group > label span:last-child {
-            display: inline-block;
-        }
-
-        .form-group input[type="checkbox"]:checked + .btn-group > label span:first-child {
-            display: inline-block;
-        }
-        .form-group input[type="checkbox"]:checked + .btn-group > label span:last-child {
-            display: none;
-        }
-    </style>
-
-    <script>
-        $(function() {
-            var compounds = {{ compounds|safe }};
-            $( "#id_compound" ).autocomplete({
-                source: compounds
-            });
-        });
-    </script>
 
     <legend><h1>Quick Search</h1></legend>
 
-    <div class="row well">
-        <form action="/bioactivities/table/" method="post">
-            {{ form.errors }}
-            {% csrf_token %}
-                {{ form.app.as_hidden }}
-                {{ form.search_term.as_hidden }}
-                <div class="col-md-6">
-                    <div class="ui-widget">
-                        <div class="form-group has-success">
-                            <div class="input-group">
-                                <span class="input-group-addon">Compound</span>
-                                <input type="text" class="form-control" name="compound" id="id_compound" placeholder="Enter a compound name (eg. Aspirin)">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group has-warning">
-                        <div class="input-group">
-                            <span class="input-group-addon">Target</span>
-                            <input type="text" class="form-control" name="target" id="id_target" placeholder="Enter a target name (eg. Geminin)">
-                        </div>
-                    </div>
-                    <div class="form-group has-error">
-                        <div class="input-group">
-                            <span class="input-group-addon">Name</span>
-                            <input type="text" class="form-control" name="name" id="id_name" placeholder="Enter a bioactivity name (eg. IC50)">
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-5">
-                    <div class="[ form-group ]" align="left">
-                        <input type="checkbox" name="pubchem" id="id_pubchem" />
-                        <div class="[ btn-group ]">
-                            <label for="id_pubchem" class="[ btn btn-success ]">
-                                <span class="[ glyphicon glyphicon-ok ]"></span>
-                                <span> </span>
-                            </label>
-                            <label for="id_pubchem" class="[ btn btn-default active ]">
-                                Use PubChem instead of ChEMBL
-                            </label>
-                        </div>
-                    </div>
-                    <div class="[ form-group ]" align="left">
-                        <input type="checkbox" name="exclude_targetless" id="id_exclude_targetless" />
-                        <div class="[ btn-group ]">
-                            <label for="id_exclude_targetless" class="[ btn btn-warning ]">
-                                <span class="[ glyphicon glyphicon-ok ]"></span>
-                                <span> </span>
-                            </label>
-                            <label for="id_exclude_targetless" class="[ btn btn-default active ]">
-                                Exclude entries without any target
-                            </label>
-                        </div>
-                    </div>
-                    <div class="[ form-group ]" align="left">
-                        <input type="checkbox" name="exclude_organismless" id="id_exclude_organismless" />
-                        <div class="[ btn-group ]">
-                            <label for="id_exclude_organismless" class="[ btn btn-danger ]">
-                                <span class="[ glyphicon glyphicon-ok ]"></span>
-                                <span> </span>
-                            </label>
-                            <label for="id_exclude_organismless" class="[ btn btn-default active ]">
-                                Exclude entries without organism&nbsp;
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-1">
-                    <button class="btn btn-primary">
-                        <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-                    </button>
-                </div>
-        </form>
-    </div>
+    <form action="/bioactivities/table/" method="post">
+        {% csrf_token %}
+        {{ form.app.as_hidden }}
+        {{ form.search_term.as_hidden }}
+        {% include 'bioactivities/bioactivities_search.html'%}
+    </form>
 
     <legend><h1>Advanced Search</h1></legend>
 
