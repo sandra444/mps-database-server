@@ -268,7 +268,14 @@ def view_table(request):
         form = SearchForm(initial={'app': 'Bioactivities'})
 
     c = RequestContext(request)
-    c.update({'form':form})
+
+    compounds = [str(compound.name) for compound in Compound.objects.all()]
+
+    c.update({
+        'form': form,
+        'compounds': compounds
+    })
+
     return render_to_response('bioactivities/table.html', c)
 
 def view_model(request):
