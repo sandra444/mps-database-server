@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group
 
 register = template.Library()
 
+# This filter is not currently used within templates, though in theoretically could be
 @register.filter(name='has_group')
 def has_group(user, group_name):
     if not group_name:

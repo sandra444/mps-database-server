@@ -67,27 +67,32 @@ def search(request):
     app = request.POST.get('app','')
     search_term = request.POST.get('search_term', '')
 
-    # If there is not a specified app or search term, just return to the home page
-    if not app or not search_term:
+    bioactivities = {
+        'compound': request.POST.get('compound', ''),
+        'target': request.POST.get('target', ''),
+        'name': request.POST.get('name', ''),
+        'pubchem': request.POST.get('pubchem', ''),
+        'exclude_targetless': request.POST.get('exclude_targetless', ''),
+        'exclude_organismless': request.POST.get('exclude_organismless', ''),
+    }
+
+    # If there is not a specified app, just return to the home page
+    if not app:
         return HttpResponseRedirect('/')
 
     elif app == 'Compounds':
-        return HttpResponseRedirect('compounds/?search={}'.format(search_term))
+        return HttpResponseRedirect('/compounds/?search={}'.format(search_term))
 
     elif app == 'Drug Trials':
-        return HttpResponseRedirect('drugtrials/?search={}'.format(search_term))
+        return HttpResponseRedirect('/drugtrials/?search={}'.format(search_term))
 
     elif app == 'Adverse Events':
-        return HttpResponseRedirect('adverse_events/?search={}'.format(search_term))
+        return HttpResponseRedirect('/adverse_events/?search={}'.format(search_term))
 
-    elif app == 'Bioactivities by Compound':
-        return HttpResponseRedirect('bioactivities/?compound={}'.format(search_term))
-
-    elif app == 'Bioactivities by Target':
-        return HttpResponseRedirect('bioactivities/?target={}'.format(search_term))
-
-    elif app == 'Bioactivities by Name':
-        return HttpResponseRedirect('bioactivities/?name={}'.format(search_term))
+    elif app == 'Bioactivities':
+        search_term = [(term + '=' + bioactivities.get(term)) for term in bioactivities if bioactivities.get(term)]
+        search_term = '&'.join(search_term)
+        return HttpResponseRedirect('/bioactivities/?{}'.format(search_term))
 
     elif app == 'Studies':
         return HttpResponseRedirect('/assays/organchipstudy/?search={}'.format(search_term))

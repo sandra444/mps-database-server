@@ -5,7 +5,13 @@ from django import forms
 
 class SearchForm(forms.Form):
     app = forms.CharField(max_length=50)
-    search_term  = forms.CharField(max_length=500)
+    compound = forms.CharField(max_length=100, required=False)
+    target = forms.CharField(max_length=100, required=False)
+    name = forms.CharField(max_length=100, required=False)
+    pubchem = forms.BooleanField(required=False)
+    exclude_targetless = forms.BooleanField(required=False)
+    exclude_organismless = forms.BooleanField(required=False)
+    search_term  = forms.CharField(max_length=500, required=False)
 
 # class MyRegistrationForm(UserCreationForm):
 #     email = forms.EmailField(required=True)
