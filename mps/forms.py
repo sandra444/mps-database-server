@@ -13,6 +13,19 @@ class SearchForm(forms.Form):
     exclude_organismless = forms.BooleanField(required=False)
     search_term  = forms.CharField(max_length=500, required=False)
 
+    def clean(self):
+        super(SearchForm, self).clean()
+
+        app = self.cleaned_data.get('app', '')
+        compound = self.cleaned_data.get('compound', '')
+        target = self.cleaned_data.get('target', '')
+        name = self.cleaned_data.get('name', '')
+
+        if app == "Bioactivities" and not any([compound, target, name]):
+            raise forms.ValidationError('You must have at least one search term')
+
+        return self.cleaned_data
+
 # class MyRegistrationForm(UserCreationForm):
 #     email = forms.EmailField(required=True)
 #     captcha = CaptchaField()
