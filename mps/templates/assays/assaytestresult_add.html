@@ -98,41 +98,14 @@
 
             <button id="submit" type="submit" class="btn btn-primary">Submit</button>
 
-            {# Html for flagging for review #}
-            {% if form.flagged.value %}
-                {# If the model is flagged then display a danger flag and the notes #}
-                <a role='button' id="flag" class="btn btn-sm btn-danger" title="Flag for review">
-                    <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-                </a>
-                <a role='button' id="notes_for_flag" class="btn btn-sm btn-warning" title="Reason for Flag">
-                    Notes
-                </a>
-            {% else %}
-                {# If the model is not flagged display a blue flag and no notes #}
-                <a role='button' id="flag" class="btn btn-sm" title="Flag for review">
-                    <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-                </a>
-                <a role='button' id="notes_for_flag" class="btn btn-sm btn-warning" title="Reason for Flag" style="display: none">
-                    Notes
-                </a>
-            {% endif %}
-
             {% if update %}
                 <a role="button" class="btn btn-danger pull-right" href="/assays/assaytestresult/{{ object.id }}/delete/">Delete</a>
             {% endif %}
 
-            <div class="form-group has-error">
-                <input class='small form-control' placeholder="Reason for Flag" id="id_reason_for_flag" maxlength="300"
-                name="reason_for_flag" type="text" style="display: none;" value="{{ form.reason_for_flag.value|default:'' }}">
-            </div>
+            {% include 'flag.html'%}
         </h1>
 
         <legend>Test Results</legend>
-
-        {# Hidden div for flagging the entry #}
-        <div hidden>
-            {{ form.flagged }}
-        </div>
 
         {% if form.chip_setup.errors %}
             {% for error in form.chip_setup.errors %}
