@@ -30,8 +30,17 @@
 <script>
     $(function() {
         var compounds = {{ compounds|safe }};
+
+        function better_search(req, responseFn) {
+            var re = $.ui.autocomplete.escapeRegex(req.term);
+            var pattern1 = new RegExp("^"+re, "i");
+            var a = $.grep(compounds, function(item, index){return pattern1.test(item);}); //build array item begins with input string
+            var b = $.grep(compounds, function(item, index){return ((item.toLowerCase()).indexOf(re.toLowerCase())>0);}); //build array items with input string somewhere
+            responseFn(a.concat(b));
+        }
+
         $("#id_compound").autocomplete({
-            source: compounds
+            source: better_search
         });
     });
 </script>
