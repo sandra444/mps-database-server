@@ -31,7 +31,7 @@ class UserIndex(OneGroupRequiredMixin, ListView):
     template_name = 'assays/index.html'
 
     def get_context_data(self, request, **kwargs):
-        self.object_list = AssayRun.objects.filter(created_by=request.user).prefetch_related('created_by')
+        self.object_list = AssayRun.objects.filter(created_by=request.user).prefetch_related('created_by', 'group')
         return super(UserIndex, self).get_context_data(**kwargs)
 
     def get(self, request, **kwargs):
@@ -61,7 +61,7 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
         # self.object_list = AssayRun.objects.filter(created_by=users)
         groups = request.user.groups.values_list('pk', flat=True)
         groups = Group.objects.filter(pk__in=groups)
-        self.object_list = AssayRun.objects.filter(group__in=groups).prefetch_related('created_by')
+        self.object_list = AssayRun.objects.filter(group__in=groups).prefetch_related('created_by', 'group')
         return super(GroupIndex, self).get_context_data(**kwargs)
 
     def get(self, request, **kwargs):
@@ -90,10 +90,9 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
 
         context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object).prefetch_related('device',
                                                                                                        'compound',
-                                                                                                       'unit',
                                                                                                        'created_by')
         readouts = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
-            'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
+            'chip_setup', 'created_by').select_related('chip_setup__compound',
                                                                    'chip_setup__unit')
 
         related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
@@ -132,8 +131,8 @@ class AssayRunList(LoginRequiredMixin, ListView):
     model = AssayRun
 
     def get_queryset(self):
-        return AssayRun.objects.filter(restricted=False).prefetch_related('created_by') | AssayRun.objects.filter(
-            group__in=self.request.user.groups.all()).prefetch_related('created_by')
+        return AssayRun.objects.filter(restricted=False).prefetch_related('created_by', 'group') | AssayRun.objects.filter(
+            group__in=self.request.user.groups.all()).prefetch_related('created_by', 'group')
 
 
 class AssayRunAdd(OneGroupRequiredMixin, CreateView):
@@ -194,7 +193,7 @@ class AssayRunDetail(DetailView):
                                                                                                      'unit',
                                                                                                      'created_by')
         readouts = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
-            'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
+            'chip_setup', 'created_by').select_related('chip_setup__compound',
                                                                    'chip_setup__unit')
 
         related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
@@ -211,14 +210,11 @@ class AssayRunDetail(DetailView):
         context['readouts'] = readouts
 
         context['results'] = AssayResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function', 'result_type',
-                                                    'test_unit').select_related('assay_result__assay_device_readout',
-                                                                                'assay_result__chip_setup',
+                                                    'test_unit').select_related('assay_result__chip_setup',
                                                                                 'assay_result__chip_setup__compound',
                                                                                 'assay_result__chip_setup__unit',
                                                                                 'assay_name__readout_id',
                                                                                 'assay_name__assay_id',
-                                                                                'assay_name__reader_id',
-                                                                                'assay_name__readout_unit',
                                                                                 'assay_result__created_by').filter(assay_result__chip_setup=context['setups'])
         return self.render_to_response(context)
 
@@ -303,9 +299,9 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return AssayChipSetup.objects.filter(assay_run_id__restricted=False).prefetch_related('assay_run_id', 'device',
                                                                                               'compound', 'unit',
-                                                                                              'created_by') | AssayChipSetup.objects.filter(
+                                                                                              'created_by', 'group') | AssayChipSetup.objects.filter(
             assay_run_id__group__in=self.request.user.groups.all()).prefetch_related('assay_run_id', 'device',
-                                                                                     'compound', 'unit', 'created_by')
+                                                                                     'compound', 'unit', 'created_by', 'group')
 
 
 AssayChipCellsFormset = inlineformset_factory(AssayChipSetup, AssayChipCells, formset=AssayChipCellsInlineFormset,
@@ -528,11 +524,10 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id__restricted=False).prefetch_related(
-            'chip_setup', 'timeunit', 'created_by').select_related('chip_setup__compound',
+            'chip_setup', 'created_by', 'group').select_related('chip_setup__compound',
                                                                    'chip_setup__unit') | AssayChipReadout.objects.filter(
             chip_setup__assay_run_id__group__in=self.request.user.groups.all()).prefetch_related('chip_setup',
-                                                                                                 'timeunit',
-                                                                                                 'created_by').select_related(
+                                                                                                 'created_by', 'group').select_related(
             'chip_setup__compound', 'chip_setup__unit')
 
         related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
@@ -733,9 +728,8 @@ class AssayTestResultList(LoginRequiredMixin, ListView):
                                                                                 'assay_result__chip_setup__unit',
                                                                                 'assay_name__readout_id',
                                                                                 'assay_name__assay_id',
-                                                                                'assay_name__reader_id',
-                                                                                'assay_name__readout_unit',
-                                                                                'assay_result__created_by')
+                                                                                'assay_result__created_by',
+                                                                                'assay_result__group')
 
         return initial_query.filter(assay_result__assay_device_readout__restricted=False) | \
                initial_query.filter(assay_result__assay_device_readout__group__in=self.request.user.groups.all())
@@ -885,6 +879,7 @@ class AssayTestResultDelete(CreatorRequiredMixin, DeleteView):
 class StudyConfigurationList(LoginRequiredMixin, ListView):
     model = StudyConfiguration
     template_name = 'assays/studyconfiguration_list.html'
+
 
 # FormSet for Study Models
 StudyModelFormSet = inlineformset_factory(StudyConfiguration, StudyModel, extra=1,
