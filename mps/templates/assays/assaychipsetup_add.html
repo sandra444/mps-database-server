@@ -200,13 +200,25 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="compound" class="col-sm-2 control-label">Compound</label>
-        <div class="col-sm-10" style="float:left; display:inline; overflow:none; white-space:nowrap;">
-            {{ form.compound }}
-            <label for="concentration" style="padding-left: 20px;padding-right: 10px;">Concentration</label>
-            {{ form.concentration }}
-            <label for="unit" style="padding-left: 20px;padding-right: 10px;">Concentration Unit</label>
-            {{ form.unit }}
+        <div class="row">
+            <div class="col-sm-12 col-lg-6">
+                <label for="compound" class="col-sm-2 col-lg-4 control-label">Compound</label>
+                <div class="col-sm-10 col-lg-8">
+                    {{ form.compound }}
+                </div>
+            </div>
+            <div class="col-sm-12 col-lg-2">
+                <label for="concentration" class="col-sm-2 col-lg-8 control-label">Concentration</label>
+                <div class="col-sm-10 col-lg-4">
+                    {{ form.concentration }}
+                </div>
+            </div>
+            <div class="col-sm-12 col-lg-4">
+                <label for="unit" class="col-sm-2 col-lg-7 control-label">Concentration Unit</label>
+                <div class="col-sm-10 col-lg-5">
+                    {{ form.unit }}
+                </div>
+            </div>
         </div>
     </div>
 
