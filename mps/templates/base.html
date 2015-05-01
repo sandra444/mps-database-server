@@ -17,7 +17,7 @@
 
     {% block extrahead %}
         <!-- Load JQuery -->
-        <script src="{% static "js/jquery-1.11.0.min.js" %}"></script>
+        <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
 
         <!-- Load JQuery UI-->
         <script src="{% static "js/jquery-ui-1.11.2.min.js" %}"></script>
@@ -34,7 +34,7 @@
         <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
 
         <!-- Underscore.js Library -->
-        <script src="{% static "js/underscore-1.6.0.js" %}"></script>
+        <script src="{% static "js/underscore.js" %}"></script>
 
         <!-- Modernizr Library -->
         <script src="{% static "js/modernizr-2.7.1.js" %}"></script>
@@ -71,7 +71,9 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a title="Click to return to homepage" class="navbar-brand" href="/">MPS</a>
+          <a title="Click to return to homepage" class="navbar-brand" href="/">
+              <img src="/static/img/brand.png" style="margin-top:-10px;">
+          </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
