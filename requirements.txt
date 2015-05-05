@@ -62,3 +62,5 @@ django-alphafilter
 #django-simple-captcha
 #qhonuskan-votes
 django-contrib-comments
+#Using whoosh for now, may switch to more sophisticated search engine later
+whoosh

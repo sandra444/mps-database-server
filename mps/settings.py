@@ -194,6 +194,9 @@ INSTALLED_APPS = (
     'qhonuskan_votes',
     'djangovoice',
 
+    # Haystack for searching
+    'haystack',
+
     # MPS applications:
     'cellsamples',
     'compounds',
@@ -208,6 +211,13 @@ INSTALLED_APPS = (
 # SOUTH_MIGRATION_MODULES = {
 #     'captcha': 'captcha.south_migrations',
 # }
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(os.path.dirname(__file__), 'whoosh_index'),
+    },
+}
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

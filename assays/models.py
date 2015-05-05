@@ -303,7 +303,8 @@ class AssayTestResult(FlaggableModel):
     class Meta(object):
         verbose_name = 'Chip Result'
 
-    # This, at some point, should probably be renamed
+    # This, at some point, should be renamed
+    # I mean, why is it called a readout when it is a study?
     assay_device_readout = models.ForeignKey('assays.AssayRun',
                                              verbose_name='Organ Chip Study')
 

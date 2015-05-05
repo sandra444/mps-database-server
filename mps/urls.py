@@ -5,6 +5,7 @@ import debug_toolbar
 
 from mps import settings
 
+from .views import s
 
 admin.autodiscover()
 
@@ -38,6 +39,11 @@ urlpatterns = patterns('',
                        url(r'^', include('microdevices.urls')),
                        url(r'^', include('drugtrials.urls')),
                        url(r'^', include('cellsamples.urls')),
+
+                       # Search via haystack/whoosh
+                       (r'^search/', include('haystack.urls')),
+                       # Testing custom search (same as default currently)
+                       (r'^s/', s),
 
                        # BEGIN old-style API
                        url(r'^assays_ajax$', 'assays.ajax.ajax'),

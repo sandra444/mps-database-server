@@ -1,0 +1,3 @@
+{{ object.name }}
+{{ object.media_composition }}
+{{ object.hardware_description }}

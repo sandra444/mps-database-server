@@ -6,6 +6,10 @@ from django.template import RequestContext
 from forms import SearchForm
 from compounds.models import Compound
 
+from haystack.query import SearchQuerySet
+from haystack.views import SearchView, search_view_factory
+import haystack.forms
+
 import os
 import settings
 
@@ -16,7 +20,7 @@ def main(request):
             return search(request)
 
     else:
-        form = SearchForm(initial={'app': 'Compounds'})
+        form = SearchForm(initial={'app': 'Global'})
 
     c = RequestContext(request)
 
@@ -88,24 +92,23 @@ def search(request):
     if not app:
         return HttpResponseRedirect('/')
 
-    elif app == 'Compounds':
-        return HttpResponseRedirect('/compounds/?search={}'.format(search_term))
-
-    elif app == 'Drug Trials':
-        return HttpResponseRedirect('/drugtrials/?search={}'.format(search_term))
-
-    elif app == 'Adverse Events':
-        return HttpResponseRedirect('/adverse_events/?search={}'.format(search_term))
+    if app == 'Global':
+        return HttpResponseRedirect('/search?q={}'.format(search_term))
 
     elif app == 'Bioactivities':
         search_term = [(term + '=' + bioactivities.get(term)) for term in bioactivities if bioactivities.get(term)]
         search_term = '&'.join(search_term)
         return HttpResponseRedirect('/bioactivities/?{}'.format(search_term))
 
-    elif app == 'Studies':
-        return HttpResponseRedirect('/assays/organchipstudy/?search={}'.format(search_term))
-
     # If, for whatever reason, invalid data is entered, just return to the home page
     else:
         return HttpResponseRedirect('/')
 
+def s(request):
+    sqs = SearchQuerySet().all()
+    view = search_view_factory(
+        template='search/search.html',
+        searchqueryset=sqs,
+        form_class= haystack.forms.ModelSearchForm
+        )
+    return view(request)

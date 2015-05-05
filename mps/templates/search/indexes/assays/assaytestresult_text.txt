@@ -1,0 +1,2 @@
+{{ object.assay_device_readout }}
+{{ object.chip_setup }}

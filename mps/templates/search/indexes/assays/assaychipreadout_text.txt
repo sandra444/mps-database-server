@@ -1,0 +1,3 @@
+{{ object.scientist }}
+{{ object.notes }}
+{{ object.chip_setup }}

@@ -21,62 +21,19 @@
     <script>
         $(function() {
 
-            var compounds = {{ compounds|safe }};
-
-            function better_search(req, responseFn) {
-                var re = $.ui.autocomplete.escapeRegex(req.term);
-                var pattern1 = new RegExp("^"+re, "i");
-                var a = $.grep(compounds, function(item, index){return pattern1.test(item);}); //build array item begins with input string
-                var b = $.grep(compounds, function(item, index){return ((item.toLowerCase()).indexOf(re.toLowerCase())>0);}); //build array items with input string somewhere
-                responseFn(a.concat(b));
-            }
-
             var initial = $('#id_app').val();
 
             if (initial == 'Bioactivities') {
                 $("#bioactivities_search").show();
                 $("#search_bar").hide();
-                $('#current_search').html('Compounds');
-                $('#id_search_term').prop('placeholder', 'Search ' + 'Compounds');
-            }
-
-            else {
-                if (initial == 'Compounds') {
-                    $("#id_search_term").autocomplete({
-                        source: better_search
-                    });
-                }
-
-                $('#current_search').html(initial);
-                $('#id_search_term').prop('placeholder', 'Search ' + initial);
             }
 
             $('#search_options li').click(function(e){
-                var selected = $(this).text();
-                $('#id_app').val(selected);
-
-                if (selected == 'Bioactivities') {
-                    $("#bioactivities_search").show("slow");
-                    $("#search_bar").hide("slow");
-                }
-                else {
-                    if (selected == 'Compounds') {
-                        $("#id_search_term").autocomplete({
-                            source: better_search
-                        });
-                    }
-                    else {
-                        $("#id_search_term").autocomplete({
-                            source: []
-                        });
-                    }
-                    $('#current_search').html(selected);
-                    $('#id_search_term').prop('placeholder', 'Search ' + selected);
-                }
+                $("#bioactivities_search").show("slow");
+                $("#search_bar").hide("slow");
             });
 
             $('#back').click(function(){
-                $('#id_app').val($('#current_search').html());
                 $("#bioactivities_search").hide("slow");
                 $("#search_bar").show("slow");
             })
@@ -92,19 +49,13 @@
                 <div id="search_bar" class="input-group">
                     <div class="input-group-btn">
                         <button type="button" class="btn btn-default dropdown-toggle not-bold" data-toggle="dropdown" aria-expanded="false">
-                            <span id="current_search">Compounds</span>
+                            <span id="current_search">Global</span>
                             <span class="caret"></span></button>
                         <ul id="search_options" class="dropdown-menu" role="menu">
-                          <li><a>Compounds</a></li>
-                          <li><a>Drug Trials</a></li>
-                          <li><a>Adverse Events</a></li>
-                          <li class="divider"></li>
-                          <li><a>Studies</a></li>
-                          <li class="divider"></li>
                           <li><a>Bioactivities</a></li>
                         </ul>
                   </div>
-                <input id="id_search_term" name="search_term" type="text" class="form-control" placeholder="Search Compounds">
+                <input id="id_search_term" name="search_term" type="text" class="form-control" placeholder="Search Global">
                 <span class="input-group-btn">
                     <button class="btn btn-primary not-bold" type="submit">Search</button>
                 </span>

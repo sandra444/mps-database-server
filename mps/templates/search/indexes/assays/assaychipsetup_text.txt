@@ -1,0 +1,4 @@
+{{ object.device.name }}
+{{ object.assay_chip_id }}
+{{ object.compound.name }}
+{{ object.scientist }}

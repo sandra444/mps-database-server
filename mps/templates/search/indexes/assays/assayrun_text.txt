@@ -1,0 +1,3 @@
+{{ object.study_configuration }}
+{{ object.assay_run_id }}
+{{ object.description }}
