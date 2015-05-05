@@ -1,0 +1,3 @@
+{{ object.compound }}
+{{ object.warnings }}
+{{ object.nonclinical_toxicology }}

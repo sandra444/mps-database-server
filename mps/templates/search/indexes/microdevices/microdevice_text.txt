@@ -1,0 +1,6 @@
+{{ object.device_name }}
+{{ object.organ }}
+{{ object.center }}
+{{ object.manufacturer }}
+{{ object.barcode }}
+{{ object.description }}

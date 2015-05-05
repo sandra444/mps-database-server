@@ -1,0 +1,7 @@
+{{ object.title }}
+{{ object.condition }}
+{{ object.source }}
+{{ object.compound }}
+{{ object.species }}
+{{ object.description }}
+{{ object.references }}

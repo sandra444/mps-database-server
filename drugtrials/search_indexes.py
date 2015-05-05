@@ -1,0 +1,15 @@
+from haystack import indexes
+from .models import *
+
+
+class OpenFDACompoundIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.EdgeNgramField(document=True, use_template=True)
+
+    def get_model(self):
+        return OpenFDACompound
+
+class DrugTrialIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.EdgeNgramField(document=True, use_template=True)
+
+    def get_model(self):
+        return DrugTrial

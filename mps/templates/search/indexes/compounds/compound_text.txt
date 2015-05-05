@@ -1,0 +1,6 @@
+{{ object.name }}
+{{ object.chemblid }}
+{{ object.pubchemid }}
+{{ object.synonyms }}
+{{ object.smiles }}
+{{ object.inchikey }}

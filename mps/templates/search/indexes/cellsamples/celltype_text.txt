@@ -1,0 +1,4 @@
+{{ object.cell_type }}
+{{ object.species }}
+{{ object.cell_subtype }}
+{{ object.organ }}
