@@ -104,11 +104,31 @@ def search(request):
     else:
         return HttpResponseRedirect('/')
 
-def s(request):
-    sqs = SearchQuerySet().all()
-    view = search_view_factory(
-        template='search/search.html',
-        searchqueryset=sqs,
-        form_class= haystack.forms.ModelSearchForm
-        )
-    return view(request)
+class CustomSearch(SearchView):
+
+    results_per_page = 1000
+
+    # def get_results(self):
+    #     """
+    #     NORMALLY Fetches the results via the form.
+    #     Returns an empty list if there's no query to search with.
+    #     """
+    #     if self.query:
+    #         return SearchQuerySet().autocomplete(text=self.query)
+    #     else:
+    #         return []
+    #
+    # def extra_context(self):
+    #     spelling = self.results.spelling_suggestion(self.query)
+    #     return {'suggestion': spelling,}
+
+# A generic use of the search_view_factory
+# def s(request):
+#     sqs = SearchQuerySet().all()
+#     view = search_view_factory(
+#         template='search/search.html',
+#         searchqueryset=sqs,
+#         form_class=haystack.forms.ModelSearchForm,
+#         results_per_page=1000,
+#         )
+#     return view(request)

@@ -1,21 +1,37 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Search</h2>
 
     <form method="get" action=".">
-        <table>
-            {{ form.as_table }}
-            <tr>
-                <td>&nbsp;</td>
-                <td>
-                    <input class="form-control" type="submit" value="Search">
-                </td>
-            </tr>
-        </table>
+{#        <input id="id_q" name="q" type="search" value="{{ query }}">#}
+        <div id="search_bar" class="input-group">
+            <div class="input-group-btn">
+                <button type="button" class="btn btn-default">Global</button>
+            </div>
+            <input id="id_q" name="q" type="search" class="form-control" placeholder="Search Global"
+                    value="{{ query }}">
+            <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit">Search</button>
+            </span>
+        </div>
+
+        <br>
+
+        <div class="row">
+        {% for model in form.models %}
+            <div class="{% cycle 'bg-primary' 'bg-success' 'bg-info' 'bg-warning'%} col-xs-12 col-sm-4 col-md-3">
+                {{ model }}
+            </div>
+        {% endfor %}
+        </div>
+
+{#        <table>#}
+{#            {{ form.as_table }}#}
+{#        </table>#}
 
         {% if query %}
-            <h3>Results</h3>
+
+{#            <h3>Results</h3>#}
 
 {#            {% for result in page.object_list %}#}
 {#                <p>#}
@@ -25,18 +41,28 @@
 {#                <p>No results found.</p>#}
 {#            {% endfor %}#}
 
-              {# Interesting but causes instability #}
+              {# Interesting but causes instability with pagination (# per page arbitrarily high currently) #}
             {% with page.object_list as results %}
                 {% regroup results|dictsort:"verbose_name_plural" by verbose_name_plural as grouped_objects %}
                 {% for ct in grouped_objects %}
-                    {{ ct.grouper }}
+                    <h3 class="text-center {% cycle 'text-primary' 'text-success' 'text-info' 'text-warning'%}">{{ ct.grouper }}</h3>
+                    <table class="display table table-striped table-hover">
                     {% for result in ct.list %}
-                        <p>
-                            <a href="{{ result.object.get_absolute_url }}">{{ result.object }}</a>
-                        </p>
+                        <tr>
+                        {# Just using the id can save time #}
+{#                            <td>#}
+{#                                <a href="{{ result.object.get_absolute_url }}">{{ result.object.id }}</a>#}
+{#                            </td>#}
+                            <td>
+                                <a href="{{ result.object.get_absolute_url }}">{{ result.object }}</a>
+                            </td>
+                        </tr>
                     {% endfor %}
+                    </table>
                 {% empty %}
-                    <p>No results found.</p>
+                    <div class="bg-danger">
+                        <h3>No results found</h3>
+                    </div>
                 {% endfor %}
             {% endwith %}
 

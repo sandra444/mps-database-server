@@ -212,12 +212,24 @@ INSTALLED_APPS = (
 #     'captcha': 'captcha.south_migrations',
 # }
 
+# For whoosh
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
         'PATH': os.path.join(os.path.dirname(__file__), 'whoosh_index'),
+        # can cause problems when dealing with data outside ascii
+        #'INCLUDE_SPELLING': True,
     },
 }
+
+# For elasticsearch
+# HAYSTACK_CONNECTIONS = {
+#     'default': {
+#         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+#         'URL': 'http://127.0.0.1:9200/',
+#         'INDEX_NAME': 'haystack',
+#     },
+# }
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
