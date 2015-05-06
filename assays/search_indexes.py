@@ -7,7 +7,7 @@ class AssayRunIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.EdgeNgramField(document=True, use_template=True)
 
     # Substring search is made possible by using EdgeNgramField in lieu of CharField
-    # text = indexes.EdgeNgramField(document=True, use_template=True)
+    # text = indexes.CharField(document=True, use_template=True)
 
     created_by = indexes.CharField(model_attr='created_by')
     group = indexes.CharField(model_attr='group')

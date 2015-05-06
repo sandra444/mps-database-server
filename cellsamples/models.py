@@ -49,6 +49,10 @@ class CellType(LockableModel):
     def cell_name(self):
         return self.__unicode__()
 
+    # Will this be useful?
+    def get_absolute_url(self):
+        return "/cellsamples/celltype/{}".format(self.id)
+
 
 class CellSubtype(LockableModel):
     class Meta(object):
@@ -155,3 +159,7 @@ class CellSample(RestrictedModel):
                                             self.cell_type,
                                             self.supplier,
                                             self.barcode)
+
+    # Will this be useful?
+    def get_absolute_url(self):
+        return "/cellsamples/cellsample/{}".format(self.id)
