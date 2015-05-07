@@ -77,6 +77,7 @@ class Microdevice(LockableModel):
 
 class OrganModel(LockableModel):
     class Meta(object):
+        verbose_name = 'Organ Model'
         ordering = ('model_name', 'organ', )
 
     model_name = models.CharField(max_length=200)

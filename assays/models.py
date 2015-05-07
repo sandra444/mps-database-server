@@ -420,6 +420,8 @@ class AssayPlateTestResult(LockableModel):
 
 
 class StudyConfiguration(LockableModel):
+    class Meta(object):
+        verbose_name = 'Study Configuration'
     # Length subject to change
     name = models.CharField(max_length=50)
     study_format = models.CharField(max_length=11, choices=(('individual','Individual'),('integrated','Integrated'),))

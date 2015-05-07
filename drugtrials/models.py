@@ -58,6 +58,7 @@ TRIALTYPES = (
 
 class DrugTrial(LockableModel):
     class Meta(object):
+        verbose_name = 'Drug Trial'
         ordering = ('compound', 'species', )
 
     title = models.CharField(max_length=255, blank=True, null=True)
@@ -361,6 +362,9 @@ class AdverseEvent(models.Model):
 # Theoretically, we would place usage information here, but that is difficult to acquire
 # If we can't think of anything, scrap this model before you put it on production
 class OpenFDACompound(LockableModel):
+
+    class Meta(object):
+        verbose_name = 'OpenFDA Report'
 
     compound = models.ForeignKey('compounds.Compound')
     warnings = models.TextField(blank=True, null=True)
