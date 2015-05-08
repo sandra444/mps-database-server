@@ -4,9 +4,12 @@ from .models import *
 
 
 class AssayRunIndex(indexes.SearchIndex, indexes.Indexable):
-    text = indexes.EdgeNgramField(document=True, use_template=True)
+    # Substring search is made possible by using EdgeNgramField/NgramField in lieu of CharField
+    # EdgeNgramfields are more efficient, but only can search based off of starts with
+    # NgramFields are less efficient, but are better at seeing if the index contains it at all
+    text = indexes.NgramField(document=True, use_template=True)
 
-    # Substring search is made possible by using EdgeNgramField in lieu of CharField
+    # However, is it in poor taste to apply it to the document?
     # text = indexes.CharField(document=True, use_template=True)
 
     created_by = indexes.CharField(model_attr='created_by')
@@ -25,7 +28,7 @@ class AssayRunIndex(indexes.SearchIndex, indexes.Indexable):
 
 
 class AssayChipSetupIndex(indexes.SearchIndex, indexes.Indexable):
-    text = indexes.EdgeNgramField(document=True, use_template=True)
+    text = indexes.NgramField(document=True, use_template=True)
     created_by = indexes.CharField(model_attr='created_by')
     group = indexes.CharField(model_attr='group')
 
@@ -34,7 +37,7 @@ class AssayChipSetupIndex(indexes.SearchIndex, indexes.Indexable):
 
 
 class AssayChipReadoutIndex(indexes.SearchIndex, indexes.Indexable):
-    text = indexes.EdgeNgramField(document=True, use_template=True)
+    text = indexes.NgramField(document=True, use_template=True)
     created_by = indexes.CharField(model_attr='created_by')
     group = indexes.CharField(model_attr='group')
 
@@ -43,7 +46,7 @@ class AssayChipReadoutIndex(indexes.SearchIndex, indexes.Indexable):
 
 
 class AssayTestResultIndex(indexes.SearchIndex, indexes.Indexable):
-    text = indexes.EdgeNgramField(document=True, use_template=True)
+    text = indexes.NgramField(document=True, use_template=True)
     created_by = indexes.CharField(model_attr='created_by')
     group = indexes.CharField(model_attr='group')
 
@@ -52,7 +55,7 @@ class AssayTestResultIndex(indexes.SearchIndex, indexes.Indexable):
 
 
 class StudyConfigurationIndex(indexes.SearchIndex, indexes.Indexable):
-    text = indexes.EdgeNgramField(document=True, use_template=True)
+    text = indexes.NgramField(document=True, use_template=True)
 
     def get_model(self):
         return StudyConfiguration

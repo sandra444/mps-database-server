@@ -70,15 +70,18 @@
                     </table>
                     </div>
                 {% empty %}
-                    <div class="bg-danger">
-                        <h2>No results found: </h2>
-                        <h3>Make sure your search is not too general, too specific, or spelled incorrectly.</h3>
-                        <h4>-If you are unsure about the complete spelling, try searching just part of the word of interest.</h4>
-                        <h4>-You may also want to change the number of filter checkboxes you have selected.</h4>
+                    <br>
+                    <div id="control_warning" class="alert alert-danger" role="alert">
+                        <span class="sr-only">Warning:</span>
+                        <h2><span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span> No results found: </h2>
+                        <h3>Make sure your search is not too general or spelled incorrectly.</h3>
+                        <h4>-If you are unsure about the complete spelling, try searching just part of the term.<br>eg. "Trog" in lieu of "Troglitazone"</h4>
+                        <h4>-You may also want to change the number of filter checkboxes you have selected.<br>Clearing all filters will search all models</h4>
                     </div>
                 {% endfor %}
             {% endwith %}
 
+            {# Curently, the entries per page is arbitrarily high (1000), but this pagination code can remain just in case #}
             {% if page.has_previous or page.has_next %}
                 <div>
                     {% if page.has_previous %}
