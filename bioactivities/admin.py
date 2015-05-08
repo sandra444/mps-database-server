@@ -390,7 +390,7 @@ admin.site.register(BioactivityType, BioactivityTypeAdmin)
 
 
 class PubChemBioactivityAdmin(LockableAdmin):
-    search_fields = ['compound__name', 'activity_name', 'target', 'source']
+    search_fields = ['compound__name', 'activity_name', 'target__name']
     list_filter = ['compound', ]
 
     raw_id_fields = ("target",)
