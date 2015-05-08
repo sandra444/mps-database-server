@@ -10,11 +10,10 @@ class AssayRunIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
 
     # However, is it in poor taste to apply it to the document?
-    # text = indexes.CharField(document=True, use_template=True)
 
-    created_by = indexes.CharField(model_attr='created_by')
-    group = indexes.CharField(model_attr='group')
-    #created_on = indexes.DateTimeField(model_attr='created_on')
+    # created_by = indexes.CharField(model_attr='created_by')
+    # group = indexes.CharField(model_attr='group')
+    # created_on = indexes.DateTimeField(model_attr='created_on')
 
     def get_model(self):
         return AssayRun
@@ -29,8 +28,8 @@ class AssayRunIndex(indexes.SearchIndex, indexes.Indexable):
 
 class AssayChipSetupIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
-    created_by = indexes.CharField(model_attr='created_by')
-    group = indexes.CharField(model_attr='group')
+    # created_by = indexes.CharField(model_attr='created_by')
+    # group = indexes.CharField(model_attr='group')
 
     def get_model(self):
         return AssayChipSetup
@@ -38,8 +37,8 @@ class AssayChipSetupIndex(indexes.SearchIndex, indexes.Indexable):
 
 class AssayChipReadoutIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
-    created_by = indexes.CharField(model_attr='created_by')
-    group = indexes.CharField(model_attr='group')
+    # created_by = indexes.CharField(model_attr='created_by')
+    # group = indexes.CharField(model_attr='group')
 
     def get_model(self):
         return AssayChipReadout
@@ -47,8 +46,8 @@ class AssayChipReadoutIndex(indexes.SearchIndex, indexes.Indexable):
 
 class AssayTestResultIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
-    created_by = indexes.CharField(model_attr='created_by')
-    group = indexes.CharField(model_attr='group')
+    # created_by = indexes.CharField(model_attr='created_by')
+    # group = indexes.CharField(model_attr='group')
 
     def get_model(self):
         return AssayTestResult

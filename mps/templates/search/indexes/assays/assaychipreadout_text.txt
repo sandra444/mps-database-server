@@ -1,3 +1,5 @@
 {{ object.scientist }}
 {{ object.notes }}
 {{ object.chip_setup }}
+{{ object.created_by }}
+{{ object.group }}
