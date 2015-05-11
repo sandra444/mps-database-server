@@ -11,9 +11,30 @@ import ujson as json
 # 9.)Activity Name	10.)Assay Name 11.)Bioassay Type 12.)PubMed ID
 # 13.)RNAi 14.)Gene Target if RNAi
 
+def get_cid(param,string):
+    """
+    Acquires PubChem CID if compound does not currently have a CID associated with it
+    """
+    url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/{}/{}/json'.format(param,string)
+    response = urllib.urlopen(url)
+    data = json.loads(response.read())
 
-def get_bioactivities(name):
-    url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{}/assaysummary/json'.format(name)
+    data = data.get('PC_Compounds', '[{}]')
+
+    data = data[0]
+
+    try:
+        cid = data.get('id','').get('id','').get('cid','')
+        return cid
+
+    except:
+        return ''
+
+def get_bioactivities(cid):
+    # Using the inchikey has the consequence of failing when PubChem "doesn't like" the inchikey
+    # or the inchikey does not exist to begin with
+    # Likewise, using the name can cause collisions between similar names (eg. ZIMELDINE AND ZIMELDINE HYDROCHLORIDE)
+    url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/{}/assaysummary/json'.format(cid)
     response = urllib.urlopen(url)
     data = json.loads(response.read())
 
@@ -188,38 +209,52 @@ def run():
     PubChemBioactivity.objects.all().delete()
 
     success = 0
-    fail = 0
+    fail_bioactivity = 0
+    fail_compound = 0
     # TODO make pubchem bioactivity entries for each activity
     for compound in Compound.objects.all():
-        activities = get_bioactivities(compound.name)
-        if activities:
-            # Add CID to compound
-            if not compound.pubchemid:
-                cid = activities[0].get('compound_id')
-                compound.pubchemid = cid
+        if not compound.pubchemid:
+            cid = get_cid('inchikey', compound.inchikey)
+
+            if not cid:
+                cid = get_cid('name', compound.name)
+
+            if cid:
+                compound.pubchem = cid
                 compound.save()
 
-            for activity in activities:
-                # Add the bioactivity
-                entry = {
-                    'assay': activity.get('assay'),
-                    'compound': compound,
-                    'target': activity.get('target'),
-                    'value': activity.get('value'),
-                    'activity_name': activity.get('activity_name')
-                }
-                try:
-                    PubChemBioactivity.objects.create(locked=True, **entry)
-                    print "Success!"
-                    success += 1
-                except:
-                    print "Fail..."
-                    fail += 1
-        else:
-            print "Fail..."
-            fail += 1
+        if compound.pubchemid:
+            activities = get_bioactivities(compound.pubchemid)
+            if activities:
+                # Add CID to compound
+                # add back in later, need to potentially rectify some CID
+                # if not compound.pubchemid:
+                # cid = activities[0].get('compound_id')
+                # compound.pubchemid = cid
+                # compound.save()
 
-    print("Failures:{}".format(fail))
+                for activity in activities:
+                    # Add the bioactivity
+                    entry = {
+                        'assay': activity.get('assay'),
+                        'compound': compound,
+                        'target': activity.get('target'),
+                        'value': activity.get('value'),
+                        'activity_name': activity.get('activity_name')
+                    }
+                    try:
+                        PubChemBioactivity.objects.create(locked=True, **entry)
+                        print "Success!"
+                        success += 1
+                    except:
+                        print "Failed bioactivity..."
+                        fail_bioactivity += 1
+        else:
+            print "Failed compound..."
+            fail_compound += 1
+
+    print("Compound Failures:{}".format(fail_compound))
+    print("Bioactivity Failures:{}".format(fail_bioactivity))
     print("Success:{}".format(success))
 
 
