@@ -2,5 +2,7 @@
 {{ object.assay_chip_id }}
 {{ object.compound.name }}
 {{ object.scientist }}
+{{ object.notes }}
+{{ object.notebook }}
 {{ object.created_by }}
 {{ object.group }}

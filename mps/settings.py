@@ -212,6 +212,12 @@ INSTALLED_APPS = (
 #     'captcha': 'captcha.south_migrations',
 # }
 
+# Should set all indices to use real time processing
+# Users will have to pay the toll when adding or deleting indexed objects...
+# However this is useful to prevent having to use a CRON job
+# Traffic will probably be fairly low, thus we have instantaneous results with little consequence
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
 # For whoosh
 HAYSTACK_CONNECTIONS = {
     'default': {
