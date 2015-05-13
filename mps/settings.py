@@ -198,6 +198,7 @@ INSTALLED_APPS = (
     'haystack',
 
     # MPS applications:
+    'mps',
     'cellsamples',
     'compounds',
     'microdevices',

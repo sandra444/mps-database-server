@@ -45,6 +45,14 @@ $(document).ready(function () {
         }
     }
 
+    // Remove empty sections (user did not have permission to see anything)
+    // Not necessary, but is unattractive to see headings for nothing
+    $('.result-group').each(function() {
+         if(!$(this)[0].children[1].children[0]) {
+             $(this).remove();
+         }
+    });
+
     // Initial values
     $("#filter [type=checkbox]").each(function() {
         init_checkbox(this);

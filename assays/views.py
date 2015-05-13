@@ -14,7 +14,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from mps.filters import *
+from mps.templatetags.custom_filters import *
 from django.db.models import Q
 
 from mps.mixins import *
