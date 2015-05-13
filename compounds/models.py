@@ -52,8 +52,11 @@ class Compound(LockableModel):
         help_text="Preferred compound name.")
     synonyms = models.TextField(max_length=4000,
         null=True, blank=True)
+    tags = models.TextField(blank=True, null=True,
+        help_text="Tags for the compound (EPA, NCATS, etc.)")
 
-    # external identifiers, not unique because does go with null on SQL server
+    # External identifiers are checked for uniqueness in form's clean
+    # Not optimal, but other solutions did not seem to work (editing save, so on)
     chemblid = models.CharField('ChEMBL ID', max_length=20,
         null=True, blank=True,
         help_text="Enter a ChEMBL id, e.g. CHEMBL25, and click Retrieve to "
@@ -63,7 +66,6 @@ class Compound(LockableModel):
     pubchemid = models.CharField(verbose_name='PubChem ID', max_length=40, null=True, blank=True)
 
     # standard names/identifiers
-    # Making this field unique causes issues if no InChI key can be found
     inchikey = models.CharField('InChI key', max_length=27,
         null=True, blank=True,
         help_text="IUPAC standard InChI key for the compound")

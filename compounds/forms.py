@@ -7,6 +7,7 @@ class CompoundForm(forms.ModelForm):
         model = Compound
         widgets = {
             'name': forms.Textarea(attrs={'rows': 1}),
+            'tags': forms.Textarea(attrs={'rows': 1}),
             'smiles': forms.Textarea(attrs={'size':50, 'rows': 3}),
             'inchikey': forms.Textarea(attrs={'size':50, 'rows': 3}),
             'molecular_formula': forms.Textarea(attrs={'size':50, 'rows': 3}),

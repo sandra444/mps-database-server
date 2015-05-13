@@ -16,6 +16,7 @@
                     <th>LogP</th>
                     <th>Rule of 5 Violations</th>
                     <th>Known Drug</th>
+                    <th>Tags</th>
 {#                    <th>Last Update</th>#}
                     <th>Image</th>
                 </tr>
@@ -30,6 +31,7 @@
                     <th>LogP</th>
                     <th>Rule of 5 Violations</th>
                     <th>Known Drug</th>
+                    <th>Tags</th>
 {#                    <th>Last Update</th>#}
                     <th>Image</th>
                 </tr>
@@ -45,6 +47,7 @@
                     <td>{{ compound.logp|default_if_none:"" }}</td>
                     <td>{{ compound.ro5_violations|default_if_none:"" }}</td>
                     <td>{{ compound.known_drug }}</td>
+                    <td>{{ compound.tags|default_if_none:"" }}</td>
 {#                    <td>{{ compound.molecular_weight }}</td>#}
 {#                    <td>{{ compound.logp }}</td>#}
 {#                    <td>{{ compound.ro5_violations }}</td>#}
@@ -62,7 +65,7 @@
                 "aoColumnDefs": [
                     {
                         "bSortable": false,
-                        "aTargets": [7]
+                        "aTargets": [8]
                     },
                     {
                         "targets": [2],
