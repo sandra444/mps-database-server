@@ -1,0 +1,7 @@
+<tr>
+    <td>
+        <a href="/assays/assaychipreadout/{{ object.id }}">
+            {{ object }}
+        </a>
+    </td>
+</tr>

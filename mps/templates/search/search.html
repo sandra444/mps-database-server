@@ -58,18 +58,7 @@
                     <h3 class="{% cycle 'text-primary' 'text-success' 'text-info' 'text-warning'%}">{{ ct.grouper }}</h3>
                     <table class="display table table-striped table-hover">
                     {% for result in ct.list %}
-                        {# This should filter out entries the user should not have access to #}
-                        {% if not result.object.group or user|has_group:result.object.group or not result.object.restricted %}
-                            <tr>
-                            {# Just using the id can save time #}
-    {#                            <td>#}
-    {#                                <a href="{{ result.object.get_absolute_url }}">{{ result.object.id }}</a>#}
-    {#                            </td>#}
-                                <td>
-                                    <a href="{{ result.object.get_absolute_url }}">{{ result.object }}</a>
-                                </td>
-                            </tr>
-                        {% endif %}
+                        {{ result.rendered|safe }}
                     {% endfor %}
                     </table>
                     </div>

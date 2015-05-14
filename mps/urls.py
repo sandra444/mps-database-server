@@ -5,7 +5,8 @@ import debug_toolbar
 
 from mps import settings
 
-from .views import CustomSearch
+# from .views import CustomSearch
+from .views import custom_search
 
 admin.autodiscover()
 
@@ -43,7 +44,9 @@ urlpatterns = patterns('',
                        # Default search via haystack/whoosh
                        (r'^haystack/', include('haystack.urls')),
                        # Testing custom search (same as default currently)
-                       (r'^search/', CustomSearch()),
+                       # (r'^search/', CustomSearch()),
+                       (r'^search/', custom_search),
+
 
                        # BEGIN old-style API
                        url(r'^assays_ajax$', 'assays.ajax.ajax'),
