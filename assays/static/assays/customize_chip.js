@@ -144,20 +144,29 @@ $(document).ready(function () {
         table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th></tr>" : "";
 
         for (var i in lines) {
-            var every = lines[i].every(isTrue);
+            var line = lines[i];
 
+            var every = line.every(isTrue);
+
+            var value = line[4];
+
+            // If the row will be excluded (highlighted red)
             if ((i < headers && !exist) || !every) {
                 table += "<tr style='background: #FF2400'>";
             }
-            else if (lines[i][4] == 'None') {
+
+            // If the row has no value (residue code, may be used later)
+            else if (value == 'None') {
                 table += "<tr style='background: #606060'>";
             }
+
             else {
                 table += "<tr>";
             }
 
+            // Add every value of interest
             for (var j=0; j<6; j++) {
-                table += "<th>" + lines[i][j] + "</th>";
+                table += "<th>" + line[j] + "</th>";
             }
             table += "</tr>";
         }
@@ -172,32 +181,41 @@ $(document).ready(function () {
 
         for (var i in lines) {
 
-            var every = lines[i].every(isTrue);
+            var line = lines[i];
+
+            var every = line.every(isTrue);
 
             if (!every || (i < headers && !exist)) {
                 continue;
             }
 
+            var time = line[0];
+            var time_unit = line[1];
+            var assay = line[2];
+            var object = line[3];
+            var value = line[4];
+            var value_unit = line[5];
+
             // Crash if the time or value are not numeric
-            if (isNaN(lines[i][0]) || isNaN(lines[i][4])) {
+            if (isNaN(time) || isNaN(value)) {
                 alert("Improperly Configured: Please check your file and the number of header rows selected.");
                 return;
             }
 
-            if (!assays[lines[i][2]]) {
-                assays[lines[i][2]] = {};
+            if (!assays[assay]) {
+                assays[assay] = {};
             }
 
-            if (lines[i][3] && lines[i][3] != 'None' && !assays[lines[i][2]][lines[i][3]]) {
-                assays[lines[i][2]][lines[i][3]] = {'time':[], 'data':[]};
+            if (object && object != 'None' && !assays[assay][object]) {
+                assays[assay][object] = {'time':[], 'data':[]};
             }
 
-            if (assays[lines[i][2]][lines[i][3]] && lines[i][4] && lines[i][4] != 'None') {
-                assays[lines[i][2]][lines[i][3]].time.push(lines[i][0]);
-                assays[lines[i][2]][lines[i][3]].data.push(lines[i][4]);
+            if (assays[assay][object] && value && value != 'None') {
+                assays[assay][object].time.push(time);
+                assays[assay][object].data.push(value);
 
-                valueUnits[lines[i][2]] = lines[i][5];
-                timeUnits[lines[i][2]] = lines[i][1];
+                valueUnits[assay] = value_unit;
+                timeUnits[assay] = time_unit;
             }
         }
 
