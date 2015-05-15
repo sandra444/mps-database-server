@@ -1,3 +1,4 @@
-{{ object.compound }}
-{{ object.warnings }}
-{{ object.nonclinical_toxicology }}
+{{ object.compound.name }}
+{% for event in object.compoundadverseevent_set.all %}
+  {{ event.event.event }}
+{% endfor %}
