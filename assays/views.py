@@ -39,10 +39,10 @@ class UserIndex(OneGroupRequiredMixin, ListView):
         self.queryset = self.object_list
         context['title'] = request.user.username + "'s Studies"
         # Check if this is setup only; if so add to add respective URLS
-        if request.GET.get('setup', ''):
-            context['setup_only'] = '/?setup=1'
-        else:
-            context['setup_only'] = ''
+        # if request.GET.get('setup', ''):
+        #     context['setup_only'] = '/?setup=1'
+        # else:
+        #     context['setup_only'] = ''
         return self.render_to_response(context)
 
 
@@ -69,10 +69,10 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
         self.queryset = self.object_list
         context['title'] = 'Group Study Index'
         # Check if this is setup only; if so add to add respective URLS
-        if request.GET.get('setup', ''):
-            context['setup_only'] = '/?setup=1'
-        else:
-            context['setup_only'] = ''
+        # if request.GET.get('setup', ''):
+        #     context['setup_only'] = '/?setup=1'
+        # else:
+        #     context['setup_only'] = ''
         return self.render_to_response(context)
 
 
@@ -119,10 +119,10 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
         context['number_of_results'] = AssayTestResult.objects.filter(chip_setup=context['setups']).count()
 
         # Check if this is setup only; if so add to add respective URLS
-        if request.GET.get('setup', ''):
-            context['setup_only'] = '/?setup=1'
-        else:
-            context['setup_only'] = ''
+        # if request.GET.get('setup', ''):
+        #     context['setup_only'] = '/?setup=1'
+        # else:
+        #     context['setup_only'] = ''
         return self.render_to_response(context)
 
 
@@ -149,9 +149,9 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
 
     # Test form validity
     def form_valid(self, form):
-        url_add = ''
-        if self.request.GET.get('setup', ''):
-            url_add = '?setup=1'
+        # url_add = ''
+        # if self.request.GET.get('setup', ''):
+        #     url_add = '?setup=1'
         # get user via self.request.user
         if form.is_valid():
             self.object = form.save()
@@ -159,7 +159,8 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
             # Save Chip Study
             self.object.save()
             return redirect(
-                self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
+                self.object.get_absolute_url())
+                # self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -251,10 +252,10 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
 
         if form.is_valid():
-            # Add to url if setup only
-            url_add = ''
-            if self.request.GET.get('setup', ''):
-                url_add = '?setup=1'
+            # # Add to url if setup only
+            # url_add = ''
+            # if self.request.GET.get('setup', ''):
+            #     url_add = '?setup=1'
             self.object = form.save()
             # TODO refactor original created by
             # Explicitly set created_by
@@ -262,7 +263,8 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             self.object.modified_by = self.request.user
             # Save study
             self.object.save()
-            return redirect(self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
+            return redirect(self.object.get_absolute_url())
+            # return redirect(self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(
             self.get_context_data(form=form,
@@ -377,9 +379,9 @@ class AssayChipSetupAdd(CreateView):
         return context
 
     def form_valid(self, form):
-        url_add = ''
-        if self.request.GET.get('setup', ''):
-            url_add = '?setup=1'
+        # url_add = ''
+        # if self.request.GET.get('setup', ''):
+        #     url_add = '?setup=1'
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.assay_run_id = study
         form.instance.group = study.group
@@ -398,8 +400,9 @@ class AssayChipSetupAdd(CreateView):
             if data['another']:
                 return self.render_to_response(self.get_context_data(form=form))
             else:
-                return redirect(
-                    self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
+                return redirect(self.object.get_absolute_url())
+                # return redirect(
+                #    self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -464,9 +467,9 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
-            url_add = ''
-            if self.request.GET.get('setup', ''):
-                url_add = '?setup=1'
+            # url_add = ''
+            # if self.request.GET.get('setup', ''):
+            #     url_add = '?setup=1'
             self.object = form.save()
             # Set restricted
             self.object.restricted = study.restricted
@@ -481,8 +484,9 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             if data['another']:
                 return redirect(self.object.get_absolute_url() + 'assaychipsetup/add/' + '?clone=' + str(self.object.id))
             else:
-                return redirect(
-                    self.object.get_absolute_url() + url_add)
+                return redirect(self.object.get_absolute_url())
+                #return redirect(
+                #    self.object.get_absolute_url() + url_add)
         else:
 
             # Get protocols
