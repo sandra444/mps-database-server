@@ -220,7 +220,7 @@ def run():
                 cid = get_cid('name', compound.name)
 
             if cid:
-                compound.pubchem = cid
+                compound.pubchemid = cid
                 compound.save()
 
         if compound.pubchemid:

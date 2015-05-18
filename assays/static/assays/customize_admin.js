@@ -478,7 +478,7 @@ $(document).ready(function () {
 
             controls.append($('<div class="form-row field-compound"><ul class="control_list">' +
                 '<li><div class="field-box"><label for="id_compound">Compound:</label>' +
-                '<input class="vForeignKeyRawIdAdminField" id="id_compound" name="compound" type="text" value="" disabled="">' +
+                '<input class="vForeignKeyRawIdAdminField" id="id_compound" name="compound" type="text" value="">' +
                 '<a href="/admin/compounds/compound/?t=id" class="related-lookup" id="lookup_id_compound" onclick="return showRelatedObjectLookupPopup(this);"> ' +
                 '<img src="/static/admin/img/selector-search.gif" width="16" height="16" alt="Lookup"></a></div></li>' +
                 '<li><div class="field-box"><label for="concentration">Concentration:</label>' +
@@ -499,7 +499,7 @@ $(document).ready(function () {
             $('#layout_table').selectable({
                 filter: "td",
                 distance: 1,
-                stop: layout_add_content,
+                stop: layout_add_content
             });
         }
 
