@@ -4,3 +4,6 @@
 {{ object.chip_setup }}
 {{ object.created_by }}
 {{ object.group }}
+{% for assay in object.assaychipreadoutassay_set.all %}
+  {{ assay }}
+{% endfor %}

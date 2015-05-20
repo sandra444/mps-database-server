@@ -6,3 +6,7 @@
 {{ object.notebook }}
 {{ object.created_by }}
 {{ object.group }}
+{% for cell in object.assaychipcells_set.all %}
+  {{ cell.cell_sample }}
+  {{ cell.cell_biosensor }}
+{% endfor %}

@@ -207,17 +207,13 @@ INSTALLED_APPS = (
     'assays',
     'resources'
 )
-# Comment out captcha for now
-# Required for captchas
-# SOUTH_MIGRATION_MODULES = {
-#     'captcha': 'captcha.south_migrations',
-# }
 
-# Should set all indices to use real time processing
-# Users will have to pay the toll when adding or deleting indexed objects...
-# However this is useful to prevent having to use a CRON job
-# Traffic will probably be fairly low, thus we have instantaneous results with little consequence
-HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+# # This should set all indices to use real time processing
+# # Users will have to pay the toll when adding or deleting indexed objects...
+# # However this is useful to prevent having to use a CRON job
+# # Traffic will probably be fairly low, thus we have (some) instantaneous results with little consequence
+# # This is disabled for the moment and a CRON job will be used for the time being
+# HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 # For whoosh
 HAYSTACK_CONNECTIONS = {
