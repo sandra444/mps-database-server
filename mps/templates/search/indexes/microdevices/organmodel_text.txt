@@ -1,0 +1,5 @@
+{{ object.model_name }}
+{{ object.organ }}
+{{ object.center }}
+{{ object.device }}
+{{ object.description }}

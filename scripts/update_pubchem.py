@@ -1,7 +1,8 @@
 from compounds.models import Compound
-from bioactivities.models import PubChemBioactivity, PubChemTarget
+from bioactivities.models import PubChemBioactivity, PubChemTarget, PubChemAssay
 
-import urllib, json
+import urllib
+import ujson as json
 
 # Call this with the command: ./manage.py runscript update_pubchem
 
@@ -10,9 +11,30 @@ import urllib, json
 # 9.)Activity Name	10.)Assay Name 11.)Bioassay Type 12.)PubMed ID
 # 13.)RNAi 14.)Gene Target if RNAi
 
+def get_cid(param,string):
+    """
+    Acquires PubChem CID if compound does not currently have a CID associated with it
+    """
+    url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/{}/{}/json'.format(param,string)
+    response = urllib.urlopen(url)
+    data = json.loads(response.read())
 
-def get_bioactivities(name):
-    url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{}/assaysummary/json'.format(name)
+    data = data.get('PC_Compounds', '[{}]')
+
+    data = data[0]
+
+    try:
+        cid = data.get('id','').get('id','').get('cid','')
+        return cid
+
+    except:
+        return ''
+
+def get_bioactivities(cid):
+    # Using the inchikey has the consequence of failing when PubChem "doesn't like" the inchikey
+    # or the inchikey does not exist to begin with
+    # Likewise, using the name can cause collisions between similar names (eg. ZIMELDINE AND ZIMELDINE HYDROCHLORIDE)
+    url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/{}/assaysummary/json'.format(cid)
     response = urllib.urlopen(url)
     data = json.loads(response.read())
 
@@ -37,7 +59,6 @@ def get_bioactivities(name):
                 value = entry[8]
                 # Please note that specifying the units as micromolar is superfluous and thus these strings are removed
                 activity_name = entry[9].replace(' (uM)','').replace('_uM','').replace('_MICROM','')
-                assay_name = entry[10]
 
                 # TODO Insert code to add/handle Bioactivity Types?
                 # Do not add outcome to returned data, assumed to be active
@@ -111,32 +132,14 @@ def get_bioactivities(name):
                                 print "Error processing target:", target
 
                     activities.append({
-                        'assay_id': AID,
                         'compound_id': CID,
                         'target': final_target,
                         'value': value,
                         'activity_name': activity_name,
-                        'assay_name': assay_name
                     })
 
         # Some entries might be empty thus check for assays
         if assays:
-
-            # flat_assays = ','.join([x for x in assays])
-            #
-            # assay_url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/assay/aid/{}/summary/json'.format(flat_assays)
-            # assay_response = urllib.urlopen(assay_url)
-            # assay_data = json.loads(assay_response.read())
-            # assay_data = assay_data.get('AssaySummaries').get('AssaySummary')
-            #
-            # for assay in assay_data:
-            #     aid = str(assay.get('AID'))
-            #     source = assay.get('SourceName')
-            #
-            #     activities_to_change = assays.get(aid)
-            #
-            #     for index in activities_to_change:
-            #         activities[index].update({'source':source})
 
             all_assays = [x for x in assays]
             flat_assays = []
@@ -154,12 +157,46 @@ def get_bioactivities(name):
 
                 for assay in assay_data:
                     aid = str(assay.get('AID'))
-                    source = assay.get('SourceName')
+
+                    comment = assay.get('Comment','')
+
+                    target_type = None
+                    organism = None
+
+                    for entry in comment:
+                        if entry.startswith('Target Type'):
+                            target_type = entry.split(': ')[-1].strip()
+                        elif entry.startswith('Organism'):
+                            organism = entry.split(': ')[-1].strip()
+
+                    # Try to get an assay with this AID from the database
+                    try:
+                        assay_model = PubChemAssay.objects.get(aid=aid)
+                        print "Found assay!"
+
+                    except:
+                        source = assay.get('SourceName')
+                        source_id = assay.get('SourceID')
+                        name = assay.get('Name')
+                        description = '\n'.join(assay.get('Description')).strip()
+
+                        entry = {
+                            'aid': aid,
+                            'source': source,
+                            'source_id': source_id,
+                            'name': name,
+                            'description': description,
+                            'target_type': target_type,
+                            'organism': organism
+                        }
+
+                        assay_model = PubChemAssay.objects.create(locked=True, **entry)
+                        print "Created assay!"
 
                     activities_to_change = assays.get(aid)
 
                     for index in activities_to_change:
-                        activities[index].update({'source':source})
+                        activities[index].update({'assay':assay_model})
 
         return activities
 
@@ -172,40 +209,52 @@ def run():
     PubChemBioactivity.objects.all().delete()
 
     success = 0
-    fail = 0
+    fail_bioactivity = 0
+    fail_compound = 0
     # TODO make pubchem bioactivity entries for each activity
     for compound in Compound.objects.all():
-        activities = get_bioactivities(compound.name)
-        if activities:
-            # Add CID to compound
-            if not compound.pubchemid:
-                cid = activities[0].get('compound_id')
+        if not compound.pubchemid:
+            cid = get_cid('inchikey', compound.inchikey)
+
+            if not cid:
+                cid = get_cid('name', compound.name)
+
+            if cid:
                 compound.pubchemid = cid
                 compound.save()
 
-            for activity in activities:
-                # Add the bioactivity
-                entry = {
-                    'assay_id': activity.get('assay_id'),
-                    'compound': compound,
-                    'target': activity.get('target'),
-                    'value': activity.get('value'),
-                    'source': activity.get('source'),
-                    'activity_name': activity.get('activity_name'),
-                    'assay_name': activity.get('assay_name')
-                }
-                try:
-                    PubChemBioactivity.objects.create(locked=True, **entry)
-                    print "Success!"
-                    success += 1
-                except:
-                    print "Fail..."
-                    fail += 1
-        else:
-            print "Fail..."
-            fail += 1
+        if compound.pubchemid:
+            activities = get_bioactivities(compound.pubchemid)
+            if activities:
+                # Add CID to compound
+                # add back in later, need to potentially rectify some CID
+                # if not compound.pubchemid:
+                # cid = activities[0].get('compound_id')
+                # compound.pubchemid = cid
+                # compound.save()
 
-    print("Failures:{}".format(fail))
+                for activity in activities:
+                    # Add the bioactivity
+                    entry = {
+                        'assay': activity.get('assay'),
+                        'compound': compound,
+                        'target': activity.get('target'),
+                        'value': activity.get('value'),
+                        'activity_name': activity.get('activity_name')
+                    }
+                    try:
+                        PubChemBioactivity.objects.create(locked=True, **entry)
+                        print "Success!"
+                        success += 1
+                    except:
+                        print "Failed bioactivity..."
+                        fail_bioactivity += 1
+        else:
+            print "Failed compound..."
+            fail_compound += 1
+
+    print("Compound Failures:{}".format(fail_compound))
+    print("Bioactivity Failures:{}".format(fail_bioactivity))
     print("Success:{}".format(success))
 
 

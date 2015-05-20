@@ -1,5 +1,5 @@
 # coding=utf-8
-import json
+import ujson as json
 from collections import defaultdict
 from django.http import *
 from .models import *

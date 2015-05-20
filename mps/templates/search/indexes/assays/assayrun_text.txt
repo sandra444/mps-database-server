@@ -1,0 +1,5 @@
+{{ object.study_configuration }}
+{{ object.assay_run_id }}
+{{ object.description }}
+{{ object.created_by }}
+{{ object.group }}

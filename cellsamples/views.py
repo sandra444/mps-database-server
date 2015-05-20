@@ -9,7 +9,7 @@ from mps.mixins import OneGroupRequiredMixin, ObjectGroupRequiredMixin
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import Group
 
-from mps.filters import *
+#from mps.templatetags.custom_filters import *
 from django.db.models import Q
 
 class CellSampleAdd(OneGroupRequiredMixin, CreateView):
@@ -35,14 +35,6 @@ class CellSampleAdd(OneGroupRequiredMixin, CreateView):
             return redirect('/cellsamples/cellsample')
         else:
             return self.render_to_response(self.get_context_data(form=form))
-
-    # def get(self, request, **kwargs):
-    #     self.object = None
-    #     if len(request.user.groups.values_list('pk', flat=True)) == 0:
-    #         return PermissionDenied(request, 'You must be a member of at least one group')
-    #     form_class = self.get_form_class()
-    #     form = self.get_form(form_class)
-    #     return self.render_to_response(self.get_context_data(form=form))
 
 
 # Note that updating a model clears technically blank fields (exclude in form to avoid this)
@@ -72,20 +64,13 @@ class CellSampleUpdate(ObjectGroupRequiredMixin, UpdateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
-    # def get(self, request, **kwargs):
-    #     self.object = self.get_object()
-    #     if not has_group(request.user, self.object.group):
-    #         return PermissionDenied(request,'You must be a member of ' + str(self.object.group))
-    #     form_class = self.get_form_class()
-    #     form = self.get_form(form_class)
-    #     return self.render_to_response(self.get_context_data(form=form))
 
 class CellSampleList(OneGroupRequiredMixin, ListView):
     template_name = 'cellsamples/cellsample_list.html'
 
     def get_queryset(self):
         groups = self.request.user.groups.values_list('id', flat=True)
-        queryset = CellSample.objects.filter(group__in=groups).prefetch_related('cell_type', 'supplier').select_related('cell_type__cell_subtype', 'cell_type__organ')
+        queryset = CellSample.objects.filter(group__in=groups).prefetch_related('cell_type', 'supplier', 'group').select_related('cell_type__cell_subtype', 'cell_type__organ')
         return queryset
 
 
@@ -104,14 +89,6 @@ class CellTypeAdd(OneGroupRequiredMixin, CreateView):
             return redirect('/cellsamples/celltype')
         else:
             return self.render_to_response(self.get_context_data(form=form))
-
-    # def get(self, request, **kwargs):
-    #     self.object = None
-    #     if len(request.user.groups.values_list('pk', flat=True)) == 0:
-    #         return PermissionDenied(request, 'You must be a member of at least one group')
-    #     form_class = self.get_form_class()
-    #     form = self.get_form(form_class)
-    #     return self.render_to_response(self.get_context_data(form=form))
 
 
 # Note that updating a model clears technically blank fields (exclude in form to avoid this)
@@ -137,13 +114,6 @@ class CellTypeUpdate(OneGroupRequiredMixin, UpdateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
-    # def get(self, request, **kwargs):
-    #     self.object = self.get_object()
-    #     if len(request.user.groups.values_list('pk', flat=True)) == 0:
-    #         return PermissionDenied(request, 'You must be a member of at least one group')
-    #     form_class = self.get_form_class()
-    #     form = self.get_form(form_class)
-    #     return self.render_to_response(self.get_context_data(form=form))
 
 class CellTypeList(ListView):
     template_name = 'cellsamples/celltype_list.html'

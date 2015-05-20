@@ -71,9 +71,13 @@ class Microdevice(LockableModel):
     def __unicode__(self):
         return self.device_name
 
+    def get_absolute_url(self):
+        return "/microdevices/device/{}".format(self.id)
+
 
 class OrganModel(LockableModel):
     class Meta(object):
+        verbose_name = 'Organ Model'
         ordering = ('model_name', 'organ', )
 
     model_name = models.CharField(max_length=200)
@@ -86,8 +90,10 @@ class OrganModel(LockableModel):
                             blank=True, null=True, help_text='File detailing the protocols for this model')
 
     def __unicode__(self):
-
         return self.model_name
+
+    def get_absolute_url(self):
+        return "/microdevices/model/{}".format(self.id)
 
 # It is somewhat odd that ValidatedAssays are inlines in lieu of a manytomany field
 # This was done originally so that additional fields could be added to a validated assay

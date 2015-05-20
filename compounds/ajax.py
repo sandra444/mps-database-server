@@ -3,7 +3,7 @@
 from django.http import *
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-import json
+import ujson as json
 from .models import *
 
 from bioservices import ChEMBL as ChEMBLdb

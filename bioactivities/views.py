@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -8,9 +8,13 @@ from django.template import RequestContext
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 
+import ujson as json
+
 from bioactivities.models import *
 from bioactivities.parsers import *
-from bioactivities.serializers import BioactivitiesSerializer
+# from bioactivities.serializers import BioactivitiesSerializer
+
+from mps.views import SearchForm, search
 
 import logging
 logger = logging.getLogger(__name__)
@@ -32,55 +36,124 @@ class JSONResponse(HttpResponse):
         super(JSONResponse, self).__init__(content, **kwargs)
 
 
-@csrf_exempt
 def bioactivities_list(request):
     """
-    List all code snippets, or create a new Bioactivity.
+    Retrieve a list of Bioactivities
     """
-    if request.method == 'GET':
-        # data = Bioactivity.objects.all().select_related("compound")
-        data = Bioactivity.objects.raw(
-            'SELECT id,compound_id,bioactivity_type,value,'
-            'units FROM  bioactivities_bioactivity;'
-        )
-
-        serializer = BioactivitiesSerializer(data, many=True)
-        return JSONResponse(serializer.data)
-
-    elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = BioactivitiesSerializer(data=data)
-        if serializer.is_valid():
-            # serializer.save()    # do not save anything yet
-            return JSONResponse(serializer.data, status=201)
-        return JSONResponse(serializer.errors, status=400)
-
-
-@csrf_exempt
-def bioactivities_detail(request, pk):
-    """
-    Retrieve, update or delete a Bioactivity.
-    """
-    try:
-        snippet = Bioactivity.objects.get(pk=pk)
-    except Bioactivity.DoesNotExist:
-        return HttpResponse(status=404)
 
     if request.method == 'GET':
-        serializer = BioactivitiesSerializer(snippet)
-        return JSONResponse(serializer.data)
+        compound =  request.GET.get('compound', '')
+        target = request.GET.get('target','')
+        name = request.GET.get('name','')
+        pubchem = request.GET.get('pubchem', '')
+        exclude_targetless = request.GET.get('exclude_targetless', '')
+        exclude_organismless = request.GET.get('exclude_organismless', '')
 
-    elif request.method == 'PUT':
-        data = JSONParser().parse(request)
-        serializer = BioactivitiesSerializer(snippet, data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JSONResponse(serializer.data)
-        return JSONResponse(serializer.errors, status=400)
+        # I might want to sort by multiple fields later
+        if any([compound,target,name]):
+            if pubchem:
+                data = PubChemBioactivity.objects.all().prefetch_related('compound','target').select_related('assay__aid')
+            else:
+                data = Bioactivity.objects.filter(standard_name__isnull=False,
+                                              standardized_units__isnull=False,
+                                              standardized_value__isnull=False).prefetch_related('compound',
+                                                                                                 'target',
+                                                                                                 'created_by').select_related('assay__chemblid')
 
-    elif request.method == 'DELETE':
-        snippet.delete()
-        return HttpResponse(status=204)
+            if compound:
+                data = data.filter(compound__name__icontains=compound)
+
+            if target:
+                data = data.filter(target__name__icontains=target)
+
+            if name:
+                if pubchem:
+                    data = data.filter(activity_name__icontains=name)
+                else:
+                    data = data.filter(standard_name__icontains=name)
+
+            if exclude_targetless:
+                # Exclude where target is "Unchecked"
+                data = data.filter(target__isnull=False).exclude(target__name="Unchecked")
+
+            if exclude_organismless:
+                # Exclude where assay and target organism are null
+                data = data.filter(assay__organism__isnull=False) | data.filter(target__organism__isnull=False)
+                # Exclude where organism is "Unspecified"
+                data = data.exclude(assay__organism="Unspecified").exclude(target__organism="Unspecified")
+
+            length = data.count()
+
+            # Limit at 5000
+            bioactivities = data[:5000]
+
+            c = RequestContext(request)
+            c.update({
+                'bioactivities': bioactivities,
+                'compound': compound,
+                'target': target,
+                'name': name,
+                'length': length,
+                'pubchem': pubchem
+            })
+            return render_to_response('bioactivities/bioactivities_list.html', c)
+
+        else:
+            raise Http404
+
+    else:
+        raise Http404
+
+# Old API
+# @csrf_exempt
+# def bioactivities_list(request):
+#     """
+#     List all code snippets, or create a new Bioactivity.
+#     """
+#     if request.method == 'GET':
+#         # data = Bioactivity.objects.all().select_related("compound")
+#         data = Bioactivity.objects.raw(
+#             'SELECT id,compound_id,bioactivity_type,value,'
+#             'units FROM  bioactivities_bioactivity;'
+#         )
+#
+#         serializer = BioactivitiesSerializer(data, many=True)
+#         return JSONResponse(serializer.data)
+#
+#     elif request.method == 'POST':
+#         data = JSONParser().parse(request)
+#         serializer = BioactivitiesSerializer(data=data)
+#         if serializer.is_valid():
+#             # serializer.save()    # do not save anything yet
+#             return JSONResponse(serializer.data, status=201)
+#         return JSONResponse(serializer.errors, status=400)
+#
+#
+# @csrf_exempt
+# def bioactivities_detail(request, pk):
+#     """
+#     Retrieve, update or delete a Bioactivity.
+#     """
+#     try:
+#         snippet = Bioactivity.objects.get(pk=pk)
+#     except Bioactivity.DoesNotExist:
+#         return HttpResponse(status=404)
+#
+#     if request.method == 'GET':
+#         serializer = BioactivitiesSerializer(snippet)
+#         return JSONResponse(serializer.data)
+#
+#     elif request.method == 'PUT':
+#         data = JSONParser().parse(request)
+#         serializer = BioactivitiesSerializer(snippet, data=data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return JSONResponse(serializer.data)
+#         return JSONResponse(serializer.errors, status=400)
+#
+#     elif request.method == 'DELETE':
+#         snippet.delete()
+#         return HttpResponse(status=204)
 
 
 @csrf_exempt
@@ -186,7 +259,23 @@ def view_heatmap(request):
     return render_to_response('bioactivities/heatmap.html', c)
 
 def view_table(request):
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            return search(request)
+
+    else:
+        form = SearchForm(initial={'app': 'Bioactivities'})
+
     c = RequestContext(request)
+
+    compounds = [str(compound.name) for compound in Compound.objects.all()]
+
+    c.update({
+        'form': form,
+        'compounds': compounds
+    })
+
     return render_to_response('bioactivities/table.html', c)
 
 def view_model(request):

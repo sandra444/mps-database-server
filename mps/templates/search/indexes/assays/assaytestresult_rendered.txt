@@ -1,0 +1,12 @@
+<tr>
+    <td>
+        <a href="/assays/assaytestresult/{{ object.id }}">
+            {{ object }}
+        </a>
+    </td>
+    <td>
+        <a class="btn btn-info" href="{{ object.get_absolute_url }}">
+            View Study
+        </a>
+    </td>
+</tr>

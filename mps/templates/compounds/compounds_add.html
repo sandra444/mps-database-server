@@ -12,7 +12,7 @@
     {% csrf_token %}
     {{ formset.management_form }}
     <h1>
-        Compound
+        Add Compound
 
         <button id="submit" type="submit" class="btn btn-primary">Submit</button>
     </h1>
@@ -47,11 +47,19 @@
     </div>
 
     <div class="form-group">
-        <label for="chemblid" class="col-sm-2 control-label compounds-compound">CHEMBL ID</label>
+        <label for="chemblid" class="col-sm-2 control-label compounds-compound">ChEMBL ID</label>
         <div class="col-sm-10">
           {{ form.chemblid }} <a target="_blank" href="https://www.ebi.ac.uk/chembl">Search ChEMBL</a>
         </div>
     </div>
+
+{#    Might as well just automatically acquire pubchem ID#}
+{#    <div class="form-group">#}
+{#        <label for="pubchemid" class="col-sm-2 control-label compounds-compound">PubChem ID</label>#}
+{#        <div class="col-sm-10">#}
+{#          {{ form.pubchemid }}#}
+{#        </div>#}
+{#    </div>#}
 
     <div class="form-group">
         <label for="name" class="col-sm-2 control-label">Name</label>
@@ -64,6 +72,13 @@
         <label for="inchikey" class="col-sm-2 control-label">IUPAC Standard InChI Key</label>
         <div class="col-sm-10">
           {{ form.inchikey }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="tags" class="col-sm-2 control-label">Tags (EPA, NCATS, etc.)</label>
+        <div class="col-sm-10">
+          {{ form.tags }}
         </div>
     </div>
 

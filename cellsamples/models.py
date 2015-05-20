@@ -23,6 +23,7 @@ class Organ(LockableModel):
 
 
 class CellType(LockableModel):
+
     SPECIESTYPE = (
         ('Human', 'Human'),
         ('Rat', 'Rat'),
@@ -37,6 +38,7 @@ class CellType(LockableModel):
     organ = models.ForeignKey('Organ')
 
     class Meta(object):
+        verbose_name = 'Cell Type'
         ordering = ('species', 'cell_type', 'cell_subtype',)
         unique_together = [('cell_type', 'species', 'cell_subtype')]
 
@@ -48,6 +50,10 @@ class CellType(LockableModel):
 
     def cell_name(self):
         return self.__unicode__()
+
+    # Will this be useful?
+    def get_absolute_url(self):
+        return "/cellsamples/celltype/{}".format(self.id)
 
 
 class CellSubtype(LockableModel):
@@ -87,8 +93,7 @@ class Biosensor(LockableModel):
 
 
 class CellSample(RestrictedModel):
-    class Meta(object):
-        ordering = ('-receipt_date', )
+
     cell_type = models.ForeignKey('CellType')
     CELLSOURCETYPE = (
         ('Freshly isolated', 'Freshly isolated'),
@@ -147,7 +152,8 @@ class CellSample(RestrictedModel):
     cell_image = models.ImageField(upload_to='cellsamples',
                                    null=True, blank=True)
     class Meta(object):
-        ordering = ('cell_type', 'cell_source', 'supplier', 'barcode', 'id',)
+        verbose_name = 'Cell Sample'
+        ordering = ('-receipt_date', )
 
     def __unicode__(self):
         return u'{} {} ({}-{})'.format(
@@ -155,3 +161,7 @@ class CellSample(RestrictedModel):
                                             self.cell_type,
                                             self.supplier,
                                             self.barcode)
+
+    # Will this be useful?
+    def get_absolute_url(self):
+        return "/cellsamples/cellsample/{}".format(self.id)

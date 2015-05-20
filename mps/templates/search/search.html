@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block load %}
+    <script src="{% static "js/search.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+    <form method="get" action=".">
+{#        <input id="id_q" name="q" type="search" value="{{ query }}">#}
+        <div id="search_bar" class="input-group">
+            <div class="input-group-btn">
+                <button type="button" class="btn btn-default">Global</button>
+            </div>
+            <input id="id_q" name="q" type="search" class="form-control" placeholder="Search Global"
+                    value="{{ query }}">
+            <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit">Search</button>
+            </span>
+        </div>
+
+        <br>
+
+        <div class="row">
+        <button id="clear_filters" class="btn btn-default" type="button">Clear Filters</button>
+        </div>
+        <div id="filter" class="row">
+        {% for model in form.models %}
+            <div class="{% cycle 'bg-primary' 'bg-success' 'bg-info' 'bg-warning'%} col-xs-12 col-sm-4 col-md-3">
+                {{ model }}
+            </div>
+        {% endfor %}
+        </div>
+
+{#        <table>#}
+{#            {{ form.as_table }}#}
+{#        </table>#}
+
+        {% if query %}
+
+{#            <h3>Results</h3>#}
+
+{#            {% for result in page.object_list %}#}
+{#                <p>#}
+{#                    <a href="{{ result.object.get_absolute_url }}">{{ result.object }} {{ result.content_type }}</a>#}
+{#                </p>#}
+{#            {% empty %}#}
+{#                <p>No results found.</p>#}
+{#            {% endfor %}#}
+
+              {# Interesting but causes instability with pagination (# per page arbitrarily high currently) #}
+            {% with page.object_list as results %}
+                {% regroup results|dictsort:"verbose_name_plural" by verbose_name_plural as grouped_objects %}
+                {% for ct in grouped_objects %}
+                    <div id="{{ ct.list.0.app_label }}{{ ct.list.0.model_name }}" class="result-group">
+                    <h3 class="{% cycle 'text-primary' 'text-success' 'text-info' 'text-warning'%}">{{ ct.grouper }}</h3>
+                    <table class="display table table-striped table-hover">
+                    {% for result in ct.list %}
+                        {{ result.rendered|safe }}
+                    {% endfor %}
+                    </table>
+                    </div>
+                {% empty %}
+                    <br>
+                    <div id="control_warning" class="alert alert-danger" role="alert">
+                        <span class="sr-only">Warning:</span>
+                        <h2><span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span> No results found: </h2>
+                        <h3>Make sure your search is not too general or spelled incorrectly.</h3>
+                        <h4>-If you are unsure about the complete spelling, try searching just part of the term.<br>eg. "Trog" in lieu of "Troglitazone"</h4>
+                        <h4>-You may also want to change the number of filter checkboxes you have selected.<br>Clearing all filters will search all models</h4>
+                    </div>
+                {% endfor %}
+            {% endwith %}
+
+            {# Curently, the entries per page is arbitrarily high (1000), but this pagination code can remain just in case #}
+            {% if page.has_previous or page.has_next %}
+                <div>
+                    {% if page.has_previous %}
+                        <a href="?q={{ query }}&amp;page={{ page.previous_page_number }}">{% endif %}&laquo; Previous
+                    {% if page.has_previous %}</a>{% endif %}
+                    |
+                    {% if page.has_next %}<a href="?q={{ query }}&amp;page={{ page.next_page_number }}">{% endif %}
+                    Next &raquo;{% if page.has_next %}</a>{% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            {# Show some example queries to run, maybe query syntax, something else? #}
+        {% endif %}
+    </form>
+{% endblock %}

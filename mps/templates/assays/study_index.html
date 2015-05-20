@@ -8,11 +8,11 @@
             <h1 align="center">
                 Study: {{ object }}
                 <br>
-                <a href="update{{ setup_only }}" class="btn btn-primary" role="button">Edit This Study</a>
+                <a href="update" class="btn btn-primary" role="button">Edit This Study</a>
             </h1>
         </div>
 
-        <legend><h2>Chip Setups  <a href="assaychipsetup/add{{ setup_only }}" class="btn btn-success" role="button">Add Setup</a></h2></legend>
+        <legend><h2>Chip Setups  <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Setup</a></h2></legend>
 
         {% if setups %}
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
@@ -41,7 +41,7 @@
             <tbody>
             {% for setup in setups %}
                 <tr id={{ setup.id }} name={{ setup.id }}>
-                    <td><a href="/assays/assaychipsetup/{{ setup.id }}/update{{ setup_only }}">{{ setup.assay_chip_id }}</a></td>
+                    <td><a href="/assays/assaychipsetup/{{ setup.id }}/update">{{ setup.assay_chip_id }}</a></td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.device }}</td>
                     <td>{{ setup.chip_test_type }}</td>
@@ -61,8 +61,6 @@
             No chip setups exist for this study
         </div>
         {% endif %}
-
-        {% if not setup_only %}
 
         <legend><h2>Chip Readouts
             {% if setups.count == 0 or setups.count == readouts.count%}
@@ -197,8 +195,6 @@
         <div class="alert alert-warning" role="alert">
             No chip results exist for this study
         </div>
-        {% endif %}
-
         {% endif %}
 
     </div>

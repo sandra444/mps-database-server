@@ -3,7 +3,7 @@ from django.views.generic import ListView, DetailView, CreateView
 # from django.utils.decorators import method_decorator
 # from django.contrib.auth.decorators import login_required
 from mps.mixins import OneGroupRequiredMixin
-from .forms import CompoundForm
+from compounds.forms import CompoundForm
 
 
 class CompoundsList(ListView):
@@ -56,5 +56,3 @@ class CompoundsAdd(OneGroupRequiredMixin, CreateView):
     #     if len(request.user.groups.values_list('pk',flat=True)) == 0:
     #         return PermissionDenied(request,'You must be a member of at least one group')
     #     return super(CompoundsAdd, self).dispatch(request, *args, **kwargs)
-
-

@@ -58,6 +58,7 @@ TRIALTYPES = (
 
 class DrugTrial(LockableModel):
     class Meta(object):
+        verbose_name = 'Drug Trial'
         ordering = ('compound', 'species', )
 
     title = models.CharField(max_length=255, blank=True, null=True)
@@ -130,6 +131,8 @@ class DrugTrial(LockableModel):
                                            self.compound.name,
                                            self.source.source_name)
 
+    def get_absolute_url(self):
+        return "/drugtrials/{}".format(self.id)
 
 class TestType(LockableModel):
     class Meta(object):
@@ -360,6 +363,9 @@ class AdverseEvent(models.Model):
 # If we can't think of anything, scrap this model before you put it on production
 class OpenFDACompound(LockableModel):
 
+    class Meta(object):
+        verbose_name = 'OpenFDA Report'
+
     compound = models.ForeignKey('compounds.Compound')
     warnings = models.TextField(blank=True, null=True)
     black_box = models.BooleanField(default=False)
@@ -374,6 +380,9 @@ class OpenFDACompound(LockableModel):
 
     def __unicode__(self):
         return u'{}'.format(self.compound.name)
+
+    def get_absolute_url(self):
+        return "/adverse_events/{}".format(self.id)
 
 
 class CompoundAdverseEvent(models.Model):

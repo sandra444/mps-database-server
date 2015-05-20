@@ -62,14 +62,14 @@ class AssayChipSetupForm(forms.ModelForm):
 
     def clean(self):
         super(forms.ModelForm, self).clean()
-        # Don't need to perform this check if no test type
-        if 'chip_test_type' in self.cleaned_data:
-            type = self.cleaned_data.get('chip_test_type', '')
-            compound = self.cleaned_data.get('compound', '')
-            concentration = self.cleaned_data.get('concentration', '')
-            unit = self.cleaned_data.get('unit', '')
-            if type == 'compound' and (not compound or not concentration or not unit):
-                raise forms.ValidationError('Please complete all data for compound.')
+
+        # Check to see if compound data is complete if: 1.) compound test type 2.) compound is selected (negative control)
+        type = self.cleaned_data.get('chip_test_type', '')
+        compound = self.cleaned_data.get('compound', '')
+        concentration = self.cleaned_data.get('concentration', '')
+        unit = self.cleaned_data.get('unit', '')
+        if type == 'compound' and not all([compound,concentration,unit]) or (compound and not all([concentration,unit])):
+            raise forms.ValidationError('Please complete all data for compound.')
         return self.cleaned_data
 
 class AssayChipCellsInlineFormset(forms.models.BaseInlineFormSet):

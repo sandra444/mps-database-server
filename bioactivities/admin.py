@@ -390,7 +390,7 @@ admin.site.register(BioactivityType, BioactivityTypeAdmin)
 
 
 class PubChemBioactivityAdmin(LockableAdmin):
-    search_fields = ['compound__name', 'activity_name', 'assay_name', 'target', 'assay_id', 'source']
+    search_fields = ['compound__name', 'activity_name', 'target__name']
     list_filter = ['compound', ]
 
     raw_id_fields = ("target",)
@@ -402,22 +402,18 @@ class PubChemBioactivityAdmin(LockableAdmin):
         'compound',
         'activity_name',
         'value',
-        'source',
-        'assay_name',
         'target',
-        'assay_id'
+        'assay'
     )
 
     fieldsets = (
         (None, {
             'fields': (
-                'assay_id',
                 'compound',
                 'target',
                 'value',
-                'source',
                 'activity_name',
-                'assay_name'
+                'assay'
             )
         }),
     )
@@ -450,3 +446,36 @@ class PubChemTargetAdmin(LockableAdmin):
 
 
 admin.site.register(PubChemTarget, PubChemTargetAdmin)
+
+
+class PubChemAssayAdmin(LockableAdmin):
+    search_fields = ['aid', 'name', 'source']
+
+    save_on_top = True
+    list_per_page = 50
+
+    list_display = (
+        'aid',
+        'name',
+        'target_type',
+        'organism',
+        'source',
+        'source_id'
+    )
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                'aid',
+                'name',
+                'target_type',
+                'organism',
+                'source',
+                'description',
+                'source_id'
+            )
+        }),
+    )
+
+
+admin.site.register(PubChemAssay, PubChemAssayAdmin)

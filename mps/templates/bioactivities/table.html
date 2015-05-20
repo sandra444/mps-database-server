@@ -8,6 +8,18 @@
 {% endblock %}
 
 {% block submit %}
+
+    <legend><h1>Quick Search</h1></legend>
+
+    <form action="/bioactivities/table/" method="post">
+        {% csrf_token %}
+        {{ form.app.as_hidden }}
+        {{ form.search_term.as_hidden }}
+        {% include 'bioactivities/bioactivities_search.html'%}
+    </form>
+
+    <legend><h1>Advanced Search</h1></legend>
+
     <button class="btn btn-xlarge btn-primary text-center" id="submit">
         Generate Table
     </button>

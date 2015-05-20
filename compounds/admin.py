@@ -28,8 +28,8 @@ class CompoundAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('name', 'chembl_link', 'known_drug',
-                    'molecular_formula', 'last_update', 'locked')
-    search_fields = ['=name', 'synonyms', '=chemblid']
+                    'molecular_formula', 'tags', 'last_update', 'locked')
+    search_fields = ['=name', 'synonyms', '=chemblid', 'tags']
     readonly_fields = ('last_update', 'created_by', 'created_on',
                        'modified_by', 'modified_on', 'image_display')
     actions = ['update_fields']
@@ -50,7 +50,7 @@ class CompoundAdmin(LockableAdmin):
     fieldsets = (
         (None, {
             'fields': (('name', 'image_display'),
-                       'chemblid', 'pubchemid', 'inchikey', 'last_update',)
+                       'chemblid', 'pubchemid', 'inchikey', 'tags', 'last_update',)
         }),
         ('Molecular Identifiers', {
             'fields': ('smiles', 'synonyms')

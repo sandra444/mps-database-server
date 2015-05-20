@@ -9,6 +9,7 @@ pillow
 PyYAML
 Pygments
 SOAPpy
+#As of Django 1.7, South is deprecated
 #South
 Sphinx
 Unipath
@@ -62,3 +63,7 @@ django-alphafilter
 #django-simple-captcha
 #qhonuskan-votes
 django-contrib-comments
+#Using whoosh for now, may switch to a more sophisticated search engine later
+whoosh
+#Sometimes pip installing django-haystack tries to force install django 1.8?
+django-haystack

@@ -17,7 +17,7 @@
 
     {% block extrahead %}
         <!-- Load JQuery -->
-        <script src="{% static "js/jquery-1.11.0.min.js" %}"></script>
+        <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
 
         <!-- Load JQuery UI-->
         <script src="{% static "js/jquery-ui-1.11.2.min.js" %}"></script>
@@ -34,7 +34,7 @@
         <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
 
         <!-- Underscore.js Library -->
-        <script src="{% static "js/underscore-1.6.0.js" %}"></script>
+        <script src="{% static "js/underscore.js" %}"></script>
 
         <!-- Modernizr Library -->
         <script src="{% static "js/modernizr-2.7.1.js" %}"></script>
@@ -60,13 +60,6 @@
 
 </head>
 
-{# A font-weight of bolder seems to render poorly in windows #}
-<style>
-    .force-bold {
-        font-weight: bold;
-    }
-</style>
-
 <body>
     <!-- Fixed navbar -->
     <nav class="navbar navbar-default navbar-static-top" role="navigation">
@@ -78,16 +71,18 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a title="Click to return to homepage" class="navbar-brand" href="/">MPS</a>
+          <a title="Click to return to homepage" class="navbar-brand" href="/">
+              <img src="/static/img/brand.png" style="margin-top:-10px;">
+          </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li title="Administrative interface for authorized users only"><a class="force-bold" href="/admin">Admin</a></li>
+{#            <li title="Administrative interface for authorized users only"><a href="/admin">Admin</a></li>#}
             <li title="Add, edit, or view assay data" class="dropdown">
-              <a class="dropdown-toggle force-bold" data-toggle="dropdown">Assays<span class="caret"></span></a>
+              <a class="dropdown-toggle" data-toggle="dropdown">Assays<span class="caret"></span></a>
                 <ul class="dropdown-menu" role="menu">
                   <li class="dropdown-header">Add/Edit Studies</li>
-                  <li title="Index of all the studies created by you"><a href="/assays/user_index">My Studies</a></li>
+                  <li title="Index of all the studies created by you"><a href="/assays/user_index">Your Studies</a></li>
                   <li title="Index of all the studies created by groups you are a member of"><a href="/assays/group_index">Group Studies</a></li>
                   <li class="divider"></li>
                   <li title="Lists all public data" class="dropdown-header">View All Public Data</li>
@@ -102,10 +97,10 @@
                   <li><a href="/assays/studyconfiguration/add/">Add Study Configuration</a></li>
                 </ul>
             </li>
-            <li title="View organ models and microdevices"><a class="force-bold" href="/microdevices">Models</a></li>
+            <li title="View organ models and microdevices"><a href="/microdevices">Models</a></li>
 {#            <li title="View curated drug trial data"><a href="/drugtrials">Drug Trials</a></li>#}
               <li title="Curated drug trials and chemical data" class="dropdown">
-                <a class="dropdown-toggle force-bold" data-toggle="dropdown">Compounds<span class="caret"></span></a>
+                <a class="dropdown-toggle" data-toggle="dropdown">Compounds<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                       <li title="View curated drug trial data"><a href="/drugtrials">View Drug Trials</a></li>
                       <li><a href="/compounds/">View Chemical Data</a></li>
@@ -116,7 +111,7 @@
                   </ul>
               </li>
               <li title="View or add cell samples and cell types" class="dropdown">
-                <a class="dropdown-toggle force-bold" data-toggle="dropdown">Cell Samples<span class="caret"></span></a>
+                <a class="dropdown-toggle" data-toggle="dropdown">Cell Samples<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                       <li><a href="/cellsamples/cellsample/">View Cell Samples</a></li>
                       <li><a href="/cellsamples/celltype/">View Cell Types</a></li>
@@ -127,26 +122,26 @@
                   </ul>
               </li>
               <li title="Analyze bioactivity data" class="dropdown">
-                <a class="dropdown-toggle force-bold" data-toggle="dropdown">Bioactivities<span class="caret"></span></a>
+                <a class="dropdown-toggle" data-toggle="dropdown">Bioactivities<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                       <li title="View a table of bioactivities based on your selection"><a href="/bioactivities/table">View Bioactivities</a></li>
                       <li title="Generate a heatmap for selected bioactivity data"><a href="/bioactivities/heatmap">Heatmap</a></li>
                       <li title="Generate a dendrogram for selected compound/bioactivity data"><a href="/bioactivities/cluster">Cluster</a></li>
                   </ul>
               </li>
-              <li title="Give feedback, ask questions, or view the knowledge base"><a class="force-bold" style="color: rgb(0,0,255)" onclick="window.open('/feedback/', 'win', 'toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')">Feedback</a></li>
+              <li title="Give feedback, ask questions, or view the knowledge base"><a style="color: rgb(0,0,255)" onclick="window.open('/feedback/', 'win', 'toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')">Feedback</a></li>
               </ul>
           <ul class="nav navbar-nav navbar-right">
               {% if user.is_active %}
               <li title="Click to log out or change password" class="dropdown">
-                <a class="dropdown-toggle force-bold" data-toggle="dropdown">Profile<span class="caret"></span></a>
+                <a class="dropdown-toggle" data-toggle="dropdown">Profile<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                       <li><a href="/accounts/logout">Log Out</a></li>
                       <li><a href="/password_change">Change Password</a></li>
                   </ul>
               </li>
               {% else %}
-                <li><a class="force-bold" href="/accounts/login">Log In</a></li>
+                <li><a href="/accounts/login">Log In</a></li>
               {% endif %}
           </ul>
         </div><!--/.nav-collapse -->

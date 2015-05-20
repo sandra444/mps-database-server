@@ -39,6 +39,7 @@ $(document).ready(function () {
         }
         else {
             data[0] = '';
+            $('#center_name').html('');
             set_data();
         }
     }
@@ -103,21 +104,29 @@ $(document).ready(function () {
     });
 
     //Get the types for each checkbox
-    tox.change(function (evt) {
-        get_types();
+
+    //Get the types for each checkbox
+    $.each(type_selectors, function(index, value) {
+        value.change(function (evt) {
+            get_types();
+        });
     });
 
-    eff.change(function (evt) {
-        get_types();
-    });
-
-    dm.change(function (evt) {
-        get_types();
-    });
-
-    cc.change(function (evt) {
-        get_types();
-    });
+//    tox.change(function (evt) {
+//        get_types();
+//    });
+//
+//    eff.change(function (evt) {
+//        get_types();
+//    });
+//
+//    dm.change(function (evt) {
+//        get_types();
+//    });
+//
+//    cc.change(function (evt) {
+//        get_types();
+//    });
 
     date.data("value", date.val());
 

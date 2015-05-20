@@ -1,0 +1,6 @@
+{{ object.cell_type }}
+{{ object.cell_source }}
+{{ object.notes }}
+{{ object.supplier }}
+{{ object.barcode }}
+{{ object.product_id }}

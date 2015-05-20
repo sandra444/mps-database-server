@@ -42,14 +42,14 @@ class AdverseEventsList(ListView):
     template_name = 'drugtrials/adverse_events_list.html'
 
     def get_queryset(self):
-        queryset = CompoundAdverseEvent.objects.prefetch_related('compound','event').select_related('compound__compound').all()
+        queryset = CompoundAdverseEvent.objects.prefetch_related('compound','event').select_related('compound__compound', 'event__organ__name').all()
         return queryset
 
 def adverse_events_detail(request, *args, **kwargs):
     c = RequestContext(request)
 
     compound = get_object_or_404(OpenFDACompound, pk=kwargs.get('pk'))
-    events = CompoundAdverseEvent.objects.filter(compound=compound).prefetch_related('event').order_by('-frequency')
+    events = CompoundAdverseEvent.objects.filter(compound=compound).prefetch_related('event').select_related('event__organ').order_by('-frequency')
 
     compounds = list(OpenFDACompound.objects.all().order_by('compound').values_list('id', flat=True))
     current = compounds.index(int(kwargs.get('pk')))

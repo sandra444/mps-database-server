@@ -1,11 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-{#    <style>#}
-{#    p {#}
-{#        word-wrap: break-word;#}
-{#    }#}
-{#    </style>#}
 
     <legend><h1>{{ object.device_name }}</h1></legend>
 
@@ -77,23 +72,6 @@
         </div>
     </div>
 
-{#    <div class="container-fluid">#}
-{##}
-{#        <div class="col-sm-6">#}
-{#            <p><b>Center:</b> {{ object.center }}</p>#}
-{#            <p><b>Organ:</b> {{ object.organ }}</p>#}
-{#            <p><b>Device Image:</b> <img src="/media/{{ object.device_image }}"></p>#}
-{#            <p><b>Description:</b> {{ object.description }}</p>#}
-{#        </div>#}
-{##}
-{#        <div class="col-sm-6">#}
-{#            <p><b>Manufacturer:</b> {{ object.manufacturer }}</p>#}
-{#            <p><b>Version Catalog:</b> {{ object.barcode }}</p>#}
-{#            <p><b>Device Cross Section:</b> <img src="/media/{{ object.device_cross_section_image }}"></p>#}
-{#        </div>#}
-{##}
-{#    </div>#}
-
     <legend>Dimensions</legend>
 
     <div class="row">
@@ -138,27 +116,5 @@
         </div>
     </div>
 
-{#    <div class="container-fluid">#}
-{##}
-{#        <div class="col-sm-12">#}
-{#            <p><b>Dimensions:</b> {{ object.device_width }} mm X {{ object.device_width }} mm X {{ object.device_thickness }} mm</p>#}
-{#        </div>#}
-{##}
-{#        <div class="col-sm-6">#}
-{#            <p><b>Substrate Material:</b> {{ object.substrate_material }}</p>#}
-{#        </div>#}
-{##}
-{#        <div class="col-sm-6">#}
-{#            <p><b>Substrate Thickness:</b> {{ object.substrate_thickness }} um</p>#}
-{#        </div>#}
-{##}
-{#        <div class="col-sm-12">#}
-{#            <p><b>Fluid Volume:</b> {{ object.device_fluid_volume }} {{ object.device_fluid_volume_unit }}</p>#}
-{#        </div>#}
-{#    </div>#}
-
-{#    <script>#}
-{#        $("p").addClass("lead");#}
-{#    </script>#}
 {% endblock %}
 

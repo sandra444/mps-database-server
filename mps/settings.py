@@ -194,7 +194,11 @@ INSTALLED_APPS = (
     'qhonuskan_votes',
     'djangovoice',
 
+    # Haystack for searching
+    'haystack',
+
     # MPS applications:
+    'mps',
     'cellsamples',
     'compounds',
     'microdevices',
@@ -203,10 +207,31 @@ INSTALLED_APPS = (
     'assays',
     'resources'
 )
-# Comment out captcha for now
-# Required for captchas
-# SOUTH_MIGRATION_MODULES = {
-#     'captcha': 'captcha.south_migrations',
+
+# # This should set all indices to use real time processing
+# # Users will have to pay the toll when adding or deleting indexed objects...
+# # However this is useful to prevent having to use a CRON job
+# # Traffic will probably be fairly low, thus we have (some) instantaneous results with little consequence
+# # This is disabled for the moment and a CRON job will be used for the time being
+# HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+# For whoosh
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(os.path.dirname(__file__), 'whoosh_index'),
+        # can cause problems when dealing with data outside ascii
+        #'INCLUDE_SPELLING': True,
+    },
+}
+
+# For elasticsearch
+# HAYSTACK_CONNECTIONS = {
+#     'default': {
+#         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+#         'URL': 'http://127.0.0.1:9200/',
+#         'INDEX_NAME': 'haystack',
+#     },
 # }
 
 # A sample logging configuration. The only tangible logging
@@ -321,6 +346,12 @@ CONN_MAX_AGE = 6000
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'drf_ujson.renderers.UJSONRenderer',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'drf_ujson.parsers.UJSONParser',
+    ),
     # Use hyperlinked styles by default.
     # Only used if the `serializer_class` attribute is not set on a view.
     'DEFAULT_MODEL_SERIALIZER_CLASS':
