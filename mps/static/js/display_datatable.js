@@ -15,6 +15,8 @@ $(document).ready(function() {
     // Swap positions of filter and length selection; clarify filter
     $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
     $('.dataTables_length').css('float', 'right');
+    // Reposition download/print/copy
+    $('.DTTT_container').css('float', 'none');
 
     // Clarify usage of sort
     $('.sorting').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');

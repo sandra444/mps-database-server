@@ -62,6 +62,7 @@
     <script>
         $(document).ready(function() {
             $('#compounds').DataTable({
+                dom: 'T<"clear">lfrtip',
                 "aoColumnDefs": [
                     {
                         "bSortable": false,
@@ -74,8 +75,6 @@
                     }
                 ],
                 "iDisplayLength": 25
-                // If one wants to display top and bottom
-                //"sDom": '<"wrapper"lfptip>'
             });
         });
     </script>

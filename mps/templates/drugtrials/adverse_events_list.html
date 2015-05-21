@@ -48,11 +48,10 @@
     <script>
         $(document).ready(function() {
             $('#adverse_events').DataTable({
+                dom: 'T<"clear">lfrtip',
                 "iDisplayLength": 50,
                 // Initially sort on compound and frequency
                 "order": [[ 0, "asc" ], [ 2, "desc"]]
-                // If one wants to display top and bottom
-                //"sDom": '<"wrapper"lfptip>'
             });
         });
     </script>

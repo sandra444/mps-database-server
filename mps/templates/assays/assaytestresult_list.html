@@ -92,6 +92,7 @@
     <script>
         $(document).ready(function() {
             $('#results').DataTable( {
+                dom: 'T<"clear">lfrtip',
                 "iDisplayLength": 50,
                 // Initially sort on study not arbitrary ID
                 "order": [ 1, "asc" ]

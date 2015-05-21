@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-    function table(data, link) {
+    function table(data) {
 
         // Show graphic
         $('#graphic').prop('hidden',false);
@@ -11,8 +11,8 @@ $(document).ready(function () {
         $('#full').dataTable().fnDestroy();
         $('#table').html('');
 
-        // Set href
-        $('#download').attr('href',link);
+//        // Set href
+//        $('#download').attr('href',link);
 
         for (var i in data) {
             var bio = data[i];
@@ -34,6 +34,7 @@ $(document).ready(function () {
         }
 
         $('#full').DataTable({
+            dom: 'T<"clear">lfrtip',
             "iDisplayLength": 100,
             // Needed to destroy old table
             "bDestroy": true
@@ -42,6 +43,8 @@ $(document).ready(function () {
         // Swap positions of filter and length selection
         $('.dataTables_filter').css('float','left');
         $('.dataTables_length').css('float','right');
+        // Reposition download/print/copy
+        $('.DTTT_container').css('float', 'none');
     }
 
     function submit() {
@@ -95,7 +98,8 @@ $(document).ready(function () {
 
                 if (json.data_json) {
                     //console.log(json);
-                    table(json.data_json, json.table_link);
+                    table(json.data_json);
+                    //table(json.data_json, json.table_link);
 //                    document.location.hash = "display";
 
                     if (json.length > 5000) {

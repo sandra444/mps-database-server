@@ -50,9 +50,32 @@
 
         <!-- DataTables CSS -->
         <link rel="stylesheet" type="text/css" href="{% static "css/jquery.dataTables.min.css" %}">
+        <link rel="stylesheet" type="text/css" href="{% static "css/dataTables.tableTools.min.css" %}">
 
         <!-- DataTables -->
         <script type="text/javascript" charset="utf8" src="{% static "js/jquery.dataTables.min.js" %}"></script>
+        <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.tableTools.min.js" %}"></script>
+
+        <script>
+{#          This inline script (I know, I know...) sets defaults for Tabletools#}
+{#          Currently I exclude Excel (as it is confusingly given a csv extension) and PDF (requires heavier SWF)#}
+{#          I may add these later, however, but I will have to remember to use the PDF enabled SWF if PDFs are desired#}
+            $.fn.dataTable.TableTools.defaults.aButtons = [
+                {
+                    "sExtends": "copy",
+                    "sButtonText": "Copy to Clipboard"
+                },
+                {
+                    "sExtends": "csv",
+                    "sButtonText": "Save as CSV"
+                },
+                {
+                    "sExtends": "print",
+                    "sButtonText": "Print"
+                }
+            ];
+            $.fn.dataTable.TableTools.defaults.sSwfPath = '/static/swf/copy_csv_xls.swf';
+        </script>
     {% endblock %}
 
     {% block load %}{% endblock %}

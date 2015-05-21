@@ -1079,28 +1079,28 @@ def table(request):
 
     data = []
 
-    # generate a unique full path for data and rows and columns information
-    data_hash = hashlib.sha512(
-        str(request_filter)
-    ).hexdigest()[:10]
-
-    fullpath_without_extension = os.path.join(
-        MEDIA_ROOT,
-        'table',
-        data_hash
-    )
-
-    # string representation of the respective full full paths
-    data_csv_fullpath = fullpath_without_extension + '_table.csv'
-
-    # generate file handles for the csv writer
-    data_csv_filehandle = open(data_csv_fullpath, "w")
-
-    # generate csv writers for each file handle
-    data_csv_writer = csv.writer(data_csv_filehandle)
-
-    # write out our data lists into csv format
-    data_csv_writer.writerow(['Compound','Target','Organism','Standard Name','Operator','Standard Value', 'Standard Units', 'ChEMBL ID'])
+    # # generate a unique full path for data and rows and columns information
+    # data_hash = hashlib.sha512(
+    #     str(request_filter)
+    # ).hexdigest()[:10]
+    #
+    # fullpath_without_extension = os.path.join(
+    #     MEDIA_ROOT,
+    #     'table',
+    #     data_hash
+    # )
+    #
+    # # string representation of the respective full full paths
+    # data_csv_fullpath = fullpath_without_extension + '_table.csv'
+    #
+    # # generate file handles for the csv writer
+    # data_csv_filehandle = open(data_csv_fullpath, "w")
+    #
+    # # generate csv writers for each file handle
+    # data_csv_writer = csv.writer(data_csv_filehandle)
+    #
+    # # write out our data lists into csv format
+    # data_csv_writer.writerow(['Compound','Target','Organism','Standard Name','Operator','Standard Value', 'Standard Units', 'ChEMBL ID'])
 
     for bioactivity in q:
 
@@ -1132,20 +1132,20 @@ def table(request):
         }
         data.append(obj)
 
-        data_csv_writer.writerow([compound, target, organism, standard_name, operator, standardized_value, standardized_units, chemblid])
-
-    # close the csv files that we have written so far
-    data_csv_filehandle.close()
-
-    table_url_prefix = '/media/table/'
-
-    data_csv_relpath = table_url_prefix + os.path.basename(
-        data_csv_fullpath
-    )
+    #     data_csv_writer.writerow([compound, target, organism, standard_name, operator, standardized_value, standardized_units, chemblid])
+    #
+    # # close the csv files that we have written so far
+    # data_csv_filehandle.close()
+    #
+    # table_url_prefix = '/media/table/'
+    #
+    # data_csv_relpath = table_url_prefix + os.path.basename(
+    #     data_csv_fullpath
+    # )
 
     return {
         # json data
         'data_json': data,
-        'table_link': data_csv_relpath,
+        # 'table_link': data_csv_relpath,
         'length': length
     }

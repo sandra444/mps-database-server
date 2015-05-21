@@ -41,11 +41,10 @@
     <script>
         $(document).ready(function() {
             $('#celltypes').DataTable({
+                dom: 'T<"clear">lfrtip',
                 "iDisplayLength": 50,
                 // Initially sort on organ
                 "order": [ 0, "asc" ]
-                // If one wants to display top and bottom
-                //"sDom": '<"wrapper"lfptip>'
             });
         });
     </script>

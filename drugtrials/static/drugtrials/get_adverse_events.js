@@ -50,11 +50,14 @@ $(document).ready(function () {
 
             $('#ae_table').DataTable( {
                 "iDisplayLength": 200,
-                "sDom": '<"wrapper"t>',
+                "sDom": '<T<"clear">t>',
                 "order": [[ 1, "desc" ]],
                 // Needed to destroy old table
                 "bDestroy": true
             });
+
+            // Reposition download/print/copy
+            $('.DTTT_container').css('float', 'none');
 
             $('#ae_table').prop('hidden', false);
         })
