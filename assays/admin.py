@@ -427,6 +427,99 @@ class AssayLayoutAdmin(LockableAdmin):
 admin.site.register(AssayLayout, AssayLayoutAdmin)
 
 
+class AssayPlateCellsInline(admin.TabularInline):
+    # Cells used to construct the plate
+    model = AssayPlateCells
+    verbose_name = 'Plate Cells'
+    verbose_name_plural = 'Plate Cells'
+    raw_id_fields = ('cell_sample',)
+    fields = (
+        (
+            'cell_sample', 'cell_biosensor', 'cellsample_density',
+            'cellsample_density_unit', 'cell_passage',
+        ),
+    )
+    extra = 0
+
+    class Media(object):
+        css = {"all": ("css/hide_admin_original.css",)}
+
+
+class AssayDeviceSetupAdmin(LockableAdmin):
+    # Setups for MICROPLATES
+
+    class Media(object):
+        js = ('js/inline_fix.js',)
+        css = {'all': ('assays/customize_admin.css',)}
+
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('assay_device_id',
+                    'assay_run_id',
+                    'setup_date')
+
+    inlines = [AssayPlateCellsInline]
+
+    fieldsets = (
+        (
+            'Device Parameters', {
+                'fields': (
+                    (
+                        'assay_run_id',
+                    ),
+                    (
+                        'assay_device_id', 'setup_date',
+                    ),
+                    (
+                        'assay_layout',
+                    ),
+                )
+            }
+        ),
+        (
+            'Reference Parameters', {
+                'fields': (
+                    (
+                        'scientist', 'notebook', 'notebook_page', 'notes',
+                    ),
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    (
+                        'created_by', 'created_on',
+                    ),
+                    (
+                        'modified_by', 'modified_on',
+                    ),
+                    (
+                        'signed_off_by', 'signed_off_date'
+                    ),
+                )
+            }
+        ),
+        (
+            'Flag for Review', {
+                'fields': (
+                    ('flagged', 'reason_for_flag',)
+                )
+            }
+        ),
+        (
+            'Group Access', {
+                'fields':(
+                    'group','restricted'
+                 ),
+            }
+        ),
+    )
+
+admin.site.register(AssayDeviceSetup, AssayDeviceSetupAdmin)
+
+
 def removeExistingReadout(currentAssayReadout):
     readouts = AssayReadout.objects.filter(
         assay_device_readout_id=currentAssayReadout.id)
@@ -463,13 +556,33 @@ def parseReadoutCSV(currentAssayReadout, file):
     return
 
 
+class AssayPlateReadoutInline(admin.TabularInline):
+    # Assays for ChipReadout
+    # formset = AssayPlateReadoutInlineFormset
+    model = AssayPlateReadoutAssay
+    verbose_name = 'Assay Plate Readout Assay'
+    verbose_plural_name = 'Assay Plate Readout Assays'
+
+    fields = (
+        (
+            ('assay_id','reader_id','readout_unit',)
+        ),
+    )
+    extra = 0
+
+    class Media(object):
+        css = {"all": ("css/hide_admin_original.css",)}
+
+
 class AssayDeviceReadoutAdmin(LockableAdmin):
     # Endpoint readouts from MICROPLATES
     resource_class = AssayDeviceReadoutResource
 
     class Media(object):
-        js = ('assays/customize_readout.js',)
+        js = ('assays/customize_readout.js','js/inline_fix.js')
         css = {'all': ('assays/customize_admin.css',)}
+
+    inlines = [AssayPlateReadoutInline]
 
     date_hierarchy = 'readout_start_time'
     raw_id_fields = ("cell_sample",)
@@ -539,6 +652,20 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
                         'signed_off_by', 'signed_off_date'
                     ),
                 )
+            }
+        ),
+        (
+            'Flag for Review', {
+                'fields': (
+                    ('flagged', 'reason_for_flag',)
+                )
+            }
+        ),
+        (
+            'Group Access', {
+                'fields':(
+                    'group','restricted'
+                 ),
             }
         ),
     )
@@ -613,7 +740,7 @@ def parseChipCSV(currentChipReadout, file, headers):
 
 
 class AssayChipCellsInline(admin.TabularInline):
-    # Cells used to constrcut the model
+    # Cells used to construct the model
     model = AssayChipCells
     verbose_name = 'Model Cells'
     verbose_name_plural = 'Model Cells'
@@ -1258,11 +1385,31 @@ class AssayTestResultAdmin(LockableAdmin):
 admin.site.register(AssayTestResult, AssayTestResultAdmin)
 
 
+class AssayPlateResultInline(admin.TabularInline):
+    # Results calculated from PLATE READOUTS
+    model = AssayPlateResult
+    #form = AssayPlateResultForm
+    verbose_name = 'Assay Plate Result'
+    verbose_name_plural = 'Assay Plate Results'
+    fields = (
+        (
+            'assay_name', 'result', 'result_function', 'result_type',
+            'value', 'test_unit', 'severity',
+        ),
+    )
+    extra = 0
+
+    class Media(object):
+        css = {"all": ("css/hide_admin_original.css",)}
+
+
 class AssayPlateTestResultAdmin(LockableAdmin):
     # Test Results from MICROPLATES
     class Media(object):
-        js = ('assays/customize_plate_results_admin.js',)
+        js = ('assays/customize_plate_results_admin.js','js/inline_fix.js')
         css = {'all': ('assays/customize_admin.css',)}
+
+    inlines = [AssayPlateResultInline,]
 
     save_as = True
     save_on_top = True
@@ -1270,7 +1417,6 @@ class AssayPlateTestResultAdmin(LockableAdmin):
     list_per_page = 300
     list_display = (
         'assay_device_id',
-        'assay_test_time', 'time_units', 'result', 'severity', 'value', 'value_units'
     )
     search_fields = ['assay_device_id']
     actions = ['update_fields']
@@ -1286,14 +1432,6 @@ class AssayPlateTestResultAdmin(LockableAdmin):
             }
         ),
         (
-            'Assay Test Parameters', {
-                'fields': (
-                    ('result', 'assay_test_time', 'time_units', 'value',
-                     'value_units', 'severity', ),
-                )
-            }
-        ),
-        (
             'Change Tracking', {
                 'fields': (
                     'locked',
@@ -1301,6 +1439,20 @@ class AssayPlateTestResultAdmin(LockableAdmin):
                     ('modified_by', 'modified_on'),
                     ('signed_off_by', 'signed_off_date'),
                 )
+            }
+        ),
+        (
+            'Flag for Review', {
+                'fields': (
+                    ('flagged', 'reason_for_flag',)
+                )
+            }
+        ),
+        (
+            'Group Access', {
+                'fields':(
+                    'group','restricted'
+                 ),
             }
         ),
     )

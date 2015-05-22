@@ -183,6 +183,66 @@ class AssayCompound(models.Model):
     column = models.CharField(max_length=25)
 
 
+class AssayPlateCells(models.Model):
+#   Individual cell parameters for CHIP setup used in inline
+    assay_chip = models.ForeignKey('AssayDeviceSetup')
+    cell_sample = models.ForeignKey('cellsamples.CellSample')
+    cell_biosensor = models.ForeignKey('cellsamples.Biosensor', null=True, blank=True)
+    cellsample_density = models.FloatField(verbose_name='density', default=0)
+
+    cellsample_density_unit = models.CharField(verbose_name='Unit',
+                                               max_length=8,
+                                               default="CP",
+                                               choices=(('WE', 'cells / well'),
+                                                        ('ML', 'cells / mL'),
+                                                        ('MM', 'cells / mm^2')))
+    cell_passage = models.CharField(max_length=16,verbose_name='Passage#',
+                                    default='-')
+
+
+class AssayDeviceSetup(FlaggableModel):
+    """Setup for MICROPLATES
+    """
+    class Meta(object):
+        verbose_name = 'Plate Setup'
+
+    # Might as well be consistent
+    assay_run_id = models.ForeignKey('assays.AssayRun', verbose_name='Study')
+
+    # The assay layout is approximately equivalent to a chip's Organ Model
+    assay_layout = models.ForeignKey('assays.AssayLayout', verbose_name='Assay Layout')
+
+    setup_date = models.DateField(help_text='YYYY-MM-DD')
+
+    # Plate identifier
+    assay_device_id = models.CharField(max_length=512, verbose_name='Plate ID/ Barcode')
+
+    scientist = models.CharField(max_length=100, blank=True, null=True)
+    notebook = models.CharField(max_length=256, blank=True, null=True)
+    notebook_page = models.IntegerField(blank=True, null=True)
+    notes = models.CharField(max_length=2048, blank=True, null=True)
+
+
+class AssayPlateReadoutAssay(models.Model):
+    # Inline for PLATE readout assays
+
+    class Meta(object):
+        unique_together = [('readout_id', 'assay_id')]
+
+    readout_id = models.ForeignKey('assays.AssayDeviceReadout', verbose_name='Readout')
+    assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True)
+    reader_id = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
+    # Object excluded for now (presumably will be just well)
+    # object_type = models.CharField(max_length=6,
+    #                         choices=object_types,
+    #                         verbose_name='Object of Interest',
+    #                         default='F')
+    readout_unit = models.ForeignKey('assays.ReadoutUnit')
+
+    def __unicode__(self):
+        return u'{}'.format(self.assay_id)
+
+
 class AssayReadout(models.Model):
     assay_device_readout = models.ForeignKey('assays.AssayDeviceReadout')
     row = models.CharField(max_length=25)
@@ -200,7 +260,7 @@ class ReadoutUnit(LockableModel):
         return self.readout_unit
 
 
-class AssayDeviceReadout(LockableModel):
+class AssayDeviceReadout(FlaggableModel):
     # Readout data collected from MICROPLATES
     class Meta(object):
         verbose_name = 'Plate Readout'
@@ -211,6 +271,8 @@ class AssayDeviceReadout(LockableModel):
     assay_device_id = models.CharField(max_length=512,
                                        verbose_name='Plate ID/ Barcode')
 
+    # Cell samples are to be handled in AssayDeviceSetup from now on
+    ### TODO This code is slated to be removed ###
     cell_sample = models.ForeignKey('cellsamples.CellSample')
 
     cellsample_density = models.FloatField(verbose_name='density', default=0)
@@ -221,6 +283,7 @@ class AssayDeviceReadout(LockableModel):
                                                choices=(('WE', 'cells / well'),
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
+    ### TODO ###
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
     assay_layout = models.ForeignKey(AssayLayout)
 
@@ -232,7 +295,11 @@ class AssayDeviceReadout(LockableModel):
     treatment_time_length = models.FloatField(verbose_name='Treatment Duration',
                                               blank=True, null=True)
 
+    # Assay start time is now in AssayDeviceSetup
+    ### TODO THis code is slated for removal ###
     assay_start_time = models.DateField(verbose_name='Start Date', blank=True, null=True, help_text="YYYY-MM-DD")
+    ### TODO ###
+
     readout_start_time = models.DateField(verbose_name='Readout Date', blank=True, null=True, help_text="YYYY-MM-DD")
 
     notebook = models.CharField(max_length=256, blank=True, null=True)
@@ -241,9 +308,6 @@ class AssayDeviceReadout(LockableModel):
     scientist = models.CharField(max_length=100, blank=True, null=True)
     file = models.FileField(upload_to='csv', verbose_name='Data File',
                             blank=True, null=True)
-
-    def assay_device_name(self):
-        return u'{0}'.format(self.assay_device_id)
 
     def __unicode__(self):
         return u'{0}'.format(self.assay_device_id)
@@ -298,6 +362,9 @@ class AssayResultType(LockableModel):
         return self.assay_result_type
 
 
+# TODO REVISE TEST RESULTS BEFORE IT IS TOO LATE!!
+# TODO THERE IS REALLY NO REASON FOR RESULTS TO LINK TO STUDY
+# TODO THERE IS REALLY NO REASON FOR RESULTS TO LINK TO SETUP IN LIEU OF READOUT
 class AssayTestResult(FlaggableModel):
 #   Results calculated from Raw Chip Data
     class Meta(object):
@@ -390,14 +457,17 @@ class AssayResult(models.Model):
                                   null=True)
 
 
-class AssayPlateTestResult(LockableModel):
-#   Test Results from MICROPLATES
-    assay_device_id = models.ForeignKey('assays.AssayDeviceReadout',
-                                        verbose_name='Plate ID/ Barcode')
+class AssayPlateResult(models.Model):
+#   Individual result parameters for PLATE RESULTS used in inline
+    assay_name = models.ForeignKey('assays.AssayPlateReadoutAssay',
+                                   verbose_name='Assay')
 
-    assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
+    assay_result = models.ForeignKey('assays.AssayPlateTestResult')
 
-    time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
+    result_function = models.ForeignKey(AssayResultFunction,
+                                        blank=True,
+                                        null=True,
+                                        verbose_name='Function')
 
     result = models.CharField(default='1',
                               max_length=8,
@@ -411,9 +481,43 @@ class AssayPlateTestResult(LockableModel):
                                 blank=True,
                                 null=True)
 
+    result_type = models.ForeignKey(AssayResultType,
+                                    blank=True,
+                                    null=True,
+                                    verbose_name='Measure')
+
     value = models.FloatField(blank=True, null=True)
 
-    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
+    test_unit = models.ForeignKey(PhysicalUnits,
+                                  blank=True,
+                                  null=True)
+
+
+class AssayPlateTestResult(FlaggableModel):
+#   Test Results from MICROPLATES
+    assay_device_id = models.ForeignKey('assays.AssayDeviceReadout',
+                                        verbose_name='Plate ID/ Barcode')
+
+    # Unclear as to what "Assay Test Time" entails
+    # assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
+    #
+    # time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
+    #
+    # result = models.CharField(default='1',
+    #                           max_length=8,
+    #                           choices=POSNEG,
+    #                           verbose_name='Pos/Neg?')
+    #
+    # severity = models.CharField(default='-1',
+    #                             max_length=5,
+    #                             choices=SEVERITY_SCORE,
+    #                             verbose_name='Severity',
+    #                             blank=True,
+    #                             null=True)
+    #
+    # value = models.FloatField(blank=True, null=True)
+    #
+    # value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
 
     def __unicode__(self):
         return u''
@@ -551,9 +655,6 @@ class AssayChipSetup(FlaggableModel):
     notebook_page = models.IntegerField(blank=True, null=True)
     notes = models.CharField(max_length=2048, blank=True, null=True)
 
-    def assay_chip_name(self):
-        return u'{0}'.format(self.assay_chip_id)
-
     def __unicode__(self):
         return u'Chip-{}:{}({}{})'.format(self.assay_chip_id,
                                         self.compound,
@@ -618,9 +719,6 @@ class AssayChipReadout(FlaggableModel):
             list_of_assays.append(str(assay))
         # Convert to unicode for consistency
         return u'{0}'.format(", ".join(list_of_assays))
-
-    def assay_chip_name(self):
-        return u'{0}'.format(AssayChipSetup.assay_chip_id)
 
     def __unicode__(self):
         return u'{0}'.format(self.chip_setup)
