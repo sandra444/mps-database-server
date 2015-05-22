@@ -749,24 +749,20 @@ class AssayTestResultAdd(StudyGroupRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        exclude_list = AssayTestResult.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
-        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
-            'assay_run_id', 'device',
-            'compound', 'unit',
-            'created_by').exclude(id__in=list(set(exclude_list)))
+        exclude_list = AssayTestResult.objects.filter(chip_readout__isnull=False).values_list('chip_readout', flat=True)
+        readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
 
         context = super(AssayTestResultAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = TestResultFormSet(self.request.POST)
-            context['setups'] = setups
+            context['readouts'] = readouts
         else:
             context['formset'] = TestResultFormSet()
-            context['setups'] = setups
+            context['readouts'] = readouts
         return context
 
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        form.instance.assay_device_readout = study
         form.instance.group = study.group
         form.instance.restricted = study.restricted
         context = self.get_context_data()
@@ -787,7 +783,7 @@ class AssayTestResultAdd(StudyGroupRequiredMixin, CreateView):
     def render_to_response(self, context):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
-        if not context.get('setups',''):
+        if not context.get('readouts',''):
             return redirect('/assays/'+str(study.id))
 
         return super(AssayTestResultAdd, self).render_to_response(context)
@@ -812,19 +808,15 @@ class AssayTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
         # Get Study
         study = self.object.assay_device_readout
 
-        exclude_list = AssayTestResult.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
-
-        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
-            'assay_run_id', 'device',
-            'compound', 'unit',
-            'created_by').exclude(id__in=list(set(exclude_list))) | AssayChipSetup.objects.filter(pk=self.object.chip_setup.id)
+        exclude_list = AssayTestResult.objects.filter(chip_readout__isnull=False).values_list('chip_readout', flat=True)
+        readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
 
         # Render form
         formset = TestResultFormSet(instance=self.object)
         return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
-                                setups = setups,
+                                readouts = readouts,
                                 update = True))
 
     def post(self, request, *args, **kwargs):
@@ -838,14 +830,10 @@ class AssayTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
         # TODO refactor redundant code here; testing for now
 
         study = self.object.assay_device_readout
-        exclude_list = AssayTestResult.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
 
-        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
-            'assay_run_id', 'device',
-            'compound', 'unit',
-            'created_by').exclude(id__in=list(set(exclude_list))) | AssayChipSetup.objects.filter(pk=self.object.chip_setup.id)
+        exclude_list = AssayTestResult.objects.filter(chip_readout__isnull=False).values_list('chip_readout', flat=True)
+        readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
 
-        form.instance.assay_device_readout = study
         form.instance.group = study.group
         # Setting restricted in the form does not work as it is not part of the form
         # form.instance.restricted = study.restricted
@@ -867,7 +855,7 @@ class AssayTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
-                                setups = setups,
+                                readouts = readouts,
                                 update = True))
 
 

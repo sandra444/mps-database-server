@@ -1,3 +1,4 @@
+// TODO REVISE
 $(document).ready(function () {
 
     var assay_layout_id;

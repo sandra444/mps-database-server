@@ -1339,9 +1339,9 @@ class AssayTestResultAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'assay_device_readout', 'assay', 'result', 'result_function', 'result_type', 'severity'
+        'chip_readout', 'assay', 'result', 'result_function', 'result_type', 'severity'
     )
-    search_fields = ['assay_device_readout']
+    search_fields = ['chip_readout']
     actions = ['update_fields']
     readonly_fields = ['created_by', 'created_on',
                        'modified_by', 'modified_on', ]
@@ -1350,7 +1350,7 @@ class AssayTestResultAdmin(LockableAdmin):
         (
             'Device/Drug Parameters', {
                 'fields': (
-                    ('assay_device_readout','chip_setup'),
+                    ('chip_readout',),
                 ),
             }
         ),

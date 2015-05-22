@@ -370,19 +370,10 @@ class AssayTestResult(FlaggableModel):
     class Meta(object):
         verbose_name = 'Chip Result'
 
-    # This, at some point, should be renamed
-    # I mean, why is it called a readout when it is a study?
-    assay_device_readout = models.ForeignKey('assays.AssayRun',
-                                             verbose_name='Organ Chip Study')
-
-    chip_setup = models.ForeignKey('assays.AssayChipSetup',
-                                             verbose_name='Chip Setup', unique=True)
-
-    # TODO ALTHOUGH IT SEEMS REDUNDANT, IT MAKES SENSE TO TIE TEST RESULTS TO A READOUT SO THEY DELETE TOGETHER
-    # chip_readout =  models.ForeignKey('assays.AssayChipReadout', verbose_name='Chip Readout')
+    chip_readout =  models.ForeignKey('assays.AssayChipReadout', verbose_name='Chip Readout')
 
     def __unicode__(self):
-        return u'{}:{}'.format(self.assay_device_readout,self.chip_setup)
+        return u'Results for: {}'.format(self.chip_readout)
 
     def assay(self):
         if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
@@ -418,7 +409,7 @@ class AssayTestResult(FlaggableModel):
         return ''
 
     def get_absolute_url(self):
-        return "/assays/%i/" % self.assay_device_readout.id
+        return "/assays/%i/" % self.chip_readout.chip_setup.assay_run_id.id
 
 
 class AssayResult(models.Model):

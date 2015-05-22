@@ -1,3 +1,4 @@
+// TODO REVISE
 $(document).ready(function () {
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');

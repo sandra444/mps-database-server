@@ -1,3 +1,4 @@
+// TODO REVISE
 $(document).ready(function () {
     function getIDs() {
         var i = 0;

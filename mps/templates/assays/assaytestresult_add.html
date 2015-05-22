@@ -7,81 +7,10 @@
     <script src="{% static "js/whittle.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
+    {# TODO ADD SCRIPT FOR TEST RESULTS WHEN IT IS READY #}
 {% endblock %}
 
 {% block content %}
-
-    {#Note that this script is divorced from the admin equivalent#}
-    <script>
-        $(function() {
-            function getIDs() {
-                var i = 0;
-                var IDs = [];
-                while ($('#id_assayresult_set-'+i+'-assay_name')[0]){
-                    IDs.push(i);
-                    i += 1;
-                }
-                return IDs;
-            }
-
-            function changeNew() {
-                var i = Math.max.apply(null,getIDs());
-                $('#id_assayresult_set-'+i+'-assay_name').html(inlineOptions);
-            }
-
-            function changeAll(reset) {
-                var IDs = getIDs();
-                var vals = [];
-
-                if (!reset) {
-                    for (var i in IDs) {
-                        vals.push($('#id_assayresult_set-'+i+'-assay_name').val());
-                    }
-                }
-
-                for (var j in IDs) {
-                    $('#id_assayresult_set-'+j+'-assay_name').html(inlineOptions);
-                    if (!reset) {
-                        $('#id_assayresult_set-'+j+'-assay_name').val(vals[j]);
-                    }
-                }
-            }
-
-            var setup = $('#id_chip_setup');
-            var setupVal = setup.val();
-            var inlineOptions = "";
-
-            // Initial inline whittle
-            $.when(whittle('chip_setup',setup.val(),'AssayChipReadout','AssayChipReadoutAssay','readout_id')).then(function(data) {
-                inlineOptions = data;
-                changeAll(false);
-            });
-
-            // Whittle inline when setup changes
-            setup.change(function() {
-                $.when(whittle('chip_setup',setup.val(),'AssayChipReadout','AssayChipReadoutAssay','readout_id')).then(function(data) {
-                    inlineOptions = data;
-                    changeAll(true);
-                    setupVal = setup.val();
-                });
-            });
-
-            // This is to deal with new inline entries when on the frontend
-            $("#add_button").click(function() {
-                changeNew();
-            });
-
-            // Resolve deletion error frontent
-            // This selector will check all items with DELETE in the name, including newly created ones
-            $("body").on("click", "input[name*='DELETE']", function(event) {
-                $.when(whittle('chip_setup',setup.val(),'AssayChipReadout','AssayChipReadoutAssay','readout_id')).then(function(data) {
-                    inlineOptions = data;
-                    changeAll(false);
-                });
-            });
-        });
-    </script>
-
 
     {% if update %}
         <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
@@ -107,8 +36,8 @@
 
         <legend>Test Results</legend>
 
-        {% if form.chip_setup.errors %}
-            {% for error in form.chip_setup.errors %}
+        {% if form.chip_readout.errors %}
+            {% for error in form.chip_readout.errors %}
                 <div class="alert alert-danger" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Error:</span>
@@ -119,16 +48,16 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-            <label for="chip_setup" class="col-sm-2 control-label">Setup*</label>
+            <label for="chip_readout" class="col-sm-2 control-label">Readout*</label>
             <div class="col-sm-10">
-                <select id="id_chip_setup" name="chip_setup">
+                <select id="id_chip_readout" name="chip_readout">
                     <option value="">---------</option>
-                    {% for setup in setups %}
+                    {% for readout in readouts %}
                         {# It is necessary to coerce the forms value into an integer for this compare #}
-                        {% if setup.id|add:"0" == form.chip_setup.value|add:"0" %}
-                            <option value={{ setup.id }} selected>{{ setup }}</option>
+                        {% if readout.id|add:"0" == form.chip_readout.value|add:"0" %}
+                            <option value={{ readout.id }} selected>{{ readout }}</option>
                         {% else %}
-                            <option value={{ setup.id }}>{{ setup }}</option>
+                            <option value={{ readout.id }}>{{ readout }}</option>
                         {% endif %}
                     {% endfor %}
                 </select>
