@@ -44,12 +44,24 @@
             <tbody>
             {% for result in object_list %}
                 <tr class="result" id={{ result.id }} name={{ result.id }}>
-                    <td><a href="{{ result.assay_result.id }}">{{ result.assay_result.id }}</a></td>
-                    <td><a href="/assays/organchipstudy/{{ result.assay_result.assay_device_readout.id }}">{{ result.assay_result.assay_device_readout }}</a></td>
-                    <td><a href="/assays/assaychipsetup/{{ result.assay_result.chip_setup.id }}">{{ result.assay_result.chip_setup }}</a></td>
                     <td>
-                        <a href="/assays/assaychipreadout/{{ result.assay_name.readout_id.id }}">
-                        {{ result.assay_name.readout_id.id }}
+                        <a href="{{ result.assay_result.id }}">
+                            {{ result.assay_result.id }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/organchipstudy/{{ result.assay_result.chip_readout.chip_setup.assay_run_id.id }}">
+                            {{ result.assay_result.chip_readout.chip_setup.assay_run_id }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/assaychipsetup/{{ result.assay_result.chip_readout.chip_setup.id }}">
+                            {{ result.assay_result.chip_readout.chip_setup }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/assaychipreadout/{{ result.assay_result.chip_readout.id }}">
+                            {{ result.assay_result.chip_readout.id }}
                         </a>
                     </td>
                     <td>{{ result.assay_name }}</td>
@@ -66,25 +78,6 @@
                     </td>
                 </tr>
             {% endfor %}
-{#            {% for result in object_list %}#}
-{#                <tr class="compound" id={{ result.id }} name={{ result.id }}>#}
-{#                    <td><a href="{{ result.id }}">{{ result.assay_device_readout }}</a></td>#}
-{#                    <td><a href="{{ result.chip_setup.id }}">{{ result.chip_setup }}</a></td>#}
-{#                    {% with result.assayresult_set.all|first as current %}#}
-{#                        <td>#}
-{#                            <a href="/assays/assaychipreadout/{{ current.assay_name.readout_id.id }}">#}
-{#                            {{ current.assay_name.readout_id.id }}#}
-{#                            </a>#}
-{#                        </td>#}
-{#                        <td>{{ current.assay_name }}</td>#}
-{#                        <td>{{ current.get_result_display }}</td>#}
-{#                        <td>{{ current.result_function }}</td>#}
-{#                        <td>{{ current.result_type }}</td>#}
-{#                        <td>{{ current.get_severity_display }}</td>#}
-{#                    {% endwith %}#}
-{#                    <td>{{ result.created_by }}</td>#}
-{#                </tr>#}
-{#            {% endfor %}#}
             </tbody>
         </table>
     </div>

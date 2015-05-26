@@ -3,33 +3,14 @@
 {% block content %}
     <legend><h1>Chip Test Results ID #{{ object.id }} for Study:<br><a href="/assays/organchipstudy/{{ object.assay_device_readout.id }}">{{ object.assay_device_readout }}</a></h1></legend>
 
-    {#    <div class="container-fluid">#}
-    {#        <div class="col-sm-12">#}
-    {#        <p><b>Setup:</b> {{ object.chip_setup }}</p>#}
-    {#        </div>#}
-    {#    </div>#}
-
-    <div class="row">
-        <div class="col-sm-2 lead text-right-responsive">
-            <b>Setup:</b>
-        </div>
-        <div class="col-sm-10 lead">
-            <a href="/assays/assaychipsetup/{{ object.chip_setup.id }}">
-                {{ object.chip_setup }}
-            </a>
-        </div>
-    </div>
-
     <div class="row">
         <div class="col-sm-2 lead text-right-responsive">
             <b>Readout:</b>
         </div>
         <div class="col-sm-10 lead">
-            {% with object.assayresult_set.all|first as current %}
-                <a href="/assays/assaychipreadout/{{ current.assay_name.readout_id.id }}">
-                    {{ current.assay_name.readout_id.id }}
-                </a>
-            {% endwith %}
+            <a href="/assays/assaychipreadout/{{ object.chip_readout.id }}">
+                {{ object.chip_readout.id }}
+            </a>
         </div>
     </div>
 
@@ -61,9 +42,5 @@
         {% endfor %}
         </tbody>
     </table>
-
-    {#    <script>#}
-    {#        $("p").addClass("lead");#}
-    {#    </script>#}
 
 {% endblock %}

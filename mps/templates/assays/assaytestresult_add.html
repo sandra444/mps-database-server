@@ -7,7 +7,7 @@
     <script src="{% static "js/whittle.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
-    {# TODO ADD SCRIPT FOR TEST RESULTS WHEN IT IS READY #}
+    <script src="{% static "assays/customize_chip_results_admin.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -116,7 +116,7 @@
                             <select id="id_assayresult_set-{{ forloop.counter0 }}-assay_name" name="assayresult_set-{{ forloop.counter0 }}-assay_name">
                                 <option value="">---------</option>
                                 {% if result.assay_name.value %}
-                                    <option selected value="{{ result.assay_name.value }}">---------</option>
+                                    <option selected value="{{ result.assay_name.value }}">Loading</option>
                                 {% endif %}
                             </select>
                         </td>
