@@ -10,6 +10,8 @@ from haystack.query import SearchQuerySet
 from haystack.views import SearchView, search_view_factory
 import haystack.forms
 
+from django.contrib.auth.models import Group
+
 import os
 import settings
 
@@ -125,7 +127,7 @@ def search(request):
 # A generic use of the search_view_factory
 def custom_search(request):
     # Filter on group: either get all with no group or those with a group the user has
-    sqs = SearchQuerySet().exclude(group__isnull=False) | SearchQuerySet().filter(group__in=request.user.groups.all())
+    sqs = SearchQuerySet().exclude(group__in=Group.objects.all()) | SearchQuerySet().filter(group__in=request.user.groups.all())
     view = search_view_factory(
         template='search/search.html',
         searchqueryset=sqs,
