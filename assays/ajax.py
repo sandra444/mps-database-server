@@ -16,7 +16,9 @@ logger = logging.getLogger(__name__)
 def main(request):
     return HttpResponseServerError()
 
+# TODO REQUIRES SERIOUS REVISION
 
+# TODO ADD BASE LAYOUT CONTENT TO ASSAY LAYOUT
 def fetch_assay_layout_content(request):
     """Return compounds in a layout."""
 
@@ -169,31 +171,31 @@ def fetch_base_layout_wells(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
-
-def fetch_base_layout_info(request):
-    """Return wells in a base layout."""
-
-    base_id = request.POST.get('id')
-
-    if not base_id:
-        logger.error('base_id not present in request to fetch_base_layout_info')
-        return HttpResponseServerError()
-
-    base = AssayBaseLayout.objects.get(id=base_id)
-
-    data = {}
-
-    data.update({
-        'format': {'row_labels': base.layout_format.row_labels.split(),
-                   'column_labels': base.layout_format.column_labels.split()},
-
-        'wells': {aw.row + '_' + aw.column: [aw.well_type.well_type,
-                                             aw.well_type.background_color]
-                  for aw in AssayWell.objects.filter(base_layout=base_id)}
-    })
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
+# Base layout is now part of assay layout
+# def fetch_base_layout_info(request):
+#     """Return wells in a base layout."""
+#
+#     base_id = request.POST.get('id')
+#
+#     if not base_id:
+#         logger.error('base_id not present in request to fetch_base_layout_info')
+#         return HttpResponseServerError()
+#
+#     base = AssayBaseLayout.objects.get(id=base_id)
+#
+#     data = {}
+#
+#     data.update({
+#         'format': {'row_labels': base.layout_format.row_labels.split(),
+#                    'column_labels': base.layout_format.column_labels.split()},
+#
+#         'wells': {aw.row + '_' + aw.column: [aw.well_type.well_type,
+#                                              aw.well_type.background_color]
+#                   for aw in AssayWell.objects.filter(base_layout=base_id)}
+#     })
+#
+#     return HttpResponse(json.dumps(data),
+#                         content_type="application/json")
 
 #Fetches and displays assay layout from plate readout
 def fetch_plate_info(request):
@@ -216,33 +218,6 @@ def fetch_plate_info(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
-# No longer needed
-
-# def fetch_chip_info(request):
-#     """Returns dynamic info for assays"""
-#
-#     assay_id = request.POST.get('id')
-#
-#     if not assay_id:
-#         logger.error('assay id not present in request to fetch_assay_info')
-#         return HttpResponseServerError()
-#
-#     assay = AssayChipReadout.objects.get(id=assay_id)
-#
-#     data = {}
-#
-#     data.update({
-#         'compound': assay.compound.name,
-#         'unit':  assay.unit.unit,
-#         'concentration': assay.concentration,
-#         'chip_test_type': assay.chip_test_type,
-#         'assay': assay.assay_name.assay_name,
-#         'run': assay.assay_run_id.assay_run_id,
-#         'model': assay.device.model_name,
-#     })
-#
-#     return HttpResponse(json.dumps(data),
-#                         content_type="application/json")
 
 def fetch_center_id(request):
     """Returns center ID for dynamic run form"""
@@ -372,9 +347,9 @@ switch = {
     'fetch_well_type_color': fetch_well_type_color,
     'fetch_baseid': fetch_baseid,
     'fetch_base_layout_wells': fetch_base_layout_wells,
-    'fetch_base_layout_info': fetch_base_layout_info,
+    # 'fetch_base_layout_info': fetch_base_layout_info,
     'fetch_plate_info': fetch_plate_info,
-#   'fetch_chip_info': fetch_chip_info,
+    # 'fetch_chip_info': fetch_chip_info,
     'fetch_center_id': fetch_center_id,
     'fetch_chip_readout': fetch_chip_readout,
     'fetch_context': fetch_context,

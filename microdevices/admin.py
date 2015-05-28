@@ -139,6 +139,18 @@ class MicrodeviceAdmin(LockableAdmin):
             }
         ),
         (
+            'Layout', {
+                'fields': (
+                    (
+                        'number_of_rows', 'number_of_columns',
+                    ),
+                    (
+                        'row_labels', 'column_labels',
+                    ),
+                )
+            }
+        ),
+        (
             None, {
                 'fields': (
                     'locked',

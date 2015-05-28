@@ -345,7 +345,9 @@ class AssayChipSetupAdd(CreateView):
         elif self.request.GET.get('clone',''):
             pk = self.request.GET.get('clone','')
             clone_setup = AssayChipSetup.objects.filter(id=pk).values()[0]
-            # Drop downs are a pain in the face: they require being specifically set to an integer value (ID)
+            # Drop downs are a pain in the face: they require being specifically set
+            # Why is this? It's because the values function returns "foreign_key_id" in lieu of "foreign_key"
+            # Alternatively, one could set these values in the template, but that is equally unpleasant
             clone_setup['device'] = clone_setup['device_id']
             clone_setup['compound'] = clone_setup['compound_id']
             clone_setup['unit'] = clone_setup['unit_id']
@@ -353,6 +355,8 @@ class AssayChipSetupAdd(CreateView):
             context['form'] = AssayChipSetupForm(initial=clone_setup)
 
             # Stupid resolution to an equally absurd problem (can you tell I'm peeved?)
+            # Why is there another formset factory here? It's because Django treats initial inlines as "extras"
+            # That is to say, formset factories are apparently only able to display as many initial inlines as "extra"
             AssayChipCellsFormset2 = inlineformset_factory(AssayChipSetup, AssayChipCells, formset=AssayChipCellsInlineFormset,
                                               extra=len(clone_cellsamples),
                                               widgets={

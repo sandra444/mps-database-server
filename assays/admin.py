@@ -14,43 +14,44 @@ from compounds.models import *
 import unicodedata
 from io import BytesIO
 
-class AssayLayoutFormatForm(forms.ModelForm):
-    class Meta(object):
-        model = AssayLayoutFormat
-        exclude = ('',)
-
-    def clean(self):
-        """Validate size of rows/columns and corresponding label counts."""
-
-        # clean the form data, before validation
-        data = super(AssayLayoutFormatForm, self).clean()
-
-        if not (int(data['number_of_columns']) ==
-                    len(set(data['column_labels'].split()))):
-            raise forms.ValidationError('Number of columns and '
-                                        'number of unique column '
-                                        'labels do not match.')
-
-        # cannot tell if it is number or letter in single entry list
-        if not ((int(data['number_of_rows'] ==
-            len(set(data['row_labels'].split())))) or
-                    ((len(set(data['row_labels']))) == 1)):
-            raise forms.ValidationError('Number of rows and '
-                                        'number of unique row '
-                                        'labels do not match.')
-        # need to return clean data if it validates
-
-        # if ((int(data['number_of_rows'])) > 1) and (len(set(data['row_labels'])) == 1):
-        #     rows = int(data['number_of_rows'])
-        #     row_list = []
-        #     start = int(list(data['row_labels'])[0])
-        #     for x in range(0, rows):
-        #         row_list.append(start)
-        #         start += 1
-        #     data['row_labels'] = row_list
-        #     print data['row_labels']
-
-        return data
+# To be removed
+# class AssayLayoutFormatForm(forms.ModelForm):
+#     class Meta(object):
+#         model = AssayLayoutFormat
+#         exclude = ('',)
+#
+#     def clean(self):
+#         """Validate size of rows/columns and corresponding label counts."""
+#
+#         # clean the form data, before validation
+#         data = super(AssayLayoutFormatForm, self).clean()
+#
+#         if not (int(data['number_of_columns']) ==
+#                     len(set(data['column_labels'].split()))):
+#             raise forms.ValidationError('Number of columns and '
+#                                         'number of unique column '
+#                                         'labels do not match.')
+#
+#         # cannot tell if it is number or letter in single entry list
+#         if not ((int(data['number_of_rows'] ==
+#             len(set(data['row_labels'].split())))) or
+#                     ((len(set(data['row_labels']))) == 1)):
+#             raise forms.ValidationError('Number of rows and '
+#                                         'number of unique row '
+#                                         'labels do not match.')
+#         # need to return clean data if it validates
+#
+#         # if ((int(data['number_of_rows'])) > 1) and (len(set(data['row_labels'])) == 1):
+#         #     rows = int(data['number_of_rows'])
+#         #     row_list = []
+#         #     start = int(list(data['row_labels'])[0])
+#         #     for x in range(0, rows):
+#         #         row_list.append(start)
+#         #         start += 1
+#         #     data['row_labels'] = row_list
+#         #     print data['row_labels']
+#
+#         return data
 
 
 class AssayModelTypeAdmin(LockableAdmin):
@@ -114,67 +115,67 @@ class AssayModelAdmin(LockableAdmin):
 
 admin.site.register(AssayModel, AssayModelAdmin)
 
-
-class AssayLayoutFormatAdmin(LockableAdmin):
-    def device_image_display(self, obj):
-        if obj.device.id and obj.device.device_image:
-            return '<img src="%s">' % \
-                   obj.device.device_image.url
-        return ''
-
-    def device_cross_section_image_display(self, obj):
-        if obj.device.id and obj.device.device_cross_section_image:
-            return '<img src="%s">' % \
-                   obj.device.device_cross_section_image.url
-        return ''
-
-    device_image_display.allow_tags = True
-    device_cross_section_image_display.allow_tags = True
-    list_per_page = 300
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    (
-                        'layout_format_name', 'device',
-                    ),
-                    (
-                        'number_of_rows', 'number_of_columns',
-                    ),
-                    (
-                        'row_labels', 'column_labels',
-                    ),
-                    (
-                        'device_image_display',
-                        'device_cross_section_image_display',
-                    )
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    'created_by',
-                    'modified_by',
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        ),
-    )
-
-    readonly_fields = (
-        'device_image_display',
-        'device_cross_section_image_display',
-    )
-
-    save_as = True
-    save_on_top = True
-    form = AssayLayoutFormatForm
-    list_display = ('layout_format_name', 'locked')
-
-
-admin.site.register(AssayLayoutFormat, AssayLayoutFormatAdmin)
+# To be removed
+# class AssayLayoutFormatAdmin(LockableAdmin):
+#     def device_image_display(self, obj):
+#         if obj.device.id and obj.device.device_image:
+#             return '<img src="%s">' % \
+#                    obj.device.device_image.url
+#         return ''
+#
+#     def device_cross_section_image_display(self, obj):
+#         if obj.device.id and obj.device.device_cross_section_image:
+#             return '<img src="%s">' % \
+#                    obj.device.device_cross_section_image.url
+#         return ''
+#
+#     device_image_display.allow_tags = True
+#     device_cross_section_image_display.allow_tags = True
+#     list_per_page = 300
+#     fieldsets = (
+#         (
+#             None, {
+#                 'fields': (
+#                     (
+#                         'layout_format_name', 'device',
+#                     ),
+#                     (
+#                         'number_of_rows', 'number_of_columns',
+#                     ),
+#                     (
+#                         'row_labels', 'column_labels',
+#                     ),
+#                     (
+#                         'device_image_display',
+#                         'device_cross_section_image_display',
+#                     )
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     'created_by',
+#                     'modified_by',
+#                     ('signed_off_by', 'signed_off_date'),
+#                 )
+#             }
+#         ),
+#     )
+#
+#     readonly_fields = (
+#         'device_image_display',
+#         'device_cross_section_image_display',
+#     )
+#
+#     save_as = True
+#     save_on_top = True
+#     form = AssayLayoutFormatForm
+#     list_display = ('layout_format_name', 'locked')
+#
+#
+# admin.site.register(AssayLayoutFormat, AssayLayoutFormatAdmin)
 
 
 class AssayWellTypeAdmin(LockableAdmin):
@@ -241,105 +242,105 @@ class AssayWellInline(admin.TabularInline):
     model = AssayWell
     extra = 1
 
+# To be removed
+# class AssayBaseLayoutAdmin(LockableAdmin):
+#     class Media(object):
+#         js = ('assays/customize_admin.js',)
+#         css = {'all': ('assays/customize_admin.css',)}
+#
+#     save_as = True
+#     save_on_top = True
+#     list_per_page = 300
+#
+#     def device_image_display(self, obj):
+#         if obj.layout_format.device.id \
+#                 and obj.layout_format.device.device_image:
+#             return '<img src="%s">' % \
+#                    obj.layout_format.device.device_image.url
+#         return ''
+#
+#     def device_cross_section_image_display(self, obj):
+#         if obj.layout_format.device.id \
+#                 and obj.layout_format.device.device_cross_section_image:
+#             return '<img src="%s">' % \
+#                    obj.layout_format.device.device_cross_section_image.url
+#         return ''
+#
+#     device_image_display.allow_tags = True
+#     device_cross_section_image_display.allow_tags = True
+#
+#     readonly_fields = (
+#         'device_image_display',
+#         'device_cross_section_image_display',
+#     )
+#
+#     fieldsets = (
+#         (
+#             None, {
+#                 'fields': (
+#                     (
+#                         'base_layout_name', 'layout_format',
+#                     ),
+#                     (
+#                         'device_image_display',
+#                         'device_cross_section_image_display',
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     'created_by',
+#                     'modified_by',
+#                     ('signed_off_by', 'signed_off_date'),
+#                 )
+#             }
+#         ),
+#     )
+#
+#     def save_model(self, request, obj, form, change):
+#
+#         if change:
+#             obj.modified_by = request.user
+#             wells = {(well.row, well.column): well
+#                      for well in AssayWell.objects.filter(base_layout=obj)}
+#         else:
+#             obj.modified_by = obj.created_by = request.user
+#             wells = {}
+#
+#         obj.save()
+#
+#         layout = AssayLayoutFormat.objects.get(id=obj.layout_format.id)
+#         column_labels = layout.column_labels.split()
+#         row_labels = layout.row_labels.split()
+#         data = form.data
+#
+#         for row in row_labels:
+#             for col in column_labels:
+#                 rowcol = (row, col)
+#                 key = 'wt_' + row + '_' + col
+#                 if data.has_key(key):
+#                     if rowcol in wells:
+#                         well = wells[rowcol]
+#                         well.well_type = AssayWellType.objects.get(
+#                             id=data.get(key))
+#                         well.save()
+#                     else:
+#                         AssayWell(base_layout=obj,
+#                                   well_type=
+#                                   AssayWellType.objects.get(id=data.get(key)),
+#                                   row=row,
+#                                   column=col
+#                         ).save()
+#                 elif rowcol in wells:
+#                     wells[rowcol].delete()
+#
+#
+# admin.site.register(AssayBaseLayout, AssayBaseLayoutAdmin)
 
-class AssayBaseLayoutAdmin(LockableAdmin):
-    class Media(object):
-        js = ('assays/customize_admin.js',)
-        css = {'all': ('assays/customize_admin.css',)}
-
-    save_as = True
-    save_on_top = True
-    list_per_page = 300
-
-    def device_image_display(self, obj):
-        if obj.layout_format.device.id \
-                and obj.layout_format.device.device_image:
-            return '<img src="%s">' % \
-                   obj.layout_format.device.device_image.url
-        return ''
-
-    def device_cross_section_image_display(self, obj):
-        if obj.layout_format.device.id \
-                and obj.layout_format.device.device_cross_section_image:
-            return '<img src="%s">' % \
-                   obj.layout_format.device.device_cross_section_image.url
-        return ''
-
-    device_image_display.allow_tags = True
-    device_cross_section_image_display.allow_tags = True
-
-    readonly_fields = (
-        'device_image_display',
-        'device_cross_section_image_display',
-    )
-
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    (
-                        'base_layout_name', 'layout_format',
-                    ),
-                    (
-                        'device_image_display',
-                        'device_cross_section_image_display',
-                    ),
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    'created_by',
-                    'modified_by',
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        ),
-    )
-
-    def save_model(self, request, obj, form, change):
-
-        if change:
-            obj.modified_by = request.user
-            wells = {(well.row, well.column): well
-                     for well in AssayWell.objects.filter(base_layout=obj)}
-        else:
-            obj.modified_by = obj.created_by = request.user
-            wells = {}
-
-        obj.save()
-
-        layout = AssayLayoutFormat.objects.get(id=obj.layout_format.id)
-        column_labels = layout.column_labels.split()
-        row_labels = layout.row_labels.split()
-        data = form.data
-
-        for row in row_labels:
-            for col in column_labels:
-                rowcol = (row, col)
-                key = 'wt_' + row + '_' + col
-                if data.has_key(key):
-                    if rowcol in wells:
-                        well = wells[rowcol]
-                        well.well_type = AssayWellType.objects.get(
-                            id=data.get(key))
-                        well.save()
-                    else:
-                        AssayWell(base_layout=obj,
-                                  well_type=
-                                  AssayWellType.objects.get(id=data.get(key)),
-                                  row=row,
-                                  column=col
-                        ).save()
-                elif rowcol in wells:
-                    wells[rowcol].delete()
-
-
-admin.site.register(AssayBaseLayout, AssayBaseLayoutAdmin)
-
-
+# TODO REVISE SAVING
 class AssayLayoutAdmin(LockableAdmin):
     class Media(object):
         js = ('assays/customize_admin.js',)
@@ -353,7 +354,7 @@ class AssayLayoutAdmin(LockableAdmin):
             None, {
                 'fields': (
                     ('layout_name',
-                     'base_layout',
+                     'device',
                      'locked',
                      ('created_by', 'created_on', ),
                      ('modified_by', 'modified_on', ),
@@ -585,12 +586,12 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
     inlines = [AssayPlateReadoutInline]
 
     date_hierarchy = 'readout_start_time'
-    raw_id_fields = ("cell_sample",)
+    # raw_id_fields = ("cell_sample",)
     save_on_top = True
     list_per_page = 300
     list_display = ('assay_device_id',
                     'assay_name',
-                    'cell_sample',
+                    # 'cell_sample',
                     'readout_start_time',
                     'reader_name')
     search_fields = ['assay_device_id']
@@ -613,15 +614,15 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
                     (
                         'assay_name',
                     ),
-                    (
-                        'cell_sample', 'cellsample_density',
-                        'cellsample_density_unit',
-                    ),
+                    # (
+                    #     'cell_sample', 'cellsample_density',
+                    #     'cellsample_density_unit',
+                    # ),
                     (
                         'timeunit', 'readout_unit',
                     ),
                     (
-                        'treatment_time_length', 'assay_start_time', 'readout_start_time',
+                        'treatment_time_length', 'readout_start_time',
                     ),
                     (
                         'file',

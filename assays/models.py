@@ -78,47 +78,61 @@ class AssayModel(LockableModel):
                                            verbose_name='Protocol File',
                                            null=True, blank=True)
     test_type = models.CharField(max_length=13,
-                            choices=types,
-                            verbose_name='Test Type')
+                                 choices=types,
+                                 verbose_name='Test Type')
 
     def __unicode__(self):
         return u'{0} ({1})'.format(self.assay_name, self.test_type)
 
+# To be removed
+# This model is deprecated and will be incorporated into devices
+# class AssayLayoutFormat(LockableModel):
+#     layout_format_name = models.CharField(max_length=200, unique=True)
+#     number_of_rows = models.IntegerField()
+#     number_of_columns = models.IntegerField()
+#     row_labels = models.CharField(max_length=1000,
+#                                   help_text=
+#                                   'Space separated list of unique labels, '
+#                                   'e.g. "A B C D ..."'
+#                                   ' Number of items must match'
+#                                   ' number of columns.''')
+#     column_labels = models.CharField(max_length=1000,
+#                                      help_text='Space separated list of unique '
+#                                                'labels, e.g. "1 2 3 4 ...". '
+#                                                'Number of items must match '
+#                                                'number of columns.')
+#
+#     device = models.ForeignKey(Microdevice)
+#
+#     class Meta(object):
+#         ordering = ('layout_format_name',)
+#
+#     def __unicode__(self):
+#         return self.layout_format_name
 
-class AssayLayoutFormat(LockableModel):
-    layout_format_name = models.CharField(max_length=200, unique=True)
-    number_of_rows = models.IntegerField()
-    number_of_columns = models.IntegerField()
-    row_labels = models.CharField(max_length=1000,
-                                  help_text=
-                                  'Space separated list of unique labels, '
-                                  'e.g. "A B C D ..."'
-                                  ' Number of items must match'
-                                  ' number of columns.''')
-    column_labels = models.CharField(max_length=1000,
-                                     help_text='Space separated list of unique '
-                                               'labels, e.g. "1 2 3 4 ...". '
-                                               'Number of items must match '
-                                               'number of columns.')
+# To be removed
+# This model is deprecated and will be incorporated into assay layout
+# class AssayBaseLayout(LockableModel):
+#     base_layout_name = models.CharField(max_length=200)
+#     layout_format = models.ForeignKey(AssayLayoutFormat)
+#
+#     class Meta(object):
+#         ordering = ('base_layout_name',)
+#
+#     def __unicode__(self):
+#         return self.base_layout_name
 
+
+class AssayLayout(LockableModel):
+    class Meta(object):
+        ordering = ('layout_name',)
+
+    layout_name = models.CharField(max_length=200)
     device = models.ForeignKey(Microdevice)
-
-    class Meta(object):
-        ordering = ('layout_format_name',)
+    #base_layout = models.ForeignKey(AssayBaseLayout)
 
     def __unicode__(self):
-        return self.layout_format_name
-
-
-class AssayBaseLayout(LockableModel):
-    base_layout_name = models.CharField(max_length=200)
-    layout_format = models.ForeignKey(AssayLayoutFormat)
-
-    class Meta(object):
-        ordering = ('base_layout_name',)
-
-    def __unicode__(self):
-        return self.base_layout_name
+        return self.layout_name
 
 
 class AssayWellType(LockableModel):
@@ -147,24 +161,14 @@ class AssayWellType(LockableModel):
 
 class AssayWell(LockableModel):
     class Meta(object):
-        unique_together = [('base_layout', 'row', 'column')]
+        unique_together = [('assay_layout', 'row', 'column')]
 
-    base_layout = models.ForeignKey(AssayBaseLayout)
+    #base_layout = models.ForeignKey(AssayBaseLayout)
+    assay_layout = models.ForeignKey(AssayLayout)
     well_type = models.ForeignKey(AssayWellType)
 
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
-
-
-class AssayLayout(LockableModel):
-    class Meta(object):
-        ordering = ('layout_name',)
-
-    layout_name = models.CharField(max_length=200)
-    base_layout = models.ForeignKey(AssayBaseLayout)
-
-    def __unicode__(self):
-        return self.layout_name
 
 
 class AssayTimepoint(models.Model):
@@ -184,7 +188,7 @@ class AssayCompound(models.Model):
 
 
 class AssayPlateCells(models.Model):
-#   Individual cell parameters for CHIP setup used in inline
+#   Individual cell parameters for PLATE setup used in inline
     assay_chip = models.ForeignKey('AssayDeviceSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
     cell_biosensor = models.ForeignKey('cellsamples.Biosensor', null=True, blank=True)
@@ -192,7 +196,7 @@ class AssayPlateCells(models.Model):
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',
                                                max_length=8,
-                                               default="CP",
+                                               default="WE",
                                                choices=(('WE', 'cells / well'),
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
@@ -221,6 +225,17 @@ class AssayDeviceSetup(FlaggableModel):
     notebook = models.CharField(max_length=256, blank=True, null=True)
     notebook_page = models.IntegerField(blank=True, null=True)
     notes = models.CharField(max_length=2048, blank=True, null=True)
+
+
+class AssayReader(LockableModel):
+    class Meta(object):
+        ordering = ('reader_name',)
+
+    reader_name = models.CharField(max_length=128)
+    reader_type = models.CharField(max_length=128)
+
+    def __unicode__(self):
+        return u'{0} - {1}'.format(self.reader_name, self.reader_type)
 
 
 class AssayPlateReadoutAssay(models.Model):
@@ -272,18 +287,18 @@ class AssayDeviceReadout(FlaggableModel):
                                        verbose_name='Plate ID/ Barcode')
 
     # Cell samples are to be handled in AssayDeviceSetup from now on
-    ### TODO This code is slated to be removed ###
-    cell_sample = models.ForeignKey('cellsamples.CellSample')
-
-    cellsample_density = models.FloatField(verbose_name='density', default=0)
-
-    cellsample_density_unit = models.CharField(verbose_name='Unit',
-                                               max_length=8,
-                                               default="ML",
-                                               choices=(('WE', 'cells / well'),
-                                                        ('ML', 'cells / mL'),
-                                                        ('MM', 'cells / mm^2')))
-    ### TODO ###
+    # ### TODO This code is slated to be removed ###
+    # cell_sample = models.ForeignKey('cellsamples.CellSample')
+    #
+    # cellsample_density = models.FloatField(verbose_name='density', default=0)
+    #
+    # cellsample_density_unit = models.CharField(verbose_name='Unit',
+    #                                            max_length=8,
+    #                                            default="ML",
+    #                                            choices=(('WE', 'cells / well'),
+    #                                                     ('ML', 'cells / mL'),
+    #                                                     ('MM', 'cells / mm^2')))
+    # ### TODO ###
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
     assay_layout = models.ForeignKey(AssayLayout)
 
@@ -297,7 +312,7 @@ class AssayDeviceReadout(FlaggableModel):
 
     # Assay start time is now in AssayDeviceSetup
     ### TODO THis code is slated for removal ###
-    assay_start_time = models.DateField(verbose_name='Start Date', blank=True, null=True, help_text="YYYY-MM-DD")
+    # assay_start_time = models.DateField(verbose_name='Start Date', blank=True, null=True, help_text="YYYY-MM-DD")
     ### TODO ###
 
     readout_start_time = models.DateField(verbose_name='Readout Date', blank=True, null=True, help_text="YYYY-MM-DD")
@@ -311,17 +326,6 @@ class AssayDeviceReadout(FlaggableModel):
 
     def __unicode__(self):
         return u'{0}'.format(self.assay_device_id)
-
-
-class AssayReader(LockableModel):
-    class Meta(object):
-        ordering = ('reader_name',)
-
-    reader_name = models.CharField(max_length=128)
-    reader_type = models.CharField(max_length=128)
-
-    def __unicode__(self):
-        return u'{0} - {1}'.format(self.reader_name, self.reader_type)
 
 
 SEVERITY_SCORE = (
@@ -360,92 +364,6 @@ class AssayResultType(LockableModel):
 
     def __unicode__(self):
         return self.assay_result_type
-
-
-# TODO REVISE TEST RESULTS BEFORE IT IS TOO LATE!!
-# TODO THERE IS REALLY NO REASON FOR RESULTS TO LINK TO STUDY
-# TODO THERE IS REALLY NO REASON FOR RESULTS TO LINK TO SETUP IN LIEU OF READOUT
-class AssayTestResult(FlaggableModel):
-#   Results calculated from Raw Chip Data
-    class Meta(object):
-        verbose_name = 'Chip Result'
-
-    chip_readout =  models.ForeignKey('assays.AssayChipReadout', verbose_name='Chip Readout')
-
-    def __unicode__(self):
-        return u'Results for: {}'.format(self.chip_readout)
-
-    def assay(self):
-        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
-            return AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].assay_name
-        return ''
-
-    def result(self):
-        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
-            abbreviation = AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result
-            if abbreviation == '1':
-                return u'Positive'
-            else:
-                return u'Negative'
-        return ''
-
-    def result_function(self):
-        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
-            return AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result_function
-        return ''
-
-    def result_type(self):
-        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
-            return AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result_type
-        return ''
-
-    def severity(self):
-        SEVERITY_SCORE = dict((
-            ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
-            ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
-        ))
-        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
-            return SEVERITY_SCORE.get(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].severity, 'None')
-        return ''
-
-    def get_absolute_url(self):
-        return "/assays/%i/" % self.chip_readout.chip_setup.assay_run_id.id
-
-
-class AssayResult(models.Model):
-#   Individual result parameters for CHIP RESULTS used in inline
-    assay_name = models.ForeignKey('assays.AssayChipReadoutAssay',
-                                   verbose_name='Assay')
-
-    assay_result = models.ForeignKey(AssayTestResult)
-
-    result_function = models.ForeignKey(AssayResultFunction,
-                                        blank=True,
-                                        null=True,
-                                        verbose_name='Function')
-
-    result = models.CharField(default='1',
-                              max_length=8,
-                              choices=POSNEG,
-                              verbose_name='Pos/Neg?')
-
-    severity = models.CharField(default='-1',
-                                max_length=5,
-                                choices=SEVERITY_SCORE,
-                                verbose_name='Severity',
-                                blank=True,
-                                null=True)
-
-    result_type = models.ForeignKey(AssayResultType,
-                                    blank=True,
-                                    null=True,
-                                    verbose_name='Measure')
-
-    value = models.FloatField(blank=True, null=True)
-
-    test_unit = models.ForeignKey(PhysicalUnits,
-                                  blank=True,
-                                  null=True)
 
 
 class AssayPlateResult(models.Model):
@@ -716,3 +634,86 @@ class AssayChipReadout(FlaggableModel):
 
     def get_absolute_url(self):
         return "/assays/%i/" % self.chip_setup.assay_run_id.id
+
+
+class AssayTestResult(FlaggableModel):
+#   Results calculated from Raw Chip Data
+    class Meta(object):
+        verbose_name = 'Chip Result'
+
+    chip_readout =  models.ForeignKey('assays.AssayChipReadout', verbose_name='Chip Readout')
+
+    def __unicode__(self):
+        return u'Results for: {}'.format(self.chip_readout)
+
+    def assay(self):
+        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            return AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].assay_name
+        return ''
+
+    def result(self):
+        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            abbreviation = AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result
+            if abbreviation == '1':
+                return u'Positive'
+            else:
+                return u'Negative'
+        return ''
+
+    def result_function(self):
+        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            return AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result_function
+        return ''
+
+    def result_type(self):
+        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            return AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result_type
+        return ''
+
+    def severity(self):
+        SEVERITY_SCORE = dict((
+            ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
+            ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
+        ))
+        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            return SEVERITY_SCORE.get(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].severity, 'None')
+        return ''
+
+    def get_absolute_url(self):
+        return "/assays/%i/" % self.chip_readout.chip_setup.assay_run_id.id
+
+
+class AssayResult(models.Model):
+#   Individual result parameters for CHIP RESULTS used in inline
+    assay_name = models.ForeignKey('assays.AssayChipReadoutAssay',
+                                   verbose_name='Assay')
+
+    assay_result = models.ForeignKey(AssayTestResult)
+
+    result_function = models.ForeignKey(AssayResultFunction,
+                                        blank=True,
+                                        null=True,
+                                        verbose_name='Function')
+
+    result = models.CharField(default='1',
+                              max_length=8,
+                              choices=POSNEG,
+                              verbose_name='Pos/Neg?')
+
+    severity = models.CharField(default='-1',
+                                max_length=5,
+                                choices=SEVERITY_SCORE,
+                                verbose_name='Severity',
+                                blank=True,
+                                null=True)
+
+    result_type = models.ForeignKey(AssayResultType,
+                                    blank=True,
+                                    null=True,
+                                    verbose_name='Measure')
+
+    value = models.FloatField(blank=True, null=True)
+
+    test_unit = models.ForeignKey(PhysicalUnits,
+                                  blank=True,
+                                  null=True)
