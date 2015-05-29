@@ -343,7 +343,7 @@ class AssayWellInline(admin.TabularInline):
 # TODO REVISE SAVING
 class AssayLayoutAdmin(LockableAdmin):
     class Media(object):
-        js = ('assays/customize_admin.js',)
+        js = ('assays/plate_create.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
     save_as = True

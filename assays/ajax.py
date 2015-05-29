@@ -3,7 +3,7 @@ import ujson as json
 from collections import defaultdict
 from django.http import *
 from .models import *
-from microdevices.models import MicrophysiologyCenter
+from microdevices.models import MicrophysiologyCenter, Microdevice
 import logging
 logger = logging.getLogger(__name__)
 
@@ -90,13 +90,21 @@ def fetch_layout_format_labels(request):
         logger.error('request_id not present in request to fetch_layout_format_labels')
         return HttpResponseServerError()
 
-    layout = AssayLayoutFormat.objects.get(id=request_id)
+    layout = Microdevice.objects.get(id=request_id)
 
     data = {}
 
+    if layout.column_labels and layout.row_labels:
+        column_labels = layout.column_labels.split()
+        row_labels = layout.row_labels.split()
+    # Contrived way to deal with models without labels
+    else:
+        column_labels = None
+        row_labels = None
+
     data.update({
-        'column_labels': layout.column_labels.split(),
-        'row_labels': layout.row_labels.split(),
+        'column_labels': column_labels,
+        'row_labels': row_labels,
     })
 
     return HttpResponse(json.dumps(data),
@@ -130,27 +138,28 @@ def fetch_well_type_color(request):
                         content_type="application/json")
 
 
-def fetch_baseid(request):
-    """Return the base assay layout id for a given assay layout"""
+# Base Layout is now merged into Assay Layout
+# def fetch_baseid(request):
+#     """Return the base assay layout id for a given assay layout"""
+#
+#     current_layout_id = request.POST.get('current_layout_id')
+#
+#     if not current_layout_id:
+#         logger.error('current_layout_id not present in request to fetch_baseid')
+#         return HttpResponseServerError()
+#
+#     assay_layout = AssayLayout.objects.get(id=current_layout_id)
+#
+#     # known to set base_layout_id to an integer value correctly
+#     base_layout_id = assay_layout.base_layout_id
+#
+#     data = {}
+#     data.update({'base_layout_id': base_layout_id})
+#
+#     return HttpResponse(json.dumps(data),
+#                         content_type="application/json")
 
-    current_layout_id = request.POST.get('current_layout_id')
-
-    if not current_layout_id:
-        logger.error('current_layout_id not present in request to fetch_baseid')
-        return HttpResponseServerError()
-
-    assay_layout = AssayLayout.objects.get(id=current_layout_id)
-
-    # known to set base_layout_id to an integer value correctly
-    base_layout_id = assay_layout.base_layout_id
-
-    data = {}
-    data.update({'base_layout_id': base_layout_id})
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
-
-
+# Base layout is now part of assay layout
 def fetch_base_layout_wells(request):
     """Return wells in a base layout."""
 
@@ -171,7 +180,6 @@ def fetch_base_layout_wells(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
-# Base layout is now part of assay layout
 # def fetch_base_layout_info(request):
 #     """Return wells in a base layout."""
 #
@@ -345,7 +353,7 @@ switch = {
     'fetch_layout_format_labels': fetch_layout_format_labels,
     'fetch_well_types': fetch_well_types,
     'fetch_well_type_color': fetch_well_type_color,
-    'fetch_baseid': fetch_baseid,
+    # 'fetch_baseid': fetch_baseid,
     'fetch_base_layout_wells': fetch_base_layout_wells,
     # 'fetch_base_layout_info': fetch_base_layout_info,
     'fetch_plate_info': fetch_plate_info,

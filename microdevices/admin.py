@@ -78,6 +78,10 @@ admin.site.register(Manufacturer, ManufacturerAdmin)
 
 class MicrodeviceAdmin(LockableAdmin):
 
+    class Media(object):
+        js = ('microdevices/layout.js',)
+        css = {'all': ('assays/customize_admin.css',)}
+
     def device_image_display(self, obj):
         if obj.id and obj.device_image:
             return '<img src="%s">' % \
@@ -89,6 +93,7 @@ class MicrodeviceAdmin(LockableAdmin):
             return '<img src="%s">' % \
                    obj.device_cross_section_image.url
         return ''
+
     device_image_display.allow_tags = True
     device_cross_section_image_display.allow_tags = True
 
