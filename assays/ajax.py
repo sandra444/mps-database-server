@@ -28,7 +28,7 @@ def fetch_assay_layout_content(request):
         logger.error('assay_layout_id not present in request to fetch_assay_layout_content')
         return HttpResponseServerError()
 
-    data = defaultdict(list)
+    data = defaultdict(dict)
     layout = AssayLayout.objects.get(id=assay_layout_id)
 
     # Fetch compounds
@@ -36,12 +36,14 @@ def fetch_assay_layout_content(request):
 
     for compound in compounds:
         well = compound.row + '_' + compound.column
-        data[well].append({
+        if not 'compounds' in data[well]:
+            data[well]['compounds'] = []
+        data[well]['compounds'].append({
             'name': compound.compound.name,
-            'compound': compound.compound.id,
+            'id': compound.compound.id,
             'concentration': compound.concentration,
             'concentration_unit': compound.concentration_unit,
-            'well': well
+            #'well': well
         })
 
     # Fetch timepoints
@@ -49,7 +51,25 @@ def fetch_assay_layout_content(request):
 
     for timepoint in timepoints:
         well = timepoint.row + '_' + timepoint.column
-        data[well].append({'timepoint': timepoint.timepoint})
+        data[well].update({'timepoint': timepoint.timepoint})
+
+    # Fetch labels
+    labels = AssayWellLabel.objects.filter(assay_layout=layout)
+
+    for label in labels:
+        well = label.row + '_' + label.column
+        data[well].update({'label': label.label})
+
+    # Fetch types
+    types = AssayWell.objects.filter(assay_layout=layout)
+
+    for type in types:
+        well = type.row + '_' + type.column
+        data[well].update({
+            'type': type.well_type.well_type,
+            'type_id': type.well_type.id,
+            'color': type.well_type.background_color
+        })
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
@@ -117,25 +137,33 @@ def fetch_well_types(request):
     data = {}
 
     for well_type in AssayWellType.objects.all():
-        data.update({well_type.id: well_type.well_type})
+        data.update(
+            {
+                well_type.id: {
+                    'name': well_type.well_type,
+                    'color': well_type.background_color
+                }
+            }
+        )
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
 
-def fetch_well_type_color(request):
-    """Return wells type colors."""
-
-    current_id = request.POST.get('id')
-
-    if not current_id:
-        logger.error('current_id was not sent with fetch_well_type_color')
-        return HttpResponseServerError()
-
-    data = AssayWellType.objects.get(id=current_id).background_color
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
+# Since the well types are already acquired via AJAX, it is somewhat excessive to grab the color separately
+# def fetch_well_type_color(request):
+#     """Return wells type colors."""
+#
+#     current_id = request.POST.get('id')
+#
+#     if not current_id:
+#         logger.error('current_id was not sent with fetch_well_type_color')
+#         return HttpResponseServerError()
+#
+#     data = AssayWellType.objects.get(id=current_id).background_color
+#
+#     return HttpResponse(json.dumps(data),
+#                         content_type="application/json")
 
 
 # Base Layout is now merged into Assay Layout
@@ -160,25 +188,25 @@ def fetch_well_type_color(request):
 #                         content_type="application/json")
 
 # Base layout is now part of assay layout
-def fetch_base_layout_wells(request):
-    """Return wells in a base layout."""
-
-    base_id = request.POST.get('id')
-
-    if not base_id:
-        logger.error('base_id not present in request to fetch_base_layout_wells')
-        return HttpResponseServerError()
-
-    data = {}
-
-    data.update({
-        aw.row + '_' + aw.column: [aw.well_type.id, aw.well_type.well_type,
-                                   aw.well_type.background_color]
-        for aw in AssayWell.objects.filter(base_layout=base_id)
-    })
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
+# def fetch_base_layout_wells(request):
+#     """Return wells in a base layout."""
+#
+#     base_id = request.POST.get('id')
+#
+#     if not base_id:
+#         logger.error('base_id not present in request to fetch_base_layout_wells')
+#         return HttpResponseServerError()
+#
+#     data = {}
+#
+#     data.update({
+#         aw.row + '_' + aw.column: [aw.well_type.id, aw.well_type.well_type,
+#                                    aw.well_type.background_color]
+#         for aw in AssayWell.objects.filter(base_layout=base_id)
+#     })
+#
+#     return HttpResponse(json.dumps(data),
+#                         content_type="application/json")
 
 # def fetch_base_layout_info(request):
 #     """Return wells in a base layout."""
@@ -352,9 +380,9 @@ switch = {
     'fetch_readout': fetch_readout,
     'fetch_layout_format_labels': fetch_layout_format_labels,
     'fetch_well_types': fetch_well_types,
-    'fetch_well_type_color': fetch_well_type_color,
+    # 'fetch_well_type_color': fetch_well_type_color,
     # 'fetch_baseid': fetch_baseid,
-    'fetch_base_layout_wells': fetch_base_layout_wells,
+    # 'fetch_base_layout_wells': fetch_base_layout_wells,
     # 'fetch_base_layout_info': fetch_base_layout_info,
     'fetch_plate_info': fetch_plate_info,
     # 'fetch_chip_info': fetch_chip_info,

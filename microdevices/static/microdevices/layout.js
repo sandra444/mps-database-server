@@ -2,6 +2,7 @@ $(document).ready(function () {
 
     // Build table
     function build_table() {
+        // Be sure to split the labels on the premise of a single space character
         var column_labels = $('#id_column_labels').val().split(' ');
         var row_labels = $('#id_row_labels').val().split(' ');
 
@@ -10,9 +11,11 @@ $(document).ready(function () {
             $('#layout_table').remove();
 
             // Choice of inserting after fieldset is contrived; for admin
-            var table = $('<table>').css('width',
-                '100%').addClass('layout-table').attr('id',
-                'layout_table').insertAfter($('fieldset')[2]);
+            var table = $('<table>')
+                .css('width','100%')
+                .addClass('layout-table')
+                .attr('id','layout_table')
+                .insertAfter($('fieldset')[2]);
 
             // make first row
             var row = $('<tr>');
@@ -26,7 +29,6 @@ $(document).ready(function () {
             $.each(row_labels, function (row_index, row_value) {
                 var row = $('<tr>');
                 row.append($('<th>').text(row_value));
-                // Note that the "lists" are added here
                 $.each(column_labels, function (column_index, column_value) {
                     row.append($('<td>'));
                 });
@@ -37,6 +39,7 @@ $(document).ready(function () {
 
     // This pulled function turns numbers into letters
     // Very convenient for handling things like moving from "Z" to "AA" automatically
+    // Though, admittedly, the case of so many rows is somewhat unlikely
     function toLetters(num) {
         "use strict";
         var mod = num % 26,

@@ -13,6 +13,7 @@ from import_export.admin import ImportExportModelAdmin
 from compounds.models import *
 import unicodedata
 from io import BytesIO
+import ujson as json
 
 # To be removed
 # class AssayLayoutFormatForm(forms.ModelForm):
@@ -375,6 +376,12 @@ class AssayLayoutAdmin(LockableAdmin):
             # Delete old timepoint data for this assay
             AssayTimepoint.objects.filter(assay_layout=layout).delete()
 
+            # Delete old types for this assay
+            AssayWell.objects.filter(assay_layout=layout).delete()
+
+            # Delete old labels for this assay
+            AssayWellLabel.objects.filter(assay_layout=layout).delete()
+
             obj.modified_by = request.user
         else:
             obj.modified_by = obj.created_by = request.user
@@ -383,47 +390,78 @@ class AssayLayoutAdmin(LockableAdmin):
 
         for key, val in form.data.iteritems():
 
-            if not key.startswith('well_') and not '_time' in key:
-                continue
+            # if not key.startswith('well_') and not '_time' in key:
+            #     continue
 
             # ## BEGIN save timepoint data ###
 
-            if '_time' in key:
+            if key.endswith('_time'):
+                # Cut off '_time'
                 content = key[:-5]
-                r, c = content.split('_')
+                row, column = content.split('_')
 
                 # Add new timepoint info
                 AssayTimepoint(
                     assay_layout=obj,
                     timepoint=val,
-                    row=r,
-                    column=c
+                    row=row,
+                    column=column
                 ).save()
 
             ### END save timepoint data ###
 
             ### BEGIN save compound information ###
 
-            if not key.startswith('well_'):
-                continue
+            # if not key.startswith('well_'):
+            #     continue
 
-            content = eval('dict(' + val + ')')
-            well = content['well']
-            row, col = well.split('_')
+            # Should refactor soon
+            elif key.startswith('well_'):
+                # Evaluate val as a JSON dict
+                content = json.loads(val)
+                well = content['well']
+                row, col = well.split('_')
 
-            if 'compound' in content:
-                # Add compound info
-                AssayCompound(
+                if 'compound' in content:
+                    # Add compound info
+                    AssayCompound(
+                        assay_layout=obj,
+                        compound=Compound.objects.get(id=content['compound']),
+                        concentration=content['concentration'],
+                        concentration_unit=content['concentration_unit'],
+                        row=row,
+                        column=col
+                    ).save()
+
+            ### END save compound information ###
+
+            # Labels
+            elif key.endswith('_label'):
+                # Cut off '_label'
+                content = key[:-6]
+                row, column = content.split('_')
+
+                # Add new label info
+                AssayWellLabel(
                     assay_layout=obj,
-                    compound=Compound.objects.get(id=content['compound']),
-                    concentration=content['concentration'],
-                    concentration_unit=content['concentration_unit'],
+                    label=val,
                     row=row,
-                    column=col
+                    column=column
                 ).save()
 
-                ### END save compound information ###
+            # Types
+            elif key.endswith('_type'):
+                # Cut fof '_type'
+                content = key[:-5]
+                row, column = content.split('_')
 
+                # Add new timepoint info
+                AssayWell(
+                    assay_layout=obj,
+                    well_type=AssayWellType.objects.get(id=val),
+                    row=row,
+                    column=column
+                ).save()
 
 admin.site.register(AssayLayout, AssayLayoutAdmin)
 
@@ -520,15 +558,17 @@ class AssayDeviceSetupAdmin(LockableAdmin):
 
 admin.site.register(AssayDeviceSetup, AssayDeviceSetupAdmin)
 
-
+# As much as I like being certain, this code is somewhat baffling
 def removeExistingReadout(currentAssayReadout):
-    readouts = AssayReadout.objects.filter(
-        assay_device_readout_id=currentAssayReadout.id)
+    AssayReadout.objects.filter(assay_device_readout=currentAssayReadout).delete()
 
-    for readout in readouts:
-        if readout.assay_device_readout_id == currentAssayReadout.id:
-            readout.delete()
-    return
+    # readouts = AssayReadout.objects.filter(
+    #     assay_device_readout_id=currentAssayReadout.id)
+    #
+    # for readout in readouts:
+    #     if readout.assay_device_readout_id == currentAssayReadout.id:
+    #         readout.delete()
+    # return
 
 
 def parseReadoutCSV(currentAssayReadout, file):
@@ -691,15 +731,17 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 
 admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
-
+# Case and point for why you should not just copy code without carefully reading it
+# TODO these remove functions really should not even exist (one line of code?)
 def removeExistingChip(currentChipReadout):
-    readouts = AssayChipRawData.objects.filter(
-        assay_chip_id_id=currentChipReadout.id)
-
-    for readout in readouts:
-        if readout.assay_chip_id_id == currentChipReadout.id:
-            readout.delete()
-    return
+    AssayChipRawData.objects.filter(assay_chip_id=currentChipReadout).delete()
+    # readouts = AssayChipRawData.objects.filter(
+    #     assay_chip_id_id=currentChipReadout.id)
+    #
+    # for readout in readouts:
+    #     if readout.assay_chip_id_id == currentChipReadout.id:
+    #         readout.delete()
+    # return
 
 def parseChipCSV(currentChipReadout, file, headers):
     removeExistingChip(currentChipReadout)

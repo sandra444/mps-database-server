@@ -186,6 +186,12 @@ class AssayCompound(models.Model):
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
 
+class AssayWellLabel(models.Model):
+    assay_layout = models.ForeignKey(AssayLayout)
+    label = models.CharField(max_length=150)
+    row = models.CharField(max_length=25)
+    column = models.CharField(max_length=25)
+
 
 class AssayPlateCells(models.Model):
 #   Individual cell parameters for PLATE setup used in inline
