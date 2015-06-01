@@ -99,17 +99,24 @@ def fetch_readout(request):
     elif model == 'assay_plate_test_results':
         current_readout_id = AssayPlateTestResult.objects.get(id=id).assay_device_id
 
-    data = defaultdict(list)
+    # data = defaultdict(list)
+    data = []
 
     readouts = AssayReadout.objects.filter(assay_device_readout=current_readout_id)
 
     for readout in readouts:
-        well = readout.row + '_' + readout.column
+        # well = readout.row + '_' + readout.column
 
-        data[well].append({
+        # data[well].append({
+        #     'row': readout.row,
+        #     'column': readout.column,
+        #     'value': readout.value,
+        # })
+
+        data.append({
             'row': readout.row,
             'column': readout.column,
-            'value': readout.value,
+            'value': readout.value
         })
 
     return HttpResponse(json.dumps(data),

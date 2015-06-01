@@ -620,7 +620,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
     resource_class = AssayDeviceReadoutResource
 
     class Media(object):
-        js = ('assays/customize_readout.js','js/inline_fix.js')
+        js = ('js/inline_fix.js', 'assays/customize_plate_readout.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
     inlines = [AssayPlateReadoutInline]
