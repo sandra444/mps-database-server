@@ -370,6 +370,7 @@ def fetch_context(request):
         'AssayChipSetup':AssayChipSetup,
         'AssayRun':AssayRun,
         'AssayChipReadoutAssay':AssayChipReadoutAssay,
+        'AssayPlateReadoutAssay':AssayPlateReadoutAssay
     }
 
     # master is what determines the subject's drop down choices

@@ -1437,14 +1437,14 @@ class AssayPlateResultInline(admin.TabularInline):
 class AssayPlateTestResultAdmin(LockableAdmin):
     # Test Results from MICROPLATES
     class Media(object):
-        js = ('assays/customize_plate_results_admin.js','js/inline_fix.js')
+        js = ('js/cookies.js','js/whittle.js', 'js/inline_fix.js', 'assays/customize_plate_results.js')
         css = {'all': ('assays/customize_admin.css',)}
 
     inlines = [AssayPlateResultInline,]
 
     save_as = True
     save_on_top = True
-    raw_id_fields = ('assay_device_id',)
+    # raw_id_fields = ('assay_device_id',)
     list_per_page = 300
     list_display = (
         'assay_device_id',
