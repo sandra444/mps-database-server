@@ -38,9 +38,6 @@ def fetch_assay_layout_content(request):
     elif model == 'assay_device_readout':
         layout = AssayDeviceReadout.objects.get(id=id).setup.assay_layout
 
-    elif model == 'assay_plate_test_results':
-        layout = AssayPlateTestResult.objects.get(id=id).assay_device_id.setup.assay_layout
-
 
     data = defaultdict(dict)
 
@@ -129,17 +126,17 @@ def fetch_layout_format_labels(request):
         logger.error('request_id not present in request to fetch_layout_format_labels')
         return HttpResponseServerError()
 
-    if model == 'assay_layout':
+    if model == 'device':
         layout = Microdevice.objects.get(id=id)
+
+    elif model == 'assay_layout':
+        layout = AssayLayout.objects.get(id=id).device
 
     elif model == 'assay_device_setup':
         layout = AssayDeviceSetup.objects.get(id=id).assay_layout.device
 
     elif model == 'assay_device_readout':
         layout = AssayDeviceReadout.objects.get(id=id).setup.assay_layout.device
-
-    elif model == 'assay_plate_test_results':
-        layout = AssayPlateTestResult.objects.get(id=id).assay_device_id.setup.assay_layout.device
 
     data = {}
 

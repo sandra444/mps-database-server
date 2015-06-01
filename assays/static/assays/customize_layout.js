@@ -22,7 +22,7 @@ $(document).ready(function () {
                     // Second token is the var name in this JS file
                     id: device_id,
 
-                    model: 'assay_layout',
+                    model: 'device',
 
                     // Always pass the CSRF middleware token with every AJAX call
                     csrfmiddlewaretoken: middleware_token

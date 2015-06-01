@@ -232,6 +232,8 @@ class AssayDeviceSetup(FlaggableModel):
     notebook_page = models.IntegerField(blank=True, null=True)
     notes = models.CharField(max_length=2048, blank=True, null=True)
 
+    def __unicode__(self):
+        return u'Plate-{}'.format(self.assay_device_id)
 
 class AssayReader(LockableModel):
     class Meta(object):
@@ -285,12 +287,12 @@ class AssayDeviceReadout(FlaggableModel):
     # Readout data collected from MICROPLATES
     class Meta(object):
         verbose_name = 'Plate Readout'
-        ordering = ('assay_device_id', 'assay_name',)
+        ordering = ('assay_device_id',)
 
     # the unique readout identifier
     # can be a barcode or a hand written identifier
     assay_device_id = models.CharField(max_length=512,
-                                       verbose_name='Plate ID/ Barcode')
+                                       verbose_name='Readout ID/ Barcode')
 
     # Cell samples are to be handled in AssayDeviceSetup from now on
     # ### TODO This code is slated to be removed ###
@@ -305,13 +307,18 @@ class AssayDeviceReadout(FlaggableModel):
     #                                                     ('ML', 'cells / mL'),
     #                                                     ('MM', 'cells / mm^2')))
     # ### TODO ###
-    assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
+
+    # OLD
+    #assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
+
     setup = models.ForeignKey(AssayDeviceSetup)
 
     # Old
     #reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
 
-    readout_unit = models.ForeignKey(ReadoutUnit)
+    # OLD
+    # readout_unit = models.ForeignKey(ReadoutUnit)
+
     timeunit = models.ForeignKey(TimeUnits)
 
     treatment_time_length = models.FloatField(verbose_name='Treatment Duration',

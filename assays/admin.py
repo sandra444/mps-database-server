@@ -488,7 +488,7 @@ class AssayDeviceSetupAdmin(LockableAdmin):
     # Setups for MICROPLATES
 
     class Media(object):
-        js = ('js/inline_fix.js',)
+        js = ('js/inline_fix.js','assays/customize_plate_setup.js')
         css = {'all': ('assays/customize_admin.css',)}
 
     save_on_top = True
@@ -630,7 +630,6 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('assay_device_id',
-                    'assay_name',
                     # 'cell_sample',
                     'readout_start_time',)
     search_fields = ['assay_device_id']
@@ -651,17 +650,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
             'Assay Parameters', {
                 'fields': (
                     (
-                        'assay_name',
-                    ),
-                    # (
-                    #     'cell_sample', 'cellsample_density',
-                    #     'cellsample_density_unit',
-                    # ),
-                    (
-                        'timeunit', 'readout_unit',
-                    ),
-                    (
-                        'treatment_time_length', 'readout_start_time',
+                        'timeunit', 'treatment_time_length', 'readout_start_time',
                     ),
                     (
                         'file',
