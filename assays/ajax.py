@@ -22,14 +22,27 @@ def main(request):
 def fetch_assay_layout_content(request):
     """Return compounds in a layout."""
 
-    assay_layout_id = request.POST.get('assay_layout_id')
+    id = request.POST.get('id')
+    model = request.POST.get('model')
 
-    if not assay_layout_id:
-        logger.error('assay_layout_id not present in request to fetch_assay_layout_content')
+    if not model and id:
+        logger.error('request_id not present in request to fetch_layout_format_labels')
         return HttpResponseServerError()
 
+    if model == 'assay_layout':
+        layout = AssayLayout.objects.get(id=id)
+
+    elif model == 'assay_device_setup':
+        layout = AssayDeviceSetup.objects.get(id=id).assay_layout
+
+    elif model == 'assay_device_readout':
+        layout = AssayDeviceReadout.objects.get(id=id).setup.assay_layout
+
+    elif model == 'assay_plate_test_results':
+        layout = AssayPlateTestResult.objects.get(id=id).assay_device_id.setup.assay_layout
+
+
     data = defaultdict(dict)
-    layout = AssayLayout.objects.get(id=assay_layout_id)
 
     # Fetch compounds
     compounds = AssayCompound.objects.filter(assay_layout=layout)
@@ -76,17 +89,22 @@ def fetch_assay_layout_content(request):
 
 
 def fetch_readout(request):
-    current_readout_id = request.POST.get('current_readout_id')
+    id = request.POST.get('id')
+    model = request.POST.get('model')
 
-    if not current_readout_id:
-        logger.error('current_readout_id not present in request to fetch_readout')
+    if not model and id:
+        logger.error('request_id not present in request to fetch_layout_format_labels')
         return HttpResponseServerError()
+
+    if model == 'assay_device_readout':
+        current_readout_id = AssayDeviceReadout.objects.get(id=id)
+
+    elif model == 'assay_plate_test_results':
+        current_readout_id = AssayPlateTestResult.objects.get(id=id).assay_device_id
 
     data = defaultdict(list)
 
-    readouts = AssayReadout.objects.filter(
-        assay_device_readout=current_readout_id
-    )
+    readouts = AssayReadout.objects.filter(assay_device_readout=current_readout_id)
 
     for readout in readouts:
         well = readout.row + '_' + readout.column
@@ -104,13 +122,24 @@ def fetch_readout(request):
 def fetch_layout_format_labels(request):
     """Return layout format labels."""
 
-    request_id = request.POST.get('id')
+    id = request.POST.get('id')
+    model = request.POST.get('model')
 
-    if not request_id:
+    if not model and id:
         logger.error('request_id not present in request to fetch_layout_format_labels')
         return HttpResponseServerError()
 
-    layout = Microdevice.objects.get(id=request_id)
+    if model == 'assay_layout':
+        layout = Microdevice.objects.get(id=id)
+
+    elif model == 'assay_device_setup':
+        layout = AssayDeviceSetup.objects.get(id=id).assay_layout.device
+
+    elif model == 'assay_device_readout':
+        layout = AssayDeviceReadout.objects.get(id=id).setup.assay_layout.device
+
+    elif model == 'assay_plate_test_results':
+        layout = AssayPlateTestResult.objects.get(id=id).assay_device_id.setup.assay_layout.device
 
     data = {}
 

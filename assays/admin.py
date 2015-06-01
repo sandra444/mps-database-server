@@ -344,7 +344,7 @@ class AssayWellInline(admin.TabularInline):
 # TODO REVISE SAVING
 class AssayLayoutAdmin(LockableAdmin):
     class Media(object):
-        js = ('assays/plate_create.js',)
+        js = ('assays/customize_layout.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
     save_as = True
@@ -632,8 +632,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
     list_display = ('assay_device_id',
                     'assay_name',
                     # 'cell_sample',
-                    'readout_start_time',
-                    'reader_name')
+                    'readout_start_time',)
     search_fields = ['assay_device_id']
     fieldsets = (
         (
@@ -643,7 +642,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
                         'assay_device_id',
                     ),
                     (
-                        'assay_layout', 'reader_name',
+                        'setup',
                     ),
                 )
             }

@@ -306,9 +306,10 @@ class AssayDeviceReadout(FlaggableModel):
     #                                                     ('MM', 'cells / mm^2')))
     # ### TODO ###
     assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
-    assay_layout = models.ForeignKey(AssayLayout)
+    setup = models.ForeignKey(AssayDeviceSetup)
 
-    reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
+    # Old
+    #reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
 
     readout_unit = models.ForeignKey(ReadoutUnit)
     timeunit = models.ForeignKey(TimeUnits)
