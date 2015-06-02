@@ -699,7 +699,10 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
         ),
     )
 
-    def save_model(self, request, obj, form, change):
+    # save_related takes the place of save_model so that the inline can be saved first
+    # this is similar to chip readouts so that we can validate the listed assays THEN the file
+    def save_related(self, request, form, formsets, change):
+        obj = form.instance
 
         if change:
             obj.modified_by = request.user
@@ -707,15 +710,22 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
         else:
             obj.modified_by = obj.created_by = request.user
 
+        # Save Plate Readout
         obj.save()
+        # Save inline
+        super(LockableAdmin, self).save_related(request, form, formsets, change)
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
             parseReadoutCSV(obj, request.FILES['file'])
 
-        #Need else to delete entries when a file is cleared
-        else:
+        #Need to delete entries when a file is cleared
+        if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
             removeExistingReadout(obj)
+
+    # save_model not used; would save twice otherwise
+    def save_model(self, request, obj, form, change):
+        pass
 
 admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
 
@@ -1052,7 +1062,7 @@ class AssayChipReadoutInline(admin.TabularInline):
 # ChipReadout validation occurs in the inline formset
 class AssayChipReadoutForm(forms.ModelForm):
 
-    headers = forms.CharField(required=True)
+    headers = forms.CharField(required=False)
 
     class Meta(object):
         model = AssayChipReadout
@@ -1165,14 +1175,11 @@ class AssayChipReadoutAdmin(LockableAdmin):
         else:
             return super(LockableAdmin, self).response_change(request, obj)
 
-    def id(self, obj):
-        return obj.id
-
     # save_realted takes the place of save_model so that the inline can be saved first
     def save_related(self, request, form, formsets, change):
         obj = form.instance
 
-        headers = int(form.data.get('headers'))
+        headers = int(form.data.get('headers')) if form.data.get('headers') else 0
 
         if change:
             obj.modified_by = request.user
@@ -1663,9 +1670,10 @@ class AssayRunAdmin(LockableAdmin):
         else:
             obj.modified_by = obj.created_by = request.user
 
-        if request.FILES:
-            # pass the upload file name to the CSV reader if a file exists
-            parseRunCSV(obj, request.FILES['file'])
+        # TODO FIX BULK UPLOAD BEFORE ALLOWING THIS
+        # if request.FILES:
+        #     # pass the upload file name to the CSV reader if a file exists
+        #     parseRunCSV(obj, request.FILES['file'])
 
         obj.save()
 
