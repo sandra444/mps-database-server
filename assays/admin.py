@@ -615,7 +615,135 @@ class AssayPlateReadoutInline(admin.TabularInline):
         css = {"all": ("css/hide_admin_original.css",)}
 
 
+class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
+    def clean(self):
+        """Validate unique, existing PLATE READOUTS"""
+
+        forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
+
+        # Dic of assay names from inline with respective unit as value
+        assays = {}
+        for form in forms_data:
+            try:
+                if form.cleaned_data:
+                    assay_name = form.cleaned_data.get('assay_id').assay_name
+                    unit = form.cleaned_data.get('readout_unit').readout_unit
+                    if assay_name not in assays:
+                        assays.update({assay_name:unit})
+                    else:
+                        raise forms.ValidationError(
+                            'Duplicate assays are not permitted; please blank out or change the duplicate')
+            except AttributeError:
+                pass
+        if len(assays) < 1:
+            raise forms.ValidationError('You must have at least one assay')
+
+        # TODO
+        # If there is already a file in the database and it is not being replaced or cleared (check for clear is implicit)
+        if self.instance.file and not forms_data[-1].files:
+
+            saved_data = AssayReadout.objects.filter(assay_device_readout=self.instance).prefetch_related('assay')
+
+            for raw in saved_data:
+
+                assay = raw.assay.assay_id.assay_name
+                val_unit = raw.assay.readout_unit.readout_unit
+
+                # Raise error when an assay does not exist
+                if assay not in assays:
+                    raise forms.ValidationError(
+                        'You can not remove the assay "%s" because it is in your uploaded data.' % assay)
+                # Raise error if val_unit not equal to one listed in APRA
+                if val_unit != assays.get(assay,''):
+                    raise forms.ValidationError(
+                        'The current value unit "%s" does not correspond with the readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+
+        # TODO what shall a uniqueness check look like?
+        # If there is a new file
+        if forms_data[-1].files:
+            test_file = forms_data[-1].files.get('file','')
+
+            datareader = csv.reader(test_file, delimiter=',')
+            datalist = list(datareader)
+
+            # Tedious way of getting timeunit; probably should refactor
+            readout_time_unit = TimeUnits.objects.get(id=self.data.get('timeunit')).unit
+
+            # Number of assays found
+            assays_found = 0
+            # Number of data blocks found
+            data_blocks_found = 0
+
+            for line in datalist:
+                # If line is blank, skip it
+                if not line:
+                    continue
+
+                # If this line is a header
+                # Headers should look like: ASSAY, {{ASSAY}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
+                if line[0].lower() == 'assay':
+                    # Throw error if header too short
+                    if len(line) < 4:
+                        raise forms.ValidationError(
+                            'Header row: {} is too short'.format(line))
+
+                    assay = line[1]
+                    assays_found += 1
+
+                    val_unit = line[3]
+
+                    # Raise error when an assay does not exist
+                    if assay not in assays:
+                        raise forms.ValidationError(
+                            'No assay with the name "%s" exists; please change your file or add this assay' % assay)
+                    # Raise error if val_unit not equal to one listed in ACRA
+                    if val_unit != assays.get(assay,''):
+                        raise forms.ValidationError(
+                            'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+
+                    # Fail if time given without time units
+                    if len(line) < 8 and len(line) > 4 and any(line[3:]):
+                        raise forms.ValidationError(
+                            'Header row: {} improperly configured'.format(line))
+
+                    if len(line) >= 8:
+                        time = line[5]
+                        time_unit = line[7]
+
+                        # Fail if time is not numeric
+                        try:
+                            float(time)
+                        except:
+                            raise forms.ValidationError(
+                                'The time "{}" is invalid. Please only enter numeric times'.format(time))
+
+                        # Fail if time unit does not match
+                        # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
+                        if time_unit[0] != readout_time_unit[0]:
+                            raise forms.ValidationError(
+                                'The time unit "%s" does not correspond with the selected readout time unit of "%s"' % (time_unit, readout_time_unit))
+
+                # Otherwise the line contains datapoints for the current assay
+                else:
+                    data_blocks_found += 1
+
+                    if not data_blocks_found > assays_found:
+                        raise forms.ValidationError(
+                                    'All plate data must have an assay associated with it. Please add a header line.')
+                    # For every value in the line
+                    for val in line:
+                        # Check every value to make sure it can resolve to a float
+                        try:
+                            # Keep empty strings, though they technically can not be converted to floats
+                            if val != '':
+                                float(val)
+                        except:
+                            raise forms.ValidationError(
+                                    'The value "%s" is invalid; please make sure all values are numerical' % str(val))
+
+
 class AssayDeviceReadoutAdmin(LockableAdmin):
+    formset = AssayDeviceReadoutInlineFormset
     # Endpoint readouts from MICROPLATES
     resource_class = AssayDeviceReadoutResource
 
@@ -920,12 +1048,11 @@ admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 
 class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
     def clean(self):
-
-        headers = 0
+        """Validate unique, existing Chip Readout IDs"""
 
         # Throw error if headers is not valid
         try:
-            headers = int(self.data.get('headers',''))
+            headers = int(self.data.get('headers','')) if self.data.get('headers') else 0
         except:
             raise forms.ValidationError('Please make number of headers a valid number.')
 
@@ -947,20 +1074,6 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
                 pass
         if len(assays) < 1:
             raise forms.ValidationError('You must have at least one assay')
-
-        """Validate unique, existing Chip Readout IDs"""
-
-        # Very unusual way of getting parent data; seems to work; TEST to be sure
-        # Although using the object dict is useful for fast debugging, dot notation is the obviously correct choice
-
-        # if self.instance.__dict__['file']:
-        #     data = self.instance.__dict__
-        #     test_file = data['file']
-        # elif not forms_data[-1].__dict__['files']:
-        #     test_file = None
-        # else:
-        #     data = forms_data[-1].__dict__
-        #     test_file = data['files']['file']\
 
         # If there is already a file in the database and it is not being replaced or cleared (check for clear is implicit)
         if self.instance.file and not forms_data[-1].files:

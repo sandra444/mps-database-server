@@ -325,7 +325,7 @@ class AssayReadout(models.Model):
 
     assay_device_readout = models.ForeignKey('assays.AssayDeviceReadout')
     # A plate can have multiple assays, this differentiates between those assays
-    #assay = models.ForeignKey('assays.AssayPlateReadoutAssay')
+    assay = models.ForeignKey('assays.AssayPlateReadoutAssay')
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
     value = models.FloatField()
@@ -339,8 +339,10 @@ class ReadoutUnit(LockableModel):
 
     class Meta(object):
         ordering = ('readout_unit',)
+
     readout_unit = models.CharField(max_length=512,unique=True)
     description = models.CharField(max_length=512,blank=True,null=True)
+
     def __unicode__(self):
         return self.readout_unit
 
@@ -394,7 +396,7 @@ class AssayDeviceReadout(FlaggableModel):
     # assay_start_time = models.DateField(verbose_name='Start Date', blank=True, null=True, help_text="YYYY-MM-DD")
     ### TODO ###
 
-    readout_start_time = models.DateField(verbose_name='Readout Date', blank=True, null=True, help_text="YYYY-MM-DD")
+    readout_start_time = models.DateField(verbose_name='Readout Date', help_text="YYYY-MM-DD")
 
     notebook = models.CharField(max_length=256, blank=True, null=True)
     notebook_page = models.IntegerField(blank=True, null=True)
