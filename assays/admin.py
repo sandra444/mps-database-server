@@ -577,24 +577,71 @@ def parseReadoutCSV(currentAssayReadout, file):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
 
-    for rowID, rowValue in enumerate(datalist):
-        # rowValue holds all of the row elements
-        # rowID is the index of the current row from top to bottom
-        for columnID, columnValue in enumerate(rowValue):
-            # columnValue is a single number: the value of our specific cell
-            # columnID is the index of the current column
+    # Current assay
+    assay = None
+    # Current time
+    time = None
 
-            # Treat empty strings as NULL values and do not save the data point
-            if not columnValue:
-                continue
+    for row_id, line in enumerate(datalist):
+        # TODO HOW DO I DEAL WITH BLANK LINES???
+        # If line is blank
+        if not line:
+            continue
 
-            AssayReadout(
-                assay_device_readout=currentAssayReadout,
-                row=rowID,
-                column=columnID,
-                value=columnValue
-            ).save()
-    return
+        # If this line is a header
+        # Headers should look like: ASSAY, {{ASSAY}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
+        if line[0].lower() == 'assay':
+            assay = line[1]
+
+            if len(line) >= 8:
+                time = line[5]
+
+            else:
+                time = None
+
+        # Otherwise the line contains datapoints for the current assay
+        else:
+            for column_id, value in enumerate(line):
+                # Treat empty strings as NULL values and do not save the data point
+                if not value:
+                    continue
+
+                if time:
+                    AssayReadout(
+                        assay_device_readout=currentAssayReadout,
+                        row=row_id,
+                        column=column_id,
+                        value=value,
+                        # the associated assay
+                        assay=AssayPlateReadoutAssay.objects.get(readout_id=currentAssayReadout, assay_id=assay),
+                        elapsed_time=time
+                    ).save()
+                else:
+                    AssayReadout(
+                        assay_device_readout=currentAssayReadout,
+                        row=row_id,
+                        column=column_id,
+                        value=value,
+                        assay=AssayPlateReadoutAssay.objects.get(readout_id=currentAssayReadout, assay_id=assay),
+                    ).save()
+
+    # for rowID, rowValue in enumerate(datalist):
+    #     # rowValue holds all of the row elements
+    #     # rowID is the index of the current row from top to bottom
+    #     for columnID, columnValue in enumerate(rowValue):
+    #         # columnValue is a single number: the value of our specific cell
+    #         # columnID is the index of the current column
+    #
+    #         # Treat empty strings as NULL values and do not save the data point
+    #         if not columnValue:
+    #             continue
+    #
+    #         AssayReadout(
+    #             assay_device_readout=currentAssayReadout,
+    #             row=rowID,
+    #             column=columnID,
+    #             value=columnValue
+    #         ).save()
 
 
 class AssayPlateReadoutInline(admin.TabularInline):

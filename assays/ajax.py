@@ -102,7 +102,9 @@ def fetch_readout(request):
     # data = defaultdict(list)
     data = []
 
-    readouts = AssayReadout.objects.filter(assay_device_readout=current_readout_id)
+    readouts = AssayReadout.objects.filter(assay_device_readout=current_readout_id).order_by('assay','elapsed_time')
+
+    time_unit = AssayDeviceReadout.objects.filter(id=current_readout_id.id)[0].timeunit
 
     for readout in readouts:
         # well = readout.row + '_' + readout.column
@@ -112,12 +114,23 @@ def fetch_readout(request):
         #     'column': readout.column,
         #     'value': readout.value,
         # })
-
-        data.append({
-            'row': readout.row,
-            'column': readout.column,
-            'value': readout.value
-        })
+        if readout.elapsed_time:
+            data.append({
+                'row': readout.row,
+                'column': readout.column,
+                'value': readout.value,
+                'assay': readout.assay.assay_id,
+                'time': readout.elapsed_time,
+                # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
+                'time_unit': time_unit
+            })
+        else:
+            data.append({
+                'row': readout.row,
+                'column': readout.column,
+                'value': readout.value,
+                'assay': readout.assay.assay_id
+            })
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
