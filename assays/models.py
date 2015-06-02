@@ -20,7 +20,12 @@ types = (
 )
 
 
+# TODO PHYSICAL UNITS SEEM VERY BROADLY DEFINED AND MAY NEED REVISION
 class PhysicalUnits(LockableModel):
+    """
+    Measures of concentration and so on
+    """
+
     unit = models.CharField(max_length=256)
     description = models.CharField(max_length=256,
                                    blank=True, null=True)
@@ -39,6 +44,10 @@ class PhysicalUnits(LockableModel):
 
 
 class TimeUnits(LockableModel):
+    """
+    Time Units (minutes, hours, etc)
+    """
+
     unit = models.CharField(max_length=16)
     description = models.CharField(max_length=256,
                                    blank=True, null=True)
@@ -54,6 +63,10 @@ class TimeUnits(LockableModel):
 
 
 class AssayModelType(LockableModel):
+    """
+    Defines the type of an ASSAY (biochemical, mass spec, and so on)
+    """
+
     class Meta(object):
         ordering = ('assay_type_name',)
 
@@ -65,6 +78,10 @@ class AssayModelType(LockableModel):
 
 
 class AssayModel(LockableModel):
+    """
+    Defines an ASSAY such as albumin, BUN, and so on
+    """
+
     class Meta(object):
         ordering = ('assay_name',)
 
@@ -124,6 +141,10 @@ class AssayModel(LockableModel):
 
 
 class AssayLayout(LockableModel):
+    """
+    Defines the layout of a PLATE (parent of all associated wells)
+    """
+
     class Meta(object):
         ordering = ('layout_name',)
 
@@ -136,6 +157,10 @@ class AssayLayout(LockableModel):
 
 
 class AssayWellType(LockableModel):
+    """
+    PLATE well type
+    """
+
     class Meta(object):
         ordering = ('well_type',)
 
@@ -160,6 +185,10 @@ class AssayWellType(LockableModel):
 
 
 class AssayWell(LockableModel):
+    """
+    An individual PLATE well
+    """
+
     class Meta(object):
         unique_together = [('assay_layout', 'row', 'column')]
 
@@ -172,6 +201,10 @@ class AssayWell(LockableModel):
 
 
 class AssayTimepoint(models.Model):
+    """
+    Timepoints for PLATE wells
+    """
+
     assay_layout = models.ForeignKey(AssayLayout)
     timepoint = models.FloatField(default=0)
     row = models.CharField(max_length=25)
@@ -179,6 +212,10 @@ class AssayTimepoint(models.Model):
 
 
 class AssayCompound(models.Model):
+    """
+    Compound for PLATE wells
+    """
+
     assay_layout = models.ForeignKey(AssayLayout)
     compound = models.ForeignKey('compounds.Compound')
     concentration = models.FloatField(default=0)
@@ -187,6 +224,10 @@ class AssayCompound(models.Model):
     column = models.CharField(max_length=25)
 
 class AssayWellLabel(models.Model):
+    """
+    Arbitrary string label for PLATE wells
+    """
+
     assay_layout = models.ForeignKey(AssayLayout)
     label = models.CharField(max_length=150)
     row = models.CharField(max_length=25)
@@ -194,7 +235,10 @@ class AssayWellLabel(models.Model):
 
 
 class AssayPlateCells(models.Model):
-#   Individual cell parameters for PLATE setup used in inline
+    """
+    Individual cell parameters for PLATE setup used in inline
+    """
+
     assay_chip = models.ForeignKey('AssayDeviceSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
     cell_biosensor = models.ForeignKey('cellsamples.Biosensor', null=True, blank=True)
@@ -211,8 +255,10 @@ class AssayPlateCells(models.Model):
 
 
 class AssayDeviceSetup(FlaggableModel):
-    """Setup for MICROPLATES
     """
+    Setup for MICROPLATES
+    """
+
     class Meta(object):
         verbose_name = 'Plate Setup'
 
@@ -236,6 +282,10 @@ class AssayDeviceSetup(FlaggableModel):
         return u'Plate-{}'.format(self.assay_device_id)
 
 class AssayReader(LockableModel):
+    """
+    Chip and Plate readers
+    """
+
     class Meta(object):
         ordering = ('reader_name',)
 
@@ -247,7 +297,9 @@ class AssayReader(LockableModel):
 
 
 class AssayPlateReadoutAssay(models.Model):
-    # Inline for PLATE readout assays
+    """
+    Inline for PLATE readout assays
+    """
 
     class Meta(object):
         unique_together = [('readout_id', 'assay_id')]
@@ -267,7 +319,13 @@ class AssayPlateReadoutAssay(models.Model):
 
 
 class AssayReadout(models.Model):
+    """
+    An individual value for a PLATE readout
+    """
+
     assay_device_readout = models.ForeignKey('assays.AssayDeviceReadout')
+    # A plate can have multiple assays, this differentiates between those assays
+    #assay = models.ForeignKey('assays.AssayPlateReadoutAssay')
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
     value = models.FloatField()
@@ -275,6 +333,10 @@ class AssayReadout(models.Model):
 
 
 class ReadoutUnit(LockableModel):
+    """
+    Units specific to readouts (AU, RFU, so on)
+    """
+
     class Meta(object):
         ordering = ('readout_unit',)
     readout_unit = models.CharField(max_length=512,unique=True)
@@ -284,7 +346,10 @@ class ReadoutUnit(LockableModel):
 
 
 class AssayDeviceReadout(FlaggableModel):
-    # Readout data collected from MICROPLATES
+    """
+    Readout data collected from MICROPLATES
+    """
+
     class Meta(object):
         verbose_name = 'Plate Readout'
         ordering = ('assay_device_id',)
@@ -354,7 +419,9 @@ POSNEG = (
 
 
 class AssayResultFunction(LockableModel):
-#   Function for analysis of CHIP RESULTS
+    """
+    Function for analysis of CHIP RESULTS
+    """
     class Meta(object):
         verbose_name = 'Function'
         ordering = ('function_name', )
@@ -368,7 +435,10 @@ class AssayResultFunction(LockableModel):
 
 
 class AssayResultType(LockableModel):
-#   Result types for CHIP RESULTS
+    """
+    Result types for CHIP RESULTS
+    """
+
     class Meta(object):
         verbose_name = 'Result type'
         ordering = ('assay_result_type', )
@@ -381,7 +451,10 @@ class AssayResultType(LockableModel):
 
 
 class AssayPlateResult(models.Model):
-#   Individual result parameters for PLATE RESULTS used in inline
+    """
+    Individual result parameters for PLATE RESULTS used in inline
+    """
+
     assay_name = models.ForeignKey('assays.AssayPlateReadoutAssay',
                                    verbose_name='Assay')
 
@@ -417,7 +490,10 @@ class AssayPlateResult(models.Model):
 
 
 class AssayPlateTestResult(FlaggableModel):
-#   Test Results from MICROPLATES
+    """
+    Test Results from MICROPLATES
+    """
+
     assay_device_id = models.ForeignKey('assays.AssayDeviceReadout',
                                         verbose_name='Plate ID/ Barcode')
 
@@ -447,6 +523,10 @@ class AssayPlateTestResult(FlaggableModel):
 
 
 class StudyConfiguration(LockableModel):
+    """
+    Defines how chips are connected together (for integrated studies to come)
+    """
+
     class Meta(object):
         verbose_name = 'Study Configuration'
     # Length subject to change
@@ -464,6 +544,10 @@ class StudyConfiguration(LockableModel):
         return "/assays/studyconfiguration/"
 
 class StudyModel(models.Model):
+    """
+    Individual connections for integrated models
+    """
+
     study_configuration = models.ForeignKey(StudyConfiguration)
     label = models.CharField(max_length=1)
     organ = models.ForeignKey(OrganModel)
@@ -474,6 +558,10 @@ class StudyModel(models.Model):
 
 
 class AssayRun(RestrictedModel):
+    """
+    The encapsulation of all data concerning some plate/chip project
+    """
+
     class Meta(object):
         verbose_name = 'Organ Chip Study'
         verbose_name_plural = 'Organ Chip Studies'
@@ -519,6 +607,10 @@ class AssayRun(RestrictedModel):
 
 
 class AssayChipRawData(models.Model):
+    """
+    Individual lines of readout data
+    """
+
     class Meta(object):
         unique_together = [('assay_chip_id', 'assay_id', 'field_id', 'elapsed_time')]
 
@@ -530,7 +622,9 @@ class AssayChipRawData(models.Model):
 
 
 class AssayChipCells(models.Model):
-#   Individual cell parameters for CHIP setup used in inline
+    """
+    Individual cell parameters for CHIP setup used in inline
+    """
     assay_chip = models.ForeignKey('AssayChipSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
     cell_biosensor = models.ForeignKey('cellsamples.Biosensor', null=True, blank=True)
@@ -548,7 +642,9 @@ class AssayChipCells(models.Model):
 
 
 class AssayChipSetup(FlaggableModel):
-    # The configuration of a Chip for implementing an assay
+    """
+    The configuration of a Chip for implementing an assay
+    """
     class Meta(object):
         verbose_name = 'Chip Setup'
         ordering = ('-assay_chip_id', 'assay_run_id', )
@@ -593,7 +689,9 @@ object_types = (
 
 
 class AssayChipReadoutAssay(models.Model):
-    # Inline for CHIP readout assays
+    """
+    Inline for CHIP readout assays
+    """
 
     class Meta(object):
         unique_together = [('readout_id', 'assay_id')]
@@ -612,6 +710,10 @@ class AssayChipReadoutAssay(models.Model):
 
 
 class AssayChipReadout(FlaggableModel):
+    """
+    Readout data for CHIPS
+    """
+
     class Meta(object):
         verbose_name = 'Chip Readout'
         ordering = ('chip_setup',)
@@ -651,7 +753,10 @@ class AssayChipReadout(FlaggableModel):
 
 
 class AssayTestResult(FlaggableModel):
-#   Results calculated from Raw Chip Data
+    """
+    Results calculated from Raw Chip Data
+    """
+
     class Meta(object):
         verbose_name = 'Chip Result'
 
@@ -698,7 +803,10 @@ class AssayTestResult(FlaggableModel):
 
 
 class AssayResult(models.Model):
-#   Individual result parameters for CHIP RESULTS used in inline
+    """
+    Individual result parameters for CHIP RESULTS used in inline
+    """
+
     assay_name = models.ForeignKey('assays.AssayChipReadoutAssay',
                                    verbose_name='Assay')
 
