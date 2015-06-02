@@ -613,7 +613,7 @@ def parseReadoutCSV(currentAssayReadout, file):
                         column=column_id,
                         value=value,
                         # the associated assay
-                        assay=AssayPlateReadoutAssay.objects.get(readout_id=currentAssayReadout, assay_id=assay),
+                        assay=AssayPlateReadoutAssay.objects.get(assay_device_readout=currentAssayReadout, assay_id=assay),
                         elapsed_time=time
                     ).save()
                 else:
@@ -622,7 +622,7 @@ def parseReadoutCSV(currentAssayReadout, file):
                         row=row_id,
                         column=column_id,
                         value=value,
-                        assay=AssayPlateReadoutAssay.objects.get(readout_id=currentAssayReadout, assay_id=assay),
+                        assay=AssayPlateReadoutAssay.objects.get(assay_device_readout=currentAssayReadout, assay_id=assay),
                     ).save()
 
     # for rowID, rowValue in enumerate(datalist):
@@ -642,24 +642,6 @@ def parseReadoutCSV(currentAssayReadout, file):
     #             column=columnID,
     #             value=columnValue
     #         ).save()
-
-
-class AssayPlateReadoutInline(admin.TabularInline):
-    # Assays for ChipReadout
-    # formset = AssayPlateReadoutInlineFormset
-    model = AssayPlateReadoutAssay
-    verbose_name = 'Assay Plate Readout Assay'
-    verbose_plural_name = 'Assay Plate Readout Assays'
-
-    fields = (
-        (
-            ('assay_id','reader_id','readout_unit',)
-        ),
-    )
-    extra = 0
-
-    class Media(object):
-        css = {"all": ("css/hide_admin_original.css",)}
 
 
 class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
@@ -774,7 +756,7 @@ class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
                 else:
                     data_blocks_found += 1
 
-                    if not data_blocks_found > assays_found:
+                    if data_blocks_found > assays_found:
                         raise forms.ValidationError(
                                     'All plate data must have an assay associated with it. Please add a header line.')
                     # For every value in the line
@@ -789,8 +771,25 @@ class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
                                     'The value "%s" is invalid; please make sure all values are numerical' % str(val))
 
 
-class AssayDeviceReadoutAdmin(LockableAdmin):
+class AssayPlateReadoutInline(admin.TabularInline):
+    # Assays for ChipReadout
     formset = AssayDeviceReadoutInlineFormset
+    model = AssayPlateReadoutAssay
+    verbose_name = 'Assay Plate Readout Assay'
+    verbose_plural_name = 'Assay Plate Readout Assays'
+
+    fields = (
+        (
+            ('assay_id','reader_id','readout_unit',)
+        ),
+    )
+    extra = 0
+
+    class Media(object):
+        css = {"all": ("css/hide_admin_original.css",)}
+
+
+class AssayDeviceReadoutAdmin(LockableAdmin):
     # Endpoint readouts from MICROPLATES
     resource_class = AssayDeviceReadoutResource
 
