@@ -140,7 +140,8 @@ class AssayModel(LockableModel):
 #         return self.base_layout_name
 
 
-class AssayLayout(LockableModel):
+# Assay layout is now a flaggable model
+class AssayLayout(FlaggableModel):
     """
     Defines the layout of a PLATE (parent of all associated wells)
     """

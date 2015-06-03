@@ -57,7 +57,7 @@ $(document).ready(function () {
         var table = $('<table>')
             .css('width','100%')
             .addClass('layout-table')
-            .attr('id','layout_table').insertAfter($('fieldset'));
+            .attr('id','layout_table').insertAfter($('fieldset')[0]);
 
         // make first row
         var row = $('<tr>');

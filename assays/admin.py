@@ -352,15 +352,43 @@ class AssayLayoutAdmin(LockableAdmin):
     list_per_page = 300
     fieldsets = (
         (
-            None, {
+            'Layout Parameters', {
                 'fields': (
                     ('layout_name',
                      'device',
                      'locked',
-                     ('created_by', 'created_on', ),
-                     ('modified_by', 'modified_on', ),
-                     ('signed_off_by', 'signed_off_date', ), )
+                    )
                 )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    (
+                        'created_by', 'created_on',
+                    ),
+                    (
+                        'modified_by', 'modified_on',
+                    ),
+                    (
+                        'signed_off_by', 'signed_off_date'
+                    ),
+                )
+            }
+        ),
+        (
+            'Flag for Review', {
+                'fields': (
+                    ('flagged', 'reason_for_flag',)
+                )
+            }
+        ),
+        (
+            'Group Access', {
+                'fields':(
+                    'group','restricted'
+                 ),
             }
         ),
     )
