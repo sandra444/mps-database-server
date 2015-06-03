@@ -582,6 +582,11 @@ def parseReadoutCSV(currentAssayReadout, file):
     # Current time
     time = None
 
+    # Used to discern number of headers for offset
+    number_of_assays = 0
+    # Used to discern row offset
+    number_of_rows = currentAssayReadout.setup.assay_layout.device.number_of_rows
+
     for row_id, line in enumerate(datalist):
         # TODO HOW DO I DEAL WITH BLANK LINES???
         # If line is blank
@@ -590,8 +595,10 @@ def parseReadoutCSV(currentAssayReadout, file):
 
         # If this line is a header
         # Headers should look like: ASSAY, {{ASSAY}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
-        if line[0].lower() == 'assay':
-            assay = line[1]
+        if line[0].lower().strip() == 'assay':
+            # GET THE ASSAY
+            assay = AssayModel.objects.get(assay_name=line[1])
+            number_of_assays += 1
 
             if len(line) >= 8:
                 time = line[5]
@@ -606,23 +613,26 @@ def parseReadoutCSV(currentAssayReadout, file):
                 if not value:
                     continue
 
+                # MUST OFFSET ROW (due to multiple datablocks)
+                offset_row_id = (row_id-number_of_assays) % number_of_rows
+
                 if time:
                     AssayReadout(
                         assay_device_readout=currentAssayReadout,
-                        row=row_id,
+                        row=offset_row_id,
                         column=column_id,
                         value=value,
                         # the associated assay
-                        assay=AssayPlateReadoutAssay.objects.get(assay_device_readout=currentAssayReadout, assay_id=assay),
+                        assay=AssayPlateReadoutAssay.objects.get(readout_id=currentAssayReadout, assay_id=assay),
                         elapsed_time=time
                     ).save()
                 else:
                     AssayReadout(
                         assay_device_readout=currentAssayReadout,
-                        row=row_id,
+                        row=offset_row_id,
                         column=column_id,
                         value=value,
-                        assay=AssayPlateReadoutAssay.objects.get(assay_device_readout=currentAssayReadout, assay_id=assay),
+                        assay=AssayPlateReadoutAssay.objects.get(readout_id=currentAssayReadout, assay_id=assay),
                     ).save()
 
     # for rowID, rowValue in enumerate(datalist):
@@ -698,12 +708,15 @@ class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
             # Tedious way of getting timeunit; probably should refactor
             readout_time_unit = TimeUnits.objects.get(id=self.data.get('timeunit')).unit
 
+            # Acquire number of rows in devices to discern datablocks
+            number_of_rows = self.instance.setup.assay_layout.device.number_of_rows
+
             # Number of assays found
             assays_found = 0
             # Number of data blocks found
             data_blocks_found = 0
 
-            for line in datalist:
+            for row_index, line in enumerate(datalist):
                 # If line is blank, skip it
                 if not line:
                     continue
@@ -754,7 +767,9 @@ class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
 
                 # Otherwise the line contains datapoints for the current assay
                 else:
-                    data_blocks_found += 1
+                    # TODO REVISE HOW DATA_BLOCKS ARE ACQUIRED
+                    if data_blocks_found == 0 or (row_index-assays_found) % number_of_rows == 0:
+                        data_blocks_found += 1
 
                     if data_blocks_found > assays_found:
                         raise forms.ValidationError(

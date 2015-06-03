@@ -228,14 +228,23 @@ $(document).ready(function () {
     function fill_readout_from_existing(data) {
         $.each(data, function(index, well_data) {
             var value = well_data.value;
+            var value_unit = well_data.value_unit;
+            var time = well_data.time;
+            var time_unit = well_data.time_unit;
+            var assay = well_data.assay;
+
             var row_label = row_labels[well_data.row];
             var column_label = column_labels[well_data.column];
             var well_id = '#' + row_label + '_' + column_label;
 
+            var text = (time && time_unit) ?
+                assay + ': ' + value + ' ' + value_unit +'\t(' + time + ' ' + time_unit + ') ':
+                assay + ': ' + value + ' ' + value_unit;
+
             $(well_id).append(
-                '<div class="value" style="text-align: center; color: blue;"><p><b>' +
-                value +
-                '</b></p></div>');
+                    '<div class="value" style="text-align: center; color: blue;"><p><b>' +
+                    text +
+                    '</b></p></div>');
         });
     }
 

@@ -104,7 +104,7 @@ def fetch_readout(request):
 
     readouts = AssayReadout.objects.filter(assay_device_readout=current_readout_id).order_by('assay','elapsed_time')
 
-    time_unit = AssayDeviceReadout.objects.filter(id=current_readout_id.id)[0].timeunit
+    time_unit = AssayDeviceReadout.objects.filter(id=current_readout_id.id)[0].timeunit.unit
 
     for readout in readouts:
         # well = readout.row + '_' + readout.column
@@ -119,17 +119,20 @@ def fetch_readout(request):
                 'row': readout.row,
                 'column': readout.column,
                 'value': readout.value,
-                'assay': readout.assay.assay_id,
+                'assay': readout.assay.assay_id.assay_name,
                 'time': readout.elapsed_time,
                 # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
-                'time_unit': time_unit
+                'time_unit': time_unit,
+                'value_unit': readout.assay.readout_unit.readout_unit,
             })
         else:
             data.append({
                 'row': readout.row,
                 'column': readout.column,
                 'value': readout.value,
-                'assay': readout.assay.assay_id
+                'assay': readout.assay.assay_id.assay_name,
+                # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
+                'value_unit': readout.assay.readout_unit.readout_unit,
             })
 
     return HttpResponse(json.dumps(data),

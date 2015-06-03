@@ -248,47 +248,122 @@ $(document).ready(function () {
 
         for (var index in all) {
             var values = all[index].split(',');
-            if (values && (values.length > column_labels.length)) {
-                alert('Error: This CSV contains too many columns.\nBe sure to match the layout.');
-                $('#id_file').val('');
-                return;
-            }
-            if (lines.length < row_labels.length) {
-                lines.push(values);
-            }
+            // TODO REVISE CHECK FOR OVERFLOW
+//            if (values && (values.length > column_labels.length)) {
+//                alert('Error: This CSV contains too many columns.\nBe sure to match the layout.');
+//                $('#id_file').val('');
+//                return;
+//            }
+//            if (lines.length < row_labels.length) {
+//                lines.push(values);
+//            }
+            lines.push(values);
         }
 
         all = null;
 
         $('.value').remove();
 
+        // Whether or not the upload should fail
         var failed = false;
 
-        $.each(row_labels, function (row_index, row_label) {
-            $.each(column_labels, function(column_index, column_label) {
-                var value = lines[row_index][column_index];
-                var well_id = '#' + row_label + '_' + column_label;
-                // If value is not a number
-                if (isNaN(value)) {
-                    $(well_id).append(
-                        '<div class="value" style="text-align: center; color: red;"><p><b>' +
-                        value +
-                        '</b></p></div>');
-                    // Fail the file
-                    failed = true;
+        // Current assay
+        var assay = undefined;
+        // Current unit
+        var value_unit = undefined;
+        // Current time
+        var time = undefined;
+        // Current units
+        var time_unit = undefined;
+
+        var number_of_assays = 0;
+        var number_of_data_blocks = 0;
+
+        // TODO FIX CLIENT-SIDE VALIDATION
+        // TODO
+        $.each(lines, function (row_index, row) {
+            // If the first value is 'assay', identify the line as a header
+            if ($.trim(row[0].toLowerCase()) == 'assay') {
+
+                assay = row[1];
+                value_unit = row[3];
+                time = row[5];
+                time_unit = row[7];
+
+                if (!assay || !value_unit || (time && !time_unit)) {
+                    failed += 'headers';
                 }
+
+                number_of_assays += 1
+            }
+
+            else {
+                // TODO NEEDS TO BE REVISED
+                // Ignore empty lines
+                if (!_.some(row, function (val) {return $.trim(val)})) {
+                    console.log('Ignored blank line');
+                }
+
+
                 else {
-                    $(well_id).append(
-                        '<div class="value" style="text-align: center; color: blue;"><p><b>' +
-                        value +
-                        '</b></p></div>');
+                    // Register a new data block if this is the first reading
+                    // OR if the row index
+                    if (number_of_data_blocks == 0 || (row_index - number_of_assays) % row_labels.length == 0) {
+                        number_of_data_blocks += 1;
+                    }
+
+                    if (number_of_data_blocks > number_of_assays) {
+                        failed += 'headers';
+                    }
+
+                    //console.log('assays: ' + number_of_assays);
+                    //console.log('blocks: ' + number_of_data_blocks);
+
+                    $.each(row, function (column_index, value) {
+
+                        // TODO REVISE
+                        // Must offset row due to headers
+                        // Employ modulo
+                        var row_label = row_labels[(row_index - number_of_assays) % row_labels.length];
+                        var column_label = column_labels[column_index];
+
+                        var well_id = '#' + row_label + '_' + column_label;
+
+                        //console.log('well_id: ' + well_id);
+
+                        var text = (time && time_unit) ?
+                            assay + ': ' + value + ' ' + value_unit + '\t(' + time + ' ' + time_unit + ') ' :
+                            assay + ': ' + value + ' ' + value_unit;
+
+                        // If value is not a number
+                        if (isNaN(value)) {
+                            $(well_id).append(
+                                    '<div class="value" style="text-align: center; color: red;"><p><b>' +
+                                    text +
+                                    '</b></p></div>');
+                            // Fail the file
+                            failed += 'non-numeric';
+                        }
+
+                        else {
+                            $(well_id).append(
+                                    '<div class="value" style="text-align: center; color: blue;"><p><b>' +
+                                    text +
+                                    '</b></p></div>');
+                        }
+                    });
                 }
-            });
+            }
         });
 
         // If the file upload has failed
         if (failed) {
-            alert('Error: This file contains non-numeric data. Please see and replace the values in red and upload again.');
+            if (failed.indexOf('headers') > -1) {
+                alert('Please ensure that all data blocks have valid headers')
+            }
+            if (failed.indexOf('non-numeric') > -1) {
+                alert('Error: This file contains non-numeric data. Please see and replace the values in red and upload again.');
+            }
             $('#id_file').val('');
         }
     }
@@ -321,16 +396,28 @@ $(document).ready(function () {
     }
 
     function fill_readout_from_existing(data) {
+        // Clear any leftover values from previews
+        $('.value').remove();
+
         $.each(data, function(index, well_data) {
             var value = well_data.value;
+            var value_unit = well_data.value_unit;
+            var time = well_data.time;
+            var time_unit = well_data.time_unit;
+            var assay = well_data.assay;
+
             var row_label = row_labels[well_data.row];
             var column_label = column_labels[well_data.column];
             var well_id = '#' + row_label + '_' + column_label;
 
+            var text = (time && time_unit) ?
+                assay + ': ' + value + ' ' + value_unit +'\t(' + time + ' ' + time_unit + ') ':
+                assay + ': ' + value + ' ' + value_unit;
+
             $(well_id).append(
-                '<div class="value" style="text-align: center; color: blue;"><p><b>' +
-                value +
-                '</b></p></div>');
+                    '<div class="value" style="text-align: center; color: blue;"><p><b>' +
+                    text +
+                    '</b></p></div>');
         });
     }
 
