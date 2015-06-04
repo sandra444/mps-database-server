@@ -15,6 +15,7 @@
                     <th>Cell Type</th>
                     <th>Cell Source</th>
                     <th>Supplier</th>
+                    <th>Patient</th>
                     <th>Group</th>
                 </tr>
             </thead>
@@ -27,6 +28,7 @@
                     <th>Cell Type</th>
                     <th>Cell Source</th>
                     <th>Supplier</th>
+                    <th>Patient</th>
                     <th>Group</th>
                 </tr>
             </tfoot>
@@ -42,6 +44,12 @@
                     <td><a href="/cellsamples/celltype/{{ cellsample.cell_type.id }}">{{ cellsample.cell_type }}</a></td>
                     <td>{{ cellsample.cell_source }}</td>
                     <td>{{ cellsample.supplier }}</td>
+                    <td>
+                        {% if cellsample.patient_age or cellsample.patient_gender != 'N' or cellsample.patient_condition %}
+                            {{ cellsample.patient_age|default:"Unknown" }} year old {{ cellsample.patient_gender }}
+                            {{ cellsample.patient_condition }}
+                        {% endif %}
+                    </td>
                     <td>{{ cellsample.group }}</td>
                 </tr>
             {% endfor %}
