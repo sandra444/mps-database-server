@@ -1,5 +1,9 @@
 from django import forms
-from assays.models import AssayChipReadout, AssayChipSetup, AssayTestResult, AssayChipCells, AssayResult, StudyConfiguration
+from assays.models import AssayChipReadout, AssayChipSetup, AssayTestResult, AssayChipCells, AssayResult, StudyConfiguration, AssayLayout
+
+# These are all of the tracking fields
+tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
+
 
 class AssayResultForm(forms.ModelForm):
     """Size the text input boxes"""
@@ -10,7 +14,7 @@ class AssayResultForm(forms.ModelForm):
             'test_time': forms.TextInput(attrs={'size': 3}),
             'value': forms.TextInput(attrs={'size': 10}),
         }
-        exclude = ('assay_device_readout','group',)
+        exclude = ('group',) + tracking
 
     # Set chip setup to unique instead of throwing error in validation
     # def clean(self):
@@ -33,7 +37,7 @@ class AssayChipReadoutForm(forms.ModelForm):
             'treatment_time_length': forms.NumberInput(attrs={'style':'width:174px;',}),
             'notes': forms.Textarea(attrs={'cols':50, 'rows': 3}),
         }
-        exclude = ('created_by','modified_by','signed_off_by','signed_off_date','locked', 'group')
+        exclude = ('group',) + tracking
 
 
     # def clean(self):
@@ -58,7 +62,7 @@ class AssayChipSetupForm(forms.ModelForm):
             'variance': forms.Textarea(attrs={'cols':50, 'rows': 2}),
         }
         # Assay Run ID is always bound to the parent Study
-        exclude = ('assay_run_id','group')
+        exclude = ('assay_run_id','group') + tracking
 
     def clean(self):
         super(forms.ModelForm, self).clean()
@@ -123,3 +127,11 @@ class StudyConfigurationForm(forms.ModelForm):
             'hardware_description': forms.Textarea(attrs={'cols':50, 'rows': 3}),
         }
         exclude = ('',)
+
+
+# Forms for plates may become more useful later
+class AssayLayoutForm(forms.ModelForm):
+
+    class Meta(object):
+        model = AssayLayout
+        exclude = tracking

@@ -15,45 +15,6 @@ import unicodedata
 from io import BytesIO
 import ujson as json
 
-# To be removed
-# class AssayLayoutFormatForm(forms.ModelForm):
-#     class Meta(object):
-#         model = AssayLayoutFormat
-#         exclude = ('',)
-#
-#     def clean(self):
-#         """Validate size of rows/columns and corresponding label counts."""
-#
-#         # clean the form data, before validation
-#         data = super(AssayLayoutFormatForm, self).clean()
-#
-#         if not (int(data['number_of_columns']) ==
-#                     len(set(data['column_labels'].split()))):
-#             raise forms.ValidationError('Number of columns and '
-#                                         'number of unique column '
-#                                         'labels do not match.')
-#
-#         # cannot tell if it is number or letter in single entry list
-#         if not ((int(data['number_of_rows'] ==
-#             len(set(data['row_labels'].split())))) or
-#                     ((len(set(data['row_labels']))) == 1)):
-#             raise forms.ValidationError('Number of rows and '
-#                                         'number of unique row '
-#                                         'labels do not match.')
-#         # need to return clean data if it validates
-#
-#         # if ((int(data['number_of_rows'])) > 1) and (len(set(data['row_labels'])) == 1):
-#         #     rows = int(data['number_of_rows'])
-#         #     row_list = []
-#         #     start = int(list(data['row_labels'])[0])
-#         #     for x in range(0, rows):
-#         #         row_list.append(start)
-#         #         start += 1
-#         #     data['row_labels'] = row_list
-#         #     print data['row_labels']
-#
-#         return data
-
 
 class AssayModelTypeAdmin(LockableAdmin):
     save_on_top = True
@@ -115,68 +76,6 @@ class AssayModelAdmin(LockableAdmin):
 
 
 admin.site.register(AssayModel, AssayModelAdmin)
-
-# To be removed
-# class AssayLayoutFormatAdmin(LockableAdmin):
-#     def device_image_display(self, obj):
-#         if obj.device.id and obj.device.device_image:
-#             return '<img src="%s">' % \
-#                    obj.device.device_image.url
-#         return ''
-#
-#     def device_cross_section_image_display(self, obj):
-#         if obj.device.id and obj.device.device_cross_section_image:
-#             return '<img src="%s">' % \
-#                    obj.device.device_cross_section_image.url
-#         return ''
-#
-#     device_image_display.allow_tags = True
-#     device_cross_section_image_display.allow_tags = True
-#     list_per_page = 300
-#     fieldsets = (
-#         (
-#             None, {
-#                 'fields': (
-#                     (
-#                         'layout_format_name', 'device',
-#                     ),
-#                     (
-#                         'number_of_rows', 'number_of_columns',
-#                     ),
-#                     (
-#                         'row_labels', 'column_labels',
-#                     ),
-#                     (
-#                         'device_image_display',
-#                         'device_cross_section_image_display',
-#                     )
-#                 )
-#             }
-#         ),
-#         (
-#             'Change Tracking', {
-#                 'fields': (
-#                     'locked',
-#                     'created_by',
-#                     'modified_by',
-#                     ('signed_off_by', 'signed_off_date'),
-#                 )
-#             }
-#         ),
-#     )
-#
-#     readonly_fields = (
-#         'device_image_display',
-#         'device_cross_section_image_display',
-#     )
-#
-#     save_as = True
-#     save_on_top = True
-#     form = AssayLayoutFormatForm
-#     list_display = ('layout_format_name', 'locked')
-#
-#
-# admin.site.register(AssayLayoutFormat, AssayLayoutFormatAdmin)
 
 
 class AssayWellTypeAdmin(LockableAdmin):
@@ -243,103 +142,110 @@ class AssayWellInline(admin.TabularInline):
     model = AssayWell
     extra = 1
 
-# To be removed
-# class AssayBaseLayoutAdmin(LockableAdmin):
-#     class Media(object):
-#         js = ('assays/customize_admin.js',)
-#         css = {'all': ('assays/customize_admin.css',)}
-#
-#     save_as = True
-#     save_on_top = True
-#     list_per_page = 300
-#
-#     def device_image_display(self, obj):
-#         if obj.layout_format.device.id \
-#                 and obj.layout_format.device.device_image:
-#             return '<img src="%s">' % \
-#                    obj.layout_format.device.device_image.url
-#         return ''
-#
-#     def device_cross_section_image_display(self, obj):
-#         if obj.layout_format.device.id \
-#                 and obj.layout_format.device.device_cross_section_image:
-#             return '<img src="%s">' % \
-#                    obj.layout_format.device.device_cross_section_image.url
-#         return ''
-#
-#     device_image_display.allow_tags = True
-#     device_cross_section_image_display.allow_tags = True
-#
-#     readonly_fields = (
-#         'device_image_display',
-#         'device_cross_section_image_display',
-#     )
-#
-#     fieldsets = (
-#         (
-#             None, {
-#                 'fields': (
-#                     (
-#                         'base_layout_name', 'layout_format',
-#                     ),
-#                     (
-#                         'device_image_display',
-#                         'device_cross_section_image_display',
-#                     ),
-#                 )
-#             }
-#         ),
-#         (
-#             'Change Tracking', {
-#                 'fields': (
-#                     'locked',
-#                     'created_by',
-#                     'modified_by',
-#                     ('signed_off_by', 'signed_off_date'),
-#                 )
-#             }
-#         ),
-#     )
-#
-#     def save_model(self, request, obj, form, change):
-#
-#         if change:
-#             obj.modified_by = request.user
-#             wells = {(well.row, well.column): well
-#                      for well in AssayWell.objects.filter(base_layout=obj)}
-#         else:
-#             obj.modified_by = obj.created_by = request.user
-#             wells = {}
-#
-#         obj.save()
-#
-#         layout = AssayLayoutFormat.objects.get(id=obj.layout_format.id)
-#         column_labels = layout.column_labels.split()
-#         row_labels = layout.row_labels.split()
-#         data = form.data
-#
-#         for row in row_labels:
-#             for col in column_labels:
-#                 rowcol = (row, col)
-#                 key = 'wt_' + row + '_' + col
-#                 if data.has_key(key):
-#                     if rowcol in wells:
-#                         well = wells[rowcol]
-#                         well.well_type = AssayWellType.objects.get(
-#                             id=data.get(key))
-#                         well.save()
-#                     else:
-#                         AssayWell(base_layout=obj,
-#                                   well_type=
-#                                   AssayWellType.objects.get(id=data.get(key)),
-#                                   row=row,
-#                                   column=col
-#                         ).save()
-#                 elif rowcol in wells:
-#                     wells[rowcol].delete()
-#
-#
-# admin.site.register(AssayBaseLayout, AssayBaseLayoutAdmin)
+
+# Saving an Assay Layout is somewhat complicated, so a function is useful here (though perhaps not in this file [spaghetti])
+# BE CAREFUL! FIELDS THAT ARE NOT IN THE FORM ARE AUTOMATICALLY SET TO NONE!
+def save_assay_layout(request, obj, form, change):
+    layout = obj
+
+    if change:
+        # Delete old compound data for this assay
+        AssayCompound.objects.filter(assay_layout=layout).delete()
+
+        # Delete old timepoint data for this assay
+        AssayTimepoint.objects.filter(assay_layout=layout).delete()
+
+        # Delete old types for this assay
+        AssayWell.objects.filter(assay_layout=layout).delete()
+
+        # Delete old labels for this assay
+        AssayWellLabel.objects.filter(assay_layout=layout).delete()
+
+        obj.modified_by = request.user
+
+    else:
+        obj.modified_by = obj.created_by = request.user
+
+    obj.save()
+
+    for key, val in form.data.iteritems():
+
+        # if not key.startswith('well_') and not '_time' in key:
+        #     continue
+
+        # ## BEGIN save timepoint data ###
+
+        if key.endswith('_time'):
+            # Cut off '_time'
+            content = key[:-5]
+            row, column = content.split('_')
+
+            # Add new timepoint info
+            AssayTimepoint(
+                assay_layout=obj,
+                timepoint=val,
+                row=row,
+                column=column
+            ).save()
+
+        ### END save timepoint data ###
+
+        ### BEGIN save compound information ###
+
+        # if not key.startswith('well_'):
+        #     continue
+
+        # Should refactor soon
+        elif key.startswith('well_'):
+            # Evaluate val as a JSON dict
+            content = json.loads(val)
+            well = content['well']
+            row, col = well.split('_')
+
+            if 'compound' in content:
+                # Add compound info
+                AssayCompound(
+                    assay_layout=obj,
+                    compound=Compound.objects.get(id=content['compound']),
+                    concentration=content['concentration'],
+                    concentration_unit=content['concentration_unit'],
+                    row=row,
+                    column=col
+                ).save()
+
+        ### END save compound information ###
+
+        # Labels
+        elif key.endswith('_label'):
+            # Cut off '_label'
+            content = key[:-6]
+            row, column = content.split('_')
+
+            # Add new label info
+            AssayWellLabel(
+                assay_layout=obj,
+                label=val,
+                row=row,
+                column=column
+            ).save()
+
+        # Types
+        elif key.endswith('_type'):
+            # Uncertain as to why empty values are past
+            # TODO EXPLORE EMPTY VALUES
+            if val:
+                # Cut fof '_type'
+                content = key[:-5]
+                row, column = content.split('_')
+
+                # Add new timepoint info
+                AssayWell(
+                    assay_layout=obj,
+                    well_type=AssayWellType.objects.get(id=val),
+                    row=row,
+                    column=column
+                ).save()
+
 
 # TODO REVISE SAVING
 class AssayLayoutAdmin(LockableAdmin):
@@ -394,102 +300,7 @@ class AssayLayoutAdmin(LockableAdmin):
     )
 
     def save_model(self, request, obj, form, change):
-
-        layout = obj
-
-        if change:
-            # Delete old compound data for this assay
-            AssayCompound.objects.filter(assay_layout=layout).delete()
-
-            # Delete old timepoint data for this assay
-            AssayTimepoint.objects.filter(assay_layout=layout).delete()
-
-            # Delete old types for this assay
-            AssayWell.objects.filter(assay_layout=layout).delete()
-
-            # Delete old labels for this assay
-            AssayWellLabel.objects.filter(assay_layout=layout).delete()
-
-            obj.modified_by = request.user
-        else:
-            obj.modified_by = obj.created_by = request.user
-
-        obj.save()
-
-        for key, val in form.data.iteritems():
-
-            # if not key.startswith('well_') and not '_time' in key:
-            #     continue
-
-            # ## BEGIN save timepoint data ###
-
-            if key.endswith('_time'):
-                # Cut off '_time'
-                content = key[:-5]
-                row, column = content.split('_')
-
-                # Add new timepoint info
-                AssayTimepoint(
-                    assay_layout=obj,
-                    timepoint=val,
-                    row=row,
-                    column=column
-                ).save()
-
-            ### END save timepoint data ###
-
-            ### BEGIN save compound information ###
-
-            # if not key.startswith('well_'):
-            #     continue
-
-            # Should refactor soon
-            elif key.startswith('well_'):
-                # Evaluate val as a JSON dict
-                content = json.loads(val)
-                well = content['well']
-                row, col = well.split('_')
-
-                if 'compound' in content:
-                    # Add compound info
-                    AssayCompound(
-                        assay_layout=obj,
-                        compound=Compound.objects.get(id=content['compound']),
-                        concentration=content['concentration'],
-                        concentration_unit=content['concentration_unit'],
-                        row=row,
-                        column=col
-                    ).save()
-
-            ### END save compound information ###
-
-            # Labels
-            elif key.endswith('_label'):
-                # Cut off '_label'
-                content = key[:-6]
-                row, column = content.split('_')
-
-                # Add new label info
-                AssayWellLabel(
-                    assay_layout=obj,
-                    label=val,
-                    row=row,
-                    column=column
-                ).save()
-
-            # Types
-            elif key.endswith('_type'):
-                # Cut fof '_type'
-                content = key[:-5]
-                row, column = content.split('_')
-
-                # Add new timepoint info
-                AssayWell(
-                    assay_layout=obj,
-                    well_type=AssayWellType.objects.get(id=val),
-                    row=row,
-                    column=column
-                ).save()
+        save_assay_layout(request, obj, form, change)
 
 admin.site.register(AssayLayout, AssayLayoutAdmin)
 

@@ -29,6 +29,11 @@ urlpatterns = patterns('',
     url(r'^assays/studyconfiguration/add/$', StudyConfigurationAdd.as_view(), name='studyconfiguration_add'),
     url(r'^assays/studyconfiguration/(?P<pk>[0-9]+)/$', StudyConfigurationUpdate.as_view(), name='studyconfiguration_update'),
 
+    url(r'^assays/assaylayout/$', AssayLayoutList.as_view(), name='assaylayout_list'),
+    url(r'^assays/assaylayout/add/$', AssayLayoutAdd.as_view(), name='assaylayout_add'),
+    url(r'^assays/assaylayout/(?P<pk>[0-9]+)/$', AssayLayoutUpdate.as_view(), name='assaylayout_update'),
+    url(r'^assays/assaylayout/(?P<pk>[0-9]+)/delete/$', AssayLayoutDelete.as_view(), name='assaylayout_delete'),
+
     url(r'^assays/organchipstudy/$', AssayRunList.as_view(), name='study_list'),
     url(r'^assays/organchipstudy/add/$', AssayRunAdd.as_view(), name='study_add'),
     url(r'^assays/organchipstudy/(?P<pk>[0-9]+)/$', AssayRunDetail.as_view(), name='study_detail'),

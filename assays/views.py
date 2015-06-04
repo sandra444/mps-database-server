@@ -448,7 +448,6 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         self.object = self.get_object()
 
         form = self.form_class(self.request.POST, instance=self.object)
-        created_by = form.instance.created_by
 
         formset = AssayChipCellsFormset(self.request.POST, instance=form.instance)
 
@@ -475,8 +474,6 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Set restricted
             self.object.restricted = study.restricted
             # TODO refactor original created by
-            # Explicitly set created_by
-            self.object.created_by = created_by
             self.object.modified_by = self.request.user
             # Save overall setup result
             self.object.save()
@@ -652,7 +649,6 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
         self.object = self.get_object()
 
         form = self.form_class(self.request.POST, self.request.FILES, instance=self.object)
-        created_by = form.instance.created_by
 
         formset = ACRAFormSet(self.request.POST, self.request.FILES, instance=form.instance)
 
@@ -679,8 +675,6 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Set restricted
             self.object.restricted = study.restricted
             # TODO refactor original created by
-            # Explicitly set created_by
-            self.object.created_by = created_by
             self.object.modified_by = self.request.user
             # Save overall readout result
             self.object.save()
@@ -825,7 +819,6 @@ class AssayTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
         self.object = self.get_object()
 
         form = self.form_class(self.request.POST, instance=self.object)
-        created_by = form.instance.created_by
 
         formset = TestResultFormSet(self.request.POST, instance=form.instance)
 
@@ -845,8 +838,6 @@ class AssayTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Set restricted
             self.object.restricted = study.restricted
             # TODO refactor original created by
-            # Explicitly set created_by
-            self.object.created_by = created_by
             self.object.modified_by = self.request.user
             # Save overall test result
             self.object.save()
@@ -933,7 +924,6 @@ class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
         self.object = self.get_object()
 
         form = self.form_class(self.request.POST, instance=self.object)
-        created_by = form.instance.created_by
 
         formset = StudyModelFormSet(self.request.POST, instance=form.instance)
 
@@ -943,8 +933,6 @@ class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
         if form.is_valid() and formset.is_valid():
             self.object = form.save()
             # TODO refactor original created by
-            # Explicitly set created_by
-            self.object.created_by = created_by
             self.object.modified_by = self.request.user
             # Save overall test result
             self.object.save()
@@ -956,3 +944,106 @@ class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
             self.get_context_data(form=form,
                                 formset = formset,
                                 update = True))
+
+
+# Class-based views for LAYOUTS
+class AssayLayoutList(LoginRequiredMixin, ListView):
+    model = AssayLayout
+
+    def get_queryset(self):
+        return AssayLayout.objects.filter(restricted=False).prefetch_related('created_by', 'group') | AssayLayout.objects.filter(
+            group__in=self.request.user.groups.all()).prefetch_related('created_by', 'group')
+
+
+# TODO ADD ADDITIONAL CONTEXT NAMELY LIMITING THE DEVICES TO THOSE WITH DIMENSIONS AND LABELS
+class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
+    model = AssayLayout
+    form = AssayLayoutForm
+    template_name = 'assays/assaylayout_add.html'
+
+    def get_context_data(self, **kwargs):
+        # Get group selection possibilities
+        groups = self.request.user.groups.filter(
+            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
+        devices = Microdevice.objects.filter(row_labels__isnull=False, number_of_columns__isnull=False)
+        context = super(AssayLayoutAdd, self).get_context_data(**kwargs)
+        context['groups'] = groups
+        context['devices'] = devices
+        return context
+
+    # Test form validity
+    def form_valid(self, form):
+        if form.is_valid():
+            # Confirm form and get object
+            self.object = form.save()
+            # Save assay layout
+            save_assay_layout(self.request, self.object, form, False)
+            return redirect(
+                self.object.get_absolute_url())
+
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+
+# TODO Assay Layout Detail does not currently exist (deemed lower priority)
+# class AssayLayoutDetail(DetailRedirectMixin, DetailView):
+#     model = AssayLayout
+
+
+# TODO ADD ADDITIONAL CONTEXT
+class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
+    model = AssayLayout
+    form_class = AssayLayoutForm
+    template_name = 'assays/assaylayout_add.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+
+        # Get group selection possibilities
+        groups = self.request.user.groups.filter(
+            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
+        # Get devices
+        devices = Microdevice.objects.filter(row_labels__isnull=False, number_of_columns__isnull=False)
+
+
+        return self.render_to_response(
+            self.get_context_data(form=form,
+                                  groups=groups,
+                                  devices=devices,
+                                  update=True))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        form = self.form_class(self.request.POST, instance=self.object)
+
+        # TODO refactor redundant code here; testing for now
+
+        # Get group selection possibilities
+        groups = self.request.user.groups.filter(
+            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
+        # Get devices
+        devices = Microdevice.objects.filter(row_labels__isnull=False, number_of_columns__isnull=False)
+
+        if form.is_valid():
+            # Confirm form and get object
+            self.object = form.save()
+            # Save assay layout
+            save_assay_layout(self.request, self.object, form, True)
+            return redirect(self.object.get_absolute_url())
+
+        else:
+            return self.render_to_response(
+            self.get_context_data(form=form,
+                                  groups=groups,
+                                  devices=devices,
+                                  update=True))
+
+
+# TODO ADD CONTEXT
+class AssayLayoutDelete(CreatorRequiredMixin, DeleteView):
+    model = AssayLayout
+    template_name = 'assays/assaylayout_delete.html'
+

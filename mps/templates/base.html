@@ -178,19 +178,28 @@
         {% endblock %}
     </div>
 
+    {# For most elements #}
     <div id="content" class="container">
 
-	{% if messages %}
-	<ul class="messages">
-	    {% for message in messages %}
-	    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-	    {% endfor %}
-	</ul>
-	{% endif %}
+    {# Still have yet to make use of messages; should do so soon #}
+{#	{% if messages %}#}
+{#	<ul class="messages">#}
+{#	    {% for message in messages %}#}
+{#	    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>#}
+{#	    {% endfor %}#}
+{#	</ul>#}
+{#	{% endif %}#}
 
-    {% block content %}This is the content area{% endblock %}
+    {% block content %}{% endblock %}
 
     </div>
+
+    {# For elements which should not be restricted by width #}
+    <div id="fluid-content" class="fluid-container">
+
+    {% block fluid-content %}{% endblock %}
+    </div>
+
 	</div>
 
     <div class="container">

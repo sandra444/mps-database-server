@@ -156,6 +156,9 @@ class AssayLayout(FlaggableModel):
     def __unicode__(self):
         return self.layout_name
 
+    def get_absolute_url(self):
+        return "/assays/assaylayout/"
+
 
 class AssayWellType(LockableModel):
     """

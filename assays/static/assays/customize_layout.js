@@ -6,6 +6,10 @@ $(document).ready(function () {
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
     var device = $('#id_device');
 
+    // TODO REMOVE SOON: SLOPPY BUT EXPEDIENT WAY TO ADD CLIENT VALIDATION
+    $('#id_layout_name').attr('required', true);
+    device.attr('required', true);
+
     // Get layout
     function get_device_layout() {
         var device_id = device.val();
@@ -86,7 +90,6 @@ $(document).ready(function () {
                         .addClass('layout-list')));
             });
             table.append(row);
-
         });
 
         // make selectable
@@ -346,7 +349,7 @@ $(document).ready(function () {
 
             // Labels
 
-            controls.append('<div class="form-row field-label"> ' +
+            controls.append('<div class="form-row"> ' +
                 '<label for="label">Label:</label><input id="id_label" name="label" size="150">' +
                 '</div>');
 
@@ -623,8 +626,11 @@ $(document).ready(function () {
     });
 
     // Add options if admin
-    if ($('fieldset')[0]) {
+    if ($('fieldset')[0].innerHTML) {
         add_options();
+    }
+    else {
+        get_well_type_selector();
     }
 
     // If a device is initially chosen
@@ -634,8 +640,13 @@ $(document).ready(function () {
 
         // get's the id of existing layout object from the delete link
         var delete_link = $('.deletelink');
+        var layout_id = undefined;
         if (delete_link.length > 0) {
-            var layout_id = delete_link.first().attr('href').split('/')[4];
+            layout_id = delete_link.first().attr('href').split('/')[4];
+            get_layout_data(layout_id);
+        }
+        else{
+            layout_id = Math.floor(window.location.href.split('/')[5]);
             get_layout_data(layout_id);
         }
     }
