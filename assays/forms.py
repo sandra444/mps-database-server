@@ -1,5 +1,6 @@
 from django import forms
 from assays.models import AssayChipReadout, AssayChipSetup, AssayTestResult, AssayChipCells, AssayResult, StudyConfiguration, AssayLayout
+from compounds.models import Compound
 
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
@@ -131,6 +132,8 @@ class StudyConfigurationForm(forms.ModelForm):
 
 # Forms for plates may become more useful later
 class AssayLayoutForm(forms.ModelForm):
+
+    compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'))
 
     class Meta(object):
         model = AssayLayout

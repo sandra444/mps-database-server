@@ -376,7 +376,8 @@ $(document).ready(function () {
             var text = well_type.text();
 
             if (text === '---------') {
-                $(".ui-selected").css('background-color', 'white');
+                alert('Select a well type first.');
+                return;
             }
 
             else {

@@ -173,7 +173,7 @@
                 <div class="field-box">
                     <label for="id_compound">Compound:</label>
                     {# TODO CHANGE TO DROPDOWN? OF COMPOUNDS #}
-                    <input class="vForeignKeyRawIdAdminField" id="id_compound" name="compound" type="text" value="">
+                    {{ form.compound }}
                 </div>
             <li>
                 <div class="field-box">
@@ -205,7 +205,7 @@
 
     <div class="row">
         <label for="label">Label:</label>
-        <input id="id_label" name="label" size="150">
+        <input id="id_label" name="label" size="50" maxlength="50">
     </div>
 
     </div>
