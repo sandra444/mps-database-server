@@ -59,9 +59,16 @@
 
         <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
 
-        <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Clone</button>
+{#      Submit and Clone revised such that it is only in ADD; UPDATE will now give a link instead of submitting#}
+{#      <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Clone</button>#}
+
+        {% if not update %}
+            <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Clone</button>
+        {% endif %}
 
         {% if update %}
+            {# Clone and Submit replaced by a simple hyperlink to the cloned add page #}
+            <a role="button" class="btn btn-info" href="/assays/{{ object.assay_run_id.id }}/assaychipsetup/add?clone={{ object.id }}">Clone</a>
             <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assaychipsetup/{{ object.id }}/delete/">Delete</a>
         {% endif %}
 
@@ -334,7 +341,8 @@
                     <th>Cell Type</th>
                     <th>Cell Source</th>
                     <th>Supplier</th>
-                    <th>Barcode/Lot #</th>
+                    <th>Barcode/Lot#</th>
+                    <th>Patient</th>
                 </tr>
             </thead>
 
@@ -345,7 +353,8 @@
                     <th>Cell Type</th>
                     <th>Cell Source</th>
                     <th>Supplier</th>
-                    <th>Barcode/Lot #</th>
+                    <th>Barcode/Lot#</th>
+                    <th>Patient</th>
                 </tr>
             </tfoot>
 
@@ -358,6 +367,12 @@
                     <td>{{ cellsample.cell_source }}</td>
                     <td>{{ cellsample.supplier }}</td>
                     <td>{{ cellsample.barcode }}</td>
+                    <td>
+                        {% if cellsample.patient_age or cellsample.patient_gender != 'N' or cellsample.patient_condition %}
+                            {{ cellsample.patient_age|default:"Unknown" }} year old {{ cellsample.patient_gender }}
+                            {{ cellsample.patient_condition }}
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -378,8 +393,8 @@
     function search(elem) {
         id = $(elem).attr("id").replace(/\D/g,'');
         $("#dialog").dialog({
-          width: 635,
-          height: 635
+          width: 775,
+          height: 775
         });
     }
 

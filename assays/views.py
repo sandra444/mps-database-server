@@ -354,11 +354,14 @@ class AssayChipSetupAdd(CreateView):
             clone_cellsamples = AssayChipCells.objects.filter(assay_chip=pk).values()
             context['form'] = AssayChipSetupForm(initial=clone_setup)
 
+            # This is to prevent there being absolutely no inlines
+            extra = len(clone_cellsamples) + 1
+
             # Stupid resolution to an equally absurd problem (can you tell I'm peeved?)
             # Why is there another formset factory here? It's because Django treats initial inlines as "extras"
             # That is to say, formset factories are apparently only able to display as many initial inlines as "extra"
             AssayChipCellsFormset2 = inlineformset_factory(AssayChipSetup, AssayChipCells, formset=AssayChipCellsInlineFormset,
-                                              extra=len(clone_cellsamples),
+                                              extra=extra,
                                               widgets={
                                               'cellsample_density': forms.NumberInput(attrs={'style': 'width:75px;', }),
                                               'cell_passage': forms.TextInput(attrs={'size': 5}), })
@@ -479,10 +482,13 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             self.object.save()
             formset.instance = self.object
             formset.save()
-            if data['another']:
-                return redirect(self.object.get_absolute_url() + 'assaychipsetup/add/' + '?clone=' + str(self.object.id))
-            else:
-                return redirect(self.object.get_absolute_url())
+            # THE TRACKING OF ANOTHER WAS TO CHECK IF SUBMIT AND CLONE WAS USED
+            # NOW THE UPDATE PAGE WILL DISPLAY A HYPERLINK TO THE CLONE PAGE INSTEAD OF ACTUALLY PERFORMING A SUBMISSION FIRST
+            # if data['another']:
+            #     return redirect(self.object.get_absolute_url() + 'assaychipsetup/add/' + '?clone=' + str(self.object.id))
+            # else:
+            #     return redirect(self.object.get_absolute_url())
+            return redirect(self.object.get_absolute_url())
                 #return redirect(
                 #    self.object.get_absolute_url() + url_add)
         else:

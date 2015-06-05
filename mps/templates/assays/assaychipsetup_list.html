@@ -46,7 +46,7 @@
                     <td>{{ setup.device }}</td>
 {#                    <td>{{ setup.chip_test_type }}</td>#}
                     {% if setup.compound != None %}
-                        <td>{{ setup.compound }}</td>
+                        <td>{{ setup.compound }} ({{ setup.concentration }} {{ setup.unit }})</td>
                     {% else %}
                         <td>-control-</td>
                     {% endif %}
