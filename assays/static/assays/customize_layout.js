@@ -433,33 +433,39 @@ $(document).ready(function () {
 
             else {
 
-                var compound_name = '';
+                var compound_name = $('#id_compound :selected').text();
                 var current_object = this;
 
-                $.ajax({
-                    url: "/compounds_ajax",
-                    type: "POST",
-                    dataType: "json",
-                    data: {
-                        // Function to call within the view is defined by `call:`
-                        call: 'fetch_compound_name',
+                if (compound_name) {
+                    add_compound_name(current_object);
+                }
 
-                        // First token is the var name within views.py
-                        // Second token is the var name in this JS file
-                        compound_id: compound_id,
+                else {
+                    $.ajax({
+                        url: "/compounds_ajax",
+                        type: "POST",
+                        dataType: "json",
+                        data: {
+                            // Function to call within the view is defined by `call:`
+                            call: 'fetch_compound_name',
 
-                        // Always pass the CSRF middleware token with every AJAX call
-                        csrfmiddlewaretoken: middleware_token
-                    },
-                    success: function (json) {
-                        compound_name = json.name;
-                        add_compound_name(current_object);
+                            // First token is the var name within views.py
+                            // Second token is the var name in this JS file
+                            compound_id: compound_id,
 
-                    },
-                    error: function (xhr, errmsg, err) {
-                        console.log(xhr.status + ": " + xhr.responseText);
-                    }
-                });
+                            // Always pass the CSRF middleware token with every AJAX call
+                            csrfmiddlewaretoken: middleware_token
+                        },
+                        success: function (json) {
+                            compound_name = json.name;
+                            add_compound_name(current_object);
+
+                        },
+                        error: function (xhr, errmsg, err) {
+                            console.log(xhr.status + ": " + xhr.responseText);
+                        }
+                    });
+                }
 
                 // Encapsulated functions may seem somewhat strange,
                 // but using functional calls is an expedient alternative to promises (apparently)
