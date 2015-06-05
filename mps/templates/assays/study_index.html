@@ -21,7 +21,7 @@
                     <th>Chip Setup ID / Barcode</th>
                     <th>Date</th>
                     <th>Organ Model Name</th>
-                    <th>Chip Test Type</th>
+{#                    <th>Chip Test Type</th>#}
                     <th>Compound</th>
                     <th>Creator</th>
                     <th>Flagged</th>
@@ -44,8 +44,12 @@
                     <td><a href="/assays/assaychipsetup/{{ setup.id }}/update">{{ setup.assay_chip_id }}</a></td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.device }}</td>
-                    <td>{{ setup.chip_test_type }}</td>
-                    <td>{{ setup.compound }}</td>
+{#                    <td>{{ setup.chip_test_type }}</td>#}
+                    {% if setup.compound != None %}
+                        <td>{{ setup.compound }} ({{ setup.concentration }} {{ setup.unit }})</td>
+                    {% else %}
+                        <td>-control-</td>
+                    {% endif %}
                     <td>{{ setup.created_by }}</td>
                     <td>
                         {% if setup.flagged %}
