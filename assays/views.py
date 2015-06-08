@@ -1116,8 +1116,8 @@ class AssayDeviceSetupAdd(StudyGroupRequiredMixin, CreateView):
 
 
 # TODO Assay Layout Detail does not currently exist (deemed lower priority)
-# class AssayDeviceSetupDetail(DetailRedirectMixin, DetailView):
-#     model = AssayDeviceSetup
+class AssayDeviceSetupDetail(DetailRedirectMixin, DetailView):
+    model = AssayDeviceSetup
 
 
 # TODO ADD ADDITIONAL CONTEXT
@@ -1192,3 +1192,178 @@ class AssayDeviceSetupDelete(CreatorRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return '/assays/' + str(self.object.assay_run_id.id)
+
+
+# Class based views for readouts
+class AssayDeviceReadoutList(LoginRequiredMixin, ListView):
+    model = AssayDeviceReadout
+
+    def get_queryset(self):
+        readouts = AssayDeviceReadout.objects.filter(setup__assay_run_id__restricted=False).prefetch_related(
+            'setup', 'created_by', 'group') | AssayDeviceReadout.objects.filter(
+            setup__assay_run_id__group__in=self.request.user.groups.all()).prefetch_related('setup',
+                                                                                            'created_by', 'group')
+
+        related_assays = AssayPlateReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id',
+                                                                                                         'assay_id')
+        related_assays_map = {}
+
+        for assay in related_assays:
+            # start appending to a list keyed by the readout ID for all related images
+            related_assays_map.setdefault(assay.readout_id.id, []).append(assay)
+
+        for readout in readouts:
+            # set an attribute on the readout that is the list created above
+            readout.related_assays = related_assays_map.get(readout.id)
+
+        return readouts
+
+
+APRAFormSet = inlineformset_factory(AssayDeviceReadout, AssayPlateReadoutAssay, formset=AssayDeviceReadoutInlineFormset,
+                                    extra=1)
+
+
+class AssayDeviceReadoutAdd(StudyGroupRequiredMixin, CreateView):
+    template_name = 'assays/assaydevicereadout_add.html'
+    form_class = AssayDeviceReadoutForm
+
+    def get_context_data(self, **kwargs):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        exclude_list = AssayDeviceReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
+        setups = AssayDeviceSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'assay_layout',
+            'created_by').exclude(id__in=list(set(exclude_list)))
+
+        context = super(AssayDeviceReadoutAdd, self).get_context_data(**kwargs)
+        if self.request.POST:
+            context['formset'] = APRAFormSet(self.request.POST, self.request.FILES)
+        else:
+            context['formset'] = APRAFormSet()
+
+        # Setups is the same regardless of if POST, GET, etc.
+        context['setups'] = setups
+
+        return context
+
+    def form_valid(self, form):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        form.instance.group = study.group
+        context = self.get_context_data()
+        formset = context['formset']
+        # This is for cleaning
+        formset.instance = form.instance
+        # get user via self.request.user
+        if form.is_valid() and formset.is_valid():
+            # Cleaned data may be used later
+            data = form.cleaned_data
+
+            self.object = form.save()
+            # Set restricted
+            self.object.restricted = study.restricted
+            self.object.modified_by = self.object.created_by = self.request.user
+            # Save Chip Readout
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            if formset.files.get('file',''):
+                file = formset.files.get('file','')
+                parseReadoutCSV(self.object, file)
+            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+    # Redirect when there are no available setups
+    def render_to_response(self, context):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+        if not context.get('setups',''):
+            return redirect('/assays/'+str(study.id))
+
+        return super(AssayDeviceReadoutAdd, self).render_to_response(context)
+
+
+# TODO ADD TEMPLATE
+class AssayDeviceReadoutDetail(DetailRedirectMixin, DetailView):
+    model = AssayDeviceReadout
+
+class AssayDeviceReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
+    model = AssayDeviceReadout
+    template_name = 'assays/assaydevicereadout_add.html'
+    form_class = AssayDeviceReadoutForm
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+
+        # Get study
+        study = self.object.setup.assay_run_id
+
+        exclude_list = AssayDeviceReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
+        setups = AssayDeviceSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'assay_layout',
+            'created_by').exclude(id__in=list(set(exclude_list))) | AssayDeviceSetup.objects.filter(pk=self.object.setup.id)
+
+        # Render form
+        formset = APRAFormSet(instance=self.object)
+        return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                setups = setups,
+                                update=True))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        form = self.form_class(self.request.POST, self.request.FILES, instance=self.object)
+
+        formset = APRAFormSet(self.request.POST, self.request.FILES, instance=form.instance)
+
+        # TODO refactor redundant code here; testing for now
+
+        study = self.object.setup.assay_run_id
+
+        form.instance.group = study.group
+
+        exclude_list = AssayDeviceReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
+        setups = AssayDeviceSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'assay_layout',
+            'created_by').exclude(id__in=list(set(exclude_list))) | AssayDeviceSetup.objects.filter(pk=self.object.setup.id)
+
+        if form.is_valid() and formset.is_valid():
+            # To be used later (maybe)
+            data = form.cleaned_data
+
+            self.object = form.save()
+            # TODO refactor original created by
+            self.object.modified_by = self.request.user
+            # Save overall readout result
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            # Save file if it exists
+            if formset.files.get('file',''):
+                file = formset.files.get('file','')
+                parseReadoutCSV(self.object, file)
+            # Clear data if clear is checked
+            if self.request.POST.get('file-clear',''):
+                removeExistingReadout(self.object)
+            # Otherwise do nothing (the file remained the same)
+            return redirect(self.object.get_absolute_url())
+        else:
+            return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                setups = setups,
+                                update=True))
+
+
+# TODO ADD CONTEXT
+class AssayDeviceReadoutDelete(CreatorRequiredMixin, DeleteView):
+    model = AssayDeviceReadout
+    template_name = 'assays/assaydevicereadout_delete.html'
+
+    def get_success_url(self):
+        return '/assays/' + str(self.object.setup.assay_run_id.id)
+
+

@@ -156,3 +156,15 @@ class AssayPlateCellsInlineFormset(forms.models.BaseInlineFormSet):
     class Meta(object):
         model = AssayPlateCells
         exclude = ('',)
+
+
+class AssayDeviceReadoutForm(forms.ModelForm):
+
+    class Meta(object):
+        model = AssayDeviceReadout
+        widgets = {
+            'notebook_page': forms.NumberInput(attrs={'style':'width:50px;',}),
+            'treatment_time_length': forms.NumberInput(attrs={'style':'width:174px;',}),
+            'notes': forms.Textarea(attrs={'cols':50, 'rows': 3}),
+        }
+        exclude = group + tracking + restricted

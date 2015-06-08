@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div style="padding-bottom: 50px">
+        <h2 align="center">Readouts</h2>
+
+        <table hidden id="readouts" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Plate Readout ID</th>
+                    <th>Plate Setup</th>
+                    <th>Assays</th>
+                    <th>Readout Date</th>
+                    <th>Scientist</th>
+                    <th>Creator</th>
+                    <th>Group</th>
+                    <th>Flagged</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Plate Readout ID</th>
+                    <th>Plate Setup</th>
+                    <th>Assays</th>
+                    <th>Readout Date</th>
+                    <th>Scientist</th>
+                    <th>Creator</th>
+                    <th>Group</th>
+                    <th>Flagged</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for readout in object_list %}
+                <tr class="readout" id={{ readout.id }} name={{ readout.id }}>
+                    <td><a href="{{ readout.id }}">{{ readout.id }}</a></td>
+                    <td><a href="/assays/assaydevicesetup/{{ readout.setup.id }}">{{ readout.setup }}</a></td>
+                    <td>
+                        {% for assay in readout.related_assays %}
+                            {{ assay }}
+                        {% endfor %}
+                    </td>
+                    {% if readout.readout_start_time != None %}
+                        <td>{{ readout.readout_start_time|date:"M d, Y" }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    <td>{{ readout.scientist }}</td>
+                    <td>{{ readout.created_by }}</td>
+                    <td>{{ readout.group }}</td>
+                    <td>
+                        {% if readout.flagged %}
+                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#readouts').DataTable( {
+                dom: 'T<"clear">lfrtip',
+                "iDisplayLength": 50,
+                // Initially sort on setup not arbitrary ID
+                "order": [[ 1, "asc" ]]
+            });
+        });
+    </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}
+

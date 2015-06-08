@@ -415,6 +415,9 @@ class AssayDeviceReadout(FlaggableModel):
     def __unicode__(self):
         return u'{0}'.format(self.assay_device_id)
 
+    def get_absolute_url(self):
+        return "/assays/{}/".format(self.setup.assay_run_id.id)
+
 
 SEVERITY_SCORE = (
     ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),

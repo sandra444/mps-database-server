@@ -217,9 +217,14 @@ $(document).ready(function () {
         // If readout already exists
         else {
             // gets the id of existing readout object from the delete link
+            var readout_id = undefined;
             var delete_link = $('.deletelink');
             if (delete_link.length > 0) {
-                var readout_id = delete_link.first().attr('href').split('/')[4];
+                readout_id = delete_link.first().attr('href').split('/')[4];
+                get_existing_readout(readout_id);
+            }
+            else {
+                readout_id = Math.floor(window.location.href.split('/')[5]);
                 get_existing_readout(readout_id);
             }
         }

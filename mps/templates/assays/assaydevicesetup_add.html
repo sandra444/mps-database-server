@@ -2,11 +2,11 @@
 {% load static %}
 
 {% block load %}
+    <link href="{% static "assays/customize_admin.css" %}" rel="stylesheet" type="text/css">
     <script src="{% static "js/inline_add.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
     <script src="{% static "assays/customize_plate_setup.js" %}"></script>
-    <link href="{% static "assays/customize_admin.css" %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block fluid-content %}
@@ -157,6 +157,15 @@
         </div>
     </div>
 
+    </div>
+
+    {# CONTRIVED: REFACTOR SOON #}
+    <div class="col-xs-12">
+        <div class="inline-group"></div>
+    </div>
+
+    <div class="container">
+
     {{ formset.management_form }}
     <legend>Model Cells</legend>
 
@@ -218,12 +227,9 @@
             {% endfor %}
         </tbody>
     </table>
-</form>
-</div>
 
-{# CONTRIVED: REFACTOR SOON #}
-<div class="col-xs-12">
-    <div class="inline-group"></div>
+    </div>
+</form>
 </div>
 
 <div hidden id="dialog">

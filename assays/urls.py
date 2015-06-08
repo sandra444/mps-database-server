@@ -18,6 +18,7 @@ urlpatterns = patterns('',
     url(r'^assays/assaytestresult/(?P<pk>[0-9]+)/update/$', AssayTestResultUpdate.as_view(), name='result_update'),
 
     url(r'^assays/assaydevicesetup/(?P<pk>[0-9]+)/update/$', AssayDeviceSetupUpdate.as_view(), name='plate_setup_update'),
+    url(r'^assays/assaydevicereadout/(?P<pk>[0-9]+)/update/$', AssayDeviceReadoutUpdate.as_view(), name='plate_readout_update'),
 
     # # Add pages for respective models
     url(r'^assays/(?P<study_id>[0-9]+)/assaychipsetup/add/$', AssayChipSetupAdd.as_view(), name='setup_add'),
@@ -25,6 +26,7 @@ urlpatterns = patterns('',
     url(r'^assays/(?P<study_id>[0-9]+)/assaytestresult/add/$', AssayTestResultAdd.as_view(), name='result_add'),
 
     url(r'^assays/(?P<study_id>[0-9]+)/assaydevicesetup/add/$', AssayDeviceSetupAdd.as_view(), name='plate_setup_add'),
+    url(r'^assays/(?P<study_id>[0-9]+)/assaydevicereadout/add/$', AssayDeviceReadoutAdd.as_view(), name='plate_readout_add'),
 
     # # Delete pages for respective models
     url(r'^assays/assaychipsetup/(?P<pk>[0-9]+)/delete/$', AssayChipSetupDelete.as_view(), name='setup_delete'),
@@ -32,6 +34,7 @@ urlpatterns = patterns('',
     url(r'^assays/assaytestresult/(?P<pk>[0-9]+)/delete/$', AssayTestResultDelete.as_view(), name='result_delete'),
 
     url(r'^assays/assaydevicesetup/(?P<pk>[0-9]+)/delete/$', AssayDeviceSetupDelete.as_view(), name='plate_setup_delete'),
+    url(r'^assays/assaydevicereadout/(?P<pk>[0-9]+)/delete/$', AssayDeviceReadoutDelete.as_view(), name='plate_readout_delete'),
 
     url(r'^assays/studyconfiguration/$', StudyConfigurationList.as_view(), name='studyconfiguration_list'),
     url(r'^assays/studyconfiguration/add/$', StudyConfigurationAdd.as_view(), name='studyconfiguration_add'),
@@ -59,4 +62,8 @@ urlpatterns = patterns('',
     url(r'^assays/assaytestresult/(?P<pk>[0-9]+)/$', AssayTestResultDetail.as_view(), name='result_detail'),
 
     url(r'^assays/assaydevicesetup/$', AssayDeviceSetupList.as_view(), name='plate_setup_list'),
+    url(r'^assays/assaydevicesetup/(?P<pk>[0-9]+)/$', AssayDeviceSetupDetail.as_view(), name='plate_setup_detail'),
+
+    url(r'^assays/assaydevicereadout/$', AssayDeviceReadoutList.as_view(), name='plate_readout_list'),
+    url(r'^assays/assaydevicereadout/(?P<pk>[0-9]+)/$', AssayDeviceReadoutDetail.as_view(), name='plate_readout_detail'),
 )
