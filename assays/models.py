@@ -321,6 +321,10 @@ class AssayPlateReadoutAssay(models.Model):
     #                         default='F')
     readout_unit = models.ForeignKey('assays.ReadoutUnit')
 
+    # For the moment, features will be just strings (this avoids potentially complex management)
+    feature = models.CharField(max_length=150)
+
+
     def __unicode__(self):
         return u'{}'.format(self.assay_id)
 

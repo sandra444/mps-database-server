@@ -160,6 +160,8 @@ class AssayPlateCellsInlineFormset(forms.models.BaseInlineFormSet):
 
 class AssayDeviceReadoutForm(forms.ModelForm):
 
+    upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
+
     class Meta(object):
         model = AssayDeviceReadout
         widgets = {

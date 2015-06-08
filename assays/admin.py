@@ -643,9 +643,21 @@ class AssayPlateReadoutInline(admin.TabularInline):
         css = {"all": ("css/hide_admin_original.css",)}
 
 
+# Plate Readout validation occurs in the inline formset
+# This form is just to jam in upload_type into the admin
+class AssayDeviceReadoutForm(forms.ModelForm):
+
+    upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
+
+    class Meta(object):
+        model = AssayDeviceReadout
+        exclude = ('',)
+
+
 class AssayDeviceReadoutAdmin(LockableAdmin):
     # Endpoint readouts from MICROPLATES
     resource_class = AssayDeviceReadoutResource
+    form = AssayDeviceReadoutForm
 
     class Media(object):
         js = ('js/inline_fix.js', 'assays/customize_plate_readout.js',)
@@ -681,7 +693,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
                         'timeunit', 'treatment_time_length', 'readout_start_time',
                     ),
                     (
-                        'file',
+                        'file', 'upload_type'
                     ),
                 )
             }
