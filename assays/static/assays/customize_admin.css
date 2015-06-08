@@ -10,11 +10,13 @@
     border: 1px solid black;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 10px;
 }
 
 .layout-table th {
     border: 1px solid black;
-    text-align: center
+    text-align: center;
+    font-size: 12px;
 }
 
 ul.layout-list {

@@ -1,10 +1,13 @@
 from django import forms
-from assays.models import AssayChipReadout, AssayChipSetup, AssayTestResult, AssayChipCells, AssayResult, StudyConfiguration, AssayLayout
+from assays.models import *
 from compounds.models import Compound
 
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
-
+# Excluding restricted is likewise useful
+restricted = ('restricted',)
+# Group
+group = ('group',)
 
 class AssayResultForm(forms.ModelForm):
     """Size the text input boxes"""
@@ -15,7 +18,7 @@ class AssayResultForm(forms.ModelForm):
             'test_time': forms.TextInput(attrs={'size': 3}),
             'value': forms.TextInput(attrs={'size': 10}),
         }
-        exclude = ('group',) + tracking
+        exclude = group + tracking + restricted
 
     # Set chip setup to unique instead of throwing error in validation
     # def clean(self):
@@ -38,7 +41,7 @@ class AssayChipReadoutForm(forms.ModelForm):
             'treatment_time_length': forms.NumberInput(attrs={'style':'width:174px;',}),
             'notes': forms.Textarea(attrs={'cols':50, 'rows': 3}),
         }
-        exclude = ('group',) + tracking
+        exclude = group + tracking + restricted
 
 
     # def clean(self):
@@ -63,7 +66,7 @@ class AssayChipSetupForm(forms.ModelForm):
             'variance': forms.Textarea(attrs={'cols':50, 'rows': 2}),
         }
         # Assay Run ID is always bound to the parent Study
-        exclude = ('assay_run_id','group') + tracking
+        exclude = ('assay_run_id','group') + tracking + restricted
 
     def clean(self):
         super(forms.ModelForm, self).clean()
@@ -83,20 +86,20 @@ class AssayChipCellsInlineFormset(forms.models.BaseInlineFormSet):
         model = AssayChipCells
         exclude = ('',)
 
-    def clean(self):
-        forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
-
-        # Does not require a minimum number of cellsamples at the moment
-        # Number of cellsamples
-        # cellsamples = 0
-        # for form in forms_data:
-        #     try:
-        #         if form.cleaned_data:
-        #             cellsamples += 1
-        #     except AttributeError:
-        #         pass
-        # if cellsamples < 1:
-        #     raise forms.ValidationError('You must have at least one cellsample.')
+    # def clean(self):
+    #     forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
+    #
+    #     #Does not require a minimum number of cellsamples at the moment
+    #     Number of cellsamples
+    #     cellsamples = 0
+    #     for form in forms_data:
+    #         try:
+    #             if form.cleaned_data:
+    #                 cellsamples += 1
+    #         except AttributeError:
+    #             pass
+    #     if cellsamples < 1:
+    #         raise forms.ValidationError('You must have at least one cellsample.')
 
 class TestResultInlineFormset(forms.models.BaseInlineFormSet):
 
@@ -133,8 +136,23 @@ class StudyConfigurationForm(forms.ModelForm):
 # Forms for plates may become more useful later
 class AssayLayoutForm(forms.ModelForm):
 
-    compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'))
+    compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
 
     class Meta(object):
         model = AssayLayout
-        exclude = tracking
+        exclude = tracking + restricted
+
+
+# Forms for plates may become more useful later
+class AssayDeviceSetupForm(forms.ModelForm):
+
+    class Meta(object):
+        model = AssayDeviceSetup
+        exclude = ('assay_run_id','group') + tracking + restricted
+
+
+class AssayPlateCellsInlineFormset(forms.models.BaseInlineFormSet):
+
+    class Meta(object):
+        model = AssayPlateCells
+        exclude = ('',)

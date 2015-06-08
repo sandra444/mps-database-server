@@ -16,14 +16,22 @@ urlpatterns = patterns('',
     url(r'^assays/assaychipsetup/(?P<pk>[0-9]+)/update/$', AssayChipSetupUpdate.as_view(), name='setup_update'),
     url(r'^assays/assaychipreadout/(?P<pk>[0-9]+)/update/$', AssayChipReadoutUpdate.as_view(), name='readout_update'),
     url(r'^assays/assaytestresult/(?P<pk>[0-9]+)/update/$', AssayTestResultUpdate.as_view(), name='result_update'),
+
+    url(r'^assays/assaydevicesetup/(?P<pk>[0-9]+)/update/$', AssayDeviceSetupUpdate.as_view(), name='plate_setup_update'),
+
     # # Add pages for respective models
     url(r'^assays/(?P<study_id>[0-9]+)/assaychipsetup/add/$', AssayChipSetupAdd.as_view(), name='setup_add'),
     url(r'^assays/(?P<study_id>[0-9]+)/assaychipreadout/add/$', AssayChipReadoutAdd.as_view(), name='readout_add'),
     url(r'^assays/(?P<study_id>[0-9]+)/assaytestresult/add/$', AssayTestResultAdd.as_view(), name='result_add'),
+
+    url(r'^assays/(?P<study_id>[0-9]+)/assaydevicesetup/add/$', AssayDeviceSetupAdd.as_view(), name='plate_setup_add'),
+
     # # Delete pages for respective models
     url(r'^assays/assaychipsetup/(?P<pk>[0-9]+)/delete/$', AssayChipSetupDelete.as_view(), name='setup_delete'),
     url(r'^assays/assaychipreadout/(?P<pk>[0-9]+)/delete/$', AssayChipReadoutDelete.as_view(), name='readout_delete'),
     url(r'^assays/assaytestresult/(?P<pk>[0-9]+)/delete/$', AssayTestResultDelete.as_view(), name='result_delete'),
+
+    url(r'^assays/assaydevicesetup/(?P<pk>[0-9]+)/delete/$', AssayDeviceSetupDelete.as_view(), name='plate_setup_delete'),
 
     url(r'^assays/studyconfiguration/$', StudyConfigurationList.as_view(), name='studyconfiguration_list'),
     url(r'^assays/studyconfiguration/add/$', StudyConfigurationAdd.as_view(), name='studyconfiguration_add'),
@@ -49,4 +57,6 @@ urlpatterns = patterns('',
     url(r'^assays/assaytestresult/$', AssayTestResultList.as_view(), name='result_list'),
     #url(r'^assays/assaytestresult/add$', AssayTestResultAdd.as_view()),
     url(r'^assays/assaytestresult/(?P<pk>[0-9]+)/$', AssayTestResultDetail.as_view(), name='result_detail'),
+
+    url(r'^assays/assaydevicesetup/$', AssayDeviceSetupList.as_view(), name='plate_setup_list'),
 )

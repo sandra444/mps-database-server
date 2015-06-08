@@ -389,13 +389,14 @@ class AssayChipSetupAdd(CreateView):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.assay_run_id = study
         form.instance.group = study.group
-        form.instance.restricted = study.restricted
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
             self.object = form.save()
+            # Set restricted
+            self.object.restricted = study.restricted
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
             self.object.save()
@@ -466,7 +467,6 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         form.instance.assay_run_id = study
         form.instance.group = study.group
-        # form.instance.restricted = study.restricted
 
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
@@ -474,8 +474,6 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             # if self.request.GET.get('setup', ''):
             #     url_add = '?setup=1'
             self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
             # TODO refactor original created by
             self.object.modified_by = self.request.user
             # Save overall setup result
@@ -584,7 +582,6 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.group = study.group
-        form.instance.restricted = study.restricted
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
@@ -595,6 +592,8 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             headers = int(data.get('headers'))
 
             self.object = form.save()
+            # Set restricted
+            self.object.restricted = study.restricted
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
             self.object.save()
@@ -669,7 +668,6 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             'created_by').exclude(id__in=list(set(exclude_list))) | AssayChipSetup.objects.filter(pk=self.object.chip_setup.id)
 
         form.instance.group = study.group
-        # form.instance.restricted = study.restricted
 
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
@@ -678,8 +676,6 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             headers = int(data.get('headers'))
 
             self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
             # TODO refactor original created by
             self.object.modified_by = self.request.user
             # Save overall readout result
@@ -766,12 +762,13 @@ class AssayTestResultAdd(StudyGroupRequiredMixin, CreateView):
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.group = study.group
-        form.instance.restricted = study.restricted
         context = self.get_context_data()
         formset = context['formset']
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
             self.object = form.save()
+            # Set restricted
+            self.object.restricted = study.restricted
             self.object.modified_by = self.object.created_by = self.request.user
             # Save overall test result
             self.object.save()
@@ -841,8 +838,6 @@ class AssayTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         if form.is_valid() and formset.is_valid():
             self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
             # TODO refactor original created by
             self.object.modified_by = self.request.user
             # Save overall test result
@@ -933,9 +928,6 @@ class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
 
         formset = StudyModelFormSet(self.request.POST, instance=form.instance)
 
-        # Setting restricted in the form does not work as it is not part of the form
-        # form.instance.restricted = study.restricted
-
         if form.is_valid() and formset.is_valid():
             self.object = form.save()
             # TODO refactor original created by
@@ -957,14 +949,14 @@ class AssayLayoutList(LoginRequiredMixin, ListView):
     model = AssayLayout
 
     def get_queryset(self):
-        return AssayLayout.objects.filter(restricted=False).prefetch_related('created_by', 'group') | AssayLayout.objects.filter(
-            group__in=self.request.user.groups.all()).prefetch_related('created_by', 'group')
+        # Not bothering with restricted at the moment
+        # return AssayLayout.objects.filter(restricted=False).prefetch_related('created_by', 'group', 'device') | AssayLayout.objects.filter(
+        #     group__in=self.request.user.groups.all()).prefetch_related('created_by', 'group', 'device')
+        return AssayLayout.objects.filter(group__in=self.request.user.groups.all()).prefetch_related('created_by', 'group', 'device')
 
-
-# TODO ADD ADDITIONAL CONTEXT NAMELY LIMITING THE DEVICES TO THOSE WITH DIMENSIONS AND LABELS
 class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
     model = AssayLayout
-    form = AssayLayoutForm
+    form_class = AssayLayoutForm
     template_name = 'assays/assaylayout_add.html'
 
     def get_context_data(self, **kwargs):
@@ -996,7 +988,6 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
 #     model = AssayLayout
 
 
-# TODO ADD ADDITIONAL CONTEXT
 class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     model = AssayLayout
     form_class = AssayLayoutForm
@@ -1053,3 +1044,151 @@ class AssayLayoutDelete(CreatorRequiredMixin, DeleteView):
     model = AssayLayout
     template_name = 'assays/assaylayout_delete.html'
 
+    def get_success_url(self):
+        return '/assays/assaylayout/'
+
+
+# Class-based views for LAYOUTS
+class AssayDeviceSetupList(LoginRequiredMixin, ListView):
+    model = AssayDeviceSetup
+
+    def get_queryset(self):
+        return AssayDeviceSetup.objects.filter(restricted=False).prefetch_related('created_by', 'group', 'assay_run_id', 'assay_layout') | AssayDeviceSetup.objects.filter(
+            group__in=self.request.user.groups.all()).prefetch_related('created_by', 'group', 'assay_run_id', 'assay_layout')
+
+# Formset for plate cells
+AssayPlateCellsFormset = inlineformset_factory(AssayDeviceSetup, AssayPlateCells, formset=AssayPlateCellsInlineFormset,
+                                              extra=1,
+                                              widgets={
+                                              'cellsample_density': forms.NumberInput(attrs={'style': 'width:100px;', }),
+                                              'cell_passage': forms.TextInput(attrs={'size': 5}), })
+
+
+# VIEWS FOR ASSAY PLATE (DEVICE) SETUP
+class AssayDeviceSetupAdd(StudyGroupRequiredMixin, CreateView):
+    model = AssayDeviceSetup
+    form_class = AssayDeviceSetupForm
+    template_name = 'assays/assaydevicesetup_add.html'
+
+    def get_context_data(self, **kwargs):
+        groups = self.request.user.groups.values_list('id', flat=True)
+        cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
+            'cell_type',
+            'supplier',
+        ).select_related('cell_type__cell_subtype')
+        context = super(AssayDeviceSetupAdd, self).get_context_data(**kwargs)
+
+        if self.request.POST:
+            context['formset'] = AssayPlateCellsFormset(self.request.POST)
+
+        else:
+            context['formset'] = AssayPlateCellsFormset()
+
+        # Cellsamples will always be the same
+        context['cellsamples'] = cellsamples
+
+        return context
+
+    def form_valid(self, form):
+        # url_add = ''
+        # if self.request.GET.get('setup', ''):
+        #     url_add = '?setup=1'
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        form.instance.assay_run_id = study
+        form.instance.group = study.group
+        context = self.get_context_data()
+        formset = context['formset']
+        # get user via self.request.user
+        if form.is_valid() and formset.is_valid():
+            self.object = form.save()
+            # Set restricted
+            self.object.restricted = study.restricted
+            self.object.modified_by = self.object.created_by = self.request.user
+            # Save Plate Setup
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            return redirect(self.object.get_absolute_url())
+                # return redirect(
+                #    self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+
+# TODO Assay Layout Detail does not currently exist (deemed lower priority)
+# class AssayDeviceSetupDetail(DetailRedirectMixin, DetailView):
+#     model = AssayDeviceSetup
+
+
+# TODO ADD ADDITIONAL CONTEXT
+class AssayDeviceSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
+    model = AssayDeviceSetup
+    form_class = AssayDeviceSetupForm
+    template_name = 'assays/assaydevicesetup_add.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+
+        # study = self.object.assay_run_id
+
+        groups = self.request.user.groups.values_list('id', flat=True)
+        cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
+            'cell_type',
+            'supplier',
+        ).select_related('cell_type__cell_subtype')
+
+        # Render form
+        formset = AssayPlateCellsFormset(instance=self.object)
+
+        return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                cellsamples = cellsamples,
+                                update = True))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        form = self.form_class(self.request.POST, instance=self.object)
+
+        formset = AssayPlateCellsFormset(self.request.POST, instance=form.instance)
+
+        # TODO refactor redundant code here; testing for now
+
+        study = self.object.assay_run_id
+
+        groups = self.request.user.groups.values_list('id', flat=True)
+        cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
+            'cell_type',
+            'supplier',
+        ).select_related('cell_type__cell_subtype')
+
+        form.instance.assay_run_id = study
+        form.instance.group = study.group
+
+        if form.is_valid() and formset.is_valid():
+            self.object = form.save()
+            self.object.modified_by = self.request.user
+            # Save overall setup result
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            return redirect(self.object.get_absolute_url())
+        else:
+
+            return self.render_to_response(
+            self.get_context_data(form=form,
+                                formset = formset,
+                                cellsamples = cellsamples,
+                                update = True))
+
+
+# TODO ADD CONTEXT
+class AssayDeviceSetupDelete(CreatorRequiredMixin, DeleteView):
+    model = AssayDeviceSetup
+    template_name = 'assays/assaydevicesetup_delete.html'
+
+    def get_success_url(self):
+        return '/assays/' + str(self.object.assay_run_id.id)

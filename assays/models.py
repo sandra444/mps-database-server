@@ -285,6 +285,9 @@ class AssayDeviceSetup(FlaggableModel):
     def __unicode__(self):
         return u'Plate-{}'.format(self.assay_device_id)
 
+    def get_absolute_url(self):
+        return "/assays/{}/".format(self.assay_run_id.id)
+
 class AssayReader(LockableModel):
     """
     Chip and Plate readers

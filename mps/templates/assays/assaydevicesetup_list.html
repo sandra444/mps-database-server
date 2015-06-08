@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div style="padding-bottom: 50px">
+        <h2 align="center">Plate Setups</h2>
+
+        <table hidden id="setups" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Chip Setup ID / Barcode</th>
+                    <th>Study</th>
+                    <th>Date</th>
+                    <th>Organ Model Name</th>
+                    <th>Scientist</th>
+                    <th>Creator</th>
+                    <th>Group</th>
+                    <th>Flagged</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Chip Setup ID / Barcode</th>
+                    <th>Study</th>
+                    <th>Date</th>
+                    <th>Organ Model Name</th>
+                    <th>Scientist</th>
+                    <th>Creator</th>
+                    <th>Group</th>
+                    <th>Flagged</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for setup in object_list %}
+                <tr class="plate-setups" id={{ setup.id }} name={{ setup.id }}>
+                    {# TODO URL SUBJECT TO CHANGE IF DETAIL VIEW IS MADE #}
+                    <td><a href="{{ setup.id }}/update">{{ setup.assay_device_id }}</a></td>
+                    <td><a href="/assays/organchipstudy/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
+                    <td>{{ setup.setup_date|date:"M d, Y" }}</td>
+                    <td>{{ setup.assay_layout }}</td>
+                    <td>{{ setup.scientist }}</td>
+                    <td>{{ setup.created_by }}</td>
+                    <td>{{ setup.group }}</td>
+                    <td>
+                        {% if setup.flagged %}
+                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#setups').DataTable( {
+                dom: 'T<"clear">lfrtip',
+                "iDisplayLength": 50
+            });
+        });
+    </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}
+
