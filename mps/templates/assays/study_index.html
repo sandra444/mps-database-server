@@ -12,7 +12,12 @@
             </h1>
         </div>
 
-        <legend><h2>Chip Setups  <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Setup</a></h2></legend>
+        <legend>
+            <h2>Setups
+                <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Chip Setup</a>
+                <a href="assaydevicesetup/add" class="btn btn-success" role="button">Add Plate Setup</a>
+            </h2>
+        </legend>
 
         {% if setups %}
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
@@ -27,16 +32,6 @@
                     <th>Flagged</th>
                 </tr>
             </thead>
-
-{#            <tfoot>#}
-{#                <tr>#}
-{#                    <th>Chip ID / Barcode</th>#}
-{#                    <th>Date</th>#}
-{#                    <th>Chip Test Type</th>#}
-{#                    <th>Compound</th>#}
-{#                    <th>Creator</th>#}
-{#                </tr>#}
-{#            </tfoot>#}
 
             <tbody>
             {% for setup in setups %}
@@ -66,7 +61,7 @@
         </div>
         {% endif %}
 
-        <legend><h2>Chip Readouts
+        <legend><h2>Readouts
             {% if setups.count == 0 or setups.count == readouts.count%}
                 <div hidden id="readout_alert" class="alert alert-warning" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -77,6 +72,7 @@
             {% else %}
                 <a href="assaychipreadout/add" class="btn btn-success" role="button">Add Readout</a>
             {% endif %}
+            <a href="assaydevicereadout/add" class="btn btn-success" role="button">Add Plate Readout</a>
         </h2></legend>
 
         {% if readouts %}
@@ -91,15 +87,6 @@
                     <th>Flagged</th>
                 </tr>
             </thead>
-
-{#            <tfoot>#}
-{#                <tr>#}
-{#                    <th>ID</th>#}
-{#                    <th>Chip Setup</th>#}
-{#                    <th>Readout Date</th>#}
-{#                    <th>Creator</th>#}
-{#                </tr>#}
-{#            </tfoot>#}
 
             <tbody>
             {% for readout in readouts %}
@@ -128,7 +115,7 @@
         </div>
         {% endif %}
 
-        <legend><h2>Chip Results
+        <legend><h2>Results
             {# Later should add condition for when not enough readouts or setups #}
             {% if readouts.count == 0 or number_of_results == readouts.count %}
                 <div hidden id="result_alert" class="alert alert-warning" role="alert">
@@ -158,17 +145,6 @@
                     <th>Flagged</th>
                 </tr>
             </thead>
-
-{#            <tfoot>#}
-{#                <tr>#}
-{#                    <th>Chip Readout</th>#}
-{#                    <th>Result</th>#}
-{#                    <th>Result Function</th>#}
-{#                    <th>Result Type</th>#}
-{#                    <th>Severity</th>#}
-{#                    <th>Creator</th>#}
-{#                </tr>#}
-{#            </tfoot>#}
 
             <tbody>
             {% for result in results %}

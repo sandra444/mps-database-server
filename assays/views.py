@@ -1330,6 +1330,9 @@ class AssayDeviceReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             'assay_run_id', 'assay_layout',
             'created_by').exclude(id__in=list(set(exclude_list))) | AssayDeviceSetup.objects.filter(pk=self.object.setup.id)
 
+        # This is for cleaning
+        formset.instance = form.instance
+
         if form.is_valid() and formset.is_valid():
             # To be used later (maybe)
             data = form.cleaned_data

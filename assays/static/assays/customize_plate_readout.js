@@ -225,7 +225,9 @@ $(document).ready(function () {
             }
             else {
                 readout_id = Math.floor(window.location.href.split('/')[5]);
-                get_existing_readout(readout_id);
+                if (readout_id) {
+                    get_existing_readout(readout_id);
+                }
             }
         }
     }
@@ -248,20 +250,30 @@ $(document).ready(function () {
             return;
         }
 
+        var current_inline = 0;
+        var assay_inline = $('#id_assayplatereadoutassay_set-0-assay_id');
+        var selector = $('<select>');
+
+        selector.append($('<option>')
+                .attr('value', '')
+                .text('-----'));
+
+        while (assay_inline[0]) {
+            var currently_selected = $('#id_assayplatereadoutassay_set-' + current_inline + '-assay_id :selected').text();
+
+            selector.append($('<option>')
+                .attr('value', current_inline)
+                .text(currently_selected));
+
+            current_inline += 1;
+            assay_inline = $('#id_assayplatereadoutassay_set-' + current_inline + '-assay_id');
+        }
+
         var all = csv.split('\n');
         var lines = [];
 
         for (var index in all) {
             var values = all[index].split(',');
-            // TODO REVISE CHECK FOR OVERFLOW
-//            if (values && (values.length > column_labels.length)) {
-//                alert('Error: This CSV contains too many columns.\nBe sure to match the layout.');
-//                $('#id_file').val('');
-//                return;
-//            }
-//            if (lines.length < row_labels.length) {
-//                lines.push(values);
-//            }
             lines.push(values);
         }
 
@@ -271,95 +283,173 @@ $(document).ready(function () {
 
         // Whether or not the upload should fail
         var failed = false;
+        // Whether to read the file as tabular or block
+        var upload_type = $('#id_upload_type').val();
+        // Get a dictionary/array of features
+        var features = [];
 
-        // Current assay
-        var assay = undefined;
-        // Current unit
-        var value_unit = undefined;
-        // Current time
-        var time = undefined;
-        // Current units
-        var time_unit = undefined;
+        if (upload_type == 'Block') {
+            // Current feature
+            // NOTE THAT FEATURES ARE NOW USED IN LIEU OF ASSAYS
+            var feature = undefined;
+            // Current unit
+            var value_unit = undefined;
+            // Current time
+            var time = undefined;
+            // Current units
+            var time_unit = undefined;
 
-        var number_of_assays = 0;
-        var number_of_data_blocks = 0;
+            var number_of_features = 0;
+            var number_of_data_blocks = 0;
 
-        // TODO FIX CLIENT-SIDE VALIDATION
-        // TODO
-        $.each(lines, function (row_index, row) {
-            // If the first value is 'assay', identify the line as a header
-            if ($.trim(row[0].toLowerCase()) == 'assay') {
+            // TODO FIX CLIENT-SIDE VALIDATION
+            // TODO
+            $.each(lines, function (row_index, row) {
+                // If the first value is 'feature', identify the line as a header
+                if ($.trim(row[0].toLowerCase()) == 'feature') {
 
-                assay = row[1];
-                value_unit = row[3];
-                time = row[5];
-                time_unit = row[7];
+                    feature = row[1];
 
-                if (!assay || !value_unit || (time && !time_unit)) {
-                    failed += 'headers';
-                }
+                    // Add feature to features
+                    features.push(feature);
 
-                number_of_assays += 1
-            }
+                    value_unit = row[3];
+                    time = row[5];
+                    time_unit = row[7];
 
-            else {
-                // TODO NEEDS TO BE REVISED
-                // Ignore empty lines
-                if (!_.some(row, function (val) {return $.trim(val)})) {
-                    console.log('Ignored blank line');
-                }
-
-
-                else {
-                    // Register a new data block if this is the first reading
-                    // OR if the row index
-                    if (number_of_data_blocks == 0 || (row_index - number_of_assays) % row_labels.length == 0) {
-                        number_of_data_blocks += 1;
-                    }
-
-                    if (number_of_data_blocks > number_of_assays) {
+                    if (!feature || !value_unit || (time && !time_unit)) {
                         failed += 'headers';
                     }
 
-                    //console.log('assays: ' + number_of_assays);
-                    //console.log('blocks: ' + number_of_data_blocks);
+                    number_of_features += 1
+                }
 
-                    $.each(row, function (column_index, value) {
+                else {
+                    // TODO NEEDS TO BE REVISED
+                    // Ignore empty lines
+                    if (!_.some(row, function (val) {
+                        return $.trim(val)
+                    })) {
+                        console.log('Ignored blank line');
+                    }
 
-                        // TODO REVISE
-                        // Must offset row due to headers
-                        // Employ modulo
-                        var row_label = row_labels[(row_index - number_of_assays) % row_labels.length];
-                        var column_label = column_labels[column_index];
 
-                        var well_id = '#' + row_label + '_' + column_label;
+                    else {
+                        // Register a new data block if this is the first reading
+                        // OR if the row index
+                        if (number_of_data_blocks == 0 || (row_index - number_of_features) % row_labels.length == 0) {
+                            number_of_data_blocks += 1;
+                        }
 
-                        //console.log('well_id: ' + well_id);
+                        if (number_of_data_blocks > number_of_features) {
+                            failed += 'headers';
+                        }
 
-                        var text = (time && time_unit) ?
-                            assay + ': ' + value + ' ' + value_unit + '\t(' + time + ' ' + time_unit + ') ' :
-                            assay + ': ' + value + ' ' + value_unit;
+                        //console.log('features: ' + number_of_features);
+                        //console.log('blocks: ' + number_of_data_blocks);
 
-                        // If value is not a number
-                        if (isNaN(value)) {
-                            $(well_id).append(
+                        $.each(row, function (column_index, value) {
+
+                            // TODO REVISE
+                            // Must offset row due to headers
+                            // Employ modulo
+                            var row_label = row_labels[(row_index - number_of_features) % row_labels.length];
+                            var column_label = column_labels[column_index];
+
+                            var well_id = '#' + row_label + '_' + column_label;
+
+                            //console.log('well_id: ' + well_id);
+
+                            // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
+                            var text = (time && time_unit) ?
+                                feature + ': ' + value + ' ' + value_unit + '\t(' + time + ' ' + time_unit + ') ' :
+                                feature + ': ' + value + ' ' + value_unit;
+
+                            // If value is not a number
+                            if (isNaN(value)) {
+                                $(well_id).append(
                                     '<div class="value" style="text-align: center; color: red;"><p><b>' +
                                     text +
                                     '</b></p></div>');
-                            // Fail the file
-                            failed += 'non-numeric';
-                        }
+                                // Fail the file
+                                failed += 'non-numeric';
+                            }
 
-                        else {
-                            $(well_id).append(
+                            else {
+                                $(well_id).append(
                                     '<div class="value" style="text-align: center; color: blue;"><p><b>' +
                                     text +
                                     '</b></p></div>');
-                        }
-                    });
+                            }
+                        });
+                    }
                 }
+            });
+        }
+
+        // Handle tabular data
+        else {
+            // Empty lines are useless in tabular uploads, remove them
+            lines = _.filter(lines, function(list){
+                return _.some(list, function (val) {
+                    return $.trim(val)
+                })
+            });
+
+            // The header should be the first line
+            var header = lines[0];
+            // Header should be: [AssayPlateID, WellName, Feature1, Feature2, ...]
+            features = header.slice(2);
+            // Exclude the header for iteration later
+            var data = lines.slice(1);
+
+            // Fail if no features
+            if (features.length < 1) {
+                failed += 'headers';
             }
-        });
+
+            $.each(data, function (row_index, row) {
+                // Check plate ID (the first value)
+//                var plate_id = row[0];
+                // Subject to change
+                // TODO MUST REMOVE IF READOUT ID's ARE REMOVED
+//                if (plate_id != $('#id_assay_device_id')) {
+//                    alert('Plate ID in file does not match Readout ID: Please make sure this is the correct file.')
+//                }
+
+                // Unchanged well
+                var well = row[1];
+                // Split the well into alphabetical and numeric and then merge again (gets rid of leading zeroes)
+                var split_well = well.match(/(\d+|[^\d]+)/g);
+                // Merge back together for ID
+                var well_id = '#' + split_well[0] + '_' + parseInt(split_well[1]);
+
+                var values = row.slice(2);
+
+                $.each(values, function (column_index, value) {
+                    feature = features[column_index];
+                     // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
+                    var text = feature + ': ' + value;
+
+                    // If value is not a number
+                    if (isNaN(value)) {
+                        $(well_id).append(
+                            '<div class="value" style="text-align: center; color: red;"><p><b>' +
+                            text +
+                            '</b></p></div>');
+                        // Fail the file
+                        failed += 'non-numeric';
+                    }
+
+                    else {
+                        $(well_id).append(
+                            '<div class="value" style="text-align: center; color: blue;"><p><b>' +
+                            text +
+                            '</b></p></div>');
+                    }
+                });
+            });
+        }
 
         // If the file upload has failed
         if (failed) {
@@ -370,6 +460,33 @@ $(document).ready(function () {
                 alert('Error: This file contains non-numeric data. Please see and replace the values in red and upload again.');
             }
             $('#id_file').val('');
+        }
+
+        // TODO
+        // If the file upload has succeeded, show the feature binding dialog
+        else {
+            $.each(features, function (index, feature) {
+                var row = $('<tr>')
+                    .append($('<td>')
+                        .append($('<input>')
+                            .val(feature)
+                            .attr('readonly', 'true')
+                            .attr('id', 'feature-' + index + '-name')))
+                    .append($('<td>')
+                        // BE SURE TO CLONE THE SELECTOR
+                        .append(selector.clone()
+                            .attr('id', 'feature-' + index)
+                            // On change, add the feature name to the respective inline feature
+                            .change( function() {
+                                var feature_name = $('#' + this.id + '-name').val();
+                                var selected_index = this.value;
+                                $('#id_assayplatereadoutassay_set-' + selected_index + '-feature').val(feature_name);
+                            })
+                        ));
+                $('#binding_table').append(row);
+            });
+            $('#binding').show();
+            alert('Please link features to assays');
         }
     }
 

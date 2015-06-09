@@ -239,7 +239,19 @@
         {% endfor %}
     {% endif %}
 
+    <table hidden class="table table-striped" id="binding">
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>Assay</th>
+            </tr>
+        </thead>
+        <tbody id="binding_table">
+        </tbody>
+    </table>
+
     <a id="add_button" class="btn btn-success" role="button">Add Assay</a>
+    <span class="text-danger">You do not need to manually type features: Use the interface that appears after upload</span>
     <table class="table table-striped assays" id="assayplatereadoutassay_set-group"  name="inlines">
         <thead>
             <tr>

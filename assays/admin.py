@@ -410,6 +410,8 @@ def removeExistingReadout(currentAssayReadout):
     # return
 
 
+# TODO CHANGE BLOCK UPLOAD
+# TODO ADD TABULAR UPLOAD
 def parseReadoutCSV(currentAssayReadout, file):
     removeExistingReadout(currentAssayReadout)
 
@@ -493,6 +495,8 @@ def parseReadoutCSV(currentAssayReadout, file):
     #         ).save()
 
 
+# TODO CHANGE BLOCK UPLOAD
+# TODO ADD TABULAR UPLOAD
 class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
     def clean(self):
         """Validate unique, existing PLATE READOUTS"""
