@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div style="padding-bottom: 50px">
+        <h2 align="center">Results</h2>
+
+        <table hidden id="results" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Plate Test Results ID</th>
+                    <th>Study</th>
+                    <th>Plate Setup</th>
+                    <th>Plate Readout ID</th>
+                    <th>Assay</th>
+                    <th>Result</th>
+                    <th>Result Function</th>
+                    <th>Result Type</th>
+                    <th>Severity</th>
+                    <th>Creator</th>
+                    <th>Group</th>
+                    <th>Flagged</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Plate Test Results ID</th>
+                    <th>Study</th>
+                    <th>Plate Setup</th>
+                    <th>Plate Readout ID</th>
+                    <th>Assay</th>
+                    <th>Result</th>
+                    <th>Result Function</th>
+                    <th>Result Type</th>
+                    <th>Severity</th>
+                    <th>Creator</th>
+                    <th>Group</th>
+                    <th>Flagged</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for result in object_list %}
+                <tr class="result" id={{ result.id }} name={{ result.id }}>
+                    <td>
+                        <a href="{{ result.assay_result.id }}">
+                            {{ result.assay_result.id }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/organchipstudy/{{ result.assay_result.assay_device_id.setup.assay_run_id.id }}">
+                            {{ result.assay_result.assay_device_id.setup.assay_run_id }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/assaychipsetup/{{ result.assay_result.assay_device_id.setup.id }}">
+                            {{ result.assay_result.assay_device_id.setup }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/assaychipreadout/{{ result.assay_result.assay_device_id.id }}">
+                            {{ result.assay_result.assay_device_id.id }}
+                        </a>
+                    </td>
+                    <td>{{ result.assay_name }}</td>
+                    <td>{{ result.get_result_display }}</td>
+                    <td>{{ result.result_function }}</td>
+                    <td>{{ result.result_type }}</td>
+                    <td>{{ result.get_severity_display }}</td>
+                    <td>{{ result.assay_result.created_by }}</td>
+                    <td>{{ result.assay_result.group }}</td>
+                    <td>
+                        {% if result.assay_result.flagged %}
+                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#results').DataTable( {
+                dom: 'T<"clear">lfrtip',
+                "iDisplayLength": 50,
+                // Initially sort on study not arbitrary ID
+                "order": [ 1, "asc" ]
+            });
+        });
+    </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}

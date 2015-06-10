@@ -537,6 +537,9 @@ class AssayPlateTestResult(FlaggableModel):
     def __unicode__(self):
         return u''
 
+    def get_absolute_url(self):
+        return "/assays/%i/" % self.assay_device_id.setup.assay_run_id.id
+
 
 class StudyConfiguration(LockableModel):
     """

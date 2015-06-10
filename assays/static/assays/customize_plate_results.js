@@ -315,5 +315,19 @@ $(document).ready(function () {
     newRow.click(function() {
         changeNew();
     });
+
+    // This is to deal with new inline entries when on the frontend
+    $("#add_button").click(function() {
+        changeNew();
+    });
+
+    // Resolve deletion error frontend
+    // This selector will check all items with DELETE in the name, including newly created ones
+    $("body").on("click", "input[name*='DELETE']", function(event) {
+        $.when(whittle('readout_id',readout.val(),'AssayPlateReadoutAssay','','')).then(function(data) {
+            inlineOptions = data;
+            changeAll(false);
+        });
+    });
 });
 

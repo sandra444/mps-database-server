@@ -1374,3 +1374,141 @@ class AssayDeviceReadoutDelete(CreatorRequiredMixin, DeleteView):
         return '/assays/' + str(self.object.setup.assay_run_id.id)
 
 
+# Class-based views for PLATE test results
+class AssayPlateTestResultList(LoginRequiredMixin, ListView):
+    # model = AssayTestResult
+    template_name = 'assays/assayplatetestresult_list.html'
+
+    def get_queryset(self):
+        initial_query = AssayPlateResult.objects.prefetch_related('result_function','result_type',
+                                                             'test_unit').select_related('assay_result__assay_device_id__setup__assay_run_id',
+                                                                                         'assay_name__assay_id',
+                                                                                         'assay_result__created_by',
+                                                                                         'assay_result__group')
+
+        return initial_query.filter(assay_result__assay_device_id__setup__assay_run_id__restricted=False) | \
+               initial_query.filter(assay_result__assay_device_id__setup__assay_run_id__group__in=self.request.user.groups.all())
+
+
+PlateTestResultFormSet = inlineformset_factory(AssayPlateTestResult, AssayPlateResult, formset=PlateTestResultInlineFormset, extra=1,
+                                          widgets={'value': forms.NumberInput(attrs={'style': 'width:100px;', }), })
+
+
+class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
+    template_name = 'assays/assayplatetestresult_add.html'
+    form_class = AssayPlateResultForm
+
+    def get_context_data(self, **kwargs):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        exclude_list = AssayPlateTestResult.objects.filter(assay_device_id__isnull=False).values_list('assay_device_id', flat=True)
+        readouts = AssayDeviceReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
+
+        context = super(AssayPlateTestResultAdd, self).get_context_data(**kwargs)
+        if self.request.POST:
+            context['formset'] = PlateTestResultFormSet(self.request.POST)
+            context['readouts'] = readouts
+        else:
+            context['formset'] = PlateTestResultFormSet()
+            context['readouts'] = readouts
+        return context
+
+    def form_valid(self, form):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        form.instance.group = study.group
+        context = self.get_context_data()
+        formset = context['formset']
+        # get user via self.request.user
+        if form.is_valid() and formset.is_valid():
+            self.object = form.save()
+            # Set restricted
+            self.object.restricted = study.restricted
+            self.object.modified_by = self.object.created_by = self.request.user
+            # Save overall test result
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+    # Redirect when there are no available setups
+    def render_to_response(self, context):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+        if not context.get('readouts',''):
+            return redirect('/assays/'+str(study.id))
+
+        return super(AssayPlateTestResultAdd, self).render_to_response(context)
+
+
+class AssayPlateTestResultDetail(DetailRedirectMixin, DetailView):
+    model = AssayPlateTestResult
+
+
+class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
+    model = AssayPlateTestResult
+    template_name = 'assays/assayplatetestresult_add.html'
+    form_class = AssayPlateResultForm
+
+    # Alternative (cleaner?) method
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+
+        # Get Study
+        study = self.object.assay_device_id.setup.assay_run_id
+
+        exclude_list = AssayPlateTestResult.objects.filter(assay_device_id__isnull=False).values_list('assay_device_id', flat=True)
+        readouts = AssayDeviceReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list))) | AssayDeviceReadout.objects.filter(pk=self.object.assay_device_id.id)
+
+        # Render form
+        formset = PlateTestResultFormSet(instance=self.object)
+        return self.render_to_response(
+            self.get_context_data(form=form,
+                                  formset = formset,
+                                  readouts = readouts,
+                                  update = True))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        form = self.form_class(self.request.POST, instance=self.object)
+
+        formset = PlateTestResultFormSet(self.request.POST, instance=form.instance)
+
+        # TODO refactor redundant code here; testing for now
+
+        study = self.object.assay_device_id.setup.assay_run_id
+
+        exclude_list = AssayPlateTestResult.objects.filter(assay_device_id__isnull=False).values_list('assay_device_id', flat=True)
+        readouts = AssayDeviceReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
+
+        form.instance.group = study.group
+        # Setting restricted in the form does not work as it is not part of the form
+        # form.instance.restricted = study.restricted
+
+        if form.is_valid() and formset.is_valid():
+            self.object = form.save()
+            # TODO refactor original created by
+            self.object.modified_by = self.request.user
+            # Save overall test result
+            self.object.save()
+            formset.instance = self.object
+            formset.save()
+            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(
+            self.get_context_data(form=form,
+                                  formset = formset,
+                                  readouts = readouts,
+                                  update = True))
+
+
+class AssayPlateTestResultDelete(CreatorRequiredMixin, DeleteView):
+    model = AssayPlateTestResult
+    template_name = 'assays/assayplatetestresult_delete.html'
+
+    def get_success_url(self):
+        return '/assays/' + str(self.object.assay_device_id.setup.assay_run_id.id)

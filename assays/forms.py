@@ -170,3 +170,36 @@ class AssayDeviceReadoutForm(forms.ModelForm):
             'notes': forms.Textarea(attrs={'cols':50, 'rows': 3}),
         }
         exclude = group + tracking + restricted
+
+
+class AssayPlateResultForm(forms.ModelForm):
+    """Size the text input boxes"""
+
+    class Meta(object):
+        model = AssayPlateTestResult
+        widgets = {
+            'test_time': forms.TextInput(attrs={'size': 3}),
+            'value': forms.TextInput(attrs={'size': 10}),
+        }
+        exclude = group + tracking + restricted
+
+
+class PlateTestResultInlineFormset(forms.models.BaseInlineFormSet):
+
+    class Meta(object):
+        model = AssayPlateResult
+        exclude = ('',)
+
+    def clean(self):
+        forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
+
+        # Number of results
+        results = 0
+        for form in forms_data:
+            try:
+                if form.cleaned_data:
+                    results += 1
+            except AttributeError:
+                pass
+        if results < 1:
+            raise forms.ValidationError('You must have at least one result.')

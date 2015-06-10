@@ -125,7 +125,8 @@
                 </div>
                 <a class="btn btn-warning" role="button" onClick="$('#result_alert').removeProp('hidden');">Add Result</a>
             {% else %}
-                <a href="assaytestresult/add" class="btn btn-success" role="button">Add Result</a>
+                <a href="assaytestresult/add" class="btn btn-success" role="button">Add Chip Result</a>
+                <a href="assayplatetestresult/add" class="btn btn-success" role="button">Add Plate Result</a>
             {% endif %}
         </h2></legend>
 
@@ -184,6 +185,5 @@
             No chip results exist for this study
         </div>
         {% endif %}
-
     </div>
 {% endblock %}
