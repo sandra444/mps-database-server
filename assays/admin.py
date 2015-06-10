@@ -399,6 +399,14 @@ class AssayDeviceSetupAdmin(LockableAdmin):
 
 admin.site.register(AssayDeviceSetup, AssayDeviceSetupAdmin)
 
+# This function turns a label to a number
+def label_to_number(label):
+    num = 0
+    for char in label:
+        if char in string.ascii_letters:
+            num = num * 26 + (ord(char.upper()) - ord('A')) + 1
+    return num
+
 # As much as I like being certain, this code is somewhat baffling
 def removeExistingReadout(currentAssayReadout):
     AssayReadout.objects.filter(assay_device_readout=currentAssayReadout).delete()
@@ -414,69 +422,116 @@ def removeExistingReadout(currentAssayReadout):
 
 # TODO CHANGE BLOCK UPLOAD
 # TODO ADD TABULAR UPLOAD
-def parseReadoutCSV(currentAssayReadout, file):
+# TODO CHANGE ROW TO BE ALPHABETICAL IN LIEU OF NUMERIC?
+def parseReadoutCSV(currentAssayReadout, file, upload_type):
     removeExistingReadout(currentAssayReadout)
 
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
 
-    # Current assay
-    assay = None
-    # Current time
-    time = None
+    if upload_type == 'Block':
+        # Current assay
+        assay = None
+        # Current time
+        time = None
 
-    # Used to discern number of headers for offset
-    number_of_assays = 0
-    # Used to discern row offset
-    number_of_rows = currentAssayReadout.setup.assay_layout.device.number_of_rows
+        # Used to discern number of headers for offset
+        number_of_assays = 0
+        # Used to discern row offset
+        number_of_rows = currentAssayReadout.setup.assay_layout.device.number_of_rows
 
-    for row_id, line in enumerate(datalist):
-        # TODO HOW DO I DEAL WITH BLANK LINES???
-        # If line is blank
-        if not line:
-            continue
+        for row_id, line in enumerate(datalist):
+            # TODO HOW DO I DEAL WITH BLANK LINES???
+            # If line is blank
+            if not line:
+                continue
 
-        # If this line is a header
-        # Headers should look like: ASSAY, {{ASSAY}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
-        if line[0].lower().strip() == 'assay':
-            # GET THE ASSAY
-            assay = AssayModel.objects.get(assay_name=line[1])
-            number_of_assays += 1
+            # If this line is a header
+            # Headers should look like: FEATURE, {{FEATURE}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
+            if line[0].lower().strip() == 'feature':
+                feature = line[1]
+                # Get the assay
+                assay = AssayPlateReadoutAssay.objects.get(readout_id=currentAssayReadout, feature=feature)
+                number_of_assays += 1
 
-            if len(line) >= 8:
-                time = line[5]
+                if len(line) >= 8:
+                    time = line[5]
 
-            else:
-                time = None
-
-        # Otherwise the line contains datapoints for the current assay
-        else:
-            for column_id, value in enumerate(line):
-                # Treat empty strings as NULL values and do not save the data point
-                if not value:
-                    continue
-
-                # MUST OFFSET ROW (due to multiple datablocks)
-                offset_row_id = (row_id-number_of_assays) % number_of_rows
-
-                if time:
-                    AssayReadout(
-                        assay_device_readout=currentAssayReadout,
-                        row=offset_row_id,
-                        column=column_id,
-                        value=value,
-                        # the associated assay
-                        assay=AssayPlateReadoutAssay.objects.get(readout_id=currentAssayReadout, assay_id=assay),
-                        elapsed_time=time
-                    ).save()
                 else:
+                    time = None
+
+            # Otherwise the line contains datapoints for the current assay
+            else:
+                for column_id, value in enumerate(line):
+                    # Treat empty strings as NULL values and do not save the data point
+                    if not value:
+                        continue
+
+                    # MUST OFFSET ROW (due to multiple datablocks)
+                    offset_row_id = (row_id-number_of_assays) % number_of_rows
+
+                    if time:
+                        AssayReadout(
+                            assay_device_readout=currentAssayReadout,
+                            row=offset_row_id,
+                            column=column_id,
+                            value=value,
+                            # the associated assay
+                            assay=assay,
+                            elapsed_time=time
+                        ).save()
+                    else:
+                        AssayReadout(
+                            assay_device_readout=currentAssayReadout,
+                            row=offset_row_id,
+                            column=column_id,
+                            value=value,
+                            assay=assay,
+                        ).save()
+
+    # Otherwise if the upload is tabular
+    else:
+        # Purge empty lines, they are useless for tabular uploads
+        datalist = [row for row in datalist if any(row)]
+        # The first line SHOULD be the header
+        header = datalist[0]
+        # The features are the third column of the header onward
+        features = header[2:]
+        # Exclude the header to get only the data points
+        data = datalist[1:]
+
+        for row_index, row in enumerate(data):
+
+            # The well identifier given
+            well = row[1]
+            # Split the well into alphabetical and numeric
+            row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
+
+            # TODO PLEASE NOTE THAT THE VALUES ARE OFFSET BY ONE (to begin with 0)
+            # Convert row_label to a number
+            row_label = label_to_number(row_label) - 1
+            # Convert column label to an integer
+            column_label = int(column_label) - 1
+
+            # Values are the slice of the third item onward
+            values = row[2:]
+
+            for column_index, value in enumerate(values):
+                feature = features[column_index]
+                # TODO NOTE THAT BLANKS ARE CURRENTLY COMPLETELY EXCLUDED
+                if value != '':
+                    value = float(value)
+
+                    assay = AssayPlateReadoutAssay.objects.get(readout_id=currentAssayReadout, feature=feature)
+
                     AssayReadout(
                         assay_device_readout=currentAssayReadout,
-                        row=offset_row_id,
-                        column=column_id,
+                        row=row_label,
+                        column=column_label,
                         value=value,
-                        assay=AssayPlateReadoutAssay.objects.get(readout_id=currentAssayReadout, assay_id=assay),
+                        assay=assay,
                     ).save()
+
 
     # for rowID, rowValue in enumerate(datalist):
     #     # rowValue holds all of the row elements
@@ -496,16 +551,11 @@ def parseReadoutCSV(currentAssayReadout, file):
     #             value=columnValue
     #         ).save()
 
-# This function turns a label to a number
-def label_to_number(label):
-    num = 0
-    for char in label:
-        if char in string.ascii_letters:
-            num = num * 26 + (ord(char.upper()) - ord('A')) + 1
-    return num
 
 # TODO CHANGE BLOCK UPLOAD
 # TODO ADD TABULAR UPLOAD
+# TODO LINKING MULTIPLE ASSAYS TO ONE FEATURE IS AMBIGUOUS: DO NOT ALLOW IT
+# TODO DO NOT ALLOW ROW OR COLUMN OVERFLOW
 class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
     def clean(self):
         """Validate unique, existing PLATE READOUTS"""
@@ -691,6 +741,8 @@ class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
                         row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
                         # Convert row_label to a number
                         row_label = label_to_number(row_label)
+                        # Convert column label to an integer
+                        column_label = int(column_label)
                     except:
                         raise forms.ValidationError(
                         'Error parsing the well ID: {}'.format(well))
@@ -698,7 +750,7 @@ class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
                     # Values are the slice of the third item onward
                     values = row[2:]
 
-                    for column_index, value in values:
+                    for column_index, value in enumerate(values):
                         #feature = features[column_index]
 
                         # Check if all the values can be parsed as floats
@@ -829,6 +881,9 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
     def save_related(self, request, form, formsets, change):
         obj = form.instance
 
+        # Need to get the upload type
+        upload_type = form.data.get('upload_type')
+
         if change:
             obj.modified_by = request.user
 
@@ -842,7 +897,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parseReadoutCSV(obj, request.FILES['file'])
+            parseReadoutCSV(obj, request.FILES['file'], upload_type)
 
         #Need to delete entries when a file is cleared
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':

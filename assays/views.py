@@ -1254,8 +1254,10 @@ class AssayDeviceReadoutAdd(StudyGroupRequiredMixin, CreateView):
         formset.instance = form.instance
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
-            # Cleaned data may be used later
             data = form.cleaned_data
+
+            # Get upload_type
+            upload_type = data.get('upload_type')
 
             self.object = form.save()
             # Set restricted
@@ -1267,7 +1269,7 @@ class AssayDeviceReadoutAdd(StudyGroupRequiredMixin, CreateView):
             formset.save()
             if formset.files.get('file',''):
                 file = formset.files.get('file','')
-                parseReadoutCSV(self.object, file)
+                parseReadoutCSV(self.object, file, upload_type)
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -1334,8 +1336,10 @@ class AssayDeviceReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
         formset.instance = form.instance
 
         if form.is_valid() and formset.is_valid():
-            # To be used later (maybe)
             data = form.cleaned_data
+
+            # Get upload_type
+            upload_type = data.get('upload_type')
 
             self.object = form.save()
             # TODO refactor original created by
@@ -1347,7 +1351,7 @@ class AssayDeviceReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Save file if it exists
             if formset.files.get('file',''):
                 file = formset.files.get('file','')
-                parseReadoutCSV(self.object, file)
+                parseReadoutCSV(self.object, file, upload_type)
             # Clear data if clear is checked
             if self.request.POST.get('file-clear',''):
                 removeExistingReadout(self.object)

@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 # Ajax requests are sent to ajax(request) and funneled into the correct
 # handler function using a simulated Python switch routing function
 
+# TODO OPTIMIZE DATABASE HITS
+
 def main(request):
     return HttpResponseServerError()
 
@@ -42,7 +44,7 @@ def fetch_assay_layout_content(request):
     data = defaultdict(dict)
 
     # Fetch compounds
-    compounds = AssayCompound.objects.filter(assay_layout=layout)
+    compounds = AssayCompound.objects.filter(assay_layout=layout).prefetch_related('assay_layout', 'compound')
 
     for compound in compounds:
         well = compound.row + '_' + compound.column
@@ -57,21 +59,21 @@ def fetch_assay_layout_content(request):
         })
 
     # Fetch timepoints
-    timepoints = AssayTimepoint.objects.filter(assay_layout=layout)
+    timepoints = AssayTimepoint.objects.filter(assay_layout=layout).prefetch_related('assay_layout')
 
     for timepoint in timepoints:
         well = timepoint.row + '_' + timepoint.column
         data[well].update({'timepoint': timepoint.timepoint})
 
     # Fetch labels
-    labels = AssayWellLabel.objects.filter(assay_layout=layout)
+    labels = AssayWellLabel.objects.filter(assay_layout=layout).prefetch_related('assay_layout')
 
     for label in labels:
         well = label.row + '_' + label.column
         data[well].update({'label': label.label})
 
     # Fetch types
-    types = AssayWell.objects.filter(assay_layout=layout)
+    types = AssayWell.objects.filter(assay_layout=layout).prefetch_related('assay_layout', 'well_type')
 
     for type in types:
         well = type.row + '_' + type.column
@@ -102,7 +104,8 @@ def fetch_readout(request):
     # data = defaultdict(list)
     data = []
 
-    readouts = AssayReadout.objects.filter(assay_device_readout=current_readout_id).order_by('assay','elapsed_time')
+    readouts = AssayReadout.objects.filter(assay_device_readout=current_readout_id)\
+        .prefetch_related('assay_device_readout', 'assay').order_by('assay','elapsed_time')
 
     time_unit = AssayDeviceReadout.objects.filter(id=current_readout_id.id)[0].timeunit.unit
 
@@ -197,90 +200,6 @@ def fetch_well_types(request):
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
-
-
-# Since the well types are already acquired via AJAX, it is somewhat excessive to grab the color separately
-# def fetch_well_type_color(request):
-#     """Return wells type colors."""
-#
-#     current_id = request.POST.get('id')
-#
-#     if not current_id:
-#         logger.error('current_id was not sent with fetch_well_type_color')
-#         return HttpResponseServerError()
-#
-#     data = AssayWellType.objects.get(id=current_id).background_color
-#
-#     return HttpResponse(json.dumps(data),
-#                         content_type="application/json")
-
-
-# Base Layout is now merged into Assay Layout
-# def fetch_baseid(request):
-#     """Return the base assay layout id for a given assay layout"""
-#
-#     current_layout_id = request.POST.get('current_layout_id')
-#
-#     if not current_layout_id:
-#         logger.error('current_layout_id not present in request to fetch_baseid')
-#         return HttpResponseServerError()
-#
-#     assay_layout = AssayLayout.objects.get(id=current_layout_id)
-#
-#     # known to set base_layout_id to an integer value correctly
-#     base_layout_id = assay_layout.base_layout_id
-#
-#     data = {}
-#     data.update({'base_layout_id': base_layout_id})
-#
-#     return HttpResponse(json.dumps(data),
-#                         content_type="application/json")
-
-# Base layout is now part of assay layout
-# def fetch_base_layout_wells(request):
-#     """Return wells in a base layout."""
-#
-#     base_id = request.POST.get('id')
-#
-#     if not base_id:
-#         logger.error('base_id not present in request to fetch_base_layout_wells')
-#         return HttpResponseServerError()
-#
-#     data = {}
-#
-#     data.update({
-#         aw.row + '_' + aw.column: [aw.well_type.id, aw.well_type.well_type,
-#                                    aw.well_type.background_color]
-#         for aw in AssayWell.objects.filter(base_layout=base_id)
-#     })
-#
-#     return HttpResponse(json.dumps(data),
-#                         content_type="application/json")
-
-# def fetch_base_layout_info(request):
-#     """Return wells in a base layout."""
-#
-#     base_id = request.POST.get('id')
-#
-#     if not base_id:
-#         logger.error('base_id not present in request to fetch_base_layout_info')
-#         return HttpResponseServerError()
-#
-#     base = AssayBaseLayout.objects.get(id=base_id)
-#
-#     data = {}
-#
-#     data.update({
-#         'format': {'row_labels': base.layout_format.row_labels.split(),
-#                    'column_labels': base.layout_format.column_labels.split()},
-#
-#         'wells': {aw.row + '_' + aw.column: [aw.well_type.well_type,
-#                                              aw.well_type.background_color]
-#                   for aw in AssayWell.objects.filter(base_layout=base_id)}
-#     })
-#
-#     return HttpResponse(json.dumps(data),
-#                         content_type="application/json")
 
 #Fetches and displays assay layout from plate readout
 def fetch_plate_info(request):
