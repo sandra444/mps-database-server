@@ -225,7 +225,7 @@ $(document).ready(function () {
             }
             else {
                 readout_id = Math.floor(window.location.href.split('/')[5]);
-                if (readout_id) {
+                if (!isNaN(readout_id)) {
                     get_existing_readout(readout_id);
                 }
             }

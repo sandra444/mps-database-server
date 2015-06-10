@@ -14,7 +14,9 @@ from compounds.models import *
 import unicodedata
 from io import BytesIO
 import ujson as json
-
+# I use regular expressions for a string split at one point
+import re
+import string
 
 class AssayModelTypeAdmin(LockableAdmin):
     save_on_top = True
@@ -494,6 +496,13 @@ def parseReadoutCSV(currentAssayReadout, file):
     #             value=columnValue
     #         ).save()
 
+# This function turns a label to a number
+def label_to_number(label):
+    num = 0
+    for char in label:
+        if char in string.ascii_letters:
+            num = num * 26 + (ord(char.upper()) - ord('A')) + 1
+    return num
 
 # TODO CHANGE BLOCK UPLOAD
 # TODO ADD TABULAR UPLOAD
@@ -501,15 +510,24 @@ class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
     def clean(self):
         """Validate unique, existing PLATE READOUTS"""
 
+        # Get upload type
+        upload_type = self.data.get('upload_type')
+
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
         # Dic of assay names from inline with respective unit as value
         assays = {}
+        # Dic of features with respective assay
+        features_to_assay = {}
         for form in forms_data:
             try:
                 if form.cleaned_data:
                     assay_name = form.cleaned_data.get('assay_id').assay_name
                     unit = form.cleaned_data.get('readout_unit').readout_unit
+
+                    feature = form.cleaned_data.get('feature')
+                    features_to_assay.update({feature: assay_name})
+
                     if assay_name not in assays:
                         assays.update({assay_name:unit})
                     else:
@@ -548,85 +566,148 @@ class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
             datareader = csv.reader(test_file, delimiter=',')
             datalist = list(datareader)
 
-            # Tedious way of getting timeunit; probably should refactor
-            readout_time_unit = TimeUnits.objects.get(id=self.data.get('timeunit')).unit
+            if upload_type == 'Block':
+                # Tedious way of getting timeunit; probably should refactor
+                readout_time_unit = TimeUnits.objects.get(id=self.data.get('timeunit')).unit
 
-            # Acquire number of rows in devices to discern datablocks
-            number_of_rows = self.instance.setup.assay_layout.device.number_of_rows
+                # Acquire number of rows in devices to discern datablocks
+                number_of_rows = self.instance.setup.assay_layout.device.number_of_rows
 
-            # Number of assays found
-            assays_found = 0
-            # Number of data blocks found
-            data_blocks_found = 0
+                # Number of assays found
+                assays_found = 0
+                # Number of data blocks found
+                data_blocks_found = 0
 
-            for row_index, line in enumerate(datalist):
-                # If line is blank, skip it
-                if not line:
-                    continue
+                for row_index, line in enumerate(datalist):
+                    # If line is blank, skip it
+                    if not line:
+                        continue
 
-                # If this line is a header
-                # Headers should look like: ASSAY, {{ASSAY}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
-                if line[0].lower() == 'assay':
-                    # Throw error if header too short
-                    if len(line) < 4:
+                    # If this line is a header
+                    # NOTE THAT FEATURE -> ASSAU
+                    # Headers should look like: FEATURE, {{FEATURE}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
+                    if line[0].lower() == 'feature':
+                        # Throw error if header too short
+                        if len(line) < 4:
+                            raise forms.ValidationError(
+                                'Header row: {} is too short'.format(line))
+
+                        feature = line[1]
+
+                        assay = features_to_assay.get(feature, '')
+                        assays_found += 1
+
+                        val_unit = line[3]
+
+                        # Raise error if feature does not exist
+                        if feature not in features_to_assay:
+                            raise forms.ValidationError(
+                                'No feature with the name "%s" exists; please change your file or add this feature' % feature)
+                        # Raise error when an assay does not exist
+                        if assay not in assays:
+                            raise forms.ValidationError(
+                                'No assay with the name "%s" exists; please change your file or add this assay' % assay)
+                        # Raise error if val_unit not equal to one listed in ACRA
+                        if val_unit != assays.get(assay,''):
+                            raise forms.ValidationError(
+                                'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+
+                        # Fail if time given without time units
+                        if len(line) < 8 and len(line) > 4 and any(line[3:]):
+                            raise forms.ValidationError(
+                                'Header row: {} improperly configured'.format(line))
+
+                        if len(line) >= 8:
+                            time = line[5]
+                            time_unit = line[7]
+
+                            # Fail if time is not numeric
+                            try:
+                                float(time)
+                            except:
+                                raise forms.ValidationError(
+                                    'The time "{}" is invalid. Please only enter numeric times'.format(time))
+
+                            # Fail if time unit does not match
+                            # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
+                            if time_unit[0] != readout_time_unit[0]:
+                                raise forms.ValidationError(
+                                    'The time unit "%s" does not correspond with the selected readout time unit of "%s"' % (time_unit, readout_time_unit))
+
+                    # Otherwise the line contains datapoints for the current assay
+                    else:
+                        # TODO REVISE HOW DATA_BLOCKS ARE ACQUIRED
+                        if data_blocks_found == 0 or (row_index-assays_found) % number_of_rows == 0:
+                            data_blocks_found += 1
+
+                        if data_blocks_found > assays_found:
+                            raise forms.ValidationError(
+                                        'All plate data must have an assay associated with it. Please add a header line.')
+                        # For every value in the line
+                        for val in line:
+                            # Check every value to make sure it can resolve to a float
+                            try:
+                                # Keep empty strings, though they technically can not be converted to floats
+                                if val != '':
+                                    float(val)
+                            except:
+                                raise forms.ValidationError(
+                                        'The value "%s" is invalid; please make sure all values are numerical' % str(val))
+
+            # If not block, then it is tabular data
+            else:
+                # Purge empty lines, they are useless for tabular uploads
+                datalist = [row for row in datalist if any(row)]
+                # The first line SHOULD be the header
+                header = datalist[0]
+                # The features are the third column of the header onward
+                features = header[2:]
+                # Exclude the header to get only the data points
+                data = datalist[1:]
+
+                # Fail if there are no features
+                if len(features) < 1:
+                    raise forms.ValidationError(
+                        'The file does not contain any features')
+
+                for feature in features:
+                    # Get associated assay
+                    assay = features_to_assay.get(feature, '')
+                    # Raise error if feature does not exist
+                    if feature not in features_to_assay:
                         raise forms.ValidationError(
-                            'Header row: {} is too short'.format(line))
-
-                    assay = line[1]
-                    assays_found += 1
-
-                    val_unit = line[3]
-
+                            'No feature with the name "%s" exists; please change your file or add this feature' % feature)
                     # Raise error when an assay does not exist
                     if assay not in assays:
                         raise forms.ValidationError(
                             'No assay with the name "%s" exists; please change your file or add this assay' % assay)
-                    # Raise error if val_unit not equal to one listed in ACRA
-                    if val_unit != assays.get(assay,''):
+
+                for row_index, row in enumerate(data):
+                    # Check if well id is valid
+                    try:
+                        # The well identifier given
+                        well = row[1]
+                        # Split the well into alphabetical and numeric
+                        row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
+                        # Convert row_label to a number
+                        row_label = label_to_number(row_label)
+                    except:
                         raise forms.ValidationError(
-                            'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+                        'Error parsing the well ID: {}'.format(well))
 
-                    # Fail if time given without time units
-                    if len(line) < 8 and len(line) > 4 and any(line[3:]):
-                        raise forms.ValidationError(
-                            'Header row: {} improperly configured'.format(line))
+                    # Values are the slice of the third item onward
+                    values = row[2:]
 
-                    if len(line) >= 8:
-                        time = line[5]
-                        time_unit = line[7]
+                    for column_index, value in values:
+                        #feature = features[column_index]
 
-                        # Fail if time is not numeric
+                        # Check if all the values can be parsed as floats
                         try:
-                            float(time)
+                            if value != '':
+                                float(value)
                         except:
                             raise forms.ValidationError(
-                                'The time "{}" is invalid. Please only enter numeric times'.format(time))
-
-                        # Fail if time unit does not match
-                        # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
-                        if time_unit[0] != readout_time_unit[0]:
-                            raise forms.ValidationError(
-                                'The time unit "%s" does not correspond with the selected readout time unit of "%s"' % (time_unit, readout_time_unit))
-
-                # Otherwise the line contains datapoints for the current assay
-                else:
-                    # TODO REVISE HOW DATA_BLOCKS ARE ACQUIRED
-                    if data_blocks_found == 0 or (row_index-assays_found) % number_of_rows == 0:
-                        data_blocks_found += 1
-
-                    if data_blocks_found > assays_found:
-                        raise forms.ValidationError(
-                                    'All plate data must have an assay associated with it. Please add a header line.')
-                    # For every value in the line
-                    for val in line:
-                        # Check every value to make sure it can resolve to a float
-                        try:
-                            # Keep empty strings, though they technically can not be converted to floats
-                            if val != '':
-                                float(val)
-                        except:
-                            raise forms.ValidationError(
-                                    'The value "%s" is invalid; please make sure all values are numerical' % str(val))
+                                    'The value {} is invalid; please make sure all values are numerical'.format(value))
 
 
 class AssayPlateReadoutInline(admin.TabularInline):
