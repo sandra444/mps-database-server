@@ -564,7 +564,7 @@ class AssayChipSetup(FlaggableModel):
         return "/assays/%i/" % self.assay_run_id.id
 
 object_types = (
-    ('F', 'Field'), ('C', 'Colony'), ('O', 'Outflow'), ('X', 'Other')
+    ('F', 'Field'), ('C', 'Colony'), ('M', 'Media'), ('X', 'Other')
 )
 
 
