@@ -267,7 +267,7 @@ SEVERITY_SCORE = (
 
 
 POSNEG = (
-    ('0', 'Neg'), ('1', 'Pos')
+    ('0', 'Negative'), ('1', 'Positive'), ('x', 'Failed')
 )
 
 
@@ -369,7 +369,7 @@ class AssayResult(models.Model):
     result = models.CharField(default='1',
                               max_length=8,
                               choices=POSNEG,
-                              verbose_name='Pos/Neg?')
+                              verbose_name='Result')
 
     severity = models.CharField(default='-1',
                                 max_length=5,
