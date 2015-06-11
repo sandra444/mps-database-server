@@ -76,7 +76,6 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
         return self.render_to_response(context)
 
 
-
 class StudyIndex(ObjectGroupRequiredMixin, DetailView):
     model = AssayRun
     context_object_name = 'study_index'

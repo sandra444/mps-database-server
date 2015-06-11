@@ -17,6 +17,7 @@ import ujson as json
 # I use regular expressions for a string split at one point
 import re
 import string
+from django.db import transaction
 
 class AssayModelTypeAdmin(LockableAdmin):
     save_on_top = True
@@ -147,8 +148,12 @@ class AssayWellInline(admin.TabularInline):
 
 # Saving an Assay Layout is somewhat complicated, so a function is useful here (though perhaps not in this file [spaghetti])
 # BE CAREFUL! FIELDS THAT ARE NOT IN THE FORM ARE AUTOMATICALLY SET TO NONE!
+@transaction.atomic
 def save_assay_layout(request, obj, form, change):
     layout = obj
+
+    compounds = dict((str(o.pk), o) for o in Compound.objects.all())
+    well_types = dict((str(o.pk), o) for o in AssayWellType.objects.all())
 
     if change:
         # Delete old compound data for this assay
@@ -208,7 +213,7 @@ def save_assay_layout(request, obj, form, change):
                 # Add compound info
                 AssayCompound(
                     assay_layout=obj,
-                    compound=Compound.objects.get(id=content['compound']),
+                    compound=compounds.get(content['compound']),
                     concentration=content['concentration'],
                     concentration_unit=content['concentration_unit'],
                     row=row,
@@ -243,7 +248,7 @@ def save_assay_layout(request, obj, form, change):
                 # Add new timepoint info
                 AssayWell(
                     assay_layout=obj,
-                    well_type=AssayWellType.objects.get(id=val),
+                    well_type=well_types.get(val),
                     row=row,
                     column=column
                 ).save()
@@ -423,11 +428,14 @@ def removeExistingReadout(currentAssayReadout):
 # TODO CHANGE BLOCK UPLOAD
 # TODO ADD TABULAR UPLOAD
 # TODO CHANGE ROW TO BE ALPHABETICAL IN LIEU OF NUMERIC?
+@transaction.atomic
 def parseReadoutCSV(currentAssayReadout, file, upload_type):
     removeExistingReadout(currentAssayReadout)
 
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
+
+    assays = dict((o.feature, o) for o in AssayPlateReadoutAssay.objects.filter(readout_id=currentAssayReadout))
 
     if upload_type == 'Block':
         # Current assay
@@ -451,7 +459,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
             if line[0].lower().strip() == 'feature':
                 feature = line[1]
                 # Get the assay
-                assay = AssayPlateReadoutAssay.objects.get(readout_id=currentAssayReadout, feature=feature)
+                assay = assays.get(feature)
                 number_of_assays += 1
 
                 if len(line) >= 8:
@@ -501,7 +509,6 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
         data = datalist[1:]
 
         for row_index, row in enumerate(data):
-
             # The well identifier given
             well = row[1]
             # Split the well into alphabetical and numeric
@@ -522,7 +529,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                 if value != '':
                     value = float(value)
 
-                    assay = AssayPlateReadoutAssay.objects.get(readout_id=currentAssayReadout, feature=feature)
+                    assay = assays.get(feature)
 
                     AssayReadout(
                         assay_device_readout=currentAssayReadout,
@@ -921,6 +928,7 @@ def removeExistingChip(currentChipReadout):
     #         readout.delete()
     # return
 
+@transaction.atomic
 def parseChipCSV(currentChipReadout, file, headers):
     removeExistingChip(currentChipReadout)
 
@@ -1666,6 +1674,7 @@ admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
 # TODO CHANGE TO USE SETUP IN LIEU OF READOUT ID
 # TODO CHANGE TO REMOVE PREVIOUS DATA
+@transaction.atomic
 def parseRunCSV(currentRun, file):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
