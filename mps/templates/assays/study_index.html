@@ -61,18 +61,63 @@
         </div>
         {% endif %}
 
+        {% if plate_setups %}
+        <table id="plate_setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Plate Setup ID / Barcode</th>
+                    <th>Date</th>
+                    <th>Assay Layout</th>
+                    <th>Creator</th>
+                    <th>Flagged</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for setup in plate_setups %}
+                <tr id={{ setup.id }} name={{ setup.id }}>
+                    <td><a href="/assays/assaydevicesetup/{{ setup.id }}/update">{{ setup.assay_device_id }}</a></td>
+                    <td>{{ setup.setup_date }}</td>
+                    <td>{{ setup.assay_layout }}</td>
+                    <td>{{ setup.created_by }}</td>
+                    <td>
+                        {% if setup.flagged %}
+                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No plate setups exist for this study
+        </div>
+        {% endif %}
+
         <legend><h2>Readouts
-            {% if setups.count == 0 or setups.count == readouts.count%}
+            {% if setups.count == 0 or setups.count == readouts.count %}
                 <div hidden id="readout_alert" class="alert alert-warning" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Warning:</span>
-                    You must add at least one setup before adding a readout.
+                    You must add at least one chip setup before adding a chip readout.
                 </div>
-                <a class="btn btn-warning" role="button" onClick="$('#readout_alert').removeProp('hidden');">Add Readout</a>
+                <a class="btn btn-warning" role="button" onClick="$('#readout_alert').removeProp('hidden');">Add Chip Readout</a>
             {% else %}
                 <a href="assaychipreadout/add" class="btn btn-success" role="button">Add Readout</a>
             {% endif %}
-            <a href="assaydevicereadout/add" class="btn btn-success" role="button">Add Plate Readout</a>
+
+            {% if plate_setups.count == 0 or plate_setups.count == plate_readouts.count %}
+                <div hidden id="plate_readout_alert" class="alert alert-warning" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Warning:</span>
+                    You must add at least one plate setup before adding a plate readout.
+                </div>
+                <a class="btn btn-warning" role="button" onClick="$('#plate_readout_alert').removeProp('hidden');">Add Plate Readout</a>
+            {% else %}
+                <a href="assaydevicereadout/add" class="btn btn-success" role="button">Add Plate Readout</a>
+            {% endif %}
+
         </h2></legend>
 
         {% if readouts %}
@@ -115,19 +160,70 @@
         </div>
         {% endif %}
 
+        {% if plate_readouts %}
+        <table id="plate_readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Plate Readout ID</th>
+                    <th>Plate Setup</th>
+                    <th>Assays</th>
+                    <th>Readout Date</th>
+                    <th>Creator</th>
+                    <th>Flagged</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for readout in plate_readouts %}
+                <tr id={{ readout.id }} name={{ readout.id }}>
+                    <td><a href="/assays/assaydevicereadout/{{ readout.id }}/update/">{{ readout.id }}</a></td>
+                    <td><a href="/assays/assaydevicesetup/{{ readout.setup.id }}/update/">{{ readout.setup }}</a></td>
+                    <td>
+                        {% for assay in readout.related_assays %}
+                            {{ assay }}
+                        {% endfor %}
+                    </td>
+                    <td>{{ readout.readout_start_time }}</td>
+                    <td>{{ readout.created_by }}</td>
+                    <td>
+                        {% if readout.flagged %}
+                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No plate readouts exist for this study
+        </div>
+        {% endif %}
+
         <legend><h2>Results
             {# Later should add condition for when not enough readouts or setups #}
             {% if readouts.count == 0 or number_of_results == readouts.count %}
                 <div hidden id="result_alert" class="alert alert-warning" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Warning:</span>
-                    You must add at least one readout before adding a result.
+                    You must add at least one chip readout before adding a chip result.
                 </div>
-                <a class="btn btn-warning" role="button" onClick="$('#result_alert').removeProp('hidden');">Add Result</a>
+                <a class="btn btn-warning" role="button" onClick="$('#result_alert').removeProp('hidden');">Add Chip Result</a>
             {% else %}
                 <a href="assaytestresult/add" class="btn btn-success" role="button">Add Chip Result</a>
+            {% endif %}
+
+            {% if plate_readouts.count == 0 or number_of_plate_results == plate_vreadouts.count %}
+                <div hidden id="plate_result_alert" class="alert alert-warning" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Warning:</span>
+                    You must add at least one plate readout before adding a plate result.
+                </div>
+                <a class="btn btn-warning" role="button" onClick="$('#plate_result_alert').removeProp('hidden');">Add Plate Result</a>
+            {% else %}
                 <a href="assayplatetestresult/add" class="btn btn-success" role="button">Add Plate Result</a>
             {% endif %}
+
         </h2></legend>
 
         {% if results %}
@@ -185,5 +281,62 @@
             No chip results exist for this study
         </div>
         {% endif %}
+
+        {% if plate_results %}
+        <table id="results" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Plate Test Results ID</th>
+                    <th>Plate Setup</th>
+                    <th>Plate Readout ID</th>
+                    <th>Assay</th>
+                    <th>Result</th>
+                    <th>Result Function</th>
+                    <th>Result Type</th>
+                    <th>Severity</th>
+                    <th>Creator</th>
+                    <th>Flagged</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for result in plate_results %}
+                <tr class="result" id={{ result.id }} name={{ result.id }}>
+                    <td>
+                        <a href="/assays/assayplatetestresult/{{ result.assay_result.id }}/update/">
+                            {{ result.assay_result.id }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/assaydevicesetup/{{ result.assay_result.assay_device_id.setup.id }}/update/">
+                            {{ result.assay_result.assay_device_id.setup }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/assaydevicereadout/{{ result.assay_result.assay_device_id.id }}/update/">
+                            {{ result.assay_result.assay_device_id.id }}
+                        </a>
+                    </td>
+                    <td>{{ result.assay_name }}</td>
+                    <td>{{ result.get_result_display }}</td>
+                    <td>{{ result.result_function }}</td>
+                    <td>{{ result.result_type }}</td>
+                    <td>{{ result.get_severity_display }}</td>
+                    <td>{{ result.assay_result.created_by }}</td>
+                    <td>
+                        {% if result.assay_result.flagged %}
+                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No plate results exist for this study
+        </div>
+        {% endif %}
+
     </div>
 {% endblock %}

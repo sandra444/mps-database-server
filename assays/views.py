@@ -82,7 +82,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
     context_object_name = 'study_index'
     template_name = 'assays/study_index.html'
 
-
+    # TODO OPTIMIZE DATABASE HITS
     def get(self, request, **kwargs):
         self.object = self.get_object()
 
@@ -92,7 +92,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
                                                                                                        'compound',
                                                                                                        'created_by')
         readouts = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
-            'chip_setup', 'created_by').select_related('chip_setup__compound',
+            'created_by').select_related('chip_setup__compound',
                                                                    'chip_setup__unit')
 
         related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
@@ -108,7 +108,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
 
         context['readouts'] = readouts
 
-        context['results'] = AssayResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function', 'result_type',
+        context['results'] = AssayResult.objects.prefetch_related('result_function', 'result_type',
                                                     'test_unit').select_related('assay_result__chip_readout__chip_setup',
                                                                                 'assay_result__chip_readout__chip_setup__unit',
                                                                                 'assay_name__assay_id',
@@ -116,11 +116,33 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
 
         context['number_of_results'] = AssayTestResult.objects.filter(chip_readout=context['readouts']).count()
 
-        # Check if this is setup only; if so add to add respective URLS
-        # if request.GET.get('setup', ''):
-        #     context['setup_only'] = '/?setup=1'
-        # else:
-        #     context['setup_only'] = ''
+        # PLATES
+
+        context['plate_setups'] = AssayDeviceSetup.objects.filter(assay_run_id=self.object).prefetch_related('assay_layout',
+                                                                                                       'created_by')
+        readouts = AssayDeviceReadout.objects.filter(setup=context['plate_setups']).prefetch_related('setup', 'created_by')
+
+        related_assays = AssayPlateReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
+        related_assays_map = {}
+
+        for assay in related_assays:
+            # start appending to a list keyed by the readout ID for all related images
+            related_assays_map.setdefault(assay.readout_id.id, []).append(assay)
+
+        for readout in readouts:
+            # set an attribute on the readout that is the list created above
+            readout.related_assays = related_assays_map.get(readout.id)
+
+        context['plate_readouts'] = readouts
+
+        context['plate_results'] = AssayPlateResult.objects.prefetch_related('result_function', 'result_type',
+                                                    'test_unit', 'assay_result').select_related('assay_result__assay_device_id__setup',
+                                                                                'assay_result__assay_device_id__setup__unit',
+                                                                                'assay_name__assay_id',
+                                                                                'assay_result__created_by').filter(assay_result__assay_device_id=context['plate_readouts'])
+
+        context['number_of_plate_results'] = AssayPlateTestResult.objects.filter(assay_device_id=context['plate_readouts']).count()
+
         return self.render_to_response(context)
 
 
