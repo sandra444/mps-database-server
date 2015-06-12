@@ -127,6 +127,7 @@ def fetch_readout(request):
                 # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
                 'time_unit': time_unit,
                 'value_unit': readout.assay.readout_unit.readout_unit,
+                'feature': readout.assay.feature,
             })
         else:
             data.append({
@@ -136,6 +137,7 @@ def fetch_readout(request):
                 'assay': readout.assay.assay_id.assay_name,
                 # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
                 'value_unit': readout.assay.readout_unit.readout_unit,
+                'feature': readout.assay.feature,
             })
 
     return HttpResponse(json.dumps(data),

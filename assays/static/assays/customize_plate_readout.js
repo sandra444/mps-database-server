@@ -14,6 +14,11 @@ $(document).ready(function () {
     // The file
     var file = $('#id_file');
 
+    // Feature select for heatmap
+    var feature_select = $('#feature_select');
+    // This will contain the min, max, and median values for a feature (for the heatmap)
+    var feature_parameters = {};
+
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     // Get layout
@@ -232,6 +237,19 @@ $(document).ready(function () {
         }
     }
 
+    function heatmap_options(features) {
+        $.each(features, function (index, feature) {
+                // Prepend 'f' to avoid invalid class name; remove all invalid characters
+                var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
+                var option = $('<option>')
+                    .attr('value', feature_class)
+                    .text(feature);
+                feature_select.append(option);
+            });
+            $('#heatmap_options').show();
+            feature_select.trigger('change');
+    }
+
     var get_text = function (readFile) {
         var reader = new FileReader();
         reader.readAsText(readFile, "UTF-8");
@@ -279,7 +297,11 @@ $(document).ready(function () {
 
         all = null;
 
+        // Remove old values
         $('.value').remove();
+
+        // Reset feature parameters
+        feature_parameters = {};
 
         // Whether or not the upload should fail
         var failed = false;
@@ -361,26 +383,41 @@ $(document).ready(function () {
                             //console.log('well_id: ' + well_id);
 
                             // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
-                            var text = (time && time_unit) ?
-                                feature + ': ' + value + ' ' + value_unit + '\t(' + time + ' ' + time_unit + ') ' :
-                                feature + ': ' + value + ' ' + value_unit;
+//                            var text = (time && time_unit) ?
+//                                feature + ': ' + value + ' ' + value_unit + '\t(' + time + ' ' + time_unit + ') ' :
+//                                feature + ': ' + value + ' ' + value_unit;
+//
+//                            // If value is not a number
+//                            if (isNaN(value)) {
+//                                $(well_id).append(
+//                                    '<div class="value" style="text-align: center; color: red;"><p><b>' +
+//                                    text +
+//                                    '</b></p></div>');
+//                                // Fail the file
+//                                failed += 'non-numeric';
+//                            }
+//
+//                            else {
+//                                $(well_id).append(
+//                                    '<div class="value" style="text-align: center; color: blue;"><p><b>' +
+//                                    text +
+//                                    '</b></p></div>');
+//                            }
+                            // Prepend 'f' to avoid invalid class name; remove all invalid characters
+                            var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
 
                             // If value is not a number
                             if (isNaN(value)) {
-                                $(well_id).append(
-                                    '<div class="value" style="text-align: center; color: red;"><p><b>' +
-                                    text +
-                                    '</b></p></div>');
                                 // Fail the file
                                 failed += 'non-numeric';
                             }
 
-                            else {
-                                $(well_id).append(
-                                    '<div class="value" style="text-align: center; color: blue;"><p><b>' +
-                                    text +
-                                    '</b></p></div>');
-                            }
+                            // Consider adding lead if people demand a larger font
+                            var readout = $('<p>')
+                                .addClass('value text-center ' + feature_class)
+                                .text(value);
+
+                            $(well_id).append(readout);
                         });
                     }
                 }
@@ -428,25 +465,24 @@ $(document).ready(function () {
 
                 $.each(values, function (column_index, value) {
                     feature = features[column_index];
-                     // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
-                    var text = feature + ': ' + value;
+                    // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
+                    // var text = feature + ': ' + value;
+
+                    // Prepend 'f' to avoid invalid class name; remove all invalid characters
+                    var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
 
                     // If value is not a number
                     if (isNaN(value)) {
-                        $(well_id).append(
-                            '<div class="value" style="text-align: center; color: red;"><p><b>' +
-                            text +
-                            '</b></p></div>');
                         // Fail the file
                         failed += 'non-numeric';
                     }
 
-                    else {
-                        $(well_id).append(
-                            '<div class="value" style="text-align: center; color: blue;"><p><b>' +
-                            text +
-                            '</b></p></div>');
-                    }
+                    // Consider adding lead if people demand a larger font
+                    var readout = $('<p>')
+                        .addClass('value text-center ' + feature_class)
+                        .text(value);
+
+                    $(well_id).append(readout);
                 });
             });
         }
@@ -463,7 +499,7 @@ $(document).ready(function () {
         }
 
         // TODO
-        // If the file upload has succeeded, show the feature binding dialog
+        // If the file upload has succeeded, show the feature binding dialog and the heatmap dialog
         else {
             $.each(features, function (index, feature) {
                 var row = $('<tr>')
@@ -486,6 +522,10 @@ $(document).ready(function () {
                 $('#binding_table').append(row);
             });
             $('#binding').show();
+
+            // Heatmap dialog
+            heatmap_options(features);
+
             alert('Please link features to assays');
         }
     }
@@ -521,8 +561,13 @@ $(document).ready(function () {
         // Clear any leftover values from previews
         $('.value').remove();
 
+        var features = {};
+
         $.each(data, function(index, well_data) {
             var value = well_data.value;
+
+            // TODO
+            // HOW WILL THESE BE DISPLAYED?
             var value_unit = well_data.value_unit;
             var time = well_data.time;
             var time_unit = well_data.time_unit;
@@ -532,15 +577,35 @@ $(document).ready(function () {
             var column_label = column_labels[well_data.column];
             var well_id = '#' + row_label + '_' + column_label;
 
-            var text = (time && time_unit) ?
-                assay + ': ' + value + ' ' + value_unit +'\t(' + time + ' ' + time_unit + ') ':
-                assay + ': ' + value + ' ' + value_unit;
+            var feature = well_data.feature;
 
-            $(well_id).append(
-                    '<div class="value" style="text-align: center; color: blue;"><p><b>' +
-                    text +
-                    '</b></p></div>');
+            // Add feature to features
+            features[feature] = feature;
+
+//            var text = (time && time_unit) ?
+//                assay + ': ' + value + ' ' + value_unit +'\t(' + time + ' ' + time_unit + ') ':
+//                assay + ': ' + value + ' ' + value_unit;
+
+//            $(well_id).append(
+//                '<div class="value" style="text-align: center; color: blue;"><p><b>' +
+//                text +
+//                '</b></p></div>');
+
+            // Prepend 'f' to avoid invalid class name; remove all invalid characters
+            var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
+
+            // Consider adding lead if people demand a larger font
+            var readout = $('<p>')
+                .addClass('value text-center ' + feature_class)
+                .text(value);
+
+            $(well_id).append(readout);
         });
+
+        // Convert features to an array
+        features = _.values(features);
+
+        heatmap_options(features);
     }
 
     // On setup change, acquire labels and build table
@@ -558,5 +623,13 @@ $(document).ready(function () {
     // If the file changes
     file.change( function () {
         get_readout();
+    });
+
+    // When the feature_select changes, get the correct values
+    feature_select.change( function() {
+        var current_feature = feature_select.val();
+
+        $('.value').hide();
+        $('.' + current_feature).show();
     });
 });

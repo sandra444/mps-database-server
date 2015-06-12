@@ -286,7 +286,16 @@
 
 {# CONTRIVED: REFACTOR SOON #}
 <div class="col-xs-12">
-    <div class="inline-group"></div>
+    <div hidden id="heatmap_options" class="inline-group row">
+        <div class="col-xs-6">
+            <div class="col-sm-2">
+                <label for="feature_select">Select Feature</label>
+            </div>
+            <div class="col-sm-10">
+                <select id="feature_select"></select>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock %}
