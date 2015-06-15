@@ -56,23 +56,23 @@
 
     <legend>Readout Details</legend>
 
-    {% if form.assay_device_id.errors %}
-        {% for error in form.assay_device_id.errors %}
-            <div class="alert alert-danger" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Error:</span>
-                {{error}}
-            </div>
-        {% endfor %}
-    <div class="form-group has-error">
-    {% else %}
-    <div class="form-group">
-    {% endif %}
-        <label for="assay_device_id" class="col-sm-2 control-label">Readout ID/Barcode*</label>
-        <div class="col-sm-10">
-          {{ form.assay_device_id }}
-        </div>
-    </div>
+{#    {% if form.assay_device_id.errors %}#}
+{#        {% for error in form.assay_device_id.errors %}#}
+{#            <div class="alert alert-danger" role="alert">#}
+{#                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                <span class="sr-only">Error:</span>#}
+{#                {{error}}#}
+{#            </div>#}
+{#        {% endfor %}#}
+{#    <div class="form-group has-error">#}
+{#    {% else %}#}
+{#    <div class="form-group">#}
+{#    {% endif %}#}
+{#        <label for="assay_device_id" class="col-sm-2 control-label">Readout ID/Barcode*</label>#}
+{#        <div class="col-sm-10">#}
+{#          {{ form.assay_device_id }}#}
+{#        </div>#}
+{#    </div>#}
 
     {% if form.setup.errors %}
         {% for error in form.setup.errors %}

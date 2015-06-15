@@ -365,12 +365,12 @@ class AssayDeviceReadout(FlaggableModel):
 
     class Meta(object):
         verbose_name = 'Plate Readout'
-        ordering = ('assay_device_id',)
 
     # the unique readout identifier
     # can be a barcode or a hand written identifier
-    assay_device_id = models.CharField(max_length=512,
-                                       verbose_name='Readout ID/ Barcode')
+    # REMOVING READOUT ID FOR NOW
+    # assay_device_id = models.CharField(max_length=512,
+    #                                    verbose_name='Readout ID/ Barcode')
 
     # Cell samples are to be handled in AssayDeviceSetup from now on
     # ### TODO This code is slated to be removed ###
@@ -417,7 +417,7 @@ class AssayDeviceReadout(FlaggableModel):
                             blank=True, null=True)
 
     def __unicode__(self):
-        return u'{0}'.format(self.assay_device_id)
+        return u'{0}'.format(self.id)
 
     def get_absolute_url(self):
         return "/assays/{}/".format(self.setup.assay_run_id.id)

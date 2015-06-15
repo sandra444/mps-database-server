@@ -778,7 +778,7 @@ class AssayPlateReadoutInline(admin.TabularInline):
 
     fields = (
         (
-            ('assay_id','reader_id','readout_unit',)
+            ('assay_id','reader_id','readout_unit','feature')
         ),
     )
     extra = 0
@@ -813,17 +813,17 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
     # raw_id_fields = ("cell_sample",)
     save_on_top = True
     list_per_page = 300
-    list_display = ('assay_device_id',
+    list_display = ('id',
+                    #'assay_device_id',
                     # 'cell_sample',
                     'readout_start_time',)
-    search_fields = ['assay_device_id']
     fieldsets = (
         (
             'Device Parameters', {
                 'fields': (
-                    (
-                        'assay_device_id',
-                    ),
+                    # (
+                    #     'assay_device_id',
+                    # ),
                     (
                         'setup',
                     ),
