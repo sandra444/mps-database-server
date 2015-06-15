@@ -4,6 +4,17 @@
 // TODO PREFERRABLY CONSOLIDATE THESE DISPLAY FUNCTION (DO NOT REPEAT YOURSELF)
 $(document).ready(function () {
 
+    // Pulled from heatmap
+    var colors = [
+        '#008000', '#1A8C00', '#339800', '#4DA400', '#66B000',
+        '#80BC00',
+        '#99C800', '#B3D400', '#CCE000', '#E6EC00', '#FFFF00',
+        '#F3E600',
+        '#E7CC00', '#DBB300', '#CF9900', '#C38000', '#B76600',
+        '#AB4D00',
+        '#9F3300', '#931A00', '#870000'
+    ];
+
     // It is useful to have a list of row and column labels
     var row_labels = null;
     var column_labels = null;
@@ -17,7 +28,12 @@ $(document).ready(function () {
     // Feature select for heatmap
     var feature_select = $('#feature_select');
     // This will contain the min, max, and median values for a feature (for the heatmap)
-    var feature_parameters = {};
+    //var feature_parameters = {};
+    // This contains all values for a feature
+    var feature_values = {};
+
+    // This will contain the respective colors for each feature on a well to well basis
+    var heatmaps = {};
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
@@ -221,13 +237,14 @@ $(document).ready(function () {
         }
         // If readout already exists
         else {
-            // gets the id of existing readout object from the delete link
+            // gets the id of existing readout object from the delete link (admin)
             var readout_id = undefined;
             var delete_link = $('.deletelink');
             if (delete_link.length > 0) {
                 readout_id = delete_link.first().attr('href').split('/')[4];
                 get_existing_readout(readout_id);
             }
+            // Otherwise, if this is the frontend, get the id from the URL
             else {
                 readout_id = Math.floor(window.location.href.split('/')[5]);
                 if (!isNaN(readout_id)) {
@@ -238,6 +255,9 @@ $(document).ready(function () {
     }
 
     function heatmap_options(features) {
+        // Clear old features
+        feature_select.empty();
+
         $.each(features, function (index, feature) {
                 // Prepend 'f' to avoid invalid class name; remove all invalid characters
                 var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
@@ -248,6 +268,35 @@ $(document).ready(function () {
             });
             $('#heatmap_options').show();
             feature_select.trigger('change');
+    }
+
+    function build_heatmap(feature_values) {
+        // For each feature
+        $.each(feature_values, function(feature, values) {
+            // Start the heatmap for this feature
+            heatmaps[feature] = {};
+
+            // Get the values list
+            // Be sure to exclude null values
+            var values_list = _.without(_.values(values), NaN);
+            // Get the min
+            var min_value = _.min(values_list);
+            min_value -= min_value * 0.000001;
+            // Get the max
+            var max_value = _.max(values_list);
+            max_value += max_value * 0.000001;
+            // Get the median
+            var median = d3.median(values_list);
+            // Get the colorscale
+            var color_scale = d3.scale.quantile()
+                .domain([min_value , median, max_value])
+                .range(colors);
+
+            // For each value
+            $.each(values, function(well, value) {
+                heatmaps[feature][well] = value ? color_scale(value) : '#606060';
+            });
+        });
     }
 
     var get_text = function (readFile) {
@@ -300,15 +349,15 @@ $(document).ready(function () {
         // Remove old values
         $('.value').remove();
 
-        // Reset feature parameters
-        feature_parameters = {};
-
         // Whether or not the upload should fail
         var failed = false;
         // Whether to read the file as tabular or block
         var upload_type = $('#id_upload_type').val();
-        // Get a dictionary/array of features
+        // Get an array of features
         var features = [];
+
+        // Get all values in a dict with features as keys
+        feature_values = {};
 
         if (upload_type == 'Block') {
             // Current feature
@@ -334,6 +383,10 @@ $(document).ready(function () {
 
                     // Add feature to features
                     features.push(feature);
+
+                    // Add feature to feature_values
+                    var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
+                    feature_values[feature_class] = {};
 
                     value_unit = row[3];
                     time = row[5];
@@ -403,8 +456,9 @@ $(document).ready(function () {
 //                                    text +
 //                                    '</b></p></div>');
 //                            }
+
                             // Prepend 'f' to avoid invalid class name; remove all invalid characters
-                            var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
+                            feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
 
                             // If value is not a number
                             if (isNaN(value)) {
@@ -414,10 +468,13 @@ $(document).ready(function () {
 
                             // Consider adding lead if people demand a larger font
                             var readout = $('<p>')
-                                .addClass('value text-center ' + feature_class)
+                                .addClass('value text-center bg-primary ' + feature_class)
                                 .text(value);
 
                             $(well_id).append(readout);
+
+                            // Add value to feature_values
+                            feature_values[feature_class][well_id] = parseFloat(value);
                         });
                     }
                 }
@@ -465,6 +522,7 @@ $(document).ready(function () {
 
                 $.each(values, function (column_index, value) {
                     feature = features[column_index];
+
                     // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
                     // var text = feature + ': ' + value;
 
@@ -479,10 +537,20 @@ $(document).ready(function () {
 
                     // Consider adding lead if people demand a larger font
                     var readout = $('<p>')
-                        .addClass('value text-center ' + feature_class)
+                        .addClass('value text-center bg-primary ' + feature_class)
                         .text(value);
 
                     $(well_id).append(readout);
+
+                    // If feature not in feature_values, add it
+                    // Otherwise tack on the value
+                    if (feature_values[feature_class]) {
+                        feature_values[feature_class][well_id] = parseFloat(value);
+                    }
+                    else {
+                        feature_values[feature_class] = {};
+                        feature_values[feature_class][well_id] = parseFloat(value);
+                    }
                 });
             });
         }
@@ -501,6 +569,9 @@ $(document).ready(function () {
         // TODO
         // If the file upload has succeeded, show the feature binding dialog and the heatmap dialog
         else {
+            // Clear the binding table
+            $('#binding_table').empty();
+
             $.each(features, function (index, feature) {
                 var row = $('<tr>')
                     .append($('<td>')
@@ -523,6 +594,7 @@ $(document).ready(function () {
             });
             $('#binding').show();
 
+            build_heatmap(feature_values);
             // Heatmap dialog
             heatmap_options(features);
 
@@ -596,15 +668,26 @@ $(document).ready(function () {
 
             // Consider adding lead if people demand a larger font
             var readout = $('<p>')
-                .addClass('value text-center ' + feature_class)
+                .addClass('value text-center bg-primary ' + feature_class)
                 .text(value);
 
             $(well_id).append(readout);
+
+            // If feature not in feature_values, add it
+            // Otherwise tack on the value
+            if (feature_values[feature_class]) {
+                feature_values[feature_class][well_id] = parseFloat(value);
+            }
+            else {
+                feature_values[feature_class] = {};
+                feature_values[feature_class][well_id] = parseFloat(value);
+            }
         });
 
         // Convert features to an array
         features = _.values(features);
 
+        build_heatmap(feature_values);
         heatmap_options(features);
     }
 
@@ -629,7 +712,18 @@ $(document).ready(function () {
     feature_select.change( function() {
         var current_feature = feature_select.val();
 
+        // Hide all values
         $('.value').hide();
+
+        // console.log(heatmaps);
+
+        // Use heatmaps to get the respective colors
+        var well_colors = heatmaps[current_feature];
+        $.each(well_colors, function(well, color) {
+           $(well).css('background-color', color);
+        });
+
+        // Show this feature's values
         $('.' + current_feature).show();
     });
 });
