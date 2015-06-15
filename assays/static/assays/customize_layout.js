@@ -5,6 +5,8 @@ $(document).ready(function () {
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
     var device = $('#id_device');
+    // Only valid on frontend
+    var action = $('#id_action');
 
     // TODO REMOVE SOON: SLOPPY BUT EXPEDIENT WAY TO ADD CLIENT VALIDATION
     $('#id_layout_name').attr('required', true);
@@ -291,7 +293,7 @@ $(document).ready(function () {
                 '<option value="type">Set well type</option>' +
                 '<option value="timepoint">Set time point</option>' +
                 '<option value="compound">Add compound</option>' +
-                '<option value="label">Add label</option>' +
+                '<option value="add-label">Add label</option>' +
                 '<option value="clear">Clear contents</option>' +
                 '</select></div>'));
 
@@ -570,7 +572,7 @@ $(document).ready(function () {
         }
 
         // TODO ADD LABEL
-        else if (act == 'label') {
+        else if (act == 'add-label') {
             $(".ui-selected", this).each(function (index, value) {
 
                 tablecell = $(this);
@@ -657,4 +659,13 @@ $(document).ready(function () {
             get_layout_data(layout_id);
         }
     }
+
+    // When the action changes, hide unrelated and show related class
+    action.change(function() {
+        var current_action =  action.val();
+        $('.change-layout').hide('fast');
+        if (current_action) {
+            $('.' + current_action).show('fast');
+        }
+    });
 });
