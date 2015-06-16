@@ -104,7 +104,9 @@ $(document).ready(function () {
         }
     }
 
-    function get_layout_data(layout_id) {
+    function get_layout_data(layout_id, clone) {
+        clone = clone || false;
+
         $.ajax({
             url: "/assays_ajax",
             type: "POST",
@@ -123,7 +125,7 @@ $(document).ready(function () {
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
-                fill_layout(json);
+                fill_layout(json, clone);
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
@@ -132,7 +134,7 @@ $(document).ready(function () {
     }
 
     // TODO FILL_LAYOUT
-    function fill_layout(layout_data) {
+    function fill_layout(layout_data, clone) {
         $.each(layout_data, function(well, data) {
             var list = $('#' + well + '_list');
 
@@ -156,75 +158,80 @@ $(document).ready(function () {
                 $('#' + well).css('background-color', data.color);
             }
 
-            // Set time
-            stamp = well + '_time';
-            // Only display text if timepoint or compounds (timepoint of zero acceptable)
-            if (data.timepoint !== undefined) {
-                // All times should be stored as minutes
-                text = 'Time: ' + data.timepoint + ' min';
 
-                // Be sure to add event when necessary
-                li = $('<li>')
-                    .attr('id', stamp)
-                    .text(text)
-                    .click(function () {
-                        $(this).remove();
-                    })
-                    .append($('<input>')
-                        .attr('type', 'hidden')
-                        .attr('name', stamp)
-                        .attr('value', data.timepoint));
+            if (!clone) {
 
-                list.prepend(li);
-            }
+                // Set time
+                stamp = well + '_time';
+                // Only display text if timepoint or compounds (timepoint of zero acceptable)
+                if (data.timepoint !== undefined) {
+                    // All times should be stored as minutes
+                    text = 'Time: ' + data.timepoint + ' min';
 
-//          // Set compounds
-            if (data.compounds) {
-                $.each(data.compounds, function (index, compound) {
-
-                    // BE CERTAIN THAT STAMPS DO NOT COLLIDE
-                    stamp = well + '_' + index;
-
-                    text = compound.name + ' (' + compound.concentration +
-                        ' ' + compound.concentration_unit + ')';
-
+                    // Be sure to add event when necessary
                     li = $('<li>')
+                        .attr('id', stamp)
                         .text(text)
-                        .attr('compound', compound.id)
                         .click(function () {
                             $(this).remove();
-                        });
+                        })
+                        .append($('<input>')
+                            .attr('type', 'hidden')
+                            .attr('name', stamp)
+                            .attr('value', data.timepoint));
 
-                    var info = '{"well":"' + well + '"' +
-                        ',"compound":"' + compound.id + '","concentration":"' +
-                        compound.concentration + '","concentration_unit":"' +
-                        compound.concentration_unit + '"}';
+                    list.prepend(li);
+                }
 
-                    li.append($('<input>')
-                        .attr('type', 'hidden')
-                        .attr('name', 'well_' + stamp)
-                        .attr('value', info));
+//          // Set compounds
+                if (data.compounds) {
+                    $.each(data.compounds, function (index, compound) {
+
+                        // BE CERTAIN THAT STAMPS DO NOT COLLIDE
+                        stamp = well + '_' + index;
+
+                        text = compound.name + ' (' + compound.concentration +
+                            ' ' + compound.concentration_unit + ')';
+
+                        li = $('<li>')
+                            .text(text)
+                            .attr('compound', compound.id)
+                            .click(function () {
+                                $(this).remove();
+                            });
+
+                        var info = '{"well":"' + well + '"' +
+                            ',"compound":"' + compound.id + '","concentration":"' +
+                            compound.concentration + '","concentration_unit":"' +
+                            compound.concentration_unit + '"}';
+
+                        li.append($('<input>')
+                            .attr('type', 'hidden')
+                            .attr('name', 'well_' + stamp)
+                            .attr('value', info));
+
+                        list.append(li);
+                    });
+                }
+
+                // Set label
+                stamp = well + '_label';
+                if (data.label) {
+                    // Be sure to add event when necessary
+                    li = $('<li>')
+                        .attr('id', stamp)
+                        .text(data.label)
+                        .click(function () {
+                            $(this).remove();
+                        })
+                        .append($('<input>')
+                            .attr('type', 'hidden')
+                            .attr('name', stamp)
+                            .attr('value', data.label));
 
                     list.append(li);
-                });
-            }
+                }
 
-            // Set label
-            stamp = well + '_label';
-            if (data.label) {
-                // Be sure to add event when necessary
-                li = $('<li>')
-                    .attr('id', stamp)
-                    .text(data.label)
-                    .click(function () {
-                        $(this).remove();
-                    })
-                    .append($('<input>')
-                        .attr('type', 'hidden')
-                        .attr('name', stamp)
-                        .attr('value', data.label));
-
-                list.append(li);
             }
         });
     }
@@ -627,6 +634,44 @@ $(document).ready(function () {
         }
     }
 
+    function clone_base_layout(layout_id) {
+        $.ajax({
+            url: "/assays_ajax",
+            type: "POST",
+            dataType: "json",
+            data: {
+                // Function to call within the view is defined by `call:`
+                call: 'fetch_layout_format_labels',
+
+                // First token is the var name within views.py
+                // Second token is the var name in this JS file
+                id: layout_id,
+
+                model: 'assay_layout',
+
+                // Always pass the CSRF middleware token with every AJAX call
+                csrfmiddlewaretoken: middleware_token
+            },
+            success: function (json) {
+                var row_labels = json.row_labels;
+                var column_labels = json.column_labels;
+                var id = json.id;
+                device.val(id);
+                if (row_labels && column_labels) {
+                    $.when(build_table(row_labels, column_labels)).done(function() {
+                        get_layout_data(layout_id, true);
+                    });
+                }
+                else {
+                    alert('This device is not configured correctly');
+                }
+            },
+            error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    }
+
     // Fill table with values of preexisting assay layout
 
     // On device change, acquire labels and build table
@@ -647,7 +692,7 @@ $(document).ready(function () {
     if (device.val()) {
         get_device_layout();
 
-        // get's the id of existing layout object from the delete link
+        // gets the id of existing layout object from the delete link
         var delete_link = $('.deletelink');
         var layout_id = undefined;
         if (delete_link.length > 0) {
@@ -668,4 +713,15 @@ $(document).ready(function () {
             $('.' + current_action).show('fast');
         }
     });
+
+    // Get the url for a clone
+    try {
+        var clone = window.location.href.split('?')[1].split('clone=')[1];
+        clone_base_layout(clone);
+    }
+    // No action taken if nothing to clone
+    catch (e) {
+
+    }
+
 });

@@ -177,6 +177,7 @@ def fetch_layout_format_labels(request):
         row_labels = None
 
     data.update({
+        'id': layout.id,
         'column_labels': column_labels,
         'row_labels': row_labels,
     })

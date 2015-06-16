@@ -29,6 +29,8 @@
         <button id="submit" type="submit" class="btn btn-primary">Submit</button>
 
         {% if update %}
+            {# An assay layout clone will be handled in javascript #}
+            <a role="button" class="btn btn-info" href="/assays/assaylayout/add?clone={{ object.id }}">Clone Base</a>
             <a role="button" class="btn btn-danger pull-right readjust-pulled" href="delete/">Delete</a>
         {% endif %}
 
