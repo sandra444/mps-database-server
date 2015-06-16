@@ -13,7 +13,7 @@
 
     <title>{% block title %}MPS Database{% endblock %}</title>
 
-{#  <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/default.css" > #}
+{# <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/default.css" > #}
 
     {% block extrahead %}
         <!-- Load JQuery -->
@@ -61,6 +61,20 @@
 {#      I may add these later, however, but I will have to remember to use the PDF enabled SWF if PDFs are desired#}
         <script type="text/javascript" charset="utf8" src="{% static "js/datatable_options.js" %}"></script>
 
+        <!-- SmartMenus jQuery plugin -->
+        <script type="text/javascript" src="{% static "js/jquery.smartmenus.min.js" %}"></script>
+
+        <script>
+            // always emulate touch mode
+            $.SmartMenus.prototype.isTouchMode = function() {
+                return true;
+            };
+        </script>
+
+        <!-- SmartMenus jQuery Bootstrap Addon -->
+        <script type="text/javascript" src="{% static "js/jquery.smartmenus.bootstrap.min.js" %}"></script>
+        <!-- SmartMenus jQuery Bootstrap Addon CSS -->
+        <link rel="stylesheet" href="{% static "css/jquery.smartmenus.bootstrap.css" %}">
     {% endblock %}
 
     {% block load %}{% endblock %}
@@ -87,28 +101,47 @@
           <ul class="nav navbar-nav">
 {#            <li title="Administrative interface for authorized users only"><a href="/admin">Admin</a></li>#}
             <li title="Add, edit, or view assay data" class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown">Assays<span class="caret"></span></a>
+              <a class="dropdown-toggle">Assays<span class="caret"></span></a>
                 <ul class="dropdown-menu" role="menu">
                   <li class="dropdown-header">Add/Edit Studies</li>
                   <li title="Index of all the studies created by you"><a href="/assays/user_index">Your Studies</a></li>
                   <li title="Index of all the studies created by groups you are a member of"><a href="/assays/group_index">Group Studies</a></li>
                   <li class="divider"></li>
-                  <li title="Lists all public data" class="dropdown-header">View All Public Data</li>
-                  <li><a href="/assays/organchipstudy">Studies</a></li>
-                  <li><a href="/assays/studyconfiguration">Study Configurations</a></li>
-                  <li><a href="/assays/assaychipsetup">Setups</a></li>
-                  <li><a href="/assays/assaychipreadout">Readouts</a></li>
-                  <li><a href="/assays/assaytestresult">Results</a></li>
+                  <li class="dropdown-submenu">
+                    <a href="#">View Assay Data <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      <li><a href="/assays/organchipstudy">Studies</a></li>
+                      <li class="dropdown-submenu">
+                        <a href="#">Chips <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                          <li><a href="/assays/studyconfiguration">Study Configurations</a></li>
+                          <li><a href="/assays/assaychipsetup">Setups</a></li>
+                          <li><a href="/assays/assaychipreadout">Readouts</a></li>
+                          <li><a href="/assays/assaytestresult">Results</a></li>
+                        </ul>
+                      </li>
+                      <li class="dropdown-submenu">
+                        <a href="#">Plates <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                          <li><a href="/assays/assaylayout">Assay Layouts</a></li>
+                          <li><a href="/assays/assaydevicesetup">Setups</a></li>
+                          <li><a href="/assays/assaydevicereadout">Readouts</a></li>
+                          <li><a href="/assays/assayplatetestresult">Results</a></li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
                   <li class="divider"></li>
                   <li class="dropdown-header">Add Study Data</li>
                   <li><a href="/assays/organchipstudy/add/">Add Study</a></li>
                   <li><a href="/assays/studyconfiguration/add/">Add Study Configuration</a></li>
+                  <li><a href="/assays/assaylayout/add/">Add Assay Layout</a></li>
                 </ul>
             </li>
             <li title="View organ models and microdevices"><a href="/microdevices">Models</a></li>
 {#            <li title="View curated drug trial data"><a href="/drugtrials">Drug Trials</a></li>#}
               <li title="Curated drug trials and chemical data" class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown">Compounds<span class="caret"></span></a>
+                <a class="dropdown-toggle">Compounds<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                       <li title="View curated drug trial data"><a href="/drugtrials">View Drug Trials</a></li>
                       <li><a href="/compounds/">View Chemical Data</a></li>
@@ -119,7 +152,7 @@
                   </ul>
               </li>
               <li title="View or add cell samples and cell types" class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown">Cell Samples<span class="caret"></span></a>
+                <a class="dropdown-toggle">Cell Samples<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                       <li><a href="/cellsamples/cellsample/">View Cell Samples</a></li>
                       <li><a href="/cellsamples/celltype/">View Cell Types</a></li>
@@ -130,7 +163,7 @@
                   </ul>
               </li>
               <li title="Analyze bioactivity data" class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown">Bioactivities<span class="caret"></span></a>
+                <a class="dropdown-toggle">Bioactivities<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                       <li title="View a table of bioactivities based on your selection"><a href="/bioactivities/table">View Bioactivities</a></li>
                       <li title="Generate a heatmap for selected bioactivity data"><a href="/bioactivities/heatmap">Heatmap</a></li>
@@ -142,7 +175,7 @@
           <ul class="nav navbar-nav navbar-right">
               {% if user.is_active %}
               <li title="Click to log out or change password" class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown">Profile<span class="caret"></span></a>
+                <a class="dropdown-toggle">Profile<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                       <li><a href="/accounts/logout">Log Out</a></li>
                       <li><a href="/password_change">Change Password</a></li>
