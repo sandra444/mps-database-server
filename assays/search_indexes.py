@@ -33,7 +33,6 @@ class AssayRunIndex(indexes.SearchIndex, indexes.Indexable):
 
 class AssayChipSetupIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
-    # created_by = indexes.CharField(model_attr='created_by')
 
     group = indexes.CharField(model_attr='group')
     restricted = indexes.CharField(model_attr='restricted')
@@ -46,7 +45,6 @@ class AssayChipSetupIndex(indexes.SearchIndex, indexes.Indexable):
 
 class AssayChipReadoutIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
-    # created_by = indexes.CharField(model_attr='created_by')
 
     group = indexes.CharField(model_attr='group')
     restricted = indexes.CharField(model_attr='restricted')
@@ -59,7 +57,6 @@ class AssayChipReadoutIndex(indexes.SearchIndex, indexes.Indexable):
 
 class AssayTestResultIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
-    # created_by = indexes.CharField(model_attr='created_by')
 
     group = indexes.CharField(model_attr='group')
     restricted = indexes.CharField(model_attr='restricted')
@@ -77,3 +74,51 @@ class StudyConfigurationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def get_model(self):
         return StudyConfiguration
+
+
+class AssayDeviceSetupIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.NgramField(document=True, use_template=True)
+
+    group = indexes.CharField(model_attr='group')
+    restricted = indexes.CharField(model_attr='restricted')
+
+    rendered = indexes.CharField(use_template=True, indexed=False)
+
+    def get_model(self):
+        return AssayDeviceSetup
+
+
+class AssayDeviceReadoutIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.NgramField(document=True, use_template=True)
+
+    group = indexes.CharField(model_attr='group')
+    restricted = indexes.CharField(model_attr='restricted')
+
+    rendered = indexes.CharField(use_template=True, indexed=False)
+
+    def get_model(self):
+        return AssayDeviceReadout
+
+
+class AssayPlateTestResultIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.NgramField(document=True, use_template=True)
+
+    group = indexes.CharField(model_attr='group')
+    restricted = indexes.CharField(model_attr='restricted')
+
+    rendered = indexes.CharField(use_template=True, indexed=False)
+
+    def get_model(self):
+        return AssayPlateTestResult
+
+
+class AssayLayoutIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.NgramField(document=True, use_template=True)
+
+    group = indexes.CharField(model_attr='group')
+    restricted = indexes.CharField(model_attr='restricted')
+
+    rendered = indexes.CharField(use_template=True, indexed=False)
+
+    def get_model(self):
+        return AssayLayout

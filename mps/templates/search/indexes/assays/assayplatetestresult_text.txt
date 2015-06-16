@@ -1,0 +1,4 @@
+{{ object.assay_device_id }}
+{{ object.assay_device_id.setup.assay_run_id }}
+{{ object.created_by }}
+{{ object.group }}

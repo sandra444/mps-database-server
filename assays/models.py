@@ -147,6 +147,7 @@ class AssayLayout(FlaggableModel):
     """
 
     class Meta(object):
+        verbose_name = 'Assay Layout'
         ordering = ('layout_name',)
 
     layout_name = models.CharField(max_length=200)
@@ -510,6 +511,9 @@ class AssayPlateTestResult(FlaggableModel):
     Test Results from MICROPLATES
     """
 
+    class Meta(object):
+        verbose_name = 'Plate Result'
+
     assay_device_id = models.ForeignKey('assays.AssayDeviceReadout',
                                         verbose_name='Plate ID/ Barcode')
 
@@ -548,6 +552,7 @@ class StudyConfiguration(LockableModel):
 
     class Meta(object):
         verbose_name = 'Study Configuration'
+
     # Length subject to change
     name = models.CharField(max_length=50)
     study_format = models.CharField(max_length=11, choices=(('individual','Individual'),('integrated','Integrated'),))

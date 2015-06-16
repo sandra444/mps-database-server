@@ -1,0 +1,3 @@
+{{ object.device }}
+{{ object.layout_name }}
+{{ object.group }}

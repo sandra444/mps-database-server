@@ -1,0 +1,11 @@
+{{ object.assay_layout.name }}
+{{ object.assay_device_id }}
+{{ object.scientist }}
+{{ object.notes }}
+{{ object.notebook }}
+{{ object.created_by }}
+{{ object.group }}
+{% for cell in object.assayplatecells_set.all %}
+  {{ cell.cell_sample }}
+  {{ cell.cell_biosensor }}
+{% endfor %}

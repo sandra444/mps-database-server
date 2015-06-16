@@ -1,0 +1,9 @@
+{{ object.scientist }}
+{{ object.notes }}
+{{ object.notebook }}
+{{ object.setup }}
+{{ object.created_by }}
+{{ object.group }}
+{% for assay in object.assayplatereadoutassay_set.all %}
+  {{ assay }}
+{% endfor %}
