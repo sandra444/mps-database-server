@@ -27,6 +27,8 @@ $(document).ready(function () {
 
     // Feature select for heatmap
     var feature_select = $('#feature_select');
+    // Data toggle for heatmap
+    var data_toggle = $('#data_toggle');
     // This will contain the min, max, and median values for a feature (for the heatmap)
     //var feature_parameters = {};
     // This contains all values for a feature
@@ -725,5 +727,10 @@ $(document).ready(function () {
 
         // Show this feature's values
         $('.' + current_feature).show();
+    });
+
+    // When the 'toggle data only' button is clicked
+    data_toggle.click( function() {
+         $('.layout-list').toggle();
     });
 });

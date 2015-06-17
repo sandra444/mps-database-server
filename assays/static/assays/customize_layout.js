@@ -159,6 +159,7 @@ $(document).ready(function () {
             }
 
 
+            // Only add times, compounds, and labels if this is not a clone
             if (!clone) {
 
                 // Set time
@@ -183,7 +184,7 @@ $(document).ready(function () {
                     list.prepend(li);
                 }
 
-//          // Set compounds
+                // Set compounds
                 if (data.compounds) {
                     $.each(data.compounds, function (index, compound) {
 
