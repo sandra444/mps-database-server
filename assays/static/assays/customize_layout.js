@@ -635,7 +635,7 @@ $(document).ready(function () {
         }
     }
 
-    function clone_base_layout(layout_id) {
+    function clone_base_layout(layout_id, base_only) {
         $.ajax({
             url: "/assays_ajax",
             type: "POST",
@@ -660,7 +660,7 @@ $(document).ready(function () {
                 device.val(id);
                 if (row_labels && column_labels) {
                     $.when(build_table(row_labels, column_labels)).done(function() {
-                        get_layout_data(layout_id, true);
+                        get_layout_data(layout_id, base_only);
                     });
                 }
                 else {
@@ -717,8 +717,10 @@ $(document).ready(function () {
 
     // Get the url for a clone
     try {
-        var clone = window.location.href.split('?')[1].split('clone=')[1];
-        clone_base_layout(clone);
+        var get_parameters = window.location.href.split('?')[1].split('=');
+        var base_only = get_parameters[0] == 'base';
+        var clone_id = get_parameters[1];
+        clone_base_layout(clone_id, base_only);
     }
     // No action taken if nothing to clone
     catch (e) {
