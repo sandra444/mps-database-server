@@ -561,7 +561,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 
 # TODO CHANGE BLOCK UPLOAD
 # TODO ADD TABULAR UPLOAD
-# TODO LINKING MULTIPLE ASSAYS TO ONE FEATURE IS AMBIGUOUS: DO NOT ALLOW IT
+# TODO LINKING MULTIPLE ASSAYS TO ONE FEATURE IS AMBIGUOUS: DO NOT ALLOW IT (X?)
 # TODO DO NOT ALLOW ROW OR COLUMN OVERFLOW
 class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
     def clean(self):
@@ -583,6 +583,12 @@ class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
                     unit = form.cleaned_data.get('readout_unit').readout_unit
 
                     feature = form.cleaned_data.get('feature')
+
+                    # Error when feature assignation ambiguous
+                    if feature in features_to_assay:
+                        raise forms.ValidationError(
+                            'The feature "{}" is used more than once; ambiguous feature binding is not permitted'.format(feature))
+
                     features_to_assay.update({feature: assay_name})
 
                     if assay_name not in assays:
