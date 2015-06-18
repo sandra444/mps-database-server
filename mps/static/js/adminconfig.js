@@ -39,7 +39,7 @@ var MODELS = {
     },
     //Order modified
     'Assays': {
-        'Organ Chip Studies': [1, 'Organ Chip Studies', 0],
+        'Studies': [1, 'Studies', 0],
         'Chip Setups': [2, 'Chip Setup', 1],
         'Chip Readouts': [3, 'Chip Readouts', 2],
         'Chip Results': [4, 'Chip Results', 3],
@@ -47,7 +47,7 @@ var MODELS = {
         'Functions': [6, 'Functions', 3, true],
         'Plate Setups': [12, 'Plate Setups', 1],
         'Plate Readouts': [13, 'Plate Readouts', 2],
-        'Assay plate test results' : [14, 'Plate Results', 3],
+        'Plate Results' : [14, 'Plate Results', 3],
         'Assay layouts': [15, 'Assay Layouts', 0],
         'Assay models': [28, 'Assay Models', 0],
         'Assay model types': [30, 'Assay Types', 1, true],

@@ -1,5 +1,13 @@
 // Adding this script will override enter such that it will display a modal confirmation
+// This script will additionally help prevent the multiple submission issue
 $(document).ready(function () {
+    // On submit, disable all submit buttons
+    $('form').submit(function(){
+        $(':submit').attr('disabled', 'disabled');
+        return true;
+    });
+
+    // Add the dialog box
     $("#content").append('<div hidden id="dialog-confirm" title="Submit this form?"><p><span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" style="float:left; margin:0 7px 20px 0;"></span>Are you sure you want to submit the form?</p></div>');
 
     var dialogConfirm = $("#dialog-confirm");
