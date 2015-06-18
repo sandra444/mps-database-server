@@ -587,8 +587,8 @@ class AssayRun(RestrictedModel):
     """
 
     class Meta(object):
-        verbose_name = 'Organ Chip Study'
-        verbose_name_plural = 'Organ Chip Studies'
+        verbose_name = 'Study'
+        verbose_name_plural = 'Studies'
         ordering = ('assay_run_id', )
 
     # Removed center_id for now: this field is basically for admins anyway
@@ -673,7 +673,7 @@ class AssayChipSetup(FlaggableModel):
         verbose_name = 'Chip Setup'
         ordering = ('-assay_chip_id', 'assay_run_id', )
 
-    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Organ Chip Study')
+    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Study')
     setup_date = models.DateField(help_text='YYYY-MM-DD')
     device = models.ForeignKey(OrganModel, verbose_name = 'Organ Model Name')
 

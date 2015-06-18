@@ -1789,6 +1789,7 @@ class AssayRunForm(forms.ModelForm):
 
 class AssayRunAdmin(LockableAdmin):
     # AssayRun is now Organ Chip Study
+    # Organ Chip Study should really be simply Study
     class Media(object):
         js = ('assays/customize_run.js',)
 
