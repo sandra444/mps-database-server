@@ -113,7 +113,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
                                                                                 'assay_name__assay_id',
                                                                                 'assay_result__created_by').filter(assay_result__chip_readout=context['readouts'])
 
-        context['number_of_results'] = AssayTestResult.objects.filter(chip_readout=context['readouts']).count()
+        context['number_of_results'] = AssayChipTestResult.objects.filter(chip_readout=context['readouts']).count()
 
         # PLATES
 
@@ -302,7 +302,7 @@ class AssayRunDelete(CreatorRequiredMixin, DeleteView):
 
         context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object.id).prefetch_related('compound','unit')
         context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups'])
-        context['results'] = AssayTestResult.objects.filter(chip_readout=context['readouts'])
+        context['results'] = AssayChipTestResult.objects.filter(chip_readout=context['readouts'])
 
         # Check if this is setup only; if so add to add respective URLS; I Guess
         # if request.GET.get('setup', ''):
@@ -535,7 +535,7 @@ class AssayChipSetupDelete(CreatorRequiredMixin, DeleteView):
         context = self.get_context_data()
 
         context['readouts'] = AssayChipReadout.objects.filter(chip_setup=self.object)
-        context['results'] = AssayTestResult.objects.filter(chip_readout=context['readouts'])
+        context['results'] = AssayChipTestResult.objects.filter(chip_readout=context['readouts'])
 
         # Check if this is setup only; if so add to add respective URLS; I Guess
         # if request.GET.get('setup', ''):
@@ -732,15 +732,15 @@ class AssayChipReadoutDelete(CreatorRequiredMixin, DeleteView):
 
         context = self.get_context_data()
 
-        context['results'] = AssayTestResult.objects.filter(chip_readout=self.object)
+        context['results'] = AssayChipTestResult.objects.filter(chip_readout=self.object)
 
         return self.render_to_response(context)
 
 
 # Class-based views for test results
-class AssayTestResultList(LoginRequiredMixin, ListView):
-    # model = AssayTestResult
-    template_name = 'assays/assaytestresult_list.html'
+class AssayChipTestResultList(LoginRequiredMixin, ListView):
+    # model = AssayChipTestResult
+    template_name = 'assays/assaychiptestresult_list.html'
 
     def get_queryset(self):
         initial_query = AssayResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function',
@@ -758,20 +758,20 @@ class AssayTestResultList(LoginRequiredMixin, ListView):
                initial_query.filter(assay_result__chip_readout__chip_setup__assay_run_id__group__in=self.request.user.groups.all())
 
 
-TestResultFormSet = inlineformset_factory(AssayTestResult, AssayResult, formset=TestResultInlineFormset, extra=1,
+TestResultFormSet = inlineformset_factory(AssayChipTestResult, AssayResult, formset=TestResultInlineFormset, extra=1,
                                           widgets={'value': forms.NumberInput(attrs={'style': 'width:100px;', }), })
 
 
-class AssayTestResultAdd(StudyGroupRequiredMixin, CreateView):
-    template_name = 'assays/assaytestresult_add.html'
+class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
+    template_name = 'assays/assaychiptestresult_add.html'
     form_class = AssayResultForm
 
     def get_context_data(self, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        exclude_list = AssayTestResult.objects.filter(chip_readout__isnull=False).values_list('chip_readout', flat=True)
+        exclude_list = AssayChipTestResult.objects.filter(chip_readout__isnull=False).values_list('chip_readout', flat=True)
         readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
 
-        context = super(AssayTestResultAdd, self).get_context_data(**kwargs)
+        context = super(AssayChipTestResultAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = TestResultFormSet(self.request.POST)
             context['readouts'] = readouts
@@ -806,16 +806,16 @@ class AssayTestResultAdd(StudyGroupRequiredMixin, CreateView):
         if not context.get('readouts',''):
             return redirect('/assays/'+str(study.id))
 
-        return super(AssayTestResultAdd, self).render_to_response(context)
+        return super(AssayChipTestResultAdd, self).render_to_response(context)
 
 
-class AssayTestResultDetail(DetailRedirectMixin, DetailView):
-    model = AssayTestResult
+class AssayChipTestResultDetail(DetailRedirectMixin, DetailView):
+    model = AssayChipTestResult
 
 
-class AssayTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
-    model = AssayTestResult
-    template_name = 'assays/assaytestresult_add.html'
+class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
+    model = AssayChipTestResult
+    template_name = 'assays/assaychiptestresult_add.html'
     form_class = AssayResultForm
 
     # Alternative (cleaner?) method
@@ -828,7 +828,7 @@ class AssayTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
         # Get Study
         study = self.object.chip_readout.chip_setup.assay_run_id
 
-        exclude_list = AssayTestResult.objects.filter(chip_readout__isnull=False).values_list('chip_readout', flat=True)
+        exclude_list = AssayChipTestResult.objects.filter(chip_readout__isnull=False).values_list('chip_readout', flat=True)
         readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=study).exclude(id__in=list(set(exclude_list))) | AssayChipReadout.objects.filter(pk=self.object.chip_readout.id)
 
         # Render form
@@ -850,7 +850,7 @@ class AssayTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         study = self.object.chip_readout.chip_setup.assay_run_id
 
-        exclude_list = AssayTestResult.objects.filter(chip_readout__isnull=False).values_list('chip_readout', flat=True)
+        exclude_list = AssayChipTestResult.objects.filter(chip_readout__isnull=False).values_list('chip_readout', flat=True)
         readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
 
         form.instance.group = study.group
@@ -874,9 +874,9 @@ class AssayTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
                                   update = True))
 
 
-class AssayTestResultDelete(CreatorRequiredMixin, DeleteView):
-    model = AssayTestResult
-    template_name = 'assays/assaytestresult_delete.html'
+class AssayChipTestResultDelete(CreatorRequiredMixin, DeleteView):
+    model = AssayChipTestResult
+    template_name = 'assays/assaychiptestresult_delete.html'
 
     def get_success_url(self):
         return '/assays/' + str(self.object.chip_readout.chip_setup.assay_run_id.id)
@@ -1397,7 +1397,7 @@ class AssayPlateReadoutDelete(CreatorRequiredMixin, DeleteView):
 
 # Class-based views for PLATE test results
 class AssayPlateTestResultList(LoginRequiredMixin, ListView):
-    # model = AssayTestResult
+    # model = AssayChipTestResult
     template_name = 'assays/assayplatetestresult_list.html'
 
     def get_queryset(self):

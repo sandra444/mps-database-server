@@ -1547,7 +1547,7 @@ class ReadoutUnitAdmin(LockableAdmin):
 admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
 
-class AssayTestResultAdmin(LockableAdmin):
+class AssayChipTestResultAdmin(LockableAdmin):
     # Results calculated from RAW CHIP DATA aka 'Chip Result'
     class Media(object):
         js = ('js/cookies.js','js/whittle.js','js/inline_fix.js','assays/customize_chip_results_admin.js')
@@ -1599,7 +1599,7 @@ class AssayTestResultAdmin(LockableAdmin):
     actions = ['update_fields']
     inlines = [AssayResultInline]
 
-admin.site.register(AssayTestResult, AssayTestResultAdmin)
+admin.site.register(AssayChipTestResult, AssayChipTestResultAdmin)
 
 
 class AssayPlateResultInline(admin.TabularInline):

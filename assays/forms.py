@@ -13,7 +13,7 @@ class AssayResultForm(forms.ModelForm):
     """Size the text input boxes"""
 
     class Meta(object):
-        model = AssayTestResult
+        model = AssayChipTestResult
         widgets = {
             'test_time': forms.TextInput(attrs={'size': 3}),
             'value': forms.TextInput(attrs={'size': 10}),
@@ -24,7 +24,7 @@ class AssayResultForm(forms.ModelForm):
     # def clean(self):
     #     super(forms.ModelForm, self).clean()
     #
-    #     if 'chip_setup' in self.cleaned_data and AssayTestResult.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
+    #     if 'chip_setup' in self.cleaned_data and AssayChipTestResult.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
     #         raise forms.ValidationError('A readout for the given setup already exists!')
     #
     #     return self.cleaned_data

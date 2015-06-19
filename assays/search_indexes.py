@@ -55,7 +55,7 @@ class AssayChipReadoutIndex(indexes.SearchIndex, indexes.Indexable):
         return AssayChipReadout
 
 
-class AssayTestResultIndex(indexes.SearchIndex, indexes.Indexable):
+class AssayChipTestResultIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
 
     group = indexes.CharField(model_attr='group')
@@ -64,7 +64,7 @@ class AssayTestResultIndex(indexes.SearchIndex, indexes.Indexable):
     rendered = indexes.CharField(use_template=True, indexed=False)
 
     def get_model(self):
-        return AssayTestResult
+        return AssayChipTestResult
 
 
 class StudyConfigurationIndex(indexes.SearchIndex, indexes.Indexable):

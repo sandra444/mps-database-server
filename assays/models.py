@@ -776,7 +776,7 @@ class AssayChipReadout(FlaggableModel):
         return "/assays/%i/" % self.chip_setup.assay_run_id.id
 
 
-class AssayTestResult(FlaggableModel):
+class AssayChipTestResult(FlaggableModel):
     """
     Results calculated from Raw Chip Data
     """
@@ -834,7 +834,7 @@ class AssayResult(models.Model):
     assay_name = models.ForeignKey('assays.AssayChipReadoutAssay',
                                    verbose_name='Assay')
 
-    assay_result = models.ForeignKey(AssayTestResult)
+    assay_result = models.ForeignKey(AssayChipTestResult)
 
     result_function = models.ForeignKey(AssayResultFunction,
                                         blank=True,
