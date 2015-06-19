@@ -99,7 +99,7 @@ def fetch_readout(request):
         current_readout_id = AssayPlateReadout.objects.get(id=id)
 
     elif model == 'assay_plate_test_results':
-        current_readout_id = AssayPlateTestResult.objects.get(id=id).assay_device_id
+        current_readout_id = AssayPlateTestResult.objects.get(id=id).readout
 
     # data = defaultdict(list)
     data = []

@@ -514,7 +514,7 @@ class AssayPlateTestResult(FlaggableModel):
     class Meta(object):
         verbose_name = 'Plate Result'
 
-    assay_device_id = models.ForeignKey('assays.AssayPlateReadout',
+    readout = models.ForeignKey('assays.AssayPlateReadout',
                                         verbose_name='Plate ID/ Barcode')
 
     # Unclear as to what "Assay Test Time" entails
@@ -542,7 +542,7 @@ class AssayPlateTestResult(FlaggableModel):
         return u''
 
     def get_absolute_url(self):
-        return "/assays/%i/" % self.assay_device_id.setup.assay_run_id.id
+        return "/assays/%i/" % self.readout.setup.assay_run_id.id
 
 
 class StudyConfiguration(LockableModel):

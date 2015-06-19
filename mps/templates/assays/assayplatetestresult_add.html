@@ -36,8 +36,8 @@
 
         <legend>Plate Test Results</legend>
 
-        {% if form.assay_device_id.errors %}
-            {% for error in form.assay_device_id.errors %}
+        {% if form.readout.errors %}
+            {% for error in form.readout.errors %}
                 <div class="alert alert-danger" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Error:</span>
@@ -48,13 +48,13 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-            <label for="assay_device_id" class="col-sm-2 control-label">Readout*</label>
+            <label for="readout" class="col-sm-2 control-label">Readout*</label>
             <div class="col-sm-10">
-                <select id="id_assay_device_id" name="assay_device_id">
+                <select id="id_readout" name="readout">
                     <option value="">---------</option>
                     {% for readout in readouts %}
                         {# It is necessary to coerce the forms value into an integer for this compare #}
-                        {% if readout.id|add:"0" == form.assay_device_id.value|add:"0" %}
+                        {% if readout.id|add:"0" == form.readout.value|add:"0" %}
                             <option value={{ readout.id }} selected>{{ readout }}</option>
                         {% else %}
                             <option value={{ readout.id }}>{{ readout }}</option>

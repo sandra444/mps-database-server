@@ -8,7 +8,7 @@ $(document).ready(function () {
     var column_labels = null;
 
     // The setup
-    var readout = $('#id_assay_device_id');
+    var readout = $('#id_readout');
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 

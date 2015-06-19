@@ -1630,12 +1630,12 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 
     save_as = True
     save_on_top = True
-    # raw_id_fields = ('assay_device_id',)
+    # raw_id_fields = ('readout',)
     list_per_page = 300
     list_display = (
-        'assay_device_id',
+        'readout',
     )
-    search_fields = ['assay_device_id']
+    search_fields = ['readout']
     actions = ['update_fields']
     readonly_fields = ['created_by', 'created_on',
                        'modified_by', 'modified_on']
@@ -1644,7 +1644,7 @@ class AssayPlateTestResultAdmin(LockableAdmin):
         (
             'Device/Drug Parameters', {
                 'fields': (
-                    ('assay_device_id',),
+                    ('readout',),
                 ),
             }
         ),

@@ -135,12 +135,12 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
         context['plate_readouts'] = readouts
 
         context['plate_results'] = AssayPlateResult.objects.prefetch_related('result_function', 'result_type',
-                                                    'test_unit', 'assay_result').select_related('assay_result__assay_device_id__setup',
-                                                                                'assay_result__assay_device_id__setup__unit',
+                                                    'test_unit', 'assay_result').select_related('assay_result__readout__setup',
+                                                                                'assay_result__readout__setup__unit',
                                                                                 'assay_name__assay_id',
-                                                                                'assay_result__created_by').filter(assay_result__assay_device_id=context['plate_readouts'])
+                                                                                'assay_result__created_by').filter(assay_result__readout=context['plate_readouts'])
 
-        context['number_of_plate_results'] = AssayPlateTestResult.objects.filter(assay_device_id=context['plate_readouts']).count()
+        context['number_of_plate_results'] = AssayPlateTestResult.objects.filter(readout=context['plate_readouts']).count()
 
         return self.render_to_response(context)
 
@@ -1402,13 +1402,13 @@ class AssayPlateTestResultList(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         initial_query = AssayPlateResult.objects.prefetch_related('result_function','result_type',
-                                                             'test_unit').select_related('assay_result__assay_device_id__setup__assay_run_id',
+                                                             'test_unit').select_related('assay_result__readout__setup__assay_run_id',
                                                                                          'assay_name__assay_id',
                                                                                          'assay_result__created_by',
                                                                                          'assay_result__group')
 
-        return initial_query.filter(assay_result__assay_device_id__setup__assay_run_id__restricted=False) | \
-               initial_query.filter(assay_result__assay_device_id__setup__assay_run_id__group__in=self.request.user.groups.all())
+        return initial_query.filter(assay_result__readout__setup__assay_run_id__restricted=False) | \
+               initial_query.filter(assay_result__readout__setup__assay_run_id__group__in=self.request.user.groups.all())
 
 
 PlateTestResultFormSet = inlineformset_factory(AssayPlateTestResult, AssayPlateResult, formset=PlateTestResultInlineFormset, extra=1,
@@ -1421,7 +1421,7 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        exclude_list = AssayPlateTestResult.objects.filter(assay_device_id__isnull=False).values_list('assay_device_id', flat=True)
+        exclude_list = AssayPlateTestResult.objects.filter(readout__isnull=False).values_list('readout', flat=True)
         readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
 
         context = super(AssayPlateTestResultAdd, self).get_context_data(**kwargs)
@@ -1479,10 +1479,10 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
         form = self.get_form(form_class)
 
         # Get Study
-        study = self.object.assay_device_id.setup.assay_run_id
+        study = self.object.readout.setup.assay_run_id
 
-        exclude_list = AssayPlateTestResult.objects.filter(assay_device_id__isnull=False).values_list('assay_device_id', flat=True)
-        readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list))) | AssayPlateReadout.objects.filter(pk=self.object.assay_device_id.id)
+        exclude_list = AssayPlateTestResult.objects.filter(readout__isnull=False).values_list('readout', flat=True)
+        readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list))) | AssayPlateReadout.objects.filter(pk=self.object.readout.id)
 
         # Render form
         formset = PlateTestResultFormSet(instance=self.object)
@@ -1501,9 +1501,9 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         # TODO refactor redundant code here; testing for now
 
-        study = self.object.assay_device_id.setup.assay_run_id
+        study = self.object.readout.setup.assay_run_id
 
-        exclude_list = AssayPlateTestResult.objects.filter(assay_device_id__isnull=False).values_list('assay_device_id', flat=True)
+        exclude_list = AssayPlateTestResult.objects.filter(readout__isnull=False).values_list('readout', flat=True)
         readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
 
         form.instance.group = study.group
@@ -1532,4 +1532,4 @@ class AssayPlateTestResultDelete(CreatorRequiredMixin, DeleteView):
     template_name = 'assays/assayplatetestresult_delete.html'
 
     def get_success_url(self):
-        return '/assays/' + str(self.object.assay_device_id.setup.assay_run_id.id)
+        return '/assays/' + str(self.object.readout.setup.assay_run_id.id)

@@ -50,18 +50,18 @@
                         </a>
                     </td>
                     <td>
-                        <a href="/assays/organchipstudy/{{ result.assay_result.assay_device_id.setup.assay_run_id.id }}">
-                            {{ result.assay_result.assay_device_id.setup.assay_run_id }}
+                        <a href="/assays/organchipstudy/{{ result.assay_result.readout.setup.assay_run_id.id }}">
+                            {{ result.assay_result.readout.setup.assay_run_id }}
                         </a>
                     </td>
                     <td>
-                        <a href="/assays/assaychipsetup/{{ result.assay_result.assay_device_id.setup.id }}">
-                            {{ result.assay_result.assay_device_id.setup }}
+                        <a href="/assays/assaychipsetup/{{ result.assay_result.readout.setup.id }}">
+                            {{ result.assay_result.readout.setup }}
                         </a>
                     </td>
                     <td>
-                        <a href="/assays/assaychipreadout/{{ result.assay_result.assay_device_id.id }}">
-                            {{ result.assay_result.assay_device_id.id }}
+                        <a href="/assays/assaychipreadout/{{ result.assay_result.readout.id }}">
+                            {{ result.assay_result.readout.id }}
                         </a>
                     </td>
                     <td>{{ result.assay_name }}</td>
