@@ -790,13 +790,13 @@ class AssayChipTestResult(FlaggableModel):
         return u'Results for: {}'.format(self.chip_readout)
 
     def assay(self):
-        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
-            return AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].assay_name
+        if self.id and not len(AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            return AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')[0].assay_name
         return ''
 
     def result(self):
-        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
-            abbreviation = AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result
+        if self.id and not len(AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            abbreviation = AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result
             if abbreviation == '1':
                 return u'Positive'
             else:
@@ -804,13 +804,13 @@ class AssayChipTestResult(FlaggableModel):
         return ''
 
     def result_function(self):
-        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
-            return AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result_function
+        if self.id and not len(AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            return AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result_function
         return ''
 
     def result_type(self):
-        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
-            return AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result_type
+        if self.id and not len(AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            return AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result_type
         return ''
 
     def severity(self):
@@ -818,15 +818,15 @@ class AssayChipTestResult(FlaggableModel):
             ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
             ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
         ))
-        if self.id and not len(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
-            return SEVERITY_SCORE.get(AssayResult.objects.filter(assay_result_id=self.id).order_by('id')[0].severity, 'None')
+        if self.id and not len(AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
+            return SEVERITY_SCORE.get(AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')[0].severity, 'None')
         return ''
 
     def get_absolute_url(self):
         return "/assays/%i/" % self.chip_readout.chip_setup.assay_run_id.id
 
 
-class AssayResult(models.Model):
+class AssayChipResult(models.Model):
     """
     Individual result parameters for CHIP RESULTS used in inline
     """

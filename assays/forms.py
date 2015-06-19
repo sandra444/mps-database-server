@@ -9,7 +9,7 @@ restricted = ('restricted',)
 # Group
 group = ('group',)
 
-class AssayResultForm(forms.ModelForm):
+class AssayChipResultForm(forms.ModelForm):
     """Size the text input boxes"""
 
     class Meta(object):
@@ -104,7 +104,7 @@ class AssayChipCellsInlineFormset(forms.models.BaseInlineFormSet):
 class TestResultInlineFormset(forms.models.BaseInlineFormSet):
 
     class Meta(object):
-        model = AssayResult
+        model = AssayChipResult
         exclude = ('',)
 
     def clean(self):

@@ -107,7 +107,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
 
         context['readouts'] = readouts
 
-        context['results'] = AssayResult.objects.prefetch_related('result_function', 'result_type',
+        context['results'] = AssayChipResult.objects.prefetch_related('result_function', 'result_type',
                                                     'test_unit').select_related('assay_result__chip_readout__chip_setup',
                                                                                 'assay_result__chip_readout__chip_setup__unit',
                                                                                 'assay_name__assay_id',
@@ -229,7 +229,7 @@ class AssayRunDetail(DetailView):
 
         context['readouts'] = readouts
 
-        context['results'] = AssayResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function', 'result_type',
+        context['results'] = AssayChipResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function', 'result_type',
                                                     'test_unit').select_related('assay_result__chip_readout__chip_setup',
                                                                                 'assay_result__chip_readout__chip_setup__unit',
                                                                                 'assay_name__assay_id',
@@ -743,7 +743,7 @@ class AssayChipTestResultList(LoginRequiredMixin, ListView):
     template_name = 'assays/assaychiptestresult_list.html'
 
     def get_queryset(self):
-        initial_query = AssayResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function',
+        initial_query = AssayChipResult.objects.prefetch_related('assay_name', 'assay_result', 'result_function',
                                                              'result_type',
                                                              'test_unit').select_related('assay_result__chip_readout',
                                                                                          'assay_result__chip_readout__chip_setup',
@@ -758,13 +758,13 @@ class AssayChipTestResultList(LoginRequiredMixin, ListView):
                initial_query.filter(assay_result__chip_readout__chip_setup__assay_run_id__group__in=self.request.user.groups.all())
 
 
-TestResultFormSet = inlineformset_factory(AssayChipTestResult, AssayResult, formset=TestResultInlineFormset, extra=1,
+TestResultFormSet = inlineformset_factory(AssayChipTestResult, AssayChipResult, formset=TestResultInlineFormset, extra=1,
                                           widgets={'value': forms.NumberInput(attrs={'style': 'width:100px;', }), })
 
 
 class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
     template_name = 'assays/assaychiptestresult_add.html'
-    form_class = AssayResultForm
+    form_class = AssayChipResultForm
 
     def get_context_data(self, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
@@ -816,7 +816,7 @@ class AssayChipTestResultDetail(DetailRedirectMixin, DetailView):
 class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
     model = AssayChipTestResult
     template_name = 'assays/assaychiptestresult_add.html'
-    form_class = AssayResultForm
+    form_class = AssayChipResultForm
 
     # Alternative (cleaner?) method
 

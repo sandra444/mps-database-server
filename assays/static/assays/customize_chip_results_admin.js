@@ -3,7 +3,7 @@ $(document).ready(function () {
     function getIDs() {
         var i = 0;
         var IDs = [];
-        while ($('#id_assayresult_set-'+i+'-assay_name')[0]){
+        while ($('#id_assaychipresult_set-'+i+'-assay_name')[0]){
             IDs.push(i);
             i += 1;
         }
@@ -12,7 +12,7 @@ $(document).ready(function () {
 
     function changeNew() {
         var i = Math.max.apply(null,getIDs());
-        $('#id_assayresult_set-'+i+'-assay_name').html(inlineOptions);
+        $('#id_assaychipresult_set-'+i+'-assay_name').html(inlineOptions);
     }
 
     function changeAll(reset) {
@@ -21,14 +21,14 @@ $(document).ready(function () {
 
         if (!reset) {
             for (var i in IDs) {
-                vals.push($('#id_assayresult_set-'+i+'-assay_name').val());
+                vals.push($('#id_assaychipresult_set-'+i+'-assay_name').val());
             }
         }
 
         for (var j in IDs) {
-            $('#id_assayresult_set-'+j+'-assay_name').html(inlineOptions);
+            $('#id_assaychipresult_set-'+j+'-assay_name').html(inlineOptions);
             if (!reset) {
-                $('#id_assayresult_set-'+j+'-assay_name').val(vals[j]);
+                $('#id_assaychipresult_set-'+j+'-assay_name').val(vals[j]);
             }
         }
     }

@@ -2,7 +2,7 @@ import csv
 
 from django.contrib import admin
 from django import forms
-from assays.forms import AssayResultForm, StudyConfigurationForm
+from assays.forms import AssayChipResultForm, StudyConfigurationForm
 from django.http import HttpResponseRedirect
 
 from assays.models import *
@@ -1441,10 +1441,10 @@ class AssayResultTypeAdmin(LockableAdmin):
 admin.site.register(AssayResultType, AssayResultTypeAdmin)
 
 
-class AssayResultInline(admin.TabularInline):
+class AssayChipResultInline(admin.TabularInline):
     # Results calculated from CHIP READOUTS
-    model = AssayResult
-    form = AssayResultForm
+    model = AssayChipResult
+    form = AssayChipResultForm
     verbose_name = 'Assay Test'
     verbose_name_plural = 'Assay Test Results'
     fields = (
@@ -1597,7 +1597,7 @@ class AssayChipTestResultAdmin(LockableAdmin):
         ),
     )
     actions = ['update_fields']
-    inlines = [AssayResultInline]
+    inlines = [AssayChipResultInline]
 
 admin.site.register(AssayChipTestResult, AssayChipTestResultAdmin)
 

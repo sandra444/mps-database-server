@@ -90,7 +90,7 @@
         {% endif %}
 
         <a id="add_button" class="btn btn-success" role="button">Add Result</a>
-        <table class="table table-striped results" id="assayresult_set-group" name="inlines">
+        <table class="table table-striped results" id="assaychipresult_set-group" name="inlines">
             <thead>
                 <tr>
                     <th>Assay</th>
@@ -109,11 +109,11 @@
                         {# Hidden input for Update (need id to associate) #}
                         {% if result.id.value %}
                         <td class="original" hidden>
-                            <input type="hidden" id="id_assayresult_set-{{ forloop.counter0 }}-id" name="assayresult_set-{{ forloop.counter0 }}-id" value="{{ result.id.value }}">
+                            <input type="hidden" id="id_assaychipresult_set-{{ forloop.counter0 }}-id" name="assaychipresult_set-{{ forloop.counter0 }}-id" value="{{ result.id.value }}">
                         </td>
                         {% endif %}
                         <td>
-                            <select id="id_assayresult_set-{{ forloop.counter0 }}-assay_name" name="assayresult_set-{{ forloop.counter0 }}-assay_name">
+                            <select id="id_assaychipresult_set-{{ forloop.counter0 }}-assay_name" name="assaychipresult_set-{{ forloop.counter0 }}-assay_name">
                                 <option value="">---------</option>
                                 {% if result.assay_name.value %}
                                     <option selected value="{{ result.assay_name.value }}">Loading</option>

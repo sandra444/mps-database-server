@@ -29,7 +29,7 @@
         </tr>
         </thead>
         <tbody>
-        {% for result in object.assayresult_set.all %}
+        {% for result in object.assaychipresult_set.all %}
             <tr>
                 <td>{{ result.assay_name }}</td>
                 <td>{{ result.get_result_display }}</td>
