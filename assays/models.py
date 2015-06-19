@@ -276,7 +276,7 @@ class AssayPlateSetup(FlaggableModel):
     setup_date = models.DateField(help_text='YYYY-MM-DD')
 
     # Plate identifier
-    assay_device_id = models.CharField(max_length=512, verbose_name='Plate ID/ Barcode')
+    assay_plate_id = models.CharField(max_length=512, verbose_name='Plate ID/ Barcode')
 
     scientist = models.CharField(max_length=100, blank=True, null=True)
     notebook = models.CharField(max_length=256, blank=True, null=True)
@@ -284,7 +284,7 @@ class AssayPlateSetup(FlaggableModel):
     notes = models.CharField(max_length=2048, blank=True, null=True)
 
     def __unicode__(self):
-        return u'Plate-{}'.format(self.assay_device_id)
+        return u'Plate-{}'.format(self.assay_plate_id)
 
     def get_absolute_url(self):
         return "/assays/{}/".format(self.assay_run_id.id)

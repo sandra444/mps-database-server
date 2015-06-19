@@ -1,5 +1,5 @@
 {{ object.assay_layout.name }}
-{{ object.assay_device_id }}
+{{ object.assay_plate_id }}
 {{ object.scientist }}
 {{ object.notes }}
 {{ object.notebook }}

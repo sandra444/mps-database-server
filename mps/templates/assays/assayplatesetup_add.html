@@ -103,8 +103,8 @@
         </div>
     </div>
 
-    {% if form.assay_device_id.errors %}
-        {% for error in form.assay_device_id.errors %}
+    {% if form.assay_plate_id.errors %}
+        {% for error in form.assay_plate_id.errors %}
             <div class="alert alert-danger" role="alert">
                 <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                 <span class="sr-only">Error:</span>
@@ -115,9 +115,9 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="assay_device_id" class="col-sm-2 control-label">Plate ID/Barcode*</label>
+        <label for="assay_plate_id" class="col-sm-2 control-label">Plate ID/Barcode*</label>
         <div class="col-sm-10">
-          {{ form.assay_device_id }}
+          {{ form.assay_plate_id }}
         </div>
     </div>
 

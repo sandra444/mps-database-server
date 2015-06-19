@@ -339,7 +339,7 @@ class AssayPlateSetupAdmin(LockableAdmin):
 
     save_on_top = True
     list_per_page = 300
-    list_display = ('assay_device_id',
+    list_display = ('assay_plate_id',
                     'assay_run_id',
                     'setup_date')
 
@@ -353,7 +353,7 @@ class AssayPlateSetupAdmin(LockableAdmin):
                         'assay_run_id',
                     ),
                     (
-                        'assay_device_id', 'setup_date',
+                        'assay_plate_id', 'setup_date',
                     ),
                     (
                         'assay_layout',

@@ -76,7 +76,7 @@
             <tbody>
             {% for setup in plate_setups %}
                 <tr id={{ setup.id }} name={{ setup.id }}>
-                    <td><a href="/assays/assayplatesetup/{{ setup.id }}/update">{{ setup.assay_device_id }}</a></td>
+                    <td><a href="/assays/assayplatesetup/{{ setup.id }}/update">{{ setup.assay_plate_id }}</a></td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.assay_layout }}</td>
                     <td>{{ setup.created_by }}</td>
