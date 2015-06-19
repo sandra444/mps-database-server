@@ -244,7 +244,7 @@ class AssayPlateCells(models.Model):
     Individual cell parameters for PLATE setup used in inline
     """
 
-    assay_chip = models.ForeignKey('AssayPlateSetup')
+    assay_plate = models.ForeignKey('AssayPlateSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
     cell_biosensor = models.ForeignKey('cellsamples.Biosensor', null=True, blank=True)
     cellsample_density = models.FloatField(verbose_name='density', default=0)
