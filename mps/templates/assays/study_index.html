@@ -213,7 +213,7 @@
                 <a href="assaychiptestresult/add" class="btn btn-success" role="button">Add Chip Result</a>
             {% endif %}
 
-            {% if plate_readouts.count == 0 or number_of_plate_results == plate_vreadouts.count %}
+            {% if plate_readouts.count == 0 or number_of_plate_results == plate_readouts.count %}
                 <div hidden id="plate_result_alert" class="alert alert-warning" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Warning:</span>
