@@ -1,6 +1,6 @@
 <tr>
     <td>
-        <a href="/assays/assaydevicesetup/{{ object.id }}">
+        <a href="/assays/assayplatesetup/{{ object.id }}">
             {{ object }}
         </a>
     </td>

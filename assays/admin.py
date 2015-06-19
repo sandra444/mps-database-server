@@ -330,7 +330,7 @@ class AssayPlateCellsInline(admin.TabularInline):
         css = {"all": ("css/hide_admin_original.css",)}
 
 
-class AssayDeviceSetupAdmin(LockableAdmin):
+class AssayPlateSetupAdmin(LockableAdmin):
     # Setups for MICROPLATES
 
     class Media(object):
@@ -402,7 +402,7 @@ class AssayDeviceSetupAdmin(LockableAdmin):
         ),
     )
 
-admin.site.register(AssayDeviceSetup, AssayDeviceSetupAdmin)
+admin.site.register(AssayPlateSetup, AssayPlateSetupAdmin)
 
 # This function turns a label to a number
 def label_to_number(label):
@@ -563,7 +563,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 # TODO ADD TABULAR UPLOAD
 # TODO LINKING MULTIPLE ASSAYS TO ONE FEATURE IS AMBIGUOUS: DO NOT ALLOW IT (X?)
 # TODO DO NOT ALLOW ROW OR COLUMN OVERFLOW
-class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
+class AssayPlateReadoutInlineFormset(forms.models.BaseInlineFormSet):
     def clean(self):
         """Validate unique, existing PLATE READOUTS"""
 
@@ -777,7 +777,7 @@ class AssayDeviceReadoutInlineFormset(forms.models.BaseInlineFormSet):
 
 class AssayPlateReadoutInline(admin.TabularInline):
     # Assays for ChipReadout
-    formset = AssayDeviceReadoutInlineFormset
+    formset = AssayPlateReadoutInlineFormset
     model = AssayPlateReadoutAssay
     verbose_name = 'Assay Plate Readout Assay'
     verbose_plural_name = 'Assay Plate Readout Assays'
@@ -795,19 +795,19 @@ class AssayPlateReadoutInline(admin.TabularInline):
 
 # Plate Readout validation occurs in the inline formset
 # This form is just to jam in upload_type into the admin
-class AssayDeviceReadoutForm(forms.ModelForm):
+class AssayPlateReadoutForm(forms.ModelForm):
 
     upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
 
     class Meta(object):
-        model = AssayDeviceReadout
+        model = AssayPlateReadout
         exclude = ('',)
 
 
-class AssayDeviceReadoutAdmin(LockableAdmin):
+class AssayPlateReadoutAdmin(LockableAdmin):
     # Endpoint readouts from MICROPLATES
-    resource_class = AssayDeviceReadoutResource
-    form = AssayDeviceReadoutForm
+    resource_class = AssayPlateReadoutResource
+    form = AssayPlateReadoutForm
 
     class Media(object):
         js = ('js/inline_fix.js', 'assays/customize_plate_readout.js',)
@@ -920,7 +920,7 @@ class AssayDeviceReadoutAdmin(LockableAdmin):
     def save_model(self, request, obj, form, change):
         pass
 
-admin.site.register(AssayDeviceReadout, AssayDeviceReadoutAdmin)
+admin.site.register(AssayPlateReadout, AssayPlateReadoutAdmin)
 
 # Case and point for why you should not just copy code without carefully reading it
 # TODO these remove functions really should not even exist (one line of code?)

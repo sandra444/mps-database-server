@@ -1,6 +1,6 @@
 <tr>
     <td>
-        <a href="/assays/assaydevicereadout/{{ object.id }}">
+        <a href="/assays/assayplatereadout/{{ object.id }}">
             {{ object }}
         </a>
     </td>

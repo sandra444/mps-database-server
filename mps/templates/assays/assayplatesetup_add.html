@@ -50,8 +50,8 @@
 {#        {% endif %}#}
 
         {% if update %}
-{#            <a role="button" class="btn btn-info" href="/assays/{{ object.assay_run_id.id }}/assaydevicesetup/add?clone={{ object.id }}">Clone</a>#}
-            <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assaydevicesetup/{{ object.id }}/delete/">Delete</a>
+{#            <a role="button" class="btn btn-info" href="/assays/{{ object.assay_run_id.id }}/assayplatesetup/add?clone={{ object.id }}">Clone</a>#}
+            <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assayplatesetup/{{ object.id }}/delete/">Delete</a>
         {% endif %}
 
         {% include 'flag.html'%}

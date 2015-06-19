@@ -117,9 +117,9 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
 
         # PLATES
 
-        context['plate_setups'] = AssayDeviceSetup.objects.filter(assay_run_id=self.object).prefetch_related('assay_layout',
+        context['plate_setups'] = AssayPlateSetup.objects.filter(assay_run_id=self.object).prefetch_related('assay_layout',
                                                                                                        'created_by')
-        readouts = AssayDeviceReadout.objects.filter(setup=context['plate_setups']).prefetch_related('setup', 'created_by')
+        readouts = AssayPlateReadout.objects.filter(setup=context['plate_setups']).prefetch_related('setup', 'created_by')
 
         related_assays = AssayPlateReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
         related_assays_map = {}
@@ -1070,15 +1070,15 @@ class AssayLayoutDelete(CreatorRequiredMixin, DeleteView):
 
 
 # Class-based views for LAYOUTS
-class AssayDeviceSetupList(LoginRequiredMixin, ListView):
-    model = AssayDeviceSetup
+class AssayPlateSetupList(LoginRequiredMixin, ListView):
+    model = AssayPlateSetup
 
     def get_queryset(self):
-        return AssayDeviceSetup.objects.filter(restricted=False).prefetch_related('created_by', 'group', 'assay_run_id', 'assay_layout') | AssayDeviceSetup.objects.filter(
+        return AssayPlateSetup.objects.filter(restricted=False).prefetch_related('created_by', 'group', 'assay_run_id', 'assay_layout') | AssayPlateSetup.objects.filter(
             group__in=self.request.user.groups.all()).prefetch_related('created_by', 'group', 'assay_run_id', 'assay_layout')
 
 # Formset for plate cells
-AssayPlateCellsFormset = inlineformset_factory(AssayDeviceSetup, AssayPlateCells, formset=AssayPlateCellsInlineFormset,
+AssayPlateCellsFormset = inlineformset_factory(AssayPlateSetup, AssayPlateCells, formset=AssayPlateCellsInlineFormset,
                                               extra=1,
                                               widgets={
                                               'cellsample_density': forms.NumberInput(attrs={'style': 'width:100px;', }),
@@ -1086,10 +1086,10 @@ AssayPlateCellsFormset = inlineformset_factory(AssayDeviceSetup, AssayPlateCells
 
 
 # VIEWS FOR ASSAY PLATE (DEVICE) SETUP
-class AssayDeviceSetupAdd(StudyGroupRequiredMixin, CreateView):
-    model = AssayDeviceSetup
-    form_class = AssayDeviceSetupForm
-    template_name = 'assays/assaydevicesetup_add.html'
+class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
+    model = AssayPlateSetup
+    form_class = AssayPlateSetupForm
+    template_name = 'assays/assayplatesetup_add.html'
 
     def get_context_data(self, **kwargs):
         groups = self.request.user.groups.values_list('id', flat=True)
@@ -1097,7 +1097,7 @@ class AssayDeviceSetupAdd(StudyGroupRequiredMixin, CreateView):
             'cell_type',
             'supplier',
         ).select_related('cell_type__cell_subtype')
-        context = super(AssayDeviceSetupAdd, self).get_context_data(**kwargs)
+        context = super(AssayPlateSetupAdd, self).get_context_data(**kwargs)
 
         if self.request.POST:
             context['formset'] = AssayPlateCellsFormset(self.request.POST)
@@ -1137,15 +1137,15 @@ class AssayDeviceSetupAdd(StudyGroupRequiredMixin, CreateView):
 
 
 # TODO Assay Layout Detail does not currently exist (deemed lower priority)
-class AssayDeviceSetupDetail(DetailRedirectMixin, DetailView):
-    model = AssayDeviceSetup
+class AssayPlateSetupDetail(DetailRedirectMixin, DetailView):
+    model = AssayPlateSetup
 
 
 # TODO ADD ADDITIONAL CONTEXT
-class AssayDeviceSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
-    model = AssayDeviceSetup
-    form_class = AssayDeviceSetupForm
-    template_name = 'assays/assaydevicesetup_add.html'
+class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
+    model = AssayPlateSetup
+    form_class = AssayPlateSetupForm
+    template_name = 'assays/assayplatesetup_add.html'
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -1207,21 +1207,21 @@ class AssayDeviceSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 
 # TODO ADD CONTEXT
-class AssayDeviceSetupDelete(CreatorRequiredMixin, DeleteView):
-    model = AssayDeviceSetup
-    template_name = 'assays/assaydevicesetup_delete.html'
+class AssayPlateSetupDelete(CreatorRequiredMixin, DeleteView):
+    model = AssayPlateSetup
+    template_name = 'assays/assayplatesetup_delete.html'
 
     def get_success_url(self):
         return '/assays/' + str(self.object.assay_run_id.id)
 
 
 # Class based views for readouts
-class AssayDeviceReadoutList(LoginRequiredMixin, ListView):
-    model = AssayDeviceReadout
+class AssayPlateReadoutList(LoginRequiredMixin, ListView):
+    model = AssayPlateReadout
 
     def get_queryset(self):
-        readouts = AssayDeviceReadout.objects.filter(setup__assay_run_id__restricted=False).prefetch_related(
-            'setup', 'created_by', 'group') | AssayDeviceReadout.objects.filter(
+        readouts = AssayPlateReadout.objects.filter(setup__assay_run_id__restricted=False).prefetch_related(
+            'setup', 'created_by', 'group') | AssayPlateReadout.objects.filter(
             setup__assay_run_id__group__in=self.request.user.groups.all()).prefetch_related('setup',
                                                                                             'created_by', 'group')
 
@@ -1240,22 +1240,22 @@ class AssayDeviceReadoutList(LoginRequiredMixin, ListView):
         return readouts
 
 
-APRAFormSet = inlineformset_factory(AssayDeviceReadout, AssayPlateReadoutAssay, formset=AssayDeviceReadoutInlineFormset,
+APRAFormSet = inlineformset_factory(AssayPlateReadout, AssayPlateReadoutAssay, formset=AssayPlateReadoutInlineFormset,
                                     extra=1)
 
 
-class AssayDeviceReadoutAdd(StudyGroupRequiredMixin, CreateView):
-    template_name = 'assays/assaydevicereadout_add.html'
-    form_class = AssayDeviceReadoutForm
+class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
+    template_name = 'assays/assayplatereadout_add.html'
+    form_class = AssayPlateReadoutForm
 
     def get_context_data(self, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        exclude_list = AssayDeviceReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
-        setups = AssayDeviceSetup.objects.filter(assay_run_id=study).prefetch_related(
+        exclude_list = AssayPlateReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
+        setups = AssayPlateSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'assay_layout',
             'created_by').exclude(id__in=list(set(exclude_list)))
 
-        context = super(AssayDeviceReadoutAdd, self).get_context_data(**kwargs)
+        context = super(AssayPlateReadoutAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = APRAFormSet(self.request.POST, self.request.FILES)
         else:
@@ -1302,17 +1302,17 @@ class AssayDeviceReadoutAdd(StudyGroupRequiredMixin, CreateView):
         if not context.get('setups',''):
             return redirect('/assays/'+str(study.id))
 
-        return super(AssayDeviceReadoutAdd, self).render_to_response(context)
+        return super(AssayPlateReadoutAdd, self).render_to_response(context)
 
 
 # TODO ADD TEMPLATE
-class AssayDeviceReadoutDetail(DetailRedirectMixin, DetailView):
-    model = AssayDeviceReadout
+class AssayPlateReadoutDetail(DetailRedirectMixin, DetailView):
+    model = AssayPlateReadout
 
-class AssayDeviceReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
-    model = AssayDeviceReadout
-    template_name = 'assays/assaydevicereadout_add.html'
-    form_class = AssayDeviceReadoutForm
+class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
+    model = AssayPlateReadout
+    template_name = 'assays/assayplatereadout_add.html'
+    form_class = AssayPlateReadoutForm
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -1322,10 +1322,10 @@ class AssayDeviceReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
         # Get study
         study = self.object.setup.assay_run_id
 
-        exclude_list = AssayDeviceReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
-        setups = AssayDeviceSetup.objects.filter(assay_run_id=study).prefetch_related(
+        exclude_list = AssayPlateReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
+        setups = AssayPlateSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'assay_layout',
-            'created_by').exclude(id__in=list(set(exclude_list))) | AssayDeviceSetup.objects.filter(pk=self.object.setup.id)
+            'created_by').exclude(id__in=list(set(exclude_list))) | AssayPlateSetup.objects.filter(pk=self.object.setup.id)
 
         # Render form
         formset = APRAFormSet(instance=self.object)
@@ -1348,10 +1348,10 @@ class AssayDeviceReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         form.instance.group = study.group
 
-        exclude_list = AssayDeviceReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
-        setups = AssayDeviceSetup.objects.filter(assay_run_id=study).prefetch_related(
+        exclude_list = AssayPlateReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
+        setups = AssayPlateSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'assay_layout',
-            'created_by').exclude(id__in=list(set(exclude_list))) | AssayDeviceSetup.objects.filter(pk=self.object.setup.id)
+            'created_by').exclude(id__in=list(set(exclude_list))) | AssayPlateSetup.objects.filter(pk=self.object.setup.id)
 
         # This is for cleaning
         formset.instance = form.instance
@@ -1387,9 +1387,9 @@ class AssayDeviceReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 
 # TODO ADD CONTEXT
-class AssayDeviceReadoutDelete(CreatorRequiredMixin, DeleteView):
-    model = AssayDeviceReadout
-    template_name = 'assays/assaydevicereadout_delete.html'
+class AssayPlateReadoutDelete(CreatorRequiredMixin, DeleteView):
+    model = AssayPlateReadout
+    template_name = 'assays/assayplatereadout_delete.html'
 
     def get_success_url(self):
         return '/assays/' + str(self.object.setup.assay_run_id.id)
@@ -1422,7 +1422,7 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         exclude_list = AssayPlateTestResult.objects.filter(assay_device_id__isnull=False).values_list('assay_device_id', flat=True)
-        readouts = AssayDeviceReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
+        readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
 
         context = super(AssayPlateTestResultAdd, self).get_context_data(**kwargs)
         if self.request.POST:
@@ -1482,7 +1482,7 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
         study = self.object.assay_device_id.setup.assay_run_id
 
         exclude_list = AssayPlateTestResult.objects.filter(assay_device_id__isnull=False).values_list('assay_device_id', flat=True)
-        readouts = AssayDeviceReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list))) | AssayDeviceReadout.objects.filter(pk=self.object.assay_device_id.id)
+        readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list))) | AssayPlateReadout.objects.filter(pk=self.object.assay_device_id.id)
 
         # Render form
         formset = PlateTestResultFormSet(instance=self.object)
@@ -1504,7 +1504,7 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
         study = self.object.assay_device_id.setup.assay_run_id
 
         exclude_list = AssayPlateTestResult.objects.filter(assay_device_id__isnull=False).values_list('assay_device_id', flat=True)
-        readouts = AssayDeviceReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
+        readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
 
         form.instance.group = study.group
         # Setting restricted in the form does not work as it is not part of the form

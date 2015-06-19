@@ -15,7 +15,7 @@
         <legend>
             <h2>Setups
                 <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Chip Setup</a>
-                <a href="assaydevicesetup/add" class="btn btn-success" role="button">Add Plate Setup</a>
+                <a href="assayplatesetup/add" class="btn btn-success" role="button">Add Plate Setup</a>
             </h2>
         </legend>
 
@@ -76,7 +76,7 @@
             <tbody>
             {% for setup in plate_setups %}
                 <tr id={{ setup.id }} name={{ setup.id }}>
-                    <td><a href="/assays/assaydevicesetup/{{ setup.id }}/update">{{ setup.assay_device_id }}</a></td>
+                    <td><a href="/assays/assayplatesetup/{{ setup.id }}/update">{{ setup.assay_device_id }}</a></td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.assay_layout }}</td>
                     <td>{{ setup.created_by }}</td>
@@ -115,7 +115,7 @@
                 </div>
                 <a class="btn btn-warning" role="button" onClick="$('#plate_readout_alert').removeProp('hidden');">Add Plate Readout</a>
             {% else %}
-                <a href="assaydevicereadout/add" class="btn btn-success" role="button">Add Plate Readout</a>
+                <a href="assayplatereadout/add" class="btn btn-success" role="button">Add Plate Readout</a>
             {% endif %}
 
         </h2></legend>
@@ -176,8 +176,8 @@
             <tbody>
             {% for readout in plate_readouts %}
                 <tr id={{ readout.id }} name={{ readout.id }}>
-                    <td><a href="/assays/assaydevicereadout/{{ readout.id }}/update/">{{ readout.id }}</a></td>
-                    <td><a href="/assays/assaydevicesetup/{{ readout.setup.id }}/update/">{{ readout.setup }}</a></td>
+                    <td><a href="/assays/assayplatereadout/{{ readout.id }}/update/">{{ readout.id }}</a></td>
+                    <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}/update/">{{ readout.setup }}</a></td>
                     <td>
                         {% for assay in readout.related_assays %}
                             {{ assay }}
@@ -308,12 +308,12 @@
                         </a>
                     </td>
                     <td>
-                        <a href="/assays/assaydevicesetup/{{ result.assay_result.assay_device_id.setup.id }}/update/">
+                        <a href="/assays/assayplatesetup/{{ result.assay_result.assay_device_id.setup.id }}/update/">
                             {{ result.assay_result.assay_device_id.setup }}
                         </a>
                     </td>
                     <td>
-                        <a href="/assays/assaydevicereadout/{{ result.assay_result.assay_device_id.id }}/update/">
+                        <a href="/assays/assayplatereadout/{{ result.assay_result.assay_device_id.id }}/update/">
                             {{ result.assay_result.assay_device_id.id }}
                         </a>
                     </td>

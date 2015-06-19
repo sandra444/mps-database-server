@@ -35,10 +35,10 @@ def fetch_assay_layout_content(request):
         layout = AssayLayout.objects.get(id=id)
 
     elif model == 'assay_device_setup':
-        layout = AssayDeviceSetup.objects.get(id=id).assay_layout
+        layout = AssayPlateSetup.objects.get(id=id).assay_layout
 
     elif model == 'assay_device_readout':
-        layout = AssayDeviceReadout.objects.get(id=id).setup.assay_layout
+        layout = AssayPlateReadout.objects.get(id=id).setup.assay_layout
 
 
     data = defaultdict(dict)
@@ -96,7 +96,7 @@ def fetch_readout(request):
         return HttpResponseServerError()
 
     if model == 'assay_device_readout':
-        current_readout_id = AssayDeviceReadout.objects.get(id=id)
+        current_readout_id = AssayPlateReadout.objects.get(id=id)
 
     elif model == 'assay_plate_test_results':
         current_readout_id = AssayPlateTestResult.objects.get(id=id).assay_device_id
@@ -107,7 +107,7 @@ def fetch_readout(request):
     readouts = AssayReadout.objects.filter(assay_device_readout=current_readout_id)\
         .prefetch_related('assay_device_readout', 'assay').order_by('assay','elapsed_time')
 
-    time_unit = AssayDeviceReadout.objects.filter(id=current_readout_id.id)[0].timeunit.unit
+    time_unit = AssayPlateReadout.objects.filter(id=current_readout_id.id)[0].timeunit.unit
 
     for readout in readouts:
         # well = readout.row + '_' + readout.column
@@ -161,10 +161,10 @@ def fetch_layout_format_labels(request):
         layout = AssayLayout.objects.get(id=id).device
 
     elif model == 'assay_device_setup':
-        layout = AssayDeviceSetup.objects.get(id=id).assay_layout.device
+        layout = AssayPlateSetup.objects.get(id=id).assay_layout.device
 
     elif model == 'assay_device_readout':
-        layout = AssayDeviceReadout.objects.get(id=id).setup.assay_layout.device
+        layout = AssayPlateReadout.objects.get(id=id).setup.assay_layout.device
 
     data = {}
 
@@ -214,7 +214,7 @@ def fetch_plate_info(request):
         logger.error('assay id not present in request to fetch_assay_info')
         return HttpResponseServerError()
 
-    assay = AssayDeviceReadout.objects.get(id=assay_id)
+    assay = AssayPlateReadout.objects.get(id=assay_id)
 
     data = {}
 

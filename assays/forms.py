@@ -144,10 +144,10 @@ class AssayLayoutForm(forms.ModelForm):
 
 
 # Forms for plates may become more useful later
-class AssayDeviceSetupForm(forms.ModelForm):
+class AssayPlateSetupForm(forms.ModelForm):
 
     class Meta(object):
-        model = AssayDeviceSetup
+        model = AssayPlateSetup
         exclude = ('assay_run_id','group') + tracking + restricted
 
 
@@ -158,12 +158,12 @@ class AssayPlateCellsInlineFormset(forms.models.BaseInlineFormSet):
         exclude = ('',)
 
 
-class AssayDeviceReadoutForm(forms.ModelForm):
+class AssayPlateReadoutForm(forms.ModelForm):
 
     upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
 
     class Meta(object):
-        model = AssayDeviceReadout
+        model = AssayPlateReadout
         widgets = {
             'notebook_page': forms.NumberInput(attrs={'style':'width:50px;',}),
             'treatment_time_length': forms.NumberInput(attrs={'style':'width:174px;',}),

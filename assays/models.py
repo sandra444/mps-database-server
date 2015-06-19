@@ -244,7 +244,7 @@ class AssayPlateCells(models.Model):
     Individual cell parameters for PLATE setup used in inline
     """
 
-    assay_chip = models.ForeignKey('AssayDeviceSetup')
+    assay_chip = models.ForeignKey('AssayPlateSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
     cell_biosensor = models.ForeignKey('cellsamples.Biosensor', null=True, blank=True)
     cellsample_density = models.FloatField(verbose_name='density', default=0)
@@ -259,7 +259,7 @@ class AssayPlateCells(models.Model):
                                     default='-')
 
 
-class AssayDeviceSetup(FlaggableModel):
+class AssayPlateSetup(FlaggableModel):
     """
     Setup for MICROPLATES
     """
@@ -312,7 +312,7 @@ class AssayPlateReadoutAssay(models.Model):
     class Meta(object):
         unique_together = [('readout_id', 'assay_id')]
 
-    readout_id = models.ForeignKey('assays.AssayDeviceReadout', verbose_name='Readout')
+    readout_id = models.ForeignKey('assays.AssayPlateReadout', verbose_name='Readout')
     assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True)
     reader_id = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
     # Object excluded for now (presumably will be just well)
@@ -335,7 +335,7 @@ class AssayReadout(models.Model):
     An individual value for a PLATE readout
     """
 
-    assay_device_readout = models.ForeignKey('assays.AssayDeviceReadout')
+    assay_device_readout = models.ForeignKey('assays.AssayPlateReadout')
     # A plate can have multiple assays, this differentiates between those assays
     assay = models.ForeignKey('assays.AssayPlateReadoutAssay')
     row = models.CharField(max_length=25)
@@ -359,7 +359,7 @@ class ReadoutUnit(LockableModel):
         return self.readout_unit
 
 
-class AssayDeviceReadout(FlaggableModel):
+class AssayPlateReadout(FlaggableModel):
     """
     Readout data collected from MICROPLATES
     """
@@ -373,7 +373,7 @@ class AssayDeviceReadout(FlaggableModel):
     # assay_device_id = models.CharField(max_length=512,
     #                                    verbose_name='Readout ID/ Barcode')
 
-    # Cell samples are to be handled in AssayDeviceSetup from now on
+    # Cell samples are to be handled in AssayPlateSetup from now on
     # ### TODO This code is slated to be removed ###
     # cell_sample = models.ForeignKey('cellsamples.CellSample')
     #
@@ -390,7 +390,7 @@ class AssayDeviceReadout(FlaggableModel):
     # OLD
     #assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
 
-    setup = models.ForeignKey(AssayDeviceSetup)
+    setup = models.ForeignKey(AssayPlateSetup)
 
     # Old
     #reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
@@ -403,7 +403,7 @@ class AssayDeviceReadout(FlaggableModel):
     treatment_time_length = models.FloatField(verbose_name='Treatment Duration',
                                               blank=True, null=True)
 
-    # Assay start time is now in AssayDeviceSetup
+    # Assay start time is now in AssayPlateSetup
     ### TODO THis code is slated for removal ###
     # assay_start_time = models.DateField(verbose_name='Start Date', blank=True, null=True, help_text="YYYY-MM-DD")
     ### TODO ###
@@ -514,7 +514,7 @@ class AssayPlateTestResult(FlaggableModel):
     class Meta(object):
         verbose_name = 'Plate Result'
 
-    assay_device_id = models.ForeignKey('assays.AssayDeviceReadout',
+    assay_device_id = models.ForeignKey('assays.AssayPlateReadout',
                                         verbose_name='Plate ID/ Barcode')
 
     # Unclear as to what "Assay Test Time" entails

@@ -76,7 +76,7 @@ class StudyConfigurationIndex(indexes.SearchIndex, indexes.Indexable):
         return StudyConfiguration
 
 
-class AssayDeviceSetupIndex(indexes.SearchIndex, indexes.Indexable):
+class AssayPlateSetupIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
 
     group = indexes.CharField(model_attr='group')
@@ -85,10 +85,10 @@ class AssayDeviceSetupIndex(indexes.SearchIndex, indexes.Indexable):
     rendered = indexes.CharField(use_template=True, indexed=False)
 
     def get_model(self):
-        return AssayDeviceSetup
+        return AssayPlateSetup
 
 
-class AssayDeviceReadoutIndex(indexes.SearchIndex, indexes.Indexable):
+class AssayPlateReadoutIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
 
     group = indexes.CharField(model_attr='group')
@@ -97,7 +97,7 @@ class AssayDeviceReadoutIndex(indexes.SearchIndex, indexes.Indexable):
     rendered = indexes.CharField(use_template=True, indexed=False)
 
     def get_model(self):
-        return AssayDeviceReadout
+        return AssayPlateReadout
 
 
 class AssayPlateTestResultIndex(indexes.SearchIndex, indexes.Indexable):
