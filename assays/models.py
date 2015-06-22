@@ -418,7 +418,7 @@ class AssayPlateReadout(FlaggableModel):
                             blank=True, null=True)
 
     def __unicode__(self):
-        return u'{0}'.format(self.id)
+        return u'{0}'.format(self.setup)
 
     def get_absolute_url(self):
         return "/assays/{}/".format(self.setup.assay_run_id.id)
@@ -539,7 +539,7 @@ class AssayPlateTestResult(FlaggableModel):
     # value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
 
     def __unicode__(self):
-        return u''
+        return u'Results for: {}'.format(self.readout)
 
     def get_absolute_url(self):
         return "/assays/%i/" % self.readout.setup.assay_run_id.id
