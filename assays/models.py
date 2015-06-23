@@ -189,7 +189,7 @@ class AssayWellType(LockableModel):
     colored_display.allow_tags = True
 
 
-class AssayWell(LockableModel):
+class AssayWell(models.Model):
     """
     An individual PLATE well
     """

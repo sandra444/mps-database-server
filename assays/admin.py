@@ -17,7 +17,7 @@ import ujson as json
 # I use regular expressions for a string split at one point
 import re
 import string
-from django.db import transaction
+from django.db import connection, transaction
 
 class AssayModelTypeAdmin(LockableAdmin):
     save_on_top = True
@@ -148,22 +148,41 @@ class AssayWellInline(admin.TabularInline):
 
 # Saving an Assay Layout is somewhat complicated, so a function is useful here (though perhaps not in this file [spaghetti])
 # BE CAREFUL! FIELDS THAT ARE NOT IN THE FORM ARE AUTOMATICALLY SET TO NONE!
-@transaction.atomic
 def save_assay_layout(request, obj, form, change):
-    layout = obj
+    cursor = connection.cursor()
 
-    compounds = dict((str(o.pk), o) for o in Compound.objects.all())
-    well_types = dict((str(o.pk), o) for o in AssayWellType.objects.all())
+    type_query = ''' INSERT INTO "assays_assaywell"
+          ("assay_layout_id", "well_type_id", "row", "column")
+          VALUES (%s, %s, %s, %s)'''
+    type_query_list = []
+
+    time_query = ''' INSERT INTO "assays_assaytimepoint"
+          ("assay_layout_id", "timepoint", "row", "column")
+          VALUES (%s, %s, %s, %s)'''
+    time_query_list = []
+
+    compound_query = ''' INSERT INTO "assays_assaycompound"
+          ("assay_layout_id", "compound_id", "concentration", "concentration_unit", "row", "column")
+          VALUES (%s, %s, %s, %s, %s, %s)'''
+    compound_query_list = []
+
+    label_query = ''' INSERT INTO "assays_assaywelllabel"
+          ("assay_layout_id", "label", "row", "column")
+          VALUES (%s, %s, %s, %s)'''
+    label_query_list = []
+
+    layout = obj
+    layout_id = obj.id
 
     if change:
+        # Delete old types for this assay
+        AssayWell.objects.filter(assay_layout=layout).delete()
+
         # Delete old compound data for this assay
         AssayCompound.objects.filter(assay_layout=layout).delete()
 
         # Delete old timepoint data for this assay
         AssayTimepoint.objects.filter(assay_layout=layout).delete()
-
-        # Delete old types for this assay
-        AssayWell.objects.filter(assay_layout=layout).delete()
 
         # Delete old labels for this assay
         AssayWellLabel.objects.filter(assay_layout=layout).delete()
@@ -188,12 +207,19 @@ def save_assay_layout(request, obj, form, change):
             row, column = content.split('_')
 
             # Add new timepoint info
-            AssayTimepoint(
-                assay_layout=obj,
-                timepoint=val,
-                row=row,
-                column=column
-            ).save()
+            time_query_list.append((
+                layout_id,
+                val,
+                row,
+                column
+            ))
+
+            # AssayTimepoint(
+            #     assay_layout=obj,
+            #     timepoint=val,
+            #     row=row,
+            #     column=column
+            # ).save()
 
         ### END save timepoint data ###
 
@@ -211,14 +237,23 @@ def save_assay_layout(request, obj, form, change):
 
             if 'compound' in content:
                 # Add compound info
-                AssayCompound(
-                    assay_layout=obj,
-                    compound=compounds.get(content['compound']),
-                    concentration=content['concentration'],
-                    concentration_unit=content['concentration_unit'],
-                    row=row,
-                    column=col
-                ).save()
+                compound_query_list.append((
+                    layout_id,
+                    content['compound'],
+                    content['concentration'],
+                    content['concentration_unit'],
+                    row,
+                    col
+                ))
+
+                # AssayCompound(
+                #     assay_layout=obj,
+                #     compound_id=content['compound'],
+                #     concentration=content['concentration'],
+                #     concentration_unit=content['concentration_unit'],
+                #     row=row,
+                #     column=col
+                # ).save()
 
         ### END save compound information ###
 
@@ -229,12 +264,19 @@ def save_assay_layout(request, obj, form, change):
             row, column = content.split('_')
 
             # Add new label info
-            AssayWellLabel(
-                assay_layout=obj,
-                label=val,
-                row=row,
-                column=column
-            ).save()
+            label_query_list.append((
+                   layout_id,
+                   val,
+                   row,
+                   column
+            ))
+
+            # AssayWellLabel(
+            #     assay_layout=obj,
+            #     label=val,
+            #     row=row,
+            #     column=column
+            # ).save()
 
         # Types
         elif key.endswith('_type'):
@@ -246,12 +288,26 @@ def save_assay_layout(request, obj, form, change):
                 row, column = content.split('_')
 
                 # Add new timepoint info
-                AssayWell(
-                    assay_layout=obj,
-                    well_type=well_types.get(val),
-                    row=row,
-                    column=column
-                ).save()
+                type_query_list.append((
+                    layout_id,
+                    val,
+                    row,
+                    column
+                ))
+
+                # AssayWell(
+                #     assay_layout=obj,
+                #     well_type_id=val,
+                #     row=row,
+                #     column=column
+                # ).save()
+
+    cursor.executemany(type_query,type_query_list)
+    cursor.executemany(time_query,time_query_list)
+    cursor.executemany(compound_query,compound_query_list)
+    cursor.executemany(label_query,label_query_list)
+
+    transaction.commit()
 
 
 # TODO REVISE SAVING
@@ -428,14 +484,23 @@ def removeExistingReadout(currentAssayReadout):
 # TODO CHANGE BLOCK UPLOAD
 # TODO ADD TABULAR UPLOAD
 # TODO CHANGE ROW TO BE ALPHABETICAL IN LIEU OF NUMERIC?
-@transaction.atomic
 def parseReadoutCSV(currentAssayReadout, file, upload_type):
     removeExistingReadout(currentAssayReadout)
+
+    cursor = connection.cursor()
+
+    query = ''' INSERT INTO "assays_assayreadout"
+          ("assay_device_readout_id", "assay_id", "row", "column", "value", "elapsed_time")
+          VALUES (%s, %s, %s, %s, %s, %s)'''
+
+    query_list = []
+
+    currentAssayReadoutId = currentAssayReadout.id
 
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
 
-    assays = dict((o.feature, o) for o in AssayPlateReadoutAssay.objects.filter(readout_id=currentAssayReadout))
+    assays = dict((o.feature, o.id) for o in AssayPlateReadoutAssay.objects.filter(readout_id=currentAssayReadout).only('feature'))
 
     if upload_type == 'Block':
         # Current assay
@@ -479,23 +544,42 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                     offset_row_id = (row_id-number_of_assays) % number_of_rows
 
                     if time:
-                        AssayReadout(
-                            assay_device_readout=currentAssayReadout,
-                            row=offset_row_id,
-                            column=column_id,
-                            value=value,
-                            # the associated assay
-                            assay=assay,
-                            elapsed_time=time
-                        ).save()
+                        query_list.append((
+                            currentAssayReadoutId,
+                            assay,
+                            offset_row_id,
+                            column_id,
+                            value,
+                            time
+                        ))
+
+                        # AssayReadout(
+                        #     assay_device_readout_id=currentAssayReadoutId,
+                        #     row=offset_row_id,
+                        #     column=column_id,
+                        #     value=value,
+                        #     # the associated assay
+                        #     assay_id=assay,
+                        #     elapsed_time=time
+                        # ).save()
                     else:
-                        AssayReadout(
-                            assay_device_readout=currentAssayReadout,
-                            row=offset_row_id,
-                            column=column_id,
-                            value=value,
-                            assay=assay,
-                        ).save()
+                        # Note default elapsed time of 0
+                        query_list.append((
+                            currentAssayReadoutId,
+                            assay,
+                            offset_row_id,
+                            column_id,
+                            value,
+                            0
+                        ))
+
+                        # AssayReadout(
+                        #     assay_device_readout_id=currentAssayReadoutId,
+                        #     row=offset_row_id,
+                        #     column=column_id,
+                        #     value=value,
+                        #     assay_id=assay,
+                        # ).save()
 
     # Otherwise if the upload is tabular
     else:
@@ -531,14 +615,26 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 
                     assay = assays.get(feature)
 
-                    AssayReadout(
-                        assay_device_readout=currentAssayReadout,
-                        row=row_label,
-                        column=column_label,
-                        value=value,
-                        assay=assay,
-                    ).save()
+                    # Note default elapsed time of 0
+                    query_list.append((
+                        currentAssayReadoutId,
+                        assay,
+                        row_label,
+                        column_label,
+                        value,
+                        0
+                    ))
+                    # AssayReadout(
+                    #     assay_device_readout_id=currentAssayReadoutId,
+                    #     row=row_label,
+                    #     column=column_label,
+                    #     value=value,
+                    #     assay_id=assay,
+                    # ).save()
 
+    cursor.executemany(query,query_list)
+
+    transaction.commit()
 
     # for rowID, rowValue in enumerate(datalist):
     #     # rowValue holds all of the row elements
