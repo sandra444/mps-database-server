@@ -156,13 +156,13 @@ def save_assay_layout(request, obj, form, change):
           VALUES (%s, %s, %s, %s)'''
     type_query_list = []
 
-    time_query = ''' INSERT INTO "assays_assaytimepoint"
+    time_query = ''' INSERT INTO "assays_assaywelltimepoint"
           ("assay_layout_id", "timepoint", "row", "column")
           VALUES (%s, %s, %s, %s)'''
     time_query_list = []
 
-    compound_query = ''' INSERT INTO "assays_assaycompound"
-          ("assay_layout_id", "compound_id", "concentration", "concentration_unit", "row", "column")
+    compound_query = ''' INSERT INTO "assays_assaywellcompound"
+          ("assay_layout_id", "compound_id", "concentration", "concentration_unit_id", "row", "column")
           VALUES (%s, %s, %s, %s, %s, %s)'''
     compound_query_list = []
 
@@ -179,10 +179,10 @@ def save_assay_layout(request, obj, form, change):
         AssayWell.objects.filter(assay_layout=layout).delete()
 
         # Delete old compound data for this assay
-        AssayCompound.objects.filter(assay_layout=layout).delete()
+        AssayWellCompound.objects.filter(assay_layout=layout).delete()
 
         # Delete old timepoint data for this assay
-        AssayTimepoint.objects.filter(assay_layout=layout).delete()
+        AssayWellTimepoint.objects.filter(assay_layout=layout).delete()
 
         # Delete old labels for this assay
         AssayWellLabel.objects.filter(assay_layout=layout).delete()
@@ -214,7 +214,7 @@ def save_assay_layout(request, obj, form, change):
                 column
             ))
 
-            # AssayTimepoint(
+            # AssayWellTimepoint(
             #     assay_layout=obj,
             #     timepoint=val,
             #     row=row,
@@ -246,7 +246,7 @@ def save_assay_layout(request, obj, form, change):
                     col
                 ))
 
-                # AssayCompound(
+                # AssayWellCompound(
                 #     assay_layout=obj,
                 #     compound_id=content['compound'],
                 #     concentration=content['concentration'],

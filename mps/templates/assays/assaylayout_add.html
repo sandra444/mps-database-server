@@ -182,9 +182,17 @@
         <div class="col-sm-10">
             <input id="id_concentration" maxlength="6" name="concentration" type="number" step="any" value="10">
             <select id="id_concunit" name="concunit">
-                <option value="1">mM</option>
-                <option value="2" selected="selected">μM</option>
-                <option value="3">nM</option>
+                {% for unit in concentration_units %}
+                    {# Crude method for choosing default #}
+                    {% if unit.id|add:"0" == 4 %}
+                        <option value={{ unit.id }} selected>{{ unit }}</option>
+                    {% else %}
+                        <option value={{ unit.id }}>{{ unit }}</option>
+                    {% endif %}
+                {% endfor %}
+{#                <option value="1">mM</option>#}
+{#                <option value="2" selected="selected">μM</option>#}
+{#                <option value="3">nM</option>#}
             </select>
         </div>
     </div>

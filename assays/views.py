@@ -985,9 +985,12 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
         groups = self.request.user.groups.filter(
             ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
         devices = Microdevice.objects.filter(row_labels__isnull=False, number_of_columns__isnull=False)
+        # Get all concentration units for compound concentration
+        concentration_units = PhysicalUnits.objects.filter(unit_type='C')
         context = super(AssayLayoutAdd, self).get_context_data(**kwargs)
         context['groups'] = groups
         context['devices'] = devices
+        context['concentration_units'] = concentration_units
         return context
 
     # Test form validity
@@ -1024,12 +1027,13 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
         # Get devices
         devices = Microdevice.objects.filter(row_labels__isnull=False, number_of_columns__isnull=False)
-
+        concentration_units = PhysicalUnits.objects.filter(unit_type='C')
 
         return self.render_to_response(
             self.get_context_data(form=form,
                                   groups=groups,
                                   devices=devices,
+                                  concentration_units=concentration_units,
                                   update=True))
 
     def post(self, request, *args, **kwargs):
@@ -1044,6 +1048,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
         # Get devices
         devices = Microdevice.objects.filter(row_labels__isnull=False, number_of_columns__isnull=False)
+        concentration_units = PhysicalUnits.objects.filter(unit_type='C')
 
         if form.is_valid():
             # Confirm form and get object
@@ -1057,6 +1062,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             self.get_context_data(form=form,
                                   groups=groups,
                                   devices=devices,
+                                  concentration_units=concentration_units,
                                   update=True))
 
 

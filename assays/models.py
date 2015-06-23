@@ -205,7 +205,7 @@ class AssayWell(models.Model):
     column = models.CharField(max_length=25)
 
 
-class AssayTimepoint(models.Model):
+class AssayWellTimepoint(models.Model):
     """
     Timepoints for PLATE wells
     """
@@ -216,7 +216,7 @@ class AssayTimepoint(models.Model):
     column = models.CharField(max_length=25)
 
 
-class AssayCompound(models.Model):
+class AssayWellCompound(models.Model):
     """
     Compound for PLATE wells
     """
@@ -224,7 +224,7 @@ class AssayCompound(models.Model):
     assay_layout = models.ForeignKey(AssayLayout)
     compound = models.ForeignKey('compounds.Compound')
     concentration = models.FloatField(default=0)
-    concentration_unit = models.CharField(max_length=64, default="μM")
+    concentration_unit = models.ForeignKey(PhysicalUnits)
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
 

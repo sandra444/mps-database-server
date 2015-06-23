@@ -204,7 +204,7 @@ $(document).ready(function () {
                         var info = '{"well":"' + well + '"' +
                             ',"compound":"' + compound.id + '","concentration":"' +
                             compound.concentration + '","concentration_unit":"' +
-                            compound.concentration_unit + '"}';
+                            compound.concentration_unit_id + '"}';
 
                         li.append($('<input>')
                             .attr('type', 'hidden')
@@ -290,6 +290,9 @@ $(document).ready(function () {
     // Add options for admin interface
     function add_options() {
         // WARNING WARNING COPY PASTED LEGACY CODE
+        alert('Modifying assay layouts is not currently available in the admin, sorry.');
+        return;
+
         if (!$('#id_locked').prop('checked')) {
             // add compound and cell sample search
             var controls = $('<div>').attr('id', 'controls');
@@ -497,6 +500,7 @@ $(document).ready(function () {
                             );
 
                             var concentration_unit = $('#id_concunit option:selected').text();
+                            var concentration_unit_id = $('#id_concunit').val();
 
                             var incr = parseFloat($('#id_increment').val());
 
@@ -521,7 +525,7 @@ $(document).ready(function () {
                             var info = '{"well":"' + tablecellid + '"' +
                                 ',"compound":"' + compound_id + '","concentration":"' +
                                 concentration + '","concentration_unit":"' +
-                                concentration_unit + '"}';
+                                concentration_unit_id + '"}';
 
                             li.append($('<input>')
                                 .attr('type','hidden')

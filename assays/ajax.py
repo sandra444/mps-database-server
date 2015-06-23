@@ -44,7 +44,7 @@ def fetch_assay_layout_content(request):
     data = defaultdict(dict)
 
     # Fetch compounds
-    compounds = AssayCompound.objects.filter(assay_layout=layout).prefetch_related('assay_layout', 'compound')
+    compounds = AssayWellCompound.objects.filter(assay_layout=layout).prefetch_related('assay_layout', 'compound')
 
     for compound in compounds:
         well = compound.row + '_' + compound.column
@@ -52,14 +52,15 @@ def fetch_assay_layout_content(request):
             data[well]['compounds'] = []
         data[well]['compounds'].append({
             'name': compound.compound.name,
-            'id': compound.compound.id,
+            'id': compound.compound_id,
             'concentration': compound.concentration,
-            'concentration_unit': compound.concentration_unit,
+            'concentration_unit_id': compound.concentration_unit_id,
+            'concentration_unit': compound.concentration_unit.unit
             #'well': well
         })
 
     # Fetch timepoints
-    timepoints = AssayTimepoint.objects.filter(assay_layout=layout).prefetch_related('assay_layout')
+    timepoints = AssayWellTimepoint.objects.filter(assay_layout=layout).prefetch_related('assay_layout')
 
     for timepoint in timepoints:
         well = timepoint.row + '_' + timepoint.column
@@ -79,7 +80,7 @@ def fetch_assay_layout_content(request):
         well = type.row + '_' + type.column
         data[well].update({
             'type': type.well_type.well_type,
-            'type_id': type.well_type.id,
+            'type_id': type.well_type_id,
             'color': type.well_type.background_color
         })
 
