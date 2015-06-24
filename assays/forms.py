@@ -2,6 +2,8 @@ from django import forms
 from assays.models import *
 from compounds.models import Compound
 
+# TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
+
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
 # Excluding restricted is likewise useful
@@ -30,6 +32,9 @@ class AssayChipResultForm(forms.ModelForm):
     #     return self.cleaned_data
 
 class AssayChipReadoutForm(forms.ModelForm):
+    def __init__(self,*args,**kwargs):
+        super (AssayChipReadoutForm,self ).__init__(*args,**kwargs)
+        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T')
 
     another = forms.BooleanField(required=False)
     headers = forms.CharField(required=True)
@@ -159,6 +164,9 @@ class AssayPlateCellsInlineFormset(forms.models.BaseInlineFormSet):
 
 
 class AssayPlateReadoutForm(forms.ModelForm):
+    def __init__(self,*args,**kwargs):
+        super (AssayPlateReadoutForm,self ).__init__(*args,**kwargs)
+        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T')
 
     upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
 

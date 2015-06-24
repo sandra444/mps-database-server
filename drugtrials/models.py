@@ -4,7 +4,7 @@ from mps.base.models import LockableModel
 from microdevices.models import OrganModel
 from cellsamples.models import Organ
 
-from assays.models import PhysicalUnits, TimeUnits
+from assays.models import PhysicalUnits
 
 from django.core.exceptions import ValidationError
 
@@ -207,6 +207,7 @@ SEVERITY_SCORE = (
     ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
 )
 
+# This is legacy code
 TIME_UNITS = (
     ('u', 'unknown'), ('h', 'hours'), ('d', 'days'),
     ('w', 'weeks'), ('m', 'months'), ('y', 'years')
@@ -232,9 +233,10 @@ class TestResult(models.Model):
 
     test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
 
-    time_units = models.ForeignKey(TimeUnits,
+    time_units = models.ForeignKey(PhysicalUnits,
                                    blank=True,
-                                   null=True)
+                                   null=True,
+                                   related_name='test_time_units')
 
     result = models.CharField(default='1',
                               max_length=8,
@@ -262,7 +264,7 @@ class TestResult(models.Model):
 
     value = models.FloatField(blank=True, null=True)
 
-    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
+    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True, related_name='test_value_units')
 
     def clean(self):
         """
@@ -309,7 +311,7 @@ class FindingResult(models.Model):
 
     finding_time = models.FloatField(verbose_name='Time', blank=True, null=True)
 
-    time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
+    time_units = models.ForeignKey(PhysicalUnits, blank=True, null=True, related_name='finding_time_units')
 
     result = models.CharField(default='1',
                               max_length=8,
@@ -342,7 +344,7 @@ class FindingResult(models.Model):
 
     value = models.FloatField(blank=True, null=True)
 
-    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
+    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True, related_name='finding_value_units')
 
     def __unicode__(self):
         return u''

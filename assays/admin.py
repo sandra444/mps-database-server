@@ -727,7 +727,7 @@ class AssayPlateReadoutInlineFormset(forms.models.BaseInlineFormSet):
 
             if upload_type == 'Block':
                 # Tedious way of getting timeunit; probably should refactor
-                readout_time_unit = TimeUnits.objects.get(id=self.data.get('timeunit')).unit
+                readout_time_unit = PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit
 
                 # Acquire number of rows in devices to discern datablocks
                 number_of_rows = self.instance.setup.assay_layout.device.number_of_rows
@@ -1271,7 +1271,7 @@ class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
             datalist = list(datareader)
 
             # Tedious way of getting timeunit; probably should refactor
-            readout_time_unit = TimeUnits.objects.get(id=self.data.get('timeunit')).unit
+            readout_time_unit = PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit
 
             # All unique rows based on ('assay_id', 'field_id', 'elapsed_time')
             unique = {}

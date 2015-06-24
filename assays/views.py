@@ -22,6 +22,7 @@ from mps.mixins import *
 import ujson as json
 
 # TODO Refactor imports
+# TODO TODO REFACTOR WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
 
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 

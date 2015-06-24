@@ -20,7 +20,7 @@ types = (
 )
 
 
-# TODO PHYSICAL UNITS SEEM VERY BROADLY DEFINED AND MAY NEED REVISION
+# TODO NEEDS REVISION
 class PhysicalUnits(LockableModel):
     """
     Measures of concentration and so on
@@ -43,6 +43,7 @@ class PhysicalUnits(LockableModel):
         return u'{}'.format(self.unit)
 
 
+# TODO TIME UNITS ARE SLATED FOR REMOVAL
 class TimeUnits(LockableModel):
     """
     Time Units (minutes, hours, etc)
@@ -398,7 +399,7 @@ class AssayPlateReadout(FlaggableModel):
     # OLD
     # readout_unit = models.ForeignKey(ReadoutUnit)
 
-    timeunit = models.ForeignKey(TimeUnits)
+    timeunit = models.ForeignKey(PhysicalUnits, default=23)
 
     treatment_time_length = models.FloatField(verbose_name='Treatment Duration',
                                               blank=True, null=True)
@@ -520,7 +521,7 @@ class AssayPlateTestResult(FlaggableModel):
     # Unclear as to what "Assay Test Time" entails
     # assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
     #
-    # time_units = models.ForeignKey(TimeUnits, blank=True, null=True)
+    # time_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
     #
     # result = models.CharField(default='1',
     #                           max_length=8,
@@ -744,7 +745,7 @@ class AssayChipReadout(FlaggableModel):
 
     chip_setup = models.ForeignKey(AssayChipSetup, null=True, unique=True)
 
-    timeunit = models.ForeignKey(TimeUnits, default=3)
+    timeunit = models.ForeignKey(PhysicalUnits, default=23)
     treatment_time_length = models.FloatField(verbose_name='Assay Treatment Duration',
                                               blank=True, null=True)
 
