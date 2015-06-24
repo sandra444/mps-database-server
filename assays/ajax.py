@@ -44,7 +44,7 @@ def fetch_assay_layout_content(request):
     data = defaultdict(dict)
 
     # Fetch compounds
-    compounds = AssayWellCompound.objects.filter(assay_layout=layout).prefetch_related('assay_layout', 'compound')
+    compounds = AssayWellCompound.objects.filter(assay_layout=layout).prefetch_related('assay_layout', 'compound', 'concentration_unit')
 
     for compound in compounds:
         well = compound.row + '_' + compound.column
