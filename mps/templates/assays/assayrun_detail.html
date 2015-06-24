@@ -160,11 +160,19 @@
             <tbody>
             {% for result in results %}
                 <tr class="result" id={{ result.id }} name={{ result.id }}>
-                    <td><a href="/assays/assaytestresult/{{ result.assay_result.id }}">{{ result.assay_result.id }}</a></td>
-                    <td><a href="/assays/assaychipsetup/{{ result.assay_result.chip_setup.id }}">{{ result.assay_result.chip_setup }}</a></td>
                     <td>
-                        <a href="/assays/assaychipreadout/{{ result.assay_name.readout_id.id }}">
-                        {{ result.assay_name.readout_id.id }}
+                        <a href="/assays/assaychiptestresult/{{ result.assay_result.id }}">
+                            {{ result.assay_result.id }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/assaychipsetup/{{ result.assay_result.chip_readout.chip_setup.id }}">
+                            {{ result.assay_result.chip_readout.chip_setup }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/assaychipreadout/{{ result.assay_result.chip_readout.id }}">
+                            {{ result.assay_result.chip_readout.id }}
                         </a>
                     </td>
                     <td>{{ result.assay_name }}</td>

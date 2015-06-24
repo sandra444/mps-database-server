@@ -68,6 +68,31 @@ class Microdevice(LockableModel):
     substrate_material = models.CharField(
         max_length=150, null=True, blank=True)
 
+    # Specify whether the device is a plate or a chip
+    device_type = models.CharField(max_length=8,
+                                   choices=(('chip', 'Microchip'),
+                                            ('plate', 'Plate')))
+
+    # Optional fields primarily intended for plates
+    # (though certain chips appear in a series)
+    number_of_rows = models.IntegerField(blank=True,null=True)
+    number_of_columns = models.IntegerField(blank=True,null=True)
+    row_labels = models.CharField(blank=True,
+                                  null=True,
+                                  max_length=1000,
+                                  help_text=
+                                  'Space separated list of unique labels, '
+                                  'e.g. "A B C D ..."'
+                                  ' Number of items must match'
+                                  ' number of columns.''')
+    column_labels = models.CharField(blank=True,
+                                     null=True,
+                                     max_length=1000,
+                                     help_text='Space separated list of unique '
+                                               'labels, e.g. "1 2 3 4 ...". '
+                                               'Number of items must match '
+                                               'number of columns.')
+
     def __unicode__(self):
         return self.device_name
 

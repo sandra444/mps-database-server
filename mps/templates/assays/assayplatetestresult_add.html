@@ -7,108 +7,37 @@
     <script src="{% static "js/whittle.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
+    <script src="{% static "assays/customize_plate_results.js" %}"></script>
 {% endblock %}
 
 {% block content %}
-
-    {#Note that this script is divorced from the admin equivalent#}
-    <script>
-        $(function() {
-            function getIDs() {
-                var i = 0;
-                var IDs = [];
-                while ($('#id_assayresult_set-'+i+'-assay_name')[0]){
-                    IDs.push(i);
-                    i += 1;
-                }
-                return IDs;
-            }
-
-            function changeNew() {
-                var i = Math.max.apply(null,getIDs());
-                $('#id_assayresult_set-'+i+'-assay_name').html(inlineOptions);
-            }
-
-            function changeAll(reset) {
-                var IDs = getIDs();
-                var vals = [];
-
-                if (!reset) {
-                    for (var i in IDs) {
-                        vals.push($('#id_assayresult_set-'+i+'-assay_name').val());
-                    }
-                }
-
-                for (var j in IDs) {
-                    $('#id_assayresult_set-'+j+'-assay_name').html(inlineOptions);
-                    if (!reset) {
-                        $('#id_assayresult_set-'+j+'-assay_name').val(vals[j]);
-                    }
-                }
-            }
-
-            var setup = $('#id_chip_setup');
-            var setupVal = setup.val();
-            var inlineOptions = "";
-
-            // Initial inline whittle
-            $.when(whittle('chip_setup',setup.val(),'AssayChipReadout','AssayChipReadoutAssay','readout_id')).then(function(data) {
-                inlineOptions = data;
-                changeAll(false);
-            });
-
-            // Whittle inline when setup changes
-            setup.change(function() {
-                $.when(whittle('chip_setup',setup.val(),'AssayChipReadout','AssayChipReadoutAssay','readout_id')).then(function(data) {
-                    inlineOptions = data;
-                    changeAll(true);
-                    setupVal = setup.val();
-                });
-            });
-
-            // This is to deal with new inline entries when on the frontend
-            $("#add_button").click(function() {
-                changeNew();
-            });
-
-            // Resolve deletion error frontent
-            // This selector will check all items with DELETE in the name, including newly created ones
-            $("body").on("click", "input[name*='DELETE']", function(event) {
-                $.when(whittle('chip_setup',setup.val(),'AssayChipReadout','AssayChipReadoutAssay','readout_id')).then(function(data) {
-                    inlineOptions = data;
-                    changeAll(false);
-                });
-            });
-        });
-    </script>
-
 
     {% if update %}
         <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
         <h1>
-            Edit Test Results ID #{{ object.id }}
+            Edit Plate Test Results ID #{{ object.id }}
     {% else %}
         <form class="form-horizontal" method="post" >
 
         <h1>
-            Add Test Results
+            Add Plate Test Results
     {% endif %}
         {% csrf_token %}
 
             <button id="submit" type="submit" class="btn btn-primary">Submit</button>
 
             {% if update %}
-                <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assaytestresult/{{ object.id }}/delete/">Delete</a>
+                <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assayplatetestresult/{{ object.id }}/delete/">Delete</a>
             {% endif %}
 
             {% include 'flag.html'%}
         </h1>
 
-        <legend>Test Results</legend>
+        <legend>Plate Test Results</legend>
 
-        {% if form.chip_setup.errors %}
-            {% for error in form.chip_setup.errors %}
+        {% if form.readout.errors %}
+            {% for error in form.readout.errors %}
                 <div class="alert alert-danger" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Error:</span>
@@ -119,16 +48,16 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-            <label for="chip_setup" class="col-sm-2 control-label">Setup*</label>
+            <label for="readout" class="col-sm-2 control-label">Readout*</label>
             <div class="col-sm-10">
-                <select id="id_chip_setup" name="chip_setup">
+                <select id="id_readout" name="readout">
                     <option value="">---------</option>
-                    {% for setup in setups %}
+                    {% for readout in readouts %}
                         {# It is necessary to coerce the forms value into an integer for this compare #}
-                        {% if setup.id|add:"0" == form.chip_setup.value|add:"0" %}
-                            <option value={{ setup.id }} selected>{{ setup }}</option>
+                        {% if readout.id|add:"0" == form.readout.value|add:"0" %}
+                            <option value={{ readout.id }} selected>{{ readout }}</option>
                         {% else %}
-                            <option value={{ setup.id }}>{{ setup }}</option>
+                            <option value={{ readout.id }}>{{ readout }}</option>
                         {% endif %}
                     {% endfor %}
                 </select>
@@ -161,11 +90,11 @@
         {% endif %}
 
         <a id="add_button" class="btn btn-success" role="button">Add Result</a>
-        <table class="table table-striped results" id="assayresult_set-group" name="inlines">
+        <table class="table table-striped results" id="assayplateresult_set-group" name="inlines">
             <thead>
                 <tr>
                     <th>Assay</th>
-                    <th>Result</th>
+                    <th>Pos/Neg</th>
                     <th>Function</th>
                     <th>Measure</th>
                     <th>Value</th>
@@ -180,14 +109,14 @@
                         {# Hidden input for Update (need id to associate) #}
                         {% if result.id.value %}
                         <td class="original" hidden>
-                            <input type="hidden" id="id_assayresult_set-{{ forloop.counter0 }}-id" name="assayresult_set-{{ forloop.counter0 }}-id" value="{{ result.id.value }}">
+                            <input type="hidden" id="id_assayplateresult_set-{{ forloop.counter0 }}-id" name="assayplateresult_set-{{ forloop.counter0 }}-id" value="{{ result.id.value }}">
                         </td>
                         {% endif %}
                         <td>
-                            <select id="id_assayresult_set-{{ forloop.counter0 }}-assay_name" name="assayresult_set-{{ forloop.counter0 }}-assay_name">
+                            <select id="id_assayplateresult_set-{{ forloop.counter0 }}-assay_name" name="assayplateresult_set-{{ forloop.counter0 }}-assay_name">
                                 <option value="">---------</option>
                                 {% if result.assay_name.value %}
-                                    <option selected value="{{ result.assay_name.value }}">---------</option>
+                                    <option selected value="{{ result.assay_name.value }}">Loading</option>
                                 {% endif %}
                             </select>
                         </td>

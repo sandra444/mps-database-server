@@ -3,7 +3,7 @@ import ujson as json
 from collections import defaultdict
 from django.http import *
 from .models import *
-from microdevices.models import MicrophysiologyCenter
+from microdevices.models import MicrophysiologyCenter, Microdevice
 import logging
 logger = logging.getLogger(__name__)
 
@@ -13,67 +13,133 @@ logger = logging.getLogger(__name__)
 # Ajax requests are sent to ajax(request) and funneled into the correct
 # handler function using a simulated Python switch routing function
 
+# TODO OPTIMIZE DATABASE HITS
+
 def main(request):
     return HttpResponseServerError()
 
+# TODO REQUIRES SERIOUS REVISION
 
+# TODO ADD BASE LAYOUT CONTENT TO ASSAY LAYOUT
 def fetch_assay_layout_content(request):
     """Return compounds in a layout."""
 
-    assay_layout_id = request.POST.get('assay_layout_id')
+    id = request.POST.get('id')
+    model = request.POST.get('model')
 
-    if not assay_layout_id:
-        logger.error('assay_layout_id not present in request to fetch_assay_layout_content')
+    if not model and id:
+        logger.error('request_id not present in request to fetch_layout_format_labels')
         return HttpResponseServerError()
 
-    data = defaultdict(list)
-    layout = AssayLayout.objects.get(id=assay_layout_id)
+    if model == 'assay_layout':
+        layout = AssayLayout.objects.get(id=id)
+
+    elif model == 'assay_device_setup':
+        layout = AssayPlateSetup.objects.get(id=id).assay_layout
+
+    elif model == 'assay_device_readout':
+        layout = AssayPlateReadout.objects.get(id=id).setup.assay_layout
+
+
+    data = defaultdict(dict)
 
     # Fetch compounds
-    compounds = AssayCompound.objects.filter(assay_layout=layout)
+    compounds = AssayWellCompound.objects.filter(assay_layout=layout).prefetch_related('assay_layout', 'compound', 'concentration_unit')
 
     for compound in compounds:
         well = compound.row + '_' + compound.column
-        data[well].append({
+        if not 'compounds' in data[well]:
+            data[well]['compounds'] = []
+        data[well]['compounds'].append({
             'name': compound.compound.name,
-            'compound': compound.compound.id,
+            'id': compound.compound_id,
             'concentration': compound.concentration,
-            'concentration_unit': compound.concentration_unit,
-            'well': well
+            'concentration_unit_id': compound.concentration_unit_id,
+            'concentration_unit': compound.concentration_unit.unit
+            #'well': well
         })
 
     # Fetch timepoints
-    timepoints = AssayTimepoint.objects.filter(assay_layout=layout)
+    timepoints = AssayWellTimepoint.objects.filter(assay_layout=layout).prefetch_related('assay_layout')
 
     for timepoint in timepoints:
         well = timepoint.row + '_' + timepoint.column
-        data[well].append({'timepoint': timepoint.timepoint})
+        data[well].update({'timepoint': timepoint.timepoint})
+
+    # Fetch labels
+    labels = AssayWellLabel.objects.filter(assay_layout=layout).prefetch_related('assay_layout')
+
+    for label in labels:
+        well = label.row + '_' + label.column
+        data[well].update({'label': label.label})
+
+    # Fetch types
+    types = AssayWell.objects.filter(assay_layout=layout).prefetch_related('assay_layout', 'well_type')
+
+    for type in types:
+        well = type.row + '_' + type.column
+        data[well].update({
+            'type': type.well_type.well_type,
+            'type_id': type.well_type_id,
+            'color': type.well_type.background_color
+        })
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
 
 def fetch_readout(request):
-    current_readout_id = request.POST.get('current_readout_id')
+    id = request.POST.get('id')
+    model = request.POST.get('model')
 
-    if not current_readout_id:
-        logger.error('current_readout_id not present in request to fetch_readout')
+    if not model and id:
+        logger.error('request_id not present in request to fetch_layout_format_labels')
         return HttpResponseServerError()
 
-    data = defaultdict(list)
+    if model == 'assay_device_readout':
+        current_readout_id = AssayPlateReadout.objects.get(id=id)
 
-    readouts = AssayReadout.objects.filter(
-        assay_device_readout=current_readout_id
-    )
+    elif model == 'assay_plate_test_results':
+        current_readout_id = AssayPlateTestResult.objects.get(id=id).readout
+
+    # data = defaultdict(list)
+    data = []
+
+    readouts = AssayReadout.objects.filter(assay_device_readout=current_readout_id)\
+        .prefetch_related('assay_device_readout', 'assay').order_by('assay','elapsed_time')
+
+    time_unit = AssayPlateReadout.objects.filter(id=current_readout_id.id)[0].timeunit.unit
 
     for readout in readouts:
-        well = readout.row + '_' + readout.column
+        # well = readout.row + '_' + readout.column
 
-        data[well].append({
-            'row': readout.row,
-            'column': readout.column,
-            'value': readout.value,
-        })
+        # data[well].append({
+        #     'row': readout.row,
+        #     'column': readout.column,
+        #     'value': readout.value,
+        # })
+        if readout.elapsed_time:
+            data.append({
+                'row': readout.row,
+                'column': readout.column,
+                'value': readout.value,
+                'assay': readout.assay.assay_id.assay_name,
+                'time': readout.elapsed_time,
+                # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
+                'time_unit': time_unit,
+                'value_unit': readout.assay.readout_unit.readout_unit,
+                'feature': readout.assay.feature,
+            })
+        else:
+            data.append({
+                'row': readout.row,
+                'column': readout.column,
+                'value': readout.value,
+                'assay': readout.assay.assay_id.assay_name,
+                # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
+                'value_unit': readout.assay.readout_unit.readout_unit,
+                'feature': readout.assay.feature,
+            })
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
@@ -82,19 +148,39 @@ def fetch_readout(request):
 def fetch_layout_format_labels(request):
     """Return layout format labels."""
 
-    request_id = request.POST.get('id')
+    id = request.POST.get('id')
+    model = request.POST.get('model')
 
-    if not request_id:
+    if not model and id:
         logger.error('request_id not present in request to fetch_layout_format_labels')
         return HttpResponseServerError()
 
-    layout = AssayLayoutFormat.objects.get(id=request_id)
+    if model == 'device':
+        layout = Microdevice.objects.get(id=id)
+
+    elif model == 'assay_layout':
+        layout = AssayLayout.objects.get(id=id).device
+
+    elif model == 'assay_device_setup':
+        layout = AssayPlateSetup.objects.get(id=id).assay_layout.device
+
+    elif model == 'assay_device_readout':
+        layout = AssayPlateReadout.objects.get(id=id).setup.assay_layout.device
 
     data = {}
 
+    if layout.column_labels and layout.row_labels:
+        column_labels = layout.column_labels.split()
+        row_labels = layout.row_labels.split()
+    # Contrived way to deal with models without labels
+    else:
+        column_labels = None
+        row_labels = None
+
     data.update({
-        'column_labels': layout.column_labels.split(),
-        'row_labels': layout.row_labels.split(),
+        'id': layout.id,
+        'column_labels': column_labels,
+        'row_labels': row_labels,
     })
 
     return HttpResponse(json.dumps(data),
@@ -107,90 +193,14 @@ def fetch_well_types(request):
     data = {}
 
     for well_type in AssayWellType.objects.all():
-        data.update({well_type.id: well_type.well_type})
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
-
-
-def fetch_well_type_color(request):
-    """Return wells type colors."""
-
-    current_id = request.POST.get('id')
-
-    if not current_id:
-        logger.error('current_id was not sent with fetch_well_type_color')
-        return HttpResponseServerError()
-
-    data = AssayWellType.objects.get(id=current_id).background_color
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
-
-
-def fetch_baseid(request):
-    """Return the base assay layout id for a given assay layout"""
-
-    current_layout_id = request.POST.get('current_layout_id')
-
-    if not current_layout_id:
-        logger.error('current_layout_id not present in request to fetch_baseid')
-        return HttpResponseServerError()
-
-    assay_layout = AssayLayout.objects.get(id=current_layout_id)
-
-    # known to set base_layout_id to an integer value correctly
-    base_layout_id = assay_layout.base_layout_id
-
-    data = {}
-    data.update({'base_layout_id': base_layout_id})
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
-
-
-def fetch_base_layout_wells(request):
-    """Return wells in a base layout."""
-
-    base_id = request.POST.get('id')
-
-    if not base_id:
-        logger.error('base_id not present in request to fetch_base_layout_wells')
-        return HttpResponseServerError()
-
-    data = {}
-
-    data.update({
-        aw.row + '_' + aw.column: [aw.well_type.id, aw.well_type.well_type,
-                                   aw.well_type.background_color]
-        for aw in AssayWell.objects.filter(base_layout=base_id)
-    })
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
-
-
-def fetch_base_layout_info(request):
-    """Return wells in a base layout."""
-
-    base_id = request.POST.get('id')
-
-    if not base_id:
-        logger.error('base_id not present in request to fetch_base_layout_info')
-        return HttpResponseServerError()
-
-    base = AssayBaseLayout.objects.get(id=base_id)
-
-    data = {}
-
-    data.update({
-        'format': {'row_labels': base.layout_format.row_labels.split(),
-                   'column_labels': base.layout_format.column_labels.split()},
-
-        'wells': {aw.row + '_' + aw.column: [aw.well_type.well_type,
-                                             aw.well_type.background_color]
-                  for aw in AssayWell.objects.filter(base_layout=base_id)}
-    })
+        data.update(
+            {
+                well_type.id: {
+                    'name': well_type.well_type,
+                    'color': well_type.background_color
+                }
+            }
+        )
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
@@ -205,7 +215,7 @@ def fetch_plate_info(request):
         logger.error('assay id not present in request to fetch_assay_info')
         return HttpResponseServerError()
 
-    assay = AssayDeviceReadout.objects.get(id=assay_id)
+    assay = AssayPlateReadout.objects.get(id=assay_id)
 
     data = {}
 
@@ -216,33 +226,6 @@ def fetch_plate_info(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
-# No longer needed
-
-# def fetch_chip_info(request):
-#     """Returns dynamic info for assays"""
-#
-#     assay_id = request.POST.get('id')
-#
-#     if not assay_id:
-#         logger.error('assay id not present in request to fetch_assay_info')
-#         return HttpResponseServerError()
-#
-#     assay = AssayChipReadout.objects.get(id=assay_id)
-#
-#     data = {}
-#
-#     data.update({
-#         'compound': assay.compound.name,
-#         'unit':  assay.unit.unit,
-#         'concentration': assay.concentration,
-#         'chip_test_type': assay.chip_test_type,
-#         'assay': assay.assay_name.assay_name,
-#         'run': assay.assay_run_id.assay_run_id,
-#         'model': assay.device.model_name,
-#     })
-#
-#     return HttpResponse(json.dumps(data),
-#                         content_type="application/json")
 
 def fetch_center_id(request):
     """Returns center ID for dynamic run form"""
@@ -326,6 +309,7 @@ def fetch_context(request):
         'AssayChipSetup':AssayChipSetup,
         'AssayRun':AssayRun,
         'AssayChipReadoutAssay':AssayChipReadoutAssay,
+        'AssayPlateReadoutAssay':AssayPlateReadoutAssay
     }
 
     # master is what determines the subject's drop down choices
@@ -369,12 +353,12 @@ switch = {
     'fetch_readout': fetch_readout,
     'fetch_layout_format_labels': fetch_layout_format_labels,
     'fetch_well_types': fetch_well_types,
-    'fetch_well_type_color': fetch_well_type_color,
-    'fetch_baseid': fetch_baseid,
-    'fetch_base_layout_wells': fetch_base_layout_wells,
-    'fetch_base_layout_info': fetch_base_layout_info,
+    # 'fetch_well_type_color': fetch_well_type_color,
+    # 'fetch_baseid': fetch_baseid,
+    # 'fetch_base_layout_wells': fetch_base_layout_wells,
+    # 'fetch_base_layout_info': fetch_base_layout_info,
     'fetch_plate_info': fetch_plate_info,
-#   'fetch_chip_info': fetch_chip_info,
+    # 'fetch_chip_info': fetch_chip_info,
     'fetch_center_id': fetch_center_id,
     'fetch_chip_readout': fetch_chip_readout,
     'fetch_context': fetch_context,

@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "js/inline_add.js" %}"></script>
+    <script src="{% static "js/cookies.js" %}"></script>
+    <script src="{% static "js/whittle.js" %}"></script>
+    <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/flag.js" %}"></script>
+    <script src="{% static "assays/customize_chip_results_admin.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+    {% if update %}
+        <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
+
+        <h1>
+            Edit Test Results ID #{{ object.id }}
+    {% else %}
+        <form class="form-horizontal" method="post" >
+
+        <h1>
+            Add Test Results
+    {% endif %}
+        {% csrf_token %}
+
+            <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+
+            {% if update %}
+                <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assaychiptestresult/{{ object.id }}/delete/">Delete</a>
+            {% endif %}
+
+            {% include 'flag.html'%}
+        </h1>
+
+        <legend>Test Results</legend>
+
+        {% if form.chip_readout.errors %}
+            {% for error in form.chip_readout.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    {{error}}
+                </div>
+            {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+            <label for="chip_readout" class="col-sm-2 control-label">Readout*</label>
+            <div class="col-sm-10">
+                <select id="id_chip_readout" name="chip_readout">
+                    <option value="">---------</option>
+                    {% for readout in readouts %}
+                        {# It is necessary to coerce the forms value into an integer for this compare #}
+                        {% if readout.id|add:"0" == form.chip_readout.value|add:"0" %}
+                            <option value={{ readout.id }} selected>{{ readout }}</option>
+                        {% else %}
+                            <option value={{ readout.id }}>{{ readout }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        {{ formset.management_form }}
+        <legend>Results</legend>
+
+        {% if formset.non_form_errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{ formset.non_form_errors }}
+            </div>
+        {% endif %}
+
+        {% if formset.errors %}
+            {% for dict in formset.errors %}
+                {% for key,value in dict.items %}
+                    {% if key %}
+                        <div class="alert alert-danger" role="alert">
+                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                            <span class="sr-only">Error:</span>
+                            {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        {% endif %}
+
+        <a id="add_button" class="btn btn-success" role="button">Add Result</a>
+        <table class="table table-striped results" id="assaychipresult_set-group" name="inlines">
+            <thead>
+                <tr>
+                    <th>Assay</th>
+                    <th>Result</th>
+                    <th>Function</th>
+                    <th>Measure</th>
+                    <th>Value</th>
+                    <th>Test Unit</th>
+                    <th>Severity</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in formset %}
+                    <tr class="inline" id="results-{{ forloop.counter0 }}">
+                        {# Hidden input for Update (need id to associate) #}
+                        {% if result.id.value %}
+                        <td class="original" hidden>
+                            <input type="hidden" id="id_assaychipresult_set-{{ forloop.counter0 }}-id" name="assaychipresult_set-{{ forloop.counter0 }}-id" value="{{ result.id.value }}">
+                        </td>
+                        {% endif %}
+                        <td>
+                            <select id="id_assaychipresult_set-{{ forloop.counter0 }}-assay_name" name="assaychipresult_set-{{ forloop.counter0 }}-assay_name">
+                                <option value="">---------</option>
+                                {% if result.assay_name.value %}
+                                    <option selected value="{{ result.assay_name.value }}">Loading</option>
+                                {% endif %}
+                            </select>
+                        </td>
+                        <td>
+                            {{ result.result }}
+                        </td>
+                        <td>
+                            {{ result.result_function }}
+                        </td>
+                        <td>
+                            {{ result.result_type }}
+                        </td>
+                        <td>
+                            {{ result.value }}
+                        </td>
+                        <td>
+                            {{ result.test_unit }}
+                        </td>
+                        <td>
+                            {{ result.severity }}
+                        </td>
+                        <td>
+                            {{ result.DELETE }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+
+{% endblock %}

@@ -87,12 +87,11 @@
 
         $(document).ready(function() {
             $('#drugtrials').DataTable({
+                dom: 'T<"clear">lfrtip',
                 "iDisplayLength": 50,
                 "deferRender": true,
                 // Initially sort on compound, not arbitrary ID
                 "order": [[ 1, "asc" ], [ 0, "asc"]],
-                // If one wants to display top and bottom
-                //"sDom": '<"wrapper"lfptip>'
 
                 // Apply custom sorting priorities to frequency column
                 "columnDefs": [{

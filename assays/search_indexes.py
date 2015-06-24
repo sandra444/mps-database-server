@@ -2,6 +2,7 @@
 from haystack import indexes
 from .models import *
 
+# TODO ADD PLATES
 
 class AssayRunIndex(indexes.SearchIndex, indexes.Indexable):
     # Substring search is made possible by using EdgeNgramField/NgramField in lieu of CharField
@@ -32,7 +33,6 @@ class AssayRunIndex(indexes.SearchIndex, indexes.Indexable):
 
 class AssayChipSetupIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
-    # created_by = indexes.CharField(model_attr='created_by')
 
     group = indexes.CharField(model_attr='group')
     restricted = indexes.CharField(model_attr='restricted')
@@ -45,7 +45,6 @@ class AssayChipSetupIndex(indexes.SearchIndex, indexes.Indexable):
 
 class AssayChipReadoutIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
-    # created_by = indexes.CharField(model_attr='created_by')
 
     group = indexes.CharField(model_attr='group')
     restricted = indexes.CharField(model_attr='restricted')
@@ -56,9 +55,8 @@ class AssayChipReadoutIndex(indexes.SearchIndex, indexes.Indexable):
         return AssayChipReadout
 
 
-class AssayTestResultIndex(indexes.SearchIndex, indexes.Indexable):
+class AssayChipTestResultIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
-    # created_by = indexes.CharField(model_attr='created_by')
 
     group = indexes.CharField(model_attr='group')
     restricted = indexes.CharField(model_attr='restricted')
@@ -66,7 +64,7 @@ class AssayTestResultIndex(indexes.SearchIndex, indexes.Indexable):
     rendered = indexes.CharField(use_template=True, indexed=False)
 
     def get_model(self):
-        return AssayTestResult
+        return AssayChipTestResult
 
 
 class StudyConfigurationIndex(indexes.SearchIndex, indexes.Indexable):
@@ -76,3 +74,51 @@ class StudyConfigurationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def get_model(self):
         return StudyConfiguration
+
+
+class AssayPlateSetupIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.NgramField(document=True, use_template=True)
+
+    group = indexes.CharField(model_attr='group')
+    restricted = indexes.CharField(model_attr='restricted')
+
+    rendered = indexes.CharField(use_template=True, indexed=False)
+
+    def get_model(self):
+        return AssayPlateSetup
+
+
+class AssayPlateReadoutIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.NgramField(document=True, use_template=True)
+
+    group = indexes.CharField(model_attr='group')
+    restricted = indexes.CharField(model_attr='restricted')
+
+    rendered = indexes.CharField(use_template=True, indexed=False)
+
+    def get_model(self):
+        return AssayPlateReadout
+
+
+class AssayPlateTestResultIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.NgramField(document=True, use_template=True)
+
+    group = indexes.CharField(model_attr='group')
+    restricted = indexes.CharField(model_attr='restricted')
+
+    rendered = indexes.CharField(use_template=True, indexed=False)
+
+    def get_model(self):
+        return AssayPlateTestResult
+
+
+class AssayLayoutIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.NgramField(document=True, use_template=True)
+
+    group = indexes.CharField(model_attr='group')
+    restricted = indexes.CharField(model_attr='restricted')
+
+    rendered = indexes.CharField(use_template=True, indexed=False)
+
+    def get_model(self):
+        return AssayLayout

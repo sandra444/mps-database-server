@@ -319,30 +319,6 @@
         {% endblock %}
     </div>
 
-    {% block graphic %}
-
-        <div hidden id="graphic">
-            <div class="row text-center">
-                <button id="back" class="btn btn-xlarge btn-info">
-                    <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
-                    Back to Selection
-                </button>
-            </div>
-
-            <hr>
-
-            <div id="query_box" class="col-xs-3">
-                <div id="query" class="affix"></div>
-            </div>
-            <div id="cluster" class="col-xs-6">
-            </div>
-            <div class="col-xs-3">
-                <div id="compound" class="affix pre-scrollable"></div>
-            </div>
-        </div>
-
-    {% endblock %}
-
     {% block spinner %}
         <script>
             // define a spinner but do not show it yet
@@ -372,4 +348,30 @@
         <div id="spinner"></div>
     {% endblock %}
 
+{% endblock %}
+
+{% block fluid-content %}
+    {% block graphic %}
+
+        <div hidden id="graphic">
+            <div class="row text-center">
+                <button id="back" class="btn btn-xlarge btn-info">
+                    <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+                    Back to Selection
+                </button>
+            </div>
+
+            <hr>
+
+            <div id="query_box" class="col-xs-3">
+                <div id="query" class="affix"></div>
+            </div>
+            <div id="cluster" class="col-xs-6">
+            </div>
+            <div class="col-xs-3">
+                <div id="compound" class="affix pre-scrollable"></div>
+            </div>
+        </div>
+
+    {% endblock %}
 {% endblock %}

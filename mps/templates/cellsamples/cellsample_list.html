@@ -60,11 +60,10 @@
     <script>
         $(document).ready(function() {
             $('#cellsamples').DataTable({
+                dom: 'T<"clear">lfrtip',
                 "iDisplayLength": 50,
                 // Initially sort on receipt date
                 "order": [ 1, "desc" ]
-                // If one wants to display top and bottom
-                //"sDom": '<"wrapper"lfptip>'
             });
         });
     </script>

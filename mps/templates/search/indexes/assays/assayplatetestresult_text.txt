@@ -1,0 +1,4 @@
+{{ object.readout }}
+{{ object.readout.setup.assay_run_id }}
+{{ object.created_by }}
+{{ object.group }}

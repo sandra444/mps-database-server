@@ -316,6 +316,8 @@
                         <button id='search-{{ forloop.counter0 }}-' type="button" class="btn btn-xs btn-info" onclick="search(this)">
                             <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                         </button>
+                        <label class="small" id="id_assaychipcells_set-{{ forloop.counter0 }}-cell_sample_label">
+                        </label>
                     </td>
                     <td>{{ cell.cell_biosensor }}</td>
                     <td>{{ cell.cellsample_density }}</td>
@@ -360,7 +362,7 @@
 
             <tbody>
             {% for cellsample in cellsamples %}
-                <tr class="cellsample" id={{ cellsample.id }} name={{ cellsample.id }}>
+                <tr class="cellsample" id={{ cellsample.id }} name="{{ cellsample }}">
                     <td>{{ cellsample.id }}</td>
                     <td>{{ cellsample.receipt_date|date:"M d, Y" }}</td>
                     <td>{{ cellsample.cell_type }}</td>
@@ -391,7 +393,7 @@
     var id = null;
 
     function search(elem) {
-        id = $(elem).attr("id").replace(/\D/g,'');
+        id = elem.id.replace(/\D/g,'');
         $("#dialog").dialog({
           width: 775,
           height: 775
@@ -461,9 +463,12 @@
         });
 
         $('.cellsample').click(function (evt) {
-            var cellsampleId = $(this).attr("id");
+            var cellsampleId = this.id;
             var selectedInput = $('#id_assaychipcells_set-' + id + '-cell_sample');
             selectedInput.prop('value', cellsampleId);
+            var cellsampleName = this.attributes["name"].value;
+            var selectedLabel = $('#id_assaychipcells_set-' + id + '-cell_sample_label');
+            selectedLabel.text(cellsampleName);
             $('#dialog').dialog('close');
         });
 
@@ -477,6 +482,18 @@
 
         // Move filter to left
         $('.dataTables_filter').css('float', 'left');
+
+        // This code should populate cell labels when data is already given
+        var current_id = 0;
+        var current_input = $('#id_assaychipcells_set-' + current_id + '-cell_sample');
+        while(current_input[0]) {
+            if(current_input.val()) {
+                var cell_name = $('#' + current_input.val()).attr('name');
+                $('#id_assaychipcells_set-' + current_id + '-cell_sample_label').text(cell_name);
+            }
+            current_id += 1;
+            current_input = $('#id_assaychipcells_set-' + current_id + '-cell_sample');
+        }
     });
 </script>
 

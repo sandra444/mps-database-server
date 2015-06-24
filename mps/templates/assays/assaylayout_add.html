@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% load static %}
+
+{# TODO ADD SCRIPT #}
+{% block load %}
+    <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/flag.js" %}"></script>
+    <script src="{% static "assays/customize_layout.js" %}"></script>
+    <link href="{% static "assays/customize_admin.css" %}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block fluid-content %}
+
+{% if update %}
+    <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post" >
+
+    <div class="container">
+    <h1>
+        Edit {{ object }}
+{% else %}
+    <form enctype="multipart/form-data" class="form-horizontal" method="post" >
+
+    <div class="container">
+    <h1>
+        Add Assay Layout
+{% endif %}
+    {% csrf_token %}
+
+        <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+
+        {% if update %}
+            {# An assay layout clone will be handled in javascript #}
+            <a role="button" class="btn btn-info" href="/assays/assaylayout/add?base={{ object.id }}">Clone Base</a>
+            <a role="button" class="btn btn-info" href="/assays/assaylayout/add?clone={{ object.id }}">Clone All</a>
+            <a role="button" class="btn btn-danger pull-right readjust-pulled" href="delete/">Delete</a>
+        {% endif %}
+
+        {% include 'flag.html'%}
+    </h1>
+
+    <legend>Assay Layout Details</legend>
+
+    {% if form.layout_name.errors %}
+        {% for error in form.layout_name.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="layout_name" class="col-sm-2 control-label">Layout Name*</label>
+        <div class="col-sm-10">
+          {{ form.layout_name }}
+        </div>
+    </div>
+
+    {# TODO ADD DEVICE TO CONTEXT #}
+    {% if form.device.errors %}
+        {% for error in form.device.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="device" class="col-sm-2 control-label">Device*</label>
+        <div class="col-sm-10">
+          <select id="id_device" name="device">
+            <option value="">---------</option>
+            {% for device in devices %}
+              {# It is necessary to coerce the forms value into an integer for this compare #}
+              {% if device.id|add:"0" == form.device.value|add:"0" %}
+                <option value={{ device.id }} selected>{{ device }}</option>
+              {% else %}
+                <option value={{ device.id }}>{{ device }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+    </div>
+
+    <legend>Group Access</legend>
+
+    {% if form.group.errors %}
+        {% for error in form.group.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="group" class="col-sm-2 control-label">Group*</label>
+        <div class="col-sm-10">
+          <select id="id_group" name="group">
+            <option value="">---------</option>
+            {% for group in groups %}
+              {# It is necessary to coerce the forms value into an integer for this compare #}
+              {% if group.id|add:"0" == form.group.value|add:"0" %}
+                <option value={{ group.id }} selected>{{ group.name }}</option>
+              {% else %}
+                <option value={{ group.id }}>{{ group.name }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+    </div>
+
+    <legend>Modify Layout</legend>
+
+    {# TODO REVISE #}
+
+    <div class="form-group row">
+        <label for="id_action" class="col-sm-2 control-label">Action:</label>
+        <div class="col-sm-10">
+            <select id="id_action" name="action">
+                <option value="" selected="selected">---------</option>
+                <option value="type">Set well type</option>
+                <option value="timepoint">Set time point</option>
+                <option value="compound">Add compound</option>
+                <option value="add-label">Add label</option>
+                <option value="clear">Clear contents</option>
+            </select>
+        </div>
+    </div>
+
+    <div hidden class="form-group row change-layout type">
+        <label for="id_type" class="col-sm-2 control-label">Well Type:</label>
+        <div id="well_type_div" class="col-sm-10">
+        </div>
+    </div>
+
+    <div hidden class="change-layout timepoint">
+    <div class="form-group row">
+        <label for="timepoint" class="col-sm-2 control-label">Timepoint:</label>
+        <div class="col-sm-10">
+            <input id="id_timepoint" maxlength="6" name="timepoint" type="number" step="any" value="0">
+            <select id="id_timeunit" name="concunit">
+                <option value="1" selected="selected">min</option>
+                <option value="60">hour</option>
+                <option value="1440">days</option>
+                <option value="10080">weeks</option>
+                <option value="43800">months</option>
+                <option value="525600">years</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="tpincr" class="col-sm-2 control-label">Increment:</label>
+        <div class="col-sm-10">
+            <input id="id_tpincr" maxlength="6" name="tpincr" type="number" step="any" value="0">
+            <input id="id_tphowtoincr" type="radio" name="tphowtoincr" value="add" checked="">
+            Add
+            <input id="id_tphowtoincr" type="radio" name="tphowtoincr" value="multiply">
+            Multiply
+        </div>
+    </div>
+    </div>
+
+    <div hidden class="change-layout compound">
+    <div class="form-group row">
+        <label for="id_compound" class="col-sm-2 control-label">Compound:</label>
+        <div class="col-sm-10">
+            {{ form.compound }}
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="concentration" class="col-sm-2 control-label">Concentration:</label>
+        <div class="col-sm-10">
+            <input id="id_concentration" maxlength="6" name="concentration" type="number" step="any" value="10">
+            <select id="id_concunit" name="concunit">
+                {% for unit in concentration_units %}
+                    {# Crude method for choosing default #}
+                    {% if unit.id|add:"0" == 4 %}
+                        <option value={{ unit.id }} selected>{{ unit }}</option>
+                    {% else %}
+                        <option value={{ unit.id }}>{{ unit }}</option>
+                    {% endif %}
+                {% endfor %}
+{#                <option value="1">mM</option>#}
+{#                <option value="2" selected="selected">μM</option>#}
+{#                <option value="3">nM</option>#}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="increment" class="col-sm-2 control-label">Dilution Factor:</label>
+        <div class="col-sm-10">
+            <input id="id_increment" maxlength="6" name="increment" type="number" step="any" value="0">
+            <input id="id_howtoincr" type="radio" name="howtoincr" value="add" checked="">
+            Add
+            <input id="id_howtoincr" type="radio" name="howtoincr" value="multiply">
+            Multiply
+        </div>
+    </div>
+    </div>
+
+    <div hidden class="form-group row change-layout add-label">
+        <label for="label" class="col-sm-2 control-label">Label:</label>
+        <div class="col-sm-10">
+            <input id="id_label" name="label" size="50" maxlength="50">
+        </div>
+    </div>
+
+    </div>
+
+    {# TODO CHANGE SOON CONTRIVED #}
+    <br>
+    <div class="col-xs-12">
+        <fieldset></fieldset>
+    </div>
+</form>
+
+{% endblock %}

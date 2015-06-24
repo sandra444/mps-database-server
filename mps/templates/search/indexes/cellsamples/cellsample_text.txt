@@ -4,3 +4,4 @@
 {{ object.supplier }}
 {{ object.barcode }}
 {{ object.product_id }}
+{{ object.group }}
