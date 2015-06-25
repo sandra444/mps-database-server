@@ -61,9 +61,17 @@ class AssayChipResultForm(forms.ModelForm):
     #     return self.cleaned_data
 
 class AssayChipReadoutForm(forms.ModelForm):
-    def __init__(self,*args,**kwargs):
+    def __init__(self,study,current,*args,**kwargs):
         super (AssayChipReadoutForm,self).__init__(*args,**kwargs)
         self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T')
+        exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
+        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'device',
+            'compound', 'unit',
+            'created_by').exclude(id__in=list(set(exclude_list)))
+        if current:
+            setups = setups | AssayChipSetup.objects.filter(pk=current)
+        self.fields['chip_setup'].queryset = setups
 
     another = forms.BooleanField(required=False)
     headers = forms.CharField(required=True)
@@ -199,9 +207,16 @@ class AssayPlateCellsInlineFormset(forms.models.BaseInlineFormSet):
 
 
 class AssayPlateReadoutForm(forms.ModelForm):
-    def __init__(self,*args,**kwargs):
+    def __init__(self,study,current,*args,**kwargs):
         super (AssayPlateReadoutForm,self).__init__(*args,**kwargs)
         self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T')
+        exclude_list = AssayPlateReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
+        setups = AssayPlateSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'assay_layout',
+            'created_by').exclude(id__in=list(set(exclude_list)))
+        if current:
+            setups = setups | AssayPlateSetup.objects.filter(pk=current)
+        self.fields['setup'].queryset = setups
 
     upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
 

@@ -291,7 +291,7 @@ AssayChipCellsFormset = inlineformset_factory(AssayChipSetup, AssayChipCells, fo
                                               'cell_passage': forms.TextInput(attrs={'size': 5}), })
 
 
-# TODO REFACTOR THE WAY CLONING IS HANDLED
+# TODO REFACTOR THE WAY CLONING IS HANDLED !!!IMPRORTANT
 class AssayChipSetupAdd(CreateView):
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
@@ -364,9 +364,6 @@ class AssayChipSetupAdd(CreateView):
         return context
 
     def form_valid(self, form):
-        # url_add = ''
-        # if self.request.GET.get('setup', ''):
-        #     url_add = '?setup=1'
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.assay_run_id = study
         form.instance.group = study.group
@@ -539,24 +536,24 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
 
-    def get_context_data(self, **kwargs):
+    def get_form(self, form_class):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
-        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
-            'assay_run_id', 'device',
-            'compound', 'unit',
-            'created_by').exclude(id__in=list(set(exclude_list)))
+        current = None
 
+        # PLEASE NOTE CONTRIVED USE OF NONE TO INDICATE THIS IS NOT AN UPDATE
+        # If POST
+        if self.request.method == 'POST':
+            return form_class(study, current, self.request.POST, self.request.FILES)
+        # If GET
+        else:
+            return form_class(study, current)
+
+    def get_context_data(self, **kwargs):
         context = super(AssayChipReadoutAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = ACRAFormSet(self.request.POST, self.request.FILES)
-            # context['study'] = self.kwargs.get('study_id')
         else:
             context['formset'] = ACRAFormSet()
-            # context['study'] = self.kwargs.get('study_id')
-
-        # Setups is the same regardless of if POST, GET, etc.
-        context['setups'] = setups
 
         return context
 
@@ -592,9 +589,14 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
     # Redirect when there are no available setups
     def render_to_response(self, context):
+        # TODO REFACTOR
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-
-        if not context.get('setups',''):
+        exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
+        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'device',
+            'compound', 'unit',
+            'created_by').exclude(id__in=list(set(exclude_list)))
+        if not setups:
             return redirect('/assays/'+str(study.id))
 
         return super(AssayChipReadoutAdd, self).render_to_response(context)
@@ -608,47 +610,33 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
 
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-
-        # Get study
+    def get_form(self, form_class):
         study = self.object.chip_setup.assay_run_id
+        current = self.object.chip_setup_id
 
-        exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
+        # If POST
+        if self.request.method == 'POST':
+            return form_class(study, current, self.request.POST, self.request.FILES, instance=self.get_object())
+        # If GET
+        else:
+            return form_class(study, current, instance=self.get_object())
 
-        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
-            'assay_run_id', 'device',
-            'compound', 'unit',
-            'created_by').exclude(id__in=list(set(exclude_list))) | AssayChipSetup.objects.filter(pk=self.object.chip_setup.id)
+    def get(self, request, *args, **kwargs):
+        form = self.get_form(self.form_class)
 
         # Render form
         formset = ACRAFormSet(instance=self.object)
         return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
-                                setups = setups,
                                 update=True))
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
 
-        form = self.form_class(self.request.POST, self.request.FILES, instance=self.object)
+        form = self.get_form(self.form_class)
 
         formset = ACRAFormSet(self.request.POST, self.request.FILES, instance=form.instance)
-
-        # TODO refactor redundant code here; testing for now
-
-        study = self.object.chip_setup.assay_run_id
-        exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
-
-        setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
-            'assay_run_id', 'device',
-            'compound', 'unit',
-            'created_by').exclude(id__in=list(set(exclude_list))) | AssayChipSetup.objects.filter(pk=self.object.chip_setup.id)
-
-        form.instance.group = study.group
 
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
@@ -657,7 +645,6 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             headers = int(data.get('headers'))
 
             self.object = form.save()
-            # TODO refactor original created by
             self.object.modified_by = self.request.user
             # Save overall readout result
             self.object.save()
@@ -676,7 +663,6 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
-                                setups = setups,
                                 update=True))
 
 
@@ -1200,21 +1186,23 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
     template_name = 'assays/assayplatereadout_add.html'
     form_class = AssayPlateReadoutForm
 
-    def get_context_data(self, **kwargs):
+    def get_form(self, form_class):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        exclude_list = AssayPlateReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
-        setups = AssayPlateSetup.objects.filter(assay_run_id=study).prefetch_related(
-            'assay_run_id', 'assay_layout',
-            'created_by').exclude(id__in=list(set(exclude_list)))
+        current = None
 
+        # If POST
+        if self.request.method == 'POST':
+            return form_class(study, current, self.request.POST)
+        # If GET
+        else:
+            return form_class(study, current)
+
+    def get_context_data(self, **kwargs):
         context = super(AssayPlateReadoutAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = APRAFormSet(self.request.POST, self.request.FILES)
         else:
             context['formset'] = APRAFormSet()
-
-        # Setups is the same regardless of if POST, GET, etc.
-        context['setups'] = setups
 
         return context
 
@@ -1248,10 +1236,15 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             return self.render_to_response(self.get_context_data(form=form))
 
     # Redirect when there are no available setups
+    # TODO REFACTOR
     def render_to_response(self, context):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        exclude_list = AssayPlateReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
+        setups = AssayPlateSetup.objects.filter(assay_run_id=study).prefetch_related(
+            'assay_run_id', 'assay_layout',
+            'created_by').exclude(id__in=list(set(exclude_list)))
 
-        if not context.get('setups',''):
+        if not setups:
             return redirect('/assays/'+str(study.id))
 
         return super(AssayPlateReadoutAdd, self).render_to_response(context)
@@ -1266,45 +1259,37 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     template_name = 'assays/assayplatereadout_add.html'
     form_class = AssayPlateReadoutForm
 
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-
-        # Get study
+    def get_form(self, form_class):
         study = self.object.setup.assay_run_id
+        current = self.object.setup_id
 
-        exclude_list = AssayPlateReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
-        setups = AssayPlateSetup.objects.filter(assay_run_id=study).prefetch_related(
-            'assay_run_id', 'assay_layout',
-            'created_by').exclude(id__in=list(set(exclude_list))) | AssayPlateSetup.objects.filter(pk=self.object.setup.id)
+        # If POST
+        if self.request.method == 'POST':
+            return form_class(study, current, self.request.POST, self.request.FILES, instance=self.get_object())
+        # If GET
+        else:
+            return form_class(study, current, instance=self.get_object())
+
+    def get(self, request, *args, **kwargs):
+        form = self.get_form(self.form_class)
 
         # Render form
         formset = APRAFormSet(instance=self.object)
         return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
-                                setups = setups,
                                 update=True))
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
 
-        form = self.form_class(self.request.POST, self.request.FILES, instance=self.object)
+        form = self.get_form(self.form_class)
 
         formset = APRAFormSet(self.request.POST, self.request.FILES, instance=form.instance)
-
-        # TODO refactor redundant code here; testing for now
 
         study = self.object.setup.assay_run_id
 
         form.instance.group = study.group
-
-        exclude_list = AssayPlateReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
-        setups = AssayPlateSetup.objects.filter(assay_run_id=study).prefetch_related(
-            'assay_run_id', 'assay_layout',
-            'created_by').exclude(id__in=list(set(exclude_list))) | AssayPlateSetup.objects.filter(pk=self.object.setup.id)
-
         # This is for cleaning
         formset.instance = form.instance
 
@@ -1334,7 +1319,6 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(
             self.get_context_data(form=form,
                                 formset = formset,
-                                setups = setups,
                                 update=True))
 
 

@@ -88,17 +88,7 @@
     {% endif %}
         <label for="setup" class="col-sm-2 control-label">Setup*</label>
         <div class="col-sm-10">
-          <select id="id_setup" name="setup">
-            <option value="">---------</option>
-            {% for setup in setups %}
-              {# It is necessary to coerce the forms value into an integer for this compare #}
-              {% if setup.id|add:"0" == form.setup.value|add:"0" %}
-                <option value={{ setup.id }} selected>{{ setup }}</option>
-              {% else %}
-                <option value={{ setup.id }}>{{ setup }}</option>
-              {% endif %}
-            {% endfor %}
-          </select>
+          {{ form.setup }}
         </div>
     </div>
 
