@@ -39,11 +39,6 @@ class UserIndex(OneGroupRequiredMixin, ListView):
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
         context['title'] = request.user.username + "'s Studies"
-        # Check if this is setup only; if so add to add respective URLS
-        # if request.GET.get('setup', ''):
-        #     context['setup_only'] = '/?setup=1'
-        # else:
-        #     context['setup_only'] = ''
         return self.render_to_response(context)
 
 
@@ -52,14 +47,6 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
     template_name = 'assays/index.html'
 
     def get_context_data(self, request, **kwargs):
-        # Alternative method using users
-        # groups = request.user.groups.values_list('name',flat=True)
-        # users = Group.objects.get(name=groups[0]).user_set.all()
-        # if len(groups) > 1:
-        # for group in groups[1:]:
-        # current_users = Group.objects.get(name=group).user_set.all()
-        # users = current_users | users
-        # self.object_list = AssayRun.objects.filter(created_by=users)
         groups = request.user.groups.values_list('pk', flat=True)
         groups = Group.objects.filter(pk__in=groups)
         self.object_list = AssayRun.objects.filter(group__in=groups).prefetch_related('created_by', 'group')
@@ -69,11 +56,6 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
         context['title'] = 'Group Study Index'
-        # Check if this is setup only; if so add to add respective URLS
-        # if request.GET.get('setup', ''):
-        #     context['setup_only'] = '/?setup=1'
-        # else:
-        #     context['setup_only'] = ''
         return self.render_to_response(context)
 
 
@@ -159,36 +141,29 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
     template_name = 'assays/assayrun_add.html'
     form_class = AssayRunForm
 
-    def get_context_data(self, **kwargs):
+    def get_form(self,form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
             ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
-        context = super(AssayRunAdd, self).get_context_data(**kwargs)
-        context['groups'] = groups
-        return context
+
+        # If POST
+        if self.request.method == 'POST':
+            return form_class(groups, self.request.POST)
+        # If GET
+        else:
+            return form_class(groups)
 
     # Test form validity
     def form_valid(self, form):
-        # url_add = ''
-        # if self.request.GET.get('setup', ''):
-        #     url_add = '?setup=1'
-        # get user via self.request.user
         if form.is_valid():
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
-            # Save Chip Study
+            # Save Study
             self.object.save()
             return redirect(
                 self.object.get_absolute_url())
-                # self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
-
-    def get(self, request, **kwargs):
-        self.object = None
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayRunDetail(DetailView):
@@ -244,50 +219,39 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
     template_name = 'assays/assayrun_add.html'
     form_class = AssayRunForm
 
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-
+    def get_form(self,form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
             ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
 
+        # If POST
+        if self.request.method == 'POST':
+            return form_class(groups, self.request.POST, instance=self.get_object())
+        # If GET
+        else:
+            return form_class(groups, instance=self.get_object())
+
+    def get(self, request, *args, **kwargs):
+        form = self.get_form(self.form_class)
+
         return self.render_to_response(
             self.get_context_data(form=form,
-                                  groups=groups,
                                   update=True))
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
 
-        form = self.form_class(self.request.POST, instance=self.object)
-        created_by = form.instance.created_by
-
-        # TODO refactor redundant code here; testing for now
-
-        # Get group selection possibilities
-        groups = self.request.user.groups.filter(
-            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
+        form = self.get_form(self.form_class)
 
         if form.is_valid():
-            # # Add to url if setup only
-            # url_add = ''
-            # if self.request.GET.get('setup', ''):
-            #     url_add = '?setup=1'
             self.object = form.save()
-            # TODO refactor original created by
-            # Explicitly set created_by
-            self.object.created_by = created_by
             self.object.modified_by = self.request.user
             # Save study
             self.object.save()
             return redirect(self.object.get_absolute_url())
-            # return redirect(self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(
             self.get_context_data(form=form,
-                                  groups=groups,
                                   update=True))
 
 
@@ -305,11 +269,6 @@ class AssayRunDelete(CreatorRequiredMixin, DeleteView):
         context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups'])
         context['results'] = AssayChipTestResult.objects.filter(chip_readout=context['readouts'])
 
-        # Check if this is setup only; if so add to add respective URLS; I Guess
-        # if request.GET.get('setup', ''):
-        #     context['setup_only'] = '/?setup=1'
-        # else:
-        #     context['setup_only'] = ''
         return self.render_to_response(context)
 
 

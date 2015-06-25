@@ -11,6 +11,35 @@ restricted = ('restricted',)
 # Group
 group = ('group',)
 
+class AssayRunForm(forms.ModelForm):
+    def __init__(self,groups,*args,**kwargs):
+        super (AssayRunForm,self).__init__(*args,**kwargs)
+        self.fields['group'].queryset = groups
+
+    class Meta(object):
+        model = AssayRun
+        widgets = {
+            'assay_run_id': forms.Textarea(attrs={'rows': 1}),
+            'name': forms.Textarea(attrs={'rows': 1}),
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
+        exclude = tracking
+
+    def clean(self):
+        """Validate unique, existing Chip Readout IDs"""
+
+        # clean the form data, before validation
+        data = super(AssayRunForm, self).clean()
+
+        if not any([data['toxicity'],data['efficacy'],data['disease'],data['cell_characterization']]):
+            raise forms.ValidationError('Please select at least one study type')
+
+        if data['assay_run_id'].startswith('-'):
+            raise forms.ValidationError('Error with assay_run_id; please try again')
+
+        return data
+
+
 class AssayChipResultForm(forms.ModelForm):
     """Size the text input boxes"""
 

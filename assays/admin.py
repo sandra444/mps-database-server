@@ -1820,7 +1820,7 @@ def parseRunCSV(currentRun, file):
     return
 
 
-class AssayRunForm(forms.ModelForm):
+class AssayRunFormAdmin(forms.ModelForm):
     class Meta(object):
         model = AssayRun
         widgets = {
@@ -1835,7 +1835,7 @@ class AssayRunForm(forms.ModelForm):
         """Validate unique, existing Chip Readout IDs"""
 
         # clean the form data, before validation
-        data = super(AssayRunForm, self).clean()
+        data = super(AssayRunFormAdmin, self).clean()
 
         if not any([data['toxicity'],data['efficacy'],data['disease'],data['cell_characterization']]):
             raise forms.ValidationError('Please select at least one study type')
@@ -1889,7 +1889,7 @@ class AssayRunAdmin(LockableAdmin):
     class Media(object):
         js = ('assays/customize_run.js',)
 
-    form = AssayRunForm
+    form = AssayRunFormAdmin
     save_on_top = True
     list_per_page = 300
     date_hierarchy = 'start_date'

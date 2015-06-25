@@ -42,24 +42,6 @@
 
     <legend>Study Details</legend>
 
-{#    {% if form.center_id.errors %}#}
-{#        {% for error in form.center_id.errors %}#}
-{#            <div class="alert alert-danger" role="alert">#}
-{#                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
-{#                <span class="sr-only">Error:</span>#}
-{#                {{error}}#}
-{#            </div>#}
-{#        {% endfor %}#}
-{#    <div class="form-group has-error">#}
-{#    {% else %}#}
-{#    <div class="form-group">#}
-{#    {% endif %}#}
-{#        <label for="center_id" class="col-sm-2 control-label">Center(s)*</label>#}
-{#        <div class="col-sm-10">#}
-{#          {{ form.center_id }}#}
-{#        </div>#}
-{#    </div>#}
-
     {% if form.group.errors %}
         {% for error in form.group.errors %}
             <div class="alert alert-danger" role="alert">
@@ -74,19 +56,7 @@
     {% endif %}
         <label for="group" class="col-sm-2 control-label">Group*</label>
         <div class="col-sm-10">
-          <select id="id_group" name="group">
-            {% if groups|length > 1 %}
-                <option value="">---------</option>
-            {% endif %}
-            {% for group in groups %}
-              {# It is necessary to coerce the forms value into an integer for this compare #}
-              {% if group.id|add:"0" == form.group.value|add:"0" %}
-                <option value={{ group.id }} selected>{{ group.name }}</option>
-              {% else %}
-                <option value={{ group.id }}>{{ group.name }}</option>
-              {% endif %}
-            {% endfor %}
-          </select>
+          {{ form.group }}
           <span id="center_name"></span>
         </div>
     </div>
