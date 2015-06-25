@@ -981,18 +981,17 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
     form_class = AssayLayoutForm
     template_name = 'assays/assaylayout_add.html'
 
-    def get_context_data(self, **kwargs):
+    def get_form(self,form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
             ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
-        devices = Microdevice.objects.filter(row_labels__isnull=False, number_of_columns__isnull=False)
-        # Get all concentration units for compound concentration
-        concentration_units = PhysicalUnits.objects.filter(unit_type='C')
-        context = super(AssayLayoutAdd, self).get_context_data(**kwargs)
-        context['groups'] = groups
-        context['devices'] = devices
-        context['concentration_units'] = concentration_units
-        return context
+
+        # If POST
+        if self.request.method == 'POST':
+            return form_class(groups, self.request.POST)
+        # If GET
+        else:
+            return form_class(groups)
 
     # Test form validity
     def form_valid(self, form):
@@ -1018,38 +1017,28 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     form_class = AssayLayoutForm
     template_name = 'assays/assaylayout_add.html'
 
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-
+    def get_form(self,form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
             ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
-        # Get devices
-        devices = Microdevice.objects.filter(row_labels__isnull=False, number_of_columns__isnull=False)
-        concentration_units = PhysicalUnits.objects.filter(unit_type='C')
+
+        # If POST
+        if self.request.method == 'POST':
+            return form_class(groups, self.request.POST, instance=self.get_object())
+        # If GET
+        else:
+            return form_class(groups, instance=self.get_object())
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form(self.form_class)
 
         return self.render_to_response(
             self.get_context_data(form=form,
-                                  groups=groups,
-                                  devices=devices,
-                                  concentration_units=concentration_units,
                                   update=True))
 
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-
-        form = self.form_class(self.request.POST, instance=self.object)
-
-        # TODO refactor redundant code here; testing for now
-
-        # Get group selection possibilities
-        groups = self.request.user.groups.filter(
-            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
-        # Get devices
-        devices = Microdevice.objects.filter(row_labels__isnull=False, number_of_columns__isnull=False)
-        concentration_units = PhysicalUnits.objects.filter(unit_type='C')
+        form = self.get_form(self.form_class)
 
         if form.is_valid():
             # Confirm form and get object
@@ -1061,9 +1050,6 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
         else:
             return self.render_to_response(
             self.get_context_data(form=form,
-                                  groups=groups,
-                                  devices=devices,
-                                  concentration_units=concentration_units,
                                   update=True))
 
 

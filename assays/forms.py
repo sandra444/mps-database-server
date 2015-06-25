@@ -33,7 +33,7 @@ class AssayChipResultForm(forms.ModelForm):
 
 class AssayChipReadoutForm(forms.ModelForm):
     def __init__(self,*args,**kwargs):
-        super (AssayChipReadoutForm,self ).__init__(*args,**kwargs)
+        super (AssayChipReadoutForm,self).__init__(*args,**kwargs)
         self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T')
 
     another = forms.BooleanField(required=False)
@@ -141,7 +141,13 @@ class StudyConfigurationForm(forms.ModelForm):
 # Forms for plates may become more useful later
 class AssayLayoutForm(forms.ModelForm):
 
+    def __init__(self,groups,*args,**kwargs):
+        super (AssayLayoutForm,self).__init__(*args,**kwargs)
+        self.fields['group'].queryset = groups
+        self.fields['device'].queryset = Microdevice.objects.filter(row_labels__isnull=False, number_of_columns__isnull=False)
+
     compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
+    concunit = forms.ModelChoiceField(queryset=PhysicalUnits.objects.filter(unit_type='C'), required=False, initial=4)
 
     class Meta(object):
         model = AssayLayout
@@ -165,7 +171,7 @@ class AssayPlateCellsInlineFormset(forms.models.BaseInlineFormSet):
 
 class AssayPlateReadoutForm(forms.ModelForm):
     def __init__(self,*args,**kwargs):
-        super (AssayPlateReadoutForm,self ).__init__(*args,**kwargs)
+        super (AssayPlateReadoutForm,self).__init__(*args,**kwargs)
         self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T')
 
     upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
