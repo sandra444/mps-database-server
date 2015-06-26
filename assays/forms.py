@@ -3,6 +3,7 @@ from assays.models import *
 from compounds.models import Compound
 
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
+# TODO REFACTOR FK QUERYSETS TO AVOID N+1
 
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
@@ -41,7 +42,13 @@ class AssayRunForm(forms.ModelForm):
 
 
 class AssayChipResultForm(forms.ModelForm):
-    """Size the text input boxes"""
+    def __init__(self,study,current,*args,**kwargs):
+        super (AssayChipResultForm,self).__init__(*args,**kwargs)
+        exclude_list = AssayChipTestResult.objects.filter(chip_readout__isnull=False).values_list('chip_readout', flat=True)
+        readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
+        if current:
+            readouts = readouts | AssayChipReadout.objects.filter(pk=current)
+        self.fields['chip_readout'].queryset = readouts
 
     class Meta(object):
         model = AssayChipTestResult
@@ -231,7 +238,13 @@ class AssayPlateReadoutForm(forms.ModelForm):
 
 
 class AssayPlateResultForm(forms.ModelForm):
-    """Size the text input boxes"""
+    def __init__(self,study,current,*args,**kwargs):
+        super (AssayPlateResultForm,self).__init__(*args,**kwargs)
+        exclude_list = AssayPlateTestResult.objects.filter(readout__isnull=False).values_list('readout', flat=True)
+        readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
+        if current:
+            readouts = readouts | AssayPlateReadout.objects.filter(pk=current)
+        self.fields['readout'].queryset = readouts
 
     class Meta(object):
         model = AssayPlateTestResult

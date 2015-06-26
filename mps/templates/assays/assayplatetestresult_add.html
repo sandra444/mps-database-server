@@ -50,17 +50,7 @@
     {% endif %}
             <label for="readout" class="col-sm-2 control-label">Readout*</label>
             <div class="col-sm-10">
-                <select id="id_readout" name="readout">
-                    <option value="">---------</option>
-                    {% for readout in readouts %}
-                        {# It is necessary to coerce the forms value into an integer for this compare #}
-                        {% if readout.id|add:"0" == form.readout.value|add:"0" %}
-                            <option value={{ readout.id }} selected>{{ readout }}</option>
-                        {% else %}
-                            <option value={{ readout.id }}>{{ readout }}</option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
+                {{ form.readout }}
             </div>
         </div>
 
