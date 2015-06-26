@@ -247,7 +247,7 @@ class AssayPlateCells(models.Model):
 
     assay_plate = models.ForeignKey('AssayPlateSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
-    cell_biosensor = models.ForeignKey('cellsamples.Biosensor', null=True, blank=True)
+    cell_biosensor = models.ForeignKey('cellsamples.Biosensor')
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',
@@ -652,7 +652,7 @@ class AssayChipCells(models.Model):
     """
     assay_chip = models.ForeignKey('AssayChipSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
-    cell_biosensor = models.ForeignKey('cellsamples.Biosensor', null=True, blank=True)
+    cell_biosensor = models.ForeignKey('cellsamples.Biosensor')
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',

@@ -312,6 +312,18 @@ class AssayChipSetupAdd(CreateView):
 
         return super(AssayChipSetupAdd, self).dispatch(*args, **kwargs)
 
+    def get_form(self, form_class):
+        # If POST
+        if self.request.method == 'POST':
+            return form_class(self.request.POST)
+        elif self.request.GET.get('clone',''):
+            pk = int(self.request.GET.get('clone',''))
+            clone = get_object_or_404(AssayChipSetup, pk=pk)
+            return form_class(instance=clone)
+        # If NO CLONE
+        else:
+            return form_class()
+
     def get_context_data(self, **kwargs):
         groups = self.request.user.groups.values_list('id', flat=True)
         cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
@@ -324,34 +336,9 @@ class AssayChipSetupAdd(CreateView):
             context['formset'] = AssayChipCellsFormset(self.request.POST)
 
         elif self.request.GET.get('clone',''):
-            pk = self.request.GET.get('clone','')
-            clone_setup = AssayChipSetup.objects.filter(id=pk).values()[0]
-            # Drop downs are a pain in the face: they require being specifically set
-            # Why is this? It's because the values function returns "foreign_key_id" in lieu of "foreign_key"
-            # Alternatively, one could set these values in the template, but that is equally unpleasant
-            clone_setup['device'] = clone_setup['device_id']
-            clone_setup['compound'] = clone_setup['compound_id']
-            clone_setup['unit'] = clone_setup['unit_id']
-            clone_cellsamples = AssayChipCells.objects.filter(assay_chip=pk).values()
-            context['form'] = AssayChipSetupForm(initial=clone_setup)
-
-            # This is to prevent there being absolutely no inlines
-            extra = len(clone_cellsamples) + 1
-
-            # Stupid resolution to an equally absurd problem (can you tell I'm peeved?)
-            # Why is there another formset factory here? It's because Django treats initial inlines as "extras"
-            # That is to say, formset factories are apparently only able to display as many initial inlines as "extra"
-            AssayChipCellsFormset2 = inlineformset_factory(AssayChipSetup, AssayChipCells, formset=AssayChipCellsInlineFormset,
-                                              extra=extra,
-                                              widgets={
-                                              'cellsample_density': forms.NumberInput(attrs={'style': 'width:75px;', }),
-                                              'cell_passage': forms.TextInput(attrs={'size': 5}), })
-
-            for index in range(len(clone_cellsamples)):
-                clone_cellsamples[index]['cell_biosensor'] = clone_cellsamples[index]['cell_biosensor_id']
-                clone_cellsamples[index]['cell_sample'] = CellSample.objects.get(pk=clone_cellsamples[index]['cell_sample_id'])
-
-            context['formset'] = AssayChipCellsFormset2(initial=clone_cellsamples)
+            pk = int(self.request.GET.get('clone',''))
+            clone = get_object_or_404(AssayChipSetup, pk=pk)
+            context['formset'] = AssayChipCellsFormset(instance=clone)
 
         else:
             context['formset'] = AssayChipCellsFormset()
@@ -367,8 +354,7 @@ class AssayChipSetupAdd(CreateView):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.assay_run_id = study
         form.instance.group = study.group
-        context = self.get_context_data()
-        formset = context['formset']
+        formset = AssayChipCellsFormset(self.request.POST, instance=form.instance)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
@@ -378,7 +364,7 @@ class AssayChipSetupAdd(CreateView):
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
             self.object.save()
-            formset.instance = self.object
+            formset = AssayChipCellsFormset(self.request.POST, instance=self.object)
             formset.save()
             if data['another']:
                 return self.render_to_response(self.get_context_data(form=form))
