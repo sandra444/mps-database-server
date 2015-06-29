@@ -1,4 +1,5 @@
 from django import forms
+from django.forms.models import BaseInlineFormSet
 from assays.models import *
 from compounds.models import Compound
 
@@ -11,6 +12,33 @@ tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_of
 restricted = ('restricted',)
 # Group
 group = ('group',)
+
+# SUBJECT TO CHANGE
+class CloneableForm(forms.ModelForm):
+    another = forms.BooleanField(required=False, initial=False)
+    success = forms.BooleanField(required=False, initial=False)
+
+# SUBJECT TO CHANGE AND REQUIRES TESTING
+class CloneableBaseInlineFormSet(BaseInlineFormSet):
+    """Overrides create form for the sake of using save_as_new for the purpose of cloning"""
+    def _construct_form(self, i, **kwargs):
+        form = super(BaseInlineFormSet, self)._construct_form(i, **kwargs)
+        # Removed code below
+        # if self.save_as_new:
+        #     # Remove the primary key from the form's data, we are only
+        #     # creating new instances
+        #     form.data[form.add_prefix(self._pk_field.name)] = None
+        #
+        #     # Remove the foreign key from the form's data
+        #     form.data[form.add_prefix(self.fk.name)] = None
+
+        # Set the fk value here so that the form can do its validation.
+        fk_value = self.instance.pk
+        if self.fk.rel.field_name != self.fk.rel.to._meta.pk.name:
+            fk_value = getattr(self.instance, self.fk.rel.field_name)
+            fk_value = getattr(fk_value, 'pk', fk_value)
+        setattr(form.instance, self.fk.get_attname(), fk_value)
+        return form
 
 class AssayRunForm(forms.ModelForm):
     def __init__(self,groups,*args,**kwargs):
@@ -67,7 +95,7 @@ class AssayChipResultForm(forms.ModelForm):
     #
     #     return self.cleaned_data
 
-class AssayChipReadoutForm(forms.ModelForm):
+class AssayChipReadoutForm(CloneableForm):
     def __init__(self,study,current,*args,**kwargs):
         super (AssayChipReadoutForm,self).__init__(*args,**kwargs)
         self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T')
@@ -80,8 +108,7 @@ class AssayChipReadoutForm(forms.ModelForm):
             setups = setups | AssayChipSetup.objects.filter(pk=current)
         self.fields['chip_setup'].queryset = setups
 
-    another = forms.BooleanField(required=False)
-    headers = forms.CharField(required=True)
+    headers = forms.CharField(required=True, initial=1)
 
     class Meta(object):
         model = AssayChipReadout
@@ -102,7 +129,7 @@ class AssayChipReadoutForm(forms.ModelForm):
     #
     #     return self.cleaned_data
 
-class AssayChipSetupForm(forms.ModelForm):
+class AssayChipSetupForm(CloneableForm):
 
     another = forms.BooleanField(required=False)
 
@@ -129,7 +156,7 @@ class AssayChipSetupForm(forms.ModelForm):
             raise forms.ValidationError('Please complete all data for compound.')
         return self.cleaned_data
 
-class AssayChipCellsInlineFormset(forms.models.BaseInlineFormSet):
+class AssayChipCellsInlineFormset(CloneableBaseInlineFormSet):
 
     class Meta(object):
         model = AssayChipCells
@@ -150,7 +177,7 @@ class AssayChipCellsInlineFormset(forms.models.BaseInlineFormSet):
     #     if cellsamples < 1:
     #         raise forms.ValidationError('You must have at least one cellsample.')
 
-class TestResultInlineFormset(forms.models.BaseInlineFormSet):
+class TestResultInlineFormset(BaseInlineFormSet):
 
     class Meta(object):
         model = AssayChipResult
@@ -198,22 +225,21 @@ class AssayLayoutForm(forms.ModelForm):
         exclude = tracking + restricted
 
 
-# Forms for plates may become more useful later
-class AssayPlateSetupForm(forms.ModelForm):
+class AssayPlateSetupForm(CloneableForm):
 
     class Meta(object):
         model = AssayPlateSetup
         exclude = ('assay_run_id','group') + tracking + restricted
 
 
-class AssayPlateCellsInlineFormset(forms.models.BaseInlineFormSet):
+class AssayPlateCellsInlineFormset(CloneableBaseInlineFormSet):
 
     class Meta(object):
         model = AssayPlateCells
         exclude = ('',)
 
 
-class AssayPlateReadoutForm(forms.ModelForm):
+class AssayPlateReadoutForm(CloneableForm):
     def __init__(self,study,current,*args,**kwargs):
         super (AssayPlateReadoutForm,self).__init__(*args,**kwargs)
         self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T')
@@ -255,7 +281,7 @@ class AssayPlateResultForm(forms.ModelForm):
         exclude = group + tracking + restricted
 
 
-class PlateTestResultInlineFormset(forms.models.BaseInlineFormSet):
+class PlateTestResultInlineFormset(BaseInlineFormSet):
 
     class Meta(object):
         model = AssayPlateResult

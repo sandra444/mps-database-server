@@ -2,7 +2,7 @@ import csv
 
 from django.contrib import admin
 from django import forms
-from assays.forms import AssayChipResultForm, StudyConfigurationForm
+from assays.forms import AssayChipResultForm, StudyConfigurationForm, CloneableBaseInlineFormSet
 from django.http import HttpResponseRedirect
 
 from assays.models import *
@@ -659,7 +659,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 # TODO ADD TABULAR UPLOAD
 # TODO LINKING MULTIPLE ASSAYS TO ONE FEATURE IS AMBIGUOUS: DO NOT ALLOW IT (X?)
 # TODO DO NOT ALLOW ROW OR COLUMN OVERFLOW
-class AssayPlateReadoutInlineFormset(forms.models.BaseInlineFormSet):
+class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
     def clean(self):
         """Validate unique, existing PLATE READOUTS"""
 
@@ -1208,7 +1208,7 @@ class AssayChipSetupAdmin(LockableAdmin):
 
 admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 
-class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
+class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
     def clean(self):
         """Validate unique, existing Chip Readout IDs"""
 

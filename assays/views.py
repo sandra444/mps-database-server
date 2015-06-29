@@ -313,14 +313,12 @@ class AssayChipSetupAdd(CreateView):
         return super(AssayChipSetupAdd, self).dispatch(*args, **kwargs)
 
     def get_form(self, form_class):
-        # If POST
         if self.request.method == 'POST':
             return form_class(self.request.POST)
         elif self.request.GET.get('clone',''):
             pk = int(self.request.GET.get('clone',''))
             clone = get_object_or_404(AssayChipSetup, pk=pk)
             return form_class(instance=clone)
-        # If NO CLONE
         else:
             return form_class()
 
@@ -354,7 +352,7 @@ class AssayChipSetupAdd(CreateView):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.assay_run_id = study
         form.instance.group = study.group
-        formset = AssayChipCellsFormset(self.request.POST, instance=form.instance)
+        formset = AssayChipCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
@@ -364,14 +362,13 @@ class AssayChipSetupAdd(CreateView):
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
             self.object.save()
-            formset = AssayChipCellsFormset(self.request.POST, instance=self.object)
             formset.save()
             if data['another']:
+                form = self.form_class(instance=self.object,
+                              initial={'success': True})
                 return self.render_to_response(self.get_context_data(form=form))
             else:
                 return redirect(self.object.get_absolute_url())
-                # return redirect(
-                #    self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -480,11 +477,6 @@ class AssayChipSetupDelete(CreatorRequiredMixin, DeleteView):
         context['readouts'] = AssayChipReadout.objects.filter(chip_setup=self.object)
         context['results'] = AssayChipTestResult.objects.filter(chip_readout=context['readouts'])
 
-        # Check if this is setup only; if so add to add respective URLS; I Guess
-        # if request.GET.get('setup', ''):
-        #     context['setup_only'] = '/?setup=1'
-        # else:
-        #     context['setup_only'] = ''
         return self.render_to_response(context)
 
 
@@ -525,12 +517,15 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
     def get_form(self, form_class):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
-
-        # PLEASE NOTE CONTRIVED USE OF NONE TO INDICATE THIS IS NOT AN UPDATE
-        # If POST
         if self.request.method == 'POST':
             return form_class(study, current, self.request.POST, self.request.FILES)
-        # If GET
+        elif self.request.GET.get('clone',''):
+            pk = int(self.request.GET.get('clone',''))
+            clone = get_object_or_404(AssayChipReadout, pk=pk)
+            form = form_class(study, current, instance=clone,
+                              initial={'file': None})
+            # We do not want to keep the file (setup automatically excluded)
+            return form
         else:
             return form_class(study, current)
 
@@ -538,6 +533,10 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
         context = super(AssayChipReadoutAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = ACRAFormSet(self.request.POST, self.request.FILES)
+        elif self.request.GET.get('clone',''):
+            pk = int(self.request.GET.get('clone',''))
+            clone = get_object_or_404(AssayChipReadout, pk=pk)
+            context['formset'] = ACRAFormSet(instance=clone)
         else:
             context['formset'] = ACRAFormSet()
 
@@ -546,8 +545,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.group = study.group
-        context = self.get_context_data()
-        formset = context['formset']
+        formset = ACRAFormSet(self.request.POST, self.request.FILES, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
@@ -561,15 +559,20 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
             self.object.save()
-            formset.instance = self.object
+            ### TERRIBLE SOLUTION TESTING ###
+            # for assay in formset:
+            #     assay.instance.readout_id_id = self.object.id
+            ### TERRIBLE SOLUTION TESTING
             formset.save()
             if formset.files.get('file',''):
                 file = formset.files.get('file','')
                 parseChipCSV(self.object, file, headers)
             if data['another']:
+                form = self.form_class(study, None, instance=self.object,
+                              initial={'file': None, 'success': True})
                 return self.render_to_response(self.get_context_data(form=form))
             else:
-                return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+                return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -1018,6 +1021,16 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
     form_class = AssayPlateSetupForm
     template_name = 'assays/assayplatesetup_add.html'
 
+    def get_form(self, form_class):
+        if self.request.method == 'POST':
+            return form_class(self.request.POST)
+        elif self.request.GET.get('clone',''):
+            pk = int(self.request.GET.get('clone',''))
+            clone = get_object_or_404(AssayPlateSetup, pk=pk)
+            return form_class(instance=clone)
+        else:
+            return form_class()
+
     def get_context_data(self, **kwargs):
         groups = self.request.user.groups.values_list('id', flat=True)
         cellsamples = CellSample.objects.filter(group__in=groups).order_by('-receipt_date').prefetch_related(
@@ -1028,7 +1041,10 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
 
         if self.request.POST:
             context['formset'] = AssayPlateCellsFormset(self.request.POST)
-
+        elif self.request.GET.get('clone',''):
+            pk = int(self.request.GET.get('clone',''))
+            clone = get_object_or_404(AssayPlateSetup, pk=pk)
+            context['formset'] = AssayPlateCellsFormset(instance=clone)
         else:
             context['formset'] = AssayPlateCellsFormset()
 
@@ -1038,27 +1054,26 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        # url_add = ''
-        # if self.request.GET.get('setup', ''):
-        #     url_add = '?setup=1'
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.assay_run_id = study
         form.instance.group = study.group
-        context = self.get_context_data()
-        formset = context['formset']
+        formset = AssayPlateCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
+            data = form.cleaned_data
             self.object = form.save()
             # Set restricted
             self.object.restricted = study.restricted
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Plate Setup
             self.object.save()
-            formset.instance = self.object
             formset.save()
-            return redirect(self.object.get_absolute_url())
-                # return redirect(
-                #    self.object.get_absolute_url() + url_add)  # assuming your model has ``get_absolute_url`` defined.
+            if data['another']:
+                form = self.form_class(instance=self.object,
+                              initial={'success': True})
+                return self.render_to_response(self.get_context_data(form=form))
+            else:
+                return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -1178,11 +1193,14 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
     def get_form(self, form_class):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
-
-        # If POST
         if self.request.method == 'POST':
-            return form_class(study, current, self.request.POST)
-        # If GET
+            return form_class(study, current, self.request.POST, self.request.FILES)
+        elif self.request.GET.get('clone',''):
+            pk = int(self.request.GET.get('clone',''))
+            clone = get_object_or_404(AssayPlateReadout, pk=pk)
+            return form_class(study, current, instance=clone,
+                              initial={'file': None})
+            # We do not want to keep the file (setup automatically excluded))
         else:
             return form_class(study, current)
 
@@ -1190,6 +1208,10 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
         context = super(AssayPlateReadoutAdd, self).get_context_data(**kwargs)
         if self.request.POST:
             context['formset'] = APRAFormSet(self.request.POST, self.request.FILES)
+        elif self.request.GET.get('clone',''):
+            pk = int(self.request.GET.get('clone',''))
+            clone = get_object_or_404(AssayPlateReadout, pk=pk)
+            context['formset'] = APRAFormSet(instance=clone)
         else:
             context['formset'] = APRAFormSet()
 
@@ -1198,10 +1220,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         form.instance.group = study.group
-        context = self.get_context_data()
-        formset = context['formset']
-        # This is for cleaning
-        formset.instance = form.instance
+        formset = APRAFormSet(self.request.POST, self.request.FILES, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
@@ -1215,12 +1234,16 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
             self.object.save()
-            formset.instance = self.object
             formset.save()
             if formset.files.get('file',''):
                 file = formset.files.get('file','')
                 parseReadoutCSV(self.object, file, upload_type)
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            if data['another']:
+                form = self.form_class(study, None, instance=self.object,
+                              initial={'file': None, 'success': True})
+                return self.render_to_response(self.get_context_data(form=form))
+            else:
+                return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -1279,8 +1302,6 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
         study = self.object.setup.assay_run_id
 
         form.instance.group = study.group
-        # This is for cleaning
-        formset.instance = form.instance
 
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
