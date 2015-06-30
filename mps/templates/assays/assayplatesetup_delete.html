@@ -2,12 +2,28 @@
 
 {% block content %}
 
-    {# TODO NEEDS REVISION #}
-
     <form method="post">{% csrf_token %}
         <h2 style="color: #FF0000">Are you sure you want to delete the Plate Setup:<br><b>{{ object }}</b>?</h2>
 
         <hr>
+
+        {% if readouts %}
+            <h4 style="color: #FF0000">Deleting this Setup will delete the following Readout:</h4>
+            <ul>
+                {% for readout in readouts %}
+                    <li>Readout ID #{{ readout.id }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if results %}
+            <h4 style="color: #FF0000">Deleting this Setup will delete the following Test Results:</h4>
+            <ul>
+                {% for result in results %}
+                    <li>Test Result ID #{{ result.id }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
 
         <br>
 

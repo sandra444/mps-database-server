@@ -10,32 +10,61 @@
 
         <hr>
 
-        {% if setups %}
-            <h4 style="color: #FF0000">Deleting this Study will delete the following Setups:</h4>
+        {% if chip_setups %}
+            <h4 style="color: #FF0000">Deleting this Study will delete the following Chip Setups:</h4>
             <ul>
-                {% for setup in setups %}
+                {% for setup in chip_setups %}
                     <li>{{ setup }}</li>
                 {% endfor %}
             </ul>
         {% endif %}
 
-        {% if readouts %}
-            <h4 style="color: #FF0000">Deleting this Study will delete the following Readouts:</h4>
+        {% if chip_readouts %}
+            <h4 style="color: #FF0000">Deleting this Study will delete the following Chip Readouts:</h4>
             <ul>
-                {% for readout in readouts %}
+                {% for readout in chip_readouts %}
                     <li>Readout ID #{{ readout.id }}</li>
                 {% endfor %}
             </ul>
         {% endif %}
 
-        {% if results %}
-            <h4 style="color: #FF0000">Deleting this Study will delete the following Test Results:</h4>
+        {% if chip_results %}
+            <h4 style="color: #FF0000">Deleting this Study will delete the following Chip Test Results:</h4>
             <ul>
-                {% for result in results %}
+                {% for result in chip_results %}
                     <li>Test Result ID #{{ result.id }}</li>
                 {% endfor %}
             </ul>
         {% endif %}
+
+        {% if plate_setups %}
+            <hr>
+            <h4 style="color: #FF0000">Deleting this Study will delete the following Plate Setups:</h4>
+            <ul>
+                {% for setup in plate_setups %}
+                    <li>{{ setup }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if plate_readouts %}
+            <h4 style="color: #FF0000">Deleting this Study will delete the following Plate Readouts:</h4>
+            <ul>
+                {% for readout in plate_readouts %}
+                    <li>Readout ID #{{ readout.id }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if plate_results %}
+            <h4 style="color: #FF0000">Deleting this Study will delete the following Plate Test Results:</h4>
+            <ul>
+                {% for result in plate_results %}
+                    <li>Test Result ID #{{ result.id }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
 
         <br>
 

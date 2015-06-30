@@ -265,9 +265,13 @@ class AssayRunDelete(CreatorRequiredMixin, DeleteView):
 
         context = self.get_context_data()
 
-        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object.id).prefetch_related('compound','unit')
-        context['readouts'] = AssayChipReadout.objects.filter(chip_setup=context['setups'])
-        context['results'] = AssayChipTestResult.objects.filter(chip_readout=context['readouts'])
+        context['chip_setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object.id).prefetch_related('compound','unit')
+        context['chip_readouts'] = AssayChipReadout.objects.filter(chip_setup=context['chip_setups'])
+        context['chip_results'] = AssayChipTestResult.objects.filter(chip_readout=context['chip_readouts'])
+
+        context['plate_setups'] = AssayPlateSetup.objects.filter(assay_run_id=self.object)
+        context['plate_readouts'] = AssayPlateReadout.objects.filter(setup=context['plate_setups'])
+        context['plate_results'] = AssayPlateTestResult.objects.filter(readout=context['plate_readouts'])
 
         return self.render_to_response(context)
 
@@ -998,6 +1002,17 @@ class AssayLayoutDelete(CreatorRequiredMixin, DeleteView):
     def get_success_url(self):
         return '/assays/assaylayout/'
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        context = self.get_context_data()
+
+        context['setups'] = AssayPlateSetup.objects.filter(assay_layout=self.object)
+        context['readouts'] = AssayPlateReadout.objects.filter(setup=context['setups'])
+        context['results'] = AssayPlateTestResult.objects.filter(readout=context['readouts'])
+
+        return self.render_to_response(context)
+
 
 # Class-based views for LAYOUTS
 class AssayPlateSetupList(LoginRequiredMixin, ListView):
@@ -1155,6 +1170,16 @@ class AssayPlateSetupDelete(CreatorRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return '/assays/' + str(self.object.assay_run_id.id)
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        context = self.get_context_data()
+
+        context['readouts'] = AssayPlateReadout.objects.filter(setup=self.object)
+        context['results'] = AssayPlateTestResult.objects.filter(readout=context['readouts'])
+
+        return self.render_to_response(context)
 
 
 # Class based views for readouts
@@ -1339,6 +1364,15 @@ class AssayPlateReadoutDelete(CreatorRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return '/assays/' + str(self.object.setup.assay_run_id.id)
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        context = self.get_context_data()
+
+        context['results'] = AssayPlateTestResult.objects.filter(readout=self.object)
+
+        return self.render_to_response(context)
 
 
 # Class-based views for PLATE test results
