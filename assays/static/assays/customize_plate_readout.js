@@ -470,7 +470,7 @@ $(document).ready(function () {
 
                             // Consider adding lead if people demand a larger font
                             var readout = $('<p>')
-                                .addClass('value text-center bg-primary ' + feature_class)
+                                .addClass('value ' + feature_class)
                                 .text(value);
 
                             $(well_id).append(readout);
@@ -539,7 +539,7 @@ $(document).ready(function () {
 
                     // Consider adding lead if people demand a larger font
                     var readout = $('<p>')
-                        .addClass('value text-center bg-primary ' + feature_class)
+                        .addClass('value ' + feature_class)
                         .text(value);
 
                     $(well_id).append(readout);
@@ -670,7 +670,7 @@ $(document).ready(function () {
 
             // Consider adding lead if people demand a larger font
             var readout = $('<p>')
-                .addClass('value text-center bg-primary ' + feature_class)
+                .addClass('value ' + feature_class)
                 .text(value);
 
             $(well_id).append(readout);

@@ -49,3 +49,8 @@ ul.layout-list {
     margin-left: 3%;
     float: left;
 }
+
+.value {
+    background-color: white;
+    text-align: center;
+}
