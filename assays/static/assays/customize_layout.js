@@ -59,6 +59,9 @@ $(document).ready(function () {
         // Remove old
         $('#layout_table').remove();
 
+        // Show buttons for changing text size
+        $('#change_text_size').attr('hidden', false);
+
         // Choice of inserting after fieldset is contrived; for admin
         var table = $('<table>')
             .css('width','100%')
