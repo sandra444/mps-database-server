@@ -422,22 +422,20 @@ $(document).ready(function () {
                             failed += 'headers';
                         }
 
-                        //console.log('features: ' + number_of_features);
-                        //console.log('blocks: ' + number_of_data_blocks);
+                        else {
+                            $.each(row, function (column_index, value) {
 
-                        $.each(row, function (column_index, value) {
+                                // TODO REVISE
+                                // Must offset row due to headers
+                                // Employ modulo
+                                var row_label = row_labels[(row_index - number_of_features) % row_labels.length];
+                                var column_label = column_labels[column_index];
 
-                            // TODO REVISE
-                            // Must offset row due to headers
-                            // Employ modulo
-                            var row_label = row_labels[(row_index - number_of_features) % row_labels.length];
-                            var column_label = column_labels[column_index];
+                                var well_id = '#' + row_label + '_' + column_label;
 
-                            var well_id = '#' + row_label + '_' + column_label;
+                                //console.log('well_id: ' + well_id);
 
-                            //console.log('well_id: ' + well_id);
-
-                            // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
+                                // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
 //                            var text = (time && time_unit) ?
 //                                feature + ': ' + value + ' ' + value_unit + '\t(' + time + ' ' + time_unit + ') ' :
 //                                feature + ': ' + value + ' ' + value_unit;
@@ -459,25 +457,26 @@ $(document).ready(function () {
 //                                    '</b></p></div>');
 //                            }
 
-                            // Prepend 'f' to avoid invalid class name; remove all invalid characters
-                            feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
+                                // Prepend 'f' to avoid invalid class name; remove all invalid characters
+                                feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g, '');
 
-                            // If value is not a number
-                            if (isNaN(value)) {
-                                // Fail the file
-                                failed += 'non-numeric';
-                            }
+                                // If value is not a number
+                                if (isNaN(value)) {
+                                    // Fail the file
+                                    failed += 'non-numeric';
+                                }
 
-                            // Consider adding lead if people demand a larger font
-                            var readout = $('<p>')
-                                .addClass('value ' + feature_class)
-                                .text(value);
+                                // Consider adding lead if people demand a larger font
+                                var readout = $('<p>')
+                                    .addClass('value ' + feature_class)
+                                    .text(value);
 
-                            $(well_id).append(readout);
+                                $(well_id).append(readout);
 
-                            // Add value to feature_values
-                            feature_values[feature_class][well_id] = parseFloat(value);
-                        });
+                                // Add value to feature_values
+                                feature_values[feature_class][well_id] = parseFloat(value);
+                            });
+                        }
                     }
                 }
             });
@@ -499,71 +498,74 @@ $(document).ready(function () {
             // Exclude the header for iteration later
             var data = lines.slice(1);
 
+            // Fail if this appears to be block data
+            if ($.trim(header[0].toLowerCase()) == 'feature') {
+                failed += 'block';
+            }
+
             // Fail if no features
-            if (features.length < 1) {
+            else if (features.length < 1 || !_.some(features)) {
                 failed += 'headers';
             }
 
-            $.each(data, function (row_index, row) {
-                // Check plate ID (the first value)
-//                var plate_id = row[0];
-                // Subject to change
-                // TODO MUST REMOVE IF READOUT ID's ARE REMOVED
-//                if (plate_id != $('#id_assay_device_id')) {
-//                    alert('Plate ID in file does not match Readout ID: Please make sure this is the correct file.')
-//                }
+            // Continue if successful
+            else {
+                $.each(data, function (row_index, row) {
+                    // Unchanged well
+                    var well = row[1];
+                    // Split the well into alphabetical and numeric and then merge again (gets rid of leading zeroes)
+                    var split_well = well.match(/(\d+|[^\d]+)/g);
+                    // Merge back together for ID
+                    var well_id = '#' + split_well[0] + '_' + parseInt(split_well[1]);
 
-                // Unchanged well
-                var well = row[1];
-                // Split the well into alphabetical and numeric and then merge again (gets rid of leading zeroes)
-                var split_well = well.match(/(\d+|[^\d]+)/g);
-                // Merge back together for ID
-                var well_id = '#' + split_well[0] + '_' + parseInt(split_well[1]);
+                    var values = row.slice(2);
 
-                var values = row.slice(2);
+                    $.each(values, function (column_index, value) {
+                        feature = features[column_index];
 
-                $.each(values, function (column_index, value) {
-                    feature = features[column_index];
+                        // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
+                        // var text = feature + ': ' + value;
 
-                    // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
-                    // var text = feature + ': ' + value;
+                        // Prepend 'f' to avoid invalid class name; remove all invalid characters
+                        var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g, '');
 
-                    // Prepend 'f' to avoid invalid class name; remove all invalid characters
-                    var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
+                        // If value is not a number
+                        if (isNaN(value)) {
+                            // Fail the file
+                            failed += 'non-numeric';
+                        }
 
-                    // If value is not a number
-                    if (isNaN(value)) {
-                        // Fail the file
-                        failed += 'non-numeric';
-                    }
+                        // Consider adding lead if people demand a larger font
+                        var readout = $('<p>')
+                            .addClass('value ' + feature_class)
+                            .text(value);
 
-                    // Consider adding lead if people demand a larger font
-                    var readout = $('<p>')
-                        .addClass('value ' + feature_class)
-                        .text(value);
+                        $(well_id).append(readout);
 
-                    $(well_id).append(readout);
-
-                    // If feature not in feature_values, add it
-                    // Otherwise tack on the value
-                    if (feature_values[feature_class]) {
-                        feature_values[feature_class][well_id] = parseFloat(value);
-                    }
-                    else {
-                        feature_values[feature_class] = {};
-                        feature_values[feature_class][well_id] = parseFloat(value);
-                    }
+                        // If feature not in feature_values, add it
+                        // Otherwise tack on the value
+                        if (feature_values[feature_class]) {
+                            feature_values[feature_class][well_id] = parseFloat(value);
+                        }
+                        else {
+                            feature_values[feature_class] = {};
+                            feature_values[feature_class][well_id] = parseFloat(value);
+                        }
+                    });
                 });
-            });
+            }
         }
 
         // If the file upload has failed
         if (failed) {
+            if (failed.indexOf('block') > -1) {
+                alert('It looks like this data has a block header; try changing "tabular" to "block."');
+            }
             if (failed.indexOf('headers') > -1) {
-                alert('Please ensure that all data blocks have valid headers')
+                alert('Please ensure that all data blocks have valid headers.')
             }
             if (failed.indexOf('non-numeric') > -1) {
-                alert('Error: This file contains non-numeric data. Please see and replace the values in red and upload again.');
+                alert('Error: This file contains non-numeric data. Please find and replace these values.');
             }
             $('#id_file').val('');
         }
