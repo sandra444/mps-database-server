@@ -658,7 +658,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 # TODO CHANGE BLOCK UPLOAD
 # TODO ADD TABULAR UPLOAD
 # TODO LINKING MULTIPLE ASSAYS TO ONE FEATURE IS AMBIGUOUS: DO NOT ALLOW IT (X?)
-# TODO DO NOT ALLOW ROW OR COLUMN OVERFLOW
+# TODO DO NOT ALLOW ROW OR COLUMN OVERFLOW (or underflow?)
 class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
     def clean(self):
         """Validate unique, existing PLATE READOUTS"""
@@ -725,12 +725,13 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
             datareader = csv.reader(test_file, delimiter=',')
             datalist = list(datareader)
 
+            # Acquire number of rows and columns
+            number_of_rows = self.instance.setup.assay_layout.device.number_of_rows
+            number_of_columns = self.instance.setup.assay_layout.device.number_of_columns
+
             if upload_type == 'Block':
                 # Tedious way of getting timeunit; probably should refactor
                 readout_time_unit = PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit
-
-                # Acquire number of rows in devices to discern datablocks
-                number_of_rows = self.instance.setup.assay_layout.device.number_of_rows
 
                 # Number of assays found
                 assays_found = 0
@@ -743,20 +744,20 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                         continue
 
                     # If this line is a header
-                    # NOTE THAT FEATURE -> ASSAU
+                    # NOTE THAT FEATURE -> ASSAY
                     # Headers should look like: FEATURE, {{FEATURE}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
-                    if line[0].lower() == 'feature':
+                    if line[0].lower().strip() == 'feature':
                         # Throw error if header too short
                         if len(line) < 4:
                             raise forms.ValidationError(
                                 'Header row: {} is too short'.format(line))
 
-                        feature = line[1]
+                        feature = line[1].strip()
 
                         assay = features_to_assay.get(feature, '')
                         assays_found += 1
 
-                        val_unit = line[3]
+                        val_unit = line[3].strip()
 
                         # Raise error if feature does not exist
                         if feature not in features_to_assay:
@@ -777,8 +778,8 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                                 'Header row: {} improperly configured'.format(line))
 
                         if len(line) >= 8:
-                            time = line[5]
-                            time_unit = line[7]
+                            time = line[5].strip()
+                            time_unit = line[7].strip()
 
                             # Fail if time is not numeric
                             try:
@@ -799,9 +800,16 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                         if data_blocks_found == 0 or (row_index-assays_found) % number_of_rows == 0:
                             data_blocks_found += 1
 
+                        # This should handle blocks that have too many rows or do not have a header
                         if data_blocks_found > assays_found:
                             raise forms.ValidationError(
                                         'All plate data must have an assay associated with it. Please add a header line.')
+
+                        # This is to deal with an excess of columns
+                        if len(line) != number_of_columns:
+                            raise forms.ValidationError(
+                                "The number of columns does not correspond with the device's dimensions")
+
                         # For every value in the line
                         for val in line:
                             # Check every value to make sure it can resolve to a float
@@ -852,6 +860,15 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                         row_label = label_to_number(row_label)
                         # Convert column label to an integer
                         column_label = int(column_label)
+
+                        if row_label > number_of_rows:
+                            raise forms.ValidationError(
+                                "The number of rows does not correspond with the device's dimensions")
+
+                        if column_label > number_of_columns:
+                            raise forms.ValidationError(
+                                "The number of columns does not correspond with the device's dimensions")
+
                     except:
                         raise forms.ValidationError(
                         'Error parsing the well ID: {}'.format(well))
@@ -869,7 +886,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                         except:
                             raise forms.ValidationError(
                                     'The value {} is invalid; please make sure all values are numerical'.format(value))
-
+        return self.cleaned_data
 
 class AssayPlateReadoutInline(admin.TabularInline):
     # Assays for ChipReadout
@@ -1316,7 +1333,7 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
                 except:
                     raise forms.ValidationError(
                             'The value "%s" is invalid; please make sure all values are numerical' % str(val))
-
+        return self.cleaned_data
 class AssayChipReadoutInline(admin.TabularInline):
     # Assays for ChipReadout
     formset = AssayChipReadoutInlineFormset
