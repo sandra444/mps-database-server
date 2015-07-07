@@ -773,11 +773,11 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                                 'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, assays.get(assay,'')))
 
                         # Fail if time given without time units
-                        if len(line) < 8 and len(line) > 4 and any(line[3:]):
+                        if len(line) < 8 and len(line) > 4 and any(line[4:]):
                             raise forms.ValidationError(
                                 'Header row: {} improperly configured'.format(line))
 
-                        if len(line) >= 8:
+                        if len(line) >= 8 and any(line[4:]):
                             time = line[5].strip()
                             time_unit = line[7].strip()
 
@@ -821,7 +821,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                                 raise forms.ValidationError(
                                         'The value "%s" is invalid; please make sure all values are numerical' % str(val))
 
-            # If not block, then it is tabular data
+            # If not block, then it is TABULAR data
             else:
                 # Purge empty lines, they are useless for tabular uploads
                 datalist = [row for row in datalist if any(row)]
