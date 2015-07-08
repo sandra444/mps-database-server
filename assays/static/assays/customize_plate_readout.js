@@ -523,15 +523,15 @@ $(document).ready(function () {
                     var time = 0;
                     var time_unit = null;
 
-                    // If NO TIME specified
+                    // If TIME specified
                     if (time_specified) {
-                        values = row.slice(1);
-                    }
-                    // If time specified
-                    else {
                         values = row.slice(3);
                         time = row[1];
                         time_unit = row[2];
+                    }
+                    // If NO TIME specified
+                    else {
+                        values = row.slice(1);
                     }
 
 
