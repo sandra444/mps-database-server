@@ -355,8 +355,10 @@ $(document).ready(function () {
         var failed = false;
         // Whether to read the file as tabular or block
         var upload_type = $('#id_upload_type').val();
-        // Get an array of features
-        var features = [];
+        // Get a list of features
+        var features = {};
+        // Get a unique array of features
+        var unique_features = [];
 
         // Get all values in a dict with features as keys
         feature_values = {};
@@ -382,17 +384,26 @@ $(document).ready(function () {
                 if ($.trim(row[0].toLowerCase()) == 'feature') {
 
                     feature = row[1];
+                    value_unit = row[3];
+                    time = row[5];
+                    time_unit = row[7];
 
-                    // Add feature to features
-                    features.push(feature);
+                    // Add feature to features (keeping it unique)
+                    if (unique_features.indexOf(feature) < 0) {
+                        unique_features.push(feature);
+                    }
+
+                    // Add time and time unit for multiple readings
+                    if (time) {
+                        feature += '_' + time + '_' + time_unit;
+                    }
+
+                    // Add feature for drop down feature list
+                    features[feature] = feature;
 
                     // Add feature to feature_values
                     var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
                     feature_values[feature_class] = {};
-
-                    value_unit = row[3];
-                    time = row[5];
-                    time_unit = row[7];
 
                     if (!feature || !value_unit || (time && !time_unit)) {
                         failed += 'headers';
@@ -433,29 +444,7 @@ $(document).ready(function () {
 
                                 var well_id = '#' + row_label + '_' + column_label;
 
-                                //console.log('well_id: ' + well_id);
-
                                 // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
-//                            var text = (time && time_unit) ?
-//                                feature + ': ' + value + ' ' + value_unit + '\t(' + time + ' ' + time_unit + ') ' :
-//                                feature + ': ' + value + ' ' + value_unit;
-//
-//                            // If value is not a number
-//                            if (isNaN(value)) {
-//                                $(well_id).append(
-//                                    '<div class="value" style="text-align: center; color: red;"><p><b>' +
-//                                    text +
-//                                    '</b></p></div>');
-//                                // Fail the file
-//                                failed += 'non-numeric';
-//                            }
-//
-//                            else {
-//                                $(well_id).append(
-//                                    '<div class="value" style="text-align: center; color: blue;"><p><b>' +
-//                                    text +
-//                                    '</b></p></div>');
-//                            }
 
                                 // Prepend 'f' to avoid invalid class name; remove all invalid characters
                                 feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g, '');
@@ -482,6 +471,7 @@ $(document).ready(function () {
             });
         }
 
+        // TODO PLEASE NOTE THAT THE TABULAR FORMAT (ESPECIALLY WITH TIME) IS SUBJECT TO CHANGE
         // Handle tabular data
         else {
             // Empty lines are useless in tabular uploads, remove them
@@ -491,10 +481,20 @@ $(document).ready(function () {
                 })
             });
 
+            // Indicates whether time was specified
+            var time_specified = false;
+
             // The header should be the first line
             var header = lines[0];
-            // Header should be: [AssayPlateID, WellName, Feature1, Feature2, ...]
-            features = header.slice(2);
+            if ($.trim(header[1].toLowerCase()) == 'time') {
+                // Header WITH TIME should be [WellName, Time, Time Unit, Feature1, Feature2, ...]
+                unique_features = header.slice(3);
+                time_specified = true;
+            }
+            else {
+                // Header WITHOUT TIME should be: [WellName, Feature1, Feature2, ...]
+                unique_features = header.slice(1);
+            }
             // Exclude the header for iteration later
             var data = lines.slice(1);
 
@@ -504,27 +504,47 @@ $(document).ready(function () {
             }
 
             // Fail if no features
-            else if (features.length < 1 || !_.some(features)) {
+            else if (unique_features.length < 1 || !_.some(unique_features)) {
                 failed += 'headers';
             }
 
+            // TODO working with times
             // Continue if successful
             else {
                 $.each(data, function (row_index, row) {
                     // Unchanged well
-                    var well = row[1];
+                    var well = row[0];
                     // Split the well into alphabetical and numeric and then merge again (gets rid of leading zeroes)
                     var split_well = well.match(/(\d+|[^\d]+)/g);
                     // Merge back together for ID
                     var well_id = '#' + split_well[0] + '_' + parseInt(split_well[1]);
 
-                    var values = row.slice(2);
+                    var values = null;
+                    var time = 0;
+                    var time_unit = null;
+
+                    // If NO TIME specified
+                    if (time_specified) {
+                        values = row.slice(1);
+                    }
+                    // If time specified
+                    else {
+                        values = row.slice(3);
+                        time = row[1];
+                        time_unit = row[2];
+                    }
+
 
                     $.each(values, function (column_index, value) {
-                        feature = features[column_index];
+                        feature = unique_features[column_index];
 
-                        // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
-                        // var text = feature + ': ' + value;
+                        if (time) {
+                            feature += '_' + time + '_' + time_unit;
+                        }
+
+                        if (!features[feature]) {
+                            features[feature] = feature;
+                        }
 
                         // Prepend 'f' to avoid invalid class name; remove all invalid characters
                         var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g, '');
@@ -535,7 +555,6 @@ $(document).ready(function () {
                             failed += 'non-numeric';
                         }
 
-                        // Consider adding lead if people demand a larger font
                         var readout = $('<p>')
                             .addClass('value ' + feature_class)
                             .text(value);
@@ -576,7 +595,7 @@ $(document).ready(function () {
             // Clear the binding table
             $('#binding_table').empty();
 
-            $.each(features, function (index, feature) {
+            $.each(unique_features, function (index, feature) {
                 var row = $('<tr>')
                     .append($('<td>')
                         .append($('<input>')
@@ -655,17 +674,13 @@ $(document).ready(function () {
 
             var feature = well_data.feature;
 
+            // Add time and time unit for multiple readings
+            if (time) {
+                feature += '_' + time + '_' + time_unit;
+            }
+
             // Add feature to features
             features[feature] = feature;
-
-//            var text = (time && time_unit) ?
-//                assay + ': ' + value + ' ' + value_unit +'\t(' + time + ' ' + time_unit + ') ':
-//                assay + ': ' + value + ' ' + value_unit;
-
-//            $(well_id).append(
-//                '<div class="value" style="text-align: center; color: blue;"><p><b>' +
-//                text +
-//                '</b></p></div>');
 
             // Prepend 'f' to avoid invalid class name; remove all invalid characters
             var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');

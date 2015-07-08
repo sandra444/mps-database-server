@@ -808,7 +808,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                         # This is to deal with an excess of columns
                         if len(line) != number_of_columns:
                             raise forms.ValidationError(
-                                "The number of columns does not correspond with the device's dimensions")
+                                "The number of columns does not correspond with the device's dimensions:{}".format(line))
 
                         # For every value in the line
                         for val in line:
