@@ -587,14 +587,22 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
         datalist = [row for row in datalist if any(row)]
         # The first line SHOULD be the header
         header = datalist[0]
-        # The features are the third column of the header onward
-        features = header[2:]
+
+        if header[1].lower().strip() == 'time':
+            # The features are the third column of the header onward
+            features = header[3:]
+            time_specified = True
+        else:
+            # The features are the third column of the header onward
+            features = header[1:]
+            time_specified = False
+
         # Exclude the header to get only the data points
         data = datalist[1:]
 
         for row_index, row in enumerate(data):
             # The well identifier given
-            well = row[1]
+            well = row[0]
             # Split the well into alphabetical and numeric
             row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
 
@@ -604,8 +612,15 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
             # Convert column label to an integer
             column_label = int(column_label) - 1
 
-            # Values are the slice of the third item onward
-            values = row[2:]
+            if time_specified:
+                # Values are the slice of the fourth item onward
+                values = row[3:]
+                time = row[1]
+
+            else:
+                # Values are the slice of the first item onward
+                values = row[1:]
+                time = 0
 
             for column_index, value in enumerate(values):
                 feature = features[column_index]
@@ -615,14 +630,13 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 
                     assay = assays.get(feature)
 
-                    # Note default elapsed time of 0
                     query_list.append((
                         currentAssayReadoutId,
                         assay,
                         row_label,
                         column_label,
                         value,
-                        0
+                        time
                     ))
                     # AssayReadout(
                     #     assay_device_readout_id=currentAssayReadoutId,
@@ -729,10 +743,10 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
             number_of_rows = self.instance.setup.assay_layout.device.number_of_rows
             number_of_columns = self.instance.setup.assay_layout.device.number_of_columns
 
-            if upload_type == 'Block':
-                # Tedious way of getting timeunit; probably should refactor
-                readout_time_unit = PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit
+            # Tedious way of getting timeunit; probably should refactor
+            readout_time_unit = PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit
 
+            if upload_type == 'Block':
                 # Number of assays found
                 assays_found = 0
                 # Number of data blocks found
@@ -827,8 +841,16 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                 datalist = [row for row in datalist if any(row)]
                 # The first line SHOULD be the header
                 header = datalist[0]
-                # The features are the third column of the header onward
-                features = header[2:]
+
+                if header[1].lower().strip() == 'time':
+                    # The features are the third column of the header onward
+                    features = header[3:]
+                    time_specified = True
+                else:
+                    # The features are the third column of the header onward
+                    features = header[1:]
+                    time_specified = False
+
                 # Exclude the header to get only the data points
                 data = datalist[1:]
 
@@ -853,7 +875,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                     # Check if well id is valid
                     try:
                         # The well identifier given
-                        well = row[1]
+                        well = row[0]
                         # Split the well into alphabetical and numeric
                         row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
                         # Convert row_label to a number
@@ -873,8 +895,29 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                         raise forms.ValidationError(
                         'Error parsing the well ID: {}'.format(well))
 
-                    # Values are the slice of the third item onward
-                    values = row[2:]
+                    if time_specified:
+                        # Values are the slice of the fourth item onward
+                        values = row[3:]
+                        time = row[1]
+                        time_unit = row[2]
+
+                        # Check time unit
+                        # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
+                        if time_unit[0] != readout_time_unit[0]:
+                            raise forms.ValidationError(
+                                'The time unit "%s" does not correspond with the selected readout time unit of "%s"' % (time_unit, readout_time_unit))
+
+                        # Check time
+                        try:
+                            float(time)
+                        except:
+                            raise forms.ValidationError(
+                                'Error while parsing time "{}"'.format(time))
+                    else:
+                        # Values are the slice of the first item onward
+                        values = row[1:]
+                        time = 0
+                        time_unit = None
 
                     for column_index, value in enumerate(values):
                         #feature = features[column_index]
