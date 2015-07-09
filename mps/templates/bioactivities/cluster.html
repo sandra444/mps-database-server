@@ -25,10 +25,11 @@
     {% endblock %}
 
     <div id="selection">
+        <form autocomplete="off">
         <div class="row">
             <div class="text-center">
                 {% block submit %}
-                <button class="btn btn-xlarge btn-primary text-center" id="submit">
+                <button type="button" class="btn btn-xlarge btn-primary text-center" id="submit">
                     Generate Dendrogram
                 </button>
                 {% endblock %}
@@ -376,6 +377,7 @@
         </div>
 
         {% endblock %}
+        </form>
     </div>
 
     {% block spinner %}
