@@ -89,7 +89,7 @@
             <hr>
         {% endblock %}
         <div class="row">
-            <div class="col-xs-4 col-xs-offset-2">
+            <div class="col-xs-4">
 
                 <div class="table-responsive">
 
@@ -189,7 +189,66 @@
                     </table>
                 </div>
             </div>
+            <div class="col-xs-4">
 
+                <div class="table-responsive">
+
+                    <table class="table table-bordered
+                            table-condensed">
+
+                        <thead>
+                            <th>
+                                {# Empty for now #}
+                            </th>
+                            <th>
+                                Filter Compounds
+                            </th>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <input value="drugs" id="drugs" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    Known Drugs
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="non_drugs" id="non_drugs" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    Non-Drugs
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <select id="logp_gtlt">
+                                        <option>&gt;</option>
+                                        <option>&lt;</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input id="logp" size="10"> LogP
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <select id="molecular_weight_gtlt">
+                                        <option>&gt;</option>
+                                        <option>&lt;</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input id="molecular_weight" size="10"> Molecular Weight
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
         </div>
         <hr>
 

@@ -48,11 +48,32 @@ $(document).ready(function () {
         $('#' + name).html('');
         // Add from list
         for (var i in list) {
+            var row = ''
             // Note added 'c' to avoid confusion with graphic
-            var row = "<tr id='" + add + list[i].name.replace(/ /g, "_").replace(/'/g, "&#39;") + "'>";
-            row += "<td>" + "<input type='checkbox' value='" + list[i].name.replace(/'/g, "&#39;") + "'></td>";
-            row += "<td>" + list[i].name + "</td>";
-            $('#' + name).append(row);
+            if (add) {
+                var data = list[i].name.split('|');
+                var compound_name = data[0];
+                var is_drug = data[1];
+                var LogP = data[2];
+                var molecular_weight = data[3];
+                row = "<tr id='" + add + compound_name.replace(/ /g, "_").replace(/'/g, "&#39;")
+                    + "' data-is_drug=" + is_drug
+                    + " data-LogP=" + LogP
+                    + " data-molecular_weight=" + molecular_weight
+                    + ' data-filters=\'{"is_drug": false, "LogP": false, "molecular_weight": false, "contains": false}\''
+                    + ">";
+                row += "<td>" + "<input type='checkbox' value='" + compound_name.replace(/'/g, "&#39;") + "'></td>";
+                row += "<td>" + compound_name + "</td>";
+                row += "</tr>";
+                $('#' + name).append(row);
+            }
+            else {
+                row = "<tr id='" + add + list[i].name.replace(/ /g, "_").replace(/'/g, "&#39;") + "'>";
+                row += "<td>" + "<input type='checkbox' value='" + list[i].name.replace(/'/g, "&#39;") + "'></td>";
+                row += "<td>" + list[i].name + "</td>";
+                row += "</tr>";
+                $('#' + name).append(row);
+            }
         }
 
         // Reset select all box
@@ -295,35 +316,70 @@ $(document).ready(function () {
         var drugtrial_string = drugtrial_search.val().toLowerCase().replace(/ /g, "_");
     }
 
+    // Discern whether row is to be hidden for compounds
+    function hide_row_and_set_values(row, filters) {
+        // If any of the of the filters are true, the row should be hidden
+        if (_.some(_.values(filters))) {
+            row.hidden = true;
+        }
+        else {
+            row.hidden = false;
+        }
+        // Set the filters to the new values
+        filters = JSON.stringify(filters);
+        row.setAttribute('data-filters', filters);
+    }
+
+    function reset_all_checkbox(selector) {
+        // Check or uncheck all as necessary
+        if ($("#" + selector + " input[type='checkbox']:checked:visible").length == $("#" + selector + " input[type='checkbox']:visible").length) {
+            $('#all_' + selector).prop('checked', true);
+        }
+        else {
+            $('#all_' + selector).prop('checked', false);
+        }
+    }
+
     // Function to reduce code
     // search = selector for search filter
     // string = the string typed into the input box
     // selector = the string (no #) to identify what is being acted on
-    // add = string to add to the search values (used for compounds)
     function search_filter(search, string, selector, add) {
         search.on('input', function () {
-            // Note the added 'c' to avoid confusion in compounds
-            string = add + search.val().toLowerCase().replace(/ /g, "_");
+            string = search.val().toLowerCase().replace(/ /g, "_");
 
-            // For every row in the given table
-            $("#" + selector + " tr").each(function () {
-                // If the row contains the requested string, do not hide it
-                if (this.id.toLowerCase().indexOf(string) > -1) {
-                    this.hidden = false;
-                }
-                // If it does not contain the string hide it
-                else {
-                    this.hidden = true;
-                }
-            });
-
-            // Check or uncheck all as necessary
-            if ($("#" + selector + " input[type='checkbox']:checked:visible").length == $("#" + selector + " input[type='checkbox']:visible").length) {
-                $('#all_' + selector).prop('checked', true);
+            // For compounds
+            if (add) {
+                // For every row in the given table
+                $("#" + selector + " tr").each(function () {
+                    var filters = JSON.parse(this.getAttribute('data-filters'));
+                    // If the row contains the requested string, do not hide it
+                    if (this.id.toLowerCase().indexOf(string) > -1) {
+                        filters.contains = false;
+                    }
+                    // If it does not contain the string hide it
+                    else {
+                        filters.contains = true;
+                    }
+                    hide_row_and_set_values(this, filters);
+                });
             }
+            // For every other type of data
             else {
-                $('#all_' + selector).prop('checked', false);
+                // For every row in the given table
+                $("#" + selector + " tr").each(function () {
+                    // If the row contains the requested string, do not hide it
+                    if (this.id.toLowerCase().indexOf(string) > -1) {
+                        this.hidden = false;
+                    }
+                    // If it does not contain the string hide it
+                    else {
+                        this.hidden = true;
+                    }
+                });
             }
+            // Check or uncheck all as necessary
+            reset_all_checkbox(selector);
         }).trigger('input');
     }
 
@@ -341,6 +397,163 @@ $(document).ready(function () {
         // When the drugtrial search changes
         search_filter(drugtrial_search, drugtrial_string, 'drugtrials', '');
     }
+
+    // Special filtering for compounds
+
+    // Check to see if the "drugs" button has been clicked
+    $('#drugs').change(function (evt) {
+        // Show all drugs
+        if (this.checked) {
+            $("#compounds tr").each(function () {
+                // If the row contains a drug, do not hide it
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (this.getAttribute('data-is_drug') == 'True') {
+                    filters.is_drug = false;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        // Hide all drugs
+        else {
+            $("#compounds tr").each(function () {
+                // If the row contains a drug, hide it
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (this.getAttribute('data-is_drug') == 'True') {
+                    filters.is_drug = true;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        reset_all_checkbox('compounds');
+    });
+
+    // Check to see if the "non-drugs" button has been clicked
+    $('#non_drugs').change(function (evt) {
+        // Show all non-drugs
+        if (this.checked) {
+            $("#compounds tr").each(function () {
+                // If the row contains a drug, do not hide it
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (this.getAttribute('data-is_drug') == 'False') {
+                    filters.is_drug = false;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        // Hide all non-drugs
+        else {
+            $("#compounds tr").each(function () {
+                // If the row contains a drug, hide it
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (this.getAttribute('data-is_drug') == 'False') {
+                    filters.is_drug = true;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        reset_all_checkbox('compounds');
+    });
+
+    var logp = $('#logp');
+    var logp_gtlt = $('#logp_gtlt');
+
+    var molecular_weight = $('#molecular_weight');
+    var molecular_weight_gtlt = $('#molecular_weight_gtlt');
+
+    // Check logp
+    logp.change(function (evt) {
+        // First need to check if value is valid
+        if (isNaN(logp.val()) || $.trim(logp.val()) === '') {
+            $("#compounds tr").each(function () {
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                filters.LogP = false;
+                hide_row_and_set_values(this, filters);
+            });
+            return;
+        }
+        // If gtlt is set to greater than
+        if (logp_gtlt.val() == '>') {
+            $("#compounds tr").each(function () {
+                // If the row contains a drug, do not hide it
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (Math.floor(this.getAttribute('data-LogP')) > Math.floor(logp.val())) {
+                    filters.LogP = false;
+                }
+                else {
+                    filters.LogP = true;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        // If gtlt is set to less than
+        else {
+            $("#compounds tr").each(function () {
+                // If the row contains a drug, do not hide it
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (Math.floor(this.getAttribute('data-LogP')) < Math.floor(logp.val())) {
+                    filters.LogP = false;
+                }
+                else {
+                    filters.LogP = true;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        reset_all_checkbox('compounds');
+    });
+
+    // Trigger logp changes when changing operator
+    logp_gtlt.change(function () {
+        logp.trigger('change');
+    });
+
+    // Check molecular_weight
+    molecular_weight.change(function (evt) {
+        // First need to check if value is valid
+        // On invalid/empty, treat all as passing
+        if (isNaN(molecular_weight.val()) || $.trim(molecular_weight.val()) === '') {
+            $("#compounds tr").each(function () {
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                filters.molecular_weight = false;
+                hide_row_and_set_values(this, filters);
+            });
+            return;
+        }
+        // If gtlt is set to greater than
+        if (molecular_weight_gtlt.val() == '>') {
+            $("#compounds tr").each(function () {
+                // If the row contains a drug, do not hide it
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (Math.floor(this.getAttribute('data-molecular_weight')) > Math.floor(molecular_weight.val())) {
+                    filters.molecular_weight = false;
+                }
+                else {
+                    filters.molecular_weight = true;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        // If gtlt is set to less than
+        else {
+            $("#compounds tr").each(function () {
+                // If the row contains a drug, do not hide it
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (Math.floor(this.getAttribute('data-molecular_weight')) < Math.floor(molecular_weight.val())) {
+                    filters.molecular_weight = false;
+                }
+                else {
+                    filters.molecular_weight = true;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        reset_all_checkbox('compounds');
+    });
+
+    // Trigger molecular_weight changes when changing operator
+    molecular_weight_gtlt.change(function () {
+        molecular_weight.trigger('change');
+    });
 
 //    function hashChange() {
 //

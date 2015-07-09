@@ -24,7 +24,11 @@ def generate_record_frequency_data(query):
     result = {}
 
     for q in query:
-        element = ''.join(q)
+        # TODO CRUDE; REQUIRES REVISION
+        if type(q) == tuple:
+            element = '|'.join([unicode(item) for item in q])
+        else:
+            element = ''.join(q)
         if element:
             if element in result:
                 frequency = result.get(element)
@@ -154,7 +158,7 @@ def generate_list_of_all_compounds_in_bioactivities():
     cursor = connection.cursor()
 
     cursor.execute(
-        'SELECT compounds_compound.name '
+        'SELECT compounds_compound.name, compounds_compound.known_drug, compounds_compound.logp, compounds_compound.molecular_weight '
         'FROM bioactivities_bioactivity '
         'INNER JOIN compounds_compound '
         'ON bioactivities_bioactivity.compound_id=compounds_compound.id;'
