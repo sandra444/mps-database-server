@@ -27,6 +27,8 @@ $(document).ready(function () {
 
     // Feature select for heatmap
     var feature_select = $('#feature_select');
+    // Time select for heatmap
+    var time_select = $('#time_select');
     // Data toggle for heatmap
     var data_toggle = $('#data_toggle');
     // This will contain the min, max, and median values for a feature (for the heatmap)
@@ -256,7 +258,7 @@ $(document).ready(function () {
         }
     }
 
-    function heatmap_options(features) {
+    function heatmap_options(features, times) {
         // Clear old features
         feature_select.empty();
 
@@ -268,8 +270,28 @@ $(document).ready(function () {
                     .text(feature);
                 feature_select.append(option);
             });
-            $('#heatmap_options').show();
-            feature_select.trigger('change');
+        // Clear old times
+        time_select.empty();
+        
+        // Convert times to sorted array?
+        
+        $.each(times, function (index, time) {
+            var option = $('<option>')
+                .attr('value', '_' + time)
+                .text(time);
+            time_select.append(option);
+        });
+        
+        // If there is only one timepoint (probably zero), no need to display time selection
+        if (_.size(times) == 1) {
+            $('#time_select_row').hide();   
+        }
+        else {
+            $('#time_select_row').show();
+        }
+        
+        $('#heatmap_options').show();
+        feature_select.trigger('change');
     }
 
     function build_heatmap(feature_values) {
@@ -355,10 +377,9 @@ $(document).ready(function () {
         var failed = false;
         // Whether to read the file as tabular or block
         var upload_type = $('#id_upload_type').val();
-        // Get a list of features
-        var features = {};
         // Get a unique array of features
         var unique_features = [];
+        var times = {};
 
         // Get all values in a dict with features as keys
         feature_values = {};
@@ -387,19 +408,22 @@ $(document).ready(function () {
                     value_unit = row[3];
                     time = row[5];
                     time_unit = row[7];
+                    
+                    // Set time to zero if undefined
+                    if (!time) {
+                        time = 0;
+                    }
+                    
+                    // Add time
+                    times[time] = [time];
 
                     // Add feature to features (keeping it unique)
                     if (unique_features.indexOf(feature) < 0) {
                         unique_features.push(feature);
                     }
-
-                    // Add time and time unit for multiple readings
-                    if (time) {
-                        feature += '_' + time + '_' + time_unit;
-                    }
-
-                    // Add feature for drop down feature list
-                    features[feature] = feature;
+                    
+                    // Add for multiple readings
+                    feature += '_' + time;
 
                     // Add feature to feature_values
                     var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
@@ -475,7 +499,7 @@ $(document).ready(function () {
         // Handle tabular data
         else {
             // Empty lines are useless in tabular uploads, remove them
-            lines = _.filter(lines, function(list){
+            lines = _.filter(lines, function(list) {
                 return _.some(list, function (val) {
                     return $.trim(val)
                 })
@@ -533,18 +557,14 @@ $(document).ready(function () {
                     else {
                         values = row.slice(1);
                     }
-
+                    
+                    // Add time
+                    times[time] = time;
 
                     $.each(values, function (column_index, value) {
                         feature = unique_features[column_index];
 
-                        if (time) {
-                            feature += '_' + time + '_' + time_unit;
-                        }
-
-                        if (!features[feature]) {
-                            features[feature] = feature;
-                        }
+                        feature += '_' + time;
 
                         // Prepend 'f' to avoid invalid class name; remove all invalid characters
                         var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g, '');
@@ -619,7 +639,7 @@ $(document).ready(function () {
 
             build_heatmap(feature_values);
             // Heatmap dialog
-            heatmap_options(features);
+            heatmap_options(unique_features, times);
 
             alert('Please link features to assays');
         }
@@ -657,6 +677,7 @@ $(document).ready(function () {
         $('.value').remove();
 
         var features = {};
+        var times = {};
 
         $.each(data, function(index, well_data) {
             var value = well_data.value;
@@ -673,14 +694,14 @@ $(document).ready(function () {
             var well_id = '#' + row_label + '_' + column_label;
 
             var feature = well_data.feature;
-
-            // Add time and time unit for multiple readings
-            if (time) {
-                feature += '_' + time + '_' + time_unit;
-            }
-
+            
             // Add feature to features
             features[feature] = feature;
+
+            // Add time for multiple readings
+            feature += '_' + time;
+            // Add time to times
+            times[time] = time;
 
             // Prepend 'f' to avoid invalid class name; remove all invalid characters
             var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
@@ -703,11 +724,8 @@ $(document).ready(function () {
             }
         });
 
-        // Convert features to an array
-        features = _.values(features);
-
         build_heatmap(feature_values);
-        heatmap_options(features);
+        heatmap_options(features, times);
     }
 
     // On setup change, acquire labels and build table
@@ -731,6 +749,9 @@ $(document).ready(function () {
     feature_select.change( function() {
         var current_feature = feature_select.val();
 
+        // Append the value of time_select
+        current_feature = current_feature + time_select.val();
+        
         // Hide all values
         $('.value').hide();
 
@@ -744,6 +765,11 @@ $(document).ready(function () {
 
         // Show this feature's values
         $('.' + current_feature).show();
+    });
+    
+    // Trigger feature select change on time change
+    time_select.change( function() {
+        feature_select.trigger('change');
     });
 
     // When the 'toggle data only' button is clicked

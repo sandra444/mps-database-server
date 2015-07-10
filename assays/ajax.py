@@ -118,28 +118,17 @@ def fetch_readout(request):
         #     'column': readout.column,
         #     'value': readout.value,
         # })
-        if readout.elapsed_time:
-            data.append({
-                'row': readout.row,
-                'column': readout.column,
-                'value': readout.value,
-                'assay': readout.assay.assay_id.assay_name,
-                'time': readout.elapsed_time,
-                # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
-                'time_unit': time_unit,
-                'value_unit': readout.assay.readout_unit.readout_unit,
-                'feature': readout.assay.feature,
-            })
-        else:
-            data.append({
-                'row': readout.row,
-                'column': readout.column,
-                'value': readout.value,
-                'assay': readout.assay.assay_id.assay_name,
-                # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
-                'value_unit': readout.assay.readout_unit.readout_unit,
-                'feature': readout.assay.feature,
-            })
+        data.append({
+            'row': readout.row,
+            'column': readout.column,
+            'value': readout.value,
+            'assay': readout.assay.assay_id.assay_name,
+            'time': readout.elapsed_time,
+            # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
+            'time_unit': time_unit,
+            'value_unit': readout.assay.readout_unit.readout_unit,
+            'feature': readout.assay.feature,
+        })
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
