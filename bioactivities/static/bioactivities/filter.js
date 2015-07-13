@@ -80,7 +80,7 @@ $(document).ready(function () {
         $("#all_" + name).prop('checked', false);
     }
 
-    function refresh() {
+    function refresh(changed) {
 
         // Disable everything
         $(":input").prop("disabled", true);
@@ -104,17 +104,19 @@ $(document).ready(function () {
                 //console.log(bioactivities);
                 //console.log(drugtrials);
 
-                // Clear bioactivities
-                reset_rows('bioactivities', bioactivities, '');
-
                 // Clear targets
                 reset_rows('targets', targets, '');
 
-                // Clear compounds
-                reset_rows('compounds', compounds, 'c');
+                if (changed == 'all') {
+                    // Clear bioactivities
+                    reset_rows('bioactivities', bioactivities, '');
+                    
+                    // Clear compounds
+                    reset_rows('compounds', compounds, 'c');
 
-                // Clear drugtrials
-                reset_rows('drugtrials', drugtrials, '');
+                    // Clear drugtrials
+                    reset_rows('drugtrials', drugtrials, '');
+                }
 
                 // Enable everything
                 $(":input").prop("disabled", false);
@@ -157,7 +159,7 @@ $(document).ready(function () {
             window.FILTER.target_types.push({"name": this.value, "is_selected": this.checked});
         });
 
-        refresh();
+        refresh('target');
     });
     //Change all target_types
     $('#all_target_types').change(function (evt) {
@@ -187,7 +189,7 @@ $(document).ready(function () {
             window.FILTER.organisms.push({"name": this.value, "is_selected": this.checked});
         });
 
-        refresh();
+        refresh('target');
     });
     //Change all organisms
     $('#all_organisms').change(function (evt) {
@@ -244,7 +246,7 @@ $(document).ready(function () {
     // Listen min feature count
     $('#apply_minimum_feature_count').click(function (evt) {
         min_feat_count = $('#minimum_feature_count').val();
-        refresh();
+        refresh('all');
     });
 
     // Initial truth log scale
@@ -287,7 +289,7 @@ $(document).ready(function () {
     var bioactivities = [];
     var drugtrials = [];
 
-    refresh();
+    refresh('all');
 
     // Return to selection
     $('#back').click(function (evt) {
