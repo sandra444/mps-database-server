@@ -721,6 +721,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
 
                 assay = raw.assay.assay_id.assay_name
                 val_unit = raw.assay.readout_unit.readout_unit
+                feature = raw.assay.feature;
 
                 # Raise error when an assay does not exist
                 if assay not in assays:
@@ -730,6 +731,13 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                 if val_unit != assays.get(assay,''):
                     raise forms.ValidationError(
                         'The current value unit "%s" does not correspond with the readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+                # TODO Raise error if feature does not correspond?
+                if feature not in features_to_assay:
+                    raise forms.ValidationError(
+                        'You can not remove the feature "{}" because it is in your uploaded data.'.format(feature))
+                if features_to_assay.get(feature) != assay:
+                    raise forms.ValidationError(
+                        'The assay-feature pair in the uploaded data is "{0}-{1}," not "{2}-{3}."'.format(assay,feature,features_to_assay.get(feature),feature))
 
         # TODO what shall a uniqueness check look like?
         # If there is a new file
