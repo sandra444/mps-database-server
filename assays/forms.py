@@ -229,6 +229,10 @@ class AssayPlateSetupForm(CloneableForm):
 
     class Meta(object):
         model = AssayPlateSetup
+        widgets = {
+            'notebook_page': forms.NumberInput(attrs={'style':'width:50px;',}),
+            'notes': forms.Textarea(attrs={'cols':50, 'rows': 3}),
+        }
         exclude = ('assay_run_id','group') + tracking + restricted
 
 
