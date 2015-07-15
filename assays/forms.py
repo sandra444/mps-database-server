@@ -131,6 +131,9 @@ class AssayChipReadoutForm(CloneableForm):
     #     return self.cleaned_data
 
 class AssayChipSetupForm(CloneableForm):
+    def __init__(self,*args,**kwargs):
+        super (AssayChipSetupForm,self).__init__(*args,**kwargs)
+        self.fields['unit'].queryset = PhysicalUnits.objects.filter(unit_type='C')
 
     another = forms.BooleanField(required=False)
 
