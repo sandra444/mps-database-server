@@ -33,6 +33,13 @@ class PhysicalUnits(LockableModel):
     unit_type = models.CharField(default='C',
                                  max_length=2,
                                  choices=PHYSICAL_UNIT_TYPES)
+    
+    # The index_order indicates where inside of a unit_type group a unit should be listed
+    # This is primarily to order things like minutes vs. seconds and so on
+    index_order = models.IntegerField(default=0)
+    
+    # TENTATIVE this field will indicate whether the unit should be displayed in test results
+    test_result = models.BooleanField(default=False)
 
     # verbose_name_plural is used to avoid a double 's' on the model name
     class Meta(object):

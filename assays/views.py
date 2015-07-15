@@ -697,7 +697,7 @@ class AssayChipTestResultList(LoginRequiredMixin, ListView):
                initial_query.filter(assay_result__chip_readout__chip_setup__assay_run_id__group__in=self.request.user.groups.all())
 
 
-TestResultFormSet = inlineformset_factory(AssayChipTestResult, AssayChipResult, formset=TestResultInlineFormset, extra=1,
+ChipTestResultFormSet = inlineformset_factory(AssayChipTestResult, AssayChipResult, formset=ChipTestResultInlineFormset, extra=1,
                                           widgets={'value': forms.NumberInput(attrs={'style': 'width:100px;', }), })
 
 
@@ -717,9 +717,9 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(AssayChipTestResultAdd, self).get_context_data(**kwargs)
         if self.request.POST:
-            context['formset'] = TestResultFormSet(self.request.POST)
+            context['formset'] = ChipTestResultFormSet(self.request.POST)
         else:
-            context['formset'] = TestResultFormSet()
+            context['formset'] = ChipTestResultFormSet()
         return context
 
     def form_valid(self, form):
@@ -779,7 +779,7 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
         form = self.get_form(self.form_class)
 
         # Render form
-        formset = TestResultFormSet(instance=self.object)
+        formset = ChipTestResultFormSet(instance=self.object)
         return self.render_to_response(
             self.get_context_data(form=form,
                                   formset = formset,
@@ -790,7 +790,7 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         form = self.get_form(self.form_class)
 
-        formset = TestResultFormSet(self.request.POST, instance=form.instance)
+        formset = ChipTestResultFormSet(self.request.POST, instance=form.instance)
 
         # TODO refactor redundant code here; testing for now
 

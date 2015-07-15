@@ -1626,7 +1626,7 @@ class AssayChipResultInline(admin.TabularInline):
 class PhysicalUnitsAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
-    list_display = ('unit_type', 'unit', 'description')
+    list_display = ('unit_type', 'unit', 'description', 'index_order', 'test_result')
     fieldsets = (
         (
             None, {
@@ -1634,6 +1634,7 @@ class PhysicalUnitsAdmin(LockableAdmin):
                     'unit',
                     'description',
                     'unit_type',
+                    ('index_order', 'test_result'),
                 )
             }
         ),

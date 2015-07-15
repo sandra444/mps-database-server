@@ -177,7 +177,12 @@ class AssayChipCellsInlineFormset(CloneableBaseInlineFormSet):
     #     if cellsamples < 1:
     #         raise forms.ValidationError('You must have at least one cellsample.')
 
-class TestResultInlineFormset(BaseInlineFormSet):
+class ChipTestResultInlineFormset(BaseInlineFormSet):
+    def __init__(self,*args,**kwargs):
+        super (ChipTestResultInlineFormset,self).__init__(*args,**kwargs)
+        unit_queryset = PhysicalUnits.objects.filter(test_result=True).order_by('unit_type', 'index_order')
+        for form in self.forms:
+            form.fields['test_unit'].queryset = unit_queryset
 
     class Meta(object):
         model = AssayChipResult
@@ -286,7 +291,12 @@ class AssayPlateResultForm(forms.ModelForm):
 
 
 class PlateTestResultInlineFormset(BaseInlineFormSet):
-
+    def __init__(self,*args,**kwargs):
+        super (PlateTestResultInlineFormset,self).__init__(*args,**kwargs)
+        unit_queryset = PhysicalUnits.objects.filter(test_result=True).order_by('unit_type', 'index_order')
+        for form in self.forms:
+            form.fields['test_unit'].queryset = unit_queryset
+        
     class Meta(object):
         model = AssayPlateResult
         exclude = ('',)
