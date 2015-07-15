@@ -71,8 +71,9 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
         context = self.get_context_data()
 
         context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object).prefetch_related('device',
-                                                                                                       'compound',
-                                                                                                       'created_by')
+                                                                                                     'compound',
+                                                                                                     'unit',
+                                                                                                     'created_by')
         readouts = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
             'created_by').select_related('chip_setup__compound',
                                                                    'chip_setup__unit')
@@ -93,6 +94,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
         context['results'] = AssayChipResult.objects.prefetch_related('result_function', 'result_type',
                                                     'test_unit').select_related('assay_result__chip_readout__chip_setup',
                                                                                 'assay_result__chip_readout__chip_setup__unit',
+                                                                                'assay_result__chip_readout__chip_setup__compound',
                                                                                 'assay_name__assay_id',
                                                                                 'assay_result__created_by').filter(assay_result__chip_readout=context['readouts'])
 

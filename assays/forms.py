@@ -76,6 +76,7 @@ class AssayChipResultForm(forms.ModelForm):
         readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
         if current:
             readouts = readouts | AssayChipReadout.objects.filter(pk=current)
+        readouts = readouts.prefetch_related('chip_setup', 'chip_setup__unit', 'chip_setup__compound')
         self.fields['chip_readout'].queryset = readouts
 
     class Meta(object):
@@ -279,6 +280,7 @@ class AssayPlateResultForm(forms.ModelForm):
         readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
         if current:
             readouts = readouts | AssayPlateReadout.objects.filter(pk=current)
+        readouts = readouts.prefetch_related('setup')
         self.fields['readout'].queryset = readouts
 
     class Meta(object):
