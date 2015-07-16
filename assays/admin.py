@@ -690,7 +690,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
             try:
                 if form.cleaned_data:
                     assay_name = form.cleaned_data.get('assay_id').assay_name
-                    unit = form.cleaned_data.get('readout_unit').readout_unit
+                    unit = form.cleaned_data.get('readout_unit').unit
 
                     feature = form.cleaned_data.get('feature')
 
@@ -720,8 +720,8 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
             for raw in saved_data:
 
                 assay = raw.assay.assay_id.assay_name
-                val_unit = raw.assay.readout_unit.readout_unit
-                feature = raw.assay.feature;
+                val_unit = raw.assay.readout_unit.unit
+                feature = raw.assay.feature
 
                 # Raise error when an assay does not exist
                 if assay not in assays:
@@ -813,8 +813,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                             # Fail if time unit does not match
                             # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
                             if time_unit[0] != readout_time_unit[0]:
-                                raise forms.ValidationError(
-                                    'The time unit "%s" does not correspond with the selected readout time unit of "%s"' % (time_unit, readout_time_unit))
+                                raise forms.ValidationError('The time unit "{}" does not correspond with the selected readout time unit of "{}"'.format(time_unit, readout_time_unit))
 
                     # Otherwise the line contains datapoints for the current assay
                     else:
@@ -1294,7 +1293,7 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
             try:
                 if form.cleaned_data:
                     assay_name = form.cleaned_data.get('assay_id').assay_name
-                    unit = form.cleaned_data.get('readout_unit').readout_unit
+                    unit = form.cleaned_data.get('readout_unit').unit
                     if assay_name not in assays:
                         assays.update({assay_name:unit})
                     else:
@@ -1320,7 +1319,7 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
             for raw in saved_data:
 
                 assay = raw.assay_id.assay_id.assay_name
-                val_unit = raw.assay_id.readout_unit.readout_unit
+                val_unit = raw.assay_id.readout_unit.unit
 
                 # Raise error when an assay does not exist
                 if assay not in assays:
@@ -1626,15 +1625,16 @@ class AssayChipResultInline(admin.TabularInline):
 class PhysicalUnitsAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
-    list_display = ('unit_type', 'unit', 'description', 'index_order', 'test_result')
+    list_display = ('unit_type', 'unit', 'base_unit', 'scale_factor', 'availability', 'description')
     fieldsets = (
         (
             None, {
                 'fields': (
                     'unit',
-                    'description',
                     'unit_type',
-                    ('index_order', 'test_result'),
+                    ('base_unit', 'scale_factor'),
+                    'availability',
+                    'description',
                 )
             }
         ),

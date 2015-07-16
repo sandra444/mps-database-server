@@ -126,7 +126,7 @@ def fetch_readout(request):
             'time': readout.elapsed_time,
             # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
             'time_unit': time_unit,
-            'value_unit': readout.assay.readout_unit.readout_unit,
+            'value_unit': readout.assay.readout_unit.unit,
             'feature': readout.assay.feature,
         })
 
