@@ -846,10 +846,11 @@ class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(StudyConfigurationAdd, self).get_context_data(**kwargs)
 
-        if self.request.POST:
-            context['formset'] = StudyModelFormSet(self.request.POST)
-        else:
-            context['formset'] = StudyModelFormSet()
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = StudyModelFormSet(self.request.POST)
+            else:
+                context['formset'] = StudyModelFormSet()
 
         return context
 
@@ -866,7 +867,7 @@ class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
             formset.save()
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
