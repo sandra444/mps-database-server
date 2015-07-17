@@ -335,17 +335,15 @@ class AssayChipSetupAdd(CreateView):
             'supplier',
         ).select_related('cell_type__cell_subtype')
         context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
-
-        if self.request.POST:
-            context['formset'] = AssayChipCellsFormset(self.request.POST)
-
-        elif self.request.GET.get('clone',''):
-            pk = int(self.request.GET.get('clone',''))
-            clone = get_object_or_404(AssayChipSetup, pk=pk)
-            context['formset'] = AssayChipCellsFormset(instance=clone)
-
-        else:
-            context['formset'] = AssayChipCellsFormset()
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = AssayChipCellsFormset(self.request.POST)
+            elif self.request.GET.get('clone',''):
+                pk = int(self.request.GET.get('clone',''))
+                clone = get_object_or_404(AssayChipSetup, pk=pk)
+                context['formset'] = AssayChipCellsFormset(instance=clone)
+            else:
+                context['formset'] = AssayChipCellsFormset()
 
         # Cellsamples will always be the same
         context['cellsamples'] = cellsamples
@@ -376,7 +374,7 @@ class AssayChipSetupAdd(CreateView):
             else:
                 return redirect(self.object.get_absolute_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 class AssayChipSetupDetail(DetailRedirectMixin,DetailView):
@@ -537,14 +535,15 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(AssayChipReadoutAdd, self).get_context_data(**kwargs)
-        if self.request.POST:
-            context['formset'] = ACRAFormSet(self.request.POST, self.request.FILES)
-        elif self.request.GET.get('clone',''):
-            pk = int(self.request.GET.get('clone',''))
-            clone = get_object_or_404(AssayChipReadout, pk=pk)
-            context['formset'] = ACRAFormSet(instance=clone)
-        else:
-            context['formset'] = ACRAFormSet()
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = ACRAFormSet(self.request.POST, self.request.FILES)
+            elif self.request.GET.get('clone',''):
+                pk = int(self.request.GET.get('clone',''))
+                clone = get_object_or_404(AssayChipReadout, pk=pk)
+                context['formset'] = ACRAFormSet(instance=clone)
+            else:
+                context['formset'] = ACRAFormSet()
 
         return context
 
@@ -580,7 +579,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_absolute_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     # Redirect when there are no available setups
     def render_to_response(self, context):
@@ -718,10 +717,11 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(AssayChipTestResultAdd, self).get_context_data(**kwargs)
-        if self.request.POST:
-            context['formset'] = ChipTestResultFormSet(self.request.POST)
-        else:
-            context['formset'] = ChipTestResultFormSet()
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = ChipTestResultFormSet(self.request.POST)
+            else:
+                context['formset'] = ChipTestResultFormSet()
         return context
 
     def form_valid(self, form):
@@ -741,7 +741,7 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
             formset.save()
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     # Redirect when there are no available setups
     # TODO REFACTOR
@@ -1055,15 +1055,15 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
             'supplier',
         ).select_related('cell_type__cell_subtype')
         context = super(AssayPlateSetupAdd, self).get_context_data(**kwargs)
-
-        if self.request.POST:
-            context['formset'] = AssayPlateCellsFormset(self.request.POST)
-        elif self.request.GET.get('clone',''):
-            pk = int(self.request.GET.get('clone',''))
-            clone = get_object_or_404(AssayPlateSetup, pk=pk)
-            context['formset'] = AssayPlateCellsFormset(instance=clone)
-        else:
-            context['formset'] = AssayPlateCellsFormset()
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = AssayPlateCellsFormset(self.request.POST)
+            elif self.request.GET.get('clone',''):
+                pk = int(self.request.GET.get('clone',''))
+                clone = get_object_or_404(AssayPlateSetup, pk=pk)
+                context['formset'] = AssayPlateCellsFormset(instance=clone)
+            else:
+                context['formset'] = AssayPlateCellsFormset()
 
         # Cellsamples will always be the same
         context['cellsamples'] = cellsamples
@@ -1092,7 +1092,7 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_absolute_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 # TODO Assay Layout Detail does not currently exist (deemed lower priority)
@@ -1233,14 +1233,15 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(AssayPlateReadoutAdd, self).get_context_data(**kwargs)
-        if self.request.POST:
-            context['formset'] = APRAFormSet(self.request.POST, self.request.FILES)
-        elif self.request.GET.get('clone',''):
-            pk = int(self.request.GET.get('clone',''))
-            clone = get_object_or_404(AssayPlateReadout, pk=pk)
-            context['formset'] = APRAFormSet(instance=clone)
-        else:
-            context['formset'] = APRAFormSet()
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = APRAFormSet(self.request.POST, self.request.FILES)
+            elif self.request.GET.get('clone',''):
+                pk = int(self.request.GET.get('clone',''))
+                clone = get_object_or_404(AssayPlateReadout, pk=pk)
+                context['formset'] = APRAFormSet(instance=clone)
+            else:
+                context['formset'] = APRAFormSet()
 
         return context
 
@@ -1272,7 +1273,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_absolute_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     # Redirect when there are no available setups
     # TODO REFACTOR
@@ -1412,11 +1413,12 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(AssayPlateTestResultAdd, self).get_context_data(**kwargs)
-        if self.request.POST:
-            context['formset'] = PlateTestResultFormSet(self.request.POST)
-        else:
-            context['formset'] = PlateTestResultFormSet()
-        return context
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = PlateTestResultFormSet(self.request.POST)
+            else:
+                context['formset'] = PlateTestResultFormSet()
+            return context
 
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
@@ -1435,7 +1437,7 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
             formset.save()
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     # Redirect when there are no available setups
     # TODO REFACTOR
