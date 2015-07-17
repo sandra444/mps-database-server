@@ -184,7 +184,7 @@ class AssayChipCellsInlineFormset(CloneableBaseInlineFormSet):
 class ChipTestResultInlineFormset(BaseInlineFormSet):
     def __init__(self,*args,**kwargs):
         super (ChipTestResultInlineFormset,self).__init__(*args,**kwargs)
-        unit_queryset = PhysicalUnits.objects.filter(test_result=True).order_by('unit_type', 'index_order')
+        unit_queryset = PhysicalUnits.objects.filter(availability__contains='test').order_by('base_unit', 'scale_factor')
         for form in self.forms:
             form.fields['test_unit'].queryset = unit_queryset
 
@@ -298,10 +298,10 @@ class AssayPlateResultForm(forms.ModelForm):
 class PlateTestResultInlineFormset(BaseInlineFormSet):
     def __init__(self,*args,**kwargs):
         super (PlateTestResultInlineFormset,self).__init__(*args,**kwargs)
-        unit_queryset = PhysicalUnits.objects.filter(test_result=True).order_by('unit_type', 'index_order')
+        unit_queryset = PhysicalUnits.objects.filter(availability__contains='test').order_by('base_unit', 'scale_factor')
         for form in self.forms:
             form.fields['test_unit'].queryset = unit_queryset
-        
+
     class Meta(object):
         model = AssayPlateResult
         exclude = ('',)
