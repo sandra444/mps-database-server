@@ -273,7 +273,7 @@ class AssayPlateCells(models.Model):
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
     cell_passage = models.CharField(max_length=16,verbose_name='Passage#',
-                                    default='-')
+                                    blank=True, null=True)
 
 
 class AssayPlateSetup(FlaggableModel):
@@ -679,7 +679,7 @@ class AssayChipCells(models.Model):
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
     cell_passage = models.CharField(max_length=16,verbose_name='Passage#',
-                                    default='-')
+                                    blank=True, null=True)
 
 
 class AssayChipSetup(FlaggableModel):
