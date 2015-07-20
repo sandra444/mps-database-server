@@ -138,7 +138,8 @@ class AssayChipReadoutForm(CloneableForm):
 class AssayChipSetupForm(CloneableForm):
     def __init__(self,*args,**kwargs):
         super (AssayChipSetupForm,self).__init__(*args,**kwargs)
-        self.fields['unit'].queryset = PhysicalUnits.objects.filter(unit_type='C').order_by('base_unit', 'scale_factor')
+        # Filter on concentration but make a special exception for percent (%)
+        self.fields['unit'].queryset = PhysicalUnits.objects.filter(unit_type='C').order_by('base_unit', 'scale_factor') | PhysicalUnits.objects.filter(unit='%')
 
     another = forms.BooleanField(required=False)
 
