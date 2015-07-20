@@ -104,7 +104,7 @@ class AssayChipResultForm(forms.ModelForm):
 class AssayChipReadoutForm(CloneableForm):
     def __init__(self,study,current,*args,**kwargs):
         super (AssayChipReadoutForm,self).__init__(*args,**kwargs)
-        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T')
+        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T').order_by('scale_factor')
         exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'device',
@@ -138,7 +138,7 @@ class AssayChipReadoutForm(CloneableForm):
 class AssayChipSetupForm(CloneableForm):
     def __init__(self,*args,**kwargs):
         super (AssayChipSetupForm,self).__init__(*args,**kwargs)
-        self.fields['unit'].queryset = PhysicalUnits.objects.filter(unit_type='C')
+        self.fields['unit'].queryset = PhysicalUnits.objects.filter(unit_type='C').order_by('base_unit', 'scale_factor')
 
     another = forms.BooleanField(required=False)
 
@@ -260,7 +260,7 @@ class AssayPlateCellsInlineFormset(CloneableBaseInlineFormSet):
 class AssayPlateReadoutForm(CloneableForm):
     def __init__(self,study,current,*args,**kwargs):
         super (AssayPlateReadoutForm,self).__init__(*args,**kwargs)
-        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T')
+        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T').order_by('scale_factor')
         exclude_list = AssayPlateReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
         setups = AssayPlateSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'assay_layout',
