@@ -447,52 +447,16 @@ $(document).ready(function () {
             }
 
             else {
-
                 var compound_name = $('#id_compound :selected').text();
                 var current_object = this;
 
                 if (compound_name) {
-                    add_compound_name(current_object);
-                }
-
-                else {
-                    $.ajax({
-                        url: "/compounds_ajax",
-                        type: "POST",
-                        dataType: "json",
-                        data: {
-                            // Function to call within the view is defined by `call:`
-                            call: 'fetch_compound_name',
-
-                            // First token is the var name within views.py
-                            // Second token is the var name in this JS file
-                            compound_id: compound_id,
-
-                            // Always pass the CSRF middleware token with every AJAX call
-                            csrfmiddlewaretoken: middleware_token
-                        },
-                        success: function (json) {
-                            compound_name = json.name;
-                            add_compound_name(current_object);
-
-                        },
-                        error: function (xhr, errmsg, err) {
-                            console.log(xhr.status + ": " + xhr.responseText);
-                        }
-                    });
-                }
-
-                // Encapsulated functions may seem somewhat strange,
-                // but using functional calls is an expedient alternative to promises (apparently)
-                function add_compound_name(current_object) {
-
                     $(".ui-selected", current_object).each(function (index, value) {
                         var tablecell = $(this);
                         var tablecellid = tablecell.attr('id');
                         var list = $('#' + tablecellid + '_list');
 
                         if (list.length) {
-
                             list.find('[compound=' + compound_id + ']').remove();
 
                             var stamp = time + '_' + index;
@@ -536,6 +500,34 @@ $(document).ready(function () {
                             list.append(li);
                         }
                     });
+                }
+
+                else {
+                    alert('There was a problem processing the compound');
+//                    $.ajax({
+//                        url: "/compounds_ajax",
+//                        type: "POST",
+//                        dataType: "json",
+//                        data: {
+//                            // Function to call within the view is defined by `call:`
+//                            call: 'fetch_compound_name',
+//
+//                            // First token is the var name within views.py
+//                            // Second token is the var name in this JS file
+//                            compound_id: compound_id,
+//
+//                            // Always pass the CSRF middleware token with every AJAX call
+//                            csrfmiddlewaretoken: middleware_token
+//                        },
+//                        success: function (json) {
+//                            compound_name = json.name;
+//                            add_compound_name(current_object, compound_id, time);
+//
+//                        },
+//                        error: function (xhr, errmsg, err) {
+//                            console.log(xhr.status + ": " + xhr.responseText);
+//                        }
+//                    });
                 }
             }
         }
