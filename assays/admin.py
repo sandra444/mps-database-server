@@ -195,11 +195,7 @@ def save_assay_layout(request, obj, form, change):
 
     for key, val in form.data.iteritems():
 
-        # if not key.startswith('well_') and not '_time' in key:
-        #     continue
-
-        # ## BEGIN save timepoint data ###
-
+        # Time points
         if key.endswith('_time'):
             # Cut off '_time'
             content = key[:-5]
@@ -213,20 +209,7 @@ def save_assay_layout(request, obj, form, change):
                 column
             ))
 
-            # AssayWellTimepoint(
-            #     assay_layout=obj,
-            #     timepoint=val,
-            #     row=row,
-            #     column=column
-            # ).save()
-
-        ### END save timepoint data ###
-
-        ### BEGIN save compound information ###
-
-        # if not key.startswith('well_'):
-        #     continue
-
+        # Compounds
         # Should refactor soon
         elif key.startswith('well_'):
             # Evaluate val as a JSON dict
@@ -245,17 +228,6 @@ def save_assay_layout(request, obj, form, change):
                     col
                 ))
 
-                # AssayWellCompound(
-                #     assay_layout=obj,
-                #     compound_id=content['compound'],
-                #     concentration=content['concentration'],
-                #     concentration_unit=content['concentration_unit'],
-                #     row=row,
-                #     column=col
-                # ).save()
-
-        ### END save compound information ###
-
         # Labels
         elif key.endswith('_label'):
             # Cut off '_label'
@@ -269,13 +241,6 @@ def save_assay_layout(request, obj, form, change):
                    row,
                    column
             ))
-
-            # AssayWellLabel(
-            #     assay_layout=obj,
-            #     label=val,
-            #     row=row,
-            #     column=column
-            # ).save()
 
         # Types
         elif key.endswith('_type'):
@@ -294,13 +259,6 @@ def save_assay_layout(request, obj, form, change):
                     column
                 ))
 
-                # AssayWell(
-                #     assay_layout=obj,
-                #     well_type_id=val,
-                #     row=row,
-                #     column=column
-                # ).save()
-
     cursor.executemany(type_query,type_query_list)
     cursor.executemany(time_query,time_query_list)
     cursor.executemany(compound_query,compound_query_list)
@@ -310,6 +268,7 @@ def save_assay_layout(request, obj, form, change):
 
 
 # TODO REVISE SAVING
+# TODO ADMIN IS NOT FUNCTIONAL AT THE MOMENT
 class AssayLayoutAdmin(LockableAdmin):
     class Media(object):
         js = ('assays/customize_layout.js',)
@@ -472,9 +431,7 @@ def removeExistingReadout(currentAssayReadout):
     # return
 
 
-# TODO CHANGE BLOCK UPLOAD
-# TODO ADD TABULAR UPLOAD
-# TODO CHANGE ROW TO BE ALPHABETICAL IN LIEU OF NUMERIC?
+# Rows are currenly numeric, not alphabetical, when stored in the database
 def parseReadoutCSV(currentAssayReadout, file, upload_type):
     removeExistingReadout(currentAssayReadout)
 
@@ -544,15 +501,6 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                             time
                         ))
 
-                        # AssayReadout(
-                        #     assay_device_readout_id=currentAssayReadoutId,
-                        #     row=offset_row_id,
-                        #     column=column_id,
-                        #     value=value,
-                        #     # the associated assay
-                        #     assay_id=assay,
-                        #     elapsed_time=time
-                        # ).save()
                     else:
                         # Note default elapsed time of 0
                         query_list.append((
@@ -564,14 +512,6 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                             0
                         ))
 
-                        # AssayReadout(
-                        #     assay_device_readout_id=currentAssayReadoutId,
-                        #     row=offset_row_id,
-                        #     column=column_id,
-                        #     value=value,
-                        #     assay_id=assay,
-                        # ).save()
-
     # Otherwise if the upload is tabular
     else:
         # Purge empty lines, they are useless for tabular uploads
@@ -580,11 +520,11 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
         header = datalist[0]
 
         if header[1].lower().strip() == 'time':
-            # The features are the third column of the header onward
+            # IF TIME The features are the fourth column of the header onward
             features = header[3:]
             time_specified = True
         else:
-            # The features are the third column of the header onward
+            # IF NO TIME The features are the second column of the header onward
             features = header[1:]
             time_specified = False
 
@@ -597,7 +537,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
             # Split the well into alphabetical and numeric
             row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
 
-            # TODO PLEASE NOTE THAT THE VALUES ARE OFFSET BY ONE (to begin with 0)
+            # PLEASE NOTE THAT THE VALUES ARE OFFSET BY ONE (to begin with 0)
             # Convert row_label to a number
             row_label = label_to_number(row_label) - 1
             # Convert column label to an integer
@@ -609,13 +549,13 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                 time = row[1]
 
             else:
-                # Values are the slice of the first item onward
+                # Values are the slice of the second item onward
                 values = row[1:]
                 time = 0
 
             for column_index, value in enumerate(values):
                 feature = features[column_index]
-                # TODO NOTE THAT BLANKS ARE CURRENTLY COMPLETELY EXCLUDED
+                # NOTE THAT BLANKS ARE CURRENTLY COMPLETELY EXCLUDED
                 if value != '':
                     value = float(value)
 
@@ -629,35 +569,10 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                         value,
                         time
                     ))
-                    # AssayReadout(
-                    #     assay_device_readout_id=currentAssayReadoutId,
-                    #     row=row_label,
-                    #     column=column_label,
-                    #     value=value,
-                    #     assay_id=assay,
-                    # ).save()
 
     cursor.executemany(query,query_list)
 
     transaction.commit()
-
-    # for rowID, rowValue in enumerate(datalist):
-    #     # rowValue holds all of the row elements
-    #     # rowID is the index of the current row from top to bottom
-    #     for columnID, columnValue in enumerate(rowValue):
-    #         # columnValue is a single number: the value of our specific cell
-    #         # columnID is the index of the current column
-    #
-    #         # Treat empty strings as NULL values and do not save the data point
-    #         if not columnValue:
-    #             continue
-    #
-    #         AssayReadout(
-    #             assay_device_readout=currentAssayReadout,
-    #             row=rowID,
-    #             column=columnID,
-    #             value=columnValue
-    #         ).save()
 
 
 class AssayPlateReadoutInline(admin.TabularInline):
@@ -1459,6 +1374,7 @@ admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
 # TODO CHANGE TO USE SETUP IN LIEU OF READOUT ID
 # TODO CHANGE TO REMOVE PREVIOUS DATA
+# TODO BULK UPLOADS ARE CURRENTLY NOT AVAILABLE
 @transaction.atomic
 def parseRunCSV(currentRun, file):
     datareader = csv.reader(file, delimiter=',')

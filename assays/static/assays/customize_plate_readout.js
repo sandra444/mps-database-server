@@ -157,7 +157,6 @@ $(document).ready(function () {
         });
     }
 
-    // TODO FILL_LAYOUT
     function fill_layout(layout_data) {
         $.each(layout_data, function(well, data) {
             var list = $('#' + well + '_list');
@@ -399,7 +398,6 @@ $(document).ready(function () {
             var number_of_data_blocks = 0;
 
             // TODO FIX CLIENT-SIDE VALIDATION
-            // TODO
             $.each(lines, function (row_index, row) {
                 // If the first value is 'feature', identify the line as a header
                 if ($.trim(row[0].toLowerCase()) == 'feature') {
@@ -532,7 +530,7 @@ $(document).ready(function () {
                 failed += 'headers';
             }
 
-            // TODO working with times
+            // working with times
             // Continue if successful
             else {
                 $.each(data, function (row_index, row) {
@@ -609,7 +607,6 @@ $(document).ready(function () {
             $('#id_file').val('');
         }
 
-        // TODO
         // If the file upload has succeeded, show the feature binding dialog and the heatmap dialog
         else {
             // Clear the binding table

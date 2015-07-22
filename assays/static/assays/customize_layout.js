@@ -1,6 +1,6 @@
 // TODO This script does many things which will not be necessary on the frontend
 // TODO Perhaps a separate script will be made for the front (to avoid AJAX and so on)
-// This script porvides the means to make an assay layout
+// This script provides the means to make an assay layout
 $(document).ready(function () {
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
@@ -136,7 +136,6 @@ $(document).ready(function () {
         });
     }
 
-    // TODO FILL_LAYOUT
     function fill_layout(layout_data, clone) {
         $.each(layout_data, function(well, data) {
             var list = $('#' + well + '_list');
@@ -586,7 +585,6 @@ $(document).ready(function () {
             });
         }
 
-        // TODO ADD LABEL
         else if (act == 'add-label') {
             $(".ui-selected", this).each(function (index, value) {
 

@@ -20,7 +20,6 @@ types = (
 )
 
 
-# TODO NEEDS REVISION
 class PhysicalUnits(LockableModel):
     """
     Measures of concentration and so on
@@ -391,29 +390,8 @@ class AssayPlateReadout(FlaggableModel):
     #                                    verbose_name='Readout ID/ Barcode')
 
     # Cell samples are to be handled in AssayPlateSetup from now on
-    # ### TODO This code is slated to be removed ###
-    # cell_sample = models.ForeignKey('cellsamples.CellSample')
-    #
-    # cellsample_density = models.FloatField(verbose_name='density', default=0)
-    #
-    # cellsample_density_unit = models.CharField(verbose_name='Unit',
-    #                                            max_length=8,
-    #                                            default="ML",
-    #                                            choices=(('WE', 'cells / well'),
-    #                                                     ('ML', 'cells / mL'),
-    #                                                     ('MM', 'cells / mm^2')))
-    # ### TODO ###
-
-    # OLD
-    #assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
 
     setup = models.ForeignKey(AssayPlateSetup)
-
-    # Old
-    #reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
-
-    # OLD
-    # readout_unit = models.ForeignKey(PhysicalUnits)
 
     timeunit = models.ForeignKey(PhysicalUnits, default=23)
 
@@ -421,9 +399,6 @@ class AssayPlateReadout(FlaggableModel):
                                               blank=True, null=True)
 
     # Assay start time is now in AssayPlateSetup
-    ### TODO THis code is slated for removal ###
-    # assay_start_time = models.DateField(verbose_name='Start Date', blank=True, null=True, help_text="YYYY-MM-DD")
-    ### TODO ###
 
     readout_start_time = models.DateField(verbose_name='Readout Date', help_text="YYYY-MM-DD")
 
@@ -533,27 +508,6 @@ class AssayPlateTestResult(FlaggableModel):
 
     readout = models.ForeignKey('assays.AssayPlateReadout',
                                         verbose_name='Plate ID/ Barcode')
-
-    # Unclear as to what "Assay Test Time" entails
-    # assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
-    #
-    # time_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
-    #
-    # result = models.CharField(default='1',
-    #                           max_length=8,
-    #                           choices=POSNEG,
-    #                           verbose_name='Pos/Neg?')
-    #
-    # severity = models.CharField(default='-1',
-    #                             max_length=5,
-    #                             choices=SEVERITY_SCORE,
-    #                             verbose_name='Severity',
-    #                             blank=True,
-    #                             null=True)
-    #
-    # value = models.FloatField(blank=True, null=True)
-    #
-    # value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
 
     def __unicode__(self):
         return u'Results for: {}'.format(self.readout)

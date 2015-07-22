@@ -334,10 +334,7 @@ def label_to_number(label):
             num = num * 26 + (ord(char.upper()) - ord('A')) + 1
     return num
 
-# TODO CHANGE BLOCK UPLOAD
-# TODO ADD TABULAR UPLOAD
-# TODO LINKING MULTIPLE ASSAYS TO ONE FEATURE IS AMBIGUOUS: DO NOT ALLOW IT (X?)
-# TODO DO NOT ALLOW ROW OR COLUMN OVERFLOW (or underflow?)
+
 class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
     def __init__(self,*args,**kwargs):
         super (AssayPlateReadoutInlineFormset,self).__init__(*args,**kwargs)
@@ -382,7 +379,6 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
         if len(assays) < 1:
             raise forms.ValidationError('You must have at least one assay')
 
-        # TODO
         # If there is already a file in the database and it is not being replaced or cleared (check for clear is implicit)
         if self.instance.file and not forms_data[-1].files:
 
@@ -402,7 +398,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                 if val_unit != assays.get(assay,''):
                     raise forms.ValidationError(
                         'The current value unit "%s" does not correspond with the readout unit of "%s"' % (val_unit, assays.get(assay,'')))
-                # TODO Raise error if feature does not correspond?
+                # Raise error if feature does not correspond?
                 if feature not in features_to_assay:
                     raise forms.ValidationError(
                         'You can not remove the feature "{}" because it is in your uploaded data.'.format(feature))

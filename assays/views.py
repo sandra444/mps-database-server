@@ -22,7 +22,7 @@ from mps.mixins import *
 import ujson as json
 
 # TODO Refactor imports
-# TODO TODO REFACTOR WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
+# TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
 
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
@@ -297,7 +297,7 @@ AssayChipCellsFormset = inlineformset_factory(AssayChipSetup, AssayChipCells, fo
                                               'cell_passage': forms.TextInput(attrs={'size': 5}), })
 
 
-# TODO REFACTOR THE WAY CLONING IS HANDLED !!!IMPRORTANT
+# Cloning was recently refactored
 class AssayChipSetupAdd(CreateView):
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
@@ -439,7 +439,6 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             # if self.request.GET.get('setup', ''):
             #     url_add = '?setup=1'
             self.object = form.save()
-            # TODO refactor original created by
             self.object.modified_by = self.request.user
             # Save overall setup result
             self.object.save()
@@ -564,10 +563,6 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Chip Readout
             self.object.save()
-            ### TERRIBLE SOLUTION TESTING ###
-            # for assay in formset:
-            #     assay.instance.readout_id_id = self.object.id
-            ### TERRIBLE SOLUTION TESTING
             formset.save()
             if formset.files.get('file',''):
                 file = formset.files.get('file','')
@@ -804,7 +799,6 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         if form.is_valid() and formset.is_valid():
             self.object = form.save()
-            # TODO refactor original created by
             self.object.modified_by = self.request.user
             # Save overall test result
             self.object.save()
@@ -997,7 +991,6 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
                                   update=True))
 
 
-# TODO ADD CONTEXT
 class AssayLayoutDelete(CreatorRequiredMixin, DeleteView):
     model = AssayLayout
     template_name = 'assays/assaylayout_delete.html'
@@ -1101,7 +1094,6 @@ class AssayPlateSetupDetail(DetailRedirectMixin, DetailView):
     model = AssayPlateSetup
 
 
-# TODO ADD ADDITIONAL CONTEXT
 class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
     model = AssayPlateSetup
     form_class = AssayPlateSetupForm
@@ -1166,7 +1158,6 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
                                 update = True))
 
 
-# TODO ADD CONTEXT
 class AssayPlateSetupDelete(CreatorRequiredMixin, DeleteView):
     model = AssayPlateSetup
     template_name = 'assays/assayplatesetup_delete.html'
@@ -1291,7 +1282,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
         return super(AssayPlateReadoutAdd, self).render_to_response(context)
 
 
-# TODO ADD TEMPLATE
+# TODO NEED TO ADD TEMPLATE
 class AssayPlateReadoutDetail(DetailRedirectMixin, DetailView):
     model = AssayPlateReadout
 
@@ -1339,7 +1330,6 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             upload_type = data.get('upload_type')
 
             self.object = form.save()
-            # TODO refactor original created by
             self.object.modified_by = self.request.user
             # Save overall readout result
             self.object.save()
