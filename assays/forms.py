@@ -233,7 +233,9 @@ class AssayLayoutForm(forms.ModelForm):
         self.fields['device'].queryset = Microdevice.objects.filter(row_labels__isnull=False, number_of_columns__isnull=False)
 
     compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
-    concunit = forms.ModelChoiceField(queryset=PhysicalUnits.objects.filter(unit_type='C'), required=False, initial=4)
+    # Notice the special exception for %
+    concunit = forms.ModelChoiceField(queryset=(PhysicalUnits.objects.filter(unit_type='C') | PhysicalUnits.objects.filter(unit='%')
+), required=False, initial=4)
 
     class Meta(object):
         model = AssayLayout
