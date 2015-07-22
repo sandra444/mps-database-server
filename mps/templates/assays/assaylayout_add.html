@@ -11,13 +11,13 @@
 {% block fluid-content %}
 
 {% if update %}
-    <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post" >
+    <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post" autocomplete="off">
 
     <div class="container">
     <h1>
         Edit {{ object }}
 {% else %}
-    <form enctype="multipart/form-data" class="form-horizontal" method="post" >
+    <form enctype="multipart/form-data" class="form-horizontal" method="post" autocomplete="off">
 
     <div class="container">
     <h1>
