@@ -50,13 +50,14 @@
         {% endif %}
 
         {% if update %}
+            <a role="button" class="btn btn-info" href="/assays/{{ object.chip_setup.assay_run_id.id }}/assaychipreadout/add?clone={{ object.id }}">Clone</a>
             <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assaychipreadout/{{ object.id }}/delete/">Delete</a>
         {% endif %}
 
         {% include 'flag.html'%}
     </h1>
 
-    {% if form.another.value and form.is_valid and formset.is_valid %}
+    {% if form.success.value %}
         <div class="alert alert-success" role="alert">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
             <span class="sr-only">Success:</span>
@@ -83,17 +84,7 @@
     {% endif %}
         <label for="chip_setup" class="col-sm-2 control-label">Setup*</label>
         <div class="col-sm-10">
-          <select id="id_chip_setup" name="chip_setup">
-            <option value="">---------</option>
-            {% for setup in setups %}
-              {# It is necessary to coerce the forms value into an integer for this compare #}
-              {% if setup.id|add:"0" == form.chip_setup.value|add:"0" %}
-                <option value={{ setup.id }} selected>{{ setup }}</option>
-              {% else %}
-                <option value={{ setup.id }}>{{ setup }}</option>
-              {% endif %}
-            {% endfor %}
-          </select>
+          {{ form.chip_setup }}
         </div>
     </div>
 

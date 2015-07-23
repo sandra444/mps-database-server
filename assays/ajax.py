@@ -18,8 +18,6 @@ logger = logging.getLogger(__name__)
 def main(request):
     return HttpResponseServerError()
 
-# TODO REQUIRES SERIOUS REVISION
-
 # TODO ADD BASE LAYOUT CONTENT TO ASSAY LAYOUT
 def fetch_assay_layout_content(request):
     """Return compounds in a layout."""
@@ -111,35 +109,17 @@ def fetch_readout(request):
     time_unit = AssayPlateReadout.objects.filter(id=current_readout_id.id)[0].timeunit.unit
 
     for readout in readouts:
-        # well = readout.row + '_' + readout.column
-
-        # data[well].append({
-        #     'row': readout.row,
-        #     'column': readout.column,
-        #     'value': readout.value,
-        # })
-        if readout.elapsed_time:
-            data.append({
-                'row': readout.row,
-                'column': readout.column,
-                'value': readout.value,
-                'assay': readout.assay.assay_id.assay_name,
-                'time': readout.elapsed_time,
-                # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
-                'time_unit': time_unit,
-                'value_unit': readout.assay.readout_unit.readout_unit,
-                'feature': readout.assay.feature,
-            })
-        else:
-            data.append({
-                'row': readout.row,
-                'column': readout.column,
-                'value': readout.value,
-                'assay': readout.assay.assay_id.assay_name,
-                # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
-                'value_unit': readout.assay.readout_unit.readout_unit,
-                'feature': readout.assay.feature,
-            })
+        data.append({
+            'row': readout.row,
+            'column': readout.column,
+            'value': readout.value,
+            'assay': readout.assay.assay_id.assay_name,
+            'time': readout.elapsed_time,
+            # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
+            'time_unit': time_unit,
+            'value_unit': readout.assay.readout_unit.unit,
+            'feature': readout.assay.feature,
+        })
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
@@ -353,12 +333,7 @@ switch = {
     'fetch_readout': fetch_readout,
     'fetch_layout_format_labels': fetch_layout_format_labels,
     'fetch_well_types': fetch_well_types,
-    # 'fetch_well_type_color': fetch_well_type_color,
-    # 'fetch_baseid': fetch_baseid,
-    # 'fetch_base_layout_wells': fetch_base_layout_wells,
-    # 'fetch_base_layout_info': fetch_base_layout_info,
     'fetch_plate_info': fetch_plate_info,
-    # 'fetch_chip_info': fetch_chip_info,
     'fetch_center_id': fetch_center_id,
     'fetch_chip_readout': fetch_chip_readout,
     'fetch_context': fetch_context,

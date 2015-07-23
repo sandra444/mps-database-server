@@ -2,7 +2,7 @@ import csv
 
 from django.contrib import admin
 from django import forms
-from assays.forms import AssayChipResultForm, StudyConfigurationForm
+from assays.forms import StudyConfigurationForm, AssayChipReadoutInlineFormset, AssayPlateReadoutInlineFormset, label_to_number
 from django.http import HttpResponseRedirect
 
 from assays.models import *
@@ -16,7 +16,6 @@ from io import BytesIO
 import ujson as json
 # I use regular expressions for a string split at one point
 import re
-import string
 from django.db import connection, transaction
 
 class AssayModelTypeAdmin(LockableAdmin):
@@ -196,11 +195,7 @@ def save_assay_layout(request, obj, form, change):
 
     for key, val in form.data.iteritems():
 
-        # if not key.startswith('well_') and not '_time' in key:
-        #     continue
-
-        # ## BEGIN save timepoint data ###
-
+        # Time points
         if key.endswith('_time'):
             # Cut off '_time'
             content = key[:-5]
@@ -214,20 +209,7 @@ def save_assay_layout(request, obj, form, change):
                 column
             ))
 
-            # AssayWellTimepoint(
-            #     assay_layout=obj,
-            #     timepoint=val,
-            #     row=row,
-            #     column=column
-            # ).save()
-
-        ### END save timepoint data ###
-
-        ### BEGIN save compound information ###
-
-        # if not key.startswith('well_'):
-        #     continue
-
+        # Compounds
         # Should refactor soon
         elif key.startswith('well_'):
             # Evaluate val as a JSON dict
@@ -246,17 +228,6 @@ def save_assay_layout(request, obj, form, change):
                     col
                 ))
 
-                # AssayWellCompound(
-                #     assay_layout=obj,
-                #     compound_id=content['compound'],
-                #     concentration=content['concentration'],
-                #     concentration_unit=content['concentration_unit'],
-                #     row=row,
-                #     column=col
-                # ).save()
-
-        ### END save compound information ###
-
         # Labels
         elif key.endswith('_label'):
             # Cut off '_label'
@@ -270,13 +241,6 @@ def save_assay_layout(request, obj, form, change):
                    row,
                    column
             ))
-
-            # AssayWellLabel(
-            #     assay_layout=obj,
-            #     label=val,
-            #     row=row,
-            #     column=column
-            # ).save()
 
         # Types
         elif key.endswith('_type'):
@@ -295,13 +259,6 @@ def save_assay_layout(request, obj, form, change):
                     column
                 ))
 
-                # AssayWell(
-                #     assay_layout=obj,
-                #     well_type_id=val,
-                #     row=row,
-                #     column=column
-                # ).save()
-
     cursor.executemany(type_query,type_query_list)
     cursor.executemany(time_query,time_query_list)
     cursor.executemany(compound_query,compound_query_list)
@@ -311,6 +268,7 @@ def save_assay_layout(request, obj, form, change):
 
 
 # TODO REVISE SAVING
+# TODO ADMIN IS NOT FUNCTIONAL AT THE MOMENT
 class AssayLayoutAdmin(LockableAdmin):
     class Media(object):
         js = ('assays/customize_layout.js',)
@@ -460,14 +418,6 @@ class AssayPlateSetupAdmin(LockableAdmin):
 
 admin.site.register(AssayPlateSetup, AssayPlateSetupAdmin)
 
-# This function turns a label to a number
-def label_to_number(label):
-    num = 0
-    for char in label:
-        if char in string.ascii_letters:
-            num = num * 26 + (ord(char.upper()) - ord('A')) + 1
-    return num
-
 # As much as I like being certain, this code is somewhat baffling
 def removeExistingReadout(currentAssayReadout):
     AssayReadout.objects.filter(assay_device_readout=currentAssayReadout).delete()
@@ -481,9 +431,7 @@ def removeExistingReadout(currentAssayReadout):
     # return
 
 
-# TODO CHANGE BLOCK UPLOAD
-# TODO ADD TABULAR UPLOAD
-# TODO CHANGE ROW TO BE ALPHABETICAL IN LIEU OF NUMERIC?
+# Rows are currenly numeric, not alphabetical, when stored in the database
 def parseReadoutCSV(currentAssayReadout, file, upload_type):
     removeExistingReadout(currentAssayReadout)
 
@@ -553,15 +501,6 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                             time
                         ))
 
-                        # AssayReadout(
-                        #     assay_device_readout_id=currentAssayReadoutId,
-                        #     row=offset_row_id,
-                        #     column=column_id,
-                        #     value=value,
-                        #     # the associated assay
-                        #     assay_id=assay,
-                        #     elapsed_time=time
-                        # ).save()
                     else:
                         # Note default elapsed time of 0
                         query_list.append((
@@ -573,302 +512,67 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                             0
                         ))
 
-                        # AssayReadout(
-                        #     assay_device_readout_id=currentAssayReadoutId,
-                        #     row=offset_row_id,
-                        #     column=column_id,
-                        #     value=value,
-                        #     assay_id=assay,
-                        # ).save()
-
     # Otherwise if the upload is tabular
     else:
         # Purge empty lines, they are useless for tabular uploads
         datalist = [row for row in datalist if any(row)]
         # The first line SHOULD be the header
         header = datalist[0]
-        # The features are the third column of the header onward
-        features = header[2:]
+
+        if header[1].lower().strip() == 'time':
+            # IF TIME The features are the fourth column of the header onward
+            features = header[3:]
+            time_specified = True
+        else:
+            # IF NO TIME The features are the second column of the header onward
+            features = header[1:]
+            time_specified = False
+
         # Exclude the header to get only the data points
         data = datalist[1:]
 
         for row_index, row in enumerate(data):
             # The well identifier given
-            well = row[1]
+            well = row[0]
             # Split the well into alphabetical and numeric
             row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
 
-            # TODO PLEASE NOTE THAT THE VALUES ARE OFFSET BY ONE (to begin with 0)
+            # PLEASE NOTE THAT THE VALUES ARE OFFSET BY ONE (to begin with 0)
             # Convert row_label to a number
             row_label = label_to_number(row_label) - 1
             # Convert column label to an integer
             column_label = int(column_label) - 1
 
-            # Values are the slice of the third item onward
-            values = row[2:]
+            if time_specified:
+                # Values are the slice of the fourth item onward
+                values = row[3:]
+                time = row[1]
+
+            else:
+                # Values are the slice of the second item onward
+                values = row[1:]
+                time = 0
 
             for column_index, value in enumerate(values):
                 feature = features[column_index]
-                # TODO NOTE THAT BLANKS ARE CURRENTLY COMPLETELY EXCLUDED
+                # NOTE THAT BLANKS ARE CURRENTLY COMPLETELY EXCLUDED
                 if value != '':
                     value = float(value)
 
                     assay = assays.get(feature)
 
-                    # Note default elapsed time of 0
                     query_list.append((
                         currentAssayReadoutId,
                         assay,
                         row_label,
                         column_label,
                         value,
-                        0
+                        time
                     ))
-                    # AssayReadout(
-                    #     assay_device_readout_id=currentAssayReadoutId,
-                    #     row=row_label,
-                    #     column=column_label,
-                    #     value=value,
-                    #     assay_id=assay,
-                    # ).save()
 
     cursor.executemany(query,query_list)
 
     transaction.commit()
-
-    # for rowID, rowValue in enumerate(datalist):
-    #     # rowValue holds all of the row elements
-    #     # rowID is the index of the current row from top to bottom
-    #     for columnID, columnValue in enumerate(rowValue):
-    #         # columnValue is a single number: the value of our specific cell
-    #         # columnID is the index of the current column
-    #
-    #         # Treat empty strings as NULL values and do not save the data point
-    #         if not columnValue:
-    #             continue
-    #
-    #         AssayReadout(
-    #             assay_device_readout=currentAssayReadout,
-    #             row=rowID,
-    #             column=columnID,
-    #             value=columnValue
-    #         ).save()
-
-
-# TODO CHANGE BLOCK UPLOAD
-# TODO ADD TABULAR UPLOAD
-# TODO LINKING MULTIPLE ASSAYS TO ONE FEATURE IS AMBIGUOUS: DO NOT ALLOW IT (X?)
-# TODO DO NOT ALLOW ROW OR COLUMN OVERFLOW
-class AssayPlateReadoutInlineFormset(forms.models.BaseInlineFormSet):
-    def clean(self):
-        """Validate unique, existing PLATE READOUTS"""
-
-        # Get upload type
-        upload_type = self.data.get('upload_type')
-
-        forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
-
-        # Dic of assay names from inline with respective unit as value
-        assays = {}
-        # Dic of features with respective assay
-        features_to_assay = {}
-        for form in forms_data:
-            try:
-                if form.cleaned_data:
-                    assay_name = form.cleaned_data.get('assay_id').assay_name
-                    unit = form.cleaned_data.get('readout_unit').readout_unit
-
-                    feature = form.cleaned_data.get('feature')
-
-                    # Error when feature assignation ambiguous
-                    if feature in features_to_assay:
-                        raise forms.ValidationError(
-                            'The feature "{}" is used more than once; ambiguous feature binding is not permitted'.format(feature))
-
-                    features_to_assay.update({feature: assay_name})
-
-                    if assay_name not in assays:
-                        assays.update({assay_name:unit})
-                    else:
-                        raise forms.ValidationError(
-                            'Duplicate assays are not permitted; please blank out or change the duplicate')
-            except AttributeError:
-                pass
-        if len(assays) < 1:
-            raise forms.ValidationError('You must have at least one assay')
-
-        # TODO
-        # If there is already a file in the database and it is not being replaced or cleared (check for clear is implicit)
-        if self.instance.file and not forms_data[-1].files:
-
-            saved_data = AssayReadout.objects.filter(assay_device_readout=self.instance).prefetch_related('assay')
-
-            for raw in saved_data:
-
-                assay = raw.assay.assay_id.assay_name
-                val_unit = raw.assay.readout_unit.readout_unit
-
-                # Raise error when an assay does not exist
-                if assay not in assays:
-                    raise forms.ValidationError(
-                        'You can not remove the assay "%s" because it is in your uploaded data.' % assay)
-                # Raise error if val_unit not equal to one listed in APRA
-                if val_unit != assays.get(assay,''):
-                    raise forms.ValidationError(
-                        'The current value unit "%s" does not correspond with the readout unit of "%s"' % (val_unit, assays.get(assay,'')))
-
-        # TODO what shall a uniqueness check look like?
-        # If there is a new file
-        if forms_data[-1].files:
-            test_file = forms_data[-1].files.get('file','')
-
-            datareader = csv.reader(test_file, delimiter=',')
-            datalist = list(datareader)
-
-            if upload_type == 'Block':
-                # Tedious way of getting timeunit; probably should refactor
-                readout_time_unit = PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit
-
-                # Acquire number of rows in devices to discern datablocks
-                number_of_rows = self.instance.setup.assay_layout.device.number_of_rows
-
-                # Number of assays found
-                assays_found = 0
-                # Number of data blocks found
-                data_blocks_found = 0
-
-                for row_index, line in enumerate(datalist):
-                    # If line is blank, skip it
-                    if not line:
-                        continue
-
-                    # If this line is a header
-                    # NOTE THAT FEATURE -> ASSAU
-                    # Headers should look like: FEATURE, {{FEATURE}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
-                    if line[0].lower() == 'feature':
-                        # Throw error if header too short
-                        if len(line) < 4:
-                            raise forms.ValidationError(
-                                'Header row: {} is too short'.format(line))
-
-                        feature = line[1]
-
-                        assay = features_to_assay.get(feature, '')
-                        assays_found += 1
-
-                        val_unit = line[3]
-
-                        # Raise error if feature does not exist
-                        if feature not in features_to_assay:
-                            raise forms.ValidationError(
-                                'No feature with the name "%s" exists; please change your file or add this feature' % feature)
-                        # Raise error when an assay does not exist
-                        if assay not in assays:
-                            raise forms.ValidationError(
-                                'No assay with the name "%s" exists; please change your file or add this assay' % assay)
-                        # Raise error if val_unit not equal to one listed in ACRA
-                        if val_unit != assays.get(assay,''):
-                            raise forms.ValidationError(
-                                'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, assays.get(assay,'')))
-
-                        # Fail if time given without time units
-                        if len(line) < 8 and len(line) > 4 and any(line[3:]):
-                            raise forms.ValidationError(
-                                'Header row: {} improperly configured'.format(line))
-
-                        if len(line) >= 8:
-                            time = line[5]
-                            time_unit = line[7]
-
-                            # Fail if time is not numeric
-                            try:
-                                float(time)
-                            except:
-                                raise forms.ValidationError(
-                                    'The time "{}" is invalid. Please only enter numeric times'.format(time))
-
-                            # Fail if time unit does not match
-                            # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
-                            if time_unit[0] != readout_time_unit[0]:
-                                raise forms.ValidationError(
-                                    'The time unit "%s" does not correspond with the selected readout time unit of "%s"' % (time_unit, readout_time_unit))
-
-                    # Otherwise the line contains datapoints for the current assay
-                    else:
-                        # TODO REVISE HOW DATA_BLOCKS ARE ACQUIRED
-                        if data_blocks_found == 0 or (row_index-assays_found) % number_of_rows == 0:
-                            data_blocks_found += 1
-
-                        if data_blocks_found > assays_found:
-                            raise forms.ValidationError(
-                                        'All plate data must have an assay associated with it. Please add a header line.')
-                        # For every value in the line
-                        for val in line:
-                            # Check every value to make sure it can resolve to a float
-                            try:
-                                # Keep empty strings, though they technically can not be converted to floats
-                                if val != '':
-                                    float(val)
-                            except:
-                                raise forms.ValidationError(
-                                        'The value "%s" is invalid; please make sure all values are numerical' % str(val))
-
-            # If not block, then it is tabular data
-            else:
-                # Purge empty lines, they are useless for tabular uploads
-                datalist = [row for row in datalist if any(row)]
-                # The first line SHOULD be the header
-                header = datalist[0]
-                # The features are the third column of the header onward
-                features = header[2:]
-                # Exclude the header to get only the data points
-                data = datalist[1:]
-
-                # Fail if there are no features
-                if len(features) < 1:
-                    raise forms.ValidationError(
-                        'The file does not contain any features')
-
-                for feature in features:
-                    # Get associated assay
-                    assay = features_to_assay.get(feature, '')
-                    # Raise error if feature does not exist
-                    if feature not in features_to_assay:
-                        raise forms.ValidationError(
-                            'No feature with the name "%s" exists; please change your file or add this feature' % feature)
-                    # Raise error when an assay does not exist
-                    if assay not in assays:
-                        raise forms.ValidationError(
-                            'No assay with the name "%s" exists; please change your file or add this assay' % assay)
-
-                for row_index, row in enumerate(data):
-                    # Check if well id is valid
-                    try:
-                        # The well identifier given
-                        well = row[1]
-                        # Split the well into alphabetical and numeric
-                        row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
-                        # Convert row_label to a number
-                        row_label = label_to_number(row_label)
-                        # Convert column label to an integer
-                        column_label = int(column_label)
-                    except:
-                        raise forms.ValidationError(
-                        'Error parsing the well ID: {}'.format(well))
-
-                    # Values are the slice of the third item onward
-                    values = row[2:]
-
-                    for column_index, value in enumerate(values):
-                        #feature = features[column_index]
-
-                        # Check if all the values can be parsed as floats
-                        try:
-                            if value != '':
-                                float(value)
-                        except:
-                            raise forms.ValidationError(
-                                    'The value {} is invalid; please make sure all values are numerical'.format(value))
 
 
 class AssayPlateReadoutInline(admin.TabularInline):
@@ -1208,114 +912,6 @@ class AssayChipSetupAdmin(LockableAdmin):
 
 admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 
-class AssayChipReadoutInlineFormset(forms.models.BaseInlineFormSet):
-    def clean(self):
-        """Validate unique, existing Chip Readout IDs"""
-
-        # Throw error if headers is not valid
-        try:
-            headers = int(self.data.get('headers','')) if self.data.get('headers') else 0
-        except:
-            raise forms.ValidationError('Please make number of headers a valid number.')
-
-        forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
-
-        # Dic of assay names from inline with respective unit as value
-        assays = {}
-        for form in forms_data:
-            try:
-                if form.cleaned_data:
-                    assay_name = form.cleaned_data.get('assay_id').assay_name
-                    unit = form.cleaned_data.get('readout_unit').readout_unit
-                    if assay_name not in assays:
-                        assays.update({assay_name:unit})
-                    else:
-                        raise forms.ValidationError(
-                            'Duplicate assays are not permitted; please blank out or change the duplicate')
-            except AttributeError:
-                pass
-        if len(assays) < 1:
-            raise forms.ValidationError('You must have at least one assay')
-
-        # If there is already a file in the database and it is not being replaced or cleared (check for clear is implicit)
-        if self.instance.file and not forms_data[-1].files:
-            new_time_unit = self.instance.timeunit
-            old_time_unit = AssayChipReadout.objects.get(id=self.instance.id).timeunit
-
-            # Fail if time unit does not match
-            if new_time_unit != old_time_unit:
-                raise forms.ValidationError(
-                    'The time unit "%s" does not correspond with the selected readout time unit of "%s"' % (new_time_unit, old_time_unit))
-
-            saved_data = AssayChipRawData.objects.filter(assay_chip_id=self.instance).prefetch_related('assay_id')
-
-            for raw in saved_data:
-
-                assay = raw.assay_id.assay_id.assay_name
-                val_unit = raw.assay_id.readout_unit.readout_unit
-
-                # Raise error when an assay does not exist
-                if assay not in assays:
-                    raise forms.ValidationError(
-                        'You can not remove the assay "%s" because it is in your uploaded data.' % assay)
-                # Raise error if val_unit not equal to one listed in ACRA
-                if val_unit != assays.get(assay,''):
-                    raise forms.ValidationError(
-                        'The current value unit "%s" does not correspond with the readout unit of "%s"' % (val_unit, assays.get(assay,'')))
-
-        # If there is a new file
-        if forms_data[-1].files:
-            test_file = forms_data[-1].files.get('file','')
-
-            datareader = csv.reader(test_file, delimiter=',')
-            datalist = list(datareader)
-
-            # Tedious way of getting timeunit; probably should refactor
-            readout_time_unit = PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit
-
-            # All unique rows based on ('assay_id', 'field_id', 'elapsed_time')
-            unique = {}
-
-            # Read headers going onward
-            for line in datalist[headers:]:
-
-                # Some lines may not be long enough (have sufficient commas), ignore such lines
-                # Some lines may be empty or incomplete, ignore these as well
-                if len(line) < 6 or not all(line):
-                    continue
-
-                time = line[0]
-                time_unit = line[1].strip().lower()
-                assay = line[2]
-                field = line[3]
-                val = line[4]
-                val_unit = line[5].strip()
-                # Raise error when an assay does not exist
-                if assay not in assays:
-                    raise forms.ValidationError(
-                        'No assay with the name "%s" exists; please change your file or add this assay' % assay)
-                # Raise error if val_unit not equal to one listed in ACRA
-                if val_unit != assays.get(assay,''):
-                    raise forms.ValidationError(
-                        'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, assays.get(assay,'')))
-                # Fail if time unit does not match
-                # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
-                if time_unit[0] != readout_time_unit[0]:
-                    raise forms.ValidationError(
-                        'The time unit "%s" does not correspond with the selected readout time unit of "%s"' % (time_unit, readout_time_unit))
-                if (time,assay,field) not in unique:
-                    unique.update({(time,assay,field):True})
-                else:
-                    raise forms.ValidationError(
-                        'File contains duplicate reading %s' % str((time,assay,field)))
-                # Check every value to make sure it can resolve to a float
-                try:
-                    # Keep empty strings, though they technically can not be converted to floats
-                    if val != '':
-                        float(val)
-                except:
-                    raise forms.ValidationError(
-                            'The value "%s" is invalid; please make sure all values are numerical' % str(val))
 
 class AssayChipReadoutInline(admin.TabularInline):
     # Assays for ChipReadout
@@ -1540,7 +1136,6 @@ admin.site.register(AssayResultType, AssayResultTypeAdmin)
 class AssayChipResultInline(admin.TabularInline):
     # Results calculated from CHIP READOUTS
     model = AssayChipResult
-    form = AssayChipResultForm
     verbose_name = 'Assay Test'
     verbose_name_plural = 'Assay Test Results'
     fields = (
@@ -1558,14 +1153,16 @@ class AssayChipResultInline(admin.TabularInline):
 class PhysicalUnitsAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
-    list_display = ('unit_type', 'unit', 'description')
+    list_display = ('unit_type', 'unit', 'base_unit', 'scale_factor', 'availability', 'description')
     fieldsets = (
         (
             None, {
                 'fields': (
                     'unit',
-                    'description',
                     'unit_type',
+                    ('base_unit', 'scale_factor'),
+                    'availability',
+                    'description',
                 )
             }
         ),
@@ -1701,7 +1298,6 @@ admin.site.register(AssayChipTestResult, AssayChipTestResultAdmin)
 class AssayPlateResultInline(admin.TabularInline):
     # Results calculated from PLATE READOUTS
     model = AssayPlateResult
-    #form = AssayPlateResultForm
     verbose_name = 'Assay Plate Result'
     verbose_name_plural = 'Assay Plate Results'
     fields = (
@@ -1776,6 +1372,7 @@ admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
 # TODO CHANGE TO USE SETUP IN LIEU OF READOUT ID
 # TODO CHANGE TO REMOVE PREVIOUS DATA
+# TODO BULK UPLOADS ARE CURRENTLY NOT AVAILABLE
 @transaction.atomic
 def parseRunCSV(currentRun, file):
     datareader = csv.reader(file, delimiter=',')
@@ -1820,7 +1417,7 @@ def parseRunCSV(currentRun, file):
     return
 
 
-class AssayRunForm(forms.ModelForm):
+class AssayRunFormAdmin(forms.ModelForm):
     class Meta(object):
         model = AssayRun
         widgets = {
@@ -1835,7 +1432,7 @@ class AssayRunForm(forms.ModelForm):
         """Validate unique, existing Chip Readout IDs"""
 
         # clean the form data, before validation
-        data = super(AssayRunForm, self).clean()
+        data = super(AssayRunFormAdmin, self).clean()
 
         if not any([data['toxicity'],data['efficacy'],data['disease'],data['cell_characterization']]):
             raise forms.ValidationError('Please select at least one study type')
@@ -1889,7 +1486,7 @@ class AssayRunAdmin(LockableAdmin):
     class Media(object):
         js = ('assays/customize_run.js',)
 
-    form = AssayRunForm
+    form = AssayRunFormAdmin
     save_on_top = True
     list_per_page = 300
     date_hierarchy = 'start_date'

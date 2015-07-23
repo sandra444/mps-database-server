@@ -3,6 +3,10 @@
 // TODO NEEDS REFACTOR
 // TODO PREFERRABLY CONSOLIDATE THESE DISPLAY FUNCTION (DO NOT REPEAT YOURSELF)
 $(document).ready(function () {
+    
+    if (!$('#flag')[0]) {
+        alert('Sorry, plate readout uploads are not currently available in the admin.');
+    }
 
     // Pulled from heatmap
     var colors = [
@@ -27,6 +31,8 @@ $(document).ready(function () {
 
     // Feature select for heatmap
     var feature_select = $('#feature_select');
+    // Time select for heatmap
+    var time_select = $('#time_select');
     // Data toggle for heatmap
     var data_toggle = $('#data_toggle');
     // This will contain the min, max, and median values for a feature (for the heatmap)
@@ -155,7 +161,6 @@ $(document).ready(function () {
         });
     }
 
-    // TODO FILL_LAYOUT
     function fill_layout(layout_data) {
         $.each(layout_data, function(well, data) {
             var list = $('#' + well + '_list');
@@ -256,7 +261,7 @@ $(document).ready(function () {
         }
     }
 
-    function heatmap_options(features) {
+    function heatmap_options(features, times) {
         // Clear old features
         feature_select.empty();
 
@@ -268,8 +273,28 @@ $(document).ready(function () {
                     .text(feature);
                 feature_select.append(option);
             });
-            $('#heatmap_options').show();
-            feature_select.trigger('change');
+        // Clear old times
+        time_select.empty();
+        
+        // Convert times to sorted array?
+        
+        $.each(times, function (index, time) {
+            var option = $('<option>')
+                .attr('value', '_' + time)
+                .text(time);
+            time_select.append(option);
+        });
+        
+        // If there is only one timepoint (probably zero), no need to display time selection
+        if (_.size(times) == 1) {
+            $('#time_select_row').hide();   
+        }
+        else {
+            $('#time_select_row').show();
+        }
+        
+        $('#heatmap_options').show();
+        feature_select.trigger('change');
     }
 
     function build_heatmap(feature_values) {
@@ -355,8 +380,9 @@ $(document).ready(function () {
         var failed = false;
         // Whether to read the file as tabular or block
         var upload_type = $('#id_upload_type').val();
-        // Get an array of features
-        var features = [];
+        // Get a unique array of features
+        var unique_features = [];
+        var times = {};
 
         // Get all values in a dict with features as keys
         feature_values = {};
@@ -376,23 +402,34 @@ $(document).ready(function () {
             var number_of_data_blocks = 0;
 
             // TODO FIX CLIENT-SIDE VALIDATION
-            // TODO
             $.each(lines, function (row_index, row) {
                 // If the first value is 'feature', identify the line as a header
                 if ($.trim(row[0].toLowerCase()) == 'feature') {
 
                     feature = row[1];
+                    value_unit = row[3];
+                    time = row[5];
+                    time_unit = row[7];
+                    
+                    // Set time to zero if undefined
+                    if (!time) {
+                        time = 0;
+                    }
+                    
+                    // Add time
+                    times[time] = [time];
 
-                    // Add feature to features
-                    features.push(feature);
+                    // Add feature to features (keeping it unique)
+                    if (unique_features.indexOf(feature) < 0) {
+                        unique_features.push(feature);
+                    }
+                    
+                    // Add for multiple readings
+                    feature += '_' + time;
 
                     // Add feature to feature_values
                     var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
                     feature_values[feature_class] = {};
-
-                    value_unit = row[3];
-                    time = row[5];
-                    time_unit = row[7];
 
                     if (!feature || !value_unit || (time && !time_unit)) {
                         failed += 'headers';
@@ -422,159 +459,164 @@ $(document).ready(function () {
                             failed += 'headers';
                         }
 
-                        //console.log('features: ' + number_of_features);
-                        //console.log('blocks: ' + number_of_data_blocks);
+                        else {
+                            $.each(row, function (column_index, value) {
 
-                        $.each(row, function (column_index, value) {
+                                // TODO REVISE
+                                // Must offset row due to headers
+                                // Employ modulo
+                                var row_label = row_labels[(row_index - number_of_features) % row_labels.length];
+                                var column_label = column_labels[column_index];
 
-                            // TODO REVISE
-                            // Must offset row due to headers
-                            // Employ modulo
-                            var row_label = row_labels[(row_index - number_of_features) % row_labels.length];
-                            var column_label = column_labels[column_index];
+                                var well_id = '#' + row_label + '_' + column_label;
 
-                            var well_id = '#' + row_label + '_' + column_label;
+                                // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
 
-                            //console.log('well_id: ' + well_id);
+                                // Prepend 'f' to avoid invalid class name; remove all invalid characters
+                                feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g, '');
 
-                            // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
-//                            var text = (time && time_unit) ?
-//                                feature + ': ' + value + ' ' + value_unit + '\t(' + time + ' ' + time_unit + ') ' :
-//                                feature + ': ' + value + ' ' + value_unit;
-//
-//                            // If value is not a number
-//                            if (isNaN(value)) {
-//                                $(well_id).append(
-//                                    '<div class="value" style="text-align: center; color: red;"><p><b>' +
-//                                    text +
-//                                    '</b></p></div>');
-//                                // Fail the file
-//                                failed += 'non-numeric';
-//                            }
-//
-//                            else {
-//                                $(well_id).append(
-//                                    '<div class="value" style="text-align: center; color: blue;"><p><b>' +
-//                                    text +
-//                                    '</b></p></div>');
-//                            }
+                                // If value is not a number
+                                if (isNaN(value)) {
+                                    // Fail the file
+                                    failed += 'non-numeric';
+                                }
 
-                            // Prepend 'f' to avoid invalid class name; remove all invalid characters
-                            feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
+                                // Consider adding lead if people demand a larger font
+                                var readout = $('<p>')
+                                    .addClass('value ' + feature_class)
+                                    .text(value);
 
-                            // If value is not a number
-                            if (isNaN(value)) {
-                                // Fail the file
-                                failed += 'non-numeric';
-                            }
+                                $(well_id).append(readout);
 
-                            // Consider adding lead if people demand a larger font
-                            var readout = $('<p>')
-                                .addClass('value text-center bg-primary ' + feature_class)
-                                .text(value);
-
-                            $(well_id).append(readout);
-
-                            // Add value to feature_values
-                            feature_values[feature_class][well_id] = parseFloat(value);
-                        });
+                                // Add value to feature_values
+                                feature_values[feature_class][well_id] = parseFloat(value);
+                            });
+                        }
                     }
                 }
             });
         }
 
+        // TODO PLEASE NOTE THAT THE TABULAR FORMAT (ESPECIALLY WITH TIME) IS SUBJECT TO CHANGE
         // Handle tabular data
         else {
             // Empty lines are useless in tabular uploads, remove them
-            lines = _.filter(lines, function(list){
+            lines = _.filter(lines, function(list) {
                 return _.some(list, function (val) {
                     return $.trim(val)
                 })
             });
 
+            // Indicates whether time was specified
+            var time_specified = false;
+
             // The header should be the first line
             var header = lines[0];
-            // Header should be: [AssayPlateID, WellName, Feature1, Feature2, ...]
-            features = header.slice(2);
+            if ($.trim(header[1].toLowerCase()) == 'time') {
+                // Header WITH TIME should be [WellName, Time, Time Unit, Feature1, Feature2, ...]
+                unique_features = header.slice(3);
+                time_specified = true;
+            }
+            else {
+                // Header WITHOUT TIME should be: [WellName, Feature1, Feature2, ...]
+                unique_features = header.slice(1);
+            }
             // Exclude the header for iteration later
             var data = lines.slice(1);
 
+            // Fail if this appears to be block data
+            if ($.trim(header[0].toLowerCase()) == 'feature') {
+                failed += 'block';
+            }
+
             // Fail if no features
-            if (features.length < 1) {
+            else if (unique_features.length < 1 || !_.some(unique_features)) {
                 failed += 'headers';
             }
 
-            $.each(data, function (row_index, row) {
-                // Check plate ID (the first value)
-//                var plate_id = row[0];
-                // Subject to change
-                // TODO MUST REMOVE IF READOUT ID's ARE REMOVED
-//                if (plate_id != $('#id_assay_device_id')) {
-//                    alert('Plate ID in file does not match Readout ID: Please make sure this is the correct file.')
-//                }
+            // working with times
+            // Continue if successful
+            else {
+                $.each(data, function (row_index, row) {
+                    // Unchanged well
+                    var well = row[0];
+                    // Split the well into alphabetical and numeric and then merge again (gets rid of leading zeroes)
+                    var split_well = well.match(/(\d+|[^\d]+)/g);
+                    // Merge back together for ID
+                    var well_id = '#' + split_well[0] + '_' + parseInt(split_well[1]);
 
-                // Unchanged well
-                var well = row[1];
-                // Split the well into alphabetical and numeric and then merge again (gets rid of leading zeroes)
-                var split_well = well.match(/(\d+|[^\d]+)/g);
-                // Merge back together for ID
-                var well_id = '#' + split_well[0] + '_' + parseInt(split_well[1]);
+                    var values = null;
+                    var time = 0;
+                    var time_unit = null;
 
-                var values = row.slice(2);
-
-                $.each(values, function (column_index, value) {
-                    feature = features[column_index];
-
-                    // FOR THE PREVIEW I MAY JUST USE FEATURE FOR NOW
-                    // var text = feature + ': ' + value;
-
-                    // Prepend 'f' to avoid invalid class name; remove all invalid characters
-                    var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
-
-                    // If value is not a number
-                    if (isNaN(value)) {
-                        // Fail the file
-                        failed += 'non-numeric';
+                    // If TIME specified
+                    if (time_specified) {
+                        values = row.slice(3);
+                        time = row[1];
+                        time_unit = row[2];
                     }
-
-                    // Consider adding lead if people demand a larger font
-                    var readout = $('<p>')
-                        .addClass('value text-center bg-primary ' + feature_class)
-                        .text(value);
-
-                    $(well_id).append(readout);
-
-                    // If feature not in feature_values, add it
-                    // Otherwise tack on the value
-                    if (feature_values[feature_class]) {
-                        feature_values[feature_class][well_id] = parseFloat(value);
-                    }
+                    // If NO TIME specified
                     else {
-                        feature_values[feature_class] = {};
-                        feature_values[feature_class][well_id] = parseFloat(value);
+                        values = row.slice(1);
                     }
+                    
+                    // Add time
+                    times[time] = time;
+
+                    $.each(values, function (column_index, value) {
+                        feature = unique_features[column_index];
+
+                        feature += '_' + time;
+
+                        // Prepend 'f' to avoid invalid class name; remove all invalid characters
+                        var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g, '');
+
+                        // If value is not a number
+                        if (isNaN(value)) {
+                            // Fail the file
+                            failed += 'non-numeric';
+                        }
+
+                        var readout = $('<p>')
+                            .addClass('value ' + feature_class)
+                            .text(value);
+
+                        $(well_id).append(readout);
+
+                        // If feature not in feature_values, add it
+                        // Otherwise tack on the value
+                        if (feature_values[feature_class]) {
+                            feature_values[feature_class][well_id] = parseFloat(value);
+                        }
+                        else {
+                            feature_values[feature_class] = {};
+                            feature_values[feature_class][well_id] = parseFloat(value);
+                        }
+                    });
                 });
-            });
+            }
         }
 
         // If the file upload has failed
         if (failed) {
+            if (failed.indexOf('block') > -1) {
+                alert('It looks like this data has a block header; try changing "tabular" to "block."');
+            }
             if (failed.indexOf('headers') > -1) {
-                alert('Please ensure that all data blocks have valid headers')
+                alert('Please ensure that all data blocks have valid headers.')
             }
             if (failed.indexOf('non-numeric') > -1) {
-                alert('Error: This file contains non-numeric data. Please see and replace the values in red and upload again.');
+                alert('Error: This file contains non-numeric data. Please find and replace these values.');
             }
             $('#id_file').val('');
         }
 
-        // TODO
         // If the file upload has succeeded, show the feature binding dialog and the heatmap dialog
         else {
             // Clear the binding table
             $('#binding_table').empty();
 
-            $.each(features, function (index, feature) {
+            $.each(unique_features, function (index, feature) {
                 var row = $('<tr>')
                     .append($('<td>')
                         .append($('<input>')
@@ -598,7 +640,7 @@ $(document).ready(function () {
 
             build_heatmap(feature_values);
             // Heatmap dialog
-            heatmap_options(features);
+            heatmap_options(unique_features, times);
 
             alert('Please link features to assays');
         }
@@ -636,6 +678,7 @@ $(document).ready(function () {
         $('.value').remove();
 
         var features = {};
+        var times = {};
 
         $.each(data, function(index, well_data) {
             var value = well_data.value;
@@ -652,25 +695,21 @@ $(document).ready(function () {
             var well_id = '#' + row_label + '_' + column_label;
 
             var feature = well_data.feature;
-
+            
             // Add feature to features
             features[feature] = feature;
 
-//            var text = (time && time_unit) ?
-//                assay + ': ' + value + ' ' + value_unit +'\t(' + time + ' ' + time_unit + ') ':
-//                assay + ': ' + value + ' ' + value_unit;
-
-//            $(well_id).append(
-//                '<div class="value" style="text-align: center; color: blue;"><p><b>' +
-//                text +
-//                '</b></p></div>');
+            // Add time for multiple readings
+            feature += '_' + time;
+            // Add time to times
+            times[time] = time;
 
             // Prepend 'f' to avoid invalid class name; remove all invalid characters
             var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
 
             // Consider adding lead if people demand a larger font
             var readout = $('<p>')
-                .addClass('value text-center bg-primary ' + feature_class)
+                .addClass('value ' + feature_class)
                 .text(value);
 
             $(well_id).append(readout);
@@ -686,11 +725,8 @@ $(document).ready(function () {
             }
         });
 
-        // Convert features to an array
-        features = _.values(features);
-
         build_heatmap(feature_values);
-        heatmap_options(features);
+        heatmap_options(features, times);
     }
 
     // On setup change, acquire labels and build table
@@ -714,6 +750,9 @@ $(document).ready(function () {
     feature_select.change( function() {
         var current_feature = feature_select.val();
 
+        // Append the value of time_select
+        current_feature = current_feature + time_select.val();
+        
         // Hide all values
         $('.value').hide();
 
@@ -727,6 +766,11 @@ $(document).ready(function () {
 
         // Show this feature's values
         $('.' + current_feature).show();
+    });
+    
+    // Trigger feature select change on time change
+    time_select.change( function() {
+        feature_select.trigger('change');
     });
 
     // When the 'toggle data only' button is clicked

@@ -31,8 +31,11 @@ $(document).ready(function () {
         else if(find < 100) {
             height = 2000;
         }
-        else {
+        else if(find < 150) {
             height = 2800;
+        }
+        else {
+            height = 3600;
         }
 
         var width = $("#cluster").width();

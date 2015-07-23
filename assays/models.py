@@ -20,7 +20,6 @@ types = (
 )
 
 
-# TODO NEEDS REVISION
 class PhysicalUnits(LockableModel):
     """
     Measures of concentration and so on
@@ -33,6 +32,22 @@ class PhysicalUnits(LockableModel):
     unit_type = models.CharField(default='C',
                                  max_length=2,
                                  choices=PHYSICAL_UNIT_TYPES)
+
+    # Base Unit for conversions and scale factor
+    base_unit = models.ForeignKey('assays.PhysicalUnits',
+                                  blank=True,
+                                  null=True)
+
+    # Scale factor gives the conversion to get to the base unit, can also act to sort
+    scale_factor = models.FloatField(blank=True,
+                                     null=True)
+
+    availability = models.CharField(max_length=256,
+                                    blank=True,
+                                    null=True,
+                                    help_text=(u'Type a series of strings for indicating '
+                                               u'where this unit should be listed:'
+                                               u'\ntest = test results\nreadouts = readouts'))
 
     # verbose_name_plural is used to avoid a double 's' on the model name
     class Meta(object):
@@ -247,7 +262,7 @@ class AssayPlateCells(models.Model):
 
     assay_plate = models.ForeignKey('AssayPlateSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
-    cell_biosensor = models.ForeignKey('cellsamples.Biosensor', null=True, blank=True)
+    cell_biosensor = models.ForeignKey('cellsamples.Biosensor')
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',
@@ -257,7 +272,7 @@ class AssayPlateCells(models.Model):
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
     cell_passage = models.CharField(max_length=16,verbose_name='Passage#',
-                                    default='-')
+                                    blank=True, null=True)
 
 
 class AssayPlateSetup(FlaggableModel):
@@ -321,7 +336,7 @@ class AssayPlateReadoutAssay(models.Model):
     #                         choices=object_types,
     #                         verbose_name='Object of Interest',
     #                         default='F')
-    readout_unit = models.ForeignKey('assays.ReadoutUnit')
+    readout_unit = models.ForeignKey('assays.PhysicalUnits')
 
     # For the moment, features will be just strings (this avoids potentially complex management)
     feature = models.CharField(max_length=150)
@@ -375,29 +390,8 @@ class AssayPlateReadout(FlaggableModel):
     #                                    verbose_name='Readout ID/ Barcode')
 
     # Cell samples are to be handled in AssayPlateSetup from now on
-    # ### TODO This code is slated to be removed ###
-    # cell_sample = models.ForeignKey('cellsamples.CellSample')
-    #
-    # cellsample_density = models.FloatField(verbose_name='density', default=0)
-    #
-    # cellsample_density_unit = models.CharField(verbose_name='Unit',
-    #                                            max_length=8,
-    #                                            default="ML",
-    #                                            choices=(('WE', 'cells / well'),
-    #                                                     ('ML', 'cells / mL'),
-    #                                                     ('MM', 'cells / mm^2')))
-    # ### TODO ###
-
-    # OLD
-    #assay_name = models.ForeignKey(AssayModel, verbose_name='Assay', null=True)
 
     setup = models.ForeignKey(AssayPlateSetup)
-
-    # Old
-    #reader_name = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
-
-    # OLD
-    # readout_unit = models.ForeignKey(ReadoutUnit)
 
     timeunit = models.ForeignKey(PhysicalUnits, default=23)
 
@@ -405,9 +399,6 @@ class AssayPlateReadout(FlaggableModel):
                                               blank=True, null=True)
 
     # Assay start time is now in AssayPlateSetup
-    ### TODO THis code is slated for removal ###
-    # assay_start_time = models.DateField(verbose_name='Start Date', blank=True, null=True, help_text="YYYY-MM-DD")
-    ### TODO ###
 
     readout_start_time = models.DateField(verbose_name='Readout Date', help_text="YYYY-MM-DD")
 
@@ -517,27 +508,6 @@ class AssayPlateTestResult(FlaggableModel):
 
     readout = models.ForeignKey('assays.AssayPlateReadout',
                                         verbose_name='Plate ID/ Barcode')
-
-    # Unclear as to what "Assay Test Time" entails
-    # assay_test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
-    #
-    # time_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
-    #
-    # result = models.CharField(default='1',
-    #                           max_length=8,
-    #                           choices=POSNEG,
-    #                           verbose_name='Pos/Neg?')
-    #
-    # severity = models.CharField(default='-1',
-    #                             max_length=5,
-    #                             choices=SEVERITY_SCORE,
-    #                             verbose_name='Severity',
-    #                             blank=True,
-    #                             null=True)
-    #
-    # value = models.FloatField(blank=True, null=True)
-    #
-    # value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True)
 
     def __unicode__(self):
         return u'Results for: {}'.format(self.readout)
@@ -652,7 +622,7 @@ class AssayChipCells(models.Model):
     """
     assay_chip = models.ForeignKey('AssayChipSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
-    cell_biosensor = models.ForeignKey('cellsamples.Biosensor', null=True, blank=True)
+    cell_biosensor = models.ForeignKey('cellsamples.Biosensor')
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',
@@ -663,7 +633,7 @@ class AssayChipCells(models.Model):
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
     cell_passage = models.CharField(max_length=16,verbose_name='Passage#',
-                                    default='-')
+                                    blank=True, null=True)
 
 
 class AssayChipSetup(FlaggableModel):
@@ -728,7 +698,7 @@ class AssayChipReadoutAssay(models.Model):
                             choices=object_types,
                             verbose_name='Object of Interest',
                             default='F')
-    readout_unit = models.ForeignKey(ReadoutUnit)
+    readout_unit = models.ForeignKey(PhysicalUnits)
 
     def __unicode__(self):
         return u'{}'.format(self.assay_id)

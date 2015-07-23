@@ -24,7 +24,11 @@ def generate_record_frequency_data(query):
     result = {}
 
     for q in query:
-        element = ''.join(q)
+        # TODO CRUDE; REQUIRES REVISION
+        if type(q) == tuple:
+            element = '|'.join([unicode(item) for item in q])
+        else:
+            element = ''.join(q)
         if element:
             if element in result:
                 frequency = result.get(element)
@@ -154,7 +158,7 @@ def generate_list_of_all_compounds_in_bioactivities():
     cursor = connection.cursor()
 
     cursor.execute(
-        'SELECT compounds_compound.name '
+        'SELECT compounds_compound.name, compounds_compound.known_drug, compounds_compound.logp, compounds_compound.molecular_weight '
         'FROM bioactivities_bioactivity '
         'INNER JOIN compounds_compound '
         'ON bioactivities_bioactivity.compound_id=compounds_compound.id;'
@@ -481,8 +485,8 @@ def heatmap(request):
         pivoted_data = pandas.pivot_table(
             bioactivities_data,
             values='value',
-            cols=['target', 'bioactivity'],
-            rows='compound'
+            columns=['target', 'bioactivity'],
+            index='compound'
         )
 
         unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
@@ -609,6 +613,7 @@ def heatmap(request):
     # GOTCHA
     # Small numbers appear to trigger a quirk in Scipy (removing them most expedient solution)
     distMat[abs(distMat)<1e-10] = 0.0
+    # Large numbers also appear to be problematic
 
     row_leaves = valid_compounds
     col_leaves = frame
@@ -751,8 +756,8 @@ def cluster(request):
             pivoted_data = pandas.pivot_table(
                 bioactivities_data,
                 values='value',
-                cols=['target', 'bioactivity'],
-                rows='compound'
+                columns=['target', 'bioactivity'],
+                index='compound'
             )
 
             unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()

@@ -31,7 +31,7 @@ ul.layout-list {
 }
 
 .layout-list li:hover {
-    text-decoration: line-through;
+    /*text-decoration: line-through;*/
     cursor: pointer;
     background-color: #FFFFFF;
     opacity: 0.6;
@@ -48,4 +48,10 @@ ul.layout-list {
     list-style-type: none;
     margin-left: 3%;
     float: left;
+}
+
+.value {
+    background-color: white;
+    text-align: center;
+    font-size: 12px;
 }
