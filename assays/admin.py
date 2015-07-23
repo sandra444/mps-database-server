@@ -1181,63 +1181,63 @@ class PhysicalUnitsAdmin(LockableAdmin):
 admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 
 
-class TimeUnitsAdmin(LockableAdmin):
-    save_on_top = True
-    list_per_page = 300
-
-    list_display = ('unit', 'unit_order',)
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    'unit',
-                    'description',
-                    'unit_order',
-                )
-            }
-        ),
-        ('Change Tracking', {
-            'fields': (
-                'locked',
-                ('created_by', 'created_on'),
-                ('modified_by', 'modified_on'),
-                ('signed_off_by', 'signed_off_date'),
-            )
-        }
-        ),
-    )
-
-
-admin.site.register(TimeUnits, TimeUnitsAdmin)
-
-
-class ReadoutUnitAdmin(LockableAdmin):
-    save_on_top = True
-    list_per_page = 100
-
-    list_display = ('readout_unit', 'description',)
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    'readout_unit',
-                    'description'
-                )
-            }
-        ),
-        ('Change Tracking', {
-            'fields': (
-                'locked',
-                ('created_by', 'created_on'),
-                ('modified_by', 'modified_on'),
-                ('signed_off_by', 'signed_off_date'),
-            )
-        }
-        ),
-    )
+#class TimeUnitsAdmin(LockableAdmin):
+#    save_on_top = True
+#    list_per_page = 300
+#
+#    list_display = ('unit', 'unit_order',)
+#    fieldsets = (
+#        (
+#            None, {
+#                'fields': (
+#                    'unit',
+#                    'description',
+#                    'unit_order',
+#                )
+#            }
+#        ),
+#        ('Change Tracking', {
+#            'fields': (
+#                'locked',
+#                ('created_by', 'created_on'),
+#                ('modified_by', 'modified_on'),
+#                ('signed_off_by', 'signed_off_date'),
+#            )
+#        }
+#        ),
+#    )
+#
+#
+#admin.site.register(TimeUnits, TimeUnitsAdmin)
 
 
-admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
+#class ReadoutUnitAdmin(LockableAdmin):
+#    save_on_top = True
+#    list_per_page = 100
+#
+#    list_display = ('readout_unit', 'description',)
+#    fieldsets = (
+#        (
+#            None, {
+#                'fields': (
+#                    'readout_unit',
+#                    'description'
+#                )
+#            }
+#        ),
+#        ('Change Tracking', {
+#            'fields': (
+#                'locked',
+#                ('created_by', 'created_on'),
+#                ('modified_by', 'modified_on'),
+#                ('signed_off_by', 'signed_off_date'),
+#            )
+#        }
+#        ),
+#    )
+#
+#
+#admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
 
 class AssayChipTestResultAdmin(LockableAdmin):

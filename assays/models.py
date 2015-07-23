@@ -59,23 +59,23 @@ class PhysicalUnits(LockableModel):
 
 
 # TODO TIME UNITS ARE SLATED FOR REMOVAL
-class TimeUnits(LockableModel):
-    """
-    Time Units (minutes, hours, etc)
-    """
-
-    unit = models.CharField(max_length=16)
-    description = models.CharField(max_length=256,
-                                   blank=True, null=True)
-    unit_order = models.FloatField(verbose_name='Seconds', default=0)
-
-    # this meta class is used to avoid a double 's' on the model name
-    class Meta(object):
-        verbose_name_plural = 'Time Units'
-        ordering = ['unit_order']
-
-    def __unicode__(self):
-        return self.unit
+#class TimeUnits(LockableModel):
+#    """
+#    Time Units (minutes, hours, etc)
+#    """
+#
+#    unit = models.CharField(max_length=16)
+#    description = models.CharField(max_length=256,
+#                                   blank=True, null=True)
+#    unit_order = models.FloatField(verbose_name='Seconds', default=0)
+#
+#    # this meta class is used to avoid a double 's' on the model name
+#    class Meta(object):
+#        verbose_name_plural = 'Time Units'
+#        ordering = ['unit_order']
+#
+#    def __unicode__(self):
+#        return self.unit
 
 
 class AssayModelType(LockableModel):
@@ -360,19 +360,19 @@ class AssayReadout(models.Model):
     elapsed_time = models.FloatField(default=0)
 
 
-class ReadoutUnit(LockableModel):
-    """
-    Units specific to readouts (AU, RFU, so on)
-    """
-
-    class Meta(object):
-        ordering = ('readout_unit',)
-
-    readout_unit = models.CharField(max_length=512,unique=True)
-    description = models.CharField(max_length=512,blank=True,null=True)
-
-    def __unicode__(self):
-        return self.readout_unit
+#class ReadoutUnit(LockableModel):
+#    """
+#    Units specific to readouts (AU, RFU, so on)
+#    """
+#
+#    class Meta(object):
+#        ordering = ('readout_unit',)
+#
+#    readout_unit = models.CharField(max_length=512,unique=True)
+#    description = models.CharField(max_length=512,blank=True,null=True)
+#
+#    def __unicode__(self):
+#        return self.readout_unit
 
 
 class AssayPlateReadout(FlaggableModel):
