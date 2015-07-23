@@ -3,6 +3,10 @@
 // TODO NEEDS REFACTOR
 // TODO PREFERRABLY CONSOLIDATE THESE DISPLAY FUNCTION (DO NOT REPEAT YOURSELF)
 $(document).ready(function () {
+    
+    if (!$('#flag')[0]) {
+        alert('Sorry, plate readout uploads are not currently available in the admin.');
+    }
 
     // Pulled from heatmap
     var colors = [

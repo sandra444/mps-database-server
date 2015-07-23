@@ -2,7 +2,7 @@ import csv
 
 from django.contrib import admin
 from django import forms
-from assays.forms import AssayChipResultForm, StudyConfigurationForm, AssayChipReadoutInlineFormset, AssayPlateReadoutInlineFormset, label_to_number
+from assays.forms import StudyConfigurationForm, AssayChipReadoutInlineFormset, AssayPlateReadoutInlineFormset, label_to_number
 from django.http import HttpResponseRedirect
 
 from assays.models import *
@@ -1136,7 +1136,6 @@ admin.site.register(AssayResultType, AssayResultTypeAdmin)
 class AssayChipResultInline(admin.TabularInline):
     # Results calculated from CHIP READOUTS
     model = AssayChipResult
-    form = AssayChipResultForm
     verbose_name = 'Assay Test'
     verbose_name_plural = 'Assay Test Results'
     fields = (
@@ -1299,7 +1298,6 @@ admin.site.register(AssayChipTestResult, AssayChipTestResultAdmin)
 class AssayPlateResultInline(admin.TabularInline):
     # Results calculated from PLATE READOUTS
     model = AssayPlateResult
-    #form = AssayPlateResultForm
     verbose_name = 'Assay Plate Result'
     verbose_name_plural = 'Assay Plate Results'
     fields = (
