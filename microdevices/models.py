@@ -11,8 +11,8 @@ class MicrophysiologyCenter(LockableModel):
 
     center_name = models.CharField(max_length=100)
     center_id = models.CharField(max_length=20,default='-')
-    description = models.CharField(max_length=400, blank=True, null=True)
-    contact_person = models.CharField(max_length=250, blank=True, null=True)
+    description = models.CharField(max_length=400, default='')
+    contact_person = models.CharField(max_length=250, default='')
     center_website = models.URLField(blank=True, null=True)
 
     groups = models.ManyToManyField(Group)
@@ -26,7 +26,7 @@ class Manufacturer(LockableModel):
         ordering = ('manufacturer_name', )
 
     manufacturer_name = models.CharField(max_length=100)
-    contact_person = models.CharField(max_length=250, blank=True, null=True)
+    contact_person = models.CharField(max_length=250, default='')
     Manufacturer_website = models.URLField(blank=True, null=True)
 
     def __unicode__(self):
@@ -43,9 +43,9 @@ class Microdevice(LockableModel):
     center = models.ForeignKey(MicrophysiologyCenter, blank=True, null=True)
     manufacturer = models.ForeignKey(Manufacturer, null=True, blank=True)
     barcode = models.CharField(
-        max_length=200, verbose_name='version/ catalog#', null=True, blank=True)
+        max_length=200, verbose_name='version/ catalog#', default='')
 
-    description = models.CharField(max_length=400, null=True, blank=True)
+    description = models.CharField(max_length=400, default='')
 
     device_width = models.FloatField(
         verbose_name='width (mm)', null=True, blank=True)
@@ -61,12 +61,12 @@ class Microdevice(LockableModel):
 
     device_fluid_volume = models.FloatField(null=True, blank=True)
     device_fluid_volume_unit = models.CharField(
-        max_length=50, null=True, blank=True)
+        max_length=50, default='')
 
     substrate_thickness = models.FloatField(
         verbose_name='substrate thickness (um)', null=True, blank=True)
     substrate_material = models.CharField(
-        max_length=150, null=True, blank=True)
+        max_length=150, default='')
 
     # Specify whether the device is a plate or a chip
     device_type = models.CharField(max_length=8,
@@ -77,16 +77,14 @@ class Microdevice(LockableModel):
     # (though certain chips appear in a series)
     number_of_rows = models.IntegerField(blank=True,null=True)
     number_of_columns = models.IntegerField(blank=True,null=True)
-    row_labels = models.CharField(blank=True,
-                                  null=True,
+    row_labels = models.CharField(default='',
                                   max_length=1000,
                                   help_text=
                                   'Space separated list of unique labels, '
                                   'e.g. "A B C D ..."'
                                   ' Number of items must match'
                                   ' number of columns.''')
-    column_labels = models.CharField(blank=True,
-                                     null=True,
+    column_labels = models.CharField(default='',
                                      max_length=1000,
                                      help_text='Space separated list of unique '
                                                'labels, e.g. "1 2 3 4 ...". '
@@ -109,7 +107,7 @@ class OrganModel(LockableModel):
     organ = models.ForeignKey('cellsamples.Organ')
     center = models.ForeignKey(MicrophysiologyCenter, null=True, blank=True)
     device = models.ForeignKey(Microdevice, null=True, blank=True)
-    description = models.CharField(max_length=400, null=True, blank=True)
+    description = models.CharField(max_length=400, default='')
 
     protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
                             blank=True, null=True, help_text='File detailing the protocols for this model')

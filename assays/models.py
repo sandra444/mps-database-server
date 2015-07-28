@@ -27,7 +27,7 @@ class PhysicalUnits(LockableModel):
 
     unit = models.CharField(max_length=256)
     description = models.CharField(max_length=256,
-                                   blank=True, null=True)
+                                   default='')
 
     unit_type = models.CharField(default='C',
                                  max_length=2,
@@ -43,8 +43,7 @@ class PhysicalUnits(LockableModel):
                                      null=True)
 
     availability = models.CharField(max_length=256,
-                                    blank=True,
-                                    null=True,
+                                    default='',
                                     help_text=(u'Type a series of strings for indicating '
                                                u'where this unit should be listed:'
                                                u'\ntest = test results\nreadouts = readouts'))
@@ -87,7 +86,7 @@ class AssayModelType(LockableModel):
         ordering = ('assay_type_name',)
 
     assay_type_name = models.CharField(max_length=200, unique=True)
-    assay_type_description = models.TextField(blank=True, null=True)
+    assay_type_description = models.TextField(default='')
 
     def __unicode__(self):
         return self.assay_type_name
@@ -104,9 +103,8 @@ class AssayModel(LockableModel):
     assay_name = models.CharField(max_length=200, unique=True)
     assay_type = models.ForeignKey(AssayModelType)
     version_number = models.CharField(max_length=200, verbose_name='Version',
-                                      blank=True, null=True)
-    assay_description = models.TextField(verbose_name='Description', blank=True,
-                                         null=True)
+                                      default='')
+    assay_description = models.TextField(verbose_name='Description', default='')
     assay_protocol_file = models.FileField(upload_to='assays',
                                            verbose_name='Protocol File',
                                            null=True, blank=True)
@@ -116,44 +114,6 @@ class AssayModel(LockableModel):
 
     def __unicode__(self):
         return u'{0} ({1})'.format(self.assay_name, self.test_type)
-
-# To be removed
-# This model is deprecated and will be incorporated into devices
-# class AssayLayoutFormat(LockableModel):
-#     layout_format_name = models.CharField(max_length=200, unique=True)
-#     number_of_rows = models.IntegerField()
-#     number_of_columns = models.IntegerField()
-#     row_labels = models.CharField(max_length=1000,
-#                                   help_text=
-#                                   'Space separated list of unique labels, '
-#                                   'e.g. "A B C D ..."'
-#                                   ' Number of items must match'
-#                                   ' number of columns.''')
-#     column_labels = models.CharField(max_length=1000,
-#                                      help_text='Space separated list of unique '
-#                                                'labels, e.g. "1 2 3 4 ...". '
-#                                                'Number of items must match '
-#                                                'number of columns.')
-#
-#     device = models.ForeignKey(Microdevice)
-#
-#     class Meta(object):
-#         ordering = ('layout_format_name',)
-#
-#     def __unicode__(self):
-#         return self.layout_format_name
-
-# To be removed
-# This model is deprecated and will be incorporated into assay layout
-# class AssayBaseLayout(LockableModel):
-#     base_layout_name = models.CharField(max_length=200)
-#     layout_format = models.ForeignKey(AssayLayoutFormat)
-#
-#     class Meta(object):
-#         ordering = ('base_layout_name',)
-#
-#     def __unicode__(self):
-#         return self.base_layout_name
 
 
 # Assay layout is now a flaggable model
@@ -186,7 +146,7 @@ class AssayWellType(LockableModel):
         ordering = ('well_type',)
 
     well_type = models.CharField(max_length=200, unique=True)
-    well_description = models.TextField(blank=True, null=True)
+    well_description = models.TextField(default='')
     background_color = models.CharField(max_length=20,
                                         help_text='Provide color code or name. '
                                                   'You can pick one from: '
@@ -272,7 +232,7 @@ class AssayPlateCells(models.Model):
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
     cell_passage = models.CharField(max_length=16,verbose_name='Passage#',
-                                    blank=True, null=True)
+                                    default='')
 
 
 class AssayPlateSetup(FlaggableModel):
@@ -294,10 +254,10 @@ class AssayPlateSetup(FlaggableModel):
     # Plate identifier
     assay_plate_id = models.CharField(max_length=512, verbose_name='Plate ID/ Barcode')
 
-    scientist = models.CharField(max_length=100, blank=True, null=True)
-    notebook = models.CharField(max_length=256, blank=True, null=True)
+    scientist = models.CharField(max_length=100, default='')
+    notebook = models.CharField(max_length=256, default='')
     notebook_page = models.IntegerField(blank=True, null=True)
-    notes = models.CharField(max_length=2048, blank=True, null=True)
+    notes = models.CharField(max_length=2048, default='')
 
     def __unicode__(self):
         return u'Plate-{}'.format(self.assay_plate_id)
@@ -402,10 +362,10 @@ class AssayPlateReadout(FlaggableModel):
 
     readout_start_time = models.DateField(verbose_name='Readout Date', help_text="YYYY-MM-DD")
 
-    notebook = models.CharField(max_length=256, blank=True, null=True)
+    notebook = models.CharField(max_length=256, default='')
     notebook_page = models.IntegerField(blank=True, null=True)
-    notes = models.CharField(max_length=2048, blank=True, null=True)
-    scientist = models.CharField(max_length=100, blank=True, null=True)
+    notes = models.CharField(max_length=2048, default='')
+    scientist = models.CharField(max_length=100, default='')
     file = models.FileField(upload_to='csv', verbose_name='Data File',
                             blank=True, null=True)
 
@@ -436,8 +396,8 @@ class AssayResultFunction(LockableModel):
         ordering = ('function_name', )
 
     function_name = models.CharField(max_length=100, unique=True)
-    function_results = models.CharField(max_length=100, blank=True, null=True)
-    description = models.CharField(max_length=200, blank=True, null=True)
+    function_results = models.CharField(max_length=100, default='')
+    description = models.CharField(max_length=200, default='')
 
     def __unicode__(self):
         return self.function_name
@@ -453,7 +413,7 @@ class AssayResultType(LockableModel):
         ordering = ('assay_result_type', )
 
     assay_result_type = models.CharField(max_length=100, unique=True)
-    description = models.CharField(max_length=200, blank=True, null=True)
+    description = models.CharField(max_length=200, default='')
 
     def __unicode__(self):
         return self.assay_result_type
@@ -482,9 +442,7 @@ class AssayPlateResult(models.Model):
     severity = models.CharField(default='-1',
                                 max_length=5,
                                 choices=SEVERITY_SCORE,
-                                verbose_name='Severity',
-                                blank=True,
-                                null=True)
+                                verbose_name='Severity')
 
     result_type = models.ForeignKey(AssayResultType,
                                     blank=True,
@@ -527,8 +485,8 @@ class StudyConfiguration(LockableModel):
     # Length subject to change
     name = models.CharField(max_length=50)
     study_format = models.CharField(max_length=11, choices=(('individual','Individual'),('integrated','Integrated'),))
-    media_composition = models.CharField(max_length=1000, blank=True, null=True)
-    hardware_description = models.CharField(max_length=1000, blank=True, null=True)
+    media_composition = models.CharField(max_length=1000, default='')
+    hardware_description = models.CharField(max_length=1000, default='')
     # Subject to removal
     # image = models.ImageField(upload_to="configuration",null=True, blank=True)
 
@@ -547,7 +505,7 @@ class StudyModel(models.Model):
     label = models.CharField(max_length=1)
     organ = models.ForeignKey(OrganModel)
     sequence_number = models.IntegerField()
-    output = models.CharField(max_length=20, blank=True, null=True)
+    output = models.CharField(max_length=20, default='')
     # Subject to change
     integration_mode = models.CharField(max_length=13, choices=(('0', 'Not Connected'),('1','Connected')))
 
@@ -577,7 +535,7 @@ class AssayRun(RestrictedModel):
     start_date = models.DateField(help_text='YYYY-MM-DD')
     assay_run_id = models.TextField(unique=True, verbose_name='Study ID',
                                     help_text="Standard format 'CenterID-YYYY-MM-DD-Name-###'")
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(default='')
 
     file = models.FileField(upload_to='csv', verbose_name='Batch Data File',
                             blank=True, null=True, help_text='Do not upload until you have made each Chip Readout')
@@ -633,7 +591,7 @@ class AssayChipCells(models.Model):
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
     cell_passage = models.CharField(max_length=16,verbose_name='Passage#',
-                                    blank=True, null=True)
+                                    default='')
 
 
 class AssayChipSetup(FlaggableModel):
@@ -648,7 +606,7 @@ class AssayChipSetup(FlaggableModel):
     setup_date = models.DateField(help_text='YYYY-MM-DD')
     device = models.ForeignKey(OrganModel, verbose_name = 'Organ Model Name')
 
-    variance = models.CharField(max_length=3000, verbose_name='Variance from Protocol', null=True, blank=True)
+    variance = models.CharField(max_length=3000, verbose_name='Variance from Protocol', default='')
 
     # the unique chip identifier
     # can be a barcode or a hand written identifier
@@ -664,10 +622,10 @@ class AssayChipSetup(FlaggableModel):
                              verbose_name='conc. Unit',
                              null=True, blank=True)
 
-    scientist = models.CharField(max_length=100, blank=True, null=True)
-    notebook = models.CharField(max_length=256, blank=True, null=True)
+    scientist = models.CharField(max_length=100, default='')
+    notebook = models.CharField(max_length=256, default='')
     notebook_page = models.IntegerField(blank=True, null=True)
-    notes = models.CharField(max_length=2048, blank=True, null=True)
+    notes = models.CharField(max_length=2048, default='')
 
     def __unicode__(self):
         return u'Chip-{}:{}({}{})'.format(self.assay_chip_id,
@@ -721,10 +679,10 @@ class AssayChipReadout(FlaggableModel):
 
     readout_start_time = models.DateField(verbose_name='Readout Start Date', help_text="YYYY-MM-DD")
 
-    notebook = models.CharField(max_length=256, blank=True, null=True)
+    notebook = models.CharField(max_length=256, default='')
     notebook_page = models.IntegerField(blank=True, null=True)
-    notes = models.CharField(max_length=2048, blank=True, null=True)
-    scientist = models.CharField(max_length=100, blank=True, null=True)
+    notes = models.CharField(max_length=2048, default='')
+    scientist = models.CharField(max_length=100, default='')
     file = models.FileField(upload_to='csv', verbose_name='Data File',
                             blank=True, null=True, help_text='Green = Data from database;'
                                                              ' Red = Line that will not be read'
@@ -820,9 +778,7 @@ class AssayChipResult(models.Model):
     severity = models.CharField(default='-1',
                                 max_length=5,
                                 choices=SEVERITY_SCORE,
-                                verbose_name='Severity',
-                                blank=True,
-                                null=True)
+                                verbose_name='Severity')
 
     result_type = models.ForeignKey(AssayResultType,
                                     blank=True,

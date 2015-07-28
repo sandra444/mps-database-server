@@ -50,15 +50,12 @@ class Compound(LockableModel):
     # The name, rather than the chemblid and/or inchikey, is unique
     name = models.CharField(max_length=200, unique=True,
         help_text="Preferred compound name.")
-    synonyms = models.TextField(max_length=4000,
-        null=True, blank=True)
-    tags = models.TextField(blank=True, null=True,
-        help_text="Tags for the compound (EPA, NCATS, etc.)")
+    synonyms = models.TextField(max_length=4000, default='')
+    tags = models.TextField(default='', help_text="Tags for the compound (EPA, NCATS, etc.)")
 
     # External identifiers are checked for uniqueness in form's clean
     # Not optimal, but other solutions did not seem to work (editing save, so on)
-    chemblid = models.CharField('ChEMBL ID', max_length=20,
-        null=True, blank=True,
+    chemblid = models.CharField('ChEMBL ID', max_length=20, default='',
         help_text="Enter a ChEMBL id, e.g. CHEMBL25, and click Retrieve to "
                   "get compound information automatically.")
 
@@ -67,15 +64,15 @@ class Compound(LockableModel):
 
     # standard names/identifiers
     inchikey = models.CharField('InChI key', max_length=27,
-        null=True, blank=True,
+        default='',
         help_text="IUPAC standard InChI key for the compound")
     smiles = models.CharField(max_length=1000,
-        null=True, blank=True,
+        default='',
         help_text="Canonical smiles, generated using pipeline pilot.")
 
     # molecular properties
     molecular_formula = models.CharField(max_length=40,
-        null=True, blank=True,
+        default='',
         help_text="Molecular formula of compound.")
     molecular_weight = models.FloatField(
         null=True, blank=True,
@@ -118,7 +115,7 @@ class Compound(LockableModel):
                   "that compounds that pass all these criteria are"
                   "more likely to be hits in fragment screening.")
     species = models.CharField('Molecular species', max_length=10,
-        blank=True, null=True,
+        default='',
         help_text="A description of the predominant species occurring at pH "
                   "7.4 and can be acid, base, neutral or zwitterion.")
 
