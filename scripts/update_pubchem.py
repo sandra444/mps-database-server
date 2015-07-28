@@ -1,15 +1,132 @@
 from compounds.models import Compound
-from bioactivities.models import PubChemBioactivity, PubChemTarget, PubChemAssay
+from bioactivities.models import PubChemBioactivity, Target, Assay
 
+from bs4 import BeautifulSoup
 import urllib
+import requests
 import ujson as json
 
 # Call this with the command: ./manage.py runscript update_pubchem
 
-# 0.)AID	1.)AID Version	2.)AID Revision	3.)Panel Member ID	4.)SID
-# 5.)CID	6.)Bioactivity Outcome	7.)Target GI	8.)Activity Value [uM]
-# 9.)Activity Name	10.)Assay Name 11.)Bioassay Type 12.)PubMed ID
+# 0.)AID    1.)AID Version    2.)AID Revision    3.)Panel Member ID    4.)SID
+# 5.)CID    6.)Bioactivity Outcome    7.)Target GI    8.)Activity Value [uM]
+# 9.)Activity Name    10.)Assay Name 11.)Bioassay Type 12.)PubMed ID
 # 13.)RNAi 14.)Gene Target if RNAi
+
+# TODO REPLACE PUBCHEM TARGET AND PUBCHEM ASSAY
+
+def get_chembl_target(target):
+    data = {}
+
+    try:
+        # Get URL of target for scrape
+        url = "https://www.ebi.ac.uk/chembl/target/inspect/{}/".format(target)
+        # Make the http request
+        response  = requests.get(url)
+        # Get the webpage as text
+        stuff = response.text
+        # Make a BeatifulSoup object
+        soup = BeautifulSoup(stuff)
+
+        table = soup.find('table', class_='contenttable_lmenu')
+        rows = table.findAll('td')
+
+        chemblid = None
+        target_type = None
+        name = None
+        synonyms = None
+        organism = None
+
+        for index in range(len(rows)):
+            contents = rows[index].text
+
+            if contents == u'Target ID':
+                chemblid = rows[index+1].text.strip()
+
+            elif contents == u'Target Type':
+                target_type = rows[index+1].text.strip()
+
+            elif contents == u'Preferred Name':
+                name = rows[index+1].text.strip()
+
+            elif contents == u'Synonyms':
+                synonyms = rows[index+1].text.strip()
+
+            elif contents == u'Organism':
+                organism = rows[index+1].text.strip()
+
+        data.update({
+            'chemblid': chemblid,
+            'target_type': target_type,
+            'name': name,
+            'organism': organism,
+            'synonyms': synonyms,
+        })
+    except:
+        print 'Failed target {}'.format(target)
+
+    return data
+
+    #print 'id:', chemblid, 'type:', target_type, 'name:', name, 'organism:', organism
+
+def get_chembl_assay(assay):
+    data = {}
+
+    try:
+        # Get URL of target for scrape
+        url = "https://www.ebi.ac.uk/chembl/assay/inspect/{}/".format(assay)
+        # Make the http request
+        response  = requests.get(url)
+        # Get the webpage as text
+        stuff = response.text
+        # Make a BeatifulSoup object
+        soup = BeautifulSoup(stuff)
+
+        table = soup.find('table', class_='contenttable_lmenu')
+        rows = table.findAll('td')
+
+        # Try to get chemblid, description, organism, assay_type, journal, strain
+        chemblid = rows[1].text.strip()
+        # NOTE THAT ONLY THE FIRST UPPER CASE LETTER IS TAKEN
+        assay_type = rows[3].text.strip().upper()[0]
+        description = rows[5].text.strip()
+        journal = rows[9].text.strip()
+        organism = rows[11].text.strip()
+        strain = rows[13].text.strip()
+
+        target_table = soup.find(id='bioactSummary')
+        link = target_table.find('a')
+
+        # Try to get the target ID
+        target = link['href'].split('/')[-1]
+
+        if target:
+            target_data = get_chembl_target(target)
+            existing = Target.objects.filter(chemblid=target_data.get('chemblid'))
+            # If not existing, make the entry
+            if not existing:
+                try:
+                    new_target = Target.objects.create(**target_data)
+                    data.update({'target_id':new_target.id})
+                except:
+                    print 'Failed creating target {}'.format(target)
+            else:
+                existing = existing[0]
+                data.update({'target_id':existing.id})
+
+        data.update({
+            'chemblid': chemblid,
+            'assay_type': assay_type,
+            'description': description,
+            'journal': journal,
+            'organism': organism,
+            'strain': strain,
+        })
+    except Exception as e:
+        print 'Failed assay {}'.format(assay)
+        print e
+
+    return data
 
 def get_cid(param,string):
     """
@@ -74,7 +191,7 @@ def get_bioactivities(cid):
                     if target:
                         # If the target is in the database
                         try:
-                            final_target = PubChemTarget.objects.get(GI=target)
+                            final_target = Target.objects.get(GI=target)
                             print "Found target!"
                         # If the target is not in the database, create it
                         except:
@@ -114,7 +231,7 @@ def get_bioactivities(cid):
                                     'GI': target,
                                 }
 
-                                target_model = PubChemTarget.objects.create(locked=True, **entry)
+                                target_model = Target.objects.create(locked=True, **entry)
                                 final_target = target_model
                                 print "Created target!"
 
@@ -126,7 +243,7 @@ def get_bioactivities(cid):
                                     'GI': target,
                                 }
 
-                                target_model = PubChemTarget.objects.create(locked=True, **entry)
+                                target_model = Target.objects.create(locked=True, **entry)
                                 final_target = target_model
 
                                 print "Error processing target:", target
@@ -171,7 +288,7 @@ def get_bioactivities(cid):
 
                     # Try to get an assay with this AID from the database
                     try:
-                        assay_model = PubChemAssay.objects.get(aid=aid)
+                        assay_model = Assay.objects.get(pubchem_id=aid)
                         print "Found assay!"
 
                     except:
@@ -181,7 +298,7 @@ def get_bioactivities(cid):
                         description = '\n'.join(assay.get('Description')).strip()
 
                         entry = {
-                            'aid': aid,
+                            'pubchem_id': aid,
                             'source': source,
                             'source_id': source_id,
                             'name': name,
@@ -190,7 +307,7 @@ def get_bioactivities(cid):
                             'organism': organism
                         }
 
-                        assay_model = PubChemAssay.objects.create(locked=True, **entry)
+                        assay_model = Assay.objects.create(locked=True, **entry)
                         print "Created assay!"
 
                     activities_to_change = assays.get(aid)
@@ -214,10 +331,12 @@ def run():
     # TODO make pubchem bioactivity entries for each activity
     for compound in Compound.objects.all():
         if not compound.pubchemid:
-            cid = get_cid('inchikey', compound.inchikey)
+            # Prefer search by name, as inchikeys from ChEMBL are not always the best
+            cid = get_cid('name', compound.name)
 
+            # If the search by name failed, use the inchikey
             if not cid:
-                cid = get_cid('name', compound.name)
+                cid = get_cid('inchikey', compound.inchikey)
 
             if cid:
                 compound.pubchemid = cid
@@ -244,7 +363,7 @@ def run():
                     }
                     try:
                         PubChemBioactivity.objects.create(locked=True, **entry)
-                        print "Success!"
+                        # print "Success!"
                         success += 1
                     except:
                         print "Failed bioactivity..."
@@ -257,4 +376,48 @@ def run():
     print("Bioactivity Failures:{}".format(fail_bioactivity))
     print("Success:{}".format(success))
 
+    print "Cleaning up activity names..."
 
+    for bio in PubChemBioactivity.objects.filter(activity_name__contains='-Replicate_1'):
+        bio.activity_name = bio.activity_name.replace('-Replicate_1', '')
+        print 'Removing -Replicate_1 from {}'.format(bio.activity_name)
+        bio.save()
+
+    for bio in PubChemBioactivity.objects.filter(activity_name__contains='um_Run1'):
+        bio.activity_name = bio.activity_name.replace('um_Run1', '')
+        print 'Removing um_Run1 from {}'.format(bio.activity_name)
+        bio.save()
+
+    for bio in PubChemBioactivity.objects.filter(activity_name__contains='Ac50'):
+        bio.activity_name = bio.activity_name.replace('Ac50', 'AC50')
+        print 'Replacing Ac50 with AC50'
+        bio.save()
+
+    for bio in PubChemBioactivity.objects.filter(activity_name__contains=' 1'):
+        bio.activity_name = bio.activity_name.replace(' 1', '')
+        print 'Removing " 1" from {}'.format(bio.activity_name)
+        bio.save()
+
+    print 'Cleaning up assays and targets...'
+
+    for assay in Assay.objects.all():
+        # If ChEMBL is the source
+        if assay.source == u'ChEMBL' and not assay.chemblid:
+            data = get_chembl_assay(assay.source_id)
+            if data:
+                chembl_assay = Assay.objects.filter(chemblid=data.get('chemblid'))
+                if not chembl_assay:
+                    try:
+                        Assay.objects.create(**data)
+                    except:
+                        print 'Failed creating assay {}'.format(assay.source_id)
+                else:
+                    try:
+                        chembl_assay.update(**data)
+                    except Exception as e:
+                        print 'Failed updating assay {}'.format(assay.source_id)
+                        print e
+            else:
+                print 'Scrape for {} failed'.format(assay.source_id)
+
+    print 'Finished'

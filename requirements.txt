@@ -65,5 +65,4 @@ django-alphafilter
 django-contrib-comments
 #Using whoosh for now, may switch to a more sophisticated search engine later
 whoosh
-#Sometimes pip installing django-haystack tries to force install django 1.8?
 django-haystack
