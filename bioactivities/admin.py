@@ -36,7 +36,7 @@ class TargetAdmin(LockableAdmin):
     list_per_page = 300
     list_display = ('name', 'organism', 'target_type', 'chembl_link', 'locked')
     list_filter = ('target_type', 'organism')
-    search_fields = ['name', 'organism', 'synonyms', '=chemblid']
+    search_fields = ['name', 'organism', 'synonyms', '=chemblid', 'GI']
     actions = ['update_fields']
     readonly_fields = ('last_update', 'created_by', 'created_on',
                        'modified_by', 'modified_on')
@@ -53,6 +53,7 @@ class TargetAdmin(LockableAdmin):
                     'organism',
                     'uniprot_accession',
                     'target_type',
+                    'GI'
                     'last_update',
                 )
             }
@@ -162,9 +163,9 @@ class AssayAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'description', 'chembl_link', 'organism', 'assay_type', 'locked')
+        'description', 'chembl_link', 'pubchem_id', 'organism', 'assay_type', 'locked')
     list_filter = ('assay_type',)
-    search_fields = ['description', '=chemblid']
+    search_fields = ['description', '=chemblid', 'pubchem_id']
     actions = ['update_fields']
     readonly_fields = ('last_update', 'created_by', 'created_on',
                        'modified_by', 'modified_on')
@@ -174,6 +175,10 @@ class AssayAdmin(LockableAdmin):
             None, {
                 'fields': (
                     'chemblid',
+                    'pubchem_id',
+                    ('source', 'source_id',),
+                    'name',
+                    'target',
                     'description',
                     'assay_type',
                     'organism',
