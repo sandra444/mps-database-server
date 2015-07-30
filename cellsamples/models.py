@@ -118,7 +118,7 @@ class CellSample(RestrictedModel):
         ('F', 'Female'),
         ('M', 'Male'),
     )
-    patient_age = models.IntegerField(default='')
+    patient_age = models.IntegerField(blank=True, null=True)
     patient_gender = models.CharField(max_length=1, choices=GENDER_CHOICES,
                                       default=GENDER_CHOICES[0][0],
                                       blank=True)
