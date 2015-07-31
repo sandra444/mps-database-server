@@ -6,6 +6,8 @@ import urllib
 import requests
 import ujson as json
 
+import numpy as np
+
 # Call this with the command: ./manage.py runscript update_pubchem
 
 # 0.)AID    1.)AID Version    2.)AID Revision    3.)Panel Member ID    4.)SID
@@ -111,8 +113,9 @@ def get_chembl_assay(assay):
                 except:
                     print 'Failed creating target {}'.format(target)
             else:
-                existing = existing[0]
-                data.update({'target_id':existing.id})
+                existing_assay = existing[0]
+                data.update({'target_id':existing_assay.id})
+                existing.update(**target_data)
 
         data.update({
             'chemblid': chemblid,
@@ -127,6 +130,71 @@ def get_chembl_assay(assay):
         print e
 
     return data
+
+def get_pubchem_target(target):
+    final_target = None
+
+    if target:
+        # If the target is in the database
+        try:
+            final_target = Target.objects.get(GI=target)
+            print "Found target!"
+        # If the target is not in the database, create it
+        except:
+
+            try:
+                # Get URL of target organism for scrape
+                url = "http://togows.dbcls.jp/entry/protein/{}/organism".format(target)
+                # Make the http request
+                response  = urllib.urlopen(url)
+                # Get the webpage as text
+                data = response.read()
+
+                organism = data.strip().strip('.')
+
+                # Get URL of target definition for scrape
+                url = "http://togows.dbcls.jp/entry/protein/{}/definition".format(target)
+                # Make the http request
+                response  = urllib.urlopen(url)
+                # Get the webpage as text
+                data = response.read()
+
+                # If the entry is annoying
+                if 'RecName: Full=' in data:
+                    full = data.split(';')[0]
+                    full = full.replace('RecName: Full=', '')
+                    name = full.strip().strip('.')
+                else:
+                    name = data.strip().strip('.')
+
+                # Remove superfluous organism in name (if it is already listed separately, what is the point?)
+                if '[{}]'.format(organism) in name:
+                    name = name.replace('[{}]'.format(organism), '').strip()
+
+                entry = {
+                    'name': name,
+                    'organism': organism,
+                    'GI': target,
+                }
+
+                target_model = Target.objects.create(locked=True, **entry)
+                final_target = target_model
+                print "Created target!"
+
+            except:
+
+                entry = {
+                    'name': '',
+                    'organism': '',
+                    'GI': target,
+                }
+
+                target_model = Target.objects.create(locked=True, **entry)
+                final_target = target_model
+
+                print "Error processing target:", target
+
+    return final_target
 
 def get_cid(param,string):
     """
@@ -173,9 +241,9 @@ def get_bioactivities(cid):
                 outcome = entry[6]
                 # The target is only sometimes listed
                 target = entry[7]
-                value = entry[8]
+                value = entry[9]
                 # Please note that specifying the units as micromolar is superfluous and thus these strings are removed
-                activity_name = entry[9].replace(' (uM)','').replace('_uM','').replace('_MICROM','')
+                activity_name = entry[10].replace(' (uM)','').replace('_uM','').replace('_MICROM','')
 
                 # TODO Insert code to add/handle Bioactivity Types?
                 # Do not add outcome to returned data, assumed to be active
@@ -186,71 +254,8 @@ def get_bioactivities(cid):
                     else:
                         assays.get(AID).append(len(activities))
 
-                    final_target = None
-
-                    if target:
-                        # If the target is in the database
-                        try:
-                            final_target = Target.objects.get(GI=target)
-                            print "Found target!"
-                        # If the target is not in the database, create it
-                        except:
-
-                            try:
-                                # Get URL of target organism for scrape
-                                url = "http://togows.dbcls.jp/entry/protein/{}/organism".format(target)
-                                # Make the http request
-                                response  = urllib.urlopen(url)
-                                # Get the webpage as text
-                                data = response.read()
-
-                                organism = data.strip().strip('.')
-
-                                # Get URL of target definition for scrape
-                                url = "http://togows.dbcls.jp/entry/protein/{}/definition".format(target)
-                                # Make the http request
-                                response  = urllib.urlopen(url)
-                                # Get the webpage as text
-                                data = response.read()
-
-                                # If the entry is annoying
-                                if 'RecName: Full=' in data:
-                                    full = data.split(';')[0]
-                                    full = full.replace('RecName: Full=', '')
-                                    name = full.strip().strip('.')
-                                else:
-                                    name = data.strip().strip('.')
-
-                                # Remove superfluous organism in name (if it is already listed separately, what is the point?)
-                                if '[{}]'.format(organism) in name:
-                                    name = name.replace('[{}]'.format(organism), '').strip()
-
-                                entry = {
-                                    'name': name,
-                                    'organism': organism,
-                                    'GI': target,
-                                }
-
-                                target_model = Target.objects.create(locked=True, **entry)
-                                final_target = target_model
-                                print "Created target!"
-
-                            except:
-
-                                entry = {
-                                    'name': '',
-                                    'organism': '',
-                                    'GI': target,
-                                }
-
-                                target_model = Target.objects.create(locked=True, **entry)
-                                final_target = target_model
-
-                                print "Error processing target:", target
-
                     activities.append({
                         'compound_id': CID,
-                        'target': final_target,
                         'value': value,
                         'activity_name': activity_name,
                     })
@@ -275,10 +280,13 @@ def get_bioactivities(cid):
                 for assay in assay_data:
                     aid = str(assay.get('AID'))
 
+                    if 'Target' in assay:
+                        target = str(assay.get('Target')[0].get('GI',''))
+
                     comment = assay.get('Comment','')
 
-                    target_type = None
-                    organism = None
+                    target_type = ''
+                    organism = ''
 
                     for entry in comment:
                         if entry.startswith('Target Type'):
@@ -289,6 +297,15 @@ def get_bioactivities(cid):
                     # Try to get an assay with this AID from the database
                     try:
                         assay_model = Assay.objects.get(pubchem_id=aid)
+                        # Add the GI to the target if necessary
+                        if assay_model.target:
+                            target_model = assay_model.target
+                            if not target_model.GI:
+                                target_model.GI = target
+                                target_model.save()
+                            if not target_model.target_type:
+                                target_model.target_type = target_type
+                                target_model.save()
                         print "Found assay!"
 
                     except:
@@ -303,9 +320,16 @@ def get_bioactivities(cid):
                             'source_id': source_id,
                             'name': name,
                             'description': description,
-                            'target_type': target_type,
-                            'organism': organism
+                            'organism': organism,
+                            'chemblid': u'',
+                            'assay_type': u'U',
+                            'journal': u'strain',
                         }
+
+                        # If this is NOT a ChEMBL assay, then also get the target and add it
+                        # If it is, that should be caught later
+                        if source != 'ChEMBL':
+                            entry.update({'target': get_pubchem_target(target)})
 
                         assay_model = Assay.objects.create(locked=True, **entry)
                         print "Created assay!"
@@ -321,13 +345,13 @@ def get_bioactivities(cid):
         return []
 
 def run():
-
     # Remove all old bioactivities
     PubChemBioactivity.objects.all().delete()
 
     success = 0
     fail_bioactivity = 0
     fail_compound = 0
+
     # TODO make pubchem bioactivity entries for each activity
     for compound in Compound.objects.all():
         if not compound.pubchemid:
@@ -398,26 +422,85 @@ def run():
         print 'Removing " 1" from {}'.format(bio.activity_name)
         bio.save()
 
+    for bio in PubChemBioactivity.objects.filter(activity_name__contains='uM_Run1'):
+        bio.activity_name = bio.activity_name.replace('uM_Run1', '')
+        print 'Removing "uM_Run1" from {}'.format(bio.activity_name)
+        bio.save()
+
     print 'Cleaning up assays and targets...'
 
-    for assay in Assay.objects.all():
+    # TODO NEEDS REVISIONS
+    # Check failures
+
+    initial_bio = PubChemBioactivity.objects.all().count()
+
+    updates = 0
+    replaces = 0
+
+    failed_updates = 0
+    failed_replaces = 0
+
+    for assay in Assay.objects.filter(chemblid='', source='ChEMBL'):
         # If ChEMBL is the source
-        if assay.source == u'ChEMBL' and not assay.chemblid:
-            data = get_chembl_assay(assay.source_id)
-            if data:
-                chembl_assay = Assay.objects.filter(chemblid=data.get('chemblid'))
-                if not chembl_assay:
-                    try:
-                        Assay.objects.create(**data)
-                    except:
-                        print 'Failed creating assay {}'.format(assay.source_id)
-                else:
-                    try:
-                        chembl_assay.update(**data)
-                    except Exception as e:
-                        print 'Failed updating assay {}'.format(assay.source_id)
-                        print e
+        # if assay.source == u'ChEMBL' and not assay.chemblid:
+        data = get_chembl_assay(assay.source_id)
+        if data:
+            chembl_assay = Assay.objects.filter(chemblid=data.get('chemblid'))
+            # Update the pubchem assay with info from chembl
+            if not chembl_assay:
+                try:
+                    assay_query = Assay.objects.filter(pk=assay.id)
+                    print 'Updating', data.get('chemblid')
+                    assay_query.update(**data)
+                except Exception as e:
+                    failed_updates += 1
+                    print 'Failed updating assay {}'.format(assay.source_id)
+                    print e
+            # Update the chembl assay with pubchem data then delete the old assay
             else:
-                print 'Scrape for {} failed'.format(assay.source_id)
+                try:
+                    print 'Replacing', chembl_assay[0].chemblid
+                    chembl_assay.update(**data)
+                    # Switch bioactivities to the correct assay
+                    for bio in PubChemBioactivity.objects.filter(assay_id=assay.id):
+                        bio.assay_id = chembl_assay[0].id
+                        bio.save()
+                    # Delete the old pubchem assay
+                    assay.delete()
+                except Exception as e:
+                    failed_replaces += 1
+                    print 'Failed replacing assay {}'.format(assay.source_id)
+                    print e
+        else:
+            print 'Scrape for {} failed'.format(assay.source_id)
+
+    print 'Failed updates:', failed_updates
+    print 'Failed replaces:', failed_replaces
+
+    print 'Successful updates:', updates
+    print 'Successful replaces:', replaces
+
+    if iniitial_bio == PubChemBioactivity.objects.all().count():
+        print 'Bio number has not changed.'
+
+    else:
+        print '!!!!! Bio number has changed !!!!!'
+
+    print 'Normalizing values'
+
+    bio_types = {bio.activity_name:True for bio in PubChemBioactivity.objects.all()}
+
+    for bio_type in bio_types:
+        targets = {bio.assay.target:True for bio in PubChemBioactivity.objects.filter(activity_name=bio_type)}
+        for target in targets:
+            bio_pk = [bio.id for bio in PubChemBioactivity.objects.filter(activity_name=bio_type).filter(assay__target=target)]
+            bio_value = np.array([bio.value for bio in PubChemBioactivity.objects.filter(activity_name=bio_type).filter(assay__target=target)])
+            if len(bio_pk) > 0 and len(bio_value) > 0:
+                bio_value /= np.max(np.abs(bio_value),axis=0)
+                for index, pk in enumerate(bio_pk):
+                    try:
+                        PubChemBioactivity.objects.filter(pk=pk).update(normalized_value=bio_value[index])
+                    except:
+                        print 'Update of bioactivity {} failed'.format(pk)
 
     print 'Finished'

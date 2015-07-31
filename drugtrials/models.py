@@ -40,7 +40,7 @@ class TrialSource(LockableModel):
         ordering = ('source_name', )
     source_name = models.CharField(max_length=40, unique=True)
     source_website = models.URLField(blank=True, null=True)
-    description = models.CharField(max_length=400, default='')
+    description = models.CharField(max_length=400, blank=True, null=True)
 
     def __unicode__(self):
         return self.source_name
@@ -61,8 +61,8 @@ class DrugTrial(LockableModel):
         verbose_name = 'Drug Trial'
         ordering = ('compound', 'species', )
 
-    title = models.CharField(max_length=255, default='')
-    condition = models.CharField(max_length=1400, default='')
+    title = models.CharField(max_length=255, blank=True, null=True)
+    condition = models.CharField(max_length=1400, blank=True, null=True)
     source = models.ForeignKey(TrialSource)
     compound = models.ForeignKey('compounds.Compound')
 
@@ -83,10 +83,14 @@ class DrugTrial(LockableModel):
                                   ('X', 'mixed'),
                                   ('U', 'unknown or unspecified'),
                               ),
-                              default='U')
+                              default='U',
+                              blank=True,
+                              null=True)
 
     population_size = models.CharField(max_length=50,
-                                       default='1')
+                                       default='1',
+                                       blank=True,
+                                       null=True)
 
     age_average = models.FloatField(blank=True, null=True)
 
@@ -95,6 +99,8 @@ class DrugTrial(LockableModel):
     age_min = models.FloatField(blank=True, null=True)
 
     age_unit = models.CharField(max_length=1,
+                                blank=True,
+                                null=True,
                                 choices=(
                                     ('M', 'months'), ('Y', 'years')
                                 ),
@@ -103,7 +109,7 @@ class DrugTrial(LockableModel):
     weight_average = models.FloatField(blank=True, null=True)
     weight_max = models.FloatField(blank=True, null=True)
     weight_min = models.FloatField(blank=True, null=True)
-    weight_unit = models.CharField(max_length=1,
+    weight_unit = models.CharField(max_length=1, blank=True, null=True,
                                    choices=(
                                        ('K', 'kilograms'), ('L', 'pounds'),
                                    ),
@@ -148,9 +154,9 @@ class Test(LockableModel):
     test_type = models.ForeignKey(TestType)
     test_name = models.CharField(max_length=40,
                                  verbose_name='Organ Function Test')
-    test_unit = models.CharField(max_length=40, default='')
+    test_unit = models.CharField(max_length=40, blank=True, null=True)
     organ = models.ForeignKey(Organ, blank=True, null=True)
-    description = models.CharField(max_length=400, default='')
+    description = models.CharField(max_length=400, blank=True, null=True)
 
     def __unicode__(self):
         return u'{} :: {} :: {}'.format(self.organ,
@@ -164,7 +170,7 @@ class FindingType(LockableModel):
         ordering = ('finding_type', )
 
     finding_type = models.CharField(max_length=100, unique=True)
-    description = models.CharField(max_length=200, default='')
+    description = models.CharField(max_length=200, blank=True, null=True)
 
     def __unicode__(self):
         return self.finding_type
@@ -177,11 +183,11 @@ class Finding(LockableModel):
 
     finding_type = models.ForeignKey(FindingType)
     finding_name = models.CharField(max_length=100)
-    finding_unit = models.CharField(max_length=40, default='')
+    finding_unit = models.CharField(max_length=40, blank=True, null=True)
     organ = models.ForeignKey(Organ,
                               blank=True,
                               null=True)
-    description = models.CharField(max_length=400, default='')
+    description = models.CharField(max_length=400, blank=True, null=True)
 
     def __unicode__(self):
         return u'{} :: {} :: {}'.format(self.organ, self.finding_type, self.finding_name)
@@ -235,12 +241,16 @@ class TestResult(models.Model):
     result = models.CharField(default='1',
                               max_length=8,
                               choices=POSNEG,
-                              verbose_name='Pos/Neg?')
+                              verbose_name='Pos/Neg?',
+                              blank=True,
+                              null=True)
 
     severity = models.CharField(default='-1',
                                 max_length=5,
                                 choices=SEVERITY_SCORE,
-                                verbose_name='Severity')
+                                verbose_name='Severity',
+                                blank=True,
+                                null=True)
 
     percent_min = models.FloatField(blank=True,
                                     null=True,
@@ -311,7 +321,9 @@ class FindingResult(models.Model):
     severity = models.CharField(default='-1',
                                 max_length=5,
                                 choices=SEVERITY_SCORE,
-                                verbose_name='Severity')
+                                verbose_name='Severity',
+                                blank=True,
+                                null=True)
 
     # May drop percent_min later, hide for now
     percent_min = models.FloatField(blank=True,
@@ -325,7 +337,8 @@ class FindingResult(models.Model):
 
     frequency = models.CharField(choices=FREQUENCIES,
                                  max_length=25,
-                                 default='')
+                                 blank=True,
+                                 null=True,)
 
     descriptor = models.ForeignKey(ResultDescriptor, blank=True, null=True)
 
@@ -356,11 +369,11 @@ class OpenFDACompound(LockableModel):
         verbose_name = 'OpenFDA Report'
 
     compound = models.ForeignKey('compounds.Compound')
-    warnings = models.TextField(default='')
+    warnings = models.TextField(blank=True, null=True)
     black_box = models.BooleanField(default=False)
 
     # Insights into non-human toxicology (can be useful)
-    nonclinical_toxicology = models.TextField(default='')
+    nonclinical_toxicology = models.TextField(blank=True, null=True)
 
     # Deemed less than useful
     #clinical_studies = models.TextField(blank=True, null=True)

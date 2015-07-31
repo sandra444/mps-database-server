@@ -31,7 +31,8 @@ class CellType(LockableModel):
     cell_type = models.CharField(max_length=255,
                                  help_text='Example: hepatocyte, muscle, kidney, etc')
     species = models.CharField(max_length=10,
-                               choices=SPECIESTYPE, default='Human')
+                               choices=SPECIESTYPE, default='Human', null=True,
+                               blank=True)
 
     cell_subtype = models.ForeignKey('CellSubtype')
     organ = models.ForeignKey('Organ')
@@ -101,7 +102,8 @@ class CellSample(RestrictedModel):
         ('Other', 'Other'),
     )
     cell_source = models.CharField(max_length=20,
-                                   choices=CELLSOURCETYPE, default='Primary')
+                                   choices=CELLSOURCETYPE, default='Primary',
+                                   null=True, blank=True)
     notes = models.TextField(blank=True)
     receipt_date = models.DateField()
 
@@ -118,7 +120,7 @@ class CellSample(RestrictedModel):
         ('F', 'Female'),
         ('M', 'Male'),
     )
-    patient_age = models.IntegerField(blank=True, null=True)
+    patient_age = models.IntegerField(null=True, blank=True)
     patient_gender = models.CharField(max_length=1, choices=GENDER_CHOICES,
                                       default=GENDER_CHOICES[0][0],
                                       blank=True)

@@ -397,7 +397,7 @@ class PubChemBioactivityAdmin(LockableAdmin):
     search_fields = ['compound__name', 'activity_name', 'target__name']
     list_filter = ['compound', ]
 
-    raw_id_fields = ("target",)
+    raw_id_fields = ("target",'assay')
 
     save_on_top = True
     list_per_page = 50
@@ -406,7 +406,7 @@ class PubChemBioactivityAdmin(LockableAdmin):
         'compound',
         'activity_name',
         'value',
-        'target',
+        'normalized_value',
         'assay'
     )
 
@@ -416,6 +416,7 @@ class PubChemBioactivityAdmin(LockableAdmin):
                 'compound',
                 'target',
                 'value',
+                'normalized_value',
                 'activity_name',
                 'assay'
             )

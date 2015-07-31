@@ -47,27 +47,25 @@ def chembl_assay(chemblid):
 
 
 class Target(LockableModel):
-    # compound_id = AutoField(primary_key=True)
-    name = models.TextField(default='', help_text="Preferred target name.")
-    synonyms = models.TextField(default='')
+    name = models.TextField(help_text="Preferred target name.")
+    synonyms = models.TextField(null=True, blank=True)
 
     # external identifiers, not unique because does go with null on SQL server
     chemblid = models.TextField('ChEMBL ID',
-                                default='',
+                                null=True, blank=True,
                                 help_text="Enter a ChEMBL id, e.g. CHEMBL260, "
                                           "and click Retrieve to get target "
                                           "information automatically.")
 
-    description = models.TextField(default='')
+    description = models.TextField(null=True, blank=True)
 
-    gene_names = models.TextField(default='')
+    gene_names = models.TextField(null=True, blank=True)
 
-    organism = models.TextField(default='')
+    organism = models.TextField(null=True, blank=True)
 
-    uniprot_accession = models.TextField(default='')
+    uniprot_accession = models.TextField(null=True, blank=True)
 
-    # Without a ChEMBL link, I think it is fair to assume the target_type is single protein
-    target_type = models.TextField(default='')
+    target_type = models.TextField(null=True, blank=True)
 
     # NCBI identifier for protein/gene targets
     GI = models.TextField('NCBI GI',
@@ -108,11 +106,11 @@ class Assay(LockableModel):
                                           "to get target information "
                                           "automatically.")
 
-    description = models.TextField(default='')
-    organism = models.TextField(default='')
-    assay_type = models.CharField(max_length=1, default='U', choices=ASSAYTYPES)
-    journal = models.TextField(default='')
-    strain = models.TextField(default='')
+    description = models.TextField(default='',)
+    organism = models.TextField(default='',)
+    assay_type = models.CharField(max_length=1, choices=ASSAYTYPES, default='U')
+    journal = models.TextField(default='',)
+    strain = models.TextField(default='',)
 
     pubchem_id = models.TextField('PubChem ID', default='')
     source = models.TextField(default='')
@@ -161,23 +159,24 @@ class Bioactivity(LockableModel):
     target = models.ForeignKey(Target)
     target_confidence = models.IntegerField(blank=True, null=True)
 
-    bioactivity_type = models.TextField(verbose_name="name", default='')
+    bioactivity_type = models.TextField(verbose_name="name", blank=True, null=True)
 
-    standard_name = models.TextField(default='')
-    operator = models.TextField(default='')
+    standard_name = models.TextField(blank=True, null=True)
+    operator = models.TextField(blank=True, null=True)
 
-    units = models.TextField(default='')
+    units = models.TextField(blank=True, null=True)
     value = models.FloatField(blank=True, null=True)
 
     standardized_units = models.TextField(verbose_name="std units",
-                                          default='')
+                                          blank=True,
+                                          null=True)
     standardized_value = models.FloatField(verbose_name="std vals",
                                            blank=True,
                                            null=True)
 
-    activity_comment = models.TextField(default='')
-    reference = models.TextField(default='')
-    name_in_reference = models.TextField(default='')
+    activity_comment = models.TextField(blank=True, null=True)
+    reference = models.TextField(blank=True, null=True)
+    name_in_reference = models.TextField(blank=True, null=True)
 
     # Use ChEMBL Assay Type to clarify unclear names like "Activity"
     # Removed for now
