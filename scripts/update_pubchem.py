@@ -247,7 +247,7 @@ def get_bioactivities(cid):
 
                 # TODO Insert code to add/handle Bioactivity Types?
                 # Do not add outcome to returned data, assumed to be active
-                if AID and CID and outcome == "Active" and value and activity_name:
+                if AID and CID and outcome and value and activity_name:
 
                     if not AID in assays:
                         assays.update({AID: [len(activities)]})
@@ -258,6 +258,7 @@ def get_bioactivities(cid):
                         'compound_id': CID,
                         'value': value,
                         'activity_name': activity_name,
+                        'outcome': outcome,
                     })
 
         # Some entries might be empty thus check for assays
@@ -344,6 +345,18 @@ def get_bioactivities(cid):
     else:
         return []
 
+def delete_from_activity_name(string):
+    for bio in PubChemBioactivity.objects.filter(activity_name__contains=string):
+        bio.activity_name = bio.activity_name.replace(string, '')
+        print 'Removing {0} from {1}'.format(string,bio.activity_name)
+        bio.save()
+
+def replace_with_activity_name(original, new):
+    for bio in PubChemBioactivity.objects.filter(activity_name__contains=original):
+        bio.activity_name = bio.activity_name.replace(original, new)
+        print 'Replacing {0} with {1}'.format(original, new)
+        bio.save()
+
 def run():
     # Remove all old bioactivities
     PubChemBioactivity.objects.all().delete()
@@ -402,30 +415,12 @@ def run():
 
     print "Cleaning up activity names..."
 
-    for bio in PubChemBioactivity.objects.filter(activity_name__contains='-Replicate_1'):
-        bio.activity_name = bio.activity_name.replace('-Replicate_1', '')
-        print 'Removing -Replicate_1 from {}'.format(bio.activity_name)
-        bio.save()
+    delete_from_activity_name('-Replicate_1')
+    delete_from_activity_name('um_Run1')
+    delete_from_activity_name(' 1')
+    delete_from_activity_name('uM_Run1')
 
-    for bio in PubChemBioactivity.objects.filter(activity_name__contains='um_Run1'):
-        bio.activity_name = bio.activity_name.replace('um_Run1', '')
-        print 'Removing um_Run1 from {}'.format(bio.activity_name)
-        bio.save()
-
-    for bio in PubChemBioactivity.objects.filter(activity_name__contains='Ac50'):
-        bio.activity_name = bio.activity_name.replace('Ac50', 'AC50')
-        print 'Replacing Ac50 with AC50'
-        bio.save()
-
-    for bio in PubChemBioactivity.objects.filter(activity_name__contains=' 1'):
-        bio.activity_name = bio.activity_name.replace(' 1', '')
-        print 'Removing " 1" from {}'.format(bio.activity_name)
-        bio.save()
-
-    for bio in PubChemBioactivity.objects.filter(activity_name__contains='uM_Run1'):
-        bio.activity_name = bio.activity_name.replace('uM_Run1', '')
-        print 'Removing "uM_Run1" from {}'.format(bio.activity_name)
-        bio.save()
+    replace_with_activity_name('Ac50', 'AC50')
 
     print 'Cleaning up assays and targets...'
 
@@ -461,6 +456,7 @@ def run():
                 try:
                     print 'Replacing', chembl_assay[0].chemblid
                     chembl_assay.update(**data)
+                    chembl_assay.update({'pubchem_id':assay.pubchem_id, 'source':assay.source, 'source_id':assay.source_id})
                     # Switch bioactivities to the correct assay
                     for bio in PubChemBioactivity.objects.filter(assay_id=assay.id):
                         bio.assay_id = chembl_assay[0].id
@@ -480,7 +476,7 @@ def run():
     print 'Successful updates:', updates
     print 'Successful replaces:', replaces
 
-    if iniitial_bio == PubChemBioactivity.objects.all().count():
+    if initial_bio == PubChemBioactivity.objects.all().count():
         print 'Bio number has not changed.'
 
     else:

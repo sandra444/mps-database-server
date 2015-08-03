@@ -223,6 +223,8 @@ class PubChemBioactivity(LockableModel):
     # Value is required
     value = models.FloatField(verbose_name="Value (uM)")
 
+    outcome = models.TextField(default='', verbose_name="Bioactivity Outcome")
+
     # Not required?
     # TODO Consider making this a FK to bioactivity types
     # TODO Or, perhaps we should make another table for PubChem types?

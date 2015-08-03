@@ -34,7 +34,7 @@ class TargetAdmin(LockableAdmin):
 
     save_on_top = True
     list_per_page = 300
-    list_display = ('name', 'organism', 'target_type', 'chembl_link', 'locked')
+    list_display = ('name', 'organism', 'target_type', 'chembl_link', 'GI', 'locked')
     list_filter = ('target_type', 'organism')
     search_fields = ['name', 'organism', 'synonyms', '=chemblid', 'GI']
     actions = ['update_fields']
@@ -394,7 +394,7 @@ admin.site.register(BioactivityType, BioactivityTypeAdmin)
 
 
 class PubChemBioactivityAdmin(LockableAdmin):
-    search_fields = ['compound__name', 'activity_name', 'target__name']
+    search_fields = ['compound__name', 'activity_name', 'target__name', 'outcome']
     list_filter = ['compound', ]
 
     raw_id_fields = ("target",'assay')
@@ -406,6 +406,7 @@ class PubChemBioactivityAdmin(LockableAdmin):
         'compound',
         'activity_name',
         'value',
+        'outcome',
         'normalized_value',
         'assay'
     )
@@ -416,6 +417,7 @@ class PubChemBioactivityAdmin(LockableAdmin):
                 'compound',
                 'target',
                 'value',
+                'outcome',
                 'normalized_value',
                 'activity_name',
                 'assay'
