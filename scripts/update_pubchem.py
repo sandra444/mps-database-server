@@ -346,15 +346,24 @@ def get_bioactivities(cid):
         return []
 
 def delete_from_activity_name(string):
+    """Remove undesired portion of activity namea"""
     for bio in PubChemBioactivity.objects.filter(activity_name__contains=string):
-        bio.activity_name = bio.activity_name.replace(string, '')
         print 'Removing {0} from {1}'.format(string,bio.activity_name)
+        bio.activity_name = bio.activity_name.replace(string, '')
         bio.save()
 
 def replace_with_activity_name(original, new):
+    """Replace undesired portion of activity namea"""
     for bio in PubChemBioactivity.objects.filter(activity_name__contains=original):
-        bio.activity_name = bio.activity_name.replace(original, new)
         print 'Replacing {0} with {1}'.format(original, new)
+        bio.activity_name = bio.activity_name.replace(original, new)
+        bio.save()
+
+def purify_activity_name(string):
+    """Completely overwrite activity names containing the string of interest"""
+    for bio in PubChemBioactivity.objects.filter(activity_name__contains=string):
+        print 'Purifying {}'.format(bio.activity_name)
+        bio.activity_name = string
         bio.save()
 
 def run():
@@ -392,6 +401,7 @@ def run():
                 for activity in activities:
                     # Add the bioactivity
                     entry = {
+                        'outcome': activity.get('outcome'),
                         'assay': activity.get('assay'),
                         'compound': compound,
                         'target': activity.get('target'),
@@ -418,9 +428,12 @@ def run():
     delete_from_activity_name('-Replicate_1')
     delete_from_activity_name('um_Run1')
     delete_from_activity_name(' 1')
+    delete_from_activity_name(' #1')
     delete_from_activity_name('uM_Run1')
 
     replace_with_activity_name('Ac50', 'AC50')
+
+    purify_activity_name('IC50')
 
     print 'Cleaning up assays and targets...'
 
@@ -447,6 +460,7 @@ def run():
                     assay_query = Assay.objects.filter(pk=assay.id)
                     print 'Updating', data.get('chemblid')
                     assay_query.update(**data)
+                    updates += 1
                 except Exception as e:
                     failed_updates += 1
                     print 'Failed updating assay {}'.format(assay.source_id)
@@ -456,13 +470,14 @@ def run():
                 try:
                     print 'Replacing', chembl_assay[0].chemblid
                     chembl_assay.update(**data)
-                    chembl_assay.update({'pubchem_id':assay.pubchem_id, 'source':assay.source, 'source_id':assay.source_id})
+                    chembl_assay.update(**{'pubchem_id':assay.pubchem_id, 'source':assay.source, 'source_id':assay.source_id})
                     # Switch bioactivities to the correct assay
                     for bio in PubChemBioactivity.objects.filter(assay_id=assay.id):
                         bio.assay_id = chembl_assay[0].id
                         bio.save()
                     # Delete the old pubchem assay
                     assay.delete()
+                    replaces += 1
                 except Exception as e:
                     failed_replaces += 1
                     print 'Failed replacing assay {}'.format(assay.source_id)
