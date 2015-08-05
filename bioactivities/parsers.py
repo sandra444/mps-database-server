@@ -1112,60 +1112,38 @@ def table(request):
     #   return {'error': 'Many bioactivities are listed with Rattus norvegicus as a target, either deselect it or choose fewer than 15 compounds.'}
 
     # Filter based on compound
-    q = Bioactivity.objects.filter(compound__name__in=desired_compounds)
+    q = PubChemBioactivity.objects.filter(compound__name__in=desired_compounds)
 
     # Filter based on organism
-    q = q.filter(target__organism__in=desired_organisms)
+    q = q.filter(assay__target__organism__in=desired_organisms)
     # Filter based on target type
-    q = q.filter(target__target_type__in=desired_target_types)
+    q = q.filter(assay__target__target_type__in=desired_target_types)
 
     # Filter based on targets
-    q = q.filter(target__name__in=desired_targets)
+    q = q.filter(assay__target__name__in=desired_targets)
     # Filter based on standardized bioactivity name
-    q = q.filter(standard_name__in=desired_bioactivities)
+    q = q.filter(activity_name__in=desired_bioactivities)
 
     length = q.count()
 
     # Prefetch all foreign keys
-    q = q.prefetch_related('assay', 'compound', 'parent_compound', 'target', 'created_by')[:5000]
+    q = q.select_related('compound__name', 'assay__target__name', 'assay__target__organism', 'assay__chemblid', 'assay__pubchem_id')[:5000]
 
     data = []
-
-    # # generate a unique full path for data and rows and columns information
-    # data_hash = hashlib.sha512(
-    #     str(request_filter)
-    # ).hexdigest()[:10]
-    #
-    # fullpath_without_extension = os.path.join(
-    #     MEDIA_ROOT,
-    #     'table',
-    #     data_hash
-    # )
-    #
-    # # string representation of the respective full full paths
-    # data_csv_fullpath = fullpath_without_extension + '_table.csv'
-    #
-    # # generate file handles for the csv writer
-    # data_csv_filehandle = open(data_csv_fullpath, "w")
-    #
-    # # generate csv writers for each file handle
-    # data_csv_writer = csv.writer(data_csv_filehandle)
-    #
-    # # write out our data lists into csv format
-    # data_csv_writer.writerow(['Compound','Target','Organism','Standard Name','Operator','Standard Value', 'Standard Units', 'ChEMBL ID'])
 
     for bioactivity in q:
 
         id = bioactivity.pk
         compound = bioactivity.compound.name
         compoundid = bioactivity.compound.id
-        target = bioactivity.target.name
-        organism = bioactivity.target.organism
-        standard_name = bioactivity.standard_name
-        operator = bioactivity.operator
-        standardized_value = bioactivity.standardized_value
-        standardized_units = bioactivity.standardized_units
+        target = bioactivity.assay.target.name
+        organism = bioactivity.assay.target.organism
+        activity_name = bioactivity.activity_name
+        #operator = bioactivity.operator
+        standardized_value = bioactivity.value
+        #standardized_units = bioactivity.standardized_units
         chemblid = bioactivity.assay.chemblid
+        pubchem_id = bioactivity.assay.pubchem_id
 
         obj = {
             'id': id,
@@ -1173,27 +1151,14 @@ def table(request):
             'compoundid': compoundid,
             'target': target,
             'organism': organism,
-            'standard_name': standard_name,
-            'operator': operator,
+            'activity_name': activity_name,
+            #'operator': operator,
             'standardized_value': standardized_value,
-            'standardized_units': standardized_units,
+            #'standardized_units': standardized_units,
             'chemblid': chemblid,
-            # 'bioactivity_type': bioactivity.bioactivity_type,
-            # 'value': bioactivity.value,
-            # 'units': bioactivity.units,
+            'pubchem_id': pubchem_id,
         }
         data.append(obj)
-
-    #     data_csv_writer.writerow([compound, target, organism, standard_name, operator, standardized_value, standardized_units, chemblid])
-    #
-    # # close the csv files that we have written so far
-    # data_csv_filehandle.close()
-    #
-    # table_url_prefix = '/media/table/'
-    #
-    # data_csv_relpath = table_url_prefix + os.path.basename(
-    #     data_csv_fullpath
-    # )
 
     return {
         # json data

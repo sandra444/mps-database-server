@@ -175,6 +175,7 @@ def get_pubchem_target(target):
                     'name': name,
                     'organism': organism,
                     'GI': target,
+                    'target_type': 'SINGLE PROTEIN'
                 }
 
                 target_model = Target.objects.create(locked=True, **entry)
@@ -184,9 +185,10 @@ def get_pubchem_target(target):
             except:
 
                 entry = {
-                    'name': '',
-                    'organism': '',
+                    'name': name,
+                    'organism': organism,
                     'GI': target,
+                    'target_type': 'SINGLE PROTEIN'
                 }
 
                 target_model = Target.objects.create(locked=True, **entry)
