@@ -15,7 +15,7 @@ import scipy.cluster
 import numpy as np
 
 from compounds.models import Compound
-from .models import Bioactivity
+from .models import Bioactivity, PubChemBioactivity, Assay
 from drugtrials.models import FindingResult
 
 from django.core import serializers
@@ -59,67 +59,73 @@ def generate_list_of_all_data_in_bioactivities(organisms, targets):
     return result
 
 def generate_list_of_all_bioactivities_in_bioactivities():
-    cursor = connection.cursor()
-
-    # Note that this query does not exclude all negative standardized_values
-    # This is the case because it selects ONLY THE NAMES of bioactivities
-    # If a bioactivity name is associated with both positive and negative values, those negative values will be included
-    cursor.execute(
-        'SELECT bioactivities_bioactivity.standard_name '
-        'FROM bioactivities_bioactivity '
-        'WHERE bioactivities_bioactivity.standardized_value>0;'
-    )
-
-    result = generate_record_frequency_data(cursor.fetchall())
-    cursor.close()
-
+    pubchem_bioactivities = PubChemBioactivity.objects.all().values_list('activity_name')
+    result = generate_record_frequency_data(pubchem_bioactivities)
     return result
+    #cursor = connection.cursor()
+
+    ## Note that this query does not exclude all negative standardized_values
+    ## This is the case because it selects ONLY THE NAMES of bioactivities
+    ## If a bioactivity name is associated with both positive and negative values, those negative values will be included
+    #cursor.execute(
+        #'SELECT bioactivities_bioactivity.standard_name '
+        #'FROM bioactivities_bioactivity '
+        #'WHERE bioactivities_bioactivity.standardized_value>0;'
+    #)
+
+    #result = generate_record_frequency_data(cursor.fetchall())
+    #cursor.close()
+
+    #return result
 
 
 def generate_list_of_all_targets_in_bioactivities(organisms, targets):
-
-    cursor = connection.cursor()
-
-
-    where_clause = " WHERE ( "
-    organisms_clause = ""
-
-    if not organisms or not targets:
-        return
-
-    if len(organisms) is 1:
-        organisms_clause = "   LOWER(bioactivities_target.organism)=LOWER('{}') ".format(''.join(organisms))
-    else:
-        for organism in organisms:
-            organisms_clause += "OR LOWER(bioactivities_target.organism)=LOWER('{}') ".format(''.join(organism))
-
-    where_clause += organisms_clause[2:]  # remove the first 'OR'
-
-    where_clause += ") AND ("
-
-    targets_clause = ""
-
-    if len(targets) is 1:
-        targets_clause = "   LOWER(bioactivities_target.target_type)=LOWER('{}') ".format(''.join(targets))
-    else:
-        for target in targets:
-            targets_clause += "OR LOWER(bioactivities_target.target_type)=LOWER('{}') ".format(''.join(target))
-
-    where_clause += targets_clause[2:]  # remove the first 'OR'
-    where_clause += ");"
-
-    cursor.execute(
-        " SELECT bioactivities_target.name " +
-        " FROM bioactivities_bioactivity " +
-        " INNER JOIN bioactivities_target " +
-        " ON bioactivities_bioactivity.target_id=bioactivities_target.id " +
-        where_clause
-    )
-
-    result = generate_record_frequency_data(cursor.fetchall())
-    cursor.close()
-
+    pubchem_targets = Assay.objects.filter(
+        organism__in=organisms,
+        target__target_type__in=targets).values_list('target__name')
+    result = generate_record_frequency_data(pubchem_targets)
     return result
+    #cursor = connection.cursor()
+
+    #where_clause = " WHERE ( "
+    #organisms_clause = ""
+
+    #if not organisms or not targets:
+        #return
+
+    #if len(organisms) is 1:
+        #organisms_clause = "   LOWER(bioactivities_target.organism)=LOWER('{}') ".format(''.join(organisms))
+    #else:
+        #for organism in organisms:
+            #organisms_clause += "OR LOWER(bioactivities_target.organism)=LOWER('{}') ".format(''.join(organism))
+
+    #where_clause += organisms_clause[2:]  # remove the first 'OR'
+
+    #where_clause += ") AND ("
+
+    #targets_clause = ""
+
+    #if len(targets) is 1:
+        #targets_clause = "   LOWER(bioactivities_target.target_type)=LOWER('{}') ".format(''.join(targets))
+    #else:
+        #for target in targets:
+            #targets_clause += "OR LOWER(bioactivities_target.target_type)=LOWER('{}') ".format(''.join(target))
+
+    #where_clause += targets_clause[2:]  # remove the first 'OR'
+    #where_clause += ");"
+
+    #cursor.execute(
+        #" SELECT bioactivities_target.name " +
+        #" FROM bioactivities_bioactivity " +
+        #" INNER JOIN bioactivities_target " +
+        #" ON bioactivities_bioactivity.target_id=bioactivities_target.id " +
+        #where_clause
+    #)
+
+    #result = generate_record_frequency_data(cursor.fetchall())
+    #cursor.close()
+
+    #return result
 
 # Worry about filtering by organism later
 # FK for organism is a little odd right now
@@ -128,9 +134,9 @@ def generate_list_of_all_drugtrials(desired_organisms):
     # TODO
     # This requires refactoring, magic conversion tables are not good practice
     organisms = {
-        'Homo Sapiens': 'Human',
-        'Rattus Norvegicus': 'Rat',
-        'Canis Lupus Familiaris': 'Dog'
+        'Homo sapiens': 'Human',
+        'Rattus norvegicus': 'Rat',
+        'Canis lupus familiaris': 'Dog'
     }
 
     desired_organisms = [organisms.get(organism,'') for organism in desired_organisms]
@@ -155,102 +161,145 @@ def generate_list_of_all_drugtrials(desired_organisms):
     return result
 
 def generate_list_of_all_compounds_in_bioactivities():
-    cursor = connection.cursor()
-
-    cursor.execute(
-        'SELECT compounds_compound.name, compounds_compound.known_drug, compounds_compound.logp, compounds_compound.molecular_weight '
-        'FROM bioactivities_bioactivity '
-        'INNER JOIN compounds_compound '
-        'ON bioactivities_bioactivity.compound_id=compounds_compound.id;'
-    )
-
-    result = generate_record_frequency_data(cursor.fetchall())
-    cursor.close()
-
+    pubchem_compounds = PubChemBioactivity.objects.all().prefetch_related('compound').values_list('compound__name')
+    result = generate_record_frequency_data(pubchem_compounds)
     return result
+    #cursor = connection.cursor()
+
+    #cursor.execute(
+        #'SELECT compounds_compound.name, compounds_compound.known_drug, compounds_compound.logp, compounds_compound.molecular_weight '
+        #'FROM bioactivities_bioactivity '
+        #'INNER JOIN compounds_compound '
+        #'ON bioactivities_bioactivity.compound_id=compounds_compound.id;'
+    #)
+
+    #result = generate_record_frequency_data(cursor.fetchall())
+    #cursor.close()
+
+    #return result
 
 
 def fetch_all_standard_bioactivities_data(
         desired_compounds,
         desired_targets,
         desired_bioactivities,
+        desired_organisms,
         normalized,
         log_scale
 ):
-    # using values for now, FUTURE: use standardized_values
-    #Appears to be using standardized_values now
-    cursor = connection.cursor()
+    # First, we acquire all the filtered hits
+    filtered_bioactivities = PubChemBioactivity.objects.filter(assay__target__isnull=False)
+    filtered_bioactivities = filtered_bioactivities.filter(
+        compound__name__in=desired_compounds,
+        activity_name__in=desired_bioactivities,
+        assay__target__name__in=desired_targets).select_related('compound__name', 'assay__target__name')
 
-    # Please note that normalization now goes from 0.0001 to 1
-    cursor.execute(
-        'SELECT compound,target,tbl.bioactivity,AVG(value) as value,units,'
-        'AVG(norm_value) as norm_value,organism,target_type '
-        'FROM ( '
-        'SELECT compounds_compound.name as compound, '
-        'bioactivities_target.name as target, '
-        'bioactivities_bioactivity.standard_name as bioactivity, '
-        'bioactivities_bioactivity.standardized_value as value,bioactivities_bioactivity.standardized_units as units, '
-        'bioactivities_target.organism, '
-        'bioactivities_target.target_type,'
-        'CASE WHEN agg_tbl.max_value-agg_tbl.min_value <> 0 '
-        'THEN (0.9999)*((standardized_value-agg_tbl.min_value)/(agg_tbl.max_value-agg_tbl.min_value)) + 0.0001 ELSE 1 END as norm_value '
-        'FROM bioactivities_bioactivity '
-        'INNER JOIN compounds_compound '
-        'ON bioactivities_bioactivity.compound_id=compounds_compound.id '
-        'INNER JOIN bioactivities_target '
-        'ON bioactivities_bioactivity.target_id=bioactivities_target.id '
-        'INNER JOIN '
-        '(SELECT bioactivities_bioactivity.standard_name ,'
-        'MAX(standardized_value) as max_value,MIN(standardized_value) as min_value '
-        'FROM bioactivities_bioactivity '
-        'GROUP BY bioactivities_bioactivity.standard_name '
-        ') as agg_tbl ON bioactivities_bioactivity.standard_name = agg_tbl.standard_name '
-        ') as tbl '
-        ' GROUP BY compound,target,tbl.bioactivity,units,organism,target_type '
-        'HAVING AVG(value) IS NOT NULL ;'
-    )
+    # Then we can iterate over them to acquire the average values and so on
 
-    # bioactivity is a tuple:
-    # (compound name, target name, the bioactivity, value, units, norm_value,organism,target_type)
-    # (0            , 1          , 2              , 3 ,  4, 5, 6, 7   )
-    query = cursor.fetchall()
+    # This dictionary will take a tuple as a key (compound, target, bioactivity, organism)
+    # DON'T WORRY ABOUT UNITS AS EVERYTHING IS IN uM
+    bioactivities = {}
 
-    result = []
-
-    for q in query:
-
-        if q[0] not in desired_compounds:
-            continue
-        if q[1] not in desired_targets:
-            continue
-
-        if q[2] not in desired_bioactivities:
-            continue
-
-        value = q[3]
-
+    # Collect every value
+    for bio in filtered_bioactivities:
+        bio_key = (bio.compound.name, bio.assay.target.name, bio.activity_name, bio.assay.organism)
         if normalized:
-            value = q[5]
-
-        # Please note that negative and zero values ARE EXCLUDED
+            value = bio.normalized_value
+        else:
+            value = bio.value
         if log_scale:
-            if value <= 0:
-                continue
-
             value = np.log10(value)
+        if bio_key not in bioactivities:
+            bioactivities[bio_key] = [value]
+        else:
+            bioactivities[bio_key].append(value)
 
-        result.append(
-            {
-                'compound': q[0],
-                'target': q[1],
-                'bioactivity': q[2],
-                'value': value
-            }
-        )
+    results = []
 
-    cursor.close()
+    # Mean every list of values and build the dictionary of values to return
+    for bio_key in bioactivities:
+        bio_to_add = {}
+        bio_to_add['value'] = sum(bioactivities[bio_key])/float(len(bioactivities[bio_key]))
+        bio_to_add['compound'] = bio_key[0]
+        bio_to_add['target'] = bio_key[1]
+        bio_to_add['bioactivity'] = bio_key[2]
+        results.append(bio_to_add)
 
-    return result
+    return results
+    ## using values for now, FUTURE: use standardized_values
+    ##Appears to be using standardized_values now
+    #cursor = connection.cursor()
+
+    ## Please note that normalization now goes from 0.0001 to 1
+    #cursor.execute(
+        #'SELECT compound,target,tbl.bioactivity,AVG(value) as value,units,'
+        #'AVG(norm_value) as norm_value,organism,target_type '
+        #'FROM ( '
+        #'SELECT compounds_compound.name as compound, '
+        #'bioactivities_target.name as target, '
+        #'bioactivities_bioactivity.standard_name as bioactivity, '
+        #'bioactivities_bioactivity.standardized_value as value,bioactivities_bioactivity.standardized_units as units, '
+        #'bioactivities_target.organism, '
+        #'bioactivities_target.target_type,'
+        #'CASE WHEN agg_tbl.max_value-agg_tbl.min_value <> 0 '
+        #'THEN (0.9999)*((standardized_value-agg_tbl.min_value)/(agg_tbl.max_value-agg_tbl.min_value)) + 0.0001 ELSE 1 END as norm_value '
+        #'FROM bioactivities_bioactivity '
+        #'INNER JOIN compounds_compound '
+        #'ON bioactivities_bioactivity.compound_id=compounds_compound.id '
+        #'INNER JOIN bioactivities_target '
+        #'ON bioactivities_bioactivity.target_id=bioactivities_target.id '
+        #'INNER JOIN '
+        #'(SELECT bioactivities_bioactivity.standard_name ,'
+        #'MAX(standardized_value) as max_value,MIN(standardized_value) as min_value '
+        #'FROM bioactivities_bioactivity '
+        #'GROUP BY bioactivities_bioactivity.standard_name '
+        #') as agg_tbl ON bioactivities_bioactivity.standard_name = agg_tbl.standard_name '
+        #') as tbl '
+        #' GROUP BY compound,target,tbl.bioactivity,units,organism,target_type '
+        #'HAVING AVG(value) IS NOT NULL ;'
+    #)
+
+    ## bioactivity is a tuple:
+    ## (compound name, target name, the bioactivity, value, units, norm_value,organism,target_type)
+    ## (0            , 1          , 2              , 3 ,  4, 5, 6, 7   )
+    #query = cursor.fetchall()
+
+    #result = []
+
+    #for q in query:
+
+        #if q[0] not in desired_compounds:
+            #continue
+        #if q[1] not in desired_targets:
+            #continue
+
+        #if q[2] not in desired_bioactivities:
+            #continue
+
+        #value = q[3]
+
+        #if normalized:
+            #value = q[5]
+
+        ## Please note that negative and zero values ARE EXCLUDED
+        #if log_scale:
+            #if value <= 0:
+                #continue
+
+            #value = np.log10(value)
+
+        #result.append(
+            #{
+                #'compound': q[0],
+                #'target': q[1],
+                #'bioactivity': q[2],
+                #'value': value
+            #}
+        #)
+
+    #cursor.close()
+
+    #return result
 
 
 def fetch_all_standard_drugtrials_data(
@@ -264,9 +313,9 @@ def fetch_all_standard_drugtrials_data(
     # TODO
     # This requires refactoring, magic conversion tables are not good practice
     organisms = {
-        'Homo Sapiens': 'Human',
-        'Rattus Norvegicus': 'Rat',
-        'Canis Lupus Familiaris': 'Dog'
+        'Homo sapiens': 'Human',
+        'Rattus norvegicus': 'Rat',
+        'Canis lupus familiaris': 'Dog'
     }
 
     desired_organisms = [organisms.get(organism,'') for organism in desired_organisms]
@@ -461,6 +510,7 @@ def heatmap(request):
         desired_compounds,
         desired_targets,
         desired_bioactivities,
+        desired_organisms,
         normalized,
         log_scale
     )
@@ -492,7 +542,7 @@ def heatmap(request):
         unwound_data = pivoted_data.unstack().reset_index(name='value').dropna()
 
         unwound_data['target_bioactivity_pair'] = \
-            unwound_data['target'] + '_ ' + unwound_data['bioactivity']
+            unwound_data['target'] + '_' + unwound_data['bioactivity']
 
         del unwound_data['target']
         del unwound_data['bioactivity']
@@ -526,7 +576,7 @@ def heatmap(request):
         data_hash
     )
 
-    # string representation of the respective full full paths
+    # string representation of the respective full paths
     data_csv_fullpath = fullpath_without_extension + '_data.csv'
 
     # generate file handles for the csv writer
@@ -722,6 +772,7 @@ def cluster(request):
         desired_compounds,
         desired_targets,
         desired_bioactivities,
+        desired_organisms,
         normalized,
         log_scale
     )
@@ -987,10 +1038,6 @@ def cluster(request):
     #     'data_json': data_json_relpath
     # }
 
-# Function to adhere to organism naming convention
-def cap_first(string):
-    return string[0].upper() + string[1:].lower()
-
 def table(request):
     if len(request.body) == 0:
         return {'error': 'empty request body'}
@@ -1031,7 +1078,7 @@ def table(request):
     desired_target_types = [
         x.get(
             'name'
-        ).upper() for x in request_filter.get(
+        ) for x in request_filter.get(
             'target_types_filter'
         ) if x.get(
             'is_selected'
@@ -1039,9 +1086,9 @@ def table(request):
     ]
 
     desired_organisms = [
-        cap_first(x.get(
+        x.get(
             'name'
-        )) for x in request_filter.get(
+        ) for x in request_filter.get(
             'organisms_filter'
         ) if x.get(
             'is_selected'
