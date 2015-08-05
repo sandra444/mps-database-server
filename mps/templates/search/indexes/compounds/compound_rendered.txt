@@ -1,6 +1,6 @@
 <tr>
     <td>
-        <a href="{{ object.get_absolute_url }}">
+        <a href="{{ object.get_absolute_url }}{{ object.id }}">
             {{ object }}
         </a>
     </td>
