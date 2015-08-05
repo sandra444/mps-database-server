@@ -9,6 +9,7 @@
         <table hidden id="readouts" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Plate Readout ID</th>
                     <th>Plate Setup</th>
                     <th>Assays</th>
@@ -22,6 +23,7 @@
 
             <tfoot>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Plate Readout ID</th>
                     <th>Plate Setup</th>
                     <th>Assays</th>
@@ -36,6 +38,7 @@
             <tbody>
             {% for readout in object_list %}
                 <tr class="readout" id={{ readout.id }} name={{ readout.id }}>
+                    <td><a class="btn btn-primary" href="{{ readout.id }}">View/Edit</a></td>
                     <td><a href="{{ readout.id }}">{{ readout.id }}</a></td>
                     <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}">{{ readout.setup }}</a></td>
                     <td>
@@ -68,7 +71,13 @@
                 dom: 'T<"clear">lfrtip',
                 "iDisplayLength": 50,
                 // Initially sort on setup not arbitrary ID
-                "order": [[ 1, "asc" ]]
+                "order": [[ 2, "asc" ]],
+                "aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0]
+                    }
+                ]
             });
         });
     </script>

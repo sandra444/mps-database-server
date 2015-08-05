@@ -23,6 +23,7 @@
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Chip Setup ID / Barcode</th>
                     <th>Date</th>
                     <th>Organ Model Name</th>
@@ -36,6 +37,12 @@
             <tbody>
             {% for setup in setups %}
                 <tr id={{ setup.id }} name={{ setup.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="/assays/assaychipsetup/{{ setup.id }}/update">
+                            View/Edit
+                        </a>
+                    </td>
                     <td><a href="/assays/assaychipsetup/{{ setup.id }}/update">{{ setup.assay_chip_id }}</a></td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.device }}</td>
@@ -65,6 +72,7 @@
         <table id="plate_setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Plate Setup ID / Barcode</th>
                     <th>Date</th>
                     <th>Assay Layout</th>
@@ -76,6 +84,12 @@
             <tbody>
             {% for setup in plate_setups %}
                 <tr id={{ setup.id }} name={{ setup.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="/assays/assayplatesetup/{{ setup.id }}/update">
+                            View/Edit
+                        </a>
+                    </td>
                     <td><a href="/assays/assayplatesetup/{{ setup.id }}/update">{{ setup.assay_plate_id }}</a></td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.assay_layout }}</td>
@@ -124,6 +138,7 @@
         <table id="readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Chip Readout ID</th>
                     <th>Chip Setup</th>
                     <th>Assays</th>
@@ -136,6 +151,12 @@
             <tbody>
             {% for readout in readouts %}
                 <tr id={{ readout.id }} name={{ readout.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="/assays/assaychipreadout/{{ readout.id }}/update/">
+                            View/Edit
+                        </a>
+                    </td>
                     <td><a href="/assays/assaychipreadout/{{ readout.id }}/update/">{{ readout.id }}</a></td>
                     <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}/update/">{{ readout.chip_setup }}</a></td>
                     <td>
@@ -164,6 +185,7 @@
         <table id="plate_readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Plate Readout ID</th>
                     <th>Plate Setup</th>
                     <th>Assays</th>
@@ -176,6 +198,12 @@
             <tbody>
             {% for readout in plate_readouts %}
                 <tr id={{ readout.id }} name={{ readout.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="/assays/assayplatereadout/{{ readout.id }}/update/">
+                            View/Edit
+                        </a>
+                    </td>
                     <td><a href="/assays/assayplatereadout/{{ readout.id }}/update/">{{ readout.id }}</a></td>
                     <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}/update/">{{ readout.setup }}</a></td>
                     <td>
@@ -230,6 +258,7 @@
         <table id="results" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Chip Test Results ID</th>
                     <th>Chip Setup</th>
                     <th>Chip Readout ID</th>
@@ -246,6 +275,12 @@
             <tbody>
             {% for result in results %}
                 <tr class="result" id={{ result.id }} name={{ result.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="/assays/assaychiptestresult/{{ result.assay_result.id }}/update/">
+                            View/Edit
+                        </a>
+                    </td>
                     <td>
                         <a href="/assays/assaychiptestresult/{{ result.assay_result.id }}/update/">
                             {{ result.assay_result.id }}
@@ -286,6 +321,7 @@
         <table id="results" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Plate Test Results ID</th>
                     <th>Plate Setup</th>
                     <th>Plate Readout ID</th>
@@ -302,6 +338,12 @@
             <tbody>
             {% for result in plate_results %}
                 <tr class="result" id={{ result.id }} name={{ result.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="/assays/assayplatetestresult/{{ result.assay_result.id }}/update/">
+                            View/Edit
+                        </a>
+                    </td>
                     <td>
                         <a href="/assays/assayplatetestresult/{{ result.assay_result.id }}/update/">
                             {{ result.assay_result.id }}

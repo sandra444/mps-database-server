@@ -9,6 +9,7 @@
         <table hidden id="drugtrials" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View</th>
                     <th>Drug Trial ID</th>
                     <th>Compound</th>
                     <th>Species</th>
@@ -25,6 +26,7 @@
 
             <tfoot>
                 <tr>
+                    <th>View</th>
                     <th>Drug Trial ID</th>
                     <th>Compound</th>
                     <th>Species</th>
@@ -42,6 +44,7 @@
             <tbody>
             {% for finding in object_list %}
                 <tr class="finding" id={{ finding.id }}>
+                    <td><a class="btn btn-primary" href="{{ finding.drug_trial.id }}">View</a></td>
                     <td>
                         <a href="/drugtrials/{{ finding.drug_trial.id }}">
                             {{ finding.drug_trial.id }}
@@ -91,13 +94,18 @@
                 "iDisplayLength": 50,
                 "deferRender": true,
                 // Initially sort on compound, not arbitrary ID
-                "order": [[ 1, "asc" ], [ 0, "asc"]],
-
+                "order": [[ 2, "asc" ], [ 1, "asc"]],
                 // Apply custom sorting priorities to frequency column
                 "columnDefs": [{
                     "type": "frequency-range",
-                    "targets": 7
-                }]
+                    "targets": 8
+                }],
+                "aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0]
+                    }
+                ]
             });
         });
     </script>

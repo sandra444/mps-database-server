@@ -9,6 +9,7 @@
         <table hidden id="celltypes" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Organ</th>
                     <th>Cell Type</th>
                     <th>Cell Subtype</th>
@@ -18,6 +19,7 @@
 
             <tfoot>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Organ</th>
                     <th>Cell Type</th>
                     <th>Cell Subtype</th>
@@ -28,6 +30,7 @@
             <tbody>
             {% for celltype in object_list %}
                 <tr class="cellsample" id={{ celltype.id }} name={{ celltype }}>
+                    <td><a class="btn btn-primary" href="{{ celltype.id }}">View/Edit</a></td>
                     <td><a href="{{ celltype.id }}">{{ celltype.organ }}</a></td>
                     <td><a href="{{ celltype.id }}">{{ celltype.cell_type }}</a></td>
                     <td>{{ celltype.cell_subtype }}</td>
@@ -44,7 +47,13 @@
                 dom: 'T<"clear">lfrtip',
                 "iDisplayLength": 50,
                 // Initially sort on organ
-                "order": [ 0, "asc" ]
+                "order": [ 2, "asc" ],
+                "aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0]
+                    }
+                ]
             });
         });
     </script>

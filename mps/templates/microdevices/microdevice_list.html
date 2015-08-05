@@ -10,6 +10,7 @@
         <table hidden id="models" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View</th>
                     <th>Organ</th>
                     <th>Model Name</th>
                     <th>Device</th>
@@ -20,6 +21,7 @@
 
             <tfoot>
                 <tr>
+                    <th>View</th>
                     <th>Organ</th>
                     <th>Model Name</th>
                     <th>Device</th>
@@ -31,6 +33,7 @@
             <tbody>
             {% for model in models %}
                 <tr class="model" id={{ model.id }} name={{ model.device_name }}>
+                    <td><a class="btn btn-primary" href="{{ model.id }}">View</a></td>
                     <td><a href="model/{{ model.id }}">{{ model.organ|default_if_none:"" }}</a></td>
                     <td><a href="model/{{ model.id }}">{{ model.model_name }}</a></td>
                     <td><a href="device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
@@ -46,6 +49,7 @@
         <table hidden id="microdevices" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View</th>
                     <th>Device Name</th>
                     <th>Manufacturer</th>
                     <th>Center</th>
@@ -56,6 +60,7 @@
 
             <tfoot>
                 <tr>
+                    <th>View</th>
                     <th>Device Name</th>
                     <th>Manufacturer</th>
                     <th>Center</th>
@@ -67,6 +72,7 @@
             <tbody>
             {% for microdevice in devices %}
                 <tr class="microdevice" id={{ microdevice.id }} name={{ microdevice.device_name }}>
+                    <td><a class="btn btn-primary" href="{{ microdevice.id }}">View</a></td>
                     <td><a href="device/{{ microdevice.id }}">{{ microdevice.device_name }}</a></td>
                     <td>{{ microdevice.manufacturer|default_if_none:"" }}</td>
                     <td>{{ microdevice.center|default_if_none:"" }}</td>
@@ -83,11 +89,23 @@
         $(document).ready(function() {
             $('#microdevices').DataTable({
                 "iDisplayLength": 200,
-                "sDom": '<T<"clear">t>'
+                "sDom": '<T<"clear">t>',
+                "aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0]
+                    }
+                ]
             });
             $('#models').DataTable({
                 "iDisplayLength": 200,
-                "sDom": '<T<"clear">t>'
+                "sDom": '<T<"clear">t>',
+                "aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0]
+                    }
+                ]
             });
         });
     </script>

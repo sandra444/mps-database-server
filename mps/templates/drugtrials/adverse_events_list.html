@@ -9,6 +9,7 @@
         <table hidden id="adverse_events" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View</th>
                     <th>Compound</th>
                     <th>Event</th>
                     <th>Frequency</th>
@@ -19,6 +20,7 @@
 
             <tfoot>
                 <tr>
+                    <th>View</th>
                     <th>Compound</th>
                     <th>Event</th>
                     <th>Frequency</th>
@@ -30,6 +32,7 @@
             <tbody>
             {% for adverse_event in object_list %}
                 <tr class="adverse_event" id={{ adverse_event.id }}>
+                    <td><a class="btn btn-primary" href="{{ adverse_event.compound.id }}">View</a></td>
                     <td><a href="{{ adverse_event.compound.id }}">{{ adverse_event.compound.compound }}</a></td>
                     <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
                     <td>{{ adverse_event.frequency }}</td>
@@ -51,9 +54,15 @@
                 dom: 'T<"clear">lfrtip',
                 "iDisplayLength": 50,
                 // Initially sort on compound and frequency
-                "order": [[ 0, "asc" ], [ 2, "desc"]],
+                "order": [[ 1, "asc" ], [ 3, "desc"]],
                 // Try to improve speed
-                "deferRender": true
+                "deferRender": true,
+                "aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0]
+                    }
+                ]
             });
         });
     </script>
