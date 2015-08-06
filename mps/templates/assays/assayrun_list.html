@@ -37,7 +37,7 @@
             {% for study in object_list %}
                 <tr class="compound" id={{ study.id }} name={{ study.id }}>
                     <td><a class="btn btn-primary" href="{{ study.id }}">View/Edit</a></td>
-                    <td><a href="{{ study.id }}">{{ study.assay_run_id }}</a></td>
+                    <td>{{ study.assay_run_id }}</td>
                     <td>{{ study.study_types }}</td>
                     <td>{{ study.study_configuration }}</td>
                     <td>{{ study.start_date|date:"M d, Y" }}</td>

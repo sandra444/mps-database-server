@@ -31,7 +31,7 @@
             {% for celltype in object_list %}
                 <tr class="cellsample" id={{ celltype.id }} name={{ celltype }}>
                     <td><a class="btn btn-primary" href="{{ celltype.id }}">View/Edit</a></td>
-                    <td><a href="{{ celltype.id }}">{{ celltype.organ }}</a></td>
+                    <td>{{ celltype.organ }}</td>
                     <td><a href="{{ celltype.id }}">{{ celltype.cell_type }}</a></td>
                     <td>{{ celltype.cell_subtype }}</td>
                     <td>{{ celltype.species }}</td>

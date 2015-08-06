@@ -31,7 +31,7 @@
             {% for configuration in object_list %}
                 <tr class="studyconfiguration" id={{ configuration.id }} name={{ configuration.name }}>
                     <td><a class="btn btn-primary" href="{{ configuration.id }}">View/Edit</a></td>
-                    <td><a href="{{ configuration.id }}">{{ configuration.name }}</a></td>
+                    <td>{{ configuration.name }}</td>
                     <td>{{ configuration.study_format }}</td>
                     <td>{{ configuration.media_composition }}</td>
                     <td>{{ configuration.hardware_description }}</td>

@@ -46,12 +46,8 @@
             <tbody>
             {% for result in object_list %}
                 <tr class="result" id={{ result.id }} name={{ result.id }}>
-                    <td><a class="btn btn-primary" href="{{ result.id }}">View/Edit</a></td>
-                    <td>
-                        <a href="{{ result.assay_result.id }}">
-                            {{ result.assay_result.id }}
-                        </a>
-                    </td>
+                    <td><a class="btn btn-primary" href="{{ result.assay_result.id }}">View/Edit</a></td>
+                    <td>{{ result.assay_result.id }}</td>
                     <td>
                         <a href="/assays/organchipstudy/{{ result.assay_result.readout.setup.assay_run_id.id }}">
                             {{ result.assay_result.readout.setup.assay_run_id }}

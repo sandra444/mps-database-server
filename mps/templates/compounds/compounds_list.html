@@ -43,7 +43,7 @@
             {% for compound in object_list %}
                 <tr class="compound" id={{ compound.id }} name={{ compound.name }}>
                     <td><a class="btn btn-primary" href="{{ compound.id }}">View</a></td>
-                    <td><a href="{{ compound.id }}">{{ compound.name }}</a></td>
+                    <td>{{ compound.name }}</td>
                     <td><a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.chemblid }}">{{ compound.chemblid }}</a></td>
                     <td>{{ compound.synonyms }}</td>
                     <td>{{ compound.molecular_weight|default_if_none:"" }}</td>

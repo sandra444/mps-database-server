@@ -39,7 +39,7 @@
             {% for readout in object_list %}
                 <tr class="readout" id={{ readout.id }} name={{ readout.id }}>
                     <td><a class="btn btn-primary" href="{{ readout.id }}">View/Edit</a></td>
-                    <td><a href="{{ readout.id }}">{{ readout.id }}</a></td>
+                    <td>{{ readout.id }}</td>
                     <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}">{{ readout.setup }}</a></td>
                     <td>
                         {% for assay in readout.related_assays %}
