@@ -163,7 +163,7 @@ class AssayAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'description', 'chembl_link', 'pubchem_id', 'organism', 'assay_type', 'locked')
+        'description', 'chembl_link', 'pubchem_id', 'organism', 'target', 'assay_type', 'locked')
     list_filter = ('assay_type',)
     search_fields = ['description', '=chemblid', 'pubchem_id']
     actions = ['update_fields']

@@ -138,7 +138,7 @@ def get_pubchem_target(target):
         # If the target is in the database
         try:
             final_target = Target.objects.get(GI=target)
-            print "Found target!"
+            #print "Found target!"
         # If the target is not in the database, create it
         except:
 
@@ -180,7 +180,7 @@ def get_pubchem_target(target):
 
                 target_model = Target.objects.create(locked=True, **entry)
                 final_target = target_model
-                print "Created target!"
+                #print "Created target!"
 
             except:
 
@@ -309,7 +309,7 @@ def get_bioactivities(cid):
                             if not target_model.target_type:
                                 target_model.target_type = target_type
                                 target_model.save()
-                        print "Found assay!"
+                        #print "Found assay!"
 
                     except:
                         source = assay.get('SourceName')
@@ -335,7 +335,7 @@ def get_bioactivities(cid):
                             entry.update({'target': get_pubchem_target(target)})
 
                         assay_model = Assay.objects.create(locked=True, **entry)
-                        print "Created assay!"
+                        #print "Created assay!"
 
                     activities_to_change = assays.get(aid)
 
@@ -460,7 +460,7 @@ def run():
             if not chembl_assay:
                 try:
                     assay_query = Assay.objects.filter(pk=assay.id)
-                    print 'Updating', data.get('chemblid')
+                    #print 'Updating', data.get('chemblid')
                     assay_query.update(**data)
                     updates += 1
                 except Exception as e:
@@ -470,7 +470,7 @@ def run():
             # Update the chembl assay with pubchem data then delete the old assay
             else:
                 try:
-                    print 'Replacing', chembl_assay[0].chemblid
+                    #print 'Replacing', chembl_assay[0].chemblid
                     chembl_assay.update(**data)
                     chembl_assay.update(**{'pubchem_id':assay.pubchem_id, 'source':assay.source, 'source_id':assay.source_id})
                     # Switch bioactivities to the correct assay
@@ -515,5 +515,13 @@ def run():
                         PubChemBioactivity.objects.filter(pk=pk).update(normalized_value=bio_value[index])
                     except:
                         print 'Update of bioactivity {} failed'.format(pk)
+
+    print 'Adding SINGLE PROTEIN to NCBI target entries'
+
+    no_type = Target.objects.filter(target_type__isnull=True) | Target.objects.filter(target_type=u'')
+
+    for target in no_type.exclude(GI=u''):
+        target.target_type = 'SINGLE PROTEIN'
+        target.save()
 
     print 'Finished'

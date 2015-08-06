@@ -110,13 +110,16 @@ $(document).ready(function () {
                 if (changed == 'all') {
                     // Clear bioactivities
                     reset_rows('bioactivities', bioactivities, '');
-                    
+
                     // Clear compounds
                     reset_rows('compounds', compounds, 'c');
 
                     // Clear drugtrials
                     reset_rows('drugtrials', drugtrials, '');
                 }
+
+                // Trigger compound filters
+                trigger_compound_filters();
 
                 // Enable everything
                 $(":input").prop("disabled", false);
@@ -402,8 +405,18 @@ $(document).ready(function () {
 
     // Special filtering for compounds
 
+    function trigger_compound_filters() {
+        drugs.trigger('change');
+        non_drugs.trigger('change');
+        logp.trigger('change');
+        molecular_weight.trigger('change');
+    }
+
+    var drugs = $('#drugs');
+    var non_drugs = $('#non_drugs');
+
     // Check to see if the "drugs" button has been clicked
-    $('#drugs').change(function (evt) {
+    drugs.change(function (evt) {
         // Show all drugs
         if (this.checked) {
             $("#compounds tr").each(function () {
@@ -430,7 +443,7 @@ $(document).ready(function () {
     });
 
     // Check to see if the "non-drugs" button has been clicked
-    $('#non_drugs').change(function (evt) {
+    non_drugs.change(function (evt) {
         // Show all non-drugs
         if (this.checked) {
             $("#compounds tr").each(function () {

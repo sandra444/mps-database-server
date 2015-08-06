@@ -161,7 +161,7 @@ def generate_list_of_all_drugtrials(desired_organisms):
     return result
 
 def generate_list_of_all_compounds_in_bioactivities():
-    pubchem_compounds = PubChemBioactivity.objects.all().prefetch_related('compound').values_list('compound__name')
+    pubchem_compounds = PubChemBioactivity.objects.all().prefetch_related('compound').values_list('compound__name', 'compound__known_drug', 'compound__logp', 'compound__molecular_weight')
     result = generate_record_frequency_data(pubchem_compounds)
     return result
     #cursor = connection.cursor()
