@@ -48,7 +48,7 @@ $(document).ready(function () {
         $('#' + name).html('');
         // Add from list
         for (var i in list) {
-            var row = ''
+            var row = '';
             // Note added 'c' to avoid confusion with graphic
             if (add) {
                 var data = list[i].name.split('|');
