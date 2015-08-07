@@ -294,18 +294,6 @@ $(document).ready(function () {
 
     refresh('all');
 
-    // Return to selection
-    $('#back').click(function (evt) {
-        $('#graphic').prop('hidden', true);
-        $('#selection').prop('hidden', false);
-//        document.location.hash = "";
-//        //Why does microsoft want me to suffer?
-//        if (browser.isIE && browser.verIE >= 11) {
-//            $('#graphic').prop('hidden',true);
-//            $('#selection').prop('hidden',false)
-//        }
-    });
-
     var bioactivity_search = $('#bioactivity_filter');
     var target_search = $('#target_filter');
     var compound_search = $('#compound_filter');
@@ -570,6 +558,16 @@ $(document).ready(function () {
         molecular_weight.trigger('change');
     });
 
+    window.onhashchange = function() {
+        if (location.hash != '#show') {
+            $('#graphic').prop('hidden', true);
+            $('#selection').prop('hidden', false);
+        }
+        else {
+            $('#graphic').prop('hidden', false);
+            $('#selection').prop('hidden', true);
+        }
+    };
 //    function hashChange() {
 //
 //        if (document.location.hash == "") {

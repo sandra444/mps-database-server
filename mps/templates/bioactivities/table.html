@@ -11,7 +11,7 @@
 
     <legend><h1>Quick Search</h1></legend>
 
-    <form action="/bioactivities/table/" method="post">
+    <form action="/bioactivities/table/#filter" method="post">
         {% csrf_token %}
         {{ form.app.as_hidden }}
         {{ form.search_term.as_hidden }}
@@ -20,9 +20,9 @@
 
     <legend><h1>Advanced Search</h1></legend>
 
-    <button type="button" class="btn btn-xlarge btn-primary text-center" id="submit">
+    <a href="#show" type="button" class="btn btn-xlarge btn-primary text-center" id="submit">
         Generate Table
-    </button>
+    </a>
 {% endblock %}
 
 {% block extra_row %}
@@ -131,10 +131,10 @@
 {% block graphic %}
     <div hidden id="graphic" style="padding-bottom: 50px" class="container">
         <div class="row text-center">
-            <button id="back" class="btn btn-xlarge btn-info">
+            <a href="#filter"  id="back" class="btn btn-xlarge btn-info">
                 <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
                 Back to Selection
-            </button>
+            </a>
 {#            <a id="download" class="btn btn-xlarge btn-primary">Download Table</a>#}
         </div>
 

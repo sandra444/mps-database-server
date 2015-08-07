@@ -8,9 +8,9 @@
 {% endblock %}
 
 {% block submit %}
-    <button type="button" class="btn btn-xlarge btn-primary text-center" id="submit">
+    <a href="#show" class="btn btn-xlarge btn-primary text-center" id="submit">
         Generate Heatmap
-    </button>
+    </a>
 {% endblock %}
 
 {% block extra_row %}
@@ -65,10 +65,10 @@
 {% block graphic %}
     <div hidden id="graphic">
         <div class="row text-center">
-            <button id="back" class="btn btn-xlarge btn-info">
+            <a href="#filter" id="back" class="btn btn-xlarge btn-info">
                 <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
                 Back to Selection
-            </button>
+            </a>
             <a id="download" class="btn btn-xlarge btn-primary">Download Heatmap</a>
         </div>
 
