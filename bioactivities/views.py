@@ -56,9 +56,8 @@ def bioactivities_list(request):
             else:
                 data = Bioactivity.objects.filter(standard_name__isnull=False,
                                               standardized_units__isnull=False,
-                                              standardized_value__isnull=False).prefetch_related('compound',
-                                                                                                 'target',
-                                                                                                 'created_by').select_related('assay__chemblid')
+                                              standardized_value__isnull=False).select_related('compound__name',
+                                                                                                 'target__name','assay__chemblid')
 
             if compound:
                 data = data.filter(compound__name__icontains=compound)
@@ -74,7 +73,7 @@ def bioactivities_list(request):
 
             if exclude_targetless:
                 # Exclude where target is "Unchecked"
-                data = data.filter(assay__target__isnull=False).exclude(target__name="Unchecked").exclude(target__name='')
+                data = data.filter(assay__target__isnull=False).exclude(assay__target__name="Unchecked").exclude(assay__target__name='')
 
             if exclude_organismless:
                 # Exclude where assay and target organism are null
