@@ -1,10 +1,13 @@
 from .models import Compound
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 # from django.utils.decorators import method_decorator
 # from django.contrib.auth.decorators import login_required
 from mps.mixins import OneGroupRequiredMixin
-from compounds.forms import CompoundForm
-
+# from django.shortcuts import render_to_response
+# from django.template import RequestContext
+from .forms import *
+from django.shortcuts import redirect
+from django.forms.models import inlineformset_factory
 
 class CompoundsList(ListView):
     model = Compound
@@ -22,6 +25,7 @@ class CompoundsList(ListView):
     #     else:
     #         object_list = self.model.objects.all()
     #     return object_list
+
 
 class CompoundsDetail(DetailView):
     model = Compound
@@ -50,9 +54,45 @@ class CompoundsAdd(OneGroupRequiredMixin, CreateView):
     form_class = CompoundForm
     template_name = 'compounds/compounds_add.html'
 
-    # # Custom dispatch (achieve same as GET in assay views
-    # @method_decorator(login_required)
-    # def dispatch(self, request, *args, **kwargs):
-    #     if len(request.user.groups.values_list('pk',flat=True)) == 0:
-    #         return PermissionDenied(request,'You must be a member of at least one group')
-    #     return super(CompoundsAdd, self).dispatch(request, *args, **kwargs)
+CompoundSummaryFormset = inlineformset_factory(Compound, CompoundSummary, formset=CompoundSummaryInlineFormset,
+                                              extra=1,
+                                              widgets={
+                                              'summary': forms.Textarea(attrs={'size': 500})
+                                              })
+
+CompoundPropertyFormset = inlineformset_factory(Compound, CompoundProperty, formset=CompoundPropertyInlineFormset,
+                                              extra=1)
+
+# DON'T BE DECEIVED! THE FRONT-END UPDATE HAS ACCESS ONLY TO THE SUMMARIES AND PROPERTIES
+class CompoundsUpdate(OneGroupRequiredMixin, UpdateView):
+    model = Compound
+    # TODO ADD
+    template_name = 'compounds/compounds_update.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        formset_summary = CompoundSummaryFormset(instance=self.object)
+        formset_property = CompoundPropertyFormset(instance=self.object)
+        return self.render_to_response(
+            self.get_context_data(formset_summary=formset_summary,
+                                  formset_property=formset_property))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        formset_summary = CompoundSummaryFormset(self.request.POST, instance=self.object)
+        formset_property = CompoundPropertyFormset(self.request.POST, instance=self.object)
+
+        if formset_summary.is_valid() and formset_property.is_valid():
+            formset_summary.save()
+            formset_property.save()
+            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(
+            self.get_context_data(formset_summary=formset_summary,
+                                  formset_property=formset_property))
+
+# def compound_report(request):
+#     """This will give a table summary based on the specifications given"""
+#     c = RequestContext(request)
+#     return render_to_response('compounds/report.html', c)

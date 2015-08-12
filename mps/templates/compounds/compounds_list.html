@@ -10,6 +10,7 @@
             <thead>
                 <tr>
                     <th>View</th>
+                    <th>Edit</th>
                     <th>Name</th>
                     <th>CHEMBL ID</th>
                     <th>Synonyms</th>
@@ -26,6 +27,7 @@
             <tfoot>
                 <tr>
                     <th>View</th>
+                    <th>Edit</th>
                     <th>Name</th>
                     <th>CHEMBL ID</th>
                     <th>Synonyms</th>
@@ -43,6 +45,7 @@
             {% for compound in object_list %}
                 <tr class="compound" id={{ compound.id }} name={{ compound.name }}>
                     <td><a class="btn btn-primary" href="{{ compound.id }}">View</a></td>
+                    <td><a class="btn btn-primary" href="{{ compound.id }}/update/">Edit</a></td>
                     <td>{{ compound.name }}</td>
                     <td><a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.chemblid }}">{{ compound.chemblid }}</a></td>
                     <td>{{ compound.synonyms }}</td>
@@ -66,14 +69,14 @@
         $(document).ready(function() {
             $('#compounds').DataTable({
                 dom: 'T<"clear">lfrtip',
-                "order": [[ 1, "asc" ]],
+                "order": [[ 2, "asc" ]],
                 "aoColumnDefs": [
                     {
                         "bSortable": false,
-                        "aTargets": [0,9]
+                        "aTargets": [0,1,10]
                     },
                     {
-                        "targets": [3],
+                        "targets": [4],
                         "visible": false,
                         "searchable": true
                     }
