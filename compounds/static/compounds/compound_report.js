@@ -30,8 +30,6 @@ $(document).ready(function () {
         // Sort by time
         data = _.sortBy(data, function(obj){ return +obj.time });
 
-        console.log(elem_id);
-
         x.domain(d3.extent(data, function(d) { return d.time; }));
         y.domain(d3.extent(data, function(d) { return d.value; }));
 
