@@ -70,7 +70,7 @@ $(document).ready(function () {
 
     function build_table(data) {
         // Show graphic
-        $('#results_table').prop('hidden',false);
+        $('#graphic').prop('hidden',false);
 
         // Clear old (if present)
         $('#results_table').dataTable().fnDestroy();
