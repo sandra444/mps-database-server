@@ -40,7 +40,7 @@ class CompoundPropertyInline(admin.TabularInline):
 
     fields = (
         (
-            ('compound','property','value',)
+            ('compound','property_type','value',)
         ),
     )
     extra = 0

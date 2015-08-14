@@ -234,7 +234,7 @@
             <tbody>
             {% for property in object.compoundproperty_set.all %}
                 <tr>
-                    <td><strong>{{ property.property }}</strong></td>
+                    <td><strong>{{ property.property_type }}</strong></td>
                     <td>{{ property.value }}</td>
                 </tr>
             {% endfor %}

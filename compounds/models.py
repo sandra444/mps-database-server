@@ -225,16 +225,21 @@ class CompoundSummary(models.Model):
     summary_type = models.ForeignKey(SummaryType)
     summary = models.CharField(max_length=500)
 
+    def __unicode__(self):
+        return unicode(self.summary)
 
 # It would be useful to have a model that catalogues COMPOUND PROPERTIES such as cmax and clogp
 class CompoundProperty(models.Model):
 
     class Meta(object):
-        unique_together = [('compound','property')]
+        unique_together = [('compound','property_type')]
         verbose_name = 'Compound Property'
         verbose_name_plural = 'Compound Properties'
 
     compound = models.ForeignKey(Compound)
-    property = models.ForeignKey(PropertyType)
+    property_type = models.ForeignKey(PropertyType)
     # After some amount of debate, it was decided a float field should be sufficient for out purposes
     value = models.FloatField()
+
+    def __unicode__(self):
+        return unicode(self.value)

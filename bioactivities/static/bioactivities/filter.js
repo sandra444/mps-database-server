@@ -568,19 +568,4 @@ $(document).ready(function () {
             $('#selection').prop('hidden', true);
         }
     };
-//    function hashChange() {
-//
-//        if (document.location.hash == "") {
-//            $('#graphic').prop('hidden',true);
-//            $('#selection').prop('hidden',false)
-//        }
-//
-//        else {
-//            $('#graphic').prop('hidden',false);
-//            $('#selection').prop('hidden',true)
-//        }
-//    }
-//
-//    //This will call the hashchange function whenever the hashchanges (does not work on outdated versions of IE)
-//    window.onhashchange = hashChange;
 });

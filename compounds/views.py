@@ -92,7 +92,8 @@ class CompoundsUpdate(OneGroupRequiredMixin, UpdateView):
             self.get_context_data(formset_summary=formset_summary,
                                   formset_property=formset_property))
 
-# def compound_report(request):
-#     """This will give a table summary based on the specifications given"""
-#     c = RequestContext(request)
-#     return render_to_response('compounds/report.html', c)
+
+# Currently, compounds report basically begins as just a compounds list
+class CompoundsReport(ListView):
+    model = Compound
+    template_name = 'compounds/compounds_report.html'

@@ -82,12 +82,51 @@ def fetch_chemblid_data(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+def fetch_compound_report(request):
+    summary_types = (
+        'Pre-clinical Findings',
+        'Clinical Findings',
+    )
+    property_types = (
+        'Dose (xCmax)',
+        'cLogP',
+    )
+
+    compounds_request = json.loads(request.POST.get('compounds'))
+
+    data = {}
+
+    compounds = Compound.objects.filter(name__in=compounds_request)
+
+    for compound in compounds:
+        data.update(
+            {compound.name: {
+                'table': {
+                    'id': compound.id
+                },
+                'plot': {}
+            }
+        })
+
+    summaries = {summary.compound.name+summary.summary_type.name:summary.summary for summary in CompoundSummary.objects.filter(compound_id__in=compounds, summary_type__name__in=summary_types)}
+    properties = {property.compound.name+property.property_type.name:property.value for property in CompoundProperty.objects.filter(compound_id__in=compounds, property_type__name__in=property_types)}
+
+    for compound in compounds:
+        for summary_type in summary_types:
+            data.get(compound.name).get('table').update({summary_type:summaries.get(compound.name+summary_type,'')})
+        for property_type in property_types:
+            data.get(compound.name).get('table').update({property_type:properties.get(compound.name+property_type,'')})
+
+
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
 
 switch = {
     'fetch_compound_name': fetch_compound_name,
     'fetch_chemblid_data': fetch_chemblid_data,
+    'fetch_compound_report': fetch_compound_report,
 }
-
 
 def ajax(request):
     post_call = request.POST['call']
