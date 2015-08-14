@@ -5,6 +5,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 import ujson as json
 from .models import *
+from assays.models import AssayChipRawData
 
 from bioservices import ChEMBL as ChEMBLdb
 
@@ -117,7 +118,28 @@ def fetch_compound_report(request):
         for property_type in property_types:
             data.get(compound.name).get('table').update({property_type:properties.get(compound.name+property_type,'')})
 
+    # Acquire AssayChipRawData and store based on compound-assay (and convert to minutes?)
+    readouts = AssayChipRawData.objects.filter(assay_chip_id__chip_setup__compound__in=compounds).select_related('assay_chip_id__chip_setup__compound__name')
 
+    for readout in readouts:
+        compound = readout.assay_chip_id.chip_setup.compound.name
+        plot = data.get(compound).get('plot')
+        assay = readout.assay_id.assay_id.assay_name
+        if not assay in plot:
+            plot[assay] = {}
+        entry = plot[assay]
+        if readout.elapsed_time not in entry:
+            entry.update({readout.elapsed_time:[readout.value]})
+        else:
+            entry.get(readout.elapsed_time).append(readout.value)
+
+    # Average out the values
+    for compound in data:
+        plot = data.get(compound).get('plot')
+        for assay in plot:
+            entry = plot[assay]
+            for time in entry:
+                entry.update({time:float(sum(entry.get(time)))/len(entry.get(time))})
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")

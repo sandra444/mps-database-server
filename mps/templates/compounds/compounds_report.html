@@ -9,6 +9,14 @@
 
 {% block content %}
 
+    <style>
+        .sparkline {
+            fill: none;
+            stroke: #000;
+            stroke-width: 0.5px;
+        }
+    </style>
+
     <div id="selection" style="padding-bottom: 50px">
         <div class="row">
             <div class="text-center">
@@ -125,6 +133,15 @@
     {# Right now the fields of a report are static, but that will likely change #}
     {# Need to switch to hide full #}
     <div id="graphic" style="padding-bottom: 50px">
+        <div class="row text-center">
+            <a href="#filter"  id="back" class="btn btn-xlarge btn-info">
+                <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+                Back to Selection
+            </a>
+        </div>
+
+        <hr>
+
         <table hidden class="display" id="results_table" cellspacing="0" width="100%">
             <thead>
                 <tr>
