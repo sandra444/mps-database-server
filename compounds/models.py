@@ -224,6 +224,7 @@ class CompoundSummary(models.Model):
     compound = models.ForeignKey(Compound)
     summary_type = models.ForeignKey(SummaryType)
     summary = models.CharField(max_length=500)
+    source = models.CharField(max_length=250)
 
     def __unicode__(self):
         return unicode(self.summary)
@@ -240,6 +241,7 @@ class CompoundProperty(models.Model):
     property_type = models.ForeignKey(PropertyType)
     # After some amount of debate, it was decided a float field should be sufficient for out purposes
     value = models.FloatField()
+    source = models.CharField(max_length=250)
 
     def __unicode__(self):
         return unicode(self.value)

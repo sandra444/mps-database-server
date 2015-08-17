@@ -22,7 +22,7 @@ class CompoundSummaryInline(admin.TabularInline):
 
     fields = (
         (
-            ('compound','summary_type','summary',)
+            ('compound','summary_type','summary','source')
         ),
     )
     extra = 0
@@ -40,7 +40,7 @@ class CompoundPropertyInline(admin.TabularInline):
 
     fields = (
         (
-            ('compound','property_type','value',)
+            ('compound','property_type','value','source')
         ),
     )
     extra = 0
