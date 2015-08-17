@@ -8,7 +8,7 @@ $(document).ready(function () {
 
     var inlines_property = $('#compoundproperty_set-group .inline');
     var next_id_property = inlines_property.length;
-    var title_property = $('.inline')[0].id.split('-')[0];
+    var title_property = 'property';
     var add_property = $('#compoundproperty_set-group .inline:last').html();
 
     $('#add_button_property').click(function() {
@@ -77,7 +77,7 @@ $(document).ready(function () {
 
     var inlines_summary = $('#compoundsummary_set-group .inline');
     var next_id_summary = inlines_summary.length;
-    var title_summary = $('.inline')[0].id.split('-')[0];
+    var title_summary = 'summary';
     var add_summary = $('#compoundsummary_set-group .inline:last').html();
 
     $('#add_button_summary').click(function() {
@@ -125,8 +125,8 @@ $(document).ready(function () {
 
             // Need to update values before creating the replacement text
             // Add values to input
-            $('#'+ title_summary +'-'+ i + ' input').each(function () {
-                $(this).attr("value", this.value);
+            $('#'+ title_summary +'-'+ i + ' textarea').each(function () {
+                $(this).text(this.text());
             });
             // Add selected attribute to selected option of each select
             $('#'+ title_summary +'-'+ i + ' select').each(function (){

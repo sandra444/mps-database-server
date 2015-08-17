@@ -86,7 +86,7 @@
         </thead>
         <tbody>
             {% for summary in formset_summary %}
-                <tr class="inline" id="property-{{ forloop.counter0 }}">
+                <tr class="inline" id="summary-{{ forloop.counter0 }}">
                     {# Hidden input for Update (need id to associate) #}
                     {% if summary.id.value %}
                     <td class="original" hidden>
