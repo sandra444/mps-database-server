@@ -92,7 +92,12 @@ $(document).ready(function () {
 
             row += "<td>";
             for (var assay in plot) {
-                row += '<div>' + assay + '<span id='+compound+'_'+assay+'></span></div>';
+                for (var concentration in plot[assay]) {
+                    // The use of days here is contrived, actual units to be decided on later
+                    row += '<div class="small">' + assay + ' (' + values.max_time[assay + '_' + concentration] + ' ' + 'days @ '
+                        + concentration + ')<span id=' + compound + '_'
+                        + assay + '_' + concentration.replace('.','_') + '></span></div>';
+                }
             }
             row += "</td>";
 
@@ -100,12 +105,14 @@ $(document).ready(function () {
             $('#results_body').append(row);
 
             for (var assay in plot) {
-                sparkline('#'+compound+'_'+assay, plot[assay]);
+                for (var concentration in plot[assay]) {
+                    sparkline('#' + compound + '_' + assay + '_' + concentration.replace('.','_'), plot[assay][concentration]);
+                }
             }
         }
 
         $('#results_table').DataTable({
-            dom: 'T<"clear">frtip',
+            dom: 'T<"clear">rt',
             "iDisplayLength": 100,
             // Needed to destroy old table
             "bDestroy": true,

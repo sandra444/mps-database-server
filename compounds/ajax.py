@@ -103,7 +103,8 @@ def fetch_compound_report(request):
         data.update(
             {compound.name: {
                 'table': {
-                    'id': compound.id
+                    'id': compound.id,
+                    'max_time': {}
                 },
                 'plot': {}
             }
@@ -119,7 +120,7 @@ def fetch_compound_report(request):
             data.get(compound.name).get('table').update({property_type:properties.get(compound.name+property_type,'')})
 
     # Acquire AssayChipRawData and store based on compound-assay (and convert to minutes?)
-    readouts = AssayChipRawData.objects.filter(assay_chip_id__chip_setup__compound__in=compounds).select_related('assay_chip_id__chip_setup__compound__name')
+    readouts = AssayChipRawData.objects.filter(assay_chip_id__chip_setup__compound__in=compounds).select_related('assay_chip_id__chip_setup__compound', 'assay_chip_id.chip_setup.unit')
 
     for readout in readouts:
         compound = readout.assay_chip_id.chip_setup.compound.name
@@ -127,7 +128,12 @@ def fetch_compound_report(request):
         assay = readout.assay_id.assay_id.assay_name
         if not assay in plot:
             plot[assay] = {}
-        entry = plot[assay]
+        concentration = unicode(readout.assay_chip_id.chip_setup.concentration) + u'_' + readout.assay_chip_id.chip_setup.unit.unit
+        # Replace unicode characters
+        concentration = concentration.replace(u'µ', u'u')
+        if not concentration in plot[assay]:
+            plot[assay][concentration] = {}
+        entry = plot[assay][concentration]
         if readout.elapsed_time not in entry:
             entry.update({readout.elapsed_time:[readout.value]})
         else:
@@ -137,9 +143,12 @@ def fetch_compound_report(request):
     for compound in data:
         plot = data.get(compound).get('plot')
         for assay in plot:
-            entry = plot[assay]
-            for time in entry:
-                entry.update({time:float(sum(entry.get(time)))/len(entry.get(time))})
+            for concentration in plot[assay]:
+                entry = plot[assay][concentration]
+                for time in entry:
+                    entry.update({time:float(sum(entry.get(time)))/len(entry.get(time))})
+                # Add maximum
+                data[compound]['table']['max_time'].update({assay+'_'+concentration: max(entry.keys())})
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
