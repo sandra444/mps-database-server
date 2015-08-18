@@ -87,8 +87,10 @@ $(document).ready(function () {
         for (var compound in data) {
             var all_plots = data[compound].plot;
             for (var assay in all_plots) {
-                x_max[assay] = 0;
-                y_max[assay] = 100;
+                if (!x_max[assay]) {
+                    x_max[assay] = 0;
+                    y_max[assay] = 100;
+                }
                 var assay_plots = all_plots[assay];
                 for (var concentration in assay_plots) {
                     for (var time in assay_plots[concentration]) {
@@ -109,25 +111,48 @@ $(document).ready(function () {
 
             row += "<td><a href='/compounds/"+values['id']+"'>" + compound + "</a></td>";
             row += "<td>" + values['Dose (xCmax)'] + "</td>";
-//            row += "<td>" + values['cLogP']  + "</td>";
+            row += "<td>" + values['cLogP']  + "</td>";
             row += "<td>" + values['Pre-clinical Findings'] + "</td>";
             row += "<td>" + values['Clinical Findings'] + "</td>";
 
-//            row += "<td>" + 'TODO' + "</td>";
+            // Recently added
+            row += "<td>" + values['PK/Metabolism'] + "</td>";
 
             row += "<td>";
-            for (var assay in plot) {
-                for (var concentration in plot[assay]) {
-                    // The use of days here is contrived, actual units to be decided on later
-                    row += '<div class="small">' + assay + ' (' + values.max_time[assay + '_' + concentration] + ' ' + 'days @ '
-                        + concentration + ')<span id=' + compound + '_'
-                        + assay + '_' + concentration.replace('.','_') + '></span></div>';
-                }
-            }
+
+            // Make the table
+            row += "<table id='"+compound+"_table'>";
+
+            // Add a row for the header
+            row += "<tr id='"+compound+"_header'><td></td></tr>";
+
+            row += "</table>";
             row += "</td>";
 
             row += "</tr>";
             $('#results_body').append(row);
+
+            for (var assay in plot) {
+                // Tack this assay on to the header
+                $('#'+compound+'_header').append($('<td>')
+                    // The use of days here is contrived, actual units to be decided on later
+                    .text(assay + ' (' + x_max[assay] + ' days)')
+                    .addClass('small'));
+                for (var concentration in plot[assay]) {
+                    var row_id = compound + '_' + concentration.replace('.','_');
+                    // If the concentration does not have a row, add it to the table
+                    if (!$('#'+row_id)[0]) {
+                        // Add the row
+                        $('#'+compound+'_table').append($('<tr>')
+                            .attr('id', row_id)
+                            .append($('<td>')
+                                .text(concentration.replace('_',' '))));
+                    }
+                    // Add a cell for the assay given concentration
+                    $('#'+row_id).append($('<td>')
+                        .attr('id', compound + '_' + assay + '_' + concentration.replace('.','_')));
+                }
+            }
 
             for (var assay in plot) {
                 for (var concentration in plot[assay]) {
@@ -150,7 +175,7 @@ $(document).ready(function () {
             "aoColumnDefs": [
                 {
                     "bSortable": false,
-                    "aTargets": [4]
+                    "aTargets": [6]
                 }
             ]
         });

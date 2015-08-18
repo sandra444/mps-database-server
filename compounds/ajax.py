@@ -84,6 +84,8 @@ def fetch_compound_report(request):
     summary_types = (
         'Pre-clinical Findings',
         'Clinical Findings',
+        # Recently added
+        'PK/Metabolism',
     )
     property_types = (
         'Dose (xCmax)',
