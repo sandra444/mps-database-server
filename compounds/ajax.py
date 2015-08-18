@@ -22,7 +22,6 @@ def main(request):
     return render_to_response('ajax_error.html',
                               context_instance=RequestContext(request))
 
-
 def fetch_compound_name(request):
     data = {}
 
@@ -32,14 +31,12 @@ def fetch_compound_name(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
-
 def chembl_error(error):
     data = {}
     data.update({'error': error})
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
-
 
 def fetch_chemblid_data(request):
     chemblid = request.POST['chemblid']
@@ -179,4 +176,3 @@ def ajax(request):
     else:
         # execute the function
         return procedure(request)
-

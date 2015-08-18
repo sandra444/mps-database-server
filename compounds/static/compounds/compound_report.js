@@ -19,7 +19,9 @@ $(document).ready(function () {
              .x(function(d) { return x(d.time); })
              .y(function(d) { return y(d.value); });
 
-    function sparkline(elem_id, plot) {
+    function sparkline(elem_id, plot, x_domain, y_domain) {
+        //console.log(x_domain);
+        //console.log(y_domain);
         data = [];
         for (var time in plot) {
             var value = +plot[time];
@@ -30,8 +32,11 @@ $(document).ready(function () {
         // Sort by time
         data = _.sortBy(data, function(obj){ return +obj.time });
 
-        x.domain(d3.extent(data, function(d) { return d.time; }));
-        y.domain(d3.extent(data, function(d) { return d.value; }));
+        // TODO THE X AND Y DOMAINS NEED TO SCALE TOGETHER ACROSS ASSAYS
+        // FOR THE X AXIS: 0-Max(X) IF I AM NOT MISTAKEN
+        // FOR THE Y AXIS: 0-100 UNLESS Y FOR THE ASSAY EXCEEDS 100
+        x.domain([0, x_domain]);
+        y.domain([0, y_domain]);
 
         d3.select(elem_id)
             .append('svg')
@@ -76,6 +81,26 @@ $(document).ready(function () {
         $('#results_table').dataTable().fnDestroy();
         $('#results_body').html('');
 
+        // Acquire domains for the plots (based on assay)
+        var x_max = {};
+        var y_max = {};
+        for (var compound in data) {
+            var all_plots = data[compound].plot;
+            for (var assay in all_plots) {
+                x_max[assay] = 0;
+                y_max[assay] = 100;
+                var assay_plots = all_plots[assay];
+                for (var concentration in assay_plots) {
+                    for (var time in assay_plots[concentration]) {
+                        var value = +assay_plots[concentration][time];
+                        time = +time;
+                        x_max[assay] = time > x_max[assay] ? time: x_max[assay];
+                        y_max[assay] = value > y_max[assay] ? value: y_max[assay];
+                    }
+                }
+            }
+        }
+
         for (var compound in data) {
             var values = data[compound].table;
             var plot = data[compound].plot;
@@ -84,11 +109,11 @@ $(document).ready(function () {
 
             row += "<td><a href='/compounds/"+values['id']+"'>" + compound + "</a></td>";
             row += "<td>" + values['Dose (xCmax)'] + "</td>";
-            row += "<td>" + values['cLogP']  + "</td>";
+//            row += "<td>" + values['cLogP']  + "</td>";
             row += "<td>" + values['Pre-clinical Findings'] + "</td>";
             row += "<td>" + values['Clinical Findings'] + "</td>";
 
-            row += "<td>" + 'TODO' + "</td>";
+//            row += "<td>" + 'TODO' + "</td>";
 
             row += "<td>";
             for (var assay in plot) {
@@ -106,7 +131,12 @@ $(document).ready(function () {
 
             for (var assay in plot) {
                 for (var concentration in plot[assay]) {
-                    sparkline('#' + compound + '_' + assay + '_' + concentration.replace('.','_'), plot[assay][concentration]);
+                    sparkline(
+                        '#' + compound + '_' + assay + '_' + concentration.replace('.','_'),
+                        plot[assay][concentration],
+                        x_max[assay],
+                        y_max[assay]
+                    );
                 }
             }
         }
@@ -120,7 +150,7 @@ $(document).ready(function () {
             "aoColumnDefs": [
                 {
                     "bSortable": false,
-                    "aTargets": [6]
+                    "aTargets": [4]
                 }
             ]
         });
