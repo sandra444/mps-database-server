@@ -147,7 +147,8 @@ def fetch_compound_report(request):
                 for time in entry:
                     entry.update({time:float(sum(entry.get(time)))/len(entry.get(time))})
                 # Add maximum
-                data[compound]['table']['max_time'].update({assay+'_'+concentration: max(entry.keys())})
+                if assay not in data[compound]['table']['max_time'] or max(entry.keys()) > data[compound]['table']['max_time'][assay]:
+                    data[compound]['table']['max_time'].update({assay: max(entry.keys())})
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")

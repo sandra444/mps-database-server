@@ -121,7 +121,7 @@ $(document).ready(function () {
             row += "<td>";
 
             // Make the table
-            row += "<table id='"+compound+"_table'>";
+            row += "<table id='"+compound+"_table' class='table table-striped table-bordered'>";
 
             // Add a row for the header
             row += "<tr id='"+compound+"_header'><td></td></tr>";
@@ -136,7 +136,7 @@ $(document).ready(function () {
                 // Tack this assay on to the header
                 $('#'+compound+'_header').append($('<td>')
                     // The use of days here is contrived, actual units to be decided on later
-                    .text(assay + ' (' + x_max[assay] + ' days)')
+                    .text(assay + ' (' + values.max_time[assay] + ' days)')
                     .addClass('small'));
                 for (var concentration in plot[assay]) {
                     var row_id = compound + '_' + concentration.replace('.','_');
@@ -148,9 +148,13 @@ $(document).ready(function () {
                             .append($('<td>')
                                 .text(concentration.replace('_',' '))));
                     }
-                    // Add a cell for the assay given concentration
-                    $('#'+row_id).append($('<td>')
-                        .attr('id', compound + '_' + assay + '_' + concentration.replace('.','_')));
+                    for (var every_assay in x_max) {
+                        // Add a cell for the assay given concentration
+                        if (!$('#'+compound + '_' + every_assay + '_' + concentration.replace('.','_'))[0]) {
+                            $('#' + row_id).append($('<td>')
+                                .attr('id', compound + '_' + every_assay + '_' + concentration.replace('.', '_')));
+                        }
+                    }
                 }
             }
 
