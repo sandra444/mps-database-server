@@ -136,8 +136,8 @@ $(document).ready(function () {
                 // Tack this assay on to the header
                 $('#'+compound+'_header').append($('<td>')
                     // The use of days here is contrived, actual units to be decided on later
-                    .text(assay + ' (' + values.max_time[assay] + ' days)')
-                    .addClass('small'));
+                    .addClass('small')
+                    .append('<span>'+assay+'<br>'+'(' + values.max_time[assay] + ' days)'+'</span>'));
                 for (var concentration in plot[assay]) {
                     var row_id = compound + '_' + concentration.replace('.','_');
                     // If the concentration does not have a row, add it to the table
