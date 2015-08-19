@@ -40,7 +40,7 @@
         <script src="{% static "js/modernizr-2.7.1.js" %}"></script>
 
         <!-- d3.js Library -->
-        <script src="{% static "js/d3.v3.min.js" %}"></script>
+        <script src="{% static "js/d3.min.js" %}"></script>
 
         <!-- Load c3.css -->
         <link href="{% static "css/c3.css" %}" rel="stylesheet" type="text/css">
@@ -146,6 +146,7 @@
                       <li title="View curated drug trial data"><a href="/drugtrials">View Drug Trials</a></li>
                       <li><a href="/compounds/">View Chemical Data</a></li>
                       <li><a href="/adverse_events/">View Adverse Events</a></li>
+                      <li><a href="/compounds/report/#filter">Compound Report</a></li>
                       <li class="divider"></li>
                       <li class="dropdown-header">Requires Permission</li>
                       <li><a href="/compounds/add">Add Compound</a></li>
@@ -165,9 +166,9 @@
               <li title="Analyze bioactivity data" class="dropdown">
                 <a class="dropdown-toggle">Bioactivities<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
-                      <li title="View a table of bioactivities based on your selection"><a href="/bioactivities/table">View Bioactivities</a></li>
-                      <li title="Generate a heatmap for selected bioactivity data"><a href="/bioactivities/heatmap">Heatmap</a></li>
-                      <li title="Generate a dendrogram for selected compound/bioactivity data"><a href="/bioactivities/cluster">Cluster</a></li>
+                      <li title="View a table of bioactivities based on your selection"><a href="/bioactivities/table/#filter">View Bioactivities</a></li>
+                      <li title="Generate a heatmap for selected bioactivity data"><a href="/bioactivities/heatmap/#filter">Heatmap</a></li>
+                      <li title="Generate a dendrogram for selected compound/bioactivity data"><a href="/bioactivities/cluster/#filter">Cluster</a></li>
                   </ul>
               </li>
               <li title="Give feedback, ask questions, or view the knowledge base"><a style="color: rgb(0,0,255)" onclick="window.open('/feedback/', 'win', 'toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')">Feedback</a></li>

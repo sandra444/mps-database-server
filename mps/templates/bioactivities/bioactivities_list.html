@@ -43,6 +43,7 @@
                     {% else %}
                         <th>Activity Name</th>
                         <th>Value (μM)</th>
+                        <th>Outcome</th>
                         <th>PubChem Link</th>
                     {% endif %}
                 </tr>
@@ -62,6 +63,7 @@
                     {% else %}
                         <th>Activity Name</th>
                         <th>Value (μM)</th>
+                        <th>Outcome</th>
                         <th>PubChem Link</th>
                     {% endif %}
                 </tr>
@@ -71,7 +73,7 @@
             {% for bioactivity in bioactivities %}
                 <tr>
                     <td><a href="/compounds/{{ bioactivity.compound.id }}">{{ bioactivity.compound }}</a></td>
-                    <td>{{ bioactivity.target|default:'' }}</td>
+                    <td>{{ bioactivity.assay.target|default:'' }}</td>
                     {% if not pubchem %}
                         <td>{{ bioactivity.organism }}</td>
                         <td>{{ bioactivity.standard_name }}</td>
@@ -82,11 +84,12 @@
                             {{ bioactivity.assay.chemblid }}
                         </a></td>
                     {% else %}
-                        <td>{{ bioactivity.target.organism|default:bioactivity.assay.organism|default:'' }}</td>
+                        <td>{{ bioactivity.assay.target.organism|default:bioactivity.assay.organism|default:'' }}</td>
                         <td>{{ bioactivity.activity_name }}</td>
                         <td>{{ bioactivity.value }}</td>
-                        <td><a href="https://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?aid={{ bioactivity.assay.aid }}">
-                            {{ bioactivity.assay.aid|default:'' }}
+                        <td>{{ bioactivity.outcome }}</td>
+                        <td><a href="https://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?aid={{ bioactivity.assay.pubchem_id }}">
+                            {{ bioactivity.assay.pubchem_id|default:'' }}
                         </a></td>
                     {% endif %}
                 </tr>

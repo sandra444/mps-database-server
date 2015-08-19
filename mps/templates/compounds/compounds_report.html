@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block load %}
+    <script src="{% static "compounds/compound_report.js" %}"></script>
+    <script src="{% static "js/spin.min.js" %}"></script>
+    <script src="{% static "js/cookies.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+    <style>
+        .sparkline {
+            fill: none;
+            stroke: #FF2400;
+            stroke-width: 0.75px;
+        }
+    </style>
+
+    <div id="selection" style="padding-bottom: 50px">
+        <div class="row">
+            <div class="text-center">
+                {% block submit %}
+                <a href="#show" class="btn btn-xlarge btn-primary text-center" id="submit">
+                    Generate Compound Report
+                </a>
+                {% endblock %}
+            </div>
+        </div>
+        <hr>
+
+        <table hidden id="compounds" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Name</th>
+                    <th>CHEMBL ID</th>
+                    <th>Synonyms</th>
+                    <th>Molecular Weight</th>
+                    <th>LogP</th>
+                    <th>Rule of 5 Violations</th>
+                    <th>Known Drug</th>
+                    <th>Tags</th>
+                    <th>Image</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>Select</th>
+                    <th>Name</th>
+                    <th>CHEMBL ID</th>
+                    <th>Synonyms</th>
+                    <th>Molecular Weight</th>
+                    <th>LogP</th>
+                    <th>Rule of 5 Violations</th>
+                    <th>Known Drug</th>
+                    <th>Tags</th>
+                    <th>Image</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            <form autocomplete="off">
+            {% for compound in object_list %}
+                <tr class="compound" id={{ compound.id }} name={{ compound.name }}>
+                    {# Checkbox for each compound #}
+                    <td><input class="checkbox" type="checkbox" value="{{ compound.name|safe }}"></td>
+                    <td><a href="/compounds/{{ compound.id }}">{{ compound.name }}</a></td>
+                    <td><a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.chemblid }}">{{ compound.chemblid }}</a></td>
+                    <td>{{ compound.synonyms }}</td>
+                    <td>{{ compound.molecular_weight|default_if_none:"" }}</td>
+                    <td>{{ compound.logp|default_if_none:"" }}</td>
+                    <td>{{ compound.ro5_violations|default_if_none:"" }}</td>
+                    <td>{{ compound.known_drug }}</td>
+                    <td>{{ compound.tags|default_if_none:"" }}</td>
+                    <td><img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}"></td>
+                </tr>
+            {% endfor %}
+            </form>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#compounds').DataTable({
+                dom: 'T<"clear">lfrtip',
+                "order": [[ 1, "asc" ]],
+                "aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0,9]
+                    },
+                    {
+                        "targets": [3],
+                        "visible": false,
+                        "searchable": true
+                    }
+                ],
+                "iDisplayLength": 25
+            });
+        });
+
+        // define a spinner but do not show it yet
+
+        window.spinner = new Spinner(
+            {
+                lines: 11, // The number of lines to draw
+                length: 40, // The length of each line
+                width: 15, // The line thickness
+                radius: 42, // The radius of the inner circle
+                corners: 1, // Corner roundness (0..1)
+                rotate: 0, // The rotation offset
+                direction: 1, // 1: clockwise, -1: counterclockwise
+                color: '#000', // #rgb or #rrggbb or array of colors
+                speed: 1.2, // Rounds per second
+                trail: 100, // Afterglow percentage
+                shadow: true, // Whether to render a shadow
+                hwaccel: true, // Whether to use hardware acceleration
+                className: 'spinner', // The CSS class to assign to the spinner
+                zIndex: 2e9, // The z-index (defaults to 2000000000)
+                top: '50%', // Top position relative to parent
+                left: '50%' // Left position relative to parent
+            }
+        );
+    </script>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
+
+    <div id="spinner"></div>
+
+    {# Right now the fields of a report are static, but that will likely change #}
+    {# Need to switch to hide full #}
+    <div hidden id="graphic" style="padding-bottom: 50px">
+        <div class="row text-center">
+            <a href="#filter"  id="back" class="btn btn-xlarge btn-info">
+                <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+                Back to Selection
+            </a>
+        </div>
+
+        <hr>
+
+        <table class="display" id="results_table" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Compound</th>
+                    <th>Dose (xCmax)</th>
+                    <th>cLogP</th>
+                    <th>Pre-clinical Findings</th>
+                    <th>Clinical Findings</th>
+                    <th>PK/Metabolism</th>
+                    <th>Organ Model Results</th>
+                </tr>
+            </thead>
+
+            <tbody id="results_body">
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

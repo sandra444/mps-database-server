@@ -19,7 +19,7 @@ $(document).ready(function () {
     });
 
     // This selector will check all items with DELETE in the name, including newly created ones
-    $( "body" ).on( "click", "input[name*='DELETE']", function(event) {
+    $("body").on("click", "input[name*='DELETE']", function(event) {
         // Use a regex to get the desired ID number
         // var thenum = thestring.match(/\d+$/)[0];
         var id = parseInt(event.target.id.match(/\d+/)[0]);
@@ -31,10 +31,7 @@ $(document).ready(function () {
             return;
         }
 
-        // Exit the function if this is an update page (known via hidden div)
-        // Really should just check if original class exists for the given row
-        // Continue only if original class does not exist in the row
-        // TODO scrap odd update hidden div thing
+        // Exit the function if this is an update page (if it has an original, it already exists)
         if ($('#' + title + '-' + id + ' .original')[0]) {
             return;
         }

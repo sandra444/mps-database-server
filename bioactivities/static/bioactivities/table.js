@@ -21,11 +21,12 @@ $(document).ready(function () {
             row += "<td><a href='/compounds/"+bio.compoundid+"'>" + bio.compound + "</a></td>";
             row += "<td>" + bio.target + "</td>";
             row += "<td>" + bio.organism + "</td>";
-            row += "<td>" + bio.standard_name + "</td>";
-            row += "<td>" + bio.operator + "</td>";
+            row += "<td>" + bio.activity_name + "</td>";
+            //row += "<td>" + bio.operator + "</td>";
             row += "<td>" + bio.standardized_value + "</td>";
-            row += "<td>" + bio.standardized_units + "</td>";
+            //row += "<td>" + bio.standardized_units + "</td>";
             row += "<td><a href='https://www.ebi.ac.uk/chembl/assay/inspect/"+bio.chemblid+"'>" + bio.chemblid + "</a></td>";
+            row += "<td><a href='https://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?aid="+bio.pubchem_id+"'>" + bio.pubchem_id + "</a></td>";
 //            row += "<td>" + bio.bioactivity_type + "</td>";
 //            row += "<td>" + bio.value + "</td>";
 //            row += "<td>" + bio.units + "</td>";

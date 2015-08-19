@@ -48,7 +48,7 @@ $(document).ready(function () {
         $('#' + name).html('');
         // Add from list
         for (var i in list) {
-            var row = ''
+            var row = '';
             // Note added 'c' to avoid confusion with graphic
             if (add) {
                 var data = list[i].name.split('|');
@@ -110,13 +110,16 @@ $(document).ready(function () {
                 if (changed == 'all') {
                     // Clear bioactivities
                     reset_rows('bioactivities', bioactivities, '');
-                    
+
                     // Clear compounds
                     reset_rows('compounds', compounds, 'c');
 
                     // Clear drugtrials
                     reset_rows('drugtrials', drugtrials, '');
                 }
+
+                // Trigger compound filters
+                trigger_compound_filters();
 
                 // Enable everything
                 $(":input").prop("disabled", false);
@@ -291,18 +294,6 @@ $(document).ready(function () {
 
     refresh('all');
 
-    // Return to selection
-    $('#back').click(function (evt) {
-        $('#graphic').prop('hidden', true);
-        $('#selection').prop('hidden', false);
-//        document.location.hash = "";
-//        //Why does microsoft want me to suffer?
-//        if (browser.isIE && browser.verIE >= 11) {
-//            $('#graphic').prop('hidden',true);
-//            $('#selection').prop('hidden',false)
-//        }
-    });
-
     var bioactivity_search = $('#bioactivity_filter');
     var target_search = $('#target_filter');
     var compound_search = $('#compound_filter');
@@ -402,8 +393,18 @@ $(document).ready(function () {
 
     // Special filtering for compounds
 
+    function trigger_compound_filters() {
+        drugs.trigger('change');
+        non_drugs.trigger('change');
+        logp.trigger('change');
+        molecular_weight.trigger('change');
+    }
+
+    var drugs = $('#drugs');
+    var non_drugs = $('#non_drugs');
+
     // Check to see if the "drugs" button has been clicked
-    $('#drugs').change(function (evt) {
+    drugs.change(function (evt) {
         // Show all drugs
         if (this.checked) {
             $("#compounds tr").each(function () {
@@ -430,7 +431,7 @@ $(document).ready(function () {
     });
 
     // Check to see if the "non-drugs" button has been clicked
-    $('#non_drugs').change(function (evt) {
+    non_drugs.change(function (evt) {
         // Show all non-drugs
         if (this.checked) {
             $("#compounds tr").each(function () {
@@ -557,19 +558,14 @@ $(document).ready(function () {
         molecular_weight.trigger('change');
     });
 
-//    function hashChange() {
-//
-//        if (document.location.hash == "") {
-//            $('#graphic').prop('hidden',true);
-//            $('#selection').prop('hidden',false)
-//        }
-//
-//        else {
-//            $('#graphic').prop('hidden',false);
-//            $('#selection').prop('hidden',true)
-//        }
-//    }
-//
-//    //This will call the hashchange function whenever the hashchanges (does not work on outdated versions of IE)
-//    window.onhashchange = hashChange;
+    window.onhashchange = function() {
+        if (location.hash != '#show') {
+            $('#graphic').prop('hidden', true);
+            $('#selection').prop('hidden', false);
+        }
+        else {
+            $('#graphic').prop('hidden', false);
+            $('#selection').prop('hidden', true);
+        }
+    };
 });

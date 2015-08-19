@@ -9,12 +9,14 @@
         <table hidden id="layouts" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Assay Layout Name</th>
                     <th>Device</th>
             </thead>
 
             <tfoot>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Assay Layout Name</th>
                     <th>Device</th>
                 </tr>
@@ -23,7 +25,8 @@
             <tbody>
             {% for layout in object_list %}
                 <tr class="layout" id={{ layout.id }} name={{ layout.id }}>
-                    <td><a href="{{ layout.id }}">{{ layout.layout_name }}</a></td>
+                    <td><a class="btn btn-primary" href="{{ layout.id }}">View/Edit</a></td>
+                    <td>{{ layout.layout_name }}</td>
                     <td><a href="/microdevices/device/{{ layout.device.id }}">{{ layout.device}}</a></td>
                 </tr>
             {% endfor %}
@@ -37,7 +40,13 @@
                 dom: 'T<"clear">lfrtip',
                 "iDisplayLength": 50,
                 // Initially sort on start date (descending), not ID
-                "order": [ 1, "asc" ]
+                "order": [ 2, "asc" ],
+                "aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0]
+                    }
+                ]
             });
         });
     </script>

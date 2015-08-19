@@ -9,6 +9,7 @@
         <table hidden id="studyconfigurations" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Name</th>
                     <th>Study Format</th>
                     <th>Media Composition</th>
@@ -18,6 +19,7 @@
 
             <tfoot>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Name</th>
                     <th>Study Format</th>
                     <th>Media Composition</th>
@@ -28,7 +30,8 @@
             <tbody>
             {% for configuration in object_list %}
                 <tr class="studyconfiguration" id={{ configuration.id }} name={{ configuration.name }}>
-                    <td><a href="{{ configuration.id }}">{{ configuration.name }}</a></td>
+                    <td><a class="btn btn-primary" href="{{ configuration.id }}">View/Edit</a></td>
+                    <td>{{ configuration.name }}</td>
                     <td>{{ configuration.study_format }}</td>
                     <td>{{ configuration.media_composition }}</td>
                     <td>{{ configuration.hardware_description }}</td>
@@ -42,7 +45,14 @@
         $(document).ready(function() {
             $('#studyconfigurations').DataTable( {
                 dom: 'T<"clear">lfrtip',
-                "iDisplayLength": 50
+                "iDisplayLength": 50,
+                "order": [[ 1, "asc" ]],
+                "aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0]
+                    }
+                ]
             });
         });
     </script>

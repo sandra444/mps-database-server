@@ -9,6 +9,7 @@
         <table hidden id="results" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Chip Test Results ID</th>
                     <th>Study</th>
                     <th>Chip Setup</th>
@@ -26,6 +27,7 @@
 
             <tfoot>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Chip Test Results ID</th>
                     <th>Study</th>
                     <th>Chip Setup</th>
@@ -44,11 +46,8 @@
             <tbody>
             {% for result in object_list %}
                 <tr class="result" id={{ result.id }} name={{ result.id }}>
-                    <td>
-                        <a href="{{ result.assay_result.id }}">
-                            {{ result.assay_result.id }}
-                        </a>
-                    </td>
+                    <td><a class="btn btn-primary" href="{{ result.assay_result.id }}">View/Edit</a></td>
+                    <td>{{ result.assay_result.id }}</td>
                     <td>
                         <a href="/assays/organchipstudy/{{ result.assay_result.chip_readout.chip_setup.assay_run_id.id }}">
                             {{ result.assay_result.chip_readout.chip_setup.assay_run_id }}
@@ -88,7 +87,13 @@
                 dom: 'T<"clear">lfrtip',
                 "iDisplayLength": 50,
                 // Initially sort on study not arbitrary ID
-                "order": [ 1, "asc" ]
+                "order": [ 2, "asc" ],
+                "aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0]
+                    }
+                ]
             });
         });
     </script>

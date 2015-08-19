@@ -34,9 +34,9 @@ class TargetAdmin(LockableAdmin):
 
     save_on_top = True
     list_per_page = 300
-    list_display = ('name', 'organism', 'target_type', 'chembl_link', 'locked')
+    list_display = ('name', 'organism', 'target_type', 'chembl_link', 'GI', 'locked')
     list_filter = ('target_type', 'organism')
-    search_fields = ['name', 'organism', 'synonyms', '=chemblid']
+    search_fields = ['name', 'organism', 'synonyms', '=chemblid', 'GI']
     actions = ['update_fields']
     readonly_fields = ('last_update', 'created_by', 'created_on',
                        'modified_by', 'modified_on')
@@ -53,6 +53,7 @@ class TargetAdmin(LockableAdmin):
                     'organism',
                     'uniprot_accession',
                     'target_type',
+                    'GI'
                     'last_update',
                 )
             }
@@ -162,9 +163,9 @@ class AssayAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'description', 'chembl_link', 'organism', 'assay_type', 'locked')
-    list_filter = ('assay_type', 'organism')
-    search_fields = ['description', '=chemblid']
+        'description', 'chembl_link', 'pubchem_id', 'organism', 'target', 'assay_type', 'locked')
+    list_filter = ('assay_type',)
+    search_fields = ['description', '=chemblid', 'pubchem_id']
     actions = ['update_fields']
     readonly_fields = ('last_update', 'created_by', 'created_on',
                        'modified_by', 'modified_on')
@@ -174,6 +175,10 @@ class AssayAdmin(LockableAdmin):
             None, {
                 'fields': (
                     'chemblid',
+                    'pubchem_id',
+                    ('source', 'source_id',),
+                    'name',
+                    'target',
                     'description',
                     'assay_type',
                     'organism',
@@ -308,7 +313,6 @@ class BioactivityAdmin(LockableAdmin):
         'standardized_units',
         'chembl_link',
         'bioactivity_type',
-        'chembl_assay_type',
         'value',
         'units',
         'locked'
@@ -321,7 +325,7 @@ class BioactivityAdmin(LockableAdmin):
     fieldsets = (
         (None, {
             'fields': (('compound', 'assay'), 'bioactivity_display', ('target', 'target_confidence'),
-                       ('bioactivity_type', 'chembl_assay_type', 'value', 'units'),
+                       ('bioactivity_type', 'value', 'units'),
                        ('standard_name', 'standardized_value', 'standardized_units'),
                        ('activity_comment', 'reference', 'name_in_reference'), 'locked',
                        ('created_by', 'created_on'), ('modified_by', 'modified_on'),
@@ -390,10 +394,10 @@ admin.site.register(BioactivityType, BioactivityTypeAdmin)
 
 
 class PubChemBioactivityAdmin(LockableAdmin):
-    search_fields = ['compound__name', 'activity_name', 'target__name']
+    search_fields = ['compound__name', 'activity_name', 'target__name', 'outcome']
     list_filter = ['compound', ]
 
-    raw_id_fields = ("target",)
+    raw_id_fields = ("target",'assay')
 
     save_on_top = True
     list_per_page = 50
@@ -402,7 +406,8 @@ class PubChemBioactivityAdmin(LockableAdmin):
         'compound',
         'activity_name',
         'value',
-        'target',
+        'outcome',
+        'normalized_value',
         'assay'
     )
 
@@ -412,6 +417,8 @@ class PubChemBioactivityAdmin(LockableAdmin):
                 'compound',
                 'target',
                 'value',
+                'outcome',
+                'normalized_value',
                 'activity_name',
                 'assay'
             )
@@ -422,60 +429,60 @@ class PubChemBioactivityAdmin(LockableAdmin):
 admin.site.register(PubChemBioactivity, PubChemBioactivityAdmin)
 
 
-class PubChemTargetAdmin(LockableAdmin):
-    search_fields = ['name', 'organism', 'GI']
-
-    save_on_top = True
-    list_per_page = 50
-
-    list_display = (
-        'name',
-        'organism',
-        'GI',
-    )
-
-    fieldsets = (
-        (None, {
-            'fields': (
-                'name',
-                'organism',
-                'GI',
-            )
-        }),
-    )
-
-
-admin.site.register(PubChemTarget, PubChemTargetAdmin)
-
-
-class PubChemAssayAdmin(LockableAdmin):
-    search_fields = ['aid', 'name', 'source']
-
-    save_on_top = True
-    list_per_page = 50
-
-    list_display = (
-        'aid',
-        'name',
-        'target_type',
-        'organism',
-        'source',
-        'source_id'
-    )
-
-    fieldsets = (
-        (None, {
-            'fields': (
-                'aid',
-                'name',
-                'target_type',
-                'organism',
-                'source',
-                'description',
-                'source_id'
-            )
-        }),
-    )
+#class PubChemTargetAdmin(LockableAdmin):
+#    search_fields = ['name', 'organism', 'GI']
+#
+#    save_on_top = True
+#    list_per_page = 50
+#
+#    list_display = (
+#        'name',
+#        'organism',
+#        'GI',
+#    )
+#
+#    fieldsets = (
+#        (None, {
+#            'fields': (
+#                'name',
+#                'organism',
+#                'GI',
+#            )
+#        }),
+#    )
+#
+#
+#admin.site.register(PubChemTarget, PubChemTargetAdmin)
 
 
-admin.site.register(PubChemAssay, PubChemAssayAdmin)
+#class PubChemAssayAdmin(LockableAdmin):
+#    search_fields = ['aid', 'name', 'source']
+#
+#    save_on_top = True
+#    list_per_page = 50
+#
+#    list_display = (
+#        'aid',
+#        'name',
+#        'target_type',
+#        'organism',
+#        'source',
+#        'source_id'
+#    )
+#
+#    fieldsets = (
+#        (None, {
+#            'fields': (
+#                'aid',
+#                'name',
+#                'target_type',
+#                'organism',
+#                'source',
+#                'description',
+#                'source_id'
+#            )
+#        }),
+#    )
+#
+#
+#admin.site.register(PubChemAssay, PubChemAssayAdmin)

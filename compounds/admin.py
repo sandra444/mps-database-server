@@ -9,7 +9,44 @@ from bioservices import ChEMBL as ChEMBLdb
 
 from compounds.resource import CompoundResource
 from mps.base.admin import LockableAdmin
-from compounds.models import Compound
+from compounds.models import *
+from compounds.forms import *
+
+
+class CompoundSummaryInline(admin.TabularInline):
+    # Assays for ChipReadout
+    formset = CompoundSummaryInlineFormset
+    model = CompoundSummary
+    verbose_name = 'Compound Summary'
+    verbose_plural_name = 'Compound Summaries'
+
+    fields = (
+        (
+            ('compound','summary_type','summary','source')
+        ),
+    )
+    extra = 0
+
+    # class Media(object):
+    #     css = {"all": ("css/hide_admin_original.css",)}
+
+
+class CompoundPropertyInline(admin.TabularInline):
+    # Assays for ChipReadout
+    formset = CompoundPropertyInlineFormset
+    model = CompoundProperty
+    verbose_name = 'Compound Properties'
+    verbose_plural_name = 'Compound Properties'
+
+    fields = (
+        (
+            ('compound','property_type','value','source')
+        ),
+    )
+    extra = 0
+
+    # class Media(object):
+    #     css = {"all": ("css/hide_admin_original.css",)}
 
 
 class CompoundAdmin(LockableAdmin):
@@ -24,6 +61,8 @@ class CompoundAdmin(LockableAdmin):
                                     widget=forms.Textarea(),
                                     help_text="<br>ChEMBL IDs separated by a "
                                               "space or a new line.")
+
+    inlines = [CompoundSummaryInline, CompoundPropertyInline]
 
     save_on_top = True
     list_per_page = 300
@@ -149,3 +188,79 @@ class CompoundAdmin(LockableAdmin):
 
 
 admin.site.register(Compound, CompoundAdmin)
+
+
+class SummaryTypeAdmin(LockableAdmin):
+    save_on_top = True
+
+    search_fields = ['name', 'description',]
+    list_filter = ['name',]
+
+    list_display = (
+        'name',
+        'description'
+    )
+
+    readonly_fields = ('created_by', 'created_on',
+                       'modified_by', 'modified_on',)
+
+    fieldsets = (
+       (
+           "Summary Type Data", {
+               'fields': (
+                   'name',
+                   'description',
+               )
+           }
+       ),
+       ('Change Tracking', {
+           'fields': (
+               'locked',
+               ('created_by', 'created_on'),
+               ('modified_by', 'modified_on'),
+               ('signed_off_by', 'signed_off_date'),
+           )
+       }
+       ),
+    )
+
+
+admin.site.register(SummaryType, SummaryTypeAdmin)
+
+
+class PropertyTypeAdmin(LockableAdmin):
+    save_on_top = True
+
+    search_fields = ['name', 'description',]
+    list_filter = ['name',]
+
+    list_display = (
+        'name',
+        'description'
+    )
+
+    readonly_fields = ('created_by', 'created_on',
+                       'modified_by', 'modified_on',)
+
+    fieldsets = (
+       (
+           "Property Data", {
+               'fields': (
+                   'name',
+                   'description',
+               )
+           }
+       ),
+       ('Change Tracking', {
+           'fields': (
+               'locked',
+               ('created_by', 'created_on'),
+               ('modified_by', 'modified_on'),
+               ('signed_off_by', 'signed_off_date'),
+           )
+       }
+       ),
+    )
+
+
+admin.site.register(PropertyType, PropertyTypeAdmin)

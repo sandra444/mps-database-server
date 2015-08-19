@@ -28,9 +28,9 @@
         <div class="row">
             <div class="text-center">
                 {% block submit %}
-                <button type="button" class="btn btn-xlarge btn-primary text-center" id="submit">
+                <a href="#show" class="btn btn-xlarge btn-primary text-center" id="submit">
                     Generate Dendrogram
-                </button>
+                </a>
                 {% endblock %}
             </div>
         </div>
@@ -109,7 +109,7 @@
                         <tbody id="control_target_types">
                             <tr>
                                 <td>
-                                    <input value="Cell-Line" id="Cell-Line" type="checkbox">
+                                    <input value="CELL-LINE" id="Cell-Line" type="checkbox">
                                 </td>
                                 <td>
                                     Cell-Line
@@ -117,7 +117,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <input value="Organism" id="Organism" type="checkbox">
+                                    <input value="ORGANISM" id="Organism" type="checkbox">
                                 </td>
                                 <td>
                                     Organism
@@ -125,7 +125,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <input value="Single Protein" id="Single_Protein" type="checkbox" checked>
+                                    <input value="SINGLE PROTEIN" id="Single_Protein" type="checkbox" checked>
                                 </td>
                                 <td>
                                     Single Protein
@@ -163,26 +163,26 @@
                         <tbody id="control_organisms">
                             <tr>
                                 <td>
-                                    <input value="Canis Lupus Familiaris" id="Canis_Lupus_Familiaris" type="checkbox">
+                                    <input value="Canis lupus familiaris" id="Canis_Lupus_Familiaris" type="checkbox">
                                 </td>
                                 <td>
-                                    Canis Lupus Familiaris
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <input value="Homo Sapiens" id="Homo_Sapiens" type="checkbox" checked>
-                                </td>
-                                <td>
-                                    Homo Sapiens
+                                    Canis lupus familiaris
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <input value="Rattus Norvegicus" id="Rattus_Norvegicus" type="checkbox" checked>
+                                    <input value="Homo sapiens" id="Homo_Sapiens" type="checkbox" checked>
                                 </td>
                                 <td>
-                                    Rattus Norvegicus
+                                    Homo sapiens
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="Rattus norvegicus" id="Rattus_Norvegicus" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    Rattus norvegicus
                                 </td>
                             </tr>
                         </tbody>
@@ -382,7 +382,7 @@
 
     {% block spinner %}
         <script>
-            // define a spinner but do not show it yet
+        // define a spinner but do not show it yet
 
         window.spinner = new Spinner(
             {
@@ -416,10 +416,10 @@
 
         <div hidden id="graphic">
             <div class="row text-center">
-                <button id="back" class="btn btn-xlarge btn-info">
+                <a href="#filter" id="back" class="btn btn-xlarge btn-info">
                     <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
                     Back to Selection
-                </button>
+                </a>
             </div>
 
             <hr>

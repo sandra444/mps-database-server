@@ -9,6 +9,7 @@
         <table hidden id="setups" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Chip Setup ID / Barcode</th>
                     <th>Study</th>
                     <th>Date</th>
@@ -22,6 +23,7 @@
 
             <tfoot>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Chip Setup ID / Barcode</th>
                     <th>Study</th>
                     <th>Date</th>
@@ -36,7 +38,8 @@
             <tbody>
             {% for setup in object_list %}
                 <tr class="plate-setups" id={{ setup.id }} name={{ setup.id }}>
-                    <td><a href="{{ setup.id }}">{{ setup.assay_plate_id }}</a></td>
+                    <td><a class="btn btn-primary" href="{{ setup.id }}">View/Edit</a></td>
+                    <td>{{ setup.assay_plate_id }}</td>
                     <td><a href="/assays/organchipstudy/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
                     <td>{{ setup.setup_date|date:"M d, Y" }}</td>
                     <td>{{ setup.assay_layout }}</td>
@@ -58,7 +61,14 @@
         $(document).ready(function() {
             $('#setups').DataTable( {
                 dom: 'T<"clear">lfrtip',
-                "iDisplayLength": 50
+                "iDisplayLength": 50,
+                "order": [[ 1, "asc" ]],
+                "aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0]
+                    }
+                ]
             });
         });
     </script>

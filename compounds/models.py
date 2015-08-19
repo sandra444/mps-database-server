@@ -1,5 +1,5 @@
 from django.db import models
-from mps.base.models import LockableModel
+from mps.base.models import LockableModel, FlaggableModel
 
 
 CHEMBL = None
@@ -185,3 +185,63 @@ class Compound(LockableModel):
 
     def get_absolute_url(self):
         return "/compounds/"
+
+
+class SummaryType(LockableModel):
+
+    class Meta(object):
+        verbose_name = 'Summary Type'
+        verbose_name_plural = 'Summary Types'
+
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=500, default='')
+
+    def __unicode__(self):
+        return unicode(self.name)
+
+class PropertyType(LockableModel):
+
+    class Meta(object):
+        verbose_name = 'Compound Property Type'
+
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=500, default='')
+
+    def __unicode__(self):
+        return unicode(self.name)
+
+
+# TODO CREATE TWO INLINES: ONE FOR SUMMARIES AND ONE FOR PROPERTIES
+# At worst, I suppose I can merge these together or even add them as fields in Compound
+# It would be useful to have a model that catalogues COMPOUND SUMMARIES such as non-clinical/clinical toxicology
+class CompoundSummary(models.Model):
+
+    class Meta(object):
+        unique_together = [('compound','summary_type')]
+        verbose_name = 'Compound Summary'
+        verbose_name_plural = 'Compound Summaries'
+
+    compound = models.ForeignKey(Compound)
+    summary_type = models.ForeignKey(SummaryType)
+    summary = models.CharField(max_length=500)
+    source = models.CharField(max_length=250)
+
+    def __unicode__(self):
+        return unicode(self.summary)
+
+# It would be useful to have a model that catalogues COMPOUND PROPERTIES such as cmax and clogp
+class CompoundProperty(models.Model):
+
+    class Meta(object):
+        unique_together = [('compound','property_type')]
+        verbose_name = 'Compound Property'
+        verbose_name_plural = 'Compound Properties'
+
+    compound = models.ForeignKey(Compound)
+    property_type = models.ForeignKey(PropertyType)
+    # After some amount of debate, it was decided a float field should be sufficient for out purposes
+    value = models.FloatField()
+    source = models.CharField(max_length=250)
+
+    def __unicode__(self):
+        return unicode(self.value)

@@ -942,7 +942,7 @@ class AssayChipReadoutForm(forms.ModelForm):
 class AssayChipReadoutAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
     class Media(object):
-        js = ('js/inline_fix.js','assays/customize_chip.js', 'js/d3.v3.min.js', 'js/c3.min.js',)
+        js = ('js/inline_fix.js','assays/customize_chip.js', 'js/d3.min.js', 'js/c3.min.js',)
         css = {'all': ('assays/customize_admin.css', 'css/c3.css',)}
 
     form = AssayChipReadoutForm
@@ -1181,63 +1181,63 @@ class PhysicalUnitsAdmin(LockableAdmin):
 admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 
 
-class TimeUnitsAdmin(LockableAdmin):
-    save_on_top = True
-    list_per_page = 300
-
-    list_display = ('unit', 'unit_order',)
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    'unit',
-                    'description',
-                    'unit_order',
-                )
-            }
-        ),
-        ('Change Tracking', {
-            'fields': (
-                'locked',
-                ('created_by', 'created_on'),
-                ('modified_by', 'modified_on'),
-                ('signed_off_by', 'signed_off_date'),
-            )
-        }
-        ),
-    )
-
-
-admin.site.register(TimeUnits, TimeUnitsAdmin)
-
-
-class ReadoutUnitAdmin(LockableAdmin):
-    save_on_top = True
-    list_per_page = 100
-
-    list_display = ('readout_unit', 'description',)
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    'readout_unit',
-                    'description'
-                )
-            }
-        ),
-        ('Change Tracking', {
-            'fields': (
-                'locked',
-                ('created_by', 'created_on'),
-                ('modified_by', 'modified_on'),
-                ('signed_off_by', 'signed_off_date'),
-            )
-        }
-        ),
-    )
+#class TimeUnitsAdmin(LockableAdmin):
+#    save_on_top = True
+#    list_per_page = 300
+#
+#    list_display = ('unit', 'unit_order',)
+#    fieldsets = (
+#        (
+#            None, {
+#                'fields': (
+#                    'unit',
+#                    'description',
+#                    'unit_order',
+#                )
+#            }
+#        ),
+#        ('Change Tracking', {
+#            'fields': (
+#                'locked',
+#                ('created_by', 'created_on'),
+#                ('modified_by', 'modified_on'),
+#                ('signed_off_by', 'signed_off_date'),
+#            )
+#        }
+#        ),
+#    )
+#
+#
+#admin.site.register(TimeUnits, TimeUnitsAdmin)
 
 
-admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
+#class ReadoutUnitAdmin(LockableAdmin):
+#    save_on_top = True
+#    list_per_page = 100
+#
+#    list_display = ('readout_unit', 'description',)
+#    fieldsets = (
+#        (
+#            None, {
+#                'fields': (
+#                    'readout_unit',
+#                    'description'
+#                )
+#            }
+#        ),
+#        ('Change Tracking', {
+#            'fields': (
+#                'locked',
+#                ('created_by', 'created_on'),
+#                ('modified_by', 'modified_on'),
+#                ('signed_off_by', 'signed_off_date'),
+#            )
+#        }
+#        ),
+#    )
+#
+#
+#admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
 
 class AssayChipTestResultAdmin(LockableAdmin):

@@ -74,7 +74,7 @@ $(document).ready(function () {
 
             var source = data[i];
 
-            var outputs = source.output;
+            var outputs = source.output.split('-');
 
             for (var j=0; j < data.length; j++) {
 
@@ -127,6 +127,7 @@ $(document).ready(function () {
             .data(bilinks)
             .enter().append("path")
             .attr("class", "link")
+            .style("stroke-width", 3)
             .style('stroke', function(d) { return d[3] ? '#00FF00':'#FF0000' })
             .style("marker-end", function(d) { return ms_ie ? "":'url(#arrow)' });
 
@@ -140,10 +141,10 @@ $(document).ready(function () {
 
         var node = gnodes.append("circle")
             .attr("class", "node")
-            .attr("r", 9)
+            .attr("r", 18)
             .style("fill", '#FDF5E6')
             .style("stroke", function(d) { return color(d.organ); })
-            .style("stroke-width", 1.5);
+            .style("stroke-width", 3);
 
         //Titles for hovering
         gnodes.append("title")
@@ -157,6 +158,7 @@ $(document).ready(function () {
             // otherwise the bottom of the text is centered, not the text itself
             .attr("dy", ".35em")
             .attr("text-anchor", "middle")
+            .attr("font-size", 20)
             .text(function(d) { return d.label; });
 
         force.on("tick", function() {
@@ -179,7 +181,7 @@ $(document).ready(function () {
             .attr("id", function(d) { return d; })
             // It is possible that the negative value in this viewBox breaks IE
             .attr("viewBox", "0 -5 10 10")
-            .attr("refX", 25)
+            .attr("refX", 20)
             .attr("refY", 0)
             .attr("markerWidth", 10)
             .attr("markerHeight", 6)

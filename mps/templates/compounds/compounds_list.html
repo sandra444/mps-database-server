@@ -9,6 +9,8 @@
         <table hidden id="compounds" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View</th>
+                    <th>Edit</th>
                     <th>Name</th>
                     <th>CHEMBL ID</th>
                     <th>Synonyms</th>
@@ -24,6 +26,8 @@
 
             <tfoot>
                 <tr>
+                    <th>View</th>
+                    <th>Edit</th>
                     <th>Name</th>
                     <th>CHEMBL ID</th>
                     <th>Synonyms</th>
@@ -40,7 +44,9 @@
             <tbody>
             {% for compound in object_list %}
                 <tr class="compound" id={{ compound.id }} name={{ compound.name }}>
-                    <td><a href="{{ compound.id }}">{{ compound.name }}</a></td>
+                    <td><a class="btn btn-primary" href="{{ compound.id }}">View</a></td>
+                    <td><a class="btn btn-primary" href="{{ compound.id }}/update/">Edit</a></td>
+                    <td>{{ compound.name }}</td>
                     <td><a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.chemblid }}">{{ compound.chemblid }}</a></td>
                     <td>{{ compound.synonyms }}</td>
                     <td>{{ compound.molecular_weight|default_if_none:"" }}</td>
@@ -63,13 +69,14 @@
         $(document).ready(function() {
             $('#compounds').DataTable({
                 dom: 'T<"clear">lfrtip',
+                "order": [[ 2, "asc" ]],
                 "aoColumnDefs": [
                     {
                         "bSortable": false,
-                        "aTargets": [8]
+                        "aTargets": [0,1,10]
                     },
                     {
-                        "targets": [2],
+                        "targets": [4],
                         "visible": false,
                         "searchable": true
                     }

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "compounds/compound_update.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+<form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post">
+
+    {% csrf_token %}
+    {{ formset_summary.management_form }}
+    {{ formset_property.management_form }}
+    <h1>
+        Edit {{ object }} Summaries and Additional Properties
+
+        <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+    </h1>
+
+    <legend>Additional Properties</legend>
+    {% if formset_property.errors %}
+        {% for dict in formset_property.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    <a id="add_button_property" class="btn btn-success" role="button">Add Additional Property</a>
+    <table class="table table-striped assays" id="compoundproperty_set-group"  name="inlines_property">
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Value</th>
+                <th>Source</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for property in formset_property %}
+                <tr class="inline" id="property-{{ forloop.counter0 }}">
+                    {# Hidden input for Update (need id to associate) #}
+                    {% if property.id.value %}
+                    <td class="original" hidden>
+                        <input id="id_compoundproperty_set-{{ forloop.counter0 }}-id" name="compoundproperty_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ property.id.value }}">
+                    </td>
+                    {% endif %}
+                    <td>{{ property.property_type }}</td>
+                    <td>{{ property.value }}</td>
+                    <td>{{ property.source }}</td>
+                    <td>{{ property.DELETE }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <legend>Summaries</legend>
+    {% if formset_summary.errors %}
+        {% for dict in formset_summary.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    <a id="add_button_summary" class="btn btn-success" role="button">Add Summary</a>
+    <table class="table table-striped assays" id="compoundsummary_set-group"  name="inlines_summary">
+        <thead>
+            <tr>
+                <th>Summary Type</th>
+                <th>Summary</th>
+                <th>Source</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for summary in formset_summary %}
+                <tr class="inline" id="summary-{{ forloop.counter0 }}">
+                    {# Hidden input for Update (need id to associate) #}
+                    {% if summary.id.value %}
+                    <td class="original" hidden>
+                        <input id="id_compoundsummary_set-{{ forloop.counter0 }}-id" name="compoundsummary_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ summary.id.value }}">
+                    </td>
+                    {% endif %}
+                    <td>{{ summary.summary_type }}</td>
+                    <td>{{ summary.summary }}</td>
+                    <td>{{ summary.source }}</td>
+                    <td>{{ summary.DELETE }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</form>
+
+{% endblock %}

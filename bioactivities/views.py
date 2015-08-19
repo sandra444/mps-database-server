@@ -52,19 +52,18 @@ def bioactivities_list(request):
         # I might want to sort by multiple fields later
         if any([compound,target,name]):
             if pubchem:
-                data = PubChemBioactivity.objects.all().prefetch_related('compound','target').select_related('assay__aid')
+                data = PubChemBioactivity.objects.all().select_related('compound__name','assay__target','assay__pubchem_id')
             else:
                 data = Bioactivity.objects.filter(standard_name__isnull=False,
                                               standardized_units__isnull=False,
-                                              standardized_value__isnull=False).prefetch_related('compound',
-                                                                                                 'target',
-                                                                                                 'created_by').select_related('assay__chemblid')
+                                              standardized_value__isnull=False).select_related('compound__name',
+                                                                                                 'target__name','assay__chemblid')
 
             if compound:
                 data = data.filter(compound__name__icontains=compound)
 
             if target:
-                data = data.filter(target__name__icontains=target)
+                data = data.filter(assay__target__name__icontains=target)
 
             if name:
                 if pubchem:
@@ -74,13 +73,14 @@ def bioactivities_list(request):
 
             if exclude_targetless:
                 # Exclude where target is "Unchecked"
-                data = data.filter(target__isnull=False).exclude(target__name="Unchecked")
+                data = data.filter(assay__target__isnull=False).exclude(assay__target__name="Unchecked").exclude(assay__target__name='')
 
             if exclude_organismless:
                 # Exclude where assay and target organism are null
-                data = data.filter(assay__organism__isnull=False) | data.filter(target__organism__isnull=False)
+                # TODO JUST SAVE THE TARGET ORGANISM AS THE ASSAY ORGANISM?
+                data = data.filter(assay__organism__isnull=False) | data.filter(assay__target__organism__isnull=False)
                 # Exclude where organism is "Unspecified"
-                data = data.exclude(assay__organism="Unspecified").exclude(target__organism="Unspecified")
+                data = data.exclude(assay__organism="Unspecified").exclude(assay__target__organism="Unspecified")
 
             length = data.count()
 

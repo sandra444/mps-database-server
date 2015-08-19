@@ -1,5 +1,7 @@
 from django import forms
-from .models import Compound
+from .models import *
+from django.forms.models import BaseInlineFormSet
+
 
 class CompoundForm(forms.ModelForm):
 
@@ -31,3 +33,16 @@ class CompoundForm(forms.ModelForm):
             raise forms.ValidationError('A compound with the given PubChem ID already exists')
 
         return self.cleaned_data
+
+
+class CompoundSummaryInlineFormset(BaseInlineFormSet):
+    class Meta(object):
+        model = CompoundSummary
+        exclude = ('',)
+
+
+class CompoundPropertyInlineFormset(BaseInlineFormSet):
+    class Meta(object):
+        model = CompoundProperty
+        exclude = ('',)
+
