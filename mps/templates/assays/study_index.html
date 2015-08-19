@@ -43,7 +43,7 @@
                             View/Edit
                         </a>
                     </td>
-                    <td><a href="/assays/assaychipsetup/{{ setup.id }}/update">{{ setup.assay_chip_id }}</a></td>
+                    <td>{{ setup.assay_chip_id }}</td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.device }}</td>
 {#                    <td>{{ setup.chip_test_type }}</td>#}
@@ -90,7 +90,7 @@
                             View/Edit
                         </a>
                     </td>
-                    <td><a href="/assays/assayplatesetup/{{ setup.id }}/update">{{ setup.assay_plate_id }}</a></td>
+                    <td>{{ setup.assay_plate_id }}</td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.assay_layout }}</td>
                     <td>{{ setup.created_by }}</td>
@@ -157,7 +157,7 @@
                             View/Edit
                         </a>
                     </td>
-                    <td><a href="/assays/assaychipreadout/{{ readout.id }}/update/">{{ readout.id }}</a></td>
+                    <td>{{ readout.id }}</td>
                     <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}/update/">{{ readout.chip_setup }}</a></td>
                     <td>
                         {% for assay in readout.related_assays %}
@@ -204,7 +204,7 @@
                             View/Edit
                         </a>
                     </td>
-                    <td><a href="/assays/assayplatereadout/{{ readout.id }}/update/">{{ readout.id }}</a></td>
+                    <td>{{ readout.id }}</td>
                     <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}/update/">{{ readout.setup }}</a></td>
                     <td>
                         {% for assay in readout.related_assays %}
@@ -282,9 +282,7 @@
                         </a>
                     </td>
                     <td>
-                        <a href="/assays/assaychiptestresult/{{ result.assay_result.id }}/update/">
-                            {{ result.assay_result.id }}
-                        </a>
+                        {{ result.assay_result.id }}
                     </td>
                     <td>
                         <a href="/assays/assaychipsetup/{{ result.assay_result.chip_readout.chip_setup.id }}/update/">
@@ -345,9 +343,7 @@
                         </a>
                     </td>
                     <td>
-                        <a href="/assays/assayplatetestresult/{{ result.assay_result.id }}/update/">
-                            {{ result.assay_result.id }}
-                        </a>
+                        {{ result.assay_result.id }}
                     </td>
                     <td>
                         <a href="/assays/assayplatesetup/{{ result.assay_result.readout.setup.id }}/update/">
