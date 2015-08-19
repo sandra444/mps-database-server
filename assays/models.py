@@ -544,7 +544,7 @@ class StudyModel(models.Model):
     """
 
     study_configuration = models.ForeignKey(StudyConfiguration)
-    label = models.CharField(max_length=1)
+    label = models.CharField(max_length=2)
     organ = models.ForeignKey(OrganModel)
     sequence_number = models.IntegerField()
     output = models.CharField(max_length=20, blank=True, null=True)

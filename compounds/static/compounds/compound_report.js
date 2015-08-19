@@ -10,7 +10,7 @@ $(document).ready(function () {
     // Object of all selected compounds
     var compounds = {};
 
-    var width = 100;
+    var width = 75;
     var height = 25;
     var x = d3.scale.linear().range([0, width]);
     var y = d3.scale.linear().range([height, 0]);

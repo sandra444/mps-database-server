@@ -74,7 +74,7 @@ $(document).ready(function () {
 
             var source = data[i];
 
-            var outputs = source.output;
+            var outputs = source.output.split('-');
 
             for (var j=0; j < data.length; j++) {
 
