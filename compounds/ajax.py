@@ -120,7 +120,9 @@ def fetch_compound_report(request):
 
     # Acquire AssayChipRawData and store based on compound-assay (and convert to minutes?)
     readouts = AssayChipRawData.objects.filter(assay_chip_id__chip_setup__compound__in=compounds,
-                                               assay_id__readout_unit__unit='%Control').select_related('assay_chip_id__chip_setup__compound', 'assay_chip_id.chip_setup.unit')
+                                               assay_id__readout_unit__unit='%Control').select_related('assay_chip_id__chip_setup__compound',
+                                                                                                       'assay_chip_id__chip_setup__unit',
+                                                                                                       'assay_chip_id__timeunit')
 
     for readout in readouts:
         compound = readout.assay_chip_id.chip_setup.compound.name
@@ -134,10 +136,17 @@ def fetch_compound_report(request):
         if not concentration in plot[assay]:
             plot[assay][concentration] = {}
         entry = plot[assay][concentration]
-        if readout.elapsed_time not in entry:
-            entry.update({readout.elapsed_time:[readout.value]})
+
+        # Convert all times to days for now
+        # Get the conversion unit
+        scale = readout.assay_chip_id.timeunit.scale_factor
+        readout_time = "{0:.2f}".format((scale/1440.0) * readout.elapsed_time)
+        readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
+
+        if readout_time not in entry:
+            entry.update({readout_time:[readout.value]})
         else:
-            entry.get(readout.elapsed_time).append(readout.value)
+            entry.get(readout_time).append(readout.value)
 
     # Average out the values
     for compound in data:
@@ -148,8 +157,9 @@ def fetch_compound_report(request):
                 for time in entry:
                     entry.update({time:float(sum(entry.get(time)))/len(entry.get(time))})
                 # Add maximum
-                if assay not in data[compound]['table']['max_time'] or max(entry.keys()) > data[compound]['table']['max_time'][assay]:
-                    data[compound]['table']['max_time'].update({assay: max(entry.keys())})
+                times = [float(t) for t in entry.keys()]
+                if assay not in data[compound]['table']['max_time'] or max(times) > data[compound]['table']['max_time'][assay]:
+                    data[compound]['table']['max_time'].update({assay: max(times)})
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
