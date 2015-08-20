@@ -53,7 +53,7 @@ class TargetAdmin(LockableAdmin):
                     'organism',
                     'uniprot_accession',
                     'target_type',
-                    'GI'
+                    'GI',
                     'last_update',
                 )
             }
