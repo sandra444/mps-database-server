@@ -154,12 +154,15 @@ def fetch_compound_report(request):
         for assay in plot:
             for concentration in plot[assay]:
                 entry = plot[assay][concentration]
+                averaged_plot = {}
                 for time in entry:
-                    entry.update({time:float(sum(entry.get(time)))/len(entry.get(time))})
+                    averaged_plot.update({time:float(sum(entry.get(time)))/len(entry.get(time))})
                 # Add maximum
                 times = [float(t) for t in entry.keys()]
                 if assay not in data[compound]['table']['max_time'] or max(times) > data[compound]['table']['max_time'][assay]:
                     data[compound]['table']['max_time'].update({assay: max(times)})
+                # Switch to averaged values
+                plot[assay][concentration] = averaged_plot
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
