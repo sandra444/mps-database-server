@@ -150,9 +150,9 @@ $(document).ready(function () {
                     }
                     for (var every_assay in x_max) {
                         // Add a cell for the assay given concentration
-                        if (!$('#'+compound + '_' + every_assay + '_' + concentration.replace('.','_'))[0]) {
+                        if (!$('#'+compound + '_' + every_assay.replace(/\s/g, "_").replace('.','_') + '_' + concentration.replace(/\s/g, "_").replace('.','_'))[0]) {
                             $('#' + row_id).append($('<td>')
-                                .attr('id', compound + '_' + every_assay + '_' + concentration.replace('.', '_')));
+                                .attr('id', compound + '_' + every_assay.replace(/\s/g, "_").replace('.','_') + '_' + concentration.replace(/\s/g, "_").replace('.','_')));
                         }
                     }
                 }
@@ -161,7 +161,7 @@ $(document).ready(function () {
             for (var assay in plot) {
                 for (var concentration in plot[assay]) {
                     sparkline(
-                        '#' + compound + '_' + assay + '_' + concentration.replace('.','_'),
+                        '#' + compound + '_' + assay.replace(/\s/g, "_").replace('.','_') + '_' + concentration.replace(/\s/g, "_").replace('.','_'),
                         plot[assay][concentration],
                         x_max[assay],
                         y_max[assay]
