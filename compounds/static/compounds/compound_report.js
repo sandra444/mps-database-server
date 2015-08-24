@@ -11,7 +11,7 @@ $(document).ready(function () {
     var compounds = {};
 
     var width = 50;
-    var height = 25;
+    var height = 50;
     var x = d3.scale.linear().range([0, width]);
     var y = d3.scale.linear().range([height, 0]);
     var line = d3.svg.line()
@@ -121,7 +121,7 @@ $(document).ready(function () {
             row += "<td>";
 
             // Make the table
-            row += "<table id='"+compound+"_table' class='table table-striped table-bordered'>";
+            row += "<table id='"+compound+"_table' class='table table-striped table-bordered inner'>";
 
             // Add a row for the header
             row += "<tr id='"+compound+"_header'><td></td></tr>";
@@ -132,27 +132,29 @@ $(document).ready(function () {
             row += "</tr>";
             $('#results_body').append(row);
 
-            for (var assay in plot) {
+            for (var assay in x_max) {
                 // Tack this assay on to the header
                 $('#'+compound+'_header').append($('<td>')
                     // The use of days here is contrived, actual units to be decided on later
                     .addClass('small')
                     .append('<span>'+assay+'<br>'+'(' + values.max_time[assay] + ' days)'+'</span>'));
-                for (var concentration in plot[assay]) {
-                    var row_id = compound + '_' + concentration.replace('.','_');
-                    // If the concentration does not have a row, add it to the table
-                    if (!$('#'+row_id)[0]) {
-                        // Add the row
-                        $('#'+compound+'_table').append($('<tr>')
-                            .attr('id', row_id)
-                            .append($('<td>')
-                                .text(concentration.replace('_',' '))));
-                    }
-                    for (var every_assay in x_max) {
-                        // Add a cell for the assay given concentration
-                        if (!$('#'+compound + '_' + every_assay.replace(/\s/g, "_").replace('.','_') + '_' + concentration.replace(/\s/g, "_").replace('.','_'))[0]) {
-                            $('#' + row_id).append($('<td>')
-                                .attr('id', compound + '_' + every_assay.replace(/\s/g, "_").replace('.','_') + '_' + concentration.replace(/\s/g, "_").replace('.','_')));
+                if (plot[assay]) {
+                    for (var concentration in plot[assay]) {
+                        var row_id = compound + '_' + concentration.replace('.', '_');
+                        // If the concentration does not have a row, add it to the table
+                        if (!$('#' + row_id)[0]) {
+                            // Add the row
+                            $('#' + compound + '_table').append($('<tr>')
+                                .attr('id', row_id)
+                                .append($('<td>')
+                                    .text(concentration.replace('_', ' '))));
+                        }
+                        for (var every_assay in x_max) {
+                            // Add a cell for the assay given concentration
+                            if (!$('#' + compound + '_' + every_assay.replace(/\s/g, "_").replace('.', '_') + '_' + concentration.replace(/\s/g, "_").replace('.', '_'))[0]) {
+                                $('#' + row_id).append($('<td>')
+                                    .attr('id', compound + '_' + every_assay.replace(/\s/g, "_").replace('.', '_') + '_' + concentration.replace(/\s/g, "_").replace('.', '_')));
+                            }
                         }
                     }
                 }
