@@ -112,11 +112,11 @@ $(document).ready(function () {
             row += "<td><a href='/compounds/"+values['id']+"'>" + compound + "</a></td>";
             row += "<td>" + values['Dose (xCmax)'] + "</td>";
             row += "<td>" + values['cLogP']  + "</td>";
-            row += "<td>" + values['Pre-clinical Findings'] + "</td>";
-            row += "<td>" + values['Clinical Findings'] + "</td>";
+            row += "<td>" + values['Pre-clinical Findings'].replace(/\r\n/g,'<br>') + "</td>";
+            row += "<td>" + values['Clinical Findings'].replace(/\r\n/g,'<br>') + "</td>";
 
             // Recently added
-            row += "<td>" + values['PK/Metabolism'] + "</td>";
+            row += "<td>" + values['PK/Metabolism'].replace(/\r\n/g,'<br>') + "</td>";
 
             row += "<td>";
 
