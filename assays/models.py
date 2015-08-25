@@ -102,6 +102,10 @@ class AssayModel(LockableModel):
         ordering = ('assay_name',)
 
     assay_name = models.CharField(max_length=200, unique=True)
+
+    # Remember, adding a unique field to existing entries needs to be null during migration
+    assay_short_name = models.CharField(max_length=10, null=True, unique=True)
+
     assay_type = models.ForeignKey(AssayModelType)
     version_number = models.CharField(max_length=200, verbose_name='Version',
                                       blank=True, null=True)

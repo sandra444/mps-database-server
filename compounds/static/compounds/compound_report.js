@@ -133,11 +133,13 @@ $(document).ready(function () {
             $('#results_body').append(row);
 
             for (var assay in x_max) {
+                var assay_max_time = values.max_time[assay] ? values.max_time[assay]:"-";
                 // Tack this assay on to the header
                 $('#'+compound+'_header').append($('<td>')
                     // The use of days here is contrived, actual units to be decided on later
                     .addClass('small')
-                    .append('<span>'+assay+'<br>'+'(' + values.max_time[assay] + ' days)'+'</span>'));
+                    .attr('width', 50)
+                    .append('<span>'+assay+'<br>'+'(' + assay_max_time + 'd)'+'</span>'));
                 if (plot[assay]) {
                     for (var concentration in plot[assay]) {
                         var row_id = compound + '_' + concentration.replace('.', '_');
