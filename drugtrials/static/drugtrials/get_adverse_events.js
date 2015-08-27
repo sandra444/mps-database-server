@@ -1,18 +1,18 @@
 // This script performs an on the spot query of the OpenFDA API to get a range of data
 $(document).ready(function () {
 
+    var name= $('#compound').html();
+
     function ISO_to_date(iso) {
         return iso.substring(0,10).replace(/\-/g,'');
     }
 
-    function get_range() {
+    function get_range_table() {
         // Clear old (if present)
         $('#ae_table').dataTable().fnDestroy();
 
         var date1= ISO_to_date($('#start_date').val());
         var date2= ISO_to_date($('#end_date').val());
-
-        var name= $('#compound').html();
 
         var limit= $('#limit').val();
 
@@ -66,9 +66,81 @@ $(document).ready(function () {
         });
     }
 
+    function get_range_plot(event) {
+        // TODO Contrived for now, should these be user selected?
+        var date1= '20040101';
+        var date2= '20150101';
+
+        var url =  ''
+
+        if (event != 'total') {
+            url = "https://api.fda.gov/drug/event.json?search=receivedate:["+date1+"+TO+"+date2+"]%20AND%20patient.reaction.reactionmeddrapt:"+event+"%20AND%20patient.drug.openfda.generic_name:"+name+"&count=receivedate";
+        }
+        else {
+            url = "https://api.fda.gov/drug/event.json?search=receivedate:["+date1+"+TO+"+date2+"]%20AND%20patient.drug.openfda.generic_name:"+name+"&count=receivedate";
+        }
+
+        console.log(url);
+
+        $.getJSON(url, function(data) {
+            var results = data.results;
+
+            if (!results) {
+                alert('No results were found');
+            }
+
+            var time = _.pluck(results, 'time');
+            time.unshift('time');
+            var values = _.pluck(results, 'count');
+            values.unshift(event);
+
+            plot(event, {'time':time, 'values':values});
+        })
+        .fail(function() {
+            alert('An error has occured')
+        });
+    }
+
+    function plot(event, data) {
+        if (event == 'total') {
+            var chart = c3.generate({
+                bindto: '#plot',
+                data: {
+                    x: 'time',
+                    xFormat: '%Y%m%d', // default '%Y-%m-%d',
+                    columns: [
+                        data.time,
+                        data.values
+                    ]
+                },
+                point: {
+                    show: false
+                },
+                axis : {
+                    x: {
+                        type: 'timeseries',
+                        tick: {
+                            format: '%Y-%m-%d'
+                        }
+                    }
+                }
+            });
+        }
+        else {
+            chart.load({
+                columns: [
+                    data.time,
+                    data.values
+                ]
+            });
+        }
+    }
+
+    get_range_plot('total');
+
     $('#submit').click(function() {
         $('#warning').prop('hidden', true);
         $('#ae_table').prop('hidden', true);
-        get_range();
+        get_range_table();
     });
 });
