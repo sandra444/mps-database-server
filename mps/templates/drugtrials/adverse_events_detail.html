@@ -108,6 +108,7 @@
                 <th>Event</th>
                 <th>Frequency</th>
                 <th>Organ</th>
+                <th>Plot</th>
             </tr>
         </thead>
         <tbody>
@@ -116,6 +117,7 @@
                 <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
                 <td>{{ adverse_event.frequency }}</td>
                 <td>{{ adverse_event.event.organ|default:"" }}</td>
+                <td><button class="plot_ae" data-adverse-event={{ adverse_event.event }}>Plot</button></td>
             </tr>
         {% endfor %}
         </tbody>
