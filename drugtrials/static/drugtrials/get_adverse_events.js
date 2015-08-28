@@ -4,6 +4,8 @@ $(document).ready(function () {
     var name= $('#compound').html();
     var chart = '';
 
+    var plotted = {'Total':false};
+
     function ISO_to_date(iso) {
         return iso.substring(0,10).replace(/\-/g,'');
     }
@@ -101,39 +103,55 @@ $(document).ready(function () {
     }
 
     function get_range_plot(event, granularity) {
-        // TODO Contrived for now, should these be user selected?
-        var date1= '19950101';
-        var date2= '20150101';
-
-        var url =  ''
-
-        if (event != 'Total') {
-            url = "https://api.fda.gov/drug/event.json?search=receivedate:["+date1+"+TO+"+date2+"]%20AND%20patient.reaction.reactionmeddrapt:"+event+"%20AND%20patient.drug.openfda.generic_name:"+name+"&count=receivedate";
+        var url_event = event.replace(/ /g, '+');
+        // If the event is already in the chart, then remove it
+        if (plotted[event]) {
+            chart.unload({
+                ids: [event]
+            });
+            delete plotted[event];
         }
+
         else {
-            url = "https://api.fda.gov/drug/event.json?search=receivedate:["+date1+"+TO+"+date2+"]%20AND%20patient.drug.openfda.generic_name:"+name+"&count=receivedate";
-        }
+            // TODO Contrived for now, should these be user selected?
+            var date1= '19950101';
+            var date2= '20150101';
 
-        $.getJSON(url, function(data) {
-            var results = process_data(data.results, granularity);
+            var url =  ''
 
-            if (!results) {
-                alert('No results were found');
+            if (event != 'Total') {
+                url = 'https://api.fda.gov/drug/event.json?search=receivedate:['+date1+'+TO+'+date2+']%20AND%20patient.reaction.reactionmeddrapt.exact:"'+url_event+'"%20AND%20patient.drug.openfda.generic_name:'+name+'&count=receivedate';
+            }
+            else {
+                url = 'https://api.fda.gov/drug/event.json?search=receivedate:['+date1+'+TO+'+date2+']%20AND%20patient.drug.openfda.generic_name:'+name+'&count=receivedate';
             }
 
-            var time = _.pluck(results, 'time');
-            time.unshift('time');
-            var values = _.pluck(results, 'count');
-            values.unshift(event);
+            $.getJSON(url, function(data) {
+                var results = process_data(data.results, granularity);
 
-            plot(event, {'time':time, 'values':values}, granularity);
-        })
-        .fail(function() {
-            alert('An error has occured')
-        });
+                if (!results) {
+                    alert('No results were found');
+                }
+
+                var time = _.pluck(results, 'time');
+                time.unshift('time');
+                var values = _.pluck(results, 'count');
+                values.unshift(event);
+
+                plot(event, {'time':time, 'values':values}, granularity);
+            })
+            .fail(function() {
+                alert('An error has occured: ' + url);
+            });
+        }
     }
 
     function plot(event, data, granularity) {
+        console.log(data);
+
+        // Add the event to plotted
+        plotted[event] = true;
+
         var x_format = '%Y%m%d';
         var tick_format = '%Y-%m-%d';
 
