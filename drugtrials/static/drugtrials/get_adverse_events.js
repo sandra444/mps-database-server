@@ -207,9 +207,11 @@ $(document).ready(function () {
     get_range_plot('Total');
 
     $('.date-select').click(function() {
-        granularity = this.id;
-        $('#plot').empty();
-        reset_new_granularity();
+        if (this.id != granularity) {
+            granularity = this.id;
+            $('#plot').empty();
+            reset_new_granularity();
+        }
     });
 
     $('.plot_ae').click(function() {
