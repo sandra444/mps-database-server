@@ -4,6 +4,8 @@ $(document).ready(function () {
     var name= $('#compound').html();
     var chart = '';
 
+    var granularity = 'month';
+
     var plotted = {'Total':false};
 
     function ISO_to_date(iso) {
@@ -89,7 +91,7 @@ $(document).ready(function () {
         return final_data;
     }
 
-    function process_data(data, granularity) {
+    function process_data(data) {
         // Default granularity from OpenFDA
         if (granularity === 'day') {
             return data;
@@ -102,10 +104,10 @@ $(document).ready(function () {
         }
     }
 
-    function get_range_plot(event, granularity) {
+    function get_range_plot(event, keep) {
         var url_event = event.replace(/ /g, '+');
         // If the event is already in the chart, then remove it
-        if (plotted[event]) {
+        if (plotted[event] && !keep) {
             chart.unload({
                 ids: [event]
             });
@@ -127,7 +129,7 @@ $(document).ready(function () {
             }
 
             $.getJSON(url, function(data) {
-                var results = process_data(data.results, granularity);
+                var results = process_data(data.results);
 
                 if (!results) {
                     alert('No results were found');
@@ -138,7 +140,7 @@ $(document).ready(function () {
                 var values = _.pluck(results, 'count');
                 values.unshift(event);
 
-                plot(event, {'time':time, 'values':values}, granularity);
+                plot(event, {'time':time, 'values':values});
             })
             .fail(function() {
                 alert('An error has occured: ' + url);
@@ -146,25 +148,20 @@ $(document).ready(function () {
         }
     }
 
-    function plot(event, data, granularity) {
-        console.log(data);
-
-        // Add the event to plotted
-        plotted[event] = true;
-
-        var x_format = '%Y%m%d';
-        var tick_format = '%Y-%m-%d';
-
-        if (granularity === 'month') {
-            x_format = '%Y%m';
-            tick_format = '%Y-%m';
-        }
-        else if (granularity === 'year') {
-            x_format = '%Y';
-            tick_format = '%Y';
-        }
-
+    function plot(event, data) {
         if (event == 'Total') {
+            var x_format = '%Y%m%d';
+            var tick_format = '%Y-%m-%d';
+
+            if (granularity === 'month') {
+                x_format = '%Y%m';
+                tick_format = '%Y-%m';
+            }
+            else if (granularity === 'year') {
+                x_format = '%Y';
+                tick_format = '%Y';
+            }
+
             chart = c3.generate({
                 bindto: '#plot',
                 data: {
@@ -182,6 +179,7 @@ $(document).ready(function () {
                     x: {
                         type: 'timeseries',
                         tick: {
+                            //values: ['2003-01-01','2004-01-01','2005-01-01','2006-01-01','2007-01-01','2008-01-01','2009-01-01','2010-01-01','2011-01-01','2012-01-01','2013-01-01','2014-01-01','2015-01-01'],
                             format: tick_format
                         }
                     }
@@ -189,6 +187,8 @@ $(document).ready(function () {
             });
         }
         else {
+            // Add the event to plotted
+            plotted[event] = true;
             chart.load({
                 columns: [
                     data.time,
@@ -198,10 +198,22 @@ $(document).ready(function () {
         }
     }
 
-    get_range_plot('Total', 'month');
+    function reset_new_granularity() {
+        for (event in plotted) {
+            get_range_plot(event, 'keep');
+        }
+    }
+
+    get_range_plot('Total');
+
+    $('.date-select').click(function() {
+        granularity = this.id;
+        $('#plot').empty();
+        reset_new_granularity();
+    });
 
     $('.plot_ae').click(function() {
-        get_range_plot(this.getAttribute('data-adverse-event'), 'month');
+        get_range_plot(this.getAttribute('data-adverse-event'));
     });
 
     $('#submit').click(function() {
