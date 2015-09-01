@@ -105,19 +105,19 @@
     <table hidden id="reported_events" class="table table-striped table-hover">
         <thead>
             <tr>
+                <th>Plot</th>
                 <th>Event</th>
                 <th>Frequency</th>
                 <th>Organ</th>
-                <th>Plot</th>
             </tr>
         </thead>
         <tbody>
         {% for adverse_event in events %}
             <tr>
+                <td><button class="plot_ae" data-adverse-event="{{ adverse_event.event }}">Toggle Plot</button></td>
                 <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
                 <td>{{ adverse_event.frequency }}</td>
                 <td>{{ adverse_event.event.organ|default:"" }}</td>
-                <td><button class="plot_ae" data-adverse-event="{{ adverse_event.event }}">Toggle Plot</button></td>
             </tr>
         {% endfor %}
         </tbody>
@@ -178,7 +178,13 @@
             $('#reported_events').DataTable( {
                 "iDisplayLength": 200,
                 "sDom": '<T<"clear">t>',
-                "order": [[ 1, "desc" ]]
+                "order": [[ 2, "desc" ]],
+                "aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0]
+                    }
+                ]
             });
 
             $('#reported_events').prop('hidden', false);

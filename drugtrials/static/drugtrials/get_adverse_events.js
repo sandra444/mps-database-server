@@ -112,6 +112,7 @@ $(document).ready(function () {
                 ids: [event]
             });
             delete plotted[event];
+            $('button[data-adverse-event="'+event+'"]').removeClass('btn-primary');
         }
 
         else {
@@ -189,6 +190,7 @@ $(document).ready(function () {
         else {
             // Add the event to plotted
             plotted[event] = true;
+            $('button[data-adverse-event="'+event+'"]').addClass('btn-primary');
             chart.load({
                 columns: [
                     data.time,
