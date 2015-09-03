@@ -37,7 +37,7 @@
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th>View/Edit</th>
+                    <th class="hidden-print">View/Edit</th>
                     <th>Chip Setup ID / Barcode</th>
                     <th>Date</th>
                     <th>Organ Model Name</th>
@@ -50,7 +50,7 @@
             <tbody>
             {% for setup in setups %}
                 <tr id={{ setup.id }} name={{ setup.id }}>
-                    <td><a class="btn btn-primary" href="/assays/assaychipsetup/{{ setup.id }}">View/Edit</a></td>
+                    <td class="hidden-print"><a class="btn btn-primary" href="/assays/assaychipsetup/{{ setup.id }}">View/Edit</a></td>
                     <td>{{ setup.assay_chip_id }}</td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.device }}</td>
