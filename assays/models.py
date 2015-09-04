@@ -674,10 +674,13 @@ class AssayChipSetup(FlaggableModel):
     notes = models.CharField(max_length=2048, blank=True, null=True)
 
     def __unicode__(self):
-        return u'Chip-{}:{}({}{})'.format(self.assay_chip_id,
+        if (self.compound):
+            return u'Chip-{}:{}({}{})'.format(self.assay_chip_id,
                                         self.compound,
                                         self.concentration,
                                         self.unit)
+        else:
+            return u'Chip-{}:Control'.format(self.assay_chip_id)
 
     def get_absolute_url(self):
         return "/assays/%i/" % self.assay_run_id.id
