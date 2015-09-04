@@ -125,9 +125,15 @@
 
     <br>
 
+    <div class="well">
+        Click and drag on the subplot to zoom
+        <br>
+        Click a legend key to hide the respective plot
+    </div>
+
     <div>
         <button class='date-select' id='day'>Day (slow!)</button>
-        <button class='date-select' id='month'>Month</button>
+        <button class='date-select btn-primary' id='month'>Month</button>
         <button class='date-select' id='year'>Year</button>
     </div>
 
@@ -150,7 +156,8 @@
         </div>
         <div class="col-md-3">
             <label for="end_date" class="control-label">End Date [yyyy-mm-dd]</label>
-            <input class="form-control" id="end_date" type="text" value="2014-01-01">
+            {# Use today's date #}
+            <input class="form-control" id="end_date" type="text" value="{% now "Y-m-d"%}">
         </div>
         <div class="col-md-3">
             <label for="limit" class="control-label">Limit</label>

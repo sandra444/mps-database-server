@@ -117,10 +117,23 @@ $(document).ready(function () {
 
         else {
             // TODO Contrived for now, should these be user selected?
-            var date1= '19950101';
-            var date2= '20150101';
+            var date1 = '19950101';
 
-            var url =  ''
+            // Get today's date
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth()+1; //January is 0!
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+
+            var date2 = yyyy+mm+dd;
+
+            var url =  '';
 
             if (event != 'Total') {
                 url = 'https://api.fda.gov/drug/event.json?search=receivedate:['+date1+'+TO+'+date2+']%20AND%20patient.reaction.reactionmeddrapt.exact:"'+url_event+'"%20AND%20patient.drug.openfda.generic_name:'+name+'&count=receivedate';
@@ -184,6 +197,9 @@ $(document).ready(function () {
                             format: tick_format
                         }
                     }
+                },
+                subchart: {
+                    show: true
                 }
             });
         }
@@ -210,6 +226,8 @@ $(document).ready(function () {
 
     $('.date-select').click(function() {
         if (this.id != granularity) {
+            $('.date-select').removeClass('btn-primary');
+            $(this).addClass('btn-primary');
             granularity = this.id;
             $('#plot').empty();
             reset_new_granularity();
