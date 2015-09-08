@@ -15,33 +15,19 @@
          </h1>
     </div>
 
-    {% if object.study_configuration %}
-        <div class="row">
-            <div class="col-sm-3 col-md-2 text-right-responsive">
-                <b>Configuration:</b>
-            </div>
-            <div class="col-sm-9 col-md-10">
-                {{ object.study_configuration }}
-            </div>
-        </div>
-    {% endif %}
-
-    <br>
-
     {% if object.description %}
-        <div class="row">
-            <div class="col-sm-3 col-md-2 text-right-responsive">
-                <b>Description:</b>
-            </div>
-            <div class="col-sm-9 col-md-10">
-                {{ object.description }}
-            </div>
-        </div>
+        <legend><h3>Description</h3></legend>
+        {{ object.description }}
+
+        {% if object.study_configuration %}
+            <br><br>
+            <b>Configuration:</b> {{ object.study_configuration }}
+        {% endif %}
     {% endif %}
 
     {% if setups %}
         <br>
-        <legend><h2>Chip Setups</h2></legend>
+        <legend><h3>Chip Setups</h3></legend>
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -87,7 +73,7 @@
     {% endif %}
 
     {% if setups.0.assaychipcells_set.all %}
-        <legend><h2>Cells for {{setups.0}}</h2></legend>
+        <legend><h3>Cells for {{setups.0}}</h3></legend>
         <table class="table table-striped">
             <thead>
             <tr>
