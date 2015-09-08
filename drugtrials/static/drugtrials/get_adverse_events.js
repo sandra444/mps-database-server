@@ -77,12 +77,12 @@ $(document).ready(function () {
         $.each(data, function(index, result) {
             var time = result.time;
             var count = result.count;
-            var current_month = time.substring(0,sub);
-            if (!new_data[current_month]) {
-                new_data[current_month] = count;
+            var current_section = time.substring(0,sub);
+            if (!new_data[current_section]) {
+                new_data[current_section] = count;
             }
             else {
-                new_data[current_month] += count;
+                new_data[current_section] += count;
             }
         });
         $.each(new_data, function(time, count) {
