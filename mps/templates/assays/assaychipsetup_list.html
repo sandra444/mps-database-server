@@ -19,7 +19,7 @@
                     <th>Scientist</th>
                     <th>Creator</th>
                     <th>Group</th>
-                    <th>Flagged</th>
+                    <th>Quality</th>
                 </tr>
             </thead>
 
@@ -35,7 +35,7 @@
                     <th>Scientist</th>
                     <th>Creator</th>
                     <th>Group</th>
-                    <th>Flagged</th>
+                    <th>Quality</th>
                 </tr>
             </tfoot>
 
@@ -58,8 +58,11 @@
                     <td>{{ setup.created_by }}</td>
                     <td>{{ setup.group }}</td>
                     <td>
+                        {% if setup.signed_off_by %}
+                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
                         {% if setup.flagged %}
-                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                            <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
                         {% endif %}
                     </td>
                 </tr>
