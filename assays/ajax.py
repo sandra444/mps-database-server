@@ -254,7 +254,7 @@ def fetch_chip_readout(request):
         csv += str(raw.elapsed_time) + ','
         # Add time unit
         csv += str(time_unit) + ','
-        csv += str(raw.assay_id.assay_id.assay_name) + ','
+        csv += str(raw.assay_id.assay_id.assay_short_name) + ','
         csv += str(raw.field_id) + ','
         # Format to two decimal places
         value = raw.value
