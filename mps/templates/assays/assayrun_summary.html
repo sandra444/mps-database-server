@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if object.signed_off_by %}
+        <div id="info" class="alert alert-info" role="alert">
+            <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+            <span class="sr-only">Info:</span>
+            This entry was reviewed by {{ object.signed_off_by }} on {{ object.signed_off_date }}
+        </div>
+    {% endif %}
+
+    <div class="well">
+        <h1 align="center">
+            {{ object }}
+         </h1>
+    </div>
+
+    {% if object.description %}
+        <legend><h3>Description</h3></legend>
+        {{ object.description }}
+
+        {% if object.study_configuration %}
+            <br><br>
+            <b>Configuration:</b> {{ object.study_configuration }}
+        {% endif %}
+    {% endif %}
+
+    <br>
+    <legend><h3>Chip Setups</h3></legend>
+    {% if setups %}
+        <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="hidden-print">View/Edit</th>
+                    <th>Chip Setup ID / Barcode</th>
+                    <th>Date</th>
+                    <th>Organ Model Name</th>
+                    <th>Compound</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for setup in setups %}
+                <tr id={{ setup.id }} name={{ setup.id }}>
+                    <td class="hidden-print"><a class="btn btn-primary" href="/assays/assaychipsetup/{{ setup.id }}">View/Edit</a></td>
+                    <td>{{ setup.assay_chip_id }}</td>
+                    <td>{{ setup.setup_date }}</td>
+                    <td>{{ setup.device }}</td>
+                    {% if setup.compound != None %}
+                        <td>{{ setup.compound }} ({{ setup.concentration }} {{ setup.unit }})</td>
+                    {% else %}
+                        <td>-control-</td>
+                    {% endif %}
+                    <td>{{ setup.created_by }}</td>
+                    <td>
+                        {% if setup.signed_off_by %}
+                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if setup.flagged %}
+                            <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No chip setups exist for this study
+        </div>
+    {% endif %}
+
+    {% if setups.0.assaychipcells_set.all %}
+        <legend><h3>Cells for {{setups.0}}</h3></legend>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Cell Sample</th>
+                <th>Cell Biosensor</th>
+                <th>Density</th>
+                <th>Unit</th>
+                <th>Passage#</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for cell in setups.0.assaychipcells_set.all %}
+                <tr>
+                    <td>{{ cell.cell_sample }}</td>
+                    <td>{{ cell.cell_biosensor }}</td>
+                    <td>{{ cell.cellsample_density }}</td>
+                    <td>{{ cell.get_cellsample_density_unit_display }}</td>
+                    <td>{{ cell.cell_passage }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if sameness %}
+        <table class="table table-striped table-bordered">
+            <tbody>
+        {% for study, same in sameness.items %}
+            <tr>
+                <td>{{ study}}</td>
+                {% if same %}
+                    <td class="text-success">Same as {{setups.0}}</td>
+                {% else %}
+                    <td class="text-danger">Differs from {{setups.0}}</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+{% endblock %}

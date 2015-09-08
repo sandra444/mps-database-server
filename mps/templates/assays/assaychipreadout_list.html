@@ -17,7 +17,7 @@
                     <th>Scientist</th>
                     <th>Creator</th>
                     <th>Group</th>
-                    <th>Flagged</th>
+                    <th>Review</th>
 {#                    <th>Group</th>#}
                 </tr>
             </thead>
@@ -32,7 +32,7 @@
                     <th>Scientist</th>
                     <th>Creator</th>
                     <th>Group</th>
-                    <th>Flagged</th>
+                    <th>Review</th>
 {#                    <th>Group</th>#}
                 </tr>
             </tfoot>
@@ -57,8 +57,11 @@
                     <td>{{ readout.created_by }}</td>
                     <td>{{ readout.group }}</td>
                     <td>
+                        {% if readout.signed_off_by %}
+                            <span title="This entry was reviewed by {{ readout.signed_off_by }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
                         {% if readout.flagged %}
-                            <span title="This entry is flagged for review" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                            <span title="This entry is flagged for review: '{{ readout.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
                         {% endif %}
                     </td>
                 </tr>

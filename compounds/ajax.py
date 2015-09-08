@@ -127,7 +127,7 @@ def fetch_compound_report(request):
     for readout in readouts:
         compound = readout.assay_chip_id.chip_setup.compound.name
         plot = data.get(compound).get('plot')
-        assay = readout.assay_id.assay_id.assay_name
+        assay = readout.assay_id.assay_id.assay_short_name
         if not assay in plot:
             plot[assay] = {}
         concentration = unicode(readout.assay_chip_id.chip_setup.concentration) + u'_' + readout.assay_chip_id.chip_setup.unit.unit

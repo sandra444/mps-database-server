@@ -102,6 +102,10 @@ class AssayModel(LockableModel):
         ordering = ('assay_name',)
 
     assay_name = models.CharField(max_length=200, unique=True)
+
+    # Remember, adding a unique field to existing entries needs to be null during migration
+    assay_short_name = models.CharField(max_length=10, null=True, unique=True)
+
     assay_type = models.ForeignKey(AssayModelType)
     version_number = models.CharField(max_length=200, verbose_name='Version',
                                       blank=True, null=True)
@@ -670,10 +674,13 @@ class AssayChipSetup(FlaggableModel):
     notes = models.CharField(max_length=2048, blank=True, null=True)
 
     def __unicode__(self):
-        return u'Chip-{}:{}({}{})'.format(self.assay_chip_id,
+        if (self.compound):
+            return u'Chip-{}:{}({}{})'.format(self.assay_chip_id,
                                         self.compound,
                                         self.concentration,
                                         self.unit)
+        else:
+            return u'Chip-{}:Control'.format(self.assay_chip_id)
 
     def get_absolute_url(self):
         return "/assays/%i/" % self.assay_run_id.id

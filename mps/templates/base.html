@@ -115,6 +115,7 @@
                         <a href="#">Chips <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                           <li><a href="/assays/studyconfiguration">Study Configurations</a></li>
+                          <li class="divider"></li>
                           <li><a href="/assays/assaychipsetup">Setups</a></li>
                           <li><a href="/assays/assaychipreadout">Readouts</a></li>
                           <li><a href="/assays/assaychiptestresult">Results</a></li>
@@ -124,6 +125,7 @@
                         <a href="#">Plates <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                           <li><a href="/assays/assaylayout">Assay Layouts</a></li>
+                          <li class="divider"></li>
                           <li><a href="/assays/assayplatesetup">Setups</a></li>
                           <li><a href="/assays/assayplatereadout">Readouts</a></li>
                           <li><a href="/assays/assayplatetestresult">Results</a></li>
@@ -190,7 +192,7 @@
       </div>
     </nav>
 
-	<div id="page">
+    <div id="page">
 
     <div id="sidebar">
         {% block sidebar %}
@@ -201,13 +203,13 @@
     <div id="content" class="container">
 
     {# Still have yet to make use of messages; should do so soon #}
-{#	{% if messages %}#}
-{#	<ul class="messages">#}
-{#	    {% for message in messages %}#}
-{#	    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>#}
-{#	    {% endfor %}#}
-{#	</ul>#}
-{#	{% endif %}#}
+{#    {% if messages %}#}
+{#    <ul class="messages">#}
+{#        {% for message in messages %}#}
+{#        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>#}
+{#        {% endfor %}#}
+{#    </ul>#}
+{#    {% endif %}#}
 
     {% block content %}{% endblock %}
 
@@ -219,9 +221,9 @@
     {% block fluid-content %}{% endblock %}
     </div>
 
-	</div>
+    </div>
 
-    <div class="container">
+    <div class="container hidden-print">
         <footer>
             <hr>
             <div class="row">

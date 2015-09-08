@@ -51,7 +51,7 @@ class AssayModelAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = (
-        'assay_name', 'version_number', 'assay_type', 'assay_description',
+        'assay_name', 'assay_short_name', 'version_number', 'assay_type', 'assay_description',
         'locked'
     )
 
@@ -59,7 +59,8 @@ class AssayModelAdmin(LockableAdmin):
         (
             None, {
                 'fields': (
-                    ('assay_name', 'assay_type','test_type'),
+                    ('assay_name', 'assay_short_name',),
+                    ('assay_type','test_type',),
                     ('version_number', 'assay_protocol_file', ),
                     ('assay_description',), )
             }

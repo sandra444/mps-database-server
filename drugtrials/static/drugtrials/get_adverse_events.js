@@ -1,18 +1,23 @@
 // This script performs an on the spot query of the OpenFDA API to get a range of data
 $(document).ready(function () {
 
+    var name= $('#compound').html();
+    var chart = '';
+
+    var granularity = 'month';
+
+    var plotted = {'Total':false};
+
     function ISO_to_date(iso) {
         return iso.substring(0,10).replace(/\-/g,'');
     }
 
-    function get_range() {
+    function get_range_table() {
         // Clear old (if present)
         $('#ae_table').dataTable().fnDestroy();
 
         var date1= ISO_to_date($('#start_date').val());
         var date2= ISO_to_date($('#end_date').val());
-
-        var name= $('#compound').html();
 
         var limit= $('#limit').val();
 
@@ -66,9 +71,176 @@ $(document).ready(function () {
         });
     }
 
+    function sum_granular(data, sub) {
+        var new_data = {};
+        var final_data = [];
+        $.each(data, function(index, result) {
+            var time = result.time;
+            var count = result.count;
+            var current_section = time.substring(0,sub);
+            if (!new_data[current_section]) {
+                new_data[current_section] = count;
+            }
+            else {
+                new_data[current_section] += count;
+            }
+        });
+        $.each(new_data, function(time, count) {
+            final_data.push({'time': time, 'count': count});
+        });
+        return final_data;
+    }
+
+    function process_data(data) {
+        // Default granularity from OpenFDA
+        if (granularity === 'day') {
+            return data;
+        }
+        else if (granularity === 'month') {
+            return sum_granular(data, 6);
+        }
+        else if (granularity === 'year') {
+            return sum_granular(data, 4);
+        }
+    }
+
+    function get_range_plot(event, keep) {
+        var url_event = event.replace(/ /g, '+');
+        // If the event is already in the chart, then remove it
+        if (plotted[event] && !keep) {
+            chart.unload({
+                ids: [event]
+            });
+            delete plotted[event];
+            $('button[data-adverse-event="'+event+'"]').removeClass('btn-primary');
+        }
+
+        else {
+            // TODO Contrived for now, should these be user selected?
+            var date1 = '19950101';
+
+            // Get today's date
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth()+1; //January is 0!
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+
+            var date2 = yyyy+mm+dd;
+
+            var url =  '';
+
+            if (event != 'Total') {
+                url = 'https://api.fda.gov/drug/event.json?search=receivedate:['+date1+'+TO+'+date2+']%20AND%20patient.reaction.reactionmeddrapt.exact:"'+url_event+'"%20AND%20patient.drug.openfda.generic_name:'+name+'&count=receivedate';
+            }
+            else {
+                url = 'https://api.fda.gov/drug/event.json?search=receivedate:['+date1+'+TO+'+date2+']%20AND%20patient.drug.openfda.generic_name:'+name+'&count=receivedate';
+            }
+
+            $.getJSON(url, function(data) {
+                var results = process_data(data.results);
+
+                if (!results) {
+                    alert('No results were found');
+                }
+
+                var time = _.pluck(results, 'time');
+                time.unshift('time');
+                var values = _.pluck(results, 'count');
+                values.unshift(event);
+
+                plot(event, {'time':time, 'values':values});
+            })
+            .fail(function() {
+                alert('An error has occured: ' + url);
+            });
+        }
+    }
+
+    function plot(event, data) {
+        if (event == 'Total') {
+            var x_format = '%Y%m%d';
+            var tick_format = '%Y-%m-%d';
+
+            if (granularity === 'month') {
+                x_format = '%Y%m';
+                tick_format = '%Y-%m';
+            }
+            else if (granularity === 'year') {
+                x_format = '%Y';
+                tick_format = '%Y';
+            }
+
+            chart = c3.generate({
+                bindto: '#plot',
+                data: {
+                    x: 'time',
+                    xFormat: x_format, // default '%Y-%m-%d',
+                    columns: [
+                        data.time,
+                        data.values
+                    ]
+                },
+                point: {
+                    show: false
+                },
+                axis : {
+                    x: {
+                        type: 'timeseries',
+                        tick: {
+                            //values: ['2003-01-01','2004-01-01','2005-01-01','2006-01-01','2007-01-01','2008-01-01','2009-01-01','2010-01-01','2011-01-01','2012-01-01','2013-01-01','2014-01-01','2015-01-01'],
+                            format: tick_format
+                        }
+                    }
+                },
+                subchart: {
+                    show: true
+                }
+            });
+        }
+        else {
+            // Add the event to plotted
+            plotted[event] = true;
+            $('button[data-adverse-event="'+event+'"]').addClass('btn-primary');
+            chart.load({
+                columns: [
+                    data.time,
+                    data.values
+                ]
+            });
+        }
+    }
+
+    function reset_new_granularity() {
+        for (event in plotted) {
+            get_range_plot(event, 'keep');
+        }
+    }
+
+    get_range_plot('Total');
+
+    $('.date-select').click(function() {
+        if (this.id != granularity) {
+            $('.date-select').removeClass('btn-primary');
+            $(this).addClass('btn-primary');
+            granularity = this.id;
+            $('#plot').empty();
+            reset_new_granularity();
+        }
+    });
+
+    $('.plot_ae').click(function() {
+        get_range_plot(this.getAttribute('data-adverse-event'));
+    });
+
     $('#submit').click(function() {
         $('#warning').prop('hidden', true);
         $('#ae_table').prop('hidden', true);
-        get_range();
+        get_range_table();
     });
 });

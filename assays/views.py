@@ -257,6 +257,59 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
                                   update=True))
 
 
+class AssayRunSummary(ObjectGroupRequiredMixin, DetailView):
+    model = AssayRun
+    template_name = 'assays/assayrun_summary.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+        context['setups'] = AssayChipSetup.objects.filter(assay_run_id=self.object).prefetch_related('assay_run_id',
+                                                                                                     'device',
+                                                                                                     'compound',
+                                                                                                     'unit',
+                                                                                                     'created_by')
+
+        # TODO THIS SAME BUSINESS NEEDS TO BE REFACTORED
+        first = {}
+        sameness = {}
+
+        if len(context['setups']) > 0:
+            for cell in AssayChipCells.objects.filter(assay_chip=context['setups'][0]):
+                first.update({tuple(AssayChipCells.objects.filter(pk=cell.id).values_list(
+                    'cell_sample',
+                    'cell_biosensor',
+                    'cellsample_density',
+                    'cellsample_density_unit',
+                    'cell_passage')):True})
+
+            for setup in context['setups'][1:]:
+                cells = {}
+
+                for cell in AssayChipCells.objects.filter(assay_chip=setup):
+                    cells.update({tuple(AssayChipCells.objects.filter(pk=cell.id).values_list(
+                        'cell_sample',
+                        'cell_biosensor',
+                        'cellsample_density',
+                        'cellsample_density_unit',
+                        'cell_passage')):True})
+
+                same = True
+
+                for cell in cells:
+                    if cell not in first:
+                        same = False
+
+                for cell in first:
+                    if cell not in cells:
+                        same = False
+
+                sameness.update({str(setup):same})
+
+        context['sameness'] = sameness
+        return self.render_to_response(context)
+
+
 class AssayRunDelete(CreatorRequiredMixin, DeleteView):
     model = AssayRun
     template_name = 'assays/assayrun_delete.html'
