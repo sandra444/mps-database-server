@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
+    {% if object.signed_off_by %}
+        <div id="info" class="alert alert-info" role="alert">
+            <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+            <span class="sr-only">Info:</span>
+            This entry was reviewed by {{ object.signed_off_by }} on {{ object.signed_off_date }}
+        </div>
+    {% endif %}
+
     <div class="well">
         <h1 align="center">
             {{ object }}
@@ -43,7 +51,7 @@
                     <th>Organ Model Name</th>
                     <th>Compound</th>
                     <th>Creator</th>
-                    <th>Quality</th>
+                    <th>Review</th>
                 </tr>
             </thead>
 
