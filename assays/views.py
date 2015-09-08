@@ -272,27 +272,39 @@ class AssayRunSummary(ObjectGroupRequiredMixin, DetailView):
 
         # TODO THIS SAME BUSINESS NEEDS TO BE REFACTORED
         first = {}
-        for cell in AssayChipCells.objects.filter(assay_chip=context['setups'][0]):
-            first.update({tuple(AssayChipCells.objects.filter(pk=cell.id).values_list('cell_sample','cell_biosensor','cellsample_density','cellsample_density_unit','cell_passage')):True})
-
         sameness = {}
-        for setup in context['setups'][1:]:
-            cells = {}
 
-            for cell in AssayChipCells.objects.filter(assay_chip=setup):
-                cells.update({tuple(AssayChipCells.objects.filter(pk=cell.id).values_list('cell_sample','cell_biosensor','cellsample_density','cellsample_density_unit','cell_passage')):True})
+        if len(context['setups']) > 0:
+            for cell in AssayChipCells.objects.filter(assay_chip=context['setups'][0]):
+                first.update({tuple(AssayChipCells.objects.filter(pk=cell.id).values_list(
+                    'cell_sample',
+                    'cell_biosensor',
+                    'cellsample_density',
+                    'cellsample_density_unit',
+                    'cell_passage')):True})
 
-            same = True
+            for setup in context['setups'][1:]:
+                cells = {}
 
-            for cell in cells:
-                if cell not in first:
-                    same = False
+                for cell in AssayChipCells.objects.filter(assay_chip=setup):
+                    cells.update({tuple(AssayChipCells.objects.filter(pk=cell.id).values_list(
+                        'cell_sample',
+                        'cell_biosensor',
+                        'cellsample_density',
+                        'cellsample_density_unit',
+                        'cell_passage')):True})
 
-            for cell in first:
-                if cell not in cells:
-                    same = False
+                same = True
 
-            sameness.update({str(setup):same})
+                for cell in cells:
+                    if cell not in first:
+                        same = False
+
+                for cell in first:
+                    if cell not in cells:
+                        same = False
+
+                sameness.update({str(setup):same})
 
         context['sameness'] = sameness
         return self.render_to_response(context)
