@@ -239,6 +239,9 @@ class AssayLayoutForm(forms.ModelForm):
 
     class Meta(object):
         model = AssayLayout
+        widgets = {
+            'layout_name': forms.TextInput(attrs={'size':35}),
+        }
         exclude = tracking + restricted
 
 
