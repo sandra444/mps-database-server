@@ -755,7 +755,13 @@ def parseChipCSV(currentChipReadout, file, headers):
         if not all(rowValue):
             continue
 
-        assay = AssayModel.objects.get(assay_name=rowValue[2])
+        # Try getting the assay from long name
+        try:
+            assay = AssayModel.objects.get(assay_name__iexact=rowValue[2])
+        # If this fails, then use the short name
+        except:
+            assay = AssayModel.objects.get(assay_short_name__iexact=rowValue[2])
+
         field = rowValue[3]
         val = rowValue[4]
         time = rowValue[0]

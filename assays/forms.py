@@ -631,13 +631,16 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
 
         # Dic of assay names from inline with respective unit as value
         assays = {}
+        short_names = {}
         for form in forms_data:
             try:
                 if form.cleaned_data:
-                    assay_name = form.cleaned_data.get('assay_id').assay_name
+                    assay_name = form.cleaned_data.get('assay_id').assay_name.upper()
+                    assay_short_name = form.cleaned_data.get('assay_id').assay_short_name.upper()
                     unit = form.cleaned_data.get('readout_unit').unit
                     if assay_name not in assays:
                         assays.update({assay_name:unit})
+                        short_names.update({assay_short_name:unit})
                     else:
                         raise forms.ValidationError(
                             'Duplicate assays are not permitted; please blank out or change the duplicate')
@@ -660,7 +663,7 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
 
             for raw in saved_data:
 
-                assay = raw.assay_id.assay_id.assay_name
+                assay = raw.assay_id.assay_id.assay_name.upper()
                 val_unit = raw.assay_id.readout_unit.unit
 
                 # Raise error when an assay does not exist
@@ -695,18 +698,22 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
 
                 time = line[0]
                 time_unit = line[1].strip().lower()
-                assay = line[2]
+                assay = line[2].upper()
                 field = line[3]
                 val = line[4]
                 val_unit = line[5].strip()
                 # Raise error when an assay does not exist
-                if assay not in assays:
+                if assay not in assays and assay not in short_names:
                     raise forms.ValidationError(
                         'No assay with the name "%s" exists; please change your file or add this assay' % assay)
                 # Raise error if val_unit not equal to one listed in ACRA
-                if val_unit != assays.get(assay,''):
-                    raise forms.ValidationError(
-                        'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+                if val_unit != assays.get(assay,'') and val_unit != short_names.get(assay,''):
+                    if assay in assays:
+                        raise forms.ValidationError(
+                            'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+                    else:
+                        raise forms.ValidationError(
+                            'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, short_names.get(assay,'')))
                 # Fail if time unit does not match
                 # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
                 if time_unit[0] != readout_time_unit[0]:
