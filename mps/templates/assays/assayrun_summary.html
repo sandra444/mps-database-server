@@ -23,9 +23,9 @@
             <br><br>
             <b>Configuration:</b> {{ object.study_configuration }}
         {% endif %}
+        <br>
     {% endif %}
 
-    <br>
     <legend><h3>Chip Setups</h3></legend>
     {% if setups %}
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
@@ -72,8 +72,8 @@
         </div>
     {% endif %}
 
-    {% if setups.0.assaychipcells_set.all %}
-        <legend><h3>Cells for {{setups.0}}</h3></legend>
+    {% if indicative.assaychipcells_set.all %}
+        <legend><h3>Cells for {{indicative}}</h3></legend>
         <table class="table table-striped">
             <thead>
             <tr>
@@ -85,7 +85,7 @@
             </tr>
             </thead>
             <tbody>
-            {% for cell in setups.0.assaychipcells_set.all %}
+            {% for cell in indicative.assaychipcells_set.all %}
                 <tr>
                     <td>{{ cell.cell_sample }}</td>
                     <td>{{ cell.cell_biosensor }}</td>
@@ -101,13 +101,92 @@
     {% if sameness %}
         <table class="table table-striped table-bordered">
             <tbody>
-        {% for study, same in sameness.items %}
+        {% for setup, same in sameness.items %}
             <tr>
-                <td>{{ study}}</td>
+                <td>{{ setup }}</td>
                 {% if same %}
-                    <td class="text-success">Same as {{setups.0}}</td>
+                    <td class="text-success">Same as {{indicative}}</td>
                 {% else %}
-                    <td class="text-danger">Differs from {{setups.0}}</td>
+                    <td class="text-danger">Differs from {{indicative}}</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if plate_setups %}
+        <legend><h3>Plate Setups</h3></legend>
+        <table id="plate_setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="hidden-print">View/Edit</th>
+                    <th>Plate Setup ID / Barcode</th>
+                    <th>Date</th>
+                    <th>Assay Layout</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for setup in plate_setups %}
+                <tr id={{ setup.id }} name={{ setup.id }}>
+                    <td class="hidden-print"><a class="btn btn-primary" href="/assays/assayplatesetup/{{ setup.id }}">View/Edit</a></td>
+                    <td>{{ setup.assay_plate_id }}</td>
+                    <td>{{ setup.setup_date }}</td>
+                    <td>{{ setup.assay_layout }}</td>
+                    <td>{{ setup.created_by }}</td>
+                    <td>
+                        {% if setup.signed_off_by %}
+                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if setup.flagged %}
+                            <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if plate_indicative.assayplatecells_set.all %}
+        <legend><h3>Cells for {{ plate_indicative }}</h3></legend>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Cell Sample</th>
+                <th>Cell Biosensor</th>
+                <th>Density</th>
+                <th>Unit</th>
+                <th>Passage#</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for cell in plate_indicative.assayplatecells_set.all %}
+                <tr>
+                    <td>{{ cell.cell_sample }}</td>
+                    <td>{{ cell.cell_biosensor }}</td>
+                    <td>{{ cell.cellsample_density }}</td>
+                    <td>{{ cell.get_cellsample_density_unit_display }}</td>
+                    <td>{{ cell.cell_passage }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if plate_sameness %}
+        <table class="table table-striped table-bordered">
+            <tbody>
+        {% for setup, same in plate_sameness.items %}
+            <tr>
+                <td>{{ setup }}</td>
+                {% if same %}
+                    <td class="text-success">Same as {{ plate_indicative }}</td>
+                {% else %}
+                    <td class="text-danger">Differs from {{ plate_indicative }}</td>
                 {% endif %}
             </tr>
         {% endfor %}

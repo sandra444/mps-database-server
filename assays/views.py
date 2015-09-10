@@ -256,6 +256,39 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             self.get_context_data(form=form,
                                   update=True))
 
+def compare_cells(current_model, current_filter, setups):
+    cells = {}
+
+    for setup in setups:
+        cells.update(
+            {
+                setup:sorted(current_model.objects.filter(**{current_filter:setup.id}).values_list(
+                    'cell_sample',
+                    'cell_biosensor',
+                    'cellsample_density',
+                    'cellsample_density_unit',
+                    'cell_passage'))
+            }
+        )
+
+    sameness = {setup:{} for setup in setups}
+    max_same = 0
+    best_setup = setups[0]
+
+    for setup_1 in setups:
+        same = 0
+        for setup_2 in setups:
+            if setup_1 != setup_2:
+                if cells.get(setup_1) == cells.get(setup_2):
+                    sameness.get(setup_1).update({str(setup_2):True})
+                    same += 1
+                else:
+                    sameness.get(setup_1).update({str(setup_2):False})
+        if same > max_same:
+            max_same = same
+            best_setup = setup_1
+
+    return (best_setup, sameness.get(best_setup))
 
 class AssayRunSummary(ObjectGroupRequiredMixin, DetailView):
     model = AssayRun
@@ -271,42 +304,38 @@ class AssayRunSummary(ObjectGroupRequiredMixin, DetailView):
                                                                                                      'created_by')
 
         # TODO THIS SAME BUSINESS NEEDS TO BE REFACTORED
-        first = {}
+        # For chips
+        indicative = None
         sameness = {}
 
-        if len(context['setups']) > 0:
-            for cell in AssayChipCells.objects.filter(assay_chip=context['setups'][0]):
-                first.update({tuple(AssayChipCells.objects.filter(pk=cell.id).values_list(
-                    'cell_sample',
-                    'cell_biosensor',
-                    'cellsample_density',
-                    'cellsample_density_unit',
-                    'cell_passage')):True})
-
-            for setup in context['setups'][1:]:
-                cells = {}
-
-                for cell in AssayChipCells.objects.filter(assay_chip=setup):
-                    cells.update({tuple(AssayChipCells.objects.filter(pk=cell.id).values_list(
-                        'cell_sample',
-                        'cell_biosensor',
-                        'cellsample_density',
-                        'cellsample_density_unit',
-                        'cell_passage')):True})
-
-                same = True
-
-                for cell in cells:
-                    if cell not in first:
-                        same = False
-
-                for cell in first:
-                    if cell not in cells:
-                        same = False
-
-                sameness.update({str(setup):same})
+        if len(context['setups']) > 1:
+            results = compare_cells(AssayChipCells, 'assay_chip', context['setups'])
+            indicative = results[0]
+            sameness = results[1]
+        elif len(context['setups']) == 1:
+            indicative = context['setups'][0]
 
         context['sameness'] = sameness
+        context['indicative'] = indicative
+
+        # For plates
+        context['plate_setups'] = AssayPlateSetup.objects.filter(assay_run_id=self.object).prefetch_related('assay_run_id',
+                                                                                                     'assay_layout',
+                                                                                                     'created_by')
+
+        indicative = None
+        sameness = {}
+
+        if len(context['plate_setups']) > 1:
+            results = compare_cells(AssayPlateCells, 'assay_plate', context['plate_setups'])
+            indicative = results[0]
+            sameness = results[1]
+        elif len(context['plate_setups']) == 1:
+            indicative = context['plate_setups'][0]
+
+        context['plate_sameness'] = sameness
+        context['plate_indicative'] = indicative
+
         return self.render_to_response(context)
 
 
