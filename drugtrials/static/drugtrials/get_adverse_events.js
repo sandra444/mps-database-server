@@ -4,9 +4,12 @@ $(document).ready(function () {
     var name= $('#compound').html();
     var chart = '';
 
+    // The total will give the x_axis every other plot must adhere to
+    var x_axis = null;
+
     var granularity = 'month';
 
-    var plotted = {'Total':false};
+    var plotted = {};
 
     function ISO_to_date(iso) {
         return iso.substring(0,10).replace(/\-/g,'');
@@ -85,6 +88,16 @@ $(document).ready(function () {
                 new_data[current_section] += count;
             }
         });
+
+        // Add zeros for missing data
+        if (x_axis) {
+            $.each(x_axis.slice(1), function(index, time) {
+                if (!new_data[time]) {
+                    new_data[time] = 0;
+                }
+            });
+        }
+
         $.each(new_data, function(time, count) {
             final_data.push({'time': time, 'count': count});
         });
@@ -164,6 +177,8 @@ $(document).ready(function () {
 
     function plot(event, data) {
         if (event == 'Total') {
+            x_axis = data.time;
+
             var x_format = '%Y%m%d';
             var tick_format = '%Y-%m-%d';
 
@@ -182,7 +197,7 @@ $(document).ready(function () {
                     x: 'time',
                     xFormat: x_format, // default '%Y-%m-%d',
                     columns: [
-                        data.time,
+                        x_axis,
                         data.values
                     ]
                 },
@@ -208,6 +223,7 @@ $(document).ready(function () {
             plotted[event] = true;
             $('button[data-adverse-event="'+event+'"]').addClass('btn-primary');
             chart.load({
+                xFormat: x_format,
                 columns: [
                     data.time,
                     data.values
@@ -217,6 +233,8 @@ $(document).ready(function () {
     }
 
     function reset_new_granularity() {
+        x_axis = null;
+        get_range_plot('Total');
         for (event in plotted) {
             get_range_plot(event, 'keep');
         }
