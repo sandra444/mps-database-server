@@ -194,9 +194,13 @@
         <label for="file" class="col-sm-2 control-label">.csv Data File</label>
         <div class="col-sm-10">
           {{ form.file }}
-            <p><b>***Uploading overwrites old data***</b>
-            Rows in <span style="color: #FF0000">red</span> will be excluded.
-            Rows in <span style="color: #00FF00">green</span> are in the database.
+            <p>
+                <b>***Uploading overwrites old data***</b>
+                <br>
+                Rows in <span style="color: #FF0000">red</span> will be excluded.
+                Rows in <span style="color: #00FF00">green</span> are in the database.
+                <br>
+                File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays.
             </p>
         </div>
     </div>
