@@ -6,6 +6,7 @@ $(document).ready(function () {
 
     // The total will give the x_axis every other plot must adhere to
     var x_axis = null;
+    var x_format = '%Y%m';
 
     var granularity = 'month';
 
@@ -179,7 +180,7 @@ $(document).ready(function () {
         if (event == 'Total') {
             x_axis = data.time;
 
-            var x_format = '%Y%m%d';
+            x_format = '%Y%m%d';
             var tick_format = '%Y-%m-%d';
 
             if (granularity === 'month') {
@@ -217,6 +218,11 @@ $(document).ready(function () {
                     show: true
                 }
             });
+
+            // Plot others for when the plot is reset
+            for (event in plotted) {
+                get_range_plot(event, 'keep');
+            }
         }
         else {
             // Add the event to plotted
@@ -235,9 +241,6 @@ $(document).ready(function () {
     function reset_new_granularity() {
         x_axis = null;
         get_range_plot('Total');
-        for (event in plotted) {
-            get_range_plot(event, 'keep');
-        }
     }
 
     get_range_plot('Total');
