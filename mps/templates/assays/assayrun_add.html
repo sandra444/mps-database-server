@@ -22,13 +22,7 @@
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post" >
 
-    {% if object.signed_off_by %}
-        <div id="info" class="alert alert-info" role="alert">
-            <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-            <span class="sr-only">Info:</span>
-            This entry was reviewed by {{ object.signed_off_by }} on {{ object.signed_off_date }}
-        </div>
-    {% endif %}
+    {% include 'review.html' %}
 
     <h1>
         Edit {{ object }}
@@ -47,6 +41,8 @@
             <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/{{ object.id }}/delete/">Delete</a>
         {% endif %}
     </h1>
+
+    {% include 'tracking.html' %}
 
     <legend>Study Details</legend>
 
