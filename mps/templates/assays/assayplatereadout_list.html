@@ -43,7 +43,7 @@
                     <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}">{{ readout.setup }}</a></td>
                     <td>
                         {% for assay in readout.related_assays %}
-                            {{ assay }}
+                            {{ assay.assay_id.assay_short_name }}
                         {% endfor %}
                     </td>
                     {% if readout.readout_start_time != None %}

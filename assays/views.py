@@ -75,8 +75,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
                                                                                                      'unit',
                                                                                                      'created_by')
         readouts = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
-            'created_by').select_related('chip_setup__compound',
-                                                                   'chip_setup__unit')
+            'created_by').select_related('chip_setup__compound','chip_setup__unit')
 
         related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
         related_assays_map = {}
@@ -101,7 +100,6 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
         context['number_of_results'] = AssayChipTestResult.objects.filter(chip_readout=context['readouts']).count()
 
         # PLATES
-
         context['plate_setups'] = AssayPlateSetup.objects.filter(assay_run_id=self.object).prefetch_related('assay_layout',
                                                                                                        'created_by')
         readouts = AssayPlateReadout.objects.filter(setup=context['plate_setups']).prefetch_related('setup', 'created_by')
