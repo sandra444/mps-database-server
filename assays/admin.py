@@ -1275,6 +1275,7 @@ class AssayChipTestResultAdmin(LockableAdmin):
             'Device/Drug Parameters', {
                 'fields': (
                     ('chip_readout',),
+                    ('summary',),
                 ),
             }
         ),
@@ -1351,6 +1352,7 @@ class AssayPlateTestResultAdmin(LockableAdmin):
             'Device/Drug Parameters', {
                 'fields': (
                     ('readout',),
+                    ('summary',),
                 ),
             }
         ),

@@ -87,8 +87,7 @@ class AssayChipResultForm(forms.ModelForm):
     class Meta(object):
         model = AssayChipTestResult
         widgets = {
-            'test_time': forms.TextInput(attrs={'size': 3}),
-            'value': forms.TextInput(attrs={'size': 10}),
+            'summary': forms.Textarea(attrs={'cols':75, 'rows': 3}),
         }
         exclude = group + tracking + restricted
 
@@ -300,8 +299,7 @@ class AssayPlateResultForm(forms.ModelForm):
     class Meta(object):
         model = AssayPlateTestResult
         widgets = {
-            'test_time': forms.TextInput(attrs={'size': 3}),
-            'value': forms.TextInput(attrs={'size': 10}),
+            'summary': forms.Textarea(attrs={'cols':75, 'rows': 3}),
         }
         exclude = group + tracking + restricted
 

@@ -512,6 +512,7 @@ class AssayPlateTestResult(FlaggableModel):
 
     readout = models.ForeignKey('assays.AssayPlateReadout',
                                         verbose_name='Plate ID/ Barcode')
+    summary = models.TextField(default='')
 
     def __unicode__(self):
         return u'Results for: {}'.format(self.readout)
@@ -769,6 +770,7 @@ class AssayChipTestResult(FlaggableModel):
         verbose_name = 'Chip Result'
 
     chip_readout =  models.ForeignKey('assays.AssayChipReadout', verbose_name='Chip Readout')
+    summary = models.TextField(default='')
 
     def __unicode__(self):
         return u'Results for: {}'.format(self.chip_readout)
