@@ -17,7 +17,7 @@ $(document).ready(function () {
 
     function addChart(id,name,timeUnits,valueUnits) {
 
-        $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 5%;margin-left: -100%px;">')
+        $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 2.5%;margin-left: -100%px;">')
             .appendTo('#extra');
 
         charts.push(
@@ -90,7 +90,8 @@ $(document).ready(function () {
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
-                parseAndReplace(json.csv,true);
+                exist = true;
+                parseAndReplace(json.csv);
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
@@ -106,10 +107,11 @@ $(document).ready(function () {
 
     var loaded = function (evt) {
         var fileString = evt.target.result;
-        parseAndReplace(fileString,false);
+        exist = false;
+        parseAndReplace(fileString);
     };
 
-    var parseAndReplace = function (csv,exist) {
+    var parseAndReplace = function (csv) {
         if (!csv) {
             $('#csv_table').html(add);
             return;
@@ -128,7 +130,7 @@ $(document).ready(function () {
         }
 
         var all = csv.split('\n');
-        var lines = [];
+        lines = [];
 
         for (var index in all) {
             if (all[index].indexOf(",") > -1) {
@@ -141,12 +143,13 @@ $(document).ready(function () {
         //Make table
         var table = exist ? "<table class='layout-table' style='width: 100%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 100%;'><tbody>";
 
-        table += exist ? "<tr style='background: #FF2400'><th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th></tr>" : "";
+        table += exist ? "<tr style='background: #FF2400'>" + header + "</tr>" : "";
 
         for (var i in lines) {
             var line = lines[i];
 
-            var every = line.every(isTrue);
+            // Need to take a slice to avoid treating missing QC as invalid
+            var every = line.slice(0,6).every(isTrue);
 
             var value = line[4];
 
@@ -164,26 +167,48 @@ $(document).ready(function () {
                 table += "<tr>";
             }
 
-            // Add every value of interest
+            // Add every value (excluding the QC)
             for (var j=0; j<6; j++) {
                 table += "<th>" + line[j] + "</th>";
             }
+
+            // Just add text if this is a header row for QC
+            if (i < headers && !exist) {
+                table += "<th>" + line[6] + "</th>";
+            }
+            // Add an input for the QC if this isn't a header
+            else {
+                table += "<th><input size='4' class='quality' id='" + i + "' name='" + i + "' value='" + line[6] + "'></th>";
+            }
+
             table += "</tr>";
         }
 
         table += "</tbody></table>";
         $('#csv_table').html(table);
 
+        // Bind change event to quality
+        $('.quality').change(function() {
+            var index = +this.id;
+            lines[index][6] = this.value;
+            resetChart();
+            plot();
+        });
+
+        plot();
+    };
+
+    function plot() {
         //Make chart
         var assays = {};
         var valueUnits = {};
         var timeUnits = {};
 
         for (var i in lines) {
-
             var line = lines[i];
 
-            var every = line.every(isTrue);
+            // Need to take a slice to avoid treating missing QC as invalid
+            var every = line.slice(0,6).every(isTrue);
 
             if (!every || (i < headers && !exist)) {
                 continue;
@@ -196,26 +221,30 @@ $(document).ready(function () {
             var value = line[4];
             var value_unit = line[5];
 
+            var quality = line[6];
+
             // Crash if the time or value are not numeric
             if (isNaN(time) || isNaN(value)) {
                 alert("Improperly Configured: Please check your file and the number of header rows selected.");
                 return;
             }
 
-            if (!assays[assay]) {
-                assays[assay] = {};
-            }
+            if (!quality) {
+                if (!assays[assay]) {
+                    assays[assay] = {};
+                }
 
-            if (object && object != 'None' && !assays[assay][object]) {
-                assays[assay][object] = {'time':[], 'data':[]};
-            }
+                if (object && object != 'None' && !assays[assay][object]) {
+                    assays[assay][object] = {'time': [], 'data': []};
+                }
 
-            if (assays[assay][object] && value && value != 'None') {
-                assays[assay][object].time.push(time);
-                assays[assay][object].data.push(value);
+                if (assays[assay][object] && value && value != 'None') {
+                    assays[assay][object].time.push(time);
+                    assays[assay][object].data.push(value);
 
-                valueUnits[assay] = value_unit;
-                timeUnits[assay] = time_unit;
+                    valueUnits[assay] = value_unit;
+                    timeUnits[assay] = time_unit;
+                }
             }
         }
 
@@ -247,7 +276,7 @@ $(document).ready(function () {
             }
             chart += 1;
         }
-    };
+    }
 
     var refresh = function() {
         resetChart();
@@ -265,28 +294,36 @@ $(document).ready(function () {
         }
     };
 
+    // The data in question
+    var lines = [];
+
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     var id = getReadoutValue();
 
+
+    // Indicates whether the data exists in the database or not
+    var exist = false;
+
     var headers = 0;
+    var header = "<th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th><th>QC Status</th>";
 
     if ($('#id_headers')[0]) {
         headers = Math.floor($('#id_headers').val());
     }
 
     var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
-            "<tr style='background: #FF2400'><th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th></tr>" +
-            "<tr>" + repeat('<th><br><br></th>',6) + "</tr>" +
-            "<tr>" + repeat('<th><br><br></th>',6) + "</tr>" +
+            "<tr style='background: #FF2400'>" + header + "</tr>" +
+            "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
+            "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
             "</tbody></table>";
 
     if ($('#assaychipreadoutassay_set-group')[0] != undefined) {
-        $('<div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;width: 99%;overflow: hidden;">')
+        $('<div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;min-width: 975px;overflow: hidden;">')
             .appendTo('body');
         $("#extra").insertAfter($("#assaychipreadoutassay_set-group")[0]);
 
-        $('<div id="csv_table" style="width: 30%;float: left;margin-left: 5%;">')
+        $('<div id="csv_table" style="width: 30%;float: left;margin-left: 2.5%;">')
             .appendTo('#extra').html(add);
 
         var charts = [];

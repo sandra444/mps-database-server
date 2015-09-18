@@ -245,7 +245,7 @@ def save_assay_layout(request, obj, form, change):
 
         # Types
         elif key.endswith('_type'):
-            # Uncertain as to why empty values are past
+            # Uncertain as to why empty values are passed
             # TODO EXPLORE EMPTY VALUES
             if val:
                 # Cut fof '_type'
@@ -752,7 +752,8 @@ def parseChipCSV(currentChipReadout, file, headers):
             continue
 
         # Skip any row with incomplete data
-        if not all(rowValue):
+        # This does not include the quality
+        if not all(rowValue[:6]):
             continue
 
         # Try getting the assay from long name
@@ -766,6 +767,11 @@ def parseChipCSV(currentChipReadout, file, headers):
         val = rowValue[4]
         time = rowValue[0]
 
+        # Get quality if possible
+        quality = ''
+        if len(rowValue) > 6:
+            quality = rowValue[6]
+
         # Originally permitted none values, will now ignore empty values
         # if not val:
         #     val = None
@@ -776,7 +782,8 @@ def parseChipCSV(currentChipReadout, file, headers):
             assay_id=AssayChipReadoutAssay.objects.get(readout_id=currentChipReadout, assay_id=assay),
             field_id=field,
             value=val,
-            elapsed_time=time
+            elapsed_time=time,
+            quality=quality,
         ).save()
     return
 
@@ -1053,7 +1060,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
         else:
             return super(LockableAdmin, self).response_change(request, obj)
 
-    # save_realted takes the place of save_model so that the inline can be saved first
+    # save_related takes the place of save_model so that the inline can be saved first
     def save_related(self, request, form, formsets, change):
         obj = form.instance
 
@@ -1072,7 +1079,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parseChipCSV(obj, request.FILES['file'], headers)
+            parseChipCSV(obj, request.FILES['file'], headers, form)
 
         #Need to delete entries when a file is cleared
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':

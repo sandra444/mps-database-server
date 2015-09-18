@@ -615,9 +615,15 @@ class AssayChipRawData(models.Model):
 
     assay_chip_id = models.ForeignKey('assays.AssayChipReadout')
     assay_id = models.ForeignKey('assays.AssayChipReadoutAssay')
-    field_id = models.CharField(max_length=255, default = '0')
+
+    field_id = models.CharField(max_length=255, default='0')
+
     value = models.FloatField(null=True)
+
     elapsed_time = models.FloatField(default=0)
+
+    # This value will act as quality control, if it evaluates True then the value is considered invalid
+    quality  = models.CharField(max_length=20, default='')
 
 
 class AssayChipCells(models.Model):
