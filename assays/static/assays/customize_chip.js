@@ -79,14 +79,7 @@ $(document).ready(function () {
             data: {
                 // Function to call within the view is defined by `call:`
                 call: 'fetch_chip_readout',
-
-                // First token is the var name within views.py
-                // Second token is the var name in this JS file
                 id: id,
-
-                // Evil hack to get the CSRF middleware token
-                // Always pass the CSRF middleware token with every AJAX call
-
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {

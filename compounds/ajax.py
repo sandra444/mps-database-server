@@ -167,10 +167,18 @@ def fetch_compound_report(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+def fetch_compound_list(request):
+    """This function just gets a list of compounds and returns it as JSON"""
+    # Why does this function exist? To have compound search suggestions without violating SOC
+    data = [compound.name for compound in Compound.objects.all()]
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
 switch = {
     'fetch_compound_name': fetch_compound_name,
     'fetch_chemblid_data': fetch_chemblid_data,
     'fetch_compound_report': fetch_compound_report,
+    'fetch_compound_list': fetch_compound_list,
 }
 
 def ajax(request):

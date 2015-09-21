@@ -26,11 +26,8 @@ def main(request):
 
     c = RequestContext(request)
 
-    compounds = [str(compound.name) for compound in Compound.objects.all()]
-
     c.update({
         'form': form,
-        'compounds': compounds
     })
 
     return render_to_response('index.html', c)
