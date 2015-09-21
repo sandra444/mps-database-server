@@ -12,24 +12,6 @@
 
 {% block content %}
 
-<style>
-.layout-table th {
-    border: 1px solid black;
-    padding: 2px;
-}
-</style>
-
-<script>
-    $(function() {
-        var date = $("#id_readout_start_time");
-        var curr_date = date.val();
-        //Add datepicker to assay and readout start time
-        date.datepicker();
-        date.datepicker("option","dateFormat","yy-mm-dd");
-        date.datepicker("setDate" , curr_date);
-    });
-</script>
-
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post" >
 

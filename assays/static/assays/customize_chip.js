@@ -352,6 +352,14 @@ $(document).ready(function () {
             }
         });
     }
+
+    // Setup date picker
+    var date = $("#id_readout_start_time");
+    var curr_date = date.val();
+    //Add datepicker to assay and readout start time
+    date.datepicker();
+    date.datepicker("option","dateFormat","yy-mm-dd");
+    date.datepicker("setDate" , curr_date);
 });
 
 
