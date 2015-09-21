@@ -3,6 +3,7 @@
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from assays.models import *
 from cellsamples.models import CellSample
+# TODO TRIM THIS IMPORT
 from assays.admin import *
 from assays.forms import *
 from django import forms
@@ -23,6 +24,7 @@ import ujson as json
 
 # TODO Refactor imports
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
+# TODO Rename get_absolute_url when the function does not actually return the model's URL
 
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
@@ -646,7 +648,10 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             formset.save()
             if formset.files.get('file',''):
                 file = formset.files.get('file','')
-                parseChipCSV(self.object, file, headers)
+                parseChipCSV(self.object, file, headers, form)
+            # If no file, try to update the qc_status
+            else:
+                modify_qc_status(self.object, form)
             if data['another']:
                 form = self.form_class(study, None, instance=self.object,
                               initial={'file': None, 'success': True})
@@ -722,7 +727,10 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Save file if it exists
             if formset.files.get('file',''):
                 file = formset.files.get('file','')
-                parseChipCSV(self.object, file, headers)
+                parseChipCSV(self.object, file, headers, form)
+            # If no file, try to update the qc_status
+            else:
+                modify_qc_status(self.object, form)
             # Clear data if clear is checked
             if self.request.POST.get('file-clear',''):
                 removeExistingChip(self.object)

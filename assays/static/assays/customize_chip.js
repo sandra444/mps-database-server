@@ -145,6 +145,9 @@ $(document).ready(function () {
 
         table += exist ? "<tr style='background: #FF2400'>" + header + "</tr>" : "";
 
+        // Current index for saving QC values
+        var current_index = 0;
+
         for (var i in lines) {
             var line = lines[i];
 
@@ -172,13 +175,18 @@ $(document).ready(function () {
                 table += "<th>" + line[j] + "</th>";
             }
 
-            // Just add text if this is a header row for QC
-            if (i < headers && !exist) {
+            // Just add text if this is a header row for QC OR if this row is invalid
+            // (QC status of an ignored row does not really matter)
+            if (i < headers && !exist || !every) {
                 table += "<th>" + line[6] + "</th>";
             }
             // Add an input for the QC if this isn't a header
+            // QC inputs NAME begin with "QC_"
+            // QC input IDS are the row index (for plotting accurately)
             else {
-                table += "<th><input size='4' class='quality' id='" + i + "' name='" + i + "' value='" + line[6] + "'></th>";
+                table += "<th><input size='4' class='quality' id='" + i + "' name='QC_" + current_index + "' value='" + line[6] + "'></th>";
+                // Increment the current index
+                current_index += 1;
             }
 
             table += "</tr>";
