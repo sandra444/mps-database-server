@@ -3,7 +3,7 @@
 // TODO NEEDS REFACTOR
 // TODO PREFERRABLY CONSOLIDATE THESE DISPLAY FUNCTION (DO NOT REPEAT YOURSELF)
 $(document).ready(function () {
-    
+
     if (!$('#flag')[0]) {
         alert('Sorry, plate readout uploads are not currently available in the admin.');
     }
@@ -275,24 +275,24 @@ $(document).ready(function () {
             });
         // Clear old times
         time_select.empty();
-        
+
         // Convert times to sorted array?
-        
+
         $.each(times, function (index, time) {
             var option = $('<option>')
                 .attr('value', '_' + time)
                 .text(time);
             time_select.append(option);
         });
-        
+
         // If there is only one timepoint (probably zero), no need to display time selection
         if (_.size(times) == 1) {
-            $('#time_select_row').hide();   
+            $('#time_select_row').hide();
         }
         else {
             $('#time_select_row').show();
         }
-        
+
         $('#heatmap_options').show();
         feature_select.trigger('change');
     }
@@ -410,12 +410,12 @@ $(document).ready(function () {
                     value_unit = row[3];
                     time = row[5];
                     time_unit = row[7];
-                    
+
                     // Set time to zero if undefined
                     if (!time) {
                         time = 0;
                     }
-                    
+
                     // Add time
                     times[time] = [time];
 
@@ -423,7 +423,7 @@ $(document).ready(function () {
                     if (unique_features.indexOf(feature) < 0) {
                         unique_features.push(feature);
                     }
-                    
+
                     // Add for multiple readings
                     feature += '_' + time;
 
@@ -559,7 +559,7 @@ $(document).ready(function () {
                     else {
                         values = row.slice(1);
                     }
-                    
+
                     // Add time
                     times[time] = time;
 
@@ -695,7 +695,7 @@ $(document).ready(function () {
             var well_id = '#' + row_label + '_' + column_label;
 
             var feature = well_data.feature;
-            
+
             // Add feature to features
             features[feature] = feature;
 
@@ -752,7 +752,7 @@ $(document).ready(function () {
 
         // Append the value of time_select
         current_feature = current_feature + time_select.val();
-        
+
         // Hide all values
         $('.value').hide();
 
@@ -767,7 +767,7 @@ $(document).ready(function () {
         // Show this feature's values
         $('.' + current_feature).show();
     });
-    
+
     // Trigger feature select change on time change
     time_select.change( function() {
         feature_select.trigger('change');
@@ -777,4 +777,14 @@ $(document).ready(function () {
     data_toggle.click( function() {
          $('.layout-list').toggle();
     });
+
+    // Datepicker superfluous on admin, use this check to apply only in frontend
+    if ($('#fluid-content')[0]) {
+        // Add datepicker
+        var date = $("#id_readout_start_time");
+        var curr_date = date.val();
+        date.datepicker();
+        date.datepicker("option", "dateFormat", "yy-mm-dd");
+        date.datepicker("setDate", curr_date);
+    }
 });

@@ -112,22 +112,6 @@ $(document).ready(function () {
         });
     });
 
-//    tox.change(function (evt) {
-//        get_types();
-//    });
-//
-//    eff.change(function (evt) {
-//        get_types();
-//    });
-//
-//    dm.change(function (evt) {
-//        get_types();
-//    });
-//
-//    cc.change(function (evt) {
-//        get_types();
-//    });
-
     date.data("value", date.val());
 
 
@@ -147,4 +131,13 @@ $(document).ready(function () {
         data[3] = $('#id_name').val();
         set_data();
     }).trigger('input');
+
+    // Datepicker superfluous on admin, use this check to apply only in frontend
+    if ($('#fluid-content')[0]) {
+        // Add datepicker
+        var curr_date = date.val();
+        date.datepicker();
+        date.datepicker("option","dateFormat","yy-mm-dd");
+        date.datepicker("setDate" , curr_date);
+    }
 });

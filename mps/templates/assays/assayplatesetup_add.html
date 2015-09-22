@@ -11,23 +11,6 @@
 
 {% block fluid-content %}
 
-<script>
-    $(function() {
-        var date = $("#id_setup_date");
-        var curr_date = date.val();
-        //Add datepicker to assay and readout start time
-        date.datepicker();
-        date.datepicker("option", "dateFormat", "yy-mm-dd");
-        date.datepicker("setDate", curr_date);
-
-        // Open and then close dialog so it doesn't get placed in window itself
-        var dialog = $('#dialog');
-        dialog.dialog();
-        dialog.dialog('close');
-        dialog.removeProp('hidden');
-    });
-</script>
-
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
@@ -288,53 +271,5 @@
             </tbody>
     </table>
 </div>
-
-<script>
-    // Global variables are in poor taste
-    var id = null;
-
-    function search(elem) {
-        id = elem.id.replace(/\D/g,'');
-        $("#dialog").dialog({
-          width: 775,
-          height: 775
-        });
-    }
-
-    $(function() {
-        $('.cellsample').click(function (evt) {
-            var cellsampleId = this.id;
-            var selectedInput = $('#id_assayplatecells_set-' + id + '-cell_sample');
-            selectedInput.prop('value', cellsampleId);
-            var cellsampleName = this.attributes["name"].value;
-            var selectedLabel = $('#id_assayplatecells_set-' + id + '-cell_sample_label');
-            selectedLabel.text(cellsampleName);
-            $('#dialog').dialog('close');
-        });
-
-        $('#cellsamples').DataTable({
-            "iDisplayLength": 50,
-            // Initially sort on receipt date
-            "order": [ 0, "desc" ],
-            // If one wants to display top and bottom
-            "sDom": '<"wrapper"fti>'
-        });
-
-        // Move filter to left
-        $('.dataTables_filter').css('float', 'left');
-
-        // This code should populate cell labels when data is already given
-        var current_id = 0;
-        var current_input = $('#id_assayplatecells_set-' + current_id + '-cell_sample');
-        while(current_input[0]) {
-            if(current_input.val()) {
-                var cell_name = $('#' + current_input.val()).attr('name');
-                $('#id_assayplatecells_set-' + current_id + '-cell_sample_label').text(cell_name);
-            }
-            current_id += 1;
-            current_input = $('#id_assayplatecells_set-' + current_id + '-cell_sample');
-        }
-    });
-</script>
 
 {% endblock %}

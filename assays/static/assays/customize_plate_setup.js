@@ -1,6 +1,18 @@
 // This script is for displaying the layout for setups
 // TODO NEEDS REFACTOR
 // TODO PREFERRABLY CONSOLIDATE THESE DISPLAY FUNCTION (DO NOT REPEAT YOURSELF)
+
+// Global variables are in poor taste
+var id = null;
+
+function search(elem) {
+    id = elem.id.replace(/\D/g,'');
+    $("#dialog").dialog({
+      width: 775,
+      height: 775
+    });
+}
+
 $(document).ready(function () {
 
     var layout = $('#id_assay_layout');
@@ -196,5 +208,57 @@ $(document).ready(function () {
     // (implies the setup is saved)
     if (layout.val()) {
         get_device_layout();
+    }
+
+    // Datepicker superfluous on admin, use this check to apply only in frontend
+    if ($('#fluid-content')[0]) {
+        // Add datepicker
+        var date = $("#id_setup_date");
+        var curr_date = date.val();
+        date.datepicker();
+        date.datepicker("option", "dateFormat", "yy-mm-dd");
+        date.datepicker("setDate", curr_date);
+    }
+
+    // Operations for the frontend only
+    if ($('#dialog')[0]) {
+        // Open and then close dialog so it doesn't get placed in window itself
+        var dialog = $('#dialog');
+        dialog.dialog();
+        dialog.dialog('close');
+        dialog.removeProp('hidden');
+
+        $('.cellsample').click(function (evt) {
+            var cellsampleId = this.id;
+            var selectedInput = $('#id_assayplatecells_set-' + id + '-cell_sample');
+            selectedInput.prop('value', cellsampleId);
+            var cellsampleName = this.attributes["name"].value;
+            var selectedLabel = $('#id_assayplatecells_set-' + id + '-cell_sample_label');
+            selectedLabel.text(cellsampleName);
+            $('#dialog').dialog('close');
+        });
+
+        $('#cellsamples').DataTable({
+            "iDisplayLength": 50,
+            // Initially sort on receipt date
+            "order": [ 0, "desc" ],
+            // If one wants to display top and bottom
+            "sDom": '<"wrapper"fti>'
+        });
+
+        // Move filter to left
+        $('.dataTables_filter').css('float', 'left');
+
+        // This code should populate cell labels when data is already given
+        var current_id = 0;
+        var current_input = $('#id_assayplatecells_set-' + current_id + '-cell_sample');
+        while(current_input[0]) {
+            if(current_input.val()) {
+                var cell_name = $('#' + current_input.val()).attr('name');
+                $('#id_assayplatecells_set-' + current_id + '-cell_sample_label').text(cell_name);
+            }
+            current_id += 1;
+            current_input = $('#id_assayplatecells_set-' + current_id + '-cell_sample');
+        }
     }
 });
