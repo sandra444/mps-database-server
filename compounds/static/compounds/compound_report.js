@@ -231,4 +231,22 @@ $(document).ready(function () {
             $('#selection').prop('hidden', true);
         }
     };
+
+    // Make the initial data table
+    $('#compounds').DataTable({
+        dom: 'T<"clear">lfrtip',
+        "order": [[ 1, "asc" ]],
+        "aoColumnDefs": [
+            {
+                "bSortable": false,
+                "aTargets": [0,9]
+            },
+            {
+                "targets": [3],
+                "visible": false,
+                "searchable": true
+            }
+        ],
+        "iDisplayLength": 25
+    });
 });
