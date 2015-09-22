@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block load %}
+    <script src="{% static "assays/assayplatetestresult_list.js" %}"></script>
+{% endblock %}
+
 {% block content %}
 
     <div style="padding-bottom: 50px">
@@ -83,23 +87,6 @@
             </tbody>
         </table>
     </div>
-
-    <script>
-        $(document).ready(function() {
-            $('#results').DataTable( {
-                dom: 'T<"clear">lfrtip',
-                "iDisplayLength": 50,
-                // Initially sort on study not arbitrary ID
-                "order": [ 2, "asc" ],
-                "aoColumnDefs": [
-                    {
-                        "bSortable": false,
-                        "aTargets": [0]
-                    }
-                ]
-            });
-        });
-    </script>
 
     <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

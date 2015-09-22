@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block load %}
+    <script src="{% static "assays/assaylayout_list.js" %}"></script>
+{% endblock %}
+
 {% block content %}
 
     <div style="padding-bottom: 50px">
@@ -43,23 +47,6 @@
             </tbody>
         </table>
     </div>
-
-    <script>
-        $(document).ready(function() {
-            $('#layouts').DataTable( {
-                dom: 'T<"clear">lfrtip',
-                "iDisplayLength": 50,
-                // Initially sort on start date (descending), not ID
-                "order": [ 2, "asc" ],
-                "aoColumnDefs": [
-                    {
-                        "bSortable": false,
-                        "aTargets": [0]
-                    }
-                ]
-            });
-        });
-    </script>
 
     <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

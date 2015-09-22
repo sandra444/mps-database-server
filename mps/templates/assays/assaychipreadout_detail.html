@@ -9,21 +9,6 @@
 {% block content %}
     <legend><h1>Chip Readout ID #{{ object.id }}</h1></legend>
 
-    {#    <div class="container-fluid">#}
-    {#        <div class="col-sm-12">#}
-    {#        <p><b>Setup:</b> {{ object.chip_setup }}</p>#}
-    {#        <p><b>Time Unit:</b> {{ object.timeunit }}</p>#}
-    {#        <p><b>Treatment Time Length:</b> {{ object.treatment_time_length }}</p>#}
-    {#        <p><b>Readout Start Time:</b> {{ object.readout_start_time }}</p>#}
-    {#        {% if object.notebook %}#}
-    {#            <p><b>Notebook:</b> {{ object.notebook }}, page {{ object.notebook_page }}</p>#}
-    {#        {% endif %}#}
-    {#        {% if object.notes %}#}
-    {#            <p><b>Notes:</b> {{ object.notes }}</p>#}
-    {#        {% endif %}#}
-    {#        </div>#}
-    {#    </div>#}
-
     <div class="row">
         <div class="col-sm-2 lead text-right-responsive">
             <b>Setup:</b>
@@ -112,9 +97,5 @@
     <div id="assaychipreadoutassay_set-group"></div>
 
     <br><br>
-
-    {#    <script>#}
-    {#        $("p").addClass("lead");#}
-    {#    </script>#}
 
 {% endblock %}
