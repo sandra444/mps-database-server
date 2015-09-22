@@ -181,25 +181,4 @@
         <tbody id="ae_body">
         </tbody>
     </table>
-
-    <script>
-        $(document).ready(function() {
-            $('#reported_events').DataTable( {
-                "iDisplayLength": 200,
-                "sDom": '<T<"clear">t>',
-                "order": [[ 2, "desc" ]],
-                "aoColumnDefs": [
-                    {
-                        "bSortable": false,
-                        "aTargets": [0]
-                    }
-                ]
-            });
-
-            $('#reported_events').prop('hidden', false);
-            // Reposition download/print/copy
-            $('.DTTT_container').css('float', 'none');
-        });
-    </script>
-
 {% endblock %}

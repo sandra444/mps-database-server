@@ -264,4 +264,21 @@ $(document).ready(function () {
         $('#ae_table').prop('hidden', true);
         get_range_table();
     });
+
+    // Initialize and adjust data table
+    $('#reported_events').DataTable({
+        "iDisplayLength": 200,
+        "sDom": '<T<"clear">t>',
+        "order": [[ 2, "desc" ]],
+        "aoColumnDefs": [
+            {
+                "bSortable": false,
+                "aTargets": [0]
+            }
+        ]
+    });
+
+    $('#reported_events').prop('hidden', false);
+    // Reposition download/print/copy
+    $('.DTTT_container').css('float', 'none');
 });
