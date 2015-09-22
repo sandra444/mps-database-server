@@ -106,11 +106,10 @@ $(document).ready(function () {
         node.on("click", function (d) {
             $('#compound').html("");
             var names = d.name.split('\n');
-            var box = "";
-            for (var i  in names){
-                if (compounds[names[i]]){
+            for (var i  in names) {
+                if (compounds[names[i]]) {
                     var com = compounds[names[i]];
-                    var box = box = "<div id='com" + i + "' class='thumbnail text-center'>";
+                    var box = "<div id='com" + i + "' class='thumbnail text-center'>";
                     box += '<button id="X' + i + '" type="button" class="btn-xs btn-danger">X</button>';
                     box += "<img src='https://www.ebi.ac.uk/chembldb/compound/displayimage/"+ com.CHEMBL + "' class='img-polaroid'>";
                     box += "<strong>" + com.name + "</strong><br>";
@@ -128,6 +127,8 @@ $(document).ready(function () {
 //                    break;
 //                }
             }
+            // Add some padding to the bottom
+            $('#compound').append('<div style="height: 300px;vertical-align: top;">');
         });
 
         //Titles for hovering
@@ -151,13 +152,18 @@ $(document).ready(function () {
         d3.select(self.frameElement).style("height", height + "px");
 
         // Display the original query in terms of what bioactivity-target pairs were used
-        var queryHeight = 600;
+        var queryHeight = $(window).height()/2;
         var queryWidth = $('#query_box').width();
         var query = "<div style='width:" + queryWidth + "px; height: "+ queryHeight + "px;!important;overflow: scroll;'><table class='table table-striped table-hover'><thead><tr><td><b>Target</b></td><td><b>Bioactivity</b></td></tr></thead>";
 
         for (var i in bioactivities){
             bioactivity = bioactivities[i].split('_');
             query += "<tr><td>"+bioactivity[0]+"</td><td>"+bioactivity[1]+"</td></tr>";
+        }
+
+        // Add some blank rows for padding the bottom
+        for (i=0; i<4; i++) {
+            query += "<tr><td> </td><td> </td></tr>";
         }
 
         query += "</table></div>";
