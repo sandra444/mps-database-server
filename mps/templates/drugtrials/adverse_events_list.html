@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block load %}
+    <script src="{% static "drugtrials/adverse_events_list.js" %}"></script>
+{% endblock %}
+
 {% block content %}
 
     <div style="padding-bottom: 50px">
@@ -47,25 +51,6 @@
             </tbody>
         </table>
     </div>
-
-    <script>
-        $(document).ready(function() {
-            $('#adverse_events').DataTable({
-                dom: 'T<"clear">lfrtip',
-                "iDisplayLength": 50,
-                // Initially sort on compound and frequency
-                "order": [[ 1, "asc" ], [ 3, "desc"]],
-                // Try to improve speed
-                "deferRender": true,
-                "aoColumnDefs": [
-                    {
-                        "bSortable": false,
-                        "aTargets": [0]
-                    }
-                ]
-            });
-        });
-    </script>
 
     <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

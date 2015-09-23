@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block load %}
+    <script src="{% static "compounds/compounds_list.js" %}"></script>
+{% endblock %}
+
 {% block content %}
 
     <div style="padding-bottom: 50px">
@@ -64,27 +68,6 @@
             </tbody>
         </table>
     </div>
-
-    <script>
-        $(document).ready(function() {
-            $('#compounds').DataTable({
-                dom: 'T<"clear">lfrtip',
-                "order": [[ 2, "asc" ]],
-                "aoColumnDefs": [
-                    {
-                        "bSortable": false,
-                        "aTargets": [0,1,10]
-                    },
-                    {
-                        "targets": [4],
-                        "visible": false,
-                        "searchable": true
-                    }
-                ],
-                "iDisplayLength": 25
-            });
-        });
-    </script>
 
     <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}
