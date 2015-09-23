@@ -3,26 +3,10 @@
 
 {% block load %}
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "cellsamples/cellsample_add.js" %}"></script>
 {% endblock %}
 
 {% block content %}
-<script>
-    $(function() {
-        var date = $("#id_receipt_date");
-        var curr_date = date.val();
-        //Add datepicker to receipt date
-        date.datepicker();
-        date.datepicker("option","dateFormat","yy-mm-dd");
-        date.datepicker("setDate" , curr_date);
-
-        var isolation = $("#id_isolation_datetime");
-        var curr_isolation = isolation.val();
-        //Add datepicker to isolation
-        isolation.datepicker();
-        isolation.datepicker("option","dateFormat","yy-mm-dd");
-        isolation.datepicker("setDate" , curr_date);
-    });
-</script>
 
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post" >
