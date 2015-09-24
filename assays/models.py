@@ -58,26 +58,6 @@ class PhysicalUnits(LockableModel):
         return u'{}'.format(self.unit)
 
 
-# TODO TIME UNITS ARE SLATED FOR REMOVAL
-#class TimeUnits(LockableModel):
-#    """
-#    Time Units (minutes, hours, etc)
-#    """
-#
-#    unit = models.CharField(max_length=16)
-#    description = models.CharField(max_length=256,
-#                                   blank=True, null=True)
-#    unit_order = models.FloatField(verbose_name='Seconds', default=0)
-#
-#    # this meta class is used to avoid a double 's' on the model name
-#    class Meta(object):
-#        verbose_name_plural = 'Time Units'
-#        ordering = ['unit_order']
-#
-#    def __unicode__(self):
-#        return self.unit
-
-
 class AssayModelType(LockableModel):
     """
     Defines the type of an ASSAY (biochemical, mass spec, and so on)
@@ -120,44 +100,6 @@ class AssayModel(LockableModel):
 
     def __unicode__(self):
         return u'{0} ({1})'.format(self.assay_name, self.test_type)
-
-# To be removed
-# This model is deprecated and will be incorporated into devices
-# class AssayLayoutFormat(LockableModel):
-#     layout_format_name = models.CharField(max_length=200, unique=True)
-#     number_of_rows = models.IntegerField()
-#     number_of_columns = models.IntegerField()
-#     row_labels = models.CharField(max_length=1000,
-#                                   help_text=
-#                                   'Space separated list of unique labels, '
-#                                   'e.g. "A B C D ..."'
-#                                   ' Number of items must match'
-#                                   ' number of columns.''')
-#     column_labels = models.CharField(max_length=1000,
-#                                      help_text='Space separated list of unique '
-#                                                'labels, e.g. "1 2 3 4 ...". '
-#                                                'Number of items must match '
-#                                                'number of columns.')
-#
-#     device = models.ForeignKey(Microdevice)
-#
-#     class Meta(object):
-#         ordering = ('layout_format_name',)
-#
-#     def __unicode__(self):
-#         return self.layout_format_name
-
-# To be removed
-# This model is deprecated and will be incorporated into assay layout
-# class AssayBaseLayout(LockableModel):
-#     base_layout_name = models.CharField(max_length=200)
-#     layout_format = models.ForeignKey(AssayLayoutFormat)
-#
-#     class Meta(object):
-#         ordering = ('base_layout_name',)
-#
-#     def __unicode__(self):
-#         return self.base_layout_name
 
 
 # Assay layout is now a flaggable model
@@ -586,6 +528,9 @@ class AssayRun(RestrictedModel):
 
     file = models.FileField(upload_to='csv', verbose_name='Batch Data File',
                             blank=True, null=True, help_text='Do not upload until you have made each Chip Readout')
+
+    # Image for the study (some illustrative image)
+    image = models.ImageField(upload_to='studies', null=True, blank=True)
 
     def study_types(self):
         types = ''

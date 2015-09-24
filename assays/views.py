@@ -150,7 +150,7 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
 
         # If POST
         if self.request.method == 'POST':
-            return form_class(groups, self.request.POST)
+            return form_class(groups, self.request.POST, self.request.FILES)
         # If GET
         else:
             return form_class(groups)
@@ -228,7 +228,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         # If POST
         if self.request.method == 'POST':
-            return form_class(groups, self.request.POST, instance=self.get_object())
+            return form_class(groups, self.request.POST, self.request.FILES, instance=self.get_object())
         # If GET
         else:
             return form_class(groups, instance=self.get_object())

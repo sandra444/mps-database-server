@@ -92,6 +92,9 @@ $(document).ready(function () {
     var group = $('#id_group');
     var name = $('#id_name');
 
+    var image = $('#id_image');
+    var image_display = $('#image_display');
+
     //Need to have condition for adding vs. changing data
     get_center_id();
     get_types();
@@ -102,8 +105,6 @@ $(document).ready(function () {
     group.change(function (evt) {
         get_center_id();
     });
-
-    //Get the types for each checkbox
 
     //Get the types for each checkbox
     $.each(type_selectors, function(index, value) {
@@ -139,5 +140,39 @@ $(document).ready(function () {
         date.datepicker();
         date.datepicker("option","dateFormat","yy-mm-dd");
         date.datepicker("setDate" , curr_date);
+
+        image.change(function() {
+            var file = image[0].files[0];
+
+            if (file) {
+                $('#current_image').hide();
+
+                var imageType = /image.*/;
+
+                if (file.type.match(imageType)) {
+                    var reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        image_display.html('');
+
+                        var img = new Image();
+                        img.src = reader.result;
+                        img.id = 'preview';
+
+                        image_display.append(img);
+                        $('#preview').addClass('img-responsive center-block padded-bottom');
+                    }
+
+                    reader.readAsDataURL(file);
+                }
+
+                else {
+                    image_display.html('File not supported!');
+                }
+            }
+            else {
+                $('#current_image').show();
+            }
+        });
     }
 });

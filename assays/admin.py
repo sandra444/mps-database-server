@@ -1561,6 +1561,7 @@ class AssayRunAdmin(LockableAdmin):
                     'start_date',
                     'name',
                     'description',
+                    'image',
                 )
             }
         ),
