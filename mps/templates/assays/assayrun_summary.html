@@ -10,6 +10,14 @@
          </h1>
     </div>
 
+    <div id="image_display">
+        <div id="current_image">
+            {% if object.image %}
+                <img class="img-responsive center-block padded-bottom" src="/media/{{ object.image }}">
+            {% endif %}
+        </div>
+    </div>
+
     {% if object.description %}
         <legend><h3>Description</h3></legend>
         {{ object.description }}
