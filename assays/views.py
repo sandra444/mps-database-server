@@ -402,13 +402,20 @@ class AssayChipSetupAdd(CreateView):
 
     def get_form(self, form_class):
         if self.request.method == 'POST':
-            return form_class(self.request.POST)
+            form = form_class(self.request.POST)
         elif self.request.GET.get('clone',''):
             pk = int(self.request.GET.get('clone',''))
             clone = get_object_or_404(AssayChipSetup, pk=pk)
-            return form_class(instance=clone)
+            form = form_class(instance=clone)
         else:
-            return form_class()
+            form = form_class()
+
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+        form.instance.assay_run_id = study
+        form.instance.group = study.group
+
+        return form
 
     def get_context_data(self, **kwargs):
         groups = self.request.user.groups.values_list('id', flat=True)
@@ -436,6 +443,7 @@ class AssayChipSetupAdd(CreateView):
 
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        # TODO THIS SHOULD BE IN get_form AND NOT HERE
         form.instance.assay_run_id = study
         form.instance.group = study.group
         formset = AssayChipCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
@@ -1122,13 +1130,20 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
 
     def get_form(self, form_class):
         if self.request.method == 'POST':
-            return form_class(self.request.POST)
+            form = form_class(self.request.POST)
         elif self.request.GET.get('clone',''):
             pk = int(self.request.GET.get('clone',''))
             clone = get_object_or_404(AssayPlateSetup, pk=pk)
-            return form_class(instance=clone)
+            form = form_class(instance=clone)
         else:
-            return form_class()
+            form = form_class()
+
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+        form.instance.assay_run_id = study
+        form.instance.group = study.group
+
+        return form
 
     def get_context_data(self, **kwargs):
         groups = self.request.user.groups.values_list('id', flat=True)
@@ -1154,6 +1169,7 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
 
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        # TODO THIS SHOULD BE IN get_form AND NOT HERE
         form.instance.assay_run_id = study
         form.instance.group = study.group
         formset = AssayPlateCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)

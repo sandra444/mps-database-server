@@ -156,6 +156,10 @@ class AssayChipSetupForm(CloneableForm):
     def clean(self):
         super(forms.ModelForm, self).clean()
 
+        # Make sure the barcode/ID is unique in the study
+        if AssayChipSetup.objects.filter(assay_run_id=self.instance.assay_run_id, assay_chip_id=self.cleaned_data.get('assay_chip_id')).exclude(id=self.instance.id):
+            raise forms.ValidationError({'assay_chip_id' : ['ID/Barcode must be unique within study.',]})
+
         # Check to see if compound data is complete if: 1.) compound test type 2.) compound is selected (negative control)
         type = self.cleaned_data.get('chip_test_type', '')
         compound = self.cleaned_data.get('compound', '')
@@ -253,6 +257,15 @@ class AssayPlateSetupForm(CloneableForm):
             'notes': forms.Textarea(attrs={'cols':50, 'rows': 3}),
         }
         exclude = ('assay_run_id','group') + tracking + restricted
+
+    def clean(self):
+        super(forms.ModelForm, self).clean()
+
+        # Make sure the barcode/id is unique in the study
+        if AssayPlateSetup.objects.filter(assay_run_id=self.instance.assay_run_id, assay_plate_id=self.cleaned_data.get('assay_plate_id')).exclude(id=self.instance.id):
+            raise forms.ValidationError({'assay_plate_id' : ['ID/Barcode must be unique within study.',]})
+
+        return self.cleaned_data
 
 
 class AssayPlateCellsInlineFormset(CloneableBaseInlineFormSet):
