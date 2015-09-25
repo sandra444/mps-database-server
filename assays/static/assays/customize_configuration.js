@@ -129,7 +129,7 @@ $(document).ready(function () {
             .attr("class", "link")
             .style("stroke-width", 3)
             .style('stroke', function(d) { return d[3] ? '#00FF00':'#FF0000' })
-            .style("marker-end", function(d) { return ms_ie ? 'url(#arrow_ie)':'url(#arrow)' });
+            .attr("marker-end", function(d) { return ms_ie ? 'url(#arrow)':'url(#arrow)' });
 
         var gnodes = svg.selectAll('g.gnode')
             .data(data)
@@ -188,23 +188,6 @@ $(document).ready(function () {
             .attr("orient", "auto")
           .append("path")
             .attr("d", "M0,-5L10,0L0,5")
-            .style("stroke", "#0000FF")
-            .style("fill", "#0000FF")
-            .style("opacity", "1");
-
-        // These half-arrows avoid negative viewbox dimensions and will hopefully work in Trident (IE)
-        svg.append("defs").selectAll("marker")
-            .data(["arrow_ie"])
-          .enter().append("marker")
-            .attr("id", function(d) { return d; })
-            .attr("viewBox", "0 0 10 10")
-            .attr("refX", 20)
-            .attr("refY", 0)
-            .attr("markerWidth", 10)
-            .attr("markerHeight", 6)
-            .attr("orient", "auto")
-          .append("path")
-            .attr("d", "M0,0L10,0L0,5")
             .style("stroke", "#0000FF")
             .style("fill", "#0000FF")
             .style("opacity", "1");
