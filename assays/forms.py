@@ -288,7 +288,7 @@ class AssayPlateReadoutForm(CloneableForm):
             setups = setups | AssayPlateSetup.objects.filter(pk=current)
         self.fields['setup'].queryset = setups
 
-    upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
+    upload_type = forms.ChoiceField(choices=(('Block', 'Block'), ('Tabular', 'Tabular')))
 
     class Meta(object):
         model = AssayPlateReadout

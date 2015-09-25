@@ -512,14 +512,19 @@ $(document).ready(function () {
 
             // The header should be the first line
             var header = lines[0];
-            if ($.trim(header[1].toLowerCase()) == 'time') {
-                // Header WITH TIME should be [WellName, Time, Time Unit, Feature1, Feature2, ...]
-                unique_features = header.slice(3);
-                time_specified = true;
+            if (header[1]) {
+                if ($.trim(header[1].toLowerCase()) == 'time') {
+                    // Header WITH TIME should be [WellName, Time, Time Unit, Feature1, Feature2, ...]
+                    unique_features = header.slice(3);
+                    time_specified = true;
+                }
+                else {
+                    // Header WITHOUT TIME should be: [WellName, Feature1, Feature2, ...]
+                    unique_features = header.slice(1);
+                }
             }
             else {
-                // Header WITHOUT TIME should be: [WellName, Feature1, Feature2, ...]
-                unique_features = header.slice(1);
+                failed += 'headers';
             }
             // Exclude the header for iteration later
             var data = lines.slice(1);
@@ -542,6 +547,12 @@ $(document).ready(function () {
                     var well = row[0];
                     // Split the well into alphabetical and numeric and then merge again (gets rid of leading zeroes)
                     var split_well = well.match(/(\d+|[^\d]+)/g);
+
+                    if (split_well.length < 2) {
+                        failed += 'well_id';
+                        return false;
+                    }
+
                     // Merge back together for ID
                     var well_id = '#' + split_well[0] + '_' + parseInt(split_well[1]);
 
@@ -607,6 +618,9 @@ $(document).ready(function () {
             }
             if (failed.indexOf('non-numeric') > -1) {
                 alert('Error: This file contains non-numeric data. Please find and replace these values.');
+            }
+            if (failed.indexOf('well_id') > -1) {
+                alert('Error: Found incorrectly formatted well_id. Please make sure this is correctly formatted tabular data.');
             }
             $('#id_file').val('');
         }
