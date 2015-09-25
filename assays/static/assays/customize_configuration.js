@@ -129,7 +129,7 @@ $(document).ready(function () {
             .attr("class", "link")
             .style("stroke-width", 3)
             .style('stroke', function(d) { return d[3] ? '#00FF00':'#FF0000' })
-            .attr("marker-end", function(d) { return ms_ie ? 'url(#arrow_ie)':'url(#arrow)' });
+            .attr("marker-end", 'url(#arrow)');
 
         var gnodes = svg.selectAll('g.gnode')
             .data(data)
@@ -161,6 +161,8 @@ $(document).ready(function () {
             .attr("font-size", 20)
             .text(function(d) { return d.label; });
 
+        var ie_tick = 0;
+
         force.on("tick", function() {
             link.attr("d", function(d) {
               return "M" + d[0].x + "," + d[0].y
@@ -171,6 +173,13 @@ $(document).ready(function () {
             gnodes.attr("transform", function(d) {
                 return 'translate(' + [d.x, d.y] + ')';
             });
+
+            // Use preposterous workaround on Internet Explorer
+            // Micro$oft doesn't care, at all
+            if (ms_ie) {
+                link.attr('marker-end', function(d) { return ie_tick % 2 == 0 ? 'url(#arrow_ie)' : 'url(#arrow)'})
+                ie_tick += 1;
+            }
         });
 
         //---Insert for markers-------
@@ -179,7 +188,6 @@ $(document).ready(function () {
             .data(["arrow"])
           .enter().append("marker")
             .attr("id", function(d) { return d; })
-            // It is possible that the negative value in this viewBox breaks IE
             .attr("viewBox", "0 -5 10 10")
             .attr("refX", 20)
             .attr("refY", 0)
@@ -192,19 +200,19 @@ $(document).ready(function () {
             .style("fill", "#0000FF")
             .style("opacity", "1");
 
-        // These half-arrows avoid negative viewbox dimensions and will hopefully work in Trident (IE)
+        // This is an identical marker definition for an IE workaround
         svg.append("defs").selectAll("marker")
             .data(["arrow_ie"])
           .enter().append("marker")
             .attr("id", function(d) { return d; })
-            .attr("viewBox", "0 0 10 10")
+            .attr("viewBox", "0 -5 10 10")
             .attr("refX", 20)
             .attr("refY", 0)
             .attr("markerWidth", 10)
             .attr("markerHeight", 6)
             .attr("orient", "auto")
           .append("path")
-            .attr("d", "M0,0L10,0L0,5")
+            .attr("d", "M0,-5L10,0L0,5")
             .style("stroke", "#0000FF")
             .style("fill", "#0000FF")
             .style("opacity", "1");
