@@ -221,6 +221,7 @@ class StudyConfigurationForm(forms.ModelForm):
     class Meta(object):
         model = StudyConfiguration
         widgets = {
+            'name': forms.Textarea(attrs={'cols':50, 'rows': 1}),
             'media_composition': forms.Textarea(attrs={'cols':50, 'rows': 3}),
             'hardware_description': forms.Textarea(attrs={'cols':50, 'rows': 3}),
         }
