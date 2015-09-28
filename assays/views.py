@@ -79,7 +79,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
         readouts = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
             'created_by').select_related('chip_setup__compound','chip_setup__unit')
 
-        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
+        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id').order_by('assay_id__assay_short_name')
         related_assays_map = {}
 
         for assay in related_assays:
@@ -106,7 +106,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
                                                                                                        'created_by')
         readouts = AssayPlateReadout.objects.filter(setup=context['plate_setups']).prefetch_related('setup', 'created_by')
 
-        related_assays = AssayPlateReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
+        related_assays = AssayPlateReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id').order_by('assay_id__assay_short_name')
         related_assays_map = {}
 
         for assay in related_assays:
@@ -194,7 +194,7 @@ class AssayRunDetail(DetailView):
             'chip_setup', 'created_by').select_related('chip_setup__compound',
                                                                    'chip_setup__unit')
 
-        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
+        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id').order_by('assay_id__assay_short_name')
         related_assays_map = {}
 
         for assay in related_assays:
@@ -585,7 +585,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
                                                                                                  'created_by', 'group').select_related(
             'chip_setup__compound', 'chip_setup__unit')
 
-        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
+        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id').order_by('assay_id__assay_short_name')
         related_assays_map = {}
 
         for assay in related_assays:
@@ -1291,7 +1291,7 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
                                                                                             'created_by', 'group')
 
         related_assays = AssayPlateReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id',
-                                                                                                         'assay_id')
+                                                                                                         'assay_id').order_by('assay_id__assay_short_name')
         related_assays_map = {}
 
         for assay in related_assays:
