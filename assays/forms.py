@@ -39,10 +39,12 @@ class CloneableBaseInlineFormSet(BaseInlineFormSet):
 
         # Set the fk value here so that the form can do its validation.
         fk_value = self.instance.pk
+
         if self.fk.rel.field_name != self.fk.rel.to._meta.pk.name:
             fk_value = getattr(self.instance, self.fk.rel.field_name)
             fk_value = getattr(fk_value, 'pk', fk_value)
         setattr(form.instance, self.fk.get_attname(), fk_value)
+
         return form
 
 class AssayRunForm(forms.ModelForm):
@@ -71,8 +73,6 @@ class AssayRunForm(forms.ModelForm):
         if data['assay_run_id'].startswith('-'):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
-        return data
-
 
 class AssayChipResultForm(forms.ModelForm):
     def __init__(self,study,current,*args,**kwargs):
@@ -97,8 +97,7 @@ class AssayChipResultForm(forms.ModelForm):
     #
     #     if 'chip_setup' in self.cleaned_data and AssayChipTestResult.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
     #         raise forms.ValidationError('A readout for the given setup already exists!')
-    #
-    #     return self.cleaned_data
+
 
 class AssayChipReadoutForm(CloneableForm):
     def __init__(self,study,current,*args,**kwargs):
@@ -131,8 +130,7 @@ class AssayChipReadoutForm(CloneableForm):
     #
     #     if 'chip_setup' in self.cleaned_data and AssayChipReadout.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
     #         raise forms.ValidationError('A readout for the given setup already exists!')
-    #
-    #     return self.cleaned_data
+
 
 class AssayChipSetupForm(CloneableForm):
     def __init__(self,*args,**kwargs):
@@ -167,7 +165,7 @@ class AssayChipSetupForm(CloneableForm):
         unit = self.cleaned_data.get('unit', '')
         if type == 'compound' and not all([compound,concentration,unit]) or (compound and not all([concentration,unit])):
             raise forms.ValidationError('Please complete all data for compound.')
-        return self.cleaned_data
+
 
 class AssayChipCellsInlineFormset(CloneableBaseInlineFormSet):
 
@@ -265,8 +263,6 @@ class AssayPlateSetupForm(CloneableForm):
         # Make sure the barcode/id is unique in the study
         if AssayPlateSetup.objects.filter(assay_run_id=self.instance.assay_run_id, assay_plate_id=self.cleaned_data.get('assay_plate_id')).exclude(id=self.instance.id):
             raise forms.ValidationError({'assay_plate_id' : ['ID/Barcode must be unique within study.',]})
-
-        return self.cleaned_data
 
 
 class AssayPlateCellsInlineFormset(CloneableBaseInlineFormSet):
@@ -620,7 +616,6 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                         except:
                             raise forms.ValidationError(
                                     'The value {} is invalid; please make sure all values are numerical'.format(value))
-        return self.cleaned_data
 
 
 class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
@@ -744,4 +739,3 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
                 except:
                     raise forms.ValidationError(
                             'The value "%s" is invalid; please make sure all values are numerical' % str(val))
-        return self.cleaned_data
