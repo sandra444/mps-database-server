@@ -7,7 +7,9 @@ $(document).ready(function () {
         $('#id_name').val(data.compound.preferredCompoundName);
         $('#id_inchikey').val(data.compound.stdInChiKey);
         $('#id_smiles').val(data.compound.smiles);
-        $('#id_synonyms').val(data.compound.synonyms);
+        // Note that the synonyms are modified so that there is a space after
+        // Each comma
+        $('#id_synonyms').val(data.compound.synonyms.replace(/,/g, ', '));
         $('#id_molecular_formula').val(data.compound.molecularFormula);
         $('#id_molecular_weight').val(data.compound.molecularWeight);
         $('#id_rotatable_bonds').val(data.compound.rotatableBonds);

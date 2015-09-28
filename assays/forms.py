@@ -39,10 +39,12 @@ class CloneableBaseInlineFormSet(BaseInlineFormSet):
 
         # Set the fk value here so that the form can do its validation.
         fk_value = self.instance.pk
+
         if self.fk.rel.field_name != self.fk.rel.to._meta.pk.name:
             fk_value = getattr(self.instance, self.fk.rel.field_name)
             fk_value = getattr(fk_value, 'pk', fk_value)
         setattr(form.instance, self.fk.get_attname(), fk_value)
+
         return form
 
 class AssayRunForm(forms.ModelForm):
@@ -71,8 +73,6 @@ class AssayRunForm(forms.ModelForm):
         if data['assay_run_id'].startswith('-'):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
-        return data
-
 
 class AssayChipResultForm(forms.ModelForm):
     def __init__(self,study,current,*args,**kwargs):
@@ -87,8 +87,7 @@ class AssayChipResultForm(forms.ModelForm):
     class Meta(object):
         model = AssayChipTestResult
         widgets = {
-            'test_time': forms.TextInput(attrs={'size': 3}),
-            'value': forms.TextInput(attrs={'size': 10}),
+            'summary': forms.Textarea(attrs={'cols':75, 'rows': 3}),
         }
         exclude = group + tracking + restricted
 
@@ -98,8 +97,7 @@ class AssayChipResultForm(forms.ModelForm):
     #
     #     if 'chip_setup' in self.cleaned_data and AssayChipTestResult.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
     #         raise forms.ValidationError('A readout for the given setup already exists!')
-    #
-    #     return self.cleaned_data
+
 
 class AssayChipReadoutForm(CloneableForm):
     def __init__(self,study,current,*args,**kwargs):
@@ -132,8 +130,7 @@ class AssayChipReadoutForm(CloneableForm):
     #
     #     if 'chip_setup' in self.cleaned_data and AssayChipReadout.objects.filter(chip_setup=self.cleaned_data.get('chip_setup','')):
     #         raise forms.ValidationError('A readout for the given setup already exists!')
-    #
-    #     return self.cleaned_data
+
 
 class AssayChipSetupForm(CloneableForm):
     def __init__(self,*args,**kwargs):
@@ -157,6 +154,10 @@ class AssayChipSetupForm(CloneableForm):
     def clean(self):
         super(forms.ModelForm, self).clean()
 
+        # Make sure the barcode/ID is unique in the study
+        if AssayChipSetup.objects.filter(assay_run_id=self.instance.assay_run_id, assay_chip_id=self.cleaned_data.get('assay_chip_id')).exclude(id=self.instance.id):
+            raise forms.ValidationError({'assay_chip_id' : ['ID/Barcode must be unique within study.',]})
+
         # Check to see if compound data is complete if: 1.) compound test type 2.) compound is selected (negative control)
         type = self.cleaned_data.get('chip_test_type', '')
         compound = self.cleaned_data.get('compound', '')
@@ -164,7 +165,7 @@ class AssayChipSetupForm(CloneableForm):
         unit = self.cleaned_data.get('unit', '')
         if type == 'compound' and not all([compound,concentration,unit]) or (compound and not all([concentration,unit])):
             raise forms.ValidationError('Please complete all data for compound.')
-        return self.cleaned_data
+
 
 class AssayChipCellsInlineFormset(CloneableBaseInlineFormSet):
 
@@ -218,6 +219,7 @@ class StudyConfigurationForm(forms.ModelForm):
     class Meta(object):
         model = StudyConfiguration
         widgets = {
+            'name': forms.Textarea(attrs={'cols':50, 'rows': 1}),
             'media_composition': forms.Textarea(attrs={'cols':50, 'rows': 3}),
             'hardware_description': forms.Textarea(attrs={'cols':50, 'rows': 3}),
         }
@@ -239,6 +241,9 @@ class AssayLayoutForm(forms.ModelForm):
 
     class Meta(object):
         model = AssayLayout
+        widgets = {
+            'layout_name': forms.TextInput(attrs={'size':35}),
+        }
         exclude = tracking + restricted
 
 
@@ -251,6 +256,13 @@ class AssayPlateSetupForm(CloneableForm):
             'notes': forms.Textarea(attrs={'cols':50, 'rows': 3}),
         }
         exclude = ('assay_run_id','group') + tracking + restricted
+
+    def clean(self):
+        super(forms.ModelForm, self).clean()
+
+        # Make sure the barcode/id is unique in the study
+        if AssayPlateSetup.objects.filter(assay_run_id=self.instance.assay_run_id, assay_plate_id=self.cleaned_data.get('assay_plate_id')).exclude(id=self.instance.id):
+            raise forms.ValidationError({'assay_plate_id' : ['ID/Barcode must be unique within study.',]})
 
 
 class AssayPlateCellsInlineFormset(CloneableBaseInlineFormSet):
@@ -272,7 +284,7 @@ class AssayPlateReadoutForm(CloneableForm):
             setups = setups | AssayPlateSetup.objects.filter(pk=current)
         self.fields['setup'].queryset = setups
 
-    upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
+    upload_type = forms.ChoiceField(choices=(('Block', 'Block'), ('Tabular', 'Tabular')))
 
     class Meta(object):
         model = AssayPlateReadout
@@ -297,8 +309,7 @@ class AssayPlateResultForm(forms.ModelForm):
     class Meta(object):
         model = AssayPlateTestResult
         widgets = {
-            'test_time': forms.TextInput(attrs={'size': 3}),
-            'value': forms.TextInput(attrs={'size': 10}),
+            'summary': forms.Textarea(attrs={'cols':75, 'rows': 3}),
         }
         exclude = group + tracking + restricted
 
@@ -605,7 +616,6 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                         except:
                             raise forms.ValidationError(
                                     'The value {} is invalid; please make sure all values are numerical'.format(value))
-        return self.cleaned_data
 
 
 class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
@@ -628,13 +638,16 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
 
         # Dic of assay names from inline with respective unit as value
         assays = {}
+        short_names = {}
         for form in forms_data:
             try:
                 if form.cleaned_data:
-                    assay_name = form.cleaned_data.get('assay_id').assay_name
+                    assay_name = form.cleaned_data.get('assay_id').assay_name.upper()
+                    assay_short_name = form.cleaned_data.get('assay_id').assay_short_name.upper()
                     unit = form.cleaned_data.get('readout_unit').unit
                     if assay_name not in assays:
                         assays.update({assay_name:unit})
+                        short_names.update({assay_short_name:unit})
                     else:
                         raise forms.ValidationError(
                             'Duplicate assays are not permitted; please blank out or change the duplicate')
@@ -657,7 +670,7 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
 
             for raw in saved_data:
 
-                assay = raw.assay_id.assay_id.assay_name
+                assay = raw.assay_id.assay_id.assay_name.upper()
                 val_unit = raw.assay_id.readout_unit.unit
 
                 # Raise error when an assay does not exist
@@ -692,18 +705,22 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
 
                 time = line[0]
                 time_unit = line[1].strip().lower()
-                assay = line[2]
+                assay = line[2].upper()
                 field = line[3]
                 val = line[4]
                 val_unit = line[5].strip()
                 # Raise error when an assay does not exist
-                if assay not in assays:
+                if assay not in assays and assay not in short_names:
                     raise forms.ValidationError(
                         'No assay with the name "%s" exists; please change your file or add this assay' % assay)
                 # Raise error if val_unit not equal to one listed in ACRA
-                if val_unit != assays.get(assay,''):
-                    raise forms.ValidationError(
-                        'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+                if val_unit != assays.get(assay,'') and val_unit != short_names.get(assay,''):
+                    if assay in assays:
+                        raise forms.ValidationError(
+                            'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+                    else:
+                        raise forms.ValidationError(
+                            'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, short_names.get(assay,'')))
                 # Fail if time unit does not match
                 # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
                 if time_unit[0] != readout_time_unit[0]:
@@ -722,4 +739,3 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
                 except:
                     raise forms.ValidationError(
                             'The value "%s" is invalid; please make sure all values are numerical' % str(val))
-        return self.cleaned_data

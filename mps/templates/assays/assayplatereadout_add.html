@@ -11,29 +11,12 @@
 
 {% block fluid-content %}
 
-<script>
-    $(function() {
-        var date = $("#id_readout_start_time");
-        var curr_date = date.val();
-        //Add datepicker to assay and readout start time
-        date.datepicker();
-        date.datepicker("option","dateFormat","yy-mm-dd");
-        date.datepicker("setDate" , curr_date);
-    });
-</script>
-
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post" >
 
     <div class="container">
 
-    {% if object.signed_off_by %}
-        <div id="info" class="alert alert-info" role="alert">
-            <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-            <span class="sr-only">Info:</span>
-            This entry was reviewed by {{ object.signed_off_by }} on {{ object.signed_off_date }}
-        </div>
-    {% endif %}
+    {% include 'review.html' %}
 
     <h1>
         Edit Plate Readout ID #{{ object.id }}
@@ -67,6 +50,8 @@
             Successful Submission and Clone
         </div>
     {% endif %}
+
+    {% include 'tracking.html' %}
 
     {# Hidden: Used to indicate submit and clone #}
     {{ form.another.as_hidden }}
@@ -239,8 +224,9 @@
         </tbody>
     </table>
 
+    <p class="text-danger">You do not need to manually type features: Use the interface that appears after upload.</p>
     <a id="add_button" class="btn btn-success" role="button">Add Assay</a>
-    <span class="text-danger">You do not need to manually type features: Use the interface that appears after upload</span>
+
     <table class="table table-striped assays" id="assayplatereadoutassay_set-group"  name="inlines">
         <thead>
             <tr>
@@ -274,7 +260,7 @@
 </form>
 
 {# CONTRIVED: REFACTOR SOON #}
-<div class="col-xs-12">
+<div class="padded-row">
     <div hidden id="heatmap_options" class="inline-group row">
         <div class="col-sm-8">
             <div class="col-sm-2 col-lg-2">

@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block load %}
+    <script src="{% static "assays/index.js" %}"></script>
+{% endblock %}
+
 {% block content %}
 
-    <div style="padding-bottom: 50px">
+    <div class="padded-bottom">
         <legend><h1>{{ title }}    <a href="/assays/organchipstudy/add" class="btn btn-success" role="button">Add Study</a></h1></legend>
 
         <table hidden id="studies" class="display" cellspacing="0" width="100%">
@@ -43,16 +47,6 @@
             </tbody>
         </table>
     </div>
-
-    <script>
-        $(document).ready(function() {
-            $('#studies').DataTable( {
-                "iDisplayLength": 50,
-                // Initially sort on start date (descending), not ID
-                "order": [ 2, "desc" ]
-            });
-        });
-    </script>
 
     <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

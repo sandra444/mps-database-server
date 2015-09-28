@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block load %}
+    <script src="{% static "assays/assayplatereadout_list.js" %}"></script>
+{% endblock %}
+
 {% block content %}
 
-    <div style="padding-bottom: 50px">
+    <div class="padded-bottom">
         <h2 align="center">Plate Readouts</h2>
 
         <table hidden id="readouts" class="display" cellspacing="0" width="100%">
@@ -43,7 +47,7 @@
                     <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}">{{ readout.setup }}</a></td>
                     <td>
                         {% for assay in readout.related_assays %}
-                            {{ assay }}
+                            {{ assay.assay_id.assay_short_name }}
                         {% endfor %}
                     </td>
                     {% if readout.readout_start_time != None %}
@@ -67,23 +71,6 @@
             </tbody>
         </table>
     </div>
-
-    <script>
-        $(document).ready(function() {
-            $('#readouts').DataTable( {
-                dom: 'T<"clear">lfrtip',
-                "iDisplayLength": 50,
-                // Initially sort on setup not arbitrary ID
-                "order": [[ 2, "asc" ]],
-                "aoColumnDefs": [
-                    {
-                        "bSortable": false,
-                        "aTargets": [0]
-                    }
-                ]
-            });
-        });
-    </script>
 
     <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

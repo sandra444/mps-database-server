@@ -12,34 +12,10 @@
 
 {% block content %}
 
-<style>
-.layout-table th {
-    border: 1px solid black;
-    padding: 2px;
-}
-</style>
-
-<script>
-    $(function() {
-        var date = $("#id_readout_start_time");
-        var curr_date = date.val();
-        //Add datepicker to assay and readout start time
-        date.datepicker();
-        date.datepicker("option","dateFormat","yy-mm-dd");
-        date.datepicker("setDate" , curr_date);
-    });
-</script>
-
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post" >
 
-    {% if object.signed_off_by %}
-        <div id="info" class="alert alert-info" role="alert">
-            <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-            <span class="sr-only">Info:</span>
-            This entry was reviewed by {{ object.signed_off_by }} on {{ object.signed_off_date }}
-        </div>
-    {% endif %}
+    {% include 'review.html' %}
 
     <h1>
         Edit Chip Readout ID #{{ object.id }}
@@ -72,6 +48,8 @@
             Successful Submission and Clone
         </div>
     {% endif %}
+
+    {% include 'tracking.html' %}
 
     {# Hidden: Used to indicate submit and clone #}
     {{ form.another.as_hidden }}
@@ -194,9 +172,18 @@
         <label for="file" class="col-sm-2 control-label">.csv Data File</label>
         <div class="col-sm-10">
           {{ form.file }}
-            <p><b>***Uploading overwrites old data***</b>
-            Rows in <span style="color: #FF0000">red</span> will be excluded.
-            Rows in <span style="color: #00FF00">green</span> are in the database.
+            <p>
+                <b>***Uploading overwrites old data***</b>
+                <br>
+                Rows in <span style="color: #FF0000">red</span> will be excluded.
+                Rows in <span style="color: #00FF00">green</span> are in the database.
+                <br>
+                File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays.
+                <br>
+                <b>Blank QC = Pass</b> &amp; <b>Non-Blank QC = Fail</b>
+                <br>
+                QC Status can be changed in the table below.
+                After changing a QC value, click away or hit tab to see the effect.
             </p>
         </div>
     </div>

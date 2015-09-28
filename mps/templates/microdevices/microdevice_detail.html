@@ -4,117 +4,124 @@
 
     <legend><h1>{{ object.device_name }}</h1></legend>
 
-    <div class="row">
-        <div class="col-sm-3 lead text-right-responsive">
-            <b>Center:</b>
-        </div>
-        <div class="col-sm-3 lead">
-            {{ object.center|default:'Unspecified' }}
-        </div>
-        <div class="col-sm-3 lead text-right-responsive">
-            <b>Manufacturer:</b>
-        </div>
-        <div class="col-sm-3 lead">
-            {{ object.manufacturer|default:'Unspecified' }}
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-3 lead text-right-responsive">
-            <b>Organ:</b>
-        </div>
-        <div class="col-sm-3 lead">
-            {{ object.organ|default:'Unspecified' }}
-        </div>
-        <div class="col-sm-3 lead text-right-responsive">
-            <b>Version Catalog:</b>
-        </div>
-        <div class="col-sm-3 lead">
-            {{ object.barcode|default:'Unspecified' }}
-        </div>
-    </div>
-
-    {# Description #}
-    {% if object.description %}
-        <div class="row">
-            <div class="col-sm-3 lead text-right-responsive">
-                <b>Description:</b>
-            </div>
-            <div class="col-sm-9 lead">
-                {{ object.description }}
-            </div>
-        </div>
-    {% endif %}
-
-    <div class="row">
-        <div class="col-sm-3 lead text-right-responsive">
-            <b>Device Image:</b>
-        </div>
-        <div class="col-sm-9 lead">
-            {% if object.device_image %}
-                <img src="/media/{{ object.device_image }}">
-            {% else %}
-                No Image Available
+    <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
+        <tbody>
+            <tr>
+                <td>
+                    <b>Center</b>
+                </td>
+                <td>
+                    {{ object.center|default:'Unspecified' }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Manufacturer</b>
+                </td>
+                <td>
+                    {{ object.manufacturer|default:'Unspecified' }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Organ</b>
+                </td>
+                <td>
+                    {{ object.organ|default:'Unspecified' }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Version Catalog</b>
+                </td>
+                <td>
+                    {{ object.barcode|default:'Unspecified' }}
+                </td>
+            </tr>
+            {% if object.description %}
+            <tr>
+                <td>
+                    <b>Description</b>
+                </td>
+                <td>
+                    {{ object.description }}
+                </td>
+            </tr>
             {% endif %}
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-3 lead text-right-responsive">
-            <b>Device Cross Section:</b>
-        </div>
-        <div class="col-sm-9 lead">
-            {% if object.device_cross_section_image %}
-                <img src="/media/{{ object.device_cross_section_image }}">
-            {% else %}
-                No Image Available
-            {% endif %}
-        </div>
-    </div>
+            <tr>
+                <td>
+                    <b>Device Image</b>
+                </td>
+                <td>
+                    {% if object.device_image %}
+                        <img src="/media/{{ object.device_image }}">
+                    {% else %}
+                        No Image Available
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Device Cross Section</b>
+                </td>
+                <td>
+                    {% if object.device_cross_section_image %}
+                        <img src="/media/{{ object.device_cross_section_image }}">
+                    {% else %}
+                        No Image Available
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
     <legend>Dimensions</legend>
 
-    <div class="row">
-        <div class="col-sm-3 lead text-right-responsive">
-            <b>Dimensions:</b>
-        </div>
-        <div class="col-sm-9 lead">
-            {% if object.device_width and object.device_width and object.device_thickness %}
-                {{ object.device_width }} mm X {{ object.device_width }} mm X {{ object.device_thickness }} mm
-            {% else %}
-                Unspecified
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-3 lead text-right-responsive">
-            <b>Substrate Material:</b>
-        </div>
-        <div class="col-sm-3 lead">
-            {{ object.substrate_material|default:'Unspecified' }}
-        </div>
-        <div class="col-sm-3 lead text-right-responsive">
-            <b>Substrate Thickness:</b>
-        </div>
-        <div class="col-sm-3 lead">
-            {% if object.substrate_thickness %}
-                {# Specify that substrate thickness is in micrometers #}
-                {{ object.substrate_thickness }} µm
-            {% else %}
-                Unspecified
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-3 lead text-right-responsive">
-            <b>Fluid Volume:</b>
-        </div>
-        <div class="col-sm-9 lead">
-            {{ object.device_fluid_volume|default:'Unspecified' }} {{ object.device_fluid_volume_unit|default:'' }}
-        </div>
-    </div>
+    <table class="table table-striped table-bordered table-nonfluid" style="background-color: #E8CAAF;">
+        <tbody>
+            <tr>
+                <td>
+                    <b>Dimensions</b>
+                </td>
+                <td>
+                    {% if object.device_width and object.device_width and object.device_thickness %}
+                        {{ object.device_width }} mm X {{ object.device_width }} mm X {{ object.device_thickness }} mm
+                    {% else %}
+                        Unspecified
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Substrate Material</b>
+                </td>
+                <td>
+                    {{ object.substrate_material|default:'Unspecified' }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Substrate Thickness</b>
+                </td>
+                <td>
+                    {% if object.substrate_thickness %}
+                        {# Specify that substrate thickness is in micrometers #}
+                        {{ object.substrate_thickness }} µm
+                    {% else %}
+                        Unspecified
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Fluid Volume</b>
+                </td>
+                <td>
+                    {{ object.device_fluid_volume|default:'Unspecified' }} {{ object.device_fluid_volume_unit|default:'' }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
 {% endblock %}
 

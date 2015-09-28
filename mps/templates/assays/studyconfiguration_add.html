@@ -9,12 +9,6 @@
 
 {% block content %}
 
-    <style>
-        .link {
-            fill: none;
-        }
-    </style>
-
     {% if update %}
         <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
@@ -130,8 +124,9 @@
             {% endfor %}
         {% endif %}
 
+        <p>Define model outputs by separating labels with dashes: "AB-CD" means the model is connected to AB and CD.</p>
         <a id="add_button" class="btn btn-success" role="button">Add Model</a>
-        <span>Define model outputs by separating labels with dashes: "AB-CD" means the model is connected to AB and CD</span>
+
         <table class="table table-striped studymodels" id="studymodel_set-group" name="inlines">
             <thead>
                 <tr>
@@ -183,9 +178,11 @@
             <span class="text-danger">Red = Not Connected</span>
         </p>
 
-        <p class="lead">Drag the circles to rearrange the graph. Double click a circle to let it move freely.
-            <button class="btn btn-default" id="reset">Reset Graph</button>
+        <p class="lead">
+            Drag the circles to rearrange the graph. Double click a circle to let it move freely.
         </p>
+
+        <button class="btn btn-default center-block" id="reset">Reset Graph</button>
     </div>
 
     <div id="graph" style="height:500px;"></div>

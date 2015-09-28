@@ -1,50 +1,3 @@
-<style>
-    .input-group-addon {
-        min-width:100px;
-        text-align:left;
-    }
-    {# Code snippet for fancy checkboxes: move to separate CSS file soon #}
-    .form-group input[type="checkbox"] {
-        display: none;
-    }
-
-    .form-group input[type="checkbox"] + .btn-group > label span {
-        width: 20px;
-    }
-
-    .form-group input[type="checkbox"] + .btn-group > label span:first-child {
-        display: none;
-    }
-    .form-group input[type="checkbox"] + .btn-group > label span:last-child {
-        display: inline-block;
-    }
-
-    .form-group input[type="checkbox"]:checked + .btn-group > label span:first-child {
-        display: inline-block;
-    }
-    .form-group input[type="checkbox"]:checked + .btn-group > label span:last-child {
-        display: none;
-    }
-</style>
-
-<script>
-    $(function() {
-        var compounds = {{ compounds|safe }};
-
-        function better_search(req, responseFn) {
-            var re = $.ui.autocomplete.escapeRegex(req.term);
-            var pattern1 = new RegExp("^"+re, "i");
-            var a = $.grep(compounds, function(item, index){return pattern1.test(item);}); //build array item begins with input string
-            var b = $.grep(compounds, function(item, index){return ((item.toLowerCase()).indexOf(re.toLowerCase())>0);}); //build array items with input string somewhere
-            responseFn(a.concat(b));
-        }
-
-        $("#id_compound").autocomplete({
-            source: better_search
-        });
-    });
-</script>
-
 {% if index %}
 <div hidden class="row well" id="bioactivities_search">
 {% else %}
@@ -53,25 +6,25 @@
     <div class="col-md-6">
         <div class="form-group has-success">
             <div class="input-group">
-                <span class="input-group-addon">Compound</span>
+                <span class="input-group-addon adjusted-addon">Compound</span>
                 <input type="text" class="form-control" name="compound" id="id_compound" placeholder="Enter a compound name (eg. Aspirin)">
             </div>
         </div>
         <div class="form-group has-warning">
             <div class="input-group">
-                <span class="input-group-addon">Target</span>
+                <span class="input-group-addon adjusted-addon">Target</span>
                 <input type="text" class="form-control" name="target" id="id_target" placeholder="Enter a target name (eg. Geminin)">
             </div>
         </div>
         <div class="form-group has-error">
             <div class="input-group">
-                <span class="input-group-addon">Name</span>
+                <span class="input-group-addon adjusted-addon">Name</span>
                 <input type="text" class="form-control" name="name" id="id_name" placeholder="Enter a bioactivity name (eg. IC50)">
             </div>
         </div>
     </div>
     <div class="col-md-5">
-        <div class="[ form-group ]" align="left">
+        <div class="[ fancy-checkbox form-group ]" align="left">
             <input type="checkbox" name="pubchem" id="id_pubchem" />
             <div class="[ btn-group ]">
                 <label for="id_pubchem" class="[ btn btn-success ]">
@@ -83,7 +36,7 @@
                 </label>
             </div>
         </div>
-        <div class="[ form-group ]" align="left">
+        <div class="[ fancy-checkbox form-group ]" align="left">
             <input type="checkbox" name="exclude_targetless" id="id_exclude_targetless" />
             <div class="[ btn-group ]">
                 <label for="id_exclude_targetless" class="[ btn btn-warning ]">
@@ -95,7 +48,7 @@
                 </label>
             </div>
         </div>
-        <div class="[ form-group ]" align="left">
+        <div class="[ fancy-checkbox form-group ]" align="left">
             <input type="checkbox" name="exclude_organismless" id="id_exclude_organismless" />
             <div class="[ btn-group ]">
                 <label for="id_exclude_organismless" class="[ btn btn-danger ]">

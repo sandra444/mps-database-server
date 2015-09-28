@@ -1,47 +1,13 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block load %}
+    <script src="{% static "js/index.js" %}"></script>
+    <script src="{% static "js/cookies.js" %}"></script>
+    <script src="{% static "bioactivities/bioactivities_search.js" %}"></script>
+{% endblock %}
+
 {% block content %}
-
-    <style>
-        h3 {
-            font-weight: bold;
-        }
-        #title {
-            background: #F8F8FF;
-        }
-
-        {# deal with css bootstrap overide for buttons and dropdowns (may have been overzealous of me) #}
-{#        .not-bold {#}
-{#            font-size: 14px;#}
-{#            font-weight: normal;#}
-{#        }#}
-    </style>
-
-    <script>
-        $(function() {
-
-            var initial = $('#id_app').val();
-
-            if (initial == 'Bioactivities') {
-                $("#bioactivities_search").show();
-                $("#search_bar").hide();
-            }
-
-            $('#search_options li').click(function(e){
-                $("#bioactivities_search").show("slow");
-                $("#search_bar").hide("slow");
-                $("#id_app").val("Bioactivities");
-            });
-
-            $('#back').click(function(){
-                $("#bioactivities_search").hide("slow");
-                $("#search_bar").show("slow");
-                $("#id_app").val("Global");
-            })
-        });
-    </script>
-
     <div class="row">
         <div class="col-xs-12">
             <form action="/" method="post">
@@ -206,11 +172,13 @@
                             <li><a href="/assays/organchipstudy">Studies</a></li>
                             <li class="divider"></li>
                             <li class="dropdown-header">Chip Data</li>
+                            <li><a href="/assays/studyconfiguration">Study Configurations</a></li>
                             <li><a href="/assays/assaychipsetup">Setups</a></li>
                             <li><a href="/assays/assaychipreadout">Readouts</a></li>
                             <li><a href="/assays/assaychiptestresult">Results</a></li>
                             <li class="divider"></li>
                             <li class="dropdown-header">Plate Data</li>
+                            <li><a href="/assays/assaylayout">Assay Layouts</a></li>
                             <li><a href="/assays/assayplatesetup">Setups</a></li>
                             <li><a href="/assays/assayplatereadout">Readouts</a></li>
                             <li><a href="/assays/assayplatetestresult">Results</a></li>

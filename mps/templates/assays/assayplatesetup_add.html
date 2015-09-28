@@ -11,23 +11,6 @@
 
 {% block fluid-content %}
 
-<script>
-    $(function() {
-        var date = $("#id_setup_date");
-        var curr_date = date.val();
-        //Add datepicker to assay and readout start time
-        date.datepicker();
-        date.datepicker("option", "dateFormat", "yy-mm-dd");
-        date.datepicker("setDate", curr_date);
-
-        // Open and then close dialog so it doesn't get placed in window itself
-        var dialog = $('#dialog');
-        dialog.dialog();
-        dialog.dialog('close');
-        dialog.removeProp('hidden');
-    });
-</script>
-
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
@@ -39,13 +22,7 @@
 
     <div class="container">
 
-    {% if object.signed_off_by %}
-        <div id="info" class="alert alert-info" role="alert">
-            <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-            <span class="sr-only">Info:</span>
-            This entry was reviewed by {{ object.signed_off_by }} on {{ object.signed_off_date }}
-        </div>
-    {% endif %}
+    {% include 'review.html' %}
 
     <h1>
         Add Plate Setup
@@ -73,6 +50,8 @@
             Successful Submission and Clone
         </div>
     {% endif %}
+
+    {% include 'tracking.html' %}
 
     {# Hidden: Used to indicate submit and clone #}
     {{ form.another.as_hidden }}
@@ -194,7 +173,9 @@
         </div>
     {% endif %}
 
-    <a id="add_button" class="btn btn-success" role="button">Add Cell Type</a> <span>Click a magnifying glass to see a list of available cell samples. Use 'e' for scientific notation: 1e3 = 1000.</span>
+    <p>Click a magnifying glass to see a list of available cell samples. Use 'e' for scientific notation: 1e3 = 1000.</p>
+    <a id="add_button" class="btn btn-success" role="button">Add Cell Line</a>
+
     <table class="table table-striped cells" id="assayplatecells_set-group" name="inlines">
         <thead>
             <tr>
@@ -238,7 +219,7 @@
 </div>
 
 {# CONTRIVED: REFACTOR SOON #}
-<div class="col-xs-12">
+<div class="padded-row">
     <div class="inline-group"></div>
 </div>
 
@@ -292,53 +273,5 @@
             </tbody>
     </table>
 </div>
-
-<script>
-    // Global variables are in poor taste
-    var id = null;
-
-    function search(elem) {
-        id = elem.id.replace(/\D/g,'');
-        $("#dialog").dialog({
-          width: 775,
-          height: 775
-        });
-    }
-
-    $(function() {
-        $('.cellsample').click(function (evt) {
-            var cellsampleId = this.id;
-            var selectedInput = $('#id_assayplatecells_set-' + id + '-cell_sample');
-            selectedInput.prop('value', cellsampleId);
-            var cellsampleName = this.attributes["name"].value;
-            var selectedLabel = $('#id_assayplatecells_set-' + id + '-cell_sample_label');
-            selectedLabel.text(cellsampleName);
-            $('#dialog').dialog('close');
-        });
-
-        $('#cellsamples').DataTable({
-            "iDisplayLength": 50,
-            // Initially sort on receipt date
-            "order": [ 0, "desc" ],
-            // If one wants to display top and bottom
-            "sDom": '<"wrapper"fti>'
-        });
-
-        // Move filter to left
-        $('.dataTables_filter').css('float', 'left');
-
-        // This code should populate cell labels when data is already given
-        var current_id = 0;
-        var current_input = $('#id_assayplatecells_set-' + current_id + '-cell_sample');
-        while(current_input[0]) {
-            if(current_input.val()) {
-                var cell_name = $('#' + current_input.val()).attr('name');
-                $('#id_assayplatecells_set-' + current_id + '-cell_sample_label').text(cell_name);
-            }
-            current_id += 1;
-            current_input = $('#id_assayplatecells_set-' + current_id + '-cell_sample');
-        }
-    });
-</script>
 
 {% endblock %}

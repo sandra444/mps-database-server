@@ -15,13 +15,7 @@
     {% if update %}
         <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
-        {% if object.signed_off_by %}
-            <div id="info" class="alert alert-info" role="alert">
-                <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-                <span class="sr-only">Info:</span>
-                This entry was reviewed by {{ object.signed_off_by }} on {{ object.signed_off_date }}
-            </div>
-        {% endif %}
+        {% include 'review.html' %}
 
         <h1>
             Edit Plate Test Results ID #{{ object.id }}
@@ -42,6 +36,8 @@
             {% include 'flag.html'%}
         </h1>
 
+        {% include 'tracking.html' %}
+
         <legend>Plate Test Results</legend>
 
         {% if form.readout.errors %}
@@ -52,13 +48,20 @@
                     {{error}}
                 </div>
             {% endfor %}
-    <div class="form-group has-error">
-    {% else %}
-    <div class="form-group">
-    {% endif %}
+        <div class="form-group has-error">
+        {% else %}
+        <div class="form-group">
+        {% endif %}
             <label for="readout" class="col-sm-2 control-label">Readout*</label>
             <div class="col-sm-10">
                 {{ form.readout }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="summary" class="col-sm-2 control-label">Summary of Results</label>
+            <div class="col-sm-10">
+                {{ form.summary }}
             </div>
         </div>
 
@@ -92,7 +95,7 @@
             <thead>
                 <tr>
                     <th>Assay</th>
-                    <th>Pos/Neg</th>
+                    <th>Result</th>
                     <th>Function</th>
                     <th>Measure</th>
                     <th>Value</th>

@@ -3,6 +3,7 @@
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from assays.models import *
 from cellsamples.models import CellSample
+# TODO TRIM THIS IMPORT
 from assays.admin import *
 from assays.forms import *
 from django import forms
@@ -23,6 +24,7 @@ import ujson as json
 
 # TODO Refactor imports
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
+# TODO Rename get_absolute_url when the function does not actually return the model's URL
 
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
@@ -75,10 +77,9 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
                                                                                                      'unit',
                                                                                                      'created_by')
         readouts = AssayChipReadout.objects.filter(chip_setup=context['setups']).prefetch_related(
-            'created_by').select_related('chip_setup__compound',
-                                                                   'chip_setup__unit')
+            'created_by').select_related('chip_setup__compound','chip_setup__unit')
 
-        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
+        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id').order_by('assay_id__assay_short_name')
         related_assays_map = {}
 
         for assay in related_assays:
@@ -101,12 +102,11 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
         context['number_of_results'] = AssayChipTestResult.objects.filter(chip_readout=context['readouts']).count()
 
         # PLATES
-
         context['plate_setups'] = AssayPlateSetup.objects.filter(assay_run_id=self.object).prefetch_related('assay_layout',
                                                                                                        'created_by')
         readouts = AssayPlateReadout.objects.filter(setup=context['plate_setups']).prefetch_related('setup', 'created_by')
 
-        related_assays = AssayPlateReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
+        related_assays = AssayPlateReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id').order_by('assay_id__assay_short_name')
         related_assays_map = {}
 
         for assay in related_assays:
@@ -150,7 +150,7 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
 
         # If POST
         if self.request.method == 'POST':
-            return form_class(groups, self.request.POST)
+            return form_class(groups, self.request.POST, self.request.FILES)
         # If GET
         else:
             return form_class(groups)
@@ -194,7 +194,7 @@ class AssayRunDetail(DetailView):
             'chip_setup', 'created_by').select_related('chip_setup__compound',
                                                                    'chip_setup__unit')
 
-        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
+        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id').order_by('assay_id__assay_short_name')
         related_assays_map = {}
 
         for assay in related_assays:
@@ -228,7 +228,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         # If POST
         if self.request.method == 'POST':
-            return form_class(groups, self.request.POST, instance=self.get_object())
+            return form_class(groups, self.request.POST, self.request.FILES, instance=self.get_object())
         # If GET
         else:
             return form_class(groups, instance=self.get_object())
@@ -256,6 +256,39 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             self.get_context_data(form=form,
                                   update=True))
 
+def compare_cells(current_model, current_filter, setups):
+    cells = {}
+
+    for setup in setups:
+        cells.update(
+            {
+                setup:sorted(current_model.objects.filter(**{current_filter:setup.id}).values_list(
+                    'cell_sample',
+                    'cell_biosensor',
+                    'cellsample_density',
+                    'cellsample_density_unit',
+                    'cell_passage'))
+            }
+        )
+
+    sameness = {setup:{} for setup in setups}
+    max_same = 0
+    best_setup = setups[0]
+
+    for setup_1 in setups:
+        same = 0
+        for setup_2 in setups:
+            if setup_1 != setup_2:
+                if cells.get(setup_1) == cells.get(setup_2):
+                    sameness.get(setup_1).update({str(setup_2):True})
+                    same += 1
+                else:
+                    sameness.get(setup_1).update({str(setup_2):False})
+        if same > max_same:
+            max_same = same
+            best_setup = setup_1
+
+    return (best_setup, sameness.get(best_setup))
 
 class AssayRunSummary(ObjectGroupRequiredMixin, DetailView):
     model = AssayRun
@@ -271,42 +304,38 @@ class AssayRunSummary(ObjectGroupRequiredMixin, DetailView):
                                                                                                      'created_by')
 
         # TODO THIS SAME BUSINESS NEEDS TO BE REFACTORED
-        first = {}
+        # For chips
+        indicative = None
         sameness = {}
 
-        if len(context['setups']) > 0:
-            for cell in AssayChipCells.objects.filter(assay_chip=context['setups'][0]):
-                first.update({tuple(AssayChipCells.objects.filter(pk=cell.id).values_list(
-                    'cell_sample',
-                    'cell_biosensor',
-                    'cellsample_density',
-                    'cellsample_density_unit',
-                    'cell_passage')):True})
-
-            for setup in context['setups'][1:]:
-                cells = {}
-
-                for cell in AssayChipCells.objects.filter(assay_chip=setup):
-                    cells.update({tuple(AssayChipCells.objects.filter(pk=cell.id).values_list(
-                        'cell_sample',
-                        'cell_biosensor',
-                        'cellsample_density',
-                        'cellsample_density_unit',
-                        'cell_passage')):True})
-
-                same = True
-
-                for cell in cells:
-                    if cell not in first:
-                        same = False
-
-                for cell in first:
-                    if cell not in cells:
-                        same = False
-
-                sameness.update({str(setup):same})
+        if len(context['setups']) > 1:
+            results = compare_cells(AssayChipCells, 'assay_chip', context['setups'])
+            indicative = results[0]
+            sameness = results[1]
+        elif len(context['setups']) == 1:
+            indicative = context['setups'][0]
 
         context['sameness'] = sameness
+        context['indicative'] = indicative
+
+        # For plates
+        context['plate_setups'] = AssayPlateSetup.objects.filter(assay_run_id=self.object).prefetch_related('assay_run_id',
+                                                                                                     'assay_layout',
+                                                                                                     'created_by')
+
+        indicative = None
+        sameness = {}
+
+        if len(context['plate_setups']) > 1:
+            results = compare_cells(AssayPlateCells, 'assay_plate', context['plate_setups'])
+            indicative = results[0]
+            sameness = results[1]
+        elif len(context['plate_setups']) == 1:
+            indicative = context['plate_setups'][0]
+
+        context['plate_sameness'] = sameness
+        context['plate_indicative'] = indicative
+
         return self.render_to_response(context)
 
 
@@ -373,13 +402,20 @@ class AssayChipSetupAdd(CreateView):
 
     def get_form(self, form_class):
         if self.request.method == 'POST':
-            return form_class(self.request.POST)
+            form = form_class(self.request.POST)
         elif self.request.GET.get('clone',''):
             pk = int(self.request.GET.get('clone',''))
             clone = get_object_or_404(AssayChipSetup, pk=pk)
-            return form_class(instance=clone)
+            form = form_class(instance=clone)
         else:
-            return form_class()
+            form = form_class()
+
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+        form.instance.assay_run_id = study
+        form.instance.group = study.group
+
+        return form
 
     def get_context_data(self, **kwargs):
         groups = self.request.user.groups.values_list('id', flat=True)
@@ -407,6 +443,7 @@ class AssayChipSetupAdd(CreateView):
 
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        # TODO THIS SHOULD BE IN get_form AND NOT HERE
         form.instance.assay_run_id = study
         form.instance.group = study.group
         formset = AssayChipCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
@@ -548,7 +585,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
                                                                                                  'created_by', 'group').select_related(
             'chip_setup__compound', 'chip_setup__unit')
 
-        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id')
+        related_assays = AssayChipReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id','assay_id').order_by('assay_id__assay_short_name')
         related_assays_map = {}
 
         for assay in related_assays:
@@ -619,7 +656,10 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             formset.save()
             if formset.files.get('file',''):
                 file = formset.files.get('file','')
-                parseChipCSV(self.object, file, headers)
+                parseChipCSV(self.object, file, headers, form)
+            # If no file, try to update the qc_status
+            else:
+                modify_qc_status(self.object, form)
             if data['another']:
                 form = self.form_class(study, None, instance=self.object,
                               initial={'file': None, 'success': True})
@@ -695,7 +735,10 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Save file if it exists
             if formset.files.get('file',''):
                 file = formset.files.get('file','')
-                parseChipCSV(self.object, file, headers)
+                parseChipCSV(self.object, file, headers, form)
+            # If no file, try to update the qc_status
+            else:
+                modify_qc_status(self.object, form)
             # Clear data if clear is checked
             if self.request.POST.get('file-clear',''):
                 removeExistingChip(self.object)
@@ -1087,13 +1130,20 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
 
     def get_form(self, form_class):
         if self.request.method == 'POST':
-            return form_class(self.request.POST)
+            form = form_class(self.request.POST)
         elif self.request.GET.get('clone',''):
             pk = int(self.request.GET.get('clone',''))
             clone = get_object_or_404(AssayPlateSetup, pk=pk)
-            return form_class(instance=clone)
+            form = form_class(instance=clone)
         else:
-            return form_class()
+            form = form_class()
+
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+        form.instance.assay_run_id = study
+        form.instance.group = study.group
+
+        return form
 
     def get_context_data(self, **kwargs):
         groups = self.request.user.groups.values_list('id', flat=True)
@@ -1119,6 +1169,7 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
 
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        # TODO THIS SHOULD BE IN get_form AND NOT HERE
         form.instance.assay_run_id = study
         form.instance.group = study.group
         formset = AssayPlateCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
@@ -1240,7 +1291,7 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
                                                                                             'created_by', 'group')
 
         related_assays = AssayPlateReadoutAssay.objects.filter(readout_id__in=readouts).prefetch_related('readout_id',
-                                                                                                         'assay_id')
+                                                                                                         'assay_id').order_by('assay_id__assay_short_name')
         related_assays_map = {}
 
         for assay in related_assays:

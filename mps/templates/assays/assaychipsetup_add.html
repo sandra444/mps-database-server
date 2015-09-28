@@ -47,13 +47,7 @@
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
-    {% if object.signed_off_by %}
-        <div id="info" class="alert alert-info" role="alert">
-            <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-            <span class="sr-only">Info:</span>
-            This entry was reviewed by {{ object.signed_off_by }} on {{ object.signed_off_date }}
-        </div>
-    {% endif %}
+    {% include 'review.html' %}
 
     <h1>
         Edit {{ object }}
@@ -90,6 +84,8 @@
             Successful Submission and Clone
         </div>
     {% endif %}
+
+    {% include 'tracking.html' %}
 
     {# Hidden: Used to indicate submit and clone #}
     {{ form.another.as_hidden }}
@@ -298,8 +294,9 @@
         </div>
     {% endif %}
 
-    <a id="add_button" class="btn btn-success" role="button">Add Cell Type</a>
-    <span>Click a magnifying glass to see a list of available cell samples. Use 'e' for scientific notation: 1e3 = 1000.</span>
+    <p>Click a magnifying glass to see a list of available cell samples. Use 'e' for scientific notation: 1e3 = 1000.</p>
+    <a id="add_button" class="btn btn-success" role="button">Add Cell Line</a>
+
     <table class="table table-striped cells" id="assaychipcells_set-group" name="inlines">
         <thead>
             <tr>
@@ -408,16 +405,6 @@
           height: 775
         });
     }
-
-{#    $("body").on( "click", "span[id*='search-']", function(event) {#}
-{#        event.preventDefault();#}
-{#        // Get ID of the clicked search#}
-{#        id = event.target.id.replace(/\D/g,'');#}
-{#        $("#dialog").dialog({#}
-{#          width: 635,#}
-{#          height: 635#}
-{#        });#}
-{#    });#}
 
     $(function() {
 

@@ -267,7 +267,9 @@ def fetch_chip_readout(request):
         value = value.rstrip('0').rstrip('.') if '.' in value else value
         csv += value + ','
         # Add value unit
-        csv += str(raw.assay_id.readout_unit) + '\n'
+        csv += str(raw.assay_id.readout_unit) + ','
+        # End with the quality
+        csv += str(raw.quality) + '\n'
 
     data = {}
 

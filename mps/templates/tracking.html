@@ -1,0 +1,19 @@
+{# Tracking for certain models #}
+{% if update %}
+    <div class="bg-primary">
+    <p style="margin-left:1em;">
+        {% if object.created_by %}
+            Created by <b>{{ object.created_by }}</b> on <b>{{ object.created_on }}</b>
+        {% else %}
+            Created by <b>Administration</b>
+        {% endif %}
+    </p>
+    </div>
+    {% if object.created_on|date:"U" != object.modified_on|date:"U" %}
+        <div class="bg-info">
+        <p style="margin-left:1em;">
+            Last Modified by <b>{{ object.modified_by }}</b> on <b>{{ object.modified_on }}</b>
+        </p>
+        </div>
+    {% endif %}
+{% endif %}

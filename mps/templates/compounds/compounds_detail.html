@@ -3,12 +3,6 @@
 {# TODO REQUIRES MAJOR AESTHETIC REVISION #}
 
 {% block content %}
-    <style>
-    p {
-        word-wrap: break-word;
-    }
-    </style>
-
     <legend>
         <h1>{{ object.name}}
         <a href="/compounds/{{ next }}" class="btn btn-primary btn-large pull-right">
@@ -24,213 +18,232 @@
 
     <div class="row">
 
-        <div class="col-sm-7">
-            <div class="row">
-                <div class="col-sm-4 lead text-right-responsive">
-                    <b>ChEMBL ID:</b>
-                </div>
-                <div class="col-sm-8 lead">
-                    <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ object.chemblid }}">{{ object.chemblid }}</a>
-                </div>
-            </div>
-
-            {% if object.pubchemid %}
-                <div class="row">
-                    <div class="col-sm-4 lead text-right-responsive">
-                        <b>PubChem ID:</b>
-                    </div>
-                    <div class="col-sm-8 lead">
-                        <a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ object.pubchemid }}">{{ object.pubchemid }}</a>
-                    </div>
-                </div>
-            {% endif %}
-
-            <div class="row">
-                <div class="col-sm-4 lead text-right-responsive">
-                    <b>Molecular Formula:</b>
-                </div>
-                <div class="col-sm-8 lead">
-                    {{ object.molecular_formula }}
-                </div>
-            </div>
-
-        </div>
-
-        <div class="col-sm-5">
+        <div class="col-sm-3 col-md-2">
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.chemblid }}">
         </div>
 
+        <div class="col-sm-9 col-md-10">
+            <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
+                <tbody>
+                    <tr>
+                        <td>
+                            <b>ChEMBL ID</b>
+                        </td>
+                        <td>
+                            <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ object.chemblid }}">{{ object.chemblid }}</a>
+                        </td>
+                    </tr>
+                    {% if object.pubchemid %}
+                        <tr>
+                            <td>
+                                <b>PubChem ID</b>
+                            </td>
+                            <td>
+                                <a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ object.pubchemid }}">{{ object.pubchemid }}</a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        <td>
+                            <b>Molecular Formula</b>
+                        </td>
+                        <td>
+                            {{ object.molecular_formula }}
+                        </td>
+                    </tr>
+                    {% if object.inchikey %}
+                        <tr>
+                            <td>
+                                <b>Inchikey:</b>
+                            </td>
+                            <td>
+                                {{ object.inchikey }}
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
     </div>
+
+    <br>
+
+    {% if object.smiles%}
+        <div class="row">
+            <div class="col-sm-2 col-md-1 text-right-responsive">
+                <b>Smiles</b>
+            </div>
+            <div class="col-sm-10 col-md-11 text-wrapped">
+                {{ object.smiles }}
+            </div>
+        </div>
+    {% endif %}
+
+    <br>
 
     {% if object.synonyms %}
-        <legend>Synonyms
-            <button class="btn btn-info" type="button" data-toggle="collapse"
-                    data-target="#synonyms" aria-expanded="false" aria-controls="synonyms">
-                Show
-            </button>
-        </legend>
-
-        <div id='synonyms' class="row collapse">
-            <blockquote>
-                <p>
-                    {{ object.synonyms }}
-                </p>
-            </blockquote>
+        <div class="row">
+            <div class="col-sm-2 col-md-1 text-right-responsive">
+                <b>Synonyms</b>
+            </div>
+            <div class="col-sm-10 col-md-11 text-wrapped">
+                {{ object.synonyms }}
+            </div>
         </div>
     {% endif %}
 
-    {% if object.smiles or object.inchikey %}
-        <legend>SMILES and InChI
-            <button class="btn btn-info" type="button" data-toggle="collapse"
-                    data-target="#smiles" aria-expanded="false" aria-controls="synonyms">
-                Show
-            </button>
-        </legend>
+    <br>
 
-        <div id='smiles' class="row collapse">
-            <blockquote>
-                <footer>SMILES</footer>
-                <p>
-                    {{ object.smiles }}
-                </p>
-            </blockquote>
-            <blockquote>
-                <footer>InChI</footer>
-                <p>
-                    {{ object.inchikey }}
-                </p>
-            </blockquote>
-        </div>
-    {% endif %}
+    <legend>Compound Properties</legend>
 
-    <legend>Drug/Drug-like Properties</legend>
-
-    <div id='drug_properties'>
-
-        <div class="row">
-            <div class="col-sm-2 lead text-right-responsive">
-                <b>Known Drug:</b>
-            </div>
-            <div class="col-sm-1 lead">
-                {% if object.known_drug %}
-                    <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-                {% else %}
-                    <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
-                {% endif %}
-            </div>
-
-            <div class="col-sm-2 lead text-right-responsive">
-                <b>Med Chem Friendly:</b>
-            </div>
-            <div class="col-sm-1 lead">
-                {% if object.medchem_friendly %}
-                    <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-                {% else %}
-                    <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
-                {% endif %}
-            </div>
-
-            <div class="col-sm-2 lead text-right-responsive">
-                <b>Passes of Rule of 3:</b>
-            </div>
-            <div class="col-sm-1 lead">
-                {% if object.ro3_passes %}
-                    <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-                {% else %}
-                    <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
-                {% endif %}
-            </div>
-
-            <div class="col-sm-2 lead text-right-responsive">
-                <b>Rule of 5 Violations:</b>
-            </div>
-            <div class="col-sm-1 lead text-danger">
-                {{ object.ro5_violations }}
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-sm-2 lead text-right-responsive">
-                <b>Molecular Species:</b>
-            </div>
-            <div class="col-sm-10 lead">
-                {{ object.species }}
-            </div>
-        </div>
-
-{#        <div class="col-sm-12">#}
-{#            <p><b>Known Drug:</b> {{ object.known_drug }}</p>#}
-{#            <p><b>Med Chem Friendly:</b> {{ object.medchem_friendly }}</p>#}
-{#            <p><b>Passes of Rule of 3:</b> {{ object.ro3_passes }}</p>#}
-{#            <p><b>Rule of 5 Violations:</b> {{ object.ro5_violations }}</p>#}
-{#            <p><b>Molecular Species:</b> {{ object.species }}</p>#}
-{#        </div>#}
-
+    <div class="row">
+    <div id="drug_properties" class="col-sm-4">
+        <table class="table table-striped table-bordered" style="background-color: #C4CBB7;">
+            <thead>
+                <tr>
+                    <th colspan=2 class="text-center">
+                        <u>Drug/Drug-like Properties</u>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <b>Known Drug</b>
+                    </td>
+                    <td>
+                        {% if object.known_drug %}
+                            <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                        {% else %}
+                            <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Med Chem Friendly</b>
+                    </td>
+                    <td>
+                        {% if object.medchem_friendly %}
+                            <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                        {% else %}
+                            <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Passes of Rule of 3</b>
+                    </td>
+                    <td>
+                        {% if object.ro3_passes %}
+                            <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                        {% else %}
+                            <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Rule of 5 Violations</b>
+                    </td>
+                    <td>
+                        {{ object.ro5_violations }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Molecular Species</b>
+                    </td>
+                    <td>
+                        {{ object.species }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
-    <legend>Molecular Properties</legend>
-
-    <div id='molecular_properties'>
-
-        <div class="row">
-            <div class="col-sm-2 lead text-right-responsive">
-                <b>Molecular Weight:</b>
-            </div>
-            <div class="col-sm-2 lead">
-                {{ object.molecular_weight }}
-            </div>
-
-            <div class="col-sm-2 lead text-right-responsive">
-                <b>Rotatable Bonds:</b>
-            </div>
-            <div class="col-sm-6 lead">
-                {{ object.rotatable_bonds }}
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-sm-2 lead text-right-responsive">
-                <b>Acidic pKa:</b>
-            </div>
-            <div class="col-sm-2 lead">
-                {{ object.acidic_pka }}
-            </div>
-
-            <div class="col-sm-2 lead text-right-responsive">
-                <b>Basic pKa:</b>
-            </div>
-            <div class="col-sm-6 lead">
-                {{ object.basic_pka }}
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-sm-2 lead text-right-responsive">
-                <b>LogP:</b>
-            </div>
-            <div class="col-sm-2 lead">
-                {{ object.logp }}
-            </div>
-
-            <div class="col-sm-2 lead text-right-responsive">
-                <b>LogD:</b>
-            </div>
-            <div class="col-sm-2 lead">
-                {{ object.logd }}
-            </div>
-
-            <div class="col-sm-2 lead text-right-responsive">
-                <b>ALogP:</b>
-            </div>
-            <div class="col-sm-2 lead">
-                {{ object.alogp }}
-            </div>
-        </div>
+    <div id="molecular_properties" class="col-sm-4">
+        <table class="table table-striped table-bordered" style="background-color: #EBEFC9;">
+            <thead>
+                <tr>
+                    <th colspan=2 class="text-center">
+                        <u>Molecular Properties</u>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <b>Molecular Weight</b>
+                    </td>
+                    <td>
+                        {{ object.molecular_weight }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Rotatable Bonds</b>
+                    </td>
+                    <td>
+                        {{ object.rotatable_bonds }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Acidic pKa</b>
+                    </td>
+                    <td>
+                        {{ object.acidic_pka }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Basic pKa</b>
+                    </td>
+                    <td>
+                        {{ object.basic_pka }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>LogP</b>
+                    </td>
+                    <td>
+                        {{ object.logp }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>LogD</b>
+                    </td>
+                    <td>
+                        {{ object.logd }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>ALogP</b>
+                    </td>
+                    <td>
+                        {{ object.alogp }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
+    <div class="col-sm-4">
     {% if object.compoundproperty_set.all %}
-        <legend>Additional Properties</legend>
-        <table class="table table-striped table-bordered" style="width: auto;">
+        <table class="table table-striped table-bordered" style="background-color: #EEE0B7;">
+            <thead>
+                <tr>
+                    <th colspan=2 class="text-center">
+                        <u>Additional Properties</u>
+                    </th>
+                </tr>
+            </thead>
             <tbody>
             {% for property in object.compoundproperty_set.all %}
                 <tr>
@@ -241,15 +254,17 @@
             </tbody>
         </table>
     {% endif %}
+    </div>
+    </div>
 
     {% if object.compoundsummary_set.all %}
-        <legend>Summary</legend>
-        <table class="table table-striped table-bordered">
+        <legend>Summaries</legend>
+        <table class="table table-striped table-bordered" style="background-color: #E8CAAF;">
             <tbody>
             {% for summary in object.compoundsummary_set.all %}
                 <tr>
                     <td><strong>{{ summary.summary_type }}</strong></td>
-                    <td>{{ summary.summary }}</td>
+                    <td>{{ summary.summary|linebreaks }}</td>
                 </tr>
             {% endfor %}
             </tbody>

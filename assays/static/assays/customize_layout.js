@@ -51,6 +51,8 @@ $(document).ready(function () {
         else {
             // Remove when invalid/nonextant layout chosen
             $('#layout_table').remove();
+            // Show the help
+            $('#help').attr('hidden', false);
         }
     }
 
@@ -61,6 +63,9 @@ $(document).ready(function () {
 
         // Show buttons for changing text size
         $('#change_text_size').attr('hidden', false);
+
+        // Hide the help
+        $('#help').attr('hidden', true);
 
         // Choice of inserting after fieldset is contrived; for admin
         var table = $('<table>')

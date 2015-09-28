@@ -245,7 +245,7 @@ def save_assay_layout(request, obj, form, change):
 
         # Types
         elif key.endswith('_type'):
-            # Uncertain as to why empty values are past
+            # Uncertain as to why empty values are passed
             # TODO EXPLORE EMPTY VALUES
             if val:
                 # Cut fof '_type'
@@ -735,12 +735,46 @@ def removeExistingChip(currentChipReadout):
     #         readout.delete()
     # return
 
+def get_qc_status(form):
+    # Get QC status for each line
+    qc_status = {}
+
+    for key, val in form.data.iteritems():
+        # If this is a QC input
+        if key.startswith('QC_'):
+            # Get index from key
+            index = int(key.split('_')[-1])
+            # Truncate value to be less than 20 characters to avoid errors
+            value = val[:19]
+            qc_status.update({index: value})
+
+    return qc_status
+
 @transaction.atomic
-def parseChipCSV(currentChipReadout, file, headers):
+def modify_qc_status(current_chip_readout, form):
+    # Get the readouts as they would appear on the front end
+    # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
+    readouts = AssayChipRawData.objects.filter(assay_chip_id=current_chip_readout).order_by('assay_id','elapsed_time')
+
+    # Get QC status for each line
+    qc_status = get_qc_status(form)
+
+    for index, readout in enumerate(readouts):
+        readout.quality = qc_status.get(index)
+        readout.save()
+
+@transaction.atomic
+def parseChipCSV(currentChipReadout, file, headers, form):
     removeExistingChip(currentChipReadout)
+
+    # Get QC status for each line
+    qc_status = get_qc_status(form)
 
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
+
+    # Current index for finding correct QC status
+    current_index = 0
 
     # Only take values from headers onward
     for rowID, rowValue in enumerate(datalist[headers:]):
@@ -752,13 +786,32 @@ def parseChipCSV(currentChipReadout, file, headers):
             continue
 
         # Skip any row with incomplete data
-        if not all(rowValue):
+        # This does not include the quality
+        if not all(rowValue[:6]):
             continue
 
-        assay = AssayModel.objects.get(assay_name=rowValue[2])
+        # Try getting the assay from long name
+        try:
+            assay = AssayModel.objects.get(assay_name__iexact=rowValue[2])
+        # If this fails, then use the short name
+        except:
+            assay = AssayModel.objects.get(assay_short_name__iexact=rowValue[2])
+
         field = rowValue[3]
         val = rowValue[4]
         time = rowValue[0]
+
+        # PLEASE NOTE Database inputs, not the csv, have the final say
+        # Get quality if possible
+        # quality = ''
+        # if len(rowValue) > 6:
+        #     quality = rowValue[6]
+
+        # Get quality from added form inputs if possible
+        if current_index in qc_status:
+            quality = qc_status.get(current_index)
+        # Increment current index acquisition
+        current_index += 1
 
         # Originally permitted none values, will now ignore empty values
         # if not val:
@@ -770,9 +823,10 @@ def parseChipCSV(currentChipReadout, file, headers):
             assay_id=AssayChipReadoutAssay.objects.get(readout_id=currentChipReadout, assay_id=assay),
             field_id=field,
             value=val,
-            elapsed_time=time
+            elapsed_time=time,
+            quality=quality,
         ).save()
-    return
+
 
 
 class AssayChipCellsInline(admin.TabularInline):
@@ -1047,7 +1101,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
         else:
             return super(LockableAdmin, self).response_change(request, obj)
 
-    # save_realted takes the place of save_model so that the inline can be saved first
+    # save_related takes the place of save_model so that the inline can be saved first
     def save_related(self, request, form, formsets, change):
         obj = form.instance
 
@@ -1066,7 +1120,11 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parseChipCSV(obj, request.FILES['file'], headers)
+            parseChipCSV(obj, request.FILES['file'], headers, form)
+
+        # Try to update QC status if no file
+        else:
+            modify_qc_status(obj, form)
 
         #Need to delete entries when a file is cleared
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
@@ -1262,6 +1320,7 @@ class AssayChipTestResultAdmin(LockableAdmin):
             'Device/Drug Parameters', {
                 'fields': (
                     ('chip_readout',),
+                    ('summary',),
                 ),
             }
         ),
@@ -1338,6 +1397,7 @@ class AssayPlateTestResultAdmin(LockableAdmin):
             'Device/Drug Parameters', {
                 'fields': (
                     ('readout',),
+                    ('summary',),
                 ),
             }
         ),
@@ -1501,6 +1561,7 @@ class AssayRunAdmin(LockableAdmin):
                     'start_date',
                     'name',
                     'description',
+                    'image',
                 )
             }
         ),

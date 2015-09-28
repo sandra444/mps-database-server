@@ -1,16 +1,20 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block load %}
+    <script src="{% static "assays/assayplatesetup_list.js" %}"></script>
+{% endblock %}
+
 {% block content %}
 
-    <div style="padding-bottom: 50px">
+    <div class="padded-bottom">
         <h2 align="center">Plate Setups</h2>
 
         <table hidden id="setups" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View/Edit</th>
-                    <th>Chip Setup ID / Barcode</th>
+                    <th>Plate Setup ID / Barcode</th>
                     <th>Study</th>
                     <th>Date</th>
                     <th>Organ Model Name</th>
@@ -24,7 +28,7 @@
             <tfoot>
                 <tr>
                     <th>View/Edit</th>
-                    <th>Chip Setup ID / Barcode</th>
+                    <th>Plate Setup ID / Barcode</th>
                     <th>Study</th>
                     <th>Date</th>
                     <th>Organ Model Name</th>
@@ -59,22 +63,6 @@
             </tbody>
         </table>
     </div>
-
-    <script>
-        $(document).ready(function() {
-            $('#setups').DataTable( {
-                dom: 'T<"clear">lfrtip',
-                "iDisplayLength": 50,
-                "order": [[ 1, "asc" ]],
-                "aoColumnDefs": [
-                    {
-                        "bSortable": false,
-                        "aTargets": [0]
-                    }
-                ]
-            });
-        });
-    </script>
 
     <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

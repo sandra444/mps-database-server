@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block load %}
+    <script src="{% static "cellsamples/cellsample_list.js" %}"></script>
+{% endblock %}
+
 {% block content %}
 
-    <div style="padding-bottom: 50px">
+    <div class="padded-bottom">
         <h2 align="center">Cell Samples <a href="/cellsamples/cellsample/add/" class="btn btn-success" role="button">Add Cell Sample</a></h2>
 
         <table hidden id="cellsamples" class="display" cellspacing="0" width="100%">
@@ -59,23 +63,6 @@
             </tbody>
         </table>
     </div>
-
-    <script>
-        $(document).ready(function() {
-            $('#cellsamples').DataTable({
-                dom: 'T<"clear">lfrtip',
-                "iDisplayLength": 50,
-                // Initially sort on receipt date
-                "order": [ 2, "desc" ],
-                "aoColumnDefs": [
-                    {
-                        "bSortable": false,
-                        "aTargets": [0]
-                    }
-                ]
-            });
-        });
-    </script>
 
     <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

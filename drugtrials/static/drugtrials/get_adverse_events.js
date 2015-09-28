@@ -4,9 +4,13 @@ $(document).ready(function () {
     var name= $('#compound').html();
     var chart = '';
 
+    // The total will give the x_axis every other plot must adhere to
+    var x_axis = null;
+    var x_format = '%Y%m';
+
     var granularity = 'month';
 
-    var plotted = {'Total':false};
+    var plotted = {};
 
     function ISO_to_date(iso) {
         return iso.substring(0,10).replace(/\-/g,'');
@@ -85,6 +89,16 @@ $(document).ready(function () {
                 new_data[current_section] += count;
             }
         });
+
+        // Add zeros for missing data
+        if (x_axis) {
+            $.each(x_axis.slice(1), function(index, time) {
+                if (!new_data[time]) {
+                    new_data[time] = 0;
+                }
+            });
+        }
+
         $.each(new_data, function(time, count) {
             final_data.push({'time': time, 'count': count});
         });
@@ -164,7 +178,9 @@ $(document).ready(function () {
 
     function plot(event, data) {
         if (event == 'Total') {
-            var x_format = '%Y%m%d';
+            x_axis = data.time;
+
+            x_format = '%Y%m%d';
             var tick_format = '%Y-%m-%d';
 
             if (granularity === 'month') {
@@ -182,7 +198,7 @@ $(document).ready(function () {
                     x: 'time',
                     xFormat: x_format, // default '%Y-%m-%d',
                     columns: [
-                        data.time,
+                        x_axis,
                         data.values
                     ]
                 },
@@ -202,12 +218,18 @@ $(document).ready(function () {
                     show: true
                 }
             });
+
+            // Plot others for when the plot is reset
+            for (event in plotted) {
+                get_range_plot(event, 'keep');
+            }
         }
         else {
             // Add the event to plotted
             plotted[event] = true;
             $('button[data-adverse-event="'+event+'"]').addClass('btn-primary');
             chart.load({
+                xFormat: x_format,
                 columns: [
                     data.time,
                     data.values
@@ -217,9 +239,8 @@ $(document).ready(function () {
     }
 
     function reset_new_granularity() {
-        for (event in plotted) {
-            get_range_plot(event, 'keep');
-        }
+        x_axis = null;
+        get_range_plot('Total');
     }
 
     get_range_plot('Total');
@@ -243,4 +264,21 @@ $(document).ready(function () {
         $('#ae_table').prop('hidden', true);
         get_range_table();
     });
+
+    // Initialize and adjust data table
+    $('#reported_events').DataTable({
+        "iDisplayLength": 200,
+        "sDom": '<T<"clear">t>',
+        "order": [[ 2, "desc" ]],
+        "aoColumnDefs": [
+            {
+                "bSortable": false,
+                "aTargets": [0]
+            }
+        ]
+    });
+
+    $('#reported_events').prop('hidden', false);
+    // Reposition download/print/copy
+    $('.DTTT_container').css('float', 'none');
 });
