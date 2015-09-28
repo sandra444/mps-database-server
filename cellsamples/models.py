@@ -156,11 +156,17 @@ class CellSample(RestrictedModel):
         ordering = ('-receipt_date', )
 
     def __unicode__(self):
-        return u'{} {} ({}-{})'.format(
-                                            self.cell_source,
-                                            self.cell_type,
-                                            self.supplier,
-                                            self.barcode)
+        if self.barcode:
+            return u'{} {} ({}-{})'.format(
+                self.cell_source,
+                self.cell_type,
+                self.supplier,
+                self.barcode)
+        else:
+            return u'{} {} ({})'.format(
+                self.cell_source,
+                self.cell_type,
+                self.supplier)
 
     # Will this be useful?
     def get_absolute_url(self):
