@@ -272,7 +272,10 @@ class AssayPlateReadoutAssay(models.Model):
     """
 
     class Meta(object):
-        unique_together = [('readout_id', 'assay_id')]
+        # Remove restriction that readout can only have one copy of an assay
+        # unique_together = [('readout_id', 'assay_id')]
+        # Features (in lieu of assays) must be unique to a readout
+        unique_together = [('readout_id', 'feature')]
 
     readout_id = models.ForeignKey('assays.AssayPlateReadout', verbose_name='Readout')
     assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True)
@@ -286,7 +289,6 @@ class AssayPlateReadoutAssay(models.Model):
 
     # For the moment, features will be just strings (this avoids potentially complex management)
     feature = models.CharField(max_length=150)
-
 
     def __unicode__(self):
         return u'{}'.format(self.assay_id)

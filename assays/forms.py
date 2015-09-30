@@ -375,6 +375,9 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
         assays = {}
         # Dic of features with respective assay
         features_to_assay = {}
+        # Dic of features with respective value unit
+        # CANNOT DO THIS WITH ASSAYS
+        features_to_unit = {}
         for form in forms_data:
             try:
                 if form.cleaned_data:
@@ -389,12 +392,14 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                             'The feature "{}" is used more than once; ambiguous feature binding is not permitted'.format(feature))
 
                     features_to_assay.update({feature: assay_name})
+                    features_to_unit.update({feature: unit})
 
                     if assay_name not in assays:
                         assays.update({assay_name:unit})
-                    else:
-                        raise forms.ValidationError(
-                            'Duplicate assays are not permitted; please blank out or change the duplicate')
+                    # Duplicate assays are now permitted in plate readouts
+                    # else:
+                    #     raise forms.ValidationError(
+                    #         'Duplicate assays are not permitted; please blank out or change the duplicate')
             except AttributeError:
                 pass
         if len(assays) < 1:
@@ -416,9 +421,10 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                     raise forms.ValidationError(
                         'You can not remove the assay "%s" because it is in your uploaded data.' % assay)
                 # Raise error if val_unit not equal to one listed in APRA
-                if val_unit != assays.get(assay,''):
+                # Note use of features to unit (unlike chips)
+                if val_unit != features_to_unit.get(feature,''):
                     raise forms.ValidationError(
-                        'The current value unit "%s" does not correspond with the readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+                        'The current value unit "%s" does not correspond with the readout unit of "%s"' % (val_unit, features_to_unit.get(feature,'')))
                 # Raise error if feature does not correspond?
                 if feature not in features_to_assay:
                     raise forms.ValidationError(
@@ -477,10 +483,10 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                         if assay not in assays:
                             raise forms.ValidationError(
                                 'No assay with the name "%s" exists; please change your file or add this assay' % assay)
-                        # Raise error if val_unit not equal to one listed in ACRA
-                        if val_unit != assays.get(assay,''):
+                        # Raise error if val_unit not equal to one listed in APRA
+                        if val_unit != features_to_unit.get(feature,''):
                             raise forms.ValidationError(
-                                'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, assays.get(assay,'')))
+                                'The value unit "%s" does not correspond with the selected readout unit of "%s"' % (val_unit, features_to_unit.get(feature,'')))
 
                         # Fail if time given without time units
                         if len(line) < 8 and len(line) > 4 and any(line[4:]):
