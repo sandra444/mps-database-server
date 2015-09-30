@@ -119,10 +119,16 @@ def fetch_compound_report(request):
             data.get(compound.name).get('table').update({property_type:properties.get(compound.name+property_type,'')})
 
     # Acquire AssayChipRawData and store based on compound-assay (and convert to minutes?)
-    readouts = AssayChipRawData.objects.filter(assay_chip_id__chip_setup__compound__in=compounds,
-                                               assay_id__readout_unit__unit='%Control').select_related('assay_chip_id__chip_setup__compound',
-                                                                                                       'assay_chip_id__chip_setup__unit',
-                                                                                                       'assay_chip_id__timeunit')
+    # Make sure that the quality IS THE EMPTY STRING (anything in the quality field qualifies as invalid)
+    readouts = AssayChipRawData.objects.filter(
+        assay_chip_id__chip_setup__compound__in=compounds,
+        assay_id__readout_unit__unit='%Control',
+        quality=u'',
+    ).select_related(
+            'assay_chip_id__chip_setup__compound',
+            'assay_chip_id__chip_setup__unit',
+            'assay_chip_id__timeunit'
+    )
 
     for readout in readouts:
         compound = readout.assay_chip_id.chip_setup.compound.name
