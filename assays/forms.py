@@ -264,6 +264,14 @@ class AssayPlateSetupForm(CloneableForm):
         if AssayPlateSetup.objects.filter(assay_run_id=self.instance.assay_run_id, assay_plate_id=self.cleaned_data.get('assay_plate_id')).exclude(id=self.instance.id):
             raise forms.ValidationError({'assay_plate_id' : ['ID/Barcode must be unique within study.',]})
 
+        # Check to see if data has been uploaded for this setup
+        # Prevent changing the assay layout if this is the case
+        # Get readouts
+        readout = AssayPlateReadout.objects.filter(setup=self.instance)
+        if readout:
+            if AssayReadout.objects.filter(assay_device_readout=readout) and self.cleaned_data.get('assay_layout') != self.instance.assay_layout:
+                raise forms.ValidationError({'assay_layout' : ['Assay layout cannot be changed after data has been uploaded.',]})
+
 
 class AssayPlateCellsInlineFormset(CloneableBaseInlineFormSet):
 
