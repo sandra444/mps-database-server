@@ -18,13 +18,14 @@
         {% include 'review.html' %}
 
         <h1>
-            Edit Chip Test Results ID #{{ object.id }}
+            Edit Test Results for <em>Chip-{{ object.chip_readout.chip_setup.assay_chip_id }}</em>
     {% else %}
         <form class="form-horizontal" method="post" >
 
         <h1>
             Add Test Results
     {% endif %}
+        <br>
         {% csrf_token %}
 
             <button id="submit" type="submit" class="btn btn-primary">Submit</button>

@@ -18,13 +18,14 @@
     {% include 'review.html' %}
 
     <h1>
-        Edit Chip Readout ID #{{ object.id }}
+        Edit Readout for <em>Chip-{{ object.chip_setup.assay_chip_id }}</em>
 {% else %}
     <form enctype="multipart/form-data" class="form-horizontal" method="post" >
 
     <h1>
         Add Chip Readout
 {% endif %}
+    <br>
     {% csrf_token %}
 
         <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>

@@ -18,13 +18,14 @@
         {% include 'review.html' %}
 
         <h1>
-            Edit Plate Test Results ID #{{ object.id }}
+            Edit Test Results for <em>{{ object.readout.setup }}</em>
     {% else %}
         <form class="form-horizontal" method="post" >
 
         <h1>
             Add Plate Test Results
     {% endif %}
+        <br>
         {% csrf_token %}
 
             <button id="submit" type="submit" class="btn btn-primary">Submit</button>

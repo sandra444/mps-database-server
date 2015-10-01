@@ -13,13 +13,14 @@
         <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
         <h1>
-            Edit Configuration {{ object.name }}
+            Edit Configuration <em>{{ object.name }}</em>
     {% else %}
         <form class="form-horizontal" method="post" >
 
         <h1>
             Add Study Configuration
     {% endif %}
+        <br>
         {% csrf_token %}
 
             <button id="submit" type="submit" class="btn btn-primary">Submit</button>

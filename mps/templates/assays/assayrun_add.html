@@ -14,13 +14,14 @@
     {% include 'review.html' %}
 
     <h1>
-        Edit {{ object }}
+        Edit <em>{{ object }}</em>
 {% else %}
     <form enctype="multipart/form-data" class="form-horizontal" method="post" >
 
     <h1>
         Add Study
 {% endif %}
+    <br>
     {% csrf_token %}
     {{ formset.management_form }}
 

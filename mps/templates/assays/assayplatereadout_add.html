@@ -19,7 +19,7 @@
     {% include 'review.html' %}
 
     <h1>
-        Edit Plate Readout ID #{{ object.id }}
+        Edit Readout for <em>{{ object.setup }}</em>
 {% else %}
     <form enctype="multipart/form-data" class="form-horizontal" method="post" >
 
@@ -27,6 +27,7 @@
     <h1>
         Add Plate Readout
 {% endif %}
+    <br>
     {% csrf_token %}
 
         <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>

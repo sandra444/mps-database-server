@@ -16,7 +16,7 @@
 
     <div class="container">
     <h1>
-        Edit {{ object }}
+        Edit <em>{{ object }}</em>
 {% else %}
     <form class="form-horizontal" method="post" >
 
@@ -27,6 +27,7 @@
     <h1>
         Add Plate Setup
 {% endif %}
+    <br>
     {% csrf_token %}
 
         <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>

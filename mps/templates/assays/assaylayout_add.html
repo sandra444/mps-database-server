@@ -18,7 +18,7 @@
     {% include 'review.html' %}
 
     <h1>
-        Edit {{ object }}
+        Edit <em>{{ object }}</em>
 {% else %}
     <form enctype="multipart/form-data" class="form-horizontal" method="post" autocomplete="off">
 
@@ -26,6 +26,7 @@
     <h1>
         Add Assay Layout
 {% endif %}
+    <br>
     {% csrf_token %}
 
         <button id="submit" type="submit" class="btn btn-primary">Submit</button>
