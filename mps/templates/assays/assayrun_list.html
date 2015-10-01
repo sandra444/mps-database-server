@@ -8,7 +8,15 @@
 {% block content %}
 
     <div class="padded-bottom">
-        <h2 align="center">Studies</h2>
+        <legend>
+            <h2 class="text-center">
+                Studies
+            </h2>
+        </legend>
+
+        <div class="row text-center">
+            <a href="/assays/organchipstudy/add" class="btn btn-lg btn-success" role="button">Add Study</a>
+        </div>
 
         <table hidden id="studies" class="display" cellspacing="0" width="100%">
             <thead>

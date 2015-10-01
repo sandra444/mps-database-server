@@ -8,7 +8,15 @@
 {% block content %}
 
     <div class="padded-bottom">
-        <h2 align="center">Cell Samples <a href="/cellsamples/cellsample/add/" class="btn btn-success" role="button">Add Cell Sample</a></h2>
+        <legend>
+            <h2 class="text-center">
+                Cell Samples
+            </h2>
+        </legend>
+
+        <div class="row text-center">
+            <a href="/cellsamples/cellsample/add/" class="btn btn-lg btn-success" role="button">Add Cell Sample</a>
+        </div>
 
         <table hidden id="cellsamples" class="display" cellspacing="0" width="100%">
             <thead>

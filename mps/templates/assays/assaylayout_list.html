@@ -8,7 +8,15 @@
 {% block content %}
 
     <div class="padded-bottom">
-        <h2 align="center">Assay Layouts <a href="/assays/assaylayout/add/" class="btn btn-success" role="button">Add Layout</a></h2>
+        <legend>
+            <h2 class="text-center">
+                Assay Layouts
+            </h2>
+        </legend>
+
+        <div class="row text-center">
+            <a href="/assays/assaylayout/add/" class="btn btn-lg btn-success" role="button">Add Layout</a>
+        </div>
 
         <table hidden id="layouts" class="display" cellspacing="0" width="100%">
             <thead>

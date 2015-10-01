@@ -8,7 +8,15 @@
 {% block content %}
 
     <div class="padded-bottom">
-        <legend><h1>{{ title }}    <a href="/assays/organchipstudy/add" class="btn btn-success" role="button">Add Study</a></h1></legend>
+        <legend>
+            <h2 class="text-center">
+                {{ title }}
+            </h2>
+        </legend>
+
+        <div class="row text-center">
+            <a href="/assays/organchipstudy/add" class="btn btn-lg btn-success" role="button">Add Study</a>
+        </div>
 
         <table hidden id="studies" class="display" cellspacing="0" width="100%">
             <thead>

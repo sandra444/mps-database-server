@@ -40,7 +40,7 @@ class UserIndex(OneGroupRequiredMixin, ListView):
     def get(self, request, **kwargs):
         context = self.get_context_data(request, **kwargs)
         self.queryset = self.object_list
-        context['title'] = request.user.username + "'s Studies"
+        context['title'] = request.user.first_name + "'s Studies"
         return self.render_to_response(context)
 
 
