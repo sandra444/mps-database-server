@@ -291,7 +291,7 @@ class AssayPlateReadoutAssay(models.Model):
     feature = models.CharField(max_length=150)
 
     def __unicode__(self):
-        return u'{}'.format(self.assay_id)
+        return u'{}'.format(self.feature)
 
 
 class AssayReadout(models.Model):
