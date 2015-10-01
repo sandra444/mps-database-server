@@ -9,7 +9,7 @@ function search(elem) {
     id = elem.id.replace(/\D/g,'');
     $("#dialog").dialog({
       width: 775,
-      height: 775
+      height: 500
     });
 }
 
