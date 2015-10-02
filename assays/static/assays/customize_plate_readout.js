@@ -266,13 +266,13 @@ $(document).ready(function () {
         feature_select.empty();
 
         $.each(features, function (index, feature) {
-                // Prepend 'f' to avoid invalid class name; remove all invalid characters
-                var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
-                var option = $('<option>')
-                    .attr('value', feature_class)
-                    .text(feature);
-                feature_select.append(option);
-            });
+            // Prepend 'f' to avoid invalid class name; remove all invalid characters
+            var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
+            var option = $('<option>')
+                .attr('value', feature_class)
+                .text(feature);
+            feature_select.append(option);
+        });
         // Clear old times
         time_select.empty();
 
@@ -776,6 +776,15 @@ $(document).ready(function () {
         var well_colors = heatmaps[current_feature];
         $.each(well_colors, function(well, color) {
            $(well).css('background-color', color);
+        });
+
+        $.each(row_labels, function(row_index, row) {
+            $.each(column_labels, function(col_index, col) {
+                var well = '#' + row + '_' + col;
+                if (!well_colors[well]) {
+                    $(well).css('background-color', '#606060');
+                }
+            })
         });
 
         // Show this feature's values
