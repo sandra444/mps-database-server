@@ -177,7 +177,7 @@ $(document).ready(function () {
             // QC inputs NAME begin with "QC_"
             // QC input IDS are the row index (for plotting accurately)
             else {
-                table += "<th><input size='4' class='quality' id='" + i + "' name='QC_" + current_index + "' value='" + line[6] + "'></th>";
+                table += "<th><input size='4' class='quality text-danger' id='" + i + "' name='QC_" + current_index + "' value='" + line[6] + "'></th>";
                 // Increment the current index
                 current_index += 1;
             }
