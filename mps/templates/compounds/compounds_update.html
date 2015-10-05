@@ -21,6 +21,16 @@
         <button id="submit" type="submit" class="btn btn-primary">Submit</button>
     </h1>
 
+    {# Note that this page does not include 'errors.html,' it is a special exception #}
+    {% if formset_summary.errors or formset_property.errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            Submission Failed: Please See Errors Below
+            <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+        </div>
+    {% endif %}
+
     <legend>Additional Properties</legend>
     {% if formset_property.errors %}
         {% for dict in formset_property.errors %}

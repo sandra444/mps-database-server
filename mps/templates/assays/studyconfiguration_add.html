@@ -26,6 +26,8 @@
             <button id="submit" type="submit" class="btn btn-primary">Submit</button>
         </h1>
 
+        {% include 'errors.html' %}
+
         <legend>Study Configuration Details</legend>
 
         {% if form.name.errors %}

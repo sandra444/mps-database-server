@@ -1,0 +1,9 @@
+{# formset may or may not exist depending on the page #}
+{% if form.errors or formset.errors %}
+    <div class="alert alert-danger" role="alert">
+        <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error:</span>
+        Submission Failed: Please See Errors Below
+        <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+    </div>
+{% endif %}
