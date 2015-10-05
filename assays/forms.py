@@ -420,11 +420,6 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                 if assay not in assays:
                     raise forms.ValidationError(
                         'You can not remove the assay "%s" because it is in your uploaded data.' % assay)
-                # Raise error if val_unit not equal to one listed in APRA
-                # Note use of features to unit (unlike chips)
-                if val_unit != features_to_unit.get(feature,''):
-                    raise forms.ValidationError(
-                        'The current value unit "%s" does not correspond with the readout unit of "%s"' % (val_unit, features_to_unit.get(feature,'')))
                 # Raise error if feature does not correspond?
                 if feature not in features_to_assay:
                     raise forms.ValidationError(
@@ -432,6 +427,11 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                 if features_to_assay.get(feature) != assay:
                     raise forms.ValidationError(
                         'The assay-feature pair in the uploaded data is "{0}-{1}," not "{2}-{3}."'.format(assay,feature,features_to_assay.get(feature),feature))
+                # Raise error if val_unit not equal to one listed in APRA
+                # Note use of features to unit (unlike chips)
+                if val_unit != features_to_unit.get(feature,''):
+                    raise forms.ValidationError(
+                        'The current value unit "%s" does not correspond with the readout unit of "%s"' % (val_unit, features_to_unit.get(feature,'')))
 
         # TODO what shall a uniqueness check look like?
         # If there is a new file
