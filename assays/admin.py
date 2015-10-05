@@ -431,6 +431,45 @@ def removeExistingReadout(currentAssayReadout):
     #         readout.delete()
     # return
 
+def get_qc_status_plate(form):
+    # Get QC status for each line
+    qc_status = {}
+
+    for key, val in form.data.iteritems():
+        # If this is a QC input
+        if key.endswith('_QC'):
+            # Split up the key
+            split_up = key.split('_')
+            row = split_up[0]
+            col = split_up[1]
+            # Be sure to convert time to a float
+            time = float(split_up[2])
+            # Combine values in a tuple for index
+            index = (row,col,time)
+            # Truncate value to be less than 20 characters to avoid errors
+            value = val[:9]
+            qc_status.update({index: value})
+
+    return qc_status
+
+@transaction.atomic
+def modify_qc_status_plate(current_plate_readout, form):
+    # Get the readouts as they would appear on the front end
+    # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
+    readouts = AssayReadout.objects.filter(assay_device_readout=current_plate_readout)
+
+    # Get QC status for each line
+    qc_status = get_qc_status_plate(form)
+
+    for readout in readouts:
+        index = (readout.row, readout.column, readout.elapsed_time)
+        if index in qc_status:
+            readout.quality = qc_status.get(index)
+            readout.save()
+        # If the quality marker has been removed
+        elif index not in qc_status and readout.quality:
+            readout.quality = u''
+            readout.save()
 
 # Rows are currenly numeric, not alphabetical, when stored in the database
 def parseReadoutCSV(currentAssayReadout, file, upload_type):
@@ -439,8 +478,8 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
     cursor = connection.cursor()
 
     query = ''' INSERT INTO "assays_assayreadout"
-          ("assay_device_readout_id", "assay_id", "row", "column", "value", "elapsed_time")
-          VALUES (%s, %s, %s, %s, %s, %s)'''
+          ("assay_device_readout_id", "assay_id", "row", "column", "value", "elapsed_time", "quality")
+          VALUES (%s, %s, %s, %s, %s, %s, '')'''
 
     query_list = []
 
@@ -717,6 +756,9 @@ class AssayPlateReadoutAdmin(LockableAdmin):
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
             removeExistingReadout(obj)
 
+        else:
+            modify_qc_status_plate(obj, form)
+
     # save_model not used; would save twice otherwise
     def save_model(self, request, obj, form, change):
         pass
@@ -735,7 +777,7 @@ def removeExistingChip(currentChipReadout):
     #         readout.delete()
     # return
 
-def get_qc_status(form):
+def get_qc_status_chip(form):
     # Get QC status for each line
     qc_status = {}
 
@@ -751,13 +793,13 @@ def get_qc_status(form):
     return qc_status
 
 @transaction.atomic
-def modify_qc_status(current_chip_readout, form):
+def modify_qc_status_chip(current_chip_readout, form):
     # Get the readouts as they would appear on the front end
     # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
     readouts = AssayChipRawData.objects.filter(assay_chip_id=current_chip_readout).order_by('assay_id','elapsed_time')
 
     # Get QC status for each line
-    qc_status = get_qc_status(form)
+    qc_status = get_qc_status_chip(form)
 
     for index, readout in enumerate(readouts):
         readout.quality = qc_status.get(index)
@@ -768,7 +810,7 @@ def parseChipCSV(currentChipReadout, file, headers, form):
     removeExistingChip(currentChipReadout)
 
     # Get QC status for each line
-    qc_status = get_qc_status(form)
+    qc_status = get_qc_status_chip(form)
 
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
@@ -1124,7 +1166,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
         # Try to update QC status if no file
         else:
-            modify_qc_status(obj, form)
+            modify_qc_status_chip(obj, form)
 
         #Need to delete entries when a file is cleared
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':

@@ -1,5 +1,6 @@
 // This script is for displaying the layout for readouts and filling in the table with readout values
-// NOTE THAT UNLIKE LAYOUT THIS DOES NOT RELY ON HIDDEN INPUTS AND INSTEAD IS BASED ON THE UPLOADED FILE
+// Injected inputs are used to indicate QC status
+// NOTE THAT QC STATUS IS DEPENDENT ON TIME BUT NOT FEATURE
 // TODO NEEDS REFACTOR
 // TODO PREFERRABLY CONSOLIDATE THESE DISPLAY FUNCTION (DO NOT REPEAT YOURSELF)
 $(document).ready(function () {
@@ -42,6 +43,9 @@ $(document).ready(function () {
 
     // This will contain the respective colors for each feature on a well to well basis
     var heatmaps = {};
+
+    // This will contain all the wells tagged invalid with time as the key
+    var invalid = {};
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
@@ -88,6 +92,28 @@ $(document).ready(function () {
         }
     }
 
+    function get_invalid_id(well_id, underscore_time) {
+        var split = well_id.split('_');
+        var row = row_labels.indexOf(split[0]);
+        var column = column_labels.indexOf(split[1]);
+        return row + '_' + column + underscore_time + '_QC';
+    }
+
+    function refresh_invalid() {
+        var current_time = $('#time_select').val();
+        var current_invalid = invalid[current_time];
+
+        if ($('.plate-well')[0]) {
+            $('.plate-well').removeClass('invalid-well');
+        }
+
+        if (current_invalid) {
+            $.each(current_invalid, function (index, well) {
+                $('#' + well).addClass('invalid-well');
+            });
+        }
+    }
+
     // Build table
     function build_table(row_labels, column_labels) {
         // Remove old
@@ -119,6 +145,8 @@ $(document).ready(function () {
             $.each(column_labels, function (column_index, column_value) {
                 row.append($('<td>')
                     .attr('id', row_value + '_' + column_value)
+                    // Add class
+                    .addClass('plate-well')
                     .append($('<div>')
                         .css('text-align','center')
                         .css('font-weight', 'bold')
@@ -128,7 +156,46 @@ $(document).ready(function () {
                         .addClass('layout-list')));
             });
             table.append(row);
+        });
 
+        $('.plate-well').click(function() {
+            var id = this.id;
+            // Check if qc mode is checked and if there is a readout value
+            if ($('#qc_mode').prop('checked') && $('#' + id + ' .value')[0]) {
+                // Get the current time
+                var current_time = $('#time_select').val();
+
+                // Make an id for the invalid input: <row>_<col>_<time>_QC
+                var invalid_id = get_invalid_id(id, current_time);
+
+                // Make an empty array for this time if it doesn't exist
+                if (!invalid[current_time]) {
+                    invalid[current_time] = [];
+                }
+
+                // Check if there is already an input, if so, delete it
+                if ($('#' + invalid_id)[0]) {
+                    $('#' + invalid_id).remove();
+                    $(this).removeClass('invalid-well');
+
+                    invalid[current_time] = _.without(invalid[current_time], id);
+                }
+                else {
+                    $(this)
+                        .addClass('invalid-well')
+                        .append($('<input>')
+                            .attr('id', invalid_id)
+                            .attr('name', invalid_id)
+                            .attr('size', '7')
+                            .attr('readonly', 'true')
+                            .addClass('invalid')
+                            .attr('hidden', 'true')
+                            .val('X'));
+
+                    invalid[current_time].push(id);
+                }
+            }
+            //console.log(invalid);
         });
 
         get_layout_data(setup.val());
@@ -285,13 +352,16 @@ $(document).ready(function () {
             time_select.append(option);
         });
 
-        // If there is only one timepoint (probably zero), no need to display time selection
-        if (_.size(times) == 1) {
-            $('#time_select_row').hide();
-        }
-        else {
-            $('#time_select_row').show();
-        }
+        // If the only timepoint is zero, no need to display time selection
+//        if (_.size(times) == 1 && times[0] == 0) {
+//            $('#time_select_row').hide();
+//        }
+//        else {
+//            $('#time_select_row').show();
+//        }
+
+        // Always show time (?)
+        $('#time_select_row').show();
 
         $('#heatmap_options').show();
         feature_select.trigger('change');
@@ -690,9 +760,13 @@ $(document).ready(function () {
     function fill_readout_from_existing(data) {
         // Clear any leftover values from previews
         $('.value').remove();
+        $('.invalid').remove();
 
         var features = {};
         var times = {};
+
+        // Reset invalid
+        invalid = {};
 
         $.each(data, function(index, well_data) {
             var value = well_data.value;
@@ -703,6 +777,7 @@ $(document).ready(function () {
             var time = well_data.time;
             var time_unit = well_data.time_unit;
             var assay = well_data.assay;
+            var quality = well_data.quality;
 
             var row_label = row_labels[well_data.row];
             var column_label = column_labels[well_data.column];
@@ -737,10 +812,40 @@ $(document).ready(function () {
                 feature_values[feature_class] = {};
                 feature_values[feature_class][well_id] = parseFloat(value);
             }
+
+            var id = row_label + '_' + column_label;
+            // Current time has an underscore for some reason, should refactor
+            var current_time = '_'+ time;
+            // Make an id for the invalid input: <row>_<col>_<time>_QC
+            var invalid_id = get_invalid_id(id, current_time);
+
+            // Make an empty array for this time if it doesn't exist
+            if (!invalid[current_time]) {
+                invalid[current_time] = [];
+            }
+
+            // Avoid redundant additions
+            if (quality && !(invalid[current_time].indexOf(id) > -1)) {
+                $(well_id)
+                    .addClass('invalid-well')
+                    .append($('<input>')
+                        .attr('id', invalid_id)
+                        .attr('name', invalid_id)
+                        .attr('size', '7')
+                        .attr('readonly', 'true')
+                        .addClass('invalid')
+                        .attr('hidden', 'true')
+                        .val('X'));
+
+                // Add to invalid
+                invalid[current_time].push(id);
+            }
         });
 
         build_heatmap(feature_values);
         heatmap_options(features, times);
+        // Ensure invalid wells are displayed correctly
+        refresh_invalid();
     }
 
     // On setup change, acquire labels and build table
@@ -774,18 +879,21 @@ $(document).ready(function () {
 
         // Use heatmaps to get the respective colors
         var well_colors = heatmaps[current_feature];
-        $.each(well_colors, function(well, color) {
-           $(well).css('background-color', color);
-        });
 
-        $.each(row_labels, function(row_index, row) {
-            $.each(column_labels, function(col_index, col) {
-                var well = '#' + row + '_' + col;
-                if (!well_colors[well]) {
-                    $(well).css('background-color', '#606060');
-                }
-            })
-        });
+        if (well_colors) {
+            $.each(well_colors, function (well, color) {
+                $(well).css('background-color', color);
+            });
+
+            $.each(row_labels, function (row_index, row) {
+                $.each(column_labels, function (col_index, col) {
+                    var well = '#' + row + '_' + col;
+                    if (!well_colors[well]) {
+                        $(well).css('background-color', '#606060');
+                    }
+                })
+            });
+        }
 
         // Show this feature's values
         $('.' + current_feature).show();
@@ -794,6 +902,7 @@ $(document).ready(function () {
     // Trigger feature select change on time change
     time_select.change( function() {
         feature_select.trigger('change');
+        refresh_invalid();
     });
 
     // When the 'toggle data only' button is clicked

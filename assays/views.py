@@ -825,7 +825,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
                 parseChipCSV(self.object, file, headers, form)
             # If no file, try to update the qc_status
             else:
-                modify_qc_status(self.object, form)
+                modify_qc_status_chip(self.object, form)
             if data['another']:
                 form = self.form_class(
                     study,
@@ -918,7 +918,7 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
                 parseChipCSV(self.object, file, headers, form)
             # If no file, try to update the qc_status
             else:
-                modify_qc_status(self.object, form)
+                modify_qc_status_chip(self.object, form)
             # Clear data if clear is checked
             if self.request.POST.get('file-clear', ''):
                 removeExistingChip(self.object)
@@ -1665,6 +1665,8 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             if formset.files.get('file', ''):
                 file = formset.files.get('file', '')
                 parseReadoutCSV(self.object, file, upload_type)
+                # Check QC
+                modify_qc_status_plate(self.object, form)
             if data['another']:
                 form = self.form_class(
                     study,
@@ -1762,6 +1764,9 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Clear data if clear is checked
             if self.request.POST.get('file-clear', ''):
                 removeExistingReadout(self.object)
+            else:
+                # Check QC
+                modify_qc_status_plate(self.object, form)
             # Otherwise do nothing (the file remained the same)
             return redirect(self.object.get_absolute_url())
         else:

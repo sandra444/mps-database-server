@@ -307,6 +307,8 @@ class AssayReadout(models.Model):
     value = models.FloatField()
     elapsed_time = models.FloatField(default=0)
 
+    # Quality, if it is not the empty string, indicates that a readout is INVALID
+    quality = models.CharField(default='', max_length=10)
 
 #class ReadoutUnit(LockableModel):
 #    """
