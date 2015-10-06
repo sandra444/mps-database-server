@@ -166,7 +166,6 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
             'assay_result'
         ).select_related(
             'assay_result__readout__setup',
-            'assay_result__readout__setup__unit',
             'assay_name__assay_id',
             'assay_result__created_by'
         ).filter(
