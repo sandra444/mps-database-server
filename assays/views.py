@@ -492,6 +492,7 @@ AssayChipCellsFormset = inlineformset_factory(
     AssayChipCells,
     formset=AssayChipCellsInlineFormset,
     extra=1,
+    exclude=[],
     widgets={
         'cellsample_density': forms.NumberInput(attrs={'style': 'width:100px;'}),
         'cell_passage': forms.TextInput(attrs={'size': 5})
@@ -760,7 +761,8 @@ ACRAFormSet = inlineformset_factory(
     AssayChipReadout,
     AssayChipReadoutAssay,
     formset=AssayChipReadoutInlineFormset,
-    extra=1
+    extra=1,
+    exclude=[],
 )
 
 
@@ -984,6 +986,7 @@ ChipTestResultFormSet = inlineformset_factory(
     AssayChipResult,
     formset=ChipTestResultInlineFormset,
     extra=1,
+    exclude=[],
     widgets={'value': forms.NumberInput(attrs={'style': 'width:100px;', })}
 )
 
@@ -1137,6 +1140,7 @@ StudyModelFormSet = inlineformset_factory(
     StudyConfiguration,
     StudyModel,
     extra=1,
+    exclude=[],
     widgets={
         'label': forms.TextInput(attrs={'size': 2}),
         'sequence_number': forms.TextInput(attrs={'size': 2})
@@ -1369,6 +1373,7 @@ AssayPlateCellsFormset = inlineformset_factory(
     AssayPlateCells,
     formset=AssayPlateCellsInlineFormset,
     extra=1,
+    exclude=[],
     widgets={
         'cellsample_density': forms.NumberInput(attrs={'style': 'width:100px;', }),
         'cell_passage': forms.TextInput(attrs={'size': 5})
@@ -1603,7 +1608,8 @@ APRAFormSet = inlineformset_factory(
     AssayPlateReadout,
     AssayPlateReadoutAssay,
     formset=AssayPlateReadoutInlineFormset,
-    extra=1
+    extra=1,
+    exclude=[],
 )
 
 
@@ -1825,6 +1831,7 @@ PlateTestResultFormSet = inlineformset_factory(
     AssayPlateResult,
     formset=PlateTestResultInlineFormset,
     extra=1,
+    exclude=[],
     widgets={'value': forms.NumberInput(attrs={'style': 'width:100px;', })}
 )
 

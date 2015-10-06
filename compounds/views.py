@@ -54,14 +54,24 @@ class CompoundsAdd(OneGroupRequiredMixin, CreateView):
     form_class = CompoundForm
     template_name = 'compounds/compounds_add.html'
 
-CompoundSummaryFormset = inlineformset_factory(Compound, CompoundSummary, formset=CompoundSummaryInlineFormset,
-                                              extra=1,
-                                              widgets={
-                                              'summary': forms.Textarea(attrs={'size': 500})
-                                              })
+CompoundSummaryFormset = inlineformset_factory(
+    Compound,
+    CompoundSummary,
+    formset=CompoundSummaryInlineFormset,
+    extra=1,
+    exclude=[],
+    widgets={
+        'summary': forms.Textarea(attrs={'size': 500})
+    }
+)
 
-CompoundPropertyFormset = inlineformset_factory(Compound, CompoundProperty, formset=CompoundPropertyInlineFormset,
-                                              extra=1)
+CompoundPropertyFormset = inlineformset_factory(
+    Compound,
+    CompoundProperty,
+    formset=CompoundPropertyInlineFormset,
+    exclude=[],
+    extra=1
+)
 
 # DON'T BE DECEIVED! THE FRONT-END UPDATE HAS ACCESS ONLY TO THE SUMMARIES AND PROPERTIES
 class CompoundsUpdate(OneGroupRequiredMixin, UpdateView):
