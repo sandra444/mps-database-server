@@ -237,10 +237,10 @@ def save_assay_layout(request, obj, form, change):
 
             # Add new label info
             label_query_list.append((
-                   layout_id,
-                   val,
-                   row,
-                   column
+                layout_id,
+                val,
+                row,
+                column
             ))
 
         # Types
@@ -488,7 +488,11 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
 
-    assays = dict((o.feature, o.id) for o in AssayPlateReadoutAssay.objects.filter(readout_id=currentAssayReadout).only('feature'))
+    assays = dict(
+        (o.feature, o.id) for o in AssayPlateReadoutAssay.objects.filter(
+            readout_id=currentAssayReadout
+        ).only('feature')
+    )
 
     if upload_type == 'Block':
         # Current assay
@@ -508,7 +512,8 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                 continue
 
             # If this line is a header
-            # Headers should look like: FEATURE, {{FEATURE}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
+            # Headers should look like:
+            # FEATURE, {{FEATURE}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
             if line[0].lower().strip() == 'feature':
                 feature = line[1]
                 # Get the assay
@@ -850,6 +855,7 @@ def parseChipCSV(currentChipReadout, file, headers, form):
         #     quality = rowValue[6]
 
         # Get quality from added form inputs if possible
+        quality = u''
         if current_index in qc_status:
             quality = qc_status.get(current_index)
         # Increment current index acquisition
@@ -1391,7 +1397,6 @@ class AssayChipTestResultAdmin(LockableAdmin):
             }
         ),
     )
-    actions = ['update_fields']
     inlines = [AssayChipResultInline]
 
 admin.site.register(AssayChipTestResult, AssayChipTestResultAdmin)
@@ -1468,7 +1473,6 @@ class AssayPlateTestResultAdmin(LockableAdmin):
             }
         ),
     )
-    actions = ['update_fields']
 
 
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
@@ -1564,7 +1568,7 @@ class AssayRunFormAdmin(forms.ModelForm):
                     continue
                 if not AssayModel.objects.filter(assay_name=assay_name).exists():
                     raise forms.ValidationError(
-                                'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
+                        'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
                 assay = AssayModel.objects.get(assay_name=assay_name)
                 for i in range(3,len(readouts)):
                     val = line[i]

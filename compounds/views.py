@@ -73,6 +73,7 @@ CompoundPropertyFormset = inlineformset_factory(
     extra=1
 )
 
+
 # DON'T BE DECEIVED! THE FRONT-END UPDATE HAS ACCESS ONLY TO THE SUMMARIES AND PROPERTIES
 class CompoundsUpdate(OneGroupRequiredMixin, UpdateView):
     model = Compound
