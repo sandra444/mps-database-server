@@ -1961,3 +1961,36 @@ class AssayPlateTestResultDelete(CreatorRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return '/assays/' + str(self.object.readout.setup.assay_run_id.id)
+
+
+class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
+    model = AssayRun
+    template_name = 'assays/readoutbulkupload.html'
+    # TODO ADD
+    form_class = ReadoutBulkUploadForm
+
+    def get_form(self, form_class):
+        # If POST
+        if self.request.method == 'POST':
+            return form_class(self.request.POST, self.request.FILES, instance=self.get_object())
+        # If GET
+        else:
+            return form_class(instance=self.get_object())
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form(self.form_class)
+
+        # Render form
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        form = self.get_form(self.form_class)
+
+        if form.is_valid():
+            # TODO ADD
+            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+        else:
+            return self.render_to_response(self.get_context_data(form=form))

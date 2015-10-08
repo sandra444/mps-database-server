@@ -139,6 +139,10 @@
                 <a href="assayplatereadout/add" class="btn btn-success" role="button">Add Plate Readout</a>
             {% endif %}
 
+            {% if readouts.count != 0 or plate_readouts.count != 0 %}
+                <a href="bulk" class="btn btn-success" role="button">Add Bulk Readout Data</a>
+            {% endif %}
+
         </h2></legend>
 
         {% if readouts %}
