@@ -697,6 +697,8 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
 
             # Read headers going onward
             for line in datalist[headers:]:
+                # Make sure to exclude QC and all cells after
+                line = line[:6]
 
                 # Some lines may not be long enough (have sufficient commas), ignore such lines
                 # Some lines may be empty or incomplete, ignore these as well
