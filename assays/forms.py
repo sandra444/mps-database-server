@@ -794,6 +794,7 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
                 readout_time_unit
             )
 
+
 class ReadoutBulkUploadForm(forms.ModelForm):
 
     bulk_file = forms.FileField()
