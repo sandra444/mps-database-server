@@ -1611,20 +1611,21 @@ class AssayRunAdmin(LockableAdmin):
                 )
             }
         ),
-                (
+        (
             'Study ID (Autocreated from entries above)', {
                 'fields': (
                     'assay_run_id',
                 )
             }
         ),
-        (
-            'Study Data Upload', {
-                'fields': (
-                    'file',
-                )
-            }
-        ),
+        # Removed to avoid confusion
+        # (
+        #     'Study Data Upload', {
+        #         'fields': (
+        #             'file',
+        #         )
+        #     }
+        # ),
         (
             'Change Tracking', {
                 'fields': (
