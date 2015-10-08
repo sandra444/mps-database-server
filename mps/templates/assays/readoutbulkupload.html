@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+    {% block load %}
+        <script src="{% static "js/enter_override.js" %}"></script>
+    {% endblock %}
+
+    <form enctype="multipart/form-data" class="form-horizontal" method="post" >
+
+    <h1>
+        Add Bulk Readout Data for <em>{{ object }}</em>
+    <br>
+    {% csrf_token %}
+        <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+    </h1>
+
+    {% include 'errors.html' %}
+
+    <legend>Excel File Upload</legend>
+
+    {% if form.errors %}
+        {% for error in form.bulk_file.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{ error }}
+            </div>
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{ error }}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="bulk_file" class="col-sm-2 control-label">Excel File*</label>
+        <div class="col-sm-10">
+          {{ form.bulk_file }}
+        </div>
+    </div>
+
+    </form>
+
+{% endblock %}
