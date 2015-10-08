@@ -77,7 +77,6 @@ CompoundPropertyFormset = inlineformset_factory(
 # DON'T BE DECEIVED! THE FRONT-END UPDATE HAS ACCESS ONLY TO THE SUMMARIES AND PROPERTIES
 class CompoundsUpdate(OneGroupRequiredMixin, UpdateView):
     model = Compound
-    # TODO ADD
     template_name = 'compounds/compounds_update.html'
 
     def get(self, request, *args, **kwargs):
