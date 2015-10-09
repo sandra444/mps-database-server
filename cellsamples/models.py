@@ -24,9 +24,11 @@ class Organ(LockableModel):
 
 class CellType(LockableModel):
 
+    # TODO refactor to be a FK instead, should not be using a charfield here
     SPECIESTYPE = (
         ('Human', 'Human'),
         ('Rat', 'Rat'),
+        ('Mouse', 'Mouse'),
     )
     cell_type = models.CharField(max_length=255,
                                  help_text='Example: hepatocyte, muscle, kidney, etc')
