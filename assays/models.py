@@ -325,6 +325,11 @@ class AssayReadout(models.Model):
 #        return self.readout_unit
 
 
+# Get readout file location
+def plate_readout_file_location(instance, filename):
+    return '/'.join(['csv', str(instance.setup.assay_run_id_id), 'plate', filename])
+
+
 class AssayPlateReadout(FlaggableModel):
     """
     Readout data collected from MICROPLATES
@@ -356,7 +361,7 @@ class AssayPlateReadout(FlaggableModel):
     notebook_page = models.IntegerField(blank=True, null=True)
     notes = models.CharField(max_length=2048, blank=True, null=True)
     scientist = models.CharField(max_length=100, blank=True, null=True)
-    file = models.FileField(upload_to='csv', verbose_name='Data File',
+    file = models.FileField(upload_to=plate_readout_file_location, verbose_name='Data File',
                             blank=True, null=True)
 
     def __unicode__(self):
@@ -667,6 +672,11 @@ class AssayChipReadoutAssay(models.Model):
         return u'{}'.format(self.assay_id)
 
 
+# Get readout file location
+def chip_readout_file_location(instance, filename):
+    return '/'.join(['csv', str(instance.chip_setup.assay_run_id_id), 'chip', filename])
+
+
 class AssayChipReadout(FlaggableModel):
     """
     Readout data for CHIPS
@@ -688,7 +698,7 @@ class AssayChipReadout(FlaggableModel):
     notebook_page = models.IntegerField(blank=True, null=True)
     notes = models.CharField(max_length=2048, blank=True, null=True)
     scientist = models.CharField(max_length=100, blank=True, null=True)
-    file = models.FileField(upload_to='csv', verbose_name='Data File',
+    file = models.FileField(upload_to=chip_readout_file_location, verbose_name='Data File',
                             blank=True, null=True, help_text='Green = Data from database;'
                                                              ' Red = Line that will not be read'
                                                              '; Gray = Reading with null value'

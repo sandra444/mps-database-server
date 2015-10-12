@@ -786,6 +786,9 @@ def get_qc_status_chip(form):
     # Get QC status for each line
     qc_status = {}
 
+    if not form:
+        return qc_status
+
     for key, val in form.data.iteritems():
         # If this is a QC input
         if key.startswith('QC_'):
@@ -850,12 +853,11 @@ def parseChipCSV(currentChipReadout, file, headers, form):
 
         # PLEASE NOTE Database inputs, not the csv, have the final say
         # Get quality if possible
-        # quality = ''
-        # if len(rowValue) > 6:
-        #     quality = rowValue[6]
+        quality = u''
+        if len(rowValue) > 6:
+            quality = rowValue[6]
 
         # Get quality from added form inputs if possible
-        quality = u''
         if current_index in qc_status:
             quality = qc_status.get(current_index)
         # Increment current index acquisition

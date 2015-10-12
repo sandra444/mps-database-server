@@ -794,6 +794,16 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
                 readout_time_unit
             )
 
+def get_bulk_datalist(sheet):
+    # Get datalist
+    datalist = []
+
+    # Exclude first row (the header)
+    for row_index in range(1,sheet.nrows):
+        datalist.append(sheet.row_values(row_index))
+
+    return datalist
+
 
 class ReadoutBulkUploadForm(forms.ModelForm):
 
@@ -803,7 +813,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
         model = AssayRun
         fields = ('bulk_file',)
 
-    def clean(self):
+    def clean_bulk_file(self):
         data = super(ReadoutBulkUploadForm, self).clean()
 
         # Get the study in question
@@ -812,17 +822,15 @@ class ReadoutBulkUploadForm(forms.ModelForm):
         test_file = data.get('bulk_file','')
 
         if not test_file:
-            raise forms.ValidationError(
-                {'bulk_file': ['No file was not supplied.']})
+            raise forms.ValidationError('No file was not supplied.')
 
-        test_file = test_file.file
+        file_data = test_file.file.read()
 
         try:
-            excel_file = xlrd.open_workbook(file_contents=test_file.read())
+            excel_file = xlrd.open_workbook(file_contents=file_data)
 
         except:
-            raise forms.ValidationError(
-                {'bulk_file': ['The given file does not appear to be a properly formatted Excel file.']})
+            raise forms.ValidationError('The given file does not appear to be a properly formatted Excel file.')
 
         # For the moment, just have headers be equal to one?
         headers = 1
@@ -840,23 +848,13 @@ class ReadoutBulkUploadForm(forms.ModelForm):
 
             if not chip_or_plate_cell or 'CHIP' not in chip_or_plate_cell and 'PLATE' not in chip_or_plate_cell:
                 raise forms.ValidationError(
-                    {'bulk_file':
-                         [
-                             'The sheet "{}" does not specify whether it is for a chip or a plate.'.format(
-                                 sheet_names[index])
-                         ]
-                    }
+                   'The sheet "{}" does not specify whether it is for a chip or a plate.'.format(sheet_names[index])
                 )
 
             # If ambiguous whether it is chip or plate
             if 'CHIP' in chip_or_plate_cell and 'PLATE' in chip_or_plate_cell:
                 raise forms.ValidationError(
-                    {'bulk_file':
-                         [
-                             'The sheet "{}" specifies both chip and plate in its first cell.'.format(
-                                 sheet_names[index])
-                         ]
-                    }
+                    'The sheet "{}" specifies both chip and plate in its first cell.'.format(sheet_names[index])
                 )
 
             # Get the listed setup
@@ -865,18 +863,16 @@ class ReadoutBulkUploadForm(forms.ModelForm):
             else:
                 setup = str(header[1])
 
+            # Get datalist
+            datalist = get_bulk_datalist(sheet)
+
             # If chip and success thus far
             if 'CHIP' in chip_or_plate_cell:
                 readout = AssayChipReadout.objects.filter(chip_setup__assay_run_id=study, chip_setup__assay_chip_id=setup)
 
                 if not readout:
                     raise forms.ValidationError(
-                        {'bulk_file':
-                             [
-                                 'No chip readout for the barcode/ID "{}" exists for this study.'.format(
-                                     setup)
-                             ]
-                        }
+                        'No chip readout for the barcode/ID "{}" exists for this study.'.format(setup)
                     )
 
                 # Get the actual readout object
@@ -896,13 +892,6 @@ class ReadoutBulkUploadForm(forms.ModelForm):
                     assays.update({assay.assay_id.assay_name:assay.readout_unit.unit})
                     short_names.update({assay.assay_id.assay_short_name:assay.readout_unit.unit})
 
-                # Get datalist
-                datalist = []
-
-                # Exclude first row (the header)
-                for row_index in range(1,sheet.nrows):
-                    datalist.append(sheet.row_values(row_index))
-
                 # Validate this sheet
                 validate_chip_readout_file(
                     headers,
@@ -918,12 +907,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
 
                 if not readout:
                     raise forms.ValidationError(
-                        {'bulk_file':
-                             [
-                                 'No plate readout for the barcode/ID "{}" exists for this study.'.format(
-                                     setup)
-                             ]
-                        }
+                        'No plate readout for the barcode/ID "{}" exists for this study.'.format(setup)
                     )
 
                 # Get the actual readout object
@@ -933,12 +917,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
 
                 if not upload_type or 'TAB' not in upload_type or 'BLOCK' not in upload_type:
                     raise forms.ValidationError(
-                        {'bulk_file':
-                             [
-                                 'Sheet "{}" does not properly specify Tabular or Block format.'.format(
-                                    sheet_names[index])
-                             ]
-                        }
+                        'Sheet "{}" does not properly specify Tabular or Block format.'.format(sheet_names[index])
                     )
 
                 if 'BLOCK' in upload_type:
@@ -967,13 +946,6 @@ class ReadoutBulkUploadForm(forms.ModelForm):
                     features_to_assay.update({assay.feature:assay.assay_id.assay_name})
                     features_to_unit.update({assay.feature:assay.readout_unit.unit})
 
-                # Get datalist
-                datalist = []
-
-                # Exclude first row (the header)
-                for row_index in range(1,sheet.nrows):
-                    datalist.append(sheet.row_values(row_index))
-
                 validate_plate_readout_file(
                     upload_type,
                     assays,
@@ -985,3 +957,4 @@ class ReadoutBulkUploadForm(forms.ModelForm):
                     readout_time_unit
                 )
 
+        return file_data

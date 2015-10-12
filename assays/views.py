@@ -21,6 +21,13 @@ from django.db.models import Q
 from mps.mixins import *
 
 import ujson as json
+import xlrd
+
+from django.conf import settings
+# Convert to valid file name
+import string
+import re
+import os
 
 # TODO Refactor imports
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
@@ -1954,13 +1961,43 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
                 )
             )
 
-
 class AssayPlateTestResultDelete(CreatorRequiredMixin, DeleteView):
     model = AssayPlateTestResult
     template_name = 'assays/assayplatetestresult_delete.html'
 
     def get_success_url(self):
         return '/assays/' + str(self.object.readout.setup.assay_run_id.id)
+
+
+def get_valid_csv_location(file_name, study_id, device_type):
+    media_root = settings.MEDIA_ROOT.replace('mps/../','',1)
+
+    valid_chars = '-_.{0}{1}'.format(string.ascii_letters, string.digits)
+    # Get only valid chars
+    valid_file_name = ''.join(c for c in file_name if c in valid_chars)
+    # Replace spaces with underscores
+    valid_file_name = re.sub(r"\s+", '_', valid_file_name)
+
+    # Check if name is already in use
+    if os.path.isfile(os.path.join(media_root, 'csv', study_id, device_type, valid_file_name + '.csv')):
+        append = 1
+        while os.path.isfile(
+            os.path.join(media_root, 'csv', study_id, device_type, valid_file_name + '_' + str(append) + '.csv')
+        ):
+            append += 1
+        valid_file_name += '_' + str(append)
+
+    return os.path.join(media_root, 'csv', study_id, device_type, valid_file_name + '.csv')
+
+def write_out_csv(file_name, data):
+    with open(file_name, 'w') as out_file:
+        writer = csv.writer(out_file)
+        writer.writerows(data)
+
+def get_csv_media_location(file_name):
+    split_name = file_name.split('/')
+    csv_onward = '/'.join(split_name[-4:])
+    return csv_onward
 
 
 class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
@@ -1991,6 +2028,99 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
         if form.is_valid():
             # TODO ADD
+            csv_root = settings.MEDIA_ROOT.replace('mps/../','',1) + '/csv/'
+
+            data = form.cleaned_data
+            bulk_file = data.get('bulk_file')
+
+            excel_file = xlrd.open_workbook(file_contents=bulk_file)
+
+            # For the moment, just have headers be equal to one?
+            headers = 1
+            study = self.object
+            study_id = str(self.object.id)
+
+            # Make sure path exists for study
+            if not os.path.exists(csv_root + study_id):
+                os.makedirs(csv_root + study_id)
+
+            for index, sheet in enumerate(excel_file.sheets()):
+                # Skip sheets without anything
+                if sheet.nrows < 1:
+                    continue
+
+                # Get the header row
+                header = sheet.row_values(0)
+                # Upper to ignore case
+                chip_or_plate_cell = str(header[0]).upper()
+
+                # Get the listed setup
+                if type(header[1]) == float:
+                    setup = str(int(header[1]))
+                else:
+                    setup = str(header[1])
+
+                # Get datalist: spaghetti from admin
+                datalist = get_bulk_datalist(sheet)
+
+                # If chip
+                if 'CHIP' in chip_or_plate_cell:
+                    readout = AssayChipReadout.objects.get(
+                        chip_setup__assay_run_id=study,
+                        chip_setup__assay_chip_id=setup
+                    )
+
+                    # Make sure path exists for plate
+                    if not os.path.exists(csv_root + study_id + '/chip'):
+                        os.makedirs(csv_root + study_id + '/chip')
+
+                    # Get valid file location
+                    # Note added csv extension
+                    file_loc = get_valid_csv_location(setup, study_id, 'chip')
+                    # Write the csv
+                    write_out_csv(file_loc, datalist)
+
+                    media_loc = get_csv_media_location(file_loc)
+
+                    # Add the file to the readout
+                    readout.file = media_loc
+                    readout.save()
+
+                    # Note the lack of a form normally used for QC
+                    parseChipCSV(readout, readout.file, headers, None)
+                    # TODO TEST
+
+                # If plate
+                else:
+                    readout = AssayPlateReadout.objects.get(
+                        plate_setup__assay_run_id=study,
+                        plate_setup__assay_plate_id=setup)
+
+                    upload_type = str(header[3]).upper()
+
+                    if 'BLOCK' in upload_type:
+                        upload_type = 'Block'
+                    else:
+                        upload_type = 'Tabular'
+
+                    # Make sure path exists for plate
+                    if not os.path.exists(csv_root + study_id + '/plate'):
+                        os.makedirs(csv_root + study_id + '/plate')
+
+                    # Get valid file location
+                    file_loc = get_valid_csv_location(setup, study_id, 'plate')
+                    # Write the csv
+                    write_out_csv(file_loc, datalist)
+
+                    media_loc = get_csv_media_location(file_loc)
+
+                    # Add the file to the readout
+                    readout.file = media_loc
+                    readout.save()
+
+                    parseReadoutCSV(readout, readout.file, upload_type)
+                    # TODO TEST
+
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
