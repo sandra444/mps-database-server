@@ -68,3 +68,5 @@ whoosh
 django-haystack
 # Ultrajson appears to outperform its competitors
 ujson
+# xlrd for reading excel files
+xlrd
