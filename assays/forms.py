@@ -802,7 +802,7 @@ def get_bulk_datalist(sheet):
 
     # Exclude first row (the header)
     for row_index in range(1,sheet.nrows):
-        datalist.append(sheet.row_values(row_index))
+        datalist.append([str(value) for value in sheet.row_values(row_index)])
 
     return datalist
 
@@ -921,7 +921,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
 
                 upload_type = str(header[3]).upper()
 
-                if not upload_type or 'TAB' not in upload_type or 'BLOCK' not in upload_type:
+                if not upload_type or ('TAB' not in upload_type and 'BLOCK' not in upload_type):
                     raise forms.ValidationError(
                         'Sheet "{}" does not properly specify Tabular or Block format.'.format(sheet_name)
                     )
