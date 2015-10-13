@@ -909,7 +909,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
 
             # If plate and success thus far
             else:
-                readout = AssayPlateReadout.objects.filter(plate_setup__assay_run_id=study, plate_setup__assay_plate_id=setup)
+                readout = AssayPlateReadout.objects.filter(setup__assay_run_id=study, setup__assay_plate_id=setup)
 
                 if not readout:
                     raise forms.ValidationError(

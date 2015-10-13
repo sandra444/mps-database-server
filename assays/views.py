@@ -2070,7 +2070,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                         chip_setup__assay_chip_id=setup
                     )
 
-                    # Make sure path exists for plate
+                    # Make sure path exists for chip
                     if not os.path.exists(csv_root + study_id + '/chip'):
                         os.makedirs(csv_root + study_id + '/chip')
 
@@ -2093,8 +2093,8 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                 # If plate
                 else:
                     readout = AssayPlateReadout.objects.get(
-                        plate_setup__assay_run_id=study,
-                        plate_setup__assay_plate_id=setup)
+                        setup__assay_run_id=study,
+                        setup__assay_plate_id=setup)
 
                     upload_type = str(header[3]).upper()
 
