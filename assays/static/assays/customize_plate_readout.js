@@ -49,6 +49,14 @@ $(document).ready(function () {
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
+    // Add commas to number
+    // Special thanks to stack overflow
+    function number_with_commas(x) {
+        var parts = x.toString().split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return parts.join(".");
+    }
+
     // Get layout
     function get_device_layout() {
         var setup_id = setup.val();
@@ -554,7 +562,7 @@ $(document).ready(function () {
                                 // Consider adding lead if people demand a larger font
                                 var readout = $('<p>')
                                     .addClass('value ' + feature_class)
-                                    .text(value);
+                                    .text(number_with_commas(value));
 
                                 $(well_id).append(readout);
 
@@ -660,7 +668,7 @@ $(document).ready(function () {
 
                         var readout = $('<p>')
                             .addClass('value ' + feature_class)
-                            .text(value);
+                            .text(number_with_commas(value));
 
                         $(well_id).append(readout);
 
@@ -799,7 +807,7 @@ $(document).ready(function () {
             // Consider adding lead if people demand a larger font
             var readout = $('<p>')
                 .addClass('value ' + feature_class)
-                .text(value);
+                .text(number_with_commas(value));
 
             $(well_id).append(readout);
 
