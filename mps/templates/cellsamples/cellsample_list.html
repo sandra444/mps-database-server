@@ -30,6 +30,7 @@
                     <th>Supplier</th>
                     <th>Patient</th>
                     <th>Group</th>
+                    <th>Quality</th>
                 </tr>
             </thead>
 
@@ -44,6 +45,7 @@
                     <th>Supplier</th>
                     <th>Patient</th>
                     <th>Group</th>
+                    <th>Quality</th>
                 </tr>
             </tfoot>
 
@@ -66,6 +68,14 @@
                         {% endif %}
                     </td>
                     <td>{{ cellsample.group }}</td>
+                    <td>
+                        {% if cellsample.signed_off_by %}
+                            <span title="This entry was reviewed by {{ cellsample.signed_off_by }} on {{ cellsample.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if cellsample.flagged %}
+                            <span title="This entry is flagged for review: '{{ cellsample.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
