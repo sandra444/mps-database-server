@@ -557,8 +557,7 @@ class AssayChipSetupAdd(CreateView):
         ).prefetch_related(
             'cell_type',
             'supplier',
-        ).select_related(
-            'cell_type__cell_subtype'
+            'cell_subtype'
         )
         context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
         if 'formset' not in context:
@@ -631,8 +630,7 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         ).prefetch_related(
             'cell_type',
             'supplier',
-        ).select_related(
-            'cell_type__cell_subtype'
+            'cell_subtype'
         )
 
         # Render form
@@ -670,8 +668,7 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         ).prefetch_related(
             'cell_type',
             'supplier',
-        ).select_related(
-            'cell_type__cell_subtype'
+            'cell_subtype'
         )
 
         form.instance.assay_run_id = study
@@ -1420,8 +1417,7 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
         ).prefetch_related(
             'cell_type',
             'supplier',
-        ).select_related(
-            'cell_type__cell_subtype'
+            'cell_subtype'
         )
         context = super(AssayPlateSetupAdd, self).get_context_data(**kwargs)
         if 'formset' not in context:
@@ -1492,8 +1488,7 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         ).prefetch_related(
             'cell_type',
             'supplier',
-        ).select_related(
-            'cell_type__cell_subtype'
+            'cell_subtype'
         )
 
         # Render form
@@ -1527,8 +1522,7 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         ).prefetch_related(
             'cell_type',
             'supplier',
-        ).select_related(
-            'cell_type__cell_subtype'
+            'cell_subtype'
         )
 
         form.instance.assay_run_id = study

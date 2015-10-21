@@ -36,6 +36,7 @@ class CellType(LockableModel):
                                choices=SPECIESTYPE, default='Human', null=True,
                                blank=True)
 
+    # TODO TO BE REMOVED
     cell_subtype = models.ForeignKey('CellSubtype')
     organ = models.ForeignKey('Organ')
 
@@ -44,14 +45,12 @@ class CellType(LockableModel):
         ordering = ('species', 'cell_type', 'cell_subtype',)
         unique_together = [('cell_type', 'species', 'cell_subtype')]
 
-
     def __unicode__(self):
-        return u'{} ({} {})'.format(self.cell_type,
-                                  self.cell_subtype,
-                                  self.species)
-
-    def cell_name(self):
-        return self.__unicode__()
+        return u'{} ({} {})'.format(
+            self.cell_type,
+            self.species,
+            self.organ
+        )
 
     # Will this be useful?
     def get_absolute_url(self):
@@ -97,15 +96,19 @@ class Biosensor(LockableModel):
 class CellSample(FlaggableModel):
 
     cell_type = models.ForeignKey('CellType')
+    cell_subtype = models.ForeignKey('CellSubtype')
+
     CELLSOURCETYPE = (
         ('Freshly isolated', 'Freshly isolated'),
         ('Cryopreserved', 'Cryopreserved'),
         ('Cultured', 'Cultured'),
         ('Other', 'Other'),
     )
+
     cell_source = models.CharField(max_length=20,
                                    choices=CELLSOURCETYPE, default='Primary',
                                    null=True, blank=True)
+
     notes = models.TextField(blank=True)
     receipt_date = models.DateField()
 
@@ -163,12 +166,14 @@ class CellSample(FlaggableModel):
                 self.cell_source,
                 self.cell_type,
                 self.supplier,
-                self.barcode)
+                self.barcode
+            )
         else:
             return u'{} {} ({})'.format(
                 self.cell_source,
                 self.cell_type,
-                self.supplier)
+                self.supplier
+            )
 
     # Will this be useful?
     def get_absolute_url(self):

@@ -24,7 +24,6 @@
                     <th>View/Edit</th>
                     <th>Organ</th>
                     <th>Cell Type</th>
-                    <th>Cell Subtype</th>
                     <th>Species</th>
                 </tr>
             </thead>
@@ -34,7 +33,6 @@
                     <th>View/Edit</th>
                     <th>Organ</th>
                     <th>Cell Type</th>
-                    <th>Cell Subtype</th>
                     <th>Species</th>
                 </tr>
             </tfoot>
@@ -45,7 +43,6 @@
                     <td><a class="btn btn-primary" href="{{ celltype.id }}">View/Edit</a></td>
                     <td>{{ celltype.organ }}</td>
                     <td><a href="{{ celltype.id }}">{{ celltype.cell_type }}</a></td>
-                    <td>{{ celltype.cell_subtype }}</td>
                     <td>{{ celltype.species }}</td>
                 </tr>
             {% endfor %}

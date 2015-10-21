@@ -130,3 +130,54 @@ class CellTypeList(ListView):
     def get_queryset(self):
         queryset = CellType.objects.all().prefetch_related('cell_subtype','organ')
         return queryset
+
+
+# # TODO
+# class CellSubtypeAdd(OneGroupRequiredMixin, CreateView):
+#     template_name = 'cellsamples/cellsubtype_add.html'
+#     # TODO ADD
+#     form_class = CellSubtypeForm
+#
+#     # Test form validity
+#     def form_valid(self, form):
+#         # get user via self.request.user
+#         if form.is_valid():
+#             self.object = form.save()
+#             self.object.modified_by = self.object.created_by = self.request.user
+#             # Save Cell Sample
+#             self.object.save()
+#             return redirect('/cellsamples/celltype')
+#         else:
+#             return self.render_to_response(self.get_context_data(form=form))
+# 
+#
+# # Note that updating a model clears technically blank fields (exclude in form to avoid this)
+# class CellSubtypeUpdate(OneGroupRequiredMixin, UpdateView):
+#     model = CellSubtype
+#     template_name = 'cellsamples/cellsubtype_add.html'
+#     form_class = CellSubtypeForm
+#
+#     def get_context_data(self, **kwargs):
+#         context = super(CellSubtypeUpdate, self).get_context_data(**kwargs)
+#         context['update'] = True
+#         return context
+#
+#     # Test form validity
+#     def form_valid(self, form):
+#         # get user via self.request.user
+#         if form.is_valid():
+#             self.object = form.save()
+#             self.object.modified_by = self.request.user
+#             # Save Cell Sample
+#             self.object.save()
+#             return redirect('/cellsamples/celltype')
+#         else:
+#             return self.render_to_response(self.get_context_data(form=form))
+#
+#
+# class CellSubtypeList(ListView):
+#     template_name = 'cellsamples/cellsubtype_list.html'
+#
+#     def get_queryset(self):
+#         queryset = CellSubtype.objects.all()
+#         return queryset

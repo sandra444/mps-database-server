@@ -14,7 +14,7 @@ from cellsamples.models import *
 
 class CellTypeAdmin(LockableAdmin):
     save_on_top = True
-    list_display = ('organ', 'cell_type', 'cell_subtype', 'species')
+    list_display = ('organ', 'cell_type', 'species')
 
     fieldsets = (
         (
@@ -22,7 +22,6 @@ class CellTypeAdmin(LockableAdmin):
                 'fields': (
                     'cell_type',
                     'species',
-                    'cell_subtype',
                     'organ',
                 )
             }
@@ -115,12 +114,12 @@ class CellSampleAdmin(LockableAdmin):
 
     save_on_top = True
     list_per_page = 300
-    list_display = ('receipt_date','barcode','cell_type', 'cell_source',
+    list_display = ('receipt_date','barcode','cell_type', 'cell_subtype', 'cell_source',
                     'supplier',
                     'locked')
 
     search_fields = ['cell_type__cell_type',
-                     'cell_type__cell_subtype__cell_subtype',
+                     'cell_subtype__cell_subtype',
                      'cell_source',
                      'supplier__name',
                      'barcode',
@@ -128,9 +127,10 @@ class CellSampleAdmin(LockableAdmin):
     save_as = True
     fieldsets = (
         (None, {
-            'fields': ('cell_type',
-                       ('cell_source', 'receipt_date'),
-                       )
+            'fields': (
+                ('cell_type','cell_subtype'),
+                ('cell_source', 'receipt_date'),
+            )
         }),
         ('Supplier Information', {
             'fields': (('supplier', 'product_id', 'barcode'),

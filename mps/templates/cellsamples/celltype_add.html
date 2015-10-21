@@ -67,24 +67,6 @@
         </div>
     </div>
 
-    {% if form.cell_subtype.errors %}
-        {% for error in form.cell_subtype.errors %}
-            <div class="alert alert-danger" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Error:</span>
-                {{error}}
-            </div>
-        {% endfor %}
-    <div class="form-group has-error">
-    {% else %}
-    <div class="form-group">
-    {% endif %}
-        <label for="cell_subtype" class="col-sm-2 control-label">Cell Subtype*</label>
-        <div class="col-sm-10">
-          {{ form.cell_subtype }}
-        </div>
-    </div>
-
     {% if form.organ.errors %}
         {% for error in form.organ.errors %}
             <div class="alert alert-danger" role="alert">
