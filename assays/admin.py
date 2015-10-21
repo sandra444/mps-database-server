@@ -284,6 +284,7 @@ class AssayLayoutAdmin(LockableAdmin):
                 'fields': (
                     ('layout_name',
                      'device',
+                     'standard',
                      'locked',
                     )
                 )

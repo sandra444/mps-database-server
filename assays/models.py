@@ -114,6 +114,10 @@ class AssayLayout(FlaggableModel):
 
     layout_name = models.CharField(max_length=200)
     device = models.ForeignKey(Microdevice)
+
+    # Specifies whether this is a standard (oft used layout)
+    standard = models.BooleanField(default=False)
+
     #base_layout = models.ForeignKey(AssayBaseLayout)
 
     def __unicode__(self):

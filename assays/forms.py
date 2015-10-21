@@ -249,6 +249,10 @@ class AssayLayoutForm(forms.ModelForm):
 
 
 class AssayPlateSetupForm(CloneableForm):
+    def __init__(self,*args,**kwargs):
+        super (AssayPlateSetupForm,self).__init__(*args,**kwargs)
+        # Should the queryset be restricted by group?
+        self.fields['assay_layout'].queryset = AssayLayout.objects.all().order_by('-standard', 'layout_name')
 
     class Meta(object):
         model = AssayPlateSetup
