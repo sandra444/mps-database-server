@@ -1,9 +1,9 @@
 $(document).ready(function() {
-    $('#cellsamples').DataTable({
+    $('#cellsubtypes').DataTable({
         dom: 'T<"clear">lfrtip',
         "iDisplayLength": 50,
-        // Initially sort on receipt date
-        "order": [ 2, "desc" ],
+        // Initially sort on organ
+        "order": [ 1, "asc" ],
         "aoColumnDefs": [
             {
                 "bSortable": false,

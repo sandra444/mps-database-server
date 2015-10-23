@@ -147,7 +147,6 @@ class CellSampleAdmin(LockableAdmin):
         }),
         ('Cell Viability', {
             'fields': (('viable_count',
-                       'viable_count_unit',
                        'percent_viability'),)
         }),
         ('Change Tracking', {

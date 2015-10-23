@@ -27,7 +27,6 @@
                     <th>Barcode/Lot #</th>
                     <th>Cell Type</th>
                     <th>Cell Subtype</th>
-                    <th>Cell Source</th>
                     <th>Supplier</th>
                     <th>Patient</th>
                     <th>Group</th>
@@ -43,7 +42,6 @@
                     <th>Barcode/Lot #</th>
                     <th>Cell Type</th>
                     <th>Cell Subtype</th>
-                    <th>Cell Source</th>
                     <th>Supplier</th>
                     <th>Patient</th>
                     <th>Group</th>
@@ -60,9 +58,16 @@
                     {# Adding a link to this row converts it from date to HTML = Really, REALLY annoying #}
                     <td>{{ cellsample.receipt_date|date:"M d, Y" }}</td>
                     <td>{{ cellsample.barcode }}</td>
-                    <td><a href="/cellsamples/celltype/{{ cellsample.cell_type.id }}">{{ cellsample.cell_type }}</a></td>
-                    <td>{{ cellsample.cell_subtype }}</td>
-                    <td>{{ cellsample.cell_source }}</td>
+                    <td>
+                        <a href="/cellsamples/celltype/{{ cellsample.cell_type.id }}">
+                            {{ cellsample.cell_type }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/cellsamples/cellsubtype/{{ cellsample.cell_subtype.id }}">
+                            {{ cellsample.cell_subtype }}
+                        </a>
+                    </td>
                     <td>{{ cellsample.supplier }}</td>
                     <td>
                         {% if cellsample.patient_age or cellsample.patient_gender != 'N' or cellsample.patient_condition %}

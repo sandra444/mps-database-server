@@ -60,9 +60,12 @@ class CellType(LockableModel):
 class CellSubtype(LockableModel):
     class Meta(object):
         ordering = ('cell_subtype', )
+
     cell_subtype = models.CharField(max_length=255, unique=True,
                                     help_text="Example: motor (type of neuron), "
                                               "skeletal (type of muscle), etc.")
+
+    cell_type = models.ForeignKey(CellType, null=True, blank=True)
 
     def __unicode__(self):
         return u'{}'.format(self.cell_subtype)
@@ -98,6 +101,8 @@ class CellSample(FlaggableModel):
     cell_type = models.ForeignKey('CellType')
     cell_subtype = models.ForeignKey('CellSubtype')
 
+    # TODO TO BE REMOVED
+    # cell_source CONSIDERED UNINTUITIVE
     CELLSOURCETYPE = (
         ('Freshly isolated', 'Freshly isolated'),
         ('Cryopreserved', 'Cryopreserved'),
@@ -135,7 +140,7 @@ class CellSample(FlaggableModel):
     # ISOLATION
 
     isolation_datetime = models.DateField("Isolation",blank=True,
-                                              null=True)
+                                          null=True)
     isolation_method = models.CharField("Method", max_length=255,
                                         blank=True)
     isolation_notes = models.CharField("Notes", max_length=255,
@@ -144,15 +149,18 @@ class CellSample(FlaggableModel):
     # VIABILITY
 
     viable_count = models.FloatField(null=True, blank=True)
-    VIABLE_COUNT_UNIT_CHOICES = (
-        ('N', 'Not-specified'),
-        ('A', 'per area'),
-        ('V', 'per volume'),
-    )
-    viable_count_unit = models.CharField(max_length=1,
-                                         choices=VIABLE_COUNT_UNIT_CHOICES,
-                                         default=VIABLE_COUNT_UNIT_CHOICES[0][
-                                             0], blank=True)
+
+    # Removed: Deemed confusing/not useful
+    # VIABLE_COUNT_UNIT_CHOICES = (
+    #     ('N', 'Not-specified'),
+    #     ('A', 'per area'),
+    #     ('V', 'per volume'),
+    # )
+    # viable_count_unit = models.CharField(max_length=1,
+    #                                      choices=VIABLE_COUNT_UNIT_CHOICES,
+    #                                      default=VIABLE_COUNT_UNIT_CHOICES[0][
+    #                                          0], blank=True)
+
     percent_viability = models.FloatField(null=True, blank=True)
     cell_image = models.ImageField(upload_to='cellsamples',
                                    null=True, blank=True)
@@ -163,14 +171,14 @@ class CellSample(FlaggableModel):
     def __unicode__(self):
         if self.barcode:
             return u'{} {} ({}-{})'.format(
-                self.cell_source,
+                self.cell_subtype,
                 self.cell_type,
                 self.supplier,
                 self.barcode
             )
         else:
             return u'{} {} ({})'.format(
-                self.cell_source,
+                self.cell_subtype,
                 self.cell_type,
                 self.supplier
             )

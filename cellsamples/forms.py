@@ -1,5 +1,6 @@
 from django import forms
-from .models import CellSample, CellType
+from .models import CellSample, CellType, CellSubtype
+
 
 class CellSampleForm(forms.ModelForm):
 
@@ -12,4 +13,11 @@ class CellTypeForm(forms.ModelForm):
 
     class Meta(object):
         model = CellType
+        exclude = ('',)
+
+
+class CellSubtypeForm(forms.ModelForm):
+
+    class Meta(object):
+        model = CellSubtype
         exclude = ('',)

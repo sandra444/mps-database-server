@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block load %}
+    <script src="{% static "cellsamples/cellsubtype_list.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Cell Subtypes
+            </h2>
+        </legend>
+
+        <div class="row text-center">
+            <a href="/cellsamples/cellsubtype/add/" class="btn btn-lg btn-success" role="button">Add Cell Subtype</a>
+        </div>
+
+        <table hidden id="cellsubtypes" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Cell Subtype</th>
+                    <th>Cell Type</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Cell Subtype</th>
+                    <th>Cell Type</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for object in object_list %}
+                <tr class="cellsubtype" id={{ object.id }} name={{ object }}>
+                    <td><a class="btn btn-primary" href="{{ object.id }}">View/Edit</a></td>
+                    <td>{{ object }}</td>
+                    <td>{{ object.cell_type|default:'Generic (Applicable to All Cell Types)' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}

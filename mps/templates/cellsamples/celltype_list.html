@@ -22,8 +22,8 @@
             <thead>
                 <tr>
                     <th>View/Edit</th>
-                    <th>Organ</th>
                     <th>Cell Type</th>
+                    <th>Organ</th>
                     <th>Species</th>
                 </tr>
             </thead>
@@ -31,8 +31,8 @@
             <tfoot>
                 <tr>
                     <th>View/Edit</th>
-                    <th>Organ</th>
                     <th>Cell Type</th>
+                    <th>Organ</th>
                     <th>Species</th>
                 </tr>
             </tfoot>
@@ -41,8 +41,8 @@
             {% for celltype in object_list %}
                 <tr class="cellsample" id={{ celltype.id }} name={{ celltype }}>
                     <td><a class="btn btn-primary" href="{{ celltype.id }}">View/Edit</a></td>
+                    <td>{{ celltype.cell_type }}</td>
                     <td>{{ celltype.organ }}</td>
-                    <td><a href="{{ celltype.id }}">{{ celltype.cell_type }}</a></td>
                     <td>{{ celltype.species }}</td>
                 </tr>
             {% endfor %}
