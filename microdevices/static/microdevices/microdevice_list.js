@@ -7,6 +7,10 @@ $(document).ready(function() {
             {
                 "bSortable": false,
                 "aTargets": [0]
+            },
+            {
+                "width": "10%",
+                "targets": [0]
             }
         ]
     });
@@ -18,6 +22,10 @@ $(document).ready(function() {
             {
                 "bSortable": false,
                 "aTargets": [0]
+            },
+            {
+                "width": "10%",
+                "targets": [0]
             }
         ]
     });

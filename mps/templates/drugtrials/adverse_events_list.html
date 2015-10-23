@@ -41,7 +41,7 @@
             {% for adverse_event in object_list %}
                 <tr class="adverse_event" id={{ adverse_event.id }}>
                     <td><a class="btn btn-primary" href="{{ adverse_event.compound.id }}">View</a></td>
-                    <td><a href="{{ adverse_event.compound.id }}">{{ adverse_event.compound.compound }}</a></td>
+                    <td>{{ adverse_event.compound.compound }}</td>
                     <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
                     <td>{{ adverse_event.frequency }}</td>
                     <td>{{ adverse_event.event.organ|default:"" }}</td>
