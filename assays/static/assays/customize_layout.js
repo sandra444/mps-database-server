@@ -181,7 +181,7 @@ $(document).ready(function () {
                         .attr('id', stamp)
                         .text(text)
                         .click(function () {
-                            if(confirm('Are you sure you want to remove this time point?')) {
+                            if(confirm('Are you sure you want to remove this time point?\n' + $(this).text())) {
                                 $(this).remove();
                             }
                         })
@@ -207,7 +207,7 @@ $(document).ready(function () {
                             .text(text)
                             .attr('compound', compound.id)
                             .click(function () {
-                                if(confirm('Are you sure you want to remove this compound?')) {
+                                if(confirm('Are you sure you want to remove this compound?\n' + $(this).text())) {
                                     $(this).remove();
                                 }
                             });
@@ -235,7 +235,7 @@ $(document).ready(function () {
                         .text(data.label)
                         .click(function () {
                             // Confirm the user wants to remove first
-                            if(confirm('Are you sure you want to remove this label?')) {
+                            if(confirm('Are you sure you want to remove this label?\n' + $(this).text())) {
                                 $(this).remove();
                             }
                         })
@@ -497,7 +497,7 @@ $(document).ready(function () {
                                 .text(text)
                                 .attr('compound',compound_id)
                                 .click(function () {
-                                    if(confirm('Are you sure you want to remove this compound?')) {
+                                    if(confirm('Are you sure you want to remove this compound?\n' + $(this).text())) {
                                         $(this).remove();
                                     }
                                 });
@@ -577,7 +577,7 @@ $(document).ready(function () {
                             .attr('id',stamp)
                             .text(text)
                             .click(function () {
-                                if(confirm('Are you sure you want to remove this time point?')) {
+                                if(confirm('Are you sure you want to remove this time point?\n' + $(this).text())) {
                                     $(this).remove();
                                 }
                             });
@@ -610,7 +610,7 @@ $(document).ready(function () {
                             .attr('id',stamp)
                             .text(label)
                             .click(function () {
-                                if(confirm('Are you sure you want to remove this label?')) {
+                                if(confirm('Are you sure you want to remove this label?\n' + $(this).text())) {
                                     $(this).remove();
                                 }
                             });

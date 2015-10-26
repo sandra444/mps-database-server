@@ -1,6 +1,6 @@
 // This script is for displaying the layout for setups
 // TODO NEEDS REFACTOR
-// TODO PREFERRABLY CONSOLIDATE THESE DISPLAY FUNCTION (DO NOT REPEAT YOURSELF)
+// TODO PREFERABLY CONSOLIDATE THESE DISPLAY FUNCTIONS (DO NOT REPEAT YOURSELF)
 
 // Global variables are in poor taste
 var id = null;
