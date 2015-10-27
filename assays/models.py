@@ -280,8 +280,8 @@ class AssayPlateReadoutAssay(models.Model):
     class Meta(object):
         # Remove restriction that readout can only have one copy of an assay
         # unique_together = [('readout_id', 'assay_id')]
-        # Features (in lieu of assays) must be unique to a readout
-        unique_together = [('readout_id', 'feature')]
+        # Assay-Feature pairs must be unique
+        unique_together = [('assay_id', 'feature')]
 
     readout_id = models.ForeignKey('assays.AssayPlateReadout', verbose_name='Readout')
     assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True)

@@ -1997,7 +1997,6 @@ def get_csv_media_location(file_name):
 class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
     model = AssayRun
     template_name = 'assays/readoutbulkupload.html'
-    # TODO ADD
     form_class = ReadoutBulkUploadForm
 
     def get_form(self, form_class):

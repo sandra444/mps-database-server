@@ -472,6 +472,7 @@ def modify_qc_status_plate(current_plate_readout, form):
             readout.quality = u''
             readout.save()
 
+# TODO REVIEW
 # Rows are currenly numeric, not alphabetical, when stored in the database
 def parseReadoutCSV(currentAssayReadout, file, upload_type):
     removeExistingReadout(currentAssayReadout)
@@ -489,11 +490,15 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
 
-    assays = dict(
-        (o.feature, o.id) for o in AssayPlateReadoutAssay.objects.filter(
-            readout_id=currentAssayReadout
-        ).only('feature')
-    )
+    assays = {}
+    for assay in AssayPlateReadoutAssay.objects.filter(readout_id=currentAssayReadout):
+        assay_name = assay.assay_id.assay_name.upper()
+        assay_short_name = assay.assay_id.assay_short_name.upper()
+        feature = assay.feature
+        id = assay.id
+
+        assays.update({(assay_name, feature): id})
+        assays.update({(assay_short_name, feature): id})
 
     if upload_type == 'Block':
         # Current assay
@@ -514,15 +519,18 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 
             # If this line is a header
             # Headers should look like:
-            # FEATURE, {{FEATURE}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
-            if line[0].lower().strip() == 'feature':
-                feature = line[1]
+            # ASSAY, {{ASSAY}}, FEATURE, {{FEATURE}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
+            if line[0].upper().strip() == 'ASSAY':
                 # Get the assay
-                assay = assays.get(feature)
+                assay_name = line[1].upper()
+                feature = line[3].upper()
+
+                assay = assays.get((assay_name, feature))
+
                 number_of_assays += 1
 
-                if len(line) >= 8:
-                    time = line[5]
+                if len(line) >= 10:
+                    time = line[7]
 
                 else:
                     time = None
@@ -565,13 +573,9 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
         # The first line SHOULD be the header
         header = datalist[0]
 
-        if header[1].lower().strip() == 'time':
-            # IF TIME The features are the fourth column of the header onward
-            features = header[3:]
+        if 'TIME' in header[4].upper() and 'UNIT' in header[5].upper():
             time_specified = True
         else:
-            # IF NO TIME The features are the second column of the header onward
-            features = header[1:]
             time_specified = False
 
         # Exclude the header to get only the data points
@@ -580,6 +584,9 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
         for row_index, row in enumerate(data):
             # The well identifier given
             well = row[0]
+            assay_name = row[1].upper()
+            feature = row[2].upper()
+
             # Split the well into alphabetical and numeric
             row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
 
@@ -590,31 +597,27 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
             column_label = int(column_label) - 1
 
             if time_specified:
-                # Values are the slice of the fourth item onward
-                values = row[3:]
-                time = row[1]
+                time = row[4]
+                value = row[6]
 
             else:
-                # Values are the slice of the second item onward
-                values = row[1:]
+                value = row[4]
                 time = 0
 
-            for column_index, value in enumerate(values):
-                feature = features[column_index]
-                # NOTE THAT BLANKS ARE CURRENTLY COMPLETELY EXCLUDED
-                if value != '':
-                    value = float(value)
+            # NOTE THAT BLANKS ARE CURRENTLY COMPLETELY EXCLUDED
+            if value != '':
+                value = float(value)
 
-                    assay = assays.get(feature)
+                assay = assays.get((assay_name, feature))
 
-                    query_list.append((
-                        currentAssayReadoutId,
-                        assay,
-                        row_label,
-                        column_label,
-                        value,
-                        time
-                    ))
+                query_list.append((
+                    currentAssayReadoutId,
+                    assay,
+                    row_label,
+                    column_label,
+                    value,
+                    time
+                ))
 
     cursor.executemany(query,query_list)
 
