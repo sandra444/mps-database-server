@@ -392,8 +392,8 @@ def validate_plate_readout_file(
                     raise forms.ValidationError(
                         sheet + 'Header row: {} is too short'.format(line))
 
-                assay = line[1].strip()
-                feature = line[3].strip()
+                assay = line[1].upper().strip()
+                feature = line[3]
 
                 assays_found += 1
 
@@ -409,6 +409,10 @@ def validate_plate_readout_file(
                 if assay not in assays:
                     raise forms.ValidationError(
                         sheet + 'No assay with the name "%s" exists; please change your file or add this assay' % assay)
+                # Raise error if assay-feature pair is not listed
+                if (assay, feature) not in assay_feature_to_unit:
+                    raise forms.ValidationError(
+                        sheet + 'The assay-feature pair "{0}-{1}" was not recognized'.format(assay, feature))
                 # Raise error if val_unit not equal to one listed in APRA
                 if val_unit != assay_feature_to_unit.get((assay, feature), ''):
                     raise forms.ValidationError(
@@ -515,7 +519,7 @@ def validate_plate_readout_file(
         for row_index, row in enumerate(data):
             # The well identifier given
             well = row[0]
-            assay = row[1]
+            assay = row[1].upper().strip()
             feature = row[2]
             val_unit = row[3]
 
@@ -527,6 +531,10 @@ def validate_plate_readout_file(
             if assay not in assays:
                 raise forms.ValidationError(
                     sheet + 'No assay with the name "%s" exists; please change your file or add this assay' % assay)
+            # Raise error if assay-feature pair is not listed
+            if (assay, feature) not in assay_feature_to_unit:
+                raise forms.ValidationError(
+                    sheet + 'The assay-feature pair "{0}-{1}" was not recognized'.format(assay, feature))
             # Raise error if val_unit not equal to one listed in APRA
             if val_unit != assay_feature_to_unit.get((assay, feature), ''):
                 raise forms.ValidationError(
@@ -645,17 +653,21 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                 if form.cleaned_data:
                     assay_name = form.cleaned_data.get('assay_id').assay_name.upper()
                     assay_short_name = form.cleaned_data.get('assay_id').assay_short_name.upper()
-                    feature = form.cleaned_data.get('feature').upper()
+                    feature = form.cleaned_data.get('feature')
                     readout_unit = form.cleaned_data.get('readout_unit').unit
 
                     # Add feature
                     features.update({feature:True})
                     # Normal assay name
                     assays.update({assay_name:True})
-                    assay_feature_to_unit.update({(assay_name, feature): readout_unit})
+                    if (assay_name, feature) not in assay_feature_to_unit:
+                        assay_feature_to_unit.update({(assay_name, feature): readout_unit})
+                    else:
+                        raise forms.ValidationError('Assay-Feature pairs must be unique.')
                     # Short assay name
                     assays.update({assay_short_name:True})
                     assay_feature_to_unit.update({(assay_short_name, feature): readout_unit})
+
             except AttributeError:
                 pass
         if len(assays) < 1:
@@ -667,7 +679,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
 
             for raw in saved_data:
 
-                assay = raw.assay.assay_id.assay_name
+                assay = raw.assay.assay_id.assay_name.upper()
                 val_unit = raw.assay.readout_unit.unit
                 feature = raw.assay.feature
 
@@ -1013,7 +1025,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
                 for assay in APRA:
                     assay_name = assay.assay_id.assay_name.upper()
                     assay_short_name = assay.assay_id.assay_short_name.upper()
-                    feature = assay.feature.upper()
+                    feature = assay.feature
                     readout_unit = assay.readout_unit.unit
                     # Add feature
                     features.update({feature:True})

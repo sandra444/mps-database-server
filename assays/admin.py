@@ -523,7 +523,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
             if line[0].upper().strip() == 'ASSAY':
                 # Get the assay
                 assay_name = line[1].upper()
-                feature = line[3].upper()
+                feature = line[3]
 
                 assay = assays.get((assay_name, feature))
 
@@ -585,7 +585,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
             # The well identifier given
             well = row[0]
             assay_name = row[1].upper()
-            feature = row[2].upper()
+            feature = row[2]
 
             # Split the well into alphabetical and numeric
             row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
