@@ -21,4 +21,7 @@ $(document).ready(function () {
     notes.click( function() {
         reason_for_flag.toggle('slow');
     });
+
+    // Increase the height of the footer to ensure it is not obscured
+    $('#footer').height("+=150")
 });

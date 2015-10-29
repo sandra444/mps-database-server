@@ -123,8 +123,12 @@ class AssayLayout(FlaggableModel):
     def __unicode__(self):
         return self.layout_name
 
+    # TODO RENAME
     def get_absolute_url(self):
         return "/assays/assaylayout/"
+
+    def get_delete_url(self):
+        return '/assays/assaylayout/{}/delete/'.format(self.id)
 
 
 class AssayWellType(LockableModel):
@@ -253,9 +257,15 @@ class AssayPlateSetup(FlaggableModel):
     def __unicode__(self):
         return u'Plate-{}'.format(self.assay_plate_id)
 
+    # TODO RENAME
     def get_absolute_url(self):
         return "/assays/{}/".format(self.assay_run_id.id)
 
+    def get_clone_url(self):
+        return '/assays/{0}/assayplatesetup/add?clone={1}'.format(self.assay_run_id.id, self.id)
+
+    def get_delete_url(self):
+        return '/assays/assayplatesetup/{}/delete/'.format(self.id)
 
 class AssayReader(LockableModel):
     """
@@ -376,6 +386,12 @@ class AssayPlateReadout(FlaggableModel):
     def get_absolute_url(self):
         return "/assays/{}/".format(self.setup.assay_run_id.id)
 
+    def get_clone_url(self):
+        return '/assays/{0}/assayplatereadout/add?clone={1}'.format(self.setup.assay_run_id.id, self.id)
+
+    def get_delete_url(self):
+        return '/assays/assayplatereadout/{}/delete/'.format(self.id)
+
 
 SEVERITY_SCORE = (
     ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
@@ -477,6 +493,9 @@ class AssayPlateTestResult(FlaggableModel):
     def get_absolute_url(self):
         return "/assays/%i/" % self.readout.setup.assay_run_id.id
 
+    def get_delete_url(self):
+        return '/assays/assayplatetestresult/{}/delete/'.format(self.id)
+
 
 class StudyConfiguration(LockableModel):
     """
@@ -569,6 +588,9 @@ class AssayRun(RestrictedModel):
     def get_absolute_url(self):
         return "/assays/%i/" % self.id
 
+    def get_delete_url(self):
+        return '/assays/{}/delete/'.format(self.id)
+
 
 class AssayChipRawData(models.Model):
     """
@@ -658,6 +680,12 @@ class AssayChipSetup(FlaggableModel):
     def get_absolute_url(self):
         return "/assays/%i/" % self.assay_run_id.id
 
+    def get_clone_url(self):
+        return '/assays/{0}/assaychipsetup/add?clone={1}'.format(self.assay_run_id.id, self.id)
+
+    def get_delete_url(self):
+        return '/assays/assaychipsetup/{}/delete/'.format(self.id)
+
 object_types = (
     ('F', 'Field'), ('C', 'Colony'), ('M', 'Media'), ('X', 'Other')
 )
@@ -739,6 +767,12 @@ class AssayChipReadout(FlaggableModel):
     def get_absolute_url(self):
         return "/assays/%i/" % self.chip_setup.assay_run_id.id
 
+    def get_clone_url(self):
+        return '/assays/{0}/assaychipreadout/add?clone={1}'.format(self.chip_setup.assay_run_id.id, self.id)
+
+    def get_delete_url(self):
+        return '/assays/assaychipreadout/{}/delete/'.format(self.id)
+
 
 class AssayChipTestResult(FlaggableModel):
     """
@@ -789,6 +823,9 @@ class AssayChipTestResult(FlaggableModel):
 
     def get_absolute_url(self):
         return "/assays/%i/" % self.chip_readout.chip_setup.assay_run_id.id
+
+    def get_delete_url(self):
+        return '/assays/assaychitestresult/{}/delete/'.format(self.id)
 
 
 class AssayChipResult(models.Model):

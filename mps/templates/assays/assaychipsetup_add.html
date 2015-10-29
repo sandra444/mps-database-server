@@ -60,23 +60,25 @@
     <br>
     {% csrf_token %}
 
-        <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
-
+{#        <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>#}
+{##}
 {#      Submit and Clone revised such that it is only in ADD; UPDATE will now give a link instead of submitting#}
 {#      <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Clone</button>#}
-
-        {% if not update %}
-            <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Clone</button>
-        {% endif %}
-
-        {% if update %}
+{##}
+{#        {% if not update %}#}
+{#            <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Clone</button>#}
+{#        {% endif %}#}
+{##}
+{#        {% if update %}#}
             {# Clone and Submit replaced by a simple hyperlink to the cloned add page #}
-            <a role="button" class="btn btn-info" href="/assays/{{ object.assay_run_id.id }}/assaychipsetup/add?clone={{ object.id }}">Clone</a>
-            <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assaychipsetup/{{ object.id }}/delete/">Delete</a>
-        {% endif %}
-
-        {% include 'flag.html'%}
+{#            <a role="button" class="btn btn-info" href="/assays/{{ object.assay_run_id.id }}/assaychipsetup/add?clone={{ object.id }}">Clone</a>#}
+{#            <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assaychipsetup/{{ object.id }}/delete/">Delete</a>#}
+{#        {% endif %}#}
+{##}
+{#        {% include 'flag.html'%}#}
     </h1>
+
+    {% include "submit.html" with flag="y" clone="y" %}
 
     {% include 'errors.html' %}
 

@@ -23,9 +23,11 @@
     <br>
     {% csrf_token %}
 
-        <button id="submit" type="submit" class="btn btn-primary">Submit</button>
-        {% include 'flag.html'%}
+{#        <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
+{#        {% include 'flag.html'%}#}
     </h1>
+
+    {% include "submit.html" with flag="y" %}
 
     {% include 'errors.html' %}
 

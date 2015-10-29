@@ -1,4 +1,5 @@
 {# Html for flagging for review #}
+{# Subject to removal if already contained in submit #}
 {% if form.flagged.value %}
     {# If the model is flagged then display a danger flag and the notes #}
     <a role='button' id="flag" class="btn btn-sm btn-danger" title="Flag for review">

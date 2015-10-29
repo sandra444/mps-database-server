@@ -17,9 +17,11 @@
         Edit <em>{{ object }}</em>
         <br>
         Summaries and Additional Properties
-        <br>
-        <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+{#        <br>#}
+{#        <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
     </h1>
+
+    {% include "submit.html" %}
 
     {# Note that this page does not include 'errors.html,' it is a special exception #}
     {% if formset_summary.errors or formset_property.errors %}
