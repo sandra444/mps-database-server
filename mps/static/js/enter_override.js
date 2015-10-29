@@ -45,4 +45,7 @@ $(document).ready(function () {
             }
         }
     });
+
+    // Increase the height of the footer to ensure it is not obscured
+    $('#footer').height("+=150")
 });
