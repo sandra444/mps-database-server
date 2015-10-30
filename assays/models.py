@@ -825,7 +825,7 @@ class AssayChipTestResult(FlaggableModel):
         return "/assays/%i/" % self.chip_readout.chip_setup.assay_run_id.id
 
     def get_delete_url(self):
-        return '/assays/assaychitestresult/{}/delete/'.format(self.id)
+        return '/assays/assaychiptestresult/{}/delete/'.format(self.id)
 
 
 class AssayChipResult(models.Model):
