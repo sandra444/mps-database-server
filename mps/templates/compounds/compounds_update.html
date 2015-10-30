@@ -33,6 +33,9 @@
         </div>
     {% endif %}
 
+    {# Passing update here is a contrived way to make tracking display #}
+    {% include 'tracking.html' with update='y' %}
+
     <legend>Additional Properties</legend>
     {% if formset_property.errors %}
         {% for dict in formset_property.errors %}
