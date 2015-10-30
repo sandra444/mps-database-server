@@ -37,7 +37,7 @@ class CellType(LockableModel):
                                blank=True)
 
     # TODO TO BE REMOVED
-    cell_subtype = models.ForeignKey('CellSubtype')
+    cell_subtype = models.ForeignKey('CellSubtype', null=True, blank=True)
     organ = models.ForeignKey('Organ')
 
     class Meta(object):
