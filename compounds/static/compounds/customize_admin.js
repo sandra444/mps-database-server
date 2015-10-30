@@ -8,8 +8,10 @@ $(document).ready(function () {
         $('#id_inchikey').val(data.compound.stdInChiKey);
         $('#id_smiles').val(data.compound.smiles);
         // Note that the synonyms are modified so that there is a space after
-        // Each comma
-        $('#id_synonyms').val(data.compound.synonyms.replace(/,/g, ', '));
+        // Each comma. Replace can not be performed on undefined variables.
+        if (data.compound.synonyms) {
+            $('#id_synonyms').val(data.compound.synonyms.replace(/,/g, ', '));
+        }
         $('#id_molecular_formula').val(data.compound.molecularFormula);
         $('#id_molecular_weight').val(data.compound.molecularWeight);
         $('#id_rotatable_bonds').val(data.compound.rotatableBonds);
