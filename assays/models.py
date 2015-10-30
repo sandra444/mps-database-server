@@ -99,7 +99,7 @@ class AssayModel(LockableModel):
                                  verbose_name='Test Type')
 
     def __unicode__(self):
-        return u'{0} ({1})'.format(self.assay_name, self.test_type)
+        return u'{0} ({1})'.format(self.assay_name, self.assay_short_name)
 
 
 # Assay layout is now a flaggable model
@@ -307,7 +307,7 @@ class AssayPlateReadoutAssay(models.Model):
     feature = models.CharField(max_length=150)
 
     def __unicode__(self):
-        return u'{}'.format(self.feature)
+        return u'{0}-{1}'.format(self.assay_id.assay_short_name, self.feature)
 
 
 class AssayReadout(models.Model):
