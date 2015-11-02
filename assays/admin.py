@@ -420,7 +420,6 @@ class AssayPlateSetupAdmin(LockableAdmin):
 
 admin.site.register(AssayPlateSetup, AssayPlateSetupAdmin)
 
-
 # As much as I like being certain, this code is somewhat baffling
 def removeExistingReadout(currentAssayReadout):
     AssayReadout.objects.filter(assay_device_readout=currentAssayReadout).delete()
@@ -433,7 +432,6 @@ def removeExistingReadout(currentAssayReadout):
     #         readout.delete()
     # return
 
-
 def get_qc_status_plate(form):
     # Get QC status for each line
     qc_status = {}
@@ -445,12 +443,11 @@ def get_qc_status_plate(form):
             split_up = key.split('_')
             row = split_up[0]
             col = split_up[1]
-            assay = int(split_up[2])
             # Be sure to convert time to a float
-            time = float(split_up[3])
+            time = float(split_up[2])
             # Combine values in a tuple for index
-            index = (row, col, assay, time)
-            # Truncate value to be less than 10 characters to avoid errors
+            index = (row,col,time)
+            # Truncate value to be less than 20 characters to avoid errors
             value = val[:9]
             qc_status.update({index: value})
 
@@ -460,27 +457,13 @@ def get_qc_status_plate(form):
 def modify_qc_status_plate(current_plate_readout, form):
     # Get the readouts as they would appear on the front end
     # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
-    # GET ALL ASSAYS
-    # Probably requires revision
-    assays = sorted(
-        list(
-            set(
-                AssayReadout.objects.filter(
-                    assay_device_readout=current_plate_readout
-                ).values_list(
-                    'assay',
-                    flat=True
-                ).prefetch_related('assay')
-            )
-        )
-    )
-    readouts = AssayReadout.objects.filter(assay_device_readout=current_plate_readout).prefetch_related('assay')
+    readouts = AssayReadout.objects.filter(assay_device_readout=current_plate_readout)
 
     # Get QC status for each line
     qc_status = get_qc_status_plate(form)
 
     for readout in readouts:
-        index = (readout.row, readout.column, assays.index(readout.assay.id), readout.elapsed_time)
+        index = (readout.row, readout.column, readout.elapsed_time)
         if index in qc_status:
             readout.quality = qc_status.get(index)
             readout.save()
