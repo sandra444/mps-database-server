@@ -3,18 +3,16 @@
 
 {% block content %}
 
-    {% block load %}
-        <script src="{% static "js/enter_override.js" %}"></script>
-    {% endblock %}
-
     <form enctype="multipart/form-data" class="form-horizontal" method="post" >
 
     <h1>
         Upload Excel File for <em>{{ object }}</em>
     <br>
     {% csrf_token %}
-        <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+{#        <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
     </h1>
+
+    {% include "submit.html" %}
 
     {% include 'errors.html' %}
 
