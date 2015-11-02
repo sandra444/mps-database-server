@@ -104,6 +104,21 @@ def fetch_readout(request):
     # data = defaultdict(list)
     data = []
 
+    # GET ALL ASSAYS
+    # Probably requires revision
+    assays = sorted(
+        list(
+            set(
+                AssayReadout.objects.filter(
+                    assay_device_readout=current_readout_id
+                ).values_list(
+                    'assay',
+                    flat=True
+                ).prefetch_related('assay')
+            )
+        )
+    )
+
     readouts = AssayReadout.objects.filter(assay_device_readout=current_readout_id)\
         .prefetch_related('assay_device_readout', 'assay').order_by('assay','elapsed_time')
 
@@ -121,6 +136,7 @@ def fetch_readout(request):
             'value_unit': readout.assay.readout_unit.unit,
             'feature': readout.assay.feature,
             'quality': readout.quality,
+            'assay_index': assays.index(readout.assay.id)
         })
 
     return HttpResponse(json.dumps(data),
