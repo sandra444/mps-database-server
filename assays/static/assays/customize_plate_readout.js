@@ -41,10 +41,13 @@ $(document).ready(function () {
     // This contains all values for a feature
     var assay_feature_values = {};
 
+    // This matches assay_feature_classes to their respective assay and feature
+    var selection_to_assay_feature = {};
+
     // This will contain the respective colors for each feature on a well to well basis
     var heatmaps = {};
 
-    // This will contain all the wells tagged invalid with time as the key
+    // This will contain all the wells tagged invalid with assay selection -> time -> value
     var invalid = {};
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
@@ -100,16 +103,44 @@ $(document).ready(function () {
         }
     }
 
-    function get_invalid_id(well_id, underscore_time) {
+    // TODO CHANGE ALL INVALID ID CALLS
+    function get_invalid_id(well_id, assay_feature_selection, underscore_time) {
         var split = well_id.split('_');
         var row = row_labels.indexOf(split[0]);
         var column = column_labels.indexOf(split[1]);
-        return row + '_' + column + underscore_time + '_QC';
+        return row + '_' + column + '_' + assay_feature_selection +  underscore_time + '_QC';
+    }
+
+    function get_invalid_name(well_id, assay_feature_selection, underscore_time) {
+        var split = well_id.split('_');
+        var row = row_labels.indexOf(split[0]);
+        var column = column_labels.indexOf(split[1]);
+        // Remove underscore
+        var time = underscore_time.slice(1);
+
+        var assay_feature = selection_to_assay_feature[assay_feature_selection];
+        var assay = assay_feature.assay;
+        var feature = assay_feature.feature;
+
+        var full_object = {
+            'row': row,
+            'column': column,
+            'time': time,
+            'assay': assay,
+            'feature': feature
+        };
+
+        return JSON.stringify(full_object);
     }
 
     function refresh_invalid() {
-        var current_time = $('#time_select').val();
-        var current_invalid = invalid[current_time];
+        var current_selection = assay_select.val();
+        var current_time = time_select.val();
+        var current_invalid = null;
+
+        if (invalid[current_selection]) {
+            current_invalid = invalid[current_selection][current_time];
+        }
 
         if ($('.plate-well')[0]) {
             $('.plate-well').removeClass('invalid-well');
@@ -170,15 +201,24 @@ $(document).ready(function () {
             var id = this.id;
             // Check if qc mode is checked and if there is a readout value
             if ($('#qc_mode').prop('checked') && $('#' + id + ' .value')[0]) {
-                // Get the current time
-                var current_time = $('#time_select').val();
+                // Get the current selection
+                var current_selection = assay_select.val();
 
-                // Make an id for the invalid input: <row>_<col>_<time>_QC
-                var invalid_id = get_invalid_id(id, current_time);
+                // Get the current time
+                var current_time = time_select.val();
+
+                // Make an id for the invalid input: <row>_<col>_<assay_feature_select>_<time>_QC
+                var invalid_id = get_invalid_id(id, current_selection, current_time);
+                var invalid_name = get_invalid_name(id, current_selection, current_time);
+
+                // Make an empty object for this selection if it doesn't exist
+                if (!invalid[current_selection]) {
+                    invalid[current_selection] = {};
+                }
 
                 // Make an empty array for this time if it doesn't exist
-                if (!invalid[current_time]) {
-                    invalid[current_time] = [];
+                if (!invalid[current_selection][current_time]) {
+                    invalid[current_selection][current_time] = [];
                 }
 
                 // Check if there is already an input, if so, delete it
@@ -186,21 +226,21 @@ $(document).ready(function () {
                     $('#' + invalid_id).remove();
                     $(this).removeClass('invalid-well');
 
-                    invalid[current_time] = _.without(invalid[current_time], id);
+                    invalid[current_selection][current_time] = _.without(invalid[current_selection][current_time], id);
                 }
                 else {
                     $(this)
                         .addClass('invalid-well')
                         .append($('<input>')
                             .attr('id', invalid_id)
-                            .attr('name', invalid_id)
+                            .attr('name', invalid_name)
                             .attr('size', '7')
                             .attr('readonly', 'true')
                             .addClass('invalid')
                             .attr('hidden', 'true')
                             .val('X'));
 
-                    invalid[current_time].push(id);
+                    invalid[current_selection][current_time].push(id);
                 }
             }
             //console.log(invalid);
@@ -459,6 +499,10 @@ $(document).ready(function () {
 
         // Remove old values
         $('.value').remove();
+        // Remove old invalid
+        $('.invalid').remove();
+        // Reset invalid
+        invalid = {};
 
         // Whether or not the upload should fail
         var failed = false;
@@ -516,9 +560,14 @@ $(document).ready(function () {
                     // Assay-Feature pair and time for distinguishing values
                     var assay_feature_pair = assay + '_' + feature + '_' + time;
 
-                    // Add feature to assay_feature_values
+                    // Add pair to assay_feature_values
                     assay_feature_class = 'f_'+ assay_feature_pair.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
                     assay_feature_values[assay_feature_class] = {};
+
+                    var assay_feature_selection = assay_feature_class.split('_').slice(0, -1).join('_');
+
+                    // Ensure unaltered assay and feature are available
+                    selection_to_assay_feature[assay_feature_selection] = {'assay': assay, 'feature': feature};
 
                     if (!assay || !feature || !value_unit || (time && !time_unit)) {
                         failed += 'headers';
@@ -668,6 +717,11 @@ $(document).ready(function () {
 
                     // Add feature to assay_feature_values
                     var assay_feature_class = 'f_'+ assay_feature_pair.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
+
+                    var assay_feature_selection = assay_feature_class.split('_').slice(0, -1).join('_');
+
+                    // Ensure unaltered assay and feature are available
+                    selection_to_assay_feature[assay_feature_selection] = {'assay': assay, 'feature': feature};
 
                     var readout = $('<p>')
                         .addClass('value ' + assay_feature_class)
@@ -834,6 +888,11 @@ $(document).ready(function () {
             // Add feature to assay_feature_values
             var assay_feature_class = 'f_'+ assay_feature_pair.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
 
+            var assay_feature_selection = assay_feature_class.split('_').slice(0, -1).join('_');
+
+            // Ensure unaltered assay and feature are available
+            selection_to_assay_feature[assay_feature_selection] = {'assay': assay, 'feature': feature};
+
             // Consider adding lead if people demand a larger font
             var readout = $('<p>')
                 .addClass('value ' + assay_feature_class)
@@ -854,21 +913,30 @@ $(document).ready(function () {
             var id = row_label + '_' + column_label;
             // Current time has an underscore for some reason, should refactor
             var current_time = '_'+ time;
-            // Make an id for the invalid input: <row>_<col>_<time>_QC
-            var invalid_id = get_invalid_id(id, current_time);
+            // Alias for readability
+            var current_selection = assay_feature_selection;
+
+            // Make an id for the invalid input: <row>_<col>_<assay_feature_select>_<time>_QC
+            var invalid_id = get_invalid_id(id, current_selection, current_time);
+            var invalid_name = get_invalid_name(id, current_selection, current_time);
+
+            // Make an empty object for this selection if it doesn't exist
+            if (!invalid[current_selection]) {
+                invalid[current_selection] = {};
+            }
 
             // Make an empty array for this time if it doesn't exist
-            if (!invalid[current_time]) {
-                invalid[current_time] = [];
+            if (!invalid[current_selection][current_time]) {
+                invalid[current_selection][current_time] = [];
             }
 
             // Avoid redundant additions
-            if (quality && !(invalid[current_time].indexOf(id) > -1)) {
+            if (quality && !(invalid[current_selection][current_time].indexOf(id) > -1)) {
                 $(well_id)
                     .addClass('invalid-well')
                     .append($('<input>')
                         .attr('id', invalid_id)
-                        .attr('name', invalid_id)
+                        .attr('name', invalid_name)
                         .attr('size', '7')
                         .attr('readonly', 'true')
                         .addClass('invalid')
@@ -876,14 +944,12 @@ $(document).ready(function () {
                         .val('X'));
 
                 // Add to invalid
-                invalid[current_time].push(id);
+                invalid[current_selection][current_time].push(id);
             }
         });
 
         build_heatmap(assay_feature_values);
         heatmap_options(assay_feature_values, times);
-        // Ensure invalid wells are displayed correctly
-        refresh_invalid();
     }
 
     // On setup change, acquire labels and build table
@@ -904,7 +970,7 @@ $(document).ready(function () {
     });
 
     // When the assay_select changes, get the correct values
-    assay_select.change( function() {
+    assay_select.change(function() {
         var current_assay_feature = assay_select.val();
 
         // Append the value of time_select
@@ -935,12 +1001,12 @@ $(document).ready(function () {
 
         // Show this feature's values
         $('.' + current_assay_feature).show();
+        refresh_invalid();
     });
 
     // Trigger feature select change on time change
     time_select.change( function() {
         assay_select.trigger('change');
-        refresh_invalid();
     });
 
     // When the 'toggle data only' button is clicked

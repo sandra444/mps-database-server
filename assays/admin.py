@@ -420,6 +420,7 @@ class AssayPlateSetupAdmin(LockableAdmin):
 
 admin.site.register(AssayPlateSetup, AssayPlateSetupAdmin)
 
+
 # As much as I like being certain, this code is somewhat baffling
 def removeExistingReadout(currentAssayReadout):
     AssayReadout.objects.filter(assay_device_readout=currentAssayReadout).delete()
@@ -432,23 +433,27 @@ def removeExistingReadout(currentAssayReadout):
     #         readout.delete()
     # return
 
+# TODO FINISH
 def get_qc_status_plate(form):
     # Get QC status for each line
     qc_status = {}
 
     for key, val in form.data.iteritems():
         # If this is a QC input
-        if key.endswith('_QC'):
-            # Split up the key
-            split_up = key.split('_')
-            row = split_up[0]
-            col = split_up[1]
+        if key.startswith('{') and key.endswith('}'):
+            # Evaluate the key
+            values = json.loads(key)
+            row = unicode(values.get('row'))
+            col = unicode(values.get('column'))
             # Be sure to convert time to a float
-            time = float(split_up[2])
+            time = float(values.get('time'))
+            # Assay needs to be case insensitive
+            assay = values.get('assay').upper()
+            feature = values.get('feature')
             # Combine values in a tuple for index
-            index = (row,col,time)
-            # Truncate value to be less than 20 characters to avoid errors
-            value = val[:9]
+            index = (row, col, time, assay, feature)
+            # Just make value X for now (isn't even used)
+            value = 'X'
             qc_status.update({index: value})
 
     return qc_status
@@ -457,18 +462,37 @@ def get_qc_status_plate(form):
 def modify_qc_status_plate(current_plate_readout, form):
     # Get the readouts as they would appear on the front end
     # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
-    readouts = AssayReadout.objects.filter(assay_device_readout=current_plate_readout)
+    readouts = AssayReadout.objects.filter(
+        assay_device_readout=current_plate_readout
+    ).prefetch_related(
+        'assay'
+    ).select_related(
+        'assay__assay_id'
+    )
 
     # Get QC status for each line
     qc_status = get_qc_status_plate(form)
 
     for readout in readouts:
-        index = (readout.row, readout.column, readout.elapsed_time)
-        if index in qc_status:
-            readout.quality = qc_status.get(index)
+        index_long = (
+            readout.row,
+            readout.column,
+            readout.elapsed_time,
+            readout.assay.assay_id.assay_name.upper(),
+            readout.assay.feature
+        )
+        index_short = (
+            readout.row,
+            readout.column,
+            readout.elapsed_time,
+            readout.assay.assay_id.assay_short_name.upper(),
+            readout.assay.feature
+        )
+        if index_long in qc_status or index_short in qc_status:
+            readout.quality = 'X'
             readout.save()
         # If the quality marker has been removed
-        elif index not in qc_status and readout.quality:
+        elif index_long not in qc_status and index_short not in qc_status and readout.quality:
             readout.quality = u''
             readout.save()
 
