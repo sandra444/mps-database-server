@@ -111,6 +111,31 @@ $(document).ready(function () {
         return row + '_' + column + '_' + assay_feature_selection +  underscore_time + '_QC';
     }
 
+    function set_invalid(id, well_id, current_selection, current_time, invalid_id, invalid_name) {
+        // Make an empty object for this selection if it doesn't exist
+        if (!invalid[current_selection]) {
+            invalid[current_selection] = {};
+        }
+
+        // Make an empty array for this time if it doesn't exist
+        if (!invalid[current_selection][current_time]) {
+            invalid[current_selection][current_time] = [];
+        }
+
+        $(well_id)
+            .addClass('invalid-well')
+            .append($('<input>')
+                .attr('id', invalid_id)
+                .attr('name', invalid_name)
+                .attr('size', '7')
+                .attr('readonly', 'true')
+                .addClass('invalid')
+                .attr('hidden', 'true')
+                .val('X'));
+
+        invalid[current_selection][current_time].push(id);
+    }
+
     function get_invalid_name(well_id, assay_feature_selection, underscore_time) {
         var split = well_id.split('_');
         var row = row_labels.indexOf(split[0]);
@@ -211,15 +236,15 @@ $(document).ready(function () {
                 var invalid_id = get_invalid_id(id, current_selection, current_time);
                 var invalid_name = get_invalid_name(id, current_selection, current_time);
 
-                // Make an empty object for this selection if it doesn't exist
-                if (!invalid[current_selection]) {
-                    invalid[current_selection] = {};
-                }
-
-                // Make an empty array for this time if it doesn't exist
-                if (!invalid[current_selection][current_time]) {
-                    invalid[current_selection][current_time] = [];
-                }
+//                // Make an empty object for this selection if it doesn't exist
+//                if (!invalid[current_selection]) {
+//                    invalid[current_selection] = {};
+//                }
+//
+//                // Make an empty array for this time if it doesn't exist
+//                if (!invalid[current_selection][current_time]) {
+//                    invalid[current_selection][current_time] = [];
+//                }
 
                 // Check if there is already an input, if so, delete it
                 if ($('#' + invalid_id)[0]) {
@@ -229,18 +254,19 @@ $(document).ready(function () {
                     invalid[current_selection][current_time] = _.without(invalid[current_selection][current_time], id);
                 }
                 else {
-                    $(this)
-                        .addClass('invalid-well')
-                        .append($('<input>')
-                            .attr('id', invalid_id)
-                            .attr('name', invalid_name)
-                            .attr('size', '7')
-                            .attr('readonly', 'true')
-                            .addClass('invalid')
-                            .attr('hidden', 'true')
-                            .val('X'));
-
-                    invalid[current_selection][current_time].push(id);
+                    set_invalid(id, this, current_selection, current_time, invalid_id, invalid_name);
+//                    $(this)
+//                        .addClass('invalid-well')
+//                        .append($('<input>')
+//                            .attr('id', invalid_id)
+//                            .attr('name', invalid_name)
+//                            .attr('size', '7')
+//                            .attr('readonly', 'true')
+//                            .addClass('invalid')
+//                            .attr('hidden', 'true')
+//                            .val('X'));
+//
+//                    invalid[current_selection][current_time].push(id);
                 }
             }
             //console.log(invalid);
@@ -920,31 +946,32 @@ $(document).ready(function () {
             var invalid_id = get_invalid_id(id, current_selection, current_time);
             var invalid_name = get_invalid_name(id, current_selection, current_time);
 
-            // Make an empty object for this selection if it doesn't exist
-            if (!invalid[current_selection]) {
-                invalid[current_selection] = {};
-            }
+//            // Make an empty object for this selection if it doesn't exist
+//            if (!invalid[current_selection]) {
+//                invalid[current_selection] = {};
+//            }
+//
+//            // Make an empty array for this time if it doesn't exist
+//            if (!invalid[current_selection][current_time]) {
+//                invalid[current_selection][current_time] = [];
+//            }
 
-            // Make an empty array for this time if it doesn't exist
-            if (!invalid[current_selection][current_time]) {
-                invalid[current_selection][current_time] = [];
-            }
-
-            // Avoid redundant additions
-            if (quality && !(invalid[current_selection][current_time].indexOf(id) > -1)) {
-                $(well_id)
-                    .addClass('invalid-well')
-                    .append($('<input>')
-                        .attr('id', invalid_id)
-                        .attr('name', invalid_name)
-                        .attr('size', '7')
-                        .attr('readonly', 'true')
-                        .addClass('invalid')
-                        .attr('hidden', 'true')
-                        .val('X'));
-
-                // Add to invalid
-                invalid[current_selection][current_time].push(id);
+            // if (quality && !(invalid[current_selection][current_time].indexOf(id) > -1)) {
+            if (quality) {
+                set_invalid(id, well_id, current_selection, current_time, invalid_id, invalid_name);
+//                $(well_id)
+//                    .addClass('invalid-well')
+//                    .append($('<input>')
+//                        .attr('id', invalid_id)
+//                        .attr('name', invalid_name)
+//                        .attr('size', '7')
+//                        .attr('readonly', 'true')
+//                        .addClass('invalid')
+//                        .attr('hidden', 'true')
+//                        .val('X'));
+//
+//                // Add to invalid
+//                invalid[current_selection][current_time].push(id);
             }
         });
 
