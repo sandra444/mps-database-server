@@ -2,7 +2,7 @@ import csv
 
 from django.contrib import admin
 from django import forms
-from assays.forms import StudyConfigurationForm, AssayChipReadoutInlineFormset, AssayPlateReadoutInlineFormset, label_to_number
+from assays.forms import StudyConfigurationForm, AssayChipReadoutInlineFormset, AssayPlateReadoutInlineFormset, label_to_number, process_readout_value
 from django.http import HttpResponseRedirect
 
 from assays.models import *
@@ -505,7 +505,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 
     query = ''' INSERT INTO "assays_assayreadout"
           ("assay_device_readout_id", "assay_id", "row", "column", "value", "elapsed_time", "quality")
-          VALUES (%s, %s, %s, %s, %s, %s, '')'''
+          VALUES (%s, %s, %s, %s, %s, %s, %s)'''
 
     query_list = []
 
@@ -566,6 +566,10 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                     if not value:
                         continue
 
+                    processed_value = process_readout_value(value)
+                    value = processed_value.get('value')
+                    quality = processed_value.get('quality')
+
                     # MUST OFFSET ROW (due to multiple datablocks)
                     offset_row_id = (row_id-number_of_assays) % number_of_rows
 
@@ -576,7 +580,8 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                             offset_row_id,
                             column_id,
                             value,
-                            time
+                            time,
+                            quality,
                         ))
 
                     else:
@@ -587,7 +592,8 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                             offset_row_id,
                             column_id,
                             value,
-                            0
+                            0,
+                            quality,
                         ))
 
     # Otherwise if the upload is tabular
@@ -630,7 +636,9 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 
             # NOTE THAT BLANKS ARE CURRENTLY COMPLETELY EXCLUDED
             if value != '':
-                value = float(value)
+                processed_value = process_readout_value(value)
+                value = processed_value.get('value')
+                quality = processed_value.get('quality')
 
                 assay = assays.get((assay_name, feature))
 
@@ -640,7 +648,8 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                     row_label,
                     column_label,
                     value,
-                    time
+                    time,
+                    quality
                 ))
 
     cursor.executemany(query,query_list)

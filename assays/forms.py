@@ -352,6 +352,7 @@ class PlateTestResultInlineFormset(BaseInlineFormSet):
         if results < 1:
             raise forms.ValidationError('You must have at least one result.')
 
+
 # This function turns a label to a number
 def label_to_number(label):
     num = 0
@@ -359,6 +360,27 @@ def label_to_number(label):
         if char in string.ascii_letters:
             num = num * 26 + (ord(char.upper()) - ord('A')) + 1
     return num
+
+
+def process_readout_value(value):
+    """Returns processed readout value and whether or not to mark it invalid"""
+
+    # Try to parse as a float
+    try:
+        value = float(value)
+        return {'value': value, 'quality': u''}
+
+    except ValueError:
+        # If not a float, take slice of all but first character and try again
+        sliced_value = value[1:]
+
+        try:
+            sliced_value = float(sliced_value)
+            return {'value': sliced_value, 'quality': 'X'}
+
+        except ValueError:
+            return None
+
 
 def validate_plate_readout_file(
         upload_type,
@@ -458,13 +480,19 @@ def validate_plate_readout_file(
                 # For every value in the line
                 for val in line:
                     # Check every value to make sure it can resolve to a float
-                    try:
-                        # Keep empty strings, though they technically can not be converted to floats
-                        if val != '':
-                            float(val)
-                    except:
+                    # Keep empty strings, though they technically can not be converted to floats
+                    if val != '':
+                        val = process_readout_value(val)
+                    if val is None:
                         raise forms.ValidationError(
                             sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(val))
+                    # try:
+                    #     # Keep empty strings, though they technically can not be converted to floats
+                    #     if val != '':
+                    #         float(val)
+                    # except:
+                    #     raise forms.ValidationError(
+                    #         sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(val))
 
     # If not block, then it is TABULAR data
     else:
@@ -584,13 +612,19 @@ def validate_plate_readout_file(
                 raise forms.ValidationError(
                 sheet + 'Error parsing the well ID: {}'.format(well))
 
-            # Check if all the values can be parsed as floats
-            try:
-                if value != '':
-                    float(value)
-            except:
+            # Check every value to make sure it can resolve to a float
+            # Keep empty strings, though they technically can not be converted to floats
+            if val != '':
+                val = process_readout_value(val)
+            if val is None:
                 raise forms.ValidationError(
-                    sheet + 'The value {} is invalid; please make sure all values are numerical'.format(value))
+                    sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(val))
+            # try:
+            #     if value != '':
+            #         float(value)
+            # except:
+            #     raise forms.ValidationError(
+            #         sheet + 'The value {} is invalid; please make sure all values are numerical'.format(value))
 
             # TODO OLD
             # if time_specified:
