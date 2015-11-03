@@ -104,14 +104,37 @@ $(document).ready(function () {
     }
 
     // TODO CHANGE ALL INVALID ID CALLS
-    function get_invalid_id(well_id, assay_feature_selection, underscore_time) {
+    function get_invalid_id(well_id, assay_feature_selection, time) {
         var split = well_id.split('_');
         var row = row_labels.indexOf(split[0]);
         var column = column_labels.indexOf(split[1]);
-        return row + '_' + column + '_' + assay_feature_selection +  underscore_time + '_QC';
+        return row + '_' + column + '_' + assay_feature_selection +  '_' + time + '_QC';
     }
 
-    function set_invalid(id, well_id, current_selection, current_time, invalid_id, invalid_name) {
+    function get_invalid_name(well_id, assay_feature_selection, time) {
+        var split = well_id.split('_');
+        var row = row_labels.indexOf(split[0]);
+        var column = column_labels.indexOf(split[1]);
+
+        var assay_feature = selection_to_assay_feature[assay_feature_selection];
+        var assay = assay_feature.assay;
+        var feature = assay_feature.feature;
+
+        var full_object = {
+            'row': row,
+            'column': column,
+            'time': time,
+            'assay': assay,
+            'feature': feature
+        };
+
+        return JSON.stringify(full_object);
+    }
+
+    function set_invalid(id, well_id, current_selection, current_time) {
+        var invalid_id = get_invalid_id(id, current_selection, current_time);
+        var invalid_name = get_invalid_name(id, current_selection, current_time);
+
         // Make an empty object for this selection if it doesn't exist
         if (!invalid[current_selection]) {
             invalid[current_selection] = {};
@@ -136,27 +159,27 @@ $(document).ready(function () {
         invalid[current_selection][current_time].push(id);
     }
 
-    function get_invalid_name(well_id, assay_feature_selection, underscore_time) {
-        var split = well_id.split('_');
-        var row = row_labels.indexOf(split[0]);
-        var column = column_labels.indexOf(split[1]);
-        // Remove underscore
-        var time = underscore_time.slice(1);
+    // Process a value from a readout file
+    function process_value(value, id, well_id, current_selection, current_time) {
+        // Check if the value is not a number
+        if (isNaN(value)) {
+            // Take everything after the first character
+            var sliced_value = value.slice(1);
 
-        var assay_feature = selection_to_assay_feature[assay_feature_selection];
-        var assay = assay_feature.assay;
-        var feature = assay_feature.feature;
-
-        var full_object = {
-            'row': row,
-            'column': column,
-            'time': time,
-            'assay': assay,
-            'feature': feature
-        };
-
-        return JSON.stringify(full_object);
+            // Check if the sliced value is not a number
+            if (isNaN(sliced_value)) {
+                return NaN
+            }
+            else {
+                set_invalid(id, well_id, current_selection, current_time);
+                return sliced_value;
+            }
+        }
+        else {
+            return value;
+        }
     }
+
 
     function refresh_invalid() {
         var current_selection = assay_select.val();
@@ -234,7 +257,6 @@ $(document).ready(function () {
 
                 // Make an id for the invalid input: <row>_<col>_<assay_feature_select>_<time>_QC
                 var invalid_id = get_invalid_id(id, current_selection, current_time);
-                var invalid_name = get_invalid_name(id, current_selection, current_time);
 
 //                // Make an empty object for this selection if it doesn't exist
 //                if (!invalid[current_selection]) {
@@ -254,7 +276,7 @@ $(document).ready(function () {
                     invalid[current_selection][current_time] = _.without(invalid[current_selection][current_time], id);
                 }
                 else {
-                    set_invalid(id, this, current_selection, current_time, invalid_id, invalid_name);
+                    set_invalid(id, this, current_selection, current_time);
 //                    $(this)
 //                        .addClass('invalid-well')
 //                        .append($('<input>')
@@ -427,7 +449,7 @@ $(document).ready(function () {
         // Convert times to sorted array?
         $.each(times, function (index, time) {
             var option = $('<option>')
-                .attr('value', '_' + time)
+                .attr('value', time)
                 .text(time);
             time_select.append(option);
         });
@@ -558,6 +580,8 @@ $(document).ready(function () {
 
             var assay_feature_class = null;
 
+            var assay_feature_selection = null;
+
             // TODO FIX CLIENT-SIDE VALIDATION
             // PLEASE NOTE THAT NEITHER FEATURES NOR ASSAYS ARE UNIQUE
             // THIS MEANS THAT SITUATIONS REQUIRING UNIQUENESS MUST USE AN ASSAY-FEATURE PAIR
@@ -590,7 +614,7 @@ $(document).ready(function () {
                     assay_feature_class = 'f_'+ assay_feature_pair.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
                     assay_feature_values[assay_feature_class] = {};
 
-                    var assay_feature_selection = assay_feature_class.split('_').slice(0, -1).join('_');
+                    assay_feature_selection = assay_feature_class.split('_').slice(0, -1).join('_');
 
                     // Ensure unaltered assay and feature are available
                     selection_to_assay_feature[assay_feature_selection] = {'assay': assay, 'feature': feature};
@@ -633,6 +657,9 @@ $(document).ready(function () {
                                 var column_label = column_labels[column_index];
 
                                 var well_id = '#' + row_label + '_' + column_label;
+                                var id = row_label + '_' + column_label;
+
+                                value = process_value(value, id, well_id, assay_feature_selection, time);
 
                                 // If value is not a number
                                 if (isNaN(value)) {
@@ -704,6 +731,7 @@ $(document).ready(function () {
 
                     // Merge back together for ID
                     var well_id = '#' + split_well[0] + '_' + parseInt(split_well[1]);
+                    var id = split_well[0] + '_' + parseInt(split_well[1]);
 
                     var assay = row[1];
                     var feature = row[2];
@@ -724,12 +752,6 @@ $(document).ready(function () {
                         value = row[4];
                     }
 
-                    // If value is not a number
-                    if (isNaN(value)) {
-                        // Fail the file
-                        failed += 'non-numeric';
-                    }
-
                     // Add time
                     times[time] = time;
 
@@ -748,6 +770,14 @@ $(document).ready(function () {
 
                     // Ensure unaltered assay and feature are available
                     selection_to_assay_feature[assay_feature_selection] = {'assay': assay, 'feature': feature};
+
+                    value = process_value(value, id, well_id, assay_feature_selection, time);
+
+                    // If value is not a number
+                    if (isNaN(value)) {
+                        // Fail the file
+                        failed += 'non-numeric';
+                    }
 
                     var readout = $('<p>')
                         .addClass('value ' + assay_feature_class)
@@ -937,14 +967,10 @@ $(document).ready(function () {
             }
 
             var id = row_label + '_' + column_label;
-            // Current time has an underscore for some reason, should refactor
-            var current_time = '_'+ time;
+            // Current time alias
+            var current_time = time;
             // Alias for readability
             var current_selection = assay_feature_selection;
-
-            // Make an id for the invalid input: <row>_<col>_<assay_feature_select>_<time>_QC
-            var invalid_id = get_invalid_id(id, current_selection, current_time);
-            var invalid_name = get_invalid_name(id, current_selection, current_time);
 
 //            // Make an empty object for this selection if it doesn't exist
 //            if (!invalid[current_selection]) {
@@ -958,7 +984,7 @@ $(document).ready(function () {
 
             // if (quality && !(invalid[current_selection][current_time].indexOf(id) > -1)) {
             if (quality) {
-                set_invalid(id, well_id, current_selection, current_time, invalid_id, invalid_name);
+                set_invalid(id, well_id, current_selection, current_time);
 //                $(well_id)
 //                    .addClass('invalid-well')
 //                    .append($('<input>')
@@ -1001,7 +1027,7 @@ $(document).ready(function () {
         var current_assay_feature = assay_select.val();
 
         // Append the value of time_select
-        current_assay_feature = current_assay_feature + time_select.val();
+        current_assay_feature = current_assay_feature + '_' + time_select.val();
 
         // Hide all values
         $('.value').hide();
