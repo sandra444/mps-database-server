@@ -478,14 +478,15 @@ def validate_plate_readout_file(
                         sheet + "The number of columns does not correspond with the device's dimensions:{}".format(line))
 
                 # For every value in the line
-                for val in line:
+                for value in line:
                     # Check every value to make sure it can resolve to a float
                     # Keep empty strings, though they technically can not be converted to floats
-                    if val != '':
-                        val = process_readout_value(val)
-                    if val is None:
-                        raise forms.ValidationError(
-                            sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(val))
+                    if value != '':
+                        processed_value = process_readout_value(value)
+
+                        if processed_value is None:
+                            raise forms.ValidationError(
+                                sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(val))
                     # try:
                     #     # Keep empty strings, though they technically can not be converted to floats
                     #     if val != '':
@@ -614,11 +615,11 @@ def validate_plate_readout_file(
 
             # Check every value to make sure it can resolve to a float
             # Keep empty strings, though they technically can not be converted to floats
-            if val != '':
-                val = process_readout_value(val)
-            if val is None:
-                raise forms.ValidationError(
-                    sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(val))
+            if value != '':
+                processed_value = process_readout_value(value)
+                if processed_value is None:
+                    raise forms.ValidationError(
+                        sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(val))
             # try:
             #     if value != '':
             #         float(value)
