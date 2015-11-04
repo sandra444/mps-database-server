@@ -486,7 +486,7 @@ def validate_plate_readout_file(
 
                         if processed_value is None:
                             raise forms.ValidationError(
-                                sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(val))
+                                sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(value))
                     # try:
                     #     # Keep empty strings, though they technically can not be converted to floats
                     #     if val != '':
@@ -619,7 +619,7 @@ def validate_plate_readout_file(
                 processed_value = process_readout_value(value)
                 if processed_value is None:
                     raise forms.ValidationError(
-                        sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(val))
+                        sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(value))
             # try:
             #     if value != '':
             #         float(value)
