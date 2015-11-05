@@ -530,7 +530,7 @@ $(document).ready(function () {
 
             // For each value
             $.each(values, function(well, value) {
-                heatmaps[pair][well] = value ? color_scale(value) : '#606060';
+                heatmaps[pair][well] = value != undefined ? color_scale(value) : '#606060';
             });
         });
 
