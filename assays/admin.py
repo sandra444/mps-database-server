@@ -837,6 +837,8 @@ def get_qc_status_chip(form):
 
     return qc_status
 
+# NOTE: Tricky thing about chip QC is IT DEPENDS ON WHETHER IT IS BEING ADDED OR UPDATED
+# Why? The ORDER OF THE VALUES REFLECTS THE FILE WHEN ADDING, BUT IS SORTED IN UPDATE
 @transaction.atomic
 def modify_qc_status_chip(current_chip_readout, form):
     # Get the readouts as they would appear on the front end

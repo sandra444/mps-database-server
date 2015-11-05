@@ -828,9 +828,6 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             if formset.files.get('file', ''):
                 file = formset.files.get('file', '')
                 parseChipCSV(self.object, file, headers, form)
-            # If no file, try to update the qc_status
-            else:
-                modify_qc_status_chip(self.object, form)
             if data['another']:
                 form = self.form_class(
                     study,
