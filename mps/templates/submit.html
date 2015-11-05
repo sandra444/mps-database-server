@@ -1,19 +1,5 @@
 {# Consolidated submit row #}
-{# TODO AFTER TESTING, MOVE THIS TO MAIN CSS FILE #}
-<style>
-    #submit-row {
-        background: #F8F8FF;
-        border-style: solid;
-    }
-    .large-padding-top {
-        padding-top: 15px;
-    }
-    .small-padding-top {
-        padding-top: 5px;
-    }
-</style>
-
-<nav id="submit-row" class="footer navbar-fixed-bottom hidden-print">
+<nav id="floating-submit-row" class="footer navbar-fixed-bottom hidden-print floating-submit-row">
     <div class="container large-padding-top">
         {% if clone %}
             <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
