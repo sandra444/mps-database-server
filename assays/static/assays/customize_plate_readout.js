@@ -103,7 +103,6 @@ $(document).ready(function () {
         }
     }
 
-    // TODO CHANGE ALL INVALID ID CALLS
     function get_invalid_id(well_id, assay_feature_selection, time) {
         var split = well_id.split('_');
         var row = row_labels.indexOf(split[0]);
@@ -156,7 +155,10 @@ $(document).ready(function () {
                 .attr('hidden', 'true')
                 .val('X'));
 
-        invalid[current_selection][current_time].push(id);
+        invalid[current_selection][current_time].push(well_id);
+
+        // THIS MAY CAUSE ISSUES, INVESTIGATE
+        build_heatmap(assay_feature_values);
     }
 
     // Process a value from a readout file
@@ -196,7 +198,7 @@ $(document).ready(function () {
 
         if (current_invalid) {
             $.each(current_invalid, function (index, well) {
-                $('#' + well).addClass('invalid-well');
+                $(well).addClass('invalid-well');
             });
         }
     }
@@ -247,6 +249,7 @@ $(document).ready(function () {
 
         $('.plate-well').click(function() {
             var id = this.id;
+            var well_id = '#' + id;
             // Check if qc mode is checked and if there is a readout value
             if ($('#qc_mode').prop('checked') && $('#' + id + ' .value')[0]) {
                 // Get the current selection
@@ -273,10 +276,12 @@ $(document).ready(function () {
                     $('#' + invalid_id).remove();
                     $(this).removeClass('invalid-well');
 
-                    invalid[current_selection][current_time] = _.without(invalid[current_selection][current_time], id);
+                    invalid[current_selection][current_time] = _.without(invalid[current_selection][current_time], '#' + id);
+                    // THIS MAY CAUSE ISSUES, INVESTIGATE
+                    build_heatmap(assay_feature_values);
                 }
                 else {
-                    set_invalid(id, this, current_selection, current_time);
+                    set_invalid(id, well_id, current_selection, current_time);
 //                    $(this)
 //                        .addClass('invalid-well')
 //                        .append($('<input>')
@@ -424,7 +429,6 @@ $(document).ready(function () {
         }
     }
 
-    // TODO CHANGE SUCH THAT {{ASSAY NAME}} IS SELECTOR TEXT AND ASSAY_FEATURE_PAIR IS VALUE
     function heatmap_options(pairs, times) {
         // Clear old features
         assay_select.empty();
@@ -469,11 +473,44 @@ $(document).ready(function () {
         assay_select.trigger('change');
     }
 
+    function apply_heatmap(current_assay_feature) {
+        // Use heatmaps to get the respective colors
+        var well_colors = heatmaps[current_assay_feature];
+
+        if (well_colors) {
+            $.each(well_colors, function (well, color) {
+                $(well).css('background-color', color);
+            });
+
+            $.each(row_labels, function (row_index, row) {
+                $.each(column_labels, function (col_index, col) {
+                    var well = '#' + row + '_' + col;
+                    if (!well_colors[well]) {
+                        $(well).css('background-color', '#606060');
+                    }
+                })
+            });
+        }
+    }
+
     function build_heatmap(assay_feature_values) {
         // For each feature
         $.each(assay_feature_values, function(pair, values) {
-            // Start the heatmap for this assay feature pair
+            // Start the heatmap for this assay feature (class) pair
             heatmaps[pair] = {};
+
+            var current_selection = pair.split('_').slice(0, -1).join('_');
+            var current_time = pair.split('_').slice(-1).join('_');
+            var current_invalid_wells = [];
+
+            if (invalid[current_selection]) {
+                current_invalid_wells = invalid[current_selection][current_time];
+            }
+
+            // Exclude invalidated wells from values
+            //console.log(values);
+            //console.log(_.omit(values, function(value, key, object) {return _.contains(current_invalid_wells, key);}));
+            values = _.omit(values, function(value, key, object) {return _.contains(current_invalid_wells, key);});
 
             // Get the values list
             // Be sure to exclude null values
@@ -496,6 +533,12 @@ $(document).ready(function () {
                 heatmaps[pair][well] = value ? color_scale(value) : '#606060';
             });
         });
+
+        // If build_heatmap is being called due to a change in invalid
+        if (assay_select.val()) {
+            var current_assay_feature = assay_select.val() + '_' + time_select.val();
+            apply_heatmap(current_assay_feature);
+        }
     }
 
     var get_text = function (readFile) {
@@ -1034,23 +1077,7 @@ $(document).ready(function () {
 
         // console.log(heatmaps);
 
-        // Use heatmaps to get the respective colors
-        var well_colors = heatmaps[current_assay_feature];
-
-        if (well_colors) {
-            $.each(well_colors, function (well, color) {
-                $(well).css('background-color', color);
-            });
-
-            $.each(row_labels, function (row_index, row) {
-                $.each(column_labels, function (col_index, col) {
-                    var well = '#' + row + '_' + col;
-                    if (!well_colors[well]) {
-                        $(well).css('background-color', '#606060');
-                    }
-                })
-            });
-        }
+        apply_heatmap(current_assay_feature);
 
         // Show this feature's values
         $('.' + current_assay_feature).show();
