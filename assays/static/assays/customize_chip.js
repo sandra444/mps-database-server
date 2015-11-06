@@ -1,5 +1,13 @@
 $(document).ready(function () {
 
+    // Add commas to number
+    // Special thanks to stack overflow
+    function number_with_commas(x) {
+        var parts = x.toString().split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return parts.join(".");
+    }
+
     // Function to repeat a string num number of times
     function repeat(str, num) {
         return (new Array(num+1)).join(str);
@@ -165,7 +173,7 @@ $(document).ready(function () {
 
             // Add every value (excluding the QC)
             for (var j=0; j<6; j++) {
-                table += "<th>" + line[j] + "</th>";
+                table += "<th>" + number_with_commas(line[j]) + "</th>";
             }
 
             // Just add text if this is a header row for QC OR if this row is invalid
