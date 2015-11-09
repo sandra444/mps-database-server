@@ -8,11 +8,20 @@
 {% block content %}
 
     <div class="padded-bottom">
-        <legend><h1>{{ title }}    <a href="/assays/organchipstudy/add" class="btn btn-success" role="button">Add Study</a></h1></legend>
+        <legend>
+            <h2 class="text-center">
+                {{ title }}
+            </h2>
+        </legend>
+
+        <div class="row text-center">
+            <a href="/assays/organchipstudy/add" class="btn btn-lg btn-success" role="button">Add Study</a>
+        </div>
 
         <table hidden id="studies" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Study ID</th>
                     <th>Study Types</th>
                     <th>Start Date</th>
@@ -24,6 +33,7 @@
 
             <tfoot>
                 <tr>
+                    <th>View/Edit</th>
                     <th>Study ID</th>
                     <th>Study Types</th>
                     <th>Start Date</th>
@@ -36,7 +46,8 @@
             <tbody>
             {% for study in object_list %}
                 <tr class="compound" id={{ study.id }} name={{ study.id }}>
-                    <td><a href="/assays/{{ study.id }}">{{ study.assay_run_id }}</a></td>
+                    <td><a class="btn btn-primary" href="/assays/{{ study.id }}">View/Edit</a></td>
+                    <td>{{ study.assay_run_id }}</td>
                     <td>{{ study.study_types }}</td>
                     <td>{{ study.start_date|date:"M d, Y" }}</td>
                     <td>{{ study.description }}</td>

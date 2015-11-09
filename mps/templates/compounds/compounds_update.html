@@ -14,10 +14,27 @@
     {{ formset_summary.management_form }}
     {{ formset_property.management_form }}
     <h1>
-        Edit {{ object }} Summaries and Additional Properties
-
-        <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+        Edit <em>{{ object }}</em>
+        <br>
+        Summaries and Additional Properties
+{#        <br>#}
+{#        <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
     </h1>
+
+    {% include "submit.html" %}
+
+    {# Note that this page does not include 'errors.html,' it is a special exception #}
+    {% if formset_summary.errors or formset_property.errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            Submission Failed: Please See Errors Below
+            <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+        </div>
+    {% endif %}
+
+    {# Passing update here is a contrived way to make tracking display #}
+    {% include 'tracking.html' with update='y' %}
 
     <legend>Additional Properties</legend>
     {% if formset_property.errors %}

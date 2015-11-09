@@ -11,6 +11,10 @@ $(document).ready(function() {
                 "targets": [4],
                 "visible": false,
                 "searchable": true
+            },
+            {
+                "width": "10%",
+                "targets": [0]
             }
         ],
         "iDisplayLength": 25

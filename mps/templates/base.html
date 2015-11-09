@@ -117,7 +117,7 @@
                   <li><a href="/assays/studyconfiguration">Study Configurations</a></li>
                   <li><a href="/assays/assaylayout">Assay Layouts</a></li>
                   <li class="dropdown-submenu">
-                    <a href="#">Chips & Plates <span class="caret"></span></a>
+                    <a href="#">Chips &amp; Plates <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                       <li class="dropdown-submenu">
                         <a href="#">Chips <span class="caret"></span></a>
@@ -158,10 +158,12 @@
                   <ul class="dropdown-menu" role="menu">
                       <li><a href="/cellsamples/cellsample/">View Cell Samples</a></li>
                       <li><a href="/cellsamples/celltype/">View Cell Types</a></li>
+                      <li><a href="/cellsamples/cellsubtype/">View Cell Subtypes</a></li>
                       <li class="divider"></li>
                       <li class="dropdown-header">Requires Permission</li>
                       <li><a href="/cellsamples/cellsample/add">Add Cell Sample</a></li>
                       <li><a href="/cellsamples/celltype/add">Add Cell Type</a></li>
+                      <li><a href="/cellsamples/cellsubtype/add">Add Cell Subtypes</a></li>
                   </ul>
               </li>
               <li title="Analyze bioactivity data" class="dropdown">
@@ -193,10 +195,11 @@
 
     <div id="page">
 
-    <div id="sidebar">
-        {% block sidebar %}
-        {% endblock %}
-    </div>
+    {# Have yet to use sidebar #}
+{#    <div id="sidebar">#}
+{#        {% block sidebar %}#}
+{#        {% endblock %}#}
+{#    </div>#}
 
     {# For most elements #}
     <div id="content" class="container">
@@ -222,7 +225,7 @@
 
     </div>
 
-    <div class="container hidden-print">
+    <div id="footer" class="container hidden-print">
         <footer>
             <hr>
             <div class="row">

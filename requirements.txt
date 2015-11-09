@@ -66,3 +66,7 @@ django-contrib-comments
 #Using whoosh for now, may switch to a more sophisticated search engine later
 whoosh
 django-haystack
+# Ultrajson appears to outperform its competitors
+ujson
+# xlrd for reading excel files
+xlrd

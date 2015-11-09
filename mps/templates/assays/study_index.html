@@ -5,7 +5,7 @@
 
     <div class="padded-bottom">
         <div class="well">
-            <h1 align="center">
+            <h1 class="text-center">
                 Study: {{ object }}
                 <br>
                 <a href="update" class="btn btn-primary" role="button">Edit This Study</a>
@@ -14,7 +14,9 @@
         </div>
 
         <legend>
-            <h2>Setups
+            <h2>
+                Setups
+                <br>
                 <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Chip Setup</a>
                 <a href="assayplatesetup/add" class="btn btn-success" role="button">Add Plate Setup</a>
             </h2>
@@ -116,30 +118,37 @@
         </div>
         {% endif %}
 
-        <legend><h2>Readouts
-            {% if setups.count == 0 or setups.count == readouts.count %}
-                <div hidden id="readout_alert" class="alert alert-warning" role="alert">
-                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                    <span class="sr-only">Warning:</span>
-                    You must add at least one chip setup before adding a chip readout.
-                </div>
-                <a class="btn btn-warning" role="button" onClick="$('#readout_alert').removeProp('hidden');">Add Chip Readout</a>
-            {% else %}
-                <a href="assaychipreadout/add" class="btn btn-success" role="button">Add Chip Readout</a>
-            {% endif %}
+        <legend>
+            <h2>
+                Readouts
+                <br>
+                {% if setups.count == 0 or setups.count == readouts.count %}
+                    <div hidden id="readout_alert" class="alert alert-warning" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Warning:</span>
+                        You must add at least one chip setup before adding a chip readout.
+                    </div>
+                    <a class="btn btn-warning" role="button" onClick="$('#readout_alert').removeProp('hidden');">Add Chip Readout</a>
+                {% else %}
+                    <a href="assaychipreadout/add" class="btn btn-success" role="button">Add Chip Readout</a>
+                {% endif %}
 
-            {% if plate_setups.count == 0 or plate_setups.count == plate_readouts.count %}
-                <div hidden id="plate_readout_alert" class="alert alert-warning" role="alert">
-                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                    <span class="sr-only">Warning:</span>
-                    You must add at least one plate setup before adding a plate readout.
-                </div>
-                <a class="btn btn-warning" role="button" onClick="$('#plate_readout_alert').removeProp('hidden');">Add Plate Readout</a>
-            {% else %}
-                <a href="assayplatereadout/add" class="btn btn-success" role="button">Add Plate Readout</a>
-            {% endif %}
+                {% if plate_setups.count == 0 or plate_setups.count == plate_readouts.count %}
+                    <div hidden id="plate_readout_alert" class="alert alert-warning" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Warning:</span>
+                        You must add at least one plate setup before adding a plate readout.
+                    </div>
+                    <a class="btn btn-warning" role="button" onClick="$('#plate_readout_alert').removeProp('hidden');">Add Plate Readout</a>
+                {% else %}
+                    <a href="assayplatereadout/add" class="btn btn-success" role="button">Add Plate Readout</a>
+                {% endif %}
 
-        </h2></legend>
+                {% if readouts.count != 0 or plate_readouts.count != 0 %}
+                    <a href="bulk" class="btn btn-success" role="button">Upload Excel File of Readout Data</a>
+                {% endif %}
+            </h2>
+        </legend>
 
         {% if readouts %}
         <table id="readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">
@@ -241,31 +250,34 @@
         </div>
         {% endif %}
 
-        <legend><h2>Results
-            {# Later should add condition for when not enough readouts or setups #}
-            {% if readouts.count == 0 or number_of_results == readouts.count %}
-                <div hidden id="result_alert" class="alert alert-warning" role="alert">
-                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                    <span class="sr-only">Warning:</span>
-                    You must add at least one chip readout before adding a chip result.
-                </div>
-                <a class="btn btn-warning" role="button" onClick="$('#result_alert').removeProp('hidden');">Add Chip Result</a>
-            {% else %}
-                <a href="assaychiptestresult/add" class="btn btn-success" role="button">Add Chip Result</a>
-            {% endif %}
+        <legend>
+            <h2>
+                Results
+                <br>
+                {# Later should add condition for when not enough readouts or setups #}
+                {% if readouts.count == 0 or number_of_results == readouts.count %}
+                    <div hidden id="result_alert" class="alert alert-warning" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Warning:</span>
+                        You must add at least one chip readout before adding a chip result.
+                    </div>
+                    <a class="btn btn-warning" role="button" onClick="$('#result_alert').removeProp('hidden');">Add Chip Result</a>
+                {% else %}
+                    <a href="assaychiptestresult/add" class="btn btn-success" role="button">Add Chip Result</a>
+                {% endif %}
 
-            {% if plate_readouts.count == 0 or number_of_plate_results == plate_readouts.count %}
-                <div hidden id="plate_result_alert" class="alert alert-warning" role="alert">
-                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                    <span class="sr-only">Warning:</span>
-                    You must add at least one plate readout before adding a plate result.
-                </div>
-                <a class="btn btn-warning" role="button" onClick="$('#plate_result_alert').removeProp('hidden');">Add Plate Result</a>
-            {% else %}
-                <a href="assayplatetestresult/add" class="btn btn-success" role="button">Add Plate Result</a>
-            {% endif %}
-
-        </h2></legend>
+                {% if plate_readouts.count == 0 or number_of_plate_results == plate_readouts.count %}
+                    <div hidden id="plate_result_alert" class="alert alert-warning" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Warning:</span>
+                        You must add at least one plate readout before adding a plate result.
+                    </div>
+                    <a class="btn btn-warning" role="button" onClick="$('#plate_result_alert').removeProp('hidden');">Add Plate Result</a>
+                {% else %}
+                    <a href="assayplatetestresult/add" class="btn btn-success" role="button">Add Plate Result</a>
+                {% endif %}
+            </h2>
+        </legend>
 
         {% if results %}
         <table id="results" class="display table table-striped table-hover" cellspacing="0" width="100%">
@@ -339,7 +351,7 @@
                     <th>Plate Test Results ID</th>
                     <th>Plate Setup</th>
                     <th>Plate Readout ID</th>
-                    <th>Assay</th>
+                    <th>Assay &amp; Feature</th>
                     <th>Result</th>
                     <th>Result Function</th>
                     <th>Result Type</th>

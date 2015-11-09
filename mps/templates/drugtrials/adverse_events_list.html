@@ -8,7 +8,11 @@
 {% block content %}
 
     <div class="padded-bottom">
-        <h2 align="center">Adverse Events</h2>
+        <legend>
+            <h2 class="text-center">
+                Adverse Events
+            </h2>
+        </legend>
 
         <table hidden id="adverse_events" class="display" cellspacing="0" width="100%">
             <thead>
@@ -37,7 +41,7 @@
             {% for adverse_event in object_list %}
                 <tr class="adverse_event" id={{ adverse_event.id }}>
                     <td><a class="btn btn-primary" href="{{ adverse_event.compound.id }}">View</a></td>
-                    <td><a href="{{ adverse_event.compound.id }}">{{ adverse_event.compound.compound }}</a></td>
+                    <td><a href="/compounds/{{ adverse_event.compound.compound.id }}">{{ adverse_event.compound.compound }}</a></td>
                     <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
                     <td>{{ adverse_event.frequency }}</td>
                     <td>{{ adverse_event.event.organ|default:"" }}</td>

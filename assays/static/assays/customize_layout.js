@@ -181,7 +181,9 @@ $(document).ready(function () {
                         .attr('id', stamp)
                         .text(text)
                         .click(function () {
-                            $(this).remove();
+                            if(confirm('Are you sure you want to remove this time point?\n' + $(this).text())) {
+                                $(this).remove();
+                            }
                         })
                         .append($('<input>')
                             .attr('type', 'hidden')
@@ -205,7 +207,9 @@ $(document).ready(function () {
                             .text(text)
                             .attr('compound', compound.id)
                             .click(function () {
-                                $(this).remove();
+                                if(confirm('Are you sure you want to remove this compound?\n' + $(this).text())) {
+                                    $(this).remove();
+                                }
                             });
 
                         var info = '{"well":"' + well + '"' +
@@ -230,7 +234,10 @@ $(document).ready(function () {
                         .attr('id', stamp)
                         .text(data.label)
                         .click(function () {
-                            $(this).remove();
+                            // Confirm the user wants to remove first
+                            if(confirm('Are you sure you want to remove this label?\n' + $(this).text())) {
+                                $(this).remove();
+                            }
                         })
                         .append($('<input>')
                             .attr('type', 'hidden')
@@ -490,7 +497,9 @@ $(document).ready(function () {
                                 .text(text)
                                 .attr('compound',compound_id)
                                 .click(function () {
-                                    $(this).remove();
+                                    if(confirm('Are you sure you want to remove this compound?\n' + $(this).text())) {
+                                        $(this).remove();
+                                    }
                                 });
 
                             var info = '{"well":"' + tablecellid + '"' +
@@ -568,7 +577,9 @@ $(document).ready(function () {
                             .attr('id',stamp)
                             .text(text)
                             .click(function () {
-                                $(this).remove();
+                                if(confirm('Are you sure you want to remove this time point?\n' + $(this).text())) {
+                                    $(this).remove();
+                                }
                             });
 
                         li.append($('<input>')
@@ -599,7 +610,9 @@ $(document).ready(function () {
                             .attr('id',stamp)
                             .text(label)
                             .click(function () {
-                                $(this).remove();
+                                if(confirm('Are you sure you want to remove this label?\n' + $(this).text())) {
+                                    $(this).remove();
+                                }
                             });
 
                         li.append($('<input>')

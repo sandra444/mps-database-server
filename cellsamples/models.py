@@ -9,7 +9,7 @@ CellSamples Models
 from django.db import models
 
 # Use our own model base classes instead of models.Model
-from mps.base.models import LockableModel, RestrictedModel
+from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
 
 
 class Organ(LockableModel):
@@ -36,7 +36,8 @@ class CellType(LockableModel):
                                choices=SPECIESTYPE, default='Human', null=True,
                                blank=True)
 
-    cell_subtype = models.ForeignKey('CellSubtype')
+    # TODO TO BE REMOVED
+    cell_subtype = models.ForeignKey('CellSubtype', null=True, blank=True)
     organ = models.ForeignKey('Organ')
 
     class Meta(object):
@@ -44,14 +45,12 @@ class CellType(LockableModel):
         ordering = ('species', 'cell_type', 'cell_subtype',)
         unique_together = [('cell_type', 'species', 'cell_subtype')]
 
-
     def __unicode__(self):
-        return u'{} ({} {})'.format(self.cell_type,
-                                  self.cell_subtype,
-                                  self.species)
-
-    def cell_name(self):
-        return self.__unicode__()
+        return u'{} ({} {})'.format(
+            self.cell_type,
+            self.species,
+            self.organ
+        )
 
     # Will this be useful?
     def get_absolute_url(self):
@@ -61,9 +60,12 @@ class CellType(LockableModel):
 class CellSubtype(LockableModel):
     class Meta(object):
         ordering = ('cell_subtype', )
+
     cell_subtype = models.CharField(max_length=255, unique=True,
                                     help_text="Example: motor (type of neuron), "
                                               "skeletal (type of muscle), etc.")
+
+    cell_type = models.ForeignKey(CellType, null=True, blank=True)
 
     def __unicode__(self):
         return u'{}'.format(self.cell_subtype)
@@ -94,18 +96,24 @@ class Biosensor(LockableModel):
         return u'{}'.format(self.name)
 
 
-class CellSample(RestrictedModel):
+class CellSample(FlaggableModel):
 
     cell_type = models.ForeignKey('CellType')
+    cell_subtype = models.ForeignKey('CellSubtype')
+
+    # TODO TO BE REMOVED
+    # cell_source CONSIDERED UNINTUITIVE
     CELLSOURCETYPE = (
         ('Freshly isolated', 'Freshly isolated'),
         ('Cryopreserved', 'Cryopreserved'),
         ('Cultured', 'Cultured'),
         ('Other', 'Other'),
     )
+
     cell_source = models.CharField(max_length=20,
                                    choices=CELLSOURCETYPE, default='Primary',
                                    null=True, blank=True)
+
     notes = models.TextField(blank=True)
     receipt_date = models.DateField()
 
@@ -132,7 +140,7 @@ class CellSample(RestrictedModel):
     # ISOLATION
 
     isolation_datetime = models.DateField("Isolation",blank=True,
-                                              null=True)
+                                          null=True)
     isolation_method = models.CharField("Method", max_length=255,
                                         blank=True)
     isolation_notes = models.CharField("Notes", max_length=255,
@@ -141,15 +149,18 @@ class CellSample(RestrictedModel):
     # VIABILITY
 
     viable_count = models.FloatField(null=True, blank=True)
-    VIABLE_COUNT_UNIT_CHOICES = (
-        ('N', 'Not-specified'),
-        ('A', 'per area'),
-        ('V', 'per volume'),
-    )
-    viable_count_unit = models.CharField(max_length=1,
-                                         choices=VIABLE_COUNT_UNIT_CHOICES,
-                                         default=VIABLE_COUNT_UNIT_CHOICES[0][
-                                             0], blank=True)
+
+    # Removed: Deemed confusing/not useful
+    # VIABLE_COUNT_UNIT_CHOICES = (
+    #     ('N', 'Not-specified'),
+    #     ('A', 'per area'),
+    #     ('V', 'per volume'),
+    # )
+    # viable_count_unit = models.CharField(max_length=1,
+    #                                      choices=VIABLE_COUNT_UNIT_CHOICES,
+    #                                      default=VIABLE_COUNT_UNIT_CHOICES[0][
+    #                                          0], blank=True)
+
     percent_viability = models.FloatField(null=True, blank=True)
     cell_image = models.ImageField(upload_to='cellsamples',
                                    null=True, blank=True)
@@ -160,15 +171,17 @@ class CellSample(RestrictedModel):
     def __unicode__(self):
         if self.barcode:
             return u'{} {} ({}-{})'.format(
-                self.cell_source,
+                self.cell_subtype,
                 self.cell_type,
                 self.supplier,
-                self.barcode)
+                self.barcode
+            )
         else:
             return u'{} {} ({})'.format(
-                self.cell_source,
+                self.cell_subtype,
                 self.cell_type,
-                self.supplier)
+                self.supplier
+            )
 
     # Will this be useful?
     def get_absolute_url(self):

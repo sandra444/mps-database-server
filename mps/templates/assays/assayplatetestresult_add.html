@@ -18,23 +18,28 @@
         {% include 'review.html' %}
 
         <h1>
-            Edit Plate Test Results ID #{{ object.id }}
+            Edit Test Results for <em>{{ object.readout.setup }}</em>
     {% else %}
         <form class="form-horizontal" method="post" >
 
         <h1>
             Add Plate Test Results
     {% endif %}
+        <br>
         {% csrf_token %}
 
-            <button id="submit" type="submit" class="btn btn-primary">Submit</button>
-
-            {% if update %}
-                <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assayplatetestresult/{{ object.id }}/delete/">Delete</a>
-            {% endif %}
-
-            {% include 'flag.html'%}
+{#            <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
+{##}
+{#            {% if update %}#}
+{#                <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assayplatetestresult/{{ object.id }}/delete/">Delete</a>#}
+{#            {% endif %}#}
+{##}
+{#            {% include 'flag.html'%}#}
         </h1>
+
+        {% include "submit.html" with flag="y" %}
+
+        {% include 'errors.html' %}
 
         {% include 'tracking.html' %}
 
@@ -94,7 +99,7 @@
         <table class="table table-striped results" id="assayplateresult_set-group" name="inlines">
             <thead>
                 <tr>
-                    <th>Assay</th>
+                    <th>Assay &amp; Feature</th>
                     <th>Result</th>
                     <th>Function</th>
                     <th>Measure</th>

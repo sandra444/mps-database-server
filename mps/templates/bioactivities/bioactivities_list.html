@@ -12,21 +12,23 @@
             </div>
         </div>
 
-        <h2 align="center">Bioactivities
+        <legend>
+            <h2 class="text-center">
+                Bioactivities
 
-            {% if compound %}
-            where compound contains "{{ compound }}"
-            {% endif %}
+                {% if compound %}
+                where compound contains "{{ compound }}"
+                {% endif %}
 
-            {% if target %}
-            where target contains "{{ target }}"
-            {% endif %}
+                {% if target %}
+                where target contains "{{ target }}"
+                {% endif %}
 
-            {% if name %}
-            where name contains "{{ name }}"
-            {% endif %}
-
-        </h2>
+                {% if name %}
+                where name contains "{{ name }}"
+                {% endif %}
+            </h2>
+        </legend>
 
         <table hidden id="bioactivities" class="display" cellspacing="0" width="100%">
             <thead>

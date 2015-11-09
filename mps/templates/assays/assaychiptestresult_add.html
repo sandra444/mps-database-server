@@ -18,23 +18,28 @@
         {% include 'review.html' %}
 
         <h1>
-            Edit Chip Test Results ID #{{ object.id }}
+            Edit Test Results for <em>Chip-{{ object.chip_readout.chip_setup.assay_chip_id }}</em>
     {% else %}
         <form class="form-horizontal" method="post" >
 
         <h1>
             Add Test Results
     {% endif %}
+        <br>
         {% csrf_token %}
 
-            <button id="submit" type="submit" class="btn btn-primary">Submit</button>
-
-            {% if update %}
-                <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assaychiptestresult/{{ object.id }}/delete/">Delete</a>
-            {% endif %}
-
-            {% include 'flag.html'%}
+{#            <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
+{##}
+{#            {% if update %}#}
+{#                <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assaychiptestresult/{{ object.id }}/delete/">Delete</a>#}
+{#            {% endif %}#}
+{##}
+{#            {% include 'flag.html'%}#}
         </h1>
+
+        {% include "submit.html" with flag="y" %}
+
+        {% include 'errors.html' %}
 
         {% include 'tracking.html' %}
 

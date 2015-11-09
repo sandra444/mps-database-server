@@ -2,7 +2,7 @@ import csv
 
 from django.contrib import admin
 from django import forms
-from assays.forms import StudyConfigurationForm, AssayChipReadoutInlineFormset, AssayPlateReadoutInlineFormset, label_to_number
+from assays.forms import StudyConfigurationForm, AssayChipReadoutInlineFormset, AssayPlateReadoutInlineFormset, label_to_number, process_readout_value
 from django.http import HttpResponseRedirect
 
 from assays.models import *
@@ -237,10 +237,10 @@ def save_assay_layout(request, obj, form, change):
 
             # Add new label info
             label_query_list.append((
-                   layout_id,
-                   val,
-                   row,
-                   column
+                layout_id,
+                val,
+                row,
+                column
             ))
 
         # Types
@@ -284,6 +284,7 @@ class AssayLayoutAdmin(LockableAdmin):
                 'fields': (
                     ('layout_name',
                      'device',
+                     'standard',
                      'locked',
                     )
                 )
@@ -419,6 +420,7 @@ class AssayPlateSetupAdmin(LockableAdmin):
 
 admin.site.register(AssayPlateSetup, AssayPlateSetupAdmin)
 
+
 # As much as I like being certain, this code is somewhat baffling
 def removeExistingReadout(currentAssayReadout):
     AssayReadout.objects.filter(assay_device_readout=currentAssayReadout).delete()
@@ -431,7 +433,69 @@ def removeExistingReadout(currentAssayReadout):
     #         readout.delete()
     # return
 
+# TODO FINISH
+def get_qc_status_plate(form):
+    # Get QC status for each line
+    qc_status = {}
 
+    for key, val in form.data.iteritems():
+        # If this is a QC input
+        if key.startswith('{') and key.endswith('}'):
+            # Evaluate the key
+            values = json.loads(key)
+            row = unicode(values.get('row'))
+            col = unicode(values.get('column'))
+            # Be sure to convert time to a float
+            time = float(values.get('time'))
+            # Assay needs to be case insensitive
+            assay = values.get('assay').upper()
+            feature = values.get('feature')
+            # Combine values in a tuple for index
+            index = (row, col, time, assay, feature)
+            # Just make value X for now (isn't even used)
+            value = 'X'
+            qc_status.update({index: value})
+
+    return qc_status
+
+@transaction.atomic
+def modify_qc_status_plate(current_plate_readout, form):
+    # Get the readouts
+    readouts = AssayReadout.objects.filter(
+        assay_device_readout=current_plate_readout
+    ).prefetch_related(
+        'assay'
+    ).select_related(
+        'assay__assay_id'
+    )
+
+    # Get QC status for each line
+    qc_status = get_qc_status_plate(form)
+
+    for readout in readouts:
+        index_long = (
+            readout.row,
+            readout.column,
+            readout.elapsed_time,
+            readout.assay.assay_id.assay_name.upper(),
+            readout.assay.feature
+        )
+        index_short = (
+            readout.row,
+            readout.column,
+            readout.elapsed_time,
+            readout.assay.assay_id.assay_short_name.upper(),
+            readout.assay.feature
+        )
+        if index_long in qc_status or index_short in qc_status:
+            readout.quality = 'X'
+            readout.save()
+        # If the quality marker has been removed
+        elif index_long not in qc_status and index_short not in qc_status and readout.quality:
+            readout.quality = u''
+            readout.save()
+
+# TODO REVIEW
 # Rows are currenly numeric, not alphabetical, when stored in the database
 def parseReadoutCSV(currentAssayReadout, file, upload_type):
     removeExistingReadout(currentAssayReadout)
@@ -439,8 +503,8 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
     cursor = connection.cursor()
 
     query = ''' INSERT INTO "assays_assayreadout"
-          ("assay_device_readout_id", "assay_id", "row", "column", "value", "elapsed_time")
-          VALUES (%s, %s, %s, %s, %s, %s)'''
+          ("assay_device_readout_id", "assay_id", "row", "column", "value", "elapsed_time", "quality")
+          VALUES (%s, %s, %s, %s, %s, %s, %s)'''
 
     query_list = []
 
@@ -449,7 +513,15 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
 
-    assays = dict((o.feature, o.id) for o in AssayPlateReadoutAssay.objects.filter(readout_id=currentAssayReadout).only('feature'))
+    assays = {}
+    for assay in AssayPlateReadoutAssay.objects.filter(readout_id=currentAssayReadout):
+        assay_name = assay.assay_id.assay_name.upper()
+        assay_short_name = assay.assay_id.assay_short_name.upper()
+        feature = assay.feature
+        id = assay.id
+
+        assays.update({(assay_name, feature): id})
+        assays.update({(assay_short_name, feature): id})
 
     if upload_type == 'Block':
         # Current assay
@@ -469,15 +541,19 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                 continue
 
             # If this line is a header
-            # Headers should look like: FEATURE, {{FEATURE}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
-            if line[0].lower().strip() == 'feature':
-                feature = line[1]
+            # Headers should look like:
+            # ASSAY, {{ASSAY}}, FEATURE, {{FEATURE}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
+            if line[0].upper().strip() == 'ASSAY':
                 # Get the assay
-                assay = assays.get(feature)
+                assay_name = line[1].upper()
+                feature = line[3]
+
+                assay = assays.get((assay_name, feature))
+
                 number_of_assays += 1
 
-                if len(line) >= 8:
-                    time = line[5]
+                if len(line) >= 10:
+                    time = line[7]
 
                 else:
                     time = None
@@ -489,6 +565,10 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                     if not value:
                         continue
 
+                    processed_value = process_readout_value(value)
+                    value = processed_value.get('value')
+                    quality = processed_value.get('quality')
+
                     # MUST OFFSET ROW (due to multiple datablocks)
                     offset_row_id = (row_id-number_of_assays) % number_of_rows
 
@@ -499,7 +579,8 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                             offset_row_id,
                             column_id,
                             value,
-                            time
+                            time,
+                            quality,
                         ))
 
                     else:
@@ -510,7 +591,8 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                             offset_row_id,
                             column_id,
                             value,
-                            0
+                            0,
+                            quality,
                         ))
 
     # Otherwise if the upload is tabular
@@ -520,13 +602,9 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
         # The first line SHOULD be the header
         header = datalist[0]
 
-        if header[1].lower().strip() == 'time':
-            # IF TIME The features are the fourth column of the header onward
-            features = header[3:]
+        if 'TIME' in header[4].upper() and 'UNIT' in header[5].upper():
             time_specified = True
         else:
-            # IF NO TIME The features are the second column of the header onward
-            features = header[1:]
             time_specified = False
 
         # Exclude the header to get only the data points
@@ -535,6 +613,9 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
         for row_index, row in enumerate(data):
             # The well identifier given
             well = row[0]
+            assay_name = row[1].upper()
+            feature = row[2]
+
             # Split the well into alphabetical and numeric
             row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
 
@@ -545,31 +626,30 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
             column_label = int(column_label) - 1
 
             if time_specified:
-                # Values are the slice of the fourth item onward
-                values = row[3:]
-                time = row[1]
+                time = row[4]
+                value = row[6]
 
             else:
-                # Values are the slice of the second item onward
-                values = row[1:]
+                value = row[4]
                 time = 0
 
-            for column_index, value in enumerate(values):
-                feature = features[column_index]
-                # NOTE THAT BLANKS ARE CURRENTLY COMPLETELY EXCLUDED
-                if value != '':
-                    value = float(value)
+            # NOTE THAT BLANKS ARE CURRENTLY COMPLETELY EXCLUDED
+            if value != '':
+                processed_value = process_readout_value(value)
+                value = processed_value.get('value')
+                quality = processed_value.get('quality')
 
-                    assay = assays.get(feature)
+                assay = assays.get((assay_name, feature))
 
-                    query_list.append((
-                        currentAssayReadoutId,
-                        assay,
-                        row_label,
-                        column_label,
-                        value,
-                        time
-                    ))
+                query_list.append((
+                    currentAssayReadoutId,
+                    assay,
+                    row_label,
+                    column_label,
+                    value,
+                    time,
+                    quality
+                ))
 
     cursor.executemany(query,query_list)
 
@@ -717,6 +797,9 @@ class AssayPlateReadoutAdmin(LockableAdmin):
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
             removeExistingReadout(obj)
 
+        else:
+            modify_qc_status_plate(obj, form)
+
     # save_model not used; would save twice otherwise
     def save_model(self, request, obj, form, change):
         pass
@@ -735,9 +818,12 @@ def removeExistingChip(currentChipReadout):
     #         readout.delete()
     # return
 
-def get_qc_status(form):
+def get_qc_status_chip(form):
     # Get QC status for each line
     qc_status = {}
+
+    if not form:
+        return qc_status
 
     for key, val in form.data.iteritems():
         # If this is a QC input
@@ -750,14 +836,16 @@ def get_qc_status(form):
 
     return qc_status
 
+# NOTE: Tricky thing about chip QC is IT DEPENDS ON WHETHER IT IS BEING ADDED OR UPDATED
+# Why? The ORDER OF THE VALUES REFLECTS THE FILE WHEN ADDING, BUT IS SORTED IN UPDATE
 @transaction.atomic
-def modify_qc_status(current_chip_readout, form):
+def modify_qc_status_chip(current_chip_readout, form):
     # Get the readouts as they would appear on the front end
     # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
     readouts = AssayChipRawData.objects.filter(assay_chip_id=current_chip_readout).order_by('assay_id','elapsed_time')
 
     # Get QC status for each line
-    qc_status = get_qc_status(form)
+    qc_status = get_qc_status_chip(form)
 
     for index, readout in enumerate(readouts):
         readout.quality = qc_status.get(index)
@@ -768,7 +856,7 @@ def parseChipCSV(currentChipReadout, file, headers, form):
     removeExistingChip(currentChipReadout)
 
     # Get QC status for each line
-    qc_status = get_qc_status(form)
+    qc_status = get_qc_status_chip(form)
 
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
@@ -803,9 +891,9 @@ def parseChipCSV(currentChipReadout, file, headers, form):
 
         # PLEASE NOTE Database inputs, not the csv, have the final say
         # Get quality if possible
-        # quality = ''
-        # if len(rowValue) > 6:
-        #     quality = rowValue[6]
+        quality = u''
+        if len(rowValue) > 6:
+            quality = rowValue[6]
 
         # Get quality from added form inputs if possible
         if current_index in qc_status:
@@ -1124,7 +1212,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
         # Try to update QC status if no file
         else:
-            modify_qc_status(obj, form)
+            modify_qc_status_chip(obj, form)
 
         #Need to delete entries when a file is cleared
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
@@ -1349,7 +1437,6 @@ class AssayChipTestResultAdmin(LockableAdmin):
             }
         ),
     )
-    actions = ['update_fields']
     inlines = [AssayChipResultInline]
 
 admin.site.register(AssayChipTestResult, AssayChipTestResultAdmin)
@@ -1426,7 +1513,6 @@ class AssayPlateTestResultAdmin(LockableAdmin):
             }
         ),
     )
-    actions = ['update_fields']
 
 
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
@@ -1522,7 +1608,7 @@ class AssayRunFormAdmin(forms.ModelForm):
                     continue
                 if not AssayModel.objects.filter(assay_name=assay_name).exists():
                     raise forms.ValidationError(
-                                'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
+                        'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
                 assay = AssayModel.objects.get(assay_name=assay_name)
                 for i in range(3,len(readouts)):
                     val = line[i]
@@ -1565,20 +1651,21 @@ class AssayRunAdmin(LockableAdmin):
                 )
             }
         ),
-                (
+        (
             'Study ID (Autocreated from entries above)', {
                 'fields': (
                     'assay_run_id',
                 )
             }
         ),
-        (
-            'Study Data Upload', {
-                'fields': (
-                    'file',
-                )
-            }
-        ),
+        # Removed to avoid confusion
+        # (
+        #     'Study Data Upload', {
+        #         'fields': (
+        #             'file',
+        #         )
+        #     }
+        # ),
         (
             'Change Tracking', {
                 'fields': (

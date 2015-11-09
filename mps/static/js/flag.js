@@ -14,7 +14,8 @@ $(document).ready(function () {
             flag.addClass('btn-danger');
         }
         else {
-            flag.removeClass('btn-danger')
+            flag.removeClass('btn-danger');
+            reason_for_flag.hide('slow');
         }
     });
 

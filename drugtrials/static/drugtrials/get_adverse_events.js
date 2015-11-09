@@ -145,7 +145,8 @@ $(document).ready(function () {
                 mm = '0' + mm;
             }
 
-            var date2 = yyyy+mm+dd;
+            // Cast as a string by concatenating the empty string
+            var date2 = ''+yyyy+''+mm+''+dd;
 
             var url =  '';
 

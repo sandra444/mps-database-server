@@ -13,9 +13,13 @@
     {{ formset.management_form }}
     <h1>
         Add Compound
-
-        <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+{#        <br>#}
+{#        <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
     </h1>
+
+    {% include "submit.html" %}
+
+    {% include 'errors.html' %}
 
     <legend>General</legend>
 

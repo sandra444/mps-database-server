@@ -1,8 +1,9 @@
 $(document).ready(function() {
-    $('#studies').DataTable( {
+    $('#cellsubtypes').DataTable({
+        dom: 'T<"clear">lfrtip',
         "iDisplayLength": 50,
-        // Initially sort on start date (descending), not ID
-        "order": [ 3, "desc" ],
+        // Initially sort on organ
+        "order": [ 1, "asc" ],
         "aoColumnDefs": [
             {
                 "bSortable": false,

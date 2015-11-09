@@ -8,15 +8,22 @@
 {% block content %}
 
     <div class="padded-bottom">
-        <h2 align="center">Cell Types <a href="/cellsamples/celltype/add/" class="btn btn-success" role="button">Add Cell Type</a></h2>
+        <legend>
+            <h2 class="text-center">
+                Cell Types
+            </h2>
+        </legend>
+
+        <div class="row text-center">
+            <a href="/cellsamples/celltype/add/" class="btn btn-lg btn-success" role="button">Add Cell Type</a>
+        </div>
 
         <table hidden id="celltypes" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View/Edit</th>
-                    <th>Organ</th>
                     <th>Cell Type</th>
-                    <th>Cell Subtype</th>
+                    <th>Organ</th>
                     <th>Species</th>
                 </tr>
             </thead>
@@ -24,9 +31,8 @@
             <tfoot>
                 <tr>
                     <th>View/Edit</th>
-                    <th>Organ</th>
                     <th>Cell Type</th>
-                    <th>Cell Subtype</th>
+                    <th>Organ</th>
                     <th>Species</th>
                 </tr>
             </tfoot>
@@ -35,9 +41,8 @@
             {% for celltype in object_list %}
                 <tr class="cellsample" id={{ celltype.id }} name={{ celltype }}>
                     <td><a class="btn btn-primary" href="{{ celltype.id }}">View/Edit</a></td>
+                    <td>{{ celltype.cell_type }}</td>
                     <td>{{ celltype.organ }}</td>
-                    <td><a href="{{ celltype.id }}">{{ celltype.cell_type }}</a></td>
-                    <td>{{ celltype.cell_subtype }}</td>
                     <td>{{ celltype.species }}</td>
                 </tr>
             {% endfor %}

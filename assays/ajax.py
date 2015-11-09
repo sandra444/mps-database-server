@@ -120,6 +120,7 @@ def fetch_readout(request):
             'time_unit': time_unit,
             'value_unit': readout.assay.readout_unit.unit,
             'feature': readout.assay.feature,
+            'quality': readout.quality,
         })
 
     return HttpResponse(json.dumps(data),

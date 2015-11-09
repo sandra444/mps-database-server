@@ -1,5 +1,13 @@
 $(document).ready(function () {
 
+    // Add commas to number
+    // Special thanks to stack overflow
+    function number_with_commas(x) {
+        var parts = x.toString().split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return parts.join(".");
+    }
+
     // Function to repeat a string num number of times
     function repeat(str, num) {
         return (new Array(num+1)).join(str);
@@ -165,7 +173,7 @@ $(document).ready(function () {
 
             // Add every value (excluding the QC)
             for (var j=0; j<6; j++) {
-                table += "<th>" + line[j] + "</th>";
+                table += "<th>" + number_with_commas(line[j]) + "</th>";
             }
 
             // Just add text if this is a header row for QC OR if this row is invalid
@@ -177,7 +185,7 @@ $(document).ready(function () {
             // QC inputs NAME begin with "QC_"
             // QC input IDS are the row index (for plotting accurately)
             else {
-                table += "<th><input size='4' class='quality' id='" + i + "' name='QC_" + current_index + "' value='" + line[6] + "'></th>";
+                table += "<th><input size='4' class='quality text-danger' id='" + i + "' name='QC_" + current_index + "' value='" + line[6] + "'></th>";
                 // Increment the current index
                 current_index += 1;
             }

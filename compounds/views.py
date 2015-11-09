@@ -54,19 +54,39 @@ class CompoundsAdd(OneGroupRequiredMixin, CreateView):
     form_class = CompoundForm
     template_name = 'compounds/compounds_add.html'
 
-CompoundSummaryFormset = inlineformset_factory(Compound, CompoundSummary, formset=CompoundSummaryInlineFormset,
-                                              extra=1,
-                                              widgets={
-                                              'summary': forms.Textarea(attrs={'size': 500})
-                                              })
+    def form_valid(self, form):
+        if form.is_valid():
+            self.object = form.save()
+            self.object.modified_by = self.object.created_by = self.request.user
+            # Save Compound
+            self.object.save()
+            return redirect(self.object.get_absolute_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
 
-CompoundPropertyFormset = inlineformset_factory(Compound, CompoundProperty, formset=CompoundPropertyInlineFormset,
-                                              extra=1)
+CompoundSummaryFormset = inlineformset_factory(
+    Compound,
+    CompoundSummary,
+    formset=CompoundSummaryInlineFormset,
+    extra=1,
+    exclude=[],
+    widgets={
+        'summary': forms.Textarea(attrs={'size': 500})
+    }
+)
+
+CompoundPropertyFormset = inlineformset_factory(
+    Compound,
+    CompoundProperty,
+    formset=CompoundPropertyInlineFormset,
+    exclude=[],
+    extra=1
+)
+
 
 # DON'T BE DECEIVED! THE FRONT-END UPDATE HAS ACCESS ONLY TO THE SUMMARIES AND PROPERTIES
 class CompoundsUpdate(OneGroupRequiredMixin, UpdateView):
     model = Compound
-    # TODO ADD
     template_name = 'compounds/compounds_update.html'
 
     def get(self, request, *args, **kwargs):
@@ -86,7 +106,10 @@ class CompoundsUpdate(OneGroupRequiredMixin, UpdateView):
         if formset_summary.is_valid() and formset_property.is_valid():
             formset_summary.save()
             formset_property.save()
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            self.object.modified_by = self.request.user
+            # Save the Compound to keep tracking data
+            self.object.save()
+            return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(
             self.get_context_data(formset_summary=formset_summary,

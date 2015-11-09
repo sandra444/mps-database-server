@@ -51,6 +51,7 @@ urlpatterns = patterns('',
                        # BEGIN old-style API
                        url(r'^assays_ajax$', 'assays.ajax.ajax'),
                        url(r'^compounds_ajax$', 'compounds.ajax.ajax'),
+                       url(r'^cellsamples_ajax$', 'cellsamples.ajax.ajax'),
                        # END old-style API
 
                        url(r'^admin/doc/',

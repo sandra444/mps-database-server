@@ -8,7 +8,15 @@
 {% block content %}
 
     <div class="padded-bottom">
-        <h2 align="center">Cell Samples <a href="/cellsamples/cellsample/add/" class="btn btn-success" role="button">Add Cell Sample</a></h2>
+        <legend>
+            <h2 class="text-center">
+                Cell Samples
+            </h2>
+        </legend>
+
+        <div class="row text-center">
+            <a href="/cellsamples/cellsample/add/" class="btn btn-lg btn-success" role="button">Add Cell Sample</a>
+        </div>
 
         <table hidden id="cellsamples" class="display" cellspacing="0" width="100%">
             <thead>
@@ -18,10 +26,11 @@
                     <th>Receipt Date</th>
                     <th>Barcode/Lot #</th>
                     <th>Cell Type</th>
-                    <th>Cell Source</th>
+                    <th>Cell Subtype</th>
                     <th>Supplier</th>
                     <th>Patient</th>
                     <th>Group</th>
+                    <th>Review</th>
                 </tr>
             </thead>
 
@@ -32,10 +41,11 @@
                     <th>Receipt Date</th>
                     <th>Barcode/Lot #</th>
                     <th>Cell Type</th>
-                    <th>Cell Source</th>
+                    <th>Cell Subtype</th>
                     <th>Supplier</th>
                     <th>Patient</th>
                     <th>Group</th>
+                    <th>Review</th>
                 </tr>
             </tfoot>
 
@@ -48,8 +58,16 @@
                     {# Adding a link to this row converts it from date to HTML = Really, REALLY annoying #}
                     <td>{{ cellsample.receipt_date|date:"M d, Y" }}</td>
                     <td>{{ cellsample.barcode }}</td>
-                    <td><a href="/cellsamples/celltype/{{ cellsample.cell_type.id }}">{{ cellsample.cell_type }}</a></td>
-                    <td>{{ cellsample.cell_source }}</td>
+                    <td>
+                        <a href="/cellsamples/celltype/{{ cellsample.cell_type.id }}">
+                            {{ cellsample.cell_type }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/cellsamples/cellsubtype/{{ cellsample.cell_subtype.id }}">
+                            {{ cellsample.cell_subtype }}
+                        </a>
+                    </td>
                     <td>{{ cellsample.supplier }}</td>
                     <td>
                         {% if cellsample.patient_age or cellsample.patient_gender != 'N' or cellsample.patient_condition %}
@@ -58,6 +76,14 @@
                         {% endif %}
                     </td>
                     <td>{{ cellsample.group }}</td>
+                    <td>
+                        {% if cellsample.signed_off_by %}
+                            <span title="This entry was reviewed by {{ cellsample.signed_off_by }} on {{ cellsample.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if cellsample.flagged %}
+                            <span title="This entry is flagged for review: '{{ cellsample.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>

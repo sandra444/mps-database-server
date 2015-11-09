@@ -99,7 +99,7 @@ class AssayModel(LockableModel):
                                  verbose_name='Test Type')
 
     def __unicode__(self):
-        return u'{0} ({1})'.format(self.assay_name, self.test_type)
+        return u'{0} ({1})'.format(self.assay_name, self.assay_short_name)
 
 
 # Assay layout is now a flaggable model
@@ -114,13 +114,21 @@ class AssayLayout(FlaggableModel):
 
     layout_name = models.CharField(max_length=200)
     device = models.ForeignKey(Microdevice)
+
+    # Specifies whether this is a standard (oft used layout)
+    standard = models.BooleanField(default=False)
+
     #base_layout = models.ForeignKey(AssayBaseLayout)
 
     def __unicode__(self):
         return self.layout_name
 
+    # TODO RENAME
     def get_absolute_url(self):
         return "/assays/assaylayout/"
+
+    def get_delete_url(self):
+        return '/assays/assaylayout/{}/delete/'.format(self.id)
 
 
 class AssayWellType(LockableModel):
@@ -190,6 +198,7 @@ class AssayWellCompound(models.Model):
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
 
+
 class AssayWellLabel(models.Model):
     """
     Arbitrary string label for PLATE wells
@@ -217,7 +226,7 @@ class AssayPlateCells(models.Model):
                                                choices=(('WE', 'cells / well'),
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
-    cell_passage = models.CharField(max_length=16,verbose_name='Passage#',
+    cell_passage = models.CharField(max_length=16, verbose_name='Passage#',
                                     blank=True, null=True)
 
 
@@ -248,8 +257,15 @@ class AssayPlateSetup(FlaggableModel):
     def __unicode__(self):
         return u'Plate-{}'.format(self.assay_plate_id)
 
+    # TODO RENAME
     def get_absolute_url(self):
         return "/assays/{}/".format(self.assay_run_id.id)
+
+    def get_clone_url(self):
+        return '/assays/{0}/assayplatesetup/add?clone={1}'.format(self.assay_run_id.id, self.id)
+
+    def get_delete_url(self):
+        return '/assays/assayplatesetup/{}/delete/'.format(self.id)
 
 class AssayReader(LockableModel):
     """
@@ -272,7 +288,10 @@ class AssayPlateReadoutAssay(models.Model):
     """
 
     class Meta(object):
-        unique_together = [('readout_id', 'assay_id')]
+        # Remove restriction that readout can only have one copy of an assay
+        # unique_together = [('readout_id', 'assay_id')]
+        # Assay-Feature pairs must be unique
+        unique_together = [('readout_id', 'assay_id', 'feature')]
 
     readout_id = models.ForeignKey('assays.AssayPlateReadout', verbose_name='Readout')
     assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True)
@@ -287,9 +306,8 @@ class AssayPlateReadoutAssay(models.Model):
     # For the moment, features will be just strings (this avoids potentially complex management)
     feature = models.CharField(max_length=150)
 
-
     def __unicode__(self):
-        return u'{}'.format(self.assay_id)
+        return u'{0}-{1}'.format(self.assay_id.assay_short_name, self.feature)
 
 
 class AssayReadout(models.Model):
@@ -305,6 +323,8 @@ class AssayReadout(models.Model):
     value = models.FloatField()
     elapsed_time = models.FloatField(default=0)
 
+    # Quality, if it is not the empty string, indicates that a readout is INVALID
+    quality = models.CharField(default='', max_length=10)
 
 #class ReadoutUnit(LockableModel):
 #    """
@@ -319,6 +339,11 @@ class AssayReadout(models.Model):
 #
 #    def __unicode__(self):
 #        return self.readout_unit
+
+
+# Get readout file location
+def plate_readout_file_location(instance, filename):
+    return '/'.join(['csv', str(instance.setup.assay_run_id_id), 'plate', filename])
 
 
 class AssayPlateReadout(FlaggableModel):
@@ -352,7 +377,7 @@ class AssayPlateReadout(FlaggableModel):
     notebook_page = models.IntegerField(blank=True, null=True)
     notes = models.CharField(max_length=2048, blank=True, null=True)
     scientist = models.CharField(max_length=100, blank=True, null=True)
-    file = models.FileField(upload_to='csv', verbose_name='Data File',
+    file = models.FileField(upload_to=plate_readout_file_location, verbose_name='Data File',
                             blank=True, null=True)
 
     def __unicode__(self):
@@ -360,6 +385,12 @@ class AssayPlateReadout(FlaggableModel):
 
     def get_absolute_url(self):
         return "/assays/{}/".format(self.setup.assay_run_id.id)
+
+    def get_clone_url(self):
+        return '/assays/{0}/assayplatereadout/add?clone={1}'.format(self.setup.assay_run_id.id, self.id)
+
+    def get_delete_url(self):
+        return '/assays/assayplatereadout/{}/delete/'.format(self.id)
 
 
 SEVERITY_SCORE = (
@@ -453,7 +484,7 @@ class AssayPlateTestResult(FlaggableModel):
         verbose_name = 'Plate Result'
 
     readout = models.ForeignKey('assays.AssayPlateReadout',
-                                        verbose_name='Plate ID/ Barcode')
+                                verbose_name='Plate ID/ Barcode')
     summary = models.TextField(default='', blank=True)
 
     def __unicode__(self):
@@ -461,6 +492,9 @@ class AssayPlateTestResult(FlaggableModel):
 
     def get_absolute_url(self):
         return "/assays/%i/" % self.readout.setup.assay_run_id.id
+
+    def get_delete_url(self):
+        return '/assays/assayplatetestresult/{}/delete/'.format(self.id)
 
 
 class StudyConfiguration(LockableModel):
@@ -473,7 +507,10 @@ class StudyConfiguration(LockableModel):
 
     # Length subject to change
     name = models.CharField(max_length=50)
-    study_format = models.CharField(max_length=11, choices=(('individual','Individual'),('integrated','Integrated'),))
+    study_format = models.CharField(
+        max_length=11,
+        choices=(('individual', 'Individual'), ('integrated', 'Integrated'),)
+    )
     media_composition = models.CharField(max_length=1000, blank=True, null=True)
     hardware_description = models.CharField(max_length=1000, blank=True, null=True)
     # Subject to removal
@@ -484,6 +521,7 @@ class StudyConfiguration(LockableModel):
 
     def get_absolute_url(self):
         return "/assays/studyconfiguration/"
+
 
 class StudyModel(models.Model):
     """
@@ -496,7 +534,7 @@ class StudyModel(models.Model):
     sequence_number = models.IntegerField()
     output = models.CharField(max_length=20, blank=True, null=True)
     # Subject to change
-    integration_mode = models.CharField(max_length=13, choices=(('0', 'Not Connected'),('1','Connected')))
+    integration_mode = models.CharField(max_length=13, choices=(('0', 'Not Connected'), ('1', 'Connected')))
 
 
 class AssayRun(RestrictedModel):
@@ -519,7 +557,7 @@ class AssayRun(RestrictedModel):
     cell_characterization = models.BooleanField(default=False)
     # Subject to change
     study_configuration = models.ForeignKey(StudyConfiguration, blank=True, null=True)
-    name = models.TextField(default='Study-01',verbose_name='Study Name',
+    name = models.TextField(default='Study-01', verbose_name='Study Name',
                             help_text='Name-###')
     start_date = models.DateField(help_text='YYYY-MM-DD')
     assay_run_id = models.TextField(unique=True, verbose_name='Study ID',
@@ -550,6 +588,9 @@ class AssayRun(RestrictedModel):
     def get_absolute_url(self):
         return "/assays/%i/" % self.id
 
+    def get_delete_url(self):
+        return '/assays/{}/delete/'.format(self.id)
+
 
 class AssayChipRawData(models.Model):
     """
@@ -569,7 +610,7 @@ class AssayChipRawData(models.Model):
     elapsed_time = models.FloatField(default=0)
 
     # This value will act as quality control, if it evaluates True then the value is considered invalid
-    quality  = models.CharField(max_length=20, default='')
+    quality = models.CharField(max_length=20, default='')
 
 
 class AssayChipCells(models.Model):
@@ -588,7 +629,7 @@ class AssayChipCells(models.Model):
                                                         ('CP', 'cells / chip'),
                                                         ('ML', 'cells / mL'),
                                                         ('MM', 'cells / mm^2')))
-    cell_passage = models.CharField(max_length=16,verbose_name='Passage#',
+    cell_passage = models.CharField(max_length=16, verbose_name='Passage#',
                                     blank=True, null=True)
 
 
@@ -600,9 +641,9 @@ class AssayChipSetup(FlaggableModel):
         verbose_name = 'Chip Setup'
         ordering = ('-assay_chip_id', 'assay_run_id', )
 
-    assay_run_id = models.ForeignKey(AssayRun, verbose_name = 'Study')
+    assay_run_id = models.ForeignKey(AssayRun, verbose_name='Study')
     setup_date = models.DateField(help_text='YYYY-MM-DD')
-    device = models.ForeignKey(OrganModel, verbose_name = 'Organ Model Name')
+    device = models.ForeignKey(OrganModel, verbose_name='Organ Model Name')
 
     variance = models.CharField(max_length=3000, verbose_name='Variance from Protocol', null=True, blank=True)
 
@@ -611,7 +652,7 @@ class AssayChipSetup(FlaggableModel):
     assay_chip_id = models.CharField(max_length=512, verbose_name='Chip ID/ Barcode')
 
     #Control => control, Compound => compound; Abbreviate? Capitalize?
-    chip_test_type = models.CharField(max_length=8, choices=(("control","Control"),("compound","Compound")))
+    chip_test_type = models.CharField(max_length=8, choices=(("control", "Control"), ("compound", "Compound")))
 
     compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
     concentration = models.FloatField(default=0, verbose_name='Conc.',
@@ -626,16 +667,24 @@ class AssayChipSetup(FlaggableModel):
     notes = models.CharField(max_length=2048, blank=True, null=True)
 
     def __unicode__(self):
-        if (self.compound):
-            return u'Chip-{}:{}({}{})'.format(self.assay_chip_id,
-                                        self.compound,
-                                        self.concentration,
-                                        self.unit)
+        if self.compound:
+            return u'Chip-{}:{}({}{})'.format(
+                self.assay_chip_id,
+                self.compound,
+                self.concentration,
+                self.unit
+            )
         else:
             return u'Chip-{}:Control'.format(self.assay_chip_id)
 
     def get_absolute_url(self):
         return "/assays/%i/" % self.assay_run_id.id
+
+    def get_clone_url(self):
+        return '/assays/{0}/assaychipsetup/add?clone={1}'.format(self.assay_run_id.id, self.id)
+
+    def get_delete_url(self):
+        return '/assays/assaychipsetup/{}/delete/'.format(self.id)
 
 object_types = (
     ('F', 'Field'), ('C', 'Colony'), ('M', 'Media'), ('X', 'Other')
@@ -653,14 +702,21 @@ class AssayChipReadoutAssay(models.Model):
     readout_id = models.ForeignKey('assays.AssayChipReadout', verbose_name='Readout')
     assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True)
     reader_id = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
-    object_type = models.CharField(max_length=6,
-                            choices=object_types,
-                            verbose_name='Object of Interest',
-                            default='F')
+    object_type = models.CharField(
+        max_length=6,
+        choices=object_types,
+        verbose_name='Object of Interest',
+        default='F'
+    )
     readout_unit = models.ForeignKey(PhysicalUnits)
 
     def __unicode__(self):
         return u'{}'.format(self.assay_id)
+
+
+# Get readout file location
+def chip_readout_file_location(instance, filename):
+    return '/'.join(['csv', str(instance.chip_setup.assay_run_id_id), 'chip', filename])
 
 
 class AssayChipReadout(FlaggableModel):
@@ -684,7 +740,7 @@ class AssayChipReadout(FlaggableModel):
     notebook_page = models.IntegerField(blank=True, null=True)
     notes = models.CharField(max_length=2048, blank=True, null=True)
     scientist = models.CharField(max_length=100, blank=True, null=True)
-    file = models.FileField(upload_to='csv', verbose_name='Data File',
+    file = models.FileField(upload_to=chip_readout_file_location, verbose_name='Data File',
                             blank=True, null=True, help_text='Green = Data from database;'
                                                              ' Red = Line that will not be read'
                                                              '; Gray = Reading with null value'
@@ -693,7 +749,13 @@ class AssayChipReadout(FlaggableModel):
     # Get a list of every assay for list view
     def assays(self):
         list_of_assays = []
-        assays = AssayChipReadoutAssay.objects.filter(readout_id=self.id).prefetch_related('assay_id','reader_id', 'readout_unit')
+        assays = AssayChipReadoutAssay.objects.filter(
+            readout_id=self.id
+        ).prefetch_related(
+            'assay_id',
+            'reader_id',
+            'readout_unit'
+        )
         for assay in assays:
             list_of_assays.append(str(assay))
         # Convert to unicode for consistency
@@ -704,6 +766,12 @@ class AssayChipReadout(FlaggableModel):
 
     def get_absolute_url(self):
         return "/assays/%i/" % self.chip_setup.assay_run_id.id
+
+    def get_clone_url(self):
+        return '/assays/{0}/assaychipreadout/add?clone={1}'.format(self.chip_setup.assay_run_id.id, self.id)
+
+    def get_delete_url(self):
+        return '/assays/assaychipreadout/{}/delete/'.format(self.id)
 
 
 class AssayChipTestResult(FlaggableModel):
@@ -755,6 +823,9 @@ class AssayChipTestResult(FlaggableModel):
 
     def get_absolute_url(self):
         return "/assays/%i/" % self.chip_readout.chip_setup.assay_run_id.id
+
+    def get_delete_url(self):
+        return '/assays/assaychiptestresult/{}/delete/'.format(self.id)
 
 
 class AssayChipResult(models.Model):
