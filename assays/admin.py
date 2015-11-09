@@ -460,8 +460,7 @@ def get_qc_status_plate(form):
 
 @transaction.atomic
 def modify_qc_status_plate(current_plate_readout, form):
-    # Get the readouts as they would appear on the front end
-    # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
+    # Get the readouts
     readouts = AssayReadout.objects.filter(
         assay_device_readout=current_plate_readout
     ).prefetch_related(

@@ -84,11 +84,15 @@ admin.site.register(Organ, OrganAdmin)
 
 class CellSubtypeAdmin(LockableAdmin):
     save_on_top = True
+
+    list_display = ('cell_subtype', 'cell_type')
+
     fieldsets = (
         (
             None, {
                 'fields': (
                     'cell_subtype',
+                    'cell_type'
                 )
             }
         ),
