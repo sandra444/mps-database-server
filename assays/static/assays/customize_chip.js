@@ -230,7 +230,7 @@ $(document).ready(function () {
             var value = line[4];
             var value_unit = line[5];
 
-            var quality = line[6];
+            var quality = $.trim(line[6]);
 
             // Crash if the time or value are not numeric
             if (isNaN(time) || isNaN(value)) {
