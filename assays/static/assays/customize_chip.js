@@ -303,13 +303,18 @@ $(document).ready(function () {
         }
     };
 
+    // Open and then close dialog so it doesn't get placed in window itself
+    var dialog = $('#dialog');
+    dialog.dialog();
+    dialog.dialog('close');
+    dialog.removeProp('hidden');
+
     // The data in question
     var lines = [];
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
     var id = getReadoutValue();
-
 
     // Indicates whether the data exists in the database or not
     var exist = false;
@@ -322,11 +327,11 @@ $(document).ready(function () {
     }
 
     var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
-            "<tr style='background: #FF2400'>" + "<th>Chip ID</th><th>[Chip ID]</th>" + repeat('<th><br><br></th>',5) + "</tr>" +
-            "<tr style='background: #FF2400'>" + header + "</tr>" +
-            "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
-            "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
-            "</tbody></table>";
+        "<tr style='background: #FF2400'>" + "<th>Chip ID</th><th>[Chip ID]</th>" + repeat('<th><br><br></th>',5) + "</tr>" +
+        "<tr style='background: #FF2400'>" + header + "</tr>" +
+        "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
+        "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
+        "</tbody></table>";
 
     if ($('#assaychipreadoutassay_set-group')[0] != undefined) {
         $('<div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;min-width: 975px;overflow: hidden;">')
@@ -364,6 +369,14 @@ $(document).ready(function () {
         date.datepicker("option", "dateFormat", "yy-mm-dd");
         date.datepicker("setDate", curr_date);
     }
+
+    // Clicking the help button will spawn the help dialog
+    $('#help_button').click(function() {
+        $("#dialog").dialog({
+            width: 900,
+            height: 500
+        });
+    });
 });
 
 

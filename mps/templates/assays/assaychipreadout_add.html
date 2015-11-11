@@ -5,8 +5,8 @@
     <script src="{% static "js/inline_add.js" %}"></script>
     {# Is this necessary? #}
     <script src="{% static "js/cookies.js" %}"></script>
-    <script src="{% static "assays/customize_chip.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "assays/customize_chip.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
 {% endblock %}
 
@@ -42,7 +42,7 @@
 {#        {% include 'flag.html'%}#}
     </h1>
 
-    {% include "submit.html" with flag="y" clone="y" %}
+    {% include "submit.html" with flag="y" clone="y" help="y" %}
 
     {% include 'errors.html' %}
 
@@ -177,19 +177,6 @@
         <label for="file" class="col-sm-2 control-label">.csv Data File</label>
         <div class="col-sm-10">
           {{ form.file }}
-            <p>
-                <b>***Uploading overwrites old data***</b>
-                <br>
-                Rows in <span style="color: #FF0000">red</span> will be excluded.
-                Rows in <span style="color: #00FF00">green</span> are in the database.
-                <br>
-                File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays.
-                <br>
-                <b>Blank QC = Pass</b> &amp; <b>Non-Blank QC = Fail</b>
-                <br>
-                QC Status can be changed in the table below.
-                After changing a QC value, click away or hit tab to see the effect.
-            </p>
         </div>
     </div>
 
@@ -266,5 +253,106 @@
         </tbody>
     </table>
 </form>
+
+<div hidden id="dialog" title="Chip Readout Help">
+    <h4>Uploading Data</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            <h4>The format for chip uploads is as follows:</h4>
+            <table class="table table-bordered small" style="background-color: #F0FFFF;">
+                <thead>
+                    <tr class="active">
+                        <th>Chip ID</th>
+                        <th>[Chip ID]</th>
+                        <th></th><th></th><th></th><th></th><th></th>
+                    </tr>
+                    <tr class="active">
+                        <th>Time</th>
+                        <th>Time Unit</th>
+                        <th>Assay</th>
+                        <th>Object</th>
+                        <th>Value</th>
+                        <th>Value Unit</th>
+                        <th>QC Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>[Time]</td>
+                        <td>[Time Unit]</td>
+                        <td>[Assay]</td>
+                        <td>[Object]</td>
+                        <td>[Value]</td>
+                        <td>[Value Unit]</td>
+                        <td>[Leave Blank to Pass]</td>
+                    </tr>
+                    <tr>
+                        <td>[Time]</td>
+                        <td>[Time Unit]</td>
+                        <td>[Assay]</td>
+                        <td>[Object]</td>
+                        <td>[Value]</td>
+                        <td>[Value Unit]</td>
+                        <td>[Any Value in this Column Marks the Reading Invalid]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </li>
+        <li class="list-group-item">
+            File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays
+        </li>
+        <li class="list-group-item">
+            Table rows in <span style="color: #FF0000">red</span> will be excluded
+            while rows in <span style="color: #00FF00">green</span> are in the database
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                Uploading overwrites previous data
+            </b>
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                You will have to reselect the desired file after a failed submission
+            </b>
+        </li>
+    </ul>
+    <h4>Changing QC</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            QC Status can be changed in the table displayed after data upload
+        <li class="list-group-item">
+            To invalidate a reading, type <b><i>anything</i></b> into the corresponding QC status input
+        </li>
+        <li class="list-group-item">
+            After changing a QC value, <b>click away</b> or <b>hit tab</b> to see the effect on the plots
+        </li>
+    </ul>
+    <h4>Flagging for Review</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm" style="color:#337AB7">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            flags the current readout for review
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-warning" style="color:#FFFFFF">
+                Notes
+            </a>
+            brings up an input dialog where you can explain why this readout was flagged
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-danger" style="color:#FFFFFF">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            removes the flag from the current readout
+        </li>
+    </ul>
+</div>
 
 {% endblock %}
