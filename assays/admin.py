@@ -513,6 +513,9 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
 
+    # EXCLUDE THE HEADER
+    datalist = datalist[1:]
+
     assays = {}
     for assay in AssayPlateReadoutAssay.objects.filter(readout_id=currentAssayReadout):
         assay_name = assay.assay_id.assay_name.upper()

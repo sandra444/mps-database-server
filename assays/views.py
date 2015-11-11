@@ -2025,8 +2025,8 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
             excel_file = xlrd.open_workbook(file_contents=bulk_file)
 
-            # For the moment, just have headers be equal to one?
-            headers = 1
+            # For the moment, just have headers be equal to two?
+            headers = 2
             study = self.object
             study_id = str(self.object.id)
 
@@ -2084,7 +2084,8 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                 else:
                     readout = AssayPlateReadout.objects.get(
                         setup__assay_run_id=study,
-                        setup__assay_plate_id=setup)
+                        setup__assay_plate_id=setup
+                    )
 
                     upload_type = str(header[3]).upper()
 

@@ -588,13 +588,6 @@ $(document).ready(function () {
 
         all = null;
 
-        // Remove old values
-        $('.value').remove();
-        // Remove old invalid
-        $('.invalid').remove();
-        // Reset invalid
-        invalid = {};
-
         // Whether or not the upload should fail
         var failed = false;
         // Whether to read the file as tabular or block
@@ -606,7 +599,42 @@ $(document).ready(function () {
         // Get all values in a dict with features as keys
         assay_feature_values = {};
 
+        var file_header = lines[0];
+
+        if (file_header.length >= 4) {
+            var plate_or_chip = file_header[0].toUpperCase();
+            var plate_id = file_header[1];
+            // Not really used
+            var cell_that_says_type = file_header[2];
+            var file_upload_type = file_header[3].toUpperCase();
+        }
+
+        // End prematurely if the header is not given properly
+        else {
+            alert('File header is not properly formatted. Should be "Plate ID, <Plate Id>, Upload Type, <Block or Tabular>"');
+            $('#id_file').val('');
+            return;
+        }
+
+        // Fail if plate not specified in first cell
+        if (plate_or_chip.indexOf('PLATE') < 0) {
+            failed += 'specify_plate';
+        }
+
+        // Fail in plate ID not specified
+        if (!plate_id) {
+            failed += 'specify_plate';
+        }
+
+        // Exclude the file_header
+        lines = lines.slice(1);
+
         if (upload_type == 'Block') {
+            // Make sure the upload types match
+            if (file_upload_type.indexOf('BLOCK') < 0) {
+                failed += 'file_header_type';
+            }
+
             // Current assay
             var assay = undefined;
             // Current feature
@@ -729,6 +757,11 @@ $(document).ready(function () {
         // TODO PLEASE NOTE THAT THE TABULAR FORMAT (ESPECIALLY WITH TIME) IS SUBJECT TO CHANGE
         // Handle tabular data
         else {
+           // Make sure the upload types match
+            if (file_upload_type.indexOf('TAB') < 0) {
+                failed += 'file_header_type';
+            }
+
             // Empty lines are useless in tabular uploads, remove them
             lines = _.filter(lines, function(list) {
                 return _.some(list, function (val) {
@@ -837,43 +870,18 @@ $(document).ready(function () {
                         assay_feature_values[assay_feature_class] = {};
                         assay_feature_values[assay_feature_class][well_id] = parseFloat(value);
                     }
-
-//                    $.each(values, function (column_index, value) {
-//                        feature = unique_features[column_index];
-//
-//                        feature += '_' + time;
-//
-//                        // Prepend 'f' to avoid invalid class name; remove all invalid characters
-//                        var feature_class = 'f' + feature.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g, '');
-//
-//                        // If value is not a number
-//                        if (isNaN(value)) {
-//                            // Fail the file
-//                            failed += 'non-numeric';
-//                        }
-//
-//                        var readout = $('<p>')
-//                            .addClass('value ' + feature_class)
-//                            .text(number_with_commas(value));
-//
-//                        $(well_id).append(readout);
-//
-//                        // If feature not in assay_feature_values, add it
-//                        // Otherwise tack on the value
-//                        if (assay_feature_values[feature_class]) {
-//                            assay_feature_values[feature_class][well_id] = parseFloat(value);
-//                        }
-//                        else {
-//                            assay_feature_values[feature_class] = {};
-//                            assay_feature_values[feature_class][well_id] = parseFloat(value);
-//                        }
-//                    });
                 });
             }
         }
 
         // If the file upload has failed
         if (failed) {
+            if (failed.indexOf('specify_plate') > -1) {
+                alert('The file header must have the word "Plate" in the first cell and specify the Plate ID in the second cell');
+            }
+            if (failed.indexOf('file_header_type') > -1) {
+                alert('The file header specifies a type that differs with the input "Upload Type"');
+            }
             if (failed.indexOf('block') > -1) {
                 alert('It looks like this data has a block header; try changing "tabular" to "block."');
             }
@@ -891,6 +899,13 @@ $(document).ready(function () {
 
         // If the file upload has succeeded, show the feature binding dialog and the heatmap dialog
         else {
+            // Remove old values
+            $('.value').remove();
+            // Remove old invalid
+            $('.invalid').remove();
+            // Reset invalid
+            invalid = {};
+
             // Clear the binding table
             $('#binding_table').empty();
 

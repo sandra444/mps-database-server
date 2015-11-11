@@ -113,7 +113,7 @@ class AssayChipReadoutForm(CloneableForm):
             setups = setups | AssayChipSetup.objects.filter(pk=current)
         self.fields['chip_setup'].queryset = setups
 
-    headers = forms.CharField(required=True, initial=1)
+    headers = forms.CharField(required=True, initial=2)
 
     class Meta(object):
         model = AssayChipReadout
@@ -166,6 +166,14 @@ class AssayChipSetupForm(CloneableForm):
         unit = self.cleaned_data.get('unit', '')
         if type == 'compound' and not all([compound,concentration,unit]) or (compound and not all([concentration,unit])):
             raise forms.ValidationError('Please complete all data for compound.')
+
+        # Check to see if data has been uploaded for this setup
+        # Prevent changing chip id if this is the case
+        # Get readouts
+        readout = AssayChipReadout.objects.filter(chip_setup=self.instance)
+        if readout:
+            if AssayChipRawData.objects.filter(assay_chip_id=readout) and self.cleaned_data.get('assay_chip_id') != self.instance.assay_chip_id:
+                raise forms.ValidationError({'assay_chip_id' : ['Chip ID/Barcode cannot be changed after data has been uploaded.',]})
 
 
 class AssayChipCellsInlineFormset(CloneableBaseInlineFormSet):
@@ -271,12 +279,14 @@ class AssayPlateSetupForm(CloneableForm):
 
         # Check to see if data has been uploaded for this setup
         # Prevent changing the assay layout if this is the case
+        # Prevent changing plate id if this is the case
         # Get readouts
         readout = AssayPlateReadout.objects.filter(setup=self.instance)
         if readout:
             if AssayReadout.objects.filter(assay_device_readout=readout) and self.cleaned_data.get('assay_layout') != self.instance.assay_layout:
                 raise forms.ValidationError({'assay_layout' : ['Assay layout cannot be changed after data has been uploaded.',]})
-
+            if AssayReadout.objects.filter(assay_device_readout=readout) and self.cleaned_data.get('assay_plate_id') != self.instance.assay_plate_id:
+                raise forms.ValidationError({'assay_plate_id' : ['Plate ID/Barcode cannot be changed after data has been uploaded.',]})
 
 class AssayPlateCellsInlineFormset(CloneableBaseInlineFormSet):
 
@@ -322,7 +332,7 @@ class AssayPlateResultForm(forms.ModelForm):
     class Meta(object):
         model = AssayPlateTestResult
         widgets = {
-            'summary': forms.Textarea(attrs={'cols':75, 'rows': 3}),
+            'summary': forms.Textarea(attrs={'cols': 75, 'rows': 3}),
         }
         exclude = group + tracking + restricted
 
@@ -382,7 +392,58 @@ def process_readout_value(value):
             return None
 
 
+def validate_header(datalist, setup_id, readout_type):
+    # Get the header row
+    header = datalist[0]
+    # Upper to ignore case
+    chip_or_plate_cell = str(header[0]).upper()
+
+    if not chip_or_plate_cell or 'CHIP' not in chip_or_plate_cell and 'PLATE' not in chip_or_plate_cell:
+        raise forms.ValidationError(
+            'The header does not specify whether the upload is for a chip or a plate.'
+        )
+
+    # If ambiguous whether it is chip or plate
+    if 'CHIP' in chip_or_plate_cell and 'PLATE' in chip_or_plate_cell:
+        raise forms.ValidationError(
+            'The header specifies both chip and plate in its first cell.'
+        )
+
+    setup = header[1]
+
+    # If chip
+    if 'CHIP' in chip_or_plate_cell:
+        if readout_type == 'PLATE':
+            raise forms.ValidationError(
+                'This is a PLATE readout, please change the header to specify PLATE instead of CHIP'
+            )
+
+        if setup_id != setup:
+            raise forms.ValidationError(
+                'The given Chip ID "{0}" does not match the listed Chip ID "{1}"'.format(setup, setup_id)
+            )
+
+    # If plate
+    else:
+        if readout_type == 'CHIP':
+            raise forms.ValidationError(
+                'This is a CHIP readout, please change the header to specify CHIP instead of PLATE'
+            )
+
+        if setup_id != setup:
+            raise forms.ValidationError(
+                'The given Plate ID "{0}" does not match the listed Plate ID "{1}"'.format(setup, setup_id)
+            )
+
+        upload_type = str(header[3]).upper()
+
+        if not upload_type or ('TAB' not in upload_type and 'BLOCK' not in upload_type):
+            raise forms.ValidationError(
+                'The header does not properly specify Tabular or Block format.'
+            )
+
 def validate_plate_readout_file(
+        setup_id,
         upload_type,
         assays,
         features,
@@ -393,6 +454,11 @@ def validate_plate_readout_file(
         readout_time_unit,
         sheet=''
 ):
+    validate_header(datalist, setup_id, 'PLATE')
+
+    # Skip the header from now on
+    datalist = datalist[1:]
+
     if upload_type == 'Block':
         # Number of assays found
         assays_found = 0
@@ -459,7 +525,7 @@ def validate_plate_readout_file(
                     # Fail if time unit does not match
                     # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
                     if time_unit[0] != readout_time_unit[0]:
-                        raise forms.ValidationError('The time unit "{}" does not correspond with the selected readout time unit of "{}"'.format(time_unit, readout_time_unit))
+                        raise forms.ValidationError(sheet + 'The time unit "{0}" does not correspond with the selected readout time unit of "{1}"'.format(time_unit, readout_time_unit))
 
             # Otherwise the line contains datapoints for the current assay
             else:
@@ -470,7 +536,7 @@ def validate_plate_readout_file(
                 # This should handle blocks that have too many rows or do not have a header
                 if data_blocks_found > assays_found:
                     raise forms.ValidationError(
-                    sheet + 'All plate data must have an assay associated with it. Please add a header line.')
+                        sheet + 'All plate data must have an assay associated with it. Please add a header line.')
 
                 # This is to deal with an EXCESS of columns
                 if len(line) > number_of_columns:
@@ -673,6 +739,8 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
 
     def clean(self):
         """Validate unique, existing PLATE READOUTS"""
+        setup_pk = int(self.data.get('setup'))
+        setup_id = AssayPlateSetup.objects.get(pk=setup_pk).assay_plate_id
 
         # TODO REVIEW
         # Get upload type
@@ -754,6 +822,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
             readout_time_unit = PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit
 
             validate_plate_readout_file(
+                setup_id,
                 upload_type,
                 assays,
                 features,
@@ -765,6 +834,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
             )
 
 def validate_chip_readout_file(
+    setup_id,
     headers,
     datalist,
     assays,
@@ -772,6 +842,8 @@ def validate_chip_readout_file(
     readout_time_unit,
     sheet=''
 ):
+    validate_header(datalist, setup_id, 'CHIP')
+
     # All unique rows based on ('assay_id', 'field_id', 'elapsed_time')
     unique = {}
 
@@ -823,6 +895,7 @@ def validate_chip_readout_file(
                     sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(val))
 
 
+# TODO CHIP READOUT UPLOAD UNSTABLE (SPECIFICALLY SUBMIT AND CLONE?)
 class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
     def __init__(self,*args,**kwargs):
         super (AssayChipReadoutInlineFormset,self).__init__(*args,**kwargs)
@@ -832,6 +905,8 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
 
     def clean(self):
         """Validate unique, existing Chip Readout IDs"""
+        setup_pk = int(self.data.get('chip_setup'))
+        setup_id = AssayChipSetup.objects.get(pk=setup_pk).assay_chip_id
 
         # Throw error if headers is not valid
         try:
@@ -898,6 +973,7 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
             readout_time_unit = PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit
 
             validate_chip_readout_file(
+                setup_id,
                 headers,
                 datalist,
                 assays,
@@ -909,8 +985,8 @@ def get_bulk_datalist(sheet):
     # Get datalist
     datalist = []
 
-    # Exclude first row (the header)
-    for row_index in range(1,sheet.nrows):
+    # Include the first row (the header)
+    for row_index in range(sheet.nrows):
         datalist.append([str(value) for value in sheet.row_values(row_index)])
 
     return datalist
@@ -933,7 +1009,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
         test_file = data.get('bulk_file','')
 
         if not test_file:
-            raise forms.ValidationError('No file was not supplied.')
+            raise forms.ValidationError('No file was supplied.')
 
         file_data = test_file.file.read()
 
@@ -943,8 +1019,8 @@ class ReadoutBulkUploadForm(forms.ModelForm):
         except:
             raise forms.ValidationError('The given file does not appear to be a properly formatted Excel file.')
 
-        # For the moment, just have headers be equal to one?
-        headers = 1
+        # For the moment, just have headers be equal to two?
+        headers = 2
         sheet_names = excel_file.sheet_names()
 
         for index, sheet in enumerate(excel_file.sheets()):
@@ -1008,6 +1084,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
 
                 # Validate this sheet
                 validate_chip_readout_file(
+                    setup,
                     headers,
                     datalist,
                     assays,
@@ -1073,6 +1150,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
 
 
                 validate_plate_readout_file(
+                    setup,
                     upload_type,
                     assays,
                     features,
