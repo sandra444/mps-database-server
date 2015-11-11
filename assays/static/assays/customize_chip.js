@@ -322,6 +322,7 @@ $(document).ready(function () {
     }
 
     var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
+            "<tr style='background: #FF2400'>" + "<th>Chip ID</th><th>[Chip ID]</th>" + repeat('<th><br><br></th>',5) + "</tr>" +
             "<tr style='background: #FF2400'>" + header + "</tr>" +
             "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
             "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
