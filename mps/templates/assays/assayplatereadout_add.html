@@ -586,6 +586,15 @@
             *Optional (if not using time, totally exclude columns)
         </li>
         <li class="list-group-item">
+            File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                Always start in the top-left corner (the first cell)
+            </b>
+        </li>
+        <li class="list-group-item">
             <b class="text-danger">
                 <span class="glyphicon glyphicon-exclamation-sign"></span>
                 Uploading overwrites previous data
@@ -601,6 +610,13 @@
     <h4>Changing QC</h4>
     <ul class="list-group">
         <li class="list-group-item">
+            <b>
+                In the .csv file you can change a value's QC status by putting a <i>single letter</i> in front of the value
+                <br>
+                (e.g. to invalidate the value "12.3" put "x12.3" in the cell instead)
+            </b>
+        </li>
+        <li class="list-group-item">
             Clicking
             <br>
             <div class="fancy-checkbox form-group">
@@ -615,7 +631,7 @@
                     </label>
                 </div>
             </div>
-            will toggle whether or not you can invalidate wells
+            will toggle whether or not you can invalidate wells by clicking on the displayed heatmap
         <li class="list-group-item">
             To invalidate a reading, click the corresponding well (granted the above button is on)
         </li>
