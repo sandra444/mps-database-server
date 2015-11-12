@@ -173,7 +173,12 @@ $(document).ready(function () {
 
             // Add every value (excluding the QC)
             for (var j=0; j<6; j++) {
-                table += "<th>" + number_with_commas(line[j]) + "</th>";
+                if (line[j]) {
+                    table += "<th>" + number_with_commas(line[j]) + "</th>";
+                }
+                else {
+                    table += "<th>undefined</th>";
+                }
             }
 
             // Just add text if this is a header row for QC OR if this row is invalid
