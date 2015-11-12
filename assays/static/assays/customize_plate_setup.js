@@ -8,7 +8,7 @@ var id = null;
 function search(elem) {
     id = elem.id.replace(/\D/g,'');
     $("#dialog").dialog({
-      width: 775,
+      width: 825,
       height: 500
     });
 }
