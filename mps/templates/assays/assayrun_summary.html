@@ -18,13 +18,18 @@
         </div>
     </div>
 
-    {% if object.description %}
+    {% if object.description or object.study_configuration or object.file %}
         <legend><h3>Description</h3></legend>
         {{ object.description }}
 
         {% if object.study_configuration %}
             <br><br>
             <b>Configuration:</b> {{ object.study_configuration }}
+        {% endif %}
+
+        {% if object.file %}
+            <br><br>
+            <b>Protocol:</b> <a href="/media/{{ object.file }}">{{ object.file }}</a>
         {% endif %}
         <br>
     {% endif %}

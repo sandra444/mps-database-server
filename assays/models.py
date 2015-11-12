@@ -267,6 +267,7 @@ class AssayPlateSetup(FlaggableModel):
     def get_delete_url(self):
         return '/assays/assayplatesetup/{}/delete/'.format(self.id)
 
+
 class AssayReader(LockableModel):
     """
     Chip and Plate readers
@@ -564,8 +565,8 @@ class AssayRun(RestrictedModel):
                                     help_text="Standard format 'CenterID-YYYY-MM-DD-Name-###'")
     description = models.TextField(blank=True, null=True)
 
-    file = models.FileField(upload_to='csv', verbose_name='Batch Data File',
-                            blank=True, null=True, help_text='Do not upload until you have made each Chip Readout')
+    file = models.FileField(upload_to='study_protocol', verbose_name='Protocol File',
+                            blank=True, null=True, help_text='Protocol File for Study')
 
     # Image for the study (some illustrative image)
     image = models.ImageField(upload_to='studies', null=True, blank=True)
@@ -782,7 +783,7 @@ class AssayChipTestResult(FlaggableModel):
     class Meta(object):
         verbose_name = 'Chip Result'
 
-    chip_readout =  models.ForeignKey('assays.AssayChipReadout', verbose_name='Chip Readout')
+    chip_readout = models.ForeignKey('assays.AssayChipReadout', verbose_name='Chip Readout')
     summary = models.TextField(default='', blank=True)
 
     def __unicode__(self):
@@ -818,7 +819,9 @@ class AssayChipTestResult(FlaggableModel):
             ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
         ))
         if self.id and not len(AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
-            return SEVERITY_SCORE.get(AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')[0].severity, 'None')
+            return SEVERITY_SCORE.get(AssayChipResult.objects.filter(
+                assay_result_id=self.id
+            ).order_by('id')[0].severity, 'None')
         return ''
 
     def get_absolute_url(self):
