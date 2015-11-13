@@ -35,6 +35,7 @@ import os
 
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
+
 # Class-based views for indexes
 class UserIndex(OneGroupRequiredMixin, ListView):
     context_object_name = 'user_index'
@@ -245,7 +246,7 @@ class AssayRunDetail(DetailView):
         if has_group(self.request.user, self.object.group):
             return redirect('/assays/' + str(self.object.id))
         elif self.object.restricted:
-            return PermissionDenied(self.request,'You must be a member of the group ' + str(self.object.group))
+            return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
         return super(AssayRunDetail, self).dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -351,6 +352,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
                 )
             )
 
+
 def compare_cells(current_model, current_filter, setups):
     cells = {}
 
@@ -375,10 +377,10 @@ def compare_cells(current_model, current_filter, setups):
         for setup_2 in setups:
             if setup_1 != setup_2:
                 if cells.get(setup_1) == cells.get(setup_2):
-                    sameness.get(setup_1).update({str(setup_2):True})
+                    sameness.get(setup_1).update({str(setup_2): True})
                     same += 1
                 else:
-                    sameness.get(setup_1).update({str(setup_2):False})
+                    sameness.get(setup_1).update({str(setup_2): False})
         if same > max_same:
             max_same = same
             best_setup = setup_1
@@ -1985,6 +1987,7 @@ def write_out_csv(file_name, data):
         writer = csv.writer(out_file)
         writer.writerows(data)
 
+
 def get_csv_media_location(file_name):
     split_name = file_name.split('/')
     csv_onward = '/'.join(split_name[-4:])
@@ -2018,7 +2021,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
         if form.is_valid():
             # TODO ADD
-            csv_root = settings.MEDIA_ROOT.replace('mps/../','',1) + '/csv/'
+            csv_root = settings.MEDIA_ROOT.replace('mps/../', '', 1) + '/csv/'
 
             data = form.cleaned_data
             bulk_file = data.get('bulk_file')
