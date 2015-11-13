@@ -456,6 +456,8 @@ $(document).ready(function () {
 
             var how_to_increment = $('#id_howtoincr:checked').val();
 
+            var compound_direction = $('#id_compound_direction:checked').val();
+
             var concentration_value = parseFloat(
                 $('#id_concentration').val()
             );
@@ -487,10 +489,14 @@ $(document).ready(function () {
 
             else {
                 var compound_name = $('#id_compound :selected').text();
-                var current_object = this;
+                var current_object = $(".ui-selected", this);
+
+                if (compound_direction === 'right_left') {
+                    current_object = $($(".ui-selected", this).get().reverse());
+                }
 
                 if (compound_name) {
-                    $(".ui-selected", current_object).each(function (index, value) {
+                    current_object.each(function (index, value) {
                         var tablecell = $(this);
                         var tablecellid = tablecell.attr('id');
                         var list = $('#' + tablecellid + '_list');
@@ -617,6 +623,8 @@ $(document).ready(function () {
 
             var time_how_to_increment = $('#id_tphowtoincr:checked').val();
 
+            var time_direction = $('#id_time_direction:checked').val();
+
             if (tp_value < 0) {
                 alert('Please specify a non-negative number for timepoint.')
             }
@@ -630,7 +638,13 @@ $(document).ready(function () {
             }
 
             else {
-                $(".ui-selected", this).each(function (index, value) {
+                var current_object = $(".ui-selected", this);
+
+                if (time_direction === 'right_left') {
+                    current_object = $($(".ui-selected", this).get().reverse());
+                }
+
+                current_object.each(function (index, value) {
                     tablecell = $(this);
                     tablecellid = tablecell.attr('id');
 
