@@ -588,6 +588,13 @@ $(document).ready(function () {
 
         all = null;
 
+        // Remove old values
+        $('.value').remove();
+        // Remove old invalid
+        $('.invalid').remove();
+        // Reset invalid
+        invalid = {};
+
         // Whether or not the upload should fail
         var failed = false;
         // Whether to read the file as tabular or block
@@ -899,13 +906,6 @@ $(document).ready(function () {
 
         // If the file upload has succeeded, show the feature binding dialog and the heatmap dialog
         else {
-            // Remove old values
-            $('.value').remove();
-            // Remove old invalid
-            $('.invalid').remove();
-            // Reset invalid
-            invalid = {};
-
             // Clear the binding table
             $('#binding_table').empty();
 
