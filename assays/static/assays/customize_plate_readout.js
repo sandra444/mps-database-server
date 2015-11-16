@@ -1063,10 +1063,15 @@ $(document).ready(function () {
         heatmap_options(assay_feature_values, times);
     }
 
-    // Open and then close dialog so it doesn't get placed in window itself
+    // Make the dialog box
     var dialog = $('#dialog');
-    dialog.dialog();
-    dialog.dialog('close');
+    dialog.dialog({
+        width: 900,
+        height: 500,
+        closeOnEscape: true,
+        autoOpen: false
+    });
+    // Remove hidden attribute
     dialog.removeProp('hidden');
 
     // On setup change, acquire labels and build table
@@ -1127,9 +1132,8 @@ $(document).ready(function () {
 
     // Clicking the help button will spawn the help dialog
     $('#help_button').click(function() {
-        $("#dialog").dialog({
-            width: 900,
-            height: 500
-        });
+        $("#dialog").dialog('open');
+        // Remove focus
+        $('.ui-dialog :button').blur();
     });
 });
