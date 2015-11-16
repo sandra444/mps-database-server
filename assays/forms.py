@@ -488,7 +488,9 @@ def validate_plate_readout_file(
         readout_time_unit,
         sheet=''
 ):
-    validate_header(datalist, setup_id, 'PLATE')
+    # Validate header if this isn't a bulk upload
+    if not sheet:
+        validate_header(datalist, setup_id, 'PLATE')
 
     # Skip the header from now on
     datalist = datalist[1:]
@@ -838,7 +840,9 @@ def validate_chip_readout_file(
     readout_time_unit,
     sheet=''
 ):
-    validate_header(datalist, setup_id, 'CHIP')
+    # Validate header if this isn't a bulk upload
+    if not sheet:
+        validate_header(datalist, setup_id, 'CHIP')
 
     # All unique rows based on ('assay_id', 'field_id', 'elapsed_time')
     unique = {}
