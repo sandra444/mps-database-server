@@ -17,6 +17,7 @@ import ujson as json
 # I use regular expressions for a string split at one point
 import re
 from django.db import connection, transaction
+from urllib import unquote
 
 
 class AssayModelTypeAdmin(LockableAdmin):
@@ -444,6 +445,7 @@ def get_qc_status_plate(form):
         # If this is a QC input
         if key.startswith('{') and key.endswith('}'):
             # Evaluate the key
+            key = unquote(key)
             values = json.loads(key)
             row = unicode(values.get('row'))
             col = unicode(values.get('column'))
