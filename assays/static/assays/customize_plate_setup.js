@@ -7,10 +7,7 @@ var id = null;
 
 function search(elem) {
     id = elem.id.replace(/\D/g,'');
-    $("#dialog").dialog({
-      width: 825,
-      height: 500
-    });
+    $("#dialog").dialog('open');
 }
 
 $(document).ready(function () {
@@ -224,8 +221,12 @@ $(document).ready(function () {
     if ($('#dialog')[0]) {
         // Open and then close dialog so it doesn't get placed in window itself
         var dialog = $('#dialog');
-        dialog.dialog();
-        dialog.dialog('close');
+        dialog.dialog({
+            width: 825,
+            height: 500,
+            closeOnEscape: true,
+            autoOpen: false
+        });
         dialog.removeProp('hidden');
 
         $('.cellsample').click(function (evt) {

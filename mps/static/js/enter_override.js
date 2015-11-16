@@ -22,6 +22,8 @@ $(document).ready(function () {
     dialogConfirm.dialog({
         height:200,
         modal: true,
+        closeOnEscape: true,
+        autoOpen: false,
         buttons: {
         Submit: function() {
             $("#submit").trigger("click");
@@ -31,8 +33,6 @@ $(document).ready(function () {
             }
         }
     });
-
-    dialogConfirm.dialog('close');
     dialogConfirm.removeProp('hidden');
 
     $(window).keydown(function(event){
