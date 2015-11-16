@@ -177,14 +177,19 @@ $(document).ready(function () {
                     table += "<th>" + number_with_commas(line[j]) + "</th>";
                 }
                 else {
-                    table += "<th>undefined</th>";
+                    table += "<th></th>";
                 }
             }
 
             // Just add text if this is a header row for QC OR if this row is invalid
             // (QC status of an ignored row does not really matter)
             if (i < headers && !exist || !every) {
-                table += "<th>" + line[6] + "</th>";
+                if (line[6]) {
+                    table += "<th>" + line[6] + "</th>";
+                }
+                else {
+                    table += "<th></th>";
+                }
             }
             // Add an input for the QC if this isn't a header
             // QC inputs NAME begin with "QC_"
