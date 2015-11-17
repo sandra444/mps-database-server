@@ -436,12 +436,13 @@ $(document).ready(function () {
         var unique_pairs = {};
 
         $.each(pairs, function (pair, value) {
-            var assay = pair.split('_')[1];
             var pair_without_time = pair.split('_').slice(0, -1).join('_');
+            var assay_feature = selection_to_assay_feature[pair_without_time];
+            var text_display = assay_feature.assay + '-' + assay_feature.feature;
             if (!unique_pairs[pair_without_time]) {
                 var option = $('<option>')
                     .attr('value', pair_without_time)
-                    .text(assay);
+                    .text(text_display);
                 assay_select.append(option);
 
                 unique_pairs[pair_without_time] = true;

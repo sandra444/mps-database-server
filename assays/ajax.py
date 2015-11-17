@@ -114,7 +114,7 @@ def fetch_readout(request):
             'row': readout.row,
             'column': readout.column,
             'value': readout.value,
-            'assay': readout.assay.assay_id.assay_name,
+            'assay': readout.assay.assay_id.assay_short_name,
             'time': readout.elapsed_time,
             # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
             'time_unit': time_unit,
