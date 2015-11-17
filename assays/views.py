@@ -2048,10 +2048,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                 chip_or_plate_cell = str(header[0]).upper()
 
                 # Get the listed setup
-                if type(header[1]) == float:
-                    setup = str(int(header[1]))
-                else:
-                    setup = str(header[1])
+                setup = stringify_excel_value(header[1])
 
                 # Get datalist: spaghetti from admin
                 datalist = get_bulk_datalist(sheet)

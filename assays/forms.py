@@ -996,13 +996,29 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
             )
 
 
+def stringify_excel_value(value):
+    # If the value is just a string literal, return it
+    if type(value) == str or type(value) == unicode:
+        return str(value)
+    else:
+        try:
+            # If the value can be an integer, make it into one
+            if int(value) == float(value):
+                return str(int(value))
+            else:
+                return str(float(value))
+        except:
+            return str(value)
+
+
+
 def get_bulk_datalist(sheet):
     # Get datalist
     datalist = []
 
     # Include the first row (the header)
     for row_index in range(sheet.nrows):
-        datalist.append([str(value) for value in sheet.row_values(row_index)])
+        datalist.append([stringify_excel_value(value) for value in sheet.row_values(row_index)])
 
     return datalist
 
@@ -1062,10 +1078,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
                 )
 
             # Get the listed setup
-            if type(header[1]) == float:
-                setup = str(int(header[1]))
-            else:
-                setup = str(header[1])
+            setup = stringify_excel_value(header[1])
 
             # Get datalist
             datalist = get_bulk_datalist(sheet)
