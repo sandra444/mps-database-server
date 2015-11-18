@@ -659,7 +659,8 @@ $(document).ready(function () {
             var number_of_features = 0;
             var number_of_data_blocks = 0;
 
-            var assay_feature_class = null;
+            //var assay_feature_class = null;
+            var assay_feature_pair = null;
 
             var assay_feature_selection = null;
 
@@ -689,10 +690,10 @@ $(document).ready(function () {
                     }
 
                     // Assay-Feature pair and time for distinguishing values
-                    var assay_feature_pair = assay + '_' + feature + '_' + time;
+                    assay_feature_pair = assay + '_' + feature + '_' + time;
 
                     // Add pair to assay_feature_values
-                    assay_feature_class = 'f_'+ assay_feature_pair.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
+                    //assay_feature_class = 'f_'+ assay_feature_pair.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
                     assay_feature_values[assay_feature_pair] = {};
 
                     assay_feature_selection = assay + '_' + feature;
@@ -851,7 +852,7 @@ $(document).ready(function () {
                     var assay_feature_pair = assay + '_' + feature + '_' + time;
 
                     // Add feature to assay_feature_values
-                    var assay_feature_class = 'f_'+ assay_feature_pair.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
+                    //var assay_feature_class = 'f_'+ assay_feature_pair.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
 
                     var assay_feature_selection = assay + '_' + feature;
 
@@ -1005,7 +1006,7 @@ $(document).ready(function () {
             var assay_feature_pair = assay + '_' + feature + '_' + time;
 
             // Add feature to assay_feature_values
-            var assay_feature_class = 'f_'+ assay_feature_pair.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
+            //var assay_feature_class = 'f_'+ assay_feature_pair.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
 
             var assay_feature_selection = assay + '_' + feature;
 
