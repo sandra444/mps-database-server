@@ -313,17 +313,6 @@ $(document).ready(function () {
         }
     };
 
-    // Make the dialog box
-    var dialog = $('#dialog');
-    dialog.dialog({
-        width: 900,
-        height: 500,
-        closeOnEscape: true,
-        autoOpen: false
-    });
-    // Remove hidden attribute
-    dialog.removeProp('hidden');
-
     // The data in question
     var lines = [];
 
@@ -384,13 +373,6 @@ $(document).ready(function () {
         date.datepicker("option", "dateFormat", "yy-mm-dd");
         date.datepicker("setDate", curr_date);
     }
-
-    // Clicking the help button will spawn the help dialog
-    $('#help_button').click(function() {
-        $("#dialog").dialog('open');
-        // Remove focus
-        $('.ui-dialog :button').blur();
-    });
 });
 
 

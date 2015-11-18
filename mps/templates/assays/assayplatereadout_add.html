@@ -7,6 +7,7 @@
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
     <script src="{% static "assays/customize_plate_readout.js" %}"></script>
+    <script src="{% static "js/help.js" %}"></script>
 {% endblock %}
 
 {% block fluid-content %}
@@ -380,7 +381,7 @@
     </div>
 </form>
 
-<div hidden id="dialog" title="Plate Readout Help">
+<div hidden id="help_dialog" title="Plate Readout Help">
     <h4>Uploading Data</h4>
     <ul class="list-group">
         <li class="list-group-item">

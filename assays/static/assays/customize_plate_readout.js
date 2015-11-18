@@ -1070,17 +1070,6 @@ $(document).ready(function () {
         heatmap_options(assay_feature_values, times);
     }
 
-    // Make the dialog box
-    var dialog = $('#dialog');
-    dialog.dialog({
-        width: 900,
-        height: 500,
-        closeOnEscape: true,
-        autoOpen: false
-    });
-    // Remove hidden attribute
-    dialog.removeProp('hidden');
-
     // On setup change, acquire labels and build table
     setup.change(function() {
         get_device_layout();
@@ -1138,11 +1127,4 @@ $(document).ready(function () {
         date.datepicker("option", "dateFormat", "yy-mm-dd");
         date.datepicker("setDate", curr_date);
     }
-
-    // Clicking the help button will spawn the help dialog
-    $('#help_button').click(function() {
-        $("#dialog").dialog('open');
-        // Remove focus
-        $('.ui-dialog :button').blur();
-    });
 });

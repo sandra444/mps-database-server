@@ -3,7 +3,7 @@
 
 {% block load %}
     <script src="{% static "js/enter_override.js" %}"></script>
-    <script src="{% static "assays/readoutbulkupload.js" %}"></script>
+    <script src="{% static "js/help.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -50,7 +50,7 @@
 
     </form>
 
-    <div hidden id="dialog" title="Bulk Upload Help">
+    <div hidden id="help_dialog" title="Bulk Upload Help">
         <ul class="list-group">
             <li class="list-group-item">
                 <h4>Each <i>sheet</i> of the excel file must follow either a <b>Chip</b> or <b>Plate</b> format</h4>
