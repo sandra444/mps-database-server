@@ -5,6 +5,7 @@
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
     <script src="{% static "assays/customize_layout.js" %}"></script>
+    <script src="{% static "js/help.js" %}"></script>
     <link href="{% static "assays/customize_admin.css" %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
@@ -42,7 +43,7 @@
 {#        {% include 'flag.html'%}#}
     </h1>
 
-    {% include "submit.html" with flag="y" assay_layout="y" %}
+    {% include "submit.html" with flag="y" assay_layout="y" help="y" %}
 
     {% include 'errors.html' %}
 
@@ -127,12 +128,15 @@
         <div class="col-sm-10">
             <select id="id_action" name="action">
                 <option value="" selected="selected">---------</option>
-                <option value="type">Set well type</option>
-                <option value="timepoint">Set time point</option>
-                <option value="compound">Add compound</option>
-                <option value="add-label">Add label</option>
-                <option value="clear">Clear contents</option>
+                <option value="type">Set Well Type</option>
+                <option value="timepoint">Set Time Point</option>
+                <option value="compound">Add Compound</option>
+                <option value="add-label">Add Label</option>
+                <option value="clear">Clear Contents</option>
             </select>
+            <p>
+                Click and Drag on the Plate Representation Below to Apply the Specified Action
+            </p>
         </div>
     </div>
 
@@ -202,7 +206,7 @@
     <div class="form-group row">
         <label for="increment" class="col-sm-2 control-label">Dilution Factor:</label>
         <div class="col-sm-10">
-            <input id="id_increment" maxlength="6" name="increment" type="number" step="any" value="0">
+            <input id="id_increment" maxlength="6" name="increment" type="number" step="any" value="1">
             <input id="id_howtoincr" type="radio" name="howtoincr" value="divide" checked>
             Divide
             <input id="id_howtoincr" type="radio" name="howtoincr" value="multiply">
@@ -249,5 +253,105 @@
         <fieldset></fieldset>
     </div>
 </form>
+
+<div hidden id="help_dialog" title="Plate Readout Help">
+    <h4>Designing an Assay Layout</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            After selecting a <b>device</b>, a representation of the plate will appear at the bottom of the page
+        </li>
+        <li class="list-group-item">
+            If a device you need is not present, contact an administrator
+        </li>
+        <li class="list-group-item">
+            You can mark a layout as a <b>"Standard Layout"</b> by clicking the checkbox
+            <br>
+            This causes the layout to be at the beginning of lists to make it more noticeable
+        </li>
+        <li class="list-group-item">
+            Making a selection from the <b>Action</b> dropdown allows one to manipulate the plate in the following ways:
+        </li>
+    </ul>
+    <h4>Set Well Type</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Selecting this option will allow you to specify the purpose of each well
+        </li>
+        <li class="list-group-item">
+            First, choose an option from the dropdown entitled <b>Well Type:</b>
+            <br>
+            Then <i>click and drag</i> on the representation so that your selection box contains the wells you want to mark
+        </li>
+        <li class="list-group-item">
+            Marking wells with a type can make the layout (and any data associated with it) much more legible
+        </li>
+    </ul>
+    <h4>Set Time Point</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Selecting this option will allow you to specify time points for each well
+        </li>
+        <li class="list-group-item">
+            The input <b>Timepoint:</b> is the initial time point and the dropdown next to it specifies the unit
+        </li>
+        <li class="list-group-item">
+            You can create a series where the value is increased from well to well
+            <br>
+            To do this, set a number in the input <b>Increment:</b>
+        </li>
+        <li class="list-group-item">
+            When creating a time point series, you can choose to <b>Add</b> or <b>Multiply</b>
+            <br>
+            You can also choose which direction to apply the series
+        </li>
+        <li class="list-group-item">
+            Each well can contain only one time point, so previous time points will be overwritten
+        </li>
+    </ul>
+    <h4>Add Compound</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Selecting this option will allow you to specify compounds and their concentrations
+        </li>
+        <li class="list-group-item">
+            Wells can contain multiple compounds
+        </li>
+        <li class="list-group-item">
+            Similar to time point, you can specify a series for the compound concentration
+            <br>
+            The default is <b>Divide</b>, but you can also <b>Add</b>, <b>Multiply</b>, or <b>Subtract</b>
+        </li>
+        <li class="list-group-item">
+            Wells can contain only one copy of each compound (e.g. a well can only have one instance of Acetaminophen)
+        </li>
+    </ul>
+    <h4>Add Label</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Selecting this option will allow you to add arbitrary text to the layout's wells
+        </li>
+        <li class="list-group-item">
+            This allows users to add data that the other options do not account for
+        </li>
+        <li class="list-group-item">
+            After typing into the input <b>Label:</b>, click and drag on the desired wells and the text will be added
+        </li>
+        <li class="list-group-item">
+            Each well can contain only one label, thus old labels will be overwritten if necessary
+        </li>
+    </ul>
+    <h4>Clear Contents</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Selecting this option will allow you to remove everything in the selected wells
+        </li>
+        <li class="list-group-item">
+            Click and drag over the desired wells and all data will be removed
+        </li>
+        <li class="list-group-item">
+            Additionally, clicking a time point, compound, or label will let you delete it
+        </li>
+    </ul>
+</div>
 
 {% endblock %}
