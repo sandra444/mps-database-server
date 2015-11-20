@@ -4,6 +4,7 @@
 {% block load %}
     <script src="{% static "assays/customize_run.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/help.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -32,7 +33,7 @@
 {#        {% endif %}#}
     </h1>
 
-    {% include "submit.html" %}
+    {% include "submit.html" with help='y' %}
 
     {% include 'errors.html' %}
 
@@ -229,5 +230,43 @@
         </div>
     </div>
 </form>
+
+<div hidden id="help_dialog" title="Study Help">
+    <h4>Making a Study</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            <b>Studies</b> serve to organize plates, chips, and their related data
+        </li>
+        <li class="list-group-item">
+            The <b>Study Type</b> indicates the general purpose of the study
+            <br>
+            Multiple <b>Study Types</b> can be chosen and at least one is required
+        </li>
+        <li class="list-group-item">
+            Please try to name the study informatively
+            <br>
+            e.g. "Kidney-Liver Vitamin C Metabolism" is more useful than "Study-1"
+        </li>
+        <li class="list-group-item">
+            You may not edit the <b>Study ID</b>, for it is automatically generated from your other choices
+        </li>
+        <li class="list-group-item">
+            Choosing to <b>Restrict Access</b> will hide the study from anyone who isn't in the listed group
+        </li>
+        <li class="list-group-item">
+            You can upload an image, such as a picture of the setup or an illustration of the protocol
+            <br>
+            If a preview of the uploaded image does not appear, something went wrong
+        </li>
+        <li class="list-group-item">
+            You can upload a word file which contains the study's protocol
+        </li>
+        <li class="list-group-item">
+            A <b>Study Configuration</b> needs to be specified for integrated studies
+            <br>
+            If the <b>Study Configuration</b> you need is not available, click the provided link to add one
+        </li>
+    </ul>
+</div>
 
 {% endblock %}
