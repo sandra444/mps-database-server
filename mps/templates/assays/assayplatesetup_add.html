@@ -6,6 +6,7 @@
     <script src="{% static "js/inline_add.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
+    <script src="{% static "js/help.js" %}"></script>
     <script src="{% static "assays/customize_plate_setup.js" %}"></script>
 {% endblock %}
 
@@ -45,7 +46,7 @@
 {#        {% include 'flag.html'%}#}
     </h1>
 
-    {% include "submit.html" with flag="y" clone="y" %}
+    {% include "submit.html" with flag="y" clone="y" help="y"%}
 
     {% include 'errors.html' %}
 
@@ -242,7 +243,7 @@
     <div class="inline-group"></div>
 </div>
 
-<div hidden id="dialog">
+<div hidden id="dialog" title="Choose a Cell Sample">
     <div class="alert alert-info" role="alert">
             <h1 class="text-center">Click Desired Row</h1>
     </div>
@@ -291,6 +292,48 @@
             {% endfor %}
             </tbody>
     </table>
+</div>
+
+{# TODO This is subject to change #}
+<div hidden id="help_dialog" title="Plate Setup Help">
+    <h4>Making a Plate Setup</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            A <b>Plate Setup</b> describes the protocols taken to prepare a plate
+        </li>
+        <li class="list-group-item">
+            Selecting an <b>Assay Layout</b> will show a preview of the plate below
+            <br>
+            Please note that you cannot edit the layout on this page, you will have to edit the layout itself
+        </li>
+        <li class="list-group-item">
+            If the layout you need does not exist, click the provided link to add a new one
+        </li>
+        <li class="list-group-item">
+            The <b>Plate ID/Barcode</b> can not be the same as another plate in the study
+        </li>
+    </ul>
+    <h4>Adding Cells</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Each row under the header <b>Model Cells</b> describes cells added to the plate
+        </li>
+        <li class="list-group-item">
+            If this plate does not have any cells, do not modify this section
+        </li>
+        <li class="list-group-item">
+            To get another row, click the <b>Add Cells</b> button
+        </li>
+        <li class="list-group-item">
+            Click a magnifying glass to see a list of available cell samples then click the desired row to select that sample
+        </li>
+        <li class="list-group-item">
+            Use 'e' for scientific notation: e.g. 1e3 = 1000.
+        </li>
+        <li class="list-group-item">
+            If you need a cell sample that is not listed, click the provided link to add it
+        </li>
+    </ul>
 </div>
 
 {% endblock %}

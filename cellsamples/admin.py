@@ -161,6 +161,13 @@ class CellSampleAdmin(LockableAdmin):
                 ('signed_off_by', 'signed_off_date'), )
         }),
         (
+            'Flag for Review', {
+                'fields': (
+                    ('flagged', 'reason_for_flag',)
+                )
+            }
+        ),
+        (
             'Group Access', {
                 'fields':(
                     'group','restricted'

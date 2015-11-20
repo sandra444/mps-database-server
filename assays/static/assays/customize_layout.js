@@ -454,40 +454,105 @@ $(document).ready(function () {
 
             var compound_id = $('#id_compound').val();
 
+            var how_to_increment = $('#id_howtoincr:checked').val();
+
+            var compound_direction = $('#id_compound_direction:checked').val();
+
+            var concentration_value = parseFloat(
+                $('#id_concentration').val()
+            );
+
+            var concentration_unit = $('#id_concunit option:selected').text();
+            var concentration_unit_id = $('#id_concunit').val();
+
+            var incr = parseFloat($('#id_increment').val());
+
             if (compound_id === '') {
                 alert('Select a compound first.');
             }
 
+            else if (isNaN(concentration_value) || isNaN(incr)) {
+                alert('Make sure concentration and increment are valid numbers.')
+            }
+
+            else if (concentration_value < 0) {
+                alert('Please specify a non-negative number for concentration.')
+            }
+
+            else if ((how_to_increment === 'multiply' || how_to_increment === 'divide') && incr < 0) {
+                alert('Negative numbers are not permitted.')
+            }
+
+            else if (how_to_increment === 'divide' && incr === 0) {
+                alert('Please refrain from dividing by zero.');
+            }
+
             else {
                 var compound_name = $('#id_compound :selected').text();
-                var current_object = this;
+                var current_object = $(".ui-selected", this);
+
+                if (compound_direction === 'right_left') {
+                    current_object = $($(".ui-selected", this).get().reverse());
+                }
 
                 if (compound_name) {
-                    $(".ui-selected", current_object).each(function (index, value) {
+                    current_object.each(function (index, value) {
                         var tablecell = $(this);
                         var tablecellid = tablecell.attr('id');
                         var list = $('#' + tablecellid + '_list');
+
+                        // Current concentration
+                        var concentration = concentration_value;
 
                         if (list.length) {
                             list.find('[compound=' + compound_id + ']').remove();
 
                             var stamp = time + '_' + index;
 
-                            var concentration = parseFloat(
-                                $('#id_concentration').val()
-                            );
+                            var result = 0;
 
-                            var concentration_unit = $('#id_concunit option:selected').text();
-                            var concentration_unit_id = $('#id_concunit').val();
-
-                            var incr = parseFloat($('#id_increment').val());
-
-                            if ($('#id_howtoincr:checked').val() === 'add') {
-                                concentration += index * incr;
+                            // Add
+                            if (how_to_increment === 'add') {
+                                result = concentration + (index * incr);
+                                if (result >= 0) {
+                                    concentration = result;
+                                }
+                                else {
+                                    concentration = 0;
+                                }
                             }
 
+                            // Divide
+                            else if(how_to_increment === 'divide') {
+                                result = concentration / Math.pow(incr, index);
+                                if (isFinite(result) && result >= 0) {
+                                    concentration = result;
+                                }
+                                else {
+                                    concentration = 0;
+                                }
+                            }
+
+                            // Subtract
+                            else if(how_to_increment === 'subtract') {
+                                result = concentration - (index * incr);
+                                if (result >= 0) {
+                                    concentration = result;
+                                }
+                                else {
+                                    concentration = 0;
+                                }
+                            }
+
+                            // Multiply
                             else {
-                                concentration *= Math.pow(incr, index);
+                                result = concentration * Math.pow(incr, index);
+                                if (result >= 0) {
+                                    concentration = result;
+                                }
+                                else {
+                                    concentration = 0;
+                                }
                             }
 
                             var text = compound_name + ' (' + concentration +
@@ -549,48 +614,79 @@ $(document).ready(function () {
         // TODO needs refactor
         else if (act === 'timepoint') {
 
-            $(".ui-selected", this).each(function (index, value) {
+            // Legacy code: apparently with the intention of converting to minutes
+            var tpunit = parseFloat($('#id_timeunit').val());
+            var tptext = $('#id_timeunit option:selected').text();
+            var incr = parseFloat($('#id_tpincr').val());
 
-                tablecell = $(this);
-                tablecellid = tablecell.attr('id');
+            var tp_value = parseFloat($('#id_timepoint').val());
 
-                var list = $('#' + tablecellid + '_list');
-                if (list.length) {
-                    var stamp = tablecellid + '_time';
-                    $('#' + stamp).remove();
-                    var tp = parseFloat($('#id_timepoint').val());
-                    // Time point of zero allowed
-                    if (tp !== '') {
-                        // Legacy code: apparently with the intention of converting to minutes
-                        var tpunit = parseFloat($('#id_timeunit').val());
-                        var tptext = $('#id_timeunit option:selected').text();
-                        var incr = parseFloat($('#id_tpincr').val());
+            var time_how_to_increment = $('#id_tphowtoincr:checked').val();
 
-                        if ($('#id_tphowtoincr:checked').val() === 'add') {
-                            tp += index * incr;
-                        } else {
-                            tp *= Math.pow(incr, index);
-                        }
+            var time_direction = $('#id_time_direction:checked').val();
 
-                        var text = 'Time: ' + tp + ' ' + tptext;
-                        var li = $('<li>')
-                            .attr('id',stamp)
-                            .text(text)
-                            .click(function () {
-                                if(confirm('Are you sure you want to remove this time point?\n' + $(this).text())) {
-                                    $(this).remove();
-                                }
-                            });
+            if (tp_value < 0) {
+                alert('Please specify a non-negative number for timepoint.')
+            }
 
-                        li.append($('<input>')
-                            .attr('type','hidden')
-                            .attr('name', stamp)
-                            // Multiple by time point unit to get minutes
-                            .attr('value',tp * tpunit));
-                        list.prepend(li);
-                    }
+            else if (isNaN(tp_value) || isNaN(incr)) {
+                alert('Make sure timepoint and increment are valid numbers.')
+            }
+
+            else if (time_how_to_increment === 'multiply' && incr < 0) {
+                alert('Negative values are not permitted.');
+            }
+
+            else {
+                var current_object = $(".ui-selected", this);
+
+                if (time_direction === 'right_left') {
+                    current_object = $($(".ui-selected", this).get().reverse());
                 }
-            });
+
+                current_object.each(function (index, value) {
+                    tablecell = $(this);
+                    tablecellid = tablecell.attr('id');
+
+                    var list = $('#' + tablecellid + '_list');
+                    if (list.length) {
+                        var stamp = tablecellid + '_time';
+                        $('#' + stamp).remove();
+                        var tp = tp_value;
+                        // Time point of zero allowed
+                        if (tp !== '') {
+                            if (time_how_to_increment === 'add') {
+                                if ((tp + index * incr) >= 0) {
+                                    tp += index * incr;
+                                }
+                                else {
+                                    tp = 0;
+                                }
+                            }
+                            else {
+                                tp *= Math.pow(incr, index);
+                            }
+
+                            var text = 'Time: ' + tp + ' ' + tptext;
+                            var li = $('<li>')
+                                .attr('id', stamp)
+                                .text(text)
+                                .click(function () {
+                                    if (confirm('Are you sure you want to remove this time point?\n' + $(this).text())) {
+                                        $(this).remove();
+                                    }
+                                });
+
+                            li.append($('<input>')
+                                .attr('type', 'hidden')
+                                .attr('name', stamp)
+                                // Multiple by time point unit to get minutes
+                                .attr('value', tp * tpunit));
+                            list.prepend(li);
+                        }
+                    }
+                });
+            }
         }
 
         else if (act == 'add-label') {

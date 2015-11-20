@@ -173,13 +173,23 @@ $(document).ready(function () {
 
             // Add every value (excluding the QC)
             for (var j=0; j<6; j++) {
-                table += "<th>" + number_with_commas(line[j]) + "</th>";
+                if (line[j]) {
+                    table += "<th>" + number_with_commas(line[j]) + "</th>";
+                }
+                else {
+                    table += "<th></th>";
+                }
             }
 
             // Just add text if this is a header row for QC OR if this row is invalid
             // (QC status of an ignored row does not really matter)
             if (i < headers && !exist || !every) {
-                table += "<th>" + line[6] + "</th>";
+                if (line[6]) {
+                    table += "<th>" + line[6] + "</th>";
+                }
+                else {
+                    table += "<th></th>";
+                }
             }
             // Add an input for the QC if this isn't a header
             // QC inputs NAME begin with "QC_"
@@ -230,7 +240,7 @@ $(document).ready(function () {
             var value = line[4];
             var value_unit = line[5];
 
-            var quality = line[6];
+            var quality = $.trim(line[6]);
 
             // Crash if the time or value are not numeric
             if (isNaN(time) || isNaN(value)) {
@@ -310,7 +320,6 @@ $(document).ready(function () {
 
     var id = getReadoutValue();
 
-
     // Indicates whether the data exists in the database or not
     var exist = false;
 
@@ -322,10 +331,11 @@ $(document).ready(function () {
     }
 
     var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
-            "<tr style='background: #FF2400'>" + header + "</tr>" +
-            "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
-            "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
-            "</tbody></table>";
+        "<tr style='background: #FF2400'>" + "<th>Chip ID</th><th>[Chip ID]</th>" + repeat('<th><br><br></th>',5) + "</tr>" +
+        "<tr style='background: #FF2400'>" + header + "</tr>" +
+        "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
+        "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
+        "</tbody></table>";
 
     if ($('#assaychipreadoutassay_set-group')[0] != undefined) {
         $('<div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;min-width: 975px;overflow: hidden;">')

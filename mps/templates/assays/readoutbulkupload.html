@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block load %}
+    <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/help.js" %}"></script>
+{% endblock %}
+
 {% block content %}
 
     <form enctype="multipart/form-data" class="form-horizontal" method="post" >
@@ -12,7 +17,7 @@
 {#        <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
     </h1>
 
-    {% include "submit.html" %}
+    {% include "submit.html" with help="y" %}
 
     {% include 'errors.html' %}
 
@@ -45,4 +50,281 @@
 
     </form>
 
+    <div hidden id="help_dialog" title="Excel Upload Help">
+        <ul class="list-group">
+            <li class="list-group-item">
+                <h4>Each <i>sheet</i> of the excel file must follow either a <b>Chip</b> or <b>Plate</b> format</h4>
+            </li>
+            <li class="list-group-item">
+                <h4>The format for <b>Chip</b> uploads is as follows:</h4>
+                <table class="table table-bordered small" style="background-color: #F0FFFF;">
+                    <thead>
+                        <tr class="active">
+                            <th>Chip ID</th>
+                            <th>[Chip ID]</th>
+                            <th></th><th></th><th></th><th></th><th></th>
+                        </tr>
+                        <tr class="active">
+                            <th>Time</th>
+                            <th>Time Unit</th>
+                            <th>Assay</th>
+                            <th>Object</th>
+                            <th>Value</th>
+                            <th>Value Unit</th>
+                            <th>QC Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>[Time]</td>
+                            <td>[Time Unit]</td>
+                            <td>[Assay]</td>
+                            <td>[Object]</td>
+                            <td>[Value]</td>
+                            <td>[Value Unit]</td>
+                            <td>[Leave Blank to Pass]</td>
+                        </tr>
+                        <tr>
+                            <td>[Time]</td>
+                            <td>[Time Unit]</td>
+                            <td>[Assay]</td>
+                            <td>[Object]</td>
+                            <td>[Value]</td>
+                            <td>[Value Unit]</td>
+                            <td>[Any Value in this Column Marks the Reading Invalid]</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </li>
+            <li class="list-group-item">
+                <h4>For <b>Plate</b> uploads you may choose between <b>Block</b> and <b>Tabular</b> formats</h4>
+            </li>
+            <li class="list-group-item">
+                <h4>A theoretical 3x2 6-well plate in <b>Block</b> format would be as follows:</h4>
+                <table class="table table-bordered small" style="background-color: #F0FFFF;">
+                    <thead>
+                        <tr class="active">
+                            <th>Plate ID</th>
+                            <th>[Plate ID]</th>
+                            <th>Upload Type</th>
+                            <th>Block</th>
+                            <th></th><th></th><th></th><th></th><th></th><th></th>
+                        </tr>
+                        <tr class="active">
+                            <th>Assay</th>
+                            <th>[Assay 1]</th>
+                            <th>Feature</th>
+                            <th>[Feature 1]</th>
+                            <th>Value Unit</th>
+                            <th>[Value Unit 1]</th>
+                            <th>Time*</th>
+                            <th>[Time 1]*</th>
+                            <th>Time Units*</th>
+                            <th>[Time Unit 1]*</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>[Val 1]</td>
+                            <td>[Val 2]</td>
+                            <td>[Val 3]</td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                        </tr>
+                        <tr>
+                            <td>[Val 4]</td>
+                            <td>[Val 5]</td>
+                            <td>[Val 6]</td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                        </tr>
+                        <tr class="active">
+                            <th>Assay</th>
+                            <th>[Assay 2]</th>
+                            <th>Feature</th>
+                            <th>[Feature 2]</th>
+                            <th>Value Unit</th>
+                            <th>[Value Unit 2]</th>
+                            <th>Time*</th>
+                            <th>[Time 2]*</th>
+                            <th>Time Units*</th>
+                            <th>[Time Unit 2]*</th>
+                        </tr>
+                        <tr>
+                            <td>[Val 7]</td>
+                            <td>[Val 8]</td>
+                            <td>[Val 9]</td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                        </tr>
+                        <tr>
+                            <td>[Val 10]</td>
+                            <td>[Val 11]</td>
+                            <td>[Val 12]</td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                *Optional (if not using time, totally exclude cells)
+            </li>
+            <li class="list-group-item">
+                <h4>The above example in <b>Tabular</b> format would be as follows:</h4>
+                <table class="table table-bordered small" style="background-color: #F0FFFF;">
+                    <thead>
+                        <tr class="active">
+                            <th>Plate ID</th>
+                            <th>[Plate ID]</th>
+                            <th>Upload Type</th>
+                            <th>Tabular</th>
+                            <th></th><th></th><th></th>
+                        </tr>
+                        <tr class="active">
+                            <th>Well ID</th>
+                            <th>Assay</th>
+                            <th>Feature</th>
+                            <th>Value Unit</th>
+                            <th>Time*</th>
+                            <th>Time Units*</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>A1</td>
+                            <td>[Assay 1]</td>
+                            <td>[Feature 1]</td>
+                            <td>[Value Unit 1]</td>
+                            <td>[Time 1]*</td>
+                            <td>[Time Unit 1]*</td>
+                            <td>[Val 1]</td>
+                        </tr>
+                        <tr>
+                            <td>A2</td>
+                            <td>[Assay 1]</td>
+                            <td>[Feature 1]</td>
+                            <td>[Value Unit 1]</td>
+                            <td>[Time 1]*</td>
+                            <td>[Time Unit 1]*</td>
+                            <td>[Val 2]</td>
+                        </tr>
+                        <tr>
+                            <td>A3</td>
+                            <td>[Assay 1]</td>
+                            <td>[Feature 1]</td>
+                            <td>[Value Unit 1]</td>
+                            <td>[Time 1]*</td>
+                            <td>[Time Unit 1]*</td>
+                            <td>[Val 3]</td>
+                        </tr>
+                        <tr>
+                            <td>B1</td>
+                            <td>[Assay 1]</td>
+                            <td>[Feature 1]</td>
+                            <td>[Value Unit 1]</td>
+                            <td>[Time 1]*</td>
+                            <td>[Time Unit 1]*</td>
+                            <td>[Val 4]</td>
+                        </tr>
+                        <tr>
+                            <td>B2</td>
+                            <td>[Assay 1]</td>
+                            <td>[Feature 1]</td>
+                            <td>[Value Unit 1]</td>
+                            <td>[Time 1]*</td>
+                            <td>[Time Unit 1]*</td>
+                            <td>[Val 5]</td>
+                        </tr>
+                        <tr>
+                            <td>B3</td>
+                            <td>[Assay 1]</td>
+                            <td>[Feature 1]</td>
+                            <td>[Value Unit 1]</td>
+                            <td>[Time 1]*</td>
+                            <td>[Time Unit 1]*</td>
+                            <td>[Val 6]</td>
+                        </tr>
+                        <tr>
+                            <td>A1</td>
+                            <td>[Assay 2]</td>
+                            <td>[Feature 2]</td>
+                            <td>[Value Unit 2]</td>
+                            <td>[Time 2]*</td>
+                            <td>[Time Unit 2]*</td>
+                            <td>[Val 7]</td>
+                        </tr>
+                        <tr>
+                            <td>A2</td>
+                            <td>[Assay 2]</td>
+                            <td>[Feature 2]</td>
+                            <td>[Value Unit 2]</td>
+                            <td>[Time 2]*</td>
+                            <td>[Time Unit 2]*</td>
+                            <td>[Val 8]</td>
+                        </tr>
+                        <tr>
+                            <td>A3</td>
+                            <td>[Assay 2]</td>
+                            <td>[Feature 2]</td>
+                            <td>[Value Unit 2]</td>
+                            <td>[Time 2]*</td>
+                            <td>[Time Unit 2]*</td>
+                            <td>[Val 9]</td>
+                        </tr>
+                        <tr>
+                            <td>B1</td>
+                            <td>[Assay 2]</td>
+                            <td>[Feature 2]</td>
+                            <td>[Value Unit 2]</td>
+                            <td>[Time 2]*</td>
+                            <td>[Time Unit 2]*</td>
+                            <td>[Val 10]</td>
+                        </tr>
+                        <tr>
+                            <td>B2</td>
+                            <td>[Assay 2]</td>
+                            <td>[Feature 2]</td>
+                            <td>[Value Unit 2]</td>
+                            <td>[Time 2]*</td>
+                            <td>[Time Unit 2]*</td>
+                            <td>[Val 11]</td>
+                        </tr>
+                        <tr>
+                            <td>B3</td>
+                            <td>[Assay 2]</td>
+                            <td>[Feature 2]</td>
+                            <td>[Value Unit 2]</td>
+                            <td>[Time 2]*</td>
+                            <td>[Time Unit 2]*</td>
+                            <td>[Val 12]</td>
+                        </tr>
+                    </tbody>
+                </table>
+                *Optional (if not using time, totally exclude columns)
+            </li>
+            <li class="list-group-item">
+                File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays
+            </li>
+            <li class="list-group-item">
+                <b class="text-danger">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    Be sure that each dataset is on its own <i>sheet</i>
+                </b>
+            </li>
+            <li class="list-group-item">
+                <b class="text-danger">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    Always start in the top-left corner (the first cell)
+                </b>
+            </li>
+            <li class="list-group-item">
+                <b class="text-danger">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    Uploading overwrites previous data
+                </b>
+            </li>
+            <li class="list-group-item">
+                <b class="text-danger">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    You will have to reselect the desired file after a failed submission
+                </b>
+            </li>
+        </ul>
+    </div>
 {% endblock %}

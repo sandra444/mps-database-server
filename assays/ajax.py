@@ -114,7 +114,7 @@ def fetch_readout(request):
             'row': readout.row,
             'column': readout.column,
             'value': readout.value,
-            'assay': readout.assay.assay_id.assay_name,
+            'assay': readout.assay.assay_id.assay_short_name,
             'time': readout.elapsed_time,
             # TODO SOMEWHAT FRIVOLOUS CONSIDER REVISING
             'time_unit': time_unit,
@@ -246,7 +246,14 @@ def fetch_chip_readout(request):
         logger.error('chip not present in request to fetch_chip_readout')
         return HttpResponseServerError()
 
-    chip_data = AssayChipRawData.objects.filter(assay_chip_id=chip_id).order_by('assay_id','elapsed_time')
+    chip_data = AssayChipRawData.objects.prefetch_related(
+        'assay_id'
+    ).filter(
+        assay_chip_id=chip_id
+    ).order_by(
+        'assay_id',
+        'elapsed_time'
+    )
 
     time_unit = AssayChipReadout.objects.filter(id=chip_id)[0].timeunit
 

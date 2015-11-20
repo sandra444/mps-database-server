@@ -17,6 +17,8 @@ import ujson as json
 # I use regular expressions for a string split at one point
 import re
 from django.db import connection, transaction
+from urllib import unquote
+
 
 class AssayModelTypeAdmin(LockableAdmin):
     save_on_top = True
@@ -60,9 +62,9 @@ class AssayModelAdmin(LockableAdmin):
             None, {
                 'fields': (
                     ('assay_name', 'assay_short_name',),
-                    ('assay_type','test_type',),
+                    ('assay_type', 'test_type',),
                     ('version_number', 'assay_protocol_file', ),
-                    ('assay_description',), )
+                    ('assay_description',))
             }
         ),
         (
@@ -260,10 +262,10 @@ def save_assay_layout(request, obj, form, change):
                     column
                 ))
 
-    cursor.executemany(type_query,type_query_list)
-    cursor.executemany(time_query,time_query_list)
-    cursor.executemany(compound_query,compound_query_list)
-    cursor.executemany(label_query,label_query_list)
+    cursor.executemany(type_query, type_query_list)
+    cursor.executemany(time_query, time_query_list)
+    cursor.executemany(compound_query, compound_query_list)
+    cursor.executemany(label_query, label_query_list)
 
     transaction.commit()
 
@@ -282,10 +284,11 @@ class AssayLayoutAdmin(LockableAdmin):
         (
             'Layout Parameters', {
                 'fields': (
-                    ('layout_name',
-                     'device',
-                     'standard',
-                     'locked',
+                    (
+                        'layout_name',
+                        'device',
+                        'standard',
+                        'locked',
                     )
                 )
             }
@@ -315,9 +318,9 @@ class AssayLayoutAdmin(LockableAdmin):
         ),
         (
             'Group Access', {
-                'fields':(
-                    'group','restricted'
-                 ),
+                'fields': (
+                    'group', 'restricted'
+                ),
             }
         ),
     )
@@ -350,7 +353,7 @@ class AssayPlateSetupAdmin(LockableAdmin):
     # Setups for MICROPLATES
 
     class Media(object):
-        js = ('js/inline_fix.js','assays/customize_plate_setup.js')
+        js = ('js/inline_fix.js', 'assays/customize_plate_setup.js')
         css = {'all': ('assays/customize_admin.css',)}
 
     save_on_top = True
@@ -411,9 +414,9 @@ class AssayPlateSetupAdmin(LockableAdmin):
         ),
         (
             'Group Access', {
-                'fields':(
-                    'group','restricted'
-                 ),
+                'fields': (
+                    'group', 'restricted'
+                ),
             }
         ),
     )
@@ -442,6 +445,7 @@ def get_qc_status_plate(form):
         # If this is a QC input
         if key.startswith('{') and key.endswith('}'):
             # Evaluate the key
+            key = unquote(key)
             values = json.loads(key)
             row = unicode(values.get('row'))
             col = unicode(values.get('column'))
@@ -457,6 +461,7 @@ def get_qc_status_plate(form):
             qc_status.update({index: value})
 
     return qc_status
+
 
 @transaction.atomic
 def modify_qc_status_plate(current_plate_readout, form):
@@ -513,6 +518,9 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
     datareader = csv.reader(file, delimiter=',')
     datalist = list(datareader)
 
+    # EXCLUDE THE HEADER
+    datalist = datalist[1:]
+
     assays = {}
     for assay in AssayPlateReadoutAssay.objects.filter(readout_id=currentAssayReadout):
         assay_name = assay.assay_id.assay_name.upper()
@@ -542,7 +550,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 
             # If this line is a header
             # Headers should look like:
-            # ASSAY, {{ASSAY}}, FEATURE, {{FEATURE}}, READOUT UNIT, {{READOUT UNIT}}, TIME, {{TIME}}. TIME UNIT, {{TIME UNIT}}
+            # ASSAY, {{}}, FEATURE, {{}}, READOUT UNIT, {{}}, TIME, {{}}. TIME UNIT, {{}}
             if line[0].upper().strip() == 'ASSAY':
                 # Get the assay
                 assay_name = line[1].upper()
@@ -651,7 +659,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                     quality
                 ))
 
-    cursor.executemany(query,query_list)
+    cursor.executemany(query, query_list)
 
     transaction.commit()
 
@@ -665,7 +673,7 @@ class AssayPlateReadoutInline(admin.TabularInline):
 
     fields = (
         (
-            ('assay_id','reader_id','readout_unit','feature')
+            ('assay_id', 'reader_id', 'readout_unit', 'feature')
         ),
     )
     extra = 0
@@ -763,9 +771,9 @@ class AssayPlateReadoutAdmin(LockableAdmin):
         ),
         (
             'Group Access', {
-                'fields':(
-                    'group','restricted'
-                 ),
+                'fields': (
+                    'group', 'restricted'
+                ),
             }
         ),
     )
@@ -818,6 +826,7 @@ def removeExistingChip(currentChipReadout):
     #         readout.delete()
     # return
 
+
 def get_qc_status_chip(form):
     # Get QC status for each line
     qc_status = {}
@@ -836,13 +845,14 @@ def get_qc_status_chip(form):
 
     return qc_status
 
+
 # NOTE: Tricky thing about chip QC is IT DEPENDS ON WHETHER IT IS BEING ADDED OR UPDATED
 # Why? The ORDER OF THE VALUES REFLECTS THE FILE WHEN ADDING, BUT IS SORTED IN UPDATE
 @transaction.atomic
 def modify_qc_status_chip(current_chip_readout, form):
     # Get the readouts as they would appear on the front end
     # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
-    readouts = AssayChipRawData.objects.filter(assay_chip_id=current_chip_readout).order_by('assay_id','elapsed_time')
+    readouts = AssayChipRawData.objects.filter(assay_chip_id=current_chip_readout).order_by('assay_id', 'elapsed_time')
 
     # Get QC status for each line
     qc_status = get_qc_status_chip(form)
@@ -850,6 +860,7 @@ def modify_qc_status_chip(current_chip_readout, form):
     for index, readout in enumerate(readouts):
         readout.quality = qc_status.get(index)
         readout.save()
+
 
 @transaction.atomic
 def parseChipCSV(currentChipReadout, file, headers, form):
@@ -914,7 +925,6 @@ def parseChipCSV(currentChipReadout, file, headers, form):
             elapsed_time=time,
             quality=quality,
         ).save()
-
 
 
 class AssayChipCellsInline(admin.TabularInline):
@@ -1019,9 +1029,9 @@ class AssayChipSetupAdmin(LockableAdmin):
         ),
         (
             'Group Access', {
-                'fields':(
-                    'group','restricted'
-                 ),
+                'fields': (
+                    'group', 'restricted'
+                ),
             }
         ),
     )
@@ -1065,13 +1075,14 @@ class AssayChipReadoutInline(admin.TabularInline):
 
     fields = (
         (
-            ('assay_id','object_type','reader_id','readout_unit',)
+            ('assay_id', 'object_type', 'reader_id', 'readout_unit',)
         ),
     )
     extra = 0
 
     class Media(object):
         css = {"all": ("css/hide_admin_original.css",)}
+
 
 # ChipReadout validation occurs in the inline formset
 class AssayChipReadoutForm(forms.ModelForm):
@@ -1082,10 +1093,11 @@ class AssayChipReadoutForm(forms.ModelForm):
         model = AssayChipReadout
         exclude = ('',)
 
+
 class AssayChipReadoutAdmin(LockableAdmin):
     # TIMEPOINT readouts from ORGAN CHIPS
     class Media(object):
-        js = ('js/inline_fix.js','assays/customize_chip.js', 'js/d3.min.js', 'js/c3.min.js',)
+        js = ('js/inline_fix.js', 'assays/customize_chip.js', 'js/d3.min.js', 'js/c3.min.js',)
         css = {'all': ('assays/customize_admin.css', 'css/c3.css',)}
 
     form = AssayChipReadoutForm
@@ -1166,9 +1178,9 @@ class AssayChipReadoutAdmin(LockableAdmin):
         ),
         (
             'Group Access', {
-                'fields':(
-                    'group','restricted'
-                 ),
+                'fields': (
+                    'group', 'restricted'
+                ),
             }
         ),
     )
@@ -1390,7 +1402,7 @@ admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 class AssayChipTestResultAdmin(LockableAdmin):
     # Results calculated from RAW CHIP DATA aka 'Chip Result'
     class Media(object):
-        js = ('js/cookies.js','js/whittle.js','js/inline_fix.js','assays/customize_chip_results_admin.js')
+        js = ('js/cookies.js', 'js/whittle.js', 'js/inline_fix.js', 'assays/customize_chip_results_admin.js')
 
     save_as = True
     save_on_top = True
@@ -1431,9 +1443,9 @@ class AssayChipTestResultAdmin(LockableAdmin):
         ),
         (
             'Group Access', {
-                'fields':(
-                    'group','restricted'
-                 ),
+                'fields': (
+                    'group', 'restricted'
+                ),
             }
         ),
     )
@@ -1462,10 +1474,10 @@ class AssayPlateResultInline(admin.TabularInline):
 class AssayPlateTestResultAdmin(LockableAdmin):
     # Test Results from MICROPLATES
     class Media(object):
-        js = ('js/cookies.js','js/whittle.js', 'js/inline_fix.js', 'assays/customize_plate_results.js')
+        js = ('js/cookies.js', 'js/whittle.js', 'js/inline_fix.js', 'assays/customize_plate_results.js')
         css = {'all': ('assays/customize_admin.css',)}
 
-    inlines = [AssayPlateResultInline,]
+    inlines = [AssayPlateResultInline]
 
     save_as = True
     save_on_top = True
@@ -1507,61 +1519,15 @@ class AssayPlateTestResultAdmin(LockableAdmin):
         ),
         (
             'Group Access', {
-                'fields':(
-                    'group','restricted'
-                 ),
+                'fields': (
+                    'group', 'restricted'
+                ),
             }
         ),
     )
 
 
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
-
-# TODO CHANGE TO USE SETUP IN LIEU OF READOUT ID
-# TODO CHANGE TO REMOVE PREVIOUS DATA
-# TODO BULK UPLOADS ARE CURRENTLY NOT AVAILABLE
-@transaction.atomic
-def parseRunCSV(currentRun, file):
-    datareader = csv.reader(file, delimiter=',')
-    datalist = list(datareader)
-
-    readouts = []
-
-    for rowID, rowValue in enumerate(datalist):
-        # rowValue holds all of the row elements
-        # rowID is the index of the current row from top to bottom
-
-        # Get foreign keys from the first row
-        if rowID == 0:
-            readouts = [x for x in rowValue if x]
-
-        elif not rowValue[0] or not rowValue[1] or not rowValue[2]:
-            continue
-
-        else:
-            for colID in range(3, len(readouts)):
-                currentChipReadout = readouts[colID]
-                field = rowValue[2]
-                val = rowValue[colID]
-                time = rowValue[0]
-                assay = AssayModel.objects.get(assay_name=rowValue[1])
-
-                if not val:
-                    continue
-
-                # Originally did not ignore empty cells; does now
-                # if not val:
-                #     val = None
-
-                #How to parse Chip data
-                AssayChipRawData(
-                    assay_chip_id=AssayChipReadout.objects.get(id=currentChipReadout),
-                    assay_id=AssayChipReadoutAssay.objects.get(readout_id=currentChipReadout, assay_id=assay),
-                    field_id=field,
-                    value=val,
-                    elapsed_time=time
-                ).save()
-    return
 
 
 class AssayRunFormAdmin(forms.ModelForm):
@@ -1581,50 +1547,11 @@ class AssayRunFormAdmin(forms.ModelForm):
         # clean the form data, before validation
         data = super(AssayRunFormAdmin, self).clean()
 
-        if not any([data['toxicity'],data['efficacy'],data['disease'],data['cell_characterization']]):
+        if not any([data['toxicity'], data['efficacy'], data['disease'], data['cell_characterization']]):
             raise forms.ValidationError('Please select at least one study type')
 
         if data['assay_run_id'].startswith('-'):
             raise forms.ValidationError('Error with assay_run_id; please try again')
-
-        # Check to make sure there is a file and it is not already in memory
-        if data['file'] and type(data['file'].file) == BytesIO:
-            datareader = csv.reader(data['file'].file, delimiter=',')
-            datalist = list(datareader)
-
-            readouts = list(x for x in datalist[0] if x)
-            # Check if any Readouts already exist, if so, crash
-            for id in readouts[3:]:
-                if AssayChipRawData.objects.filter(assay_chip_id=id).count() > 0:
-                    raise forms.ValidationError(
-                        'Chip Readout id = %s already contains data; please change your batch file' % id)
-                if not AssayChipReadout.objects.filter(id=id).exists():
-                    raise forms.ValidationError(
-                        'Chip Readout id = %s does not exist; please change your batch file or add this readout' % id)
-
-            for line in datalist[1:]:
-                assay_name = line[1]
-                if not assay_name:
-                    continue
-                if not AssayModel.objects.filter(assay_name=assay_name).exists():
-                    raise forms.ValidationError(
-                        'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
-                assay = AssayModel.objects.get(assay_name=assay_name)
-                for i in range(3,len(readouts)):
-                    val = line[i]
-                    if val and val != 'None':
-                        currentChipReadout = readouts[i]
-                        if not AssayChipReadoutAssay.objects.filter(readout_id=currentChipReadout, assay_id=assay).exists():
-                            raise forms.ValidationError(
-                                'No assay with the name "%s" exists; please change your file or add this assay' % assay_name)
-                    # Check every value to make sure it can resolve to a float
-                    try:
-                        float(val)
-                    except:
-                        raise forms.ValidationError(
-                                'The value "%s" is invalid; please make sure all values are numerical' % str(val))
-
-        return data
 
 
 class AssayRunAdmin(LockableAdmin):
@@ -1658,14 +1585,13 @@ class AssayRunAdmin(LockableAdmin):
                 )
             }
         ),
-        # Removed to avoid confusion
-        # (
-        #     'Study Data Upload', {
-        #         'fields': (
-        #             'file',
-        #         )
-        #     }
-        # ),
+        (
+            'Protocol File Upload', {
+                'fields': (
+                    'file',
+                )
+            }
+        ),
         (
             'Change Tracking', {
                 'fields': (
@@ -1678,9 +1604,9 @@ class AssayRunAdmin(LockableAdmin):
         ),
         (
             'Group Access', {
-                'fields':(
-                    'group','restricted'
-                 ),
+                'fields': (
+                    'group', 'restricted'
+                ),
             }
         ),
     )
@@ -1692,11 +1618,6 @@ class AssayRunAdmin(LockableAdmin):
 
         else:
             obj.modified_by = obj.created_by = request.user
-
-        # TODO FIX BULK UPLOAD BEFORE ALLOWING THIS
-        # if request.FILES:
-        #     # pass the upload file name to the CSV reader if a file exists
-        #     parseRunCSV(obj, request.FILES['file'])
 
         obj.save()
 
