@@ -7,6 +7,7 @@
     <script src="{% static "js/whittle.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
+    <script src="{% static "js/help.js" %}"></script>
     <script src="{% static "assays/customize_plate_results.js" %}"></script>
 {% endblock %}
 
@@ -37,7 +38,7 @@
 {#            {% include 'flag.html'%}#}
         </h1>
 
-        {% include "submit.html" with flag="y" %}
+        {% include "submit.html" with flag="y" help="y" %}
 
         {% include 'errors.html' %}
 
@@ -152,5 +153,26 @@
             </tbody>
         </table>
     </form>
+
+    <div hidden id="help_dialog" title="Plate Test Results Help">
+        <h4>Making Plate Test Results</h4>
+        <ul class="list-group">
+            <li class="list-group-item">
+                First, choose a <b>Readout</b>
+                <br>
+                Without a readout, you are unable to specify <b>Assay & Feature</b>
+            </li>
+            <li class="list-group-item">
+                <b>Summary of Results</b> should be a brief summary of your findings from this plate
+                <br>
+                These results can be qualitative
+            </li>
+            <li class="list-group-item">
+                Each <b>Result</b> represents a finding from a specific assay
+                <br>
+                Clicking <b>Add Result</b> will make another row
+            </li>
+        </ul>
+    </div>
 
 {% endblock %}
