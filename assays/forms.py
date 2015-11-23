@@ -142,6 +142,8 @@ class AssayChipSetupForm(CloneableForm):
             'base_unit',
             'scale_factor'
         ) | PhysicalUnits.objects.filter(unit='%')
+        # Filter devices to be only microchips (or "chips" like the venous system)
+        self.fields['device'].queryset = Microdevice.objects.filter(device_type='chip')
 
     another = forms.BooleanField(required=False)
 
@@ -903,7 +905,6 @@ def validate_chip_readout_file(
             )
 
 
-# TODO CHIP READOUT UPLOAD UNSTABLE (SPECIFICALLY SUBMIT AND CLONE?)
 class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
     def __init__(self,*args,**kwargs):
         super (AssayChipReadoutInlineFormset,self).__init__(*args,**kwargs)

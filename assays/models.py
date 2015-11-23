@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from django.db import models
-from microdevices.models import Microdevice, OrganModel
+from microdevices.models import Microdevice, OrganModel, OrganModelProtocol
 from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
 
 PHYSICAL_UNIT_TYPES = (
@@ -644,7 +644,15 @@ class AssayChipSetup(FlaggableModel):
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name='Study')
     setup_date = models.DateField(help_text='YYYY-MM-DD')
-    device = models.ForeignKey(OrganModel, verbose_name='Organ Model Name')
+
+    # TEMPORARILY NOT REQUIRED, SET BACK TO REQUIRED AFTER MIGRATONS
+    device = models.ForeignKey(Microdevice, verbose_name='Device')
+
+    # RENAMED (previously field was erroneously device)
+    organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model Name', null=True, blank=True)
+
+    organ_model_protocol = models.ForeignKey(OrganModelProtocol, verbose_name='Organ Model Protocol',
+                                             null=True, blank=True)
 
     variance = models.CharField(max_length=3000, verbose_name='Variance from Protocol', null=True, blank=True)
 

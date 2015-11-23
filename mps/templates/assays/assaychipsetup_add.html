@@ -4,51 +4,12 @@
 {% block load %}
     <script src="{% static "js/inline_add.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "assays/assaychipsetup_add.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
     <script src="{% static "js/help.js" %}"></script>
 {% endblock %}
 
 {% block content %}
-
-<script>
-    $(function() {
-        var date = $("#id_setup_date");
-        var curr_date = date.val();
-        //Add datepicker to assay and readout start time
-        date.datepicker();
-        date.datepicker("option","dateFormat","yy-mm-dd");
-        date.datepicker("setDate" , curr_date);
-
-        // Open and then close dialog so it doesn't get placed in window itself
-        var dialog = $('#dialog');
-        dialog.dialog({
-            width: 825,
-            height: 500,
-            closeOnEscape: true,
-            autoOpen: false
-        });
-        dialog.removeProp('hidden');
-
-        var warning = $('#warning');
-        warning.dialog({
-            height:200,
-            modal: true,
-            closeOnEscape: true,
-            autoOpen: false,
-            buttons: {
-            Yes: function() {
-                $(this).dialog("close");
-                },
-            No: function() {
-                $('#id_chip_test_type').val('compound');
-                $('#id_chip_test_type').trigger('change');
-                $(this).dialog("close");
-                }
-            }
-        });
-        warning.removeProp('hidden');
-    });
-</script>
 
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
@@ -133,11 +94,47 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="device" class="col-sm-2 control-label">Organ Model Name*</label>
+        <label for="device" class="col-sm-2 control-label">Device*</label>
         <div class="col-sm-10">
           {{ form.device }}
+        </div>
+    </div>
+
+    {% if form.organ_model.errors %}
+        {% for error in form.organ_model.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div id="organ_model_div" class="form-group has-error">
+    {% else %}
+    <div hidden id="organ_model_div" class="form-group">
+    {% endif %}
+        <label for="organ_model" class="col-sm-2 control-label">Organ Model</label>
+        <div class="col-sm-10">
+          {{ form.organ_model }}
+        </div>
+    </div>
+
+    {% if form.organ_model_protocol.errors %}
+        {% for error in form.organ_model_protocol.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div id="protocol_div" class="form-group has-error">
+    {% else %}
+    <div hidden id="protocol_div" class="form-group">
+    {% endif %}
+        <label for="organ_model_protocol" class="col-sm-2 control-label">Organ Model Protocol</label>
+        <div class="col-sm-10">
+          {{ form.organ_model_protocol }}
           <span>
-            <a href="" id="protocol"></a>
+            <a target="_blank" href="" id="protocol_display"></a>
           </span>
         </div>
     </div>
@@ -150,9 +147,9 @@
                 {{error}}
             </div>
         {% endfor %}
-    <div class="form-group has-error">
+    <div hidden id="variance_div" class="form-group has-error">
     {% else %}
-    <div class="form-group">
+    <div hidden id="variance_div" class="form-group">
     {% endif %}
         <label for="variance" class="col-sm-2 control-label">Variance from Protocol</label>
         <div class="col-sm-10">
@@ -456,101 +453,5 @@
         </li>
     </ul>
 </div>
-
-<script>
-    // Global variables are in poor taste
-    var id = null;
-
-    function search(elem) {
-        id = elem.id.replace(/\D/g,'');
-        $("#dialog").dialog('open');
-    }
-
-    $(function() {
-
-        // safe converts the JSON passed to the context into something the JS compiler can read
-        var protocols = {{ protocols|safe }};
-
-        function display_protocol() {
-            if(protocols[$('#id_device').val()]) {
-                $('#protocol').html('Click here to view protocol')
-                        .prop('href','/media/' + protocols[$('#id_device').val()]);
-            }
-            else{
-                $('#protocol').html('')
-                        .prop('href','');
-            }
-        }
-
-        display_protocol();
-
-        $('#id_device').change( function() {
-            display_protocol();
-        });
-
-        function toggle_warning(first) {
-            if (test_type == 'control' && compound) {
-                $('#control_warning').prop('hidden',false);
-                if (!first) {
-                    $('#warning').dialog('open');
-                }
-            }
-            else{
-                $('#control_warning').prop('hidden',true);
-            }
-        }
-
-        var test_type_selector = $('#id_chip_test_type');
-        var compound_selector = $('#id_compound');
-
-        var test_type = test_type_selector.val();
-        var compound = compound_selector.val();
-
-        toggle_warning(true);
-
-        test_type_selector.change(function() {
-            test_type = test_type_selector.val();
-            toggle_warning(false);
-        });
-
-        compound_selector.change(function() {
-            compound = compound_selector.val();
-            toggle_warning(false);
-        });
-
-        $('.cellsample').click(function (evt) {
-            var cellsampleId = this.id;
-            var selectedInput = $('#id_assaychipcells_set-' + id + '-cell_sample');
-            selectedInput.prop('value', cellsampleId);
-            var cellsampleName = this.attributes["name"].value;
-            var selectedLabel = $('#id_assaychipcells_set-' + id + '-cell_sample_label');
-            selectedLabel.text(cellsampleName);
-            $('#dialog').dialog('close');
-        });
-
-        $('#cellsamples').DataTable({
-            "iDisplayLength": 50,
-            // Initially sort on receipt date
-            "order": [ 0, "desc" ],
-            // If one wants to display top and bottom
-            "sDom": '<"wrapper"fti>'
-        });
-
-        // Move filter to left
-        $('.dataTables_filter').css('float', 'left');
-
-        // This code should populate cell labels when data is already given
-        var current_id = 0;
-        var current_input = $('#id_assaychipcells_set-' + current_id + '-cell_sample');
-        while(current_input[0]) {
-            if(current_input.val()) {
-                var cell_name = $('#' + current_input.val()).attr('name');
-                $('#id_assaychipcells_set-' + current_id + '-cell_sample_label').text(cell_name);
-            }
-            current_id += 1;
-            current_input = $('#id_assaychipcells_set-' + current_id + '-cell_sample');
-        }
-    });
-</script>
 
 {% endblock %}

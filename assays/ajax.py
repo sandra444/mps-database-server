@@ -15,8 +15,10 @@ logger = logging.getLogger(__name__)
 
 # TODO OPTIMIZE DATABASE HITS
 
+
 def main(request):
     return HttpResponseServerError()
+
 
 # TODO ADD BASE LAYOUT CONTENT TO ASSAY LAYOUT
 def fetch_assay_layout_content(request):
@@ -37,7 +39,6 @@ def fetch_assay_layout_content(request):
 
     elif model == 'assay_device_readout':
         layout = AssayPlateReadout.objects.get(id=id).setup.assay_layout
-
 
     data = defaultdict(dict)
 
@@ -187,6 +188,7 @@ def fetch_well_types(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+
 #Fetches and displays assay layout from plate readout
 def fetch_plate_info(request):
     """Returns dynamic info for plate assays"""
@@ -236,6 +238,7 @@ def fetch_center_id(request):
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
+
 
 def fetch_chip_readout(request):
     """Returns the Raw Chip Data stored for a Chip Readout"""
@@ -289,6 +292,80 @@ def fetch_chip_readout(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+
+# Should these be refactored just to use fetch_context instead?
+def fetch_organ_models(request):
+    context = u'<option value="">---------</option>'
+
+    device = request.POST.get('device')
+
+    findings = OrganModel.objects.filter(device_id=device)
+
+    for finding in findings:
+        # match value to the desired subject ID
+        value = str(finding.id)
+        context += u'<option value="' + value + '">' + unicode(finding) + '</option>'
+
+    data = {}
+
+    data.update({
+        'context': context,
+    })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
+
+def fetch_protocols(request):
+    context = u'<option value="">---------</option>'
+
+    organ_model = request.POST.get('organ_model')
+
+    # Order should be from newest to oldest
+    findings = OrganModelProtocol.objects.filter(organ_model_id=organ_model).order_by('-version')
+
+    # Default to first finding
+    if len(findings) >= 1:
+        finding = findings[0]
+        value = str(finding.id)
+        context += u'<option selected value="' + value + '">' + unicode(finding) + '</option>'
+
+    if len(findings) > 1:
+        # Add the other protocols
+        for finding in findings[1:]:
+            # match value to the desired subject ID
+            value = str(finding.id)
+            context += u'<option value="' + value + '">' + unicode(finding) + '</option>'
+
+    data = {}
+
+    data.update({
+        'context': context,
+    })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
+
+def fetch_protocol(request):
+    data = {}
+
+    protocol_id = request.POST.get('protocol')
+
+    protocol = OrganModelProtocol.objects.filter(pk=protocol_id)
+
+    if protocol:
+        protocol_file = protocol[0].protocol
+        file_name = '/'.join(protocol_file.name.split('/')[1:])
+        href = '/media/' + protocol_file.name
+        data.update({
+            'file_name': file_name,
+            'href': href
+        })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
 def fetch_context(request):
     """Acquires context for whittling down number of dropdown"""
 
@@ -296,11 +373,11 @@ def fetch_context(request):
 
     # the model who's dropdown you want to whittle down
     models = {
-        'AssayChipReadout':AssayChipReadout,
-        'AssayChipSetup':AssayChipSetup,
-        'AssayRun':AssayRun,
-        'AssayChipReadoutAssay':AssayChipReadoutAssay,
-        'AssayPlateReadoutAssay':AssayPlateReadoutAssay
+        'AssayChipReadout': AssayChipReadout,
+        'AssayChipSetup': AssayChipSetup,
+        'AssayRun': AssayRun,
+        'AssayChipReadoutAssay': AssayChipReadoutAssay,
+        'AssayPlateReadoutAssay': AssayPlateReadoutAssay
     }
 
     # master is what determines the subject's drop down choices
@@ -315,7 +392,7 @@ def fetch_context(request):
     next_model = request.POST.get('next_model')
     next_filter = request.POST.get('next_filter')
 
-    findings = subject.objects.filter(**{master:master_id})
+    findings = subject.objects.filter(**{master: master_id})
 
     if next_model and next_filter:
         next_model = models.get(next_model)
@@ -323,7 +400,7 @@ def fetch_context(request):
         findings = []
 
         for item in original:
-            findings.extend(next_model.objects.filter(**{next_filter:item}))
+            findings.extend(next_model.objects.filter(**{next_filter: item}))
 
     for finding in findings:
         # match value to the desired subject ID
@@ -348,6 +425,9 @@ switch = {
     'fetch_center_id': fetch_center_id,
     'fetch_chip_readout': fetch_chip_readout,
     'fetch_context': fetch_context,
+    'fetch_organ_models': fetch_organ_models,
+    'fetch_protocols': fetch_protocols,
+    'fetch_protocol': fetch_protocol,
 }
 
 

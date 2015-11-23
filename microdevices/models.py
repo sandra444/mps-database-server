@@ -5,12 +5,13 @@ from django.contrib.auth.models import Group
 
 from mps.base.models import LockableModel
 
+
 class MicrophysiologyCenter(LockableModel):
     class Meta(object):
         ordering = ('center_name', )
 
     center_name = models.CharField(max_length=100)
-    center_id = models.CharField(max_length=20,default='-')
+    center_id = models.CharField(max_length=20, default='-')
     description = models.CharField(max_length=400, blank=True, null=True)
     contact_person = models.CharField(max_length=250, blank=True, null=True)
     center_website = models.URLField(blank=True, null=True)
@@ -75,8 +76,8 @@ class Microdevice(LockableModel):
 
     # Optional fields primarily intended for plates
     # (though certain chips appear in a series)
-    number_of_rows = models.IntegerField(blank=True,null=True)
-    number_of_columns = models.IntegerField(blank=True,null=True)
+    number_of_rows = models.IntegerField(blank=True, null=True)
+    number_of_columns = models.IntegerField(blank=True, null=True)
     row_labels = models.CharField(blank=True,
                                   null=True,
                                   max_length=1000,
@@ -111,14 +112,16 @@ class OrganModel(LockableModel):
     device = models.ForeignKey(Microdevice, null=True, blank=True)
     description = models.CharField(max_length=400, null=True, blank=True)
 
-    protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
-                            blank=True, null=True, help_text='File detailing the protocols for this model')
+    # Removed in favor of protocol inline
+    #protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
+    #                        blank=True, null=True, help_text='File detailing the protocols for this model')
 
     def __unicode__(self):
         return self.model_name
 
     def get_absolute_url(self):
         return "/microdevices/model/{}".format(self.id)
+
 
 # It is somewhat odd that ValidatedAssays are inlines in lieu of a manytomany field
 # This was done originally so that additional fields could be added to a validated assay
@@ -127,3 +130,16 @@ class ValidatedAssay(models.Model):
     # Validated assays for an organ model used in inline
     organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model')
     assay = models.ForeignKey('assays.AssayModel', verbose_name='Assay Model')
+
+
+class OrganModelProtocol(models.Model):
+    """
+    This model is intended to be an inline
+    It contains files for Organ Model Protocols and designates their version
+    """
+    organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model')
+    version = models.CharField(max_length=20)
+    protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File')
+
+    def __unicode__(self):
+        return self.version

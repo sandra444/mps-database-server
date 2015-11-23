@@ -574,8 +574,6 @@ class AssayChipSetupAdd(CreateView):
 
         # Cellsamples will always be the same
         context['cellsamples'] = cellsamples
-        # Get protocols
-        context['protocols'] = json.dumps({item['id']: item['protocol'] for item in OrganModel.objects.all().values()})
 
         return context
 

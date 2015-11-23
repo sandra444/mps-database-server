@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 from mps.base.admin import LockableAdmin
-from .models import MicrophysiologyCenter, Manufacturer, Microdevice, OrganModel, ValidatedAssay
+from .models import MicrophysiologyCenter, Manufacturer, Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
 from drugtrials.models import Test
 
 
@@ -110,6 +110,9 @@ class MicrodeviceAdmin(LockableAdmin):
             None, {
                 'fields': (
                     (
+                        'device_type'
+                    ),
+                    (
                         'center', 'manufacturer',
                     ),
                     (
@@ -175,15 +178,14 @@ class MicrodeviceAdmin(LockableAdmin):
 admin.site.register(Microdevice, MicrodeviceAdmin)
 
 
-# class TestInline(admin.TabularInline):
-#     model = Test
-#     extra = 1
-#     exclude = ['created_by', 'modified_by']
-#     fields = ('locked', 'test_name', 'test_type', 'test_unit', 'description')
-#
-#     class Media(object):
-#         css = {"all": ("css/hide_admin_original.css",)}
+class OrganModelProtocolInline(admin.TabularInline):
+    """Organ Model Protocols"""
+    model = OrganModelProtocol
+    fields = ('version', 'protocol')
+    extra = 1
 
+    class Media(object):
+        css = {"all": ("css/hide_admin_original.css",)}
 
 class ValidatedAssayInline(admin.TabularInline):
     # Results calculated from CHIP READOUTS
@@ -220,9 +222,6 @@ class OrganModelAdmin(LockableAdmin):
                     (
                         'organ', 'device', 'description',
                     ),
-                    (
-                        'protocol',
-                    ),
                 )
             }
         ),
@@ -240,7 +239,6 @@ class OrganModelAdmin(LockableAdmin):
 
     actions = ['update_fields']
     save_on_top = True
-    # inlines = [TestInline]
-    inlines = [ValidatedAssayInline]
+    inlines = [ValidatedAssayInline, OrganModelProtocolInline]
 
 admin.site.register(OrganModel, OrganModelAdmin)

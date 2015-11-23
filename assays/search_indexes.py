@@ -2,7 +2,6 @@
 from haystack import indexes
 from .models import *
 
-# TODO ADD PLATES
 
 class AssayRunIndex(indexes.SearchIndex, indexes.Indexable):
     # Substring search is made possible by using EdgeNgramField/NgramField in lieu of CharField
