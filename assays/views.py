@@ -480,6 +480,7 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
         ).prefetch_related(
             'assay_run_id',
             'device',
+            'organ_model',
             'compound',
             'unit',
             'created_by',
@@ -636,15 +637,11 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         # Render form
         formset = AssayChipCellsFormset(instance=self.object)
 
-        # Get protocols
-        protocols = json.dumps({item['id']: item['protocol'] for item in OrganModel.objects.all().values()})
-
         return self.render_to_response(
             self.get_context_data(
                 form=form,
                 formset=formset,
                 cellsamples=cellsamples,
-                protocols=protocols,
                 update=True
             )
         )
@@ -684,15 +681,11 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             return redirect(self.object.get_absolute_url())
         else:
 
-            # Get protocols
-            protocols = json.dumps({item['id']: item['protocol'] for item in OrganModel.objects.all().values()})
-
             return self.render_to_response(
                 self.get_context_data(
                     form=form,
                     formset=formset,
                     cellsamples=cellsamples,
-                    protocols=protocols,
                     update=True
                 )
             )

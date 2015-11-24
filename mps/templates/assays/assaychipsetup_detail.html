@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+{# TODO REVIEW THIS AND OTHER DETAIL PAGES #}
 {% block content %}
     <legend><h1>Chip Setup: {{ object.assay_chip_id }}</h1></legend>
 
@@ -14,12 +15,36 @@
 
     <div class="row">
         <div class="col-sm-2 lead text-right-responsive">
+            <b>Device:</b>
+        </div>
+        <div class="col-sm-10 lead">
+            <a href="/microdevices/device/{{ object.device.id }}">{{ object.device }}</a>
+        </div>
+    </div>
+
+    {% if object.organ_model %}
+    <div class="row">
+        <div class="col-sm-2 lead text-right-responsive">
             <b>Model:</b>
         </div>
         <div class="col-sm-10 lead">
-            <a href="/microdevices/model/{{ object.device.id }}">{{ object.device }}</a>
+            <a href="/microdevices/model/{{ object.organ_model.id }}">{{ object.organ_model }}</a>
         </div>
     </div>
+    {% endif %}
+
+    {% if object.organ_model_protocol %}
+    <div class="row">
+        <div class="col-sm-2 lead text-right-responsive">
+            <b>Protocol:</b>
+        </div>
+        <div class="col-sm-10 lead">
+            <a target="_blank" href="/media/{{ object.organ_model_protocol.protocol }}">
+                {{ object.organ_model_protocol.protocol }}
+            </a>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="row">
         <div class="col-sm-2 lead text-right-responsive">
