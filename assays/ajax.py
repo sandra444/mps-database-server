@@ -299,7 +299,7 @@ def fetch_organ_models(request):
 
     device = request.POST.get('device')
 
-    findings = OrganModel.objects.filter(device_id=device)
+    findings = OrganModel.objects.filter(device_id=device).prefetch_related('device')
 
     for finding in findings:
         # match value to the desired subject ID
@@ -322,7 +322,11 @@ def fetch_protocols(request):
     organ_model = request.POST.get('organ_model')
 
     # Order should be from newest to oldest
-    findings = OrganModelProtocol.objects.filter(organ_model_id=organ_model).order_by('-version')
+    findings = OrganModelProtocol.objects.filter(
+        organ_model_id=organ_model
+    ).prefetch_related(
+        'organ_model'
+    ).order_by('-version')
 
     # Default to first finding
     if len(findings) >= 1:

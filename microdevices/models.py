@@ -109,7 +109,7 @@ class OrganModel(LockableModel):
     model_name = models.CharField(max_length=200)
     organ = models.ForeignKey('cellsamples.Organ')
     center = models.ForeignKey(MicrophysiologyCenter, null=True, blank=True)
-    device = models.ForeignKey(Microdevice, null=True, blank=True)
+    device = models.ForeignKey(Microdevice)
     description = models.CharField(max_length=400, null=True, blank=True)
 
     # Removed in favor of protocol inline

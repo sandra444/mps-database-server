@@ -1,11 +1,16 @@
-from microdevices.models import Microdevice, OrganModel, ValidatedAssay
-from django.views.generic import DetailView
-from django.shortcuts import render_to_response, get_object_or_404
+from microdevices.models import Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
+from django.views.generic import DetailView, CreateView, UpdateView
+from django.shortcuts import redirect, render_to_response, get_object_or_404
 from django.template import RequestContext
+from django import forms
+from django.forms.models import inlineformset_factory
+from .forms import *
+from mps.mixins import OneGroupRequiredMixin
 
 # class MicrodeviceList(ListView):
 #     model = Microdevice
 #     template_name = 'microdevices/microdevice_list.html'
+
 
 def microdevice_list(request, *args, **kwargs):
     c = RequestContext(request)
@@ -20,6 +25,7 @@ def microdevice_list(request, *args, **kwargs):
 
     return render_to_response('microdevices/microdevice_list.html', c)
 
+
 def organ_model_detail(request, *args, **kwargs):
     c = RequestContext(request)
 
@@ -33,6 +39,107 @@ def organ_model_detail(request, *args, **kwargs):
 
     return render_to_response('microdevices/organ_model_detail.html', c)
 
+
 class MicrodeviceDetail(DetailView):
     model = Microdevice
     template_name = 'microdevices/microdevice_detail.html'
+
+
+class MicrodeviceAdd(OneGroupRequiredMixin, CreateView):
+    model = Microdevice
+    template_name = 'microdevices/microdevice_add.html'
+    form_class = MicrodeviceForm
+
+    def form_valid(self, form):
+        if form.is_valid():
+            self.object = form.save()
+            self.object.modified_by = self.request.user
+            self.object.save()
+            return redirect('/microdevices/')
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+
+class MicrodeviceUpdate(OneGroupRequiredMixin, UpdateView):
+    model = Microdevice
+    template_name = 'microdevices/microdevice_add.html'
+    form_class = MicrodeviceForm
+
+    def get_context_data(self, **kwargs):
+        context = super(MicrodeviceUpdate, self).get_context_data(**kwargs)
+        context['update'] = True
+        return context
+
+    def form_valid(self, form):
+        if form.is_valid():
+            self.object = form.save()
+            self.object.modified_by = self.request.user
+            self.object.save()
+            return redirect('/microdevices/')
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+OrganModelProtocolFormset = inlineformset_factory(
+    OrganModel,
+    OrganModelProtocol,
+    formset=OrganModelProtocolInlineFormset,
+    extra=1,
+    exclude=[],
+    widgets={
+        'version': forms.TextInput(attrs={'size': 5})
+    }
+)
+
+
+class OrganModelAdd(OneGroupRequiredMixin, CreateView):
+    model = OrganModel
+    template_name = 'microdevices/organ_model_add.html'
+    form_class = OrganModelForm
+
+    def get_context_data(self, **kwargs):
+        context = super(OrganModelAdd, self).get_context_data(**kwargs)
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = OrganModelProtocolFormset(self.request.POST)
+            else:
+                context['formset'] = OrganModelProtocolFormset()
+
+        return context
+
+    def form_valid(self, form):
+        if form.is_valid():
+            self.object = form.save()
+            self.object.modified_by = self.request.user
+            # Save Cell Sample
+            self.object.save()
+            return redirect('/microdevices/')
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+
+class OrganModelUpdate(OneGroupRequiredMixin, UpdateView):
+    model = OrganModel
+    template_name = 'microdevices/organ_model_add.html'
+    form_class = OrganModelForm
+
+    def get_context_data(self, **kwargs):
+        context = super(OrganModelUpdate, self).get_context_data(**kwargs)
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = OrganModelProtocolFormset(self.request.POST, instance=self.object)
+            else:
+                context['formset'] = OrganModelProtocolFormset(instance=self.object)
+
+        context['update'] = True
+
+        return context
+
+    def form_valid(self, form):
+        if form.is_valid():
+            self.object = form.save()
+            self.object.modified_by = self.request.user
+            # Save Cell Sample
+            self.object.save()
+            return redirect('/microdevices/')
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
