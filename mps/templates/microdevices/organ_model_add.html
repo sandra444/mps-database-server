@@ -34,7 +34,29 @@
 
 {% include 'generic_field.html' with field=form.model_name label="Model Name*"%}
 
-{% include 'generic_field.html' with field=form.device label="Device*"%}
+{% if form.device.errors %}
+    {% for error in form.device.errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{error}}
+        </div>
+    {% endfor %}
+<div class="form-group has-error">
+{% else %}
+<div class="form-group">
+{% endif %}
+    <label for="device" class="col-sm-2 control-label">Device*</label>
+    <div class="col-sm-10">
+        {{ form.device }}
+        <p>
+            <a href="/microdevices/device/add">
+                <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
+                Add Microdevice (Must Refresh Page to See Change)
+            </a>
+        </p>
+    </div>
+</div>
 
 {% include 'generic_field.html' with field=form.organ label="Organ*"%}
 

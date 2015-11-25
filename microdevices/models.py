@@ -60,9 +60,10 @@ class Microdevice(LockableModel):
     device_cross_section_image = models.ImageField(
         upload_to='assays', null=True, blank=True)
 
-    device_fluid_volume = models.FloatField(null=True, blank=True)
-    device_fluid_volume_unit = models.CharField(
-        max_length=50, null=True, blank=True)
+    device_fluid_volume = models.FloatField(verbose_name='device fluid volume (uL)', null=True, blank=True)
+    # device fluid volume will now always be micro liters
+    # device_fluid_volume_unit = models.CharField(
+    #     max_length=50, null=True, blank=True)
 
     substrate_thickness = models.FloatField(
         verbose_name='substrate thickness (um)', null=True, blank=True)
@@ -85,7 +86,7 @@ class Microdevice(LockableModel):
                                   'Space separated list of unique labels, '
                                   'e.g. "A B C D ..."'
                                   ' Number of items must match'
-                                  ' number of columns.''')
+                                  ' number of columns.')
     column_labels = models.CharField(blank=True,
                                      null=True,
                                      max_length=1000,

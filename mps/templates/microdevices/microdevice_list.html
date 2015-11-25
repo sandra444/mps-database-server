@@ -15,10 +15,15 @@
             </h2>
         </legend>
 
+        <div class="row text-center">
+            <a href="/microdevices/model/add/" class="btn btn-lg btn-success" role="button">Add Model</a>
+        </div>
+
         <table hidden id="models" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View</th>
+                    <th>Edit</th>
                     <th>Organ</th>
                     <th>Model Name</th>
                     <th>Device</th>
@@ -30,6 +35,7 @@
             <tfoot>
                 <tr>
                     <th>View</th>
+                    <th>Edit</th>
                     <th>Organ</th>
                     <th>Model Name</th>
                     <th>Device</th>
@@ -42,6 +48,7 @@
             {% for model in models %}
                 <tr class="model" id={{ model.id }} name={{ model.device_name }}>
                     <td><a class="btn btn-primary" href="model/{{ model.id }}">View</a></td>
+                    <td><a class="btn btn-primary" href="model/{{ model.id }}/update/">Edit</a></td>
                     <td>{{ model.organ|default_if_none:"" }}</td>
                     <td>{{ model.model_name }}</td>
                     <td><a href="device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
@@ -58,10 +65,15 @@
             </h2>
         </legend>
 
+        <div class="row text-center">
+            <a href="/microdevices/device/add/" class="btn btn-lg btn-success" role="button">Add Device</a>
+        </div>
+
         <table hidden id="microdevices" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View</th>
+                    <th>Edit</th>
                     <th>Device Name</th>
                     <th>Manufacturer</th>
                     <th>Center</th>
@@ -73,6 +85,7 @@
             <tfoot>
                 <tr>
                     <th>View</th>
+                    <th>Edit</th>
                     <th>Device Name</th>
                     <th>Manufacturer</th>
                     <th>Center</th>
@@ -85,6 +98,7 @@
             {% for microdevice in devices %}
                 <tr class="microdevice" id={{ microdevice.id }} name={{ microdevice.device_name }}>
                     <td><a class="btn btn-primary" href="device/{{ microdevice.id }}">View</a></td>
+                    <td><a class="btn btn-primary" href="device/{{ microdevice.id }}/update/">Edit</a></td>
                     <td>{{ microdevice.device_name }}</td>
                     <td>{{ microdevice.manufacturer|default_if_none:"" }}</td>
                     <td>{{ microdevice.center|default_if_none:"" }}</td>

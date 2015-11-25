@@ -135,7 +135,7 @@ class MicrodeviceAdmin(LockableAdmin):
                         'device_width', 'device_length', 'device_thickness',
                     ),
                     (
-                        'device_fluid_volume', 'device_fluid_volume_unit',
+                        'device_fluid_volume',
                     ),
                     (
                         'substrate_material', 'substrate_thickness',

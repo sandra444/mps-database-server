@@ -2,11 +2,11 @@ $(document).ready(function() {
     $('#microdevices').DataTable({
         "iDisplayLength": 200,
         "sDom": '<T<"clear">t>',
-        "order": [[ 1, "asc" ]],
+        "order": [[ 2, "asc" ]],
         "aoColumnDefs": [
             {
                 "bSortable": false,
-                "aTargets": [0]
+                "aTargets": [0, 1]
             },
             {
                 "width": "10%",
@@ -17,15 +17,15 @@ $(document).ready(function() {
     $('#models').DataTable({
         "iDisplayLength": 200,
         "sDom": '<T<"clear">t>',
-        "order": [[ 1, "asc" ]],
+        "order": [[ 2, "asc" ]],
         "aoColumnDefs": [
             {
                 "bSortable": false,
-                "aTargets": [0]
+                "aTargets": [0, 1]
             },
             {
                 "width": "10%",
-                "targets": [0]
+                "targets": [0, 1]
             }
         ]
     });
