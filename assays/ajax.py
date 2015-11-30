@@ -359,7 +359,7 @@ def fetch_protocol(request):
     protocol = OrganModelProtocol.objects.filter(pk=protocol_id)
 
     if protocol:
-        protocol_file = protocol[0].protocol
+        protocol_file = protocol[0].file
         file_name = '/'.join(protocol_file.name.split('/')[1:])
         href = '/media/' + protocol_file.name
         data.update({

@@ -57,6 +57,27 @@
         </tbody>
     </table>
 
+    {% if protocols %}
+    <legend><b>Protocols</b></legend>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Version</th>
+            <th>Protocol</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for protocol in protocols %}
+            <tr>
+                <td>{{ protocol.version }}</td>
+                <td><a href="/media/{{ protocol.file }}">{{ protocol.file }}</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
     {% if assays %}
     <legend><b>Validated Assays</b></legend>
 

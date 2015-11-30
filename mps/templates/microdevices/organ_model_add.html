@@ -8,14 +8,14 @@
 
 {% block content %}
 {% if update %}
-<form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
+<form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post" enctype="multipart/form-data">
 
 {% include 'review.html' %}
 
 <h1>
     Edit <em>{{ object }}</em>
 {% else %}
-<form class="form-horizontal" method="post" >
+<form class="form-horizontal" method="post" enctype="multipart/form-data">
 
 <h1>
     Add Organ Model
@@ -92,7 +92,7 @@
     <tbody>
         {% for protocol in formset %}
             <tr class="inline" id="protocols-{{ forloop.counter0 }}">
-                {% if result.id.value %}
+                {% if protocol.id.value %}
                 <td class="original" hidden>
                     <input type="hidden"
                            id="id_organmodelprotocol_set-{{ forloop.counter0 }}-id"
@@ -101,7 +101,7 @@
                 </td>
                 {% endif %}
                 <td>{{ protocol.version }}</td>
-                <td>{{ protocol.protocol }}</td>
+                <td>{{ protocol.file }}</td>
                 <td>{{ protocol.DELETE }}</td>
             </tr>
         {% endfor %}

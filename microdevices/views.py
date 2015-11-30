@@ -12,6 +12,7 @@ from mps.mixins import OneGroupRequiredMixin
 #     template_name = 'microdevices/microdevice_list.html'
 
 
+# Why is this not class based again?
 def microdevice_list(request, *args, **kwargs):
     c = RequestContext(request)
 
@@ -26,15 +27,18 @@ def microdevice_list(request, *args, **kwargs):
     return render_to_response('microdevices/microdevice_list.html', c)
 
 
+# Why is this not class based again?
 def organ_model_detail(request, *args, **kwargs):
     c = RequestContext(request)
 
     model = get_object_or_404(OrganModel, pk=kwargs.get('pk'))
     assays = ValidatedAssay.objects.filter(organ_model=model).prefetch_related('assay','assay__assay_type')
+    protocols = OrganModelProtocol.objects.filter(organ_model=model).order_by('-version')
 
     c.update({
         'model': model,
         'assays': assays,
+        'protocols': protocols,
     })
 
     return render_to_response('microdevices/organ_model_detail.html', c)
@@ -100,18 +104,23 @@ class OrganModelAdd(OneGroupRequiredMixin, CreateView):
         context = super(OrganModelAdd, self).get_context_data(**kwargs)
         if 'formset' not in context:
             if self.request.POST:
-                context['formset'] = OrganModelProtocolFormset(self.request.POST)
+                context['formset'] = OrganModelProtocolFormset(self.request.POST, self.request.FILES)
             else:
                 context['formset'] = OrganModelProtocolFormset()
 
         return context
 
     def form_valid(self, form):
-        if form.is_valid():
+        formset = OrganModelProtocolFormset(
+            self.request.POST,
+            self.request.FILES,
+            instance=form.instance
+        )
+        if form.is_valid() and formset.is_valid():
             self.object = form.save()
             self.object.modified_by = self.request.user
-            # Save Cell Sample
             self.object.save()
+            formset.save()
             return redirect('/microdevices/')
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -126,7 +135,7 @@ class OrganModelUpdate(OneGroupRequiredMixin, UpdateView):
         context = super(OrganModelUpdate, self).get_context_data(**kwargs)
         if 'formset' not in context:
             if self.request.POST:
-                context['formset'] = OrganModelProtocolFormset(self.request.POST, instance=self.object)
+                context['formset'] = OrganModelProtocolFormset(self.request.POST, self.request.FILES, instance=self.object)
             else:
                 context['formset'] = OrganModelProtocolFormset(instance=self.object)
 
@@ -135,11 +144,16 @@ class OrganModelUpdate(OneGroupRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        if form.is_valid():
+        formset = OrganModelProtocolFormset(
+            self.request.POST,
+            self.request.FILES,
+            instance=form.instance
+        )
+        if form.is_valid() and formset.is_valid():
             self.object = form.save()
             self.object.modified_by = self.request.user
-            # Save Cell Sample
             self.object.save()
+            formset.save()
             return redirect('/microdevices/')
         else:
             return self.render_to_response(self.get_context_data(form=form))

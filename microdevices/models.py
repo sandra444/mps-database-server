@@ -138,9 +138,13 @@ class OrganModelProtocol(models.Model):
     This model is intended to be an inline
     It contains files for Organ Model Protocols and designates their version
     """
+
+    class Meta(object):
+        unique_together = [('version', 'organ_model')]
+
     organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model')
     version = models.CharField(max_length=20)
-    protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File')
+    file = models.FileField(upload_to='protocols', verbose_name='Protocol File')
 
     def __unicode__(self):
         return self.version
