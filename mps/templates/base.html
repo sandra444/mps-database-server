@@ -139,7 +139,16 @@
                   </li>
                 </ul>
             </li>
-            <li title="View organ models and microdevices"><a href="/microdevices">Models</a></li>
+              <li title="View/add organ models and microdevices" class="dropdown">
+                <a class="dropdown-toggle">Models<span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                      <li title="View organ models and microdevices"><a href="/microdevices">View Models &amp; Devices</a></li>
+                      <li class="divider"></li>
+                      <li class="dropdown-header">Requires Permission</li>
+                      <li><a href="/microdevices/device/add">Add Microdevice</a></li>
+                      <li><a href="/microdevices/model/add">Add Organ Model</a></li>
+                  </ul>
+              </li>
 {#            <li title="View curated drug trial data"><a href="/drugtrials">Drug Trials</a></li>#}
               <li title="Curated drug trials and chemical data" class="dropdown">
                 <a class="dropdown-toggle">Compounds<span class="caret"></span></a>
@@ -163,7 +172,7 @@
                       <li class="dropdown-header">Requires Permission</li>
                       <li><a href="/cellsamples/cellsample/add">Add Cell Sample</a></li>
                       <li><a href="/cellsamples/celltype/add">Add Cell Type</a></li>
-                      <li><a href="/cellsamples/cellsubtype/add">Add Cell Subtypes</a></li>
+                      <li><a href="/cellsamples/cellsubtype/add">Add Cell Subtype</a></li>
                   </ul>
               </li>
               <li title="Analyze bioactivity data" class="dropdown">
