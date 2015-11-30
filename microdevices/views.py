@@ -5,7 +5,7 @@ from django.template import RequestContext
 from django import forms
 from django.forms.models import inlineformset_factory
 from .forms import *
-from mps.mixins import OneGroupRequiredMixin
+from mps.mixins import SpecificGroupRequiredMixin
 
 # class MicrodeviceList(ListView):
 #     model = Microdevice
@@ -49,10 +49,12 @@ class MicrodeviceDetail(DetailView):
     template_name = 'microdevices/microdevice_detail.html'
 
 
-class MicrodeviceAdd(OneGroupRequiredMixin, CreateView):
+class MicrodeviceAdd(SpecificGroupRequiredMixin, CreateView):
     model = Microdevice
     template_name = 'microdevices/microdevice_add.html'
     form_class = MicrodeviceForm
+
+    required_group_name = 'Change Microdevices Front'
 
     def form_valid(self, form):
         if form.is_valid():
@@ -64,10 +66,12 @@ class MicrodeviceAdd(OneGroupRequiredMixin, CreateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class MicrodeviceUpdate(OneGroupRequiredMixin, UpdateView):
+class MicrodeviceUpdate(SpecificGroupRequiredMixin, UpdateView):
     model = Microdevice
     template_name = 'microdevices/microdevice_add.html'
     form_class = MicrodeviceForm
+
+    required_group_name = 'Change Microdevices Front'
 
     def get_context_data(self, **kwargs):
         context = super(MicrodeviceUpdate, self).get_context_data(**kwargs)
@@ -95,10 +99,12 @@ OrganModelProtocolFormset = inlineformset_factory(
 )
 
 
-class OrganModelAdd(OneGroupRequiredMixin, CreateView):
+class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
     model = OrganModel
     template_name = 'microdevices/organ_model_add.html'
     form_class = OrganModelForm
+
+    required_group_name = 'Change Microdevices Front'
 
     def get_context_data(self, **kwargs):
         context = super(OrganModelAdd, self).get_context_data(**kwargs)
@@ -126,10 +132,12 @@ class OrganModelAdd(OneGroupRequiredMixin, CreateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class OrganModelUpdate(OneGroupRequiredMixin, UpdateView):
+class OrganModelUpdate(SpecificGroupRequiredMixin, UpdateView):
     model = OrganModel
     template_name = 'microdevices/organ_model_add.html'
     form_class = OrganModelForm
+
+    required_group_name = 'Change Microdevices Front'
 
     def get_context_data(self, **kwargs):
         context = super(OrganModelUpdate, self).get_context_data(**kwargs)

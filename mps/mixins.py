@@ -5,6 +5,7 @@ from django.utils.decorators import method_decorator
 from django.template import RequestContext, loader
 from django.http import HttpResponseForbidden
 from assays.models import AssayRun
+from django.contrib.auth.models import Group
 
 # This function will take a string a render 403.html with that string as context
 def PermissionDenied(request, message):
@@ -78,3 +79,18 @@ class CreatorRequiredMixin(object):
         if not self.request.user.is_authenticated() or self.request.user != self.object.created_by:
             return PermissionDenied(self.request,'You can only delete entries that you have created')
         return super(CreatorRequiredMixin, self).dispatch(*args, **kwargs)
+
+
+# Require the specified group or fail
+class SpecificGroupRequiredMixin(object):
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        group = Group.objects.get(name=self.required_group_name)
+        if has_group(self.request.user, group):
+            return super(SpecificGroupRequiredMixin, self).dispatch(*args, **kwargs)
+        else:
+            return PermissionDenied(
+                self.request,
+                'You do not have permission to view this page. <br>'
+                'Contact an administrator if you would like to gain permission.'
+            )

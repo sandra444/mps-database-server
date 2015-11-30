@@ -5,9 +5,8 @@ from .models import *
 from .forms import *
 # Best practice would be to put this in base or something of that sort (avoid spaghetti code)
 # Did this ^
-from mps.mixins import OneGroupRequiredMixin, ObjectGroupRequiredMixin
+from mps.mixins import OneGroupRequiredMixin, ObjectGroupRequiredMixin, SpecificGroupRequiredMixin
 from django.shortcuts import redirect, get_object_or_404
-from django.contrib.auth.models import Group
 
 #from mps.templatetags.custom_filters import *
 from django.db.models import Q
@@ -38,10 +37,12 @@ class CellSampleAdd(OneGroupRequiredMixin, CreateView):
 
 
 # Note that updating a model clears technically blank fields (exclude in form to avoid this)
-class CellSampleUpdate(ObjectGroupRequiredMixin, UpdateView):
+class CellSampleUpdate(SpecificGroupRequiredMixin, UpdateView):
     model = CellSample
     template_name = 'cellsamples/cellsample_add.html'
     form_class = CellSampleForm
+
+    required_group_name = 'Change Cell Samples Front'
 
     def get_context_data(self, **kwargs):
         # Get group selection possibilities
@@ -101,10 +102,12 @@ class CellTypeAdd(OneGroupRequiredMixin, CreateView):
 
 
 # Note that updating a model clears technically blank fields (exclude in form to avoid this)
-class CellTypeUpdate(OneGroupRequiredMixin, UpdateView):
+class CellTypeUpdate(SpecificGroupRequiredMixin, UpdateView):
     model = CellType
     template_name = 'cellsamples/celltype_add.html'
     form_class = CellTypeForm
+
+    required_group_name = 'Change Cell Samples Front'
 
     def get_context_data(self, **kwargs):
         context = super(CellTypeUpdate, self).get_context_data(**kwargs)
@@ -150,10 +153,12 @@ class CellSubtypeAdd(OneGroupRequiredMixin, CreateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class CellSubtypeUpdate(OneGroupRequiredMixin, UpdateView):
+class CellSubtypeUpdate(SpecificGroupRequiredMixin, UpdateView):
     model = CellSubtype
     template_name = 'cellsamples/cellsubtype_add.html'
     form_class = CellSubtypeForm
+
+    required_group_name = 'Change Cell Samples Front'
 
     def get_context_data(self, **kwargs):
         context = super(CellSubtypeUpdate, self).get_context_data(**kwargs)
