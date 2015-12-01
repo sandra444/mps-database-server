@@ -108,6 +108,15 @@ $(document).ready(function() {
         current_input = $('#id_assaychipcells_set-' + current_id + '-cell_sample');
     }
 
+    // This will clear a cell sample when the button is pressed
+    $('#clear_cell_sample').click(function() {
+        var selectedInput = $('#id_assaychipcells_set-' + id + '-cell_sample');
+        selectedInput.prop('value', '');
+        var selectedLabel = $('#id_assaychipcells_set-' + id + '-cell_sample_label');
+        selectedLabel.text('');
+        $('#dialog').dialog('close');
+    });
+
     var device = $('#id_device');
     var organ_model = $('#id_organ_model');
     var protocol = $('#id_organ_model_protocol');
