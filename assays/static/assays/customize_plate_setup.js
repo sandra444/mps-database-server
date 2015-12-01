@@ -264,9 +264,9 @@ $(document).ready(function () {
 
         // This will clear a cell sample when the button is pressed
         $('#clear_cell_sample').click(function() {
-            var selectedInput = $('#id_assaychipcells_set-' + id + '-cell_sample');
+            var selectedInput = $('#id_assayplatecells_set-' + id + '-cell_sample');
             selectedInput.prop('value', '');
-            var selectedLabel = $('#id_assaychipcells_set-' + id + '-cell_sample_label');
+            var selectedLabel = $('#id_assayplatecells_set-' + id + '-cell_sample_label');
             selectedLabel.text('');
             $('#dialog').dialog('close');
         });
