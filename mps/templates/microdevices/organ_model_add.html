@@ -66,6 +66,14 @@
 
 {{ formset.management_form }}
 <legend>Protocols</legend>
+{% if formset.non_form_errors %}
+    <div class="alert alert-danger" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error:</span>
+        {{ formset.non_form_errors }}
+    </div>
+{% endif %}
+
 {% if formset.errors %}
     {% for dict in formset.errors %}
         {% for key,value in dict.items %}

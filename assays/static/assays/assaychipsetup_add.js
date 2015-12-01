@@ -45,26 +45,6 @@ $(document).ready(function() {
     });
     warning.removeProp('hidden');
 
-    // safe converts the JSON passed to the context into something the JS compiler can read
-//        var protocols = {{ protocols|safe }};
-//
-//        function display_protocol() {
-//            if(protocols[$('#id_device').val()]) {
-//                $('#protocol').html('Click here to view protocol')
-//                        .prop('href','/media/' + protocols[$('#id_device').val()]);
-//            }
-//            else{
-//                $('#protocol').html('')
-//                        .prop('href','');
-//            }
-//        }
-//
-//        display_protocol();
-//
-//        $('#id_device').change( function() {
-//            display_protocol();
-//        });
-
     function toggle_warning(first) {
         if (test_type == 'control' && compound) {
             $('#control_warning').prop('hidden',false);
