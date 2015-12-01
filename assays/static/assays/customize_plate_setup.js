@@ -8,6 +8,8 @@ var id = null;
 function search(elem) {
     id = elem.id.replace(/\D/g,'');
     $("#dialog").dialog('open');
+    // Remove focus
+    $('.ui-dialog :button').blur();
 }
 
 $(document).ready(function () {
