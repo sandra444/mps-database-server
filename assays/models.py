@@ -645,7 +645,6 @@ class AssayChipSetup(FlaggableModel):
     assay_run_id = models.ForeignKey(AssayRun, verbose_name='Study')
     setup_date = models.DateField(help_text='YYYY-MM-DD')
 
-    # TEMPORARILY NOT REQUIRED, SET BACK TO REQUIRED AFTER MIGRATONS
     device = models.ForeignKey(Microdevice, verbose_name='Device')
 
     # RENAMED (previously field was erroneously device)

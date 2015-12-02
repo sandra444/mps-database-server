@@ -75,11 +75,12 @@ class CellSampleList(OneGroupRequiredMixin, ListView):
             group__in=groups
         ).prefetch_related(
             'cell_type',
+            'cell_subtype',
             'supplier',
             'group'
         ).select_related(
             'cell_type__cell_subtype',
-            'cell_type__organ'
+            'cell_type__organ',
         )
         return queryset
 
@@ -182,5 +183,5 @@ class CellSubtypeList(ListView):
     template_name = 'cellsamples/cellsubtype_list.html'
 
     def get_queryset(self):
-        queryset = CellSubtype.objects.all()
+        queryset = CellSubtype.objects.all().select_related('cell_type','cell_type__organ')
         return queryset

@@ -16,8 +16,8 @@ from mps.mixins import SpecificGroupRequiredMixin
 def microdevice_list(request, *args, **kwargs):
     c = RequestContext(request)
 
-    models = OrganModel.objects.prefetch_related('organ','center','device').all()
-    devices = Microdevice.objects.prefetch_related('organ','center','manufacturer').all()
+    models = OrganModel.objects.prefetch_related('organ', 'center', 'device').all()
+    devices = Microdevice.objects.prefetch_related('organ', 'center', 'manufacturer').all()
 
     c.update({
         'models': models,
@@ -32,7 +32,7 @@ def organ_model_detail(request, *args, **kwargs):
     c = RequestContext(request)
 
     model = get_object_or_404(OrganModel, pk=kwargs.get('pk'))
-    assays = ValidatedAssay.objects.filter(organ_model=model).prefetch_related('assay','assay__assay_type')
+    assays = ValidatedAssay.objects.filter(organ_model=model).prefetch_related('assay', 'assay__assay_type')
     protocols = OrganModelProtocol.objects.filter(organ_model=model).order_by('-version')
 
     c.update({
@@ -143,7 +143,11 @@ class OrganModelUpdate(SpecificGroupRequiredMixin, UpdateView):
         context = super(OrganModelUpdate, self).get_context_data(**kwargs)
         if 'formset' not in context:
             if self.request.POST:
-                context['formset'] = OrganModelProtocolFormset(self.request.POST, self.request.FILES, instance=self.object)
+                context['formset'] = OrganModelProtocolFormset(
+                    self.request.POST,
+                    self.request.FILES,
+                    instance=self.object
+                )
             else:
                 context['formset'] = OrganModelProtocolFormset(instance=self.object)
 
