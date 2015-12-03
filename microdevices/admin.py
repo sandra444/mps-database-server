@@ -3,8 +3,8 @@
 from django.contrib import admin
 from mps.base.admin import LockableAdmin
 from .models import MicrophysiologyCenter, Manufacturer, Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
-from drugtrials.models import Test
-
+from django.core.urlresolvers import resolve
+from django.db.models.fields.files import FieldFile
 
 class MicrophysiologyCenterAdmin(LockableAdmin):
     save_on_top = True
@@ -174,6 +174,21 @@ class MicrodeviceAdmin(LockableAdmin):
     readonly_fields = (
         'device_image_display', 'device_cross_section_image_display',
     )
+
+    def save_model(self, request, obj, form, change):
+        # Django always sends this when "Save as new is clicked"
+        if '_saveasnew' in request.POST:
+            # Get the ID from the admin URL
+            original_pk = resolve(request.path).args[0]
+            # Get the original object
+            original_obj = obj._meta.concrete_model.objects.get(id=original_pk)
+
+            # Iterate through all it's properties
+            for prop, value in vars(original_obj).iteritems():
+                # if the property is an Image (don't forget to import ImageFieldFile!)
+                if isinstance(getattr(original_obj, prop), FieldFile):
+                    setattr(obj,prop,getattr(original_obj, prop)) # Copy it!
+        obj.save()
 
 admin.site.register(Microdevice, MicrodeviceAdmin)
 
