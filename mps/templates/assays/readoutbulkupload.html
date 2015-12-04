@@ -44,7 +44,15 @@
     {% endif %}
         <label for="bulk_file" class="col-sm-2 control-label">Excel File*</label>
         <div class="col-sm-10">
-          {{ form.bulk_file }}
+            {{ form.bulk_file }}
+
+            <p>
+                <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">Click Here For Chip Template</a>
+                <br>
+                <a href="/media/excel_templates/plate_tabular_template-{{ version }}.xlsx">Click Here For Plate (Tabular) Template</a>
+                <br>
+                <a href="/media/excel_templates/plate_block_template-{{ version }}.xlsx">Click Here For Plate (Block) Template</a>
+            </p>
         </div>
     </div>
 

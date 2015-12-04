@@ -19,6 +19,178 @@ import re
 from django.db import connection, transaction
 from urllib import unquote
 
+from mps.settings import MEDIA_ROOT
+import os
+import xlsxwriter
+from xlsxwriter.utility import xl_col_to_name
+
+
+def modify_templates():
+    # Where will I store the templates?
+    template_root = MEDIA_ROOT + '/excel_templates/'
+
+    version = 1
+    version += len(os.listdir(template_root)) / 3
+    version = str(version)
+
+    chip = xlsxwriter.Workbook(template_root + 'chip_template-' + version + '.xlsx')
+    plate_tabular = xlsxwriter.Workbook(template_root + 'plate_tabular_template-' + version + '.xlsx')
+    plate_block = xlsxwriter.Workbook(template_root + 'plate_block_template-' + version + '.xlsx')
+
+    chips_sheet = chip.add_worksheet()
+    plate_tabular_sheet = plate_tabular.add_worksheet()
+    plate_block_sheet = plate_block.add_worksheet()
+
+    # Write the base files
+    chip_initial = [
+        [
+            'Chip ID',
+            '{ type chip id here }',
+            '[Upload Type]',
+            '[Tabular]',
+            '',
+            '',
+            '',
+            'Note: ANY value in QC Status will mark a row as invalid'
+        ],
+        [
+            'Time',
+            'Time Units',
+            'Assay',
+            'Object',
+            'Value',
+            'Value Unit',
+            'QC Status',
+        ]
+    ]
+
+    plate_tabular_initial = [
+        [
+            'Plate ID',
+            '{ enter plate id here }',
+            'Upload Type',
+            'Tabular',
+            '',
+            '',
+            '',
+            'Note: Totally remove the Time and Time Units columns if you are not using them',
+        ],
+        [
+            'Well Name (e.g. A1)',
+            'Assay',
+            'Feature',
+            'Unit',
+            '[ Time ]',
+            '[ Time Units ]',
+            'Value'
+        ],
+    ]
+
+    plate_block_initial = [
+        [
+            'Plate ID',
+            '{ enter plate id here }',
+            'Upload Type',
+            'Block',
+            '',
+            '',
+            '',
+            'Note: Totally remove the Time and Time Units cells if you are not using them',
+        ],
+        [
+            'Assay',
+            '',
+            'Feature',
+            '{ enter Feature here }',
+            'Unit',
+            '',
+            '[Time]',
+            '[{ enter Time here }]',
+            '[Time Unit]',
+            ''
+        ],
+    ]
+
+    # Write out initial
+    for row_index, row in enumerate(chip_initial):
+        for column_index, column in enumerate(row):
+            chips_sheet.write(row_index, column_index, column)
+
+    for row_index, row in enumerate(plate_tabular_initial):
+        for column_index, column in enumerate(row):
+            plate_tabular_sheet.write(row_index, column_index, column)
+
+    for row_index, row in enumerate(plate_block_initial):
+        for column_index, column in enumerate(row):
+            plate_block_sheet.write(row_index, column_index, column)
+
+    # Get list of time units (TODO CHANGE ORDER_BY)
+    time_units = PhysicalUnits.objects.filter(
+        unit_type='T'
+    ).order_by(
+        'scale_factor'
+    ).values_list('unit', flat=True)
+
+    # Get list of value units  (TODO CHANGE ORDER_BY)
+    value_units = PhysicalUnits.objects.filter(
+        availability__contains='readout'
+    ).order_by(
+        'scale_factor'
+    ).values_list('unit', flat=True)
+
+    # Get list of assays
+    assays = AssayModel.objects.all().order_by(
+        'assay_name'
+    ).values_list('assay_name', flat=True)
+
+    for index, value in enumerate(time_units):
+        index += 100
+        chips_sheet.write(0, index, value)
+        plate_tabular_sheet.write(0, index, value)
+        plate_block_sheet.write(0, index, value)
+
+    for index, value in enumerate(value_units):
+        index += 300
+        chips_sheet.write(0, index, value)
+        plate_tabular_sheet.write(0, index, value)
+        plate_block_sheet.write(0, index, value)
+
+    for index, value in enumerate(assays):
+        index += 500
+        chips_sheet.write(0, index, value)
+        plate_tabular_sheet.write(0, index, value)
+        plate_block_sheet.write(0, index, value)
+
+    time_units_range = '=$' + xl_col_to_name(100) + '$1' + ':$' + xl_col_to_name(100 + len(time_units)) + '$1'
+    value_units_range = '=$' + xl_col_to_name(300) + '$1' + ':$' + xl_col_to_name(300 + len(value_units)) + '$1'
+    assays_range = '=$' + xl_col_to_name(500) + '$1' + ':$' + xl_col_to_name(500 + len(assays)) + '$1'
+
+    chips_sheet.data_validation('B3', {'validate': 'list',
+                                  'source': time_units_range,})
+    chips_sheet.data_validation('C3', {'validate': 'list',
+                                  'source': assays_range,})
+    chips_sheet.data_validation('F3', {'validate': 'list',
+                                  'source': value_units_range,})
+
+    plate_tabular_sheet.data_validation('B3', {'validate': 'list',
+                                  'source': assays_range,})
+    plate_tabular_sheet.data_validation('D3', {'validate': 'list',
+                                  'source': value_units_range,})
+    plate_tabular_sheet.data_validation('F3', {'validate': 'list',
+                                  'source': time_units_range,})
+
+    plate_block_sheet.data_validation('B2', {'validate': 'list',
+                                  'source': assays_range,})
+    plate_block_sheet.data_validation('F2', {'validate': 'list',
+                                  'source': value_units_range,})
+    plate_block_sheet.data_validation('J2', {'validate': 'list',
+                                  'source': time_units_range,})
+
+    # Save
+    chip.close()
+    plate_tabular.close()
+    plate_block.close()
+
 
 class AssayModelTypeAdmin(LockableAdmin):
     save_on_top = True
@@ -78,6 +250,17 @@ class AssayModelAdmin(LockableAdmin):
             }
         ),
     )
+
+    def save_model(self, request, obj, form, change):
+        if change:
+            obj.modified_by = request.user
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        obj.save()
+
+        if change:
+            modify_templates()
 
 
 admin.site.register(AssayModel, AssayModelAdmin)
@@ -1335,6 +1518,17 @@ class PhysicalUnitsAdmin(LockableAdmin):
         }
         ),
     )
+
+    def save_model(self, request, obj, form, change):
+        if change:
+            obj.modified_by = request.user
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        obj.save()
+
+        if change and 'readout' in obj.availability:
+            modify_templates()
 
 
 admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)

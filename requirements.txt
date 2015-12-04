@@ -70,3 +70,5 @@ django-haystack
 ujson
 # xlrd for reading excel files
 xlrd
+# xlsxwriter for writing excel files
+xlsxwriter

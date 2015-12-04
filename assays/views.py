@@ -29,6 +29,8 @@ import string
 import re
 import os
 
+from mps.settings import MEDIA_ROOT
+
 # TODO Refactor imports
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
 # TODO Rename get_absolute_url when the function does not actually return the model's URL
@@ -2003,13 +2005,17 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
         self.object = self.get_object()
         form = self.get_form(self.form_class)
 
+        version = len(os.listdir(MEDIA_ROOT + '/excel_templates/')) / 3
+
         # Render form
-        return self.render_to_response(self.get_context_data(form=form))
+        return self.render_to_response(self.get_context_data(form=form, version=version))
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
 
         form = self.get_form(self.form_class)
+
+        version = len(os.listdir(MEDIA_ROOT + '/excel_templates/')) / 3
 
         if form.is_valid():
             # TODO ADD
@@ -2106,4 +2112,4 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, version=version))
