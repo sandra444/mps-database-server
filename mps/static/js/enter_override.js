@@ -31,6 +31,12 @@ $(document).ready(function () {
         Cancel: function() {
             $(this).dialog("close");
             }
+        },
+        close: function() {
+            $('body').removeClass('stop-scrolling');
+        },
+        open: function() {
+            $('body').addClass('stop-scrolling');
         }
     });
     dialogConfirm.removeProp('hidden');

@@ -24,7 +24,13 @@ $(document).ready(function() {
         width: 825,
         height: 500,
         closeOnEscape: true,
-        autoOpen: false
+        autoOpen: false,
+        close: function() {
+            $('body').removeClass('stop-scrolling');
+        },
+        open: function() {
+            $('body').addClass('stop-scrolling');
+        }
     });
     dialog.removeProp('hidden');
 
@@ -43,6 +49,12 @@ $(document).ready(function() {
                     $('#id_chip_test_type').trigger('change');
                     $(this).dialog("close");
                 }
+        },
+        close: function() {
+            $('body').removeClass('stop-scrolling');
+        },
+        open: function() {
+            $('body').addClass('stop-scrolling');
         }
     });
     warning.removeProp('hidden');

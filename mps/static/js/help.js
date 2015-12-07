@@ -6,7 +6,13 @@ $(document).ready(function() {
         width: 900,
         height: 500,
         closeOnEscape: true,
-        autoOpen: false
+        autoOpen: false,
+        close: function() {
+            $('body').removeClass('stop-scrolling');
+        },
+        open: function() {
+            $('body').addClass('stop-scrolling');
+        }
     });
     // Remove hidden attribute
     dialog.removeProp('hidden');
