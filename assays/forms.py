@@ -9,6 +9,8 @@ import re
 import string
 import xlrd
 
+from chardet.universaldetector import UniversalDetector
+
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
 
@@ -19,6 +21,27 @@ restricted = ('restricted',)
 # Group
 group = ('group',)
 
+
+def charset_detect(f, chunk_size=4096):
+    f.seek(0)
+    chardet_detector = UniversalDetector()
+    chardet_detector.reset()
+    while 1:
+        chunk = f.read(chunk_size)
+        if not chunk: break
+        chardet_detector.feed(chunk)
+        if chardet_detector.done: break
+    chardet_detector.close()
+    f.seek(0)
+    return chardet_detector.result
+
+
+def unicode_csv_reader(in_file, dialect=csv.excel, **kwargs):
+    chardet_results = charset_detect(in_file)
+    encoding = chardet_results.get('encoding')
+    csv_reader = csv.reader(in_file, dialect=dialect, **kwargs)
+    for row in csv_reader:
+        yield [unicode(cell.decode(encoding)) for cell in row]
 
 # SUBJECT TO CHANGE
 class CloneableForm(forms.ModelForm):
@@ -808,7 +831,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
         if forms_data[-1].files:
             test_file = forms_data[-1].files.get('file','')
 
-            datareader = csv.reader(test_file, delimiter=',')
+            datareader = unicode_csv_reader(test_file, delimiter=',')
             datalist = list(datareader)
 
             # Acquire number of rows and columns
@@ -980,7 +1003,7 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
         if forms_data[-1].files:
             test_file = forms_data[-1].files.get('file', '')
 
-            datareader = csv.reader(test_file, delimiter=',')
+            datareader = unicode_csv_reader(test_file, delimiter=',')
             datalist = list(datareader)
 
             # Tedious way of getting timeunit; probably should refactor
@@ -996,19 +1019,20 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
             )
 
 
+# Now uses unicode instead of string
 def stringify_excel_value(value):
     # If the value is just a string literal, return it
     if type(value) == str or type(value) == unicode:
-        return str(value)
+        return unicode(value)
     else:
         try:
             # If the value can be an integer, make it into one
             if int(value) == float(value):
-                return str(int(value))
+                return unicode(int(value))
             else:
-                return str(float(value))
+                return unicode(float(value))
         except:
-            return str(value)
+            return unicode(value)
 
 
 

@@ -2,7 +2,7 @@ import csv
 
 from django.contrib import admin
 from django import forms
-from assays.forms import StudyConfigurationForm, AssayChipReadoutInlineFormset, AssayPlateReadoutInlineFormset, label_to_number, process_readout_value
+from assays.forms import StudyConfigurationForm, AssayChipReadoutInlineFormset, AssayPlateReadoutInlineFormset, label_to_number, process_readout_value, unicode_csv_reader
 from django.http import HttpResponseRedirect
 
 from assays.models import *
@@ -515,7 +515,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 
     currentAssayReadoutId = currentAssayReadout.id
 
-    datareader = csv.reader(file, delimiter=',')
+    datareader = unicode_csv_reader(file, delimiter=',')
     datalist = list(datareader)
 
     # EXCLUDE THE HEADER
@@ -869,7 +869,7 @@ def parseChipCSV(currentChipReadout, file, headers, form):
     # Get QC status for each line
     qc_status = get_qc_status_chip(form)
 
-    datareader = csv.reader(file, delimiter=',')
+    datareader = unicode_csv_reader(file, delimiter=',')
     datalist = list(datareader)
 
     # Current index for finding correct QC status
