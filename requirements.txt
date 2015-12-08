@@ -1,7 +1,7 @@
 matplotlib
 django-uwsgi-cache
 networkx
-Django==1.7.10
+Django==1.7.11
 Jinja2
 Markdown
 MarkupSafe
@@ -72,3 +72,5 @@ ujson
 xlrd
 # xlsxwriter for writing excel files
 xlsxwriter
+# chardet will detect a files (probable) encoding
+chardet
