@@ -36,7 +36,7 @@ from mps.settings import MEDIA_ROOT
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
 # TODO Rename get_absolute_url when the function does not actually return the model's URL
 # TODO It is probably more semantic to overwrite get_context_data and form_valid in lieu of post and get for updates
-
+# TODO ^ Update Views should be refactored soon
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
 

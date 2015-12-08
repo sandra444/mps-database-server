@@ -166,25 +166,25 @@ def modify_templates():
     assays_range = '=$' + xl_col_to_name(500) + '$1' + ':$' + xl_col_to_name(500 + len(assays)) + '$1'
 
     chips_sheet.data_validation('B3', {'validate': 'list',
-                                  'source': time_units_range,})
+                                'source': time_units_range})
     chips_sheet.data_validation('C3', {'validate': 'list',
-                                  'source': assays_range,})
+                                'source': assays_range})
     chips_sheet.data_validation('F3', {'validate': 'list',
-                                  'source': value_units_range,})
+                                'source': value_units_range})
 
     plate_tabular_sheet.data_validation('B3', {'validate': 'list',
-                                  'source': assays_range,})
+                                        'source': assays_range})
     plate_tabular_sheet.data_validation('D3', {'validate': 'list',
-                                  'source': value_units_range,})
+                                        'source': value_units_range})
     plate_tabular_sheet.data_validation('F3', {'validate': 'list',
-                                  'source': time_units_range,})
+                                        'source': time_units_range})
 
     plate_block_sheet.data_validation('B2', {'validate': 'list',
-                                  'source': assays_range,})
+                                      'source': assays_range})
     plate_block_sheet.data_validation('F2', {'validate': 'list',
-                                  'source': value_units_range,})
+                                      'source': value_units_range})
     plate_block_sheet.data_validation('J2', {'validate': 'list',
-                                  'source': time_units_range,})
+                                      'source': time_units_range})
 
     # Save
     chip.close()
