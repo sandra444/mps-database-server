@@ -609,41 +609,7 @@ $(document).ready(function () {
         // Get all values in a dict with features as keys
         assay_feature_values = {};
 
-        var file_header = lines[0];
-
-        if (file_header.length >= 4) {
-            var plate_or_chip = file_header[0].toUpperCase();
-            var plate_id = file_header[1];
-            // Not really used
-            var cell_that_says_type = file_header[2];
-            var file_upload_type = file_header[3].toUpperCase();
-        }
-
-        // End prematurely if the header is not given properly
-        else {
-            alert('File header is not properly formatted. Should be "Plate ID, <Plate Id>, Upload Type, <Block or Tabular>"');
-            $('#id_file').val('');
-            return;
-        }
-
-        // Fail if plate not specified in first cell
-        if (plate_or_chip.indexOf('PLATE') < 0) {
-            failed += 'specify_plate';
-        }
-
-        // Fail in plate ID not specified
-        if (!plate_id) {
-            failed += 'specify_plate';
-        }
-
-        // Exclude the file_header
-        lines = lines.slice(1);
-
         if (upload_type == 'Block') {
-            // Make sure the upload types match
-            if (file_upload_type.indexOf('BLOCK') < 0) {
-                failed += 'file_header_type';
-            }
 
             // Current assay
             var assay = undefined;
@@ -668,13 +634,13 @@ $(document).ready(function () {
             // PLEASE NOTE THAT NEITHER FEATURES NOR ASSAYS ARE UNIQUE
             // THIS MEANS THAT SITUATIONS REQUIRING UNIQUENESS MUST USE AN ASSAY-FEATURE PAIR
             $.each(lines, function (row_index, row) {
-                // If the first value is 'assay', identify the line as a header
-                if ($.trim(row[0].toUpperCase()) == 'ASSAY') {
-                    assay = row[1];
-                    feature = row[3];
-                    value_unit = row[5];
-                    time = row[7];
-                    time_unit = row[9];
+                // If the first value is 'Plate ID', identify the line as a header
+                if ($.trim(row[0].toUpperCase()) == 'PLATE ID') {
+                    assay = row[3];
+                    feature = row[5];
+                    value_unit = row[7];
+                    time = row[9];
+                    time_unit = row[11];
 
                     // Set time to zero if undefined
                     if (!time) {
@@ -769,11 +735,6 @@ $(document).ready(function () {
         // TODO PLEASE NOTE THAT THE TABULAR FORMAT (ESPECIALLY WITH TIME) IS SUBJECT TO CHANGE
         // Handle tabular data
         else {
-           // Make sure the upload types match
-            if (file_upload_type.indexOf('TAB') < 0) {
-                failed += 'file_header_type';
-            }
-
             // Empty lines are useless in tabular uploads, remove them
             lines = _.filter(lines, function(list) {
                 return _.some(list, function (val) {
@@ -788,7 +749,7 @@ $(document).ready(function () {
             var header = lines[0];
             if (header[1]) {
                 // If time is specified
-                if ($.trim(header[4].toUpperCase()) == 'TIME') {
+                if ($.trim(header[5].toUpperCase()) == 'TIME') {
                     time_specified = true;
                 }
             }
@@ -799,7 +760,7 @@ $(document).ready(function () {
             var data = lines.slice(1);
 
             // Fail if this appears to be block data
-            if ($.trim(header[0].toUpperCase()) == 'ASSAY') {
+            if ($.trim(header[3].toUpperCase()) == 'ASSAY') {
                 failed += 'block';
             }
 
@@ -808,7 +769,7 @@ $(document).ready(function () {
             else {
                 $.each(data, function (row_index, row) {
                     // Unchanged well
-                    var well = row[0];
+                    var well = row[1];
                     // Split the well into alphabetical and numeric and then merge again (gets rid of leading zeroes)
                     var split_well = well.match(/(\d+|[^\d]+)/g);
 
@@ -821,9 +782,9 @@ $(document).ready(function () {
                     var well_id = '#' + split_well[0] + '_' + parseInt(split_well[1]);
                     var id = split_well[0] + '_' + parseInt(split_well[1]);
 
-                    var assay = row[1];
-                    var feature = row[2];
-                    var val_unit = row[3];
+                    var assay = row[2];
+                    var feature = row[3];
+                    var val_unit = row[4];
 
                     var value = null;
                     var time = 0;
@@ -831,13 +792,13 @@ $(document).ready(function () {
 
                     // If TIME specified
                     if (time_specified) {
-                        time = row[4];
-                        time_unit = row[5];
-                        value = row[6];
+                        time = row[5];
+                        time_unit = row[6];
+                        value = row[7];
                     }
                     // If NO TIME specified
                     else {
-                        value = row[4];
+                        value = row[5];
                     }
 
                     // Add time
@@ -889,12 +850,6 @@ $(document).ready(function () {
 
         // If the file upload has failed
         if (failed) {
-            if (failed.indexOf('specify_plate') > -1) {
-                alert('The file header must have the word "Plate" in the first cell and specify the Plate ID in the second cell');
-            }
-            if (failed.indexOf('file_header_type') > -1) {
-                alert('The file header specifies a type that differs with the input "Upload Type"');
-            }
             if (failed.indexOf('block') > -1) {
                 alert('It looks like this data has a block header; try changing "tabular" to "block."');
             }

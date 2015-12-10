@@ -701,9 +701,6 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
     datareader = unicode_csv_reader(file, delimiter=',')
     datalist = list(datareader)
 
-    # EXCLUDE THE HEADER
-    datalist = datalist[1:]
-
     assays = {}
     for assay in AssayPlateReadoutAssay.objects.filter(readout_id=currentAssayReadout):
         assay_name = assay.assay_id.assay_name.upper()
@@ -733,18 +730,18 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 
             # If this line is a header
             # Headers should look like:
-            # ASSAY, {{}}, FEATURE, {{}}, READOUT UNIT, {{}}, TIME, {{}}. TIME UNIT, {{}}
-            if line[0].upper().strip() == 'ASSAY':
+            # PLATE ID, {{}}, ASSAY, {{}}, FEATURE, {{}}, READOUT UNIT, {{}}, TIME, {{}}. TIME UNIT, {{}}
+            if 'PLATE ID' in line[0].upper():
                 # Get the assay
-                assay_name = line[1].upper()
-                feature = line[3]
+                assay_name = line[3].upper()
+                feature = line[5]
 
                 assay = assays.get((assay_name, feature))
 
                 number_of_assays += 1
 
-                if len(line) >= 10:
-                    time = line[7]
+                if len(line) >= 12:
+                    time = line[9]
 
                 else:
                     time = None
@@ -793,7 +790,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
         # The first line SHOULD be the header
         header = datalist[0]
 
-        if 'TIME' in header[4].upper() and 'UNIT' in header[5].upper():
+        if 'TIME' in header[5].upper() and 'UNIT' in header[6].upper():
             time_specified = True
         else:
             time_specified = False
@@ -803,9 +800,9 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 
         for row_index, row in enumerate(data):
             # The well identifier given
-            well = row[0]
-            assay_name = row[1].upper()
-            feature = row[2]
+            well = row[1]
+            assay_name = row[2].upper()
+            feature = row[3]
 
             # Split the well into alphabetical and numeric
             row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
@@ -817,11 +814,11 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
             column_label = int(column_label) - 1
 
             if time_specified:
-                time = row[4]
-                value = row[6]
+                time = row[5]
+                value = row[7]
 
             else:
-                value = row[4]
+                value = row[5]
                 time = 0
 
             # NOTE THAT BLANKS ARE CURRENTLY COMPLETELY EXCLUDED
@@ -1064,30 +1061,30 @@ def parseChipCSV(currentChipReadout, file, headers, form):
         # rowID is the index of the current row from top to bottom
 
         # Skip any row with insufficient commas
-        if len(rowValue) < 6:
+        if len(rowValue) < 7:
             continue
 
         # Skip any row with incomplete data
         # This does not include the quality
-        if not all(rowValue[:6]):
+        if not all(rowValue[:7]):
             continue
 
         # Try getting the assay from long name
         try:
-            assay = AssayModel.objects.get(assay_name__iexact=rowValue[2])
+            assay = AssayModel.objects.get(assay_name__iexact=rowValue[3])
         # If this fails, then use the short name
         except:
-            assay = AssayModel.objects.get(assay_short_name__iexact=rowValue[2])
+            assay = AssayModel.objects.get(assay_short_name__iexact=rowValue[3])
 
-        field = rowValue[3]
-        val = rowValue[4]
-        time = rowValue[0]
+        field = rowValue[4]
+        val = rowValue[5]
+        time = rowValue[1]
 
         # PLEASE NOTE Database inputs, not the csv, have the final say
         # Get quality if possible
         quality = u''
-        if len(rowValue) > 6:
-            quality = rowValue[6]
+        if len(rowValue) > 7:
+            quality = rowValue[7]
 
         # Get quality from added form inputs if possible
         if current_index in qc_status:

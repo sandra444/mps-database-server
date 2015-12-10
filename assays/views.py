@@ -2050,7 +2050,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             excel_file = xlrd.open_workbook(file_contents=bulk_file)
 
             # For the moment, just have headers be equal to two?
-            headers = 2
+            headers = 1
             study = self.object
             study_id = str(self.object.id)
 
@@ -2065,73 +2065,237 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
                 # Get the header row
                 header = sheet.row_values(0)
-                # Upper to ignore case
-                chip_or_plate_cell = str(header[0]).upper()
 
-                # Get the listed setup
-                setup = stringify_excel_value(header[1])
+                sheet_type = ''
 
-                # Get datalist: spaghetti from admin
-                datalist = get_bulk_datalist(sheet)
+                if 'CHIP' in header[0].upper() and 'ASSAY' in header[3].upper():
+                    sheet_type = 'Chip'
 
-                # If chip
-                if 'CHIP' in chip_or_plate_cell:
-                    readout = AssayChipReadout.objects.get(
-                        chip_setup__assay_run_id=study,
-                        chip_setup__assay_chip_id=setup
-                    )
+                # Check if plate tabular
+                elif 'PLATE' in header[0].upper() and 'WELL' in header[1].upper() and 'ASSAY' in header[2].upper():
+                    sheet_type = 'Tabular'
 
-                    # Make sure path exists for chip
-                    if not os.path.exists(csv_root + study_id + '/chip'):
-                        os.makedirs(csv_root + study_id + '/chip')
+                # Check if plate block
+                elif 'PLATE' in header[0].upper() and 'ASSAY' in header[2].upper() and 'FEATURE' in header[4].upper():
+                    sheet_type = 'Block'
 
-                    # Get valid file location
-                    # Note added csv extension
-                    file_loc = get_valid_csv_location(setup, study_id, 'chip')
-                    # Write the csv
-                    write_out_csv(file_loc, datalist)
+                if sheet_type == 'Chip':
+                    header = [u'Chip ID', u'Time' u'Time Units', u'Assay', u'Object', u'Value', u'Value Unit']
+                    csv_data = {}
+                    # Skip header
+                    for row_index in range(1, sheet.nrows):
+                        row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
+                        chip_id = row[0]
 
-                    media_loc = get_csv_media_location(file_loc)
+                        if chip_id not in csv_data:
+                            csv_data.update({
+                                chip_id: [header]
+                            })
 
-                    # Add the file to the readout
-                    readout.file = media_loc
-                    readout.save()
+                        csv_data.get(chip_id).append(row)
 
-                    # Note the lack of a form normally used for QC
-                    parseChipCSV(readout, readout.file, headers, None)
-                    # TODO TEST
+                    for chip_id in csv_data:
+                        datalist = csv_data.get(chip_id)
 
-                # If plate
-                else:
-                    readout = AssayPlateReadout.objects.get(
-                        setup__assay_run_id=study,
-                        setup__assay_plate_id=setup
-                    )
+                        readout = AssayChipReadout.objects.get(
+                            chip_setup__assay_run_id=study,
+                            chip_setup__assay_chip_id=chip_id
+                        )
 
-                    upload_type = str(header[3]).upper()
+                        # Make sure path exists for chip
+                        if not os.path.exists(csv_root + study_id + '/chip'):
+                            os.makedirs(csv_root + study_id + '/chip')
 
-                    if 'BLOCK' in upload_type:
-                        upload_type = 'Block'
+                        # Get valid file location
+                        # Note added csv extension
+                        file_loc = get_valid_csv_location(chip_id, study_id, 'chip')
+                        # Write the csv
+                        write_out_csv(file_loc, datalist)
+
+                        media_loc = get_csv_media_location(file_loc)
+
+                        # Add the file to the readout
+                        readout.file = media_loc
+                        readout.save()
+
+                        # Note the lack of a form normally used for QC
+                        parseChipCSV(readout, readout.file, headers, None)
+
+                elif sheet_type == 'Tabular':
+                    # Header if time
+                    if 'TIME' in header[5].upper() and 'UNIT' in header[6].upper():
+                        header = [
+                            u'Plate ID',
+                            u'Well Name',
+                            u'Assay',
+                            u'Feature',
+                            u'Unit',
+                            u'Time',
+                            u'Time Unit',
+                            u'Value'
+                        ]
+                    # Header if no time
                     else:
-                        upload_type = 'Tabular'
+                        header = [
+                            u'Plate ID',
+                            u'Well Name',
+                            u'Assay',
+                            u'Feature',
+                            u'Unit',
+                            u'Value'
+                        ]
+                    csv_data = {}
+                    # Skip header
+                    for row_index in range(1, sheet.nrows):
+                        row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
+                        plate_id = row[0]
 
-                    # Make sure path exists for plate
-                    if not os.path.exists(csv_root + study_id + '/plate'):
-                        os.makedirs(csv_root + study_id + '/plate')
+                        if plate_id not in csv_data:
+                            csv_data.update({
+                                plate_id: [header]
+                            })
 
-                    # Get valid file location
-                    file_loc = get_valid_csv_location(setup, study_id, 'plate')
-                    # Write the csv
-                    write_out_csv(file_loc, datalist)
+                        csv_data.get(plate_id).append(row)
 
-                    media_loc = get_csv_media_location(file_loc)
+                    for plate_id in csv_data:
+                        datalist = csv_data.get(plate_id)
 
-                    # Add the file to the readout
-                    readout.file = media_loc
-                    readout.save()
+                        readout = AssayPlateReadout.objects.get(
+                            setup__assay_run_id=study,
+                            setup__assay_plate_id=plate_id
+                        )
 
-                    parseReadoutCSV(readout, readout.file, upload_type)
-                    # TODO TEST
+                        # Make sure path exists for chip
+                        if not os.path.exists(csv_root + study_id + '/plate'):
+                            os.makedirs(csv_root + study_id + '/plate')
+
+                        # Get valid file location
+                        # Note added csv extension
+                        file_loc = get_valid_csv_location(plate_id, study_id, 'plate')
+                        # Write the csv
+                        write_out_csv(file_loc, datalist)
+
+                        media_loc = get_csv_media_location(file_loc)
+
+                        # Add the file to the readout
+                        readout.file = media_loc
+                        readout.save()
+
+                        # Note the lack of a form normally used for QC
+                        parseReadoutCSV(readout, readout.file, 'Tabular')
+
+                elif sheet_type == 'Block':
+                    csv_data = {}
+                    # DO NOT skip header
+                    plate_id = None
+                    for row_index in range(sheet.nrows):
+                        row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
+
+                        if 'PLATE' in row[0].upper():
+                            plate_id = row[1]
+
+                            if plate_id not in csv_data:
+                                csv_data.update({
+                                    plate_id: []
+                                })
+
+                        csv_data.get(plate_id).append(row)
+
+                    for plate_id in csv_data:
+                        datalist = csv_data.get(plate_id)
+
+                        readout = AssayPlateReadout.objects.get(
+                            setup__assay_run_id=study,
+                            setup__assay_plate_id=plate_id
+                        )
+
+                        # Make sure path exists for chip
+                        if not os.path.exists(csv_root + study_id + '/plate'):
+                            os.makedirs(csv_root + study_id + '/plate')
+
+                        # Get valid file location
+                        # Note added csv extension
+                        file_loc = get_valid_csv_location(plate_id, study_id, 'plate')
+                        # Write the csv
+                        write_out_csv(file_loc, datalist)
+
+                        media_loc = get_csv_media_location(file_loc)
+
+                        # Add the file to the readout
+                        readout.file = media_loc
+                        readout.save()
+
+                        # Note the lack of a form normally used for QC
+                        parseReadoutCSV(readout, readout.file, 'Block')
+
+
+                # # Upper to ignore case
+                # chip_or_plate_cell = str(header[0]).upper()
+                #
+                # # Get the listed setup
+                # setup = stringify_excel_value(header[1])
+                #
+                # # Get datalist: spaghetti from admin
+                # datalist = get_bulk_datalist(sheet)
+                #
+                # # If chip
+                # if 'CHIP' in chip_or_plate_cell:
+                #     readout = AssayChipReadout.objects.get(
+                #         chip_setup__assay_run_id=study,
+                #         chip_setup__assay_chip_id=setup
+                #     )
+                #
+                #     # Make sure path exists for chip
+                #     if not os.path.exists(csv_root + study_id + '/chip'):
+                #         os.makedirs(csv_root + study_id + '/chip')
+                #
+                #     # Get valid file location
+                #     # Note added csv extension
+                #     file_loc = get_valid_csv_location(setup, study_id, 'chip')
+                #     # Write the csv
+                #     write_out_csv(file_loc, datalist)
+                #
+                #     media_loc = get_csv_media_location(file_loc)
+                #
+                #     # Add the file to the readout
+                #     readout.file = media_loc
+                #     readout.save()
+                #
+                #     # Note the lack of a form normally used for QC
+                #     parseChipCSV(readout, readout.file, headers, None)
+                #     # TODO TEST
+                #
+                # # If plate
+                # else:
+                #     readout = AssayPlateReadout.objects.get(
+                #         setup__assay_run_id=study,
+                #         setup__assay_plate_id=setup
+                #     )
+                #
+                #     upload_type = str(header[3]).upper()
+                #
+                #     if 'BLOCK' in upload_type:
+                #         upload_type = 'Block'
+                #     else:
+                #         upload_type = 'Tabular'
+                #
+                #     # Make sure path exists for plate
+                #     if not os.path.exists(csv_root + study_id + '/plate'):
+                #         os.makedirs(csv_root + study_id + '/plate')
+                #
+                #     # Get valid file location
+                #     file_loc = get_valid_csv_location(setup, study_id, 'plate')
+                #     # Write the csv
+                #     write_out_csv(file_loc, datalist)
+                #
+                #     media_loc = get_csv_media_location(file_loc)
+                #
+                #     # Add the file to the readout
+                #     readout.file = media_loc
+                #     readout.save()
+                #
+                #     parseReadoutCSV(readout, readout.file, upload_type)
+                #     # TODO TEST
 
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:

@@ -258,11 +258,14 @@ def fetch_chip_readout(request):
         'elapsed_time'
     )
 
-    time_unit = AssayChipReadout.objects.filter(id=chip_id)[0].timeunit
+    readout = AssayChipReadout.objects.filter(id=chip_id)[0]
+    time_unit = readout.timeunit
+    chip_name = readout.chip_setup.assay_chip_id
 
     csv = ""
 
     for raw in chip_data:
+        csv += str(chip_name) + ','
         csv += str(raw.elapsed_time) + ','
         # Add time unit
         csv += str(time_unit) + ','
