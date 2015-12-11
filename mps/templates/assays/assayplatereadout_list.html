@@ -19,6 +19,7 @@
                 <tr>
                     <th>View/Edit</th>
                     <th>Plate Readout ID</th>
+                    <th>Study</th>
                     <th>Plate Setup</th>
                     <th>Assays</th>
                     <th>Readout Date</th>
@@ -33,6 +34,7 @@
                 <tr>
                     <th>View/Edit</th>
                     <th>Plate Readout ID</th>
+                    <th>Study</th>
                     <th>Plate Setup</th>
                     <th>Assays</th>
                     <th>Readout Date</th>
@@ -48,6 +50,7 @@
                 <tr class="readout" id={{ readout.id }} name={{ readout.id }}>
                     <td><a class="btn btn-primary" href="{{ readout.id }}">View/Edit</a></td>
                     <td>{{ readout.id }}</td>
+                    <td><a href="/assays/{{ readout.setup.assay_run_id.id }}">{{ readout.setup.assay_run_id }}</a></td>
                     <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}">{{ readout.setup }}</a></td>
                     <td>
                         {% for assay in readout.related_assays %}

@@ -746,6 +746,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
             'created_by',
             'group'
         ).select_related(
+            'chip_setup__assay_run_id',
             'chip_setup__compound',
             'chip_setup__unit'
         ) | AssayChipReadout.objects.filter(
@@ -755,6 +756,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
             'created_by',
             'group'
         ).select_related(
+            'chip_setup__assay_run_id',
             'chip_setup__compound',
             'chip_setup__unit'
         )
@@ -1592,12 +1594,16 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
             'setup',
             'created_by',
             'group'
+        ).select_related(
+            'setup__assay_run_id'
         ) | AssayPlateReadout.objects.filter(
             setup__assay_run_id__group__in=self.request.user.groups.all()
         ).prefetch_related(
             'setup',
             'created_by',
             'group'
+        ).select_related(
+            'setup__assay_run_id'
         )
 
         related_assays = AssayPlateReadoutAssay.objects.filter(

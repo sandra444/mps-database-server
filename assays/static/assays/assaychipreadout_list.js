@@ -3,7 +3,7 @@ $(document).ready(function() {
         dom: 'T<"clear">lfrtip',
         "iDisplayLength": 50,
         // Initially sort on setup not arbitrary ID
-        "order": [[ 2, "asc" ]],
+        "order": [[ 3, "asc" ]],
         "aoColumnDefs": [
             {
                 "bSortable": false,
