@@ -37,23 +37,32 @@ def modify_templates():
     plate_tabular = xlsxwriter.Workbook(template_root + 'plate_tabular_template-' + version + '.xlsx')
     plate_block = xlsxwriter.Workbook(template_root + 'plate_block_template-' + version + '.xlsx')
 
-    chips_sheet = chip.add_worksheet()
+    chip_sheet = chip.add_worksheet()
     plate_tabular_sheet = plate_tabular.add_worksheet()
     plate_block_sheet = plate_block.add_worksheet()
+
+    # Set up formats
+    chip_red = chip.add_format()
+    chip_red.set_bg_color('red')
+    chip_green = chip.add_format()
+    chip_green.set_bg_color('green')
+
+    plate_tabular_red = plate_tabular.add_format()
+    plate_tabular_red.set_bg_color('red')
+    plate_tabular_green = plate_tabular.add_format()
+    plate_tabular_green.set_bg_color('green')
+
+    plate_block_red = plate_block.add_format()
+    plate_block_red.set_bg_color('red')
+    plate_block_green = plate_block.add_format()
+    plate_block_green.set_bg_color('green')
+    plate_block_yellow = plate_block.add_format()
+    plate_block_yellow.set_bg_color('yellow')
 
     # Write the base files
     chip_initial = [
         [
             'Chip ID',
-            '{ type chip id here }',
-            '[Upload Type]',
-            '[Tabular]',
-            '',
-            '',
-            '',
-            'Note: ANY value in QC Status will mark a row as invalid'
-        ],
-        [
             'Time',
             'Time Units',
             'Assay',
@@ -61,43 +70,60 @@ def modify_templates():
             'Value',
             'Value Unit',
             'QC Status',
+            'Note: ANY value in QC Status will mark a row as invalid'
+        ],
+        [''] * 9
+    ]
+
+    chip_initial_format = [
+        [chip_red] * 9,
+        [
+            None,
+            None,
+            chip_green,
+            chip_green,
+            None,
+            None,
+            chip_green,
+            None,
+            None
         ]
     ]
 
     plate_tabular_initial = [
         [
             'Plate ID',
-            '{ enter plate id here }',
-            'Upload Type',
-            'Tabular',
-            '',
-            '',
-            '',
-            'Note: Totally remove the Time and Time Units columns if you are not using them',
-        ],
-        [
             'Well Name (e.g. A1)',
             'Assay',
             'Feature',
             'Unit',
             '[ Time ]',
             '[ Time Units ]',
-            'Value'
+            'Value',
+            'Note: Totally remove the Time and Time Units columns if you are not using them',
         ],
+        [''] * 9
+    ]
+
+    plate_tabular_initial_format = [
+        [plate_tabular_red] * 9,
+        [
+            None,
+            None,
+            plate_tabular_green,
+            None,
+            plate_tabular_green,
+            None,
+            plate_tabular_green,
+            None,
+            None
+        ]
     ]
 
     plate_block_initial = [
         [
             'Plate ID',
-            '{ enter plate id here }',
-            'Upload Type',
-            'Block',
-            '',
-            '',
-            '',
-            'Note: Totally remove the Time and Time Units cells if you are not using them',
-        ],
-        [
+            '{ enter Plate ID here }',
             'Assay',
             '',
             'Feature',
@@ -107,22 +133,83 @@ def modify_templates():
             '[Time]',
             '[{ enter Time here }]',
             '[Time Unit]',
-            ''
+            '',
+            'Note: Totally remove the Time and Time Units cells if you are not using them',
         ],
+    ]
+
+    plate_block_initial_format = [
+        [
+            plate_block_red,
+            plate_block_yellow,
+            plate_block_red,
+            plate_block_green,
+            plate_block_red,
+            plate_block_yellow,
+            plate_block_red,
+            plate_block_green,
+            plate_block_red,
+            plate_block_yellow,
+            plate_block_red,
+            plate_block_green,
+            plate_block_red
+        ]
     ]
 
     # Write out initial
     for row_index, row in enumerate(chip_initial):
         for column_index, column in enumerate(row):
-            chips_sheet.write(row_index, column_index, column)
+            cell_format = chip_initial_format[row_index][column_index]
+            chip_sheet.write(row_index, column_index, column, cell_format)
 
     for row_index, row in enumerate(plate_tabular_initial):
         for column_index, column in enumerate(row):
-            plate_tabular_sheet.write(row_index, column_index, column)
+            cell_format = plate_tabular_initial_format[row_index][column_index]
+            plate_tabular_sheet.write(row_index, column_index, column, cell_format)
 
     for row_index, row in enumerate(plate_block_initial):
         for column_index, column in enumerate(row):
-            plate_block_sheet.write(row_index, column_index, column)
+            cell_format = plate_block_initial_format[row_index][column_index]
+            plate_block_sheet.write(row_index, column_index, column, cell_format)
+
+    # Set column widths
+    # Chip
+    chip_sheet.set_column('A:A', 20)
+    chip_sheet.set_column('B:B', 10)
+    chip_sheet.set_column('C:C', 20)
+    chip_sheet.set_column('D:D', 30)
+    chip_sheet.set_column('E:E', 10)
+    chip_sheet.set_column('F:F', 15)
+    chip_sheet.set_column('G:G', 15)
+    chip_sheet.set_column('H:H', 10)
+    chip_sheet.set_column('I:I', 100)
+
+    # Plate Tabular
+    plate_tabular_sheet.set_column('A:A', 20)
+    plate_tabular_sheet.set_column('B:B', 20)
+    plate_tabular_sheet.set_column('C:C', 30)
+    plate_tabular_sheet.set_column('D:D', 30)
+    plate_tabular_sheet.set_column('E:E', 20)
+    plate_tabular_sheet.set_column('F:F', 15)
+    plate_tabular_sheet.set_column('G:G', 15)
+    plate_tabular_sheet.set_column('H:H', 15)
+    plate_tabular_sheet.set_column('I:I', 100)
+
+    # Plate Block
+    plate_block_sheet.set_column('A:A', 10)
+    plate_block_sheet.set_column('B:B', 20)
+    plate_block_sheet.set_column('C:C', 10)
+    plate_block_sheet.set_column('D:D', 30)
+    plate_block_sheet.set_column('E:E', 10)
+    plate_block_sheet.set_column('F:F', 30)
+    plate_block_sheet.set_column('G:G', 10)
+    plate_block_sheet.set_column('H:H', 20)
+    plate_block_sheet.set_column('I:I', 15)
+    plate_block_sheet.set_column('I:I', 10)
+    plate_block_sheet.set_column('J:J', 20)
+    plate_block_sheet.set_column('K:K', 10)
+    plate_block_sheet.set_column('L:L', 15)
+    plate_block_sheet.set_column('M:M', 100)
 
     # Get list of time units (TODO CHANGE ORDER_BY)
     time_units = PhysicalUnits.objects.filter(
@@ -145,19 +232,19 @@ def modify_templates():
 
     for index, value in enumerate(time_units):
         index += 100
-        chips_sheet.write(0, index, value)
+        chip_sheet.write(0, index, value)
         plate_tabular_sheet.write(0, index, value)
         plate_block_sheet.write(0, index, value)
 
     for index, value in enumerate(value_units):
         index += 300
-        chips_sheet.write(0, index, value)
+        chip_sheet.write(0, index, value)
         plate_tabular_sheet.write(0, index, value)
         plate_block_sheet.write(0, index, value)
 
     for index, value in enumerate(assays):
         index += 500
-        chips_sheet.write(0, index, value)
+        chip_sheet.write(0, index, value)
         plate_tabular_sheet.write(0, index, value)
         plate_block_sheet.write(0, index, value)
 
@@ -165,25 +252,25 @@ def modify_templates():
     value_units_range = '=$' + xl_col_to_name(300) + '$1' + ':$' + xl_col_to_name(300 + len(value_units)) + '$1'
     assays_range = '=$' + xl_col_to_name(500) + '$1' + ':$' + xl_col_to_name(500 + len(assays)) + '$1'
 
-    chips_sheet.data_validation('B3', {'validate': 'list',
-                                'source': time_units_range})
-    chips_sheet.data_validation('C3', {'validate': 'list',
-                                'source': assays_range})
-    chips_sheet.data_validation('F3', {'validate': 'list',
-                                'source': value_units_range})
+    chip_sheet.data_validation('C2', {'validate': 'list',
+                               'source': time_units_range})
+    chip_sheet.data_validation('D2', {'validate': 'list',
+                               'source': assays_range})
+    chip_sheet.data_validation('G2', {'validate': 'list',
+                               'source': value_units_range})
 
-    plate_tabular_sheet.data_validation('B3', {'validate': 'list',
+    plate_tabular_sheet.data_validation('C2', {'validate': 'list',
                                         'source': assays_range})
-    plate_tabular_sheet.data_validation('D3', {'validate': 'list',
+    plate_tabular_sheet.data_validation('E2', {'validate': 'list',
                                         'source': value_units_range})
-    plate_tabular_sheet.data_validation('F3', {'validate': 'list',
+    plate_tabular_sheet.data_validation('G2', {'validate': 'list',
                                         'source': time_units_range})
 
-    plate_block_sheet.data_validation('B2', {'validate': 'list',
+    plate_block_sheet.data_validation('D1', {'validate': 'list',
                                       'source': assays_range})
-    plate_block_sheet.data_validation('F2', {'validate': 'list',
+    plate_block_sheet.data_validation('H1', {'validate': 'list',
                                       'source': value_units_range})
-    plate_block_sheet.data_validation('J2', {'validate': 'list',
+    plate_block_sheet.data_validation('L1', {'validate': 'list',
                                       'source': time_units_range})
 
     # Save
