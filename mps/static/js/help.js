@@ -3,7 +3,7 @@ $(document).ready(function() {
     // Make the dialog box
     var dialog = $('#help_dialog');
     dialog.dialog({
-        width: 900,
+        width: 1025,
         height: 500,
         closeOnEscape: true,
         autoOpen: false,
