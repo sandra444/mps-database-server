@@ -1012,6 +1012,15 @@ def validate_chip_readout_file(
                 sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(val)
             )
 
+        # Check to make certain the time is a valid float
+        try:
+            float(time)
+
+        except:
+            raise forms.ValidationError(
+                sheet + 'The time "%s" is invalid; please make sure all times are numerical' % str(time)
+            )
+
 
 class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
     def __init__(self,*args,**kwargs):
