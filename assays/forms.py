@@ -947,8 +947,9 @@ def validate_chip_readout_file(
                 )
 
     # Likely to change
+    # Duplicates are now permitted
     # All unique rows based on ('chip_id', 'assay_id', 'field_id', 'elapsed_time')
-    unique = {}
+    # unique = {}
 
     # Read headers going onward
     for line in datalist[headers:]:
@@ -995,12 +996,12 @@ def validate_chip_readout_file(
                 sheet + 'Chip-%s: The time unit "%s" does not correspond with the selected readout time unit of "%s"'
                 % (chip_id, time_unit, readout_time_unit)
             )
-        if (chip_id, time, assay, object) not in unique:
-            unique.update({(chip_id, time, assay, object): True})
-        else:
-            raise forms.ValidationError(
-                sheet + 'File contains duplicate reading %s' % str((chip_id, time, assay, object))
-            )
+        # if (chip_id, time, assay, object) not in unique:
+        #     unique.update({(chip_id, time, assay, object): True})
+        # else:
+        #     raise forms.ValidationError(
+        #         sheet + 'File contains duplicate reading %s' % str((chip_id, time, assay, object))
+        #     )
         # Check every value to make sure it can resolve to a float
         try:
             # Keep empty strings, though they technically can not be converted to floats

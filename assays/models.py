@@ -598,8 +598,8 @@ class AssayChipRawData(models.Model):
     Individual lines of readout data
     """
 
-    class Meta(object):
-        unique_together = [('assay_chip_id', 'assay_id', 'field_id', 'elapsed_time')]
+    # class Meta(object):
+    #     unique_together = [('assay_chip_id', 'assay_id', 'field_id', 'elapsed_time')]
 
     assay_chip_id = models.ForeignKey('assays.AssayChipReadout')
     assay_id = models.ForeignKey('assays.AssayChipReadoutAssay')
