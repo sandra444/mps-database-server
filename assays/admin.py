@@ -213,7 +213,7 @@ def modify_templates():
 
     # Get list of time units (TODO CHANGE ORDER_BY)
     time_units = PhysicalUnits.objects.filter(
-        unit_type='T'
+        unit_type__unit_type='Time'
     ).order_by(
         'scale_factor'
     ).values_list('unit', flat=True)
@@ -1574,6 +1574,33 @@ class AssayChipResultInline(admin.TabularInline):
 
     class Media(object):
         css = {"all": ("css/hide_admin_original.css",)}
+
+
+class UnitTypeAdmin(LockableAdmin):
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('unit_type', 'description')
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    ('unit_type', 'description'),
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
+
+
+admin.site.register(UnitType, UnitTypeAdmin)
 
 
 class PhysicalUnitsAdmin(LockableAdmin):

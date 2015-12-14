@@ -4,6 +4,7 @@ from django.db import models
 from microdevices.models import Microdevice, OrganModel, OrganModelProtocol
 from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
 
+# DEPRECATED, REMOVE SOON
 PHYSICAL_UNIT_TYPES = (
     (u'V', u'Volume'),
     (u'C', u'Concentration'),
@@ -20,6 +21,18 @@ types = (
 )
 
 
+class UnitType(LockableModel):
+    """
+    Unit types for physical units
+    """
+
+    unit_type = models.CharField(max_length=100)
+    description = models.CharField(max_length=256,
+                                   blank=True, null=True)
+
+    def __unicode__(self):
+        return u'{}'.format(self.unit_type)
+
 class PhysicalUnits(LockableModel):
     """
     Measures of concentration and so on
@@ -29,9 +42,7 @@ class PhysicalUnits(LockableModel):
     description = models.CharField(max_length=256,
                                    blank=True, null=True)
 
-    unit_type = models.CharField(default='C',
-                                 max_length=2,
-                                 choices=PHYSICAL_UNIT_TYPES)
+    unit_type = models.ForeignKey(UnitType)
 
     # Base Unit for conversions and scale factor
     base_unit = models.ForeignKey('assays.PhysicalUnits',

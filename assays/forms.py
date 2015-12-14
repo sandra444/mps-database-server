@@ -131,7 +131,9 @@ class AssayChipResultForm(forms.ModelForm):
 class AssayChipReadoutForm(CloneableForm):
     def __init__(self, study, current, *args, **kwargs):
         super(AssayChipReadoutForm, self).__init__(*args, **kwargs)
-        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T').order_by('scale_factor')
+        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(
+            unit_type__unit_type='Time'
+        ).order_by('scale_factor')
         exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'device',
@@ -160,7 +162,7 @@ class AssayChipSetupForm(CloneableForm):
         super(AssayChipSetupForm, self).__init__(*args, **kwargs)
         # Filter on concentration but make a special exception for percent (%)
         self.fields['unit'].queryset = PhysicalUnits.objects.filter(
-            unit_type='C'
+            unit_type__unit_type='Concentration'
         ).order_by(
             'base_unit',
             'scale_factor'
@@ -288,7 +290,12 @@ class AssayLayoutForm(forms.ModelForm):
     compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
     # Notice the special exception for %
     concunit = forms.ModelChoiceField(
-        queryset=(PhysicalUnits.objects.filter(unit_type='C') | PhysicalUnits.objects.filter(unit='%')),
+        queryset=(PhysicalUnits.objects.filter(
+            unit_type__unit_type='Concentration'
+        ).order_by(
+            'base_unit',
+            'scale_factor'
+        ) | PhysicalUnits.objects.filter(unit='%')),
         required=False, initial=4
     )
 
@@ -354,7 +361,9 @@ class AssayPlateCellsInlineFormset(CloneableBaseInlineFormSet):
 class AssayPlateReadoutForm(CloneableForm):
     def __init__(self, study, current, *args, **kwargs):
         super(AssayPlateReadoutForm, self).__init__(*args, **kwargs)
-        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T').order_by('scale_factor')
+        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(
+            unit_type__unit_type='Time'
+        ).order_by('scale_factor')
         exclude_list = AssayPlateReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
         setups = AssayPlateSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'assay_layout',
