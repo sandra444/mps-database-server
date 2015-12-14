@@ -93,7 +93,7 @@ def modify_templates():
     plate_tabular_initial = [
         [
             'Plate ID',
-            'Well Name (e.g. A1)',
+            'Well Name (e.g. A01,F12)',
             'Assay',
             'Feature',
             'Unit',
@@ -186,7 +186,7 @@ def modify_templates():
 
     # Plate Tabular
     plate_tabular_sheet.set_column('A:A', 20)
-    plate_tabular_sheet.set_column('B:B', 20)
+    plate_tabular_sheet.set_column('B:B', 25)
     plate_tabular_sheet.set_column('C:C', 30)
     plate_tabular_sheet.set_column('D:D', 30)
     plate_tabular_sheet.set_column('E:E', 20)
