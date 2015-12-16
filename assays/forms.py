@@ -1203,11 +1203,13 @@ class ReadoutBulkUploadForm(forms.ModelForm):
                 sheet_type = 'Chip'
 
             # Check if plate tabular
-            elif 'PLATE' in header[0].upper() and 'WELL' in header[1].upper() and 'ASSAY' in header[2].upper():
+            elif 'PLATE' in header[0].upper() and 'WELL' in header[1].upper() and 'ASSAY' in header[2].upper()\
+                    and 'FEATURE' in header[3].upper() and 'UNIT' in header[4].upper():
                 sheet_type = 'Tabular'
 
             # Check if plate block
-            elif 'PLATE' in header[0].upper() and 'ASSAY' in header[2].upper() and 'FEATURE' in header[4].upper():
+            elif 'PLATE' in header[0].upper() and 'ASSAY' in header[2].upper() and 'FEATURE' in header[4].upper()\
+                    and 'UNIT' in header[6].upper():
                 sheet_type = 'Block'
 
             # Throw error if can not be determined
