@@ -1,4 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "js/cookies.js" %}"></script>
+    <script src="{% static "assays/assayrun_summary.js" %}"></script>
+{% endblock %}
 
 {% block content %}
 
@@ -201,5 +207,7 @@
             </tbody>
         </table>
     {% endif %}
+
+    <div id="charts"></div>
 
 {% endblock %}

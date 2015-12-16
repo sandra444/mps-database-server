@@ -296,6 +296,87 @@ def fetch_chip_readout(request):
                         content_type="application/json")
 
 
+# TODO REQUIRES MAJOR REVISION
+# TODO IDEALLY SHOULD BE SET UP SUCH THAT EACH KEY HAS ITS OWN LOAD IN C3
+# TODO WE NEED TO DO THIS BECAUSE OTHERWISE POINTS ARE NOT CORRECTLY CONNECTED WITH LINES
+def fetch_readouts(request):
+    assays = {}
+
+    study = request.POST.get('study')
+    key = request.POST.get('key')
+
+    # Get chip readouts
+    readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=study)
+
+    if key == 'compound':
+        raw_data = AssayChipRawData.objects.filter(
+            assay_chip_id=readouts
+        ).prefetch_related(
+            'assay_id',
+            'assay_chip_id'
+        ).select_related(
+            'assay_chip_id__chip_setup',
+            'assay_chip_id__chip_setup__compound',
+            'assay_chip_id__chip_setup__unit',
+            'assay_id__assay_id'
+        )
+
+    else:
+        raw_data = AssayChipRawData.objects.filter(
+            assay_chip_id=readouts
+        ).prefetch_related(
+            'assay_id',
+            'assay_chip_id'
+        ).select_related(
+            'assay_chip_id__chip_setup',
+            'assay_id__assay_id'
+        )
+
+    for raw in raw_data:
+        assay = raw.assay_id.assay_id.assay_short_name
+        field = raw.field_id
+        value = raw.value
+        time = raw.elapsed_time
+        quality = raw.quality
+
+        if not quality:
+            if key == 'compound':
+                if raw.assay_chip_id.chip_setup.compound:
+                    tag = raw.assay_chip_id.chip_setup.compound.name
+                    tag += '_' + str(raw.assay_chip_id.chip_setup.concentration)
+                    tag += '_' + raw.assay_chip_id.chip_setup.unit.unit
+                else:
+                    tag = 'Control'
+            else:
+                tag = raw.assay_chip_id.chip_setup.assay_chip_id
+
+            current_key = tag + '_' + field
+
+            if assay not in assays:
+                assays.update({assay: {}})
+
+            current_assay = assays.get(assay)
+            if current_key not in current_assay:
+                current_assay.update({
+                    current_key: {
+                        'time': [],
+                        'values': [current_key]
+                    }
+                })
+
+            current_values = current_assay.get(current_key)
+
+            current_values.get('time').append(time)
+            current_values.get('values').append(value)
+
+    data = {
+        'assays': assays,
+    }
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
+
 # Should these be refactored just to use fetch_context instead?
 def fetch_organ_models(request):
     context = u'<option value="">---------</option>'
@@ -431,6 +512,7 @@ switch = {
     'fetch_plate_info': fetch_plate_info,
     'fetch_center_id': fetch_center_id,
     'fetch_chip_readout': fetch_chip_readout,
+    'fetch_readouts': fetch_readouts,
     'fetch_context': fetch_context,
     'fetch_organ_models': fetch_organ_models,
     'fetch_protocols': fetch_protocols,
