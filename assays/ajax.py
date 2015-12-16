@@ -301,8 +301,6 @@ def fetch_chip_readout(request):
 # TODO NEED TO CONFIRM UNITS ARE THE SAME (ELSE CONVERSION)
 # TODO ONLY USE FIELD WHEN NECESSARY
 def fetch_readouts(request):
-    assays = {}
-
     study = request.POST.get('study')
     key = request.POST.get('key')
 
@@ -335,6 +333,9 @@ def fetch_readouts(request):
             'assay_id__readout_unit'
         )
 
+    assays = {}
+    initial_data = {}
+
     for raw in raw_data:
         assay = raw.assay_id.assay_id.assay_short_name
         unit = raw.assay_id.readout_unit.unit
@@ -358,22 +359,34 @@ def fetch_readouts(request):
 
             current_key = tag + '_' + field
 
-            if assay_label not in assays:
-                assays.update({assay_label: {}})
+            if assay_label not in initial_data:
+                initial_data.update({assay_label: {}})
 
-            current_assay = assays.get(assay_label)
+            current_assay = initial_data.get(assay_label)
             if current_key not in current_assay:
                 current_assay.update({
-                    current_key: {
-                        'time': [],
-                        'values': [current_key]
-                    }
+                    current_key: {}
                 })
 
             current_values = current_assay.get(current_key)
 
-            current_values.get('time').append(time)
-            current_values.get('values').append(value)
+            current_value = current_values.get(time, '')
+
+            if current_value:
+                current_values.update({time: (current_value + value) / 2.0})
+            else:
+                current_values.update({time: value})
+
+    for assay, current_keys in initial_data.items():
+        assays.update({assay: {}})
+
+        for current_key, times_values in current_keys.items():
+            assays.get(assay).update({
+                current_key: {
+                    'time': times_values.keys(),
+                    'values': times_values.values()
+                }
+            })
 
     data = {
         'assays': assays,

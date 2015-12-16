@@ -48,6 +48,8 @@ $(document).ready(function() {
                 xs[current_key] = 'x' + num;
 
                 current_data.time.unshift('x' + num);
+                current_data.values.unshift(current_key);
+
                 current_chart.load({
                     xs: xs,
 
@@ -72,7 +74,7 @@ $(document).ready(function() {
                 // Function to call within the view is defined by `call:`
                 call: 'fetch_readouts',
                 study: study_id,
-                key: 'chip',
+                key: 'compound',
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
