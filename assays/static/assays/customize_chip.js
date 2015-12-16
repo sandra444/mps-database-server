@@ -171,8 +171,12 @@ $(document).ready(function () {
                 table += "<tr>";
             }
 
-            // Add every value (excluding the QC)
-            for (var j=0; j<7; j++) {
+            // DO NOT ADD COMMAS TO CHIP ID
+            if (line[0]) {
+                table += "<th>" + line[0] + "</th>";
+            }
+
+            for (var j=1; j<7; j++) {
                 if (line[j]) {
                     table += "<th>" + number_with_commas(line[j]) + "</th>";
                 }
