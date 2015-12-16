@@ -297,8 +297,9 @@ def fetch_chip_readout(request):
 
 
 # TODO REQUIRES MAJOR REVISION
-# TODO IDEALLY SHOULD BE SET UP SUCH THAT EACH KEY HAS ITS OWN LOAD IN C3
-# TODO WE NEED TO DO THIS BECAUSE OTHERWISE POINTS ARE NOT CORRECTLY CONNECTED WITH LINES
+# TODO NEED TO AVERAGE REPEAT VALUES
+# TODO NEED TO CONFIRM UNITS ARE THE SAME (ELSE CONVERSION)
+# TODO ONLY USE FIELD WHEN NECESSARY
 def fetch_readouts(request):
     assays = {}
 
@@ -318,7 +319,8 @@ def fetch_readouts(request):
             'assay_chip_id__chip_setup',
             'assay_chip_id__chip_setup__compound',
             'assay_chip_id__chip_setup__unit',
-            'assay_id__assay_id'
+            'assay_id__assay_id',
+            'assay_id__readout_unit'
         )
 
     else:
@@ -329,11 +331,15 @@ def fetch_readouts(request):
             'assay_chip_id'
         ).select_related(
             'assay_chip_id__chip_setup',
-            'assay_id__assay_id'
+            'assay_id__assay_id',
+            'assay_id__readout_unit'
         )
 
     for raw in raw_data:
         assay = raw.assay_id.assay_id.assay_short_name
+        unit = raw.assay_id.readout_unit.unit
+        assay_label = assay + '  (' + unit + ')'
+
         field = raw.field_id
         value = raw.value
         time = raw.elapsed_time
@@ -352,10 +358,10 @@ def fetch_readouts(request):
 
             current_key = tag + '_' + field
 
-            if assay not in assays:
-                assays.update({assay: {}})
+            if assay_label not in assays:
+                assays.update({assay_label: {}})
 
-            current_assay = assays.get(assay)
+            current_assay = assays.get(assay_label)
             if current_key not in current_assay:
                 current_assay.update({
                     current_key: {

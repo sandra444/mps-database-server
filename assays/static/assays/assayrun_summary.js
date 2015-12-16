@@ -5,13 +5,16 @@ $(document).ready(function() {
 
     function make_charts(assays) {
         for (var assay in assays) {
+            var assay_id = assay.split('  ')[0];
             charts.append($('<div>')
-                    .attr('id', 'chart_' + assay)
+                    .attr('id', 'chart_' + assay_id)
             );
         }
         for (assay in assays) {
+            var assay_id = assay.split('  ')[0];
+
             var current_chart = c3.generate({
-                bindto: '#chart_' + assay,
+                bindto: '#chart_' + assay_id,
 
                 data: {
                     columns: []
