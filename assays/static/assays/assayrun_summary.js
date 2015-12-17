@@ -3,9 +3,16 @@ $(document).ready(function() {
     var middleware_token = getCookie('csrftoken');
     var study_id = Math.floor(window.location.href.split('/')[4]);
 
+    var radio_buttons_display = $('#radio_buttons');
+
     function make_charts(assays) {
         // Clear existing charts
         charts.empty();
+
+        // Show radio_buttons if there is data
+        if (Object.keys(assays).length > 0) {
+            radio_buttons_display.show();
+        }
 
         var previous = null;
         for (var assay in assays) {
