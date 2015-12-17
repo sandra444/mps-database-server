@@ -4,11 +4,27 @@ $(document).ready(function() {
     var study_id = Math.floor(window.location.href.split('/')[4]);
 
     function make_charts(assays) {
+        var previous = null;
         for (var assay in assays) {
             var assay_id = assay.split('  ')[0];
-            charts.append($('<div>')
+            if (!previous) {
+                previous = $('<div>')
+                    .addClass('padded-row')
+                    .css('min-height', 320);
+                charts.append(previous
+                    .append($('<div>')
+                        .attr('id', 'chart_' + assay_id)
+                        .addClass('col-sm-6')
+                    )
+                );
+            }
+            else {
+                previous.append($('<div>')
                     .attr('id', 'chart_' + assay_id)
-            );
+                    .addClass('col-sm-6')
+                );
+                previous = null;
+            }
         }
         for (assay in assays) {
             var assay_id = assay.split('  ')[0];
@@ -18,6 +34,10 @@ $(document).ready(function() {
 
                 data: {
                     columns: []
+                },
+
+                size: {
+                  height: 320
                 },
 
                 axis: {
@@ -74,6 +94,7 @@ $(document).ready(function() {
                 // Function to call within the view is defined by `call:`
                 call: 'fetch_readouts',
                 study: study_id,
+                // TODO SET UP A WAY TO SWITCH BETWEEN CHIP AND COMPOUND
                 key: 'compound',
                 csrfmiddlewaretoken: middleware_token
             },
