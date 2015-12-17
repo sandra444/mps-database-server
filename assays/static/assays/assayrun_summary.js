@@ -4,6 +4,9 @@ $(document).ready(function() {
     var study_id = Math.floor(window.location.href.split('/')[4]);
 
     function make_charts(assays) {
+        // Clear existing charts
+        charts.empty();
+
         var previous = null;
         for (var assay in assays) {
             var assay_id = assay.split('  ')[0];
@@ -14,14 +17,14 @@ $(document).ready(function() {
                 charts.append(previous
                     .append($('<div>')
                         .attr('id', 'chart_' + assay_id)
-                        .addClass('col-sm-6')
+                        .addClass('col-sm-6 no-padding')
                     )
                 );
             }
             else {
                 previous.append($('<div>')
                     .attr('id', 'chart_' + assay_id)
-                    .addClass('col-sm-6')
+                    .addClass('col-sm-6 no-padding')
                 );
                 previous = null;
             }
@@ -85,7 +88,7 @@ $(document).ready(function() {
         }
     }
 
-    function get_readouts() {
+    function get_readouts(current_key) {
         $.ajax({
             url: "/assays_ajax",
             type: "POST",
@@ -95,7 +98,7 @@ $(document).ready(function() {
                 call: 'fetch_readouts',
                 study: study_id,
                 // TODO SET UP A WAY TO SWITCH BETWEEN CHIP AND COMPOUND
-                key: 'compound',
+                key: current_key,
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
@@ -108,5 +111,11 @@ $(document).ready(function() {
         });
     }
 
-    get_readouts();
+    // Initially by device
+    get_readouts('chip');
+
+    // Check when radio buttons changed
+    $('input[type=radio][name=chart_type_radio]').change(function() {
+        get_readouts(this.value);
+    });
 });

@@ -208,6 +208,16 @@
         </table>
     {% endif %}
 
+    <div class="well">
+        <h3 class="text-center">Chip Readout Data</h3>
+        <label class="radio-inline">
+            <input type="radio" name="chart_type_radio" id="chip_select" value="chip" checked> View By Device
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="chart_type_radio" id="compound_select" value="compound"> View By Compound
+        </label>
+    </div>
+
     <div id="charts"></div>
 
 {% endblock %}
