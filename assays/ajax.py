@@ -296,10 +296,8 @@ def fetch_chip_readout(request):
                         content_type="application/json")
 
 
-# TODO REQUIRES MAJOR REVISION
-# TODO NEED TO AVERAGE REPEAT VALUES
+# TODO REQUIRES REVISION
 # TODO NEED TO CONFIRM UNITS ARE THE SAME (ELSE CONVERSION)
-# TODO ONLY USE FIELD WHEN NECESSARY
 def fetch_readouts(request):
     study = request.POST.get('study')
     key = request.POST.get('key')
@@ -335,6 +333,7 @@ def fetch_readouts(request):
 
     assays = {}
     initial_data = {}
+    fields = {}
 
     for raw in raw_data:
         assay = raw.assay_id.assay_id.assay_short_name
@@ -361,12 +360,19 @@ def fetch_readouts(request):
 
             if assay_label not in initial_data:
                 initial_data.update({assay_label: {}})
+                fields.update({assay_label: {}})
 
             current_assay = initial_data.get(assay_label)
             if current_key not in current_assay:
                 current_assay.update({
                     current_key: {}
                 })
+                fields.get(assay_label).update({
+                    current_key: {}
+                })
+
+            # Enumerate all fields for current_key
+            fields.get(assay_label).get(current_key).update({field: True})
 
             current_values = current_assay.get(current_key)
 
@@ -381,6 +387,11 @@ def fetch_readouts(request):
         assays.update({assay: {}})
 
         for current_key, times_values in current_keys.items():
+            # If the field label is superfluous (there are not multiple fields)
+            # Remove the field from the key
+            if len(fields.get(assay).get(current_key)) == 1:
+                current_key = '_'.join(current_key.split('_')[:-1])
+
             assays.get(assay).update({
                 current_key: {
                     'time': times_values.keys(),

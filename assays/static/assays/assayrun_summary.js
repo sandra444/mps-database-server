@@ -102,7 +102,7 @@ $(document).ready(function() {
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
-                console.log(json);
+                //console.log(json);
                 make_charts(json.assays);
             },
             error: function (xhr, errmsg, err) {
