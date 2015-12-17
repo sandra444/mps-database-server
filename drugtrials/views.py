@@ -8,14 +8,36 @@ class DrugTrialList(ListView):
     template_name = 'drugtrials/drugtrial_list.html'
 
     def get_queryset(self):
-        queryset = FindingResult.objects.prefetch_related('drug_trial', 'descriptor', 'finding_name', 'value_units').select_related('drug_trial__compound', 'drug_trial__species', 'finding_name__organ', 'finding_name__finding_type').all()
+        queryset = FindingResult.objects.prefetch_related(
+            'drug_trial',
+            'descriptor',
+            'finding_name',
+            'value_units'
+        ).select_related(
+            'drug_trial__compound',
+            'drug_trial__species',
+            'finding_name__organ',
+            'finding_name__finding_type'
+        ).all()
         return queryset
 
 def drug_trial_detail(request, *args, **kwargs):
     c = RequestContext(request)
 
     trial = get_object_or_404(DrugTrial, pk=kwargs.get('pk'))
-    results = FindingResult.objects.filter(drug_trial=trial).prefetch_related('drug_trial', 'descriptor', 'finding_name', 'value_units').select_related('drug_trial__compound', 'drug_trial__species', 'finding_name__organ', 'finding_name__finding_type')
+    results = FindingResult.objects.filter(
+        drug_trial=trial
+    ).prefetch_related(
+        'drug_trial',
+        'descriptor',
+        'finding_name',
+        'value_units'
+    ).select_related(
+        'drug_trial__compound',
+        'drug_trial__species',
+        'finding_name__organ',
+        'finding_name__finding_type'
+    )
 
     trials = list(DrugTrial.objects.all().order_by('compound','id').values_list('id', flat=True))
     current = trials.index(int(kwargs.get('pk')))
@@ -42,14 +64,26 @@ class AdverseEventsList(ListView):
     template_name = 'drugtrials/adverse_events_list.html'
 
     def get_queryset(self):
-        queryset = CompoundAdverseEvent.objects.prefetch_related('compound','event').select_related('compound__compound', 'event__organ__name').all()
+        queryset = CompoundAdverseEvent.objects.prefetch_related(
+            'compound',
+            'event'
+        ).select_related(
+            'compound__compound',
+            'event__organ'
+        ).all()
         return queryset
 
 def adverse_events_detail(request, *args, **kwargs):
     c = RequestContext(request)
 
     compound = get_object_or_404(OpenFDACompound, pk=kwargs.get('pk'))
-    events = CompoundAdverseEvent.objects.filter(compound=compound).prefetch_related('event').select_related('event__organ').order_by('-frequency')
+    events = CompoundAdverseEvent.objects.filter(
+        compound=compound
+    ).prefetch_related(
+        'event'
+    ).select_related(
+        'event__organ'
+    ).order_by('-frequency')
 
     compounds = list(OpenFDACompound.objects.all().order_by('compound').values_list('id', flat=True))
     current = compounds.index(int(kwargs.get('pk')))
