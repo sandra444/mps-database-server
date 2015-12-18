@@ -2102,7 +2102,16 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                     sheet_type = 'Block'
 
                 if sheet_type == 'Chip':
-                    header = [u'Chip ID', u'Time' u'Time Units', u'Assay', u'Object', u'Value', u'Value Unit']
+                    header = [
+                        u'Chip ID',
+                        u'Time',
+                        u'Time Unit',
+                        u'Assay',
+                        u'Object',
+                        u'Value',
+                        u'Value Unit',
+                        u'QC Status'
+                    ]
                     csv_data = {}
                     # Skip header
                     for row_index in range(1, sheet.nrows):

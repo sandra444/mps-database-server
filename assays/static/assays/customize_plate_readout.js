@@ -610,7 +610,6 @@ $(document).ready(function () {
         assay_feature_values = {};
 
         if (upload_type == 'Block') {
-
             // Current assay
             var assay = undefined;
             // Current feature
