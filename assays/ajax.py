@@ -349,8 +349,8 @@ def fetch_readouts(request):
             if key == 'compound':
                 if raw.assay_chip_id.chip_setup.compound:
                     tag = raw.assay_chip_id.chip_setup.compound.name
-                    tag += '_' + str(raw.assay_chip_id.chip_setup.concentration)
-                    tag += '_' + raw.assay_chip_id.chip_setup.unit.unit
+                    tag += ' ' + str(raw.assay_chip_id.chip_setup.concentration)
+                    tag += ' ' + raw.assay_chip_id.chip_setup.unit.unit
                 else:
                     tag = 'Control'
             else:
