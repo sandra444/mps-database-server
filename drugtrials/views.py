@@ -3,6 +3,7 @@ from django.views.generic import ListView
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+
 class DrugTrialList(ListView):
     #model = FindingResult
     template_name = 'drugtrials/drugtrial_list.html'
@@ -20,6 +21,7 @@ class DrugTrialList(ListView):
             'finding_name__finding_type'
         ).all()
         return queryset
+
 
 def drug_trial_detail(request, *args, **kwargs):
     c = RequestContext(request)
@@ -39,7 +41,7 @@ def drug_trial_detail(request, *args, **kwargs):
         'finding_name__finding_type'
     )
 
-    trials = list(DrugTrial.objects.all().order_by('compound','id').values_list('id', flat=True))
+    trials = list(DrugTrial.objects.all().order_by('compound', 'id').values_list('id', flat=True))
     current = trials.index(int(kwargs.get('pk')))
 
     if current == 0:
@@ -54,11 +56,12 @@ def drug_trial_detail(request, *args, **kwargs):
     c.update({
         'trial': trial,
         'results': results,
-        'previous':previous,
-        'next':next,
+        'previous': previous,
+        'next': next,
     })
 
     return render_to_response('drugtrials/drugtrial_detail.html', c)
+
 
 class AdverseEventsList(ListView):
     template_name = 'drugtrials/adverse_events_list.html'
@@ -72,6 +75,7 @@ class AdverseEventsList(ListView):
             'event__organ'
         ).all()
         return queryset
+
 
 def adverse_events_detail(request, *args, **kwargs):
     c = RequestContext(request)
@@ -100,8 +104,8 @@ def adverse_events_detail(request, *args, **kwargs):
     c.update({
         'compound': compound,
         'events': events,
-        'previous':previous,
-        'next':next,
+        'previous': previous,
+        'next': next,
     })
 
     return render_to_response('drugtrials/adverse_events_detail.html', c)
