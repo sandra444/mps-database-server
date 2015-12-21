@@ -97,8 +97,8 @@ def modify_templates():
             'Assay',
             'Feature',
             'Unit',
-            '[ Time ]',
-            '[ Time Units ]',
+            '[Time]',
+            '[Time Units]',
             'Value',
             'Note: Totally remove the Time and Time Units columns if you are not using them',
         ],
@@ -123,15 +123,15 @@ def modify_templates():
     plate_block_initial = [
         [
             'Plate ID',
-            '{ enter Plate ID here }',
+            '{enter Plate ID here}',
             'Assay',
             '',
             'Feature',
-            '{ enter Feature here }',
+            '{enter Feature here}',
             'Unit',
             '',
             '[Time]',
-            '[{ enter Time here }]',
+            '[{enter Time here}]',
             '[Time Unit]',
             '',
             'Note: Totally remove the Time and Time Units cells if you are not using them',
@@ -1643,65 +1643,6 @@ class PhysicalUnitsAdmin(LockableAdmin):
 
 
 admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
-
-
-#class TimeUnitsAdmin(LockableAdmin):
-#    save_on_top = True
-#    list_per_page = 300
-#
-#    list_display = ('unit', 'unit_order',)
-#    fieldsets = (
-#        (
-#            None, {
-#                'fields': (
-#                    'unit',
-#                    'description',
-#                    'unit_order',
-#                )
-#            }
-#        ),
-#        ('Change Tracking', {
-#            'fields': (
-#                'locked',
-#                ('created_by', 'created_on'),
-#                ('modified_by', 'modified_on'),
-#                ('signed_off_by', 'signed_off_date'),
-#            )
-#        }
-#        ),
-#    )
-#
-#
-#admin.site.register(TimeUnits, TimeUnitsAdmin)
-
-
-#class ReadoutUnitAdmin(LockableAdmin):
-#    save_on_top = True
-#    list_per_page = 100
-#
-#    list_display = ('readout_unit', 'description',)
-#    fieldsets = (
-#        (
-#            None, {
-#                'fields': (
-#                    'readout_unit',
-#                    'description'
-#                )
-#            }
-#        ),
-#        ('Change Tracking', {
-#            'fields': (
-#                'locked',
-#                ('created_by', 'created_on'),
-#                ('modified_by', 'modified_on'),
-#                ('signed_off_by', 'signed_off_date'),
-#            )
-#        }
-#        ),
-#    )
-#
-#
-#admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
 
 class AssayChipTestResultAdmin(LockableAdmin):
