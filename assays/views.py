@@ -2084,7 +2084,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                     continue
 
                 # Get the header row
-                header = sheet.row_values(0)
+                header = [unicode(value) for value in sheet.row_values(0)]
 
                 sheet_type = ''
 

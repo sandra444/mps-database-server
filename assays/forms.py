@@ -565,14 +565,15 @@ def validate_plate_readout_file(
 
                     # Fail if time is not numeric
                     try:
-                        float(time)
+                        if time != '':
+                            float(time)
                     except:
                         raise forms.ValidationError(
                             sheet + 'The time "{}" is invalid. Please only enter numeric times'.format(time))
 
                     # Fail if time unit does not match
                     # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
-                    if time_unit[0] != readout_time_unit[0]:
+                    if time_unit and (time_unit[0] != readout_time_unit[0]):
                         raise forms.ValidationError(
                             sheet +
                             'Plate-{0}: The time unit "{1}" does not correspond with '
@@ -586,21 +587,27 @@ def validate_plate_readout_file(
                     data_blocks_found += 1
 
                 # This should handle blocks that have too many rows or do not have a header
-                if data_blocks_found > assays_found:
+                # Don't throw an error if there are not any meaningful values
+                if data_blocks_found > assays_found and any(line[:number_of_columns]):
                     raise forms.ValidationError(
-                        sheet + 'All plate data must have an assay associated with it. Please add a header line.')
+                        sheet + 'All plate data must have an assay associated with it. Please add a header line '
+                                'and/or make sure there are no blank lines between blocks')
 
-                trimmed_line = [val for val in line if val]
+                ### NOTE: This has been removed in favor of restricting block data to only the devices columns
+                ### This allows us to place data in places other than the header in block readout files
+                ### On the other hand it prevents us from warning the user that they might be using the incorrect layout
+                ### A more intricate solution may be implemented later to raise an error when there is a plate mismatch
+                # trimmed_line = [val for val in line if val]
+                #
+                # # This is to deal with an EXCESS of columns
+                # if len(trimmed_line) > number_of_columns:
+                #     raise forms.ValidationError(
+                #         sheet + "Plate-{0}: The number of columns does not correspond "
+                #                 "with the device's dimensions:{1}".format(plate_id, line)
+                #     )
 
-                # This is to deal with an EXCESS of columns
-                if len(trimmed_line) > number_of_columns:
-                    raise forms.ValidationError(
-                        sheet + "Plate-{0}: The number of columns does not correspond "
-                                "with the device's dimensions:{1}".format(plate_id, line)
-                    )
-
-                # For every value in the line
-                for value in line:
+                # For every value in the line (breaking at number of columns)
+                for value in line[:number_of_columns]:
                     # Check every value to make sure it can resolve to a float
                     # Keep empty strings, though they technically can not be converted to floats
                     if value != '':
@@ -1142,7 +1149,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
             datalist = get_bulk_datalist(sheet)
 
             # Get the header row
-            header = sheet.row_values(0)
+            header = [unicode(value) for value in sheet.row_values(0)]
 
             sheet_type = None
 

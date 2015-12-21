@@ -100,7 +100,7 @@ def modify_templates():
             '[Time]',
             '[Time Units]',
             'Value',
-            'Note: Totally remove the Time and Time Units columns if you are not using them',
+            'Note: Totally remove the contents of the Time and Time Units columns if you are not using them',
         ],
         [''] * 9
     ]
@@ -134,7 +134,7 @@ def modify_templates():
             '[{enter Time here}]',
             '[Time Unit]',
             '',
-            'Note: Totally remove the Time and Time Units cells if you are not using them',
+            'Note: Totally remove the contents of the Time and Time Units cells if you are not using them',
         ],
     ]
 
@@ -184,6 +184,8 @@ def modify_templates():
     chip_sheet.set_column('H:H', 10)
     chip_sheet.set_column('I:I', 100)
 
+    chip_sheet.set_column('AA:AC', 30)
+
     # Plate Tabular
     plate_tabular_sheet.set_column('A:A', 20)
     plate_tabular_sheet.set_column('B:B', 25)
@@ -194,6 +196,8 @@ def modify_templates():
     plate_tabular_sheet.set_column('G:G', 15)
     plate_tabular_sheet.set_column('H:H', 15)
     plate_tabular_sheet.set_column('I:I', 100)
+
+    plate_tabular_sheet.set_column('AA:AC', 30)
 
     # Plate Block
     plate_block_sheet.set_column('A:A', 10)
@@ -210,6 +214,8 @@ def modify_templates():
     plate_block_sheet.set_column('K:K', 10)
     plate_block_sheet.set_column('L:L', 15)
     plate_block_sheet.set_column('M:M', 100)
+
+    plate_block_sheet.set_column('AA:AC', 30)
 
     # Get list of time units (TODO CHANGE ORDER_BY)
     time_units = PhysicalUnits.objects.filter(
@@ -231,26 +237,23 @@ def modify_templates():
     ).values_list('assay_name', flat=True)
 
     for index, value in enumerate(time_units):
-        index += 100
-        chip_sheet.write(0, index, value)
-        plate_tabular_sheet.write(0, index, value)
-        plate_block_sheet.write(0, index, value)
+        chip_sheet.write(index, 28, value)
+        plate_tabular_sheet.write(index, 28, value)
+        plate_block_sheet.write(index, 28, value)
 
     for index, value in enumerate(value_units):
-        index += 300
-        chip_sheet.write(0, index, value)
-        plate_tabular_sheet.write(0, index, value)
-        plate_block_sheet.write(0, index, value)
+        chip_sheet.write(index, 27, value)
+        plate_tabular_sheet.write(index, 27, value)
+        plate_block_sheet.write(index, 27, value)
 
     for index, value in enumerate(assays):
-        index += 500
-        chip_sheet.write(0, index, value)
-        plate_tabular_sheet.write(0, index, value)
-        plate_block_sheet.write(0, index, value)
+        chip_sheet.write(index, 26, value)
+        plate_tabular_sheet.write(index, 26, value)
+        plate_block_sheet.write(index, 26, value)
 
-    time_units_range = '=$' + xl_col_to_name(100) + '$1' + ':$' + xl_col_to_name(100 + len(time_units)) + '$1'
-    value_units_range = '=$' + xl_col_to_name(300) + '$1' + ':$' + xl_col_to_name(300 + len(value_units)) + '$1'
-    assays_range = '=$' + xl_col_to_name(500) + '$1' + ':$' + xl_col_to_name(500 + len(assays)) + '$1'
+    time_units_range = '=$AC$1:$AC$' + str(len(time_units))
+    value_units_range = '=$AB$1:$AB$' + str(len(value_units))
+    assays_range = '=$AA$1:$AA$' + str(len(assays))
 
     chip_sheet.data_validation('C2', {'validate': 'list',
                                'source': time_units_range})
@@ -808,6 +811,8 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
         number_of_assays = 0
         # Used to discern row offset
         number_of_rows = currentAssayReadout.setup.assay_layout.device.number_of_rows
+        # Used to discern where to read values
+        number_of_columns = currentAssayReadout.setup.assay_layout.device.number_of_columns
 
         for row_id, line in enumerate(datalist):
             # TODO HOW DO I DEAL WITH BLANK LINES???
@@ -834,8 +839,9 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                     time = None
 
             # Otherwise the line contains datapoints for the current assay
+            # Break if the column_id exceeds the number of columns
             else:
-                for column_id, value in enumerate(line):
+                for column_id, value in enumerate(line[:number_of_columns]):
                     # Treat empty strings as NULL values and do not save the data point
                     if not value:
                         continue
