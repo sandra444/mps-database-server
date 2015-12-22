@@ -9,6 +9,9 @@ $(document).ready(function() {
         // Clear existing charts
         charts.empty();
 
+        var assay_to_id = {};
+        var assay_ids = {};
+
         // Show radio_buttons if there is data
         if (Object.keys(assays).length > 0) {
             radio_buttons_display.show();
@@ -17,6 +20,24 @@ $(document).ready(function() {
         var previous = null;
         for (var assay in assays) {
             var assay_id = assay.split('  ')[0];
+
+            if (!assay_ids[assay_id]) {
+                assay_ids[assay_id] = true;
+                assay_to_id[assay] = assay_id;
+            }
+            else {
+                var assay_number = 2;
+
+                while (assay_ids[assay_id + '_' + assay_number]) {
+                    assay_number += 1;
+                }
+
+                assay_id = assay_id + '_' + assay_number;
+
+                assay_ids[assay_id] = true;
+                assay_to_id[assay] = assay_id;
+            }
+
             if (!previous) {
                 previous = $('<div>')
                     .addClass('padded-row')
@@ -37,10 +58,10 @@ $(document).ready(function() {
             }
         }
         for (assay in assays) {
-            var assay_id = assay.split('  ')[0];
+            var current_assay_id = assay_to_id[assay];
 
             var current_chart = c3.generate({
-                bindto: '#chart_' + assay_id,
+                bindto: '#chart_' + current_assay_id,
 
                 data: {
                     columns: []

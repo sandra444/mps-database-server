@@ -46,6 +46,7 @@ def unicode_csv_reader(in_file, dialect=csv.excel, **kwargs):
     for row in csv_reader:
         yield [unicode(cell.decode(encoding)) for cell in row]
 
+
 # SUBJECT TO CHANGE
 class CloneableForm(forms.ModelForm):
     another = forms.BooleanField(required=False, initial=False)
