@@ -138,6 +138,9 @@ def fetch_compound_report(request):
             plot[assay] = {}
         concentration = unicode(readout.assay_chip_id.chip_setup.concentration) + u'_' + readout.assay_chip_id.chip_setup.unit.unit
         # Replace unicode characters
+        # This may pose problems should more unicode characters appear
+        # I may want to employ a sort of ASCII heuristic table to deal with this issue
+        # Otherwise I would want to just avoid passing unicode where it shouldn't be (in HTML IDs and so on)
         concentration = concentration.replace(u'µ', u'u')
         if not concentration in plot[assay]:
             plot[assay][concentration] = {}

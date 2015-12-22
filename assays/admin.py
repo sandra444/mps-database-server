@@ -24,6 +24,9 @@ import os
 import xlsxwriter
 from xlsxwriter.utility import xl_col_to_name
 
+# This variable exists to avoid a magic number for the location of the validation starting column
+TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX = 52
+
 
 def modify_templates():
     # Where will I store the templates?
@@ -184,7 +187,7 @@ def modify_templates():
     chip_sheet.set_column('H:H', 10)
     chip_sheet.set_column('I:I', 100)
 
-    chip_sheet.set_column('AA:AC', 30)
+    chip_sheet.set_column('BA:BC', 30)
 
     # Plate Tabular
     plate_tabular_sheet.set_column('A:A', 20)
@@ -197,7 +200,7 @@ def modify_templates():
     plate_tabular_sheet.set_column('H:H', 15)
     plate_tabular_sheet.set_column('I:I', 100)
 
-    plate_tabular_sheet.set_column('AA:AC', 30)
+    plate_tabular_sheet.set_column('BA:BC', 30)
 
     # Plate Block
     plate_block_sheet.set_column('A:A', 10)
@@ -215,7 +218,7 @@ def modify_templates():
     plate_block_sheet.set_column('L:L', 15)
     plate_block_sheet.set_column('M:M', 100)
 
-    plate_block_sheet.set_column('AA:AC', 30)
+    plate_block_sheet.set_column('BA:BC', 30)
 
     # Get list of time units (TODO CHANGE ORDER_BY)
     time_units = PhysicalUnits.objects.filter(
@@ -237,23 +240,23 @@ def modify_templates():
     ).values_list('assay_name', flat=True)
 
     for index, value in enumerate(time_units):
-        chip_sheet.write(index, 28, value)
-        plate_tabular_sheet.write(index, 28, value)
-        plate_block_sheet.write(index, 28, value)
+        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+2, value)
+        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+2, value)
+        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+2, value)
 
     for index, value in enumerate(value_units):
-        chip_sheet.write(index, 27, value)
-        plate_tabular_sheet.write(index, 27, value)
-        plate_block_sheet.write(index, 27, value)
+        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+1, value)
+        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+1, value)
+        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+1, value)
 
     for index, value in enumerate(assays):
-        chip_sheet.write(index, 26, value)
-        plate_tabular_sheet.write(index, 26, value)
-        plate_block_sheet.write(index, 26, value)
+        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
+        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
+        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
 
-    time_units_range = '=$AC$1:$AC$' + str(len(time_units))
-    value_units_range = '=$AB$1:$AB$' + str(len(value_units))
-    assays_range = '=$AA$1:$AA$' + str(len(assays))
+    time_units_range = '=$BC$1:$BC$' + str(len(time_units))
+    value_units_range = '=$BB$1:$BB$' + str(len(value_units))
+    assays_range = '=$BA$1:$BA$' + str(len(assays))
 
     chip_sheet.data_validation('C2', {'validate': 'list',
                                'source': time_units_range})

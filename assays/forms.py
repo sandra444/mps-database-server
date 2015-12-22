@@ -14,6 +14,9 @@ from chardet.universaldetector import UniversalDetector
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
 
+# This variable exists to avoid a magic number for the location of the validation starting column
+TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX = 52
+
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
 # Excluding restricted is likewise useful
@@ -593,18 +596,16 @@ def validate_plate_readout_file(
                         sheet + 'All plate data must have an assay associated with it. Please add a header line '
                                 'and/or make sure there are no blank lines between blocks')
 
-                ### NOTE: This has been removed in favor of restricting block data to only the devices columns
-                ### This allows us to place data in places other than the header in block readout files
-                ### On the other hand it prevents us from warning the user that they might be using the incorrect layout
-                ### A more intricate solution may be implemented later to raise an error when there is a plate mismatch
-                # trimmed_line = [val for val in line if val]
-                #
-                # # This is to deal with an EXCESS of columns
-                # if len(trimmed_line) > number_of_columns:
-                #     raise forms.ValidationError(
-                #         sheet + "Plate-{0}: The number of columns does not correspond "
-                #                 "with the device's dimensions:{1}".format(plate_id, line)
-                #     )
+                # TODO NOTE: THIS IS DEPENDENT ON THE LOCATION OF THE TEMPLATE'S VALIDATION CELLS
+                # TODO AS A RESULT,
+                trimmed_line = [val for val in line[:TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX] if val]
+
+                # This is to deal with an EXCESS of columns
+                if len(trimmed_line) > number_of_columns:
+                    raise forms.ValidationError(
+                        sheet + "Plate-{0}: The number of columns does not correspond "
+                                "with the device's dimensions:{1}".format(plate_id, line)
+                    )
 
                 # For every value in the line (breaking at number of columns)
                 for value in line[:number_of_columns]:
