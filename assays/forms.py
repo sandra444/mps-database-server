@@ -644,7 +644,7 @@ def validate_plate_readout_file(
         number_of_columns = u''
 
         # TODO REVISE
-        if header < 6:
+        if len(header) < 6:
             raise forms.ValidationError(
                 sheet + 'Please specify Plate ID, Well, Assay, Feature, Feature Unit, [Time, Time Unit], '
                         'and Value in header.')
