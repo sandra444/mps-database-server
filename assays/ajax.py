@@ -15,8 +15,10 @@ logger = logging.getLogger(__name__)
 
 # TODO OPTIMIZE DATABASE HITS
 
+
 def main(request):
     return HttpResponseServerError()
+
 
 # TODO ADD BASE LAYOUT CONTENT TO ASSAY LAYOUT
 def fetch_assay_layout_content(request):
@@ -37,7 +39,6 @@ def fetch_assay_layout_content(request):
 
     elif model == 'assay_device_readout':
         layout = AssayPlateReadout.objects.get(id=id).setup.assay_layout
-
 
     data = defaultdict(dict)
 
@@ -187,6 +188,7 @@ def fetch_well_types(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+
 #Fetches and displays assay layout from plate readout
 def fetch_plate_info(request):
     """Returns dynamic info for plate assays"""
@@ -237,6 +239,7 @@ def fetch_center_id(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+
 def fetch_chip_readout(request):
     """Returns the Raw Chip Data stored for a Chip Readout"""
 
@@ -255,11 +258,14 @@ def fetch_chip_readout(request):
         'elapsed_time'
     )
 
-    time_unit = AssayChipReadout.objects.filter(id=chip_id)[0].timeunit
+    readout = AssayChipReadout.objects.filter(id=chip_id)[0]
+    time_unit = readout.timeunit
+    chip_name = readout.chip_setup.assay_chip_id
 
     csv = ""
 
     for raw in chip_data:
+        csv += str(chip_name) + ','
         csv += str(raw.elapsed_time) + ','
         # Add time unit
         csv += str(time_unit) + ','
@@ -289,6 +295,195 @@ def fetch_chip_readout(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+
+# TODO REQUIRES REVISION
+# TODO NEED TO CONFIRM UNITS ARE THE SAME (ELSE CONVERSION)
+def fetch_readouts(request):
+    study = request.POST.get('study')
+    key = request.POST.get('key')
+
+    # Get chip readouts
+    readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=study)
+
+    if key == 'compound':
+        raw_data = AssayChipRawData.objects.filter(
+            assay_chip_id=readouts
+        ).prefetch_related(
+            'assay_id',
+            'assay_chip_id'
+        ).select_related(
+            'assay_chip_id__chip_setup',
+            'assay_chip_id__chip_setup__compound',
+            'assay_chip_id__chip_setup__unit',
+            'assay_id__assay_id',
+            'assay_id__readout_unit'
+        )
+
+    else:
+        raw_data = AssayChipRawData.objects.filter(
+            assay_chip_id=readouts
+        ).prefetch_related(
+            'assay_id',
+            'assay_chip_id'
+        ).select_related(
+            'assay_chip_id__chip_setup',
+            'assay_id__assay_id',
+            'assay_id__readout_unit'
+        )
+
+    assays = {}
+    initial_data = {}
+    fields = {}
+
+    for raw in raw_data:
+        assay = raw.assay_id.assay_id.assay_short_name
+        unit = raw.assay_id.readout_unit.unit
+        assay_label = assay + '  (' + unit + ')'
+
+        field = raw.field_id
+        value = raw.value
+        time = raw.elapsed_time
+        quality = raw.quality
+
+        if not quality:
+            if key == 'compound':
+                if raw.assay_chip_id.chip_setup.compound:
+                    tag = raw.assay_chip_id.chip_setup.compound.name
+                    tag += ' ' + str(raw.assay_chip_id.chip_setup.concentration)
+                    tag += ' ' + raw.assay_chip_id.chip_setup.unit.unit
+                else:
+                    tag = 'Control'
+            else:
+                tag = raw.assay_chip_id.chip_setup.assay_chip_id
+
+            current_key = tag + '_' + field
+
+            if assay_label not in initial_data:
+                initial_data.update({assay_label: {}})
+                fields.update({assay_label: {}})
+
+            current_assay = initial_data.get(assay_label)
+            if current_key not in current_assay:
+                current_assay.update({
+                    current_key: {}
+                })
+                fields.get(assay_label).update({
+                    current_key: {}
+                })
+
+            # Enumerate all fields for current_key
+            fields.get(assay_label).get(current_key).update({field: True})
+
+            current_values = current_assay.get(current_key)
+
+            current_value = current_values.get(time, '')
+
+            if current_value:
+                current_values.update({time: (current_value + value) / 2.0})
+            else:
+                current_values.update({time: value})
+
+    for assay, current_keys in initial_data.items():
+        assays.update({assay: {}})
+
+        for current_key, times_values in current_keys.items():
+            # If the field label is superfluous (there are not multiple fields)
+            # Remove the field from the key
+            if len(fields.get(assay).get(current_key)) == 1:
+                current_key = '_'.join(current_key.split('_')[:-1])
+
+            assays.get(assay).update({
+                current_key: {
+                    'time': times_values.keys(),
+                    'values': times_values.values()
+                }
+            })
+
+    data = {
+        'assays': assays,
+    }
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
+
+# Should these be refactored just to use fetch_context instead?
+def fetch_organ_models(request):
+    context = u'<option value="">---------</option>'
+
+    device = request.POST.get('device')
+
+    findings = OrganModel.objects.filter(device_id=device).prefetch_related('device')
+
+    for finding in findings:
+        # match value to the desired subject ID
+        value = str(finding.id)
+        context += u'<option value="' + value + '">' + unicode(finding) + '</option>'
+
+    data = {}
+
+    data.update({
+        'context': context,
+    })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
+
+def fetch_protocols(request):
+    context = u'<option value="">---------</option>'
+
+    organ_model = request.POST.get('organ_model')
+
+    # Order should be from newest to oldest
+    findings = OrganModelProtocol.objects.filter(
+        organ_model_id=organ_model
+    ).prefetch_related(
+        'organ_model'
+    ).order_by('-version')
+
+    # Default to first finding
+    if len(findings) >= 1:
+        finding = findings[0]
+        value = str(finding.id)
+        context += u'<option selected value="' + value + '">' + unicode(finding) + '</option>'
+
+    if len(findings) > 1:
+        # Add the other protocols
+        for finding in findings[1:]:
+            # match value to the desired subject ID
+            value = str(finding.id)
+            context += u'<option value="' + value + '">' + unicode(finding) + '</option>'
+
+    data = {}
+
+    data.update({
+        'context': context,
+    })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
+
+def fetch_protocol(request):
+    data = {}
+
+    protocol_id = request.POST.get('protocol')
+
+    protocol = OrganModelProtocol.objects.filter(pk=protocol_id)
+
+    if protocol:
+        protocol_file = protocol[0].file
+        file_name = '/'.join(protocol_file.name.split('/')[1:])
+        href = '/media/' + protocol_file.name
+        data.update({
+            'file_name': file_name,
+            'href': href
+        })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
 def fetch_context(request):
     """Acquires context for whittling down number of dropdown"""
 
@@ -296,11 +491,11 @@ def fetch_context(request):
 
     # the model who's dropdown you want to whittle down
     models = {
-        'AssayChipReadout':AssayChipReadout,
-        'AssayChipSetup':AssayChipSetup,
-        'AssayRun':AssayRun,
-        'AssayChipReadoutAssay':AssayChipReadoutAssay,
-        'AssayPlateReadoutAssay':AssayPlateReadoutAssay
+        'AssayChipReadout': AssayChipReadout,
+        'AssayChipSetup': AssayChipSetup,
+        'AssayRun': AssayRun,
+        'AssayChipReadoutAssay': AssayChipReadoutAssay,
+        'AssayPlateReadoutAssay': AssayPlateReadoutAssay
     }
 
     # master is what determines the subject's drop down choices
@@ -315,7 +510,7 @@ def fetch_context(request):
     next_model = request.POST.get('next_model')
     next_filter = request.POST.get('next_filter')
 
-    findings = subject.objects.filter(**{master:master_id})
+    findings = subject.objects.filter(**{master: master_id})
 
     if next_model and next_filter:
         next_model = models.get(next_model)
@@ -323,7 +518,7 @@ def fetch_context(request):
         findings = []
 
         for item in original:
-            findings.extend(next_model.objects.filter(**{next_filter:item}))
+            findings.extend(next_model.objects.filter(**{next_filter: item}))
 
     for finding in findings:
         # match value to the desired subject ID
@@ -347,7 +542,11 @@ switch = {
     'fetch_plate_info': fetch_plate_info,
     'fetch_center_id': fetch_center_id,
     'fetch_chip_readout': fetch_chip_readout,
+    'fetch_readouts': fetch_readouts,
     'fetch_context': fetch_context,
+    'fetch_organ_models': fetch_organ_models,
+    'fetch_protocols': fetch_protocols,
+    'fetch_protocol': fetch_protocol,
 }
 
 

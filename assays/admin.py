@@ -19,6 +19,271 @@ import re
 from django.db import connection, transaction
 from urllib import unquote
 
+from mps.settings import MEDIA_ROOT
+import os
+import xlsxwriter
+from xlsxwriter.utility import xl_col_to_name
+
+# This variable exists to avoid a magic number for the location of the validation starting column
+TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX = 52
+
+
+def modify_templates():
+    # Where will I store the templates?
+    template_root = MEDIA_ROOT + '/excel_templates/'
+
+    version = 1
+    version += len(os.listdir(template_root)) / 3
+    version = str(version)
+
+    chip = xlsxwriter.Workbook(template_root + 'chip_template-' + version + '.xlsx')
+    plate_tabular = xlsxwriter.Workbook(template_root + 'plate_tabular_template-' + version + '.xlsx')
+    plate_block = xlsxwriter.Workbook(template_root + 'plate_block_template-' + version + '.xlsx')
+
+    chip_sheet = chip.add_worksheet()
+    plate_tabular_sheet = plate_tabular.add_worksheet()
+    plate_block_sheet = plate_block.add_worksheet()
+
+    # Set up formats
+    chip_red = chip.add_format()
+    chip_red.set_bg_color('red')
+    chip_green = chip.add_format()
+    chip_green.set_bg_color('green')
+
+    plate_tabular_red = plate_tabular.add_format()
+    plate_tabular_red.set_bg_color('red')
+    plate_tabular_green = plate_tabular.add_format()
+    plate_tabular_green.set_bg_color('green')
+
+    plate_block_red = plate_block.add_format()
+    plate_block_red.set_bg_color('red')
+    plate_block_green = plate_block.add_format()
+    plate_block_green.set_bg_color('green')
+    plate_block_yellow = plate_block.add_format()
+    plate_block_yellow.set_bg_color('yellow')
+
+    # Write the base files
+    chip_initial = [
+        [
+            'Chip ID',
+            'Time',
+            'Time Units',
+            'Assay',
+            'Object',
+            'Value',
+            'Value Unit',
+            'QC Status',
+            'Note: ANY value in QC Status will mark a row as invalid'
+        ],
+        [''] * 9
+    ]
+
+    chip_initial_format = [
+        [chip_red] * 9,
+        [
+            None,
+            None,
+            chip_green,
+            chip_green,
+            None,
+            None,
+            chip_green,
+            None,
+            None
+        ]
+    ]
+
+    plate_tabular_initial = [
+        [
+            'Plate ID',
+            'Well Name (e.g. A01,F12)',
+            'Assay',
+            'Feature',
+            'Unit',
+            '[Time]',
+            '[Time Units]',
+            'Value',
+            'Note: Totally remove the contents of the Time and Time Units columns if you are not using them',
+        ],
+        [''] * 9
+    ]
+
+    plate_tabular_initial_format = [
+        [plate_tabular_red] * 9,
+        [
+            None,
+            None,
+            plate_tabular_green,
+            None,
+            plate_tabular_green,
+            None,
+            plate_tabular_green,
+            None,
+            None
+        ]
+    ]
+
+    plate_block_initial = [
+        [
+            'Plate ID',
+            '{enter Plate ID here}',
+            'Assay',
+            '',
+            'Feature',
+            '{enter Feature here}',
+            'Unit',
+            '',
+            '[Time]',
+            '[{enter Time here}]',
+            '[Time Unit]',
+            '',
+            'Note: Totally remove the contents of the Time and Time Units cells if you are not using them',
+        ],
+    ]
+
+    plate_block_initial_format = [
+        [
+            plate_block_red,
+            plate_block_yellow,
+            plate_block_red,
+            plate_block_green,
+            plate_block_red,
+            plate_block_yellow,
+            plate_block_red,
+            plate_block_green,
+            plate_block_red,
+            plate_block_yellow,
+            plate_block_red,
+            plate_block_green,
+            plate_block_red
+        ]
+    ]
+
+    # Write out initial
+    for row_index, row in enumerate(chip_initial):
+        for column_index, column in enumerate(row):
+            cell_format = chip_initial_format[row_index][column_index]
+            chip_sheet.write(row_index, column_index, column, cell_format)
+
+    for row_index, row in enumerate(plate_tabular_initial):
+        for column_index, column in enumerate(row):
+            cell_format = plate_tabular_initial_format[row_index][column_index]
+            plate_tabular_sheet.write(row_index, column_index, column, cell_format)
+
+    for row_index, row in enumerate(plate_block_initial):
+        for column_index, column in enumerate(row):
+            cell_format = plate_block_initial_format[row_index][column_index]
+            plate_block_sheet.write(row_index, column_index, column, cell_format)
+
+    # Set column widths
+    # Chip
+    chip_sheet.set_column('A:A', 20)
+    chip_sheet.set_column('B:B', 10)
+    chip_sheet.set_column('C:C', 20)
+    chip_sheet.set_column('D:D', 30)
+    chip_sheet.set_column('E:E', 10)
+    chip_sheet.set_column('F:F', 15)
+    chip_sheet.set_column('G:G', 15)
+    chip_sheet.set_column('H:H', 10)
+    chip_sheet.set_column('I:I', 100)
+
+    chip_sheet.set_column('BA:BC', 30)
+
+    # Plate Tabular
+    plate_tabular_sheet.set_column('A:A', 20)
+    plate_tabular_sheet.set_column('B:B', 25)
+    plate_tabular_sheet.set_column('C:C', 30)
+    plate_tabular_sheet.set_column('D:D', 30)
+    plate_tabular_sheet.set_column('E:E', 20)
+    plate_tabular_sheet.set_column('F:F', 15)
+    plate_tabular_sheet.set_column('G:G', 15)
+    plate_tabular_sheet.set_column('H:H', 15)
+    plate_tabular_sheet.set_column('I:I', 100)
+
+    plate_tabular_sheet.set_column('BA:BC', 30)
+
+    # Plate Block
+    plate_block_sheet.set_column('A:A', 10)
+    plate_block_sheet.set_column('B:B', 20)
+    plate_block_sheet.set_column('C:C', 10)
+    plate_block_sheet.set_column('D:D', 30)
+    plate_block_sheet.set_column('E:E', 10)
+    plate_block_sheet.set_column('F:F', 30)
+    plate_block_sheet.set_column('G:G', 10)
+    plate_block_sheet.set_column('H:H', 20)
+    plate_block_sheet.set_column('I:I', 15)
+    plate_block_sheet.set_column('I:I', 10)
+    plate_block_sheet.set_column('J:J', 20)
+    plate_block_sheet.set_column('K:K', 10)
+    plate_block_sheet.set_column('L:L', 15)
+    plate_block_sheet.set_column('M:M', 100)
+
+    plate_block_sheet.set_column('BA:BC', 30)
+
+    # Get list of time units (TODO CHANGE ORDER_BY)
+    time_units = PhysicalUnits.objects.filter(
+        unit_type__unit_type='Time'
+    ).order_by(
+        'scale_factor'
+    ).values_list('unit', flat=True)
+
+    # Get list of value units  (TODO CHANGE ORDER_BY)
+    value_units = PhysicalUnits.objects.filter(
+        availability__contains='readout'
+    ).order_by(
+        'scale_factor'
+    ).values_list('unit', flat=True)
+
+    # Get list of assays
+    assays = AssayModel.objects.all().order_by(
+        'assay_name'
+    ).values_list('assay_name', flat=True)
+
+    for index, value in enumerate(time_units):
+        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+2, value)
+        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+2, value)
+        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+2, value)
+
+    for index, value in enumerate(value_units):
+        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+1, value)
+        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+1, value)
+        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+1, value)
+
+    for index, value in enumerate(assays):
+        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
+        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
+        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
+
+    time_units_range = '=$BC$1:$BC$' + str(len(time_units))
+    value_units_range = '=$BB$1:$BB$' + str(len(value_units))
+    assays_range = '=$BA$1:$BA$' + str(len(assays))
+
+    chip_sheet.data_validation('C2', {'validate': 'list',
+                               'source': time_units_range})
+    chip_sheet.data_validation('D2', {'validate': 'list',
+                               'source': assays_range})
+    chip_sheet.data_validation('G2', {'validate': 'list',
+                               'source': value_units_range})
+
+    plate_tabular_sheet.data_validation('C2', {'validate': 'list',
+                                        'source': assays_range})
+    plate_tabular_sheet.data_validation('E2', {'validate': 'list',
+                                        'source': value_units_range})
+    plate_tabular_sheet.data_validation('G2', {'validate': 'list',
+                                        'source': time_units_range})
+
+    plate_block_sheet.data_validation('D1', {'validate': 'list',
+                                      'source': assays_range})
+    plate_block_sheet.data_validation('H1', {'validate': 'list',
+                                      'source': value_units_range})
+    plate_block_sheet.data_validation('L1', {'validate': 'list',
+                                      'source': time_units_range})
+
+    # Save
+    chip.close()
+    plate_tabular.close()
+    plate_block.close()
+
 
 class AssayModelTypeAdmin(LockableAdmin):
     save_on_top = True
@@ -78,6 +343,17 @@ class AssayModelAdmin(LockableAdmin):
             }
         ),
     )
+
+    def save_model(self, request, obj, form, change):
+        if change:
+            obj.modified_by = request.user
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        obj.save()
+
+        if change:
+            modify_templates()
 
 
 admin.site.register(AssayModel, AssayModelAdmin)
@@ -518,9 +794,6 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
     datareader = unicode_csv_reader(file, delimiter=',')
     datalist = list(datareader)
 
-    # EXCLUDE THE HEADER
-    datalist = datalist[1:]
-
     assays = {}
     for assay in AssayPlateReadoutAssay.objects.filter(readout_id=currentAssayReadout):
         assay_name = assay.assay_id.assay_name.upper()
@@ -541,6 +814,8 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
         number_of_assays = 0
         # Used to discern row offset
         number_of_rows = currentAssayReadout.setup.assay_layout.device.number_of_rows
+        # Used to discern where to read values
+        number_of_columns = currentAssayReadout.setup.assay_layout.device.number_of_columns
 
         for row_id, line in enumerate(datalist):
             # TODO HOW DO I DEAL WITH BLANK LINES???
@@ -550,25 +825,26 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 
             # If this line is a header
             # Headers should look like:
-            # ASSAY, {{}}, FEATURE, {{}}, READOUT UNIT, {{}}, TIME, {{}}. TIME UNIT, {{}}
-            if line[0].upper().strip() == 'ASSAY':
+            # PLATE ID, {{}}, ASSAY, {{}}, FEATURE, {{}}, READOUT UNIT, {{}}, TIME, {{}}. TIME UNIT, {{}}
+            if 'PLATE ID' in line[0].upper():
                 # Get the assay
-                assay_name = line[1].upper()
-                feature = line[3]
+                assay_name = line[3].upper()
+                feature = line[5]
 
                 assay = assays.get((assay_name, feature))
 
                 number_of_assays += 1
 
-                if len(line) >= 10:
-                    time = line[7]
+                if len(line) >= 12:
+                    time = line[9]
 
                 else:
                     time = None
 
             # Otherwise the line contains datapoints for the current assay
+            # Break if the column_id exceeds the number of columns
             else:
-                for column_id, value in enumerate(line):
+                for column_id, value in enumerate(line[:number_of_columns]):
                     # Treat empty strings as NULL values and do not save the data point
                     if not value:
                         continue
@@ -610,7 +886,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
         # The first line SHOULD be the header
         header = datalist[0]
 
-        if 'TIME' in header[4].upper() and 'UNIT' in header[5].upper():
+        if 'TIME' in header[5].upper() and 'UNIT' in header[6].upper():
             time_specified = True
         else:
             time_specified = False
@@ -620,9 +896,9 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 
         for row_index, row in enumerate(data):
             # The well identifier given
-            well = row[0]
-            assay_name = row[1].upper()
-            feature = row[2]
+            well = row[1]
+            assay_name = row[2].upper()
+            feature = row[3]
 
             # Split the well into alphabetical and numeric
             row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
@@ -634,11 +910,11 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
             column_label = int(column_label) - 1
 
             if time_specified:
-                time = row[4]
-                value = row[6]
+                time = row[5]
+                value = row[7]
 
             else:
-                value = row[4]
+                value = row[5]
                 time = 0
 
             # NOTE THAT BLANKS ARE CURRENTLY COMPLETELY EXCLUDED
@@ -881,30 +1157,30 @@ def parseChipCSV(currentChipReadout, file, headers, form):
         # rowID is the index of the current row from top to bottom
 
         # Skip any row with insufficient commas
-        if len(rowValue) < 6:
+        if len(rowValue) < 7:
             continue
 
         # Skip any row with incomplete data
         # This does not include the quality
-        if not all(rowValue[:6]):
+        if not all(rowValue[:7]):
             continue
 
         # Try getting the assay from long name
         try:
-            assay = AssayModel.objects.get(assay_name__iexact=rowValue[2])
+            assay = AssayModel.objects.get(assay_name__iexact=rowValue[3])
         # If this fails, then use the short name
         except:
-            assay = AssayModel.objects.get(assay_short_name__iexact=rowValue[2])
+            assay = AssayModel.objects.get(assay_short_name__iexact=rowValue[3])
 
-        field = rowValue[3]
-        val = rowValue[4]
-        time = rowValue[0]
+        field = rowValue[4]
+        val = rowValue[5]
+        time = rowValue[1]
 
         # PLEASE NOTE Database inputs, not the csv, have the final say
         # Get quality if possible
         quality = u''
-        if len(rowValue) > 6:
-            quality = rowValue[6]
+        if len(rowValue) > 7:
+            quality = rowValue[7]
 
         # Get quality from added form inputs if possible
         if current_index in qc_status:
@@ -1309,6 +1585,33 @@ class AssayChipResultInline(admin.TabularInline):
         css = {"all": ("css/hide_admin_original.css",)}
 
 
+class UnitTypeAdmin(LockableAdmin):
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('unit_type', 'description')
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                    ('unit_type', 'description'),
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }
+        ),
+    )
+
+
+admin.site.register(UnitType, UnitTypeAdmin)
+
+
 class PhysicalUnitsAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
@@ -1336,67 +1639,19 @@ class PhysicalUnitsAdmin(LockableAdmin):
         ),
     )
 
+    def save_model(self, request, obj, form, change):
+        if change:
+            obj.modified_by = request.user
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        obj.save()
+
+        if change and 'readout' in obj.availability:
+            modify_templates()
+
 
 admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
-
-
-#class TimeUnitsAdmin(LockableAdmin):
-#    save_on_top = True
-#    list_per_page = 300
-#
-#    list_display = ('unit', 'unit_order',)
-#    fieldsets = (
-#        (
-#            None, {
-#                'fields': (
-#                    'unit',
-#                    'description',
-#                    'unit_order',
-#                )
-#            }
-#        ),
-#        ('Change Tracking', {
-#            'fields': (
-#                'locked',
-#                ('created_by', 'created_on'),
-#                ('modified_by', 'modified_on'),
-#                ('signed_off_by', 'signed_off_date'),
-#            )
-#        }
-#        ),
-#    )
-#
-#
-#admin.site.register(TimeUnits, TimeUnitsAdmin)
-
-
-#class ReadoutUnitAdmin(LockableAdmin):
-#    save_on_top = True
-#    list_per_page = 100
-#
-#    list_display = ('readout_unit', 'description',)
-#    fieldsets = (
-#        (
-#            None, {
-#                'fields': (
-#                    'readout_unit',
-#                    'description'
-#                )
-#            }
-#        ),
-#        ('Change Tracking', {
-#            'fields': (
-#                'locked',
-#                ('created_by', 'created_on'),
-#                ('modified_by', 'modified_on'),
-#                ('signed_off_by', 'signed_off_date'),
-#            )
-#        }
-#        ),
-#    )
-#
-#
-#admin.site.register(ReadoutUnit, ReadoutUnitAdmin)
 
 
 class AssayChipTestResultAdmin(LockableAdmin):

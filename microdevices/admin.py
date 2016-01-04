@@ -2,9 +2,9 @@
 
 from django.contrib import admin
 from mps.base.admin import LockableAdmin
-from .models import MicrophysiologyCenter, Manufacturer, Microdevice, OrganModel, ValidatedAssay
-from drugtrials.models import Test
-
+from .models import MicrophysiologyCenter, Manufacturer, Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
+from django.core.urlresolvers import resolve
+from django.db.models.fields.files import FieldFile
 
 class MicrophysiologyCenterAdmin(LockableAdmin):
     save_on_top = True
@@ -110,6 +110,9 @@ class MicrodeviceAdmin(LockableAdmin):
             None, {
                 'fields': (
                     (
+                        'device_type'
+                    ),
+                    (
                         'center', 'manufacturer',
                     ),
                     (
@@ -132,7 +135,7 @@ class MicrodeviceAdmin(LockableAdmin):
                         'device_width', 'device_length', 'device_thickness',
                     ),
                     (
-                        'device_fluid_volume', 'device_fluid_volume_unit',
+                        'device_fluid_volume',
                     ),
                     (
                         'substrate_material', 'substrate_thickness',
@@ -172,18 +175,32 @@ class MicrodeviceAdmin(LockableAdmin):
         'device_image_display', 'device_cross_section_image_display',
     )
 
+    def save_model(self, request, obj, form, change):
+        # Django always sends this when "Save as new is clicked"
+        if '_saveasnew' in request.POST:
+            # Get the ID from the admin URL
+            original_pk = resolve(request.path).args[0]
+            # Get the original object
+            original_obj = obj._meta.concrete_model.objects.get(id=original_pk)
+
+            # Iterate through all it's properties
+            for prop, value in vars(original_obj).iteritems():
+                # if the property is an Image (don't forget to import ImageFieldFile!)
+                if isinstance(getattr(original_obj, prop), FieldFile):
+                    setattr(obj,prop,getattr(original_obj, prop)) # Copy it!
+        obj.save()
+
 admin.site.register(Microdevice, MicrodeviceAdmin)
 
 
-# class TestInline(admin.TabularInline):
-#     model = Test
-#     extra = 1
-#     exclude = ['created_by', 'modified_by']
-#     fields = ('locked', 'test_name', 'test_type', 'test_unit', 'description')
-#
-#     class Media(object):
-#         css = {"all": ("css/hide_admin_original.css",)}
+class OrganModelProtocolInline(admin.TabularInline):
+    """Organ Model Protocols"""
+    model = OrganModelProtocol
+    fields = ('version', 'file')
+    extra = 1
 
+    class Media(object):
+        css = {"all": ("css/hide_admin_original.css",)}
 
 class ValidatedAssayInline(admin.TabularInline):
     # Results calculated from CHIP READOUTS
@@ -220,9 +237,6 @@ class OrganModelAdmin(LockableAdmin):
                     (
                         'organ', 'device', 'description',
                     ),
-                    (
-                        'protocol',
-                    ),
                 )
             }
         ),
@@ -240,7 +254,6 @@ class OrganModelAdmin(LockableAdmin):
 
     actions = ['update_fields']
     save_on_top = True
-    # inlines = [TestInline]
-    inlines = [ValidatedAssayInline]
+    inlines = [ValidatedAssayInline, OrganModelProtocolInline]
 
 admin.site.register(OrganModel, OrganModelAdmin)

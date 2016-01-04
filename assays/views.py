@@ -30,10 +30,13 @@ import re
 import os
 import codecs,cStringIO
 
+from mps.settings import MEDIA_ROOT
+
 # TODO Refactor imports
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
 # TODO Rename get_absolute_url when the function does not actually return the model's URL
-
+# TODO It is probably more semantic to overwrite get_context_data and form_valid in lieu of post and get for updates
+# TODO ^ Update Views should be refactored soon
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
 
@@ -503,6 +506,7 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
         ).prefetch_related(
             'assay_run_id',
             'device',
+            'organ_model',
             'compound',
             'unit',
             'created_by',
@@ -597,8 +601,6 @@ class AssayChipSetupAdd(CreateView):
 
         # Cellsamples will always be the same
         context['cellsamples'] = cellsamples
-        # Get protocols
-        context['protocols'] = json.dumps({item['id']: item['protocol'] for item in OrganModel.objects.all().values()})
 
         return context
 
@@ -661,15 +663,11 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         # Render form
         formset = AssayChipCellsFormset(instance=self.object)
 
-        # Get protocols
-        protocols = json.dumps({item['id']: item['protocol'] for item in OrganModel.objects.all().values()})
-
         return self.render_to_response(
             self.get_context_data(
                 form=form,
                 formset=formset,
                 cellsamples=cellsamples,
-                protocols=protocols,
                 update=True
             )
         )
@@ -709,15 +707,11 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             return redirect(self.object.get_absolute_url())
         else:
 
-            # Get protocols
-            protocols = json.dumps({item['id']: item['protocol'] for item in OrganModel.objects.all().values()})
-
             return self.render_to_response(
                 self.get_context_data(
                     form=form,
                     formset=formset,
                     cellsamples=cellsamples,
-                    protocols=protocols,
                     update=True
                 )
             )
@@ -752,6 +746,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
             'created_by',
             'group'
         ).select_related(
+            'chip_setup__assay_run_id',
             'chip_setup__compound',
             'chip_setup__unit'
         ) | AssayChipReadout.objects.filter(
@@ -761,6 +756,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
             'created_by',
             'group'
         ).select_related(
+            'chip_setup__assay_run_id',
             'chip_setup__compound',
             'chip_setup__unit'
         )
@@ -1598,12 +1594,16 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
             'setup',
             'created_by',
             'group'
+        ).select_related(
+            'setup__assay_run_id'
         ) | AssayPlateReadout.objects.filter(
             setup__assay_run_id__group__in=self.request.user.groups.all()
         ).prefetch_related(
             'setup',
             'created_by',
             'group'
+        ).select_related(
+            'setup__assay_run_id'
         )
 
         related_assays = AssayPlateReadoutAssay.objects.filter(
@@ -2030,20 +2030,38 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
         else:
             return form_class(instance=self.get_object())
 
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form = self.get_form(self.form_class)
+    def get_context_data(self, **kwargs):
+        context = super(ReadoutBulkUpload, self).get_context_data(**kwargs)
 
-        # Render form
-        return self.render_to_response(self.get_context_data(form=form))
+        chip_readouts = AssayChipReadout.objects.filter(
+            chip_setup__assay_run_id=self.object
+        ).prefetch_related('chip_setup')
+        plate_readouts = AssayPlateReadout.objects.filter(
+            setup__assay_run_id=self.object
+        ).prefetch_related('setup')
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        # TODO Could use a refactor
+        chip_has_data = {}
+        for readout in chip_readouts:
+            if AssayChipRawData.objects.filter(assay_chip_id=readout):
+                chip_has_data.update({readout: True})
+        plate_has_data = {}
+        for readout in plate_readouts:
+            if AssayReadout.objects.filter(assay_device_readout=readout):
+                plate_has_data.update({readout: True})
 
-        form = self.get_form(self.form_class)
+        context['chip_readouts'] = chip_readouts
+        context['plate_readouts'] = plate_readouts
 
+        context['chip_has_data'] = chip_has_data
+        context['plate_has_data'] = plate_has_data
+
+        context['version'] = len(os.listdir(MEDIA_ROOT + '/excel_templates/')) / 3
+
+        return context
+
+    def form_valid(self, form):
         if form.is_valid():
-            # TODO ADD
             csv_root = settings.MEDIA_ROOT.replace('mps/../', '', 1) + '/csv/'
 
             data = form.cleaned_data
@@ -2052,7 +2070,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             excel_file = xlrd.open_workbook(file_contents=bulk_file)
 
             # For the moment, just have headers be equal to two?
-            headers = 2
+            headers = 1
             study = self.object
             study_id = str(self.object.id)
 
@@ -2066,75 +2084,182 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                     continue
 
                 # Get the header row
-                header = sheet.row_values(0)
-                # Upper to ignore case
-                chip_or_plate_cell = str(header[0]).upper()
+                header = [unicode(value) for value in sheet.row_values(0)]
 
-                # Get the listed setup
-                setup = stringify_excel_value(header[1])
+                sheet_type = ''
 
-                # Get datalist: spaghetti from admin
-                datalist = get_bulk_datalist(sheet)
+                if 'CHIP' in header[0].upper() and 'ASSAY' in header[3].upper():
+                    sheet_type = 'Chip'
 
-                # If chip
-                if 'CHIP' in chip_or_plate_cell:
-                    readout = AssayChipReadout.objects.get(
-                        chip_setup__assay_run_id=study,
-                        chip_setup__assay_chip_id=setup
-                    )
+                # Check if plate tabular
+                elif 'PLATE' in header[0].upper() and 'WELL' in header[1].upper() and 'ASSAY' in header[2].upper()\
+                        and 'FEATURE' in header[3].upper() and 'UNIT' in header[4].upper():
+                    sheet_type = 'Tabular'
 
-                    # Make sure path exists for chip
-                    if not os.path.exists(csv_root + study_id + '/chip'):
-                        os.makedirs(csv_root + study_id + '/chip')
+                # Check if plate block
+                elif 'PLATE' in header[0].upper() and 'ASSAY' in header[2].upper() and 'FEATURE' in header[4].upper()\
+                        and 'UNIT' in header[6].upper():
+                    sheet_type = 'Block'
 
-                    # Get valid file location
-                    # Note added csv extension
-                    file_loc = get_valid_csv_location(setup, study_id, 'chip')
-                    # Write the csv
-                    write_out_csv(file_loc, datalist)
+                if sheet_type == 'Chip':
+                    header = [
+                        u'Chip ID',
+                        u'Time',
+                        u'Time Unit',
+                        u'Assay',
+                        u'Object',
+                        u'Value',
+                        u'Value Unit',
+                        u'QC Status'
+                    ]
+                    csv_data = {}
+                    # Skip header
+                    for row_index in range(1, sheet.nrows):
+                        row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
+                        chip_id = row[0]
 
-                    media_loc = get_csv_media_location(file_loc)
+                        if chip_id not in csv_data:
+                            csv_data.update({
+                                chip_id: [header]
+                            })
 
-                    # Add the file to the readout
-                    readout.file = media_loc
-                    readout.save()
+                        csv_data.get(chip_id).append(row)
 
-                    # Note the lack of a form normally used for QC
-                    parseChipCSV(readout, readout.file, headers, None)
-                    # TODO TEST
+                    for chip_id in csv_data:
+                        datalist = csv_data.get(chip_id)
 
-                # If plate
-                else:
-                    readout = AssayPlateReadout.objects.get(
-                        setup__assay_run_id=study,
-                        setup__assay_plate_id=setup
-                    )
+                        readout = AssayChipReadout.objects.get(
+                            chip_setup__assay_run_id=study,
+                            chip_setup__assay_chip_id=chip_id
+                        )
 
-                    upload_type = str(header[3]).upper()
+                        # Make sure path exists for chip
+                        if not os.path.exists(csv_root + study_id + '/chip'):
+                            os.makedirs(csv_root + study_id + '/chip')
 
-                    if 'BLOCK' in upload_type:
-                        upload_type = 'Block'
+                        # Get valid file location
+                        # Note added csv extension
+                        file_loc = get_valid_csv_location(chip_id, study_id, 'chip')
+                        # Write the csv
+                        write_out_csv(file_loc, datalist)
+
+                        media_loc = get_csv_media_location(file_loc)
+
+                        # Add the file to the readout
+                        readout.file = media_loc
+                        readout.save()
+
+                        # Note the lack of a form normally used for QC
+                        parseChipCSV(readout, readout.file, headers, None)
+
+                elif sheet_type == 'Tabular':
+                    # Header if time
+                    if 'TIME' in header[5].upper() and 'UNIT' in header[6].upper():
+                        header = [
+                            u'Plate ID',
+                            u'Well Name',
+                            u'Assay',
+                            u'Feature',
+                            u'Unit',
+                            u'Time',
+                            u'Time Unit',
+                            u'Value'
+                        ]
+                    # Header if no time
                     else:
-                        upload_type = 'Tabular'
+                        header = [
+                            u'Plate ID',
+                            u'Well Name',
+                            u'Assay',
+                            u'Feature',
+                            u'Unit',
+                            u'Value'
+                        ]
+                    csv_data = {}
+                    # Skip header
+                    for row_index in range(1, sheet.nrows):
+                        row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
+                        plate_id = row[0]
 
-                    # Make sure path exists for plate
-                    if not os.path.exists(csv_root + study_id + '/plate'):
-                        os.makedirs(csv_root + study_id + '/plate')
+                        if plate_id not in csv_data:
+                            csv_data.update({
+                                plate_id: [header]
+                            })
 
-                    # Get valid file location
-                    file_loc = get_valid_csv_location(setup, study_id, 'plate')
-                    # Write the csv
-                    write_out_csv(file_loc, datalist)
+                        csv_data.get(plate_id).append(row)
 
-                    media_loc = get_csv_media_location(file_loc)
+                    for plate_id in csv_data:
+                        datalist = csv_data.get(plate_id)
 
-                    # Add the file to the readout
-                    readout.file = media_loc
-                    readout.save()
+                        readout = AssayPlateReadout.objects.get(
+                            setup__assay_run_id=study,
+                            setup__assay_plate_id=plate_id
+                        )
 
-                    parseReadoutCSV(readout, readout.file, upload_type)
-                    # TODO TEST
+                        # Make sure path exists for chip
+                        if not os.path.exists(csv_root + study_id + '/plate'):
+                            os.makedirs(csv_root + study_id + '/plate')
+
+                        # Get valid file location
+                        # Note added csv extension
+                        file_loc = get_valid_csv_location(plate_id, study_id, 'plate')
+                        # Write the csv
+                        write_out_csv(file_loc, datalist)
+
+                        media_loc = get_csv_media_location(file_loc)
+
+                        # Add the file to the readout
+                        readout.file = media_loc
+                        readout.save()
+
+                        # Note the lack of a form normally used for QC
+                        parseReadoutCSV(readout, readout.file, 'Tabular')
+
+                elif sheet_type == 'Block':
+                    csv_data = {}
+                    # DO NOT skip header
+                    plate_id = None
+                    for row_index in range(sheet.nrows):
+                        row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
+
+                        if 'PLATE' in row[0].upper():
+                            plate_id = row[1]
+
+                            if plate_id not in csv_data:
+                                csv_data.update({
+                                    plate_id: []
+                                })
+
+                        csv_data.get(plate_id).append(row)
+
+                    for plate_id in csv_data:
+                        datalist = csv_data.get(plate_id)
+
+                        readout = AssayPlateReadout.objects.get(
+                            setup__assay_run_id=study,
+                            setup__assay_plate_id=plate_id
+                        )
+
+                        # Make sure path exists for chip
+                        if not os.path.exists(csv_root + study_id + '/plate'):
+                            os.makedirs(csv_root + study_id + '/plate')
+
+                        # Get valid file location
+                        # Note added csv extension
+                        file_loc = get_valid_csv_location(plate_id, study_id, 'plate')
+                        # Write the csv
+                        write_out_csv(file_loc, datalist)
+
+                        media_loc = get_csv_media_location(file_loc)
+
+                        # Add the file to the readout
+                        readout.file = media_loc
+                        readout.save()
+
+                        # Note the lack of a form normally used for QC
+                        parseReadoutCSV(readout, readout.file, 'Block')
 
             return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
         else:
             return self.render_to_response(self.get_context_data(form=form))
+

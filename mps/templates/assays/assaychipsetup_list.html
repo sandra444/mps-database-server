@@ -22,7 +22,8 @@
                     <th>Chip Setup ID / Barcode</th>
                     <th>Study</th>
                     <th>Date</th>
-                    <th>Organ Model Name</th>
+                    <th>Device</th>
+                    <th>Organ Model</th>
 {#                    <th>Chip Test Type</th>#}
                     <th>Compound</th>
                     <th>Scientist</th>
@@ -38,7 +39,8 @@
                     <th>Chip Setup ID / Barcode</th>
                     <th>Study</th>
                     <th>Date</th>
-                    <th>Organ Model Name</th>
+                    <th>Device</th>
+                    <th>Organ Model</th>
 {#                    <th>Chip Test Type</th>#}
                     <th>Compound</th>
                     <th>Scientist</th>
@@ -56,6 +58,7 @@
                     <td><a href="/assays/organchipstudy/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
                     <td>{{ setup.setup_date|date:"M d, Y" }}</td>
                     <td>{{ setup.device }}</td>
+                    <td>{{ setup.organ_model }} {{ setup.organ_model_protocol|default:'' }}</td>
 {#                    <td>{{ setup.chip_test_type }}</td>#}
                     {% if setup.compound != None %}
                         <td>{{ setup.compound }} ({{ setup.concentration }} {{ setup.unit }})</td>

@@ -3,10 +3,16 @@ $(document).ready(function() {
     // Make the dialog box
     var dialog = $('#help_dialog');
     dialog.dialog({
-        width: 900,
+        width: 1025,
         height: 500,
         closeOnEscape: true,
-        autoOpen: false
+        autoOpen: false,
+        close: function() {
+            $('body').removeClass('stop-scrolling');
+        },
+        open: function() {
+            $('body').addClass('stop-scrolling');
+        }
     });
     // Remove hidden attribute
     dialog.removeProp('hidden');

@@ -14,6 +14,9 @@ from chardet.universaldetector import UniversalDetector
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
 
+# This variable exists to avoid a magic number for the location of the validation starting column
+TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX = 52
+
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
 # Excluding restricted is likewise useful
@@ -42,6 +45,7 @@ def unicode_csv_reader(in_file, dialect=csv.excel, **kwargs):
     csv_reader = csv.reader(in_file, dialect=dialect, **kwargs)
     for row in csv_reader:
         yield [unicode(cell.decode(encoding)) for cell in row]
+
 
 # SUBJECT TO CHANGE
 class CloneableForm(forms.ModelForm):
@@ -131,7 +135,9 @@ class AssayChipResultForm(forms.ModelForm):
 class AssayChipReadoutForm(CloneableForm):
     def __init__(self, study, current, *args, **kwargs):
         super(AssayChipReadoutForm, self).__init__(*args, **kwargs)
-        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T').order_by('scale_factor')
+        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(
+            unit_type__unit_type='Time'
+        ).order_by('scale_factor')
         exclude_list = AssayChipReadout.objects.filter(chip_setup__isnull=False).values_list('chip_setup', flat=True)
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'device',
@@ -141,7 +147,7 @@ class AssayChipReadoutForm(CloneableForm):
             setups = setups | AssayChipSetup.objects.filter(pk=current)
         self.fields['chip_setup'].queryset = setups
 
-    headers = forms.CharField(required=True, initial=2)
+    headers = forms.CharField(required=True, initial=1)
 
     class Meta(object):
         model = AssayChipReadout
@@ -160,11 +166,13 @@ class AssayChipSetupForm(CloneableForm):
         super(AssayChipSetupForm, self).__init__(*args, **kwargs)
         # Filter on concentration but make a special exception for percent (%)
         self.fields['unit'].queryset = PhysicalUnits.objects.filter(
-            unit_type='C'
+            unit_type__unit_type='Concentration'
         ).order_by(
             'base_unit',
             'scale_factor'
         ) | PhysicalUnits.objects.filter(unit='%')
+        # Filter devices to be only microchips (or "chips" like the venous system)
+        self.fields['device'].queryset = Microdevice.objects.filter(device_type='chip')
 
     another = forms.BooleanField(required=False)
 
@@ -286,7 +294,12 @@ class AssayLayoutForm(forms.ModelForm):
     compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
     # Notice the special exception for %
     concunit = forms.ModelChoiceField(
-        queryset=(PhysicalUnits.objects.filter(unit_type='C') | PhysicalUnits.objects.filter(unit='%')),
+        queryset=(PhysicalUnits.objects.filter(
+            unit_type__unit_type='Concentration'
+        ).order_by(
+            'base_unit',
+            'scale_factor'
+        ) | PhysicalUnits.objects.filter(unit='%')),
         required=False, initial=4
     )
 
@@ -352,7 +365,9 @@ class AssayPlateCellsInlineFormset(CloneableBaseInlineFormSet):
 class AssayPlateReadoutForm(CloneableForm):
     def __init__(self, study, current, *args, **kwargs):
         super(AssayPlateReadoutForm, self).__init__(*args, **kwargs)
-        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(unit_type='T').order_by('scale_factor')
+        self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(
+            unit_type__unit_type='Time'
+        ).order_by('scale_factor')
         exclude_list = AssayPlateReadout.objects.filter(setup__isnull=False).values_list('setup', flat=True)
         setups = AssayPlateSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'assay_layout',
@@ -448,81 +463,30 @@ def process_readout_value(value):
             return None
 
 
-def validate_header(datalist, setup_id, readout_type):
-    # Get the header row
-    header = datalist[0]
-    # Upper to ignore case
-    chip_or_plate_cell = str(header[0]).upper()
-
-    if not chip_or_plate_cell or 'CHIP' not in chip_or_plate_cell and 'PLATE' not in chip_or_plate_cell:
-        raise forms.ValidationError(
-            'The header does not specify whether the upload is for a chip or a plate.'
-        )
-
-    # If ambiguous whether it is chip or plate
-    if 'CHIP' in chip_or_plate_cell and 'PLATE' in chip_or_plate_cell:
-        raise forms.ValidationError(
-            'The header specifies both chip and plate in its first cell.'
-        )
-
-    setup = header[1]
-
-    # If chip
-    if 'CHIP' in chip_or_plate_cell:
-        if readout_type == 'PLATE':
-            raise forms.ValidationError(
-                'This is a PLATE readout, please change the header to specify PLATE instead of CHIP'
-            )
-
-        if setup_id != setup:
-            raise forms.ValidationError(
-                'The given Chip ID "{0}" does not match the listed Chip ID "{1}"'.format(setup, setup_id)
-            )
-
-    # If plate
-    else:
-        if readout_type == 'CHIP':
-            raise forms.ValidationError(
-                'This is a CHIP readout, please change the header to specify CHIP instead of PLATE'
-            )
-
-        if setup_id != setup:
-            raise forms.ValidationError(
-                'The given Plate ID "{0}" does not match the listed Plate ID "{1}"'.format(setup, setup_id)
-            )
-
-        upload_type = str(header[3]).upper()
-
-        if not upload_type or ('TAB' not in upload_type and 'BLOCK' not in upload_type):
-            raise forms.ValidationError(
-                'The header does not properly specify Tabular or Block format.'
-            )
-
-
 def validate_plate_readout_file(
-        setup_id,
         upload_type,
-        assays,
-        features,
-        assay_feature_to_unit,
+        plate_assays,
+        plate_features,
+        plate_assay_feature_to_unit,
         datalist,
-        number_of_rows,
-        number_of_columns,
-        readout_time_unit,
+        plate_number_of_rows,
+        plate_number_of_columns,
+        plate_readout_time_unit,
         sheet=''
 ):
-    # Validate header if this isn't a bulk upload
-    if not sheet:
-        validate_header(datalist, setup_id, 'PLATE')
-
-    # Skip the header from now on
-    datalist = datalist[1:]
-
     if upload_type == 'Block':
         # Number of assays found
         assays_found = 0
         # Number of data blocks found
         data_blocks_found = 0
+
+        features = {}
+        assays = {}
+        assay_feature_to_unit = {}
+
+        readout_time_unit = u''
+        number_of_rows = u''
+        number_of_columns = u''
 
         for row_index, line in enumerate(datalist):
             # If line is blank, skip it
@@ -532,68 +496,92 @@ def validate_plate_readout_file(
             # If this line is a header
             # NOTE THAT ASSAYS AND FEATURES ARE IN PAIRS
             # Headers should look like:
-            # ASSAY, {{}}, FEATURE, {{}}, READOUT UNIT, {{}}, TIME, {{}}. TIME UNIT, {{}}
-            if line[0].upper().strip() == 'ASSAY':
+            # PLATE ID, {{}}, ASSAY, {{}}, FEATURE, {{}}, READOUT UNIT, {{}}, TIME, {{}}. TIME UNIT, {{}}
+            if 'PLATE' in line[0].upper().strip():
                 # Throw error if header too short
-                if len(line) < 6:
+                if len(line) < 8:
                     raise forms.ValidationError(
                         sheet + 'Header row: {} is too short'.format(line))
 
-                assay = line[1].upper().strip()
-                feature = line[3]
+                plate_id = line[1]
+
+                if plate_id not in plate_assays:
+                    raise forms.ValidationError(
+                        sheet + 'The Plate ID "{0}" was not recognized.'
+                                ' Make sure a readout for this plate exists.'.format(plate_id)
+                    )
+
+                # Set to correct set of assays, features, and pairs
+                assays = plate_assays.get(plate_id)
+                features = plate_features.get(plate_id)
+                assay_feature_to_unit = plate_assay_feature_to_unit.get(plate_id)
+
+                readout_time_unit = plate_readout_time_unit.get(plate_id)
+                number_of_rows = plate_number_of_rows.get(plate_id)
+                number_of_columns = plate_number_of_columns.get(plate_id)
+
+                assay = line[3].upper().strip()
+                feature = line[5]
 
                 assays_found += 1
 
-                val_unit = line[5].strip()
+                val_unit = line[7].strip()
 
                 # TODO OLD
                 # TODO REVISE
                 # Raise error if feature does not exist
                 if feature not in features:
                     raise forms.ValidationError(
-                        sheet + 'No feature with the name "%s" exists; please change your file or add this feature'
-                        % feature
+                        sheet + 'Plate-%s: No feature with the name "%s" exists; '
+                                'please change your file or add this feature'
+                        % (plate_id, feature)
                     )
                 # Raise error when an assay does not exist
                 if assay not in assays:
                     raise forms.ValidationError(
-                        sheet + 'No assay with the name "%s" exists; please change your file or add this assay'
-                        % assay
+                        sheet + 'Plate-%s: No assay with the name "%s" exists; please change your file or add this assay'
+                        % (plate_id, assay)
                     )
                 # Raise error if assay-feature pair is not listed
                 if (assay, feature) not in assay_feature_to_unit:
                     raise forms.ValidationError(
-                        sheet + 'The assay-feature pair "{0}-{1}" was not recognized'.format(assay, feature))
+                        sheet + 'Plate-{0}: The assay-feature pair "{1}-{2}" was not recognized'.format(
+                            plate_id,
+                            assay,
+                            feature
+                        )
+                    )
                 # Raise error if val_unit not equal to one listed in APRA
                 if val_unit != assay_feature_to_unit.get((assay, feature), ''):
                     raise forms.ValidationError(
-                        sheet + 'The value unit "%s" does not correspond with the selected readout unit of "%s"'
-                        % (val_unit, assay_feature_to_unit.get((assay, feature), ''))
+                        sheet + 'Plate-%s: The value unit "%s" does not correspond with the selected readout unit of "%s"'
+                        % (plate_id, val_unit, assay_feature_to_unit.get((assay, feature), ''))
                     )
 
                 # Fail if time given without time units
-                if len(line) < 10 and len(line) > 6 and any(line[6:]):
+                if len(line) < 12 and len(line) > 8 and any(line[8:]):
                     raise forms.ValidationError(
                         sheet + 'Header row: {} improperly configured'.format(line))
 
-                if len(line) >= 10 and any(line[6:]):
-                    time = line[7].strip()
-                    time_unit = line[9].strip()
+                if len(line) >= 12 and any(line[8:]):
+                    time = line[9].strip()
+                    time_unit = line[11].strip()
 
                     # Fail if time is not numeric
                     try:
-                        float(time)
+                        if time != '':
+                            float(time)
                     except:
                         raise forms.ValidationError(
                             sheet + 'The time "{}" is invalid. Please only enter numeric times'.format(time))
 
                     # Fail if time unit does not match
                     # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
-                    if time_unit[0] != readout_time_unit[0]:
+                    if time_unit and (time_unit[0] != readout_time_unit[0]):
                         raise forms.ValidationError(
                             sheet +
-                            'The time unit "{0}" does not correspond with '
-                            'the selected readout time unit of "{1}"'.format(time_unit, readout_time_unit)
+                            'Plate-{0}: The time unit "{1}" does not correspond with '
+                            'the selected readout time unit of "{2}"'.format(plate_id, time_unit, readout_time_unit)
                         )
 
             # Otherwise the line contains datapoints for the current assay
@@ -603,19 +591,25 @@ def validate_plate_readout_file(
                     data_blocks_found += 1
 
                 # This should handle blocks that have too many rows or do not have a header
-                if data_blocks_found > assays_found:
+                # Don't throw an error if there are not any meaningful values
+                if data_blocks_found > assays_found and any(line[:number_of_columns]):
                     raise forms.ValidationError(
-                        sheet + 'All plate data must have an assay associated with it. Please add a header line.')
+                        sheet + 'All plate data must have an assay associated with it. Please add a header line '
+                                'and/or make sure there are no blank lines between blocks')
+
+                # TODO NOTE: THIS IS DEPENDENT ON THE LOCATION OF THE TEMPLATE'S VALIDATION CELLS
+                # TODO AS A RESULT,
+                trimmed_line = [val for val in line[:TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX] if val]
 
                 # This is to deal with an EXCESS of columns
-                if len(line) > number_of_columns:
+                if len(trimmed_line) > number_of_columns:
                     raise forms.ValidationError(
-                        sheet + "The number of columns does not correspond "
-                                "with the device's dimensions:{}".format(line)
+                        sheet + "Plate-{0}: The number of columns does not correspond "
+                                "with the device's dimensions:{1}".format(plate_id, line)
                     )
 
-                # For every value in the line
-                for value in line:
+                # For every value in the line (breaking at number of columns)
+                for value in line[:number_of_columns]:
                     # Check every value to make sure it can resolve to a float
                     # Keep empty strings, though they technically can not be converted to floats
                     if value != '':
@@ -641,15 +635,24 @@ def validate_plate_readout_file(
         # The first line SHOULD be the header
         header = datalist[0]
 
+        features = {}
+        assays = {}
+        assay_feature_to_unit = {}
+
+        readout_time_unit = u''
+        number_of_rows = u''
+        number_of_columns = u''
+
         # TODO REVISE
-        if header < 5:
+        if len(header) < 6:
             raise forms.ValidationError(
-                sheet + 'Please specify Well, Assay, Feature, Feature Unit, [Time, Time Unit], and Value in header.')
-        if 'TIME' in header[4].upper() and (len(header) < 7 or 'UNIT' not in header[5].upper()):
+                sheet + 'Please specify Plate ID, Well, Assay, Feature, Feature Unit, [Time, Time Unit], '
+                        'and Value in header.')
+        if 'TIME' in header[5].upper() and (len(header) < 8 or 'UNIT' not in header[6].upper()):
             raise forms.ValidationError(
                 sheet + 'If you are specifying time, you must also specify the time unit')
 
-        if 'TIME' in header[4].upper() and 'UNIT' in header[5].upper():
+        if 'TIME' in header[5].upper() and 'UNIT' in header[6].upper():
             time_specified = True
         else:
             time_specified = False
@@ -658,47 +661,69 @@ def validate_plate_readout_file(
         data = datalist[1:]
 
         for row_index, row in enumerate(data):
+            # Plate ID given
+            plate_id = row[0]
+
+            if plate_id not in plate_assays:
+                raise forms.ValidationError(
+                    sheet + 'The Plate ID "{0}" was not recognized.'
+                            ' Make sure a readout for this plate exists.'.format(plate_id)
+                )
+
+            # Set to correct set of assays, features, and pairs
+            assays = plate_assays.get(plate_id)
+            features = plate_features.get(plate_id)
+            assay_feature_to_unit = plate_assay_feature_to_unit.get(plate_id)
+
+            readout_time_unit = plate_readout_time_unit.get(plate_id)
+            number_of_rows = plate_number_of_rows.get(plate_id)
+            number_of_columns = plate_number_of_columns.get(plate_id)
+
             # The well identifier given
-            well = row[0]
-            assay = row[1].upper().strip()
-            feature = row[2]
-            val_unit = row[3]
+            well = row[1]
+            assay = row[2].upper().strip()
+            feature = row[3]
+            val_unit = row[4]
 
             # Raise error if feature does not exist
             if feature not in features:
                 raise forms.ValidationError(
-                    sheet + 'No feature with the name "%s" exists; please change your file or add this feature'
-                    % feature
+                    sheet + 'Plate-%s: No feature with the name "%s" exists; please change your file or add this feature'
+                    % (plate_id, feature)
                 )
             # Raise error when an assay does not exist
             if assay not in assays:
                 raise forms.ValidationError(
-                    sheet + 'No assay with the name "%s" exists; please change your file or add this assay'
-                    % assay
+                    sheet + 'Plate-%s: No assay with the name "%s" exists; please change your file or add this assay'
+                    % (plate_id, assay)
                 )
             # Raise error if assay-feature pair is not listed
             if (assay, feature) not in assay_feature_to_unit:
                 raise forms.ValidationError(
-                    sheet + 'The assay-feature pair "{0}-{1}" was not recognized'.format(assay, feature))
+                    sheet + 'Plate-{0}: The assay-feature pair "{1}-{2}" was not recognized'.format(
+                        plate_id, assay, feature
+                    )
+                )
             # Raise error if val_unit not equal to one listed in APRA
             if val_unit != assay_feature_to_unit.get((assay, feature), ''):
                 raise forms.ValidationError(
-                    sheet + 'The value unit "%s" does not correspond with the selected readout unit of "%s"'
-                    % (val_unit, assay_feature_to_unit.get((assay, feature), ''))
+                    sheet + 'Plate-%s: The value unit "%s" does not correspond with the selected readout unit of "%s"'
+                    % (plate_id, val_unit, assay_feature_to_unit.get((assay, feature), ''))
                 )
 
             # If time is specified
             if time_specified:
-                time = row[4]
-                time_unit = row[5].strip().lower()
-                value = row[6]
+                time = row[5]
+                time_unit = row[6].strip().lower()
+                value = row[7]
 
                 # Check time unit
                 # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
                 if time_unit[0] != readout_time_unit[0]:
                     raise forms.ValidationError(
-                        sheet + 'The time unit "%s" does not correspond with the selected readout time unit of "%s"'
-                        % (time_unit, readout_time_unit)
+                        sheet + 'Plate-%s: The time unit "%s" does not correspond with the selected readout time unit '
+                                'of "%s"'
+                        % (plate_id, time_unit, readout_time_unit)
                     )
 
                 # Check time
@@ -710,7 +735,7 @@ def validate_plate_readout_file(
 
             # If time is not specified
             else:
-                value = row[4]
+                value = row[5]
 
             # Check if well id is valid
             try:
@@ -723,15 +748,22 @@ def validate_plate_readout_file(
 
                 if row_label > number_of_rows:
                     raise forms.ValidationError(
-                        sheet + "The number of rows does not correspond with the device's dimensions")
+                        sheet + "Plate-{0}: The number of rows does not correspond with the device's dimensions".format(
+                            plate_id
+                        )
+                    )
 
                 if column_label > number_of_columns:
                     raise forms.ValidationError(
-                        sheet + "The number of columns does not correspond with the device's dimensions")
+                        sheet + "Plate-{0}: The number of columns does not correspond "
+                                "with the device's dimensions".format(
+                            plate_id
+                        )
+                    )
 
             except:
                 raise forms.ValidationError(
-                    sheet + 'Error parsing the well ID: {}'.format(well)
+                    sheet + 'Plate-{0}: Error parsing the well ID: {1}'.format(plate_id, well)
                 )
 
             # Check every value to make sure it can resolve to a float
@@ -763,9 +795,14 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
 
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
-        assays = {}
-        features = {}
-        assay_feature_to_unit = {}
+
+        plate_assays = {setup_id: {}}
+        assays = plate_assays.get(setup_id)
+        plate_features = {setup_id: {}}
+        features = plate_features.get(setup_id)
+        plate_assay_feature_to_unit = {setup_id: {}}
+        assay_feature_to_unit = plate_assay_feature_to_unit.get(setup_id)
+
         for form in forms_data:
             try:
                 if form.cleaned_data:
@@ -841,80 +878,97 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
             # Tedious way of getting timeunit; probably should refactor
             readout_time_unit = PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit
 
+            plate_readout_time_unit = {setup_id: readout_time_unit}
+            plate_number_of_rows = {setup_id: number_of_rows}
+            plate_number_of_columns = {setup_id: number_of_columns}
+
             validate_plate_readout_file(
-                setup_id,
                 upload_type,
-                assays,
-                features,
-                assay_feature_to_unit,
+                plate_assays,
+                plate_features,
+                plate_assay_feature_to_unit,
                 datalist,
-                number_of_rows,
-                number_of_columns,
-                readout_time_unit
+                plate_number_of_rows,
+                plate_number_of_columns,
+                plate_readout_time_unit
             )
 
 
 def validate_chip_readout_file(
-    setup_id,
     headers,
     datalist,
-    assays,
-    short_names,
-    readout_time_unit,
+    chip_assays,
+    chip_readout_time_unit,
     sheet=''
 ):
-    # Validate header if this isn't a bulk upload
+    # Confirm that there is only one chip_id given if this is not a bulk upload
     if not sheet:
-        validate_header(datalist, setup_id, 'CHIP')
+        for line in datalist[headers:]:
+            if line[0] not in chip_assays:
+                raise forms.ValidationError(
+                    'Chip ID "{0}" does not match current Chip ID. '
+                    'You cannot upload data for multiple chips in this interface. '
+                    'If you want to upload multiple set of data, '
+                    'use the "Upload Excel File of Readout Data" interface instead. '
+                    .format(line[0])
+                )
 
-    # All unique rows based on ('assay_id', 'field_id', 'elapsed_time')
-    unique = {}
+    # Likely to change
+    # Duplicates are now permitted
+    # All unique rows based on ('chip_id', 'assay_id', 'field_id', 'elapsed_time')
+    # unique = {}
 
     # Read headers going onward
     for line in datalist[headers:]:
         # Set line to ignore QC and all after
-        line = line[:6]
+        line = line[:7]
 
         # Some lines may not be long enough (have sufficient commas), ignore such lines
         # Some lines may be empty or incomplete, ignore these as well
-        if len(line) < 6 or not all(line):
+        if len(line) < 7 or not all(line):
             continue
 
-        time = line[0]
-        time_unit = line[1].strip().lower()
-        assay = line[2].upper()
-        field = line[3]
-        val = line[4]
-        val_unit = line[5].strip()
-        # Raise error when an assay does not exist
-        if assay not in assays and assay not in short_names:
+        chip_id = line[0]
+        time = line[1]
+        time_unit = line[2].strip().lower()
+        assay = line[3].upper()
+        object = line[4]
+        val = line[5]
+        val_unit = line[6].strip()
+
+        if chip_id not in chip_assays:
             raise forms.ValidationError(
-                sheet + 'No assay with the name "%s" exists; please change your file or add this assay' % assay)
+                sheet + 'No Chip with the ID "{0}" exists; please change your file or add this assay.'.format(chip_id)
+            )
+
+        assays = chip_assays.get(chip_id)
+        readout_time_unit = chip_readout_time_unit.get(chip_id)
+
+        # Raise error when an assay does not exist
+        if assay not in assays:
+            raise forms.ValidationError(
+                sheet + 'Chip-%s: No assay with the name "%s" exists; please change your file or add this assay'
+                % (chip_id, assay))
         # Raise error if val_unit not equal to one listed in ACRA
-        if val_unit != assays.get(assay, '') and val_unit != short_names.get(assay, ''):
-            if assay in assays:
-                raise forms.ValidationError(
-                    sheet + 'The value unit "%s" does not correspond with the selected readout unit of "%s"'
-                    % (val_unit, assays.get(assay, ''))
-                )
-            else:
-                raise forms.ValidationError(
-                    sheet + 'The value unit "%s" does not correspond with the selected readout unit of "%s"'
-                    % (val_unit, short_names.get(assay, ''))
-                )
+        if val_unit != assays.get(assay, ''):
+            raise forms.ValidationError(
+                sheet + 'Chip-%s: The value unit "%s" does not correspond with the selected readout unit of "%s"'
+                % (chip_id, val_unit, assays.get(assay, ''))
+            )
+
         # Fail if time unit does not match
         # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
         if time_unit[0] != readout_time_unit[0]:
             raise forms.ValidationError(
-                sheet + 'The time unit "%s" does not correspond with the selected readout time unit of "%s"'
-                % (time_unit, readout_time_unit)
+                sheet + 'Chip-%s: The time unit "%s" does not correspond with the selected readout time unit of "%s"'
+                % (chip_id, time_unit, readout_time_unit)
             )
-        if (time, assay, field) not in unique:
-            unique.update({(time, assay, field): True})
-        else:
-            raise forms.ValidationError(
-                sheet + 'File contains duplicate reading %s' % str((time, assay, field))
-            )
+        # if (chip_id, time, assay, object) not in unique:
+        #     unique.update({(chip_id, time, assay, object): True})
+        # else:
+        #     raise forms.ValidationError(
+        #         sheet + 'File contains duplicate reading %s' % str((chip_id, time, assay, object))
+        #     )
         # Check every value to make sure it can resolve to a float
         try:
             # Keep empty strings, though they technically can not be converted to floats
@@ -925,8 +979,16 @@ def validate_chip_readout_file(
                 sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(val)
             )
 
+        # Check to make certain the time is a valid float
+        try:
+            float(time)
 
-# TODO CHIP READOUT UPLOAD UNSTABLE (SPECIFICALLY SUBMIT AND CLONE?)
+        except:
+            raise forms.ValidationError(
+                sheet + 'The time "%s" is invalid; please make sure all times are numerical' % str(time)
+            )
+
+
 class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
     def __init__(self,*args,**kwargs):
         super (AssayChipReadoutInlineFormset,self).__init__(*args,**kwargs)
@@ -950,8 +1012,8 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
         # Dic of assay names from inline with respective unit as value
-        assays = {}
-        short_names = {}
+        chip_assays = {setup_id: {}}
+        assays = chip_assays.get(setup_id)
         for form in forms_data:
             try:
                 if form.cleaned_data:
@@ -960,7 +1022,7 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
                     unit = form.cleaned_data.get('readout_unit').unit
                     if assay_name not in assays:
                         assays.update({assay_name: unit})
-                        short_names.update({assay_short_name: unit})
+                        assays.update({assay_short_name: unit})
                     else:
                         raise forms.ValidationError(
                             'Duplicate assays are not permitted; please blank out or change the duplicate')
@@ -1009,13 +1071,13 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
             # Tedious way of getting timeunit; probably should refactor
             readout_time_unit = PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit
 
+            chip_readout_time_unit = {setup_id: readout_time_unit}
+
             validate_chip_readout_file(
-                setup_id,
                 headers,
                 datalist,
-                assays,
-                short_names,
-                readout_time_unit
+                chip_assays,
+                chip_readout_time_unit
             )
 
 
@@ -1075,7 +1137,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
             raise forms.ValidationError('The given file does not appear to be a properly formatted Excel file.')
 
         # For the moment, just have headers be equal to two?
-        headers = 2
+        headers = 1
         sheet_names = excel_file.sheet_names()
 
         for index, sheet in enumerate(excel_file.sheets()):
@@ -1085,134 +1147,125 @@ class ReadoutBulkUploadForm(forms.ModelForm):
             if sheet.nrows < 1:
                 continue
 
-            # Get the header row
-            header = sheet.row_values(0)
-            # Upper to ignore case
-            chip_or_plate_cell = str(header[0]).upper()
-
-            if not chip_or_plate_cell or 'CHIP' not in chip_or_plate_cell and 'PLATE' not in chip_or_plate_cell:
-                raise forms.ValidationError(
-                    'The sheet "{}" does not specify whether it is for a chip or a plate.'.format(sheet_name)
-                )
-
-            # If ambiguous whether it is chip or plate
-            if 'CHIP' in chip_or_plate_cell and 'PLATE' in chip_or_plate_cell:
-                raise forms.ValidationError(
-                    'The sheet "{}" specifies both chip and plate in its first cell.'.format(sheet_name)
-                )
-
-            # Get the listed setup
-            setup = stringify_excel_value(header[1])
-
             # Get datalist
             datalist = get_bulk_datalist(sheet)
 
-            # If chip and success thus far
-            if 'CHIP' in chip_or_plate_cell:
-                readout = AssayChipReadout.objects.filter(
-                    chip_setup__assay_run_id=study,
-                    chip_setup__assay_chip_id=setup
+            # Get the header row
+            header = [unicode(value) for value in sheet.row_values(0)]
+
+            sheet_type = None
+
+            # From the header we need to discern the type of upload
+            # Check if chip
+            if 'CHIP' in header[0].upper() and 'ASSAY' in header[3].upper():
+                sheet_type = 'Chip'
+
+            # Check if plate tabular
+            elif 'PLATE' in header[0].upper() and 'WELL' in header[1].upper() and 'ASSAY' in header[2].upper()\
+                    and 'FEATURE' in header[3].upper() and 'UNIT' in header[4].upper():
+                sheet_type = 'Tabular'
+
+            # Check if plate block
+            elif 'PLATE' in header[0].upper() and 'ASSAY' in header[2].upper() and 'FEATURE' in header[4].upper()\
+                    and 'UNIT' in header[6].upper():
+                sheet_type = 'Block'
+
+            # Throw error if can not be determined
+            else:
+                raise forms.ValidationError(
+                    'The header of sheet "{0}" was not recognized.'.format(sheet_name)
                 )
 
-                if not readout:
-                    raise forms.ValidationError(
-                        'No chip readout for the barcode/ID "{}" exists for this study.'.format(setup)
-                    )
+            # If chip
+            if sheet_type == 'Chip':
+                readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=study)
 
-                # Get the actual readout object
-                readout = readout[0]
+                chip_assays = {}
+                chip_readout_time_unit = {}
 
-                # Get readout time unit
-                readout_time_unit = readout.timeunit.unit
+                for readout in readouts:
+                    setup_id = readout.chip_setup.assay_chip_id
 
-                # Get assay chip readout assays for readout
-                ACRA = AssayChipReadoutAssay.objects.filter(readout_id=readout)
+                    chip_assays.update({setup_id: {}})
+                    current_assays = chip_assays.get(setup_id)
 
-                assays = {}
-                short_names = {}
+                    timeunit = readout.timeunit.unit
+                    chip_readout_time_unit.update({setup_id: timeunit})
 
-                # Get long and short assay names
-                # Make sure they are upper
-                for assay in ACRA:
-                    assays.update({assay.assay_id.assay_name.upper(): assay.readout_unit.unit})
-                    short_names.update({assay.assay_id.assay_short_name.upper(): assay.readout_unit.unit})
+                    assays = AssayChipReadoutAssay.objects.filter(readout_id=readout)
+
+                    for assay in assays:
+                        readout_unit = assay.readout_unit.unit
+                        assay_name = assay.assay_id.assay_name.upper()
+                        assay_short_name = assay.assay_id.assay_short_name.upper()
+
+                        current_assays.update({assay_name: readout_unit})
+                        current_assays.update({assay_short_name: readout_unit})
 
                 # Validate this sheet
                 validate_chip_readout_file(
-                    setup,
                     headers,
                     datalist,
-                    assays,
-                    short_names,
-                    readout_time_unit,
+                    chip_assays,
+                    chip_readout_time_unit,
                     'Sheet "' + sheet_name + '": '
                 )
-
-            # If plate and success thus far
+            # If plate
             else:
-                readout = AssayPlateReadout.objects.filter(setup__assay_run_id=study, setup__assay_plate_id=setup)
+                readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=study)
 
-                if not readout:
-                    raise forms.ValidationError(
-                        'No plate readout for the barcode/ID "{}" exists for this study.'.format(setup)
-                    )
+                plate_assays = {}
+                plate_features = {}
+                plate_assay_feature_to_unit = {}
+                plate_number_of_rows = {}
+                plate_number_of_columns = {}
+                plate_readout_time_unit = {}
 
-                # Get the actual readout object
-                readout = readout[0]
+                for readout in readouts:
+                    setup_id = readout.setup.assay_plate_id
 
-                upload_type = str(header[3]).upper()
+                    plate_assays.update({setup_id: {}})
+                    current_assays = plate_assays.get(setup_id)
 
-                if not upload_type or ('TAB' not in upload_type and 'BLOCK' not in upload_type):
-                    raise forms.ValidationError(
-                        'Sheet "{}" does not properly specify Tabular or Block format.'.format(sheet_name)
-                    )
+                    plate_features.update({setup_id: {}})
+                    current_features = plate_features.get(setup_id)
 
-                if 'BLOCK' in upload_type:
-                    upload_type = 'Block'
+                    plate_assay_feature_to_unit.update({setup_id: {}})
+                    current_assay_feature_to_unit = plate_assay_feature_to_unit.get(setup_id)
 
-                else:
-                    upload_type = 'Tabular'
+                    timeunit = readout.timeunit.unit
+                    plate_readout_time_unit.update({setup_id: timeunit})
 
-                # Get readout time unit
-                readout_time_unit = readout.timeunit.unit
+                    number_of_rows = readout.setup.assay_layout.device.number_of_rows
+                    plate_number_of_rows.update({setup_id: number_of_rows})
+                    number_of_columns = readout.setup.assay_layout.device.number_of_columns
+                    plate_number_of_columns.update({setup_id: number_of_columns})
 
-                # Get number of rows and number of columns
-                number_of_rows = readout.setup.assay_layout.device.number_of_rows
-                number_of_columns = readout.setup.assay_layout.device.number_of_columns
+                    assays = AssayPlateReadoutAssay.objects.filter(readout_id=readout)
 
-                # Get assay plate readout assays for readout
-                APRA = AssayPlateReadoutAssay.objects.filter(readout_id=readout)
+                    for assay in assays:
+                        readout_unit = assay.readout_unit.unit
+                        assay_name = assay.assay_id.assay_name.upper()
+                        assay_short_name = assay.assay_id.assay_short_name.upper()
+                        feature = assay.feature
 
-                # TODO REVIEW
-                assays = {}
-                features = {}
-                assay_feature_to_unit = {}
+                        current_assays.update({assay_name: True})
+                        current_assays.update({assay_short_name: True})
 
-                # Get long and short assay names
-                for assay in APRA:
-                    assay_name = assay.assay_id.assay_name.upper()
-                    assay_short_name = assay.assay_id.assay_short_name.upper()
-                    feature = assay.feature
-                    readout_unit = assay.readout_unit.unit
-                    # Add feature
-                    features.update({feature: True})
-                    # Normal assay name
-                    assays.update({assay_name: True})
-                    assay_feature_to_unit.update({(assay_name, feature): readout_unit})
-                    # Short assay name
-                    assays.update({assay_short_name: True})
-                    assay_feature_to_unit.update({(assay_short_name, feature): readout_unit})
+                        current_features.update({feature: True})
+
+                        current_assay_feature_to_unit.update({(assay_name, feature): readout_unit})
+                        current_assay_feature_to_unit.update({(assay_short_name, feature): readout_unit})
 
                 validate_plate_readout_file(
-                    setup,
-                    upload_type,
-                    assays,
-                    features,
-                    assay_feature_to_unit,
+                    sheet_type,
+                    plate_assays,
+                    plate_features,
+                    plate_assay_feature_to_unit,
                     datalist,
-                    number_of_rows,
-                    number_of_columns,
-                    readout_time_unit,
+                    plate_number_of_rows,
+                    plate_number_of_columns,
+                    plate_readout_time_unit,
                     'Sheet "' + sheet_name + '": '
                 )
 

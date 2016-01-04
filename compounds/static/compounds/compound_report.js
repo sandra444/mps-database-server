@@ -22,7 +22,7 @@ $(document).ready(function () {
     function sparkline(elem_id, plot, x_domain, y_domain) {
         //console.log(x_domain);
         //console.log(y_domain);
-        data = [];
+        var data = [];
         for (var time in plot) {
             var value = +plot[time];
             var x_time = +time;
@@ -103,7 +103,7 @@ $(document).ready(function () {
             }
         }
 
-        for (var compound in data) {
+        for (compound in data) {
             var values = data[compound].table;
             var plot = data[compound].plot;
 
@@ -132,7 +132,7 @@ $(document).ready(function () {
             row += "</tr>";
             $('#results_body').append(row);
 
-            for (var assay in x_max) {
+            for (assay in x_max) {
                 var assay_max_time = values.max_time[assay] ? values.max_time[assay]:"-";
                 // Tack this assay on to the header
                 $('#'+compound+'_header').append($('<td>')
@@ -141,7 +141,7 @@ $(document).ready(function () {
                     .attr('width', 50)
                     .append('<span>'+assay+'<br>'+'(' + assay_max_time + 'd)'+'</span>'));
                 if (plot[assay]) {
-                    for (var concentration in plot[assay]) {
+                    for (concentration in plot[assay]) {
                         var row_id = compound + '_' + concentration.replace('.', '_');
                         // If the concentration does not have a row, add it to the table
                         if (!$('#' + row_id)[0]) {

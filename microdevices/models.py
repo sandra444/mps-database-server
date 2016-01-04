@@ -5,12 +5,13 @@ from django.contrib.auth.models import Group
 
 from mps.base.models import LockableModel
 
+
 class MicrophysiologyCenter(LockableModel):
     class Meta(object):
         ordering = ('center_name', )
 
     center_name = models.CharField(max_length=100)
-    center_id = models.CharField(max_length=20,default='-')
+    center_id = models.CharField(max_length=20, default='-')
     description = models.CharField(max_length=400, blank=True, null=True)
     contact_person = models.CharField(max_length=250, blank=True, null=True)
     center_website = models.URLField(blank=True, null=True)
@@ -59,9 +60,10 @@ class Microdevice(LockableModel):
     device_cross_section_image = models.ImageField(
         upload_to='assays', null=True, blank=True)
 
-    device_fluid_volume = models.FloatField(null=True, blank=True)
-    device_fluid_volume_unit = models.CharField(
-        max_length=50, null=True, blank=True)
+    device_fluid_volume = models.FloatField(verbose_name='device fluid volume (uL)', null=True, blank=True)
+    # device fluid volume will now always be micro liters
+    # device_fluid_volume_unit = models.CharField(
+    #     max_length=50, null=True, blank=True)
 
     substrate_thickness = models.FloatField(
         verbose_name='substrate thickness (um)', null=True, blank=True)
@@ -75,8 +77,8 @@ class Microdevice(LockableModel):
 
     # Optional fields primarily intended for plates
     # (though certain chips appear in a series)
-    number_of_rows = models.IntegerField(blank=True,null=True)
-    number_of_columns = models.IntegerField(blank=True,null=True)
+    number_of_rows = models.IntegerField(blank=True, null=True)
+    number_of_columns = models.IntegerField(blank=True, null=True)
     row_labels = models.CharField(blank=True,
                                   null=True,
                                   max_length=1000,
@@ -84,7 +86,7 @@ class Microdevice(LockableModel):
                                   'Space separated list of unique labels, '
                                   'e.g. "A B C D ..."'
                                   ' Number of items must match'
-                                  ' number of columns.''')
+                                  ' number of columns.')
     column_labels = models.CharField(blank=True,
                                      null=True,
                                      max_length=1000,
@@ -108,17 +110,19 @@ class OrganModel(LockableModel):
     model_name = models.CharField(max_length=200)
     organ = models.ForeignKey('cellsamples.Organ')
     center = models.ForeignKey(MicrophysiologyCenter, null=True, blank=True)
-    device = models.ForeignKey(Microdevice, null=True, blank=True)
+    device = models.ForeignKey(Microdevice)
     description = models.CharField(max_length=400, null=True, blank=True)
 
-    protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
-                            blank=True, null=True, help_text='File detailing the protocols for this model')
+    # Removed in favor of protocol inline
+    #protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
+    #                        blank=True, null=True, help_text='File detailing the protocols for this model')
 
     def __unicode__(self):
         return self.model_name
 
     def get_absolute_url(self):
         return "/microdevices/model/{}".format(self.id)
+
 
 # It is somewhat odd that ValidatedAssays are inlines in lieu of a manytomany field
 # This was done originally so that additional fields could be added to a validated assay
@@ -127,3 +131,20 @@ class ValidatedAssay(models.Model):
     # Validated assays for an organ model used in inline
     organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model')
     assay = models.ForeignKey('assays.AssayModel', verbose_name='Assay Model')
+
+
+class OrganModelProtocol(models.Model):
+    """
+    This model is intended to be an inline
+    It contains files for Organ Model Protocols and designates their version
+    """
+
+    class Meta(object):
+        unique_together = [('version', 'organ_model')]
+
+    organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model')
+    version = models.CharField(max_length=20)
+    file = models.FileField(upload_to='protocols', verbose_name='Protocol File')
+
+    def __unicode__(self):
+        return self.version

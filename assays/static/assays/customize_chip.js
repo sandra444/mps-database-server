@@ -153,9 +153,9 @@ $(document).ready(function () {
             var line = lines[i];
 
             // Need to take a slice to avoid treating missing QC as invalid
-            var every = line.slice(0,6).every(isTrue);
+            var every = line.slice(0,7).every(isTrue);
 
-            var value = line[4];
+            var value = line[5];
 
             // If the row will be excluded (highlighted red)
             if ((i < headers && !exist) || !every) {
@@ -171,8 +171,12 @@ $(document).ready(function () {
                 table += "<tr>";
             }
 
-            // Add every value (excluding the QC)
-            for (var j=0; j<6; j++) {
+            // DO NOT ADD COMMAS TO CHIP ID
+            if (line[0]) {
+                table += "<th>" + line[0] + "</th>";
+            }
+
+            for (var j=1; j<7; j++) {
                 if (line[j]) {
                     table += "<th>" + number_with_commas(line[j]) + "</th>";
                 }
@@ -184,8 +188,8 @@ $(document).ready(function () {
             // Just add text if this is a header row for QC OR if this row is invalid
             // (QC status of an ignored row does not really matter)
             if (i < headers && !exist || !every) {
-                if (line[6]) {
-                    table += "<th>" + line[6] + "</th>";
+                if (line[7]) {
+                    table += "<th>" + line[7] + "</th>";
                 }
                 else {
                     table += "<th></th>";
@@ -195,7 +199,7 @@ $(document).ready(function () {
             // QC inputs NAME begin with "QC_"
             // QC input IDS are the row index (for plotting accurately)
             else {
-                table += "<th><input size='4' class='quality text-danger' id='" + i + "' name='QC_" + current_index + "' value='" + line[6] + "'></th>";
+                table += "<th><input size='4' class='quality text-danger' id='" + i + "' name='QC_" + current_index + "' value='" + line[7] + "'></th>";
                 // Increment the current index
                 current_index += 1;
             }
@@ -209,7 +213,7 @@ $(document).ready(function () {
         // Bind change event to quality
         $('.quality').change(function() {
             var index = +this.id;
-            lines[index][6] = this.value;
+            lines[index][7] = this.value;
             resetChart();
             plot();
         });
@@ -227,20 +231,20 @@ $(document).ready(function () {
             var line = lines[i];
 
             // Need to take a slice to avoid treating missing QC as invalid
-            var every = line.slice(0,6).every(isTrue);
+            var every = line.slice(0,7).every(isTrue);
 
             if (!every || (i < headers && !exist)) {
                 continue;
             }
 
-            var time = line[0];
-            var time_unit = line[1];
-            var assay = line[2];
-            var object = line[3];
-            var value = line[4];
-            var value_unit = line[5];
+            var time = line[1];
+            var time_unit = line[2];
+            var assay = line[3];
+            var object = line[4];
+            var value = line[5];
+            var value_unit = line[6];
 
-            var quality = $.trim(line[6]);
+            var quality = $.trim(line[7]);
 
             // Crash if the time or value are not numeric
             if (isNaN(time) || isNaN(value)) {
@@ -324,17 +328,16 @@ $(document).ready(function () {
     var exist = false;
 
     var headers = 0;
-    var header = "<th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th><th>QC Status</th>";
+    var header = "<th>Chip ID</th><th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th><th>QC Status</th>";
 
     if ($('#id_headers')[0]) {
         headers = Math.floor($('#id_headers').val());
     }
 
     var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
-        "<tr style='background: #FF2400'>" + "<th>Chip ID</th><th>[Chip ID]</th>" + repeat('<th><br><br></th>',5) + "</tr>" +
         "<tr style='background: #FF2400'>" + header + "</tr>" +
-        "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
-        "<tr>" + repeat('<th><br><br></th>',7) + "</tr>" +
+        "<tr>" + repeat('<th><br><br></th>',8) + "</tr>" +
+        "<tr>" + repeat('<th><br><br></th>',8) + "</tr>" +
         "</tbody></table>";
 
     if ($('#assaychipreadoutassay_set-group')[0] != undefined) {

@@ -44,9 +44,57 @@
     {% endif %}
         <label for="bulk_file" class="col-sm-2 control-label">Excel File*</label>
         <div class="col-sm-10">
-          {{ form.bulk_file }}
+            {{ form.bulk_file }}
+
+            <p>
+                <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">Click Here For Chip Template</a>
+                <br>
+                <a href="/media/excel_templates/plate_tabular_template-{{ version }}.xlsx">Click Here For Plate (Tabular) Template</a>
+                <br>
+                <a href="/media/excel_templates/plate_block_template-{{ version }}.xlsx">Click Here For Plate (Block) Template</a>
+            </p>
         </div>
     </div>
+
+    {% if chip_readouts %}
+        <legend>Available Chip Readouts</legend>
+        <table class="table table-striped table-bordered">
+            <tbody>
+                {% for readout in chip_readouts %}
+                    <tr>
+                        <td>{{ readout.chip_setup.assay_chip_id }}</td>
+                        <td>
+                            {% if readout in chip_has_data %}
+                                <span class="text-danger">Already Contains Uploaded Data</span>
+                            {% else %}
+                                <span class="text-success">Does Not Contain Uploaded Data</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if plate_readouts %}
+        <legend>Available Plate Readouts</legend>
+        <table class="table table-striped table-bordered">
+            <tbody>
+                {% for readout in plate_readouts %}
+                    <tr>
+                        <td>{{ readout.setup.assay_plate_id }}</td>
+                        <td>
+                            {% if readout in plate_has_data %}
+                                <span class="text-danger">Already Contains Uploaded Data</span>
+                            {% else %}
+                                <span class="text-success">Does Not Contain Uploaded Data</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
 
     </form>
 
@@ -61,10 +109,6 @@
                     <thead>
                         <tr class="active">
                             <th>Chip ID</th>
-                            <th>[Chip ID]</th>
-                            <th></th><th></th><th></th><th></th><th></th>
-                        </tr>
-                        <tr class="active">
                             <th>Time</th>
                             <th>Time Unit</th>
                             <th>Assay</th>
@@ -76,6 +120,7 @@
                     </thead>
                     <tbody>
                         <tr>
+                            <td>[Chip ID]</td>
                             <td>[Time]</td>
                             <td>[Time Unit]</td>
                             <td>[Assay]</td>
@@ -85,6 +130,7 @@
                             <td>[Leave Blank to Pass]</td>
                         </tr>
                         <tr>
+                            <td>[Chip ID]</td>
                             <td>[Time]</td>
                             <td>[Time Unit]</td>
                             <td>[Assay]</td>
@@ -106,11 +152,6 @@
                         <tr class="active">
                             <th>Plate ID</th>
                             <th>[Plate ID]</th>
-                            <th>Upload Type</th>
-                            <th>Block</th>
-                            <th></th><th></th><th></th><th></th><th></th><th></th>
-                        </tr>
-                        <tr class="active">
                             <th>Assay</th>
                             <th>[Assay 1]</th>
                             <th>Feature</th>
@@ -128,15 +169,17 @@
                             <td>[Val 1]</td>
                             <td>[Val 2]</td>
                             <td>[Val 3]</td>
-                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                         </tr>
                         <tr>
                             <td>[Val 4]</td>
                             <td>[Val 5]</td>
                             <td>[Val 6]</td>
-                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                         </tr>
                         <tr class="active">
+                            <th>Plate ID</th>
+                            <th>[Plate ID]</th>
                             <th>Assay</th>
                             <th>[Assay 2]</th>
                             <th>Feature</th>
@@ -152,13 +195,13 @@
                             <td>[Val 7]</td>
                             <td>[Val 8]</td>
                             <td>[Val 9]</td>
-                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                         </tr>
                         <tr>
                             <td>[Val 10]</td>
                             <td>[Val 11]</td>
                             <td>[Val 12]</td>
-                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                         </tr>
                     </tbody>
                 </table>
@@ -170,12 +213,6 @@
                     <thead>
                         <tr class="active">
                             <th>Plate ID</th>
-                            <th>[Plate ID]</th>
-                            <th>Upload Type</th>
-                            <th>Tabular</th>
-                            <th></th><th></th><th></th>
-                        </tr>
-                        <tr class="active">
                             <th>Well ID</th>
                             <th>Assay</th>
                             <th>Feature</th>
@@ -187,6 +224,7 @@
                     </thead>
                     <tbody>
                         <tr>
+                            <td>[Plate ID]</td>
                             <td>A1</td>
                             <td>[Assay 1]</td>
                             <td>[Feature 1]</td>
@@ -196,6 +234,7 @@
                             <td>[Val 1]</td>
                         </tr>
                         <tr>
+                            <td>[Plate ID]</td>
                             <td>A2</td>
                             <td>[Assay 1]</td>
                             <td>[Feature 1]</td>
@@ -205,6 +244,7 @@
                             <td>[Val 2]</td>
                         </tr>
                         <tr>
+                            <td>[Plate ID]</td>
                             <td>A3</td>
                             <td>[Assay 1]</td>
                             <td>[Feature 1]</td>
@@ -214,6 +254,7 @@
                             <td>[Val 3]</td>
                         </tr>
                         <tr>
+                            <td>[Plate ID]</td>
                             <td>B1</td>
                             <td>[Assay 1]</td>
                             <td>[Feature 1]</td>
@@ -223,6 +264,7 @@
                             <td>[Val 4]</td>
                         </tr>
                         <tr>
+                            <td>[Plate ID]</td>
                             <td>B2</td>
                             <td>[Assay 1]</td>
                             <td>[Feature 1]</td>
@@ -232,6 +274,7 @@
                             <td>[Val 5]</td>
                         </tr>
                         <tr>
+                            <td>[Plate ID]</td>
                             <td>B3</td>
                             <td>[Assay 1]</td>
                             <td>[Feature 1]</td>
@@ -241,6 +284,7 @@
                             <td>[Val 6]</td>
                         </tr>
                         <tr>
+                            <td>[Plate ID]</td>
                             <td>A1</td>
                             <td>[Assay 2]</td>
                             <td>[Feature 2]</td>
@@ -250,6 +294,7 @@
                             <td>[Val 7]</td>
                         </tr>
                         <tr>
+                            <td>[Plate ID]</td>
                             <td>A2</td>
                             <td>[Assay 2]</td>
                             <td>[Feature 2]</td>
@@ -259,6 +304,7 @@
                             <td>[Val 8]</td>
                         </tr>
                         <tr>
+                            <td>[Plate ID]</td>
                             <td>A3</td>
                             <td>[Assay 2]</td>
                             <td>[Feature 2]</td>
@@ -268,6 +314,7 @@
                             <td>[Val 9]</td>
                         </tr>
                         <tr>
+                            <td>[Plate ID]</td>
                             <td>B1</td>
                             <td>[Assay 2]</td>
                             <td>[Feature 2]</td>
@@ -277,6 +324,7 @@
                             <td>[Val 10]</td>
                         </tr>
                         <tr>
+                            <td>[Plate ID]</td>
                             <td>B2</td>
                             <td>[Assay 2]</td>
                             <td>[Feature 2]</td>
@@ -286,6 +334,7 @@
                             <td>[Val 11]</td>
                         </tr>
                         <tr>
+                            <td>[Plate ID]</td>
                             <td>B3</td>
                             <td>[Assay 2]</td>
                             <td>[Feature 2]</td>
@@ -304,7 +353,25 @@
             <li class="list-group-item">
                 <b class="text-danger">
                     <span class="glyphicon glyphicon-exclamation-sign"></span>
-                    Be sure that each dataset is on its own <i>sheet</i>
+                    The brackets ([] and {}) in the above examples and templates are not meant to be taken literally
+                    <br>
+                    When you are actually entering data, remove them
+                </b>
+            </li>
+            <li class="list-group-item">
+                <b class="text-danger">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    The Chip/Plate ID should be nothing more than the Chip/Plate ID/Barcode you entered in the setup
+                    <br>
+                    i.e. do not include "Chip-"/"Plate-" at the beginning of the Chip/Plate ID
+                </b>
+            </li>
+            <li class="list-group-item">
+                <b class="text-danger">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    If you want to upload data from multiple different types (chip, plate-tabular, plate-block):
+                    <br>
+                    Add a <i>sheet</i> for each different type (i.e. chips will be on one sheet, plate-tabular on another)
                 </b>
             </li>
             <li class="list-group-item">

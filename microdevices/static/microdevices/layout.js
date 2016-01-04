@@ -1,5 +1,11 @@
 $(document).ready(function () {
 
+    var insert_into = $('fieldset')[2];
+
+    if ($('#footer')[0]) {
+        insert_into = $('#layout_display');
+    }
+
     // Build table
     function build_table() {
         // Be sure to split the labels on the premise of a single space character
@@ -15,7 +21,7 @@ $(document).ready(function () {
                 .css('width','100%')
                 .addClass('layout-table')
                 .attr('id','layout_table')
-                .insertAfter($('fieldset')[2]);
+                .insertAfter(insert_into);
 
             // make first row
             var row = $('<tr>');

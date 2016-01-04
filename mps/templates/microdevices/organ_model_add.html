@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "js/inline_add.js" %}"></script>
+    <script src="{% static "js/enter_override.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+{% if update %}
+<form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post" enctype="multipart/form-data">
+
+{% include 'review.html' %}
+
+<h1>
+    Edit <em>{{ object }}</em>
+{% else %}
+<form class="form-horizontal" method="post" enctype="multipart/form-data">
+
+<h1>
+    Add Organ Model
+{% endif %}
+<br>
+{% csrf_token %}
+</h1>
+
+{% include "submit.html" %}
+
+{% include 'errors.html' %}
+
+{% include 'tracking.html' %}
+
+<legend>Organ Model</legend>
+
+{% include 'generic_field.html' with field=form.model_name label="Model Name*"%}
+
+{% if form.device.errors %}
+    {% for error in form.device.errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{error}}
+        </div>
+    {% endfor %}
+<div class="form-group has-error">
+{% else %}
+<div class="form-group">
+{% endif %}
+    <label for="device" class="col-sm-2 control-label">Device*</label>
+    <div class="col-sm-10">
+        {{ form.device }}
+        <p>
+            <a href="/microdevices/device/add">
+                <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
+                Add Microdevice (Must Refresh Page to See Change)
+            </a>
+        </p>
+    </div>
+</div>
+
+{% include 'generic_field.html' with field=form.organ label="Organ*"%}
+
+{% include 'generic_field.html' with field=form.center label="Center"%}
+
+{% include 'generic_field.html' with field=form.description label="Description"%}
+
+{{ formset.management_form }}
+<legend>Protocols</legend>
+{% if formset.non_form_errors %}
+    <div class="alert alert-danger" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error:</span>
+        {{ formset.non_form_errors }}
+    </div>
+{% endif %}
+
+{% if formset.errors %}
+    {% for dict in formset.errors %}
+        {% for key,value in dict.items %}
+            {% if key %}
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+{% endif %}
+
+<a id="add_button" class="btn btn-success" role="button">Add Protocol</a>
+<table class="table table-striped results" id="organmodelprotocol_set-group" name="inlines">
+    <thead>
+        <tr>
+            <th>Version</th>
+            <th>File (PDF)</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for protocol in formset %}
+            <tr class="inline" id="protocols-{{ forloop.counter0 }}">
+                {% if protocol.id.value %}
+                <td class="original" hidden>
+                    <input type="hidden"
+                           id="id_organmodelprotocol_set-{{ forloop.counter0 }}-id"
+                           name="organmodelprotocol_set-{{ forloop.counter0 }}-id"
+                           value="{{ protocol.id.value }}">
+                </td>
+                {% endif %}
+                <td>{{ protocol.version }}</td>
+                <td>{{ protocol.file }}</td>
+                <td>{{ protocol.DELETE }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</form>
+{% endblock %}

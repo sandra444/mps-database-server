@@ -2,7 +2,7 @@ from .models import Compound
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 # from django.utils.decorators import method_decorator
 # from django.contrib.auth.decorators import login_required
-from mps.mixins import OneGroupRequiredMixin
+from mps.mixins import SpecificGroupRequiredMixin
 # from django.shortcuts import render_to_response
 # from django.template import RequestContext
 from .forms import *
@@ -50,9 +50,11 @@ class CompoundsDetail(DetailView):
         return context
 
 
-class CompoundsAdd(OneGroupRequiredMixin, CreateView):
+class CompoundsAdd(SpecificGroupRequiredMixin, CreateView):
     form_class = CompoundForm
     template_name = 'compounds/compounds_add.html'
+
+    required_group_name = 'Change Compounds Front'
 
     def form_valid(self, form):
         if form.is_valid():
@@ -85,9 +87,11 @@ CompoundPropertyFormset = inlineformset_factory(
 
 
 # DON'T BE DECEIVED! THE FRONT-END UPDATE HAS ACCESS ONLY TO THE SUMMARIES AND PROPERTIES
-class CompoundsUpdate(OneGroupRequiredMixin, UpdateView):
+class CompoundsUpdate(SpecificGroupRequiredMixin, UpdateView):
     model = Compound
     template_name = 'compounds/compounds_update.html'
+
+    required_group_name = 'Change Compounds Front'
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()

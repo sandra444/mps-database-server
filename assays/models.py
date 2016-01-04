@@ -1,9 +1,10 @@
 # coding=utf-8
 
 from django.db import models
-from microdevices.models import Microdevice, OrganModel
+from microdevices.models import Microdevice, OrganModel, OrganModelProtocol
 from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
 
+# DEPRECATED, REMOVE SOON
 PHYSICAL_UNIT_TYPES = (
     (u'V', u'Volume'),
     (u'C', u'Concentration'),
@@ -20,6 +21,18 @@ types = (
 )
 
 
+class UnitType(LockableModel):
+    """
+    Unit types for physical units
+    """
+
+    unit_type = models.CharField(max_length=100)
+    description = models.CharField(max_length=256,
+                                   blank=True, null=True)
+
+    def __unicode__(self):
+        return u'{}'.format(self.unit_type)
+
 class PhysicalUnits(LockableModel):
     """
     Measures of concentration and so on
@@ -29,9 +42,7 @@ class PhysicalUnits(LockableModel):
     description = models.CharField(max_length=256,
                                    blank=True, null=True)
 
-    unit_type = models.CharField(default='C',
-                                 max_length=2,
-                                 choices=PHYSICAL_UNIT_TYPES)
+    unit_type = models.ForeignKey(UnitType)
 
     # Base Unit for conversions and scale factor
     base_unit = models.ForeignKey('assays.PhysicalUnits',
@@ -598,8 +609,8 @@ class AssayChipRawData(models.Model):
     Individual lines of readout data
     """
 
-    class Meta(object):
-        unique_together = [('assay_chip_id', 'assay_id', 'field_id', 'elapsed_time')]
+    # class Meta(object):
+    #     unique_together = [('assay_chip_id', 'assay_id', 'field_id', 'elapsed_time')]
 
     assay_chip_id = models.ForeignKey('assays.AssayChipReadout')
     assay_id = models.ForeignKey('assays.AssayChipReadoutAssay')
@@ -644,7 +655,14 @@ class AssayChipSetup(FlaggableModel):
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name='Study')
     setup_date = models.DateField(help_text='YYYY-MM-DD')
-    device = models.ForeignKey(OrganModel, verbose_name='Organ Model Name')
+
+    device = models.ForeignKey(Microdevice, verbose_name='Device')
+
+    # RENAMED (previously field was erroneously device)
+    organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model Name', null=True, blank=True)
+
+    organ_model_protocol = models.ForeignKey(OrganModelProtocol, verbose_name='Organ Model Protocol',
+                                             null=True, blank=True)
 
     variance = models.CharField(max_length=3000, verbose_name='Variance from Protocol', null=True, blank=True)
 

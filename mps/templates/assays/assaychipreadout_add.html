@@ -134,6 +134,13 @@
         </div>
     </div>
 
+    <div class="form-group">
+        <label for="scientist" class="col-sm-2 control-label">Scientist</label>
+        <div class="col-sm-10">
+          {{ form.scientist }}
+        </div>
+    </div>
+
     {% if form.notebook_page.errors %}
         {% for error in form.notebook_page.errors %}
             <div class="alert alert-danger" role="alert">
@@ -264,10 +271,6 @@
                 <thead>
                     <tr class="active">
                         <th>Chip ID</th>
-                        <th>[Chip ID]</th>
-                        <th></th><th></th><th></th><th></th><th></th>
-                    </tr>
-                    <tr class="active">
                         <th>Time</th>
                         <th>Time Unit</th>
                         <th>Assay</th>
@@ -279,6 +282,7 @@
                 </thead>
                 <tbody>
                     <tr>
+                        <td>[Chip ID]</td>
                         <td>[Time]</td>
                         <td>[Time Unit]</td>
                         <td>[Assay]</td>
@@ -288,6 +292,7 @@
                         <td>[Leave Blank to Pass]</td>
                     </tr>
                     <tr>
+                        <td>[Chip ID]</td>
                         <td>[Time]</td>
                         <td>[Time Unit]</td>
                         <td>[Assay]</td>
@@ -305,6 +310,22 @@
         <li class="list-group-item">
             Table rows in <span style="color: #FF0000">red</span> will be excluded
             while rows in <span style="color: #00FF00">green</span> are in the database
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                The brackets ([] and {}) in the above examples and templates are not meant to be taken literally
+                <br>
+                When you are actually entering data, remove them
+            </b>
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                The Chip ID should be nothing more than the Chip ID/Barcode you entered in the setup
+                <br>
+                i.e. do not include "Chip-" at the beginning of the Chip ID
+            </b>
         </li>
         <li class="list-group-item">
             <b class="text-danger">
