@@ -631,7 +631,8 @@ def validate_plate_readout_file(
     # If not block, then it is TABULAR data
     else:
         # Purge empty lines, they are useless for tabular uploads
-        datalist = [row for row in datalist if any(row)]
+        # All lines that do not have anything in their first 8 cells are purged
+        datalist = [row for row in datalist if any(row[:8])]
         # The first line SHOULD be the header
         header = datalist[0]
 
@@ -719,7 +720,7 @@ def validate_plate_readout_file(
 
                 # Check time unit
                 # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
-                if time_unit[0] != readout_time_unit[0]:
+                if not time_unit or (time_unit[0] != readout_time_unit[0]):
                     raise forms.ValidationError(
                         sheet + 'Plate-%s: The time unit "%s" does not correspond with the selected readout time unit '
                                 'of "%s"'
@@ -958,7 +959,7 @@ def validate_chip_readout_file(
 
         # Fail if time unit does not match
         # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
-        if time_unit[0] != readout_time_unit[0]:
+        if not time_unit or (time_unit[0] != readout_time_unit[0]):
             raise forms.ValidationError(
                 sheet + 'Chip-%s: The time unit "%s" does not correspond with the selected readout time unit of "%s"'
                 % (chip_id, time_unit, readout_time_unit)
