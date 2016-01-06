@@ -345,6 +345,17 @@ class AssayModelAdmin(LockableAdmin):
     )
 
     def save_model(self, request, obj, form, change):
+        template_change = False
+
+        # Check whether template needs to change
+        # Change if assay name has changed or it is new
+        if obj.pk is not None:
+            original = AssayModel.objects.get(pk=obj.pk)
+            if original.assay_name != obj.assay_name:
+                template_change = True
+        else:
+            template_change = True
+
         if change:
             obj.modified_by = request.user
         else:
@@ -352,7 +363,7 @@ class AssayModelAdmin(LockableAdmin):
 
         obj.save()
 
-        if change:
+        if template_change:
             modify_templates()
 
 
@@ -1647,7 +1658,8 @@ class PhysicalUnitsAdmin(LockableAdmin):
 
         obj.save()
 
-        if change and 'readout' in obj.availability:
+        # If this is a readout unit, modify the templates
+        if 'readout' in obj.availability:
             modify_templates()
 
 
