@@ -1058,7 +1058,7 @@ $(document).ready(function () {
         current_assay_feature = current_assay_feature.replace('.', '\\.');
 
         // Show this feature's values
-        $('p[data-assay-feature-time=' + current_assay_feature + ']').show();
+        $('p[data-assay-feature-time="' + current_assay_feature + '"]').show();
         refresh_invalid();
     });
 
