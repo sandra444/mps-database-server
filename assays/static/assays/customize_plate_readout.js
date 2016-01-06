@@ -272,8 +272,8 @@ $(document).ready(function () {
 //                }
 
                 // Check if there is already an input, if so, delete it
-                if ($('#' + invalid_id)[0]) {
-                    $('#' + invalid_id).remove();
+                if ($('[id="'+ invalid_id + '"]')[0]) {
+                    $('[id="'+ invalid_id + '"]').remove();
                     $(this).removeClass('invalid-well');
 
                     invalid[current_selection][current_time] = _.without(invalid[current_selection][current_time], '#' + id);
