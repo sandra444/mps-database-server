@@ -2116,14 +2116,18 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                     # Skip header
                     for row_index in range(1, sheet.nrows):
                         row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
-                        chip_id = row[0]
 
-                        if chip_id not in csv_data:
-                            csv_data.update({
-                                chip_id: [header]
-                            })
+                        # Make sure the data is valid before adding it
+                        # The first 7 cells need to be filled for a row to be valid
+                        if row and all(row[:7]):
+                            chip_id = row[0]
 
-                        csv_data.get(chip_id).append(row)
+                            if chip_id not in csv_data:
+                                csv_data.update({
+                                    chip_id: [header]
+                                })
+
+                            csv_data.get(chip_id).append(row)
 
                     for chip_id in csv_data:
                         datalist = csv_data.get(chip_id)
@@ -2179,14 +2183,18 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                     # Skip header
                     for row_index in range(1, sheet.nrows):
                         row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
-                        plate_id = row[0]
 
-                        if plate_id not in csv_data:
-                            csv_data.update({
-                                plate_id: [header]
-                            })
+                        # Make sure the data is valid before adding it
+                        # The first 6 cells must be filled (time and time unit are not required)
+                        if row and all(row[:6]):
+                            plate_id = row[0]
 
-                        csv_data.get(plate_id).append(row)
+                            if plate_id not in csv_data:
+                                csv_data.update({
+                                    plate_id: [header]
+                                })
+
+                            csv_data.get(plate_id).append(row)
 
                     for plate_id in csv_data:
                         datalist = csv_data.get(plate_id)

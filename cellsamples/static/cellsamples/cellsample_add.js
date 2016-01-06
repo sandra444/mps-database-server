@@ -34,7 +34,7 @@ $(function() {
                 var options = json.context;
                 var current_value = subtype.val();
                 subtype.html(options);
-                if ($('#id_cell_subtype option[value='+current_value+']')[0]) {
+                if (current_value && $('#id_cell_subtype option[value='+current_value+']')[0]) {
                     subtype.val(current_value);
                 }
                 else {

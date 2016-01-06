@@ -15,7 +15,11 @@ def get_cell_subtypes(request):
 
     cell_type = request.POST.get('cell_type')
 
-    findings = CellSubtype.objects.filter(cell_type_id=cell_type) | CellSubtype.objects.filter(cell_type__isnull=True)
+    findings = CellSubtype.objects.filter(cell_type__isnull=True)
+
+    if cell_type:
+        findings = findings | CellSubtype.objects.filter(cell_type_id=cell_type)
+
     findings = findings.order_by('cell_type', 'cell_subtype')
 
     for finding in findings:

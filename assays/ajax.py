@@ -240,6 +240,7 @@ def fetch_center_id(request):
                         content_type="application/json")
 
 
+# TODO Needs refactor
 def fetch_chip_readout(request):
     """Returns the Raw Chip Data stored for a Chip Readout"""
 
