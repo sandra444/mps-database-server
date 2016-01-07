@@ -21,7 +21,7 @@ class TrackableModel(models.Model):
     # CREATION DATA #
 
     created_by = models.ForeignKey('auth.User',
-                                   related_name='%(class)s_created-by',
+                                   related_name='%(class)s_created_by',
                                    blank=True,
                                    null=True)
 
@@ -32,7 +32,7 @@ class TrackableModel(models.Model):
     # MODIFICATION DATA #
 
     modified_by = models.ForeignKey('auth.User',
-                                    related_name='%(class)s_modified-by',
+                                    related_name='%(class)s_modified_by',
                                     blank=True,
                                     null=True)
 

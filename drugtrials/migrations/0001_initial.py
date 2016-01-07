@@ -176,8 +176,8 @@ class Migration(migrations.Migration):
                 ('test_name', models.CharField(max_length=40, verbose_name=b'Organ Function Test')),
                 ('test_unit', models.CharField(max_length=40, null=True, blank=True)),
                 ('description', models.CharField(max_length=400, null=True, blank=True)),
-                ('created_by', models.ForeignKey(related_name='test_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='test_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='test_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='test_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('organ', models.ForeignKey(blank=True, to='cellsamples.Organ', null=True)),
             ],
             options={
@@ -215,8 +215,8 @@ class Migration(migrations.Migration):
                 ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
                 ('test_type', models.CharField(unique=True, max_length=60)),
                 ('description', models.CharField(max_length=200, null=True, blank=True)),
-                ('created_by', models.ForeignKey(related_name='testtype_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='testtype_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='testtype_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='testtype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('signed_off_by', models.ForeignKey(related_name='testtype_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
@@ -235,8 +235,8 @@ class Migration(migrations.Migration):
                 ('source_name', models.CharField(unique=True, max_length=40)),
                 ('source_website', models.URLField(null=True, blank=True)),
                 ('description', models.CharField(max_length=400, null=True, blank=True)),
-                ('created_by', models.ForeignKey(related_name='trialsource_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='trialsource_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='trialsource_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='trialsource_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('signed_off_by', models.ForeignKey(related_name='trialsource_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={

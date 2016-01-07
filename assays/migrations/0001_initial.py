@@ -478,8 +478,8 @@ class Migration(migrations.Migration):
                 ('unit', models.CharField(max_length=16)),
                 ('description', models.CharField(max_length=256, null=True, blank=True)),
                 ('unit_order', models.FloatField(default=0, verbose_name=b'Seconds')),
-                ('created_by', models.ForeignKey(related_name='timeunits_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='timeunits_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='timeunits_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='timeunits_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('signed_off_by', models.ForeignKey(related_name='timeunits_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={

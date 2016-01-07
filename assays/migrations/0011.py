@@ -35,8 +35,8 @@ class Migration(migrations.Migration):
                 ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
                 ('unit_type', models.CharField(max_length=100)),
                 ('description', models.CharField(max_length=256, null=True, blank=True)),
-                ('created_by', models.ForeignKey(related_name='unittype_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='unittype_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='unittype_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='unittype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('signed_off_by', models.ForeignKey(related_name='unittype_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
@@ -44,4 +44,4 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
-    ] 
+    ]
