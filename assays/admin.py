@@ -19,13 +19,10 @@ import re
 from django.db import connection, transaction
 from urllib import unquote
 
-from mps.settings import MEDIA_ROOT
+from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 import os
 import xlsxwriter
 from xlsxwriter.utility import xl_col_to_name
-
-# This variable exists to avoid a magic number for the location of the validation starting column
-TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX = 52
 
 
 def modify_templates():

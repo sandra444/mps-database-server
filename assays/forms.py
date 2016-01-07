@@ -14,8 +14,7 @@ from chardet.universaldetector import UniversalDetector
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
 
-# This variable exists to avoid a magic number for the location of the validation starting column
-TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX = 52
+from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
