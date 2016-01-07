@@ -56,6 +56,15 @@
         </div>
     </div>
 
+    {% if not chip_readouts and not plate_readouts %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            No Chip or Plate Readouts exists for this study:
+            <br>
+            You must add a Chip or Plate Readout before adding data.
+        </div>
+    {% endif %}
+
     {% if chip_readouts %}
         <legend>Available Chip Readouts</legend>
         <table class="table table-striped table-bordered">
