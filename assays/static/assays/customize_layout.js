@@ -141,6 +141,31 @@ $(document).ready(function () {
         });
     }
 
+    var time_conversions = [
+        1,
+        60,
+        1440,
+        10080
+    ];
+
+    var time_units = [
+        'min',
+        'hour',
+        'days',
+        'weeks'
+    ];
+
+    function get_best_time_index(value) {
+        var index = 0;
+        while (time_conversions[index+1]
+            && time_conversions[index+1] <= value
+            && (value % time_conversions[index+1] == 0 || value % time_conversions[index] != 0)
+        ) {
+            index += 1;
+        }
+        return index;
+    }
+
     function fill_layout(layout_data, clone) {
         $.each(layout_data, function(well, data) {
             var list = $('#' + well + '_list');
@@ -173,8 +198,13 @@ $(document).ready(function () {
                 stamp = well + '_time';
                 // Only display text if timepoint or compounds (timepoint of zero acceptable)
                 if (data.timepoint !== undefined) {
-                    // All times should be stored as minutes
-                    text = 'Time: ' + data.timepoint + ' min';
+                    // Get best units and convert
+                    var best_index = get_best_time_index(data.timepoint);
+                    var best_unit = time_units[best_index];
+                    var converted_time = data.timepoint / time_conversions[best_index];
+
+                    // Display time with best value
+                    text = 'Time: ' + converted_time + ' ' + best_unit;
 
                     // Be sure to add event when necessary
                     li = $('<li>')
