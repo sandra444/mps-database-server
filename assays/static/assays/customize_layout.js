@@ -159,13 +159,15 @@ $(document).ready(function () {
         var index = 0;
         while (time_conversions[index+1]
             && time_conversions[index+1] <= value
-            && (value % time_conversions[index+1] == 0 || value % time_conversions[index] != 0)
-        ) {
+            && (value % time_conversions[index+1] == 0
+                || value % time_conversions[index] != 0
+                || (value > 1440 && index != 2))) {
             index += 1;
         }
         return index;
     }
 
+    // This function differs from the other "fill_layout" functions because the data needs to be editable
     function fill_layout(layout_data, clone) {
         $.each(layout_data, function(well, data) {
             var list = $('#' + well + '_list');

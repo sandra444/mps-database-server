@@ -1738,7 +1738,7 @@ class AssayPlateResultInline(admin.TabularInline):
 class AssayPlateTestResultAdmin(LockableAdmin):
     # Test Results from MICROPLATES
     class Media(object):
-        js = ('js/cookies.js', 'js/whittle.js', 'js/inline_fix.js', 'assays/customize_plate_results.js')
+        js = ('js/cookies.js', 'js/whittle.js', 'js/inline_fix.js', 'assays/plate_display.js', 'assays/customize_plate_results.js')
         css = {'all': ('assays/customize_admin.css',)}
 
     inlines = [AssayPlateResultInline]
