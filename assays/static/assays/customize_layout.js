@@ -755,20 +755,53 @@ $(document).ready(function () {
         }
 
         else if (act === 'clear') {
+            var clear = $('#id_clear_type').val();
+
             $(".ui-selected", this).each(function () {
                 tablecell = $(this);
                 tablecellid = tablecell.attr('id');
-                // Clear 'list' elements
+
                 var list = $('#' + tablecellid + '_list');
-                if (list.length) {
-                    list.empty();
+
+                // Clear all 'list' elements
+                if (clear == 'all') {
+                    if (list.length) {
+                        list.empty();
+                    }
+                }
+                // Clear certain list elements
+                else if (clear != 'type') {
+                    if (list.length) {
+                        if (clear === 'compound') {
+                            $(this).find('li').each(function() {
+                                if (this.getAttribute('compound')) {
+                                    this.remove();
+                                }
+                            });
+                        }
+                        else if (clear === 'time') {
+                            $(this).find('li').each(function() {
+                                if (this.id.split('_')[2] === 'time') {
+                                    this.remove();
+                                }
+                            });
+                        }
+                        else if (clear === 'label') {
+                            $(this).find('li').each(function() {
+                                if (this.id.split('_')[2] == 'label') {
+                                    this.remove();
+                                }
+                            });
+                        }
+                    }
                 }
                 // Clear well type
-                // TODO TEST
-                var type = $('#' + tablecellid + '_type');
-                if (type.length) {
-                    type.empty();
-                    tablecell.css('background-color', 'white');
+                if (clear == 'all' || clear == 'type') {
+                    var type = $('#' + tablecellid + '_type');
+                    if (type.length) {
+                        type.empty();
+                        tablecell.css('background-color', 'white');
+                    }
                 }
             });
         }

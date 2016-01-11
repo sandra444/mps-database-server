@@ -124,9 +124,9 @@
     {# TODO REVISE #}
 
     <div class="form-group row">
-        <label for="id_action" class="col-sm-2 control-label">Action:</label>
+        <label for="id_action" class="col-sm-2 control-label">Action</label>
         <div class="col-sm-10">
-            <select id="id_action" name="action">
+            <select id="id_action">
                 <option value="" selected="selected">---------</option>
                 <option value="type">Set Well Type</option>
                 <option value="timepoint">Set Time Point</option>
@@ -141,17 +141,17 @@
     </div>
 
     <div hidden class="form-group row change-layout type">
-        <label for="id_type" class="col-sm-2 control-label">Well Type:</label>
+        <label for="id_type" class="col-sm-2 control-label">Well Type</label>
         <div id="well_type_div" class="col-sm-10">
         </div>
     </div>
 
     <div hidden class="change-layout timepoint">
     <div class="form-group row">
-        <label for="timepoint" class="col-sm-2 control-label">Timepoint:</label>
+        <label for="timepoint" class="col-sm-2 control-label">Timepoint</label>
         <div class="col-sm-10">
-            <input id="id_timepoint" maxlength="6" name="timepoint" type="number" step="any" value="0">
-            <select id="id_timeunit" name="concunit">
+            <input id="id_timepoint" maxlength="6" type="number" step="any" value="0">
+            <select id="id_timeunit">
                 <option value="1" selected="selected">min</option>
                 <option value="60">hour</option>
                 <option value="1440">days</option>
@@ -163,22 +163,22 @@
     </div>
 
     <div class="form-group row">
-        <label for="tpincr" class="col-sm-2 control-label">Increment:</label>
+        <label for="tpincr" class="col-sm-2 control-label">Increment</label>
         <div class="col-sm-10">
-            <input id="id_tpincr" maxlength="6" name="tpincr" type="number" step="any" value="0">
-            <input id="id_tphowtoincr" type="radio" name="tphowtoincr" value="add" checked="">
+            <input id="id_tpincr" maxlength="6" type="number" step="any" value="0">
+            <input id="id_tphowtoincr" type="radio" value="add" checked="">
             Add
-            <input id="id_tphowtoincr" type="radio" name="tphowtoincr" value="multiply">
+            <input id="id_tphowtoincr" type="radio" value="multiply">
             Multiply
         </div>
     </div>
 
     <div class="form-group row">
-        <label for="time_direction" class="col-sm-2 control-label">Direction of Series:</label>
+        <label for="time_direction" class="col-sm-2 control-label">Direction of Series</label>
         <div class="col-sm-10">
-            <input id="id_time_direction" type="radio" name="time_direction" value="left_right" checked>
+            <input id="id_time_direction" type="radio" value="left_right" checked>
             Left -> Right &amp; Top -> Bottom
-            <input id="id_time_direction" type="radio" name="time_direction" value="right_left">
+            <input id="id_time_direction" type="radio" value="right_left">
             Right -> Left &amp; Bottom -> Top
         </div>
     </div>
@@ -186,16 +186,16 @@
 
     <div hidden class="change-layout compound">
     <div class="form-group row">
-        <label for="id_compound" class="col-sm-2 control-label">Compound:</label>
+        <label for="id_compound" class="col-sm-2 control-label">Compound</label>
         <div class="col-sm-10">
             {{ form.compound }}
         </div>
     </div>
 
     <div class="form-group row">
-        <label for="concentration" class="col-sm-2 control-label">Concentration:</label>
+        <label for="concentration" class="col-sm-2 control-label">Concentration</label>
         <div class="col-sm-10">
-            <input id="id_concentration" maxlength="6" name="concentration" type="number" step="any" value="10">
+            <input id="id_concentration" maxlength="6" type="number" step="any" value="10">
             {{ form.concunit }}
 {#                <option value="1">mM</option>#}
 {#                <option value="2" selected="selected">μM</option>#}
@@ -204,36 +204,51 @@
     </div>
 
     <div class="form-group row">
-        <label for="increment" class="col-sm-2 control-label">Dilution Factor:</label>
+        <label for="increment" class="col-sm-2 control-label">Dilution Factor</label>
         <div class="col-sm-10">
-            <input id="id_increment" maxlength="6" name="increment" type="number" step="any" value="1">
-            <input id="id_howtoincr" type="radio" name="howtoincr" value="divide" checked>
+            <input id="id_increment" maxlength="6" type="number" step="any" value="1">
+            <input id="id_howtoincr" type="radio" value="divide" checked>
             Divide
-            <input id="id_howtoincr" type="radio" name="howtoincr" value="multiply">
+            <input id="id_howtoincr" type="radio" value="multiply">
             Multiply
-            <input id="id_howtoincr" type="radio" name="howtoincr" value="subtract">
+            <input id="id_howtoincr" type="radio" value="subtract">
             Subtract
-            <input id="id_howtoincr" type="radio" name="howtoincr" value="add">
+            <input id="id_howtoincr" type="radio" value="add">
             Add
         </div>
     </div>
 
     <div class="form-group row">
-        <label for="compound_direction" class="col-sm-2 control-label">Direction of Series:</label>
+        <label for="compound_direction" class="col-sm-2 control-label">Direction of Series</label>
         <div class="col-sm-10">
-            <input id="id_compound_direction" type="radio" name="compound_direction" value="left_right" checked>
+            <input id="id_compound_direction" type="radio" value="left_right" checked>
             Left -> Right &amp; Top -> Bottom
-            <input id="id_compound_direction" type="radio" name="compound_direction" value="right_left">
+            <input id="id_compound_direction" type="radio" value="right_left">
             Right -> Left &amp; Bottom -> Top
         </div>
     </div>
     </div>
 
     <div hidden class="form-group row change-layout add-label">
-        <label for="label" class="col-sm-2 control-label">Label:</label>
+        <label for="label" class="col-sm-2 control-label">Label</label>
         <div class="col-sm-10">
-            <input id="id_label" name="label" size="50" maxlength="50">
+            <input id="id_label" size="50" maxlength="50">
         </div>
+    </div>
+
+    <div hidden class="change-layout clear">
+    <div class="form-group row">
+        <label for="clear_type" class="col-sm-2 control-label">What to Clear</label>
+        <div class="col-sm-10">
+            <select id="id_clear_type">
+                <option value="all" selected="selected">Everything</option>
+                <option value="type">Well Type</option>
+                <option value="time">Time Point</option>
+                <option value="compound">Compounds</option>
+                <option value="label">Label</option>
+            </select>
+        </div>
+    </div>
     </div>
 
     <div class='well lead text-center' id='help'>
