@@ -637,7 +637,7 @@ class AssayPlateSetupAdmin(LockableAdmin):
     # Setups for MICROPLATES
 
     class Media(object):
-        js = ('js/inline_fix.js', 'assays/customize_plate_setup.js')
+        js = ('js/inline_fix.js', 'assays/plate_display.js', 'assays/customize_plate_setup.js')
         css = {'all': ('assays/customize_admin.css',)}
 
     save_on_top = True
@@ -983,7 +983,7 @@ class AssayPlateReadoutAdmin(LockableAdmin):
     form = AssayPlateReadoutForm
 
     class Media(object):
-        js = ('js/inline_fix.js', 'assays/customize_plate_readout.js',)
+        js = ('js/inline_fix.js', 'assays/plate_display.js', 'assays/customize_plate_readout.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
     inlines = [AssayPlateReadoutInline]
