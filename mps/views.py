@@ -124,7 +124,11 @@ def search(request):
 # A generic use of the search_view_factory
 def custom_search(request):
     # Filter on group: either get all with no group or those with a group the user has
-    sqs = SearchQuerySet().exclude(group__in=Group.objects.all()) | SearchQuerySet().filter(group__in=request.user.groups.all())
+    sqs = SearchQuerySet().exclude(group__in=Group.objects.all())
+
+    if request.user.groups.all():
+          sqs = sqs | SearchQuerySet().filter(group__in=request.user.groups.all())
+
     view = search_view_factory(
         template='search/search.html',
         searchqueryset=sqs,

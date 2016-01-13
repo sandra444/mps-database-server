@@ -26,8 +26,8 @@ class Migration(migrations.Migration):
                 ('manufacturer_name', models.CharField(max_length=100)),
                 ('contact_person', models.CharField(max_length=250, null=True, blank=True)),
                 ('Manufacturer_website', models.URLField(null=True, blank=True)),
-                ('created_by', models.ForeignKey(related_name='manufacturer_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='manufacturer_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='manufacturer_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='manufacturer_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('signed_off_by', models.ForeignKey(related_name='manufacturer_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
@@ -75,9 +75,9 @@ class Migration(migrations.Migration):
                 ('description', models.CharField(max_length=400, null=True, blank=True)),
                 ('contact_person', models.CharField(max_length=250, null=True, blank=True)),
                 ('center_website', models.URLField(null=True, blank=True)),
-                ('created_by', models.ForeignKey(related_name='microphysiologycenter_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='microphysiologycenter_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('groups', models.ManyToManyField(to='auth.Group')),
-                ('modified_by', models.ForeignKey(related_name='microphysiologycenter_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='microphysiologycenter_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('signed_off_by', models.ForeignKey(related_name='microphysiologycenter_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
@@ -97,9 +97,9 @@ class Migration(migrations.Migration):
                 ('description', models.CharField(max_length=400, null=True, blank=True)),
                 ('protocol', models.FileField(help_text=b'File detailing the protocols for this model', upload_to=b'protocols', null=True, verbose_name=b'Protocol File', blank=True)),
                 ('center', models.ForeignKey(blank=True, to='microdevices.MicrophysiologyCenter', null=True)),
-                ('created_by', models.ForeignKey(related_name='organmodel_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='organmodel_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('device', models.ForeignKey(blank=True, to='microdevices.Microdevice', null=True)),
-                ('modified_by', models.ForeignKey(related_name='organmodel_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='organmodel_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('organ', models.ForeignKey(to='cellsamples.Organ')),
                 ('signed_off_by', models.ForeignKey(related_name='organmodel_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
@@ -128,7 +128,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='microdevice',
             name='created_by',
-            field=models.ForeignKey(related_name='microdevice_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='microdevice_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -140,7 +140,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='microdevice',
             name='modified_by',
-            field=models.ForeignKey(related_name='microdevice_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='microdevice_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(

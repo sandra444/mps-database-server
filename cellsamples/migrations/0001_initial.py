@@ -25,8 +25,8 @@ class Migration(migrations.Migration):
                 ('product_id', models.CharField(max_length=255, blank=True)),
                 ('lot_number', models.CharField(max_length=255, verbose_name=b'Lot#', blank=True)),
                 ('description', models.CharField(max_length=512, blank=True)),
-                ('created_by', models.ForeignKey(related_name='biosensor_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='biosensor_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='biosensor_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='biosensor_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('signed_off_by', models.ForeignKey(related_name='biosensor_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
@@ -73,8 +73,8 @@ class Migration(migrations.Migration):
                 ('signed_off_date', models.DateTimeField(null=True, blank=True)),
                 ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
                 ('cell_subtype', models.CharField(help_text=b'Example: motor (type of neuron), skeletal (type of muscle), etc.', unique=True, max_length=255)),
-                ('created_by', models.ForeignKey(related_name='cellsubtype_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='cellsubtype_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='cellsubtype_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='cellsubtype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('signed_off_by', models.ForeignKey(related_name='cellsubtype_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
@@ -93,8 +93,8 @@ class Migration(migrations.Migration):
                 ('cell_type', models.CharField(help_text=b'Example: hepatocyte, muscle, kidney, etc', max_length=255)),
                 ('species', models.CharField(default=b'Human', max_length=10, null=True, blank=True, choices=[(b'Human', b'Human'), (b'Rat', b'Rat')])),
                 ('cell_subtype', models.ForeignKey(to='cellsamples.CellSubtype')),
-                ('created_by', models.ForeignKey(related_name='celltype_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='celltype_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='celltype_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='celltype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
                 'ordering': ('species', 'cell_type', 'cell_subtype'),
@@ -110,8 +110,8 @@ class Migration(migrations.Migration):
                 ('signed_off_date', models.DateTimeField(null=True, blank=True)),
                 ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
                 ('organ_name', models.CharField(unique=True, max_length=255)),
-                ('created_by', models.ForeignKey(related_name='organ_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='organ_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='organ_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='organ_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('signed_off_by', models.ForeignKey(related_name='organ_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
@@ -130,8 +130,8 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(unique=True, max_length=255)),
                 ('phone', models.CharField(max_length=255, blank=True)),
                 ('address', models.CharField(max_length=255, blank=True)),
-                ('created_by', models.ForeignKey(related_name='supplier_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='supplier_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='supplier_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='supplier_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('signed_off_by', models.ForeignKey(related_name='supplier_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
@@ -164,7 +164,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cellsample',
             name='created_by',
-            field=models.ForeignKey(related_name='cellsample_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='cellsample_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -176,7 +176,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cellsample',
             name='modified_by',
-            field=models.ForeignKey(related_name='cellsample_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='cellsample_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(

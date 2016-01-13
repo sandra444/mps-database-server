@@ -375,3 +375,6 @@ DEBUG_TOOLBAR_CONFIG = {
 
 # A test runner to run unit tests
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
+# This variable exists to avoid a magic number for the location of the validation starting column
+TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX = 52

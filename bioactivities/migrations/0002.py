@@ -28,8 +28,8 @@ class Migration(migrations.Migration):
                 ('aid', models.TextField(verbose_name=b'Assay ID')),
                 ('name', models.TextField(default=b'', null=True, verbose_name=b'Assay Name', blank=True)),
                 ('description', models.TextField(null=True, blank=True)),
-                ('created_by', models.ForeignKey(related_name='pubchemassay_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='pubchemassay_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='pubchemassay_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='pubchemassay_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('signed_off_by', models.ForeignKey(related_name='pubchemassay_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={

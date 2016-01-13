@@ -54,7 +54,7 @@
             {% endif %}{% endif %}
         {% endblock %}
         <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}"
-              method="post" id="{{ opts.module_name }}_form">
+              method="post" id="{{ opts.model_name }}_form">
             {% csrf_token %}{% block form_top %}{% endblock %}
             <div>
                 {% if is_popup %}

@@ -19,13 +19,10 @@ import re
 from django.db import connection, transaction
 from urllib import unquote
 
-from mps.settings import MEDIA_ROOT
+from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 import os
 import xlsxwriter
 from xlsxwriter.utility import xl_col_to_name
-
-# This variable exists to avoid a magic number for the location of the validation starting column
-TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX = 52
 
 
 def modify_templates():
@@ -640,7 +637,7 @@ class AssayPlateSetupAdmin(LockableAdmin):
     # Setups for MICROPLATES
 
     class Media(object):
-        js = ('js/inline_fix.js', 'assays/customize_plate_setup.js')
+        js = ('js/inline_fix.js', 'assays/plate_display.js', 'assays/customize_plate_setup.js')
         css = {'all': ('assays/customize_admin.css',)}
 
     save_on_top = True
@@ -986,7 +983,7 @@ class AssayPlateReadoutAdmin(LockableAdmin):
     form = AssayPlateReadoutForm
 
     class Media(object):
-        js = ('js/inline_fix.js', 'assays/customize_plate_readout.js',)
+        js = ('js/inline_fix.js', 'assays/plate_display.js', 'assays/customize_plate_readout.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
     inlines = [AssayPlateReadoutInline]
@@ -1741,7 +1738,7 @@ class AssayPlateResultInline(admin.TabularInline):
 class AssayPlateTestResultAdmin(LockableAdmin):
     # Test Results from MICROPLATES
     class Media(object):
-        js = ('js/cookies.js', 'js/whittle.js', 'js/inline_fix.js', 'assays/customize_plate_results.js')
+        js = ('js/cookies.js', 'js/whittle.js', 'js/inline_fix.js', 'assays/plate_display.js', 'assays/customize_plate_results.js')
         css = {'all': ('assays/customize_admin.css',)}
 
     inlines = [AssayPlateResultInline]

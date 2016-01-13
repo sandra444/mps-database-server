@@ -2,6 +2,9 @@ import ujson as json
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
+
 from qhonuskan_votes.utils import get_vote_model, SumWithDefault
 
 
@@ -75,7 +78,7 @@ def vote(request, model, object_id, value):
 
     response_dict = model.objects.filter(
         object__id=object_id
-    ).aggregate(score=SumWithDefault("value", default=0))
+    ).aggregate(score=Coalesce(Sum("value"), 0))
 
     response_dict.update({"voted_as": value})
 

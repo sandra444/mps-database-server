@@ -42,13 +42,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='species',
             name='created_by',
-            field=models.ForeignKey(related_name='species_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='species_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='species',
             name='modified_by',
-            field=models.ForeignKey(related_name='species_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='species_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -60,13 +60,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='resultdescriptor',
             name='created_by',
-            field=models.ForeignKey(related_name='resultdescriptor_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='resultdescriptor_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='resultdescriptor',
             name='modified_by',
-            field=models.ForeignKey(related_name='resultdescriptor_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='resultdescriptor_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -84,13 +84,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='openfdacompound',
             name='created_by',
-            field=models.ForeignKey(related_name='openfdacompound_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='openfdacompound_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='openfdacompound',
             name='modified_by',
-            field=models.ForeignKey(related_name='openfdacompound_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='openfdacompound_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -102,13 +102,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='findingtype',
             name='created_by',
-            field=models.ForeignKey(related_name='findingtype_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='findingtype_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='findingtype',
             name='modified_by',
-            field=models.ForeignKey(related_name='findingtype_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='findingtype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -150,7 +150,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='finding',
             name='created_by',
-            field=models.ForeignKey(related_name='finding_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='finding_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -162,7 +162,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='finding',
             name='modified_by',
-            field=models.ForeignKey(related_name='finding_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='finding_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -190,13 +190,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='drugtrial',
             name='created_by',
-            field=models.ForeignKey(related_name='drugtrial_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='drugtrial_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='drugtrial',
             name='modified_by',
-            field=models.ForeignKey(related_name='drugtrial_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='drugtrial_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(

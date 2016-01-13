@@ -32,13 +32,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='studyconfiguration',
             name='created_by',
-            field=models.ForeignKey(related_name='studyconfiguration_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='studyconfiguration_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='studyconfiguration',
             name='modified_by',
-            field=models.ForeignKey(related_name='studyconfiguration_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='studyconfiguration_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -50,13 +50,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='readoutunit',
             name='created_by',
-            field=models.ForeignKey(related_name='readoutunit_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='readoutunit_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='readoutunit',
             name='modified_by',
-            field=models.ForeignKey(related_name='readoutunit_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='readoutunit_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -68,13 +68,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='physicalunits',
             name='created_by',
-            field=models.ForeignKey(related_name='physicalunits_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='physicalunits_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='physicalunits',
             name='modified_by',
-            field=models.ForeignKey(related_name='physicalunits_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='physicalunits_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -86,13 +86,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaywelltype',
             name='created_by',
-            field=models.ForeignKey(related_name='assaywelltype_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaywelltype_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='assaywelltype',
             name='modified_by',
-            field=models.ForeignKey(related_name='assaywelltype_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaywelltype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -110,13 +110,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaywell',
             name='created_by',
-            field=models.ForeignKey(related_name='assaywell_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaywell_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='assaywell',
             name='modified_by',
-            field=models.ForeignKey(related_name='assaywell_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaywell_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -156,7 +156,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaytestresult',
             name='created_by',
-            field=models.ForeignKey(related_name='assaytestresult_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaytestresult_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -168,7 +168,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaytestresult',
             name='modified_by',
-            field=models.ForeignKey(related_name='assaytestresult_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaytestresult_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -180,7 +180,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assayrun',
             name='created_by',
-            field=models.ForeignKey(related_name='assayrun_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assayrun_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -192,7 +192,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assayrun',
             name='modified_by',
-            field=models.ForeignKey(related_name='assayrun_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assayrun_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -210,13 +210,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assayresulttype',
             name='created_by',
-            field=models.ForeignKey(related_name='assayresulttype_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assayresulttype_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='assayresulttype',
             name='modified_by',
-            field=models.ForeignKey(related_name='assayresulttype_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assayresulttype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -228,13 +228,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assayresultfunction',
             name='created_by',
-            field=models.ForeignKey(related_name='assayresultfunction_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assayresultfunction_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='assayresultfunction',
             name='modified_by',
-            field=models.ForeignKey(related_name='assayresultfunction_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assayresultfunction_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -282,13 +282,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assayreader',
             name='created_by',
-            field=models.ForeignKey(related_name='assayreader_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assayreader_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='assayreader',
             name='modified_by',
-            field=models.ForeignKey(related_name='assayreader_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assayreader_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -306,13 +306,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assayplatetestresult',
             name='created_by',
-            field=models.ForeignKey(related_name='assayplatetestresult_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assayplatetestresult_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='assayplatetestresult',
             name='modified_by',
-            field=models.ForeignKey(related_name='assayplatetestresult_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assayplatetestresult_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -336,13 +336,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaymodeltype',
             name='created_by',
-            field=models.ForeignKey(related_name='assaymodeltype_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaymodeltype_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='assaymodeltype',
             name='modified_by',
-            field=models.ForeignKey(related_name='assaymodeltype_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaymodeltype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -360,13 +360,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaymodel',
             name='created_by',
-            field=models.ForeignKey(related_name='assaymodel_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaymodel_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='assaymodel',
             name='modified_by',
-            field=models.ForeignKey(related_name='assaymodel_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaymodel_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -378,7 +378,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaylayoutformat',
             name='created_by',
-            field=models.ForeignKey(related_name='assaylayoutformat_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaylayoutformat_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -390,7 +390,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaylayoutformat',
             name='modified_by',
-            field=models.ForeignKey(related_name='assaylayoutformat_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaylayoutformat_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -408,13 +408,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaylayout',
             name='created_by',
-            field=models.ForeignKey(related_name='assaylayout_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaylayout_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='assaylayout',
             name='modified_by',
-            field=models.ForeignKey(related_name='assaylayout_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaylayout_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -444,13 +444,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaydevicereadout',
             name='created_by',
-            field=models.ForeignKey(related_name='assaydevicereadout_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaydevicereadout_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='assaydevicereadout',
             name='modified_by',
-            field=models.ForeignKey(related_name='assaydevicereadout_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaydevicereadout_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -504,7 +504,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaychipsetup',
             name='created_by',
-            field=models.ForeignKey(related_name='assaychipsetup_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaychipsetup_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -522,7 +522,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaychipsetup',
             name='modified_by',
-            field=models.ForeignKey(related_name='assaychipsetup_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaychipsetup_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -574,7 +574,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaychipreadout',
             name='created_by',
-            field=models.ForeignKey(related_name='assaychipreadout_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaychipreadout_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -586,7 +586,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaychipreadout',
             name='modified_by',
-            field=models.ForeignKey(related_name='assaychipreadout_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaychipreadout_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -638,7 +638,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaybaselayout',
             name='created_by',
-            field=models.ForeignKey(related_name='assaybaselayout_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaybaselayout_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -650,7 +650,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaybaselayout',
             name='modified_by',
-            field=models.ForeignKey(related_name='assaybaselayout_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='assaybaselayout_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(

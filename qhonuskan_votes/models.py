@@ -3,6 +3,9 @@ from django.db.models.base import ModelBase
 from django.utils.translation import ugettext_lazy as _
 from django.dispatch import Signal
 
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
+
 from django.conf import settings
 try:
     from django.contrib.auth import get_user_model
@@ -22,11 +25,8 @@ class ObjectsWithScoresManager(models.Manager):
     Returns objects with their scores
     """
     def get_queryset(self):
-        from qhonuskan_votes.utils import SumWithDefault
         return super(ObjectsWithScoresManager, self).get_queryset().annotate(
-            vote_score=SumWithDefault(
-                '%svote__value' % self.model._meta.module_name, default=0
-            )
+            vote_score=Coalesce(Sum('%svote__value' % self.model._meta.model_name), 0)
         )
 
 
@@ -35,10 +35,8 @@ class SortByScoresManager(models.Manager):
     Returns objects with their scores and orders them by value (1,0,-1)
     """
     def get_queryset(self):
-        from qhonuskan_votes.utils import SumWithDefault
         return super(SortByScoresManager, self).get_queryset().annotate(
-            vote_score=SumWithDefault(
-                '%svote__value' % self.model._meta.module_name, default=0
+            vote_score=Coalesce(Sum('%svote__value' % self.model._meta.model_name, 0)
             )
         ).order_by('-vote_score')
 

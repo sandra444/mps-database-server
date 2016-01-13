@@ -30,7 +30,7 @@ import re
 import os
 import codecs,cStringIO
 
-from mps.settings import MEDIA_ROOT
+from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
 # TODO Refactor imports
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
@@ -2117,6 +2117,9 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                     for row_index in range(1, sheet.nrows):
                         row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
 
+                        # Trim row to exclude validation columns and beyond
+                        row = row[:TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX]
+
                         # Make sure the data is valid before adding it
                         # The first 7 cells need to be filled for a row to be valid
                         if row and all(row[:7]):
@@ -2184,6 +2187,9 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                     for row_index in range(1, sheet.nrows):
                         row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
 
+                        # Trim row to exclude validation columns and beyond
+                        row = row[:TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX]
+
                         # Make sure the data is valid before adding it
                         # The first 6 cells must be filled (time and time unit are not required)
                         if row and all(row[:6]):
@@ -2229,6 +2235,9 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                     plate_id = None
                     for row_index in range(sheet.nrows):
                         row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
+
+                        # Trim row to exclude validation columns and beyond
+                        row = row[:TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX]
 
                         if 'PLATE' in row[0].upper():
                             plate_id = row[1]

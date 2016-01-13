@@ -51,8 +51,8 @@ class Migration(migrations.Migration):
                 ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
                 ('name', models.CharField(max_length=100)),
                 ('description', models.CharField(default=b'', max_length=500)),
-                ('created_by', models.ForeignKey(related_name='propertytype_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='propertytype_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='propertytype_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='propertytype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('signed_off_by', models.ForeignKey(related_name='propertytype_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
@@ -70,8 +70,8 @@ class Migration(migrations.Migration):
                 ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
                 ('name', models.CharField(max_length=100)),
                 ('description', models.CharField(default=b'', max_length=500)),
-                ('created_by', models.ForeignKey(related_name='summarytype_created-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='summarytype_modified-by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='summarytype_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='summarytype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('signed_off_by', models.ForeignKey(related_name='summarytype_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={

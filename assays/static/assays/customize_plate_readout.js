@@ -330,68 +330,7 @@ $(document).ready(function () {
     }
 
     function fill_layout(layout_data) {
-        $.each(layout_data, function(well, data) {
-            var list = $('#' + well + '_list');
-
-            var stamp =  '';
-            var text = '';
-            var li = '';
-
-            // Set type
-
-            stamp = well + '_type';
-
-            $('#' + stamp)
-                .text(data.type);
-
-            if (data.color) {
-                $('#' + well).css('background-color', data.color);
-            }
-
-            // Set time
-            stamp = well + '_time';
-            // Only display text if timepoint or compounds (timepoint of zero acceptable)
-            if (data.timepoint !== undefined) {
-                // All times should be stored as minutes
-                text = 'Time: ' + data.timepoint + ' min';
-
-                // Be sure to add event when necessary
-                li = $('<li>')
-                    .attr('id', stamp)
-                    .text(text);
-
-                list.prepend(li);
-            }
-
-//          // Set compounds
-            if (data.compounds) {
-                $.each(data.compounds, function (index, compound) {
-
-                    // BE CERTAIN THAT STAMPS DO NOT COLLIDE
-                    stamp = well + '_' + index;
-
-                    text = compound.name + ' (' + compound.concentration +
-                        ' ' + compound.concentration_unit + ')';
-
-                    li = $('<li>')
-                        .text(text)
-                        .attr('compound', compound.id);
-
-                    list.append(li);
-                });
-            }
-
-            // Set label
-            stamp = well + '_label';
-            if (data.label) {
-                // Be sure to add event when necessary
-                li = $('<li>')
-                    .attr('id', stamp)
-                    .text(data.label);
-
-                list.append(li);
-            }
-        });
+        window.LAYOUT.fill_layout(layout_data);
 
         // Attempt to acquire the readout
         // (AVOID RACE CONDITIONS AT ALL COST)
