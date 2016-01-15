@@ -217,7 +217,7 @@ def modify_templates():
 
     plate_block_sheet.set_column('BA:BC', 30)
 
-    # Get list of time units (TODO CHANGE ORDER_BY)
+    # Get list of time units
     time_units = PhysicalUnits.objects.filter(
         unit_type__unit_type='Time'
     ).order_by(
@@ -228,6 +228,7 @@ def modify_templates():
     value_units = PhysicalUnits.objects.filter(
         availability__contains='readout'
     ).order_by(
+        'base_unit',
         'scale_factor'
     ).values_list('unit', flat=True)
 
