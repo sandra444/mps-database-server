@@ -25,7 +25,7 @@ def get_chembl_target(target):
         # Get URL of target for scrape
         url = "https://www.ebi.ac.uk/chembl/target/inspect/{}/".format(target)
         # Make the http request
-        response  = requests.get(url)
+        response = requests.get(url)
         # Get the webpage as text
         stuff = response.text
         # Make a BeatifulSoup object

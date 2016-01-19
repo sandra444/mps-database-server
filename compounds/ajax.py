@@ -22,6 +22,7 @@ def main(request):
     return render_to_response('ajax_error.html',
                               context_instance=RequestContext(request))
 
+
 def fetch_compound_name(request):
     data = {}
 
@@ -31,12 +32,14 @@ def fetch_compound_name(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+
 def chembl_error(error):
     data = {}
     data.update({'error': error})
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
+
 
 def fetch_chemblid_data(request):
     chemblid = request.POST['chemblid']
@@ -80,6 +83,7 @@ def fetch_chemblid_data(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+
 def fetch_compound_report(request):
     summary_types = (
         'Pre-clinical Findings',
@@ -106,17 +110,26 @@ def fetch_compound_report(request):
                     'max_time': {}
                 },
                 'plot': {}
-            }
-        })
+            }}
+        )
 
-    summaries = {summary.compound.name+summary.summary_type.name:summary.summary for summary in CompoundSummary.objects.filter(compound_id__in=compounds, summary_type__name__in=summary_types)}
-    properties = {property.compound.name+property.property_type.name:property.value for property in CompoundProperty.objects.filter(compound_id__in=compounds, property_type__name__in=property_types)}
+    summaries = {
+        summary.compound.name+summary.summary_type.name: summary.summary for summary in CompoundSummary.objects.filter(
+            compound_id__in=compounds,
+            summary_type__name__in=summary_types
+        )
+    }
+    properties = {
+        property.compound.name+property.property_type.name: property.value for property in CompoundProperty.objects.filter(
+            compound_id__in=compounds, property_type__name__in=property_types
+        )
+    }
 
     for compound in compounds:
         for summary_type in summary_types:
-            data.get(compound.name).get('table').update({summary_type:summaries.get(compound.name+summary_type,'')})
+            data.get(compound.name).get('table').update({summary_type: summaries.get(compound.name+summary_type, '')})
         for property_type in property_types:
-            data.get(compound.name).get('table').update({property_type:properties.get(compound.name+property_type,'')})
+            data.get(compound.name).get('table').update({property_type: properties.get(compound.name+property_type, '')})
 
     # Acquire AssayChipRawData and store based on compound-assay (and convert to minutes?)
     # Make sure that the quality IS THE EMPTY STRING (anything in the quality field qualifies as invalid)
@@ -153,7 +166,7 @@ def fetch_compound_report(request):
         readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
 
         if readout_time not in entry:
-            entry.update({readout_time:[readout.value]})
+            entry.update({readout_time: [readout.value]})
         else:
             entry.get(readout_time).append(readout.value)
 
@@ -165,7 +178,7 @@ def fetch_compound_report(request):
                 entry = plot[assay][concentration]
                 averaged_plot = {}
                 for time in entry:
-                    averaged_plot.update({time:float(sum(entry.get(time)))/len(entry.get(time))})
+                    averaged_plot.update({time: float(sum(entry.get(time)))/len(entry.get(time))})
                 # Add maximum
                 times = [float(t) for t in entry.keys()]
                 if assay not in data[compound]['table']['max_time'] or max(times) > data[compound]['table']['max_time'][assay]:
@@ -175,6 +188,7 @@ def fetch_compound_report(request):
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
+
 
 def fetch_compound_list(request):
     """This function just gets a list of compounds and returns it as JSON"""
@@ -189,6 +203,7 @@ switch = {
     'fetch_compound_report': fetch_compound_report,
     'fetch_compound_list': fetch_compound_list,
 }
+
 
 def ajax(request):
     post_call = request.POST['call']
