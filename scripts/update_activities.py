@@ -11,6 +11,8 @@ from bioactivities.models import chembl_target, chembl_assay
 from bioservices import ChEMBL as ChEMBLdb
 from bioservices.services import BioServicesError
 
+from django.db import connection
+
 FIELDS = {
     'reference': 'reference',
     'target_chemblid': 'target',
@@ -135,7 +137,39 @@ def run(days=180):
     print('{} bioactivities were added, {} were found in the database, and '
           '{} failed due to value errors.'.format(count, skip, error))
 
+    print 'Updating bioactivity units...'
+    cursor = connection.cursor()
+
+    cursor.execute(
+        '''
+        UPDATE bioactivities_bioactivity
+        SET standardized_units = NULL,
+            standard_name = NULL,
+            standardized_value = NULL;
+
+        --no mass is needed in data conversion
+        UPDATE public.bioactivities_bioactivity as v
+        SET standard_name = s.standard_name,
+        standardized_units=s.standard_unit,
+            standardized_value=value*scale_factor
+        FROM public.bioactivities_bioactivitytype as s
+        WHERE v.bioactivity_type = s.chembl_bioactivity and
+        v.units=s.chembl_unit and s.mass_flag='N';
+
+        --mass is needed in data conversion
+        UPDATE public.bioactivities_bioactivity as v
+        SET standard_name = s.standard_name,
+        standardized_units=s.standard_unit,
+            standardized_value=value*scale_factor/c.molecular_weight
+        FROM public.bioactivities_bioactivitytype as s,
+        public.compounds_compound as c
+        WHERE v.bioactivity_type = s.chembl_bioactivity and
+        v.units=s.chembl_unit and v.compound_id =c.id and s.mass_flag='Y';
+        '''
+    )
+
+    print 'Units updated'
+
 # A second run is useful to catch newly added compounds,
 # but just calling run is somewhat inefficient (it would run through every compound again)
 #run(0)
-

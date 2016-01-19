@@ -245,7 +245,7 @@
                 </tr>
             </thead>
             <tbody>
-            {% for property in object.compoundproperty_set.all %}
+            {% for property in object.compoundproperty_set.all|dictsort:"property_type.name" %}
                 <tr>
                     <td><strong>{{ property.property_type }}</strong></td>
                     <td>{{ property.value }}</td>
@@ -261,7 +261,7 @@
         <legend>Summaries</legend>
         <table class="table table-striped table-bordered" style="background-color: #E8CAAF;">
             <tbody>
-            {% for summary in object.compoundsummary_set.all %}
+            {% for summary in object.compoundsummary_set.all|dictsort:"summary_type.name" %}
                 <tr>
                     <td><strong>{{ summary.summary_type }}</strong></td>
                     <td>{{ summary.summary|linebreaks }}</td>

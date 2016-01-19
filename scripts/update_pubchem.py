@@ -17,6 +17,7 @@ import numpy as np
 
 # TODO REPLACE PUBCHEM TARGET AND PUBCHEM ASSAY
 
+
 def get_chembl_target(target):
     data = {}
 
@@ -24,7 +25,7 @@ def get_chembl_target(target):
         # Get URL of target for scrape
         url = "https://www.ebi.ac.uk/chembl/target/inspect/{}/".format(target)
         # Make the http request
-        response  = requests.get(url)
+        response = requests.get(url)
         # Get the webpage as text
         stuff = response.text
         # Make a BeatifulSoup object
@@ -71,6 +72,7 @@ def get_chembl_target(target):
 
     #print 'id:', chemblid, 'type:', target_type, 'name:', name, 'organism:', organism
 
+
 def get_chembl_assay(assay):
     data = {}
 
@@ -78,7 +80,7 @@ def get_chembl_assay(assay):
         # Get URL of target for scrape
         url = "https://www.ebi.ac.uk/chembl/assay/inspect/{}/".format(assay)
         # Make the http request
-        response  = requests.get(url)
+        response = requests.get(url)
         # Get the webpage as text
         stuff = response.text
         # Make a BeatifulSoup object
@@ -109,12 +111,12 @@ def get_chembl_assay(assay):
             if not existing:
                 try:
                     new_target = Target.objects.create(**target_data)
-                    data.update({'target_id':new_target.id})
+                    data.update({'target_id': new_target.id})
                 except:
                     print 'Failed creating target {}'.format(target)
             else:
                 existing_assay = existing[0]
-                data.update({'target_id':existing_assay.id})
+                data.update({'target_id': existing_assay.id})
                 existing.update(**target_data)
 
         data.update({
@@ -131,6 +133,7 @@ def get_chembl_assay(assay):
 
     return data
 
+
 def get_pubchem_target(target):
     final_target = None
 
@@ -146,7 +149,7 @@ def get_pubchem_target(target):
                 # Get URL of target organism for scrape
                 url = "http://togows.dbcls.jp/entry/protein/{}/organism".format(target)
                 # Make the http request
-                response  = urllib.urlopen(url)
+                response = urllib.urlopen(url)
                 # Get the webpage as text
                 data = response.read()
 
@@ -198,11 +201,12 @@ def get_pubchem_target(target):
 
     return final_target
 
-def get_cid(param,string):
+
+def get_cid(param, string):
     """
     Acquires PubChem CID if compound does not currently have a CID associated with it
     """
-    url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/{}/{}/json'.format(param,string)
+    url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/{}/{}/json'.format(param, string)
     response = urllib.urlopen(url)
     data = json.loads(response.read())
 
@@ -211,11 +215,12 @@ def get_cid(param,string):
     data = data[0]
 
     try:
-        cid = data.get('id','').get('id','').get('cid','')
+        cid = data.get('id', '').get('id', '').get('cid', '')
         return cid
 
     except:
         return ''
+
 
 def get_bioactivities(cid):
     # Using the inchikey has the consequence of failing when PubChem "doesn't like" the inchikey
@@ -233,9 +238,9 @@ def get_bioactivities(cid):
     activities = []
     assays = {}
 
-    if data.get('Row',''):
+    if data.get('Row', ''):
         for entry in data.get('Row'):
-            entry = entry.get('Cell','')
+            entry = entry.get('Cell', '')
 
             if entry:
                 AID = entry[0]
@@ -245,7 +250,7 @@ def get_bioactivities(cid):
                 target = entry[7]
                 value = entry[9]
                 # Please note that specifying the units as micromolar is superfluous and thus these strings are removed
-                activity_name = entry[10].replace(' (uM)','').replace('_uM','').replace('_MICROM','')
+                activity_name = entry[10].replace(' (uM)', '').replace('_uM', '').replace('_MICROM', '')
 
                 # TODO Insert code to add/handle Bioactivity Types?
                 # Do not add outcome to returned data, assumed to be active
@@ -270,7 +275,7 @@ def get_bioactivities(cid):
             flat_assays = []
 
             # Need to split into a series of queries due to the limit on URL length
-            for i in range(0,len(all_assays),500):
+            for i in range(0, len(all_assays),500):
                 batch = ','.join(all_assays[i:i+500])
                 flat_assays.append(batch)
 
@@ -284,9 +289,9 @@ def get_bioactivities(cid):
                     aid = str(assay.get('AID'))
 
                     if 'Target' in assay:
-                        target = str(assay.get('Target')[0].get('GI',''))
+                        target = str(assay.get('Target')[0].get('GI', ''))
 
-                    comment = assay.get('Comment','')
+                    comment = assay.get('Comment', '')
 
                     target_type = ''
                     organism = ''
@@ -340,33 +345,37 @@ def get_bioactivities(cid):
                     activities_to_change = assays.get(aid)
 
                     for index in activities_to_change:
-                        activities[index].update({'assay':assay_model})
+                        activities[index].update({'assay': assay_model})
 
         return activities
 
     else:
         return []
 
+
 def delete_from_activity_name(string):
-    """Remove undesired portion of activity namea"""
+    """Remove undesired portion of activity name"""
     for bio in PubChemBioactivity.objects.filter(activity_name__contains=string):
-        print 'Removing {0} from {1}'.format(string,bio.activity_name)
+        # print 'Removing {0} from {1}'.format(string, bio.activity_name)
         bio.activity_name = bio.activity_name.replace(string, '')
         bio.save()
+
 
 def replace_with_activity_name(original, new):
     """Replace undesired portion of activity namea"""
     for bio in PubChemBioactivity.objects.filter(activity_name__contains=original):
-        print 'Replacing {0} with {1}'.format(original, new)
+        # print 'Replacing {0} with {1}'.format(original, new)
         bio.activity_name = bio.activity_name.replace(original, new)
         bio.save()
+
 
 def purify_activity_name(string):
     """Completely overwrite activity names containing the string of interest"""
     for bio in PubChemBioactivity.objects.filter(activity_name__contains=string):
-        print 'Purifying {}'.format(bio.activity_name)
+        # print 'Purifying {}'.format(bio.activity_name)
         bio.activity_name = string
         bio.save()
+
 
 def run():
     # Remove all old bioactivities
@@ -418,7 +427,7 @@ def run():
                         print "Failed bioactivity..."
                         fail_bioactivity += 1
         else:
-            print "Failed compound..."
+            print "Failed compound: {}...".format(compound.name)
             fail_compound += 1
 
     print("Compound Failures:{}".format(fail_compound))
@@ -472,7 +481,11 @@ def run():
                 try:
                     #print 'Replacing', chembl_assay[0].chemblid
                     chembl_assay.update(**data)
-                    chembl_assay.update(**{'pubchem_id':assay.pubchem_id, 'source':assay.source, 'source_id':assay.source_id})
+                    chembl_assay.update(**{
+                        'pubchem_id': assay.pubchem_id,
+                        'source': assay.source,
+                        'source_id': assay.source_id
+                    })
                     # Switch bioactivities to the correct assay
                     for bio in PubChemBioactivity.objects.filter(assay_id=assay.id):
                         bio.assay_id = chembl_assay[0].id
@@ -501,13 +514,17 @@ def run():
 
     print 'Normalizing values'
 
-    bio_types = {bio.activity_name:True for bio in PubChemBioactivity.objects.all()}
+    bio_types = {bio.activity_name: True for bio in PubChemBioactivity.objects.all()}
 
     for bio_type in bio_types:
-        targets = {bio.assay.target:True for bio in PubChemBioactivity.objects.filter(activity_name=bio_type)}
+        targets = {bio.assay.target: True for bio in PubChemBioactivity.objects.filter(activity_name=bio_type)}
         for target in targets:
-            bio_pk = [bio.id for bio in PubChemBioactivity.objects.filter(activity_name=bio_type).filter(assay__target=target)]
-            bio_value = np.array([bio.value for bio in PubChemBioactivity.objects.filter(activity_name=bio_type).filter(assay__target=target)])
+            bio_pk = [bio.id for bio in PubChemBioactivity.objects.filter(
+                activity_name=bio_type).filter(assay__target=target
+            )]
+            bio_value = np.array([bio.value for bio in PubChemBioactivity.objects.filter(
+                activity_name=bio_type).filter(assay__target=target
+            )])
             if len(bio_pk) > 0 and len(bio_value) > 0:
                 bio_value /= np.max(np.abs(bio_value),axis=0)
                 for index, pk in enumerate(bio_pk):
