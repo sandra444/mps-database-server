@@ -356,7 +356,7 @@ def get_bioactivities(cid):
 def delete_from_activity_name(string):
     """Remove undesired portion of activity name"""
     for bio in PubChemBioactivity.objects.filter(activity_name__contains=string):
-        print 'Removing {0} from {1}'.format(string, bio.activity_name)
+        # print 'Removing {0} from {1}'.format(string, bio.activity_name)
         bio.activity_name = bio.activity_name.replace(string, '')
         bio.save()
 
@@ -364,7 +364,7 @@ def delete_from_activity_name(string):
 def replace_with_activity_name(original, new):
     """Replace undesired portion of activity namea"""
     for bio in PubChemBioactivity.objects.filter(activity_name__contains=original):
-        print 'Replacing {0} with {1}'.format(original, new)
+        # print 'Replacing {0} with {1}'.format(original, new)
         bio.activity_name = bio.activity_name.replace(original, new)
         bio.save()
 
@@ -372,7 +372,7 @@ def replace_with_activity_name(original, new):
 def purify_activity_name(string):
     """Completely overwrite activity names containing the string of interest"""
     for bio in PubChemBioactivity.objects.filter(activity_name__contains=string):
-        print 'Purifying {}'.format(bio.activity_name)
+        # print 'Purifying {}'.format(bio.activity_name)
         bio.activity_name = string
         bio.save()
 
@@ -427,7 +427,7 @@ def run():
                         print "Failed bioactivity..."
                         fail_bioactivity += 1
         else:
-            print "Failed compound..."
+            print "Failed compound: {}...".format(compound.name)
             fail_compound += 1
 
     print("Compound Failures:{}".format(fail_compound))
