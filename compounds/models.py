@@ -48,16 +48,20 @@ class Compound(LockableModel):
 
     #compound_id = AutoField(primary_key=True)
     # The name, rather than the chemblid and/or inchikey, is unique
-    name = models.CharField(max_length=200, unique=True,
+    name = models.CharField(
+        max_length=200, unique=True,
         help_text="Preferred compound name.")
-    synonyms = models.TextField(max_length=4000,
+    synonyms = models.TextField(
+        max_length=4000,
         null=True, blank=True)
-    tags = models.TextField(blank=True, null=True,
+    tags = models.TextField(
+        blank=True, null=True,
         help_text="Tags for the compound (EPA, NCATS, etc.)")
 
     # External identifiers are checked for uniqueness in form's clean
     # Not optimal, but other solutions did not seem to work (editing save, so on)
-    chemblid = models.CharField('ChEMBL ID', max_length=20,
+    chemblid = models.CharField(
+        'ChEMBL ID', max_length=20,
         null=True, blank=True,
         help_text="Enter a ChEMBL id, e.g. CHEMBL25, and click Retrieve to "
                   "get compound information automatically.")
@@ -66,15 +70,18 @@ class Compound(LockableModel):
     pubchemid = models.CharField(verbose_name='PubChem ID', max_length=40, null=True, blank=True)
 
     # standard names/identifiers
-    inchikey = models.CharField('InChI key', max_length=27,
+    inchikey = models.CharField(
+        'InChI key', max_length=27,
         null=True, blank=True,
         help_text="IUPAC standard InChI key for the compound")
-    smiles = models.CharField(max_length=1000,
+    smiles = models.CharField(
+        max_length=1000,
         null=True, blank=True,
         help_text="Canonical smiles, generated using pipeline pilot.")
 
     # molecular properties
-    molecular_formula = models.CharField(max_length=40,
+    molecular_formula = models.CharField(
+        max_length=40,
         null=True, blank=True,
         help_text="Molecular formula of compound.")
     molecular_weight = models.FloatField(
@@ -85,53 +92,98 @@ class Compound(LockableModel):
         help_text="Number of rotatable bonds.")
 
     # some calculated properties
-    acidic_pka = models.FloatField("Acidic pKa",
+    acidic_pka = models.FloatField(
+        "Acidic pKa (ACD)",
         null=True, blank=True,
         help_text="The most acidic pKa calculated using ACDlabs.")
-    basic_pka = models.FloatField("Basic pKa",
+    basic_pka = models.FloatField(
+        "Basic pKa (ACD)",
         null=True, blank=True,
         help_text="The most basic pKa calculated using ACDlabs.")
-    logp = models.FloatField("LogP",
+    logp = models.FloatField(
+        "LogP (ACD)",
         null=True, blank=True,
         help_text="The calculated octanol/water partition coefficient using "
                   "ACDlabs")
-    logd = models.FloatField("LogD",
+    logd = models.FloatField(
+        "LogD (ACD)",
         null=True, blank=True,
         help_text="The calculated octanol/water distribution "
                   "coefficient at pH7.4 using ACDlabs.")
-    alogp = models.FloatField('ALogP',
+    alogp = models.FloatField(
+        'ALogP',
         null=True, blank=True,
         help_text="Calculated ALogP.")
 
     # drug related properties
-    known_drug = models.BooleanField('Known drug?',
+    known_drug = models.BooleanField(
+        'Known drug?',
         default=False)
-    medchem_friendly = models.BooleanField('Med Chem friendly?',
+    medchem_friendly = models.BooleanField(
+        'Med Chem friendly?',
         default=False)
-    ro5_violations = models.IntegerField('Rule of 5 violations',
+    ro5_violations = models.IntegerField(
+        'Rule of 5 violations',
         null=True, blank=True,
         help_text="Number of properties defined in Lipinski's Rule of 5 (RO5) "
                   "that the compound fails.")
-    ro3_passes = models.BooleanField('Passes rule of 3?',
+    ro3_passes = models.BooleanField(
+        'Passes rule of 3?',
         default=False,
         help_text="Rule of 3 passes.  It is suggested "
                   "that compounds that pass all these criteria are"
                   "more likely to be hits in fragment screening.")
-    species = models.CharField('Molecular species', max_length=10,
+    species = models.CharField(
+        'Molecular species', max_length=10,
         blank=True, null=True,
         help_text="A description of the predominant species occurring at pH "
                   "7.4 and can be acid, base, neutral or zwitterion.")
 
-
-    last_update = models.DateField(blank=True, null=True,
+    last_update = models.DateField(
+        blank=True, null=True,
         help_text="Last time when activities associated with the compound were"
                   " updated.")
+
+    # DrugBank data
+    drugbank_id = models.CharField(
+        'DrugBank ID', max_length=20,
+        null=True, blank=True,
+        help_text="DrugBank ID")
+    # Listed as "Sub Class" in DrugBank
+    drug_class = models.CharField(
+        'Class', max_length=40,
+        null=True, blank=True,
+        help_text="Drug Class from DrugBank")
+    # Percent value for protein_binding
+    protein_binding = models.CharField(
+        'Protein Binding', max_length=20,
+        null=True, blank=True,
+        help_text="Protein Binding from DrugBank")
+    # Drug's half life (may be a range)
+    half_life = models.CharField(
+        'Half Life', max_length=100,
+        null=True, blank=True,
+        help_text="Half Life from DrugBank")
+    # Description of clearance
+    clearance = models.CharField(
+        'Clearance', max_length=500,
+        null=True, blank=True,
+        help_text="Clearance from DrugBank")
+    # Percent value for drug bioavailability
+    bioavailability = models.CharField(
+        'Bioavailability', max_length=20,
+        null=True, blank=True,
+        help_text="Bioavailability from DrugBank")
+    # Test description of the drug's absorption
+    absorption_description = models.CharField(
+        'Absorption Description', max_length=1000,
+        null=True, blank=True,
+        help_text="Absorption Description from DrugBank")
 
     class Meta(object):
         ordering = ('name', )
 
     def __unicode__(self):
-
         return u'{0}'.format(self.name)
 
     def chembl_link(self):
@@ -157,7 +209,7 @@ class Compound(LockableModel):
 
         url = self.thumb_src()
         if url:
-            return (u'<img src="{}" />').format(url)
+            return u'<img src="{}" />'.format(url)
         else:
             return u''
 
@@ -168,7 +220,7 @@ class Compound(LockableModel):
 
         url = self.image_src()
         if url:
-            return (u'<img src="{}" />').format(url)
+            return u'<img src="{}" />'.format(url)
         else:
             return u''
 
@@ -199,6 +251,7 @@ class SummaryType(LockableModel):
     def __unicode__(self):
         return unicode(self.name)
 
+
 class PropertyType(LockableModel):
 
     class Meta(object):
@@ -217,7 +270,7 @@ class PropertyType(LockableModel):
 class CompoundSummary(models.Model):
 
     class Meta(object):
-        unique_together = [('compound','summary_type')]
+        unique_together = [('compound', 'summary_type')]
         verbose_name = 'Compound Summary'
         verbose_name_plural = 'Compound Summaries'
 
@@ -229,11 +282,13 @@ class CompoundSummary(models.Model):
     def __unicode__(self):
         return unicode(self.summary)
 
+
 # It would be useful to have a model that catalogues COMPOUND PROPERTIES such as cmax and clogp
 class CompoundProperty(models.Model):
 
     class Meta(object):
-        unique_together = [('compound','property_type')]
+        # Remove restriction
+        #unique_together = [('compound', 'property_type')]
         verbose_name = 'Compound Property'
         verbose_name_plural = 'Compound Properties'
 
@@ -245,3 +300,15 @@ class CompoundProperty(models.Model):
 
     def __unicode__(self):
         return unicode(self.value)
+
+
+# # Should these be treated separately from bioactivity targets?
+# # Whatever the case, the following information was requested:
+class CompoundTarget(models.Model):
+    name = models.CharField(max_length=150)
+    # May not be present
+    uniprot_id = models.CharField(max_length=20, blank=True, null=True)
+    action = models.CharField(max_length=75)
+    pharmacological_action = models.CharField(max_length=20)
+    organism = models.CharField(max_length=30)
+    type = models.CharField(max_length=30)
