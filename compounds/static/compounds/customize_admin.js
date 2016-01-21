@@ -1,6 +1,7 @@
 $(document).ready(function () {
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
+    var chemblid = null;
 
     function compound_finalizer(data) {
 
@@ -40,6 +41,9 @@ $(document).ready(function () {
         } else {
             $('#id_ro3_passes').prop('checked', false);
         }
+
+        // Call drugbank
+        get_drugbank_data();
 
         return $('#retrieve').removeAttr('disabled').val('Retrieve');
     }
@@ -82,6 +86,39 @@ $(document).ready(function () {
         });
     }
 
+    function apply_drugbank_data(data) {
+        $('#id_drugbank_id').val(data.drugbank_id);
+        $('#id_drug_class').val(data.drug_class);
+        $('#id_protein_binding').val(data.protein_binding);
+        $('#id_half_life').val(data.half_life);
+        $('#id_bioavailability').val(data.bioavailability);
+        $('#id_clearance').val(data.clearance);
+        $('#id_absorption').val(data.absorption);
+    }
+
+    function get_drugbank_data() {
+        $.ajax({
+            url: "/compounds_ajax",
+            type: "POST",
+            dataType: "json",
+            data: {
+                call: 'fetch_drugbank_data',
+                chembl_id: chemblid,
+                csrfmiddlewaretoken: middleware_token
+            },
+            success: function (json) {
+                if (json.error) {
+                    alert(json.error);
+                }
+                else {
+                    apply_drugbank_data(json);
+                }
+            },
+            error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    }
 
     if ($('.object-tools > li > .addlink').length) {
         $(".object-tools").append(
@@ -94,7 +131,7 @@ $(document).ready(function () {
             .insertAfter('#id_chemblid');
 
         $('#retrieve').click(function () {
-            var chemblid = $('#id_chemblid').val();
+            chemblid = $('#id_chemblid').val();
 
             if (chemblid.match("^CHEMBL")) {
 

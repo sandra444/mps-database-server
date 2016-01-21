@@ -291,7 +291,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         # Values found in table
         data = {
             'drugbank_id': '',
-            'class': '',
+            'drug_class': '',
             'protein_binding': '',
             'half_life': '',
             'clearance': '',
@@ -317,7 +317,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
                     # The sub class is in the text of a link
                     # There might not be a sub class
                     if row.findChildren('a'):
-                        data['class'] = row.findChildren('a')[0].text.rstrip()
+                        data['drug_class'] = row.findChildren('a')[0].text.rstrip()
 
                 elif header == 'Protein binding':
                     # Trim protein binding to get just the percentage
@@ -424,7 +424,7 @@ switch = {
     'fetch_chemblid_data': fetch_chemblid_data,
     'fetch_compound_report': fetch_compound_report,
     'fetch_compound_list': fetch_compound_list,
-    'fetch_drugbank_data_from_chemblid': fetch_drugbank_data
+    'fetch_drugbank_data': fetch_drugbank_data
 }
 
 

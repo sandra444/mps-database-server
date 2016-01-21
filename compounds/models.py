@@ -175,8 +175,8 @@ class Compound(LockableModel):
         null=True, blank=True,
         help_text="Bioavailability from DrugBank")
     # Test description of the drug's absorption
-    absorption_description = models.CharField(
-        'Absorption Description', max_length=1000,
+    absorption = models.CharField(
+        'Absorption', max_length=1000,
         null=True, blank=True,
         help_text="Absorption Description from DrugBank")
 
@@ -305,6 +305,9 @@ class CompoundProperty(models.Model):
 # # Should these be treated separately from bioactivity targets?
 # # Whatever the case, the following information was requested:
 class CompoundTarget(models.Model):
+    # Must link back to a compound
+    compound = models.ForeignKey(Compound)
+
     name = models.CharField(max_length=150)
     # May not be present
     uniprot_id = models.CharField(max_length=20, blank=True, null=True)
