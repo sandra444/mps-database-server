@@ -11,6 +11,10 @@ from bioservices import ChEMBL as ChEMBLdb
 
 from bioactivities.models import Assay, Target
 
+from bs4 import BeautifulSoup
+import requests
+import re
+
 # Calling main is and always will be indicative of an error condition.
 # ajax.py is strictly for AJAX requests
 
@@ -129,7 +133,9 @@ def fetch_compound_report(request):
         for summary_type in summary_types:
             data.get(compound.name).get('table').update({summary_type: summaries.get(compound.name+summary_type, '')})
         for property_type in property_types:
-            data.get(compound.name).get('table').update({property_type: properties.get(compound.name+property_type, '')})
+            data.get(compound.name).get('table').update(
+                {property_type: properties.get(compound.name+property_type, '')}
+            )
 
     # Acquire AssayChipRawData and store based on compound-assay (and convert to minutes?)
     # Make sure that the quality IS THE EMPTY STRING (anything in the quality field qualifies as invalid)
@@ -138,9 +144,9 @@ def fetch_compound_report(request):
         assay_id__readout_unit__unit='%Control',
         quality=u'',
     ).select_related(
-            'assay_chip_id__chip_setup__compound',
-            'assay_chip_id__chip_setup__unit',
-            'assay_chip_id__timeunit'
+        'assay_chip_id__chip_setup__compound',
+        'assay_chip_id__chip_setup__unit',
+        'assay_chip_id__timeunit'
     )
 
     for readout in readouts:
@@ -149,7 +155,9 @@ def fetch_compound_report(request):
         assay = readout.assay_id.assay_id.assay_short_name
         if not assay in plot:
             plot[assay] = {}
-        concentration = unicode(readout.assay_chip_id.chip_setup.concentration) + u'_' + readout.assay_chip_id.chip_setup.unit.unit
+        concentration = unicode(
+            readout.assay_chip_id.chip_setup.concentration
+        ) + u'_' + readout.assay_chip_id.chip_setup.unit.unit
         # Replace unicode characters
         # This may pose problems should more unicode characters appear
         # I may want to employ a sort of ASCII heuristic table to deal with this issue
@@ -197,11 +205,226 @@ def fetch_compound_list(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+
+def fetch_drugbank_data(request):
+    """Get DrugBank data"""
+    chembl_id = request.POST.get('chembl_id')
+
+    data = get_drugbank_data_from_chembl_id(chembl_id)
+
+    return HttpResponse(json.dumps(data),
+                        content_type='application/json')
+
+
+def get_drugbank_target_information(data, type_of_target):
+    target = {
+        'name': '',
+        # May not be present
+        'uniprot_id': '',
+        'action': '',
+        'pharmacological_action': '',
+        'organism': '',
+        'type': type_of_target
+    }
+
+    # Get name from header (table may not be present?)
+    target['name'] = data.findChildren('h3')[0].findChildren('a')[0].text
+
+    # Loop through the p children to find info
+    for p in data.findChildren('p'):
+        if 'Organism: ' in p.text:
+            target['organism'] = p.text.replace('Organism: ', '').strip()
+        elif 'Pharmacological action:' in p.text:
+            target['pharmacological_action'] = p.text.replace('Pharmacological action:', '').strip()
+        elif 'Actions:' in p.text:
+            target['action'] = p.text.replace('Actions:', '').lstrip().replace('\n        ', ', ').strip()
+
+    # The child table contains the corresponding UniProt ID
+    if data.findChildren('table') and data.findChildren('table')[0].findChildren('tbody')[0].findChildren('td'):
+        target['uniprot_id'] = data.findChildren('table')[0].findChildren(
+            'tbody')[0].findChildren('tr')[0].findChildren('td')[1].text.strip()
+
+    return target
+
+
+def get_drugbank_data_from_chembl_id(chembl_id):
+    data = {}
+
+    # Get drugbank_id or fail
+    url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/2'.format(chembl_id)
+    # Make the http request
+    response = requests.get(url)
+    # Get the webpage as JSON
+    json_data = json.loads(response.text)
+
+    if json_data and u'error' not in json_data:
+        # Get drugbank_id
+        drugbank_id = json_data[0].get('src_compound_id')
+
+        # Get URL of target for scrape
+        url = "http://www.drugbank.ca/drugs/{}".format(drugbank_id)
+        # Make the http request
+        response = requests.get(url)
+        # Get the webpage as text
+        stuff = response.text
+        # Make a BeatifulSoup object
+        soup = BeautifulSoup(stuff, 'html5lib')
+
+        # Get all tables
+        tables = soup.findChildren('table')
+        # Get table of interest
+        main_table = tables[0]
+        # Get rows
+        rows = main_table.findChildren('tr')
+
+        # Regex for extracting percentages
+        percent_extractor = re.compile(r'\d+%')
+
+        # Units for half life
+        units = ['week', 'day', 'hour', 'minute', 'second']
+
+        # Regex for extracting floats
+        float_extractor = re.compile(r'\d+\.\d+')
+        # Regex for extracting ints (ignores anything with periods)
+        integer_extractor = re.compile(r'(?<!\.)(?<!\d)\d+(?!\.)')
+
+        # Values found in table
+        data = {
+            'drugbank_id': '',
+            'class': '',
+            'protein_binding': '',
+            'half_life': '',
+            'clearance': '',
+            'bioavailability': '',
+            'absorption': '',
+        }
+
+        # Loop through the rows of the table
+        # Break when all 6 table rows found
+        # MAKE SURE TO IGNORE EXMPTY FIELDS
+        for row in rows:
+            header = row.findChildren('th')
+
+            if header:
+                header = header[0].text
+
+                if header == 'Accession Number':
+                    # The ID is in bold, so find with strong
+                    # There will always be an ID
+                    data['drugbank_id'] = row.findChildren('strong')[0].text
+
+                elif header == 'Sub Class':
+                    # The sub class is in the text of a link
+                    # There might not be a sub class
+                    if row.findChildren('a'):
+                        data['class'] = row.findChildren('a')[0].text.rstrip()
+
+                elif header == 'Protein binding':
+                    # Trim protein binding to get just the percentage
+                    # There might not be protein binding
+                    protein_binding_initial = row.findChildren('td')[0].text
+                    protein_binding_initial = re.findall(percent_extractor, protein_binding_initial)
+                    # If there are multiple, which do I take?
+                    # Taking first percent for now
+                    if protein_binding_initial:
+                        data['protein_binding'] = protein_binding_initial[0]
+
+                elif header == 'Half life':
+                    # Take full string
+                    # Might not exist
+                    # Be sure to decode for unicode comparisons
+                    life = row.findChildren('td')[0].text
+                    unit = ''
+                    for possible_unit in units:
+                        if not unit and possible_unit in life:
+                            unit = possible_unit
+                        # If a unit has already been selected, trim life to remove distracting units
+                        elif unit and possible_unit in life:
+                            life = life[life.index(possible_unit):]
+
+                    # Special exception for min (abbreviation of minutes)
+                    if not unit and 'min' in life:
+                        unit = 'min'
+
+                    if unit:
+                        trimmed_life = life[:life.index(unit)]
+                        found_numbers = re.findall(float_extractor, trimmed_life) + re.findall(
+                            integer_extractor, trimmed_life)
+
+                        # Make sure the numbers aren't jumbled (float came second and integer came first)
+                        found_numbers.sort(key=float)
+
+                        # If it is plus or minus
+                        if u'+/-' in trimmed_life or u'±' in trimmed_life:
+                            found_numbers = [
+                                unicode(float(found_numbers[-1])-float(found_numbers[0])),
+                                unicode(float(found_numbers[-1])+float(found_numbers[0]))
+                            ]
+
+                        data['half_life'] = '-'.join(found_numbers) + ' ' + unit + 's'
+
+                # Be sure to trim
+                elif header == 'Clearance':
+                    # Might not exist
+                    # Get rid of bullets! (see whether there are multiple bullets?
+                    data['clearance'] = row.findChildren('td')[0].text.lstrip()
+
+                # Be sure to trim
+                elif header == 'Absorption':
+                    # Might not exist
+                    absorption_initial = row.findChildren('td')[0].text
+                    # Absorption is just the full text
+                    data['absorption'] = absorption_initial
+                    # Find percent for bioavailability
+                    bioavailability_initial = re.findall(percent_extractor, absorption_initial)
+                    # If there are multiple, which do I take?
+                    # Taking first percent for now
+                    if bioavailability_initial:
+                        data['bioavailability'] = bioavailability_initial[0]
+
+        # Convert Not Available to None (for clarity)
+        for key, value in data.items():
+            if value == 'Not Available':
+                data.update({key: ''})
+
+        # Array of targets
+        targets = []
+
+        # Loop through all target cards
+        listed_targets = soup.findChildren('div', class_='target')
+        if listed_targets:
+            listed_targets = listed_targets[0].findChildren('div')
+
+            for target in listed_targets:
+                targets.append(get_drugbank_target_information(target, 'Target'))
+
+        # Loop through all enzyme cards
+        listed_enzymes = soup.findChildren('div', class_='enzyme')
+        if listed_enzymes:
+            listed_enzymes = listed_enzymes[0].findChildren('div')
+
+            for enzyme in listed_enzymes:
+                targets.append(get_drugbank_target_information(enzyme, 'Enzyme'))
+
+        # Loop through all transporter cards
+        listed_transporters = soup.findChildren('div', class_='transporter')
+        if listed_transporters:
+            listed_transporters = listed_transporters[0].findChildren('div')
+
+            for transporter in listed_transporters:
+                targets.append(get_drugbank_target_information(transporter, 'Transporter'))
+
+        # Remember that targets is a list!
+        data.update({'targets': targets})
+
+    return data
+
 switch = {
     'fetch_compound_name': fetch_compound_name,
     'fetch_chemblid_data': fetch_chemblid_data,
     'fetch_compound_report': fetch_compound_report,
     'fetch_compound_list': fetch_compound_list,
+    'fetch_drugbank_data_from_chemblid': fetch_drugbank_data
 }
 
 

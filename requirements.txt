@@ -74,3 +74,5 @@ xlrd
 xlsxwriter
 # chardet will detect a files (probable) encoding
 chardet
+# Alternative html parser used in conjunction with BeautifulSoup
+html5lib
