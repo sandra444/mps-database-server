@@ -747,7 +747,7 @@ class AssayChipReadout(FlaggableModel):
         verbose_name = 'Chip Readout'
         ordering = ('chip_setup',)
 
-    chip_setup = models.ForeignKey(AssayChipSetup, null=True, unique=True)
+    chip_setup = models.ForeignKey(AssayChipSetup)
 
     timeunit = models.ForeignKey(PhysicalUnits, default=23)
     treatment_time_length = models.FloatField(verbose_name='Assay Treatment Duration',
