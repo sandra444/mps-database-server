@@ -268,7 +268,7 @@ $(document).ready(function () {
     // Initialize and adjust data table
     $('#reported_events').DataTable({
         "iDisplayLength": 200,
-        "sDom": '<T<"clear">t>',
+        "sDom": '<T<"clear">ft>',
         "order": [[ 2, "desc" ]],
         "aoColumnDefs": [
             {
