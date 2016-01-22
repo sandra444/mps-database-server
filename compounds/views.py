@@ -49,6 +49,21 @@ class CompoundsDetail(DetailView):
         context.update({'previous':previous, 'next':next})
         return context
 
+CompoundTargetFormset = inlineformset_factory(
+    Compound,
+    CompoundTarget,
+    formset=CompoundTargetInlineFormset,
+    extra=1,
+    exclude=[],
+    widgets={
+        'name': forms.Textarea(attrs={'size': 25, 'rows': 1}),
+        'uniprot_id': forms.TextInput(attrs={'size': 10}),
+        'pharmacological_action': forms.TextInput(attrs={'size': 7}),
+        'organism': forms.TextInput(attrs={'size': 7}),
+        'type': forms.TextInput(attrs={'size': 11}),
+    }
+)
+
 
 class CompoundsAdd(SpecificGroupRequiredMixin, CreateView):
     form_class = CompoundForm
@@ -56,12 +71,25 @@ class CompoundsAdd(SpecificGroupRequiredMixin, CreateView):
 
     required_group_name = 'Change Compounds Front'
 
+    def get_context_data(self, **kwargs):
+        context = super(CompoundsAdd, self).get_context_data(**kwargs)
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = CompoundTargetFormset(self.request.POST)
+            else:
+                context['formset'] = CompoundTargetFormset()
+
+        return context
+
     def form_valid(self, form):
-        if form.is_valid():
+        formset = CompoundTargetFormset(self.request.POST, instance=form.instance)
+
+        if form.is_valid() and formset.is_valid():
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Compound
             self.object.save()
+            formset.save()
             return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))

@@ -94,6 +94,17 @@ $(document).ready(function () {
         $('#id_bioavailability').val(data.bioavailability);
         $('#id_clearance').val(data.clearance);
         $('#id_absorption').val(data.absorption);
+
+        // TODO WORK OUT HOW TO CREATE TARGET ENTRIES HERE
+        for (var x in data.targets) {
+            var target = data.targets[x];
+            var add_to = '#id_compoundtarget_set-' + x + '-';
+
+            for (var field in target) {
+                var id_field = add_to + field;
+                $(id_field).val(target[field]);
+            }
+        }
     }
 
     function get_drugbank_data() {
@@ -111,6 +122,23 @@ $(document).ready(function () {
                     alert(json.error);
                 }
                 else {
+                    // TODO Think of a better way to generate the rows
+                    var add_button = $('#add_button');
+                    if (add_button[0]) {
+                        for (var x in json.targets) {
+                            add_button.trigger('click');
+                        }
+                    }
+                    // TODO Alternative for admin SHOULD PROBABLY BE MADE
+                    else {
+                        // WHY DOES IT SAY django.jQuery?
+                        // It is because Django admin has a namespace for its jQuery copy!
+                        add_button = django.jQuery(django.jQuery('table')[2]).find('a');
+                        for (var x in json.targets) {
+                           add_button.trigger('click');
+                        }
+                    }
+                    // Apply the data
                     apply_drugbank_data(json);
                 }
             },

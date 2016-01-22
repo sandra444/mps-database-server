@@ -88,6 +88,7 @@ def fetch_chemblid_data(request):
                         content_type="application/json")
 
 
+# TODO NEEDS REVISION: SWITCH TO ACD CALCULATED LOGP ETC
 def fetch_compound_report(request):
     summary_types = (
         'Pre-clinical Findings',
@@ -228,14 +229,26 @@ def get_drugbank_target_information(data, type_of_target):
     }
 
     # Get name from header (table may not be present?)
-    target['name'] = data.findChildren('h3')[0].findChildren('a')[0].text
+    name = data.findChildren('h3')[0].findChildren('a')[0].text
+
+    if len(name) > 150:
+        name = name[:145] + '...'
+
+    target['name'] = name
 
     # Loop through the p children to find info
     for p in data.findChildren('p'):
         if 'Organism: ' in p.text:
-            target['organism'] = p.text.replace('Organism: ', '').strip()
+            organism = p.text.replace('Organism: ', '').strip()
+
+            if len(organism) > 150:
+                organism = organism[:145] + '...'
+
+            target['organism'] = organism
+
         elif 'Pharmacological action:' in p.text:
             target['pharmacological_action'] = p.text.replace('Pharmacological action:', '').strip()
+
         elif 'Actions:' in p.text:
             target['action'] = p.text.replace('Actions:', '').lstrip().replace('\n        ', ', ').strip()
 
@@ -317,6 +330,11 @@ def get_drugbank_data_from_chembl_id(chembl_id):
                     # The sub class is in the text of a link
                     # There might not be a sub class
                     if row.findChildren('a'):
+                        drug_class = row.findChildren('a')[0].text.rstrip()
+
+                        if len(drug_class) > 150:
+                            drug_class = drug_class[:145] + '...'
+
                         data['drug_class'] = row.findChildren('a')[0].text.rstrip()
 
                 elif header == 'Protein binding':
@@ -329,6 +347,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
                     if protein_binding_initial:
                         data['protein_binding'] = protein_binding_initial[0]
 
+                # NOT GUARANTEED TO BE 100% ACCURATE
                 elif header == 'Half life':
                     # Take full string
                     # Might not exist
@@ -361,20 +380,31 @@ def get_drugbank_data_from_chembl_id(chembl_id):
                                 unicode(float(found_numbers[-1])+float(found_numbers[0]))
                             ]
 
-                        data['half_life'] = '-'.join(found_numbers) + ' ' + unit + 's'
+                        # Take first two
+                        data['half_life'] = '-'.join(found_numbers[:2]) + ' ' + unit + 's'
 
                 # Be sure to trim
                 elif header == 'Clearance':
                     # Might not exist
-                    # Get rid of bullets! (see whether there are multiple bullets?
-                    data['clearance'] = row.findChildren('td')[0].text.lstrip()
+                    # Get rid of bullets with lstrip
+                    clearance = row.findChildren('td')[0].text.lstrip()
+
+                    if len(clearance) > 500:
+                        clearance = clearance[:495] + '...'
+
+                    data['clearance'] = clearance
 
                 # Be sure to trim
                 elif header == 'Absorption':
                     # Might not exist
                     absorption_initial = row.findChildren('td')[0].text
+
                     # Absorption is just the full text
-                    data['absorption'] = absorption_initial
+                    absorption = absorption_initial
+                    if len(absorption) > 1000:
+                        absorption = absorption[:995] + '...'
+                    data['absorption'] = absorption
+
                     # Find percent for bioavailability
                     bioavailability_initial = re.findall(percent_extractor, absorption_initial)
                     # If there are multiple, which do I take?

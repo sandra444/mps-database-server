@@ -151,7 +151,7 @@ class Compound(LockableModel):
         help_text="DrugBank ID")
     # Listed as "Sub Class" in DrugBank
     drug_class = models.CharField(
-        'Class', max_length=40,
+        'Class', max_length=150,
         null=True, blank=True,
         help_text="Drug Class from DrugBank")
     # Percent value for protein_binding
@@ -313,5 +313,5 @@ class CompoundTarget(models.Model):
     uniprot_id = models.CharField(max_length=20, blank=True, null=True)
     action = models.CharField(max_length=75)
     pharmacological_action = models.CharField(max_length=20)
-    organism = models.CharField(max_length=30)
+    organism = models.CharField(max_length=150)
     type = models.CharField(max_length=30)

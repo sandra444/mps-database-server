@@ -13,6 +13,17 @@ from compounds.models import *
 from compounds.forms import *
 
 
+class CompoundTargetInline(admin.TabularInline):
+    formset = CompoundTargetInlineFormset
+    model = CompoundTarget
+
+    fields = (
+        ('name', 'uniprot_id', 'type', 'organism', 'pharmacological_action', 'action')
+    )
+    extra = 0
+
+
+
 class CompoundSummaryInline(admin.TabularInline):
     # Assays for ChipReadout
     formset = CompoundSummaryInlineFormset
@@ -21,9 +32,7 @@ class CompoundSummaryInline(admin.TabularInline):
     verbose_plural_name = 'Compound Summaries'
 
     fields = (
-        (
-            ('compound','summary_type','summary','source')
-        ),
+        ('compound','summary_type','summary','source')
     )
     extra = 0
 
@@ -62,7 +71,7 @@ class CompoundAdmin(LockableAdmin):
                                     help_text="<br>ChEMBL IDs separated by a "
                                               "space or a new line.")
 
-    inlines = [CompoundSummaryInline, CompoundPropertyInline]
+    inlines = [CompoundSummaryInline, CompoundPropertyInline, CompoundTargetInline]
 
     save_on_top = True
     list_per_page = 300
@@ -89,7 +98,7 @@ class CompoundAdmin(LockableAdmin):
     fieldsets = (
         (None, {
             'fields': (('name', 'image_display'),
-                       'chemblid', 'pubchemid', 'inchikey', 'tags', 'last_update',)
+                       'chemblid', 'pubchemid', 'drugbank_id', 'inchikey', 'tags', 'last_update',)
         }),
         ('Molecular Identifiers', {
             'fields': ('smiles', 'synonyms')
@@ -102,7 +111,9 @@ class CompoundAdmin(LockableAdmin):
         }),
         ('Drug(-like) Properties', {
             'fields': ('known_drug', 'medchem_friendly', 'ro3_passes',
-                       'ro5_violations', 'species',)
+                       'ro5_violations', 'species', 'drug_class', 'protein_binding',
+                       'half_life', 'bioavailability', 'clearance', 'absorption'
+            )
         }),
         ('Change Tracking', {
             'fields': (

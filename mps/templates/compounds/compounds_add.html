@@ -4,6 +4,7 @@
 {% block load %}
     <script src="{% static "compounds/customize_admin.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/inline_add.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -204,6 +205,43 @@
           {{ form.synonyms }}
         </div>
     </div>
+
+    {# TODO MAKE SURE TARGETS ARE WORKING #}
+    <legend>Targets/Interactions</legend>
+
+    <a id="add_button" class="btn btn-success" role="button">Add Target</a>
+    <table class="table table-striped assays" id="compoundtarget_set-group"  name="inlines">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Uniprot ID</th>
+                <th>Type</th>
+                <th>Organism</th>
+                <th>Pharmacological Action</th>
+                <th>Actions</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for target in formset %}
+                <tr class="inline" id="target-{{ forloop.counter0 }}">
+                    {# Hidden input for Update (need id to associate) #}
+{#                    {% if assay.id.value %}#}
+{#                    <td class="original" hidden>#}
+{#                        <input id="id_compoundtarget_set-{{ forloop.counter0 }}-id" name="compoundtarget_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ target.id.value }}">#}
+{#                    </td>#}
+{#                    {% endif %}#}
+                    <td>{{ target.name }}</td>
+                    <td>{{ target.uniprot_id }}</td>
+                    <td>{{ target.type }}</td>
+                    <td>{{ target.organism }}</td>
+                    <td>{{ target.pharmacological_action }}</td>
+                    <td>{{ target.action }}</td>
+                    <td>{{ target.DELETE }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
 </form>
 

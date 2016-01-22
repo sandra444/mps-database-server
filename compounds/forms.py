@@ -14,6 +14,9 @@ class CompoundForm(forms.ModelForm):
             'inchikey': forms.Textarea(attrs={'size': 50, 'rows': 3}),
             'molecular_formula': forms.Textarea(attrs={'size': 50, 'rows': 3}),
             'ro5_violations': forms.TextInput(attrs={'size': 2}),
+
+            'clearance': forms.Textarea(attrs={'size': 50, 'rows': 3}),
+            'absorption': forms.Textarea(attrs={'size': 50, 'rows': 3}),
         }
         exclude = ('',)
 
@@ -45,3 +48,10 @@ class CompoundPropertyInlineFormset(BaseInlineFormSet):
     class Meta(object):
         model = CompoundProperty
         exclude = ('',)
+
+
+class CompoundTargetInlineFormset(BaseInlineFormSet):
+    class Meta(object):
+        model = CompoundTarget
+        exclude = ('',)
+
