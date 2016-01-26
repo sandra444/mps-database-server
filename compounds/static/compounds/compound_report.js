@@ -19,6 +19,14 @@ $(document).ready(function () {
              .x(function(d) { return x(d.time); })
              .y(function(d) { return y(d.value); });
 
+    // Add method to sort by checkbox
+    // (I reversed it so that ascending will place checked first)
+    $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col){
+        return this.api().column(col, {order:'index'}).nodes().map(function(td, i){
+            return $('input', td).prop('checked') ? 0 : 1;
+        });
+    };
+
     function sparkline(elem_id, plot, x_domain, y_domain) {
         //console.log(x_domain);
         //console.log(y_domain);
@@ -217,7 +225,7 @@ $(document).ready(function () {
             compounds[compound] = compound;
         }
         else {
-            delete compounds[compound]
+            delete compounds[compound];
         }
     });
 
@@ -239,12 +247,16 @@ $(document).ready(function () {
         "aoColumnDefs": [
             {
                 "bSortable": false,
-                "aTargets": [0,9]
+                "aTargets": [9]
             },
             {
                 "targets": [3],
                 "visible": false,
                 "searchable": true
+            },
+            {
+                "sSortDataType": "dom-checkbox",
+                "targets": 0
             }
         ],
         "iDisplayLength": 25
