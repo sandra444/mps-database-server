@@ -23,15 +23,17 @@
 
         <br>
 
-        <div class="row">
-        <button id="clear_filters" class="btn-warning" type="button">Clear Filters</button>
-        </div>
-        <div id="filter" class="row">
-        {% for model in form.models %}
-            <div class="{% cycle 'bg-primary' 'bg-success' 'bg-info' 'bg-warning'%} col-xs-12 col-sm-4 col-md-3">
-                {{ model }}
+        <div class="hidden-print">
+            <div class="row">
+            <button id="clear_filters" class="btn-warning" type="button">Clear Filters</button>
             </div>
-        {% endfor %}
+            <div id="filter" class="row">
+            {% for model in form.models %}
+                <div class="{% cycle 'bg-primary' 'bg-success' 'bg-info' 'bg-warning'%} col-xs-12 col-sm-4 col-md-3">
+                    {{ model }}
+                </div>
+            {% endfor %}
+            </div>
         </div>
 
 {#        <table>#}
