@@ -36,8 +36,9 @@ $(document).ready(function () {
 
     function load_data(adverse_event) {
         var sorted = [];
-        for (var compound in full_data[adverse_event])
-              sorted.push([compound, full_data[adverse_event][compound]]);
+        for (var compound in full_data[adverse_event]) {
+            sorted.push([compound, full_data[adverse_event][compound]]);
+        }
 
         sorted.sort();
 
@@ -201,23 +202,4 @@ $(document).ready(function () {
     });
 
     //var all_compounds = compounds_table.columns(1).data().eq(0);
-
-//    setTimeout(function () {
-//        bar_graphs.load({
-//            x: 'x',
-//            columns: [
-//                ['x', 'Category1', 'Category2', 'Category3', 'Category4'],
-//                ['NAUSEA', 10, 0, 20, 30]
-//            ]
-//        });
-//    }, 1000);
-//    setTimeout(function () {
-//        bar_graphs.load({
-//            x: 'x',
-//            columns: [
-//                ['x', 'Category5'],
-//                ['NAUSEA', 100]
-//            ]
-//        });
-//    }, 2000);
 });
