@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "drugtrials/compare_adverse_events.js" %}"></script>
+{% endblock %}
+
+{% block fluid-content %}
+
+    {# Get rid of inline style eventually #}
+    <div class="padded-row padded-bottom hidden-print" style="overflow:auto;">
+        <div class="col-sm-6">
+            <table hidden id="adverse_events" class="display" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Adverse Event</th>
+                        <th>Organ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in adverse_events %}
+                        <tr>
+                            <td>
+                                <input class="checkbox adverse-event" type="checkbox" value="{{ event.event|safe }}">
+                            </td>
+                            <td>
+                                {{ event.event }}
+                            </td>
+                            <td>
+                                {{ event.organ|default:'' }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-sm-6">
+            <table hidden id="compounds" class="display" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Compound</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for compound in compounds %}
+                        <tr>
+                            <td>
+                                <input class="checkbox compound" type="checkbox" value="{{ compound.compound.name|safe }}">
+                            </td>
+                            <td>
+                                {{ compound.compound.name }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
+
+    <div id="bar_graphs" style="height:750px;"></div>
+
+{% endblock %}

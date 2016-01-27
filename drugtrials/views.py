@@ -1,4 +1,5 @@
 from .models import FindingResult,  DrugTrial, AdverseEvent, OpenFDACompound, CompoundAdverseEvent
+
 from django.views.generic import ListView
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -78,6 +79,8 @@ class AdverseEventsList(ListView):
 
 
 def adverse_events_detail(request, *args, **kwargs):
+    """Adverse event rates for the given compound"""
+
     c = RequestContext(request)
 
     compound = get_object_or_404(OpenFDACompound, pk=kwargs.get('pk'))
@@ -109,3 +112,26 @@ def adverse_events_detail(request, *args, **kwargs):
     })
 
     return render_to_response('drugtrials/adverse_events_detail.html', c)
+
+
+# What to name function?
+def compare_adverse_events(request, *args, **kwargs):
+    """Adverse event rates for the given adverse event"""
+
+    c = RequestContext(request)
+
+    compounds = OpenFDACompound.objects.all().select_related('compound').order_by('compound__name')
+
+    # Alternative call
+    #compounds = Compound.objects.filter(compoundadverseevent_set__isnull=False)
+
+    adverse_events = AdverseEvent.objects.all().select_related('organ').order_by('event')
+
+    # Should I even bother putting events (perhaps even compounds) into the context?
+    c.update({
+        'compounds': compounds,
+        'adverse_events': adverse_events
+    })
+
+    # What to name template?
+    return render_to_response('drugtrials/compare_adverse_events.html', c)
