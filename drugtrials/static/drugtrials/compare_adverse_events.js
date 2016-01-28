@@ -136,7 +136,9 @@ $(document).ready(function () {
 
         for (var adverse_event in adverse_events) {
             delete full_data[adverse_event][compound];
+        }
 
+        for (adverse_event in adverse_events) {
             load_data(adverse_event);
         }
     }
