@@ -9,22 +9,36 @@ $(document).ready(function () {
     var full_data = {};
 
     // The bar graphs
-    var bar_graphs = c3.generate({
-        bindto: '#bar_graphs',
-        size: {
-            height: 500
-        },
-        data: {
-            x: 'x',
-            columns: [],
-            type: 'bar'
-        },
-        axis: {
-            x: {
-                type: 'category'
+    var bar_graphs = null;
+
+    function create_initial_plot() {
+        bar_graphs = c3.generate({
+            bindto: '#bar_graphs',
+            size: {
+                height: 500
+            },
+            data: {
+                x: 'x',
+                columns: [],
+                type: 'bar'
+            },
+            axis: {
+                x: {
+                    type: 'category',
+                    label: {
+                        text: 'Compound',
+                        position: 'outer-center'
+                    }
+                },
+                y: {
+                    label: {
+                        text: 'Number of Reports',
+                        position: 'outer-middle'
+                    }
+                }
             }
-        }
-    });
+        });
+    }
 
     // Add method to sort by checkbox
     // (I reversed it so that ascending will place checked first)
@@ -117,22 +131,7 @@ $(document).ready(function () {
     }
 
     function remove_compound(compound) {
-        bar_graphs = c3.generate({
-            bindto: '#bar_graphs',
-            size: {
-                height: 500
-            },
-            data: {
-                x: 'x',
-                columns: [],
-                type: 'bar'
-            },
-            axis: {
-                x: {
-                    type: 'category'
-                }
-            }
-        });
+        create_initial_plot();
 
         for (var adverse_event in adverse_events) {
             delete full_data[adverse_event][compound];
@@ -202,6 +201,8 @@ $(document).ready(function () {
             }
         ]
     });
+
+    create_initial_plot();
 
     //var all_compounds = compounds_table.columns(1).data().eq(0);
 });
