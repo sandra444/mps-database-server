@@ -44,8 +44,6 @@ $(document).ready(function () {
 
         // Call drugbank
         get_drugbank_data();
-
-        return $('#retrieve').removeAttr('disabled').val('Retrieve');
     }
 
     function caller(selection, chemblid, middleware_token) {
@@ -105,6 +103,8 @@ $(document).ready(function () {
                 $(id_field).val(target[field]);
             }
         }
+
+        $('#retrieve').removeAttr('disabled').val('Retrieve');
     }
 
     function get_drugbank_data() {
@@ -144,6 +144,7 @@ $(document).ready(function () {
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
+                $('#retrieve').removeAttr('disabled').val('Retrieve');
             }
         });
     }
