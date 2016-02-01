@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
 
 {% block load %}
     <script src="{% static "drugtrials/compare_adverse_events.js" %}"></script>
@@ -41,6 +42,7 @@
                     <tr>
                         <th>Select</th>
                         <th>Compound</th>
+                        <th>Estimated Usage</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -50,7 +52,10 @@
                                 <input class="checkbox compound" type="checkbox" value="{{ compound.compound.name|safe }}">
                             </td>
                             <td>
-                                {{ compound.compound.name }}
+                                <a href="/compounds/{{ compound.compound.id }}">{{ compound.compound.name }}</a>
+                            </td>
+                            <td>
+                                {{ compound.estimated_usage|default:''|intcomma }}
                             </td>
                         </tr>
                     {% endfor %}

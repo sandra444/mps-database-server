@@ -11,6 +11,14 @@ $(document).ready(function () {
     // The bar graphs
     var bar_graphs = null;
 
+    // Add method to sort by checkbox
+    // (I reversed it so that ascending will place checked first)
+    $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col){
+        return this.api().column(col, {order:'index'}).nodes().map(function(td, i){
+            return $('input', td).prop('checked') ? 0 : 1;
+        });
+    };
+
     function create_initial_plot() {
         bar_graphs = c3.generate({
             bindto: '#bar_graphs',
@@ -35,18 +43,17 @@ $(document).ready(function () {
                         text: 'Number of Reports',
                         position: 'outer-middle'
                     }
+                },
+                y2: {
+                    show: true,
+                    label: {
+                        text: 'Normalized Number of Reports',
+                        position: 'outer-middle'
+                    }
                 }
             }
         });
     }
-
-    // Add method to sort by checkbox
-    // (I reversed it so that ascending will place checked first)
-    $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col){
-        return this.api().column(col, {order:'index'}).nodes().map(function(td, i){
-            return $('input', td).prop('checked') ? 0 : 1;
-        });
-    };
 
     function load_data(adverse_event) {
         var sorted = [];
@@ -57,17 +64,35 @@ $(document).ready(function () {
         sorted.sort();
 
         var keys = _.pluck(sorted, 0);
-        keys.unshift('x');
-
         var values = _.pluck(sorted, 1);
+
+        var normalized_values = [];
+
+        for (var i=0; i<keys.length; i++) {
+            if (estimated_usage[keys[i]]) {
+                normalized_values.push(values[i] / estimated_usage[keys[i]]);
+            }
+            else {
+                normalized_values.push(0);
+            }
+        }
+
+        keys.unshift('x');
         values.unshift(adverse_event);
+        normalized_values.unshift('NORMALIZED ' + adverse_event);
+
+        axes = {};
+        axes[adverse_event] = 'y';
+        axes['NORMALIZED ' + adverse_event] = 'y2';
 
         bar_graphs.load({
             x: 'x',
             columns: [
                 keys,
-                values
-            ]
+                values,
+                normalized_values
+            ],
+            axes: axes
         });
     }
 
@@ -165,7 +190,7 @@ $(document).ready(function () {
             delete adverse_events[adverse_event];
             delete full_data[adverse_event];
             bar_graphs.unload({
-              ids: [adverse_event]
+                ids: [adverse_event, 'NORMALIZED ' + adverse_event]
             });
         }
     });
@@ -204,5 +229,20 @@ $(document).ready(function () {
 
     create_initial_plot();
 
-    //var all_compounds = compounds_table.columns(1).data().eq(0);
+    var full_compounds = compounds_table.columns(1).data().eq(0);
+
+    var all_compounds = [];
+    for (var index=0; index < full_compounds.length; index++) {
+        all_compounds.push(full_compounds[index].replace(/<\/?[^>]+(>|$)/g, ''));
+    }
+
+    var full_estimates = compounds_table.columns(2).data().eq(0);
+
+    var all_estimates = [];
+    for (index=0; index < full_estimates.length; index++) {
+        all_estimates.push(full_estimates[index].replace(/,/g, ''));
+    }
+
+    var estimated_usage = {};
+    _.each(all_compounds,function(key, index){estimated_usage[key] = parseInt(all_estimates[index]);});
 });

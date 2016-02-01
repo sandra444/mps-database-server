@@ -168,6 +168,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'django.contrib.humanize',
 # South is not supported in Django >= 1.7
 #    'south',
     'django_extensions',
