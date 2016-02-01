@@ -47,11 +47,28 @@ $(document).ready(function () {
                 y2: {
                     show: true,
                     label: {
-                        text: 'Normalized Number of Reports',
+                        text: 'Number of Reports per 10,000 Mentions',
                         position: 'outer-middle'
                     }
                 }
+            },
+            color: {
+                // May need more colors later (these colors might also be too similar?)
+                pattern: [
+                    '#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78',
+                    '#2ca02c', '#98df8a', '#d62728', '#ff9896', '#9467bd',
+                    '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2',
+                    '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5'
+                ]
             }
+            // Consider way to deal with overbearing tooltips
+//            tooltip: {
+//                position: function (data, width, height, element) {
+//                    return {top: 0, left: 0}
+//                }
+//                // Breaks on bar charts?
+//                //grouped: false
+//            }
         });
     }
 
@@ -70,7 +87,8 @@ $(document).ready(function () {
 
         for (var i=0; i<keys.length; i++) {
             if (estimated_usage[keys[i]]) {
-                normalized_values.push(values[i] / estimated_usage[keys[i]]);
+                // Number of reports per 10,000 mentions
+                normalized_values.push(values[i] / estimated_usage[keys[i]] * 10000);
             }
             else {
                 normalized_values.push(0);
