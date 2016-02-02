@@ -1,6 +1,7 @@
 {{ object.name }}
 {{ object.chemblid }}
 {{ object.pubchemid }}
+{{ object.drugbank_id }}
 {{ object.synonyms }}
 {{ object.inchikey }}
 {{ object.tags }}

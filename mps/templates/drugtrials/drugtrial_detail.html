@@ -4,19 +4,20 @@
 {% block content %}
 
     <legend>
-        <h1>Drug Trial ID #{{ trial.id }}
-        <a href="/drugtrials/{{ next }}" class="btn btn-primary btn-large pull-right">
-            Next
-            <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-        </a>
-        <a href="/drugtrials/{{ previous }}" class="btn btn-primary btn-large pull-right">
-            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-            Previous
-        </a>
+        <h1>
+            Drug Trial ID #{{ trial.id }}
+            <a href="/drugtrials/{{ next }}" class="btn btn-primary btn-large pull-right">
+                Next
+                <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+            </a>
+            <a href="/drugtrials/{{ previous }}" class="btn btn-primary btn-large pull-right">
+                <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                Previous
+            </a>
         </h1>
     </legend>
 
-    <div class="row">
+    <div class="padded-row">
 
         <div class="col-sm-3 col-md-2 thumbnail">
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ trial.compound.chemblid }}">

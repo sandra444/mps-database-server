@@ -11,18 +11,18 @@
         <h1>Adverse Events for
             <br>
             <a id="compound" href="/compounds/{{ compound.compound.id }}">{{ compound }}</a>
-        <a href="/adverse_events/{{ next }}" class="btn btn-primary btn-large pull-right">
-            Next
-            <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-        </a>
-        <a href="/adverse_events/{{ previous }}" class="btn btn-primary btn-large pull-right">
-            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-            Previous
-        </a>
+            <a href="/adverse_events/{{ next }}" class="btn btn-primary btn-large pull-right">
+                Next
+                <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+            </a>
+            <a href="/adverse_events/{{ previous }}" class="btn btn-primary btn-large pull-right">
+                <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                Previous
+            </a>
         </h1>
     </legend>
 
-    <div class="row">
+    <div class="padded-row">
 
         <div class="col-sm-3 col-md-2 thumbnail">
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.compound.chemblid }}">
@@ -48,6 +48,16 @@
                             <a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ compound.compound.pubchemid }}">{{ compound.compound.pubchemid }}</a>
                         </td>
                     </tr>
+                    {% endif %}
+                    {% if compound.compound.drugbank_id %}
+                        <tr>
+                            <td>
+                                <b>DrugBank ID</b>
+                            </td>
+                            <td>
+                                <a href="http://www.drugbank.ca/drugs/{{ compound.compound.drugbank_id }}">{{ compound.compound.drugbank_id }}</a>
+                            </td>
+                        </tr>
                     {% endif %}
                 </tbody>
             </table>

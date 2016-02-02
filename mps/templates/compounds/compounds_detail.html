@@ -9,19 +9,20 @@
 
 {% block content %}
     <legend>
-        <h1>{{ object.name}}
-        <a href="/compounds/{{ next }}" class="btn btn-primary btn-large pull-right">
-            Next
-            <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-        </a>
-        <a href="/compounds/{{ previous }}" class="btn btn-primary btn-large pull-right">
-            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-            Previous
-        </a>
+        <h1>
+            {{ object.name}}
+            <a href="/compounds/{{ next }}" class="btn btn-primary btn-large pull-right">
+                Next
+                <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+            </a>
+            <a href="/compounds/{{ previous }}" class="btn btn-primary btn-large pull-right">
+                <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                Previous
+            </a>
         </h1>
     </legend>
 
-    <div class="row">
+    <div class="padded-row">
 
         <div class="col-sm-3 col-md-2 thumbnail">
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.chemblid }}">
@@ -82,9 +83,9 @@
 
     </div>
 
-    <br>
-
     {% if object.drug_class%}
+        <br>
+
         <div class="row">
             <div class="col-sm-2 col-md-1 text-right-responsive">
                 <b>Class</b>
@@ -95,9 +96,9 @@
         </div>
     {% endif %}
 
-    <br>
-
     {% if object.smiles%}
+        <br>
+
         <div class="row">
             <div class="col-sm-2 col-md-1 text-right-responsive">
                 <b>Smiles</b>
@@ -108,9 +109,9 @@
         </div>
     {% endif %}
 
-    <br>
-
     {% if object.synonyms %}
+        <br>
+
         <div class="row">
             <div class="col-sm-2 col-md-1 text-right-responsive">
                 <b>Synonyms</b>
