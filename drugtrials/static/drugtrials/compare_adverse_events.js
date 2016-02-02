@@ -60,15 +60,21 @@ $(document).ready(function () {
                     '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2',
                     '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5'
                 ]
-            }
+            },
             // Consider way to deal with overbearing tooltips
-//            tooltip: {
-//                position: function (data, width, height, element) {
-//                    return {top: 0, left: 0}
-//                }
-//                // Breaks on bar charts?
-//                //grouped: false
-//            }
+            tooltip: {
+                //position: function (data, width, height, element) {
+                //    return {top: 0, left: 0}
+                //}
+                format: {
+                    value: function (value, ratio, id) {
+                        var format = value % 1 === 0 ? d3.format('d') : d3.format('.2f');
+                        return format(value);
+                    }
+                }
+                // Breaks on bar charts?
+                //grouped: false
+            }
         });
     }
 
