@@ -168,12 +168,9 @@ $(document).ready(function () {
                  * process of retrieving data */
                 $('#retrieve').val('Retrieving').attr('disabled', 'disabled');
 
-                var selection = '';
-
-                if ($('.compounds-compound').length) {
-                    // If we are adding an assay, fetch CHEMBL assays
-                    selection = 'compound';
-                }
+                // Not sure why this was originally written like this
+                // Should perform refactor soon
+                var selection = 'compound';
 
                 caller(selection, chemblid, middleware_token);
 
