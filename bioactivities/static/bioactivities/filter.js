@@ -106,6 +106,7 @@ $(document).ready(function () {
 
                 // Clear targets
                 reset_rows('targets', targets, '');
+                $('#target_filter').val('');
 
                 if (changed == 'all') {
                     // Clear bioactivities
@@ -116,6 +117,8 @@ $(document).ready(function () {
 
                     // Clear drugtrials
                     reset_rows('drugtrials', drugtrials, '');
+
+                    $('.table-filter').val('');
                 }
 
                 // Trigger compound filters

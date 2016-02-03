@@ -82,7 +82,8 @@ def generate_list_of_all_bioactivities_in_bioactivities():
 def generate_list_of_all_targets_in_bioactivities(organisms, targets):
     pubchem_targets = Assay.objects.filter(
         organism__in=organisms,
-        target__target_type__in=targets).values_list('target__name')
+        target__target_type__in=targets
+    ).prefetch_related('organism', 'target').values_list('target__name')
     result = generate_record_frequency_data(pubchem_targets)
     return result
     #cursor = connection.cursor()
@@ -141,7 +142,9 @@ def generate_list_of_all_drugtrials(desired_organisms):
 
     desired_organisms = [organisms.get(organism,'') for organism in desired_organisms]
 
-    result = FindingResult.objects.filter(value__isnull=False,drug_trial__species__species_name__in=desired_organisms).values_list('finding_name__finding_name', flat=True)
+    result = FindingResult.objects.filter(
+        value__isnull=False, drug_trial__species__species_name__in=desired_organisms
+    ).select_related('drug_trial__species', 'finding_name').values_list('finding_name__finding_name', flat=True)
 
     result = generate_record_frequency_data(result)
 
@@ -161,7 +164,14 @@ def generate_list_of_all_drugtrials(desired_organisms):
     return result
 
 def generate_list_of_all_compounds_in_bioactivities():
-    pubchem_compounds = PubChemBioactivity.objects.all().prefetch_related('compound').values_list('compound__name', 'compound__known_drug', 'compound__logp', 'compound__molecular_weight')
+    pubchem_compounds = PubChemBioactivity.objects.all().prefetch_related(
+        'compound'
+    ).values_list(
+        'compound__name',
+        'compound__known_drug',
+        'compound__logp',
+        'compound__molecular_weight'
+    )
     result = generate_record_frequency_data(pubchem_compounds)
     return result
     #cursor = connection.cursor()
@@ -192,7 +202,8 @@ def fetch_all_standard_bioactivities_data(
     filtered_bioactivities = filtered_bioactivities.filter(
         compound__name__in=desired_compounds,
         activity_name__in=desired_bioactivities,
-        assay__target__name__in=desired_targets).select_related('compound__name', 'assay__target__name')
+        assay__target__name__in=desired_targets
+    ).select_related('compound', 'assay__target')
 
     # Then we can iterate over them to acquire the average values and so on
 
@@ -226,8 +237,6 @@ def fetch_all_standard_bioactivities_data(
         results.append(bio_to_add)
 
     return results
-    ## using values for now, FUTURE: use standardized_values
-    ##Appears to be using standardized_values now
     #cursor = connection.cursor()
 
     ## Please note that normalization now goes from 0.0001 to 1
@@ -328,7 +337,12 @@ def fetch_all_standard_drugtrials_data(
 
     for finding in desired_drugtrials:
 
-        drugtrial_data = FindingResult.objects.filter(finding_name__finding_name=finding,value__isnull=False,drug_trial__compound__name__in=desired_compounds,drug_trial__species__species_name__in=desired_organisms)
+        drugtrial_data = FindingResult.objects.filter(
+            finding_name__finding_name=finding,
+            value__isnull=False,
+            drug_trial__compound__name__in=desired_compounds,
+            drug_trial__species__species_name__in=desired_organisms
+        )
         #average = 0
         min = 999999999
         max = -999999999
@@ -826,7 +840,10 @@ def cluster(request):
             rearranged_data = pandas.DataFrame()
 
         if all_std_drugtrial:
-            drugtrial_df = pandas.DataFrame(all_std_drugtrial, columns=['compound', 'target_bioactivity_pair', 'value'])
+            drugtrial_df = pandas.DataFrame(
+                all_std_drugtrial,
+                columns=['compound', 'target_bioactivity_pair', 'value']
+            )
 
             rearranged_data = rearranged_data.append(drugtrial_df)
 
@@ -1127,7 +1144,12 @@ def table(request):
     length = q.count()
 
     # Prefetch all foreign keys
-    q = q.select_related('compound__name', 'assay__target__name', 'assay__target__organism', 'assay__chemblid', 'assay__pubchem_id')[:5000]
+    q = q.select_related(
+        'compound',
+        'assay__target',
+        'assay__target__organism',
+        'assay'
+    )[:5000]
 
     data = []
 
