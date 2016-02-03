@@ -55,10 +55,10 @@ $(document).ready(function () {
             color: {
                 // May need more colors later (these colors might also be too similar?)
                 pattern: [
-                    '#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78',
-                    '#2ca02c', '#98df8a', '#d62728', '#ff9896', '#9467bd',
-                    '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2',
-                    '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5'
+                    '#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c',
+                    '#98df8a', '#d62728', '#ff9896', '#9467bd', '#c5b0d5',
+                    '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f',
+                    '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5'
                 ]
             },
             // Consider way to deal with overbearing tooltips
@@ -180,6 +180,8 @@ $(document).ready(function () {
     }
 
     function remove_compound(compound) {
+        delete compounds[compound];
+
         create_initial_plot();
 
         for (var adverse_event in adverse_events) {
@@ -187,6 +189,22 @@ $(document).ready(function () {
         }
 
         for (adverse_event in adverse_events) {
+            load_data(adverse_event);
+        }
+    }
+
+    function remove_adverse_event(removed_adverse_event) {
+        delete adverse_events[removed_adverse_event];
+        delete full_data[removed_adverse_event];
+
+        // The benefit, and problem, with unloading is that the colors do not change
+        //bar_graphs.unload({
+        //    ids: [adverse_event, 'NORMALIZED ' + adverse_event]
+        //});
+
+        create_initial_plot();
+
+        for (var adverse_event in adverse_events) {
             load_data(adverse_event);
         }
     }
@@ -199,7 +217,6 @@ $(document).ready(function () {
             collect_all_adverse_events();
         }
         else {
-            delete compounds[compound];
             remove_compound(compound);
         }
     });
@@ -211,11 +228,7 @@ $(document).ready(function () {
             collect_all_adverse_events();
         }
         else {
-            delete adverse_events[adverse_event];
-            delete full_data[adverse_event];
-            bar_graphs.unload({
-                ids: [adverse_event, 'NORMALIZED ' + adverse_event]
-            });
+            remove_adverse_event(adverse_event);
         }
     });
 
