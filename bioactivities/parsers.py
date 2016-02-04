@@ -44,23 +44,29 @@ def generate_record_frequency_data(query):
 
     return result_list
 
-def generate_list_of_all_data_in_bioactivities(organisms, targets):
-    bioactivities_data = generate_list_of_all_bioactivities_in_bioactivities()
-    compounds_data = generate_list_of_all_compounds_in_bioactivities()
+def generate_list_of_all_data_in_bioactivities(pubchem, organisms, targets):
+    bioactivities_data = generate_list_of_all_bioactivities_in_bioactivities(pubchem)
+    compounds_data = generate_list_of_all_compounds_in_bioactivities(pubchem)
+    # Targets are based on assay and not dependent on pubchem
     targets_data = generate_list_of_all_targets_in_bioactivities(organisms, targets)
     drugtrial_data = generate_list_of_all_drugtrials(organisms)
 
-    result = {'bioactivities':bioactivities_data,
-              'compounds':compounds_data,
-              'targets':targets_data,
-              'drugtrials': drugtrial_data
-            }
+    result = {
+        'bioactivities':bioactivities_data,
+        'compounds':compounds_data,
+        'targets':targets_data,
+        'drugtrials': drugtrial_data
+    }
 
     return result
 
-def generate_list_of_all_bioactivities_in_bioactivities():
-    pubchem_bioactivities = PubChemBioactivity.objects.all().values_list('activity_name')
-    result = generate_record_frequency_data(pubchem_bioactivities)
+def generate_list_of_all_bioactivities_in_bioactivities(pubchem):
+    if pubchem:
+        pubchem_bioactivities = PubChemBioactivity.objects.all().values_list('activity_name')
+        result = generate_record_frequency_data(pubchem_bioactivities)
+    else:
+        chembl_bioactivities = Bioactivity.objects.all().values_list('standard_name')
+        result = generate_record_frequency_data(chembl_bioactivities)
     return result
     #cursor = connection.cursor()
 
@@ -80,11 +86,11 @@ def generate_list_of_all_bioactivities_in_bioactivities():
 
 
 def generate_list_of_all_targets_in_bioactivities(organisms, targets):
-    pubchem_targets = Assay.objects.filter(
+    all_targets = Assay.objects.filter(
         organism__in=organisms,
         target__target_type__in=targets
     ).prefetch_related('organism', 'target').values_list('target__name')
-    result = generate_record_frequency_data(pubchem_targets)
+    result = generate_record_frequency_data(all_targets)
     return result
     #cursor = connection.cursor()
 
@@ -131,7 +137,6 @@ def generate_list_of_all_targets_in_bioactivities(organisms, targets):
 # Worry about filtering by organism later
 # FK for organism is a little odd right now
 def generate_list_of_all_drugtrials(desired_organisms):
-
     # TODO
     # This requires refactoring, magic conversion tables are not good practice
     organisms = {
@@ -163,16 +168,28 @@ def generate_list_of_all_drugtrials(desired_organisms):
 
     return result
 
-def generate_list_of_all_compounds_in_bioactivities():
-    pubchem_compounds = PubChemBioactivity.objects.all().prefetch_related(
-        'compound'
-    ).values_list(
-        'compound__name',
-        'compound__known_drug',
-        'compound__logp',
-        'compound__molecular_weight'
-    )
-    result = generate_record_frequency_data(pubchem_compounds)
+def generate_list_of_all_compounds_in_bioactivities(pubchem):
+    if pubchem:
+        pubchem_compounds = PubChemBioactivity.objects.all().prefetch_related(
+            'compound'
+        ).values_list(
+            'compound__name',
+            'compound__known_drug',
+            'compound__logp',
+            'compound__molecular_weight'
+        )
+        result = generate_record_frequency_data(pubchem_compounds)
+    else:
+        chembl_compounds = Bioactivity.objects.all().prefetch_related(
+            'compound'
+        ).values_list(
+            'compound__name',
+            'compound__known_drug',
+            'compound__logp',
+            'compound__molecular_weight'
+        )
+        result = generate_record_frequency_data(chembl_compounds)
+
     return result
     #cursor = connection.cursor()
 
@@ -1062,6 +1079,8 @@ def table(request):
     # convert data sent in request to a dict data type from a string data type
     request_filter = json.loads(request.body)
 
+    pubchem = request_filter.get('pubchem')
+
     desired_targets = [
         x.get(
             'name'
@@ -1129,7 +1148,10 @@ def table(request):
     #   return {'error': 'Many bioactivities are listed with Rattus norvegicus as a target, either deselect it or choose fewer than 15 compounds.'}
 
     # Filter based on compound
-    q = PubChemBioactivity.objects.filter(compound__name__in=desired_compounds)
+    if pubchem:
+        q = PubChemBioactivity.objects.filter(activity_name__in=desired_bioactivities)
+    else:
+        q = Bioactivity.objects.filter(standard_name__in=desired_bioactivities)
 
     # Filter based on organism
     q = q.filter(assay__target__organism__in=desired_organisms)
@@ -1139,7 +1161,7 @@ def table(request):
     # Filter based on targets
     q = q.filter(assay__target__name__in=desired_targets)
     # Filter based on standardized bioactivity name
-    q = q.filter(activity_name__in=desired_bioactivities)
+    q = q.filter(compound__name__in=desired_compounds)
 
     length = q.count()
 
@@ -1160,12 +1182,19 @@ def table(request):
         compoundid = bioactivity.compound.id
         target = bioactivity.assay.target.name
         organism = bioactivity.assay.target.organism
-        activity_name = bioactivity.activity_name
-        #operator = bioactivity.operator
-        standardized_value = bioactivity.value
-        #standardized_units = bioactivity.standardized_units
         chemblid = bioactivity.assay.chemblid
         pubchem_id = bioactivity.assay.pubchem_id
+
+        if pubchem:
+            activity_name = bioactivity.activity_name
+            standardized_value = bioactivity.value
+            operator = u''
+            standardized_units = u''
+        else:
+            activity_name = bioactivity.standard_name
+            standardized_value = bioactivity.standardized_value
+            operator = bioactivity.operator
+            standardized_units = bioactivity.standardized_units
 
         obj = {
             'id': id,
@@ -1174,9 +1203,9 @@ def table(request):
             'target': target,
             'organism': organism,
             'activity_name': activity_name,
-            #'operator': operator,
+            'operator': operator,
             'standardized_value': standardized_value,
-            #'standardized_units': standardized_units,
+            'standardized_units': standardized_units,
             'chemblid': chemblid,
             'pubchem_id': pubchem_id,
         }

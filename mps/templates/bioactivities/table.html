@@ -29,11 +29,19 @@
 {% endblock %}
 
 {% block extra_row %}
-    <div class="row text-center">
-        <label>Minimum Feature Count Per Record
-            <input id="minimum_feature_count" type="number" value="1">
-            <button type="button" id="apply_minimum_feature_count">Apply</button>
-        </label>
+    <div class="row">
+        <div class="col-xs-4">
+            <label>
+                Use PubChem instead of ChEMBL
+                <input id="pubchem" type="checkbox">
+            </label>
+        </div>
+        <div class="col-xs-8">
+            <label>Minimum Feature Count Per Record
+                <input id="minimum_feature_count" type="number" value="1">
+                <button type="button" id="apply_minimum_feature_count">Apply</button>
+            </label>
+        </div>
     </div>
     <hr>
 {% endblock %}
@@ -158,33 +166,17 @@
         </legend>
 
         <table id="full" class="display" cellspacing="0" width="100%">
-            <thead>
-                <tr>
-                    <th>Compound</th>
-                    <th>Target</th>
-                    <th>Organism</th>
-                    <th>Activity Name</th>
-                    <th>Standard Value (μm)</th>
-                    <th>ChEMBL Link</th>
-                    <th>PubChem Link</th>
-                </tr>
+            <thead id="variable-header">
             </thead>
 
-            <tfoot>
-                <tr>
-                    <th>Compound</th>
-                    <th>Target</th>
-                    <th>Organism</th>
-                    <th>Activity Name</th>
-                    <th>Standard Value (μm)</th>
-                    <th>ChEMBL Link</th>
-                    <th>PubChem Link</th>
-                </tr>
+            <tfoot id="variable-footer">
             </tfoot>
 
             <tbody id="table">
             </tbody>
         </table>
+
+        {# Headers to plug-in, odd way to achieve this #}
     </div>
 
     <div id="spinner"></div>

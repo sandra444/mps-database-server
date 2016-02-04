@@ -81,15 +81,21 @@ $(document).ready(function () {
     }
 
     function refresh(changed) {
-
         // Disable everything
         $(":input").prop("disabled", true);
+
+        // Whether or not refresh should use pubchem
+        var pubchem = true;
+        if ($('#pubchem')[0]) {
+            pubchem = $('#pubchem').prop('checked');
+        }
 
         $.ajax({
             url: '/bioactivities/all_data',
             type: "GET",
             dataType: "json",
             data: {
+                pubchem: pubchem,
                 target_types: JSON.stringify(FILTER.target_types),
                 organisms: JSON.stringify(FILTER.organisms)
             },
@@ -559,6 +565,11 @@ $(document).ready(function () {
     // Trigger molecular_weight changes when changing operator
     molecular_weight_gtlt.change(function () {
         molecular_weight.trigger('change');
+    });
+
+    // Trigger refresh when switching between ChEMBL and PubChem
+    $('#pubchem').click(function() {
+        refresh('all');
     });
 
     window.onhashchange = function() {

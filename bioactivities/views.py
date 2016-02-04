@@ -194,6 +194,7 @@ def list_of_all_compounds_in_bioactivities(request):
 
 @csrf_exempt
 def list_of_all_data_in_bioactivities(request):
+    pubchem = json.loads(request.GET.get('pubchem'))
     target_types = json.loads(request.GET.get('target_types'))
     organisms = json.loads(request.GET.get('organisms'))
 
@@ -215,7 +216,7 @@ def list_of_all_data_in_bioactivities(request):
         ) is True
     ]
 
-    return JSONResponse(generate_list_of_all_data_in_bioactivities(desired_organisms, desired_target_types))
+    return JSONResponse(generate_list_of_all_data_in_bioactivities(pubchem, desired_organisms, desired_target_types))
 
 @csrf_exempt
 def gen_heatmap(request):
