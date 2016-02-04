@@ -20,6 +20,7 @@ from drugtrials.models import FindingResult
 
 from django.core import serializers
 
+
 def generate_record_frequency_data(query):
     result = {}
 
@@ -44,6 +45,7 @@ def generate_record_frequency_data(query):
 
     return result_list
 
+
 def generate_list_of_all_data_in_bioactivities(pubchem, organisms, targets):
     bioactivities_data = generate_list_of_all_bioactivities_in_bioactivities(pubchem)
     compounds_data = generate_list_of_all_compounds_in_bioactivities(pubchem)
@@ -52,13 +54,14 @@ def generate_list_of_all_data_in_bioactivities(pubchem, organisms, targets):
     drugtrial_data = generate_list_of_all_drugtrials(organisms)
 
     result = {
-        'bioactivities':bioactivities_data,
-        'compounds':compounds_data,
-        'targets':targets_data,
+        'bioactivities': bioactivities_data,
+        'compounds': compounds_data,
+        'targets': targets_data,
         'drugtrials': drugtrial_data
     }
 
     return result
+
 
 def generate_list_of_all_bioactivities_in_bioactivities(pubchem):
     if pubchem:
@@ -86,11 +89,27 @@ def generate_list_of_all_bioactivities_in_bioactivities(pubchem):
 
 
 def generate_list_of_all_targets_in_bioactivities(organisms, targets):
-    all_targets = Assay.objects.filter(
-        organism__in=organisms,
+    # Requires revision
+    initial_targets = Assay.objects.filter(
+        target__organism__in=organisms,
         target__target_type__in=targets
-    ).prefetch_related('organism', 'target').values_list('target__name')
+    )
+
+    no_null_targets = Assay.objects.filter(target__isnull=False)
+
+    if '!No Organism' in organisms:
+        all_targets = initial_targets | no_null_targets.filter(
+            target__organism__isnull=True) | no_null_targets.filter(target__organism="Unspecified")
+    else:
+        all_targets = initial_targets
+
+    all_targets = all_targets.prefetch_related('organism', 'target').values_list('target__name')
+
     result = generate_record_frequency_data(all_targets)
+
+    # Add no target
+    result.append(['!No Target', 999999999])
+
     return result
     #cursor = connection.cursor()
 
@@ -134,6 +153,7 @@ def generate_list_of_all_targets_in_bioactivities(organisms, targets):
 
     #return result
 
+
 # Worry about filtering by organism later
 # FK for organism is a little odd right now
 def generate_list_of_all_drugtrials(desired_organisms):
@@ -145,7 +165,7 @@ def generate_list_of_all_drugtrials(desired_organisms):
         'Canis lupus familiaris': 'Dog'
     }
 
-    desired_organisms = [organisms.get(organism,'') for organism in desired_organisms]
+    desired_organisms = [organisms.get(organism, '') for organism in desired_organisms]
 
     result = FindingResult.objects.filter(
         value__isnull=False, drug_trial__species__species_name__in=desired_organisms
@@ -167,6 +187,7 @@ def generate_list_of_all_drugtrials(desired_organisms):
     # cursor.close()
 
     return result
+
 
 def generate_list_of_all_compounds_in_bioactivities(pubchem):
     if pubchem:
@@ -462,9 +483,11 @@ def fetch_all_standard_mps_assay_data():
 
 import collections
 
+
 # dic is a dictionary capable of autovivification
 def dic():
     return collections.defaultdict(dic)
+
 
 def heatmap(request):
     if len(request.body) == 0:
@@ -722,6 +745,7 @@ def heatmap(request):
         'row_order': row_leaves,
         'col_order': col_leaves,
     }
+
 
 def cluster(request):
 
@@ -1072,6 +1096,7 @@ def cluster(request):
     #     'data_json': data_json_relpath
     # }
 
+
 def table(request):
     if len(request.body) == 0:
         return {'error': 'empty request body'}
@@ -1147,21 +1172,54 @@ def table(request):
     #if 'Rattus norvegicus' in desired_targets and len(desired_compounds) >= 15:
     #   return {'error': 'Many bioactivities are listed with Rattus norvegicus as a target, either deselect it or choose fewer than 15 compounds.'}
 
-    # Filter based on compound
+    # Filter based on bioactivity
     if pubchem:
         q = PubChemBioactivity.objects.filter(activity_name__in=desired_bioactivities)
     else:
         q = Bioactivity.objects.filter(standard_name__in=desired_bioactivities)
 
-    # Filter based on organism
-    q = q.filter(assay__target__organism__in=desired_organisms)
-    # Filter based on target type
-    q = q.filter(assay__target__target_type__in=desired_target_types)
-
-    # Filter based on targets
-    q = q.filter(assay__target__name__in=desired_targets)
     # Filter based on standardized bioactivity name
     q = q.filter(compound__name__in=desired_compounds)
+
+    # Filter based on target type
+    q_targets = q.filter(assay__target__target_type__in=desired_target_types)
+
+    # Filter based on targets
+    q_targets = q_targets.filter(assay__target__name__in=desired_targets)
+
+    if '!No Target' in desired_targets:
+        q = q_targets | q.filter(assay__target__isnull=True)
+
+        if q.filter(assay__target__isnull=True).count() != q.filter(assay__target__isnull=False).count():
+            q = q | q.filter(
+                assay__target__name='Unchecked'
+            ) | q.filter(assay__target__name='')
+    else:
+        q = q_targets
+
+    # Filter based on organism
+    q_organisms = q.filter(assay__target__organism__in=desired_organisms)
+
+    # If no organism selected
+    # TODO NEEDS REVISION
+    if '!No Organism' in desired_organisms:
+        q = q_organisms | q.filter(
+            assay__organism__isnull=True
+        ) | q.filter(
+            assay__organism=''
+        )
+
+        if q.filter(assay__target__isnull=True).count() != q.filter(assay__target__isnull=False).count():
+            q = q | q.filter(
+                assay__target__organism__isnull=True
+            ) | q.filter(
+                assay__target__organism='Unspecified'
+            ) | q.filter(
+                assay__target__organism=''
+            )
+    else:
+        q = q_organisms
+
 
     length = q.count()
 
@@ -1180,8 +1238,12 @@ def table(request):
         id = bioactivity.pk
         compound = bioactivity.compound.name
         compoundid = bioactivity.compound.id
-        target = bioactivity.assay.target.name
-        organism = bioactivity.assay.target.organism
+        if bioactivity.assay.target:
+            target = bioactivity.assay.target.name
+            organism = bioactivity.assay.target.organism
+        else:
+            target = u''
+            organism = bioactivity.assay.organism
         chemblid = bioactivity.assay.chemblid
         pubchem_id = bioactivity.assay.pubchem_id
 

@@ -6,11 +6,11 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
+#from rest_framework.parsers import JSONParser
 
-import ujson as json
+#import ujson as json
 
-from bioactivities.models import *
+#from bioactivities.models import *
 from bioactivities.parsers import *
 # from bioactivities.serializers import BioactivitiesSerializer
 
@@ -40,24 +40,32 @@ def bioactivities_list(request):
     """
     Retrieve a list of Bioactivities
     """
-
     if request.method == 'GET':
-        compound =  request.GET.get('compound', '')
-        target = request.GET.get('target','')
-        name = request.GET.get('name','')
+        compound = request.GET.get('compound', '')
+        target = request.GET.get('target', '')
+        name = request.GET.get('name', '')
         pubchem = request.GET.get('pubchem', '')
         exclude_targetless = request.GET.get('exclude_targetless', '')
         exclude_organismless = request.GET.get('exclude_organismless', '')
 
         # I might want to sort by multiple fields later
-        if any([compound,target,name]):
+        if any([compound, target, name]):
             if pubchem:
-                data = PubChemBioactivity.objects.all().select_related('compound__name','assay__target','assay__pubchem_id')
+                data = PubChemBioactivity.objects.all().select_related(
+                    'compound__name',
+                    'assay__target',
+                    'assay__pubchem_id'
+                )
             else:
-                data = Bioactivity.objects.filter(standard_name__isnull=False,
-                                              standardized_units__isnull=False,
-                                              standardized_value__isnull=False).select_related('compound__name',
-                                                                                                 'target__name','assay__chemblid')
+                data = Bioactivity.objects.filter(
+                    standard_name__isnull=False,
+                    standardized_units__isnull=False,
+                    standardized_value__isnull=False
+                ).select_related(
+                    'compound__name',
+                    'target__name',
+                    'assay__chemblid'
+                )
 
             if compound:
                 data = data.filter(compound__name__icontains=compound)
@@ -73,7 +81,9 @@ def bioactivities_list(request):
 
             if exclude_targetless:
                 # Exclude where target is "Unchecked"
-                data = data.filter(assay__target__isnull=False).exclude(assay__target__name="Unchecked").exclude(assay__target__name='')
+                data = data.filter(
+                    assay__target__isnull=False
+                ).exclude(assay__target__name="Unchecked").exclude(assay__target__name='')
 
             if exclude_organismless:
                 # Exclude where assay and target organism are null
@@ -156,9 +166,10 @@ def bioactivities_list(request):
 #         return HttpResponse(status=204)
 
 
+# TODO NEEDS REVISION
 @csrf_exempt
 def list_of_all_bioactivities_in_bioactivities(request):
-    return JSONResponse(generate_list_of_all_bioactivities_in_bioactivities())
+    return JSONResponse(generate_list_of_all_bioactivities_in_bioactivities(True))
 
 
 @csrf_exempt
@@ -190,7 +201,8 @@ def list_of_all_targets_in_bioactivities(request):
 
 @csrf_exempt
 def list_of_all_compounds_in_bioactivities(request):
-    return JSONResponse(generate_list_of_all_compounds_in_bioactivities())
+    return JSONResponse(generate_list_of_all_compounds_in_bioactivities(True))
+
 
 @csrf_exempt
 def list_of_all_data_in_bioactivities(request):
@@ -218,6 +230,7 @@ def list_of_all_data_in_bioactivities(request):
 
     return JSONResponse(generate_list_of_all_data_in_bioactivities(pubchem, desired_organisms, desired_target_types))
 
+
 @csrf_exempt
 def gen_heatmap(request):
     result = heatmap(request)
@@ -228,6 +241,7 @@ def gen_heatmap(request):
     else:
         logging.debug('Final JSON response step failed: result has no data')
         return HttpResponse()
+
 
 @csrf_exempt
 def gen_cluster(request):
@@ -240,6 +254,7 @@ def gen_cluster(request):
         logging.debug('Final JSON response step failed: result has no data')
         return HttpResponse()
 
+
 @csrf_exempt
 def gen_table(request):
     result = table(request)
@@ -251,13 +266,16 @@ def gen_table(request):
         logging.debug('Final JSON response step failed: result has no data')
         return HttpResponse()
 
+
 def view_cluster(request):
     c = RequestContext(request)
     return render_to_response('bioactivities/cluster.html', c)
 
+
 def view_heatmap(request):
     c = RequestContext(request)
     return render_to_response('bioactivities/heatmap.html', c)
+
 
 def view_table(request):
     if request.method == 'POST':
@@ -275,6 +293,7 @@ def view_table(request):
     })
 
     return render_to_response('bioactivities/table.html', c)
+
 
 def view_model(request):
     c = RequestContext(request)
