@@ -153,8 +153,10 @@
               <li title="Curated drug trials and chemical data" class="dropdown">
                 <a class="dropdown-toggle">Compounds<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
-                      <li title="View curated drug trial data"><a href="/drugtrials">View Drug Trials</a></li>
                       <li><a href="/compounds/">View Chemical Data</a></li>
+                      {# TODO NOTE THAT THIS IS A REPEAT LINK! #}
+                      <li><a href="/bioactivities/table/#filter">View Bioactivities</a></li>
+                      <li><a href="/drugtrials/">View Drug Trials</a></li>
                       <li><a href="/adverse_events/">View Adverse Events</a></li>
                       <li><a href="/compare_adverse_events/">Compare Adverse Events</a></li>
                       <li><a href="/compounds/report/#filter">Compound Report</a></li>
@@ -166,20 +168,19 @@
               <li title="View or add cell samples and cell types" class="dropdown">
                 <a class="dropdown-toggle">Cell Samples<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
-                      <li><a href="/cellsamples/cellsample/">View Cell Samples</a></li>
                       <li><a href="/cellsamples/celltype/">View Cell Types</a></li>
                       <li><a href="/cellsamples/cellsubtype/">View Cell Subtypes</a></li>
+                      <li><a href="/cellsamples/cellsample/">View Cell Samples</a></li>
                       <li class="divider"></li>
                       <li class="dropdown-header">Requires Permission</li>
-                      <li><a href="/cellsamples/cellsample/add">Add Cell Sample</a></li>
                       <li><a href="/cellsamples/celltype/add">Add Cell Type</a></li>
                       <li><a href="/cellsamples/cellsubtype/add">Add Cell Subtype</a></li>
+                      <li><a href="/cellsamples/cellsample/add">Add Cell Sample</a></li>
                   </ul>
               </li>
-              <li title="Analyze bioactivity data" class="dropdown">
-                <a class="dropdown-toggle">Bioactivities<span class="caret"></span></a>
+              <li title="Analyze bioactivity and drugtrial data" class="dropdown">
+                <a class="dropdown-toggle">Data Analysis<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
-                      <li title="View a table of bioactivities based on your selection"><a href="/bioactivities/table/#filter">View Bioactivities</a></li>
                       <li title="Generate a heatmap for selected bioactivity data"><a href="/bioactivities/heatmap/#filter">Heatmap</a></li>
                       <li title="Generate a dendrogram for selected compound/bioactivity data"><a href="/bioactivities/cluster/#filter">Cluster</a></li>
                   </ul>
