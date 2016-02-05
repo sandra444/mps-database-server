@@ -140,7 +140,12 @@ $(document).ready(function () {
             row += "</tr>";
             $('#results_body').append(row);
 
-            for (assay in x_max) {
+            // Sorted assays for iteration
+            var sorted_assays = _.sortBy(_.keys(x_max), function(a) { return a; });
+
+            for (var i=0; i<sorted_assays.length; i++) {
+                assay = sorted_assays[i];
+
                 var assay_max_time = values.max_time[assay] ? values.max_time[assay]:"-";
                 // Tack this assay on to the header
                 $('#'+compound+'_header').append($('<td>')
@@ -149,7 +154,11 @@ $(document).ready(function () {
                     .attr('width', 50)
                     .append('<span>'+assay+'<br>'+'(' + assay_max_time + 'd)'+'</span>'));
                 if (plot[assay]) {
-                    for (concentration in plot[assay]) {
+                    var sorted_concentrations = _.sortBy(_.keys(plot[assay]), function(a) { return parseFloat(a); });
+
+                    for (var j=0; j<sorted_concentrations.length; j++) {
+                        concentration = sorted_concentrations[j];
+
                         var row_id = compound + '_' + concentration.replace('.', '_');
                         // If the concentration does not have a row, add it to the table
                         if (!$('#' + row_id)[0]) {
