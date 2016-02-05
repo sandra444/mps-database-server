@@ -82,7 +82,7 @@ $(document).ready(function () {
 
     function refresh(changed) {
         // Disable everything
-        $(":input").prop("disabled", true);
+        $("#selection_form :input").prop("disabled", true);
 
         // Whether or not refresh should use pubchem
         var pubchem = true;

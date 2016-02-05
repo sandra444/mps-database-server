@@ -71,7 +71,10 @@ def bioactivities_list(request):
                 data = data.filter(compound__name__icontains=compound)
 
             if target:
-                data = data.filter(assay__target__name__icontains=target)
+                if pubchem:
+                    data = data.filter(assay__target__name__icontains=target)
+                else:
+                    data = data.filter(target__name__icontains=target)
 
             if name:
                 if pubchem:
@@ -81,9 +84,14 @@ def bioactivities_list(request):
 
             if exclude_targetless:
                 # Exclude where target is "Unchecked"
-                data = data.filter(
-                    assay__target__isnull=False
-                ).exclude(assay__target__name="Unchecked").exclude(assay__target__name='')
+                if pubchem:
+                    data = data.filter(
+                        assay__target__isnull=False
+                    ).exclude(assay__target__name="Unchecked").exclude(assay__target__name='')
+                else:
+                    data = data.filter(
+                       target__isnull=False
+                    ).exclude(target__name="Unchecked").exclude(target__name='')
 
             if exclude_organismless:
                 # Exclude where assay and target organism are null

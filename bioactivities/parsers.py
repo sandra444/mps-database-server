@@ -1183,44 +1183,79 @@ def table(request):
     # Filter based on compound
     q = q.filter(compound__name__in=desired_compounds)
 
-    q_non_null_targets = q.filter(assay__target__isnull=False)
+    # TODO FILTER TARGETS WITH BIOACTIVITY WHEN CHEMBL
 
     # Filter based on target type
-    q_targets = q.filter(assay__target__target_type__in=desired_target_types)
+    #q_targets = q.filter(assay__target__target_type__in=desired_target_types)
 
     # Filter based on targets
-    q_targets = q_targets.filter(assay__target__name__in=desired_targets)
+    if pubchem:
+        q_targets = q.filter(assay__target__name__in=desired_targets)
 
-    if '!No Target' in desired_targets:
-        q = q_targets | q.filter(assay__target__isnull=True)
+        q_non_null_targets = q_targets.filter(assay__target__isnull=False)
 
-        if q_non_null_targets:
-            q = q | q_non_null_targets.filter(
-                assay__target__name=''
-            )
+        if '!No Target' in desired_targets:
+            q = q_targets | q.filter(assay__target__isnull=True)
+
+            if q_non_null_targets:
+                q = q | q_non_null_targets.filter(
+                    assay__target__name=''
+                ) | q_non_null_targets.filter(
+                    assay__target__name='Unchecked'
+                )
+        else:
+            q = q_targets
+
+        # Filter based on organism
+        q_organisms = q.filter(assay__target__organism__in=desired_organisms)
+
+        # If no organism selected
+        # TODO NEEDS REVISION
+        if '!No Organism' in desired_organisms:
+            q_organisms = q_organisms | q.filter(assay__target__isnull=True)
+
+            if q_non_null_targets:
+                q = q_organisms | q_non_null_targets.filter(
+                    assay__target__organism='Unspecified'
+                ) | q_non_null_targets.filter(
+                    assay__target__organism=''
+                )
+        else:
+            q = q_organisms
+
     else:
-        q = q_targets
+        q_targets = q.filter(target__name__in=desired_targets)
 
-    # Filter based on organism
-    q_organisms = q.filter(assay__target__organism__in=desired_organisms)
+        q_non_null_targets = q_targets.filter(target__isnull=False)
 
-    # If no organism selected
-    # TODO NEEDS REVISION
-    if '!No Organism' in desired_organisms:
-        q = q_organisms | q.filter(
-            assay__organism=''
-        ) | q.filter(
-            assay__target__isnull=True
-        )
+        if '!No Target' in desired_targets:
+            q = q_targets | q.filter(target__isnull=True)
 
-        if q_non_null_targets:
-            q = q | q_non_null_targets.filter(
-                assay__target__organism='Unspecified'
-            ) | q_non_null_targets.filter(
-                assay__target__organism=''
-            )
-    else:
-        q = q_organisms
+            if q_non_null_targets:
+                q = q | q_non_null_targets.filter(
+                    target__name=''
+                ) | q_non_null_targets.filter(
+                    target__name='Unchecked'
+                )
+        else:
+            q = q_targets
+
+        # Filter based on organism
+        q_organisms = q.filter(target__organism__in=desired_organisms)
+
+        # If no organism selected
+        # TODO NEEDS REVISION
+        if '!No Organism' in desired_organisms:
+            q_organisms = q_organisms | q.filter(target__isnull=True)
+
+            if q_non_null_targets:
+                q = q_organisms | q_non_null_targets.filter(
+                    target__organism='Unspecified'
+                ) | q_non_null_targets.filter(
+                    target__organism=''
+                )
+        else:
+            q = q_organisms
 
     length = q.count()
 
@@ -1238,12 +1273,22 @@ def table(request):
         id = bioactivity.pk
         compound = bioactivity.compound.name
         compoundid = bioactivity.compound.id
-        if bioactivity.assay.target:
-            target = bioactivity.assay.target.name
-            organism = bioactivity.assay.target.organism
+
+        if pubchem:
+            if bioactivity.assay.target:
+                target = bioactivity.assay.target.name
+                organism = bioactivity.assay.target.organism
+            else:
+                target = u''
+                organism = bioactivity.assay.organism
         else:
-            target = u''
-            organism = bioactivity.assay.organism
+            if bioactivity.target:
+                target = bioactivity.target.name
+                organism = bioactivity.target.organism
+            else:
+                target = u''
+                organism = bioactivity.assay.organism
+
         chemblid = bioactivity.assay.chemblid
         pubchem_id = bioactivity.assay.pubchem_id
 

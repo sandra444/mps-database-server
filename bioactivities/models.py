@@ -155,7 +155,7 @@ class Bioactivity(LockableModel):
     parent_compound = models.ForeignKey('compounds.Compound',
                                         related_name='bioactivity_parent')
 
-    # Target is slated to be added to assay instead
+    # TODO NOTE THAT THIS TARGET IS MORE ACCURATE THAN ASSAY TARGET FOR CHEMBL
     target = models.ForeignKey(Target)
     target_confidence = models.IntegerField(blank=True, null=True)
 
@@ -217,7 +217,7 @@ class PubChemBioactivity(LockableModel):
     #compound_id = models.TextField(verbose_name="Compound ID")
     compound = models.ForeignKey('compounds.Compound')
 
-    # Target is slated to be added to assay instead
+    # TODO SHOULD PULL TARGET FROM ASSAY IF THIS IS NONE (IF TO BE KEPT)
     target = models.ForeignKey('Target', default=None, verbose_name="Target", null=True, blank=True)
 
     # Value is required
