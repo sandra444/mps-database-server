@@ -19,6 +19,7 @@ from .models import Bioactivity, PubChemBioactivity, Assay
 from drugtrials.models import FindingResult
 
 from django.core import serializers
+# TODO FIX TARGET VS. ASSAY ORGANISM CONFLICT
 
 
 def generate_record_frequency_data(query):
@@ -99,11 +100,11 @@ def generate_list_of_all_targets_in_bioactivities(organisms, targets):
 
     if '!No Organism' in organisms:
         all_targets = initial_targets | no_null_targets.filter(
-            target__organism__isnull=True) | no_null_targets.filter(target__organism="Unspecified")
+            target__organism='') | no_null_targets.filter(target__organism="Unspecified")
     else:
         all_targets = initial_targets
 
-    all_targets = all_targets.prefetch_related('organism', 'target').values_list('target__name')
+    all_targets = all_targets.prefetch_related('target').values_list('target__name')
 
     result = generate_record_frequency_data(all_targets)
 
@@ -251,7 +252,7 @@ def fetch_all_standard_bioactivities_data(
 
     # Collect every value
     for bio in filtered_bioactivities:
-        bio_key = (bio.compound.name, bio.assay.target.name, bio.activity_name, bio.assay.organism)
+        bio_key = (bio.compound.name, bio.assay.target.name, bio.activity_name, bio.assay.target.organism)
         if normalized:
             value = bio.normalized_value
         else:
@@ -270,7 +271,7 @@ def fetch_all_standard_bioactivities_data(
         bio_to_add = {}
         bio_to_add['value'] = sum(bioactivities[bio_key])/float(len(bioactivities[bio_key]))
         bio_to_add['compound'] = bio_key[0]
-        bio_to_add['target'] = bio_key[1]
+        bio_to_add['target'] = bio_key[1] + '_' + bio_key[3]
         bio_to_add['bioactivity'] = bio_key[2]
         results.append(bio_to_add)
 
@@ -349,6 +350,7 @@ def fetch_all_standard_bioactivities_data(
     #return result
 
 
+# TODO FIX NULL TARGETS AND NULL ORGANISMS
 def fetch_all_standard_drugtrials_data(
         desired_compounds,
         desired_drugtrials,
@@ -1178,8 +1180,10 @@ def table(request):
     else:
         q = Bioactivity.objects.filter(standard_name__in=desired_bioactivities)
 
-    # Filter based on standardized bioactivity name
+    # Filter based on compound
     q = q.filter(compound__name__in=desired_compounds)
+
+    q_non_null_targets = q.filter(assay__target__isnull=False)
 
     # Filter based on target type
     q_targets = q.filter(assay__target__target_type__in=desired_target_types)
@@ -1190,10 +1194,10 @@ def table(request):
     if '!No Target' in desired_targets:
         q = q_targets | q.filter(assay__target__isnull=True)
 
-        if q.filter(assay__target__isnull=True).count() != q.filter(assay__target__isnull=False).count():
-            q = q | q.filter(
-                assay__target__name='Unchecked'
-            ) | q.filter(assay__target__name='')
+        if q_non_null_targets:
+            q = q | q_non_null_targets.filter(
+                assay__target__name=''
+            )
     else:
         q = q_targets
 
@@ -1204,22 +1208,19 @@ def table(request):
     # TODO NEEDS REVISION
     if '!No Organism' in desired_organisms:
         q = q_organisms | q.filter(
-            assay__organism__isnull=True
-        ) | q.filter(
             assay__organism=''
+        ) | q.filter(
+            assay__target__isnull=True
         )
 
-        if q.filter(assay__target__isnull=True).count() != q.filter(assay__target__isnull=False).count():
-            q = q | q.filter(
-                assay__target__organism__isnull=True
-            ) | q.filter(
+        if q_non_null_targets:
+            q = q | q_non_null_targets.filter(
                 assay__target__organism='Unspecified'
-            ) | q.filter(
+            ) | q_non_null_targets.filter(
                 assay__target__organism=''
             )
     else:
         q = q_organisms
-
 
     length = q.count()
 
@@ -1227,7 +1228,6 @@ def table(request):
     q = q.select_related(
         'compound',
         'assay__target',
-        'assay__target__organism',
         'assay'
     )[:5000]
 

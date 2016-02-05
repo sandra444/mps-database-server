@@ -34,11 +34,11 @@ def get_chembl_target(target):
         table = soup.find('table', class_='contenttable_lmenu')
         rows = table.findAll('td')
 
-        chemblid = None
-        target_type = None
-        name = None
-        synonyms = None
-        organism = None
+        chemblid = ''
+        target_type = ''
+        name = ''
+        synonyms = ''
+        organism = ''
 
         for index in range(len(rows)):
             contents = rows[index].text
