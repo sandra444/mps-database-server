@@ -228,7 +228,7 @@ $(document).ready(function () {
     });
 
     // Tracks the clicking of checkboxes to fill compounds
-    $('.checkbox').change( function() {
+    $('.checkbox').change(function() {
         var compound = this.value;
         if (this.checked) {
             compounds[compound] = compound;
