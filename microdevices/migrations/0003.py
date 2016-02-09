@@ -33,10 +33,10 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(to='microdevices.Microdevice'),
             preserve_default=True,
         ),
-		migrations.RemoveField(
-			model_name='microdevice',
-			name='device_fluid_volume_unit',
-		),
+        migrations.RemoveField(
+            model_name='microdevice',
+            name='device_fluid_volume_unit',
+        ),
         migrations.AlterField(
             model_name='microdevice',
             name='device_fluid_volume',
