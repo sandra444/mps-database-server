@@ -286,8 +286,7 @@ class AssayLayoutForm(forms.ModelForm):
         super(AssayLayoutForm, self).__init__(*args, **kwargs)
         self.fields['group'].queryset = groups
         self.fields['device'].queryset = Microdevice.objects.filter(
-            row_labels__isnull=False,
-            number_of_columns__isnull=False
+            device_type='plate'
         )
 
     compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
