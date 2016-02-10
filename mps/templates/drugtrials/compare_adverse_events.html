@@ -9,6 +9,8 @@
 {% block fluid-content %}
 
     {# Get rid of inline style eventually #}
+    {# Using a form here is a contrived way to prevent checkboxes from being initially filled #}
+    <form autocomplete="off">
     <div class="padded-row padded-bottom hidden-print" style="overflow:auto;">
         <div class="col-sm-6">
             <table hidden id="adverse_events" class="display" cellspacing="0" width="100%">
@@ -16,6 +18,7 @@
                     <tr>
                         <th>Select</th>
                         <th>Adverse Event</th>
+                        <th>Frequency in Database</th>
                         <th>Organ</th>
                     </tr>
                 </thead>
@@ -27,6 +30,9 @@
                             </td>
                             <td>
                                 {{ event.event }}
+                            </td>
+                            <td>
+                                {{ event.frequency|intcomma }}
                             </td>
                             <td>
                                 {{ event.organ|default:'' }}
@@ -42,6 +48,7 @@
                     <tr>
                         <th>Select</th>
                         <th>Compound</th>
+                        <th>Frequency in Database</th>
                         <th>Estimated Usage</th>
                     </tr>
                 </thead>
@@ -55,6 +62,9 @@
                                 <a href="/compounds/{{ compound.compound.id }}">{{ compound.compound.name }}</a>
                             </td>
                             <td>
+                                {{ compound.frequency|intcomma }}
+                            </td>
+                            <td>
                                 {{ compound.estimated_usage|default:''|intcomma }}
                             </td>
                         </tr>
@@ -63,6 +73,7 @@
             </table>
         </div>
     </div>
+    </form>
 
     <script src="{% static "js/display_datatable.js" %}"></script>
 

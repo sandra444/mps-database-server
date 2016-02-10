@@ -4,6 +4,7 @@ from django.views.generic import ListView
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+from django.db.models import Sum
 
 class DrugTrialList(ListView):
     #model = FindingResult
@@ -120,12 +121,30 @@ def compare_adverse_events(request, *args, **kwargs):
 
     c = RequestContext(request)
 
-    compounds = OpenFDACompound.objects.all().select_related('compound').order_by('compound__name')
+    compounds = OpenFDACompound.objects.all().prefetch_related(
+        'compound'
+    ).order_by('compound__name')
 
     # Alternative call
     #compounds = Compound.objects.filter(compoundadverseevent_set__isnull=False)
 
-    adverse_events = AdverseEvent.objects.all().select_related('organ').order_by('event')
+    adverse_events = AdverseEvent.objects.all().prefetch_related(
+        'organ'
+    ).order_by('event')
+
+    compound_frequency = {}
+    adverse_event_frequency = {}
+
+    for adverse_event in CompoundAdverseEvent.objects.all().prefetch_related('compound', 'event'):
+        compound_frequency.setdefault(adverse_event.compound.id, []).append(adverse_event.frequency)
+        adverse_event_frequency.setdefault(adverse_event.event.id, []).append(adverse_event.frequency)
+
+    for adverse_event in adverse_events:
+        adverse_event.frequency = sum(adverse_event_frequency.get(adverse_event.id, [0]))
+
+    for compound in compounds:
+        compound.frequency = sum(compound_frequency.get(compound.id, [0]))
+
 
     # Should I even bother putting events (perhaps even compounds) into the context?
     c.update({

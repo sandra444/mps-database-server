@@ -273,7 +273,7 @@ $(document).ready(function () {
         all_compounds.push(full_compounds[index].replace(/<\/?[^>]+(>|$)/g, ''));
     }
 
-    var full_estimates = compounds_table.columns(2).data().eq(0);
+    var full_estimates = compounds_table.columns(3).data().eq(0);
 
     var all_estimates = [];
     for (index=0; index < full_estimates.length; index++) {
