@@ -1,5 +1,6 @@
 // Name subject to change
 // This file allows the user to compare data of different adverse events for differing compounds
+// TODO THIS SCRIPT NEEDS TO BE REVISED TO LIMIT API HITS
 $(document).ready(function () {
     // Stores all currently selected compounds
     var compounds = {};

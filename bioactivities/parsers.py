@@ -72,21 +72,6 @@ def generate_list_of_all_bioactivities_in_bioactivities(pubchem):
         chembl_bioactivities = Bioactivity.objects.all().values_list('standard_name')
         result = generate_record_frequency_data(chembl_bioactivities)
     return result
-    #cursor = connection.cursor()
-
-    ## Note that this query does not exclude all negative standardized_values
-    ## This is the case because it selects ONLY THE NAMES of bioactivities
-    ## If a bioactivity name is associated with both positive and negative values, those negative values will be included
-    #cursor.execute(
-        #'SELECT bioactivities_bioactivity.standard_name '
-        #'FROM bioactivities_bioactivity '
-        #'WHERE bioactivities_bioactivity.standardized_value>0;'
-    #)
-
-    #result = generate_record_frequency_data(cursor.fetchall())
-    #cursor.close()
-
-    #return result
 
 
 def generate_list_of_all_targets_in_bioactivities(organisms, targets):
@@ -112,47 +97,6 @@ def generate_list_of_all_targets_in_bioactivities(organisms, targets):
     result.append(['!No Target', 999999999])
 
     return result
-    #cursor = connection.cursor()
-
-    #where_clause = " WHERE ( "
-    #organisms_clause = ""
-
-    #if not organisms or not targets:
-        #return
-
-    #if len(organisms) is 1:
-        #organisms_clause = "   LOWER(bioactivities_target.organism)=LOWER('{}') ".format(''.join(organisms))
-    #else:
-        #for organism in organisms:
-            #organisms_clause += "OR LOWER(bioactivities_target.organism)=LOWER('{}') ".format(''.join(organism))
-
-    #where_clause += organisms_clause[2:]  # remove the first 'OR'
-
-    #where_clause += ") AND ("
-
-    #targets_clause = ""
-
-    #if len(targets) is 1:
-        #targets_clause = "   LOWER(bioactivities_target.target_type)=LOWER('{}') ".format(''.join(targets))
-    #else:
-        #for target in targets:
-            #targets_clause += "OR LOWER(bioactivities_target.target_type)=LOWER('{}') ".format(''.join(target))
-
-    #where_clause += targets_clause[2:]  # remove the first 'OR'
-    #where_clause += ");"
-
-    #cursor.execute(
-        #" SELECT bioactivities_target.name " +
-        #" FROM bioactivities_bioactivity " +
-        #" INNER JOIN bioactivities_target " +
-        #" ON bioactivities_bioactivity.target_id=bioactivities_target.id " +
-        #where_clause
-    #)
-
-    #result = generate_record_frequency_data(cursor.fetchall())
-    #cursor.close()
-
-    #return result
 
 
 # Worry about filtering by organism later
@@ -173,19 +117,6 @@ def generate_list_of_all_drugtrials(desired_organisms):
     ).select_related('drug_trial__species', 'finding_name').values_list('finding_name__finding_name', flat=True)
 
     result = generate_record_frequency_data(result)
-
-    # cursor = connection.cursor()
-    #
-    # cursor.execute(
-    #     'SELECT drugtrials_finding.finding_name '
-    #     'FROM drugtrials_finding '
-    #     'INNER JOIN drugtrials_findingresult '
-    #     'ON drugtrials_finding.id=drugtrials_findingresult.finding_name_id '
-    #     'WHERE drugtrials_findingresult.value IS NOT NULL;'
-    # )
-    #
-    # result = generate_record_frequency_data(cursor.fetchall())
-    # cursor.close()
 
     return result
 
@@ -228,7 +159,194 @@ def generate_list_of_all_compounds_in_bioactivities(pubchem):
     #return result
 
 
+def get_form_data(request):
+    # convert data sent in request to a dict data type from a string data type
+    request_filter = json.loads(request.body)
+
+    desired_targets = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'targets_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_compounds = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'compounds_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    desired_bioactivities = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'bioactivities_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    if 'drugtrials_filter' in request_filter:
+        desired_drugtrials = [
+            x.get(
+                'name'
+            ) for x in request_filter.get(
+                'drugtrials_filter'
+            ) if x.get(
+                'is_selected'
+            ) is True
+        ]
+    else:
+        desired_drugtrials = []
+
+    desired_organisms = [
+        x.get(
+            'name'
+        ) for x in request_filter.get(
+            'organisms_filter'
+        ) if x.get(
+            'is_selected'
+        ) is True
+    ]
+
+    log_scale = request_filter.get('log_scale', False)
+    normalized = request_filter.get('normalize_bioactivities', False)
+
+    method = str(request_filter.get('method', ''))
+    metric = str(request_filter.get('metric', ''))
+
+    # Whether or not to use chemical properties
+    chemical_properties = request_filter.get('chemical_properties', False)
+
+    pubchem = request_filter.get('pubchem', True)
+
+    return {
+        'desired_targets': desired_targets,
+        'desired_compounds': desired_compounds,
+        'desired_bioactivities': desired_bioactivities,
+        'desired_drugtrials': desired_drugtrials,
+        'desired_organisms': desired_organisms,
+        'log_scale': log_scale,
+        'normalized': normalized,
+        'method': method,
+        'metric': metric,
+        'chemical_properties': chemical_properties,
+        'pubchem': pubchem
+    }
+
+
+def get_filtered_bioactivities(
+        pubchem,
+        desired_compounds,
+        desired_targets,
+        desired_bioactivities,
+        desired_organisms
+):
+    # Filter based on bioactivity
+    if pubchem:
+        q = PubChemBioactivity.objects.filter(activity_name__in=desired_bioactivities)
+    else:
+        q = Bioactivity.objects.filter(standard_name__in=desired_bioactivities)
+
+    # Filter based on compound
+    q = q.filter(compound__name__in=desired_compounds)
+
+    # TODO FILTER TARGETS WITH BIOACTIVITY WHEN CHEMBL
+
+    # Filter based on target type
+    #q_targets = q.filter(assay__target__target_type__in=desired_target_types)
+
+    # Filter based on targets
+    if pubchem:
+        q_targets = q.filter(assay__target__name__in=desired_targets)
+
+        if '!No Target' in desired_targets and '!No Organism' in desired_organisms:
+            q = q_targets | q.filter(assay__target__isnull=True)
+
+        else:
+            q = q_targets
+
+        q_non_null_targets = q_targets.filter(assay__target__isnull=False)
+
+        # Filter based on organism
+        q_organisms = q.filter(
+            assay__organism__in=desired_organisms
+        ) | q.filter(assay__target__organism__in=desired_organisms)
+
+        # If no organism selected
+        # TODO NEEDS REVISION
+        if '!No Organism' in desired_organisms:
+            q_organisms = q_organisms | q.filter(assay__target__isnull=True, assay__organism='')
+
+            if q_non_null_targets:
+                q = q_organisms | q_non_null_targets.filter(
+                    assay__target__organism='Unspecified',
+                    assay__organism=''
+                ) | q_non_null_targets.filter(
+                    assay__target__organism='',
+                    assay__organism=''
+                )
+        else:
+            q = q_organisms
+
+        q = q.prefetch_related(
+            'compound',
+            'assay'
+        ).select_related(
+            'assay__target'
+        )
+
+    else:
+        q_targets = q.filter(target__name__in=desired_targets)
+
+        q_non_null_targets = q_targets.filter(target__isnull=False)
+
+        if '!No Target' in desired_targets:
+            q = q_targets | q.filter(target__isnull=True)
+
+            if q_non_null_targets:
+                q = q | q_non_null_targets.filter(
+                    target__name='Unchecked'
+                )
+        else:
+            q = q_targets
+
+        # Filter based on organism
+        q_organisms = q.filter(target__organism__in=desired_organisms)
+
+        # If no organism selected
+        # TODO NEEDS REVISION
+        if '!No Organism' in desired_organisms:
+            q_organisms = q_organisms | q.filter(target__isnull=True)
+
+            if q_non_null_targets:
+                q = q_organisms | q_non_null_targets.filter(
+                    target__organism='Unspecified'
+                ) | q_non_null_targets.filter(
+                    target__organism=''
+                )
+        else:
+            q = q_organisms
+
+        q = q.prefetch_related(
+            'compound',
+            'assay',
+            'target'
+        )
+
+    return q
+
+
+# TODO STANDARD BIOACTIVITIES FOR ChEBML (right now just PubChem)
 def fetch_all_standard_bioactivities_data(
+        pubchem,
         desired_compounds,
         desired_targets,
         desired_bioactivities,
@@ -237,12 +355,13 @@ def fetch_all_standard_bioactivities_data(
         log_scale
 ):
     # First, we acquire all the filtered hits
-    filtered_bioactivities = PubChemBioactivity.objects.filter(assay__target__isnull=False)
-    filtered_bioactivities = filtered_bioactivities.filter(
-        compound__name__in=desired_compounds,
-        activity_name__in=desired_bioactivities,
-        assay__target__name__in=desired_targets
-    ).select_related('compound', 'assay__target')
+    filtered_bioactivities = get_filtered_bioactivities(
+        pubchem,
+        desired_compounds,
+        desired_targets,
+        desired_bioactivities,
+        desired_organisms
+    )
 
     # Then we can iterate over them to acquire the average values and so on
 
@@ -252,7 +371,24 @@ def fetch_all_standard_bioactivities_data(
 
     # Collect every value
     for bio in filtered_bioactivities:
-        bio_key = (bio.compound.name, bio.assay.target.name, bio.activity_name, bio.assay.target.organism)
+        compound = bio.compound.name
+
+        if bio.assay.target:
+            target = bio.assay.target.name
+        else:
+            target = 'No Target'
+
+        activity = bio.activity_name
+
+        if bio.assay.target and bio.assay.target.organism:
+            organism = bio.assay.target.organism
+        elif bio.assay.organism:
+            organism = bio.assay.organism
+        else:
+            organism = 'No Organism'
+
+        bio_key = (compound, target, activity, organism)
+
         if normalized:
             value = bio.normalized_value
         else:
@@ -276,78 +412,6 @@ def fetch_all_standard_bioactivities_data(
         results.append(bio_to_add)
 
     return results
-    #cursor = connection.cursor()
-
-    ## Please note that normalization now goes from 0.0001 to 1
-    #cursor.execute(
-        #'SELECT compound,target,tbl.bioactivity,AVG(value) as value,units,'
-        #'AVG(norm_value) as norm_value,organism,target_type '
-        #'FROM ( '
-        #'SELECT compounds_compound.name as compound, '
-        #'bioactivities_target.name as target, '
-        #'bioactivities_bioactivity.standard_name as bioactivity, '
-        #'bioactivities_bioactivity.standardized_value as value,bioactivities_bioactivity.standardized_units as units, '
-        #'bioactivities_target.organism, '
-        #'bioactivities_target.target_type,'
-        #'CASE WHEN agg_tbl.max_value-agg_tbl.min_value <> 0 '
-        #'THEN (0.9999)*((standardized_value-agg_tbl.min_value)/(agg_tbl.max_value-agg_tbl.min_value)) + 0.0001 ELSE 1 END as norm_value '
-        #'FROM bioactivities_bioactivity '
-        #'INNER JOIN compounds_compound '
-        #'ON bioactivities_bioactivity.compound_id=compounds_compound.id '
-        #'INNER JOIN bioactivities_target '
-        #'ON bioactivities_bioactivity.target_id=bioactivities_target.id '
-        #'INNER JOIN '
-        #'(SELECT bioactivities_bioactivity.standard_name ,'
-        #'MAX(standardized_value) as max_value,MIN(standardized_value) as min_value '
-        #'FROM bioactivities_bioactivity '
-        #'GROUP BY bioactivities_bioactivity.standard_name '
-        #') as agg_tbl ON bioactivities_bioactivity.standard_name = agg_tbl.standard_name '
-        #') as tbl '
-        #' GROUP BY compound,target,tbl.bioactivity,units,organism,target_type '
-        #'HAVING AVG(value) IS NOT NULL ;'
-    #)
-
-    ## bioactivity is a tuple:
-    ## (compound name, target name, the bioactivity, value, units, norm_value,organism,target_type)
-    ## (0            , 1          , 2              , 3 ,  4, 5, 6, 7   )
-    #query = cursor.fetchall()
-
-    #result = []
-
-    #for q in query:
-
-        #if q[0] not in desired_compounds:
-            #continue
-        #if q[1] not in desired_targets:
-            #continue
-
-        #if q[2] not in desired_bioactivities:
-            #continue
-
-        #value = q[3]
-
-        #if normalized:
-            #value = q[5]
-
-        ## Please note that negative and zero values ARE EXCLUDED
-        #if log_scale:
-            #if value <= 0:
-                #continue
-
-            #value = np.log10(value)
-
-        #result.append(
-            #{
-                #'compound': q[0],
-                #'target': q[1],
-                #'bioactivity': q[2],
-                #'value': value
-            #}
-        #)
-
-    #cursor.close()
-
-    #return result
 
 
 # TODO FIX NULL TARGETS AND NULL ORGANISMS
@@ -358,7 +422,6 @@ def fetch_all_standard_drugtrials_data(
         normalized,
         log_scale
 ):
-
     # TODO
     # This requires refactoring, magic conversion tables are not good practice
     organisms = {
@@ -426,30 +489,6 @@ def fetch_all_standard_drugtrials_data(
                 }
             )
 
-
-    # # What to do about returned dic?
-    # for q in query:
-    #
-    #     value = q[2]
-    #
-    #     if normalized:
-    #         value = q[4]
-    #
-    #     # Please note that negative and zero values ARE EXCLUDED
-    #     if log_scale:
-    #         if value <= 0:
-    #             continue
-    #
-    #         value = np.log10(value)
-    #
-    #     result.append(
-    #         {
-    #             'compound': q[0],
-    #             'findingresult': q[1],
-    #             'value': value
-    #         }
-    #     )
-
     return results
 
 
@@ -495,58 +534,19 @@ def heatmap(request):
     if len(request.body) == 0:
         return {'error': 'empty request body'}
 
-    # convert data sent in request to a dict data type from a string data type
-    request_filter = json.loads(request.body)
+    form = get_form_data(request)
 
-    desired_targets = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'targets_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
+    desired_compounds = form['desired_compounds']
+    desired_bioactivities = form['desired_bioactivities']
+    desired_targets = form['desired_targets']
+    desired_drugtrials = form['desired_drugtrials']
+    desired_organisms = form['desired_organisms']
+    normalized = form['normalized']
+    log_scale = form['log_scale']
+    method = form['method']
+    metric = form['metric']
 
-    desired_compounds = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'compounds_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
-
-    desired_bioactivities = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'bioactivities_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
-
-    desired_drugtrials = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'drugtrials_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
-
-    desired_organisms = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'organisms_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
+    pubchem = form['pubchem']
 
     # throw error if no compounds are selected
     if not desired_compounds:
@@ -556,13 +556,8 @@ def heatmap(request):
     if not desired_bioactivities and not desired_targets and not desired_drugtrials:
         return {'error': 'Select at least one target and at least one bioactivity or at least one drugtrial.'}
 
-    log_scale = request_filter.get('log_scale')
-    normalized = request_filter.get('normalize_bioactivities')
-
-    method = str(request_filter.get('method'))
-    metric = str(request_filter.get('metric'))
-
     all_std_bioactivities = fetch_all_standard_bioactivities_data(
+        pubchem,
         desired_compounds,
         desired_targets,
         desired_bioactivities,
@@ -750,82 +745,34 @@ def heatmap(request):
 
 
 def cluster(request):
-
     if len(request.body) == 0:
         return {'error': 'empty request body'}
 
-    # convert data sent in request to a dict data type from a string data type
-    request_filter = json.loads(request.body)
+    form = get_form_data(request)
 
-    desired_targets = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'targets_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
+    desired_compounds = form['desired_compounds']
+    desired_bioactivities = form['desired_bioactivities']
+    desired_targets = form['desired_targets']
+    desired_drugtrials = form['desired_drugtrials']
+    desired_organisms = form['desired_organisms']
+    normalized = form['normalized']
+    log_scale = form['log_scale']
+    chemical_properties = form['chemical_properties']
+    method = form['method']
+    metric = form['metric']
 
-    desired_compounds = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'compounds_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
-
-    desired_bioactivities = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'bioactivities_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
-
-    desired_drugtrials = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'drugtrials_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
-
-    desired_organisms = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'organisms_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
+    pubchem = form['pubchem']
 
     # throw error if only one compound is selected (can not cluster just one)
     if len(desired_compounds) < 2:
         return {'error': 'require more than one compound to cluster'}
 
-    log_scale = request_filter.get('log_scale')
-    normalized = request_filter.get('normalize_bioactivities')
-
-    # Whether or not to use chemical properties
-    chemical_properties = request_filter.get('chemical_properties')
-
     # throw error if no drugtrials or no pairs are chosen and chemical properties is not checked
     if (not desired_bioactivities or not desired_targets) and not desired_drugtrials and not chemical_properties:
         return {'error': 'Select at least one target and at least one bioactivity or at least one drugtrial.'}
 
-
-    method = str(request_filter.get('method'))
-    metric = str(request_filter.get('metric'))
-
     all_std_bioactivities = fetch_all_standard_bioactivities_data(
+        pubchem,
         desired_compounds,
         desired_targets,
         desired_bioactivities,
@@ -1103,60 +1050,13 @@ def table(request):
     if len(request.body) == 0:
         return {'error': 'empty request body'}
 
-    # convert data sent in request to a dict data type from a string data type
-    request_filter = json.loads(request.body)
+    form = get_form_data(request)
 
-    pubchem = request_filter.get('pubchem')
-
-    desired_targets = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'targets_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
-
-    desired_compounds = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'compounds_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
-
-    desired_bioactivities = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'bioactivities_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
-
-    desired_target_types = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'target_types_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
-
-    desired_organisms = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'organisms_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
+    desired_compounds = form['desired_compounds']
+    desired_bioactivities = form['desired_bioactivities']
+    desired_targets = form['desired_targets']
+    desired_organisms = form['desired_organisms']
+    pubchem = form['pubchem']
 
     # throw error if no compounds are selected
     if len(desired_compounds) < 1:
@@ -1174,88 +1074,13 @@ def table(request):
     #if 'Rattus norvegicus' in desired_targets and len(desired_compounds) >= 15:
     #   return {'error': 'Many bioactivities are listed with Rattus norvegicus as a target, either deselect it or choose fewer than 15 compounds.'}
 
-    # Filter based on bioactivity
-    if pubchem:
-        q = PubChemBioactivity.objects.filter(activity_name__in=desired_bioactivities)
-    else:
-        q = Bioactivity.objects.filter(standard_name__in=desired_bioactivities)
-
-    # Filter based on compound
-    q = q.filter(compound__name__in=desired_compounds)
-
-    # TODO FILTER TARGETS WITH BIOACTIVITY WHEN CHEMBL
-
-    # Filter based on target type
-    #q_targets = q.filter(assay__target__target_type__in=desired_target_types)
-
-    # Filter based on targets
-    if pubchem:
-        q_targets = q.filter(assay__target__name__in=desired_targets)
-
-        q_non_null_targets = q_targets.filter(assay__target__isnull=False)
-
-        if '!No Target' in desired_targets:
-            q = q_targets | q.filter(assay__target__isnull=True)
-
-            if q_non_null_targets:
-                q = q | q_non_null_targets.filter(
-                    assay__target__name=''
-                ) | q_non_null_targets.filter(
-                    assay__target__name='Unchecked'
-                )
-        else:
-            q = q_targets
-
-        # Filter based on organism
-        q_organisms = q.filter(assay__target__organism__in=desired_organisms)
-
-        # If no organism selected
-        # TODO NEEDS REVISION
-        if '!No Organism' in desired_organisms:
-            q_organisms = q_organisms | q.filter(assay__target__isnull=True)
-
-            if q_non_null_targets:
-                q = q_organisms | q_non_null_targets.filter(
-                    assay__target__organism='Unspecified'
-                ) | q_non_null_targets.filter(
-                    assay__target__organism=''
-                )
-        else:
-            q = q_organisms
-
-    else:
-        q_targets = q.filter(target__name__in=desired_targets)
-
-        q_non_null_targets = q_targets.filter(target__isnull=False)
-
-        if '!No Target' in desired_targets:
-            q = q_targets | q.filter(target__isnull=True)
-
-            if q_non_null_targets:
-                q = q | q_non_null_targets.filter(
-                    target__name=''
-                ) | q_non_null_targets.filter(
-                    target__name='Unchecked'
-                )
-        else:
-            q = q_targets
-
-        # Filter based on organism
-        q_organisms = q.filter(target__organism__in=desired_organisms)
-
-        # If no organism selected
-        # TODO NEEDS REVISION
-        if '!No Organism' in desired_organisms:
-            q_organisms = q_organisms | q.filter(target__isnull=True)
-
-            if q_non_null_targets:
-                q = q_organisms | q_non_null_targets.filter(
-                    target__organism='Unspecified'
-                ) | q_non_null_targets.filter(
-                    target__organism=''
-                )
-        else:
-            q = q_organisms
+    q = get_filtered_bioactivities(
+        pubchem,
+        desired_compounds,
+        desired_targets,
+        desired_bioactivities,
+        desired_organisms
+    )
 
     length = q.count()
 
