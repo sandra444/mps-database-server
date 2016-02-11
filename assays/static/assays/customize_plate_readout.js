@@ -1,6 +1,7 @@
 // This script is for displaying the layout for readouts and filling in the table with readout values
 // Injected inputs are used to indicate QC status
 // NOTE THAT QC STATUS IS DEPENDENT ON TIME BUT NOT FEATURE
+// TODO DEFINING STYLE IN JS IS IN POOR TASTE
 // TODO NEEDS REFACTOR
 // TODO PREFERRABLY CONSOLIDATE THESE DISPLAY FUNCTION (DO NOT REPEAT YOURSELF)
 $(document).ready(function () {

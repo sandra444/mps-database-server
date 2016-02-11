@@ -91,6 +91,6 @@ class SpecificGroupRequiredMixin(object):
         else:
             return PermissionDenied(
                 self.request,
-                'You do not have permission to view this page. <br>'
-                'Contact an administrator if you would like to gain permission.'
+                'You do not have permission to view this page <br>'
+                'Contact an administrator if you would like to gain permission'
             )
