@@ -33,22 +33,22 @@ $(document).ready(function () {
             },
             axis: {
                 x: {
-                    type: 'category',
-                    label: {
-                        text: 'Compound',
-                        position: 'outer-center'
-                    }
+                    type: 'category'
+//                    label: {
+//                        text: 'Compound',
+//                        position: 'outer-center'
+//                    }
                 },
                 y: {
                     label: {
-                        text: 'Number of Reports',
+                        text: 'Number of Reports  per 10,000 Mentions',
                         position: 'outer-middle'
                     }
                 },
                 y2: {
                     show: true,
                     label: {
-                        text: 'Number of Reports per 10,000 Mentions',
+                        text: 'Number of Reports',
                         position: 'outer-middle'
                     }
                 }
@@ -107,15 +107,15 @@ $(document).ready(function () {
         normalized_values.unshift('NORMALIZED ' + adverse_event);
 
         axes = {};
-        axes[adverse_event] = 'y';
-        axes['NORMALIZED ' + adverse_event] = 'y2';
+        axes['NORMALIZED ' + adverse_event] = 'y';
+        axes[adverse_event] = 'y2';
 
         bar_graphs.load({
             x: 'x',
             columns: [
                 keys,
-                values,
-                normalized_values
+                normalized_values,
+                values
             ],
             axes: axes
         });
