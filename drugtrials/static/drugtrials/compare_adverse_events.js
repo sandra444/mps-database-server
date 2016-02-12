@@ -75,6 +75,11 @@ $(document).ready(function () {
                 }
                 // Breaks on bar charts?
                 //grouped: false
+            },
+            bar: {
+                width: {
+                    ratio: 0.85
+                }
             }
         });
     }
