@@ -22,6 +22,14 @@ $(document).ready(function () {
         });
     };
 
+    // Plugin to show/hide extra axis
+    c3.chart.fn.axis.show_y2 = function (shown) {
+        var $$ = this.internal, config = $$.config;
+        config.axis_y2_show = !!shown;
+        $$.axes.y2.style("visibility", config.axis_y2_show ? 'visible' : 'hidden');
+        $$.redraw();
+    };
+
     function create_initial_plot() {
         bar_graphs = c3.generate({
             bindto: '#bar_graphs',
@@ -48,7 +56,7 @@ $(document).ready(function () {
                     }
                 },
                 y2: {
-                    show: true,
+                    show: !raw_hidden,
                     label: {
                         text: 'Number of Reports',
                         position: 'outer-middle'
@@ -250,12 +258,14 @@ $(document).ready(function () {
             $(this).addClass('btn-primary')
                 .text('Hide Raw Values');
             raw_hidden = false;
+            bar_graphs.axis.show_y2(true);
         }
         else {
             bar_graphs.hide(_.keys(adverse_events), {withLegend: true});
             $(this).removeClass('btn-primary')
                 .text('Show Raw Values');
             raw_hidden = true;
+            bar_graphs.axis.show_y2(false);
         }
     });
 
