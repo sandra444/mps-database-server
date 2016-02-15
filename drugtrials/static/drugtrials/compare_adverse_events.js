@@ -12,6 +12,8 @@ $(document).ready(function () {
     // The bar graphs
     var bar_graphs = null;
 
+    var raw_hidden = true;
+
     // Add method to sort by checkbox
     // (I reversed it so that ascending will place checked first)
     $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col){
@@ -124,6 +126,10 @@ $(document).ready(function () {
             ],
             axes: axes
         });
+
+        if (raw_hidden) {
+            bar_graphs.hide(_.keys(adverse_events), {withLegend: true});
+        }
     }
 
     function collect_all_adverse_events() {
@@ -235,6 +241,21 @@ $(document).ready(function () {
         }
         else {
             remove_adverse_event(adverse_event);
+        }
+    });
+
+    $('#show_raw').click(function() {
+        if (raw_hidden) {
+            bar_graphs.show(_.keys(adverse_events), {withLegend: true});
+            $(this).addClass('btn-primary')
+                .text('Hide Raw Values');
+            raw_hidden = false;
+        }
+        else {
+            bar_graphs.hide(_.keys(adverse_events), {withLegend: true});
+            $(this).removeClass('btn-primary')
+                .text('Show Raw Values');
+            raw_hidden = true;
         }
     });
 
