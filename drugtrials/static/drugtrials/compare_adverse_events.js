@@ -118,12 +118,12 @@ $(document).ready(function () {
         }
 
         keys.unshift('x');
-        values.unshift(adverse_event);
-        normalized_values.unshift('NORMALIZED ' + adverse_event);
+        values.unshift(adverse_event + ' (COUNT)');
+        normalized_values.unshift(adverse_event);
 
         axes = {};
-        axes['NORMALIZED ' + adverse_event] = 'y';
-        axes[adverse_event] = 'y2';
+        axes[adverse_event] = 'y';
+        axes[adverse_event + ' (COUNT)'] = 'y2';
 
         bar_graphs.load({
             x: 'x',
@@ -136,7 +136,7 @@ $(document).ready(function () {
         });
 
         if (raw_hidden) {
-            bar_graphs.hide(_.keys(adverse_events), {withLegend: true});
+            bar_graphs.hide(_.map(adverse_events, function(num, key){ return key + ' (COUNT)'; }), {withLegend: true});
         }
     }
 
@@ -219,7 +219,7 @@ $(document).ready(function () {
 
         // The benefit, and problem, with unloading is that the colors do not change
         //bar_graphs.unload({
-        //    ids: [adverse_event, 'NORMALIZED ' + adverse_event]
+        //    ids: [adverse_event, adverse_event + ' (COUNT)']
         //});
 
         create_initial_plot();
@@ -254,16 +254,16 @@ $(document).ready(function () {
 
     $('#show_raw').click(function() {
         if (raw_hidden) {
-            bar_graphs.show(_.keys(adverse_events), {withLegend: true});
+            bar_graphs.show(_.map(adverse_events, function(num, key){ return key + ' (COUNT)'; }), {withLegend: true});
             $(this).addClass('btn-primary')
-                .text('Hide Raw Values');
+                .text('Hide Raw Counts');
             raw_hidden = false;
             bar_graphs.axis.show_y2(true);
         }
         else {
-            bar_graphs.hide(_.keys(adverse_events), {withLegend: true});
+            bar_graphs.hide(_.map(adverse_events, function(num, key){ return key + ' (COUNT)'; }), {withLegend: true});
             $(this).removeClass('btn-primary')
-                .text('Show Raw Values');
+                .text('Show Raw Counts');
             raw_hidden = true;
             bar_graphs.axis.show_y2(false);
         }
