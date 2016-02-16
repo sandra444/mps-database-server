@@ -96,6 +96,11 @@ $(document).ready(function () {
                 width: {
                     ratio: 0.85
                 }
+            },
+            grid: {
+                focus: {
+                    show: false
+                }
             }
         });
     }
