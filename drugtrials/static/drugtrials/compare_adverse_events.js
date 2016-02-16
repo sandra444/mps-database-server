@@ -82,9 +82,9 @@ $(document).ready(function () {
                         var format = value % 1 === 0 ? d3.format('d') : d3.format('.2f');
                         return format(value);
                     }
-                }
-                // Breaks on bar charts?
-                //grouped: false
+                },
+                // REQUIRES POLYFILL IN CHROME
+                grouped: false
             },
             bar: {
                 width: {
