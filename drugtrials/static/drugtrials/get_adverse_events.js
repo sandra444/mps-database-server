@@ -75,6 +75,15 @@ $(document).ready(function () {
         });
     }
 
+    function stringify_month(month) {
+        if (month < 10) {
+            return '0' + month;
+        }
+        else {
+            return '' + month;
+        }
+    }
+
     function sum_granular(data, sub) {
         var new_data = {};
         var final_data = [];
@@ -97,6 +106,52 @@ $(document).ready(function () {
                     new_data[time] = 0;
                 }
             });
+        }
+        else {
+            var min_year = parseInt(data[0].time.substring(0,4));
+            var max_year = parseInt(data[data.length-1].time.substring(0,4));
+
+            if (granularity === 'month') {
+                var min_month = parseInt(data[0].time.substring(4,6));
+                var max_month = parseInt(data[data.length-1].time.substring(4,6));
+                var current_month = '';
+
+                // First year
+                for (var month = min_month; month <= 12; month++) {
+                    current_month = stringify_month(month);
+
+                    if (!new_data[''+min_year+current_month]) {
+                        new_data[''+min_year+current_month] = 0;
+                    }
+                }
+
+                // Other years
+                for (var current_year = min_year+1; current_year < max_year; current_year++) {
+                    for (month = 1; month <= 12; month++) {
+                        current_month = stringify_month(month);
+
+                        if (!new_data[''+current_year+current_month]) {
+                            new_data[''+current_year+current_month] = 0;
+                        }
+                    }
+                }
+
+                // Last year
+                for (month = 1; month <= max_month; month++) {
+                    current_month = stringify_month(month);
+
+                    if (!new_data[''+max_year+current_month]) {
+                        new_data[''+max_year+current_month] = 0;
+                    }
+                }
+            }
+            else if (granularity === 'year') {
+                for (var year = min_year; year <= max_year; year++) {
+                    if (!new_data[''+year]) {
+                        new_data[''+year] = 0;
+                    }
+                }
+            }
         }
 
         $.each(new_data, function(time, count) {
