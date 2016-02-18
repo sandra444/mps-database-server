@@ -2,6 +2,9 @@
 // This file allows the user to compare data of different adverse events for differing compounds
 // TODO THIS SCRIPT NEEDS TO BE REVISED TO LIMIT API HITS
 $(document).ready(function () {
+    // Prevent CSS conflict with Bootstrap
+    $.fn.button.noConflict();
+
     // Stores all currently selected compounds
     var compounds = {};
     // Stores all currently selected adverse events
@@ -14,10 +17,45 @@ $(document).ready(function () {
 
     var raw_hidden = true;
 
+    var selections = $('#selections');
+
+    var table_options =
+    {
+        dom: '<"clear">lfrtip',
+        "iDisplayLength": 10,
+        "order": [[ 1, "asc" ]],
+        "aoColumnDefs": [
+            {
+                "width": "10%",
+                "targets": [0]
+            },
+            {
+                "sSortDataType": "dom-checkbox",
+                "targets": 0
+            }
+        ]
+    };
+
+    // Open and then close dialog so it doesn't get placed in window itself
+    var dialog = $('#selection_dialog');
+    dialog.dialog({
+        width: 825,
+        height: 500,
+        closeOnEscape: true,
+        autoOpen: false,
+        close: function() {
+            $('body').removeClass('stop-scrolling');
+        },
+        open: function() {
+            $('body').addClass('stop-scrolling');
+        }
+    });
+    dialog.removeProp('hidden');
+
     // Add method to sort by checkbox
     // (I reversed it so that ascending will place checked first)
-    $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col){
-        return this.api().column(col, {order:'index'}).nodes().map(function(td, i){
+    $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col) {
+        return this.api().column(col, {order:'index'}).nodes().map(function(td, i) {
             return $('input', td).prop('checked') ? 0 : 1;
         });
     };
@@ -29,6 +67,98 @@ $(document).ready(function () {
         $$.axes.y2.style("visibility", config.axis_y2_show ? 'visible' : 'hidden');
         $$.redraw();
     };
+
+    function save_selections() {
+        var current_selections = {
+            'adverse_events': _.keys(adverse_events),
+            'compounds': _.keys(compounds)
+        };
+
+        var all_selections = [];
+        var current_storage = localStorage.getItem('compare_ae_selections');
+
+        if (current_storage) {
+            all_selections = JSON.parse(current_storage);
+
+            if (all_selections.length > 4) {
+                all_selections = all_selections.slice(1);
+            }
+        }
+        all_selections.push(current_selections);
+        all_selections = JSON.stringify(all_selections);
+
+        localStorage.setItem('compare_ae_selections', all_selections)
+    }
+
+    function display_load_dialog() {
+        var current_storage = localStorage.getItem('compare_ae_selections');
+        if (current_storage) {
+            var all_selections = JSON.parse(current_storage);
+
+            // Clear old selections
+            selections.html('');
+
+            $.each(all_selections, function(index, selection) {
+                var row = $('<tr>').addClass('table-selection')
+                    .attr('data-selection-index', index);
+
+                var ae_column = $('<td>').text(selection.adverse_events.join(', '));
+                var compound_column = $('<td>').text(selection.compounds.join(', '));
+
+                row.append(ae_column);
+                row.append(compound_column);
+                selections.append(row);
+            });
+        }
+
+        dialog.dialog('open');
+        // Remove focus
+        $('.ui-dialog :button').blur();
+    }
+
+    function load_selections(selection_index) {
+        clear_selections();
+
+        adverse_events_table.page.len(-1).draw();
+        compounds_table.page.len(-1).draw();
+
+        var current_storage = localStorage.getItem('compare_ae_selections');
+        var all_selections = JSON.parse(current_storage);
+
+        var ae_selections = all_selections[selection_index].adverse_events;
+        var compound_selections = all_selections[selection_index].compounds;
+
+        $.each(ae_selections, function(index, adverse_event) {
+            adverse_events[adverse_event] = adverse_event;
+            var current_checkbox = $('input[value="' + adverse_event +'"');
+            current_checkbox.prop('checked', true);
+        });
+
+        adverse_events_table.order([[ 0, 'asc' ]]);
+        adverse_events_table.page.len(10).draw();
+
+        $.each(compound_selections, function(index, compound) {
+            compounds[compound] = compound;
+            var current_checkbox = $('input[value="' + compound +'"');
+            current_checkbox.prop('checked', true);
+        });
+
+        compounds_table.order([[ 0, 'asc' ]]);
+        compounds_table.page.len(10).draw();
+
+        dialog.dialog('close');
+
+        collect_all_adverse_events();
+    }
+
+    function clear_selections() {
+        adverse_events = {};
+        compounds = {};
+        full_data = {};
+
+        $('.checkbox').prop('checked', false);
+        create_initial_plot();
+    }
 
     function create_initial_plot() {
         bar_graphs = c3.generate({
@@ -75,7 +205,6 @@ $(document).ready(function () {
                     '#AAF514', '#CDF283',
                     '#52400B', '#635B42',
                     '#CCCCCC', '#E3E3E3'
-
                 ]
             },
             // Consider way to deal with overbearing tooltips
@@ -132,7 +261,7 @@ $(document).ready(function () {
         values.unshift(adverse_event + ' (COUNT)');
         normalized_values.unshift(adverse_event);
 
-        axes = {};
+        var axes = {};
         axes[adverse_event] = 'y';
         axes[adverse_event + ' (COUNT)'] = 'y2';
 
@@ -243,6 +372,7 @@ $(document).ready(function () {
     // Tracks the clicking of checkboxes to fill compounds
     $('.compound').change(function() {
         var compound = this.value;
+
         if (this.checked) {
             compounds[compound] = compound;
             collect_all_adverse_events();
@@ -254,6 +384,7 @@ $(document).ready(function () {
     // Tracks the clicking of checkboxes to fill adverse events
     $('.adverse-event').change(function() {
         var adverse_event = this.value;
+
         if (this.checked) {
             adverse_events[adverse_event] = adverse_event;
             collect_all_adverse_events();
@@ -280,37 +411,25 @@ $(document).ready(function () {
         }
     });
 
-    var adverse_events_table = $('#adverse_events').DataTable({
-        dom: '<"clear">lfrtip',
-        "iDisplayLength": 10,
-        "order": [[ 1, "asc" ]],
-        "aoColumnDefs": [
-            {
-                "width": "10%",
-                "targets": [0]
-            },
-            {
-                "sSortDataType": "dom-checkbox",
-                "targets": 0
-            }
-        ]
+    $('#save_selections').click(function() {
+        save_selections();
     });
 
-    var compounds_table = $('#compounds').DataTable({
-        dom: '<"clear">lfrtip',
-        "iDisplayLength": 10,
-        "order": [[ 1, "asc" ]],
-        "aoColumnDefs": [
-            {
-                "width": "10%",
-                "targets": [0]
-            },
-            {
-                "sSortDataType": "dom-checkbox",
-                "targets": 0
-            }
-        ]
+    $('#load_selections').click(function() {
+        display_load_dialog();
     });
+
+    $('#clear_selections').click(function() {
+        clear_selections();
+    });
+
+    selections.on('click', '.table-selection', function() {
+        load_selections(+$(this).attr('data-selection-index'));
+    });
+
+    var adverse_events_table = $('#adverse_events').DataTable(table_options);
+
+    var compounds_table = $('#compounds').DataTable(table_options);
 
     create_initial_plot();
 

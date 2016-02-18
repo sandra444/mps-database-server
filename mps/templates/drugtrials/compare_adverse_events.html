@@ -13,11 +13,36 @@
         font: 14px sans-serif;
         font-weight: bold;
     }
+
+    {# TODO problematic! what if user desires many compounds? #}
+    {# Diagonal axis? #}
+    .c3-axis-x .tick {
+        font: 16px sans-serif;
+        font-weight: bold;
+    }
+
+    .c3-axis-y-label {
+        font: 16px sans-serif;
+        font-weight: bold;
+    }
+
+    .c3-axis-y2-label {
+        font: 16px sans-serif;
+        font-weight: bold;
+    }
     </style>
 
     {# Get rid of inline style eventually #}
     {# Using a form here is a contrived way to prevent checkboxes from being initially filled #}
+
+    <div class="padded-row padded-bottom hidden-print" style="overflow:auto;">
+        <button role="button" class="btn btn-primary" id="save_selections">Save Selections</button>
+        <button role="button" class="btn btn-info" id="load_selections">Load Selections</button>
+        <button role="button" class="btn btn-danger" id="clear_selections">Clear Current Selections</button>
+    </div>
+
     <form autocomplete="off">
+
     <div class="padded-row padded-bottom hidden-print" style="overflow:auto;">
         <div class="col-sm-6">
             <table hidden id="adverse_events" class="display" cellspacing="0" width="100%">
@@ -89,5 +114,30 @@
     </div>
 
     <div id="bar_graphs" style="height:750px;"></div>
+
+    <div hidden id="selection_dialog" title="Load Selections">
+        <div class="alert alert-info text-center" role="alert">
+                <h1>Click Desired Set of Selections</h1>
+        </div>
+
+        <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Adverse Events</th>
+                        <th>Compounds</th>
+                    </tr>
+                </thead>
+
+                <tfoot>
+                    <tr>
+                        <th>Adverse Events</th>
+                        <th>Compounds</th>
+                    </tr>
+                </tfoot>
+
+                <tbody id="selections">
+                </tbody>
+        </table>
+    </div>
 
 {% endblock %}
