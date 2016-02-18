@@ -282,14 +282,26 @@ $(document).ready(function () {
         else {
             // Add the event to plotted
             plotted[event] = true;
+
+            // Get the groups
+            var groups = [_.without(_.keys(plotted), 'Total')];
+            var types = {};
+
+            $.each(groups[0], function(index, ae) {
+                types[ae] = 'area'
+            });
+
             $('button[data-adverse-event="'+event+'"]').addClass('btn-primary');
             chart.load({
                 xFormat: x_format,
                 columns: [
                     data.time,
                     data.values
-                ]
+                ],
+                types: types
             });
+
+            chart.groups(groups);
         }
     }
 
