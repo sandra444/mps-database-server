@@ -233,7 +233,11 @@ $(document).ready(function () {
     }
 
     function plot(event, data) {
+        var axes = {};
+
         if (event == 'Total') {
+            axes[event] = 'y';
+
             x_axis = data.time;
 
             x_format = '%Y%m%d';
@@ -256,7 +260,8 @@ $(document).ready(function () {
                     columns: [
                         x_axis,
                         data.values
-                    ]
+                    ],
+                    axes: axes
                 },
                 point: {
                     show: false
@@ -266,6 +271,19 @@ $(document).ready(function () {
                         type: 'timeseries',
                         tick: {
                             format: tick_format
+                        }
+                    },
+                    y: {
+                        label: {
+                            text: 'Number of Reports  (Total Events)',
+                            position: 'outer-middle'
+                        }
+                    },
+                    y2: {
+                        show: true,
+                        label: {
+                            text: 'Number of Reports (Individual Events)',
+                            position: 'outer-middle'
                         }
                     }
                 },
@@ -280,6 +298,8 @@ $(document).ready(function () {
             }
         }
         else {
+            axes[event] = 'y2';
+
             // Add the event to plotted
             plotted[event] = true;
             $('button[data-adverse-event="'+event+'"]').addClass('btn-primary');
@@ -288,7 +308,8 @@ $(document).ready(function () {
                 columns: [
                     data.time,
                     data.values
-                ]
+                ],
+                axes: axes
             });
         }
     }
