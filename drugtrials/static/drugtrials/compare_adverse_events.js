@@ -227,7 +227,7 @@ $(document).ready(function () {
                 //}
                 format: {
                     value: function (value, ratio, id) {
-                        var format = value % 1 === 0 ? d3.format('d') : d3.format('.2f');
+                        var format = value % 1 === 0 ? d3.format(',d') : d3.format(',.2f');
                         return format(value);
                     }
                 },

@@ -271,6 +271,14 @@ $(document).ready(function () {
                 },
                 subchart: {
                     show: true
+                },
+                tooltip: {
+                    format: {
+                        value: function (value, ratio, id) {
+                            var format = d3.format(',d');
+                            return format(value);
+                        }
+                    }
                 }
             });
 
