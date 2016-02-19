@@ -267,6 +267,12 @@ $(document).ready(function () {
                         tick: {
                             format: tick_format
                         }
+                    },
+                    y: {
+                        label: {
+                            text: 'Number of Reports',
+                            position: 'outer-middle'
+                        }
                     }
                 },
                 subchart: {
