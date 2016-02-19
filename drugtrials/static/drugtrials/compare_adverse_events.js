@@ -175,6 +175,10 @@ $(document).ready(function () {
     }
 
     function clear_selections() {
+        compounds_table.search('');
+        adverse_events_table.search('');
+        $('input[type=search]').val('');
+
         adverse_events = {};
         compounds = {};
         full_data = {};
