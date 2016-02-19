@@ -91,6 +91,29 @@ $(document).ready(function () {
         $$.redraw();
     };
 
+    // Pass true for reset to reset the table after finished
+    function clear_selections(reset) {
+        compounds_table.search('');
+        adverse_events_table.search('');
+        $('input[type=search]').val('');
+
+        adverse_events_table.page.len(-1).draw();
+        compounds_table.page.len(-1).draw();
+
+        $('.checkbox').prop('checked', false);
+
+        adverse_events = {};
+        compounds = {};
+        full_data = {};
+
+        create_initial_plot();
+
+        if (reset) {
+            adverse_events_table.page.len(10).draw();
+            compounds_table.page.len(10).draw();
+        }
+    }
+
     function save_selections() {
         var current_selections = {
             'adverse_events': _.keys(adverse_events),
@@ -140,10 +163,7 @@ $(document).ready(function () {
     }
 
     function load_selections(selection_index) {
-        clear_selections();
-
-        adverse_events_table.page.len(-1).draw();
-        compounds_table.page.len(-1).draw();
+        clear_selections(false);
 
         var current_storage = localStorage.getItem('compare_ae_selections');
         var all_selections = JSON.parse(current_storage);
@@ -157,7 +177,7 @@ $(document).ready(function () {
             current_checkbox.prop('checked', true);
         });
 
-        adverse_events_table.order([[ 0, 'asc' ]]);
+        adverse_events_table.order([[0, 'asc']]);
         adverse_events_table.page.len(10).draw();
 
         $.each(compound_selections, function(index, compound) {
@@ -166,25 +186,12 @@ $(document).ready(function () {
             current_checkbox.prop('checked', true);
         });
 
-        compounds_table.order([[ 0, 'asc' ]]);
+        compounds_table.order([[0, 'asc']]);
         compounds_table.page.len(10).draw();
 
         dialog.dialog('close');
 
         collect_all_adverse_events();
-    }
-
-    function clear_selections() {
-        compounds_table.search('');
-        adverse_events_table.search('');
-        $('input[type=search]').val('');
-
-        adverse_events = {};
-        compounds = {};
-        full_data = {};
-
-        $('.checkbox').prop('checked', false);
-        create_initial_plot();
     }
 
     function create_initial_plot() {
@@ -437,7 +444,7 @@ $(document).ready(function () {
     });
 
     $('#clear_selections').click(function() {
-        clear_selections();
+        clear_selections(true);
     });
 
     selections.on('click', '.table-selection', function() {

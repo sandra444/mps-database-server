@@ -27,6 +27,20 @@ $(document).ready(function () {
         });
     };
 
+    function clear_selections() {
+        // Remove search terms
+        $('input[type=search]').val('');
+        compounds_table.search('');
+        // Show all checkboxes
+        compounds_table.page.len(-1).draw();
+        // Uncheck all checkboxes
+        $('.checkbox').prop('checked', false);
+        // Remove all compounds
+        compounds = {};
+        // Return to default length (maintains previous sorting and so on)
+        compounds_table.page.len(25).draw();
+    }
+
     function sparkline(elem_id, plot, x_domain, y_domain) {
         //console.log(x_domain);
         //console.log(y_domain);
@@ -238,6 +252,10 @@ $(document).ready(function () {
         }
     });
 
+    $('#clear_selections').click(function() {
+        clear_selections();
+    });
+
     window.onhashchange = function() {
         if (location.hash != '#show') {
             $('#graphic').prop('hidden', true);
@@ -250,7 +268,7 @@ $(document).ready(function () {
     };
 
     // Make the initial data table
-    $('#compounds').DataTable({
+    var compounds_table = $('#compounds').DataTable({
         dom: 'T<"clear">lfrtip',
         "order": [[ 1, "asc" ]],
         "aoColumnDefs": [
