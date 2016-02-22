@@ -2,7 +2,6 @@
 // 1.) Employ some method to filter desired compounds (will resemble list display with checkboxes)
 // 2.) Display all of the requested compound data in the desired table
 // 3.) Display D3 "Sparklines" for every assay for the given compound (TODO LOOK AT D3 TECHNIQUE)
-
 $(document).ready(function () {
     // Middleware token for CSRF validation
     var middleware_token = getCookie('csrftoken');
@@ -19,6 +18,25 @@ $(document).ready(function () {
              .x(function(d) { return x(d.time); })
              .y(function(d) { return y(d.value); });
 
+    var selections = $('#selections');
+    var MAX_SAVED_SELECTIONS = 5;
+
+    // Open and then close dialog so it doesn't get placed in window itself
+    var dialog = $('#selection_dialog');
+    dialog.dialog({
+        width: 825,
+        height: 500,
+        closeOnEscape: true,
+        autoOpen: false,
+        close: function() {
+            $('body').removeClass('stop-scrolling');
+        },
+        open: function() {
+            $('body').addClass('stop-scrolling');
+        }
+    });
+    dialog.removeProp('hidden');
+
     // Add method to sort by checkbox
     // (I reversed it so that ascending will place checked first)
     $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col){
@@ -27,7 +45,7 @@ $(document).ready(function () {
         });
     };
 
-    function clear_selections() {
+    function clear_selections(reset) {
         // Remove search terms
         $('input[type=search]').val('');
         compounds_table.search('');
@@ -37,8 +55,74 @@ $(document).ready(function () {
         $('.checkbox').prop('checked', false);
         // Remove all compounds
         compounds = {};
-        // Return to default length (maintains previous sorting and so on)
-        compounds_table.page.len(25).draw();
+
+        if (reset) {
+            // Return to default length (maintains previous sorting and so on)
+            compounds_table.page.len(25).draw();
+        }
+    }
+
+    function save_selections() {
+        var current_selections = _.keys(compounds);
+
+        var all_selections = [];
+        var current_storage = localStorage.getItem('compound_report_selections');
+
+        if (current_storage) {
+            all_selections = JSON.parse(current_storage);
+
+            if (all_selections.length >= MAX_SAVED_SELECTIONS) {
+                all_selections = all_selections.slice(1);
+            }
+        }
+        all_selections.push(current_selections);
+        all_selections = JSON.stringify(all_selections);
+
+        localStorage.setItem('compound_report_selections', all_selections)
+    }
+
+    function display_load_dialog() {
+        var current_storage = localStorage.getItem('compound_report_selections');
+        if (current_storage) {
+            var all_selections = JSON.parse(current_storage);
+
+            // Clear old selections
+            selections.html('');
+
+            $.each(all_selections, function(index, selection) {
+                var row = $('<tr>').addClass('table-selection')
+                    .attr('data-selection-index', index);
+
+                var compound_column = $('<td>').text(selection.join(', '));
+
+                row.append(compound_column);
+                selections.append(row);
+            });
+        }
+
+        dialog.dialog('open');
+        // Remove focus
+        $('.ui-dialog :button').blur();
+    }
+
+    function load_selections(selection_index) {
+        clear_selections(false);
+
+        var current_storage = localStorage.getItem('compound_report_selections');
+        var all_selections = JSON.parse(current_storage);
+
+        var compound_selections = all_selections[selection_index];
+
+        $.each(compound_selections, function(index, compound) {
+            compounds[compound] = compound;
+            var current_checkbox = $('input[value="' + compound +'"');
+            current_checkbox.prop('checked', true);
+        });
+
+        compounds_table.order([[0, 'asc']]);
+        compounds_table.page.len(10).draw();
+
+        dialog.dialog('close');
     }
 
     function sparkline(elem_id, plot, x_domain, y_domain) {
@@ -252,8 +336,20 @@ $(document).ready(function () {
         }
     });
 
+    $('#save_selections').click(function() {
+        save_selections();
+    });
+
+    $('#load_selections').click(function() {
+        display_load_dialog();
+    });
+
     $('#clear_selections').click(function() {
-        clear_selections();
+        clear_selections(true);
+    });
+
+    selections.on('click', '.table-selection', function() {
+        load_selections(+$(this).attr('data-selection-index'));
     });
 
     window.onhashchange = function() {

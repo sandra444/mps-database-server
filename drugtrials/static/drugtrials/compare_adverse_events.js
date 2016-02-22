@@ -18,6 +18,7 @@ $(document).ready(function () {
     var raw_hidden = true;
 
     var selections = $('#selections');
+    var MAX_SAVED_SELECTIONS = 5;
 
     var initial_pattern = [
         '#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c',
@@ -126,7 +127,7 @@ $(document).ready(function () {
         if (current_storage) {
             all_selections = JSON.parse(current_storage);
 
-            if (all_selections.length > 4) {
+            if (all_selections.length >= MAX_SAVED_SELECTIONS) {
                 all_selections = all_selections.slice(1);
             }
         }
