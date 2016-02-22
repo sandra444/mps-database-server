@@ -85,7 +85,7 @@ $(document).ready(function () {
     };
 
     // Plugin to show/hide extra axis
-    c3.chart.fn.axis.show_y2 = function (shown) {
+    c3.chart.fn.axis.show_y2 = function(shown) {
         var $$ = this.internal, config = $$.config;
         config.axis_y2_show = !!shown;
         $$.axes.y2.style("visibility", config.axis_y2_show ? 'visible' : 'hidden');

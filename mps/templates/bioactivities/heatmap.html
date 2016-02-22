@@ -17,15 +17,33 @@
 {% block extra_row %}
         <div class="row text-center">
             <div class="col-xs-4">
-                <label>Log Scale
-                    <input title="Currently excludes 0 and negative values" id="log_scale" type="checkbox">
-                </label>
+                <div title="Currently excludes 0 and negative values" class="fancy-checkbox" align="left">
+                    <input type="checkbox" name="log_scale" id="log_scale" />
+                    <div class="btn-group">
+                        <label for="log_scale" class="btn btn-warning">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            <span> </span>
+                        </label>
+                        <label for="log_scale" class="btn btn-default active">
+                            Log Scale
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div class="col-xs-4">
-                <label>Normalize Bioactivities
-                    <input title="Normalizes to range 0.0001 to 1.0" id="normalize_bioactivities" type="checkbox" checked>
-                </label>
+                <div title="Normalizes to range 0.0001 to 1.0" class="fancy-checkbox" align="left">
+                    <input type="checkbox" name="normalize_bioactivities" id="normalize_bioactivities" checked/>
+                    <div class="btn-group">
+                        <label for="normalize_bioactivities" class="btn btn-danger">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            <span> </span>
+                        </label>
+                        <label for="normalize_bioactivities" class="btn btn-default active">
+                            Normalize Bioactivities
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div class="col-xs-4">
