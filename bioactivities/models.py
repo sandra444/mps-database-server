@@ -48,24 +48,24 @@ def chembl_assay(chemblid):
 
 class Target(LockableModel):
     name = models.TextField(help_text="Preferred target name.")
-    synonyms = models.TextField(null=True, blank=True)
+    synonyms = models.TextField(default='')
 
     # external identifiers, not unique because does go with null on SQL server
     chemblid = models.TextField('ChEMBL ID',
-                                null=True, blank=True,
+                                default='',
                                 help_text="Enter a ChEMBL id, e.g. CHEMBL260, "
                                           "and click Retrieve to get target "
                                           "information automatically.")
 
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(default='')
 
-    gene_names = models.TextField(null=True, blank=True)
+    gene_names = models.TextField(default='')
 
-    organism = models.TextField(null=True, blank=True)
+    organism = models.TextField(default='')
 
-    uniprot_accession = models.TextField(null=True, blank=True)
+    uniprot_accession = models.TextField(default='')
 
-    target_type = models.TextField(null=True, blank=True)
+    target_type = models.TextField(default='')
 
     # NCBI identifier for protein/gene targets
     GI = models.TextField('NCBI GI',
@@ -159,24 +159,23 @@ class Bioactivity(LockableModel):
     target = models.ForeignKey(Target)
     target_confidence = models.IntegerField(blank=True, null=True)
 
-    bioactivity_type = models.TextField(verbose_name="name", blank=True, null=True)
+    bioactivity_type = models.TextField(verbose_name="name", default='')
 
-    standard_name = models.TextField(blank=True, null=True)
-    operator = models.TextField(blank=True, null=True)
+    standard_name = models.TextField(default='')
+    operator = models.TextField(default='')
 
-    units = models.TextField(blank=True, null=True)
+    units = models.TextField(default='')
     value = models.FloatField(blank=True, null=True)
 
     standardized_units = models.TextField(verbose_name="std units",
-                                          blank=True,
-                                          null=True)
+                                          default='')
     standardized_value = models.FloatField(verbose_name="std vals",
                                            blank=True,
                                            null=True)
 
-    activity_comment = models.TextField(blank=True, null=True)
-    reference = models.TextField(blank=True, null=True)
-    name_in_reference = models.TextField(blank=True, null=True)
+    activity_comment = models.TextField(default='')
+    reference = models.TextField(default='')
+    name_in_reference = models.TextField(default='')
 
     # Use ChEMBL Assay Type to clarify unclear names like "Activity"
     # Removed for now
@@ -218,7 +217,7 @@ class PubChemBioactivity(LockableModel):
     compound = models.ForeignKey('compounds.Compound')
 
     # TODO SHOULD PULL TARGET FROM ASSAY IF THIS IS NONE (IF TO BE KEPT)
-    target = models.ForeignKey('Target', default=None, verbose_name="Target", null=True, blank=True)
+    target = models.ForeignKey('Target', verbose_name="Target", null=True, blank=True)
 
     # Value is required
     value = models.FloatField(verbose_name="Value (uM)")

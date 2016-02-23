@@ -57,10 +57,10 @@ def bioactivities_list(request):
                     'assay__pubchem_id'
                 )
             else:
-                data = Bioactivity.objects.filter(
-                    standard_name__isnull=False,
-                    standardized_units__isnull=False,
-                    standardized_value__isnull=False
+                data = Bioactivity.objects.exclude(
+                    standard_name='',
+                    standardized_units='',
+                    standardized_value=''
                 ).select_related(
                     'compound__name',
                     'target__name',
@@ -96,7 +96,7 @@ def bioactivities_list(request):
             if exclude_organismless:
                 # Exclude where assay and target organism are null
                 # TODO JUST SAVE THE TARGET ORGANISM AS THE ASSAY ORGANISM?
-                data = data.filter(assay__organism__isnull=False) | data.filter(assay__target__organism__isnull=False)
+                data = data.exclude(assay__organism='').exclude(assay__target__organism='')
                 # Exclude where organism is "Unspecified"
                 data = data.exclude(assay__organism="Unspecified").exclude(assay__target__organism="Unspecified")
 

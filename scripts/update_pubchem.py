@@ -535,7 +535,7 @@ def run():
 
     print 'Adding SINGLE PROTEIN to NCBI target entries'
 
-    no_type = Target.objects.filter(target_type__isnull=True) | Target.objects.filter(target_type=u'')
+    no_type = Target.objects.filter(target_type=u'')
 
     for target in no_type.exclude(GI=u''):
         target.target_type = 'SINGLE PROTEIN'
