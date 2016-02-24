@@ -51,7 +51,7 @@ def generate_list_of_all_data_in_bioactivities(pubchem, organisms, targets):
     bioactivities_data = generate_list_of_all_bioactivities_in_bioactivities(pubchem)
     compounds_data = generate_list_of_all_compounds_in_bioactivities(pubchem)
     # Targets are based on assay and not dependent on pubchem
-    targets_data = generate_list_of_all_targets_in_bioactivities(organisms, targets)
+    targets_data = generate_list_of_all_targets_in_bioactivities(pubchem, organisms, targets)
     drugtrial_data = generate_list_of_all_drugtrials(organisms)
 
     result = {
@@ -74,24 +74,43 @@ def generate_list_of_all_bioactivities_in_bioactivities(pubchem):
     return result
 
 
-def generate_list_of_all_targets_in_bioactivities(organisms, targets):
+def generate_list_of_all_targets_in_bioactivities(pubchem, organisms, targets):
     # Requires revision
-    initial_targets = Assay.objects.filter(
-        target__organism__in=organisms,
-        target__target_type__in=targets
-    )
+    if pubchem:
+        initial_targets = PubChemBioactivity.objects.filter(
+            assay__target__organism__in=organisms,
+            assay__target__target_type__in=targets
+        )
 
-    no_null_targets = Assay.objects.filter(target__isnull=False)
+        no_null_targets = PubChemBioactivity.objects.filter(assay__target__isnull=False)
 
-    if '!No Organism' in organisms:
-        all_targets = initial_targets | no_null_targets.filter(
-            target__organism='') | no_null_targets.filter(target__organism="Unspecified")
+        if '!No Organism' in organisms:
+            all_targets = initial_targets | no_null_targets.filter(
+                assay__target__organism='') | no_null_targets.filter(assay__target__organism="Unspecified")
+        else:
+            all_targets = initial_targets
+
+        all_targets = all_targets.select_related('assay__target').values_list('assay__target__name')
+
+        result = generate_record_frequency_data(all_targets)
+
     else:
-        all_targets = initial_targets
+        initial_targets = Bioactivity.objects.filter(
+            target__organism__in=organisms,
+            target__target_type__in=targets
+        )
 
-    all_targets = all_targets.prefetch_related('target').values_list('target__name')
+        no_null_targets = Bioactivity.objects.filter(target__isnull=False)
 
-    result = generate_record_frequency_data(all_targets)
+        if '!No Organism' in organisms:
+            all_targets = initial_targets | no_null_targets.filter(
+                target__organism='') | no_null_targets.filter(target__organism="Unspecified")
+        else:
+            all_targets = initial_targets
+
+        all_targets = all_targets.prefetch_related('target').values_list('target__name')
+
+        result = generate_record_frequency_data(all_targets)
 
     # Add no target
     result.append(['!No Target', 999999999])
@@ -144,19 +163,6 @@ def generate_list_of_all_compounds_in_bioactivities(pubchem):
         result = generate_record_frequency_data(chembl_compounds)
 
     return result
-    #cursor = connection.cursor()
-
-    #cursor.execute(
-        #'SELECT compounds_compound.name, compounds_compound.known_drug, compounds_compound.logp, compounds_compound.molecular_weight '
-        #'FROM bioactivities_bioactivity '
-        #'INNER JOIN compounds_compound '
-        #'ON bioactivities_bioactivity.compound_id=compounds_compound.id;'
-    #)
-
-    #result = generate_record_frequency_data(cursor.fetchall())
-    #cursor.close()
-
-    #return result
 
 
 def get_form_data(request):
