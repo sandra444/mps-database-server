@@ -517,19 +517,26 @@ def run():
     bio_types = {bio.activity_name: True for bio in PubChemBioactivity.objects.all()}
 
     for bio_type in bio_types:
-        targets = {bio.assay.target: True for bio in PubChemBioactivity.objects.filter(activity_name=bio_type)}
+        targets = {
+            bio.assay.target: True for bio in PubChemBioactivity.objects.filter(
+                activity_name=bio_type
+            ).select_related('assay__target')
+        }
         for target in targets:
-            bio_pk = [bio.id for bio in PubChemBioactivity.objects.filter(
-                activity_name=bio_type).filter(assay__target=target
-            )]
-            bio_value = np.array([bio.value for bio in PubChemBioactivity.objects.filter(
-                activity_name=bio_type).filter(assay__target=target
-            )])
+            current_bio = PubChemBioactivity.objects.filter(
+                activity_name=bio_type,
+                assay__target=target
+            ).select_related('assay__target')
+
+            bio_pk = [bio.id for bio in current_bio]
+            bio_value = np.array([bio.value for bio in current_bio])
             if len(bio_pk) > 0 and len(bio_value) > 0:
-                bio_value /= np.max(np.abs(bio_value),axis=0)
+                bio_value /= np.max(np.abs(bio_value), axis=0)
                 for index, pk in enumerate(bio_pk):
                     try:
-                        PubChemBioactivity.objects.filter(pk=pk).update(normalized_value=bio_value[index])
+                        PubChemBioactivity.objects.filter(pk=pk).update(
+                            normalized_value=bio_value[index]
+                        )
                     except:
                         print 'Update of bioactivity {} failed'.format(pk)
 
