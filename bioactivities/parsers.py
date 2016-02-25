@@ -379,32 +379,48 @@ def fetch_all_standard_bioactivities_data(
     for bio in filtered_bioactivities:
         compound = bio.compound.name
 
-        if bio.assay.target:
-            target = bio.assay.target.name
-        else:
-            target = 'No Target'
+        if pubchem:
+            if bio.assay.target:
+                target = bio.assay.target.name
+            else:
+                target = 'No Target'
 
-        activity = bio.activity_name
+            activity = bio.activity_name
 
-        if bio.assay.target and bio.assay.target.organism:
-            organism = bio.assay.target.organism
-        elif bio.assay.organism:
-            organism = bio.assay.organism
+            if bio.assay.target and bio.assay.target.organism:
+                organism = bio.assay.target.organism
+            elif bio.assay.organism:
+                organism = bio.assay.organism
+            else:
+                organism = 'No Organism'
         else:
-            organism = 'No Organism'
+            if bio.target:
+                target = bio.target.name
+            else:
+                target = 'No Target'
+
+            activity = bio.standard_name
+
+            if bio.target and bio.target.organism:
+                organism = bio.target.organism
+            elif bio.assay.organism:
+                organism = bio.assay.organism
+            else:
+                organism = 'No Organism'
 
         bio_key = (compound, target, activity, organism)
 
-        if normalized:
-            value = bio.normalized_value
-        else:
-            value = bio.value
-        if log_scale:
-            value = np.log10(value)
-        if bio_key not in bioactivities:
-            bioactivities[bio_key] = [value]
-        else:
-            bioactivities[bio_key].append(value)
+        if (normalized and bio.normalized_value) or (not normalized and bio.value):
+            if normalized:
+                value = bio.normalized_value
+            else:
+                value = bio.value
+            if log_scale:
+                value = np.log10(value)
+            if bio_key not in bioactivities:
+                bioactivities[bio_key] = [value]
+            else:
+                bioactivities[bio_key].append(value)
 
     results = []
 
@@ -1003,25 +1019,6 @@ def cluster(request):
             'ro5': ro5,
             'species': species,
         }
-
-        # Add in JS
-        # box = "<div id='com' class='thumbnail text-center affix'>"
-        # box += '<button id="X" type="button" class="btn-xs btn-danger">X</button>'
-        # box += "<img src='https://www.ebi.ac.uk/chembldb/compound/displayimage/"+ CHEMBL + "' class='img-polaroid'>"
-        # box += "<strong>" + name + "</strong><br>"
-        # box += "Known Drug: "
-        # if known_drug:
-        #     box += "<span class='glyphicon glyphicon-ok'></span><br>"
-        # else:
-        #     box += "<span class='glyphicon glyphicon-remove'></span><br>"
-        # box += "Passes Rule of 3: "
-        # if ro3:
-        #     box += "<span class='glyphicon glyphicon-ok'></span><br>"
-        # else:
-        #     box += "<span class='glyphicon glyphicon-remove'></span><br>"
-        # box += "Rule of 5 Violations: " + str(ro5) + "<br>"
-        # box += "Species: " + str(species)
-        # box += "</div>"
 
         compounds[name] = data
 
