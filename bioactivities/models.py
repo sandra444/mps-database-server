@@ -177,6 +177,10 @@ class Bioactivity(LockableModel):
     reference = models.TextField(default='')
     name_in_reference = models.TextField(default='')
 
+    normalized_value = models.FloatField(blank=True,
+                                        null=True,
+                                        verbose_name="Normalized Value")
+
     # Use ChEMBL Assay Type to clarify unclear names like "Activity"
     # Removed for now
     # chembl_assay_type = models.TextField(blank=True, null=True, default='')
@@ -233,7 +237,7 @@ class PubChemBioactivity(LockableModel):
     # Be sure to normalize on bioactivity-target pair across the entire database
     normalized_value = models.FloatField(blank=True,
                                         null=True,
-                                        verbose_name="Value (uM)")
+                                        verbose_name="Normalized Value")
 
 
 # TODO PubChem Bioactivity Type? and PubChem targets
