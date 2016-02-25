@@ -170,6 +170,35 @@ def run(days=180):
 
     print 'Units updated'
 
+    print 'Normalizing values'
+
+    bio_types = {bio.standard_name: True for bio in Bioactivity.objects.all()}
+
+    for bio_type in bio_types:
+        targets = {
+            bio.target: True for bio in Bioactivity.objects.filter(
+                standard_name=bio_type
+            ).prefetch_related('target')
+        }
+        for target in targets:
+            current_bio = Bioactivity.objects.filter(
+                standard_name=bio_type,
+                target=target,
+                standardized_value__isnull=False
+            ).prefetch_related('target')
+
+            bio_pk = [bio.id for bio in current_bio]
+            bio_value = np.array([bio.standardized_value for bio in current_bio])
+            if len(bio_pk) > 0 and len(bio_value) > 0:
+                bio_value /= np.max(np.abs(bio_value), axis=0)
+                for index, pk in enumerate(bio_pk):
+                    try:
+                        Bioactivity.objects.filter(pk=pk).update(
+                            normalized_value=bio_value[index]
+                        )
+                    except:
+                        print 'Update of bioactivity {} failed'.format(pk)
+
 # A second run is useful to catch newly added compounds,
 # but just calling run is somewhat inefficient (it would run through every compound again)
 #run(0)
