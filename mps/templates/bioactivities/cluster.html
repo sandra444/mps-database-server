@@ -435,7 +435,7 @@
     {% block graphic %}
 
         <div hidden id="graphic">
-            <div class="row text-center">
+            <div class="padded-row text-center">
                 <a href="#filter" id="back" class="btn btn-xlarge btn-info">
                     <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
                     Back to Selection
@@ -444,15 +444,15 @@
 
             <hr>
 
-            <div class="row">
-            <div id="query_box" class="col-xs-3">
-                <div id="query" class="affix"></div>
-            </div>
-            <div id="cluster" class="col-xs-6">
-            </div>
-            <div class="col-xs-3">
-                <div id="compound" class="affix pre-scrollable"></div>
-            </div>
+            <div style="overflow:auto; width:100%; height:100%;">
+                <div id="query_box" class="col-xs-3">
+                    <div id="query" class="affix"></div>
+                </div>
+                <div id="cluster" class="col-xs-6">
+                </div>
+                <div class="col-xs-3">
+                    <div id="compound" class="affix pre-scrollable"></div>
+                </div>
             </div>
         </div>
 
