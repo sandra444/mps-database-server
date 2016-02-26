@@ -291,15 +291,17 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         rows = main_table.findChildren('tr')
 
         # Regex for extracting percentages
-        percent_extractor = re.compile(r'\d+%')
+        percent_extractor = re.compile(r'<?\>?\d*\.?\d+%')
 
         # Units for half life
         units = ['week', 'day', 'hour', 'minute', 'second']
 
-        # Regex for extracting floats
+        # Regex for extracting SPECIFICALLY floats
         float_extractor = re.compile(r'\d+\.\d+')
         # Regex for extracting ints (ignores anything with periods)
         integer_extractor = re.compile(r'(?<!\.)(?<!\d)\d+(?!\.)')
+        # Regex for extracting ints or floats
+        integer_and_float_extractor = re.compile(r'\d*\.?\d+')
 
         # Values found in table
         data = {
@@ -335,17 +337,36 @@ def get_drugbank_data_from_chembl_id(chembl_id):
                         if len(drug_class) > 150:
                             drug_class = drug_class[:145] + '...'
 
-                        data['drug_class'] = row.findChildren('a')[0].text.rstrip()
+                        data['drug_class'] = drug_class
 
                 elif header == 'Protein binding':
                     # Trim protein binding to get just the percentage
                     # There might not be protein binding
                     protein_binding_initial = row.findChildren('td')[0].text
-                    protein_binding_initial = re.findall(percent_extractor, protein_binding_initial)
+                    protein_binding_processed = re.findall(percent_extractor, protein_binding_initial)
                     # If there are multiple, which do I take?
                     # Taking first percent for now
-                    if protein_binding_initial:
-                        data['protein_binding'] = protein_binding_initial[0]
+                    if protein_binding_processed:
+                        data['protein_binding'] = protein_binding_processed[0]
+
+                    # If regex has failed and 'percent' is in the strings
+                    elif 'percent' in protein_binding_initial:
+                        protein_binding_processed = re.findall(re.compile(r'<?\>?\d*\.?\d+\spercent'), protein_binding_initial)
+                        if protein_binding_processed:
+                            data['protein_binding'] = protein_binding_processed[0]
+
+                    # If +/- is in the string, the percent is likely the deviation
+                    if u'+/-' in protein_binding_initial:
+                        protein_binding_processed = protein_binding_initial.split(u'+/-')
+                        protein_binding_processed = re.findall(integer_and_float_extractor, protein_binding_processed[0])
+                        if protein_binding_processed:
+                            data['protein_binding'] = protein_binding_processed[0]
+
+                    if u'±' in protein_binding_initial:
+                        protein_binding_processed = protein_binding_initial.split(u'±')
+                        protein_binding_processed = re.findall(integer_and_float_extractor, protein_binding_processed[0])
+                        if protein_binding_processed:
+                            data['protein_binding'] = protein_binding_processed[0]
 
                 # NOT GUARANTEED TO BE 100% ACCURATE
                 elif header == 'Half life':
