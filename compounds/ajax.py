@@ -374,6 +374,10 @@ def get_drugbank_data_from_chembl_id(chembl_id):
                     # Might not exist
                     # Be sure to decode for unicode comparisons
                     life = row.findChildren('td')[0].text
+
+                    # Remove 't1/2' to eliminate confusion for the parser
+                    life = life.replace('t1/2', '')
+
                     unit = ''
                     for possible_unit in units:
                         if not unit and possible_unit in life:
@@ -388,8 +392,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
 
                     if unit:
                         trimmed_life = life[:life.index(unit)]
-                        found_numbers = re.findall(float_extractor, trimmed_life) + re.findall(
-                            integer_extractor, trimmed_life)
+                        found_numbers = re.findall(integer_and_float_extractor, trimmed_life)
 
                         # Make sure the numbers aren't jumbled (float came second and integer came first)
                         found_numbers.sort(key=float)
@@ -402,7 +405,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
                             ]
 
                         # Take first two
-                        data['half_life'] = '-'.join(found_numbers[:2]) + ' ' + unit + 's'
+                        data['half_life'] = '-'.join(found_numbers[:2]) + ' ' + unit + 's'.lstrip()
 
                 # Be sure to trim
                 elif header == 'Clearance':
