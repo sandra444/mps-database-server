@@ -21,7 +21,6 @@ class MicrodeviceForm(forms.ModelForm):
 class OrganModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(OrganModelForm, self).__init__(*args, **kwargs)
-        self.fields['device'].queryset = Microdevice.objects.filter(device_type='chip')
 
     class Meta(object):
         model = OrganModel
