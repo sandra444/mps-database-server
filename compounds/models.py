@@ -53,36 +53,36 @@ class Compound(LockableModel):
         help_text="Preferred compound name.")
     synonyms = models.TextField(
         max_length=4000,
-        null=True, blank=True)
+        default='')
     tags = models.TextField(
-        blank=True, null=True,
+        default='',
         help_text="Tags for the compound (EPA, NCATS, etc.)")
 
     # External identifiers are checked for uniqueness in form's clean
     # Not optimal, but other solutions did not seem to work (editing save, so on)
     chemblid = models.CharField(
         'ChEMBL ID', max_length=20,
-        null=True, blank=True,
+        default='',
         help_text="Enter a ChEMBL id, e.g. CHEMBL25, and click Retrieve to "
                   "get compound information automatically.")
 
     # Pubchem ID
-    pubchemid = models.CharField(verbose_name='PubChem ID', max_length=40, null=True, blank=True)
+    pubchemid = models.CharField(verbose_name='PubChem ID', max_length=40, default='')
 
     # standard names/identifiers
     inchikey = models.CharField(
         'InChI key', max_length=27,
-        null=True, blank=True,
+        default='',
         help_text="IUPAC standard InChI key for the compound")
     smiles = models.CharField(
         max_length=1000,
-        null=True, blank=True,
+        default='',
         help_text="Canonical smiles, generated using pipeline pilot.")
 
     # molecular properties
     molecular_formula = models.CharField(
         max_length=40,
-        null=True, blank=True,
+        default='',
         help_text="Molecular formula of compound.")
     molecular_weight = models.FloatField(
         null=True, blank=True,
@@ -135,7 +135,7 @@ class Compound(LockableModel):
                   "more likely to be hits in fragment screening.")
     species = models.CharField(
         'Molecular species', max_length=10,
-        blank=True, null=True,
+        default='',
         help_text="A description of the predominant species occurring at pH "
                   "7.4 and can be acid, base, neutral or zwitterion.")
 
@@ -147,52 +147,52 @@ class Compound(LockableModel):
     # DrugBank data
     drugbank_id = models.CharField(
         'DrugBank ID', max_length=20,
-        null=True, blank=True,
+        default='',
         help_text="DrugBank ID")
     # Listed as "Sub Class" in DrugBank
     drug_class = models.CharField(
         'Class', max_length=150,
-        null=True, blank=True,
+        default='',
         help_text="Drug Class from DrugBank")
     # Percent value for protein_binding
     protein_binding = models.CharField(
         'Protein Binding', max_length=20,
-        null=True, blank=True,
+        default='',
         help_text="Protein Binding from DrugBank")
     # Drug's half life (may be a range)
     half_life = models.CharField(
         'Half Life', max_length=100,
-        null=True, blank=True,
+        default='',
         help_text="Half Life from DrugBank")
     # Description of clearance
     clearance = models.CharField(
         'Clearance', max_length=500,
-        null=True, blank=True,
+        default='',
         help_text="Clearance from DrugBank")
     # Percent value for drug bioavailability
     bioavailability = models.CharField(
         'Bioavailability', max_length=20,
-        null=True, blank=True,
+        default='',
         help_text="Bioavailability from DrugBank")
     # Test description of the drug's absorption
     absorption = models.CharField(
         'Absorption', max_length=1000,
-        null=True, blank=True,
+        default='',
         help_text="Absorption Description from DrugBank")
     # Summary of PK and Metabolism
     pk_metabolism = models.CharField(
         'PK/Metabolism', max_length=1000,
-        null=True, blank=True,
+        default='',
         help_text="Summary of pharmacokinetics and metabolism")
     # Summary of pre-clinical trial data
     preclinical = models.CharField(
         'Pre-clinical Findings', max_length=1000,
-        null=True, blank=True,
+        default='',
         help_text="Summary of pre-clinical findings")
     # Summary of clinical trial data
     clinical = models.CharField(
         'Clinical Findings', max_length=1000,
-        null=True, blank=True,
+        default='',
         help_text="Summary of clinical findings")
 
     class Meta(object):

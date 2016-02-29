@@ -112,31 +112,15 @@ def fetch_compound_report(request):
             {compound.name: {
                 'table': {
                     'id': compound.id,
+                    'preclinical': compound.preclinical,
+                    'clinical': compound.clinical,
+                    'pk_metabolism': compound.pk_metabolism,
+                    'logP': compound.logp,
                     'max_time': {}
                 },
                 'plot': {}
             }}
         )
-
-    summaries = {
-        summary.compound.name+summary.summary_type.name: summary.summary for summary in CompoundSummary.objects.filter(
-            compound_id__in=compounds,
-            summary_type__name__in=summary_types
-        )
-    }
-    properties = {
-        property.compound.name+property.property_type.name: property.value for property in CompoundProperty.objects.filter(
-            compound_id__in=compounds, property_type__name__in=property_types
-        )
-    }
-
-    for compound in compounds:
-        for summary_type in summary_types:
-            data.get(compound.name).get('table').update({summary_type: summaries.get(compound.name+summary_type, '')})
-        for property_type in property_types:
-            data.get(compound.name).get('table').update(
-                {property_type: properties.get(compound.name+property_type, '')}
-            )
 
     # Acquire AssayChipRawData and store based on compound-assay (and convert to minutes?)
     # Make sure that the quality IS THE EMPTY STRING (anything in the quality field qualifies as invalid)
