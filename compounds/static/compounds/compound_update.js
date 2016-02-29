@@ -1,3 +1,4 @@
+// TODO THIS FILE HAS BEEN DEPRECATED
 // TODO This file really should not exist
 // TODO This was made in the interest of time, but it makes more sense to modify inline_add to be general
 // Perhaps there will not be any more models with multiple inlines, but perhaps not so it is something I should look in to

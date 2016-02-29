@@ -179,6 +179,21 @@ class Compound(LockableModel):
         'Absorption', max_length=1000,
         null=True, blank=True,
         help_text="Absorption Description from DrugBank")
+    # Summary of PK and Metabolism
+    pk_metabolism = models.CharField(
+        'PK/Metabolism', max_length=1000,
+        null=True, blank=True,
+        help_text="Summary of pharmacokinetics and metabolism")
+    # Summary of pre-clinical trial data
+    preclinical = models.CharField(
+        'Pre-clinical Findings', max_length=1000,
+        null=True, blank=True,
+        help_text="Summary of pre-clinical findings")
+    # Summary of clinical trial data
+    clinical = models.CharField(
+        'Clinical Findings', max_length=1000,
+        null=True, blank=True,
+        help_text="Summary of clinical findings")
 
     class Meta(object):
         ordering = ('name', )
@@ -239,6 +254,7 @@ class Compound(LockableModel):
         return "/compounds/"
 
 
+# TODO THIS MODEL IS DEPRECATED
 class SummaryType(LockableModel):
 
     class Meta(object):
@@ -252,6 +268,7 @@ class SummaryType(LockableModel):
         return unicode(self.name)
 
 
+# TODO THIS MODEL IS DEPRECATED
 class PropertyType(LockableModel):
 
     class Meta(object):
@@ -264,7 +281,7 @@ class PropertyType(LockableModel):
         return unicode(self.name)
 
 
-# TODO CREATE TWO INLINES: ONE FOR SUMMARIES AND ONE FOR PROPERTIES
+# TODO THIS MODEL IS DEPRECATED
 # At worst, I suppose I can merge these together or even add them as fields in Compound
 # It would be useful to have a model that catalogues COMPOUND SUMMARIES such as non-clinical/clinical toxicology
 class CompoundSummary(models.Model):
@@ -283,6 +300,7 @@ class CompoundSummary(models.Model):
         return unicode(self.summary)
 
 
+# TODO THIS MODEL IS DEPRECATED
 # It would be useful to have a model that catalogues COMPOUND PROPERTIES such as cmax and clogp
 class CompoundProperty(models.Model):
 

@@ -128,10 +128,6 @@
 
     {% include 'generic_field.html' with field=form.bioavailability label="Bioavailability"%}
 
-    {% include 'generic_field.html' with field=form.clearance label="Clearance"%}
-
-    {% include 'generic_field.html' with field=form.absorption label="Absorption"%}
-
     <legend>Molecular Properties</legend>
 
     <div class="form-group">
@@ -206,6 +202,18 @@
         </div>
     </div>
 
+    <legend>Summaries</legend>
+
+    {% include 'generic_field.html' with field=form.absorption label="Absorption"%}
+
+    {% include 'generic_field.html' with field=form.clearance label="Clearance"%}
+
+    {% include 'generic_field.html' with field=form.pk_metabolism label="PK/Metabolism"%}
+
+    {% include 'generic_field.html' with field=form.preclinical label="Pre-clinical Findings"%}
+
+    {% include 'generic_field.html' with field=form.clinical label="Clinical Findings"%}
+
     {# TODO MAKE SURE TARGETS ARE WORKING #}
     <legend>Targets/Interactions</legend>
 
@@ -226,11 +234,11 @@
             {% for target in formset %}
                 <tr class="inline" id="target-{{ forloop.counter0 }}">
                     {# Hidden input for Update (need id to associate) #}
-{#                    {% if assay.id.value %}#}
-{#                    <td class="original" hidden>#}
-{#                        <input id="id_compoundtarget_set-{{ forloop.counter0 }}-id" name="compoundtarget_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ target.id.value }}">#}
-{#                    </td>#}
-{#                    {% endif %}#}
+                    {% if target.id.value %}
+                    <td class="original" hidden>
+                        <input id="id_compoundtarget_set-{{ forloop.counter0 }}-id" name="compoundtarget_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ target.id.value }}">
+                    </td>
+                    {% endif %}
                     <td>{{ target.name }}</td>
                     <td>{{ target.uniprot_id }}</td>
                     <td>{{ target.type }}</td>

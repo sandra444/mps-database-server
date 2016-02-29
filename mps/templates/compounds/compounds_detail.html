@@ -293,27 +293,28 @@
         </table>
     </div>
 
-    <div class="col-sm-4">
-    {% if object.compoundproperty_set.all %}
-        <table class="table table-striped table-bordered" style="background-color: #EEE0B7;">
-            <thead>
-                <tr>
-                    <th colspan=2 class="text-center">
-                        <u>Additional Properties</u>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for property in object.compoundproperty_set.all|dictsort:"property_type.name" %}
-                <tr>
-                    <td><strong>{{ property.property_type }}</strong></td>
-                    <td>{{ property.value }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
-    </div>
+{#    <div class="col-sm-4">#}
+{#    {% if object.compoundproperty_set.all %}#}
+{#        <table class="table table-striped table-bordered" style="background-color: #EEE0B7;">#}
+{#            <thead>#}
+{#                <tr>#}
+{#                    <th colspan=2 class="text-center">#}
+{#                        <u>Additional Properties</u>#}
+{#                    </th>#}
+{#                </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#            {% for property in object.compoundproperty_set.all|dictsort:"property_type.name" %}#}
+{#                <tr>#}
+{#                    <td><strong>{{ property.property_type }}</strong></td>#}
+{#                    <td>{{ property.value }}</td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#            </tbody>#}
+{#        </table>#}
+{#    {% endif %}#}
+{#    </div>#}
+
     </div>
 
     {% if object.compoundsummary_set.all or object.absorption or object.clearance %}
@@ -334,12 +335,33 @@
                 </tr>
             {% endif %}
 
-            {% for summary in object.compoundsummary_set.all|dictsort:"summary_type.name" %}
+            {% if object.pk_metabolism %}
                 <tr>
-                    <td><strong>{{ summary.summary_type }}</strong></td>
-                    <td>{{ summary.summary|linebreaks }}</td>
+                    <td><strong>PK/Metabolism</strong></td>
+                    <td>{{ object.pk_metabolism|linebreaks }}</td>
                 </tr>
-            {% endfor %}
+            {% endif %}
+
+            {% if object.preclinical %}
+                <tr>
+                    <td><strong>Pre-clinical Findings</strong></td>
+                    <td>{{ object.preclinical|linebreaks }}</td>
+                </tr>
+            {% endif %}
+
+            {% if object.clinical %}
+                <tr>
+                    <td><strong>Clinical Findings</strong></td>
+                    <td>{{ object.clinical|linebreaks }}</td>
+                </tr>
+            {% endif %}
+
+{#            {% for summary in object.compoundsummary_set.all|dictsort:"summary_type.name" reversed%}#}
+{#                <tr>#}
+{#                    <td><strong>{{ summary.summary_type }}</strong></td>#}
+{#                    <td>{{ summary.summary|linebreaks }}</td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
             </tbody>
         </table>
     {% endif %}

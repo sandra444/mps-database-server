@@ -17,6 +17,9 @@ class CompoundForm(forms.ModelForm):
 
             'clearance': forms.Textarea(attrs={'size': 50, 'rows': 3}),
             'absorption': forms.Textarea(attrs={'size': 50, 'rows': 3}),
+            'pk_metabolism': forms.Textarea(attrs={'size': 50, 'rows': 3}),
+            'preclinical': forms.Textarea(attrs={'size': 50, 'rows': 3}),
+            'clinical': forms.Textarea(attrs={'size': 50, 'rows': 3}),
         }
         exclude = ('',)
 
