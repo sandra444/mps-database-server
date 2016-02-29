@@ -66,11 +66,9 @@ $(document).ready(function() {
                 data: {
                     columns: []
                 },
-
                 size: {
                   height: 320
                 },
-
                 axis: {
                     x: {
                         label: {

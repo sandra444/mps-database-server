@@ -4,58 +4,67 @@
 
     <legend><h1>{{ model.model_name }}</h1></legend>
 
-    <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
-        <tbody>
-            <tr>
-                <td>
-                    <b>Center</b>
-                </td>
-                <td>
-                    {{ model.center|default:'Unspecified' }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <b>Organ</b>
-                </td>
-                <td>
-                    {{ model.organ|default:'Unspecified' }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <b>Device</b>
-                </td>
-                <td>
-                    {% if model.device.id %}
-                        <a href="/microdevices/device/{{ model.device.id }}">{{ model.device }}</a>
-                    {% else %}
-                        Unspecified
-                    {% endif %}
-                </td>
-            </tr>
-            {% if model.description %}
-            <tr>
-                <td>
-                    <b>Description</b>
-                </td>
-                <td>
-                    {{ model.description }}
-                </td>
-            </tr>
-            {% endif %}
-            {% if model.protocol %}
-            <tr>
-                <td>
-                    <b>Protocol File</b>
-                </td>
-                <td>
-                    <a class="lead" href="/media/{{ model.protocol }}">Click here to view/download protocols</a>
-                </td>
-            </tr>
-            {% endif %}
-        </tbody>
-    </table>
+    <div>
+        <div class="col-sm-4">
+        <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
+            <tbody>
+                <tr>
+                    <td>
+                        <b>Center</b>
+                    </td>
+                    <td>
+                        {{ model.center|default:'Unspecified' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Organ</b>
+                    </td>
+                    <td>
+                        {{ model.organ|default:'Unspecified' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Device</b>
+                    </td>
+                    <td>
+                        {% if model.device.id %}
+                            <a href="/microdevices/device/{{ model.device.id }}">{{ model.device }}</a>
+                        {% else %}
+                            Unspecified
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if model.description %}
+                <tr>
+                    <td>
+                        <b>Description</b>
+                    </td>
+                    <td>
+                        {{ model.description }}
+                    </td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>
+                        <b>Model Image</b>
+                    </td>
+                    <td>
+                        {% if model.model_image %}
+                            <img src="/media/{{ model.model_image }}">
+                        {% else %}
+                            No Image Available
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="col-sm-8">
+            <img src="/media/{{ model.device.device_image }}">
+        </div>
+    </div>
 
     {% if protocols %}
     <legend><b>Protocols</b></legend>
