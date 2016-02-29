@@ -60,7 +60,7 @@ def bioactivities_list(request):
                 data = Bioactivity.objects.exclude(
                     standard_name='',
                     standardized_units='',
-                    standardized_value=''
+                    standardized_value__isnull=True
                 ).select_related(
                     'compound__name',
                     'target__name',
