@@ -95,6 +95,9 @@ $(document).ready(function() {
                         }
                     }
                 },
+                padding: {
+                  right: 10
+                },
                 // TODO this is not optimal
                 // manually reposition axis label
                 onrendered: function() {
