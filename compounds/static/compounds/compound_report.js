@@ -14,9 +14,10 @@ $(document).ready(function () {
     var x = d3.scale.linear().range([0, width]);
     var y = d3.scale.linear().range([height, 0]);
     var line = d3.svg.line()
-             .interpolate("basis")
-             .x(function(d) { return x(d.time); })
-             .y(function(d) { return y(d.value); });
+        // We no longer interpolate
+        //.interpolate("basis")
+        .x(function(d) { return x(d.time); })
+        .y(function(d) { return y(d.value); });
 
     var selections = $('#selections');
     var MAX_SAVED_SELECTIONS = 5;
@@ -266,7 +267,8 @@ $(document).ready(function () {
                                 .append($('<td>')
                                     .text(concentration.replace('_', ' '))));
                         }
-                        for (var every_assay in x_max) {
+                        for (var x=0; x<sorted_assays.length; x++) {
+                            var every_assay = sorted_assays[x];
                             // Add a cell for the assay given concentration
                             if (!$('#' + compound + '_' + every_assay.replace(/\s/g, "_").replace('.', '_') + '_' + concentration.replace(/\s/g, "_").replace('.', '_'))[0]) {
                                 $('#' + row_id).append($('<td>')
