@@ -1131,6 +1131,8 @@ def table(request):
             operator = bioactivity.operator
             standardized_units = bioactivity.standardized_units
 
+        notes = bioactivity.notes
+
         obj = {
             'id': id,
             'compound': compound,
@@ -1143,6 +1145,7 @@ def table(request):
             'standardized_units': standardized_units,
             'chemblid': chemblid,
             'pubchem_id': pubchem_id,
+            'notes': notes
         }
         data.append(obj)
 

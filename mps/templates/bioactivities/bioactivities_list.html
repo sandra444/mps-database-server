@@ -42,6 +42,7 @@
                     <th>Standard Units</th>
                     <th>ChEMBL Link</th>
                     <th>PubChem Link</th>
+                    <th>Notes</th>
                 </tr>
             </thead>
 
@@ -56,6 +57,7 @@
                     <th>Standard Units</th>
                     <th>ChEMBL Link</th>
                     <th>PubChem Link</th>
+                    <th>Notes</th>
                 </tr>
             </tfoot>
 
@@ -70,7 +72,6 @@
                         <td>{{ bioactivity.operator }}</td>
                         <td>{{ bioactivity.standardized_value }}</td>
                         <td>{{ bioactivity.standardized_units }}</td>
-
                     {% else %}
                         <td>{{ bioactivity.assay.target|default:'' }}</td>
                         <td>{{ bioactivity.assay.target.organism|default:bioactivity.assay.organism|default:'' }}</td>
@@ -89,6 +90,7 @@
                     <td><a href="https://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?aid={{ bioactivity.assay.pubchem_id }}">
                         {{ bioactivity.assay.pubchem_id|default:'' }}
                     </a></td>
+                    <td>{{ bioactivity.notes }}</td>
                 </tr>
             {% endfor %}
             </tbody>

@@ -181,6 +181,9 @@ class Bioactivity(LockableModel):
                                         null=True,
                                         verbose_name="Normalized Value")
 
+    # Indicates whether there was an error or something of that sort
+    notes = models.TextField(default='')
+
     # Use ChEMBL Assay Type to clarify unclear names like "Activity"
     # Removed for now
     # chembl_assay_type = models.TextField(blank=True, null=True, default='')
@@ -239,6 +242,8 @@ class PubChemBioactivity(LockableModel):
                                         null=True,
                                         verbose_name="Normalized Value")
 
+    # Indicates whether there was an error or something of that sort
+    notes = models.TextField(default='')
 
 # TODO PubChem Bioactivity Type? and PubChem targets
 # To following table may eventually be merged into the existing bioactivty type table
