@@ -56,6 +56,11 @@ $(document).ready(function () {
                             return format(value);
                         }
                     }
+                },
+                // TODO this is not optimal
+                // manually reposition axis label
+                onrendered: function() {
+                    $('.c3-axis-x-label').attr('dy', '35px');
                 }
             })
         );
