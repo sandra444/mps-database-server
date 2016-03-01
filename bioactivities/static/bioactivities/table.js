@@ -25,11 +25,17 @@ $(document).ready(function () {
             if (!pubchem) {
                 row += "<td>" + bio.operator + "</td>";
             }
+            else {
+                row += "<td>=</td>";
+            }
 
             row += "<td>" + bio.standardized_value + "</td>";
 
             if (!pubchem) {
                 row += "<td>" + bio.standardized_units + "</td>";
+            }
+            else {
+                row += "<td>µM</td>";
             }
 
             row += "<td><a href='https://www.ebi.ac.uk/chembl/assay/inspect/"+bio.chemblid+"'>" + bio.chemblid + "</a></td>";
@@ -60,14 +66,14 @@ $(document).ready(function () {
         pubchem = $('#pubchem').prop('checked');
 
         // Set the headers relative to pubchem or chembl
-        if (pubchem) {
-            $('#variable-header').html(pubchem_header);
-            $('#variable-footer').html(pubchem_header);
-        }
-        else {
-            $('#variable-header').html(chembl_header);
-            $('#variable-footer').html(chembl_header);
-        }
+//        if (pubchem) {
+//            $('#variable-header').html(pubchem_header);
+//            $('#variable-footer').html(pubchem_header);
+//        }
+//        else {
+//            $('#variable-header').html(chembl_header);
+//            $('#variable-footer').html(chembl_header);
+//        }
 
         // Clear all filters
         bioactivities_filter = [];
@@ -157,27 +163,27 @@ $(document).ready(function () {
         });
     }
 
-    var pubchem_header = '<tr>' +
-        '<th>Compound</th>' +
-        '<th>Target</th>' +
-        '<th>Organism</th>' +
-        '<th>Activity Name</th>' +
-        '<th>Standard Value (μm)</th>' +
-        '<th>ChEMBL Link</th>' +
-        '<th>PubChem Link</th>' +
-        '</tr>';
-
-    var chembl_header = '<tr>' +
-        '<th>Compound</th>' +
-        '<th>Target</th>' +
-        '<th>Organism</th>' +
-        '<th>Activity Name</th>' +
-        '<th>Operator</th>' +
-        '<th>Standard Value</th>' +
-        '<th>Standard Units</th>' +
-        '<th>ChEMBL Link</th>' +
-        '<th>PubChem Link</th>' +
-        '</tr>';
+//    var pubchem_header = '<tr>' +
+//        '<th>Compound</th>' +
+//        '<th>Target</th>' +
+//        '<th>Organism</th>' +
+//        '<th>Activity Name</th>' +
+//        '<th>Standard Value (μm)</th>' +
+//        '<th>ChEMBL Link</th>' +
+//        '<th>PubChem Link</th>' +
+//        '</tr>';
+//
+//    var chembl_header = '<tr>' +
+//        '<th>Compound</th>' +
+//        '<th>Target</th>' +
+//        '<th>Organism</th>' +
+//        '<th>Activity Name</th>' +
+//        '<th>Operator</th>' +
+//        '<th>Standard Value</th>' +
+//        '<th>Standard Units</th>' +
+//        '<th>ChEMBL Link</th>' +
+//        '<th>PubChem Link</th>' +
+//        '</tr>';
 
     var targets_filter = [];
     var compounds_filter = [];
