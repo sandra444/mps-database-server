@@ -31,6 +31,7 @@ class CompoundForm(forms.ModelForm):
         chemblid = self.cleaned_data.get('chemblid', '')
         inchikey = self.cleaned_data.get('inchikey', '')
         pubchemid = self.cleaned_data.get('pubchemid', '')
+        drugbank_id = self.cleaned_data.get('drugbank_id', '')
 
         # If this instance does not have a primary key, then it is new and this is NOT an update
         if not self.instance.pk:
@@ -40,6 +41,8 @@ class CompoundForm(forms.ModelForm):
                 raise forms.ValidationError('A compound with the given InChI Key already exists')
             if pubchemid and Compound.objects.filter(pubchemid=pubchemid).exists():
                 raise forms.ValidationError('A compound with the given PubChem ID already exists')
+            if drugbank_id and Compound.objects.filter(drugbank_id=drugbank_id).exists():
+                raise forms.ValidationError('A compound with the given DrugBank ID already exists')
 
         return self.cleaned_data
 

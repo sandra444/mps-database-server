@@ -195,9 +195,9 @@ class Compound(LockableModel):
         default='', blank=True,
         help_text="Summary of clinical findings")
     post_marketing = models.CharField(
-        'Postmarketing', max_length=1000,
+        'Post-marketing', max_length=1000,
         default='', blank=True,
-        help_text="Summary of clinical findings")
+        help_text="Summary of post-marketing findings")
 
     class Meta(object):
         ordering = ('name', )
