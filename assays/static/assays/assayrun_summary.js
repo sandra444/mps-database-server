@@ -5,6 +5,18 @@ $(document).ready(function() {
 
     var radio_buttons_display = $('#radio_buttons');
 
+    var pattern = [
+        '#1f77b4', '#ff7f0e', '#2ca02c',
+        '#d62728', '#9467bd',
+        '#8c564b', '#e377c2','#7f7f7f',
+        '#bcbd22', '#17becf',
+        '#18F285',
+        '#E6F02E',
+        '#AAF514',
+        '#52400B',
+        '#CCCCCC'
+    ];
+
     function make_charts(assays) {
         // Clear existing charts
         charts.empty();
@@ -102,6 +114,10 @@ $(document).ready(function() {
                 // manually reposition axis label
                 onrendered: function() {
                     $('.c3-axis-x-label').attr('dy', '35px');
+                },
+                color: {
+                    // May need more colors later (these colors might also be too similar?)
+                    pattern: pattern
                 }
             });
 

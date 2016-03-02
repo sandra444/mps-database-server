@@ -12,6 +12,18 @@ $(document).ready(function () {
 
     var plotted = {};
 
+    var pattern = [
+        '#1f77b4', '#ff7f0e', '#2ca02c',
+        '#d62728', '#9467bd',
+        '#8c564b', '#e377c2','#7f7f7f',
+        '#bcbd22', '#17becf',
+        '#18F285',
+        '#E6F02E',
+        '#AAF514',
+        '#52400B',
+        '#CCCCCC'
+    ];
+
     function ISO_to_date(iso) {
         return iso.substring(0,10).replace(/\-/g,'');
     }
@@ -288,6 +300,10 @@ $(document).ready(function () {
                 },
                 padding: {
                   right: 10
+                },
+                color: {
+                    // May need more colors later (these colors might also be too similar?)
+                    pattern: pattern
                 }
             });
 
