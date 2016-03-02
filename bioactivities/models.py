@@ -48,28 +48,28 @@ def chembl_assay(chemblid):
 
 class Target(LockableModel):
     name = models.TextField(help_text="Preferred target name.")
-    synonyms = models.TextField(default='')
+    synonyms = models.TextField(default='', blank=True)
 
     # external identifiers, not unique because does go with null on SQL server
     chemblid = models.TextField('ChEMBL ID',
-                                default='',
+                                default='', blank=True,
                                 help_text="Enter a ChEMBL id, e.g. CHEMBL260, "
                                           "and click Retrieve to get target "
                                           "information automatically.")
 
-    description = models.TextField(default='')
+    description = models.TextField(default='', blank=True)
 
-    gene_names = models.TextField(default='')
+    gene_names = models.TextField(default='', blank=True)
 
-    organism = models.TextField(default='')
+    organism = models.TextField(default='', blank=True)
 
-    uniprot_accession = models.TextField(default='')
+    uniprot_accession = models.TextField(default='', blank=True)
 
-    target_type = models.TextField(default='')
+    target_type = models.TextField(default='', blank=True)
 
     # NCBI identifier for protein/gene targets
     GI = models.TextField('NCBI GI',
-                          default='')
+                          default='', blank=True)
 
     last_update = models.DateField(blank=True, null=True,
                                    help_text="Last time when activities "
@@ -100,22 +100,22 @@ ASSAYTYPES = (('B', 'Binding'), ('F', 'Functional'), ('A', 'ADMET'), ('P', 'Phys
 class Assay(LockableModel):
     # external identifiers, not unique because does go with null on SQL server
     chemblid = models.TextField('ChEMBL ID',
-                                default='',
+                                default='', blank=True,
                                 help_text="Enter a ChEMBL id, e.g. "
                                           "CHEMBL1217643, and click Retrieve "
                                           "to get target information "
                                           "automatically.")
 
-    description = models.TextField(default='',)
-    organism = models.TextField(default='',)
+    description = models.TextField(default='', blank=True,)
+    organism = models.TextField(default='', blank=True,)
     assay_type = models.CharField(max_length=1, choices=ASSAYTYPES, default='U')
-    journal = models.TextField(default='',)
-    strain = models.TextField(default='',)
+    journal = models.TextField(default='', blank=True,)
+    strain = models.TextField(default='', blank=True,)
 
-    pubchem_id = models.TextField('PubChem ID', default='')
-    source = models.TextField(default='')
-    source_id = models.TextField(default='')
-    name = models.TextField(default='', verbose_name="Assay Name")
+    pubchem_id = models.TextField('PubChem ID', default='', blank=True)
+    source = models.TextField(default='', blank=True)
+    source_id = models.TextField(default='', blank=True)
+    name = models.TextField(default='', blank=True, verbose_name="Assay Name")
 
     target = models.ForeignKey('Target', default=None, verbose_name="Target", null=True, blank=True)
 
@@ -159,34 +159,34 @@ class Bioactivity(LockableModel):
     target = models.ForeignKey(Target)
     target_confidence = models.IntegerField(blank=True, null=True)
 
-    bioactivity_type = models.TextField(verbose_name="name", default='')
+    bioactivity_type = models.TextField(verbose_name="name", default='', blank=True)
 
-    standard_name = models.TextField(default='')
-    operator = models.TextField(default='')
+    standard_name = models.TextField(default='', blank=True)
+    operator = models.TextField(default='', blank=True)
 
-    units = models.TextField(default='')
+    units = models.TextField(default='', blank=True)
     value = models.FloatField(blank=True, null=True)
 
     standardized_units = models.TextField(verbose_name="std units",
-                                          default='')
+                                          default='', blank=True)
     standardized_value = models.FloatField(verbose_name="std vals",
                                            blank=True,
                                            null=True)
 
-    activity_comment = models.TextField(default='')
-    reference = models.TextField(default='')
-    name_in_reference = models.TextField(default='')
+    activity_comment = models.TextField(default='', blank=True)
+    reference = models.TextField(default='', blank=True)
+    name_in_reference = models.TextField(default='', blank=True)
 
     normalized_value = models.FloatField(blank=True,
                                         null=True,
                                         verbose_name="Normalized Value")
 
     # Indicates whether there was an error or something of that sort
-    notes = models.TextField(default='')
+    notes = models.TextField(default='', blank=True)
 
     # Use ChEMBL Assay Type to clarify unclear names like "Activity"
     # Removed for now
-    # chembl_assay_type = models.TextField(blank=True, null=True, default='')
+    # chembl_assay_type = models.TextField(blank=True, null=True, default='', blank=True)
 
     def organism(self):
         return self.target.organism
@@ -202,14 +202,14 @@ class Bioactivity(LockableModel):
 class BioactivityType(LockableModel):
     class Meta(object):
         ordering = ('chembl_bioactivity','chembl_unit', )
-    chembl_bioactivity = models.TextField(default='')
-    chembl_unit = models.TextField(default='')
+    chembl_bioactivity = models.TextField(default='', blank=True)
+    chembl_unit = models.TextField(default='', blank=True)
     scale_factor = models.FloatField(default=1,blank=True, null=True)
     mass_flag = models.CharField(max_length=8,default='N',choices=(('Y', 'Yes'),
                                                         ('N', 'No')))
-    standard_name = models.TextField(default='')
-    description = models.TextField(default='')
-    standard_unit = models.TextField(default='')
+    standard_name = models.TextField(default='', blank=True)
+    description = models.TextField(default='', blank=True)
+    standard_unit = models.TextField(default='', blank=True)
 
     def __unicode__(self):
         return unicode(self.standard_name)
@@ -229,12 +229,12 @@ class PubChemBioactivity(LockableModel):
     # Value is required
     value = models.FloatField(verbose_name="Value (uM)")
 
-    outcome = models.TextField(default='', verbose_name="Bioactivity Outcome")
+    outcome = models.TextField(default='', blank=True, verbose_name="Bioactivity Outcome")
 
     # Not required?
     # TODO Consider making this a FK to bioactivity types
     # TODO Or, perhaps we should make another table for PubChem types?
-    activity_name = models.TextField(default='', verbose_name="Activity Name")
+    activity_name = models.TextField(default='', blank=True, verbose_name="Activity Name")
 
     # Normalized value for visualization and so on
     # Be sure to normalize on bioactivity-target pair across the entire database
@@ -243,18 +243,18 @@ class PubChemBioactivity(LockableModel):
                                         verbose_name="Normalized Value")
 
     # Indicates whether there was an error or something of that sort
-    notes = models.TextField(default='')
+    notes = models.TextField(default='', blank=True)
 
 # TODO PubChem Bioactivity Type? and PubChem targets
 # To following table may eventually be merged into the existing bioactivty type table
 # Deliberating, is it really worthwhile to make a model with only one field?
 #class PubChemBioactivityType(LockableModel):
-#    name = models.TextField(default='')
+#    name = models.TextField(default='', blank=True)
 
 
 # TODO PubChemTarget model is slated for removal
 class PubChemTarget(LockableModel):
-    name = models.TextField(default='', help_text="Preferred target name.")
+    name = models.TextField(default='', blank=True, help_text="Preferred target name.")
 
     # May be difficult to acquire
     #synonyms = models.TextField(null=True, blank=True)
@@ -266,10 +266,10 @@ class PubChemTarget(LockableModel):
                           blank=True)
 
     # Target type is not always listed: not required
-    target_type = models.TextField(default='')
+    target_type = models.TextField(default='', blank=True)
 
     # Organism is not always listed: not required
-    organism = models.TextField(default='')
+    organism = models.TextField(default='', blank=True)
 
     def __unicode__(self):
         return unicode(self.name)
@@ -278,17 +278,17 @@ class PubChemTarget(LockableModel):
 # TODO PubChemAssay model is slated for removal
 class PubChemAssay(LockableModel):
     # Source is an optional field showing where PubChem pulled their data
-    source = models.TextField(default='')
+    source = models.TextField(default='', blank=True)
 
-    source_id = models.TextField(default='')
+    source_id = models.TextField(default='', blank=True)
 
     # PubChem ID
     aid = models.TextField(verbose_name="Assay ID")
 
     # Not required?
-    name = models.TextField(default='', verbose_name="Assay Name")
+    name = models.TextField(default='', blank=True, verbose_name="Assay Name")
 
-    description = models.TextField(default='')
+    description = models.TextField(default='', blank=True)
 
     def __unicode__(self):
         return unicode(self.aid)
