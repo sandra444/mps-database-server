@@ -356,6 +356,13 @@
                 </tr>
             {% endif %}
 
+            {% if object.post_marketing %}
+                <tr>
+                    <td><strong>Post-marketing</strong></td>
+                    <td>{{ object.post_marketing|linebreaks }}</td>
+                </tr>
+            {% endif %}
+
 {#            {% for summary in object.compoundsummary_set.all|dictsort:"summary_type.name" reversed%}#}
 {#                <tr>#}
 {#                    <td><strong>{{ summary.summary_type }}</strong></td>#}

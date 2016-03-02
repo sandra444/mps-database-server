@@ -9,18 +9,30 @@
 
 {% block content %}
 
-<form enctype="multipart/form-data" class="form-horizontal" method="post" >
-    {% csrf_token %}
-    {{ formset.management_form }}
+{% if update %}
+    <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');"
+          enctype="multipart/form-data" class="form-horizontal" method="post" >
+
+    {% include 'review.html' %}
+
+    <h1>
+        Edit <em>{{ object }}</em>
+{% else %}
+    <form enctype="multipart/form-data" class="form-horizontal" method="post" >
+
     <h1>
         Add Compound
-{#        <br>#}
-{#        <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
+{% endif %}
     </h1>
+
+    {% csrf_token %}
+    {{ formset.management_form }}
 
     {% include "submit.html" %}
 
     {% include 'errors.html' %}
+
+    {% include 'tracking.html' %}
 
     <legend>General</legend>
 
@@ -204,15 +216,17 @@
 
     <legend>Summaries</legend>
 
-    {% include 'generic_field.html' with field=form.absorption label="Absorption"%}
+    {% include 'generic_field.html' with field=form.absorption label="Absorption" %}
 
-    {% include 'generic_field.html' with field=form.clearance label="Clearance"%}
+    {% include 'generic_field.html' with field=form.clearance label="Clearance" %}
 
-    {% include 'generic_field.html' with field=form.pk_metabolism label="PK/Metabolism"%}
+    {% include 'generic_field.html' with field=form.pk_metabolism label="PK/Metabolism" %}
 
-    {% include 'generic_field.html' with field=form.preclinical label="Pre-clinical Findings"%}
+    {% include 'generic_field.html' with field=form.preclinical label="Pre-clinical Findings" %}
 
-    {% include 'generic_field.html' with field=form.clinical label="Clinical Findings"%}
+    {% include 'generic_field.html' with field=form.clinical label="Clinical Findings" %}
+
+    {% include 'generic_field.html' with field=form.post_marketing label="Post-marketing" %}
 
     {# TODO MAKE SURE TARGETS ARE WORKING #}
     <legend>Targets/Interactions</legend>

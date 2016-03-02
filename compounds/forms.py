@@ -20,6 +20,7 @@ class CompoundForm(forms.ModelForm):
             'pk_metabolism': forms.Textarea(attrs={'size': 50, 'rows': 3}),
             'preclinical': forms.Textarea(attrs={'size': 50, 'rows': 3}),
             'clinical': forms.Textarea(attrs={'size': 50, 'rows': 3}),
+            'post_marketing': forms.Textarea(attrs={'size': 50, 'rows': 3}),
         }
         exclude = ('',)
 
@@ -31,12 +32,14 @@ class CompoundForm(forms.ModelForm):
         inchikey = self.cleaned_data.get('inchikey', '')
         pubchemid = self.cleaned_data.get('pubchemid', '')
 
-        if chemblid and Compound.objects.filter(chemblid=chemblid).exists():
-            raise forms.ValidationError('A compound with the given ChEMBL ID already exists')
-        if inchikey and Compound.objects.filter(inchikey=inchikey).exists():
-            raise forms.ValidationError('A compound with the given InChI Key already exists')
-        if pubchemid and Compound.objects.filter(pubchemid=pubchemid).exists():
-            raise forms.ValidationError('A compound with the given PubChem ID already exists')
+        # If this instance does not have a primary key, then it is new and this is NOT an update
+        if not self.instance.pk:
+            if chemblid and Compound.objects.filter(chemblid=chemblid).exists():
+                raise forms.ValidationError('A compound with the given ChEMBL ID already exists')
+            if inchikey and Compound.objects.filter(inchikey=inchikey).exists():
+                raise forms.ValidationError('A compound with the given InChI Key already exists')
+            if pubchemid and Compound.objects.filter(pubchemid=pubchemid).exists():
+                raise forms.ValidationError('A compound with the given PubChem ID already exists')
 
         return self.cleaned_data
 

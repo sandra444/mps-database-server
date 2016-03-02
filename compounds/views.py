@@ -111,6 +111,8 @@ class CompoundsUpdate(SpecificGroupRequiredMixin, UpdateView):
             else:
                 context['formset'] = CompoundTargetFormset(instance=self.object)
 
+        context['update'] = True
+
         return context
 
     def form_valid(self, form):

@@ -112,7 +112,11 @@ class CompoundAdmin(LockableAdmin):
         ('Drug(-like) Properties', {
             'fields': ('known_drug', 'medchem_friendly', 'ro3_passes',
                        'ro5_violations', 'species', 'drug_class', 'protein_binding',
-                       'half_life', 'bioavailability', 'clearance', 'absorption'
+                       'half_life', 'bioavailability'
+            )
+        }),
+        ('Summaries', {
+            'fields': ('absorption', 'clearance', 'pk_metabolism', 'preclinical', 'clinical', 'post_marketing'
             )
         }),
         ('Change Tracking', {
