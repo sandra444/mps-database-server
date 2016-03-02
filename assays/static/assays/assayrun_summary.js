@@ -107,7 +107,11 @@ $(document).ready(function() {
 
             var num = 1;
             var xs = {};
-            for (var current_key in assays[assay]) {
+
+            var sorted_keys = _.sortBy(_.keys(assays[assay]));
+
+            for (var i=0; i<sorted_keys.length; i++) {
+                var current_key = sorted_keys[i];
                 var current_data = assays[assay][current_key];
 
                 xs[current_key] = 'x' + num;
