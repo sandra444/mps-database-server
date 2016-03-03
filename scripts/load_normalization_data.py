@@ -5,6 +5,7 @@ from mps.settings import PROJECT_ROOT
 def run():
     normalize_file = open(PROJECT_ROOT[:-4] + '/scripts/NAMCS_NHAMCS_combined_data.json', 'r')
     normalize = json.loads(normalize_file.read())
+    normalize_file.close()
 
     failed = []
 
