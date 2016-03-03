@@ -97,6 +97,7 @@ class Target(LockableModel):
 
 ASSAYTYPES = (('B', 'Binding'), ('F', 'Functional'), ('A', 'ADMET'), ('P', 'Physicochemical'), ('U', 'Unknown'))
 
+
 class Assay(LockableModel):
     # external identifiers, not unique because does go with null on SQL server
     chemblid = models.TextField('ChEMBL ID',
