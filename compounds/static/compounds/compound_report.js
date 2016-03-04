@@ -219,12 +219,10 @@ $(document).ready(function () {
             row += "<td><a href='/compounds/"+values['id']+"'>" + compound + "</a></td>";
             //row += "<td>" + values['Dose (xCmax)'] + "</td>";
             row += "<td>" + values['logP']  + "</td>";
+            row += "<td>" + values['pk_metabolism'].replace(/\r\n/g,'<br>') + "</td>";
             row += "<td>" + values['preclinical'].replace(/\r\n/g,'<br>') + "</td>";
             row += "<td>" + values['clinical'].replace(/\r\n/g,'<br>') + "</td>";
-
-            // Recently added
-            row += "<td>" + values['pk_metabolism'].replace(/\r\n/g,'<br>') + "</td>";
-
+            row += "<td>" + values['post_marketing'].replace(/\r\n/g,'<br>') + "</td>";
             row += "<td>";
 
             // Make the table
@@ -300,7 +298,7 @@ $(document).ready(function () {
             "aoColumnDefs": [
                 {
                     "bSortable": false,
-                    "aTargets": [5]
+                    "aTargets": [6]
                 }
             ]
         });

@@ -115,6 +115,7 @@ def fetch_compound_report(request):
                     'preclinical': compound.preclinical,
                     'clinical': compound.clinical,
                     'pk_metabolism': compound.pk_metabolism,
+                    'post_marketing': compound.post_marketing,
                     'logP': compound.logp,
                     'max_time': {}
                 },
