@@ -42,6 +42,7 @@ $(document).ready(function () {
             row += "<td><a href='https://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?aid="+bio.pubchem_id+"'>" + bio.pubchem_id + "</a></td>";
 
             row += "<td>" + bio.notes + "</td>";
+            row += "<td class='text-danger'>" + bio.data_validity + "</td>";
 //            row += "<td>" + bio.bioactivity_type + "</td>";
 //            row += "<td>" + bio.value + "</td>";
 //            row += "<td>" + bio.units + "</td>";
@@ -65,7 +66,9 @@ $(document).ready(function () {
 
     function submit() {
         // Get pubchem checkbox value
-        pubchem = $('#pubchem').prop('checked');
+        var pubchem = $('#pubchem').prop('checked');
+        // Get exclude questionable
+        var exclude_questionable = $('#exclude_questionable').prop('checked');
 
         // Set the headers relative to pubchem or chembl
 //        if (pubchem) {
@@ -113,6 +116,7 @@ $(document).ready(function () {
             contentType: 'application/json',
             // Remember to convert to string
             data: JSON.stringify({
+                'exclude_questionable': exclude_questionable,
                 'pubchem': pubchem,
                 'bioactivities_filter': bioactivities_filter,
                 'targets_filter': targets_filter,
@@ -190,8 +194,6 @@ $(document).ready(function () {
     var targets_filter = [];
     var compounds_filter = [];
     var bioactivities_filter = [];
-
-    var pubchem = $('#pubchem').prop('checked');
 
     $('#submit').click(function(evt) {
         submit();

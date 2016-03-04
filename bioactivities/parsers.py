@@ -47,11 +47,11 @@ def generate_record_frequency_data(query):
     return result_list
 
 
-def generate_list_of_all_data_in_bioactivities(pubchem, organisms, targets):
-    bioactivities_data = generate_list_of_all_bioactivities_in_bioactivities(pubchem)
-    compounds_data = generate_list_of_all_compounds_in_bioactivities(pubchem)
+def generate_list_of_all_data_in_bioactivities(exclude_questionable, pubchem, organisms, targets):
+    bioactivities_data = generate_list_of_all_bioactivities_in_bioactivities(exclude_questionable, pubchem)
+    compounds_data = generate_list_of_all_compounds_in_bioactivities(exclude_questionable, pubchem)
     # Targets are based on assay and not dependent on pubchem
-    targets_data = generate_list_of_all_targets_in_bioactivities(pubchem, organisms, targets)
+    targets_data = generate_list_of_all_targets_in_bioactivities(exclude_questionable, pubchem, organisms, targets)
     drugtrial_data = generate_list_of_all_drugtrials(organisms)
 
     result = {
@@ -64,17 +64,21 @@ def generate_list_of_all_data_in_bioactivities(pubchem, organisms, targets):
     return result
 
 
-def generate_list_of_all_bioactivities_in_bioactivities(pubchem):
+def generate_list_of_all_bioactivities_in_bioactivities(exclude_questionable, pubchem):
     if pubchem:
-        pubchem_bioactivities = PubChemBioactivity.objects.all().values_list('activity_name')
-        result = generate_record_frequency_data(pubchem_bioactivities)
+        bioactivities = PubChemBioactivity.objects.all().values_list('activity_name')
     else:
-        chembl_bioactivities = Bioactivity.objects.all().values_list('standard_name')
-        result = generate_record_frequency_data(chembl_bioactivities)
+        bioactivities = Bioactivity.objects.all().values_list('standard_name')
+
+    if exclude_questionable:
+        bioactivities = bioactivities.filter(data_validity='')
+
+    result = generate_record_frequency_data(bioactivities)
+
     return result
 
 
-def generate_list_of_all_targets_in_bioactivities(pubchem, organisms, targets):
+def generate_list_of_all_targets_in_bioactivities(exclude_questionable, pubchem, organisms, targets):
     # Requires revision
     if pubchem:
         initial_targets = PubChemBioactivity.objects.filter(
@@ -92,8 +96,6 @@ def generate_list_of_all_targets_in_bioactivities(pubchem, organisms, targets):
 
         all_targets = all_targets.select_related('assay__target').values_list('assay__target__name')
 
-        result = generate_record_frequency_data(all_targets)
-
     else:
         initial_targets = Bioactivity.objects.filter(
             target__organism__in=organisms,
@@ -110,7 +112,10 @@ def generate_list_of_all_targets_in_bioactivities(pubchem, organisms, targets):
 
         all_targets = all_targets.prefetch_related('target').values_list('target__name')
 
-        result = generate_record_frequency_data(all_targets)
+    if exclude_questionable:
+        all_targets = all_targets.filter(data_validity='')
+
+    result = generate_record_frequency_data(all_targets)
 
     # Add no target
     result.append(['!No Target', 999999999])
@@ -140,9 +145,9 @@ def generate_list_of_all_drugtrials(desired_organisms):
     return result
 
 
-def generate_list_of_all_compounds_in_bioactivities(pubchem):
+def generate_list_of_all_compounds_in_bioactivities(exclude_questionable, pubchem):
     if pubchem:
-        pubchem_compounds = PubChemBioactivity.objects.all().prefetch_related(
+        compounds = PubChemBioactivity.objects.all().prefetch_related(
             'compound'
         ).values_list(
             'compound__name',
@@ -150,9 +155,8 @@ def generate_list_of_all_compounds_in_bioactivities(pubchem):
             'compound__logp',
             'compound__molecular_weight'
         )
-        result = generate_record_frequency_data(pubchem_compounds)
     else:
-        chembl_compounds = Bioactivity.objects.all().prefetch_related(
+        compounds = Bioactivity.objects.all().prefetch_related(
             'compound'
         ).values_list(
             'compound__name',
@@ -160,7 +164,11 @@ def generate_list_of_all_compounds_in_bioactivities(pubchem):
             'compound__logp',
             'compound__molecular_weight'
         )
-        result = generate_record_frequency_data(chembl_compounds)
+
+    if exclude_questionable:
+        compounds = compounds.filter(data_validity='')
+
+    result = generate_record_frequency_data(compounds)
 
     return result
 
@@ -233,6 +241,8 @@ def get_form_data(request):
 
     pubchem = request_filter.get('pubchem', True)
 
+    exclude_questionable = request_filter.get('exclude_questionable', True)
+
     return {
         'desired_targets': desired_targets,
         'desired_compounds': desired_compounds,
@@ -244,11 +254,13 @@ def get_form_data(request):
         'method': method,
         'metric': metric,
         'chemical_properties': chemical_properties,
-        'pubchem': pubchem
+        'pubchem': pubchem,
+        'exclude_questionable': exclude_questionable
     }
 
 
 def get_filtered_bioactivities(
+        exclude_questionable,
         pubchem,
         desired_compounds,
         desired_targets,
@@ -347,11 +359,15 @@ def get_filtered_bioactivities(
             'target'
         )
 
+    if exclude_questionable:
+        q = q.filter(data_validity='')
+
     return q
 
 
 # TODO STANDARD BIOACTIVITIES FOR ChEBML (right now just PubChem)
 def fetch_all_standard_bioactivities_data(
+        exclude_questionable,
         pubchem,
         desired_compounds,
         desired_targets,
@@ -362,6 +378,7 @@ def fetch_all_standard_bioactivities_data(
 ):
     # First, we acquire all the filtered hits
     filtered_bioactivities = get_filtered_bioactivities(
+        exclude_questionable,
         pubchem,
         desired_compounds,
         desired_targets,
@@ -570,6 +587,8 @@ def heatmap(request):
 
     pubchem = form['pubchem']
 
+    exclude_questionable = form['exclude_questionable']
+
     # throw error if no compounds are selected
     if not desired_compounds:
         return {'error': 'Select at least one compound.'}
@@ -579,6 +598,7 @@ def heatmap(request):
         return {'error': 'Select at least one target and at least one bioactivity or at least one drugtrial.'}
 
     all_std_bioactivities = fetch_all_standard_bioactivities_data(
+        exclude_questionable,
         pubchem,
         desired_compounds,
         desired_targets,
@@ -785,6 +805,8 @@ def cluster(request):
 
     pubchem = form['pubchem']
 
+    exclude_questionable = form['exclude_questionable']
+
     # throw error if only one compound is selected (can not cluster just one)
     if len(desired_compounds) < 2:
         return {'error': 'require more than one compound to cluster'}
@@ -794,6 +816,7 @@ def cluster(request):
         return {'error': 'Select at least one target and at least one bioactivity or at least one drugtrial.'}
 
     all_std_bioactivities = fetch_all_standard_bioactivities_data(
+        exclude_questionable,
         pubchem,
         desired_compounds,
         desired_targets,
@@ -1061,6 +1084,8 @@ def table(request):
     desired_organisms = form['desired_organisms']
     pubchem = form['pubchem']
 
+    exclude_questionable = form['exclude_questionable']
+
     # throw error if no compounds are selected
     if len(desired_compounds) < 1:
         return {'error': 'Select at least one compound.'}
@@ -1078,6 +1103,7 @@ def table(request):
     #   return {'error': 'Many bioactivities are listed with Rattus norvegicus as a target, either deselect it or choose fewer than 15 compounds.'}
 
     q = get_filtered_bioactivities(
+        exclude_questionable,
         pubchem,
         desired_compounds,
         desired_targets,
@@ -1133,6 +1159,8 @@ def table(request):
 
         notes = bioactivity.notes
 
+        data_validity = bioactivity.get_data_validity_display()
+
         obj = {
             'id': id,
             'compound': compound,
@@ -1145,7 +1173,8 @@ def table(request):
             'standardized_units': standardized_units,
             'chemblid': chemblid,
             'pubchem_id': pubchem_id,
-            'notes': notes
+            'notes': notes,
+            'data_validity': data_validity
         }
         data.append(obj)
 

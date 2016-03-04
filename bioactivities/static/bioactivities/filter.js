@@ -85,10 +85,8 @@ $(document).ready(function () {
         $("#selection_form :input").prop("disabled", true);
 
         // Whether or not refresh should use pubchem
-        var pubchem = true;
-        if ($('#pubchem')[0]) {
-            pubchem = $('#pubchem').prop('checked');
-        }
+        var pubchem = $('#pubchem').prop('checked');
+        var exclude_questionable = $('#exclude_questionable').prop('checked');
 
         $.ajax({
             url: '/bioactivities/all_data',
@@ -96,6 +94,7 @@ $(document).ready(function () {
             dataType: "json",
             data: {
                 pubchem: pubchem,
+                exclude_questionable: exclude_questionable,
                 target_types: JSON.stringify(FILTER.target_types),
                 organisms: JSON.stringify(FILTER.organisms)
             },
@@ -569,6 +568,11 @@ $(document).ready(function () {
 
     // Trigger refresh when switching between ChEMBL and PubChem
     $('#pubchem').click(function() {
+        refresh('all');
+    });
+
+    // Trigger refresh when changing exclude questionable
+    $('#exclude_questionable').click(function() {
         refresh('all');
     });
 

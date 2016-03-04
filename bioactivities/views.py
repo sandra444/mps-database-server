@@ -187,6 +187,7 @@ def list_of_all_bioactivities_in_bioactivities(request):
 
 @csrf_exempt
 def list_of_all_targets_in_bioactivities(request):
+    exclude_questionable = json.loads(request.GET.get('exclude_questionable'))
     pubchem = json.loads(request.GET.get('pubchem'))
     target_types = json.loads(request.GET.get('target_types'))
     organisms = json.loads(request.GET.get('organisms'))
@@ -209,16 +210,30 @@ def list_of_all_targets_in_bioactivities(request):
         ) is True
     ]
 
-    return JSONResponse(generate_list_of_all_targets_in_bioactivities(pubchem, desired_organisms, desired_target_types))
+    return JSONResponse(
+        generate_list_of_all_targets_in_bioactivities(
+            exclude_questionable,
+            pubchem,
+            desired_organisms,
+            desired_target_types
+        )
+    )
 
 
 @csrf_exempt
 def list_of_all_compounds_in_bioactivities(request):
-    return JSONResponse(generate_list_of_all_compounds_in_bioactivities(True))
+    exclude_questionable = json.loads(request.GET.get('exclude_questionable'))
+    pubchem = json.loads(request.GET.get('pubchem'))
+
+    return JSONResponse(generate_list_of_all_compounds_in_bioactivities(
+        exclude_questionable,
+        pubchem,
+    ))
 
 
 @csrf_exempt
 def list_of_all_data_in_bioactivities(request):
+    exclude_questionable = json.loads(request.GET.get('exclude_questionable'))
     pubchem = json.loads(request.GET.get('pubchem'))
     target_types = json.loads(request.GET.get('target_types'))
     organisms = json.loads(request.GET.get('organisms'))
@@ -241,7 +256,14 @@ def list_of_all_data_in_bioactivities(request):
         ) is True
     ]
 
-    return JSONResponse(generate_list_of_all_data_in_bioactivities(pubchem, desired_organisms, desired_target_types))
+    return JSONResponse(
+        generate_list_of_all_data_in_bioactivities(
+            exclude_questionable,
+            pubchem,
+            desired_organisms,
+            desired_target_types
+        )
+    )
 
 
 @csrf_exempt

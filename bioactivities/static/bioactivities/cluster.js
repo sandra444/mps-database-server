@@ -191,7 +191,9 @@ $(document).ready(function () {
 
     function submit() {
         // Get pubchem checkbox value
-        pubchem = $('#pubchem').prop('checked');
+        var pubchem = $('#pubchem').prop('checked');
+        // Get exclude questionable
+        var exclude_questionable = $('#exclude_questionable').prop('checked');
 
         // Clear all filters
         bioactivities_filter = [];
@@ -235,6 +237,7 @@ $(document).ready(function () {
             contentType: 'application/json',
             // Remember to convert to string
             data: JSON.stringify({
+                'exclude_questionable': exclude_questionable,
                 'pubchem': pubchem,
                 'bioactivities_filter': bioactivities_filter,
                 'targets_filter': targets_filter,
