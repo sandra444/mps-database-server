@@ -328,7 +328,7 @@ class BioactivityAdmin(LockableAdmin):
                        ('bioactivity_type', 'value', 'units'),
                        ('standard_name', 'standardized_value', 'standardized_units'),
                        ('activity_comment', 'reference', 'name_in_reference'),
-                       'notes',
+                       ('notes', 'data_validity'),
                        'locked',
                        ('created_by', 'created_on'), ('modified_by', 'modified_on'),
                        ('signed_off_by', 'signed_off_date'),)
@@ -423,7 +423,7 @@ class PubChemBioactivityAdmin(LockableAdmin):
                 'normalized_value',
                 'activity_name',
                 'assay',
-                'notes',
+                ('notes', 'data_validity'),
             )
         }),
     )

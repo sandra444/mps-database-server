@@ -43,6 +43,7 @@
                     <th>ChEMBL Link</th>
                     <th>PubChem Link</th>
                     <th>Notes</th>
+                    <th>Valid?</th>
                 </tr>
             </thead>
 
@@ -58,6 +59,7 @@
                     <th>ChEMBL Link</th>
                     <th>PubChem Link</th>
                     <th>Notes</th>
+                    <th>Valid?</th>
                 </tr>
             </tfoot>
 
@@ -91,6 +93,7 @@
                         {{ bioactivity.assay.pubchem_id|default:'' }}
                     </a></td>
                     <td>{{ bioactivity.notes }}</td>
+                    <td class="text-danger">{{ bioactivity.get_data_validity_display }}</td>
                 </tr>
             {% endfor %}
             </tbody>

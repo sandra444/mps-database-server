@@ -15,6 +15,7 @@ from django.contrib.auth.models import Group
 import os
 import settings
 
+
 def main(request):
     if request.method == 'POST':
         form = SearchForm(request.POST)
@@ -32,6 +33,7 @@ def main(request):
 
     return render_to_response('index.html', c)
 
+
 def login(request):
     next = request.GET.get('next', '')
     # Don't allow a user to try to log in twice
@@ -44,6 +46,7 @@ def login(request):
     c.update(csrf(request))
     c.update({'next':request.GET.get('next', '')})
     return render_to_response('login.html', c)
+
 
 def auth_view(request):
     username = request.POST.get('username', '')
@@ -60,19 +63,23 @@ def auth_view(request):
     else:
         return HttpResponseRedirect('/accounts/invalid')
 
+
 def loggedin(request):
     c = RequestContext(request)
     c.update({'full_name': request.user.username})
     return render_to_response('loggedin.html', c)
 
+
 def invalid_login(request):
     c = RequestContext(request)
     return render_to_response('invalid_login.html', c)
+
 
 def logout(request):
     auth.logout(request)
     c = RequestContext(request)
     return render_to_response('logout.html', c)
+
 
 def search(request):
     app = request.POST.get('app','')
@@ -85,6 +92,7 @@ def search(request):
         'pubchem': request.POST.get('pubchem', ''),
         'exclude_targetless': request.POST.get('exclude_targetless', ''),
         'exclude_organismless': request.POST.get('exclude_organismless', ''),
+        'exclude_questionable': request.POST.get('exclude_questionable', ''),
     }
 
     # If there is not a specified app, just return to the home page
@@ -120,6 +128,7 @@ def search(request):
 #     def extra_context(self):
 #         spelling = self.results.spelling_suggestion(self.query)
 #         return {'suggestion': spelling,}
+
 
 # A generic use of the search_view_factory
 def custom_search(request):

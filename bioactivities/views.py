@@ -47,6 +47,7 @@ def bioactivities_list(request):
         pubchem = request.GET.get('pubchem', '')
         exclude_targetless = request.GET.get('exclude_targetless', '')
         exclude_organismless = request.GET.get('exclude_organismless', '')
+        exclude_questionable = request.GET.get('exclude_questionable', '')
 
         # I might want to sort by multiple fields later
         if any([compound, target, name]):
@@ -100,6 +101,9 @@ def bioactivities_list(request):
                 # Exclude where organism is "Unspecified"
                 data = data.exclude(assay__organism="Unspecified").exclude(assay__target__organism="Unspecified")
 
+            if exclude_questionable:
+                data = data.filter(data_validity='')
+
             length = data.count()
 
             # Limit at 5000
@@ -114,6 +118,7 @@ def bioactivities_list(request):
                 'length': length,
                 'pubchem': pubchem
             })
+
             return render_to_response('bioactivities/bioactivities_list.html', c)
 
         else:

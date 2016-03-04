@@ -181,10 +181,10 @@ class Bioactivity(LockableModel):
     name_in_reference = models.TextField(default='', blank=True)
 
     normalized_value = models.FloatField(blank=True,
-                                        null=True,
-                                        verbose_name="Normalized Value")
+                                         null=True,
+                                         verbose_name="Normalized Value")
 
-    # Indicates whether there was an error or something of that sort
+    # Column for notes
     notes = models.TextField(default='', blank=True)
 
     # Indicates the validity of the entry: empty string is valid other choices show questionable
@@ -248,7 +248,7 @@ class PubChemBioactivity(LockableModel):
                                         null=True,
                                         verbose_name="Normalized Value")
 
-    # Indicates whether there was an error or something of that sort
+    # Column for notes
     notes = models.TextField(default='', blank=True)
 
     # Indicates the validity of the entry: empty string is valid other choices show questionable
