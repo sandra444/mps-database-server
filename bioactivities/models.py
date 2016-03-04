@@ -143,6 +143,8 @@ class Assay(LockableModel):
     chembl_link.allow_tags = True
     chembl_link.short_description = 'ChEMBL ID'
 
+DATA_VALIDITY_ANNOTATIONS = (('R', 'Outside typical range'), ('T', 'Potential transcription error'), ('O', 'Other'))
+
 
 class Bioactivity(LockableModel):
     class Meta(object):
@@ -184,6 +186,9 @@ class Bioactivity(LockableModel):
 
     # Indicates whether there was an error or something of that sort
     notes = models.TextField(default='', blank=True)
+
+    # Indicates the validity of the entry: empty string is valid other choices show questionable
+    data_validity = models.CharField(max_length=1, choices=DATA_VALIDITY_ANNOTATIONS, default='', blank=True)
 
     # Use ChEMBL Assay Type to clarify unclear names like "Activity"
     # Removed for now
@@ -245,6 +250,9 @@ class PubChemBioactivity(LockableModel):
 
     # Indicates whether there was an error or something of that sort
     notes = models.TextField(default='', blank=True)
+
+    # Indicates the validity of the entry: empty string is valid other choices show questionable
+    data_validity = models.CharField(max_length=1, choices=DATA_VALIDITY_ANNOTATIONS, default='', blank=True)
 
 # TODO PubChem Bioactivity Type? and PubChem targets
 # To following table may eventually be merged into the existing bioactivty type table
