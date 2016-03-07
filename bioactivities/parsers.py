@@ -1019,7 +1019,6 @@ def cluster(request):
 
         return leafNames
 
-
     label_tree(d3Dendro["children"][0])
 
     # Turn bioactivities into a sorted list of bioactivity-target pairs

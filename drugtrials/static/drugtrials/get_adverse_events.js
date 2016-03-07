@@ -217,7 +217,7 @@ $(document).ready(function () {
 
             var url =  '';
 
-            if (event != 'Total') {
+            if (event != 'Total Reports') {
                 url = 'https://api.fda.gov/drug/event.json?search=receivedate:['+date1+'+TO+'+date2+']%20AND%20patient.reaction.reactionmeddrapt.exact:"'+url_event+'"%20AND%20patient.drug.openfda.generic_name:'+name+'&count=receivedate';
             }
             else {
@@ -245,7 +245,7 @@ $(document).ready(function () {
     }
 
     function plot(event, data) {
-        if (event == 'Total') {
+        if (event == 'Total Reports') {
             x_axis = data.time;
 
             x_format = '%Y%m%d';
@@ -317,7 +317,7 @@ $(document).ready(function () {
             plotted[event] = true;
 
             // Get the groups
-            var groups = [_.without(_.keys(plotted), 'Total')];
+            var groups = [_.without(_.keys(plotted), 'Total Reports')];
             var types = {};
 
             $.each(groups[0], function(index, ae) {
@@ -340,10 +340,10 @@ $(document).ready(function () {
 
     function reset_new_granularity() {
         x_axis = null;
-        get_range_plot('Total');
+        get_range_plot('Total Reports');
     }
 
-    get_range_plot('Total');
+    get_range_plot('Total Reports');
 
     $('.date-select').click(function() {
         if (this.id != granularity) {
