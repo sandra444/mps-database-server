@@ -84,17 +84,13 @@ $(document).ready(function () {
         // Disable everything
         $("#selection_form :input").prop("disabled", true);
 
-        // Whether or not refresh should use pubchem
-        var pubchem = $('#pubchem').prop('checked');
-        var exclude_questionable = $('#exclude_questionable').prop('checked');
-
         $.ajax({
             url: '/bioactivities/all_data',
             type: "GET",
             dataType: "json",
             data: {
-                pubchem: pubchem,
-                exclude_questionable: exclude_questionable,
+                pubchem: FILTER.pubchem,
+                exclude_questionable: FILTER.exclude_questionable,
                 target_types: JSON.stringify(FILTER.target_types),
                 organisms: JSON.stringify(FILTER.organisms)
             },
@@ -260,39 +256,63 @@ $(document).ready(function () {
         refresh('all');
     });
 
+    var pubchem = $('#pubchem');
+    var exclude_questionable = $('#exclude_questionable');
+    var log_scale = $('#log_scale');
+    var normalize_bioactivities = $('#normalize_bioactivities');
+    var chemical_properties = $('#chemical_properties');
+    var metric = $('#metric');
+    var method = $('#method');
+
+    // Initial truth pubchem
+    window.FILTER.pubchem = pubchem.prop('checked');
+    // Listen pubchem
+    pubchem.change(function (evt) {
+        window.FILTER.pubchem = pubchem.prop('checked');
+        refresh('all');
+    });
+
+    // Initial truth exclude_questionable
+    window.FILTER.exclude_questionable = exclude_questionable.prop('checked');
+    // Listen exclude_questionable
+    exclude_questionable.change(function (evt) {
+        window.FILTER.exclude_questionable = exclude_questionable.prop('checked');
+        refresh('all');
+    });
+
     // Initial truth log scale
-    window.FILTER.log_scale = $('#log_scale').prop('checked');
+    window.FILTER.log_scale = log_scale.prop('checked');
     // Listen log_scale
-    $('#log_scale').change(function (evt) {
-        window.FILTER.log_scale = $('#log_scale').prop('checked');
+    log_scale.change(function (evt) {
+        window.FILTER.log_scale = log_scale.prop('checked');
     });
 
     // Initial truth normalize
-    window.FILTER.normalize_bioactivities = $('#normalize_bioactivities').prop('checked');
+    window.FILTER.normalize_bioactivities = normalize_bioactivities.prop('checked');
     // Listen normalize
-    $('#normalize_bioactivities').change(function (evt) {
-        window.FILTER.normalize_bioactivities = $('#normalize_bioactivities').prop('checked');
+    normalize_bioactivities.change(function (evt) {
+        window.FILTER.normalize_bioactivities = normalize_bioactivities.prop('checked');
     });
 
     // Initial truth chem properties
-    window.FILTER.chemical_properties = $('#chemical_properties').prop('checked');
+    window.FILTER.chemical_properties = chemical_properties.prop('checked');
     // Listen chemical properties
-    $('#chemical_properties').change(function (evt) {
-        window.FILTER.chemical_properties = $('#chemical_properties').prop('checked');
+    chemical_properties.change(function (evt) {
+        window.FILTER.chemical_properties = chemical_properties.prop('checked');
     });
 
     // Initial metric
-    window.FILTER.metric = $('#metric').val();
+    window.FILTER.metric = metric.val();
     // Listen metric
-    $('#metric').change(function (evt) {
-        window.FILTER.metric = $('#metric').val();
+    metric.change(function (evt) {
+        window.FILTER.metric = metric.val();
     });
 
     // Initial method
-    window.FILTER.method = $('#method').val();
+    window.FILTER.method = method.val();
     // Listen method
-    $('#method').change(function (evt) {
-        window.FILTER.method = $('#method').val();
+    method.change(function (evt) {
+        window.FILTER.method = method.val();
     });
 
     var targets = [];
@@ -564,16 +584,6 @@ $(document).ready(function () {
     // Trigger molecular_weight changes when changing operator
     molecular_weight_gtlt.change(function () {
         molecular_weight.trigger('change');
-    });
-
-    // Trigger refresh when switching between ChEMBL and PubChem
-    $('#pubchem').click(function() {
-        refresh('all');
-    });
-
-    // Trigger refresh when changing exclude questionable
-    $('#exclude_questionable').click(function() {
-        refresh('all');
     });
 
     window.onhashchange = function() {

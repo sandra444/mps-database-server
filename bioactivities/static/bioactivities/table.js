@@ -65,11 +65,6 @@ $(document).ready(function () {
     }
 
     function submit() {
-        // Get pubchem checkbox value
-        var pubchem = $('#pubchem').prop('checked');
-        // Get exclude questionable
-        var exclude_questionable = $('#exclude_questionable').prop('checked');
-
         // Set the headers relative to pubchem or chembl
 //        if (pubchem) {
 //            $('#variable-header').html(pubchem_header);
@@ -116,8 +111,8 @@ $(document).ready(function () {
             contentType: 'application/json',
             // Remember to convert to string
             data: JSON.stringify({
-                'exclude_questionable': exclude_questionable,
-                'pubchem': pubchem,
+                'exclude_questionable': FILTER.exclude_questionable,
+                'pubchem': FILTER.pubchem,
                 'bioactivities_filter': bioactivities_filter,
                 'targets_filter': targets_filter,
                 'compounds_filter': compounds_filter,
