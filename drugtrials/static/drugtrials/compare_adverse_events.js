@@ -47,7 +47,7 @@ $(document).ready(function () {
     {
         dom: '<"clear">lfrtip',
         "iDisplayLength": 10,
-        "order": [[ 1, "asc" ]],
+        "order": [[ 2, "desc" ]],
         "aoColumnDefs": [
             {
                 "width": "10%",
