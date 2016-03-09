@@ -23,7 +23,6 @@ class CompoundTargetInline(admin.TabularInline):
     extra = 0
 
 
-
 class CompoundSummaryInline(admin.TabularInline):
     # Assays for ChipReadout
     formset = CompoundSummaryInlineFormset
@@ -32,7 +31,7 @@ class CompoundSummaryInline(admin.TabularInline):
     verbose_plural_name = 'Compound Summaries'
 
     fields = (
-        ('compound','summary_type','summary','source')
+        ('compound', 'summary_type', 'summary', 'source')
     )
     extra = 0
 
@@ -49,7 +48,7 @@ class CompoundPropertyInline(admin.TabularInline):
 
     fields = (
         (
-            ('compound','property_type','value','source')
+            ('compound', 'property_type', 'value', 'source')
         ),
     )
     extra = 0
@@ -70,8 +69,9 @@ class CompoundAdmin(LockableAdmin):
                                     widget=forms.Textarea(),
                                     help_text="<br>ChEMBL IDs separated by a "
                                               "space or a new line.")
-
-    inlines = [CompoundSummaryInline, CompoundPropertyInline, CompoundTargetInline]
+    # Compound summary and compound properties are deprecated
+    #inlines = [CompoundSummaryInline, CompoundPropertyInline, CompoundTargetInline]
+    inlines = [CompoundTargetInline]
 
     save_on_top = True
     list_per_page = 300
@@ -84,8 +84,9 @@ class CompoundAdmin(LockableAdmin):
 
     def image_display(self, obj):
         if obj.chemblid:
-            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
-                    'displayimage/' + obj.chemblid)
+            url = (
+                u'https://www.ebi.ac.uk/chembldb/compound/'
+                'displayimage/' + obj.chemblid)
             print '<img src="%s">' % \
                 url
             return '<img src="%s">' % \
