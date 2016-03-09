@@ -18,19 +18,21 @@ from compounds.models import Compound
 from .models import Bioactivity, PubChemBioactivity, Assay
 from drugtrials.models import FindingResult
 
+# POTENTIALLY TOO MEMORY CONSUMING; BE CAUTIOUS
+# Only uncomment this if requested
+#import sys
+#sys.setrecursionlimit(10000)
+
 from django.core import serializers
+
 # TODO FIX TARGET VS. ASSAY ORGANISM CONFLICT
 
 
 def generate_record_frequency_data(query):
     result = {}
 
-    for q in query:
+    for element in query:
         # TODO CRUDE; REQUIRES REVISION
-        if type(q) == tuple:
-            element = '|'.join([unicode(item) for item in q])
-        else:
-            element = ''.join(q)
         if element:
             if element in result:
                 frequency = result.get(element)
@@ -46,13 +48,98 @@ def generate_record_frequency_data(query):
 
     return result_list
 
+def get_compound_frequency_data(query):
+    result = {}
+
+    for element in query:
+        # TODO CRUDE; REQUIRES REVISION
+        element = '|'.join([unicode(item) for item in element])
+        if element:
+            if element in result:
+                frequency = result.get(element)
+                frequency += 1
+                result.update({element: frequency})
+            else:
+                result.update({element: 1})
+
+    result_list = []
+
+    for key, value in result.iteritems():
+        result_list.append([key, value])
+
+    return result_list
 
 def generate_list_of_all_data_in_bioactivities(exclude_questionable, pubchem, organisms, targets):
-    bioactivities_data = generate_list_of_all_bioactivities_in_bioactivities(exclude_questionable, pubchem)
-    compounds_data = generate_list_of_all_compounds_in_bioactivities(exclude_questionable, pubchem)
-    # Targets are based on assay and not dependent on pubchem
-    targets_data = generate_list_of_all_targets_in_bioactivities(exclude_questionable, pubchem, organisms, targets)
+    if pubchem:
+        initial_targets = PubChemBioactivity.objects.filter(
+            assay__target__organism__in=organisms,
+            assay__target__target_type__in=targets
+        )
+
+        no_null_targets = PubChemBioactivity.objects.filter(assay__target__isnull=False)
+
+        if '!No Organism' in organisms:
+            all_targets = initial_targets | no_null_targets.filter(
+                assay__target__organism='') | no_null_targets.filter(assay__target__organism="Unspecified")
+        else:
+            all_targets = initial_targets
+
+        if exclude_questionable:
+            all_targets = all_targets.filter(data_validity='')
+
+        all_targets = all_targets.prefetch_related('compound').select_related('assay__target')
+
+        all_data = all_targets.values_list(
+            'activity_name',
+            'assay__target__name',
+            'compound__name',
+            'compound__known_drug',
+            'compound__logp',
+            'compound__molecular_weight'
+        )
+
+
+
+    else:
+        initial_targets = Bioactivity.objects.filter(
+            target__organism__in=organisms,
+            target__target_type__in=targets
+        )
+
+        no_null_targets = Bioactivity.objects.filter(target__isnull=False)
+
+        if '!No Organism' in organisms:
+            all_targets = initial_targets | no_null_targets.filter(
+                target__organism='') | no_null_targets.filter(target__organism="Unspecified")
+        else:
+            all_targets = initial_targets
+
+        if exclude_questionable:
+            all_targets = all_targets.filter(data_validity='')
+
+        all_targets = all_targets.prefetch_related('target', 'compound')
+
+        all_data = all_targets.values_list(
+            'standard_name',
+            'target__name',
+            'compound__name',
+            'compound__known_drug',
+            'compound__logp',
+            'compound__molecular_weight'
+        )
+
+    bioactivities_data = [data[0] for data in all_data]
+    targets_data = [data[1] for data in all_data]
+    compounds_data = [data[2:] for data in all_data]
+
+    targets_data = generate_record_frequency_data(targets_data)
+    bioactivities_data = generate_record_frequency_data(bioactivities_data)
+    compounds_data = get_compound_frequency_data(compounds_data)
+
     drugtrial_data = generate_list_of_all_drugtrials(organisms)
+
+    # Add no target
+    targets_data.append(['!No Target', 999999999])
 
     result = {
         'bioactivities': bioactivities_data,
@@ -168,7 +255,7 @@ def generate_list_of_all_compounds_in_bioactivities(exclude_questionable, pubche
     if exclude_questionable:
         compounds = compounds.filter(data_validity='')
 
-    result = generate_record_frequency_data(compounds)
+    result = get_compound_frequency_data(compounds)
 
     return result
 
