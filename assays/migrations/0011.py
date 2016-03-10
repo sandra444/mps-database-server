@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 from django.conf import settings
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -12,8 +13,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-		# Make devices required
-		migrations.AlterField(
+        # Make devices required
+        migrations.AlterField(
             model_name='assaychipsetup',
             name='device',
             field=models.ForeignKey(verbose_name=b'Device', to='microdevices.Microdevice'),

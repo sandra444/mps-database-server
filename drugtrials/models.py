@@ -134,6 +134,7 @@ class DrugTrial(LockableModel):
     def get_absolute_url(self):
         return "/drugtrials/{}".format(self.id)
 
+
 class TestType(LockableModel):
     class Meta(object):
         ordering = ('test_type',)
@@ -379,6 +380,9 @@ class OpenFDACompound(LockableModel):
     #clinical_studies = models.TextField(blank=True, null=True)
     # Deemed less than useful
     # laboratory_tests = models.TextField(blank=True, null=True)
+
+    # For normalizing data, may change
+    estimated_usage = models.IntegerField(blank=True, null=True)
 
     def __unicode__(self):
         return u'{}'.format(self.compound.name)

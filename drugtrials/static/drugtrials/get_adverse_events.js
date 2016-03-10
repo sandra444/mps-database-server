@@ -12,6 +12,18 @@ $(document).ready(function () {
 
     var plotted = {};
 
+    var pattern = [
+        '#1f77b4', '#ff7f0e', '#2ca02c',
+        '#d62728', '#9467bd',
+        '#8c564b', '#e377c2','#7f7f7f',
+        '#bcbd22', '#17becf',
+        '#18F285',
+        '#E6F02E',
+        '#AAF514',
+        '#52400B',
+        '#CCCCCC'
+    ];
+
     function ISO_to_date(iso) {
         return iso.substring(0,10).replace(/\-/g,'');
     }
@@ -75,6 +87,15 @@ $(document).ready(function () {
         });
     }
 
+    function stringify_month(month) {
+        if (month < 10) {
+            return '0' + month;
+        }
+        else {
+            return '' + month;
+        }
+    }
+
     function sum_granular(data, sub) {
         var new_data = {};
         var final_data = [];
@@ -97,6 +118,52 @@ $(document).ready(function () {
                     new_data[time] = 0;
                 }
             });
+        }
+        else {
+            var min_year = parseInt(data[0].time.substring(0,4));
+            var max_year = parseInt(data[data.length-1].time.substring(0,4));
+
+            if (granularity === 'month') {
+                var min_month = parseInt(data[0].time.substring(4,6));
+                var max_month = parseInt(data[data.length-1].time.substring(4,6));
+                var current_month = '';
+
+                // First year
+                for (var month = min_month; month <= 12; month++) {
+                    current_month = stringify_month(month);
+
+                    if (!new_data[''+min_year+current_month]) {
+                        new_data[''+min_year+current_month] = 0;
+                    }
+                }
+
+                // Other years
+                for (var current_year = min_year+1; current_year < max_year; current_year++) {
+                    for (month = 1; month <= 12; month++) {
+                        current_month = stringify_month(month);
+
+                        if (!new_data[''+current_year+current_month]) {
+                            new_data[''+current_year+current_month] = 0;
+                        }
+                    }
+                }
+
+                // Last year
+                for (month = 1; month <= max_month; month++) {
+                    current_month = stringify_month(month);
+
+                    if (!new_data[''+max_year+current_month]) {
+                        new_data[''+max_year+current_month] = 0;
+                    }
+                }
+            }
+            else if (granularity === 'year') {
+                for (var year = min_year; year <= max_year; year++) {
+                    if (!new_data[''+year]) {
+                        new_data[''+year] = 0;
+                    }
+                }
+            }
         }
 
         $.each(new_data, function(time, count) {
@@ -150,7 +217,7 @@ $(document).ready(function () {
 
             var url =  '';
 
-            if (event != 'Total') {
+            if (event != 'Total Reports') {
                 url = 'https://api.fda.gov/drug/event.json?search=receivedate:['+date1+'+TO+'+date2+']%20AND%20patient.reaction.reactionmeddrapt.exact:"'+url_event+'"%20AND%20patient.drug.openfda.generic_name:'+name+'&count=receivedate';
             }
             else {
@@ -178,7 +245,7 @@ $(document).ready(function () {
     }
 
     function plot(event, data) {
-        if (event == 'Total') {
+        if (event == 'Total Reports') {
             x_axis = data.time;
 
             x_format = '%Y%m%d';
@@ -212,10 +279,31 @@ $(document).ready(function () {
                         tick: {
                             format: tick_format
                         }
+                    },
+                    y: {
+                        label: {
+                            text: 'Number of Reports',
+                            position: 'outer-middle'
+                        }
                     }
                 },
                 subchart: {
                     show: true
+                },
+                tooltip: {
+                    format: {
+                        value: function (value, ratio, id) {
+                            var format = d3.format(',d');
+                            return format(value);
+                        }
+                    }
+                },
+                padding: {
+                  right: 10
+                },
+                color: {
+                    // May need more colors later (these colors might also be too similar?)
+                    pattern: pattern
                 }
             });
 
@@ -227,23 +315,35 @@ $(document).ready(function () {
         else {
             // Add the event to plotted
             plotted[event] = true;
+
+            // Get the groups
+            var groups = [_.without(_.keys(plotted), 'Total Reports')];
+            var types = {};
+
+            $.each(groups[0], function(index, ae) {
+                types[ae] = 'area'
+            });
+
             $('button[data-adverse-event="'+event+'"]').addClass('btn-primary');
             chart.load({
                 xFormat: x_format,
                 columns: [
                     data.time,
                     data.values
-                ]
+                ],
+                types: types
             });
+
+            chart.groups(groups);
         }
     }
 
     function reset_new_granularity() {
         x_axis = null;
-        get_range_plot('Total');
+        get_range_plot('Total Reports');
     }
 
-    get_range_plot('Total');
+    get_range_plot('Total Reports');
 
     $('.date-select').click(function() {
         if (this.id != granularity) {
@@ -268,7 +368,7 @@ $(document).ready(function () {
     // Initialize and adjust data table
     $('#reported_events').DataTable({
         "iDisplayLength": 200,
-        "sDom": '<T<"clear">t>',
+        "sDom": '<T<"clear">ft>',
         "order": [[ 2, "desc" ]],
         "aoColumnDefs": [
             {

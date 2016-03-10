@@ -14,7 +14,7 @@
 
     <legend><h1>Quick Search</h1></legend>
 
-    <form action="/bioactivities/table/#filter" method="post">
+    <form action="/bioactivities/table/" method="post">
         {% csrf_token %}
         {{ form.app.as_hidden }}
         {{ form.search_term.as_hidden }}
@@ -29,11 +29,43 @@
 {% endblock %}
 
 {% block extra_row %}
-    <div class="row text-center">
-        <label>Minimum Feature Count Per Record
-            <input id="minimum_feature_count" type="number" value="10">
-            <button type="button" id="apply_minimum_feature_count">Apply</button>
-        </label>
+    <div class="row">
+        <div class="col-xs-5">
+            <div class="fancy-checkbox" align="left">
+                <input type="checkbox" name="pubchem" id="pubchem" />
+                <div class="btn-group">
+                    <label for="pubchem" class="btn btn-success">
+                        <span class="glyphicon glyphicon-ok"></span>
+                        <span> </span>
+                    </label>
+                    <label for="pubchem" class="btn btn-default active">
+                        Use PubChem instead of ChEMBL
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-4">
+            <div class="fancy-checkbox" align="left">
+                <input type="checkbox" id="exclude_questionable" checked/>
+                <div class="btn-group">
+                    <label for="exclude_questionable" class="btn btn-default">
+                        <span class="glyphicon glyphicon-ok"></span>
+                        <span> </span>
+                    </label>
+                    <label for="exclude_questionable" class="btn btn-default active">
+                        Exclude Questionable
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-3">
+            <label>Minimum Feature Count Per Record
+                <input id="minimum_feature_count" type="number" value="10">
+                <button type="button" id="apply_minimum_feature_count">Apply</button>
+            </label>
+        </div>
     </div>
     <hr>
 {% endblock %}
@@ -45,7 +77,7 @@
             <p class="text-center">
                 <label>
                     Bioactivities Filter:
-                    <input id="bioactivity_filter">
+                    <input class="table-filter" id="bioactivity_filter">
                 </label>
             </p>
 
@@ -74,7 +106,7 @@
             <p class="text-center">
                 <label>
                     Targets Filter:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <input id="target_filter">
+                    <input class="table-filter" id="target_filter">
                 </label>
             </p>
 
@@ -104,7 +136,7 @@
             <p class="text-center">
                 <label>
                     Compounds Filter:&nbsp;&nbsp;&nbsp;&nbsp;
-                    <input id="compound_filter">
+                    <input class="table-filter" id="compound_filter">
                 </label>
             </p>
 
@@ -158,33 +190,43 @@
         </legend>
 
         <table id="full" class="display" cellspacing="0" width="100%">
-            <thead>
+            <thead id="variable-header">
                 <tr>
                     <th>Compound</th>
                     <th>Target</th>
                     <th>Organism</th>
-                    <th>Activity Name</th>
-                    <th>Standard Value (μm)</th>
+                    <th>Standard Name</th>
+                    <th>Operator</th>
+                    <th>Standard Value</th>
+                    <th>Standard Units</th>
                     <th>ChEMBL Link</th>
                     <th>PubChem Link</th>
+                    <th>Notes</th>
+                    <th>Data Validity</th>
                 </tr>
             </thead>
 
-            <tfoot>
+            <tfoot id="variable-footer">
                 <tr>
                     <th>Compound</th>
                     <th>Target</th>
                     <th>Organism</th>
-                    <th>Activity Name</th>
-                    <th>Standard Value (μm)</th>
+                    <th>Standard Name</th>
+                    <th>Operator</th>
+                    <th>Standard Value</th>
+                    <th>Standard Units</th>
                     <th>ChEMBL Link</th>
                     <th>PubChem Link</th>
+                    <th>Notes</th>
+                    <th>Data Validity</th>
                 </tr>
             </tfoot>
 
             <tbody id="table">
             </tbody>
         </table>
+
+        {# Headers to plug-in, odd way to achieve this #}
     </div>
 
     <div id="spinner"></div>

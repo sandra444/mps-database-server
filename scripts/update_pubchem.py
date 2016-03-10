@@ -34,11 +34,11 @@ def get_chembl_target(target):
         table = soup.find('table', class_='contenttable_lmenu')
         rows = table.findAll('td')
 
-        chemblid = None
-        target_type = None
-        name = None
-        synonyms = None
-        organism = None
+        chemblid = ''
+        target_type = ''
+        name = ''
+        synonyms = ''
+        organism = ''
 
         for index in range(len(rows)):
             contents = rows[index].text
@@ -517,28 +517,104 @@ def run():
     bio_types = {bio.activity_name: True for bio in PubChemBioactivity.objects.all()}
 
     for bio_type in bio_types:
-        targets = {bio.assay.target: True for bio in PubChemBioactivity.objects.filter(activity_name=bio_type)}
+        targets = {
+            bio.assay.target: True for bio in PubChemBioactivity.objects.filter(
+                activity_name=bio_type
+            ).select_related('assay__target')
+        }
         for target in targets:
-            bio_pk = [bio.id for bio in PubChemBioactivity.objects.filter(
-                activity_name=bio_type).filter(assay__target=target
-            )]
-            bio_value = np.array([bio.value for bio in PubChemBioactivity.objects.filter(
-                activity_name=bio_type).filter(assay__target=target
-            )])
+            current_bio = PubChemBioactivity.objects.filter(
+                activity_name=bio_type,
+                assay__target=target
+            ).select_related('assay__target')
+
+            bio_pk = [bio.id for bio in current_bio]
+            bio_value = np.array([bio.value for bio in current_bio])
             if len(bio_pk) > 0 and len(bio_value) > 0:
-                bio_value /= np.max(np.abs(bio_value),axis=0)
+                bio_value /= np.max(np.abs(bio_value), axis=0)
                 for index, pk in enumerate(bio_pk):
                     try:
-                        PubChemBioactivity.objects.filter(pk=pk).update(normalized_value=bio_value[index])
+                        PubChemBioactivity.objects.filter(pk=pk).update(
+                            normalized_value=bio_value[index]
+                        )
                     except:
                         print 'Update of bioactivity {} failed'.format(pk)
 
     print 'Adding SINGLE PROTEIN to NCBI target entries'
 
-    no_type = Target.objects.filter(target_type__isnull=True) | Target.objects.filter(target_type=u'')
+    no_type = Target.objects.filter(target_type=u'')
 
     for target in no_type.exclude(GI=u''):
         target.target_type = 'SINGLE PROTEIN'
         target.save()
+
+    # Flag questionable entries
+    print 'Flagging questionable entries...'
+
+    all_pubchem = PubChemBioactivity.objects.all().prefetch_related('compound').select_related('assay__target')
+
+    bio_types = {bio.activity_name: True for bio in all_pubchem}
+    bio_compounds = {bio.compound: True for bio in all_pubchem}
+    bio_targets = {bio.assay.target: True for bio in all_pubchem}
+
+    pubchem_entries = {}
+
+    for entry in all_pubchem:
+        if entry.assay.target:
+            key = '|'.join([entry.activity_name, str(entry.compound.id), str(entry.assay.target.id)])
+
+        else:
+            key = '|'.join([entry.activity_name, str(entry.compound.id), 'None'])
+
+        pubchem_entries.setdefault(key, []).append(entry)
+
+    # Remove old flags in case they have become outdated (medians change and so on)
+    PubChemBioactivity.objects.all().update(data_validity='')
+
+    total = 0
+
+    for bio_type in bio_types:
+        for target in bio_targets:
+            for compound in bio_compounds:
+                if bio_type and target and compound:
+                    if target:
+                        current_bio = pubchem_entries.get('|'.join([bio_type, str(compound.id), str(target.id)]), [])
+                    else:
+                        current_bio = pubchem_entries.get('|'.join([bio_type, str(compound.id), 'None']), [])
+
+                    bio_pk = [bio.id for bio in current_bio]
+                    bio_value = np.array([bio.value for bio in current_bio])
+
+                    if len(bio_pk) > 0 and len(bio_value) > 0:
+                        bio_median = np.median(bio_value)
+                        flag_threshold = bio_median * 100
+
+                        # Check for out of range
+                        for index, pk in enumerate(bio_pk):
+                            if bio_value[index] > flag_threshold:
+                                this_bio = PubChemBioactivity.objects.get(pk=bio_pk[index])
+                                pubchem_id = this_bio.assay.pubchem_id
+                                #this_bio.notes = 'Flagged'
+                                # Flag data validity for "Out of Range"
+                                this_bio.data_validity = 'R'
+                                this_bio.save()
+                                print bio_pk[index], bio_value[index], 'vs', bio_median
+                                #print pubchem_id
+                                #print 'https://pubchem.ncbi.nlm.nih.gov/bioassay/' + pubchem_id
+                                total += 1
+
+                        # Check for possible transcription errors (1000-fold error mistaking uM for nM)
+                        for index, pk in enumerate(bio_pk):
+                            thousand_fold = np.where(bio_value==bio_value[index] * 1000)[0]
+                            if len(thousand_fold) > 0:
+                                for error_index in thousand_fold:
+                                    this_bio = PubChemBioactivity.objects.get(pk=bio_pk[error_index])
+                                    if not this_bio.data_validity:
+                                        total += 1
+                                    this_bio.data_validity = 'T'
+                                    this_bio.save()
+                                    print bio_pk[error_index], bio_value[error_index], 'thousand fold'
+
+    print total
 
     print 'Finished'

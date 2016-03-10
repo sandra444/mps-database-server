@@ -35,7 +35,6 @@ $(document).ready(function () {
                 data: {
                     columns: []
                 },
-
                 axis: {
                     x: {
                         label: {
@@ -49,6 +48,22 @@ $(document).ready(function () {
                             position: 'outer-middle'
                         }
                     }
+                },
+                tooltip: {
+                    format: {
+                        value: function (value, ratio, id) {
+                            var format = value % 1 === 0 ? d3.format(',d') : d3.format(',.2f');
+                            return format(value);
+                        }
+                    }
+                },
+                padding: {
+                  right: 10
+                },
+                // TODO this is not optimal
+                // manually reposition axis label
+                onrendered: function() {
+                    $('.c3-axis-x-label').attr('dy', '35px');
                 }
             })
         );

@@ -113,6 +113,8 @@ class OrganModel(LockableModel):
     device = models.ForeignKey(Microdevice)
     description = models.CharField(max_length=400, null=True, blank=True)
 
+    model_image = models.ImageField(upload_to='models', null=True, blank=True)
+
     # Removed in favor of protocol inline
     #protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
     #                        blank=True, null=True, help_text='File detailing the protocols for this model')

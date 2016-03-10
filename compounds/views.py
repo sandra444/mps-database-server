@@ -9,6 +9,7 @@ from .forms import *
 from django.shortcuts import redirect
 from django.forms.models import inlineformset_factory
 
+
 class CompoundsList(ListView):
     model = Compound
     template_name = 'compounds/compounds_list.html'
@@ -49,6 +50,21 @@ class CompoundsDetail(DetailView):
         context.update({'previous':previous, 'next':next})
         return context
 
+CompoundTargetFormset = inlineformset_factory(
+    Compound,
+    CompoundTarget,
+    formset=CompoundTargetInlineFormset,
+    extra=1,
+    exclude=[],
+    widgets={
+        'name': forms.Textarea(attrs={'size': 25, 'rows': 1}),
+        'uniprot_id': forms.TextInput(attrs={'size': 10}),
+        'pharmacological_action': forms.TextInput(attrs={'size': 7}),
+        'organism': forms.TextInput(attrs={'size': 7}),
+        'type': forms.TextInput(attrs={'size': 11}),
+    }
+)
+
 
 class CompoundsAdd(SpecificGroupRequiredMixin, CreateView):
     form_class = CompoundForm
@@ -56,68 +72,115 @@ class CompoundsAdd(SpecificGroupRequiredMixin, CreateView):
 
     required_group_name = 'Change Compounds Front'
 
+    def get_context_data(self, **kwargs):
+        context = super(CompoundsAdd, self).get_context_data(**kwargs)
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = CompoundTargetFormset(self.request.POST)
+            else:
+                context['formset'] = CompoundTargetFormset()
+
+        return context
+
     def form_valid(self, form):
-        if form.is_valid():
+        formset = CompoundTargetFormset(self.request.POST, instance=form.instance)
+
+        if form.is_valid() and formset.is_valid():
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Compound
             self.object.save()
+            formset.save()
             return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
-CompoundSummaryFormset = inlineformset_factory(
-    Compound,
-    CompoundSummary,
-    formset=CompoundSummaryInlineFormset,
-    extra=1,
-    exclude=[],
-    widgets={
-        'summary': forms.Textarea(attrs={'size': 500})
-    }
-)
 
-CompoundPropertyFormset = inlineformset_factory(
-    Compound,
-    CompoundProperty,
-    formset=CompoundPropertyInlineFormset,
-    exclude=[],
-    extra=1
-)
-
-
-# DON'T BE DECEIVED! THE FRONT-END UPDATE HAS ACCESS ONLY TO THE SUMMARIES AND PROPERTIES
 class CompoundsUpdate(SpecificGroupRequiredMixin, UpdateView):
     model = Compound
-    template_name = 'compounds/compounds_update.html'
+    form_class = CompoundForm
+    template_name = 'compounds/compounds_add.html'
 
     required_group_name = 'Change Compounds Front'
 
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        formset_summary = CompoundSummaryFormset(instance=self.object)
-        formset_property = CompoundPropertyFormset(instance=self.object)
-        return self.render_to_response(
-            self.get_context_data(formset_summary=formset_summary,
-                                  formset_property=formset_property))
+    def get_context_data(self, **kwargs):
+        context = super(CompoundsUpdate, self).get_context_data(**kwargs)
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = CompoundTargetFormset(self.request.POST)
+            else:
+                context['formset'] = CompoundTargetFormset(instance=self.object)
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        context['update'] = True
 
-        formset_summary = CompoundSummaryFormset(self.request.POST, instance=self.object)
-        formset_property = CompoundPropertyFormset(self.request.POST, instance=self.object)
+        return context
 
-        if formset_summary.is_valid() and formset_property.is_valid():
-            formset_summary.save()
-            formset_property.save()
-            self.object.modified_by = self.request.user
-            # Save the Compound to keep tracking data
+    def form_valid(self, form):
+        formset = CompoundTargetFormset(self.request.POST, instance=form.instance)
+
+        if form.is_valid() and formset.is_valid():
+            self.object = form.save()
+            self.object.modified_by = self.object.created_by = self.request.user
+            # Save Compound
             self.object.save()
+            formset.save()
             return redirect(self.object.get_absolute_url())
         else:
-            return self.render_to_response(
-            self.get_context_data(formset_summary=formset_summary,
-                                  formset_property=formset_property))
+            return self.render_to_response(self.get_context_data(form=form))
+
+
+# TODO OLD COMPOUNDS UPDATE
+# CompoundSummaryFormset = inlineformset_factory(
+#     Compound,
+#     CompoundSummary,
+#     formset=CompoundSummaryInlineFormset,
+#     extra=1,
+#     exclude=[],
+#     widgets={
+#         'summary': forms.Textarea(attrs={'size': 500})
+#     }
+# )
+#
+# CompoundPropertyFormset = inlineformset_factory(
+#     Compound,
+#     CompoundProperty,
+#     formset=CompoundPropertyInlineFormset,
+#     exclude=[],
+#     extra=1
+# )
+#
+#
+# class CompoundsUpdate(SpecificGroupRequiredMixin, UpdateView):
+#     model = Compound
+#     template_name = 'compounds/compounds_update.html'
+#
+#     required_group_name = 'Change Compounds Front'
+#
+#     def get(self, request, *args, **kwargs):
+#         self.object = self.get_object()
+#         formset_summary = CompoundSummaryFormset(instance=self.object)
+#         formset_property = CompoundPropertyFormset(instance=self.object)
+#         return self.render_to_response(
+#             self.get_context_data(formset_summary=formset_summary,
+#                                   formset_property=formset_property))
+#
+#     def post(self, request, *args, **kwargs):
+#         self.object = self.get_object()
+#
+#         formset_summary = CompoundSummaryFormset(self.request.POST, instance=self.object)
+#         formset_property = CompoundPropertyFormset(self.request.POST, instance=self.object)
+#
+#         if formset_summary.is_valid() and formset_property.is_valid():
+#             formset_summary.save()
+#             formset_property.save()
+#             self.object.modified_by = self.request.user
+#             # Save the Compound to keep tracking data
+#             self.object.save()
+#             return redirect(self.object.get_absolute_url())
+#         else:
+#             return self.render_to_response(
+#             self.get_context_data(formset_summary=formset_summary,
+#                                   formset_property=formset_property))
 
 
 # Currently, compounds report basically begins as just a compounds list

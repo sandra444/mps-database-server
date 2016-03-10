@@ -36,18 +36,14 @@
                     <th>Compound</th>
                     <th>Target</th>
                     <th>Organism</th>
-                    {% if not pubchem %}
-                        <th>Standard Name</th>
-                        <th>Operator</th>
-                        <th>Standard Value</th>
-                        <th>Standard Units</th>
-                        <th>ChEMBL Link</th>
-                    {% else %}
-                        <th>Activity Name</th>
-                        <th>Value (μM)</th>
-                        <th>Outcome</th>
-                        <th>PubChem Link</th>
-                    {% endif %}
+                    <th>Standard Name</th>
+                    <th>Operator</th>
+                    <th>Standard Value</th>
+                    <th>Standard Units</th>
+                    <th>ChEMBL Link</th>
+                    <th>PubChem Link</th>
+                    <th>Notes</th>
+                    <th>Data Validity</th>
                 </tr>
             </thead>
 
@@ -56,18 +52,14 @@
                     <th>Compound</th>
                     <th>Target</th>
                     <th>Organism</th>
-                    {% if not pubchem %}
-                        <th>Standard Name</th>
-                        <th>Operator</th>
-                        <th>Standard Value</th>
-                        <th>Standard Units</th>
-                        <th>ChEMBL Link</th>
-                    {% else %}
-                        <th>Activity Name</th>
-                        <th>Value (μM)</th>
-                        <th>Outcome</th>
-                        <th>PubChem Link</th>
-                    {% endif %}
+                    <th>Standard Name</th>
+                    <th>Operator</th>
+                    <th>Standard Value</th>
+                    <th>Standard Units</th>
+                    <th>ChEMBL Link</th>
+                    <th>PubChem Link</th>
+                    <th>Notes</th>
+                    <th>Data Validity</th>
                 </tr>
             </tfoot>
 
@@ -75,25 +67,33 @@
             {% for bioactivity in bioactivities %}
                 <tr>
                     <td><a href="/compounds/{{ bioactivity.compound.id }}">{{ bioactivity.compound }}</a></td>
-                    <td>{{ bioactivity.assay.target|default:'' }}</td>
                     {% if not pubchem %}
+                        <td>{{ bioactivity.target|default:'' }}</td>
                         <td>{{ bioactivity.organism }}</td>
                         <td>{{ bioactivity.standard_name }}</td>
                         <td>{{ bioactivity.operator }}</td>
                         <td>{{ bioactivity.standardized_value }}</td>
                         <td>{{ bioactivity.standardized_units }}</td>
-                        <td><a href="https://www.ebi.ac.uk/chembl/assay/inspect/{{ bioactivity.assay.chemblid }}">
-                            {{ bioactivity.assay.chemblid }}
-                        </a></td>
                     {% else %}
+                        <td>{{ bioactivity.assay.target|default:'' }}</td>
                         <td>{{ bioactivity.assay.target.organism|default:bioactivity.assay.organism|default:'' }}</td>
                         <td>{{ bioactivity.activity_name }}</td>
+                        {# TODO Not all pubchem entries actually have = as the operator #}
+                        <td>=</td>
                         <td>{{ bioactivity.value }}</td>
-                        <td>{{ bioactivity.outcome }}</td>
-                        <td><a href="https://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?aid={{ bioactivity.assay.pubchem_id }}">
-                            {{ bioactivity.assay.pubchem_id|default:'' }}
-                        </a></td>
+                        {# All pubchem entries use µM#}
+                        <td>µM</td>
+                        {# What to do with outcome? #}
+                        {# <td>{{ bioactivity.outcome }}</td> #}
                     {% endif %}
+                    <td><a href="https://www.ebi.ac.uk/chembl/assay/inspect/{{ bioactivity.assay.chemblid }}">
+                        {{ bioactivity.assay.chemblid|default:'' }}
+                    </a></td>
+                    <td><a href="https://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?aid={{ bioactivity.assay.pubchem_id }}">
+                        {{ bioactivity.assay.pubchem_id|default:'' }}
+                    </a></td>
+                    <td>{{ bioactivity.notes }}</td>
+                    <td class="text-danger">{{ bioactivity.get_data_validity_display }}</td>
                 </tr>
             {% endfor %}
             </tbody>

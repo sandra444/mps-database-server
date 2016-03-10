@@ -1,7 +1,7 @@
 matplotlib
 django-uwsgi-cache
 networkx
-Django==1.8.8
+Django==1.8.9
 Jinja2
 Markdown
 MarkupSafe
@@ -74,3 +74,5 @@ xlrd
 xlsxwriter
 # chardet will detect a files (probable) encoding
 chardet
+# Alternative html parser used in conjunction with BeautifulSoup
+html5lib

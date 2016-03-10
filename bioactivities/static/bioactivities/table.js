@@ -1,7 +1,6 @@
 $(document).ready(function () {
 
     function table(data) {
-
         // Show graphic
         $('#graphic').prop('hidden',false);
         // Hide error
@@ -22,11 +21,28 @@ $(document).ready(function () {
             row += "<td>" + bio.target + "</td>";
             row += "<td>" + bio.organism + "</td>";
             row += "<td>" + bio.activity_name + "</td>";
-            //row += "<td>" + bio.operator + "</td>";
+
+            if (!pubchem) {
+                row += "<td>" + bio.operator + "</td>";
+            }
+            else {
+                row += "<td>=</td>";
+            }
+
             row += "<td>" + bio.standardized_value + "</td>";
-            //row += "<td>" + bio.standardized_units + "</td>";
+
+            if (!pubchem) {
+                row += "<td>" + bio.standardized_units + "</td>";
+            }
+            else {
+                row += "<td>µM</td>";
+            }
+
             row += "<td><a href='https://www.ebi.ac.uk/chembl/assay/inspect/"+bio.chemblid+"'>" + bio.chemblid + "</a></td>";
             row += "<td><a href='https://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?aid="+bio.pubchem_id+"'>" + bio.pubchem_id + "</a></td>";
+
+            row += "<td>" + bio.notes + "</td>";
+            row += "<td class='text-danger'>" + bio.data_validity + "</td>";
 //            row += "<td>" + bio.bioactivity_type + "</td>";
 //            row += "<td>" + bio.value + "</td>";
 //            row += "<td>" + bio.units + "</td>";
@@ -49,6 +65,15 @@ $(document).ready(function () {
     }
 
     function submit() {
+        // Set the headers relative to pubchem or chembl
+//        if (pubchem) {
+//            $('#variable-header').html(pubchem_header);
+//            $('#variable-footer').html(pubchem_header);
+//        }
+//        else {
+//            $('#variable-header').html(chembl_header);
+//            $('#variable-footer').html(chembl_header);
+//        }
 
         // Clear all filters
         bioactivities_filter = [];
@@ -86,6 +111,8 @@ $(document).ready(function () {
             contentType: 'application/json',
             // Remember to convert to string
             data: JSON.stringify({
+                'exclude_questionable': FILTER.exclude_questionable,
+                'pubchem': FILTER.pubchem,
                 'bioactivities_filter': bioactivities_filter,
                 'targets_filter': targets_filter,
                 'compounds_filter': compounds_filter,
@@ -136,6 +163,28 @@ $(document).ready(function () {
             }
         });
     }
+
+//    var pubchem_header = '<tr>' +
+//        '<th>Compound</th>' +
+//        '<th>Target</th>' +
+//        '<th>Organism</th>' +
+//        '<th>Activity Name</th>' +
+//        '<th>Standard Value (μm)</th>' +
+//        '<th>ChEMBL Link</th>' +
+//        '<th>PubChem Link</th>' +
+//        '</tr>';
+//
+//    var chembl_header = '<tr>' +
+//        '<th>Compound</th>' +
+//        '<th>Target</th>' +
+//        '<th>Organism</th>' +
+//        '<th>Activity Name</th>' +
+//        '<th>Operator</th>' +
+//        '<th>Standard Value</th>' +
+//        '<th>Standard Units</th>' +
+//        '<th>ChEMBL Link</th>' +
+//        '<th>PubChem Link</th>' +
+//        '</tr>';
 
     var targets_filter = [];
     var compounds_filter = [];

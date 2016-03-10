@@ -1,3 +1,4 @@
+// TODO add previews for images
 $(document).ready(function () {
 
     var insert_into = $('fieldset')[2];

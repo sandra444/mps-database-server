@@ -11,20 +11,20 @@
         <h1>Adverse Events for
             <br>
             <a id="compound" href="/compounds/{{ compound.compound.id }}">{{ compound }}</a>
-        <a href="/adverse_events/{{ next }}" class="btn btn-primary btn-large pull-right">
-            Next
-            <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-        </a>
-        <a href="/adverse_events/{{ previous }}" class="btn btn-primary btn-large pull-right">
-            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-            Previous
-        </a>
+            <a href="/adverse_events/{{ next }}" class="btn btn-primary btn-large pull-right">
+                Next
+                <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+            </a>
+            <a href="/adverse_events/{{ previous }}" class="btn btn-primary btn-large pull-right">
+                <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                Previous
+            </a>
         </h1>
     </legend>
 
-    <div class="row">
+    <div class="padded-row">
 
-        <div class="col-sm-3 col-md-2">
+        <div class="col-sm-3 col-md-2 thumbnail">
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.compound.chemblid }}">
         </div>
 
@@ -48,6 +48,16 @@
                             <a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ compound.compound.pubchemid }}">{{ compound.compound.pubchemid }}</a>
                         </td>
                     </tr>
+                    {% endif %}
+                    {% if compound.compound.drugbank_id %}
+                        <tr>
+                            <td>
+                                <b>DrugBank ID</b>
+                            </td>
+                            <td>
+                                <a href="http://www.drugbank.ca/drugs/{{ compound.compound.drugbank_id }}">{{ compound.compound.drugbank_id }}</a>
+                            </td>
+                        </tr>
                     {% endif %}
                 </tbody>
             </table>
@@ -125,12 +135,30 @@
         </tbody>
     </table>
 
+    <script src="{% static "js/display_datatable.js" %}"></script>
+
     <br>
 
     <div class="well">
-        Click and drag on the subplot to zoom
-        <br>
-        Click a legend key to hide the respective plot
+        <b class="text-info">
+            Click and drag on the subplot to zoom.
+            <br>
+            Click a legend key to hide the respective plot.
+            <br>
+        </b>
+        <b class="text-warning">
+            Please note that the values in this plot refer to the
+            number of reports and not the number of adverse events.
+            <br>
+            Reports can contain multiple adverse events, so
+            the sum of values for different adverse events can exceed the total number of reports.
+            <br>
+            <br>
+        </b>
+        <b class="text-danger">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            OpenFDA is in beta: This data is not intended for clinical use.
+        </b>
     </div>
 
     <div>
@@ -151,7 +179,7 @@
         Error: Please try a different query or submit again later
     </div>
 
-    <div class="form-group">
+    <div class="form-group row">
         <div class="col-md-3">
             <label for="start_date" class="control-label">Start Date [yyyy-mm-dd]</label>
             <input class="form-control" id="start_date" type="text" value="2013-01-01">

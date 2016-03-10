@@ -490,7 +490,6 @@ $(document).ready(function () {
     }
 
     function submit() {
-
         // Clear all filters
         bioactivities_filter = [];
         targets_filter = [];
@@ -533,6 +532,8 @@ $(document).ready(function () {
             contentType: 'application/json',
             // Remember to convert to string
             data: JSON.stringify({
+                'exclude_questionable': FILTER.exclude_questionable,
+                'pubchem': FILTER.pubchem,
                 'bioactivities_filter': bioactivities_filter,
                 'targets_filter': targets_filter,
                 'compounds_filter': compounds_filter,
@@ -588,4 +589,3 @@ $(document).ready(function () {
         submit();
     });
 });
-

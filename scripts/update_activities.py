@@ -13,6 +13,8 @@ from bioservices.services import BioServicesError
 
 from django.db import connection
 
+import numpy as np
+
 FIELDS = {
     'reference': 'reference',
     'target_chemblid': 'target',
@@ -169,6 +171,107 @@ def run(days=180):
     )
 
     print 'Units updated'
+
+    print 'Normalizing values'
+
+    bio_types = {bio.standard_name: True for bio in Bioactivity.objects.all()}
+
+    for bio_type in bio_types:
+        targets = {
+            bio.target: True for bio in Bioactivity.objects.filter(
+                standard_name=bio_type
+            ).prefetch_related('target')
+        }
+        for target in targets:
+            current_bio = Bioactivity.objects.filter(
+                standard_name=bio_type,
+                target=target,
+                standardized_value__isnull=False
+            ).prefetch_related('target')
+
+            bio_pk = [bio.id for bio in current_bio]
+            bio_value = np.array([bio.standardized_value for bio in current_bio])
+            if len(bio_pk) > 0 and len(bio_value) > 0:
+                bio_value /= np.max(np.abs(bio_value), axis=0)
+                for index, pk in enumerate(bio_pk):
+                    try:
+                        Bioactivity.objects.filter(pk=pk).update(
+                            normalized_value=bio_value[index]
+                        )
+                    except:
+                        print 'Update of bioactivity {} failed'.format(pk)
+
+    # Flag questionable entries
+    print 'Flagging questionable entries...'
+
+    # Remove old flags in case they have become outdated (medians change and so on)
+    Bioactivity.objects.all().update(data_validity='')
+
+    total = 0
+
+    all_chembl = Bioactivity.objects.all().prefetch_related('compound', 'target').filter(
+        standardized_value__isnull=False
+    )
+
+    bio_types = {bio.standard_name: True for bio in all_chembl}
+    bio_compounds = {bio.compound: True for bio in all_chembl}
+    bio_targets = {bio.target: True for bio in all_chembl}
+
+    chembl_entries = {}
+
+    for entry in all_chembl:
+        if entry.target:
+            key = '|'.join([entry.standard_name, str(entry.compound.id), str(entry.target.id)])
+        else:
+            key = '|'.join([entry.standard_name, str(entry.compound.id), 'None'])
+
+        chembl_entries.setdefault(key, []).append(entry)
+
+    # ChEMBL contains negative values!
+    # TODO Needs revision
+    for bio_type in bio_types:
+        for target in bio_targets:
+            for compound in bio_compounds:
+                if bio_type and target and compound:
+                    if target:
+                        current_bio = chembl_entries.get('|'.join([bio_type, str(compound.id), str(target.id)]), [])
+                    else:
+                        current_bio = chembl_entries.get('|'.join([bio_type, str(compound.id), 'None']), [])
+
+                    bio_pk = [bio.id for bio in current_bio]
+                    bio_value = np.array([bio.standardized_value for bio in current_bio])
+
+                    if len(bio_value) > 0:
+                        # Shift values by the minimum to avoid problems with negative values
+                        bio_value = np.array(bio_value) + np.abs(np.min(bio_value)) + 1
+
+                    if len(bio_pk) > 0 and len(bio_value) > 0:
+                        bio_median = np.median(bio_value)
+                        flag_threshold = bio_median * 100
+
+                        for index, pk in enumerate(bio_pk):
+                            if bio_value[index] > flag_threshold:
+                                this_bio = Bioactivity.objects.get(pk=bio_pk[index])
+                                #this_bio.notes = 'Flagged'
+                                # Flag data validity for "Out of Range"
+                                this_bio.data_validity = 'R'
+                                this_bio.save()
+                                print bio_pk[index], bio_value[index], 'vs', bio_median
+                                total += 1
+
+                        # Check for possible transcription errors (1000-fold error mistaking uM for nM)
+                        for index, pk in enumerate(bio_pk):
+                            thousand_fold = np.where(bio_value==bio_value[index] * 1000)[0]
+                            if len(thousand_fold) > 0:
+                                for error_index in thousand_fold:
+                                    this_bio = Bioactivity.objects.get(pk=bio_pk[error_index])
+                                    if not this_bio.data_validity:
+                                        total += 1
+                                    this_bio.data_validity = 'T'
+                                    this_bio.save()
+                                    print bio_pk[error_index], bio_value[error_index], 'thousand fold'
+
+    print total
 
 # A second run is useful to catch newly added compounds,
 # but just calling run is somewhat inefficient (it would run through every compound again)

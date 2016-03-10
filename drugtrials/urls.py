@@ -9,4 +9,5 @@ urlpatterns = patterns('',
     # User can view adverse events
     url(r'^adverse_events/$', AdverseEventsList.as_view(), name='adverse_events_list'),
     url(r'^adverse_events/(?P<pk>[0-9]+)/$', adverse_events_detail, name='adverse_events_details'),
+    url(r'^compare_adverse_events/$', compare_adverse_events, name='compare_adverse_events'),
 )

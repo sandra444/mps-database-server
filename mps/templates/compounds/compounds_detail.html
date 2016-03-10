@@ -1,24 +1,30 @@
 {% extends "base.html" %}
+{% load staticfiles %}
 
-{# TODO REQUIRES MAJOR AESTHETIC REVISION #}
+{% block load %}
+    <script src="{% static "compounds/compounds_detail.js" %}"></script>
+{% endblock %}
+
+{# TODO REQUIRES AESTHETIC REVISION #}
 
 {% block content %}
     <legend>
-        <h1>{{ object.name}}
-        <a href="/compounds/{{ next }}" class="btn btn-primary btn-large pull-right">
-            Next
-            <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-        </a>
-        <a href="/compounds/{{ previous }}" class="btn btn-primary btn-large pull-right">
-            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-            Previous
-        </a>
+        <h1>
+            {{ object.name}}
+            <a href="/compounds/{{ next }}" class="btn btn-primary btn-large pull-right">
+                Next
+                <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+            </a>
+            <a href="/compounds/{{ previous }}" class="btn btn-primary btn-large pull-right">
+                <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                Previous
+            </a>
         </h1>
     </legend>
 
-    <div class="row">
+    <div class="padded-row">
 
-        <div class="col-sm-3 col-md-2">
+        <div class="col-sm-3 col-md-2 thumbnail">
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.chemblid }}">
         </div>
 
@@ -33,6 +39,16 @@
                             <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ object.chemblid }}">{{ object.chemblid }}</a>
                         </td>
                     </tr>
+                    {% if object.drugbank_id %}
+                        <tr>
+                            <td>
+                                <b>DrugBank ID</b>
+                            </td>
+                            <td>
+                                <a href="http://www.drugbank.ca/drugs/{{ object.drugbank_id }}">{{ object.drugbank_id }}</a>
+                            </td>
+                        </tr>
+                    {% endif %}
                     {% if object.pubchemid %}
                         <tr>
                             <td>
@@ -54,7 +70,7 @@
                     {% if object.inchikey %}
                         <tr>
                             <td>
-                                <b>Inchikey:</b>
+                                <b>Inchikey</b>
                             </td>
                             <td>
                                 {{ object.inchikey }}
@@ -67,9 +83,22 @@
 
     </div>
 
-    <br>
+    {% if object.drug_class%}
+        <br>
+
+        <div class="row">
+            <div class="col-sm-2 col-md-1 text-right-responsive">
+                <b>Class</b>
+            </div>
+            <div class="col-sm-10 col-md-11 text-wrapped">
+                {{ object.drug_class }}
+            </div>
+        </div>
+    {% endif %}
 
     {% if object.smiles%}
+        <br>
+
         <div class="row">
             <div class="col-sm-2 col-md-1 text-right-responsive">
                 <b>Smiles</b>
@@ -80,9 +109,9 @@
         </div>
     {% endif %}
 
-    <br>
-
     {% if object.synonyms %}
+        <br>
+
         <div class="row">
             <div class="col-sm-2 col-md-1 text-right-responsive">
                 <b>Synonyms</b>
@@ -160,6 +189,36 @@
                         {{ object.species }}
                     </td>
                 </tr>
+                {% if object.protein_binding %}
+                <tr>
+                    <td>
+                        <b>Protein Binding</b>
+                    </td>
+                    <td>
+                        {{ object.protein_binding }}
+                    </td>
+                </tr>
+                {% endif %}
+                {% if object.half_life %}
+                <tr>
+                    <td>
+                        <b>Half Life</b>
+                    </td>
+                    <td>
+                        {{ object.half_life }}
+                    </td>
+                </tr>
+                {% endif %}
+                {% if object.bioavailability %}
+                <tr>
+                    <td>
+                        <b>Bioavailability</b>
+                    </td>
+                    <td>
+                        {{ object.bioavailability }}
+                    </td>
+                </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
@@ -192,7 +251,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>Acidic pKa</b>
+                        <b>Acidic pKa (ACD)</b>
                     </td>
                     <td>
                         {{ object.acidic_pka }}
@@ -200,7 +259,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>Basic pKa</b>
+                        <b>Basic pKa (ACD)</b>
                     </td>
                     <td>
                         {{ object.basic_pka }}
@@ -208,7 +267,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>LogP</b>
+                        <b>LogP (ACD)</b>
                     </td>
                     <td>
                         {{ object.logp }}
@@ -216,7 +275,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>LogD</b>
+                        <b>LogD (ACD)</b>
                     </td>
                     <td>
                         {{ object.logd }}
@@ -234,41 +293,114 @@
         </table>
     </div>
 
-    <div class="col-sm-4">
-    {% if object.compoundproperty_set.all %}
-        <table class="table table-striped table-bordered" style="background-color: #EEE0B7;">
-            <thead>
-                <tr>
-                    <th colspan=2 class="text-center">
-                        <u>Additional Properties</u>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for property in object.compoundproperty_set.all|dictsort:"property_type.name" %}
-                <tr>
-                    <td><strong>{{ property.property_type }}</strong></td>
-                    <td>{{ property.value }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
-    </div>
+{#    <div class="col-sm-4">#}
+{#    {% if object.compoundproperty_set.all %}#}
+{#        <table class="table table-striped table-bordered" style="background-color: #EEE0B7;">#}
+{#            <thead>#}
+{#                <tr>#}
+{#                    <th colspan=2 class="text-center">#}
+{#                        <u>Additional Properties</u>#}
+{#                    </th>#}
+{#                </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#            {% for property in object.compoundproperty_set.all|dictsort:"property_type.name" %}#}
+{#                <tr>#}
+{#                    <td><strong>{{ property.property_type }}</strong></td>#}
+{#                    <td>{{ property.value }}</td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#            </tbody>#}
+{#        </table>#}
+{#    {% endif %}#}
+{#    </div>#}
+
     </div>
 
-    {% if object.compoundsummary_set.all %}
+    {% if object.compoundsummary_set.all or object.absorption or object.clearance %}
         <legend>Summaries</legend>
         <table class="table table-striped table-bordered" style="background-color: #E8CAAF;">
             <tbody>
-            {% for summary in object.compoundsummary_set.all|dictsort:"summary_type.name" %}
+            {% if object.absorption %}
                 <tr>
-                    <td><strong>{{ summary.summary_type }}</strong></td>
-                    <td>{{ summary.summary|linebreaks }}</td>
+                    <td><strong>Absorption</strong></td>
+                    <td>{{ object.absorption|linebreaks }}</td>
+                </tr>
+            {% endif %}
+
+            {% if object.clearance %}
+                <tr>
+                    <td><strong>Clearance</strong></td>
+                    <td>{{ object.clearance|linebreaks }}</td>
+                </tr>
+            {% endif %}
+
+            {% if object.pk_metabolism %}
+                <tr>
+                    <td><strong>PK/Metabolism</strong></td>
+                    <td>{{ object.pk_metabolism|linebreaks }}</td>
+                </tr>
+            {% endif %}
+
+            {% if object.preclinical %}
+                <tr>
+                    <td><strong>Pre-clinical Findings</strong></td>
+                    <td>{{ object.preclinical|linebreaks }}</td>
+                </tr>
+            {% endif %}
+
+            {% if object.clinical %}
+                <tr>
+                    <td><strong>Clinical Findings</strong></td>
+                    <td>{{ object.clinical|linebreaks }}</td>
+                </tr>
+            {% endif %}
+
+            {% if object.post_marketing %}
+                <tr>
+                    <td><strong>Post-marketing</strong></td>
+                    <td>{{ object.post_marketing|linebreaks }}</td>
+                </tr>
+            {% endif %}
+
+{#            {% for summary in object.compoundsummary_set.all|dictsort:"summary_type.name" reversed%}#}
+{#                <tr>#}
+{#                    <td><strong>{{ summary.summary_type }}</strong></td>#}
+{#                    <td>{{ summary.summary|linebreaks }}</td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if object.compoundtarget_set.all %}
+        <legend>Targets</legend>
+        <table hidden id="target_table" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Uniprot ID</th>
+                    <th>Type</th>
+                    <th>Organism</th>
+                    <th>Pharmacological Action</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for target in object.compoundtarget_set.all %}
+                <tr>
+                    <td>{{ target.name }}</td>
+                    <td><a href="http://www.uniprot.org/uniprot/{{ target.uniprot_id }}">{{ target.uniprot_id }}</a></td>
+                    <td>{{ target.type }}</td>
+                    <td>{{ target.organism }}</td>
+                    <td>{{ target.pharmacological_action }}</td>
+                    <td>{{ target.action }}</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
+
+        <script src="{% static "js/display_datatable.js" %}"></script>
     {% endif %}
 
 {% endblock %}

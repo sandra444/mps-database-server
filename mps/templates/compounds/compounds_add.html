@@ -4,22 +4,35 @@
 {% block load %}
     <script src="{% static "compounds/customize_admin.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/inline_add.js" %}"></script>
 {% endblock %}
 
 {% block content %}
 
-<form enctype="multipart/form-data" class="form-horizontal" method="post" >
-    {% csrf_token %}
-    {{ formset.management_form }}
+{% if update %}
+    <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');"
+          enctype="multipart/form-data" class="form-horizontal" method="post" >
+
+    {% include 'review.html' %}
+
+    <h1>
+        Edit <em>{{ object }}</em>
+{% else %}
+    <form enctype="multipart/form-data" class="form-horizontal" method="post" >
+
     <h1>
         Add Compound
-{#        <br>#}
-{#        <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
+{% endif %}
     </h1>
+
+    {% csrf_token %}
+    {{ formset.management_form }}
 
     {% include "submit.html" %}
 
     {% include 'errors.html' %}
+
+    {% include 'tracking.html' %}
 
     <legend>General</legend>
 
@@ -58,12 +71,14 @@
     </div>
 
 {#    Might as well just automatically acquire pubchem ID#}
-{#    <div class="form-group">#}
-{#        <label for="pubchemid" class="col-sm-2 control-label compounds-compound">PubChem ID</label>#}
-{#        <div class="col-sm-10">#}
-{#          {{ form.pubchemid }}#}
-{#        </div>#}
-{#    </div>#}
+    <div class="form-group">
+        <label for="pubchemid" class="col-sm-2 control-label compounds-compound">PubChem ID</label>
+        <div class="col-sm-10">
+          {{ form.pubchemid }}
+        </div>
+    </div>
+
+    {% include 'generic_field.html' with field=form.drugbank_id label="DrugBank ID"%}
 
     <div class="form-group">
         <label for="name" class="col-sm-2 control-label">Name</label>
@@ -117,6 +132,14 @@
         </div>
     </div>
 
+    {% include 'generic_field.html' with field=form.drug_class label="Drug Class"%}
+
+    {% include 'generic_field.html' with field=form.protein_binding label="Protein Binding"%}
+
+    {% include 'generic_field.html' with field=form.half_life label="Half Life"%}
+
+    {% include 'generic_field.html' with field=form.bioavailability label="Bioavailability"%}
+
     <legend>Molecular Properties</legend>
 
     <div class="form-group">
@@ -141,28 +164,28 @@
     </div>
 
     <div class="form-group">
-        <label for="acidic_pka" class="col-sm-2 control-label">Acidic pKa</label>
+        <label for="acidic_pka" class="col-sm-2 control-label">Acidic pKa (ACD)</label>
         <div class="col-sm-10">
           {{ form.acidic_pka }}
         </div>
     </div>
 
     <div class="form-group">
-        <label for="basic_pka" class="col-sm-2 control-label">Basic pKa</label>
+        <label for="basic_pka" class="col-sm-2 control-label">Basic pKa (ACD)</label>
         <div class="col-sm-10">
           {{ form.basic_pka }}
         </div>
     </div>
 
     <div class="form-group">
-        <label for="logp" class="col-sm-2 control-label">LogP</label>
+        <label for="logp" class="col-sm-2 control-label">LogP (ACD)</label>
         <div class="col-sm-10">
           {{ form.logp }}
         </div>
     </div>
 
     <div class="form-group">
-        <label for="logd" class="col-sm-2 control-label">LogD</label>
+        <label for="logd" class="col-sm-2 control-label">LogD (ACD)</label>
         <div class="col-sm-10">
           {{ form.logd }}
         </div>
@@ -190,6 +213,57 @@
           {{ form.synonyms }}
         </div>
     </div>
+
+    <legend>Summaries</legend>
+
+    {% include 'generic_field.html' with field=form.absorption label="Absorption" %}
+
+    {% include 'generic_field.html' with field=form.clearance label="Clearance" %}
+
+    {% include 'generic_field.html' with field=form.pk_metabolism label="PK/Metabolism" %}
+
+    {% include 'generic_field.html' with field=form.preclinical label="Pre-clinical Findings" %}
+
+    {% include 'generic_field.html' with field=form.clinical label="Clinical Findings" %}
+
+    {% include 'generic_field.html' with field=form.post_marketing label="Post-marketing" %}
+
+    {# TODO MAKE SURE TARGETS ARE WORKING #}
+    <legend>Targets/Interactions</legend>
+
+    <a id="add_button" class="btn btn-success" role="button">Add Target</a>
+    <table class="table table-striped assays" id="compoundtarget_set-group"  name="inlines">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Uniprot ID</th>
+                <th>Type</th>
+                <th>Organism</th>
+                <th>Pharmacological Action</th>
+                <th>Actions</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for target in formset %}
+                <tr class="inline" id="target-{{ forloop.counter0 }}">
+                    {# Hidden input for Update (need id to associate) #}
+                    {% if target.id.value %}
+                    <td class="original" hidden>
+                        <input id="id_compoundtarget_set-{{ forloop.counter0 }}-id" name="compoundtarget_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ target.id.value }}">
+                    </td>
+                    {% endif %}
+                    <td>{{ target.name }}</td>
+                    <td>{{ target.uniprot_id }}</td>
+                    <td>{{ target.type }}</td>
+                    <td>{{ target.organism }}</td>
+                    <td>{{ target.pharmacological_action }}</td>
+                    <td>{{ target.action }}</td>
+                    <td>{{ target.DELETE }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
 </form>
 

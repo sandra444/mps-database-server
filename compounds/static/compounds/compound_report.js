@@ -2,7 +2,6 @@
 // 1.) Employ some method to filter desired compounds (will resemble list display with checkboxes)
 // 2.) Display all of the requested compound data in the desired table
 // 3.) Display D3 "Sparklines" for every assay for the given compound (TODO LOOK AT D3 TECHNIQUE)
-
 $(document).ready(function () {
     // Middleware token for CSRF validation
     var middleware_token = getCookie('csrftoken');
@@ -15,9 +14,117 @@ $(document).ready(function () {
     var x = d3.scale.linear().range([0, width]);
     var y = d3.scale.linear().range([height, 0]);
     var line = d3.svg.line()
-             .interpolate("basis")
-             .x(function(d) { return x(d.time); })
-             .y(function(d) { return y(d.value); });
+        // We no longer interpolate
+        //.interpolate("basis")
+        .x(function(d) { return x(d.time); })
+        .y(function(d) { return y(d.value); });
+
+    var selections = $('#selections');
+    var MAX_SAVED_SELECTIONS = 5;
+
+    // Open and then close dialog so it doesn't get placed in window itself
+    var dialog = $('#selection_dialog');
+    dialog.dialog({
+        width: 825,
+        height: 500,
+        closeOnEscape: true,
+        autoOpen: false,
+        close: function() {
+            $('body').removeClass('stop-scrolling');
+        },
+        open: function() {
+            $('body').addClass('stop-scrolling');
+        }
+    });
+    dialog.removeProp('hidden');
+
+    // Add method to sort by checkbox
+    // (I reversed it so that ascending will place checked first)
+    $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col){
+        return this.api().column(col, {order:'index'}).nodes().map(function(td, i){
+            return $('input', td).prop('checked') ? 0 : 1;
+        });
+    };
+
+    function clear_selections(reset) {
+        // Remove search terms
+        $('input[type=search]').val('');
+        compounds_table.search('');
+        // Show all checkboxes
+        compounds_table.page.len(-1).draw();
+        // Uncheck all checkboxes
+        $('.checkbox').prop('checked', false);
+        // Remove all compounds
+        compounds = {};
+
+        if (reset) {
+            // Return to default length (maintains previous sorting and so on)
+            compounds_table.page.len(25).draw();
+        }
+    }
+
+    function save_selections() {
+        var current_selections = _.keys(compounds);
+
+        var all_selections = [];
+        var current_storage = localStorage.getItem('compound_report_selections');
+
+        if (current_storage) {
+            all_selections = JSON.parse(current_storage);
+
+            if (all_selections.length >= MAX_SAVED_SELECTIONS) {
+                all_selections = all_selections.slice(1);
+            }
+        }
+        all_selections.push(current_selections);
+        all_selections = JSON.stringify(all_selections);
+
+        localStorage.setItem('compound_report_selections', all_selections)
+    }
+
+    function display_load_dialog() {
+        var current_storage = localStorage.getItem('compound_report_selections');
+        if (current_storage) {
+            var all_selections = JSON.parse(current_storage);
+
+            // Clear old selections
+            selections.html('');
+
+            $.each(all_selections, function(index, selection) {
+                var row = $('<tr>').addClass('table-selection')
+                    .attr('data-selection-index', index);
+
+                var compound_column = $('<td>').text(selection.join(', '));
+
+                row.append(compound_column);
+                selections.append(row);
+            });
+        }
+
+        dialog.dialog('open');
+        // Remove focus
+        $('.ui-dialog :button').blur();
+    }
+
+    function load_selections(selection_index) {
+        clear_selections(false);
+
+        var current_storage = localStorage.getItem('compound_report_selections');
+        var all_selections = JSON.parse(current_storage);
+
+        var compound_selections = all_selections[selection_index];
+
+        $.each(compound_selections, function(index, compound) {
+            compounds[compound] = compound;
+            var current_checkbox = $('input[value="' + compound +'"');
+            current_checkbox.prop('checked', true);
+        });
+
+        compounds_table.order([[0, 'asc']]);
+        compounds_table.page.len(10).draw();
+
+        dialog.dialog('close');
+    }
 
     function sparkline(elem_id, plot, x_domain, y_domain) {
         //console.log(x_domain);
@@ -110,14 +217,12 @@ $(document).ready(function () {
             var row = "<tr>";
 
             row += "<td><a href='/compounds/"+values['id']+"'>" + compound + "</a></td>";
-            row += "<td>" + values['Dose (xCmax)'] + "</td>";
-            row += "<td>" + values['cLogP']  + "</td>";
-            row += "<td>" + values['Pre-clinical Findings'].replace(/\r\n/g,'<br>') + "</td>";
-            row += "<td>" + values['Clinical Findings'].replace(/\r\n/g,'<br>') + "</td>";
-
-            // Recently added
-            row += "<td>" + values['PK/Metabolism'].replace(/\r\n/g,'<br>') + "</td>";
-
+            //row += "<td>" + values['Dose (xCmax)'] + "</td>";
+            row += "<td>" + values['logP']  + "</td>";
+            row += "<td>" + values['pk_metabolism'].replace(/\r\n/g,'<br>') + "</td>";
+            row += "<td>" + values['preclinical'].replace(/\r\n/g,'<br>') + "</td>";
+            row += "<td>" + values['clinical'].replace(/\r\n/g,'<br>') + "</td>";
+            row += "<td>" + values['post_marketing'].replace(/\r\n/g,'<br>') + "</td>";
             row += "<td>";
 
             // Make the table
@@ -132,7 +237,12 @@ $(document).ready(function () {
             row += "</tr>";
             $('#results_body').append(row);
 
-            for (assay in x_max) {
+            // Sorted assays for iteration
+            var sorted_assays = _.sortBy(_.keys(x_max), function(a) { return a; });
+
+            for (var i=0; i<sorted_assays.length; i++) {
+                assay = sorted_assays[i];
+
                 var assay_max_time = values.max_time[assay] ? values.max_time[assay]:"-";
                 // Tack this assay on to the header
                 $('#'+compound+'_header').append($('<td>')
@@ -141,7 +251,11 @@ $(document).ready(function () {
                     .attr('width', 50)
                     .append('<span>'+assay+'<br>'+'(' + assay_max_time + 'd)'+'</span>'));
                 if (plot[assay]) {
-                    for (concentration in plot[assay]) {
+                    var sorted_concentrations = _.sortBy(_.keys(plot[assay]), function(a) { return parseFloat(a); });
+
+                    for (var j=0; j<sorted_concentrations.length; j++) {
+                        concentration = sorted_concentrations[j];
+
                         var row_id = compound + '_' + concentration.replace('.', '_');
                         // If the concentration does not have a row, add it to the table
                         if (!$('#' + row_id)[0]) {
@@ -151,7 +265,8 @@ $(document).ready(function () {
                                 .append($('<td>')
                                     .text(concentration.replace('_', ' '))));
                         }
-                        for (var every_assay in x_max) {
+                        for (var x=0; x<sorted_assays.length; x++) {
+                            var every_assay = sorted_assays[x];
                             // Add a cell for the assay given concentration
                             if (!$('#' + compound + '_' + every_assay.replace(/\s/g, "_").replace('.', '_') + '_' + concentration.replace(/\s/g, "_").replace('.', '_'))[0]) {
                                 $('#' + row_id).append($('<td>')
@@ -211,14 +326,30 @@ $(document).ready(function () {
     });
 
     // Tracks the clicking of checkboxes to fill compounds
-    $('.checkbox').change( function() {
+    $('.checkbox').change(function() {
         var compound = this.value;
         if (this.checked) {
             compounds[compound] = compound;
         }
         else {
-            delete compounds[compound]
+            delete compounds[compound];
         }
+    });
+
+    $('#save_selections').click(function() {
+        save_selections();
+    });
+
+    $('#load_selections').click(function() {
+        display_load_dialog();
+    });
+
+    $('#clear_selections').click(function() {
+        clear_selections(true);
+    });
+
+    selections.on('click', '.table-selection', function() {
+        load_selections(+$(this).attr('data-selection-index'));
     });
 
     window.onhashchange = function() {
@@ -233,18 +364,22 @@ $(document).ready(function () {
     };
 
     // Make the initial data table
-    $('#compounds').DataTable({
+    var compounds_table = $('#compounds').DataTable({
         dom: 'T<"clear">lfrtip',
         "order": [[ 1, "asc" ]],
         "aoColumnDefs": [
             {
                 "bSortable": false,
-                "aTargets": [0,9]
+                "aTargets": [9]
             },
             {
                 "targets": [3],
                 "visible": false,
                 "searchable": true
+            },
+            {
+                "sSortDataType": "dom-checkbox",
+                "targets": 0
             }
         ],
         "iDisplayLength": 25

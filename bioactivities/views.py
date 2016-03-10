@@ -6,11 +6,11 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
+#from rest_framework.parsers import JSONParser
 
-import ujson as json
+#import ujson as json
 
-from bioactivities.models import *
+#from bioactivities.models import *
 from bioactivities.parsers import *
 # from bioactivities.serializers import BioactivitiesSerializer
 
@@ -40,30 +40,42 @@ def bioactivities_list(request):
     """
     Retrieve a list of Bioactivities
     """
-
     if request.method == 'GET':
-        compound =  request.GET.get('compound', '')
-        target = request.GET.get('target','')
-        name = request.GET.get('name','')
+        compound = request.GET.get('compound', '')
+        target = request.GET.get('target', '')
+        name = request.GET.get('name', '')
         pubchem = request.GET.get('pubchem', '')
         exclude_targetless = request.GET.get('exclude_targetless', '')
         exclude_organismless = request.GET.get('exclude_organismless', '')
+        exclude_questionable = request.GET.get('exclude_questionable', '')
 
         # I might want to sort by multiple fields later
-        if any([compound,target,name]):
+        if any([compound, target, name]):
             if pubchem:
-                data = PubChemBioactivity.objects.all().select_related('compound__name','assay__target','assay__pubchem_id')
+                data = PubChemBioactivity.objects.all().select_related(
+                    'compound__name',
+                    'assay__target',
+                    'assay__pubchem_id'
+                )
             else:
-                data = Bioactivity.objects.filter(standard_name__isnull=False,
-                                              standardized_units__isnull=False,
-                                              standardized_value__isnull=False).select_related('compound__name',
-                                                                                                 'target__name','assay__chemblid')
+                data = Bioactivity.objects.exclude(
+                    standard_name='',
+                    standardized_units='',
+                    standardized_value__isnull=True
+                ).select_related(
+                    'compound__name',
+                    'target__name',
+                    'assay__chemblid'
+                )
 
             if compound:
                 data = data.filter(compound__name__icontains=compound)
 
             if target:
-                data = data.filter(assay__target__name__icontains=target)
+                if pubchem:
+                    data = data.filter(assay__target__name__icontains=target)
+                else:
+                    data = data.filter(target__name__icontains=target)
 
             if name:
                 if pubchem:
@@ -73,14 +85,24 @@ def bioactivities_list(request):
 
             if exclude_targetless:
                 # Exclude where target is "Unchecked"
-                data = data.filter(assay__target__isnull=False).exclude(assay__target__name="Unchecked").exclude(assay__target__name='')
+                if pubchem:
+                    data = data.filter(
+                        assay__target__isnull=False
+                    ).exclude(assay__target__name="Unchecked").exclude(assay__target__name='')
+                else:
+                    data = data.filter(
+                       target__isnull=False
+                    ).exclude(target__name="Unchecked").exclude(target__name='')
 
             if exclude_organismless:
                 # Exclude where assay and target organism are null
                 # TODO JUST SAVE THE TARGET ORGANISM AS THE ASSAY ORGANISM?
-                data = data.filter(assay__organism__isnull=False) | data.filter(assay__target__organism__isnull=False)
+                data = data.exclude(assay__organism='').exclude(assay__target__organism='')
                 # Exclude where organism is "Unspecified"
                 data = data.exclude(assay__organism="Unspecified").exclude(assay__target__organism="Unspecified")
+
+            if exclude_questionable:
+                data = data.filter(data_validity='')
 
             length = data.count()
 
@@ -96,6 +118,7 @@ def bioactivities_list(request):
                 'length': length,
                 'pubchem': pubchem
             })
+
             return render_to_response('bioactivities/bioactivities_list.html', c)
 
         else:
@@ -156,14 +179,16 @@ def bioactivities_list(request):
 #         return HttpResponse(status=204)
 
 
+# TODO NEEDS REVISION
 @csrf_exempt
 def list_of_all_bioactivities_in_bioactivities(request):
-    return JSONResponse(generate_list_of_all_bioactivities_in_bioactivities())
+    return JSONResponse(generate_list_of_all_bioactivities_in_bioactivities(True))
 
 
 @csrf_exempt
 def list_of_all_targets_in_bioactivities(request):
-
+    exclude_questionable = json.loads(request.GET.get('exclude_questionable'))
+    pubchem = json.loads(request.GET.get('pubchem'))
     target_types = json.loads(request.GET.get('target_types'))
     organisms = json.loads(request.GET.get('organisms'))
 
@@ -185,15 +210,31 @@ def list_of_all_targets_in_bioactivities(request):
         ) is True
     ]
 
-    return JSONResponse(generate_list_of_all_targets_in_bioactivities(desired_organisms, desired_target_types))
+    return JSONResponse(
+        generate_list_of_all_targets_in_bioactivities(
+            exclude_questionable,
+            pubchem,
+            desired_organisms,
+            desired_target_types
+        )
+    )
 
 
 @csrf_exempt
 def list_of_all_compounds_in_bioactivities(request):
-    return JSONResponse(generate_list_of_all_compounds_in_bioactivities())
+    exclude_questionable = json.loads(request.GET.get('exclude_questionable'))
+    pubchem = json.loads(request.GET.get('pubchem'))
+
+    return JSONResponse(generate_list_of_all_compounds_in_bioactivities(
+        exclude_questionable,
+        pubchem,
+    ))
+
 
 @csrf_exempt
 def list_of_all_data_in_bioactivities(request):
+    exclude_questionable = json.loads(request.GET.get('exclude_questionable'))
+    pubchem = json.loads(request.GET.get('pubchem'))
     target_types = json.loads(request.GET.get('target_types'))
     organisms = json.loads(request.GET.get('organisms'))
 
@@ -215,7 +256,15 @@ def list_of_all_data_in_bioactivities(request):
         ) is True
     ]
 
-    return JSONResponse(generate_list_of_all_data_in_bioactivities(desired_organisms, desired_target_types))
+    return JSONResponse(
+        generate_list_of_all_data_in_bioactivities(
+            exclude_questionable,
+            pubchem,
+            desired_organisms,
+            desired_target_types
+        )
+    )
+
 
 @csrf_exempt
 def gen_heatmap(request):
@@ -228,6 +277,7 @@ def gen_heatmap(request):
         logging.debug('Final JSON response step failed: result has no data')
         return HttpResponse()
 
+
 @csrf_exempt
 def gen_cluster(request):
     result = cluster(request)
@@ -238,6 +288,7 @@ def gen_cluster(request):
     else:
         logging.debug('Final JSON response step failed: result has no data')
         return HttpResponse()
+
 
 @csrf_exempt
 def gen_table(request):
@@ -250,13 +301,16 @@ def gen_table(request):
         logging.debug('Final JSON response step failed: result has no data')
         return HttpResponse()
 
+
 def view_cluster(request):
     c = RequestContext(request)
     return render_to_response('bioactivities/cluster.html', c)
 
+
 def view_heatmap(request):
     c = RequestContext(request)
     return render_to_response('bioactivities/heatmap.html', c)
+
 
 def view_table(request):
     if request.method == 'POST':
@@ -274,6 +328,7 @@ def view_table(request):
     })
 
     return render_to_response('bioactivities/table.html', c)
+
 
 def view_model(request):
     c = RequestContext(request)

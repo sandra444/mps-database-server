@@ -81,15 +81,16 @@ $(document).ready(function () {
     }
 
     function refresh(changed) {
-
         // Disable everything
-        $(":input").prop("disabled", true);
+        $("#selection_form :input").prop("disabled", true);
 
         $.ajax({
             url: '/bioactivities/all_data',
             type: "GET",
             dataType: "json",
             data: {
+                pubchem: FILTER.pubchem,
+                exclude_questionable: FILTER.exclude_questionable,
                 target_types: JSON.stringify(FILTER.target_types),
                 organisms: JSON.stringify(FILTER.organisms)
             },
@@ -106,6 +107,7 @@ $(document).ready(function () {
 
                 // Clear targets
                 reset_rows('targets', targets, '');
+                $('#target_filter').val('');
 
                 if (changed == 'all') {
                     // Clear bioactivities
@@ -116,6 +118,8 @@ $(document).ready(function () {
 
                     // Clear drugtrials
                     reset_rows('drugtrials', drugtrials, '');
+
+                    $('.table-filter').val('');
                 }
 
                 // Trigger compound filters
@@ -252,39 +256,63 @@ $(document).ready(function () {
         refresh('all');
     });
 
+    var pubchem = $('#pubchem');
+    var exclude_questionable = $('#exclude_questionable');
+    var log_scale = $('#log_scale');
+    var normalize_bioactivities = $('#normalize_bioactivities');
+    var chemical_properties = $('#chemical_properties');
+    var metric = $('#metric');
+    var method = $('#method');
+
+    // Initial truth pubchem
+    window.FILTER.pubchem = pubchem.prop('checked');
+    // Listen pubchem
+    pubchem.change(function (evt) {
+        window.FILTER.pubchem = pubchem.prop('checked');
+        refresh('all');
+    });
+
+    // Initial truth exclude_questionable
+    window.FILTER.exclude_questionable = exclude_questionable.prop('checked');
+    // Listen exclude_questionable
+    exclude_questionable.change(function (evt) {
+        window.FILTER.exclude_questionable = exclude_questionable.prop('checked');
+        refresh('all');
+    });
+
     // Initial truth log scale
-    window.FILTER.log_scale = $('#log_scale').prop('checked');
+    window.FILTER.log_scale = log_scale.prop('checked');
     // Listen log_scale
-    $('#log_scale').change(function (evt) {
-        window.FILTER.log_scale = $('#log_scale').prop('checked');
+    log_scale.change(function (evt) {
+        window.FILTER.log_scale = log_scale.prop('checked');
     });
 
     // Initial truth normalize
-    window.FILTER.normalize_bioactivities = $('#normalize_bioactivities').prop('checked');
+    window.FILTER.normalize_bioactivities = normalize_bioactivities.prop('checked');
     // Listen normalize
-    $('#normalize_bioactivities').change(function (evt) {
-        window.FILTER.normalize_bioactivities = $('#normalize_bioactivities').prop('checked');
+    normalize_bioactivities.change(function (evt) {
+        window.FILTER.normalize_bioactivities = normalize_bioactivities.prop('checked');
     });
 
     // Initial truth chem properties
-    window.FILTER.chemical_properties = $('#chemical_properties').prop('checked');
+    window.FILTER.chemical_properties = chemical_properties.prop('checked');
     // Listen chemical properties
-    $('#chemical_properties').change(function (evt) {
-        window.FILTER.chemical_properties = $('#chemical_properties').prop('checked');
+    chemical_properties.change(function (evt) {
+        window.FILTER.chemical_properties = chemical_properties.prop('checked');
     });
 
     // Initial metric
-    window.FILTER.metric = $('#metric').val();
+    window.FILTER.metric = metric.val();
     // Listen metric
-    $('#metric').change(function (evt) {
-        window.FILTER.metric = $('#metric').val();
+    metric.change(function (evt) {
+        window.FILTER.metric = metric.val();
     });
 
     // Initial method
-    window.FILTER.method = $('#method').val();
+    window.FILTER.method = method.val();
     // Listen method
-    $('#method').change(function (evt) {
-        window.FILTER.method = $('#method').val();
+    method.change(function (evt) {
+        window.FILTER.method = method.val();
     });
 
     var targets = [];

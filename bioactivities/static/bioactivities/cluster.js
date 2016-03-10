@@ -157,8 +157,13 @@ $(document).ready(function () {
         var query = "<div style='width:" + queryWidth + "px; height: "+ queryHeight + "px;!important;overflow: scroll;'><table class='table table-striped table-hover'><thead><tr><td><b>Target</b></td><td><b>Bioactivity</b></td></tr></thead>";
 
         for (var i in bioactivities){
-            bioactivity = bioactivities[i].split('_');
-            query += "<tr><td>"+bioactivity[0]+"</td><td>"+bioactivity[1]+"</td></tr>";
+            var bioactivity = bioactivities[i].split('_');
+            if (bioactivity.length > 2) {
+                query += "<tr><td>" + bioactivity[0] + '_' + bioactivity[1] + "</td><td>" + bioactivity[2] + "</td></tr>";
+            }
+            else {
+                query += "<tr><td>Drug Trial</td><td>" + bioactivity[0] + "</td></tr>";
+            }
         }
 
         // Add some blank rows for padding the bottom
@@ -185,7 +190,6 @@ $(document).ready(function () {
     }
 
     function submit() {
-
         // Clear all filters
         bioactivities_filter = [];
         targets_filter = [];
@@ -228,6 +232,8 @@ $(document).ready(function () {
             contentType: 'application/json',
             // Remember to convert to string
             data: JSON.stringify({
+                'exclude_questionable': FILTER.exclude_questionable,
+                'pubchem': FILTER.pubchem,
                 'bioactivities_filter': bioactivities_filter,
                 'targets_filter': targets_filter,
                 'compounds_filter': compounds_filter,

@@ -5,6 +5,18 @@ $(document).ready(function() {
 
     var radio_buttons_display = $('#radio_buttons');
 
+    var pattern = [
+        '#1f77b4', '#ff7f0e', '#2ca02c',
+        '#d62728', '#9467bd',
+        '#8c564b', '#e377c2','#7f7f7f',
+        '#bcbd22', '#17becf',
+        '#18F285',
+        '#E6F02E',
+        '#AAF514',
+        '#52400B',
+        '#CCCCCC'
+    ];
+
     function make_charts(assays) {
         // Clear existing charts
         charts.empty();
@@ -66,11 +78,9 @@ $(document).ready(function() {
                 data: {
                     columns: []
                 },
-
                 size: {
                   height: 320
                 },
-
                 axis: {
                     x: {
                         label: {
@@ -88,12 +98,36 @@ $(document).ready(function() {
                             position: 'outer-middle'
                         }
                     }
+                },
+                tooltip: {
+                    format: {
+                        value: function (value, ratio, id) {
+                            var format = value % 1 === 0 ? d3.format(',d') : d3.format(',.2f');
+                            return format(value);
+                        }
+                    }
+                },
+                padding: {
+                  right: 10
+                },
+                // TODO this is not optimal
+                // manually reposition axis label
+                onrendered: function() {
+                    $('.c3-axis-x-label').attr('dy', '35px');
+                },
+                color: {
+                    // May need more colors later (these colors might also be too similar?)
+                    pattern: pattern
                 }
             });
 
             var num = 1;
             var xs = {};
-            for (var current_key in assays[assay]) {
+
+            var sorted_keys = _.sortBy(_.keys(assays[assay]));
+
+            for (var i=0; i<sorted_keys.length; i++) {
+                var current_key = sorted_keys[i];
                 var current_data = assays[assay][current_key];
 
                 xs[current_key] = 'x' + num;
