@@ -120,7 +120,7 @@ class CompoundsUpdate(SpecificGroupRequiredMixin, UpdateView):
 
         if form.is_valid() and formset.is_valid():
             self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
+            self.object.modified_by = self.request.user
             # Save Compound
             self.object.save()
             formset.save()
