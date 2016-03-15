@@ -22,7 +22,7 @@ class CompoundForm(forms.ModelForm):
             'clinical': forms.Textarea(attrs={'size': 50, 'rows': 3}),
             'post_marketing': forms.Textarea(attrs={'size': 50, 'rows': 3}),
         }
-        exclude = ('',)
+        exclude = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
 
     # Deal with nonsense
     def clean(self):
