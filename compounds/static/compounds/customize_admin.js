@@ -93,6 +93,8 @@ $(document).ready(function () {
         $('#id_clearance').val(data.clearance);
         $('#id_absorption').val(data.absorption);
 
+        $('#id_pubchemid').val(data.pubchemid);
+
         // TODO WORK OUT HOW TO CREATE TARGET ENTRIES HERE
         for (var x in data.targets) {
             var target = data.targets[x];

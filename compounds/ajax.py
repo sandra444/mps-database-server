@@ -291,6 +291,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         # Values found in table
         data = {
             'drugbank_id': '',
+            'pubchemid': '',
             'drug_class': '',
             'protein_binding': '',
             'half_life': '',
@@ -455,6 +456,19 @@ def get_drugbank_data_from_chembl_id(chembl_id):
 
         # Remember that targets is a list!
         data.update({'targets': targets})
+
+    # YES, I know that the function title is deceiving in that this is actually a PubChem ID
+    # Get pubchemid from unichem too
+    url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/22'.format(chembl_id)
+    # Make the http request
+    response = requests.get(url)
+    # Get the webpage as JSON
+    json_data = json.loads(response.text)
+
+    if json_data and u'error' not in json_data:
+        # Extract ID
+        pubchemid = json_data[0].get('src_compound_id')
+        data.update({'pubchemid': pubchemid})
 
     return data
 
