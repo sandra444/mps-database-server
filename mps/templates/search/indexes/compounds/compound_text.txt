@@ -4,4 +4,3 @@
 {{ object.drugbank_id }}
 {{ object.synonyms }}
 {{ object.inchikey }}
-{{ object.tags }}

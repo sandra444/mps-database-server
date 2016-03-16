@@ -24,8 +24,17 @@
 
     <div class="padded-row">
 
-        <div class="col-sm-3 col-md-2 thumbnail">
+        <div class="col-sm-3 col-md-2 thumbnail text-center">
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.chemblid }}">
+            {% if object.mps %}
+                <span class="btn btn-primary">MPS</span>
+            {% endif %}
+            {% if object.epa %}
+                <span class="btn btn-success">EPA</span>
+            {% endif %}
+            {% if not object.mps and not object.epa %}
+                <span class="btn btn-default">Unassigned</span>
+            {% endif %}
         </div>
 
         <div class="col-sm-9 col-md-10">
@@ -39,26 +48,22 @@
                             <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ object.chemblid }}">{{ object.chemblid }}</a>
                         </td>
                     </tr>
-                    {% if object.drugbank_id %}
-                        <tr>
-                            <td>
-                                <b>DrugBank ID</b>
-                            </td>
-                            <td>
-                                <a href="http://www.drugbank.ca/drugs/{{ object.drugbank_id }}">{{ object.drugbank_id }}</a>
-                            </td>
-                        </tr>
-                    {% endif %}
-                    {% if object.pubchemid %}
-                        <tr>
-                            <td>
-                                <b>PubChem ID</b>
-                            </td>
-                            <td>
-                                <a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ object.pubchemid }}">{{ object.pubchemid }}</a>
-                            </td>
-                        </tr>
-                    {% endif %}
+                    <tr>
+                        <td>
+                            <b>PubChem ID</b>
+                        </td>
+                        <td>
+                            <a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ object.pubchemid }}">{{ object.pubchemid }}</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>DrugBank ID</b>
+                        </td>
+                        <td>
+                            <a href="http://www.drugbank.ca/drugs/{{ object.drugbank_id }}">{{ object.drugbank_id }}</a>
+                        </td>
+                    </tr>
                     <tr>
                         <td>
                             <b>Molecular Formula</b>
@@ -67,16 +72,14 @@
                             {{ object.molecular_formula }}
                         </td>
                     </tr>
-                    {% if object.inchikey %}
-                        <tr>
-                            <td>
-                                <b>Inchikey</b>
-                            </td>
-                            <td>
-                                {{ object.inchikey }}
-                            </td>
-                        </tr>
-                    {% endif %}
+                    <tr>
+                        <td>
+                            <b>Inchikey</b>
+                        </td>
+                        <td>
+                            {{ object.inchikey }}
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>

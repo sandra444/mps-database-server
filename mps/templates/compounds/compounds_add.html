@@ -94,12 +94,25 @@
         </div>
     </div>
 
+    {# TODO REVISE #}
     <div class="form-group">
-        <label for="tags" class="col-sm-2 control-label">Tags (EPA, NCATS, etc.)</label>
-        <div class="col-sm-10">
-          {{ form.tags }}
+        <label for="mps" class="col-sm-2 control-label">Part of the MPS Project</label>
+        <div class="col-sm-2 col-md-1">
+          {{ form.mps }}
+        </div>
+        <label for="epa" class="col-sm-2 control-label">Part of the EPA Project</label>
+        <div class="col-sm-2 col-md-1">
+          {{ form.epa }}
         </div>
     </div>
+
+    {# TODO This field is deprecated #}
+{#    <div class="form-group">#}
+{#        <label for="tags" class="col-sm-2 control-label">Tags (EPA, NCATS, etc.)</label>#}
+{#        <div class="col-sm-10">#}
+{#          {{ form.tags }}#}
+{#        </div>#}
+{#    </div>#}
 
     <legend>Drug/Drug-like Properties</legend>
 

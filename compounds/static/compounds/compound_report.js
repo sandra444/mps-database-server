@@ -38,6 +38,25 @@ $(document).ready(function () {
     });
     dialog.removeProp('hidden');
 
+    var show_mps = $('#show_mps');
+    var show_epa = $('#show_epa');
+    var show_unassigned = $('#show_unassigned');
+
+    var filters = {
+        'MPS': true,
+        'EPA': true,
+        'Unassigned': true
+    };
+
+    // This function filters the dataTable rows
+    $.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
+        for (var filter in filters) {
+            if (filters[filter] && aData[8].indexOf(filter) > -1) {
+                return true
+            }
+        }
+    });
+
     // Add method to sort by checkbox
     // (I reversed it so that ascending will place checked first)
     $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col){
@@ -373,7 +392,7 @@ $(document).ready(function () {
                 "aTargets": [9]
             },
             {
-                "targets": [3],
+                "targets": [3, 8],
                 "visible": false,
                 "searchable": true
             },
@@ -383,5 +402,14 @@ $(document).ready(function () {
             }
         ],
         "iDisplayLength": 25
+    });
+
+    $('.table-filter').click(function() {
+        filters['MPS'] = show_mps.prop('checked');
+        filters['EPA'] = show_epa.prop('checked');
+        filters['Unassigned'] = show_unassigned.prop('checked');
+
+        // Redraw the table
+        compounds_table.draw();
     });
 });
