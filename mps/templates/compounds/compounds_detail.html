@@ -27,13 +27,13 @@
         <div class="col-sm-3 col-md-2 thumbnail text-center">
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.chemblid }}">
             {% if object.mps %}
-                <span class="btn btn-primary">MPS</span>
+                <span class="label label-primary">MPS</span>
             {% endif %}
             {% if object.epa %}
-                <span class="btn btn-success">EPA</span>
+                <span class="label label-success">EPA</span>
             {% endif %}
             {% if not object.mps and not object.epa %}
-                <span class="btn btn-default">Unassigned</span>
+                <span class="label label-default">Unassigned</span>
             {% endif %}
         </div>
 

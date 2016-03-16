@@ -115,6 +115,15 @@ class OrganModel(LockableModel):
 
     model_image = models.ImageField(upload_to='models', null=True, blank=True)
 
+    epa = models.BooleanField(
+        default=False,
+        help_text='Whether this compound is part of the EPA project'
+    )
+    mps = models.BooleanField(
+        default=False,
+        help_text='Whether this compound is part of the MPS project'
+    )
+
     # Removed in favor of protocol inline
     #protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
     #                        blank=True, null=True, help_text='File detailing the protocols for this model')
