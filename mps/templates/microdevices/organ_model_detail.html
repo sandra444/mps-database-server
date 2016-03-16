@@ -51,13 +51,13 @@
                         <b>Project</b>
                     </td>
                     <td>
-                        {% if object.mps %}
+                        {% if model.mps %}
                             <span class="label label-primary">MPS</span>
                         {% endif %}
-                        {% if object.epa %}
+                        {% if model.epa %}
                             <span class="label label-success">EPA</span>
                         {% endif %}
-                        {% if not object.mps and not object.epa %}
+                        {% if not model.mps and not model.epa %}
                             <span class="label label-default">Unassigned</span>
                         {% endif %}
                     </td>
