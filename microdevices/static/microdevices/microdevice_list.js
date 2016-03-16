@@ -24,6 +24,11 @@ $(document).ready(function() {
                 "aTargets": [0, 1]
             },
             {
+                'sortable': true,
+                'visible': false,
+                'targets': [6]
+            },
+            {
                 "width": "10%",
                 "targets": [0, 1]
             }

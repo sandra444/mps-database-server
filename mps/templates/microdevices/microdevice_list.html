@@ -56,14 +56,14 @@
                     <td><a href="device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
                     <td>{{ model.center|default_if_none:"" }}</td>
                     <td>
-                        {% if model.mps %}
-                            <span class="label label-primary">MPS</span>
+                        {% if compound.mps %}
+                            MPS
                         {% endif %}
-                        {% if model.epa %}
-                            <span class="label label-success">EPA</span>
+                        {% if compound.epa %}
+                            EPA
                         {% endif %}
-                        {% if not model.mps and not object.epa %}
-                            <span class="label label-default">Unassigned</span>
+                        {% if not compound.epa and not compound.mps %}
+                            Unassigned
                         {% endif %}
                     </td>
                     <td>{{ model.description }}</td>

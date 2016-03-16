@@ -221,7 +221,7 @@ class OrganModelAdmin(LockableAdmin):
 
     list_per_page = 300
     list_display = (
-        'model_name', 'organ', 'device', 'center', 'description')
+        'model_name', 'organ', 'device', 'center', 'description', 'mps', 'epa')
     search_fields = [
         'model_name', 'organ', 'device', 'center', 'description']
     readonly_fields = ['created_by', 'created_on',
@@ -237,6 +237,9 @@ class OrganModelAdmin(LockableAdmin):
                     (
                         'organ', 'device', 'description',
                     ),
+                    (
+                        'mps', 'epa'
+                    )
                 )
             }
         ),
