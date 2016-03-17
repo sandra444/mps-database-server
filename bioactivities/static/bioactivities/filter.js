@@ -56,11 +56,17 @@ $(document).ready(function () {
                 var is_drug = data[1];
                 var LogP = data[2];
                 var molecular_weight = data[3];
+                var mps = data[4];
+                var epa = data[5];
                 row = "<tr id='" + add + compound_name.replace(/ /g, "_").replace(/'/g, "&#39;")
                     + "' data-is_drug=" + is_drug
                     + " data-LogP=" + LogP
                     + " data-molecular_weight=" + molecular_weight
-                    + ' data-filters=\'{"is_drug": false, "LogP": false, "molecular_weight": false, "contains": false}\''
+                    + " data-mps=" + mps
+                    + " data-epa=" + epa
+                    + ' data-filters=\'{"is_drug": false, "LogP": false,' +
+                    ' "molecular_weight": false, "mps": false, "epa": false,' +
+                    ' "unlabelled": false, "contains": false}\''
                     + ">";
                 row += "<td>" + "<input type='checkbox' value='" + compound_name.replace(/'/g, "&#39;") + "'></td>";
                 row += "<td>" + compound_name + "</td>";
@@ -431,6 +437,10 @@ $(document).ready(function () {
     var drugs = $('#drugs');
     var non_drugs = $('#non_drugs');
 
+    var mps = $('#mps');
+    var epa = $('#epa');
+    var unlabelled = $('#unlabelled');
+
     // Check to see if the "drugs" button has been clicked
     drugs.change(function (evt) {
         // Show all drugs
@@ -478,6 +488,87 @@ $(document).ready(function () {
                 var filters = JSON.parse(this.getAttribute('data-filters'));
                 if (this.getAttribute('data-is_drug') == 'False') {
                     filters.is_drug = true;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        reset_all_checkbox('compounds');
+    });
+
+    // Check to see if the "non-drugs" button has been clicked
+    mps.change(function (evt) {
+        // Show all mps
+        if (this.checked) {
+            $("#compounds tr").each(function () {
+                // If the row is for an mps drug
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (this.getAttribute('data-mps') == 'True') {
+                    filters.mps = false;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        // Hide all mps
+        else {
+            $("#compounds tr").each(function () {
+                // If the row mps
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (this.getAttribute('data-mps') == 'True') {
+                    filters.mps = true;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        reset_all_checkbox('compounds');
+    });
+
+    // Check to see if the "epa" button has been clicked
+    epa.change(function (evt) {
+        // Show all epa
+        if (this.checked) {
+            $("#compounds tr").each(function () {
+                // If the row is for an epa drug
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (this.getAttribute('data-epa') == 'True') {
+                    filters.epa = false;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        // Hide all epa
+        else {
+            $("#compounds tr").each(function () {
+                // If the row epa, hide it
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (this.getAttribute('data-epa') == 'True') {
+                    filters.epa = true;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        reset_all_checkbox('compounds');
+    });
+
+    // Check to see if the "unlabelled" button has been clicked
+    unlabelled.change(function (evt) {
+        // Show all unlabelled
+        if (this.checked) {
+            $("#compounds tr").each(function () {
+                // If the row is for an unlabelled drug
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (this.getAttribute('data-mps') == 'False' && this.getAttribute('data-epa') == 'False') {
+                    filters.unlabelled = false;
+                }
+                hide_row_and_set_values(this, filters);
+            });
+        }
+        // Hide all unlabelled
+        else {
+            $("#compounds tr").each(function () {
+                // If the row unlabelled, hide it
+                var filters = JSON.parse(this.getAttribute('data-filters'));
+                if (this.getAttribute('data-mps') == 'False' && this.getAttribute('data-epa') == 'False') {
+                    filters.unlabelled = true;
                 }
                 hide_row_and_set_values(this, filters);
             });
