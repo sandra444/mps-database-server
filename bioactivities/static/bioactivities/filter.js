@@ -432,6 +432,9 @@ $(document).ready(function () {
         non_drugs.trigger('change');
         logp.trigger('change');
         molecular_weight.trigger('change');
+        mps.trigger('change');
+        epa.trigger('change');
+        unlabelled.trigger('change');
     }
 
     var drugs = $('#drugs');
