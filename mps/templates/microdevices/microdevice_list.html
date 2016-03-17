@@ -19,6 +19,8 @@
             <a href="/microdevices/model/add/" class="btn btn-lg btn-success" role="button">Add Model</a>
         </div>
 
+        {% include 'project_filters.html' %}
+
         <table hidden id="models" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -56,13 +58,13 @@
                     <td><a href="device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
                     <td>{{ model.center|default_if_none:"" }}</td>
                     <td>
-                        {% if compound.mps %}
+                        {% if model.mps %}
                             MPS
                         {% endif %}
-                        {% if compound.epa %}
+                        {% if model.epa %}
                             EPA
                         {% endif %}
-                        {% if not compound.epa and not compound.mps %}
+                        {% if not model.epa and not model.mps %}
                             Unassigned
                         {% endif %}
                     </td>

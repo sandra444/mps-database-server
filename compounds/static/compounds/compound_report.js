@@ -52,7 +52,7 @@ $(document).ready(function () {
     $.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
         for (var filter in filters) {
             if (filters[filter] && aData[8].indexOf(filter) > -1) {
-                return true
+                return true;
             }
         }
     });
