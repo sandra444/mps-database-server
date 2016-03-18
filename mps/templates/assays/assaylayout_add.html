@@ -166,9 +166,9 @@
         <label for="tpincr" class="col-sm-2 control-label">Increment</label>
         <div class="col-sm-10">
             <input id="id_tpincr" maxlength="6" type="number" step="any" value="0">
-            <input id="id_tphowtoincr" type="radio" value="add" checked="">
+            <input id="id_tphowtoincr" name="id_tphowtoincr" type="radio" value="add" checked="">
             Add
-            <input id="id_tphowtoincr" type="radio" value="multiply">
+            <input id="id_tphowtoincr" name="id_tphowtoincr" type="radio" value="multiply">
             Multiply
         </div>
     </div>
@@ -176,9 +176,9 @@
     <div class="form-group row">
         <label for="time_direction" class="col-sm-2 control-label">Direction of Series</label>
         <div class="col-sm-10">
-            <input id="id_time_direction" type="radio" value="left_right" checked>
+            <input id="id_time_direction" name="id_time_direction" type="radio" value="left_right" checked>
             Left -> Right &amp; Top -> Bottom
-            <input id="id_time_direction" type="radio" value="right_left">
+            <input id="id_time_direction" name="id_time_direction" type="radio" value="right_left">
             Right -> Left &amp; Bottom -> Top
         </div>
     </div>
@@ -206,14 +206,14 @@
     <div class="form-group row">
         <label for="increment" class="col-sm-2 control-label">Dilution Factor</label>
         <div class="col-sm-10">
-            <input id="id_increment" maxlength="6" type="number" step="any" value="1">
-            <input id="id_howtoincr" type="radio" value="divide" checked>
+            <input id="id_increment" name="id_increment" maxlength="6" type="number" step="any" value="1">
+            <input id="id_howtoincr" name="id_howtoincr" type="radio" value="divide" checked>
             Divide
-            <input id="id_howtoincr" type="radio" value="multiply">
+            <input id="id_howtoincr" name="id_howtoincr" type="radio" value="multiply">
             Multiply
-            <input id="id_howtoincr" type="radio" value="subtract">
+            <input id="id_howtoincr" name="id_howtoincr" type="radio" value="subtract">
             Subtract
-            <input id="id_howtoincr" type="radio" value="add">
+            <input id="id_howtoincr" name="id_howtoincr" type="radio" value="add">
             Add
         </div>
     </div>
@@ -221,9 +221,9 @@
     <div class="form-group row">
         <label for="compound_direction" class="col-sm-2 control-label">Direction of Series</label>
         <div class="col-sm-10">
-            <input id="id_compound_direction" type="radio" value="left_right" checked>
+            <input id="id_compound_direction" name="id_compound_direction" type="radio" value="left_right" checked>
             Left -> Right &amp; Top -> Bottom
-            <input id="id_compound_direction" type="radio" value="right_left">
+            <input id="id_compound_direction" name="id_compound_direction" type="radio" value="right_left">
             Right -> Left &amp; Bottom -> Top
         </div>
     </div>
