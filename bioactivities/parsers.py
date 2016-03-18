@@ -1220,7 +1220,7 @@ def table(request):
 
         id = bioactivity.pk
         compound = bioactivity.compound.name
-        compoundid = bioactivity.compound.id
+        compoundid = bioactivity.compound_id
 
         if pubchem:
             if bioactivity.assay.target:

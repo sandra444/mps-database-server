@@ -122,21 +122,21 @@ def compare_adverse_events(request, *args, **kwargs):
 
     compounds = OpenFDACompound.objects.all().prefetch_related(
         'compound'
-    ).order_by('compound__name')
+    )
 
     # Alternative call
     #compounds = Compound.objects.filter(compoundadverseevent_set__isnull=False)
 
     adverse_events = AdverseEvent.objects.all().prefetch_related(
         'organ'
-    ).order_by('event')
+    )
 
     compound_frequency = {}
     adverse_event_frequency = {}
 
     for adverse_event in CompoundAdverseEvent.objects.all().prefetch_related('compound', 'event'):
-        compound_frequency.setdefault(adverse_event.compound.id, []).append(adverse_event.frequency)
-        adverse_event_frequency.setdefault(adverse_event.event.id, []).append(adverse_event.frequency)
+        compound_frequency.setdefault(adverse_event.compound_id, []).append(adverse_event.frequency)
+        adverse_event_frequency.setdefault(adverse_event.event_id, []).append(adverse_event.frequency)
 
     for adverse_event in adverse_events:
         adverse_event.frequency = sum(adverse_event_frequency.get(adverse_event.id, [0]))

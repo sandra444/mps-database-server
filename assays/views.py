@@ -135,7 +135,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
 
         for assay in related_assays:
             # start appending to a list keyed by the readout ID for all related images
-            related_assays_map.setdefault(assay.readout_id.id, []).append(assay)
+            related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
 
         for readout in readouts:
             # set an attribute on the readout that is the list created above
@@ -185,7 +185,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
 
         for assay in related_assays:
             # start appending to a list keyed by the readout ID for all related images
-            related_assays_map.setdefault(assay.readout_id.id, []).append(assay)
+            related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
 
         for readout in readouts:
             # set an attribute on the readout that is the list created above
@@ -309,7 +309,7 @@ class AssayRunDetail(DetailView):
 
         for assay in related_assays:
             # start appending to a list keyed by the readout ID for all related images
-            related_assays_map.setdefault(assay.readout_id.id, []).append(assay)
+            related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
 
         for readout in readouts:
             # set an attribute on the readout that is the list created above
@@ -721,7 +721,7 @@ class AssayChipSetupDelete(CreatorRequiredMixin, DeleteView):
     template_name = 'assays/assaychipsetup_delete.html'
 
     def get_success_url(self):
-        return '/assays/' + str(self.object.assay_run_id.id)
+        return '/assays/' + str(self.object.assay_run_id_id)
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -773,7 +773,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
 
         for assay in related_assays:
             # start appending to a list keyed by the readout ID for all related images
-            related_assays_map.setdefault(assay.readout_id.id, []).append(assay)
+            related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
 
         for readout in readouts:
             # set an attribute on the readout that is the list created above
@@ -961,7 +961,7 @@ class AssayChipReadoutDelete(CreatorRequiredMixin, DeleteView):
     template_name = 'assays/assaychipreadout_delete.html'
 
     def get_success_url(self):
-        return '/assays/' + str(self.object.chip_setup.assay_run_id.id)
+        return '/assays/' + str(self.object.chip_setup.assay_run_id_id)
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -1148,7 +1148,7 @@ class AssayChipTestResultDelete(CreatorRequiredMixin, DeleteView):
     template_name = 'assays/assaychiptestresult_delete.html'
 
     def get_success_url(self):
-        return '/assays/' + str(self.object.chip_readout.chip_setup.assay_run_id.id)
+        return '/assays/' + str(self.object.chip_readout.chip_setup.assay_run_id_id)
 
 
 # Class-based views for study configuration
@@ -1570,7 +1570,7 @@ class AssayPlateSetupDelete(CreatorRequiredMixin, DeleteView):
     template_name = 'assays/assayplatesetup_delete.html'
 
     def get_success_url(self):
-        return '/assays/' + str(self.object.assay_run_id.id)
+        return '/assays/' + str(self.object.assay_run_id_id)
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -1618,7 +1618,7 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
 
         for assay in related_assays:
             # start appending to a list keyed by the readout ID for all related images
-            related_assays_map.setdefault(assay.readout_id.id, []).append(assay)
+            related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
 
         for readout in readouts:
             # set an attribute on the readout that is the list created above
@@ -1813,7 +1813,7 @@ class AssayPlateReadoutDelete(CreatorRequiredMixin, DeleteView):
     template_name = 'assays/assayplatereadout_delete.html'
 
     def get_success_url(self):
-        return '/assays/' + str(self.object.setup.assay_run_id.id)
+        return '/assays/' + str(self.object.setup.assay_run_id_id)
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -1982,7 +1982,7 @@ class AssayPlateTestResultDelete(CreatorRequiredMixin, DeleteView):
     template_name = 'assays/assayplatetestresult_delete.html'
 
     def get_success_url(self):
-        return '/assays/' + str(self.object.readout.setup.assay_run_id.id)
+        return '/assays/' + str(self.object.readout.setup.assay_run_id_id)
 
 
 def get_valid_csv_location(file_name, study_id, device_type):

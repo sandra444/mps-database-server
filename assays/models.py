@@ -270,10 +270,10 @@ class AssayPlateSetup(FlaggableModel):
 
     # TODO RENAME
     def get_absolute_url(self):
-        return "/assays/{}/".format(self.assay_run_id.id)
+        return "/assays/{}/".format(self.assay_run_id_id)
 
     def get_clone_url(self):
-        return '/assays/{0}/assayplatesetup/add?clone={1}'.format(self.assay_run_id.id, self.id)
+        return '/assays/{0}/assayplatesetup/add?clone={1}'.format(self.assay_run_id_id, self.id)
 
     def get_delete_url(self):
         return '/assays/assayplatesetup/{}/delete/'.format(self.id)
@@ -396,10 +396,10 @@ class AssayPlateReadout(FlaggableModel):
         return u'{0}'.format(self.setup)
 
     def get_absolute_url(self):
-        return "/assays/{}/".format(self.setup.assay_run_id.id)
+        return "/assays/{}/".format(self.setup.assay_run_id_id)
 
     def get_clone_url(self):
-        return '/assays/{0}/assayplatereadout/add?clone={1}'.format(self.setup.assay_run_id.id, self.id)
+        return '/assays/{0}/assayplatereadout/add?clone={1}'.format(self.setup.assay_run_id_id, self.id)
 
     def get_delete_url(self):
         return '/assays/assayplatereadout/{}/delete/'.format(self.id)
@@ -503,7 +503,7 @@ class AssayPlateTestResult(FlaggableModel):
         return u'Results for: {}'.format(self.readout)
 
     def get_absolute_url(self):
-        return "/assays/%i/" % self.readout.setup.assay_run_id.id
+        return "/assays/%i/" % self.readout.setup.assay_run_id_id
 
     def get_delete_url(self):
         return '/assays/assayplatetestresult/{}/delete/'.format(self.id)
@@ -697,10 +697,10 @@ class AssayChipSetup(FlaggableModel):
             return u'Chip-{}:Control'.format(self.assay_chip_id)
 
     def get_absolute_url(self):
-        return "/assays/%i/" % self.assay_run_id.id
+        return "/assays/%i/" % self.assay_run_id_id
 
     def get_clone_url(self):
-        return '/assays/{0}/assaychipsetup/add?clone={1}'.format(self.assay_run_id.id, self.id)
+        return '/assays/{0}/assaychipsetup/add?clone={1}'.format(self.assay_run_id_id, self.id)
 
     def get_delete_url(self):
         return '/assays/assaychipsetup/{}/delete/'.format(self.id)
@@ -787,7 +787,7 @@ class AssayChipReadout(FlaggableModel):
         return "/assays/%i/" % self.chip_setup.assay_run_id.id
 
     def get_clone_url(self):
-        return '/assays/{0}/assaychipreadout/add?clone={1}'.format(self.chip_setup.assay_run_id.id, self.id)
+        return '/assays/{0}/assaychipreadout/add?clone={1}'.format(self.chip_setup.assay_run_id_id, self.id)
 
     def get_delete_url(self):
         return '/assays/assaychipreadout/{}/delete/'.format(self.id)
@@ -843,7 +843,7 @@ class AssayChipTestResult(FlaggableModel):
         return ''
 
     def get_absolute_url(self):
-        return "/assays/%i/" % self.chip_readout.chip_setup.assay_run_id.id
+        return "/assays/%i/" % self.chip_readout.chip_setup.assay_run_id_id
 
     def get_delete_url(self):
         return '/assays/assaychiptestresult/{}/delete/'.format(self.id)
