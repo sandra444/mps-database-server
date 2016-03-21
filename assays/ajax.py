@@ -343,7 +343,12 @@ def fetch_readouts(request):
 
         field = raw.field_id
         value = raw.value
-        time = raw.elapsed_time
+
+        # Convert all times to days for now
+        # Get the conversion unit
+        scale = raw.assay_chip_id.timeunit.scale_factor
+        time = "{0:.2f}".format((scale/1440.0) * raw.elapsed_time)
+
         quality = raw.quality
 
         if not quality:
