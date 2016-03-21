@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block breadcrumbs %}
+    <li><a href="/assays/assaychipsetups/">Chip Setups</a></li>
+    <li class="active">{{ object }}</li>
+{% endblock %}
+
 {# TODO REVIEW THIS AND OTHER DETAIL PAGES #}
 {% block content %}
     <legend><h1>Chip Setup: {{ object.assay_chip_id }}</h1></legend>

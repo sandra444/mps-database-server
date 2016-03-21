@@ -7,8 +7,23 @@
     <script src="{% static "js/help.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    {% if object %}
+        <li>
+        <a href="/assays/{{ object.id }}">{{ object }}</a>
+        </li>
+    {% endif %}
+    <li class="active">
+        {% if object %}
+            Edit <em>{{ object }}</em>
+        {% else %}
+            Add Study
+        {% endif %}
+    </li>
+{% endblock %}
 
+{% block content %}
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post" >
 
@@ -268,5 +283,4 @@
         </li>
     </ul>
 </div>
-
 {% endblock %}

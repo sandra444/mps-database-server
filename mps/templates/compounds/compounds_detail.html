@@ -7,6 +7,11 @@
 
 {# TODO REQUIRES AESTHETIC REVISION #}
 
+{% block breadcrumbs %}
+    <li><a href="/compounds/">Compounds</a></li>
+    <li class="active">{{ object.name}}</li>
+{% endblock %}
+
 {% block content %}
     <legend>
         <h1>
@@ -405,5 +410,4 @@
 
         <script src="{% static "js/display_datatable.js" %}"></script>
     {% endif %}
-
 {% endblock %}

@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 
+{% block breadcrumbs %}
+    <li class="active">Invalid Log In</li>
+{% endblock %}
+
 {% block content %}
-
-  <h2>Your login details are invalid.</h2>
+  <h2>Your login credentials are invalid.</h2>
   <p>Click <a href="/accounts/login/">here</a> to login again.</p>
-
 {% endblock %}

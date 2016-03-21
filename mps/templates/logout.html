@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li class="active">Logged Out</li>
+{% endblock %}
 
+{% block content %}
   <h2>You have logged out.</h2>
   <p>Click <a href="/accounts/login/">here</a> to login again.</p>
-
 {% endblock %}

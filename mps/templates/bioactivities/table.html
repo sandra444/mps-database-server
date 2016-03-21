@@ -10,8 +10,11 @@
     <script src="{% static "bioactivities/bioactivities_search.js" %}"></script>
 {% endblock %}
 
-{% block submit %}
+{% block breadcrumbs %}
+    <li class="active">Bioactivities Table</li>
+{% endblock %}
 
+{% block submit %}
     <legend><h1>Quick Search</h1></legend>
 
     <form action="/bioactivities/table/" method="post">

@@ -8,8 +8,18 @@
     <script src="{% static "js/help.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/assays/studyconfiguration">Study Configurations</a></li>
+    <li class="active">
+        {% if object %}
+             Edit Configuration <em>{{ object.name }}</em>
+        {% else %}
+            Add Study Configuration
+        {% endif %}
+    </li>
+{% endblock %}
 
+{% block content %}
     {% if update %}
         <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
@@ -229,5 +239,4 @@
             </li>
         </ul>
     </div>
-
 {% endblock %}

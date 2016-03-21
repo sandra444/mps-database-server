@@ -8,6 +8,17 @@
     <script src="{% static "microdevices/layout.js" %}"></script>
 {% endblock %}
 
+{% block breadcrumbs %}
+    <li><a href="/microdevices/">Microdevices &amp; Organ Models</a></li>
+    <li class="active">
+        {% if object %}
+            Edit <em>{{ object }}</em>
+        {% else %}
+            Add Microdevice
+        {% endif %}
+    </li>
+{% endblock %}
+
 {# TODO needs image preview and layout display #}
 {% block content %}
 {% if update %}
@@ -115,5 +126,4 @@
 <div id="layout_display">
 
 </div>
-
 {% endblock %}

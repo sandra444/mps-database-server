@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li class="active">Log In</li>
+{% endblock %}
 
+{% block content %}
   {% if form.errors %}
     <p class="error">Sorry, that's not a valid username or password</p>
   {% endif %}

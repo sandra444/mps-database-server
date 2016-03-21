@@ -11,8 +11,25 @@
     <script src="{% static "js/help.js" %}"></script>
 {% endblock %}
 
-{% block fluid-content %}
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    <li>
+        {% if object %}
+            <a href="/assays/{{ object.setup.assay_run_id.id }}">{{ object.setup.assay_run_id }}</a>
+        {% else %}
+            <a href="/assays/{{ study.id }}">{{ study }}</a>
+        {% endif %}
+    </li>
+    <li class="active">
+        {% if object %}
+            Edit Readout for <em>Plate-{{ object.setup.assay_plate_id }}</em>
+        {% else %}
+            Add Plate Readout
+        {% endif %}
+    </li>
+{% endblock %}
 
+{% block fluid-content %}
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post" >
 
@@ -692,5 +709,4 @@
         </li>
     </ul>
 </div>
-
 {% endblock %}

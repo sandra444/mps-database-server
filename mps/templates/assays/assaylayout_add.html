@@ -9,8 +9,18 @@
     <link href="{% static "assays/customize_admin.css" %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
-{% block fluid-content %}
+{% block breadcrumbs %}
+    <li><a href="/assays/assaylayout/">Assay Layouts</a></li>
+    <li class="active">
+        {% if object %}
+            Edit <em>{{ object }}</em>
+        {% else %}
+            Add Assay Layout
+        {% endif %}
+    </li>
+{% endblock %}
 
+{% block fluid-content %}
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post" autocomplete="off">
 
@@ -392,5 +402,4 @@
         </li>
     </ul>
 </div>
-
 {% endblock %}

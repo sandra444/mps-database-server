@@ -9,8 +9,11 @@
     <script src="{% static "bioactivities/cluster.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li class="active">Cluster Compounds</li>
+{% endblock %}
 
+{% block content %}
     {% block error %}
         <div class="row">
             <div hidden class="alert alert-danger" role="alert" id="error_message">

@@ -1,7 +1,16 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    <li>
+        <a href="/assays/{{ object.setup.assay_run_id.id }}">{{ object.setup.assay_run_id }}</a>
+    </li>
+    <li class="active">
+        Delete Readout for <em>Plate-{{ object.setup.assay_plate_id }}</em>
+    </li>
+{% endblock %}
 
+{% block content %}
     <form method="post">{% csrf_token %}
         <h2 style="color: #FF0000">Are you sure you want to delete the Plate Readout:<br><b>{{ object }}</b>?</h2>
 
@@ -21,5 +30,4 @@
 
         <button type="submit" class="btn btn-danger">Confirm Deletion</button>
     </form>
-
 {% endblock %}

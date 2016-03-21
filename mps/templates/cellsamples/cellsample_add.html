@@ -7,8 +7,18 @@
     <script src="{% static "cellsamples/cellsample_add.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/cellsamples/cellsample/">Cell Samples</a></li>
+    <li class="active">
+        {% if object %}
+            Edit <em>Cell Sample ID #{{ object.id }}</em>
+        {% else %}
+            Add Cell Sample
+        {% endif %}
+    </li>
+{% endblock %}
 
+{% block content %}
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post" >
 

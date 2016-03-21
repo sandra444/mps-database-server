@@ -6,8 +6,13 @@
     <script src="{% static "js/help.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    <li><a href="/assays/{{ object.id }}">{{ object }}</a></li>
+    <li class="active">Upload Excel File</li>
+{% endblock %}
 
+{% block content %}
     <form enctype="multipart/form-data" class="form-horizontal" method="post" >
 
     <h1>

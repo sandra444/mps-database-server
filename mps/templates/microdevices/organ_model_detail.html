@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/microdevices/">Microdevices &amp; Organ Models</a></li>
+    <li class="active">{{ model.model_name }}</li>
+{% endblock %}
 
+{% block content %}
     <legend><h1>{{ model.model_name }}</h1></legend>
 
     <div>
@@ -127,5 +131,4 @@
         </tbody>
     </table>
     {% endif %}
-
 {% endblock %}

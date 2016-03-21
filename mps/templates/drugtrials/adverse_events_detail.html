@@ -5,8 +5,12 @@
     <script src="{% static "drugtrials/get_adverse_events.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/adverse_events/">Adverse Events</a></li>
+    <li class="active">Adverse Events for {{ compound }}</li>
+{% endblock %}
 
+{% block content %}
     <legend>
         <h1>Adverse Events for
             <br>

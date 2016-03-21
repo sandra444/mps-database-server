@@ -6,8 +6,11 @@
     <script src="{% static "drugtrials/compare_adverse_events.js" %}"></script>
 {% endblock %}
 
-{% block fluid-content %}
+{% block breadcrumbs %}
+    <li class="active">Compare Adverse Events</li>
+{% endblock %}
 
+{% block fluid-content %}
     <style>
     .c3 svg {
         font: 14px sans-serif;
@@ -146,5 +149,4 @@
                 </tbody>
         </table>
     </div>
-
 {% endblock %}

@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/microdevices/">Microdevices &amp; Organ Models</a></li>
+    <li class="active">{{ object.device_name }}</li>
+{% endblock %}
 
+{% block content %}
     <legend><h1>{{ object.device_name }}</h1></legend>
 
     <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
@@ -122,6 +126,5 @@
             </tr>
         </tbody>
     </table>
-
 {% endblock %}
 

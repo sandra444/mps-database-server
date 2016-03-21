@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/assays/assaylayout/">Assay Layouts</a></li>
+    <li class="active">Delete <em>{{ object }}</em></li>
+{% endblock %}
 
+{% block content %}
     <form method="post">{% csrf_token %}
         <h2 style="color: #FF0000">Are you sure you want to delete the Assay Layout:<br><b>{{ object }}</b>?</h2>
 
@@ -38,5 +42,4 @@
 
         <button type="submit" class="btn btn-danger">Confirm Deletion</button>
     </form>
-
 {% endblock %}

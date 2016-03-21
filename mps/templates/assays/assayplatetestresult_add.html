@@ -11,8 +11,25 @@
     <script src="{% static "assays/customize_plate_results.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    <li>
+        {% if object %}
+            <a href="/assays/{{ object.readout.setup.assay_run_id.id }}">{{ object.readout.setup.assay_run_id }}</a>
+        {% else %}
+            <a href="/assays/{{ study.id }}">{{ study }}</a>
+        {% endif %}
+    </li>
+    <li class="active">
+        {% if object %}
+            Edit Test Results for <em>Plate-{{ object.readout.setup.assay_plate_id }}</em>
+        {% else %}
+            Add Plate Test Results
+        {% endif %}
+    </li>
+{% endblock %}
 
+{% block content %}
     {% if update %}
         <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
@@ -198,5 +215,4 @@
             </li>
         </ul>
     </div>
-
 {% endblock %}

@@ -11,8 +11,21 @@
     <script src="{% static "assays/customize_plate_setup.js" %}"></script>
 {% endblock %}
 
-{% block fluid-content %}
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    <li>
+        <a href="/assays/{{ form.instance.assay_run_id.id }}">{{ form.instance.assay_run_id }}</a>
+    </li>
+    <li class="active">
+        {% if object %}
+            Edit <em>{{ object }}</em>
+        {% else %}
+            Add Plate Setup
+        {% endif %}
+    </li>
+{% endblock %}
 
+{% block fluid-content %}
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
@@ -361,5 +374,4 @@
         </li>
     </ul>
 </div>
-
 {% endblock %}

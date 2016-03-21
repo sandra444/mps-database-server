@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/drugtrials/">Drug Trials</a></li>
+    <li class="active">Drug Trial ID #{{ trial.id }}</li>
+{% endblock %}
 
+{% block content %}
     <legend>
         <h1>
             Drug Trial ID #{{ trial.id }}
@@ -148,5 +152,4 @@
         {% endfor %}
         </tbody>
     </table>
-
 {% endblock %}
