@@ -70,6 +70,9 @@ class CellSubtype(LockableModel):
     def __unicode__(self):
         return u'{}'.format(self.cell_subtype)
 
+    def get_absolute_url(self):
+        return "/cellsamples/cellsubtype/{}".format(self.id)
+
 
 class Supplier(LockableModel):
     class Meta(object):

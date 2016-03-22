@@ -99,7 +99,7 @@ class Microdevice(LockableModel):
         return self.device_name
 
     def get_absolute_url(self):
-        return "/microdevices/device/{}".format(self.id)
+        return "/microdevices/device/{}/".format(self.id)
 
 
 class OrganModel(LockableModel):
@@ -132,7 +132,7 @@ class OrganModel(LockableModel):
         return self.model_name
 
     def get_absolute_url(self):
-        return "/microdevices/model/{}".format(self.id)
+        return "/microdevices/model/{}/".format(self.id)
 
 
 # It is somewhat odd that ValidatedAssays are inlines in lieu of a manytomany field

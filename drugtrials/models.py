@@ -132,7 +132,7 @@ class DrugTrial(LockableModel):
                                            self.source.source_name)
 
     def get_absolute_url(self):
-        return "/drugtrials/{}".format(self.id)
+        return "/drugtrials/{}/".format(self.id)
 
 
 class TestType(LockableModel):
@@ -388,7 +388,7 @@ class OpenFDACompound(LockableModel):
         return u'{}'.format(self.compound.name)
 
     def get_absolute_url(self):
-        return "/adverse_events/{}".format(self.id)
+        return "/adverse_events/{}/".format(self.id)
 
 
 class CompoundAdverseEvent(models.Model):

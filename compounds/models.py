@@ -265,6 +265,9 @@ class Compound(LockableModel):
     image.short_description = 'Image'
 
     def get_absolute_url(self):
+        return "/compounds/{}/".format(self.id)
+
+    def get_post_submission_url(self):
         return "/compounds/"
 
 

@@ -622,7 +622,7 @@ class AssayChipSetupAdd(CreateView):
                 )
                 return self.render_to_response(self.get_context_data(form=form))
             else:
-                return redirect(self.object.get_absolute_url())
+                return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -671,7 +671,7 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Save overall setup result
             self.object.save()
             formset.save()
-            return redirect(self.object.get_absolute_url())
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -820,7 +820,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
                 )
                 return self.render_to_response(self.get_context_data(form=form))
             else:
-                return redirect(self.object.get_absolute_url())
+                return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -903,7 +903,7 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             if self.request.POST.get('file-clear', ''):
                 removeExistingChip(self.object)
             # Otherwise do nothing (the file remained the same)
-            return redirect(self.object.get_absolute_url())
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -1005,7 +1005,7 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
             self.object.save()
             formset.instance = self.object
             formset.save()
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -1072,7 +1072,7 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Save overall test result
             self.object.save()
             formset.save()
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -1130,7 +1130,7 @@ class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
             self.object.save()
             formset.instance = self.object
             formset.save()
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -1166,7 +1166,7 @@ class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
             # Save overall test result
             self.object.save()
             formset.save()
-            return redirect(self.object.get_absolute_url())
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -1222,7 +1222,7 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
             self.object = form.save()
             # Save assay layout
             save_assay_layout(self.request, self.object, form, False)
-            return redirect(self.object.get_absolute_url())
+            return redirect(self.object.get_post_submission_url())
 
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -1263,7 +1263,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             self.object = form.save()
             # Save assay layout
             save_assay_layout(self.request, self.object, form, True)
-            return redirect(self.object.get_absolute_url())
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -1395,7 +1395,7 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
                 )
                 return self.render_to_response(self.get_context_data(form=form))
             else:
-                return redirect(self.object.get_absolute_url())
+                return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -1451,7 +1451,7 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Save Plate Setup
             self.object.save()
             formset.save()
-            return redirect(self.object.get_absolute_url())
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -1597,7 +1597,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
                 )
                 return self.render_to_response(self.get_context_data(form=form))
             else:
-                return redirect(self.object.get_absolute_url())
+                return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -1675,7 +1675,7 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
                 # Check QC
                 modify_qc_status_plate(self.object, form)
             # Otherwise do nothing (the file remained the same)
-            return redirect(self.object.get_absolute_url())
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -1772,7 +1772,7 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
             self.object.save()
             formset.instance = self.object
             formset.save()
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -1829,7 +1829,7 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Save overall test result
             self.object.save()
             formset.save()
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
@@ -2134,6 +2134,6 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                         # Note the lack of a form normally used for QC
                         parseReadoutCSV(readout, readout.file, 'Block')
 
-            return redirect(self.object.get_absolute_url())  # assuming your model has ``get_absolute_url`` defined.
+            return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
