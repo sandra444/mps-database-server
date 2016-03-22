@@ -271,7 +271,7 @@ class AssayPlateSetup(FlaggableModel):
         return u'Plate-{}'.format(self.assay_plate_id)
 
     def get_absolute_url(self):
-        return "/assays/{0}/assayplatesetup/{1}/".format(self.assay_run_id_id, self.id)
+        return "/assays/assayplatesetup/{}/".format(self.id)
 
     def get_post_submission_url(self):
         return "/assays/{}/".format(self.assay_run_id_id)
@@ -400,7 +400,7 @@ class AssayPlateReadout(FlaggableModel):
         return u'{0}'.format(self.setup)
 
     def get_absolute_url(self):
-        return "/assays/{0}/assayplatereadout/{1}".format(self.setup.assay_run_id_id, self.id)
+        return "/assays/assayplatereadout/{}/".format(self.id)
 
     def get_post_submission_url(self):
         return "/assays/{}/".format(self.setup.assay_run_id_id)
@@ -510,7 +510,7 @@ class AssayPlateTestResult(FlaggableModel):
         return u'Results for: {}'.format(self.readout)
 
     def get_absolute_url(self):
-        return "/assays/{0}/assayplatetestresult/{1}/".format(self.readout.setup.assay_run_id_id, self.id)
+        return "/assays/assayplatetestresult/{}/".format(self.id)
 
     def get_post_submission_url(self):
         return "/assays/{}/".format(self.readout.setup.assay_run_id_id)
@@ -710,7 +710,7 @@ class AssayChipSetup(FlaggableModel):
             return u'Chip-{}:Control'.format(self.assay_chip_id)
 
     def get_absolute_url(self):
-        return "/assays/{0}/assaychipsetup/{1}".format(self.assay_run_id_id, self.id)
+        return "/assays/assaychipsetup/{}/".format(self.id)
 
     def get_post_submission_url(self):
         return "/assays/{}/".format(self.assay_run_id_id)
@@ -800,7 +800,7 @@ class AssayChipReadout(FlaggableModel):
         return u'{0}'.format(self.chip_setup)
 
     def get_absolute_url(self):
-        return "/assays/{0}/assaychipreadout/{1}/".format(self.chip_setup.assay_run_id.id, self.id)
+        return "/assays/assaychipreadout/{}/".format(self.id)
 
     def get_post_submission_url(self):
         return "/assays/{}/".format(self.chip_setup.assay_run_id.id)
@@ -862,7 +862,7 @@ class AssayChipTestResult(FlaggableModel):
         return ''
 
     def get_absolute_url(self):
-        return "/assays/{0}/assaychiptestresult/{1}/".format(self.chip_readout.chip_setup.assay_run_id_id, self.id)
+        return "/assays/assaychiptestresult/{}/".format(self.id)
 
     def get_post_submission_url(self):
         return "/assays/{}/".format(self.chip_readout.chip_setup.assay_run_id_id)

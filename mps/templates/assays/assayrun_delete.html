@@ -2,7 +2,13 @@
 
 {% block breadcrumbs %}
     <li><a href="/assays/group_index/">Group Studies</a></li>
-    <li class="active">Delete <em>{{ object }}</em></li>
+    <li>
+        <a href="{{ object.get_absolute_url }}"><em>{{ object }}</em></a>
+    </li>
+    <li>
+        <a href="{{ object.get_absolute_url }}update">Update</a>
+    </li>
+    <li class="active">Delete</li>
 {% endblock %}
 
 {% block content %}

@@ -2,7 +2,10 @@
 
 {% block breadcrumbs %}
     <li><a href="/assays/assaylayout/">Assay Layouts</a></li>
-    <li class="active">Delete <em>{{ object }}</em></li>
+    <li>
+        <a href="{{ object.get_absolute_url }}"><em>{{ object }}</em></a>
+    </li>
+    <li class="active">Delete</li>
 {% endblock %}
 
 {% block content %}

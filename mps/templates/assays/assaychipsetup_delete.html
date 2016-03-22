@@ -3,10 +3,13 @@
 {% block breadcrumbs %}
     <li><a href="/assays/group_index/">Group Studies</a></li>
     <li>
-        <a href="/assays/{{ object.assay_run_id.id }}">{{ object.assay_run_id }}</a>
+        <a href="{{ object.get_post_submission_url }}">{{ object.assay_run_id }}</a>
+    </li>
+    <li>
+        <a href="{{ object.get_absolute_url }}"><em>{{ object }}</em></a>
     </li>
     <li class="active">
-        Delete <em>{{ object }}</em>
+        Delete
     </li>
 {% endblock %}
 
