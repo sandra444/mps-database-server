@@ -57,7 +57,23 @@ class CompoundPropertyInline(admin.TabularInline):
     #     css = {"all": ("css/hide_admin_original.css",)}
 
 
+class CompoundAdminForm(forms.ModelForm):
+
+    class Meta(object):
+        model = Compound
+        widgets = {
+            'clearance': forms.Textarea(attrs={'cols': 75, 'rows': 10}),
+            'absorption': forms.Textarea(attrs={'cols': 75, 'rows': 10}),
+            'pk_metabolism': forms.Textarea(attrs={'cols': 75, 'rows': 10}),
+            'preclinical': forms.Textarea(attrs={'cols': 75, 'rows': 10}),
+            'clinical': forms.Textarea(attrs={'cols': 75, 'rows': 10}),
+            'post_marketing': forms.Textarea(attrs={'cols': 75, 'rows': 10}),
+        }
+        exclude = []
+
+
 class CompoundAdmin(LockableAdmin):
+    form = CompoundAdminForm
     resource_class = CompoundResource
 
     class Media(object):
