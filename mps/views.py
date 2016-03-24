@@ -145,3 +145,8 @@ def custom_search(request):
         results_per_page=1000,
         )
     return view(request)
+
+
+def help(request):
+    c = RequestContext(request)
+    return render_to_response('help.html', c)

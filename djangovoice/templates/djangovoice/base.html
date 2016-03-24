@@ -12,6 +12,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width">
 
+    <link rel="icon"
+        type="image/png"
+        href="/static/img/glyphicons-info-sign.png">
+
     <title>{% block title %}MPS Feedback{% endblock %}</title>
     <link rel="alternate" type="application/rss+xml" title="{% trans "Latest feedback" %}" href="{% url 'feeds_latest' %}" />
 
@@ -51,9 +55,6 @@
                 </a>
               </li>
               <li>
-                  <a href="/">{% trans "Return to Database" %}</a>
-              </li>
-              <li>
 {#                <a href="{% url 'django.contrib.auth.views.logout' %}?next={% url 'djangovoice_home' %}">#}
                   <a href="/accounts/logout/">
                   {% trans "Sign Out" %}
@@ -81,11 +82,6 @@
 
       <div class="navbar navbar-static-top">
         <div class="navbar-inner">
-          <div class="container-fluid">
-            <a class="brand" href="/">
-              Return to MPS Database
-            </a>
-          </div>
           {% block navbottom %}
             {% include "djangovoice/includes/navbottom.html" %}
           {% endblock %}

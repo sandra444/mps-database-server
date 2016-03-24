@@ -1,3 +1,4 @@
+// TODO THIS FILE HAS BEEN DEPRECATED
 // Code for handling help dialog boxes
 $(document).ready(function() {
     // Make the dialog box

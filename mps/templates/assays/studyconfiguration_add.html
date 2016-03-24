@@ -5,7 +5,7 @@
     <script src="{% static "js/inline_add.js" %}"></script>
     <script src="{% static "assays/customize_configuration.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
-    <script src="{% static "js/help.js" %}"></script>
+{#    <script src="{% static "js/help.js" %}"></script>#}
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -37,7 +37,7 @@
 {#            <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
         </h1>
 
-        {% include "submit.html" with help="y" %}
+        {% include "submit.html" %}
 
         {% include 'errors.html' %}
 
@@ -205,38 +205,38 @@
 
     <div id="graph" style="height:500px;"></div>
 
-    <div hidden id="help_dialog" title="Study Configuration Help">
-        <h4>Making a Study Configuration</h4>
-        <ul class="list-group">
-            <li class="list-group-item">
-                A <b>Study Configuration</b> shows how different devices in an integrated study associate with eachother
-            </li>
-            <li class="list-group-item">
-                Please be sure to use an informative name
-            </li>
-        </ul>
-        <h4>Defining How the Models are Associated</h4>
-        <ul class="list-group">
-            <li class="list-group-item">
-                Each model has a <b>Label</b> which can be one or two characters long
-            </li>
-            <li class="list-group-item">
-                <b>Organ</b> specifies which organ model is associated with the label
-            </li>
-            <li class="list-group-item">
-                <b>Sequence Number</b> shows the order of input for the models
-            </li>
-            <li class="list-group-item">
-                <b>Output</b> lists all of the other models the current model feeds into
-                <br>
-                Output should be a list of labels separated by dashes: e.g. "AB-CD" means the model is connected to AB and CD
-            </li>
-            <li class="list-group-item">
-                <b>Integration Mode</b> indicates whether or not the model is directly hooked up to the other models
-            </li>
-            <li class="list-group-item">
-                Click <b>Add Model</b> to add another row
-            </li>
-        </ul>
-    </div>
+{#    <div hidden id="help_dialog" title="Study Configuration Help">#}
+{#        <h4>Making a Study Configuration</h4>#}
+{#        <ul class="list-group">#}
+{#            <li class="list-group-item">#}
+{#                A <b>Study Configuration</b> shows how different devices in an integrated study associate with eachother#}
+{#            </li>#}
+{#            <li class="list-group-item">#}
+{#                Please be sure to use an informative name#}
+{#            </li>#}
+{#        </ul>#}
+{#        <h4>Defining How the Models are Associated</h4>#}
+{#        <ul class="list-group">#}
+{#            <li class="list-group-item">#}
+{#                Each model has a <b>Label</b> which can be one or two characters long#}
+{#            </li>#}
+{#            <li class="list-group-item">#}
+{#                <b>Organ</b> specifies which organ model is associated with the label#}
+{#            </li>#}
+{#            <li class="list-group-item">#}
+{#                <b>Sequence Number</b> shows the order of input for the models#}
+{#            </li>#}
+{#            <li class="list-group-item">#}
+{#                <b>Output</b> lists all of the other models the current model feeds into#}
+{#                <br>#}
+{#                Output should be a list of labels separated by dashes: e.g. "AB-CD" means the model is connected to AB and CD#}
+{#            </li>#}
+{#            <li class="list-group-item">#}
+{#                <b>Integration Mode</b> indicates whether or not the model is directly hooked up to the other models#}
+{#            </li>#}
+{#            <li class="list-group-item">#}
+{#                Click <b>Add Model</b> to add another row#}
+{#            </li>#}
+{#        </ul>#}
+{#    </div>#}
 {% endblock %}

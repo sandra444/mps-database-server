@@ -29,6 +29,9 @@ urlpatterns = patterns('',
                        # Captchas
                        # url(r'^captcha/', include('captcha.urls')),
 
+                       # Help
+                       url(r'^help/', 'mps.views.help'),
+
                        # Djangovoice for feedback
                        url(r'^comments/', include('django_comments.urls')),
                        url(r'^feedback/', include('djangovoice.urls')),

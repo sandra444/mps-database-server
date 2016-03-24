@@ -7,7 +7,7 @@
     <script src="{% static "js/whittle.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
-    <script src="{% static "js/help.js" %}"></script>
+{#    <script src="{% static "js/help.js" %}"></script>#}
     <script src="{% static "assays/customize_chip_results_admin.js" %}"></script>
 {% endblock %}
 
@@ -55,7 +55,7 @@
 {#            {% include 'flag.html'%}#}
         </h1>
 
-        {% include "submit.html" with flag="y" help="y" %}
+        {% include "submit.html" with flag="y" %}
 
         {% include 'errors.html' %}
 
@@ -171,48 +171,48 @@
         </table>
     </form>
 
-    <div hidden id="help_dialog" title="Chip Test Results Help">
-        <h4>Making Chip Test Results</h4>
-        <ul class="list-group">
-            <li class="list-group-item">
-                First, choose a <b>Readout</b>
-                <br>
-                Without a readout, you are unable to specify <b>Assay</b>
-            </li>
-            <li class="list-group-item">
-                <b>Summary of Results</b> should be a brief summary of your findings from this chip
-                <br>
-                These results can be qualitative
-            </li>
-            <li class="list-group-item">
-                Each <b>Result</b> represents a finding from a specific assay
-                <br>
-                Clicking <b>Add Result</b> will make another row
-            </li>
-        </ul>
-        <h4>Flagging for Review</h4>
-        <ul class="list-group">
-            <li class="list-group-item">
-                Clicking
-                <a role='button' class="btn btn-sm" style="color:#337AB7">
-                    <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-                </a>
-                flags the current results for review
-            </li>
-            <li class="list-group-item">
-                Clicking
-                <a role='button' class="btn btn-sm btn-warning" style="color:#FFFFFF">
-                    Notes
-                </a>
-                brings up an input dialog where you can explain why these results were flagged
-            </li>
-            <li class="list-group-item">
-                Clicking
-                <a role='button' class="btn btn-sm btn-danger" style="color:#FFFFFF">
-                    <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-                </a>
-                removes the flag from the current results
-            </li>
-        </ul>
-    </div>
+{#    <div hidden id="help_dialog" title="Chip Test Results Help">#}
+{#        <h4>Making Chip Test Results</h4>#}
+{#        <ul class="list-group">#}
+{#            <li class="list-group-item">#}
+{#                First, choose a <b>Readout</b>#}
+{#                <br>#}
+{#                Without a readout, you are unable to specify <b>Assay</b>#}
+{#            </li>#}
+{#            <li class="list-group-item">#}
+{#                <b>Summary of Results</b> should be a brief summary of your findings from this chip#}
+{#                <br>#}
+{#                These results can be qualitative#}
+{#            </li>#}
+{#            <li class="list-group-item">#}
+{#                Each <b>Result</b> represents a finding from a specific assay#}
+{#                <br>#}
+{#                Clicking <b>Add Result</b> will make another row#}
+{#            </li>#}
+{#        </ul>#}
+{#        <h4>Flagging for Review</h4>#}
+{#        <ul class="list-group">#}
+{#            <li class="list-group-item">#}
+{#                Clicking#}
+{#                <a role='button' class="btn btn-sm" style="color:#337AB7">#}
+{#                    <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>#}
+{#                </a>#}
+{#                flags the current results for review#}
+{#            </li>#}
+{#            <li class="list-group-item">#}
+{#                Clicking#}
+{#                <a role='button' class="btn btn-sm btn-warning" style="color:#FFFFFF">#}
+{#                    Notes#}
+{#                </a>#}
+{#                brings up an input dialog where you can explain why these results were flagged#}
+{#            </li>#}
+{#            <li class="list-group-item">#}
+{#                Clicking#}
+{#                <a role='button' class="btn btn-sm btn-danger" style="color:#FFFFFF">#}
+{#                    <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>#}
+{#                </a>#}
+{#                removes the flag from the current results#}
+{#            </li>#}
+{#        </ul>#}
+{#    </div>#}
 {% endblock %}

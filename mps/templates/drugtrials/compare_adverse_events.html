@@ -12,33 +12,32 @@
 
 {% block fluid-content %}
     <style>
-    .c3 svg {
-        font: 14px sans-serif;
-        font-weight: bold;
-    }
+        .c3 svg {
+            font: 14px sans-serif;
+            font-weight: bold;
+        }
 
-    {# TODO problematic! what if user desires many compounds? #}
-    {# Diagonal axis? #}
-    .c3-axis-x .tick {
-        font: 16px sans-serif;
-        font-weight: bold;
-    }
+        {# TODO problematic! what if user desires many compounds? #}
+        {# Diagonal axis? #}
+        .c3-axis-x .tick {
+            font: 16px sans-serif;
+            font-weight: bold;
+        }
 
-    .c3-axis-y-label {
-        font: 16px sans-serif;
-        font-weight: bold;
-    }
+        .c3-axis-y-label {
+            font: 16px sans-serif;
+            font-weight: bold;
+        }
 
-    .c3-axis-y2-label {
-        font: 16px sans-serif;
-        font-weight: bold;
-    }
+        .c3-axis-y2-label {
+            font: 16px sans-serif;
+            font-weight: bold;
+        }
     </style>
 
     {# Move styles eventually (SOC) #}
     {# Using a form here is a contrived way to prevent checkboxes from being initially filled #}
-
-    <div class="padded-row padded-bottom hidden-print" style="overflow:auto;">
+    <div class="large-padding-top padded-row padded-bottom hidden-print" style="overflow:auto;">
         <button role="button" class="btn btn-primary" id="save_selections">Save Selections</button>
         <button role="button" class="btn btn-info" id="load_selections">Load Selections</button>
         <button role="button" class="btn btn-danger" id="clear_selections">Clear Current Selections</button>
