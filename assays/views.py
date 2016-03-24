@@ -597,6 +597,9 @@ class AssayChipSetupAdd(CreateView):
         # Cellsamples will always be the same
         context['cellsamples'] = cellsamples
 
+        # Anchor for help
+        context['help_anchor'] = '#chipsetups'
+
         return context
 
     def form_valid(self, form):
@@ -659,6 +662,9 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         context['cellsamples'] = cellsamples
         context['update'] = True
+
+        # Anchor for help
+        context['help_anchor'] = '#chipsetups'
 
         return context
 
@@ -788,6 +794,9 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
+        # Anchor for help
+        context['help_anchor'] = '#chipreadouts'
+
         return context
 
     def form_valid(self, form):
@@ -875,6 +884,9 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
                 context['formset'] = ACRAFormSet(instance=self.object)
 
         context['update'] = True
+
+        # Anchor for help
+        context['help_anchor'] = '#chipreadouts'
 
         return context
 
@@ -988,6 +1000,9 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
+        # Anchor for help
+        context['help_anchor'] = '#chipresults'
+
         return context
 
     def form_valid(self, form):
@@ -1061,6 +1076,9 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         context['update'] = True
 
+        # Anchor for help
+        context['help_anchor'] = '#chipresults'
+
         return context
 
     def form_valid(self, form):
@@ -1117,6 +1135,9 @@ class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
             else:
                 context['formset'] = StudyModelFormSet()
 
+        # Anchor for help
+        context['help_anchor'] = '#studyconfigurations'
+
         return context
 
     def form_valid(self, form):
@@ -1153,6 +1174,9 @@ class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
                 context['formset'] = StudyModelFormSet(instance=self.object)
 
         context['update'] = True
+
+        # Anchor for help
+        context['help_anchor'] = '#studyconfigurations'
 
         return context
 
@@ -1201,6 +1225,14 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
     model = AssayLayout
     form_class = AssayLayoutForm
     template_name = 'assays/assaylayout_add.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayLayoutAdd, self).get_context_data(**kwargs)
+
+        # Anchor for help
+        context['help_anchor'] = '#assaylayouts'
+
+        return context
 
     def get_form(self, form_class):
         # Get group selection possibilities
@@ -1254,6 +1286,9 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(AssayLayoutUpdate, self).get_context_data(**kwargs)
         context['update'] = True
+
+        # Anchor for help
+        context['help_anchor'] = '#assaylayouts'
 
         return context
 
@@ -1370,6 +1405,9 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
         # Cellsamples will always be the same
         context['cellsamples'] = cellsamples
 
+        # Anchor for help
+        context['help_anchor'] = '#platesetups'
+
         return context
 
     def form_valid(self, form):
@@ -1439,6 +1477,9 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         context['cellsamples'] = cellsamples
         # Mark as update
         context['update'] = True
+
+        # Anchor for help
+        context['help_anchor'] = '#platesetups'
 
         return context
 
@@ -1563,6 +1604,9 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
+        # Anchor for help
+        context['help_anchor'] = '#platereadouts'
+
         return context
 
     def form_valid(self, form):
@@ -1648,6 +1692,9 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
                 context['formset'] = APRAFormSet(instance=self.object)
 
         context['update'] = True
+
+        # Anchor for help
+        context['help_anchor'] = '#platereadouts'
 
         return context
 
@@ -1755,6 +1802,9 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
+        # Anchor for help
+        context['help_anchor'] = '#plateresults'
+
         return context
 
     def form_valid(self, form):
@@ -1816,6 +1866,9 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
                 context['formset'] = PlateTestResultFormSet(instance=self.object)
 
         context['update'] = True
+
+        # Anchor for help
+        context['help_anchor'] = '#plateresults'
 
         return context
 
