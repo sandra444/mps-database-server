@@ -94,7 +94,7 @@ OrganModelProtocolFormset = inlineformset_factory(
     extra=1,
     exclude=[],
     widgets={
-        'version': forms.TextInput(attrs={'size': 5})
+        'version': forms.TextInput(attrs={'size': 10})
     }
 )
 

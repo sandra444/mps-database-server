@@ -74,16 +74,17 @@
     {% endif %}
         <label for="cell_type" class="col-sm-2 control-label">Cell Type</label>
         <div class="col-sm-10">
-          {{ form.cell_type }}
-        <p class="text-danger">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            Select a Cell Type ONLY if this Subtype is SPECIFIC to a certain Cell Type (e.g. a cell line)
+            {{ form.cell_type }}
+            <br>
+            <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+            <span class="text-danger">
+                Select a Cell Type ONLY if this Subtype is SPECIFIC to a certain Cell Type (e.g. a cell line)
+            </span>
             <br>
             <a href="/cellsamples/celltype">
                 <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
                 Add/Edit Cell Types (Must Refresh Page to See Change)
             </a>
-        </p>
         </div>
     </div>
 {% endblock %}

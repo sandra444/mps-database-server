@@ -60,12 +60,11 @@
         <label for="cell_type" class="col-sm-2 control-label">Cell Type*</label>
         <div class="col-sm-10">
             {{ form.cell_type }}
-            <p>
-                <a href="/cellsamples/celltype">
-                    <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
-                    Add/Edit Cell Types (Must Refresh Page to See Change)
-                </a>
-            </p>
+            <br>
+            <a href="/cellsamples/celltype">
+                <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
+                Add/Edit Cell Types (Must Refresh Page to See Change)
+            </a>
         </div>
     </div>
 
@@ -84,15 +83,14 @@
         <label for="cell_subtype" class="col-sm-2 control-label">Cell Subtype*</label>
         <div class="col-sm-10">
             {{ form.cell_subtype }}
-            <p>
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                If the Cell Subtype is a cell line, please select the associated Cell Type first.
-                <br>
-                <a href="/cellsamples/cellsubtype">
-                    <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
-                    Add/Edit Cell Subtypes (Must Refresh Page to See Change)
-                </a>
-            </p>
+            <br>
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            If the Cell Subtype is a cell line, please select the associated Cell Type first.
+            <br>
+            <a href="/cellsamples/cellsubtype">
+                <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
+                Add/Edit Cell Subtypes (Must Refresh Page to See Change)
+            </a>
         </div>
     </div>
 
