@@ -15,6 +15,8 @@ from django.contrib.auth.models import Group
 import os
 import settings
 
+from mps.settings import MEDIA_ROOT
+
 
 def main(request):
     if request.method == 'POST':
@@ -149,4 +151,7 @@ def custom_search(request):
 
 def help(request):
     c = RequestContext(request)
+    # Add version for templates
+    c['version'] = len(os.listdir(MEDIA_ROOT + '/excel_templates/')) / 3
+
     return render_to_response('help.html', c)
