@@ -12,7 +12,7 @@ $(document).ready(function () {
                 $(filter[x]).show();
             }
         }
-        else{
+        else {
             $('.result-group').show();
         }
     }
@@ -26,7 +26,7 @@ $(document).ready(function () {
         }
         // Mark if it was not part of the search
         else {
-            if(at_least_one_checked) {
+            if (at_least_one_checked) {
                 $(box).parent().parent().addClass('bg-danger');
             }
         }
