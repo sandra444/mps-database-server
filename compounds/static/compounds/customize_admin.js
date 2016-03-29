@@ -30,11 +30,12 @@ $(document).ready(function () {
             $('#id_known_drug').prop('checked', false);
         }
 
-        if ("Yes" === data.compound.medChemFriendly) {
-            $('#id_medchem_friendly').prop('checked', true);
-        } else {
-            $('#id_medchem_friendly').prop('checked', false);
-        }
+        // Deprecated
+//        if ("Yes" === data.compound.medChemFriendly) {
+//            $('#id_medchem_friendly').prop('checked', true);
+//        } else {
+//            $('#id_medchem_friendly').prop('checked', false);
+//        }
 
         if ("Yes" === data.compound.passesRuleOfThree) {
             $('#id_ro3_passes').prop('checked', true);

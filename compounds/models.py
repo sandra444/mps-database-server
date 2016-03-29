@@ -21,7 +21,8 @@ FIELDS = {
     'alogp': 'alogp',
     'chemblId': 'chemblid',
     'knownDrug': 'known_drug',
-    'medChemFriendly': 'medchem_friendly',
+    # Deprecated
+    #'medChemFriendly': 'medchem_friendly',
     'molecularFormula': 'molecular_formula',
     'molecularWeight': 'molecular_weight',
     'numRo5Violations': 'ro5_violations',
@@ -129,8 +130,12 @@ class Compound(LockableModel):
     known_drug = models.BooleanField(
         'Known drug?',
         default=False)
+    # TODO This field is now deprecated
     medchem_friendly = models.BooleanField(
         'Med Chem friendly?',
+        default=False)
+    medchem_alerts = models.BooleanField(
+        'Inicates whether structural alerts are listed for this compound',
         default=False)
     ro5_violations = models.IntegerField(
         'Rule of 5 violations',

@@ -129,7 +129,7 @@ class CompoundAdmin(LockableAdmin):
                        'logp', 'logd', 'alogp',)
         }),
         ('Drug(-like) Properties', {
-            'fields': ('known_drug', 'medchem_friendly', 'ro3_passes',
+            'fields': ('known_drug', 'medchem_alerts', 'ro3_passes',
                        'ro5_violations', 'species', 'drug_class', 'protein_binding',
                        'half_life', 'bioavailability'
             )

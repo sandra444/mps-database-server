@@ -52,33 +52,20 @@ def fetch_chemblid_data(request):
     if not chemblid or not selector:
         return main(request)
 
-    element = {
-        'compound': Compound.objects.filter(chemblid=chemblid),
-        'assay': Assay.objects.filter(chemblid=chemblid),
-        'target': Target.objects.filter(chemblid=chemblid),
-    }[selector]
-
     if chemblid.startswith('CHEMBL') and chemblid[6:].isdigit():
+        try:
+            if 'compound' == selector:
+                data = ChEMBLdb().get_compounds_by_chemblId(str(chemblid))
+            elif 'assay' == selector:
+                data = ChEMBLdb().get_assay_by_chemblId(str(chemblid))
+            elif 'target' == selector:
+                data = ChEMBLdb().get_target_by_chemblId(str(chemblid))
 
-        if element:
+        except Exception:
             return chembl_error(
-                '"{}" is already in the database.'.format(chemblid)
+                '"{}" did not match any compound records.'.format(chemblid)
             )
 
-        else:
-
-            try:
-                if 'compound' == selector:
-                    data = ChEMBLdb().get_compounds_by_chemblId(str(chemblid))
-                elif 'assay' == selector:
-                    data = ChEMBLdb().get_assay_by_chemblId(str(chemblid))
-                elif 'target' == selector:
-                    data = ChEMBLdb().get_target_by_chemblId(str(chemblid))
-
-            except Exception:
-                return chembl_error(
-                    '"{}" did not match any compound records.'.format(chemblid)
-                )
     else:
         return chembl_error(
             '"{}" is not a valid ChEMBL id.'.format(chemblid)
@@ -246,7 +233,17 @@ def get_drugbank_target_information(data, type_of_target):
 
 
 def get_drugbank_data_from_chembl_id(chembl_id):
-    data = {}
+    # Values found in table
+    data = {
+        'drugbank_id': '',
+        'pubchemid': '',
+        'drug_class': '',
+        'protein_binding': '',
+        'half_life': '',
+        'clearance': '',
+        'bioavailability': '',
+        'absorption': '',
+    }
 
     # Get drugbank_id or fail
     url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/2'.format(chembl_id)
@@ -287,18 +284,6 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         integer_extractor = re.compile(r'(?<!\.)(?<!\d)\d+(?!\.)')
         # Regex for extracting ints or floats
         integer_and_float_extractor = re.compile(r'\d*\.?\d+')
-
-        # Values found in table
-        data = {
-            'drugbank_id': '',
-            'pubchemid': '',
-            'drug_class': '',
-            'protein_binding': '',
-            'half_life': '',
-            'clearance': '',
-            'bioavailability': '',
-            'absorption': '',
-        }
 
         # Loop through the rows of the table
         # Break when all 6 table rows found
@@ -469,6 +454,25 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         # Extract ID
         pubchemid = json_data[0].get('src_compound_id')
         data.update({'pubchemid': pubchemid})
+
+    # AGAIN, I know this is deceptive as this is from ChEMBL (but collected from a scrape)
+    medchem_alerts = False
+    # Get URL of target for scrape
+    url = "https://www.ebi.ac.uk/chembl/compound/structural_alerts/{}".format(chembl_id)
+    # Make the http request
+    response = requests.get(url)
+    # Get the webpage as text
+    stuff = response.text
+    # Make a BeatifulSoup object
+    soup = BeautifulSoup(stuff, 'html5lib')
+
+    # Get all tables
+    table = soup.find(id="structural_wedding")
+    # If there is a table and it contains alerts
+    if table and table.tbody.text.strip():
+        medchem_alerts = True
+
+    data.update({'medchem_alerts': medchem_alerts})
 
     return data
 
