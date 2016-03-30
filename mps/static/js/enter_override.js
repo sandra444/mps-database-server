@@ -41,7 +41,7 @@ $(document).ready(function () {
     });
     dialogConfirm.removeProp('hidden');
 
-    $(window).keydown(function(event){
+    $(window).keydown(function(event) {
         if(event.keyCode == 13) {
             // Only perform the override if an input is focused
             if($('input:focus')[0]) {

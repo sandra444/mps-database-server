@@ -2,9 +2,9 @@
 {% load static %}
 
 {% block load %}
-    <script src="{% static "compounds/customize_admin.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/inline_add.js" %}"></script>
+    <script src="{% static "compounds/customize_admin.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -76,7 +76,12 @@
     <div class="form-group">
         <label for="chemblid" class="col-sm-2 control-label compounds-compound">ChEMBL ID</label>
         <div class="col-sm-10">
-          {{ form.chemblid }} <a target="_blank" href="https://www.ebi.ac.uk/chembl">Search ChEMBL</a>
+          {{ form.chemblid }}
+{#          <a target="_blank" href="https://www.ebi.ac.uk/chembl">Search ChEMBL</a>#}
+          <button type="button" id="search_chembl" class="btn btn-info">
+              <span class="glyphicon glyphicon-search"></span>
+              Search ChEMBL
+          </button>
         </div>
     </div>
 
@@ -294,4 +299,51 @@
         </tbody>
     </table>
 </form>
+
+<div hidden id="dialog" title="Search ChEMBL">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="input-group">
+                <input id="chembl_search" type="text" class="form-control" placeholder="Search ChEMBL">
+                <span class="input-group-btn">
+                    <button class="btn btn-primary" id="chembl_search_submit" type="button">
+                        Search
+                    </button>
+                </span>
+            </div>
+        </div>
+        <div class="col-xs-12 help-block">
+            Type a search term (preferably the generic name of a compound or drug) into the box and <b>click</b> "Search"
+            <br>
+            After getting a list of possibilities, <b>click</b> "Select" to choose the ChEMBL ID (you can then <b>click</b> "Retrieve")
+            <br>
+            If you are having trouble, try
+            <a target="_bank" href="https://www.ebi.ac.uk/chembl/">searching ChEMBL directly</a>
+        </div>
+    </div>
+
+    <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>ChEMBL ID</th>
+                    <th>Name</th>
+                    <th>Synonyms</th>
+                    <th>Image</th>
+                    <th>Select</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>ChEMBL ID</th>
+                    <th>Name</th>
+                    <th>Synonyms</th>
+                    <th>Image</th>
+                    <th>Select</th>
+                </tr>
+            </tfoot>
+
+            <tbody id="chembl_search_results"></tbody>
+    </table>
+</div>
 {% endblock %}

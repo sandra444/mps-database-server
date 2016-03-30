@@ -476,12 +476,54 @@ def get_drugbank_data_from_chembl_id(chembl_id):
 
     return data
 
+
+def fetch_chembl_search_results(request):
+    query = request.POST.get('query', '')
+
+    url = 'https://www.ebi.ac.uk/chembl/api/data/chembl_id_lookup/search.json?q={}'.format(query)
+    # Make the http request
+    response = requests.get(url)
+    # Get the webpage as JSON
+    json_data = json.loads(response.text)
+
+    lookups = json_data.get('chembl_id_lookups', [])
+
+    results = []
+    for lookup in lookups:
+        if lookup.get('entity_type', '') == 'COMPOUND' and lookup.get('status', '') == 'ACTIVE':
+            additional_data = {}
+            chembl_id = lookup.get('chembl_id', '')
+
+            url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chembl_id)
+            # Make the http request
+            response = requests.get(url)
+            # Get the webpage as JSON
+            json_data = json.loads(response.text)
+
+            additional_data.update({'name': json_data.get('pref_name', '')})
+
+            synonyms = []
+            for entry in json_data.get('molecule_synonyms', []):
+                synonym = entry.get('synonyms', '')
+                if synonym and synonym not in synonyms:
+                    synonyms.append(synonym)
+
+            synonyms = ', '.join(synonyms)
+            additional_data.update({'synonyms': synonyms})
+
+            lookup.update(additional_data)
+            results.append(lookup)
+
+    return HttpResponse(json.dumps(results),
+                        content_type="application/json")
+
 switch = {
     'fetch_compound_name': fetch_compound_name,
     'fetch_chemblid_data': fetch_chemblid_data,
     'fetch_compound_report': fetch_compound_report,
     'fetch_compound_list': fetch_compound_list,
-    'fetch_drugbank_data': fetch_drugbank_data
+    'fetch_drugbank_data': fetch_drugbank_data,
+    'fetch_chembl_search_results': fetch_chembl_search_results
 }
 
 

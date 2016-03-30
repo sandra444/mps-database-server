@@ -3,8 +3,27 @@ $(document).ready(function () {
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
     var chemblid = null;
 
-    function compound_finalizer(data) {
+    var chembl_search_results = $('#chembl_search_results');
+    var chembl_search_submit = $('#chembl_search_submit');
 
+    // Open and then close dialog so it doesn't get placed in window itself
+    var dialog = $('#dialog');
+    dialog.dialog({
+        width: 825,
+        height: 500,
+        closeOnEscape: true,
+        autoOpen: false,
+        // Potentially helpful
+        close: function() {
+            $('body').removeClass('stop-scrolling');
+        },
+        open: function() {
+            $('body').addClass('stop-scrolling');
+        }
+    });
+    dialog.removeProp('hidden');
+
+    function compound_finalizer(data) {
         $('#id_name').val(data.compound.preferredCompoundName);
         $('#id_inchikey').val(data.compound.stdInChiKey);
         $('#id_smiles').val(data.compound.smiles);
@@ -152,12 +171,88 @@ $(document).ready(function () {
         });
     }
 
+    function get_search_results() {
+        chembl_search_submit.prop('disabled', true)
+            .removeClass('btn-primary')
+            .addClass('btn-warning')
+            .text('Loading...');
+
+        $.ajax({
+            url: "/compounds_ajax",
+            type: "POST",
+            dataType: "json",
+            data: {
+                call: 'fetch_chembl_search_results',
+                query: $('#chembl_search').val(),
+                csrfmiddlewaretoken: middleware_token
+            },
+            success: function (json) {
+                if (json) {
+                    display_search_results(json);
+                }
+                else {
+                    alert('No results found.')
+                }
+                chembl_search_submit.prop('disabled', false)
+                    .addClass('btn-primary')
+                    .removeClass('btn-warning')
+                    .text('Search');
+            },
+            error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+                alert('An error occurred!');
+                chembl_search_submit.prop('disabled', false)
+                    .addClass('btn-primary')
+                    .removeClass('btn-warning')
+                    .text('Search');
+            }
+        });
+    }
+
+    function display_search_results(results) {
+        // Clear old results
+        chembl_search_results.html('');
+
+        for (var index in results) {
+            var result = results[index];
+
+            var current_id = result.chembl_id;
+
+            var row = $('<tr>').append(
+                $('<td>').append($('<a>')
+                    .attr('href', 'https://www.ebi.ac.uk/chembl/compound/inspect/' + result.chembl_id)
+                    .attr('target', '_blank')
+                    .text(result.chembl_id)))
+                .append($('<td>')
+                     .text(result.name))
+                .append($('<td>')
+                     .text(result.synonyms))
+                .append($('<td>').append($('<img>')
+                     .attr('src', 'https://www.ebi.ac.uk/chembldb/compound/displayimage/' + result.chembl_id)))
+                .append($('<td>').append($('<button>')
+                    .addClass('btn btn-primary')
+                    .text('Select')
+                    .attr('data-chemblid', current_id)
+                    .click(function(){apply_selection(this)})));
+
+            chembl_search_results.append(row);
+        }
+    }
+
+    function apply_selection(selection) {
+        var chembl_id = selection.getAttribute('data-chemblid');
+        $('#id_chemblid').val(chembl_id);
+        dialog.dialog('close');
+    }
+
+    // FOR ADMIN ONLY
     if ($('.object-tools > li > .addlink').length) {
         $(".object-tools").append(
             '<li><a href="add_multi/" class="addlink">Add multiple</a></li>'
         );
     }
 
+    // FOR ADMIN ONLY
     if (!$('#id_locked').prop('checked')) {
         $('<input type="button" value="Retrieve" id="retrieve" name="_fetch">')
             .insertAfter('#id_chemblid');
@@ -166,7 +261,6 @@ $(document).ready(function () {
             chemblid = $('#id_chemblid').val();
 
             if (chemblid.match("^CHEMBL")) {
-
                 /* If we match CHEMBL, display the fact that we are in the
                  * process of retrieving data */
                 $('#retrieve').val('Retrieving').attr('disabled', 'disabled');
@@ -176,10 +270,18 @@ $(document).ready(function () {
                 var selection = 'compound';
 
                 caller(selection, chemblid, middleware_token);
-
-            } else {
+            }
+            else {
                 alert("Please enter a ChEMBL id.");
             }
         });
     }
+
+    $('#search_chembl').click(function() {
+        dialog.dialog('open');
+    });
+
+    chembl_search_submit.click(function() {
+        get_search_results();
+    });
 });
