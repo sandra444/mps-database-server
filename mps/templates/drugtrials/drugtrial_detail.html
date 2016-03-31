@@ -3,13 +3,13 @@
 
 {% block breadcrumbs %}
     <li><a href="/drugtrials/">Drug Trials</a></li>
-    <li class="active">Drug Trial ID #{{ trial.id }}</li>
+    <li class="active">Drug Trial ID #{{ object.id }}</li>
 {% endblock %}
 
 {% block content %}
     <legend>
         <h1>
-            Drug Trial ID #{{ trial.id }}
+            Drug Trial ID #{{ object.id }}
             <a href="/drugtrials/{{ next }}" class="btn btn-primary btn-large pull-right">
                 Next
                 <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
@@ -24,7 +24,7 @@
     <div class="padded-row">
 
         <div class="col-sm-3 col-md-2 thumbnail">
-            <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ trial.compound.chemblid }}">
+            <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.compound.chemblid }}">
         </div>
 
         <div class="col-sm-9 col-md-10">
@@ -35,7 +35,7 @@
                             <b>Compound</b>
                         </td>
                         <td>
-                            <a href="/compounds/{{ trial.compound.id }}">{{ trial.compound }}</a>
+                            <a href="/compounds/{{ object.compound.id }}">{{ object.compound }}</a>
                         </td>
                     </tr>
                     <tr>
@@ -43,7 +43,7 @@
                             <b>Trial Type</b>
                         </td>
                         <td>
-                            {{ trial.get_trial_type_display }}
+                            {{ object.get_trial_type_display }}
                         </td>
                     </tr>
                     <tr>
@@ -51,7 +51,7 @@
                             <b>Trial Sub Type</b>
                         </td>
                         <td>
-                            {{ trial.get_trial_sub_type_display }}
+                            {{ object.get_trial_sub_type_display }}
                         </td>
                     </tr>
                     <tr>
@@ -59,7 +59,7 @@
                             <b>Participant Species</b>
                         </td>
                         <td>
-                            {{ trial.species }}
+                            {{ object.species }}
                         </td>
                     </tr>
                     <tr>
@@ -67,56 +67,56 @@
                             <b>Source</b>
                         </td>
                         <td>
-                            {{ trial.source }}
+                            {{ object.source }}
                         </td>
                     </tr>
-                    {% if trial.source_link %}
+                    {% if object.source_link %}
                     <tr>
                         <td>
                             <b>Source Link</b>
                         </td>
                         <td>
-                            <a href="{{ trial.source_link }}">{{ trial.source_link }}</a>
+                            <a href="{{ object.source_link }}">{{ object.source_link }}</a>
                         </td>
                     </tr>
                     {% endif %}
-                    {% if trial.condition %}
+                    {% if object.condition %}
                     <tr>
                         <td>
                             <b>Condition</b>
                         </td>
                         <td>
-                            {{ trial.condition }}
+                            {{ object.condition }}
                         </td>
                     </tr>
                     {% endif %}
-                    {% if trial.description %}
+                    {% if object.description %}
                     <tr>
                         <td>
                             <b>Description</b>
                         </td>
                         <td>
-                            {{ trial.description }}
+                            {{ object.description }}
                         </td>
                     </tr>
                     {% endif %}
-                    {% if trial.figure1 %}
+                    {% if object.figure1 %}
                     <tr>
                         <td>
                             <b>Figure 1</b>
                         </td>
                         <td>
-                            <img src="/media/{{ trial.figure1 }}">
+                            <img src="/media/{{ object.figure1 }}">
                         </td>
                     </tr>
                     {% endif %}
-                    {% if trial.figure2 %}
+                    {% if object.figure2 %}
                     <tr>
                         <td>
                             <b>Figure 2</b>
                         </td>
                         <td>
-                            <img src="/media/{{ trial.figure2 }}">
+                            <img src="/media/{{ object.figure2 }}">
                         </td>
                     </tr>
                     {% endif %}

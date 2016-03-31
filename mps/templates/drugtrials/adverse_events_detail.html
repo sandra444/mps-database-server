@@ -7,14 +7,14 @@
 
 {% block breadcrumbs %}
     <li><a href="/adverse_events/">Adverse Events</a></li>
-    <li class="active">Adverse Events for {{ compound }}</li>
+    <li class="active">Adverse Events for {{ object }}</li>
 {% endblock %}
 
 {% block content %}
     <legend>
         <h1>Adverse Events for
             <br>
-            <a id="compound" href="/compounds/{{ compound.compound.id }}">{{ compound }}</a>
+            <a id="compound" href="/compounds/{{ object.compound.id }}">{{ object }}</a>
             <a href="/adverse_events/{{ next }}" class="btn btn-primary btn-large pull-right">
                 Next
                 <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
@@ -29,7 +29,7 @@
     <div class="padded-row">
 
         <div class="col-sm-3 col-md-2 thumbnail">
-            <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.compound.chemblid }}">
+            <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.compound.chemblid }}">
         </div>
 
         <div class="col-sm-9 col-md-10">
@@ -40,26 +40,26 @@
                             <b>ChEMBL ID</b>
                         </td>
                         <td>
-                            <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.compound.chemblid }}">{{ compound.compound.chemblid }}</a>
+                            <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ object.compound.chemblid }}">{{ object.compound.chemblid }}</a>
                         </td>
                     </tr>
-                    {% if compound.compound.pubchemid %}
+                    {% if object.compound.pubchemid %}
                     <tr>
                         <td>
                             <b>PubChem ID</b>
                         </td>
                         <td>
-                            <a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ compound.compound.pubchemid }}">{{ compound.compound.pubchemid }}</a>
+                            <a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ object.compound.pubchemid }}">{{ object.compound.pubchemid }}</a>
                         </td>
                     </tr>
                     {% endif %}
-                    {% if compound.compound.drugbank_id %}
+                    {% if object.compound.drugbank_id %}
                         <tr>
                             <td>
                                 <b>DrugBank ID</b>
                             </td>
                             <td>
-                                <a href="http://www.drugbank.ca/drugs/{{ compound.compound.drugbank_id }}">{{ compound.compound.drugbank_id }}</a>
+                                <a href="http://www.drugbank.ca/drugs/{{ object.compound.drugbank_id }}">{{ object.compound.drugbank_id }}</a>
                             </td>
                         </tr>
                     {% endif %}
@@ -70,11 +70,11 @@
     </div>
 
 
-    {% if compound.warnings %}
+    {% if object.warnings %}
         <legend>
             Warnings
 
-            {% if compound.black_box %}
+            {% if object.black_box %}
                 <span title="This compound has a Black Box Warning" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
             {% endif %}
 
@@ -88,14 +88,14 @@
 {#            <blockquote>#}
             <div class="col-xs-12">
                 <p>
-                    {{ compound.warnings }}
+                    {{ object.warnings }}
                 </p>
             </div>
 {#            </blockquote>#}
         </div>
     {% endif %}
 
-    {% if compound.nonclinical_toxicology %}
+    {% if object.nonclinical_toxicology %}
         <legend>
             Nonclinical Toxicology
 
@@ -109,7 +109,7 @@
 {#            <blockquote>#}
             <div class="col-xs-12">
                 <p>
-                    {{ compound.nonclinical_toxicology }}
+                    {{ object.nonclinical_toxicology }}
                 </p>
             </div>
 {#            </blockquote>#}

@@ -239,7 +239,7 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
     template_name = 'assays/assayrun_add.html'
     form_class = AssayRunForm
 
-    def get_form(self,form_class):
+    def get_form(self, form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
             ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete ")

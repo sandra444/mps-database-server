@@ -12,7 +12,7 @@ from mps.mixins import SpecificGroupRequiredMixin
 #     template_name = 'microdevices/microdevice_list.html'
 
 
-# Why is this not class based again?
+# Convert to class?
 def microdevice_list(request, *args, **kwargs):
     c = RequestContext(request)
 
@@ -27,21 +27,38 @@ def microdevice_list(request, *args, **kwargs):
     return render_to_response('microdevices/microdevice_list.html', c)
 
 
-# Why is this not class based again?
-def organ_model_detail(request, *args, **kwargs):
-    c = RequestContext(request)
+class OrganModelDetail(DetailView):
+    model = OrganModel
+    template_name = 'microdevices/organ_model_detail.html'
 
-    model = get_object_or_404(OrganModel, pk=kwargs.get('pk'))
-    assays = ValidatedAssay.objects.filter(organ_model=model).prefetch_related('assay', 'assay__assay_type')
-    protocols = OrganModelProtocol.objects.filter(organ_model=model).order_by('-version')
+    def get_context_data(self, **kwargs):
+        context = super(OrganModelDetail, self).get_context_data(**kwargs)
 
-    c.update({
-        'model': model,
-        'assays': assays,
-        'protocols': protocols,
-    })
+        assays = ValidatedAssay.objects.filter(organ_model=self.object).prefetch_related('assay', 'assay__assay_type')
+        protocols = OrganModelProtocol.objects.filter(organ_model=self.object).order_by('-version')
 
-    return render_to_response('microdevices/organ_model_detail.html', c)
+        context.update({
+            'assays': assays,
+            'protocols': protocols,
+        })
+
+        return context
+
+
+# def organ_model_detail(request, *args, **kwargs):
+#     c = RequestContext(request)
+#
+#     model = get_object_or_404(OrganModel, pk=kwargs.get('pk'))
+#     assays = ValidatedAssay.objects.filter(organ_model=model).prefetch_related('assay', 'assay__assay_type')
+#     protocols = OrganModelProtocol.objects.filter(organ_model=model).order_by('-version')
+#
+#     c.update({
+#         'model': model,
+#         'assays': assays,
+#         'protocols': protocols,
+#     })
+#
+#     return render_to_response('microdevices/organ_model_detail.html', c)
 
 
 class MicrodeviceDetail(DetailView):
