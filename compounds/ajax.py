@@ -45,6 +45,7 @@ def chembl_error(error):
                         content_type="application/json")
 
 
+# Virtually deprecated (gives incorrect values for things like known drug. Sad!
 def fetch_chemblid_data(request):
     chemblid = request.POST['chemblid']
     selector = request.POST['selector']
@@ -73,6 +74,78 @@ def fetch_chemblid_data(request):
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
+
+
+def fetch_chembl_compound_data(request):
+    chemblid = request.POST['chemblid']
+
+    data = {}
+
+    url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chemblid)
+    response = requests.get(url)
+    initial_data = json.loads(response.text)
+
+    if initial_data:
+        molecular_structures = initial_data.get('molecule_structures', {})
+
+        if molecular_structures:
+            data['name'] = initial_data.get('pref_name', '')
+            data['inchikey'] = molecular_structures.get('standard_inchi_key', '')
+            data['smiles'] = molecular_structures.get('canonical_smiles', '')
+
+        # Start known drug as False
+        data['known_drug'] = False
+        # Get synonyms and check if it is a drug too
+        synonyms = []
+        for entry in initial_data.get('molecule_synonyms', []):
+            synonym = entry.get('synonyms', '')
+            if synonym and synonym not in synonyms:
+                synonyms.append(synonym)
+            # Using INN sometimes causes false positives for pesticides and the like ALPHA-CYPERMETHRIN 
+            if entry.get('syn_type', '') == 'INN' or entry.get('syn_type', '') == 'FDA':
+                data['known_drug'] = True
+        data['synonyms'] = ', '.join(synonyms)
+
+        molecular_properties = initial_data.get('molecule_properties', {})
+
+        if molecular_properties:
+            data['molecular_formula'] = molecular_properties.get('full_molformula', '')
+            data['molecular_weight'] = molecular_properties.get('full_mwt', '')
+            data['rotatable_bonds'] = molecular_properties.get('rtb', '')
+            data['acidic_pka'] = molecular_properties.get('acd_most_apka', '')
+            data['basic_pka'] = molecular_properties.get('acd_most_bpka', '')
+            data['logp'] = molecular_properties.get('acd_logp', '')
+            data['logd'] = molecular_properties.get('acd_logd', '')
+            data['alogp'] = molecular_properties.get('alogp', '')
+            data['species'] = molecular_properties.get('molecular_species', '')
+            data['ro5_violations'] = molecular_properties.get('num_ro5_violations', '')
+
+            if molecular_properties.get('ro3_pass', 'N') == 'Y':
+                data['ro3_passes'] = True
+            else:
+                data['ro3_passes'] = False
+
+        # Get medchem alerts
+        medchem_alerts = False
+        # Get URL of target for scrape
+        url = "https://www.ebi.ac.uk/chembl/compound/structural_alerts/{}".format(chemblid)
+        # Make the http request
+        response = requests.get(url)
+        # Get the webpage as text
+        stuff = response.text
+        # Make a BeatifulSoup object
+        soup = BeautifulSoup(stuff, 'html5lib')
+
+        # Get all tables
+        table = soup.find(id="structural_wedding")
+        # If there is a table and it contains alerts
+        if table and table.tbody.text.strip():
+            medchem_alerts = True
+
+        data['medchem_alerts'] = medchem_alerts
+
+    return HttpResponse(json.dumps(data),
+                        content_type='application/json')
 
 
 # TODO NEEDS REVISION: SWITCH TO ACD CALCULATED LOGP ETC
@@ -455,25 +528,6 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         pubchemid = json_data[0].get('src_compound_id')
         data.update({'pubchemid': pubchemid})
 
-    # AGAIN, I know this is deceptive as this is from ChEMBL (but collected from a scrape)
-    medchem_alerts = False
-    # Get URL of target for scrape
-    url = "https://www.ebi.ac.uk/chembl/compound/structural_alerts/{}".format(chembl_id)
-    # Make the http request
-    response = requests.get(url)
-    # Get the webpage as text
-    stuff = response.text
-    # Make a BeatifulSoup object
-    soup = BeautifulSoup(stuff, 'html5lib')
-
-    # Get all tables
-    table = soup.find(id="structural_wedding")
-    # If there is a table and it contains alerts
-    if table and table.tbody.text.strip():
-        medchem_alerts = True
-
-    data.update({'medchem_alerts': medchem_alerts})
-
     return data
 
 
@@ -523,7 +577,8 @@ switch = {
     'fetch_compound_report': fetch_compound_report,
     'fetch_compound_list': fetch_compound_list,
     'fetch_drugbank_data': fetch_drugbank_data,
-    'fetch_chembl_search_results': fetch_chembl_search_results
+    'fetch_chembl_search_results': fetch_chembl_search_results,
+    'fetch_chembl_compound_data': fetch_chembl_compound_data
 }
 
 

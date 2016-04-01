@@ -23,45 +23,83 @@ $(document).ready(function () {
     });
     dialog.removeProp('hidden');
 
-    function compound_finalizer(data) {
-        $('#id_name').val(data.compound.preferredCompoundName);
-        $('#id_inchikey').val(data.compound.stdInChiKey);
-        $('#id_smiles').val(data.compound.smiles);
-        // Note that the synonyms are modified so that there is a space after
-        // Each comma. Replace can not be performed on undefined variables.
-        if (data.compound.synonyms) {
-            $('#id_synonyms').val(data.compound.synonyms.replace(/,/g, ', '));
-        }
-        $('#id_molecular_formula').val(data.compound.molecularFormula);
-        $('#id_molecular_weight').val(data.compound.molecularWeight);
-        $('#id_rotatable_bonds').val(data.compound.rotatableBonds);
-        $('#id_acidic_pka').val(data.compound.acdAcidicPka);
-        $('#id_basic_pka').val(data.compound.acdBasicPka);
-        $('#id_logp').val(data.compound.acdLogp);
-        $('#id_logd').val(data.compound.acdLogd);
-        $('#id_alogp').val(data.compound.alogp);
-        $('#id_ro5_violations').val(data.compound.numRo5Violations);
-        $('#id_species').val(data.compound.species);
+//    function compound_finalizer(data) {
+//        $('#id_name').val(data.compound.preferredCompoundName);
+//        $('#id_inchikey').val(data.compound.stdInChiKey);
+//        $('#id_smiles').val(data.compound.smiles);
+//        // Note that the synonyms are modified so that there is a space after
+//        // Each comma. Replace can not be performed on undefined variables.
+//        if (data.compound.synonyms) {
+//            $('#id_synonyms').val(data.compound.synonyms.replace(/,/g, ', '));
+//        }
+//        $('#id_molecular_formula').val(data.compound.molecularFormula);
+//        $('#id_molecular_weight').val(data.compound.molecularWeight);
+//        $('#id_rotatable_bonds').val(data.compound.rotatableBonds);
+//        $('#id_acidic_pka').val(data.compound.acdAcidicPka);
+//        $('#id_basic_pka').val(data.compound.acdBasicPka);
+//        $('#id_logp').val(data.compound.acdLogp);
+//        $('#id_logd').val(data.compound.acdLogd);
+//        $('#id_alogp').val(data.compound.alogp);
+//        $('#id_ro5_violations').val(data.compound.numRo5Violations);
+//        $('#id_species').val(data.compound.species);
+//
+//        if ("Yes" === data.compound.knownDrug) {
+//            $('#id_known_drug').prop('checked', true);
+//        } else {
+//            $('#id_known_drug').prop('checked', false);
+//        }
+//
+//        // Deprecated
+////        if ("Yes" === data.compound.medChemFriendly) {
+////            $('#id_medchem_friendly').prop('checked', true);
+////        } else {
+////            $('#id_medchem_friendly').prop('checked', false);
+////        }
+//
+//        if ("Yes" === data.compound.passesRuleOfThree) {
+//            $('#id_ro3_passes').prop('checked', true);
+//        } else {
+//            $('#id_ro3_passes').prop('checked', false);
+//        }
+//
+//        // Call drugbank
+//        get_drugbank_data();
+//    }
 
-        if ("Yes" === data.compound.knownDrug) {
+    function compound_finalizer(data) {
+        $('#id_name').val(data.name);
+        $('#id_inchikey').val(data.inchikey);
+        $('#id_smiles').val(data.smiles);
+        $('#id_synonyms').val(data.synonyms);
+        $('#id_molecular_formula').val(data.molecular_formula);
+        $('#id_molecular_weight').val(data.molecular_weight);
+        $('#id_rotatable_bonds').val(data.rotatable_bonds);
+        $('#id_acidic_pka').val(data.acidic_pka);
+        $('#id_basic_pka').val(data.basic_pka);
+        $('#id_logp').val(data.logp);
+        $('#id_logd').val(data.logd);
+        $('#id_alogp').val(data.alogp);
+        $('#id_ro5_violations').val(data.ro5_violations);
+        $('#id_species').val(data.species);
+
+        if (data.known_drug) {
             $('#id_known_drug').prop('checked', true);
         } else {
             $('#id_known_drug').prop('checked', false);
         }
 
-        // Deprecated
-//        if ("Yes" === data.compound.medChemFriendly) {
-//            $('#id_medchem_friendly').prop('checked', true);
-//        } else {
-//            $('#id_medchem_friendly').prop('checked', false);
-//        }
-
-        if ("Yes" === data.compound.passesRuleOfThree) {
+        if (data.ro3_passes) {
             $('#id_ro3_passes').prop('checked', true);
         } else {
             $('#id_ro3_passes').prop('checked', false);
         }
 
+
+        if (data.medchem_alerts) {
+            $('#id_medchem_alerts').prop('checked', true);
+        } else {
+            $('#id_medchem_alerts').prop('checked', false);
+        }
         // Call drugbank
         get_drugbank_data();
     }
@@ -74,14 +112,15 @@ $(document).ready(function () {
             dataType: "json",
             data: {
                 // Function to call within the view is defined by `call:`
-                call: 'fetch_chemblid_data',
+                //call: 'fetch_chemblid_data',
+                call: 'fetch_chembl_compound_data',
 
                 // First token is the var name within views.py
                 // Second token is the var name in this JS file
                 chemblid: chemblid,
 
                 // Select assay data return
-                selector: selection,
+                //selector: selection,
 
                 // Always pass the CSRF middleware token with every AJAX call
                 csrfmiddlewaretoken: middleware_token
