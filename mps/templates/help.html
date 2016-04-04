@@ -20,28 +20,17 @@
   <!-- Incorporate the Bootstrap JavaScript plugins -->
   <script src="{% static "js/bootstrap.min.js" %}"></script>
   <link rel="stylesheet" href="{% static "css/bootstrap-theme.min.css" %}">
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" type="text/css" href="{% static "css/jquery.dataTables.min.css" %}">
+  <link rel="stylesheet" type="text/css" href="{% static "css/dataTables.tableTools.min.css" %}">
+  <!-- DataTables -->
+  <script type="text/javascript" charset="utf8" src="{% static "js/jquery.dataTables.min.js" %}"></script>
+  <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.tableTools.min.js" %}"></script>
+  <script type="text/javascript" charset="utf8" src="{% static "js/datatable_options.js" %}"></script>
   <!-- Custom CSS Rules -->
   <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
-
-  {# TODO REFACTOR THIS CRUDE RESOLUTION TO ANCHORS GOING TO THE INCORRECT LOCATION #}
-  {# Also this violated SOC #}
-  <script>
-    $(document).ready(function () {
-      var offset = 60;
-
-      $('.navbar li a').click(function(event) {
-        event.preventDefault();
-        $('html, body').animate({
-            scrollTop: $($(this).attr('href')).offset().top -offset
-          }, 500);
-        });
-
-        var initial_hash = window.location.hash;
-        $('html, body').animate({
-          scrollTop: $(initial_hash).offset().top -offset
-        }, 500);
-    });
-  </script>
+  <!-- Help JS -->
+  <script type="text/javascript" charset="utf8" src="{% static "js/help.js" %}"></script>
 </head>
 
 {# MAKE SURE THIS OFFSET IS EQUAL TO THE OFFSET LISTED IN THE SCRIPT #}
@@ -1475,9 +1464,36 @@
     </ul>
   </div>
 </div>
-<div id="glossary" class="container">
+<div id="glossary" class="container padded-bottom">
   <h1>Glossary</h1>
-  Work In Progress...
+  <table hidden id="glossary_table" class="display" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Term</th>
+        <th>Definition</th>
+        <th>Ref</th>
+      </tr>
+    </thead>
+
+    <tfoot>
+      <tr>
+        <th>Term</th>
+        <th>Definition</th>
+        <th>Ref</th>
+      </tr>
+    </tfoot>
+
+    <tbody>
+      {% for term in glossary %}
+        <tr>
+          <td>{{ term.term }}</td>
+          <td>{{ term.definition }}</td>
+          <td>{{ term.show_url }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <script src="{% static "js/display_datatable.js" %}"></script>
 </div>
 </div>
 </body>

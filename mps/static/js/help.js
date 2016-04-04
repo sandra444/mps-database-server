@@ -1,27 +1,24 @@
-// TODO THIS FILE HAS BEEN DEPRECATED
-// Code for handling help dialog boxes
-$(document).ready(function() {
-    // Make the dialog box
-    var dialog = $('#help_dialog');
-    dialog.dialog({
-        width: 1025,
-        height: 500,
-        closeOnEscape: true,
-        autoOpen: false,
-        close: function() {
-            $('body').removeClass('stop-scrolling');
-        },
-        open: function() {
-            $('body').addClass('stop-scrolling');
-        }
-    });
-    // Remove hidden attribute
-    dialog.removeProp('hidden');
+$(document).ready(function () {
+    // Resolve anchors going to the incorrect location
+    var offset = 60;
 
-    // Clicking the help button will spawn the help dialog
-    $('#help_button').click(function() {
-        dialog.dialog('open');
-        // Remove focus
-        $('.ui-dialog :button').blur();
+    $('.navbar li a').click(function(event) {
+        event.preventDefault();
+    $('html, body').animate({
+            scrollTop: $($(this).attr('href')).offset().top -offset
+        }, 500);
+    });
+
+    var initial_hash = window.location.hash;
+    if (initial_hash) {
+        $('html, body').animate({
+            scrollTop: $(initial_hash).offset().top - offset
+        }, 500);
+    }
+
+    // Call datatables for glossary
+    $('#glossary_table').DataTable({
+        dom: 'T<"clear">lfrtip',
+        "iDisplayLength": 10
     });
 });
