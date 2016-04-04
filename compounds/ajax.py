@@ -99,10 +99,12 @@ def fetch_chembl_compound_data(request):
         synonyms = []
         for entry in initial_data.get('molecule_synonyms', []):
             synonym = entry.get('synonyms', '')
+            syn_type = entry.get('syn_type', '')
             if synonym and synonym not in synonyms:
                 synonyms.append(synonym)
-            # Using INN sometimes causes false positives for pesticides and the like ALPHA-CYPERMETHRIN 
-            if entry.get('syn_type', '') == 'INN' or entry.get('syn_type', '') == 'FDA':
+            # Check whether the synonym is a International, FDA, British Approved, or US Adopted Name
+            # This technique includes pesticides, however they are *usually* also used topically, and thus drugs
+            if syn_type in ['INN', 'FDA', 'BAN', 'USAN']:
                 data['known_drug'] = True
         data['synonyms'] = ', '.join(synonyms)
 
