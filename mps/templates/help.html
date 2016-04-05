@@ -48,6 +48,7 @@
     <div>
       <div class="collapse navbar-collapse" id="myNavbar">
         <ul class="nav navbar-nav">
+          <li><a href="#search">Search</a></li>
           <li class="dropdown">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#">Assays<span class="caret"></span></a>
             <ul class="dropdown-menu">
@@ -104,9 +105,37 @@
 </nav>
 
 <div class="offset-help-navbar">
+<div id="search_section" class="container">
+  <h1>Search</h1>
+  <div id="search">
+      <h2>Searching the Database</h2>
+      <ul class="list-group">
+        <li class="list-group-item active">
+          From the home page, you can perform a <b>Global Search</b> with the provided text input
+        </li>
+        <li class="list-group-item">
+          To search, type a query in the search input field and hit enter or click the blue <b>Search</b> button
+        </li>
+        <li class="list-group-item">
+          After submitting a query, you are brought to the <b>Search Results</b> page
+          <br>
+          This page has a text input so that you can submit another search
+          <br>
+          Below the text input, you will see a number of checkboxes with labels for different types of data
+          <br>
+          Clicking a checkbox will restrict the results to only display results that have a checked-off type
+          <br>
+          You can clear all of the checkboxes and show all of the results again by clicking the red <b>Clear Filters</b> button
+        </li>
+        <li class="list-group-item">
+          Clicking the white button reading <b>Global</b> let's you switch to a <b>Bioactivites Search</b> described
+            <a href="#bioactivities">here</a>
+        </li>
+      </ul>
+  </div>
+</div>
 <div id="assays_section" class="container">
   <h1>Assays</h1>
-
   <div id="studies">
     <h2>Studies</h2>
     <h4>Adding or Editing a Study</h4>
