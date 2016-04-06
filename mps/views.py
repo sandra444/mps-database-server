@@ -146,7 +146,7 @@ def custom_search(request):
         searchqueryset=sqs,
         form_class=haystack.forms.ModelSearchForm,
         results_per_page=1000,
-        )
+    )
     return view(request)
 
 

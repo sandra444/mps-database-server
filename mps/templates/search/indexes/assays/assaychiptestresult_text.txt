@@ -1,4 +1,6 @@
-{{ object.chip_readout }}
+{{ object }}
 {{ object.chip_readout.chip_setup.assay_run_id }}
+{# {{ object.chip_readout }} }#
+{# {{ object.chip_readout.chip_setup.assay_run_id }} #}
 {{ object.created_by }}
 {{ object.group }}

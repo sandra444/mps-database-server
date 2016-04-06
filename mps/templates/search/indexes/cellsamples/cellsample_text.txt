@@ -1,3 +1,4 @@
+{{ object }}
 {{ object.cell_type }}
 {{ object.notes }}
 {{ object.supplier }}

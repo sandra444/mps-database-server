@@ -1,4 +1,6 @@
-{{ object.readout }}
+{{ object }}
 {{ object.readout.setup.assay_run_id }}
+{# {{ object.readout }} #}
+{# {{ object.readout.setup.assay_run_id }} #}
 {{ object.created_by }}
 {{ object.group }}

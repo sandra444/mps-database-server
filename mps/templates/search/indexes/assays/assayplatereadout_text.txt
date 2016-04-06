@@ -1,3 +1,5 @@
+{{ object }}
+{{ object.setup.assay_plate_id }}
 {{ object.scientist }}
 {{ object.notes }}
 {{ object.notebook }}

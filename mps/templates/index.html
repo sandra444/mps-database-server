@@ -2,8 +2,8 @@
 {% load staticfiles %}
 
 {% block load %}
-    <script src="{% static "js/index.js" %}"></script>
     <script src="{% static "js/cookies.js" %}"></script>
+    <script src="{% static "js/index.js" %}"></script>
     <script src="{% static "bioactivities/bioactivities_search.js" %}"></script>
 {% endblock %}
 
@@ -28,7 +28,7 @@
                     <button class="btn btn-primary" type="submit">Search</button>
                 </span>
             </div>
-            {% include 'bioactivities/bioactivities_search.html' with index=True%}
+            {% include 'bioactivities/bioactivities_search.html' with index=True %}
             </form>
         </div>
     </div>

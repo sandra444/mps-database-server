@@ -1,6 +1,8 @@
+{{ object }}
+{{ object.compound }}
 {{ object.title }}
 {{ object.source }}
-{{ object.compound }}
+{# {{ object.compound }} #}
 {{ object.species }}
 {{ object.references }}
 {% for finding in object.findingresult_set.all %}

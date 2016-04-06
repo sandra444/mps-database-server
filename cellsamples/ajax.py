@@ -5,8 +5,10 @@ from .models import *
 import logging
 logger = logging.getLogger(__name__)
 
+
 def main(request):
     return HttpResponseServerError()
+
 
 def get_cell_subtypes(request):
     """Acquires context for whittling down number of dropdown"""
@@ -39,6 +41,7 @@ def get_cell_subtypes(request):
 switch = {
     'get_cell_subtypes': get_cell_subtypes,
 }
+
 
 def ajax(request):
     post_call = request.POST.get('call')

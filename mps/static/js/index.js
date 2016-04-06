@@ -1,5 +1,6 @@
 $(function() {
     var initial = $('#id_app').val();
+    var middleware_token = getCookie('csrftoken');
 
     if (initial == 'Bioactivities') {
         $("#bioactivities_search").show();
@@ -16,5 +17,27 @@ $(function() {
         $("#bioactivities_search").hide("slow");
         $("#search_bar").show("slow");
         $("#id_app").val("Global");
+    });
+
+    $("#id_search_term").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: "/search_ajax",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    call: 'fetch_global_search_suggestions',
+                    text: request.term,
+                    csrfmiddlewaretoken: middleware_token
+                },
+                success: function (json) {
+                    response(json);
+                },
+                error: function (xhr, errmsg, err) {
+                    console.log(xhr.status + ": " + xhr.responseText);
+                }
+            });
+        },
+        minLength: 2
     });
 });
