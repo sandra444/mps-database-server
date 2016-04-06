@@ -12,6 +12,19 @@
 {% endblock %}
 
 {% block content %}
+    <style>
+        #back_to_top {
+            position: fixed;
+            bottom: 60px;
+            right: 60px;
+            z-index: 9999;
+        }
+    </style>
+
+    <a href="#" id="back_to_top" title="Back to top" class="btn btn-primary">
+        <span class="glyphicon glyphicon glyphicon-circle-arrow-up"></span>
+    </a>
+
     <form method="get" action=".">
 {#        <input id="id_q" name="q" type="search" value="{{ query }}">#}
         <div id="search_bar" class="input-group">
