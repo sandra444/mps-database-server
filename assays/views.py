@@ -1144,11 +1144,7 @@ class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
         context = super(StudyConfigurationUpdate, self).get_context_data(**kwargs)
         if 'formset' not in context:
             if self.request.POST:
-                context['formset'] = StudyModelFormSet(
-                    self.request.POST,
-                    self.request.FILES,
-                    instance=self.object
-                )
+                context['formset'] = StudyModelFormSet(self.request.POST, instance=self.object)
             else:
                 context['formset'] = StudyModelFormSet(instance=self.object)
 
@@ -1409,13 +1405,6 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
     model = AssayPlateSetup
     form_class = AssayPlateSetupForm
     template_name = 'assays/assayplatesetup_add.html'
-
-    def get_form(self, form_class):
-        if self.request.method == 'POST':
-            form = form_class(self.request.POST, instance=self.object)
-        else:
-            form = form_class(instance=self.object)
-        return form
 
     def get_context_data(self, **kwargs):
         groups = self.request.user.groups.values_list('id', flat=True)
