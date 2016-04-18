@@ -1,14 +1,26 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    <li>
+        <a href="{{ object.get_post_submission_url }}">{{ object.assay_run_id }}</a>
+    </li>
+    <li>
+        <a href="{{ object.get_absolute_url }}"><em>{{ object }}</em></a>
+    </li>
+    <li class="active">
+        Delete
+    </li>
+{% endblock %}
 
+{% block content %}
     <form method="post">{% csrf_token %}
-        <h2 style="color: #FF0000">Are you sure you want to delete the Plate Setup:<br><b>{{ object }}</b>?</h2>
+        <h2 class="text-danger">Are you sure you want to delete the Plate Setup:<br><b>{{ object }}</b>?</h2>
 
         <hr>
 
         {% if readouts %}
-            <h4 style="color: #FF0000">Deleting this Setup will delete the following Readout:</h4>
+            <h4 class="text-danger">Deleting this Setup will delete the following Readout:</h4>
             <ul>
                 {% for readout in readouts %}
                     <li>Readout ID #{{ readout.id }}</li>
@@ -17,7 +29,7 @@
         {% endif %}
 
         {% if results %}
-            <h4 style="color: #FF0000">Deleting this Setup will delete the following Test Results:</h4>
+            <h4 class="text-danger">Deleting this Setup will delete the following Test Results:</h4>
             <ul>
                 {% for result in results %}
                     <li>Test Result ID #{{ result.id }}</li>
@@ -29,6 +41,5 @@
 
         <button type="submit" class="btn btn-danger">Confirm Deletion</button>
     </form>
-
 {% endblock %}
 

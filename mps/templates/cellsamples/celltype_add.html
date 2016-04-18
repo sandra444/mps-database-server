@@ -5,8 +5,18 @@
     <script src="{% static "js/enter_override.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/cellsamples/celltype/">Cell Types</a></li>
+    <li class="active">
+        {% if object %}
+            Edit <em>{{ object }}</em>
+        {% else %}
+            Add Cell Type
+        {% endif %}
+    </li>
+{% endblock %}
 
+{% block content %}
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
@@ -85,5 +95,4 @@
           {{ form.organ }}
         </div>
     </div>
-
 {% endblock %}

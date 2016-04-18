@@ -7,6 +7,11 @@
 
 {# TODO REQUIRES AESTHETIC REVISION #}
 
+{% block breadcrumbs %}
+    <li><a href="/compounds/">Compounds</a></li>
+    <li class="active">{{ object.name}}</li>
+{% endblock %}
+
 {% block content %}
     <legend>
         <h1>
@@ -24,8 +29,17 @@
 
     <div class="padded-row">
 
-        <div class="col-sm-3 col-md-2 thumbnail">
+        <div class="col-sm-3 col-md-2 thumbnail text-center">
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.chemblid }}">
+            {% if object.mps %}
+                <span class="label label-primary">MPS</span>
+            {% endif %}
+            {% if object.epa %}
+                <span class="label label-success">EPA</span>
+            {% endif %}
+            {% if not object.mps and not object.epa %}
+                <span class="label label-default">Unassigned</span>
+            {% endif %}
         </div>
 
         <div class="col-sm-9 col-md-10">
@@ -39,26 +53,22 @@
                             <a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ object.chemblid }}">{{ object.chemblid }}</a>
                         </td>
                     </tr>
-                    {% if object.drugbank_id %}
-                        <tr>
-                            <td>
-                                <b>DrugBank ID</b>
-                            </td>
-                            <td>
-                                <a href="http://www.drugbank.ca/drugs/{{ object.drugbank_id }}">{{ object.drugbank_id }}</a>
-                            </td>
-                        </tr>
-                    {% endif %}
-                    {% if object.pubchemid %}
-                        <tr>
-                            <td>
-                                <b>PubChem ID</b>
-                            </td>
-                            <td>
-                                <a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ object.pubchemid }}">{{ object.pubchemid }}</a>
-                            </td>
-                        </tr>
-                    {% endif %}
+                    <tr>
+                        <td>
+                            <b>PubChem ID</b>
+                        </td>
+                        <td>
+                            <a href="https://pubchem.ncbi.nlm.nih.gov/compound/{{ object.pubchemid }}">{{ object.pubchemid }}</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>DrugBank ID</b>
+                        </td>
+                        <td>
+                            <a href="http://www.drugbank.ca/drugs/{{ object.drugbank_id }}">{{ object.drugbank_id }}</a>
+                        </td>
+                    </tr>
                     <tr>
                         <td>
                             <b>Molecular Formula</b>
@@ -67,16 +77,14 @@
                             {{ object.molecular_formula }}
                         </td>
                     </tr>
-                    {% if object.inchikey %}
-                        <tr>
-                            <td>
-                                <b>Inchikey</b>
-                            </td>
-                            <td>
-                                {{ object.inchikey }}
-                            </td>
-                        </tr>
-                    {% endif %}
+                    <tr>
+                        <td>
+                            <b>Inchikey</b>
+                        </td>
+                        <td>
+                            {{ object.inchikey }}
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -151,16 +159,30 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>Med Chem Friendly</b>
+                        <b>Medchem Alerts</b>
                     </td>
                     <td>
-                        {% if object.medchem_friendly %}
-                            <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                        {% if object.medchem_alerts%}
+                            <a class="glyphicon glyphicon-flag text-danger"
+                               href="https://www.ebi.ac.uk/chembl/compound/structural_alerts/{{ object.chemblid }}"
+                               aria-hidden="true"></a>
                         {% else %}
-                            <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
+                            <span class="text-success">None</span>
                         {% endif %}
                     </td>
                 </tr>
+{#                <tr>#}
+{#                    <td>#}
+{#                        <b>Med Chem Friendly</b>#}
+{#                    </td>#}
+{#                    <td>#}
+{#                        {% if object.medchem_friendly %}#}
+{#                            <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>#}
+{#                        {% else %}#}
+{#                            <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>#}
+{#                        {% endif %}#}
+{#                    </td>#}
+{#                </tr>#}
                 <tr>
                     <td>
                         <b>Passes of Rule of 3</b>
@@ -238,7 +260,7 @@
                         <b>Molecular Weight</b>
                     </td>
                     <td>
-                        {{ object.molecular_weight }}
+                        {{ object.molecular_weight|default_if_none:'-' }}
                     </td>
                 </tr>
                 <tr>
@@ -246,7 +268,7 @@
                         <b>Rotatable Bonds</b>
                     </td>
                     <td>
-                        {{ object.rotatable_bonds }}
+                        {{ object.rotatable_bonds|default_if_none:'-' }}
                     </td>
                 </tr>
                 <tr>
@@ -254,7 +276,7 @@
                         <b>Acidic pKa (ACD)</b>
                     </td>
                     <td>
-                        {{ object.acidic_pka }}
+                        {{ object.acidic_pka|default_if_none:'-' }}
                     </td>
                 </tr>
                 <tr>
@@ -262,7 +284,7 @@
                         <b>Basic pKa (ACD)</b>
                     </td>
                     <td>
-                        {{ object.basic_pka }}
+                        {{ object.basic_pka|default_if_none:'-' }}
                     </td>
                 </tr>
                 <tr>
@@ -270,7 +292,7 @@
                         <b>LogP (ACD)</b>
                     </td>
                     <td>
-                        {{ object.logp }}
+                        {{ object.logp|default_if_none:'-' }}
                     </td>
                 </tr>
                 <tr>
@@ -278,7 +300,7 @@
                         <b>LogD (ACD)</b>
                     </td>
                     <td>
-                        {{ object.logd }}
+                        {{ object.logd|default_if_none:'-' }}
                     </td>
                 </tr>
                 <tr>
@@ -286,7 +308,7 @@
                         <b>ALogP</b>
                     </td>
                     <td>
-                        {{ object.alogp }}
+                        {{ object.alogp|default_if_none:'-' }}
                     </td>
                 </tr>
             </tbody>
@@ -402,5 +424,4 @@
 
         <script src="{% static "js/display_datatable.js" %}"></script>
     {% endif %}
-
 {% endblock %}

@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block breadcrumbs %}
+    <li><a href="/assays/organchipstudy/">Studies</a></li>
+    <li class="active">{{ object.assay_run_id }}</li>
+{% endblock %}
+
 {% block content %}
     <legend><h1>Study: {{ object.assay_run_id }}</h1></legend>
 
@@ -204,5 +209,4 @@
             No chip results exist for this study
         </div>
         {% endif %}
-
 {% endblock %}

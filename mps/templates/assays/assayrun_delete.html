@@ -1,17 +1,27 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    <li>
+        <a href="{{ object.get_absolute_url }}"><em>{{ object }}</em></a>
+    </li>
+    <li>
+        <a href="{{ object.get_absolute_url }}update">Update</a>
+    </li>
+    <li class="active">Delete</li>
+{% endblock %}
 
+{% block content %}
     {# Perhaps links to delete pages can be placed in the update page, similar to the admin #}
     {# It would be nice to display all children that will be deleted, again, something like in the admin #}
 
     <form method="post">{% csrf_token %}
-        <h2 style="color: #FF0000">Are you sure you want to delete the Study:<br><b>{{ object }}</b>?</h2>
+        <h2 class="text-danger">Are you sure you want to delete the Study:<br><b>{{ object }}</b>?</h2>
 
         <hr>
 
         {% if chip_setups %}
-            <h4 style="color: #FF0000">Deleting this Study will delete the following Chip Setups:</h4>
+            <h4 class="text-danger">Deleting this Study will delete the following Chip Setups:</h4>
             <ul>
                 {% for setup in chip_setups %}
                     <li>{{ setup }}</li>
@@ -20,7 +30,7 @@
         {% endif %}
 
         {% if chip_readouts %}
-            <h4 style="color: #FF0000">Deleting this Study will delete the following Chip Readouts:</h4>
+            <h4 class="text-danger">Deleting this Study will delete the following Chip Readouts:</h4>
             <ul>
                 {% for readout in chip_readouts %}
                     <li>Readout ID #{{ readout.id }}</li>
@@ -29,7 +39,7 @@
         {% endif %}
 
         {% if chip_results %}
-            <h4 style="color: #FF0000">Deleting this Study will delete the following Chip Test Results:</h4>
+            <h4 class="text-danger">Deleting this Study will delete the following Chip Test Results:</h4>
             <ul>
                 {% for result in chip_results %}
                     <li>Test Result ID #{{ result.id }}</li>
@@ -39,7 +49,7 @@
 
         {% if plate_setups %}
             <hr>
-            <h4 style="color: #FF0000">Deleting this Study will delete the following Plate Setups:</h4>
+            <h4 class="text-danger">Deleting this Study will delete the following Plate Setups:</h4>
             <ul>
                 {% for setup in plate_setups %}
                     <li>{{ setup }}</li>
@@ -48,7 +58,7 @@
         {% endif %}
 
         {% if plate_readouts %}
-            <h4 style="color: #FF0000">Deleting this Study will delete the following Plate Readouts:</h4>
+            <h4 class="text-danger">Deleting this Study will delete the following Plate Readouts:</h4>
             <ul>
                 {% for readout in plate_readouts %}
                     <li>Readout ID #{{ readout.id }}</li>
@@ -57,7 +67,7 @@
         {% endif %}
 
         {% if plate_results %}
-            <h4 style="color: #FF0000">Deleting this Study will delete the following Plate Test Results:</h4>
+            <h4 class="text-danger">Deleting this Study will delete the following Plate Test Results:</h4>
             <ul>
                 {% for result in plate_results %}
                     <li>Test Result ID #{{ result.id }}</li>
@@ -65,10 +75,8 @@
             </ul>
         {% endif %}
 
-
         <br>
 
         <button type="submit" class="btn btn-danger">Confirm Deletion</button>
     </form>
-
 {% endblock %}

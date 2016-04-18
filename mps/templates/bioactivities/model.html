@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li class="active">Predictive Modeling</li>
+{% endblock %}
 
+{% block content %}
 <h1>Work in Progress:</h1>
 <h5>This is an example page for predictive modeling: Click a point to see the associated compound.</h5>
 <hr>
@@ -271,5 +274,4 @@ var liver = {
    "ranitidine": [4.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,10000.0,0.0,0.0],
    "troglitazone": [0.01,28.0,43.0,61.0,12.3,108.0,10000.0,10000.0,0.0,1.0]}
 </script>
-
 {% endblock %}

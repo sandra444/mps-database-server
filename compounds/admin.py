@@ -92,7 +92,7 @@ class CompoundAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('name', 'chembl_link', 'known_drug',
-                    'molecular_formula', 'tags', 'last_update', 'locked')
+                    'molecular_formula', 'tags', 'mps', 'epa', 'last_update', 'locked')
     search_fields = ['=name', 'synonyms', '=chemblid', 'tags']
     readonly_fields = ('last_update', 'created_by', 'created_on',
                        'modified_by', 'modified_on', 'image_display')
@@ -116,6 +116,7 @@ class CompoundAdmin(LockableAdmin):
         (None, {
             'fields': (('name', 'image_display'),
                        ('chemblid', 'pubchemid', 'drugbank_id', 'inchikey'),
+                       ('mps', 'epa'),
                        'last_update',)
         }),
         ('Molecular Identifiers', {
@@ -128,7 +129,7 @@ class CompoundAdmin(LockableAdmin):
                        'logp', 'logd', 'alogp',)
         }),
         ('Drug(-like) Properties', {
-            'fields': ('known_drug', 'medchem_friendly', 'ro3_passes',
+            'fields': ('known_drug', 'medchem_alerts', 'ro3_passes',
                        'ro5_violations', 'species', 'drug_class', 'protein_binding',
                        'half_life', 'bioavailability'
             )

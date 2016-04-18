@@ -5,8 +5,11 @@
     <script src="{% static "microdevices/microdevice_list.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li class="active">Microdevices &amp; Organ Models</li>
+{% endblock %}
 
+{% block content %}
     <div class="padded-bottom">
 
         <legend>
@@ -19,6 +22,8 @@
             <a href="/microdevices/model/add/" class="btn btn-lg btn-success" role="button">Add Model</a>
         </div>
 
+        {% include 'project_filters.html' %}
+
         <table hidden id="models" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -28,6 +33,7 @@
                     <th>Model Name</th>
                     <th>Device</th>
                     <th>Center</th>
+                    <th>Project</th>
                     <th>Description</th>
                 </tr>
             </thead>
@@ -40,6 +46,7 @@
                     <th>Model Name</th>
                     <th>Device</th>
                     <th>Center</th>
+                    <th>Project</th>
                     <th>Description</th>
                 </tr>
             </tfoot>
@@ -53,6 +60,17 @@
                     <td>{{ model.model_name }}</td>
                     <td><a href="device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
                     <td>{{ model.center|default_if_none:"" }}</td>
+                    <td>
+                        {% if model.mps %}
+                            MPS
+                        {% endif %}
+                        {% if model.epa %}
+                            EPA
+                        {% endif %}
+                        {% if not model.epa and not model.mps %}
+                            Unassigned
+                        {% endif %}
+                    </td>
                     <td>{{ model.description }}</td>
                 </tr>
             {% endfor %}

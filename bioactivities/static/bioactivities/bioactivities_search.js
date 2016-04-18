@@ -17,7 +17,7 @@ $(function() {
             dataType: "json",
             data: {
                 call: 'fetch_compound_list',
-                csrfmiddlewaretoken: middleware_token,
+                csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
                 compounds = json;

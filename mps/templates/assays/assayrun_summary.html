@@ -6,8 +6,13 @@
     <script src="{% static "assays/assayrun_summary.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    <li><a href="/assays/{{ object.id }}">{{ object }}</a></li>
+    <li class="active">Study Summary</li>
+{% endblock %}
 
+{% block content %}
     {% include 'review.html' %}
 
     <div class="well">
@@ -219,5 +224,4 @@
     </div>
 
     <div id="charts"></div>
-
 {% endblock %}

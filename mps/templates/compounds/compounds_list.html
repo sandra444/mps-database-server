@@ -5,8 +5,11 @@
     <script src="{% static "compounds/compounds_list.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li class="active">Compounds</li>
+{% endblock %}
 
+{% block content %}
     <div class="padded-bottom">
         <legend>
             <h2 class="text-center">
@@ -17,6 +20,8 @@
         <div class="row text-center">
             <a href="/compounds/add/" class="btn btn-lg btn-success" role="button">Add Compound</a>
         </div>
+
+        {% include 'project_filters.html' %}
 
         <table hidden id="compounds" class="display" cellspacing="0" width="100%">
             <thead>
@@ -30,7 +35,7 @@
                     <th>LogP</th>
                     <th>Rule of 5 Violations</th>
                     <th>Known Drug</th>
-                    <th>Tags</th>
+                    <th>Project</th>
 {#                    <th>Last Update</th>#}
                     <th>Image</th>
                 </tr>
@@ -47,7 +52,7 @@
                     <th>LogP</th>
                     <th>Rule of 5 Violations</th>
                     <th>Known Drug</th>
-                    <th>Tags</th>
+                    <th>Project</th>
 {#                    <th>Last Update</th>#}
                     <th>Image</th>
                 </tr>
@@ -64,8 +69,31 @@
                     <td>{{ compound.molecular_weight|default_if_none:"" }}</td>
                     <td>{{ compound.logp|default_if_none:"" }}</td>
                     <td>{{ compound.ro5_violations|default_if_none:"" }}</td>
-                    <td>{{ compound.known_drug }}</td>
-                    <td>{{ compound.tags|default_if_none:"" }}</td>
+
+                    <td>
+                        {% if compound.known_drug %}
+                            <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span hidden>True</span>
+                        {% else %}
+                            <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
+                            <span hidden>False</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if compound.mps %}
+                            MPS
+                        {% endif %}
+                        {% if compound.epa %}
+                            EPA
+                        {% endif %}
+                        {% if not compound.epa and not compound.mps %}
+                            Unassigned
+                        {% endif %}
+                    </td>
+
+                    {# TODO Tags field is deprecated #}
+{#                    <td>{{ compound.tags|default_if_none:"" }}</td>#}
 {#                    <td>{{ compound.molecular_weight }}</td>#}
 {#                    <td>{{ compound.logp }}</td>#}
 {#                    <td>{{ compound.ro5_violations }}</td>#}

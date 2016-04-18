@@ -6,11 +6,23 @@
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "assays/assaychipsetup_add.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
-    <script src="{% static "js/help.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    <li>
+        <a href="/assays/{{ form.instance.assay_run_id.id }}">{{ form.instance.assay_run_id }}</a>
+    </li>
+    <li class="active">
+        {% if object %}
+            Edit <em>{{ object }}</em>
+        {% else %}
+            Add Chip Setup
+        {% endif %}
+    </li>
 {% endblock %}
 
 {% block content %}
-
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
@@ -45,7 +57,7 @@
 {#        {% include 'flag.html'%}#}
     </h1>
 
-    {% include "submit.html" with flag="y" clone="y" help="y"%}
+    {% include "submit.html" with flag="y" clone="y" %}
 
     {% include 'errors.html' %}
 
@@ -353,8 +365,8 @@
 
 <div hidden id="dialog" title="Choose a Cell Sample">
     <div class="alert alert-info text-center" role="alert">
-            <h1>Click Desired Row</h1>
-            <button role="button" class="btn btn-danger" id="clear_cell_sample">Clear Cell Sample</button>
+        <h1>Click Desired Row</h1>
+        <button role="button" class="btn btn-danger" id="clear_cell_sample">Clear Cell Sample</button>
     </div>
 
     <table id="cellsamples" class="table table-striped table-hover">
@@ -409,74 +421,4 @@
         Are you sure you want to add a compound to a control chip?
     </p>
 </div>
-
-{# TODO This is subject to change #}
-<div hidden id="help_dialog" title="Chip Setup Help">
-    <h4>Making a Chip Setup</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            A <b>Chip Setup</b> describes the protocols taken to prepare a chip
-        </li>
-        <li class="list-group-item">
-            After selecting an <b>Organ Model</b>, a link to view its standard protocol will appear (granted a PDF has been uploaded)
-        </li>
-        <li class="list-group-item">
-            <b>Variance from Protocol</b> should list the ways this setup diverged from the organ model's standard protocols
-        </li>
-        <li class="list-group-item">
-            The <b>Chip ID/Barcode</b> can not be the same as another chip in the study
-        </li>
-        <li class="list-group-item">
-            <b>Test Type</b> specifies whether the chip functions as a control or not
-            <br>
-            If the chip is not a control chip, you must specify a compound, concentration, and unit
-        </li>
-    </ul>
-    <h4>Adding Cells</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Each row under the header <b>Model Cells</b> describes cells added to the chip
-        </li>
-        <li class="list-group-item">
-            If this chip does not have any cells, do not modify this section
-        </li>
-        <li class="list-group-item">
-            To get another row, click the <b>Add Cells</b> button
-        </li>
-        <li class="list-group-item">
-            Click a magnifying glass to see a list of available cell samples then click the desired row to select that sample
-        </li>
-        <li class="list-group-item">
-            Use 'e' for scientific notation: e.g. 1e3 = 1000.
-        </li>
-        <li class="list-group-item">
-            If you need a cell sample that is not listed, click the provided link to add it
-        </li>
-    </ul>
-    <h4>Flagging for Review</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm" style="color:#337AB7">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            flags the current setup for review
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-warning" style="color:#FFFFFF">
-                Notes
-            </a>
-            brings up an input dialog where you can explain why this setup was flagged
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-danger" style="color:#FFFFFF">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            removes the flag from the current setup
-        </li>
-    </ul>
-</div>
-
 {% endblock %}

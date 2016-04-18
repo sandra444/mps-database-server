@@ -9,8 +9,11 @@
     <script src="{% static "bioactivities/cluster.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li class="active">Cluster Compounds</li>
+{% endblock %}
 
+{% block content %}
     {% block error %}
         <div class="row">
             <div hidden class="alert alert-danger" role="alert" id="error_message">
@@ -292,6 +295,30 @@
                             </tr>
                             <tr>
                                 <td>
+                                    <input value="mps" id="mps" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    MPS
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="epa" id="epa" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    EPA
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="unlabelled" id="unlabelled" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    Unlabelled
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
                                     <select id="logp_gtlt">
                                         <option>&gt;</option>
                                         <option>&lt;</option>
@@ -449,7 +476,7 @@
 {% block fluid-content %}
     {% block graphic %}
 
-        <div hidden id="graphic">
+        <div hidden id="graphic" class="large-padding-top">
             <div class="padded-row text-center">
                 <a href="#filter" id="back" class="btn btn-xlarge btn-info">
                     <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>

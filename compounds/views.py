@@ -91,7 +91,7 @@ class CompoundsAdd(SpecificGroupRequiredMixin, CreateView):
             # Save Compound
             self.object.save()
             formset.save()
-            return redirect(self.object.get_absolute_url())
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -124,7 +124,7 @@ class CompoundsUpdate(SpecificGroupRequiredMixin, UpdateView):
             # Save Compound
             self.object.save()
             formset.save()
-            return redirect(self.object.get_absolute_url())
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -176,7 +176,7 @@ class CompoundsUpdate(SpecificGroupRequiredMixin, UpdateView):
 #             self.object.modified_by = self.request.user
 #             # Save the Compound to keep tracking data
 #             self.object.save()
-#             return redirect(self.object.get_absolute_url())
+#             return redirect(self.object.get_post_submission_url())
 #         else:
 #             return self.render_to_response(
 #             self.get_context_data(formset_summary=formset_summary,

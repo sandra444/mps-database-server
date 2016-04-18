@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block breadcrumbs %}
+    <li class="active">403 Forbidden Error</li>
+{% endblock %}
+
 {% block content %}
     <h1 class="text-danger">403 Forbidden Error</h1>
     <hr>

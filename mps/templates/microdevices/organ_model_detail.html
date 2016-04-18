@@ -1,11 +1,15 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/microdevices/">Microdevices &amp; Organ Models</a></li>
+    <li class="active">{{ object.model_name }}</li>
+{% endblock %}
 
-    <legend><h1>{{ model.model_name }}</h1></legend>
+{% block content %}
+    <legend><h1>{{ object.model_name }}</h1></legend>
 
     <div>
-        <div class="col-sm-4">
+        <div class="col-xs-12">
         <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
             <tbody>
                 <tr>
@@ -13,7 +17,7 @@
                         <b>Center</b>
                     </td>
                     <td>
-                        {{ model.center|default:'Unspecified' }}
+                        {{ object.center|default:'Unspecified' }}
                     </td>
                 </tr>
                 <tr>
@@ -21,7 +25,7 @@
                         <b>Organ</b>
                     </td>
                     <td>
-                        {{ model.organ|default:'Unspecified' }}
+                        {{ object.organ|default:'Unspecified' }}
                     </td>
                 </tr>
                 <tr>
@@ -29,30 +33,58 @@
                         <b>Device</b>
                     </td>
                     <td>
-                        {% if model.device.id %}
-                            <a href="/microdevices/device/{{ model.device.id }}">{{ model.device }}</a>
+                        {% if object.device.id %}
+                            <a href="/microdevices/device/{{ object.device.id }}">{{ object.device }}</a>
                         {% else %}
                             Unspecified
                         {% endif %}
                     </td>
                 </tr>
-                {% if model.description %}
+                {% if object.description %}
                 <tr>
                     <td>
                         <b>Description</b>
                     </td>
                     <td>
-                        {{ model.description }}
+                        {{ object.description }}
                     </td>
                 </tr>
                 {% endif %}
                 <tr>
                     <td>
+                        <b>Project</b>
+                    </td>
+                    <td>
+                        {% if object.mps %}
+                            <span class="label label-primary">MPS</span>
+                        {% endif %}
+                        {% if object.epa %}
+                            <span class="label label-success">EPA</span>
+                        {% endif %}
+                        {% if not object.mps and not object.epa %}
+                            <span class="label label-default">Unassigned</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
                         <b>Model Image</b>
                     </td>
                     <td>
-                        {% if model.model_image %}
-                            <img src="/media/{{ model.model_image }}">
+                        {% if object.model_image %}
+                            <img src="/media/{{ object.model_image }}">
+                        {% else %}
+                            No Image Available
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Device Image</b>
+                    </td>
+                    <td>
+                        {% if object.device.device_image %}
+                            <img src="/media/{{ object.device.device_image }}">
                         {% else %}
                             No Image Available
                         {% endif %}
@@ -60,9 +92,6 @@
                 </tr>
             </tbody>
         </table>
-        </div>
-        <div class="col-sm-8">
-            <img src="/media/{{ model.device.device_image }}">
         </div>
     </div>
 
@@ -111,5 +140,4 @@
         </tbody>
     </table>
     {% endif %}
-
 {% endblock %}

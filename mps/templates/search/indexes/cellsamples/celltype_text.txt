@@ -1,3 +1,4 @@
 {{ object.cell_type }}
+{{ object.cell_type }}
 {{ object.species }}
 {{ object.organ }}

@@ -6,6 +6,11 @@
     <script src="{% static "assays/customize_chip.js" %}"></script>
 {% endblock %}
 
+{% block breadcrumbs %}
+    <li><a href="/assays/assaychipreadouts/">Chip Readouts</a></li>
+    <li class="active">Readout for <em>Chip-{{ object.chip_setup.assay_chip_id }}</em></li>
+{% endblock %}
+
 {% block content %}
     <legend><h1>Chip Readout ID #{{ object.id }}</h1></legend>
 

@@ -1,45 +1,45 @@
 # NOTE: Decided it was best to keep AJAX calls app-separated
 import ujson as json
 from django.http import *
-from .models import *
 import logging
 logger = logging.getLogger(__name__)
 
+from django.contrib.auth.models import Group
 
+from haystack.query import SearchQuerySet
+
+
+# Default
 def main(request):
     return HttpResponseServerError()
 
 
-def get_cell_subtypes(request):
-    """Acquires context for whittling down number of dropdown"""
+def fetch_global_search_suggestions(request):
+    data = []
 
-    context = u'<option value="">---------</option>'
+    # Get text from request
+    text = request.POST.get('text')
 
-    cell_type = request.POST.get('cell_type')
+    # Filter on group: either get all with no group or those with a group the user has
+    sqs = SearchQuerySet().exclude(group__in=Group.objects.all())
 
-    findings = CellSubtype.objects.filter(cell_type__isnull=True)
+    if request.user and request.user.groups.all():
+          sqs = sqs | SearchQuerySet().filter(group__in=request.user.groups.all())
 
-    if cell_type:
-        findings = findings | CellSubtype.objects.filter(cell_type_id=cell_type)
-
-    findings = findings.order_by('cell_type', 'cell_subtype')
-
-    for finding in findings:
-        # match value to the desired subject ID
-        value = str(finding.id)
-        context += u'<option value="' + value + '">' + unicode(finding) + '</option>'
-
-    data = {}
-
-    data.update({
-        'context': context,
-    })
+    suggestions = sqs.autocomplete(text=text)
+    # At the moment, I just take the first five results
+    for suggestion in suggestions[:10]:
+        #data.append(suggestion.suggestion)
+        data.append({
+            'label': suggestion.text.split('\n')[0],
+            'value': suggestion.text.split('\n')[1]
+        })
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
 switch = {
-    'get_cell_subtypes': get_cell_subtypes,
+    'fetch_global_search_suggestions': fetch_global_search_suggestions,
 }
 
 

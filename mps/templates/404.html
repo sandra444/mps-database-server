@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
-{# Please note that this page will not display unless Debug is set to False #}
+{% block breadcrumbs %}
+    <li class="active">404 Not Found Error</li>
+{% endblock %}
 
+{# Please note that this page will not display unless Debug is set to False #}
 {% block content %}
     <h1 class="text-danger">404 Not Found Error:</h1>
     <h2 class="text-danger">The requested page does not exist.</h2>

@@ -1,8 +1,10 @@
+{{ object }}
+{{ object.assay_chip_id }}
 {{ object.device }}
 {{ object.organ_model }}
 {{ object.organ_model_protocol }}
-{{ object.assay_chip_id }}
-{{ object.compound.name }}
+{# {{ object.assay_chip_id }} #}
+{# {{ object.compound.name }} #}
 {{ object.scientist }}
 {{ object.notes }}
 {{ object.notebook }}

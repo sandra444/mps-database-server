@@ -21,7 +21,8 @@ FIELDS = {
     'alogp': 'alogp',
     'chemblId': 'chemblid',
     'knownDrug': 'known_drug',
-    'medChemFriendly': 'medchem_friendly',
+    # Deprecated
+    #'medChemFriendly': 'medchem_friendly',
     'molecularFormula': 'molecular_formula',
     'molecularWeight': 'molecular_weight',
     'numRo5Violations': 'ro5_violations',
@@ -54,6 +55,7 @@ class Compound(LockableModel):
     synonyms = models.TextField(
         max_length=4000,
         default='', blank=True)
+    # TODO DEPRECATED AND SUBJECT TO REMOVAL
     tags = models.TextField(
         default='', blank=True,
         help_text="Tags for the compound (EPA, NCATS, etc.)")
@@ -68,6 +70,15 @@ class Compound(LockableModel):
 
     # Pubchem ID
     pubchemid = models.CharField(verbose_name='PubChem ID', max_length=40, default='', blank=True)
+
+    epa = models.BooleanField(
+        default=False,
+        help_text='Whether this compound is part of the EPA project'
+    )
+    mps = models.BooleanField(
+        default=False,
+        help_text='Whether this compound is part of the MPS project'
+    )
 
     # standard names/identifiers
     inchikey = models.CharField(
@@ -119,8 +130,12 @@ class Compound(LockableModel):
     known_drug = models.BooleanField(
         'Known drug?',
         default=False)
+    # TODO This field is now deprecated
     medchem_friendly = models.BooleanField(
         'Med Chem friendly?',
+        default=False)
+    medchem_alerts = models.BooleanField(
+        'Inicates whether structural alerts are listed for this compound',
         default=False)
     ro5_violations = models.IntegerField(
         'Rule of 5 violations',
@@ -255,6 +270,9 @@ class Compound(LockableModel):
     image.short_description = 'Image'
 
     def get_absolute_url(self):
+        return "/compounds/{}/".format(self.id)
+
+    def get_post_submission_url(self):
         return "/compounds/"
 
 

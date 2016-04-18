@@ -1,3 +1,5 @@
+{{ object }}
+{{ object.chip_setup.assay_chip_id }}
 {{ object.scientist }}
 {{ object.notes }}
 {{ object.notebook }}

@@ -10,8 +10,11 @@
     <script src="{% static "bioactivities/bioactivities_search.js" %}"></script>
 {% endblock %}
 
-{% block submit %}
+{% block breadcrumbs %}
+    <li class="active">Bioactivities Table</li>
+{% endblock %}
 
+{% block submit %}
     <legend><h1>Quick Search</h1></legend>
 
     <form action="/bioactivities/table/" method="post">
@@ -164,7 +167,7 @@
 {% endblock %}
 
 {% block graphic %}
-    <div hidden id="graphic" class="container padded-bottom">
+    <div hidden id="graphic" class="container large-padding-top padded-bottom">
         <div class="row text-center">
             <a href="#filter"  id="back" class="btn btn-xlarge btn-info">
                 <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>

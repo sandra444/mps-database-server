@@ -1,0 +1,1529 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<head>
+  <link rel="icon"
+    type="image/png"
+    href="/static/img/glyphicons-question-sign.png">
+
+  <title>MPS Help</title>
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+  <!-- Load JQuery -->
+  <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
+  <!-- Incorporate the Bootstrap JavaScript plugins -->
+  <script src="{% static "js/bootstrap.min.js" %}"></script>
+  <link rel="stylesheet" href="{% static "css/bootstrap-theme.min.css" %}">
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" type="text/css" href="{% static "css/jquery.dataTables.min.css" %}">
+  <link rel="stylesheet" type="text/css" href="{% static "css/dataTables.tableTools.min.css" %}">
+  <!-- DataTables -->
+  <script type="text/javascript" charset="utf8" src="{% static "js/jquery.dataTables.min.js" %}"></script>
+  <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.tableTools.min.js" %}"></script>
+  <script type="text/javascript" charset="utf8" src="{% static "js/datatable_options.js" %}"></script>
+  <!-- Custom CSS Rules -->
+  <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
+  <!-- Help JS -->
+  <script type="text/javascript" charset="utf8" src="{% static "js/help.js" %}"></script>
+</head>
+
+{# MAKE SURE THIS OFFSET IS EQUAL TO THE OFFSET LISTED IN THE SCRIPT #}
+<body data-spy="scroll" data-target=".navbar" data-offset="80">
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <span class="navbar-brand navbar-help"><b>MPS Help</b></span>
+    </div>
+    <div>
+      <div class="collapse navbar-collapse" id="myNavbar">
+        <ul class="nav navbar-nav">
+          <li><a href="#search">Search</a></li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Assays<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#studies">Studies</a></li>
+              <li><a href="#studyconfigurations">Study Configurations</a></li>
+              <li><a href="#assaylayouts">Assay Layout</a></li>
+              <li><a href="#chipsetups">Chip Setup</a></li>
+              <li><a href="#chipreadouts">Chip Readout</a></li>
+              <li><a href="#chipresults">Chip Results</a></li>
+              <li><a href="#platesetups">Plate Setup</a></li>
+              <li><a href="#platereadouts">Plate Readout</a></li>
+              <li><a href="#plateresults">Plate Results</a></li>
+              <li class="divider"></li>
+              <li><a href="#bulk">Upload Multiple Sets of Readout Data</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Models<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#organmodels">Organ Models</a></li>
+              <li><a href="#microdevices">Microdevices</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Compounds<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#chemicaldata">Chemical Data</a></li>
+              <li><a href="#bioactivities">Bioactivities</a></li>
+              <li><a href="#drugtrials">Drug Trials</a></li>
+              <li><a href="#adverseevents">Adverse Events</a></li>
+              <li><a href="#compoundreport">Compound Report</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Cell Samples<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#celltypes">Cell Types</a></li>
+              <li><a href="#cellsubtypes">Cell Subtypes</a></li>
+              <li><a href="#cellsamples">Cell Samples</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Data Analysis<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#heatmap">Heatmap</a></li>
+              <li><a href="#cluster">Cluster</a></li>
+            </ul>
+          </li>
+          <li><a href="#glossary">Glossary</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="offset-help-navbar">
+<div id="search_section" class="container">
+  <h1>Search</h1>
+  <div id="search">
+      <h2>Searching the Database</h2>
+      <ul class="list-group">
+        <li class="list-group-item active">
+          From the home page, you can perform a <b>Global Search</b> with the provided text input
+        </li>
+        <li class="list-group-item">
+          To search, type a query in the search input field and hit enter or click the blue <b>Search</b> button
+        </li>
+        <li class="list-group-item">
+          Clicking the white button reading <b>Global</b> let's you switch to a <b>Bioactivites Search</b> described
+            <a href="#bioactivities">here</a>
+        </li>
+        <li class="list-group-item">
+          After submitting a <em>global</em> query, you are brought to the <b>Search Results</b> page
+          <br>
+          This page has a text input so that you can submit another <em>global</em> search
+          <br>
+          Below the text input, you will see a number of checkboxes with labels for different types of data
+          <br>
+          Clicking a checkbox will restrict the results to only display results that have a checked-off type
+          <br>
+          You can clear all of the checkboxes and show all of the results again by clicking the red <b>Clear Filters</b> button
+        </li>
+      </ul>
+  </div>
+</div>
+<div id="assays_section" class="container">
+  <h1>Assays</h1>
+  <div id="studies">
+    <h2>Studies</h2>
+    <h4>Adding or Editing a Study</h4>
+    <ul class="list-group">
+      <li class="list-group-item active">
+        <b>Studies</b> serve to organize plates, chips, and their related data
+      </li>
+      <li class="list-group-item">
+        The <b>Study Type</b> indicates the general purpose of the study
+        <br>
+        Multiple <b>Study Types</b> can be chosen and at least one is required
+      </li>
+      <li class="list-group-item">
+        Please try to name the study informatively
+        <br>
+        e.g. "Kidney-Liver Vitamin C Metabolism" is more useful than "Study-1"
+      </li>
+      <li class="list-group-item">
+        You may not edit the <b>Study ID</b>, for it is automatically generated from your other choices
+      </li>
+      <li class="list-group-item">
+        Choosing to <b>Restrict Access</b> will hide the study from anyone who isn't in the listed group
+      </li>
+      <li class="list-group-item">
+        You can upload an image, such as a picture of the setup or an illustration of the protocol
+        <br>
+        If a preview of the uploaded image does not appear, something went wrong
+      </li>
+      <li class="list-group-item">
+        You can upload a PDF or word file which contains the study's protocol
+      </li>
+      <li class="list-group-item">
+        A <b>Study Configuration</b> needs to be specified for integrated studies
+        <br>
+        If the <b>Study Configuration</b> you need is not available, click the provided link to add one
+      </li>
+    </ul>
+  </div>
+
+  <div id="studyconfigurations">
+  <h2>Study Configurations</h2>
+    <h4>Adding or Editing a Study Configuration</h4>
+    <ul class="list-group">
+      <li class="list-group-item active">
+        A <b>Study Configuration</b> shows how different devices in an integrated study associate with eachother
+      </li>
+      <li class="list-group-item">
+        Please be sure to use an informative name
+      </li>
+    </ul>
+    <h4>Defining How the Models are Associated</h4>
+    <ul class="list-group">
+      <li class="list-group-item">
+        Each model has a <b>Label</b> which can be one or two characters long
+      </li>
+      <li class="list-group-item">
+        <b>Organ</b> specifies which organ model is associated with the label
+      </li>
+      <li class="list-group-item">
+        <b>Sequence Number</b> shows the order of input for the models
+      </li>
+      <li class="list-group-item">
+        <b>Output</b> lists all of the other models the current model feeds into
+        <br>
+        Output should be a list of labels separated by dashes: e.g. "AB-CD" means the model is connected to AB and CD
+      </li>
+      <li class="list-group-item">
+        <b>Integration Mode</b> indicates whether or not the model is directly hooked up to the other models
+      </li>
+      <li class="list-group-item">
+        Click <b>Add Model</b> to add another row
+      </li>
+    </ul>
+  </div>
+
+  <div id="assaylayouts">
+    <h2>Assay Layouts</h2>
+    <h4>Adding or Editing an Assay Layout</h4>
+    <ul class="list-group">
+        <li class="list-group-item active">
+            An <b>Assay Layout</b> dictates the contents of a plate by showing on a well-by-well basis what compounds and time points were used
+        </li>
+        <li class="list-group-item">
+            After selecting a <b>device</b>, a representation of the plate will appear at the bottom of the page
+        </li>
+        <li class="list-group-item">
+            If a device you need is not present, contact an administrator
+        </li>
+        <li class="list-group-item">
+            You can mark a layout as a <b>"Standard Layout"</b> by clicking the checkbox
+            <br>
+            This causes the layout to be at the beginning of lists to make it more noticeable
+        </li>
+        <li class="list-group-item">
+            Making a selection from the <b>Action</b> dropdown allows one to manipulate the plate in the following ways:
+        </li>
+    </ul>
+    <h4>Set Well Type</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Selecting this option will allow you to specify the purpose of each well
+        </li>
+        <li class="list-group-item">
+            First, choose an option from the dropdown entitled <b>Well Type:</b>
+            <br>
+            Then <i>click and drag</i> on the representation so that your selection box contains the wells you want to mark
+        </li>
+        <li class="list-group-item">
+            Marking wells with a type can make the layout (and any data associated with it) much more legible
+        </li>
+    </ul>
+    <h4>Set Time Point</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Selecting this option will allow you to specify time points for each well
+        </li>
+        <li class="list-group-item">
+            The input <b>Timepoint:</b> is the initial time point and the dropdown next to it specifies the unit
+        </li>
+        <li class="list-group-item">
+            You can create a series where the value is increased from well to well
+            <br>
+            To do this, set a number in the input <b>Increment:</b>
+        </li>
+        <li class="list-group-item">
+            When creating a time point series, you can choose to <b>Add</b> or <b>Multiply</b>
+            <br>
+            You can also choose which direction to apply the series
+        </li>
+        <li class="list-group-item">
+            Each well can contain only one time point, so previous time points will be overwritten
+        </li>
+    </ul>
+    <h4>Add Compound</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Selecting this option will allow you to specify compounds and their concentrations
+        </li>
+        <li class="list-group-item">
+            Wells can contain multiple compounds
+        </li>
+        <li class="list-group-item">
+            Similar to time point, you can specify a series for the compound concentration
+            <br>
+            The default is <b>Divide</b>, but you can also <b>Add</b>, <b>Multiply</b>, or <b>Subtract</b>
+        </li>
+        <li class="list-group-item">
+            Wells can contain only one copy of each compound (e.g. a well can only have one instance of Acetaminophen)
+        </li>
+    </ul>
+    <h4>Add Label</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Selecting this option will allow you to add arbitrary text to the layout's wells
+        </li>
+        <li class="list-group-item">
+            This allows users to add data that the other options do not account for
+        </li>
+        <li class="list-group-item">
+            After typing into the input <b>Label</b>, click and drag on the desired wells and the text will be added
+        </li>
+        <li class="list-group-item">
+            Each well can contain only one label, thus old labels will be overwritten if necessary
+        </li>
+    </ul>
+    <h4>Clear Contents</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Selecting this option will allow you to remove everything in the selected wells
+        </li>
+        <li class="list-group-item">
+            Click and drag over the desired wells and all data will be removed
+        </li>
+        <li class="list-group-item">
+            Additionally, clicking a time point, compound, or label will let you delete it
+        </li>
+    </ul>
+    <h4>Flagging for Review</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm" style="color:#337AB7">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            flags the current layout for review
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-warning">
+                Notes
+            </a>
+            brings up an input dialog where you can explain why this layout was flagged
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-danger">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            removes the flag from the current layout
+        </li>
+    </ul>
+  </div>
+
+  <div id="chipsetups">
+    <h2>Chip Setups</h2>
+    <h4>Adding or Editing a Chip Setup</h4>
+    <ul class="list-group">
+        <li class="list-group-item active">
+            A <b>Chip Setup</b> describes the protocols taken to prepare a chip
+        </li>
+        <li class="list-group-item">
+            After selecting an <b>Organ Model</b>, a link to view its standard protocol will appear (granted a PDF has been uploaded)
+        </li>
+        <li class="list-group-item">
+            <b>Variance from Protocol</b> should list the ways this setup diverged from the organ model's standard protocols
+        </li>
+        <li class="list-group-item">
+            The <b>Chip ID/Barcode</b> can not be the same as another chip in the study
+        </li>
+        <li class="list-group-item">
+            <b>Test Type</b> specifies whether the chip functions as a control or not
+            <br>
+            If the chip is not a control chip, you must specify a compound, concentration, and unit
+        </li>
+    </ul>
+    <h4>Adding Cells</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Each row under the header <b>Model Cells</b> describes cells added to the chip
+        </li>
+        <li class="list-group-item">
+            If this chip does not have any cells, do not modify this section
+        </li>
+        <li class="list-group-item">
+            To get another row, click the <b>Add Cells</b> button
+        </li>
+        <li class="list-group-item">
+            Click a magnifying glass to see a list of available cell samples then click the desired row to select that sample
+        </li>
+        <li class="list-group-item">
+            Use 'e' for scientific notation: e.g. 1e3 = 1000.
+        </li>
+        <li class="list-group-item">
+            If you need a cell sample that is not listed, click the provided link to add it
+        </li>
+    </ul>
+    <h4>Flagging for Review</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm" style="color:#337AB7">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            flags the current setup for review
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-warning">
+                Notes
+            </a>
+            brings up an input dialog where you can explain why this setup was flagged
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-danger">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            removes the flag from the current setup
+        </li>
+    </ul>
+  </div>
+
+  <div id="chipreadouts">
+    <h2>Chip Readouts</h2>
+    <h4>Adding or Editing a Chip Readout</h4>
+    <ul class="list-group">
+        <li class="list-group-item active">
+            A <b>Chip Readout</b> describes the assays performed and the raw values from these assays
+        </li>
+    </ul>
+    <h4>Uploading Data</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            <h4>The format for chip uploads is as follows:</h4>
+            <table class="table table-bordered small" style="background-color: #F0FFFF;">
+                <thead>
+                    <tr class="active">
+                        <th>Chip ID</th>
+                        <th>Time</th>
+                        <th>Time Unit</th>
+                        <th>Assay</th>
+                        <th>Object</th>
+                        <th>Value</th>
+                        <th>Value Unit</th>
+                        <th>QC Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>[Chip ID]</td>
+                        <td>[Time]</td>
+                        <td>[Time Unit]</td>
+                        <td>[Assay]</td>
+                        <td>[Object]</td>
+                        <td>[Value]</td>
+                        <td>[Value Unit]</td>
+                        <td>[Leave Blank to Pass]</td>
+                    </tr>
+                    <tr>
+                        <td>[Chip ID]</td>
+                        <td>[Time]</td>
+                        <td>[Time Unit]</td>
+                        <td>[Assay]</td>
+                        <td>[Object]</td>
+                        <td>[Value]</td>
+                        <td>[Value Unit]</td>
+                        <td>[Any Value in this Column Marks the Reading Invalid]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </li>
+        <li class="list-group-item">
+            File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays
+        </li>
+        <li class="list-group-item">
+            Table rows in <span class="text-danger">red</span> will be excluded
+            while rows in <span class="text-success">green</span> are in the database
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                The brackets ([] and {}) in the above examples and templates are not meant to be taken literally
+                <br>
+                When you are actually entering data, remove them
+            </b>
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                The Chip ID should be nothing more than the Chip ID/Barcode you entered in the setup
+                <br>
+                i.e. do not include "Chip-" at the beginning of the Chip ID
+            </b>
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                Always start in the top-left corner (the first cell)
+            </b>
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                Uploading overwrites previous data
+            </b>
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                You will have to reselect the desired file after a failed submission
+            </b>
+        </li>
+    </ul>
+    <h4>Changing QC</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            QC Status can be changed in the table displayed after data upload
+        <li class="list-group-item">
+            To invalidate a reading, type <b><i>anything</i></b> into the corresponding QC status input
+        </li>
+        <li class="list-group-item">
+            After changing a QC value, <b>click away</b> or <b>hit tab</b> to see the effect on the plots
+        </li>
+    </ul>
+    <h4>Flagging for Review</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm" style="color:#337AB7">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            flags the current readout for review
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-warning">
+                Notes
+            </a>
+            brings up an input dialog where you can explain why this readout was flagged
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-danger">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            removes the flag from the current readout
+        </li>
+    </ul>
+  </div>
+
+  <div id="chipresults">
+    <h2>Chip Results</h2>
+    <h4>Adding or Editing Chip Test Results</h4>
+    <ul class="list-group">
+        <li class="list-group-item active">
+            <b>Chip Results</b> distill raw data into summaries and important values like half-life
+        </li>
+        <li class="list-group-item">
+            First, choose a <b>Readout</b>
+            <br>
+            Without a readout, you are unable to specify <b>Assay</b>
+        </li>
+        <li class="list-group-item">
+            <b>Summary of Results</b> should be a brief summary of your findings from this chip
+            <br>
+            These results can be qualitative
+        </li>
+        <li class="list-group-item">
+            Each <b>Result</b> represents a finding from a specific assay
+            <br>
+            Clicking <b>Add Result</b> will make another row
+        </li>
+    </ul>
+    <h4>Flagging for Review</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm" style="color:#337AB7">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            flags the current results for review
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-warning">
+                Notes
+            </a>
+            brings up an input dialog where you can explain why these results were flagged
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-danger">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            removes the flag from the current results
+        </li>
+    </ul>
+  </div>
+
+  <div id="platesetups">
+    <h2>Plate Setups</h2>
+    <h4>Adding or Editing a Plate Setup</h4>
+    <ul class="list-group">
+        <li class="list-group-item active">
+            A <b>Plate Setup</b> describes the protocols taken to prepare a plate
+        </li>
+        <li class="list-group-item">
+            Selecting an <b>Assay Layout</b> will show a preview of the plate below
+            <br>
+            Please note that you cannot edit the layout on this page, you will have to edit the layout itself
+        </li>
+        <li class="list-group-item">
+            If the layout you need does not exist, click the provided link to add a new one
+        </li>
+        <li class="list-group-item">
+            The <b>Plate ID/Barcode</b> can not be the same as another plate in the study
+        </li>
+    </ul>
+    <h4>Adding Cells</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Each row under the header <b>Model Cells</b> describes cells added to the plate
+        </li>
+        <li class="list-group-item">
+            If this plate does not have any cells, do not modify this section
+        </li>
+        <li class="list-group-item">
+            To get another row, click the <b>Add Cells</b> button
+        </li>
+        <li class="list-group-item">
+            Click a magnifying glass to see a list of available cell samples then click the desired row to select that sample
+        </li>
+        <li class="list-group-item">
+            Use 'e' for scientific notation: e.g. 1e3 = 1000.
+        </li>
+        <li class="list-group-item">
+            If you need a cell sample that is not listed, click the provided link to add it
+        </li>
+    </ul>
+    <h4>Flagging for Review</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            flags the current setup for review
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-warning">
+                Notes
+            </a>
+            brings up an input dialog where you can explain why this setup was flagged
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-danger">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            removes the flag from the current setup
+        </li>
+    </ul>
+  </div>
+
+  <div id="platereadouts">
+    <h2>Plate Readouts</h2>
+    <h4>Adding or Editing a Chip Readout</h4>
+    <ul class="list-group">
+        <li class="list-group-item active">
+            A <b>Plate Readout</b> describes the assays performed and the raw values from these assays
+        </li>
+    </ul>
+    <h4>Uploading Data</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            <h4>You may choose between <b>Block</b> and <b>Tabular</b> formats</h4>
+        </li>
+        <li class="list-group-item">
+            <h4>A theoretical 3x2 6-well plate in <b>Block</b> format would be as follows:</h4>
+            <table class="table table-bordered small" style="background-color: #F0FFFF;">
+                <thead>
+                    <tr class="active">
+                        <th>Plate ID</th>
+                        <th>[Plate ID]</th>
+                        <th>Assay</th>
+                        <th>[Assay 1]</th>
+                        <th>Feature</th>
+                        <th>[Feature 1]</th>
+                        <th>Value Unit</th>
+                        <th>[Value Unit 1]</th>
+                        <th>Time*</th>
+                        <th>[Time 1]*</th>
+                        <th>Time Units*</th>
+                        <th>[Time Unit 1]*</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>[Val 1]</td>
+                        <td>[Val 2]</td>
+                        <td>[Val 3]</td>
+                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    </tr>
+                    <tr>
+                        <td>[Val 4]</td>
+                        <td>[Val 5]</td>
+                        <td>[Val 6]</td>
+                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    </tr>
+                    <tr class="active">
+                        <th>Plate ID</th>
+                        <th>[Plate ID]</th>
+                        <th>Assay</th>
+                        <th>[Assay 2]</th>
+                        <th>Feature</th>
+                        <th>[Feature 2]</th>
+                        <th>Value Unit</th>
+                        <th>[Value Unit 2]</th>
+                        <th>Time*</th>
+                        <th>[Time 2]*</th>
+                        <th>Time Units*</th>
+                        <th>[Time Unit 2]*</th>
+                    </tr>
+                    <tr>
+                        <td>[Val 7]</td>
+                        <td>[Val 8]</td>
+                        <td>[Val 9]</td>
+                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    </tr>
+                    <tr>
+                        <td>[Val 10]</td>
+                        <td>[Val 11]</td>
+                        <td>[Val 12]</td>
+                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    </tr>
+                </tbody>
+            </table>
+            *Optional (if not using time, totally exclude cells)
+        </li>
+        <li class="list-group-item">
+            <h4>The above example in <b>Tabular</b> format would be as follows:</h4>
+            <table class="table table-bordered small" style="background-color: #F0FFFF;">
+                <thead>
+                    <tr class="active">
+                        <th>Plate ID</th>
+                        <th>Well ID</th>
+                        <th>Assay</th>
+                        <th>Feature</th>
+                        <th>Value Unit</th>
+                        <th>Time*</th>
+                        <th>Time Units*</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>[Plate ID]</td>
+                        <td>A1</td>
+                        <td>[Assay 1]</td>
+                        <td>[Feature 1]</td>
+                        <td>[Value Unit 1]</td>
+                        <td>[Time 1]*</td>
+                        <td>[Time Unit 1]*</td>
+                        <td>[Val 1]</td>
+                    </tr>
+                    <tr>
+                        <td>[Plate ID]</td>
+                        <td>A2</td>
+                        <td>[Assay 1]</td>
+                        <td>[Feature 1]</td>
+                        <td>[Value Unit 1]</td>
+                        <td>[Time 1]*</td>
+                        <td>[Time Unit 1]*</td>
+                        <td>[Val 2]</td>
+                    </tr>
+                    <tr>
+                        <td>[Plate ID]</td>
+                        <td>A3</td>
+                        <td>[Assay 1]</td>
+                        <td>[Feature 1]</td>
+                        <td>[Value Unit 1]</td>
+                        <td>[Time 1]*</td>
+                        <td>[Time Unit 1]*</td>
+                        <td>[Val 3]</td>
+                    </tr>
+                    <tr>
+                        <td>[Plate ID]</td>
+                        <td>B1</td>
+                        <td>[Assay 1]</td>
+                        <td>[Feature 1]</td>
+                        <td>[Value Unit 1]</td>
+                        <td>[Time 1]*</td>
+                        <td>[Time Unit 1]*</td>
+                        <td>[Val 4]</td>
+                    </tr>
+                    <tr>
+                        <td>[Plate ID]</td>
+                        <td>B2</td>
+                        <td>[Assay 1]</td>
+                        <td>[Feature 1]</td>
+                        <td>[Value Unit 1]</td>
+                        <td>[Time 1]*</td>
+                        <td>[Time Unit 1]*</td>
+                        <td>[Val 5]</td>
+                    </tr>
+                    <tr>
+                        <td>[Plate ID]</td>
+                        <td>B3</td>
+                        <td>[Assay 1]</td>
+                        <td>[Feature 1]</td>
+                        <td>[Value Unit 1]</td>
+                        <td>[Time 1]*</td>
+                        <td>[Time Unit 1]*</td>
+                        <td>[Val 6]</td>
+                    </tr>
+                    <tr>
+                        <td>[Plate ID]</td>
+                        <td>A1</td>
+                        <td>[Assay 2]</td>
+                        <td>[Feature 2]</td>
+                        <td>[Value Unit 2]</td>
+                        <td>[Time 2]*</td>
+                        <td>[Time Unit 2]*</td>
+                        <td>[Val 7]</td>
+                    </tr>
+                    <tr>
+                        <td>[Plate ID]</td>
+                        <td>A2</td>
+                        <td>[Assay 2]</td>
+                        <td>[Feature 2]</td>
+                        <td>[Value Unit 2]</td>
+                        <td>[Time 2]*</td>
+                        <td>[Time Unit 2]*</td>
+                        <td>[Val 8]</td>
+                    </tr>
+                    <tr>
+                        <td>[Plate ID]</td>
+                        <td>A3</td>
+                        <td>[Assay 2]</td>
+                        <td>[Feature 2]</td>
+                        <td>[Value Unit 2]</td>
+                        <td>[Time 2]*</td>
+                        <td>[Time Unit 2]*</td>
+                        <td>[Val 9]</td>
+                    </tr>
+                    <tr>
+                        <td>[Plate ID]</td>
+                        <td>B1</td>
+                        <td>[Assay 2]</td>
+                        <td>[Feature 2]</td>
+                        <td>[Value Unit 2]</td>
+                        <td>[Time 2]*</td>
+                        <td>[Time Unit 2]*</td>
+                        <td>[Val 10]</td>
+                    </tr>
+                    <tr>
+                        <td>[Plate ID]</td>
+                        <td>B2</td>
+                        <td>[Assay 2]</td>
+                        <td>[Feature 2]</td>
+                        <td>[Value Unit 2]</td>
+                        <td>[Time 2]*</td>
+                        <td>[Time Unit 2]*</td>
+                        <td>[Val 11]</td>
+                    </tr>
+                    <tr>
+                        <td>[Plate ID]</td>
+                        <td>B3</td>
+                        <td>[Assay 2]</td>
+                        <td>[Feature 2]</td>
+                        <td>[Value Unit 2]</td>
+                        <td>[Time 2]*</td>
+                        <td>[Time Unit 2]*</td>
+                        <td>[Val 12]</td>
+                    </tr>
+                </tbody>
+            </table>
+            *Optional (if not using time, totally exclude columns)
+        </li>
+        <li class="list-group-item">
+            File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                The brackets ([] and {}) in the above examples and templates are not meant to be taken literally
+                <br>
+                When you are actually entering data, remove them
+            </b>
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                The Plate ID should be nothing more than the Plate ID/Barcode you entered in the setup
+                <br>
+                i.e. do not include "Plate-" at the beginning of the Plate ID
+            </b>
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                Always start in the top-left corner (the first cell)
+            </b>
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                Uploading overwrites previous data
+            </b>
+        </li>
+        <li class="list-group-item">
+            <b class="text-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                You will have to reselect the desired file after a failed submission
+            </b>
+        </li>
+    </ul>
+    <h4>Changing QC</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            <b>
+                In the .csv file you can change a value's QC status by putting a <i>single letter</i> in front of the value
+                <br>
+                (e.g. to invalidate the value "12.3" put "x12.3" in the cell instead)
+            </b>
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <br>
+            <div class="fancy-checkbox form-group">
+                <input type="checkbox" />
+                <div class="btn-group" style="min-width: 550px;">
+                    <label class="btn btn-danger">
+                        <span class="glyphicon glyphicon-ok"></span>
+                        <span> </span>
+                    </label>
+                    <label class="btn btn-default active">
+                        Click Wells to Invalidate/Validate Them <small>(click here to toggle this function on and off)</small>
+                    </label>
+                </div>
+            </div>
+            will toggle whether or not you can invalidate wells by clicking on the displayed heatmap
+        <li class="list-group-item">
+            To invalidate a reading, click the corresponding well (granted the above button is on)
+        </li>
+        <li class="list-group-item">
+            Invalidated wells will be greyed out and their values put in red
+        </li>
+    </ul>
+    <h4>Flagging for Review</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            flags the current readout for review
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-warning">
+                Notes
+            </a>
+            brings up an input dialog where you can explain why this readout was flagged
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-danger">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            removes the flag from the current readout
+        </li>
+    </ul>
+  </div>
+
+  <div id="plateresults">
+    <h2>Plate Results</h2>
+    <h4>Adding or Editing Plate Test Results</h4>
+    <ul class="list-group">
+        <li class="list-group-item active">
+            <b>Plate Results</b> distill raw data into summaries and important values like half-life
+        </li>
+        <li class="list-group-item">
+            First, choose a <b>Readout</b>
+            <br>
+            Without a readout, you are unable to specify <b>Assay & Feature</b>
+        </li>
+        <li class="list-group-item">
+            <b>Summary of Results</b> should be a brief summary of your findings from this plate
+            <br>
+            These results can be qualitative
+        </li>
+        <li class="list-group-item">
+            Each <b>Result</b> represents a finding from a specific assay
+            <br>
+            Clicking <b>Add Result</b> will make another row
+        </li>
+    </ul>
+    <h4>Flagging for Review</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            flags the current results for review
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-warning">
+                Notes
+            </a>
+            brings up an input dialog where you can explain why these results were flagged
+        </li>
+        <li class="list-group-item">
+            Clicking
+            <a role='button' class="btn btn-sm btn-danger">
+                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            </a>
+            removes the flag from the current results
+        </li>
+    </ul>
+  </div>
+  <div id="bulk">
+    <h2>Uploading an Excel File of Readout Data</h2>
+{#    <h4></h4>#}
+    <ul class="list-group">
+      <li class="list-group-item active">
+        It is possible to upload multiple sets of readout data by uploading an Excel file (.xls or .xlsx)
+      </li>
+      <li class="list-group-item">
+        To access this interface, go to the desired study's page and click this button:
+          <a class="btn btn-block btn-info" role="button">
+            Upload Excel File of Readout Data
+            <br>
+            <small>*Requires respective readouts to be created first</small>
+          </a>
+      </li>
+      <li class="list-group-item">
+        Click the following links to download Excel templates:
+        <br>
+        <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">
+            Click Here For Chip Template
+        </a>
+        <br>
+        <a href="/media/excel_templates/plate_tabular_template-{{ version }}.xlsx">
+            Click Here For Plate (Tabular) Template
+        </a>
+        <br>
+        <a href="/media/excel_templates/plate_block_template-{{ version }}.xlsx">
+            Click Here For Plate (Block) Template
+        </a>
+      </li>
+      <li class="list-group-item">
+        The templates indicate where to place the Chip/Plate IDs
+      </li>
+      <li class="list-group-item">
+        The Chip/Plate IDs must be for Chips/Plates in the current study
+      </li>
+      <li class="list-group-item">
+        It is possible to upload chip, tabular plate, and block plate data together:
+        <br>
+        To do this, put the different data on different sheets
+        <br>
+        (i.e. keep chip data on one sheet, tabular plate on another, and block plate on yet another)
+      </li>
+      <li class="list-group-item">
+        Please see the help entries for <a href="#chipreadouts">Chip Readout</a> and <a href="#platereadouts">Plate Readout</a> for more information about readout data
+      </li>
+    </ul>
+  </div>
+</div>
+<div id="models_section" class="container">
+  <h1>Models</h1>
+
+  <div id="organmodels">
+    <h2>Organ Models</h2>
+    <ul class="list-group">
+      <li class="list-group-item active">
+        <b>Organ Models</b> illustrate how a microdevice is prepared to mime an organ
+      </li>
+      <li class="list-group-item">
+        You can designate the model as being part of the MPS project, EPA project, both, or neither
+      </li>
+      <li class="list-group-item">
+        You can associate a number of <b>Protocols</b> with a model
+        <br>
+        This allows you to clarify the differences between setups using the same model with different protocols
+      <li class="list-group-item">
+        The version name of the protocol can be any <b>20 characters</b>, but it is recommended that you adhere to a convention such as increasing numbers:
+        <br>
+        i.e. v1.0 -> v1.5 -> v2.0
+      </li>
+      <li class="list-group-item">
+        Please be sure to upload each protocol as a <b>PDF</b> so that it is more accessible
+      </li>
+      <li class="list-group-item">
+        If you need to add a protocol, click the green "Add Protocol" button to add a row in the table
+      </li>
+      <li class="list-group-item">
+        <b class="text-danger">
+          <span class="glyphicon glyphicon-exclamation-sign"></span>
+          If a protocol involves using a different <em>Microdevice</em>, make a new Organ Model using that device
+        </b>
+      </li>
+      <li class="list-group-item">
+        <b class="text-danger">
+          <span class="glyphicon glyphicon-exclamation-sign"></span>
+          You will have to reselect the image file after a failed submission (only when adding a new image)
+        </b>
+      </li>
+    </ul>
+  </div>
+
+  <div id="microdevices">
+    <h2>Microdevices</h2>
+    <ul class="list-group">
+      <li class="list-group-item active">
+        <b>Microdevices</b> describe a device's dimensions along with other characteristics
+      </li>
+      <li class="list-group-item">
+        If you are making a plate and intend on using it for plate setups, please fill out the <b>Layout</b> section
+      </li>
+      <li class="list-group-item">
+        The <b>Layout</b> section is primarily intended for plates, but can be used for chips as well
+      </li>
+      <li class="list-group-item">
+        <b class="text-danger">
+          <span class="glyphicon glyphicon-exclamation-sign"></span>
+          You will have to reselect image files after a failed submission (only when adding new images)
+        </b>
+      </li>
+    </ul>
+  </div>
+</div>
+<div id="compounds_section" class="container">
+  <h1>Compounds</h1>
+
+  <div id="chemicaldata">
+    <h2>Chemical Data</h2>
+    <h4>Viewing Chemical Data</h4>
+      <ul class="list-group">
+        <li class="list-group-item active">
+          The <b>Chemical Data</b> section displays information about pertinent compounds
+        </li>
+        <li class="list-group-item">
+          After choosing a compound to view, you can traverse the list in <em>alphanumeric order</em> with the "Next" and "Previous" buttons
+        </li>
+        <li class="list-group-item">
+          The labels beneath the image of the compound indicate what project or projects the compound is part of
+        </li>
+        <li class="list-group-item">
+          The "Medchem Alerts" field shows whether functional groups that are uncommon in drugs are present in this compound
+          <br>
+          If there are Medchem Alerts for a compound, you can click on the flag to see a list of the functional groups
+        </li>
+      </ul>
+    <h4>Adding Chemical Data</h4>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <b class="text-danger">
+            <span class="glyphicon glyphicon-exclamation-sign"></span>
+            Before entering data yourself, please check ChEMBL (follow the link) for the compound you are interested in
+          </b>
+        </li>
+        <li class="list-group-item">
+          If you found one, put the <em>entire ChEMBL ID</em> (including "CHEMBL") into the ChEBML ID field and hit "Retrieve"
+        </li>
+      </ul>
+  </div>
+
+  <div id="bioactivities">
+    <h2>Bioactivities</h2>
+    <h4>About Bioactivities</h4>
+      <ul class="list-group">
+        <li class="list-group-item active">
+          This <b>Bioactivity</b> data comes from ChEMBL and PubChem
+        </li>
+        <li class="list-group-item">
+          Some data from these sources has been marked <em>questionable</em> for various reasons, you can exclude such entries
+        </li>
+      </ul>
+    <h4>Using the Quick Search</h4>
+    <ul class="list-group">
+      <li class="list-group-item">
+        <b>You do not need to fill out every field in this form</b>
+        <br>
+        It is only neccessary to fill out one of the three fields: "Compound", "Target", or "Name"
+      </li>
+      <li class="list-group-item">
+        Search suggestions will appear for the compounds field
+      </li>
+      <li class="list-group-item">
+        This interface can also be accessed on the home page: click the drop down button reading "Global" and switch to "Bioactivities"
+      </li>
+    </ul>
+    <h4>Using the Advanced Search</h4>
+    <ul class="list-group">
+      <li class="list-group-item">
+        Scroll down to see the Advanced Search options
+      </li>
+      <li class="list-group-item">
+        Check the checkboxes of desired rows from each section and hit "Generate Table" when you are done
+      </li>
+      <li class="list-group-item">
+        Clicking the checkbox at the top of a section will select <em>all currently visible</em> checkboxes in that section
+      </li>
+      <li class="list-group-item">
+        To limit the number of choices to those containing specific characters, type in the <em>Filter</em> located above the respective section
+      </li>
+      <li class="list-group-item">
+        The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
+        <br>
+        e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN"
+      </li>
+      <li class="list-group-item">
+        Changes to the min feature count are not automatically applied, be sure to hit the "Apply" button if you want to change the min feature count
+      </li>
+      <li class="list-group-item">
+        The following actions will clear <em>all</em> your selections and cause a refresh:
+        <br>
+        Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count
+      </li>
+      <li class="list-group-item">
+        Changing the <em>Target Types</em> or <em>Organisms</em> will clear your <em>Target</em> selections and cause a refresh
+      </li>
+      <li class="list-group-item">
+        The data for compounds is simple enough that you can use <em>Filter Compounds</em> without a refresh
+      </li>
+    </ul>
+    <h4>Viewing the Table</h4>
+    <ul class="list-group">
+      <li class="list-group-item">
+        The resulting tables are similar in design to the other tables in the database
+      </li>
+      <li class="list-group-item">
+        The "Data Validity" column shows whether or not and why an entry has been marked questionable
+      </li>
+      <li class="list-group-item">
+        Please note that not every ChEMBL entry has a corresponding PubChem entry and vice versa
+      </li>
+    </ul>
+  </div>
+
+  <div id="drugtrials">
+    <h2>Drug Trials</h2>
+    <ul class="list-group">
+      <li class="list-group-item active">
+        <b>Drug Trials</b> contain manually curated preclinical, clinical, and post-marketing data for compounds
+      </li>
+      <li class="list-group-item">
+        After choosing a trial to view, you can traverse the list in <em>alphanumeric order</em> with the "Next" and "Previous" buttons
+      </li>
+    </ul>
+  </div>
+
+  <div id="adverseevents">
+    <h2>Adverse Events</h2>
+    <h4>Viewing Adverse Events</h4>
+    <ul class="list-group">
+      <li class="list-group-item active">
+        <b>Adverse Events</b> contain automatically acquired data from OpenFDA
+      </li>
+      <li class="list-group-item">
+        Only top adverse events for compounds are shown in this interface
+      </li>
+      <li class="list-group-item">
+        After choosing a compound to view, you can traverse the list in <em>alphanumeric order</em> with the "Next" and "Previous" buttons
+      </li>
+      <li class="list-group-item">
+        While viewing a compound's adverse events, you can create time plots by selecting the "Toggle Plot" button in each row of the table
+      </li>
+      <li class="list-group-item">
+        It is also possible to generate tables of adverse event frequencies given a specific time frame by using the interface at the bottom of the page
+      </li>
+      <li class="list-group-item">
+        Additional information from OpenFDA such as warnings are sometimes found for a compound, click the "Show" button to view such data
+      </li>
+      <li class="list-group-item">
+        <b class="text-danger">
+          <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+          OpenFDA is in beta: This data is not intended for clinical use
+        </b>
+      </li>
+    </ul>
+    <h4>Compare Adverse Events</h4>
+    <ul class="list-group">
+      <li class="list-group-item">
+        Make selections by clicking the checkboxes in the furthest left column of the tables
+      </li>
+      <li class="list-group-item">
+        Bar graphs will not appear until you have selected at least one adverse event and at least one compound
+      </li>
+      <li class="list-group-item">
+        You can save, load, and clear your selections by using the buttons at the top
+      </li>
+      <li class="list-group-item">
+        "Freq Among Top" is the frequency of the most common adverse events for each compound
+        <br>
+        <b class="text-danger">
+          <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+          Entries with 0 for "Freq Among Top" still have data from OpenFDA, these entries have a zero value because they are not top adverse events
+        </b>
+      </li>
+      <li class="list-group-item">
+        "Estimated Usage" are values derived from "Drug Mentions" listed in the CDC NAMCS and NHAMCS surveys of clinics, out-patient, and ER facilities
+      </li>
+      <li class="list-group-item">
+        "Estimated Usage" is used to normalize the number of adverse events reports
+        <br>
+        To show the raw counts of adverse event reports, click the "Show Raw Counts" button
+      </li>
+    </ul>
+  </div>
+
+  <div id="compoundreport">
+    <h2>Compound Report</h2>
+    <ul class="list-group">
+      <li class="list-group-item active">
+        <b>Compound Report</b> lets you compare compound summaries
+      </li>
+      <li class="list-group-item">
+        Make selections by clicking the checkboxes in the furthest left column of the table
+      </li>
+      <li class="list-group-item">
+        When you are finished making selections, click "Generate Compound Report"
+      </li>
+      <li class="list-group-item">
+        You can save, load, and clear your selections by using the buttons at the top
+      </li>
+      <li class="list-group-item">
+        The report shows a summary of compound properties and plots of data for available assays
+      </li>
+      <li class="list-group-item">
+        <b>Please note that only normalized data is considered in the plots</b>
+      </li>
+    </ul>
+  </div>
+</div>
+<div id="cellsamples_section" class="container">
+  <h1>Cell Samples</h1>
+
+  <div id="celltypes">
+    <h2>Cell Types</h2>
+    <ul class="list-group">
+      <li class="list-group-item active">
+        <b>Cell Types</b> describe a variety of cells, such as <em>astrocyte</em> or <em>hepatocyte</em>
+      </li>
+      <li class="list-group-item">
+        Please be sure to specify the organ, as many cell types differ depending on where they are located
+        <br>
+        e.g. hepatic stellate cells differ from pancreatic stellate cells
+      </li>
+    </ul>
+  </div>
+
+  <div id="cellsubtypes">
+    <h2>Cell Subtypes</h2>
+    <ul class="list-group">
+      <li class="list-group-item active">
+        <b>Cell Subtypes</b> elaborate on the origin of the cells, for instance whether they are fresh, cryproeserved, or from a cell line
+      </li>
+      <li class="list-group-item">
+        <b class="text-danger">
+          <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+          Select a Cell Type ONLY if this Subtype is SPECIFIC to a certain Cell Type (e.g. a cell line)
+        </b>
+      </li>
+    </ul>
+  </div>
+
+  <div id="cellsamples">
+    <h2>Cell Samples</h2>
+    <ul class="list-group">
+      <li class="list-group-item active">
+        <b>Cell Samples</b> describe a specific instance of cells used for experiments
+      </li>
+      <li class="list-group-item">
+        If the <em>Cell Subtype</em> of the sample is a cell line, please be sure to select the <b>Cell Type</b> first
+      </li>
+      <li class="list-group-item">
+        Differentiating cell lots on date received and other criteria can help in quality control if the cells are discovered to be problematic
+      </li>
+    </ul>
+  </div>
+</div>
+<div id="analysis_section" class="container">
+  <h1>Data Analysis</h1>
+
+  <div id="heatmap">
+    <h2>Heatmap</h2>
+    <h4>About Bioactivities</h4>
+    <ul class="list-group">
+      <li class="list-group-item active">
+        This <b>Bioactivity</b> data comes from ChEMBL and PubChem
+      </li>
+      <li class="list-group-item">
+        Some data from these sources has been marked <em>questionable</em> for various reasons, you can exclude such entries
+      </li>
+    </ul>
+    <h4>Making Selections</h4>
+    <ul class="list-group">
+      <li class="list-group-item">
+        Check the checkboxes of desired rows from each section and hit "Generate Heatmap" when you are done
+      </li>
+      <li class="list-group-item">
+        Clicking the checkbox at the top of a section will select <em>all currently visible</em> checkboxes in that section
+      </li>
+      <li class="list-group-item">
+        To limit the number of choices to those containing specific characters, type in the <em>Filter</em> located above the respective section
+      </li>
+      <li class="list-group-item">
+        The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
+        <br>
+        e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN"
+      </li>
+      <li class="list-group-item">
+        Changes to the min feature count are not automatically applied, be sure to hit the "Apply" button if you want to change the min feature count
+      </li>
+      <li class="list-group-item">
+        The following actions will clear <em>all</em> your selections and cause a refresh:
+        <br>
+        Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count
+      </li>
+      <li class="list-group-item">
+        Changing the <em>Target Types</em> or <em>Organisms</em> will clear your <em>Target</em> selections and cause a refresh
+      </li>
+      <li class="list-group-item">
+        The data for compounds is simple enough that you can use <em>Filter Compounds</em> without a refresh
+      </li>
+    </ul>
+    <h4>Viewing the Heatmap</h4>
+    <ul class="list-group">
+      <li class="list-group-item">
+        You can download a .csv file containing the information in the heatmap
+      </li>
+      <li class="list-group-item">
+        The legend at the bottom of the page shows the meaning of the colors used
+      </li>
+      <li class="list-group-item">
+        Click on a row or column label to sort the heatmap such that entries in the selection are ordered from highest to lowest
+      </li>
+      <li class="list-group-item">
+        Clicking on a specific square in the heatmap will show that particular value in a pop-up
+      </li>
+    </ul>
+  </div>
+
+  <div id="cluster">
+    <h2>Cluster</h2>
+    <h4>About Bioactivities</h4>
+    <ul class="list-group">
+      <li class="list-group-item active">
+        This <b>Bioactivity</b> data comes from ChEMBL and PubChem
+      </li>
+      <li class="list-group-item">
+        Some data from these sources has been marked <em>questionable</em> for various reasons, you can exclude such entries
+      </li>
+    </ul>
+    <h4>Making Selections</h4>
+    <ul class="list-group">
+      <li class="list-group-item">
+        Check the checkboxes of desired rows from each section and hit "Generate Dendrogram" when you are done
+      </li>
+      <li class="list-group-item">
+        Clicking the checkbox at the top of a section will select <em>all currently visible</em> checkboxes in that section
+      </li>
+      <li class="list-group-item">
+        To limit the number of choices to those containing specific characters, type in the <em>Filter</em> located above the respective section
+      </li>
+      <li class="list-group-item">
+        The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
+        <br>
+        e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN"
+      </li>
+      <li class="list-group-item">
+        Changes to the min feature count are not automatically applied, be sure to hit the "Apply" button if you want to change the min feature count
+      </li>
+      <li class="list-group-item">
+        The following actions will clear <em>all</em> your selections and cause a refresh:
+        <br>
+        Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count
+      </li>
+      <li class="list-group-item">
+        Changing the <em>Target Types</em> or <em>Organisms</em> will clear your <em>Target</em> selections and cause a refresh
+      </li>
+      <li class="list-group-item">
+        The data for compounds is simple enough that you can use <em>Filter Compounds</em> without a refresh
+      </li>
+      <li class="list-group-item">
+        This interface is made to be similar to the selection forms used in the Heatmap and Cluster pages
+      </li>
+    </ul>
+    <h4>Viewing the Cluster</h4>
+    <ul class="list-group">
+      <li class="list-group-item">
+        The table on the left shows the bioactivities and drug trial data taken into account
+      </li>
+      <li class="list-group-item">
+        Clicking on a node will show the corresponding compound or compounds in the box on the right
+        <br>
+        You can dismiss a compound's information by hitting the corresponding red "X" button
+      </li>
+    </ul>
+  </div>
+</div>
+<div id="glossary" class="container padded-bottom">
+  <h1>Glossary</h1>
+  <table hidden id="glossary_table" class="display" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Term</th>
+        <th>Definition</th>
+        <th>Ref</th>
+      </tr>
+    </thead>
+
+    <tfoot>
+      <tr>
+        <th>Term</th>
+        <th>Definition</th>
+        <th>Ref</th>
+      </tr>
+    </tfoot>
+
+    <tbody>
+      {% for term in glossary %}
+        <tr>
+          <td>{{ term.term }}</td>
+          <td>{{ term.definition }}</td>
+          <td>{{ term.show_url }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <script src="{% static "js/display_datatable.js" %}"></script>
+</div>
+</div>
+</body>
+</html>

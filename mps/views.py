@@ -4,7 +4,6 @@ from django.contrib import auth
 from django.core.context_processors import csrf
 from django.template import RequestContext
 from forms import SearchForm
-from compounds.models import Compound
 
 from haystack.query import SearchQuerySet
 from haystack.views import SearchView, search_view_factory
@@ -14,6 +13,10 @@ from django.contrib.auth.models import Group
 
 import os
 import settings
+
+from mps.settings import MEDIA_ROOT
+
+from resources.models import Definition
 
 
 def main(request):
@@ -143,5 +146,15 @@ def custom_search(request):
         searchqueryset=sqs,
         form_class=haystack.forms.ModelSearchForm,
         results_per_page=1000,
-        )
+    )
     return view(request)
+
+
+def mps_help(request):
+    c = RequestContext(request)
+    # Add version for templates
+    c['version'] = len(os.listdir(MEDIA_ROOT + '/excel_templates/')) / 3
+    # Get glossary
+    c['glossary'] = Definition.objects.exclude(definition='')
+
+    return render_to_response('help.html', c)

@@ -5,14 +5,19 @@
     <script src="{% static "drugtrials/adverse_events_list.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li class="active">Adverse Events</li>
+{% endblock %}
 
+{% block content %}
     <div class="padded-bottom">
         <legend>
             <h2 class="text-center">
                 Adverse Events
             </h2>
         </legend>
+
+        {% include 'project_filters.html' %}
 
         <table hidden id="adverse_events" class="display" cellspacing="0" width="100%">
             <thead>
@@ -22,6 +27,7 @@
                     <th>Event</th>
                     <th>Frequency</th>
                     <th>Organ</th>
+                    <th>Project</th>
                     <th>Black Box Warning</th>
                 </tr>
             </thead>
@@ -33,6 +39,7 @@
                     <th>Event</th>
                     <th>Frequency</th>
                     <th>Organ</th>
+                    <th>Project</th>
                     <th>Black Box Warning</th>
                 </tr>
             </tfoot>
@@ -45,6 +52,17 @@
                     <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
                     <td>{{ adverse_event.frequency }}</td>
                     <td>{{ adverse_event.event.organ|default:"" }}</td>
+                    <td>
+                        {% if adverse_event.compound.compound.mps %}
+                            MPS
+                        {% endif %}
+                        {% if adverse_event.compound.compound.epa %}
+                            EPA
+                        {% endif %}
+                        {% if not adverse_event.compound.compound.epa and not adverse_event.compound.compound.mps %}
+                            Unassigned
+                        {% endif %}
+                    </td>
                     <td>
                         {% if adverse_event.compound.black_box %}
                             <span title="This compound has a Black Box Warning" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>

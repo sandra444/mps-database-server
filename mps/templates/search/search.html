@@ -3,11 +3,15 @@
 {% load custom_filters %}
 
 {% block load %}
+    <script src="{% static "js/cookies.js" %}"></script>
     <script src="{% static "js/search.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li class="active">Search</li>
+{% endblock %}
 
+{% block content %}
     <form method="get" action=".">
 {#        <input id="id_q" name="q" type="search" value="{{ query }}">#}
         <div id="search_bar" class="input-group">

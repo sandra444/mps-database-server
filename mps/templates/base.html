@@ -30,9 +30,6 @@
     <script src="{% static "js/bootstrap.min.js" %}"></script>
     <link rel="stylesheet" href="{% static "css/bootstrap-theme.min.css" %}">
 
-    <!-- Custom CSS Rules -->
-    <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
-
     <!-- Underscore.js Library -->
     <script src="{% static "js/underscore.js" %}"></script>
 
@@ -67,11 +64,88 @@
     <!-- SmartMenus jQuery plugin -->
     <script type="text/javascript" src="{% static "js/jquery.smartmenus.min.js" %}"></script>
 
+    <!-- Custom CSS Rules -->
+    <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
+
+    {# Yes, I know this violates SOC #}
     <script>
       // always emulate touch mode
       $.SmartMenus.prototype.isTouchMode = function() {
         return true;
       };
+
+      // TODO MOVE THIS TO ITS OWN FILE PLEASE
+      $(document).ready(function () {
+        // Discern what anchor to add to the help URL by looking at current url
+        var url = window.location.href;
+        var anchor = '';
+
+        if (url.indexOf('/assaychipsetup/') > -1) {
+          anchor = '#chipsetups'
+        }
+        else if (url.indexOf('/assaychipreadout/') > -1) {
+          anchor = '#chipreadouts'
+        }
+        else if (url.indexOf('/assaychiptestresult/') > -1) {
+          anchor = '#chipresults'
+        }
+        else if (url.indexOf('/assayplatesetup/') > -1) {
+          anchor = '#platesetups'
+        }
+        else if (url.indexOf('/assayplatereadout/') > -1) {
+          anchor = '#platereadouts'
+        }
+        else if (url.indexOf('/assayplatetestresult/') > -1) {
+          anchor = '#plateresults'
+        }
+        else if (url.indexOf('/bulk/') > -1) {
+          anchor = '#bulk'
+        }
+        else if (url.indexOf('/assaylayout/') > -1) {
+          anchor = '#assaylayouts'
+        }
+        else if (url.indexOf('/studyconfiguration/') > -1) {
+          anchor = '#studyconfigurations'
+        }
+        else if (url.indexOf('/model/') > -1) {
+          anchor = '#organmodels'
+        }
+        else if (url.indexOf('/microdevices/') > -1) {
+          anchor = '#microdevices'
+        }
+        else if (url.indexOf('/table/') > -1) {
+          anchor = '#bioactivities'
+        }
+        else if (url.indexOf('/drugtrials/') > -1) {
+          anchor = '#drugtrials'
+        }
+        else if (url.indexOf('adverse_events/') > -1) {
+          anchor = '#adverseevents'
+        }
+        else if (url.indexOf('/report/') > -1) {
+          anchor = '#compoundreport'
+        }
+        else if (url.indexOf('/compounds/') > -1) {
+          anchor = '#chemicaldata'
+        }
+        else if (url.indexOf('/heatmap/') > -1) {
+          anchor = '#heatmap'
+        }
+        else if (url.indexOf('/cluster/') > -1) {
+          anchor = '#cluster'
+        }
+        else if (url.indexOf('/celltype/') > -1) {
+          anchor = '#celltypes'
+        }
+        else if (url.indexOf('/cellsubtype/') > -1) {
+          anchor = '#cellsubtypes'
+        }
+        else if (url.indexOf('/cellsample/') > -1) {
+          anchor = '#cellsamples'
+        }
+
+        $('#view_help').attr('onclick',"window.open('/help/" + anchor + "','win','toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')");
+      });
     </script>
 
     <!-- SmartMenus jQuery Bootstrap Addon -->
@@ -107,9 +181,9 @@
         <a class="dropdown-toggle">Assays<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
           <li class="dropdown-header">Add/Edit Studies</li>
-          <li title="Index of all the studies created by you"><a href="/assays/user_index">Your Studies</a></li>
+          <li title="Index of all the studies created by you"><a href="/assays/user_index/">Your Studies</a></li>
           <li title="Index of all the studies created by groups you are a member of">
-              <a href="/assays/group_index">Group Studies</a>
+              <a href="/assays/group_index/">Group Studies</a>
           </li>
           <li class="divider"></li>
           <li class="dropdown-header">Add Study Data</li>
@@ -118,26 +192,26 @@
           <li><a href="/assays/assaylayout/add/">Add Assay Layout</a></li>
           <li class="divider"></li>
           <li class="dropdown-header">View/Edit Study Data</li>
-          <li><a href="/assays/organchipstudy">All Studies</a></li>
-          <li><a href="/assays/studyconfiguration">Study Configurations</a></li>
-          <li><a href="/assays/assaylayout">Assay Layouts</a></li>
+          <li><a href="/assays/organchipstudy/">All Studies</a></li>
+          <li><a href="/assays/studyconfiguration/">Study Configurations</a></li>
+          <li><a href="/assays/assaylayout/">Assay Layouts</a></li>
           <li class="dropdown-submenu">
           <a href="#">Chips &amp; Plates <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li class="dropdown-submenu">
             <a href="#">Chips <span class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li><a href="/assays/assaychipsetup">Setups</a></li>
-              <li><a href="/assays/assaychipreadout">Readouts</a></li>
-              <li><a href="/assays/assaychiptestresult">Results</a></li>
+              <li><a href="/assays/assaychipsetup/">Setups</a></li>
+              <li><a href="/assays/assaychipreadout/">Readouts</a></li>
+              <li><a href="/assays/assaychiptestresult/">Results</a></li>
             </ul>
             </li>
             <li class="dropdown-submenu">
             <a href="#">Plates <span class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li><a href="/assays/assayplatesetup">Setups</a></li>
-              <li><a href="/assays/assayplatereadout">Readouts</a></li>
-              <li><a href="/assays/assayplatetestresult">Results</a></li>
+              <li><a href="/assays/assayplatesetup/">Setups</a></li>
+              <li><a href="/assays/assayplatereadout/">Readouts</a></li>
+              <li><a href="/assays/assayplatetestresult/">Results</a></li>
             </ul>
             </li>
           </ul>
@@ -147,11 +221,11 @@
         <li title="View/add organ models and microdevices" class="dropdown">
         <a class="dropdown-toggle">Models<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
-          <li title="View organ models and microdevices"><a href="/microdevices">View Models &amp; Devices</a></li>
+          <li title="View organ models and microdevices"><a href="/microdevices/">View Models &amp; Devices</a></li>
           <li class="divider"></li>
           <li class="dropdown-header">Requires Permission</li>
-          <li><a href="/microdevices/device/add">Add Microdevice</a></li>
-          <li><a href="/microdevices/model/add">Add Organ Model</a></li>
+          <li><a href="/microdevices/device/add/">Add Microdevice</a></li>
+          <li><a href="/microdevices/model/add/">Add Organ Model</a></li>
         </ul>
         </li>
         {#      <li title="View curated drug trial data"><a href="/drugtrials">Drug Trials</a></li>#}
@@ -168,7 +242,7 @@
           <li><a href="/compounds/report/#filter">Compound Report</a></li>
           <li class="divider"></li>
           <li class="dropdown-header">Requires Permission</li>
-          <li><a href="/compounds/add">Add Compound</a></li>
+          <li><a href="/compounds/add/">Add Compound</a></li>
         </ul>
         </li>
         <li title="View or add cell samples and cell types" class="dropdown">
@@ -179,13 +253,13 @@
           <li><a href="/cellsamples/cellsample/">View Cell Samples</a></li>
           <li class="divider"></li>
           <li class="dropdown-header">Requires Permission</li>
-          <li><a href="/cellsamples/celltype/add">Add Cell Type</a></li>
-          <li><a href="/cellsamples/cellsubtype/add">Add Cell Subtype</a></li>
-          <li><a href="/cellsamples/cellsample/add">Add Cell Sample</a></li>
+          <li><a href="/cellsamples/celltype/add/">Add Cell Type</a></li>
+          <li><a href="/cellsamples/cellsubtype/add/">Add Cell Subtype</a></li>
+          <li><a href="/cellsamples/cellsample/add/">Add Cell Sample</a></li>
         </ul>
         </li>
         <li title="Analyze bioactivity and drugtrial data" class="dropdown">
-        <a class="dropdown-toggle">Data Analysis<span class="caret"></span></a>
+        <a class="dropdown-toggle">Analysis<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
           <li title="Generate a heatmap for selected bioactivity data">
               <a href="/bioactivities/heatmap/#filter">Heatmap</a>
@@ -195,11 +269,19 @@
           </li>
         </ul>
         </li>
+        <li title="View help">
+            <a id="view_help" class="navbar-help"
+               onclick="window.open('/help/',
+                 'win',
+                 'toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')">
+                 Help
+            </a>
+        </li>
         <li title="Give feedback, ask questions, or view the knowledge base">
-            <a style="color: rgb(0,0,255)"
+            <a class="navbar-feedback"
                onclick="window.open('/feedback/',
                 'win',
-                 'toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')">
+                'toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')">
                 Feedback
             </a>
         </li>
@@ -209,12 +291,12 @@
           <li title="Click to log out or change password" class="dropdown">
           <a class="dropdown-toggle">Profile<span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
-            <li><a href="/accounts/logout">Log Out</a></li>
-            <li><a href="/password_change">Change Password</a></li>
+            <li><a href="/accounts/logout/">Log Out</a></li>
+            <li><a href="/password_change/">Change Password</a></li>
           </ul>
           </li>
         {% else %}
-        <li><a href="/accounts/login">Log In</a></li>
+        <li><a href="/accounts/login/">Log In</a></li>
         {% endif %}
       </ul>
     </div><!--/.nav-collapse -->
@@ -231,6 +313,11 @@
 
   {# For most elements #}
   <div id="content" class="container">
+
+  <ol id="breadcrumbs" class="breadcrumb">
+    <li><a href="/">Home</a></li>
+    {% block breadcrumbs %}{% endblock %}
+  </ol>
 
   {# Still have yet to make use of messages; should do so soon #}
 {#  {% if messages %}#}

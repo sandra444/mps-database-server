@@ -45,6 +45,7 @@ def chembl_error(error):
                         content_type="application/json")
 
 
+# Virtually deprecated (gives incorrect values for things like known drug. Sad!
 def fetch_chemblid_data(request):
     chemblid = request.POST['chemblid']
     selector = request.POST['selector']
@@ -52,33 +53,20 @@ def fetch_chemblid_data(request):
     if not chemblid or not selector:
         return main(request)
 
-    element = {
-        'compound': Compound.objects.filter(chemblid=chemblid),
-        'assay': Assay.objects.filter(chemblid=chemblid),
-        'target': Target.objects.filter(chemblid=chemblid),
-    }[selector]
-
     if chemblid.startswith('CHEMBL') and chemblid[6:].isdigit():
+        try:
+            if 'compound' == selector:
+                data = ChEMBLdb().get_compounds_by_chemblId(str(chemblid))
+            elif 'assay' == selector:
+                data = ChEMBLdb().get_assay_by_chemblId(str(chemblid))
+            elif 'target' == selector:
+                data = ChEMBLdb().get_target_by_chemblId(str(chemblid))
 
-        if element:
+        except Exception:
             return chembl_error(
-                '"{}" is already in the database.'.format(chemblid)
+                '"{}" did not match any compound records.'.format(chemblid)
             )
 
-        else:
-
-            try:
-                if 'compound' == selector:
-                    data = ChEMBLdb().get_compounds_by_chemblId(str(chemblid))
-                elif 'assay' == selector:
-                    data = ChEMBLdb().get_assay_by_chemblId(str(chemblid))
-                elif 'target' == selector:
-                    data = ChEMBLdb().get_target_by_chemblId(str(chemblid))
-
-            except Exception:
-                return chembl_error(
-                    '"{}" did not match any compound records.'.format(chemblid)
-                )
     else:
         return chembl_error(
             '"{}" is not a valid ChEMBL id.'.format(chemblid)
@@ -86,6 +74,80 @@ def fetch_chemblid_data(request):
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
+
+
+def fetch_chembl_compound_data(request):
+    chemblid = request.POST['chemblid']
+
+    data = {}
+
+    url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chemblid)
+    response = requests.get(url)
+    initial_data = json.loads(response.text)
+
+    if initial_data:
+        molecular_structures = initial_data.get('molecule_structures', {})
+
+        if molecular_structures:
+            data['name'] = initial_data.get('pref_name', '')
+            data['inchikey'] = molecular_structures.get('standard_inchi_key', '')
+            data['smiles'] = molecular_structures.get('canonical_smiles', '')
+
+        # Start known drug as False
+        data['known_drug'] = False
+        # Get synonyms and check if it is a drug too
+        synonyms = []
+        for entry in initial_data.get('molecule_synonyms', []):
+            synonym = entry.get('synonyms', '')
+            syn_type = entry.get('syn_type', '')
+            if synonym and synonym not in synonyms:
+                synonyms.append(synonym)
+            # Check whether the synonym is a International, FDA, British Approved, or US Adopted Name
+            # This technique includes pesticides, however they are *usually* also used topically, and thus drugs
+            if syn_type in ['INN', 'FDA', 'BAN', 'USAN']:
+                data['known_drug'] = True
+        data['synonyms'] = ', '.join(synonyms)
+
+        molecular_properties = initial_data.get('molecule_properties', {})
+
+        if molecular_properties:
+            data['molecular_formula'] = molecular_properties.get('full_molformula', '')
+            data['molecular_weight'] = molecular_properties.get('full_mwt', '')
+            data['rotatable_bonds'] = molecular_properties.get('rtb', '')
+            data['acidic_pka'] = molecular_properties.get('acd_most_apka', '')
+            data['basic_pka'] = molecular_properties.get('acd_most_bpka', '')
+            data['logp'] = molecular_properties.get('acd_logp', '')
+            data['logd'] = molecular_properties.get('acd_logd', '')
+            data['alogp'] = molecular_properties.get('alogp', '')
+            data['species'] = molecular_properties.get('molecular_species', '')
+            data['ro5_violations'] = molecular_properties.get('num_ro5_violations', '')
+
+            if molecular_properties.get('ro3_pass', 'N') == 'Y':
+                data['ro3_passes'] = True
+            else:
+                data['ro3_passes'] = False
+
+        # Get medchem alerts
+        medchem_alerts = False
+        # Get URL of target for scrape
+        url = "https://www.ebi.ac.uk/chembl/compound/structural_alerts/{}".format(chemblid)
+        # Make the http request
+        response = requests.get(url)
+        # Get the webpage as text
+        stuff = response.text
+        # Make a BeatifulSoup object
+        soup = BeautifulSoup(stuff, 'html5lib')
+
+        # Get all tables
+        table = soup.find(id="structural_wedding")
+        # If there is a table and it contains alerts
+        if table and table.tbody.text.strip():
+            medchem_alerts = True
+
+        data['medchem_alerts'] = medchem_alerts
+
+    return HttpResponse(json.dumps(data),
+                        content_type='application/json')
 
 
 # TODO NEEDS REVISION: SWITCH TO ACD CALCULATED LOGP ETC
@@ -246,7 +308,17 @@ def get_drugbank_target_information(data, type_of_target):
 
 
 def get_drugbank_data_from_chembl_id(chembl_id):
-    data = {}
+    # Values found in table
+    data = {
+        'drugbank_id': '',
+        'pubchemid': '',
+        'drug_class': '',
+        'protein_binding': '',
+        'half_life': '',
+        'clearance': '',
+        'bioavailability': '',
+        'absorption': '',
+    }
 
     # Get drugbank_id or fail
     url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/2'.format(chembl_id)
@@ -287,17 +359,6 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         integer_extractor = re.compile(r'(?<!\.)(?<!\d)\d+(?!\.)')
         # Regex for extracting ints or floats
         integer_and_float_extractor = re.compile(r'\d*\.?\d+')
-
-        # Values found in table
-        data = {
-            'drugbank_id': '',
-            'drug_class': '',
-            'protein_binding': '',
-            'half_life': '',
-            'clearance': '',
-            'bioavailability': '',
-            'absorption': '',
-        }
 
         # Loop through the rows of the table
         # Break when all 6 table rows found
@@ -456,14 +517,70 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         # Remember that targets is a list!
         data.update({'targets': targets})
 
+    # YES, I know that the function title is deceiving in that this is actually a PubChem ID
+    # Get pubchemid from unichem too
+    url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/22'.format(chembl_id)
+    # Make the http request
+    response = requests.get(url)
+    # Get the webpage as JSON
+    json_data = json.loads(response.text)
+
+    if json_data and u'error' not in json_data:
+        # Extract ID
+        pubchemid = json_data[0].get('src_compound_id')
+        data.update({'pubchemid': pubchemid})
+
     return data
+
+
+def fetch_chembl_search_results(request):
+    query = request.POST.get('query', '')
+
+    url = 'https://www.ebi.ac.uk/chembl/api/data/chembl_id_lookup/search.json?q={}'.format(query)
+    # Make the http request
+    response = requests.get(url)
+    # Get the webpage as JSON
+    json_data = json.loads(response.text)
+
+    lookups = json_data.get('chembl_id_lookups', [])
+
+    results = []
+    for lookup in lookups:
+        if lookup.get('entity_type', '') == 'COMPOUND' and lookup.get('status', '') == 'ACTIVE':
+            additional_data = {}
+            chembl_id = lookup.get('chembl_id', '')
+
+            url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chembl_id)
+            # Make the http request
+            response = requests.get(url)
+            # Get the webpage as JSON
+            json_data = json.loads(response.text)
+
+            additional_data.update({'name': json_data.get('pref_name', '')})
+
+            synonyms = []
+            for entry in json_data.get('molecule_synonyms', []):
+                synonym = entry.get('synonyms', '')
+                if synonym and synonym not in synonyms:
+                    synonyms.append(synonym)
+
+            synonyms = ', '.join(synonyms)
+            additional_data.update({'synonyms': synonyms})
+
+            lookup.update(additional_data)
+            results.append(lookup)
+
+    return HttpResponse(json.dumps(results),
+                        content_type="application/json")
 
 switch = {
     'fetch_compound_name': fetch_compound_name,
     'fetch_chemblid_data': fetch_chemblid_data,
     'fetch_compound_report': fetch_compound_report,
     'fetch_compound_list': fetch_compound_list,
-    'fetch_drugbank_data': fetch_drugbank_data
+    'fetch_drugbank_data': fetch_drugbank_data,
+    'fetch_chembl_search_results': fetch_chembl_search_results,
+    'fetch_chembl_compound_data': fetch_chembl_compound_data
 }
 
 

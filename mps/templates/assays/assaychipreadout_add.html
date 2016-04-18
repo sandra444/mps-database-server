@@ -8,11 +8,27 @@
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "assays/customize_chip.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
-    <script src="{% static "js/help.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    <li>
+        {% if object %}
+            <a href="/assays/{{ object.chip_setup.assay_run_id.id }}">{{ object.chip_setup.assay_run_id }}</a>
+        {% else %}
+            <a href="/assays/{{ study.id }}">{{ study }}</a>
+        {% endif %}
+    </li>
+    <li class="active">
+        {% if object %}
+            Edit Readout for <em>Chip-{{ object.chip_setup.assay_chip_id }}</em>
+        {% else %}
+            Add Chip Readout
+        {% endif %}
+    </li>
 {% endblock %}
 
 {% block content %}
-
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post" >
 
@@ -43,7 +59,7 @@
 {#        {% include 'flag.html'%}#}
     </h1>
 
-    {% include "submit.html" with flag="y" clone="y" help="y" %}
+    {% include "submit.html" with flag="y" clone="y"%}
 
     {% include 'errors.html' %}
 
@@ -261,126 +277,4 @@
         </tbody>
     </table>
 </form>
-
-<div hidden id="help_dialog" title="Chip Readout Help">
-    <h4>Uploading Data</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            <h4>The format for chip uploads is as follows:</h4>
-            <table class="table table-bordered small" style="background-color: #F0FFFF;">
-                <thead>
-                    <tr class="active">
-                        <th>Chip ID</th>
-                        <th>Time</th>
-                        <th>Time Unit</th>
-                        <th>Assay</th>
-                        <th>Object</th>
-                        <th>Value</th>
-                        <th>Value Unit</th>
-                        <th>QC Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>[Chip ID]</td>
-                        <td>[Time]</td>
-                        <td>[Time Unit]</td>
-                        <td>[Assay]</td>
-                        <td>[Object]</td>
-                        <td>[Value]</td>
-                        <td>[Value Unit]</td>
-                        <td>[Leave Blank to Pass]</td>
-                    </tr>
-                    <tr>
-                        <td>[Chip ID]</td>
-                        <td>[Time]</td>
-                        <td>[Time Unit]</td>
-                        <td>[Assay]</td>
-                        <td>[Object]</td>
-                        <td>[Value]</td>
-                        <td>[Value Unit]</td>
-                        <td>[Any Value in this Column Marks the Reading Invalid]</td>
-                    </tr>
-                </tbody>
-            </table>
-        </li>
-        <li class="list-group-item">
-            File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays
-        </li>
-        <li class="list-group-item">
-            Table rows in <span style="color: #FF0000">red</span> will be excluded
-            while rows in <span style="color: #00FF00">green</span> are in the database
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                The brackets ([] and {}) in the above examples and templates are not meant to be taken literally
-                <br>
-                When you are actually entering data, remove them
-            </b>
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                The Chip ID should be nothing more than the Chip ID/Barcode you entered in the setup
-                <br>
-                i.e. do not include "Chip-" at the beginning of the Chip ID
-            </b>
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                Always start in the top-left corner (the first cell)
-            </b>
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                Uploading overwrites previous data
-            </b>
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                You will have to reselect the desired file after a failed submission
-            </b>
-        </li>
-    </ul>
-    <h4>Changing QC</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            QC Status can be changed in the table displayed after data upload
-        <li class="list-group-item">
-            To invalidate a reading, type <b><i>anything</i></b> into the corresponding QC status input
-        </li>
-        <li class="list-group-item">
-            After changing a QC value, <b>click away</b> or <b>hit tab</b> to see the effect on the plots
-        </li>
-    </ul>
-    <h4>Flagging for Review</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm" style="color:#337AB7">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            flags the current readout for review
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-warning" style="color:#FFFFFF">
-                Notes
-            </a>
-            brings up an input dialog where you can explain why this readout was flagged
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-danger" style="color:#FFFFFF">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            removes the flag from the current readout
-        </li>
-    </ul>
-</div>
-
 {% endblock %}

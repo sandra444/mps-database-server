@@ -1,3 +1,5 @@
+{{ object }}
+{{ object.assay_plate_id }}
 {{ object.assay_layout.name }}
 {{ object.assay_plate_id }}
 {{ object.scientist }}

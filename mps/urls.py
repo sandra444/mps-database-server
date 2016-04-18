@@ -11,7 +11,6 @@ from .views import custom_search
 admin.autodiscover()
 
 urlpatterns = patterns('',
-
                        url(r'^$', 'mps.views.main'),
 
                        # user auth urls
@@ -28,6 +27,9 @@ urlpatterns = patterns('',
                        # Comment out captchas for now
                        # Captchas
                        # url(r'^captcha/', include('captcha.urls')),
+
+                       # Help
+                       url(r'^help/', 'mps.views.mps_help'),
 
                        # Djangovoice for feedback
                        url(r'^comments/', include('django_comments.urls')),
@@ -49,6 +51,7 @@ urlpatterns = patterns('',
 
 
                        # BEGIN old-style API
+                       url(r'^search_ajax$', 'mps.ajax.ajax'),
                        url(r'^assays_ajax$', 'assays.ajax.ajax'),
                        url(r'^compounds_ajax$', 'compounds.ajax.ajax'),
                        url(r'^cellsamples_ajax$', 'cellsamples.ajax.ajax'),

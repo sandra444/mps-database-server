@@ -84,7 +84,7 @@ $(document).ready(function() {
                 axis: {
                     x: {
                         label: {
-                            text: 'Time',
+                            text: 'Time (days)',
                             // TODO ADD UNITS
                             //text: 'Time (' + timeUnits + ')',
                             position: 'outer-center'

@@ -30,3 +30,13 @@ class ResourceSubtypeForm(forms.ModelForm):
             'name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
+
+
+class DefinitionForm(forms.ModelForm):
+    """Size the text input boxes"""
+
+    class Meta(object):
+        widgets = {
+            'term': forms.Textarea(attrs={'rows': 1}),
+            'definition': forms.Textarea(attrs={'rows': 5}),
+        }

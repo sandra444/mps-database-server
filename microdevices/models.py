@@ -99,7 +99,7 @@ class Microdevice(LockableModel):
         return self.device_name
 
     def get_absolute_url(self):
-        return "/microdevices/device/{}".format(self.id)
+        return "/microdevices/device/{}/".format(self.id)
 
 
 class OrganModel(LockableModel):
@@ -115,6 +115,15 @@ class OrganModel(LockableModel):
 
     model_image = models.ImageField(upload_to='models', null=True, blank=True)
 
+    epa = models.BooleanField(
+        default=False,
+        help_text='Whether this compound is part of the EPA project'
+    )
+    mps = models.BooleanField(
+        default=False,
+        help_text='Whether this compound is part of the MPS project'
+    )
+
     # Removed in favor of protocol inline
     #protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
     #                        blank=True, null=True, help_text='File detailing the protocols for this model')
@@ -123,7 +132,7 @@ class OrganModel(LockableModel):
         return self.model_name
 
     def get_absolute_url(self):
-        return "/microdevices/model/{}".format(self.id)
+        return "/microdevices/model/{}/".format(self.id)
 
 
 # It is somewhat odd that ValidatedAssays are inlines in lieu of a manytomany field

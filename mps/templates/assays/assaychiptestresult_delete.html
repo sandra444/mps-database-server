@@ -1,15 +1,27 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    <li>
+        <a href="{{ object.get_post_submission_url }}">{{ object.chip_readout.chip_setup.assay_run_id }}</a>
+    </li>
+    <li>
+        <a href="{{ object.get_absolute_url }}">
+            Test Results for <em>Chip-{{ object.chip_readout.chip_setup.assay_chip_id }}</em>
+        </a>
+    </li>
+    <li class="active">
+        Delete
+    </li>
+{% endblock %}
 
+{% block content %}
     <form method="post">{% csrf_token %}
-        <h3 style="color: #FF0000">Are you sure you want to delete Chip Test Results: <b>ID #{{ object.id }}</b>?</h3>
+        <h3 class="text-danger">Are you sure you want to delete Chip Test Results: <b>ID #{{ object.id }}</b>?</h3>
 
         <hr>
-
         <br>
 
         <button type="submit" class="btn btn-danger">Confirm Deletion</button>
     </form>
-
 {% endblock %}

@@ -1,8 +1,8 @@
 // This script adds additional functionality to the global search
 $(document).ready(function () {
-
     var filter = [];
     var at_least_one_checked = $("#filter [type=checkbox]").is(':checked');
+    var middleware_token = getCookie('csrftoken');
 
     function filter_results() {
         // Default to showing everything (ie, only run if filters selected)
@@ -12,7 +12,7 @@ $(document).ready(function () {
                 $(filter[x]).show();
             }
         }
-        else{
+        else {
             $('.result-group').show();
         }
     }
@@ -26,7 +26,7 @@ $(document).ready(function () {
         }
         // Mark if it was not part of the search
         else {
-            if(at_least_one_checked) {
+            if (at_least_one_checked) {
                 $(box).parent().parent().addClass('bg-danger');
             }
         }
@@ -53,11 +53,11 @@ $(document).ready(function () {
 //         }
 //    });
 
-    // Initial values
-    $("#filter [type=checkbox]").each(function() {
-        init_checkbox(this);
-    });
-    filter_results();
+   // Initial values
+   $("#filter [type=checkbox]").each(function() {
+       init_checkbox(this);
+   });
+   filter_results();
 
     // Listener for change
     $("#filter [type=checkbox]").change(function() {
@@ -68,5 +68,27 @@ $(document).ready(function () {
 
     $("#clear_filters").click(function() {
         $("[type=checkbox]").prop('checked',false).trigger('change');
+    });
+
+    $("#id_q").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: "/search_ajax",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    call: 'fetch_global_search_suggestions',
+                    text: request.term,
+                    csrfmiddlewaretoken: middleware_token
+                },
+                success: function (json) {
+                    response(json);
+                },
+                error: function (xhr, errmsg, err) {
+                    console.log(xhr.status + ": " + xhr.responseText);
+                }
+            });
+        },
+        minLength: 2
     });
 });

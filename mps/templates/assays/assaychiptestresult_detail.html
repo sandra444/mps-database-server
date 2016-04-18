@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block breadcrumbs %}
+    <li><a href="/assays/assaychiptestresults/">Chip Results</a></li>
+    <li class="active">Test Results for <em>Chip-{{ object.chip_readout.chip_setup.assay_chip_id }}</em></li>
+{% endblock %}
+
 {% block content %}
     <legend><h1>Chip Test Results ID #{{ object.id }} for Study:<br><a href="/assays/organchipstudy/{{ object.assay_device_readout.id }}">{{ object.assay_device_readout }}</a></h1></legend>
 

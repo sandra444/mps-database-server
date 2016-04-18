@@ -5,14 +5,19 @@
     <script src="{% static "drugtrials/drugtrial_list.js" %}"></script>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumbs %}
+    <li class="active">Drug Trials</li>
+{% endblock %}
 
+{% block content %}
     <div class="padded-bottom">
         <legend>
             <h2 class="text-center">
                 Drug Trials
             </h2>
         </legend>
+
+        {% include 'project_filters.html' %}
 
         <table hidden id="drugtrials" class="display" cellspacing="0" width="100%">
             <thead>
@@ -29,6 +34,7 @@
                     <th>Frequency</th>
                     <th>Value</th>
                     <th>Value Units</th>
+                    <th>Project</th>
                 </tr>
             </thead>
 
@@ -46,6 +52,7 @@
                     <th>Frequency</th>
                     <th>Value</th>
                     <th>Value Units</th>
+                    <th>Project</th>
                 </tr>
             </tfoot>
 
@@ -68,7 +75,17 @@
                     <td>{{ finding.frequency|default_if_none:"" }}</td>
                     <td>{{ finding.value|default_if_none:"" }}</td>
                     <td>{{ finding.value_units|default_if_none:"" }}</td>
-
+                    <td>
+                        {% if finding.drug_trial.compound.mps %}
+                            MPS
+                        {% endif %}
+                        {% if finding.drug_trial.compound.epa %}
+                            EPA
+                        {% endif %}
+                        {% if not finding.drug_trial.compound.epa and not finding.drug_trial.compound.mps %}
+                            Unassigned
+                        {% endif %}
+                    </td>
 {#                    <td>{{ finding.percent_max }}</td>#}
 {#                    <td>{{ finding.value }}</td>#}
 {#                    <td>{{ finding.value_units }}</td>#}

@@ -1,3 +1,4 @@
+Adverse Events for {{ object.compound.name }}
 {{ object.compound.name }}
 {% for event in object.compoundadverseevent_set.all %}
   {{ event.event.event }}

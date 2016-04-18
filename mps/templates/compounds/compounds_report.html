@@ -8,6 +8,10 @@
     <script src="{% static "js/cookies.js" %}"></script>
 {% endblock %}
 
+{% block breadcrumbs %}
+    <li class="active">Compound Report</li>
+{% endblock %}
+
 {% block content %}
     <div id="selection" class="padded-bottom">
         <div class="row">
@@ -27,6 +31,8 @@
             <button role="button" class="btn btn-danger" id="clear_selections">Clear Current Selections</button>
         </div>
 
+        {% include 'project_filters.html' %}
+
         <table hidden id="compounds" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -38,7 +44,7 @@
                     <th>LogP</th>
                     <th>Rule of 5 Violations</th>
                     <th>Known Drug</th>
-                    <th>Tags</th>
+                    <th>Project</th>
                     <th>Image</th>
                 </tr>
             </thead>
@@ -53,7 +59,7 @@
                     <th>LogP</th>
                     <th>Rule of 5 Violations</th>
                     <th>Known Drug</th>
-                    <th>Tags</th>
+                    <th>Project</th>
                     <th>Image</th>
                 </tr>
             </tfoot>
@@ -70,8 +76,30 @@
                     <td>{{ compound.molecular_weight|default_if_none:"" }}</td>
                     <td>{{ compound.logp|default_if_none:"" }}</td>
                     <td>{{ compound.ro5_violations|default_if_none:"" }}</td>
-                    <td>{{ compound.known_drug }}</td>
-                    <td>{{ compound.tags|default_if_none:"" }}</td>
+
+                    <td>
+                        {% if compound.known_drug %}
+                            <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span hidden>True</span>
+                        {% else %}
+                            <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
+                            <span hidden>False</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if compound.mps %}
+                            MPS
+                        {% endif %}
+                        {% if compound.epa %}
+                            EPA
+                        {% endif %}
+                        {% if not compound.epa and not compound.mps %}
+                            Unassigned
+                        {% endif %}
+                    </td>
+                    {# TODO Tags field is deprecated #}
+{#                    <td>{{ compound.tags|default_if_none:"" }}</td>#}
                     <td><img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}"></td>
                 </tr>
             {% endfor %}

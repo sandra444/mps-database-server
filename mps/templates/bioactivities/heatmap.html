@@ -8,6 +8,10 @@
     <script src="{% static "bioactivities/render_heatmap.js" %}"></script>
 {% endblock %}
 
+{% block breadcrumbs %}
+    <li class="active">Generate Heatmap</li>
+{% endblock %}
+
 {% block submit %}
     <a href="#show" class="btn btn-xlarge btn-primary text-center" id="submit">
         Generate Heatmap
@@ -112,7 +116,7 @@
 {% endblock %}
 
 {% block graphic %}
-    <div hidden id="graphic">
+    <div hidden id="graphic" class="large-padding-top">
         <div class="padded-row text-center">
             <a href="#filter" id="back" class="btn btn-xlarge btn-info">
                 <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
