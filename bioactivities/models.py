@@ -271,7 +271,7 @@ class PubChemTarget(LockableModel):
     # The GI is what is given by a PubChem assay
     # Optional, not all targets will have this
     GI = models.TextField('NCBI GI',
-                          null=True,
+                          default='',
                           blank=True)
 
     # Target type is not always listed: not required

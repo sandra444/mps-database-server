@@ -350,8 +350,8 @@ class CompoundTarget(models.Model):
 
     name = models.CharField(max_length=150)
     # May not be present
-    uniprot_id = models.CharField(max_length=20, blank=True, null=True)
-    action = models.CharField(max_length=75)
+    uniprot_id = models.CharField(max_length=20, blank=True, default='')
+    action = models.CharField(max_length=75, blank=True, default='unknown')
     pharmacological_action = models.CharField(max_length=20)
     organism = models.CharField(max_length=150)
     type = models.CharField(max_length=30)
