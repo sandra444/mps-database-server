@@ -76,3 +76,4 @@ xlsxwriter
 chardet
 # Alternative html parser used in conjunction with BeautifulSoup
 html5lib
+urllib3
