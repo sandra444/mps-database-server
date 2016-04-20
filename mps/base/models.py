@@ -96,12 +96,10 @@ class FlaggableModel(RestrictedModel):
     """
 
     flagged = models.BooleanField(default=False,
-                                     help_text=
-                                     'Check box to flag for review')
+                                  help_text='Check box to flag for review')
 
     reason_for_flag = models.CharField(max_length=300,
-                                     help_text=
-                                     'Reason for why this entry was flagged', blank=True, null=True)
+                                       help_text='Reason for why this entry was flagged', blank=True, default='')
 
     class Meta(object):
         abstract = True

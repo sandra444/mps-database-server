@@ -275,34 +275,71 @@ def get_drugbank_target_information(data, type_of_target):
         'type': type_of_target
     }
 
-    # Get name from header (table may not be present?)
-    name = data.findChildren('h3')[0].findChildren('a')[0].text
+    try:
+        # Get name from header (table may not be present?)
+        name = data.findChildren('strong')[0].findChildren('a')[0].text
+    except:
+        name_text = data.findChildren('strong')[0].text.split('.')[1:]
+        name = ''.join(name_text).strip()
 
     if len(name) > 150:
         name = name[:145] + '...'
 
     target['name'] = name
 
-    # Loop through the p children to find info
-    for p in data.findChildren('p'):
-        if 'Organism: ' in p.text:
-            organism = p.text.replace('Organism: ', '').strip()
+    headers = data.findChildren('dt')
+    values = data.findChildren('dd')
+
+    for index, dt in enumerate(headers):
+        if dt.text == 'Organism':
+            organism = values[index].text.strip()
 
             if len(organism) > 150:
                 organism = organism[:145] + '...'
 
             target['organism'] = organism
 
-        elif 'Pharmacological action:' in p.text:
-            target['pharmacological_action'] = p.text.replace('Pharmacological action:', '').strip()
+    # Labels are used to show pharmacological action
+    label = data.findChildren('strong', class_='label')
 
-        elif 'Actions:' in p.text:
-            target['action'] = p.text.replace('Actions:', '').lstrip().replace('\n        ', ', ').strip()
+    if label:
+        target['pharmacological_action'] = label[0].text.strip()
 
-    # The child table contains the corresponding UniProt ID
-    if data.findChildren('table') and data.findChildren('table')[0].findChildren('tbody')[0].findChildren('td'):
-        target['uniprot_id'] = data.findChildren('table')[0].findChildren(
-            'tbody')[0].findChildren('tr')[0].findChildren('td')[1].text.strip()
+    # Badges contain actions
+    badges = data.findChildren('strong', class_='badge')
+    actions = []
+
+    for badge in badges:
+        actions.append(badge.text.strip())
+
+    target['action'] = ', '.join(actions)
+
+    uniprot = data.findChildren('div', class_='panel-body')[0].findChildren('a')
+
+    if uniprot:
+        if 'www.uniprot.org' in uniprot[0]['href']:
+            target['uniprot_id'] = uniprot[0].text.strip()
+
+    # Loop through the p children to find info
+    # for p in data.findChildren('p'):
+    #     if 'Organism: ' in p.text:
+    #         organism = p.text.replace('Organism: ', '').strip()
+    #
+    #         if len(organism) > 150:
+    #             organism = organism[:145] + '...'
+    #
+    #         target['organism'] = organism
+    #
+    #     elif 'Pharmacological action:' in p.text:
+    #         target['pharmacological_action'] = p.text.replace('Pharmacological action:', '').strip()
+    #
+    #     elif 'Actions:' in p.text:
+    #         target['action'] = p.text.replace('Actions:', '').lstrip().replace('\n        ', ', ').strip()
+    #
+    # # The child table contains the corresponding UniProt ID
+    # if data.findChildren('table') and data.findChildren('table')[0].findChildren('tbody')[0].findChildren('td'):
+    #     target['uniprot_id'] = data.findChildren('table')[0].findChildren(
+    #         'tbody')[0].findChildren('tr')[0].findChildren('td')[1].text.strip()
 
     return target
 
@@ -493,26 +530,42 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         # Loop through all target cards
         listed_targets = soup.findChildren('div', class_='target')
         if listed_targets:
-            listed_targets = listed_targets[0].findChildren('div')
+            listed_targets = listed_targets[0].findChildren('div', class_='panel')
 
             for target in listed_targets:
-                targets.append(get_drugbank_target_information(target, 'Target'))
+                to_add = get_drugbank_target_information(target, 'Target')
+                if to_add.get('name', ''):
+                    targets.append(to_add)
 
         # Loop through all enzyme cards
         listed_enzymes = soup.findChildren('div', class_='enzyme')
         if listed_enzymes:
-            listed_enzymes = listed_enzymes[0].findChildren('div')
+            listed_enzymes = listed_enzymes[0].findChildren('div', class_='panel')
 
             for enzyme in listed_enzymes:
-                targets.append(get_drugbank_target_information(enzyme, 'Enzyme'))
+                to_add = get_drugbank_target_information(enzyme, 'Enzyme')
+                if to_add.get('name', ''):
+                    targets.append(to_add)
+
+        # Loop through all carrier cards
+        listed_carriers = soup.findChildren('div', class_='carrier')
+        if listed_carriers:
+            listed_carriers = listed_carriers[0].findChildren('div', class_='panel')
+
+            for carrier in listed_carriers:
+                to_add = get_drugbank_target_information(carrier, 'Carrier')
+                if to_add.get('name', ''):
+                    targets.append(to_add)
 
         # Loop through all transporter cards
         listed_transporters = soup.findChildren('div', class_='transporter')
         if listed_transporters:
-            listed_transporters = listed_transporters[0].findChildren('div')
+            listed_transporters = listed_transporters[0].findChildren('div', class_='panel')
 
             for transporter in listed_transporters:
-                targets.append(get_drugbank_target_information(transporter, 'Transporter'))
+                to_add = get_drugbank_target_information(transporter, 'Transporter')
+                if to_add.get('name', ''):
+                    targets.append(to_add)
 
         # Remember that targets is a list!
         data.update({'targets': targets})

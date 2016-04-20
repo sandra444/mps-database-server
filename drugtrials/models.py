@@ -61,8 +61,8 @@ class DrugTrial(LockableModel):
         verbose_name = 'Drug Trial'
         ordering = ('compound', 'species', )
 
-    title = models.CharField(max_length=255, blank=True, null=True)
-    condition = models.CharField(max_length=1400, blank=True, null=True)
+    title = models.CharField(max_length=255, blank=True, default='')
+    condition = models.CharField(max_length=1400, blank=True, default='')
     source = models.ForeignKey(TrialSource)
     compound = models.ForeignKey('compounds.Compound')
 
@@ -84,13 +84,11 @@ class DrugTrial(LockableModel):
                                   ('U', 'unknown or unspecified'),
                               ),
                               default='U',
-                              blank=True,
-                              null=True)
+                              blank=True)
 
     population_size = models.CharField(max_length=50,
                                        default='1',
-                                       blank=True,
-                                       null=True)
+                                       blank=True)
 
     age_average = models.FloatField(blank=True, null=True)
 
@@ -100,7 +98,6 @@ class DrugTrial(LockableModel):
 
     age_unit = models.CharField(max_length=1,
                                 blank=True,
-                                null=True,
                                 choices=(
                                     ('M', 'months'), ('Y', 'years')
                                 ),
@@ -109,7 +106,7 @@ class DrugTrial(LockableModel):
     weight_average = models.FloatField(blank=True, null=True)
     weight_max = models.FloatField(blank=True, null=True)
     weight_min = models.FloatField(blank=True, null=True)
-    weight_unit = models.CharField(max_length=1, blank=True, null=True,
+    weight_unit = models.CharField(max_length=1, blank=True,
                                    choices=(
                                        ('K', 'kilograms'), ('L', 'pounds'),
                                    ),
@@ -123,7 +120,7 @@ class DrugTrial(LockableModel):
     trial_date = models.DateField(blank=True, null=True)
     description = models.CharField(max_length=1400, blank=True, default='')
     source_link = models.URLField(blank=True, null=True)
-    references = models.CharField(max_length=400, null=True,
+    references = models.CharField(max_length=400, default='',
                                   verbose_name='Trial ID/Reference')
 
     def __unicode__(self):
@@ -337,7 +334,7 @@ class FindingResult(models.Model):
     frequency = models.CharField(choices=FREQUENCIES,
                                  max_length=25,
                                  blank=True,
-                                 null=True)
+                                 default='')
 
     descriptor = models.ForeignKey(ResultDescriptor, blank=True, null=True)
 
@@ -372,12 +369,12 @@ class OpenFDACompound(LockableModel):
     black_box = models.BooleanField(default=False)
 
     # Insights into non-human toxicology (can be useful)
-    nonclinical_toxicology = models.TextField(blank=True, null=True)
+    nonclinical_toxicology = models.TextField(blank=True, default='')
 
     # Deemed less than useful
-    #clinical_studies = models.TextField(blank=True, null=True)
+    #clinical_studies = models.TextField(blank=True, default='')
     # Deemed less than useful
-    # laboratory_tests = models.TextField(blank=True, null=True)
+    # laboratory_tests = models.TextField(blank=True, default='')
 
     # For normalizing data, may change
     estimated_usage = models.IntegerField(blank=True, null=True)

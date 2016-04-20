@@ -33,7 +33,7 @@ class CellType(LockableModel):
     cell_type = models.CharField(max_length=255,
                                  help_text='Example: hepatocyte, muscle, kidney, etc')
     species = models.CharField(max_length=10,
-                               choices=SPECIESTYPE, default='Human', null=True,
+                               choices=SPECIESTYPE, default='Human',
                                blank=True)
 
     # TODO TO BE REMOVED
@@ -115,7 +115,7 @@ class CellSample(FlaggableModel):
 
     cell_source = models.CharField(max_length=20,
                                    choices=CELLSOURCETYPE, default='Primary',
-                                   null=True, blank=True)
+                                   blank=True)
 
     notes = models.TextField(blank=True)
     receipt_date = models.DateField()

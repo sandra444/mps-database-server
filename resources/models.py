@@ -10,7 +10,7 @@ class ResourceSubtype(LockableModel):
         ordering = ['name']
 
     name = models.TextField(max_length=40, unique=True, verbose_name='Category')
-    description = models.TextField(max_length=400, blank=True, null=True)
+    description = models.TextField(max_length=400, blank=True, default='')
 
     def __unicode__(self):
         return self.name
@@ -21,7 +21,7 @@ class ResourceType(LockableModel):
         ordering = ['resource_subtype', 'resource_type_name']
 
     resource_type_name = models.CharField(max_length=40, unique=True, verbose_name="Type")
-    description = models.CharField(max_length=400, blank=True, null=True)
+    description = models.CharField(max_length=400, blank=True, default='')
     resource_subtype = models.ForeignKey(ResourceSubtype, verbose_name="Category")
 
     def __unicode__(self):
@@ -35,7 +35,7 @@ class Resource(LockableModel):
 
     resource_name = models.CharField(max_length=60, unique=True, verbose_name="Name")
     resource_website = models.URLField(blank=True, null=True)
-    description = models.CharField(max_length=400, blank=True, null=True)
+    description = models.CharField(max_length=400, blank=True, default='')
     type = models.ForeignKey(ResourceType)
 
     def __unicode__(self):
