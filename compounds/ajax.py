@@ -533,7 +533,9 @@ def get_drugbank_data_from_chembl_id(chembl_id):
             listed_targets = listed_targets[0].findChildren('div', class_='panel')
 
             for target in listed_targets:
-                targets.append(get_drugbank_target_information(target, 'Target'))
+                to_add = get_drugbank_target_information(target, 'Target')
+                if to_add.get('name', ''):
+                    targets.append(to_add)
 
         # Loop through all enzyme cards
         listed_enzymes = soup.findChildren('div', class_='enzyme')
@@ -541,7 +543,9 @@ def get_drugbank_data_from_chembl_id(chembl_id):
             listed_enzymes = listed_enzymes[0].findChildren('div', class_='panel')
 
             for enzyme in listed_enzymes:
-                targets.append(get_drugbank_target_information(enzyme, 'Enzyme'))
+                to_add = get_drugbank_target_information(enzyme, 'Enzyme')
+                if to_add.get('name', ''):
+                    targets.append(to_add)
 
         # Loop through all carrier cards
         listed_carriers = soup.findChildren('div', class_='carrier')
@@ -549,7 +553,9 @@ def get_drugbank_data_from_chembl_id(chembl_id):
             listed_carriers = listed_carriers[0].findChildren('div', class_='panel')
 
             for carrier in listed_carriers:
-                targets.append(get_drugbank_target_information(carrier, 'Carrier'))
+                to_add = get_drugbank_target_information(carrier, 'Carrier')
+                if to_add.get('name', ''):
+                    targets.append(to_add)
 
         # Loop through all transporter cards
         listed_transporters = soup.findChildren('div', class_='transporter')
@@ -557,7 +563,9 @@ def get_drugbank_data_from_chembl_id(chembl_id):
             listed_transporters = listed_transporters[0].findChildren('div', class_='panel')
 
             for transporter in listed_transporters:
-                targets.append(get_drugbank_target_information(transporter, 'Transporter'))
+                to_add = get_drugbank_target_information(transporter, 'Transporter')
+                if to_add.get('name', ''):
+                    targets.append(to_add)
 
         # Remember that targets is a list!
         data.update({'targets': targets})
