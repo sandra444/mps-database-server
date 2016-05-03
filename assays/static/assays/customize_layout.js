@@ -876,7 +876,7 @@ $(document).ready(function () {
             layout_id = delete_link.first().attr('href').split('/')[4];
             get_layout_data(layout_id);
         }
-        else{
+        else {
             layout_id = Math.floor(window.location.href.split('/')[5]);
             get_layout_data(layout_id);
         }

@@ -6,4 +6,3 @@ class DrugTrialResource(resources.ModelResource):
 
     class Meta(object):
         model = DrugTrial
-

@@ -10,6 +10,7 @@ class OpenFDACompoundIndex(indexes.SearchIndex, indexes.Indexable):
     def get_model(self):
         return OpenFDACompound
 
+
 class DrugTrialIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.NgramField(document=True, use_template=True)
 

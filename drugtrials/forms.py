@@ -1,12 +1,14 @@
 from django import forms
 
+
 class DrugTrialForm(forms.ModelForm):
 
     class Meta(object):
         widgets = {
-                'description': forms.Textarea(attrs={'cols':70, 'rows': 10}),
-                'condition': forms.Textarea(attrs={'cols':70, 'rows': 10}),
+                'description': forms.Textarea(attrs={'cols': 70, 'rows': 10}),
+                'condition': forms.Textarea(attrs={'cols': 70, 'rows': 10}),
         }
+
 
 class TestResultForm(forms.ModelForm):
     """Size the text input boxes"""

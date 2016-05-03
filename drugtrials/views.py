@@ -6,7 +6,7 @@ from django.template import RequestContext
 
 
 class DrugTrialList(ListView):
-    #model = FindingResult
+    # model = FindingResult
     template_name = 'drugtrials/drugtrial_list.html'
 
     def get_queryset(self):
@@ -202,7 +202,7 @@ def compare_adverse_events(request, *args, **kwargs):
     )
 
     # Alternative call
-    #compounds = Compound.objects.filter(compoundadverseevent_set__isnull=False)
+    # compounds = Compound.objects.filter(compoundadverseevent_set__isnull=False)
 
     adverse_events = AdverseEvent.objects.all().prefetch_related(
         'organ'
@@ -220,7 +220,6 @@ def compare_adverse_events(request, *args, **kwargs):
 
     for compound in compounds:
         compound.frequency = sum(compound_frequency.get(compound.id, [0]))
-
 
     # Should I even bother putting events (perhaps even compounds) into the context?
     c.update({
