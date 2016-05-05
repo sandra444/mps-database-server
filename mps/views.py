@@ -57,7 +57,7 @@ def auth_view(request):
     next = request.POST.get('next', '')
     user = auth.authenticate(username=username, password=password)
 
-    if user is not None:
+    if user is not None and user.is_active:
         auth.login(request, user)
         if next:
             return HttpResponseRedirect(next)
