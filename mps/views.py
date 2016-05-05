@@ -47,7 +47,7 @@ def login(request):
         return HttpResponseRedirect("/")
     c = RequestContext(request)
     c.update(csrf(request))
-    c.update({'next':request.GET.get('next', '')})
+    c.update({'next': request.GET.get('next', '')})
     return render_to_response('login.html', c)
 
 
@@ -85,7 +85,7 @@ def logout(request):
 
 
 def search(request):
-    app = request.POST.get('app','')
+    app = request.POST.get('app', '')
     search_term = request.POST.get('search_term', '')
 
     bioactivities = {
@@ -139,7 +139,7 @@ def custom_search(request):
     sqs = SearchQuerySet().exclude(group__in=Group.objects.all())
 
     if request.user.groups.all():
-          sqs = sqs | SearchQuerySet().filter(group__in=request.user.groups.all())
+        sqs = sqs | SearchQuerySet().filter(group__in=request.user.groups.all())
 
     view = search_view_factory(
         template='search/search.html',
