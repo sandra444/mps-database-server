@@ -9,22 +9,48 @@
     <p class="error">Sorry, that's not a valid username or password</p>
   {% endif %}
 
-  <form action="/accounts/auth/" method="post">{% csrf_token %}
+  <form action="/accounts/auth/" method="post">
+    {% csrf_token %}
 
-        <label for="username">User name:</label>
-        <div class="input-group">
-            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-            <input type="text" name="username" value="" class="form-control" id="username" placeholder="User name">
-        </div>
-        <label for="password">Password:</label>
-        <div class="input-group">
-            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-            <input type="password" name="password" class="form-control" value="" id="password" placeholder="Password">
-        </div>
-        {# Used to move to the next page #}
-        <input type="hidden" name="next" value="{{next}}" />
+    <label for="username">Username:</label>
+    <div class="input-group">
+      <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+      <input type="text" name="username" value="" class="form-control" id="username" placeholder="User name">
+    </div>
 
-        <br>
-        <button id="submit" type="submit" class="btn btn-primary btn-lg btn-block">Login</button>
+    <br>
+
+    <label for="password">Password:</label>
+    <div class="input-group">
+      <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+      <input type="password" name="password" class="form-control" value="" id="password" placeholder="Password">
+    </div>
+    {# Used to move to the next page #}
+    <input type="hidden" name="next" value="{{ next }}" />
+
+    <br>
+    <button id="submit" type="submit" class="btn btn-primary btn-lg btn-block">Login</button>
+
+    <br>
+    <div class="well">
+      <div class="row">
+        <div class="col-sm-4 col-md-3 text-success">
+          <i class="glyphicon glyphicon-plus"></i>
+          Don't have an account?
+        </div>
+        <div class="col-sm-8 col-md-9">
+          <a href="{% url 'registration_register' %}">Click here to register</a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-4 col-md-3 text-warning">
+          <i class="glyphicon glyphicon-pencil"></i>
+          Forgot your password?
+        </div>
+        <div class="col-sm-8 col-md-9">
+          <a href="{% url 'auth_password_reset' %}">Click here to reset your password</a>
+        </div>
+      </div>
+    </div>
   </form>
 {% endblock %}

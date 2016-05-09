@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+<li class="active">Registration</li>
+{% endblock %}
+
+{% block content %}
+{% if form.errors %}
+    <div class="alert alert-danger" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error:</span>
+        Sorry, registration failed. Try again.
+    </div>
+{% endif %}
+<form method="post" action=".">
+  {% csrf_token %}
+
+  <legend>
+    <h1>
+      Register
+    </h1>
+  </legend>
+
+  <label for="username">Username:</label>
+  <div class="input-group">
+    <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+    <input required type="text" name="username" class="form-control" value="" id="id_username" placeholder="Username">
+  </div>
+  <span class="help-block">30 characters or fewer. Letters, digits and @/./+/-/_ only.</span>
+
+  <label for="email">Email:</label>
+  <div class="input-group">
+    <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
+    <input required type="email" name="email" class="form-control" value="" id="id_email" placeholder="Email">
+  </div>
+  <span class="help-block">Please enter your Email address.</span>
+
+  <label for="password1">Password:</label>
+  <div class="input-group">
+    <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+    <input required type="password" name="password1" class="form-control" value="" id="id_password1" placeholder="Password">
+  </div>
+
+  <br>
+
+  <label for="password2">Confirm Password:</label>
+  <div class="input-group">
+    <span class="input-group-addon"><i class="glyphicon glyphicon-ok"></i></span>
+    <input required type="password" name="password2" class="form-control" value="" id="id_password2" placeholder="Confirm Password">
+  </div>
+  <span class="help-block">Enter the same password as above, for verification.</span>
+
+  <br>
+  <button id="submit" type="submit" class="btn btn-primary btn-lg btn-block">Register</button>
+  <br>
+</form>
+{% endblock %}
