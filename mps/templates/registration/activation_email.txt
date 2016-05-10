@@ -8,3 +8,5 @@ The above link is valid for {{ expiration_days }} days.
 
 Thank you very much,
 The MPS Database Team
+
+***PLEASE DO NOT REPLY TO THIS EMAIL***
