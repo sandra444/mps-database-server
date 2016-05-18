@@ -96,7 +96,7 @@ $(document).ready(function () {
 
     function getReadout() {
         $.ajax({
-            url: "/assays_ajax",
+            url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: {
@@ -392,6 +392,3 @@ $(document).ready(function () {
         date.datepicker("setDate", curr_date);
     }
 });
-
-
-

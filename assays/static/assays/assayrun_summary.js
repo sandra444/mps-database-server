@@ -152,7 +152,7 @@ $(document).ready(function() {
 
     function get_readouts(current_key) {
         $.ajax({
-            url: "/assays_ajax",
+            url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: {

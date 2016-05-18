@@ -51,10 +51,10 @@ urlpatterns = patterns('',
 
 
                        # BEGIN old-style API
-                       url(r'^search_ajax$', 'mps.ajax.ajax'),
-                       url(r'^assays_ajax$', 'assays.ajax.ajax'),
-                       url(r'^compounds_ajax$', 'compounds.ajax.ajax'),
-                       url(r'^cellsamples_ajax$', 'cellsamples.ajax.ajax'),
+                       url(r'^search_ajax/$', 'mps.ajax.ajax'),
+                       url(r'^assays_ajax/$', 'assays.ajax.ajax'),
+                       url(r'^compounds_ajax/$', 'compounds.ajax.ajax'),
+                       url(r'^cellsamples_ajax/$', 'cellsamples.ajax.ajax'),
                        # END old-style API
 
                        url(r'^admin/doc/',
@@ -76,4 +76,3 @@ urlpatterns = patterns('',
 # rest_framework.urls' with the 'rest_framework' namespace.
 
 urlpatterns += staticfiles_urlpatterns()
-

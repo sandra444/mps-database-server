@@ -66,7 +66,7 @@ $(document).ready(function () {
         var setup_id = setup.val();
         if (setup_id) {
             $.ajax({
-                url: "/assays_ajax",
+                url: "/assays_ajax/",
                 type: "POST",
                 dataType: "json",
                 data: {
@@ -305,7 +305,7 @@ $(document).ready(function () {
 
     function get_layout_data(setup_id) {
         $.ajax({
-            url: "/assays_ajax",
+            url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: {
@@ -841,7 +841,7 @@ $(document).ready(function () {
 
     function get_existing_readout(readout_id) {
         $.ajax({
-            url: "/assays_ajax",
+            url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: {

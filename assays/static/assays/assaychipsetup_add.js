@@ -146,7 +146,7 @@ $(document).ready(function() {
     function get_organ_models(device) {
         if (device) {
             $.ajax({
-                url: "/assays_ajax",
+                url: "/assays_ajax/",
                 type: "POST",
                 dataType: "json",
                 data: {
@@ -190,7 +190,7 @@ $(document).ready(function() {
     function get_protocols(organ_model) {
         if (organ_model) {
             $.ajax({
-                url: "/assays_ajax",
+                url: "/assays_ajax/",
                 type: "POST",
                 dataType: "json",
                 data: {
@@ -234,7 +234,7 @@ $(document).ready(function() {
     function display_protocol(protocol) {
         if (protocol) {
             $.ajax({
-                url: "/assays_ajax",
+                url: "/assays_ajax/",
                 type: "POST",
                 dataType: "json",
                 data: {

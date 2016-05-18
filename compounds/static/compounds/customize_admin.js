@@ -107,7 +107,7 @@ $(document).ready(function () {
     function caller(selection, chemblid, middleware_token) {
 
         return $.ajax({
-            url: "/compounds_ajax",
+            url: "/compounds_ajax/",
             type: "POST",
             dataType: "json",
             data: {
@@ -170,7 +170,7 @@ $(document).ready(function () {
 
     function get_drugbank_data() {
         $.ajax({
-            url: "/compounds_ajax",
+            url: "/compounds_ajax/",
             type: "POST",
             dataType: "json",
             data: {
@@ -217,7 +217,7 @@ $(document).ready(function () {
             .text('Loading...');
 
         $.ajax({
-            url: "/compounds_ajax",
+            url: "/compounds_ajax/",
             type: "POST",
             dataType: "json",
             data: {

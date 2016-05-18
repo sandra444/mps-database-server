@@ -177,7 +177,7 @@ $(document).ready(function () {
     // AJAX call for getting data
     function get_data() {
         $.ajax({
-            url: "/compounds_ajax",
+            url: "/compounds_ajax/",
             type: "POST",
             dataType: "json",
             data: {

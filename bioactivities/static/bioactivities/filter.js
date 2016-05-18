@@ -91,7 +91,7 @@ $(document).ready(function () {
         $("#selection_form :input").prop("disabled", true);
 
         $.ajax({
-            url: '/bioactivities/all_data',
+            url: '/bioactivities/all_data/',
             type: "GET",
             dataType: "json",
             data: {

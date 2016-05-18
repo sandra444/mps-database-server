@@ -17,7 +17,7 @@ $(document).ready(function () {
         var device_id = device.val();
         if (device_id) {
             $.ajax({
-                url: "/assays_ajax",
+                url: "/assays_ajax/",
                 type: "POST",
                 dataType: "json",
                 data: {
@@ -116,7 +116,7 @@ $(document).ready(function () {
         clone = clone || false;
 
         $.ajax({
-            url: "/assays_ajax",
+            url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: {
@@ -285,7 +285,7 @@ $(document).ready(function () {
 
     function get_well_type_selector() {
         $.ajax({
-            url: "/assays_ajax",
+            url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: {
@@ -616,7 +616,7 @@ $(document).ready(function () {
                 else {
                     alert('There was a problem processing the compound');
 //                    $.ajax({
-//                        url: "/compounds_ajax",
+//                        url: "/compounds_ajax/",
 //                        type: "POST",
 //                        dataType: "json",
 //                        data: {
@@ -813,7 +813,7 @@ $(document).ready(function () {
 
     function clone_base_layout(layout_id, base_only) {
         $.ajax({
-            url: "/assays_ajax",
+            url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: {

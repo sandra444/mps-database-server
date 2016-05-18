@@ -22,7 +22,7 @@ $(document).ready(function () {
         var layout_id = layout.val();
         if (layout_id) {
             $.ajax({
-                url: "/assays_ajax",
+                url: "/assays_ajax/",
                 type: "POST",
                 dataType: "json",
                 data: {
@@ -107,7 +107,7 @@ $(document).ready(function () {
 
     function get_layout_data(layout_id) {
         $.ajax({
-            url: "/assays_ajax",
+            url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: {

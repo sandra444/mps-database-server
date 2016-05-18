@@ -29,7 +29,7 @@ $(document).ready(function () {
     function caller(selection, chemblid, middleware_token) {
 
         return $.ajax({
-            url: "/compounds_ajax",
+            url: "/compounds_ajax/",
             type: "POST",
             dataType: "json",
             data: {
