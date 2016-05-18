@@ -12,7 +12,7 @@ $(function() {
 
     function get_compounds() {
         $.ajax({
-            url: "/compounds_ajax",
+            url: "/compounds_ajax/",
             type: "POST",
             dataType: "json",
             data: {

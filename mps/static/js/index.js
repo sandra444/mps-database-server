@@ -22,7 +22,7 @@ $(function() {
     $("#id_search_term").autocomplete({
         source: function (request, response) {
             $.ajax({
-                url: "/search_ajax",
+                url: "/search_ajax/",
                 type: "POST",
                 dataType: "json",
                 data: {

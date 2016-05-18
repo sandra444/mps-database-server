@@ -22,7 +22,7 @@ $(function() {
 
     function whittle_subtype(cell_type) {
         $.ajax({
-            url: "/cellsamples_ajax",
+            url: "/cellsamples_ajax/",
             type: "POST",
             dataType: "json",
             data: {

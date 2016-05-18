@@ -24,7 +24,11 @@ urlpatterns = patterns(
     url(r'^accounts/auth/$',  'mps.views.auth_view', name='auth'),
     url(r'^accounts/logout/$', 'mps.views.logout', name='auth_logout'),
     url(r'^accounts/loggedin/$', 'mps.views.loggedin', name='auth_loggedin'),
-    url(r'^accounts/invalid/$', 'mps.views.invalid_login', name='auth_invalid'),
+    url(
+        r'^accounts/invalid/$',
+        'mps.views.invalid_login',
+        name='auth_invalid'
+    ),
     url(
         r'^password_change/$',
         'django.contrib.auth.views.password_change',
@@ -126,10 +130,10 @@ urlpatterns = patterns(
 
 
     # BEGIN old-style API
-    url(r'^search_ajax$', 'mps.ajax.ajax'),
-    url(r'^assays_ajax$', 'assays.ajax.ajax'),
-    url(r'^compounds_ajax$', 'compounds.ajax.ajax'),
-    url(r'^cellsamples_ajax$', 'cellsamples.ajax.ajax'),
+    url(r'^search_ajax/$', 'mps.ajax.ajax'),
+    url(r'^assays_ajax/$', 'assays.ajax.ajax'),
+    url(r'^compounds_ajax/$', 'compounds.ajax.ajax'),
+    url(r'^cellsamples_ajax/$', 'cellsamples.ajax.ajax'),
     # END old-style API
 
     url(

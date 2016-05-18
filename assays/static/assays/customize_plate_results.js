@@ -17,7 +17,7 @@ $(document).ready(function () {
         var readout_id = readout.val();
         if (readout_id) {
             $.ajax({
-                url: "/assays_ajax",
+                url: "/assays_ajax/",
                 type: "POST",
                 dataType: "json",
                 data: {
@@ -103,7 +103,7 @@ $(document).ready(function () {
 
     function get_layout_data(readout_id) {
         $.ajax({
-            url: "/assays_ajax",
+            url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: {
@@ -139,7 +139,7 @@ $(document).ready(function () {
 
     function get_existing_readout(readout_id) {
         $.ajax({
-            url: "/assays_ajax",
+            url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: {
@@ -269,4 +269,3 @@ $(document).ready(function () {
         });
     });
 });
-

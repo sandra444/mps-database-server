@@ -73,7 +73,7 @@ $(document).ready(function () {
     $("#id_q").autocomplete({
         source: function (request, response) {
             $.ajax({
-                url: "/search_ajax",
+                url: "/search_ajax/",
                 type: "POST",
                 dataType: "json",
                 data: {

@@ -13,7 +13,7 @@ $(document).ready(function () {
     function get_center_id() {
         if (group.val()) {
             $.ajax({
-                url: "/assays_ajax",
+                url: "/assays_ajax/",
                 type: "POST",
                 dataType: "json",
                 data: {

@@ -7,7 +7,7 @@ function whittle(master,master_id,subject,next_model,next_filter) {
 
     if (master && master_id && subject) {
         $.ajax({
-            url: "/assays_ajax",
+            url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: {
