@@ -50,6 +50,10 @@ $(document).ready(function () {
 
     // This function filters the dataTable rows
     $.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
+        if (oSettings.nTable.getAttribute('id') != 'compounds') {
+            return true;
+        }
+
         for (var filter in filters) {
             if (filters[filter] && aData[8].indexOf(filter) > -1) {
                 return true;
