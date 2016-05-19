@@ -26,6 +26,7 @@ $(document).ready(function () {
     function addChart(id,name,timeUnits,valueUnits) {
 
         $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 2.5%;margin-left: -100%px;">')
+            .addClass('chart-container')
             .appendTo('#extra');
 
         charts.push(

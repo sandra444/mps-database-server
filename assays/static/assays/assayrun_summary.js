@@ -57,14 +57,14 @@ $(document).ready(function() {
                 charts.append(previous
                     .append($('<div>')
                         .attr('id', 'chart_' + assay_id)
-                        .addClass('col-sm-6 no-padding')
+                        .addClass('col-sm-6 no-padding chart-container')
                     )
                 );
             }
             else {
                 previous.append($('<div>')
                     .attr('id', 'chart_' + assay_id)
-                    .addClass('col-sm-6 no-padding')
+                    .addClass('col-sm-6 no-padding chart-container')
                 );
                 previous = null;
             }
