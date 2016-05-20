@@ -52,6 +52,21 @@
   <span class="help-block">Enter the same password as above, for verification.</span>
 
   <br>
+
+  <div class="well well-lg">
+    <label for="captcha">Please Type What You See</label>
+    <div class="input-group">
+      {{ form.captcha }}
+    </div>
+    {% if form.captcha.errors %}
+      <span class="text-danger">
+        <span class="glyphicon glyphicon-remove"></span>
+          Please try again.
+      </span>
+    {% endif %}
+  </div>
+
+  <br>
   <button id="submit" type="submit" class="btn btn-primary btn-lg btn-block">Register</button>
   <br>
 </form>

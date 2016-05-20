@@ -6,10 +6,15 @@
 
 {% block content %}
   {% if form.errors %}
-    <p class="error">Sorry, that's not a valid username or password</p>
+    <div class="alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      Sorry, that's not a valid username or password.
+    </div>
+    <p class="error"></p>
   {% endif %}
 
-  <form action="/accounts/auth/" method="post">
+  <form action="." method="post">
     {% csrf_token %}
 
     <label for="username">Username:</label>

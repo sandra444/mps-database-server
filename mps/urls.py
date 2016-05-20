@@ -6,7 +6,8 @@ import debug_toolbar
 from mps import settings
 
 # from .views import CustomSearch
-from .views import custom_search
+from .views import *
+from .forms import *
 
 # For registration
 from django.views.generic.base import TemplateView
@@ -20,15 +21,19 @@ urlpatterns = patterns(
     url(r'^$', 'mps.views.main'),
 
     # user auth urls
-    url(r'^accounts/login/$',  'mps.views.login', name='auth_login'),
-    url(r'^accounts/auth/$',  'mps.views.auth_view', name='auth'),
-    url(r'^accounts/logout/$', 'mps.views.logout', name='auth_logout'),
-    url(r'^accounts/loggedin/$', 'mps.views.loggedin', name='auth_loggedin'),
     url(
-        r'^accounts/invalid/$',
-        'mps.views.invalid_login',
-        name='auth_invalid'
+        r'^accounts/login/$',
+        auth_views.login,
+        {'template_name': 'login.html'},
+        name='auth_login'
     ),
+    url(
+        r'^accounts/logout/$',
+        auth_views.logout,
+        {'template_name': 'logout.html'},
+        name='auth_logout'
+    ),
+    url(r'^accounts/loggedin/$', 'mps.views.loggedin', name='auth_loggedin'),
     url(
         r'^password_change/$',
         'django.contrib.auth.views.password_change',
@@ -59,7 +64,9 @@ urlpatterns = patterns(
     ),
     url(
         r'^register/$',
-        RegistrationView.as_view(),
+        RegistrationView.as_view(
+            form_class=CaptchaRegistrationForm
+        ),
         name='registration_register'
     ),
     url(
@@ -81,8 +88,11 @@ urlpatterns = patterns(
     url(
         r'^password/reset/$',
         auth_views.password_reset,
-        {'post_reset_redirect': 'auth_password_reset_done',
-         'email_template_name': 'registration/password_reset_email.txt'},
+        {
+            'post_reset_redirect': 'auth_password_reset_done',
+            'email_template_name': 'registration/password_reset_email.txt',
+            'password_reset_form': CaptchaResetForm,
+        },
         name='auth_password_reset'
     ),
     url(
@@ -103,9 +113,8 @@ urlpatterns = patterns(
         name='auth_password_reset_done'
     ),
 
-    # Comment out captchas for now
     # Captchas
-    # url(r'^captcha/', include('captcha.urls')),
+    url(r'^captcha/', include('captcha.urls')),
 
     # Help
     url(r'^help/', 'mps.views.mps_help'),

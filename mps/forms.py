@@ -1,7 +1,9 @@
 from django import forms
-# from django.contrib.auth.models import User
-# from django.contrib.auth.forms import UserCreationForm
-# from captcha.fields import CaptchaField
+from captcha.fields import CaptchaField
+from registration.forms import RegistrationFormUniqueEmail
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.models import User
+
 
 class SearchForm(forms.Form):
     app = forms.CharField(max_length=50)
@@ -11,7 +13,7 @@ class SearchForm(forms.Form):
     pubchem = forms.BooleanField(required=False)
     exclude_targetless = forms.BooleanField(required=False)
     exclude_organismless = forms.BooleanField(required=False)
-    search_term  = forms.CharField(max_length=500, required=False)
+    search_term = forms.CharField(max_length=500, required=False)
 
     def clean(self):
         super(SearchForm, self).clean()
@@ -22,24 +24,25 @@ class SearchForm(forms.Form):
         name = self.cleaned_data.get('name', '')
 
         if app == "Bioactivities" and not any([compound, target, name]):
-            raise forms.ValidationError('You must have at least one search term')
+            raise forms.ValidationError(
+                'You must have at least one search term'
+            )
 
         return self.cleaned_data
 
-# class MyRegistrationForm(UserCreationForm):
-#     email = forms.EmailField(required=True)
-#     captcha = CaptchaField()
-#
-#     class Meta:
-#         model = User
-#         fields = ('username', 'email', 'password1', 'password2', 'captcha')
-#
-#     def save(self, commit=True):
-#         user = super(MyRegistrationForm, self).save(commit=False)
-#         user.email = self.cleaned_data['email']
-#         # user.set_password(self.cleaned_data['password1'])
-#
-#         if commit:
-#             user.save()
-#
-#         return user
+
+# Add captcha to registration form
+class CaptchaRegistrationForm(RegistrationFormUniqueEmail):
+    captcha = CaptchaField()
+
+
+# Add captcha to reset form
+class CaptchaResetForm(PasswordResetForm):
+    captcha = CaptchaField()
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if not User.objects.filter(email__iexact=email, is_active=True).exists():
+            raise forms.ValidationError("There is no user registered with the specified email address!")
+
+        return email
