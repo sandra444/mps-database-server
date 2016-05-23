@@ -7,11 +7,8 @@ if 'gravatar' in settings.INSTALLED_APPS:
     from gravatar.templatetags.gravatar_tags import gravatar_for_user
 
 else:
-    gravatar_url = 'http://www.gravatar.com/'
-
+    # Just use a glyphicon for users
     def gravatar_for_user(user, size=80):
-        size_param = urllib.urlencode({'s': str(size)})
-        email = md5(user.email).hexdigest()
-        url = '%savatar/%s/?%s' % (gravatar_url, email, size_param)
+        url = '/static/img/glyphicons-user.png'
 
         return url
