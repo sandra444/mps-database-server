@@ -50,7 +50,7 @@ $(document).ready(function () {
 
     // Convert ID to valid selector
     function valid_selector(id) {
-        return "#" + id.replace(/(:|\.|\[|\]|,)/g, "\\$1");
+        return "#" + id.replace(/(:|\.|\[|\]|,|'|\(|\))/g, "\\$1");
     }
 
     // This function filters the dataTable rows
@@ -173,7 +173,7 @@ $(document).ready(function () {
         x.domain([0, x_domain]);
         y.domain([0, y_domain]);
 
-        d3.select(elem_id)
+        d3.select(valid_selector(elem_id))
             .append('svg')
             .attr('width', width)
             .attr('height', height)
@@ -308,7 +308,7 @@ $(document).ready(function () {
             for (var assay in plot) {
                 for (var concentration in plot[assay]) {
                     sparkline(
-                        '#' + compound + '_' + assay + '_' + concentration,
+                        compound + '_' + assay + '_' + concentration,
                         plot[assay][concentration],
                         x_max[assay],
                         y_max[assay]
