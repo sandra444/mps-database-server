@@ -16,14 +16,26 @@
     <legend>
         <h1>
             {{ object.name}}
-            <a href="/compounds/{{ next }}" class="btn btn-primary btn-large pull-right">
-                Next
-                <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-            </a>
-            <a href="/compounds/{{ previous }}" class="btn btn-primary btn-large pull-right">
-                <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-                Previous
-            </a>
+            <span class="hidden-xs hidden-sm">
+                <a href="/compounds/{{ next }}" class="btn btn-primary btn-large pull-right">
+                    Next
+                    <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+                </a>
+                <a href="/compounds/{{ previous }}" class="btn btn-primary btn-large pull-right">
+                    <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                    Previous
+                </a>
+            </span>
+            <div class="row text-center hidden-md hidden-lg">
+                <a href="/compounds/{{ previous }}" class="btn btn-primary btn-large">
+                    <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                    Previous
+                </a>
+                <a href="/compounds/{{ next }}" class="btn btn-primary btn-large">
+                    Next
+                    <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+                </a>
+            </div>
         </h1>
     </legend>
 
@@ -396,6 +408,7 @@
     {% endif %}
 
     {% if object.compoundtarget_set.all %}
+        <div class="padded-bottom">
         <legend>Targets</legend>
         <table hidden id="target_table" class="display" cellspacing="0" width="100%">
             <thead>
@@ -423,5 +436,6 @@
         </table>
 
         <script src="{% static "js/display_datatable.js" %}"></script>
+        </div>
     {% endif %}
 {% endblock %}

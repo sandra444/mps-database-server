@@ -15,14 +15,26 @@
         <h1>Adverse Events for
             <br>
             <a id="compound" href="/compounds/{{ object.compound.id }}">{{ object }}</a>
-            <a href="/adverse_events/{{ next }}" class="btn btn-primary btn-large pull-right">
-                Next
-                <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-            </a>
-            <a href="/adverse_events/{{ previous }}" class="btn btn-primary btn-large pull-right">
-                <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-                Previous
-            </a>
+            <span class="hidden-xs hidden-sm">
+                <a href="/adverse_events/{{ next }}" class="btn btn-primary btn-large pull-right">
+                    Next
+                    <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+                </a>
+                <a href="/adverse_events/{{ previous }}" class="btn btn-primary btn-large pull-right">
+                    <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                    Previous
+                </a>
+            </span>
+            <div class="row text-center hidden-md hidden-lg">
+                <a href="/adverse_events/{{ previous }}" class="btn btn-primary btn-large ">
+                    <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                    Previous
+                </a>
+                <a href="/adverse_events/{{ next }}" class="btn btn-primary btn-large">
+                    Next
+                    <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+                </a>
+            </div>
         </h1>
     </legend>
 
@@ -173,7 +185,7 @@
 
     <br>
 
-    <div id="plot" style="height:400px;"></div>
+    <div id="plot" class="large-chart-container" style="height:400px;"></div>
 
     <legend><b>Events by Range</b></legend>
 
@@ -183,6 +195,7 @@
         Error: Please try a different query or submit again later
     </div>
 
+    <div class="padded-bottom">
     <div class="form-group row">
         <div class="col-md-3">
             <label for="start_date" class="control-label">Start Date [yyyy-mm-dd]</label>
@@ -213,4 +226,5 @@
         <tbody id="ae_body">
         </tbody>
     </table>
+  </div>
 {% endblock %}

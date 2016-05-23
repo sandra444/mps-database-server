@@ -1193,6 +1193,7 @@ class AssayLayoutList(LoginRequiredMixin, ListView):
             'device'
         )
 
+
 class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
     model = AssayLayout
     form_class = AssayLayoutForm
@@ -1614,6 +1615,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
 # TODO NEED TO ADD TEMPLATE
 class AssayPlateReadoutDetail(DetailRedirectMixin, DetailView):
     model = AssayPlateReadout
+
 
 class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     model = AssayPlateReadout

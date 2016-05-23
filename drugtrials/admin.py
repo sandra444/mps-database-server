@@ -110,7 +110,7 @@ class FindingResultInline(admin.TabularInline):
     verbose_name = 'Organ Finding'
     verbose_name_plural = 'Organ Findings'
     fields = ('finding_name', 'descriptor', 'finding_time', 'time_units',
-               'result', 'severity', 'frequency', 'value', 'value_units',)
+              'result', 'severity', 'frequency', 'value', 'value_units',)
     extra = 0
 
     class Media(object):

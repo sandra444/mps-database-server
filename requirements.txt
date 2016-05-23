@@ -1,7 +1,7 @@
 matplotlib
 django-uwsgi-cache
 networkx
-Django==1.8.12
+Django==1.8.13
 Jinja2
 Markdown
 MarkupSafe
@@ -60,8 +60,7 @@ wsgiref
 wstools
 django-import-export
 django-alphafilter
-#django-simple-captcha
-#qhonuskan-votes
+django-simple-captcha
 django-contrib-comments
 #Using whoosh for now, may switch to a more sophisticated search engine later
 whoosh
@@ -77,3 +76,4 @@ chardet
 # Alternative html parser used in conjunction with BeautifulSoup
 html5lib
 urllib3
+django-registration

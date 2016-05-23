@@ -6,13 +6,13 @@ from assays.forms import StudyConfigurationForm, AssayChipReadoutInlineFormset, 
 from django.http import HttpResponseRedirect
 
 from assays.models import *
-from compounds.models import Compound
+# from compounds.models import Compound
 from mps.base.admin import LockableAdmin
 from assays.resource import *
-from import_export.admin import ImportExportModelAdmin
-from compounds.models import *
-import unicodedata
-from io import BytesIO
+# from import_export.admin import ImportExportModelAdmin
+# from compounds.models import *
+# import unicodedata
+# from io import BytesIO
 import ujson as json
 # I use regular expressions for a string split at one point
 import re
@@ -22,7 +22,7 @@ from urllib import unquote
 from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 import os
 import xlsxwriter
-from xlsxwriter.utility import xl_col_to_name
+# from xlsxwriter.utility import xl_col_to_name
 
 
 def modify_templates():
@@ -994,7 +994,7 @@ class AssayPlateReadoutAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('id',
-                    #'assay_device_id',
+                    # 'assay_device_id',
                     # 'cell_sample',
                     'readout_start_time',)
     fieldsets = (
@@ -1086,7 +1086,7 @@ class AssayPlateReadoutAdmin(LockableAdmin):
             # pass the upload file name to the CSV reader if a file exists
             parseReadoutCSV(obj, request.FILES['file'], upload_type)
 
-        #Need to delete entries when a file is cleared
+        # Need to delete entries when a file is cleared
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
             removeExistingReadout(obj)
 
@@ -1098,6 +1098,7 @@ class AssayPlateReadoutAdmin(LockableAdmin):
         pass
 
 admin.site.register(AssayPlateReadout, AssayPlateReadoutAdmin)
+
 
 # Case and point for why you should not just copy code without carefully reading it
 # TODO these remove functions really should not even exist (one line of code?)
@@ -1511,7 +1512,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
         else:
             modify_qc_status_chip(obj, form)
 
-        #Need to delete entries when a file is cleared
+        # Need to delete entries when a file is cleared
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
             removeExistingChip(obj)
 
@@ -1921,7 +1922,7 @@ class StudyConfigurationAdmin(LockableAdmin):
                     'study_format',
                     'media_composition',
                     'hardware_description',
-                    #'image',
+                    # 'image',
                 )
             }
         ),

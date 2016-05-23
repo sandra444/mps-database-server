@@ -10,14 +10,26 @@
     <legend>
         <h1>
             Drug Trial ID #{{ object.id }}
-            <a href="/drugtrials/{{ next }}" class="btn btn-primary btn-large pull-right">
-                Next
-                <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-            </a>
-            <a href="/drugtrials/{{ previous }}" class="btn btn-primary btn-large pull-right">
-                <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-                Previous
-            </a>
+            <span class="hidden-xs hidden-sm">
+                <a href="/drugtrials/{{ next }}" class="btn btn-primary btn-large pull-right">
+                    Next
+                    <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+                </a>
+                <a href="/drugtrials/{{ previous }}" class="btn btn-primary btn-large pull-right">
+                    <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                    Previous
+                </a>
+            </span>
+            <div class="row text-center hidden-md hidden-lg">
+                <a href="/drugtrials/{{ previous }}" class="btn btn-primary btn-large">
+                    <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                    Previous
+                </a>
+                <a href="/drugtrials/{{ next }}" class="btn btn-primary btn-large">
+                    Next
+                    <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+                </a>
+            </div>
         </h1>
     </legend>
 

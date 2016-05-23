@@ -1,7 +1,8 @@
 from django.conf.urls import patterns, url
 from .views import *
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     # Proposed URLS:
     # User can view drugtrials
     url(r'^drugtrials/$', DrugTrialList.as_view(), name='drugtrial_list'),

@@ -48,8 +48,17 @@ $(document).ready(function () {
         'Unassigned': true
     };
 
+    // Convert ID to valid selector
+    function valid_selector(id) {
+        return "#" + id.replace(/(:|\.|\[|\]|,)/g, "\\$1");
+    }
+
     // This function filters the dataTable rows
     $.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
+        if (oSettings.nTable.getAttribute('id') != 'compounds') {
+            return true;
+        }
+
         for (var filter in filters) {
             if (filters[filter] && aData[8].indexOf(filter) > -1) {
                 return true;
@@ -264,7 +273,7 @@ $(document).ready(function () {
 
                 var assay_max_time = values.max_time[assay] ? values.max_time[assay]:"-";
                 // Tack this assay on to the header
-                $('#'+compound+'_header').append($('<td>')
+                $(valid_selector(compound+'_header')).append($('<td>')
                     // The use of days here is contrived, actual units to be decided on later
                     .addClass('small')
                     .attr('width', 50)
@@ -275,11 +284,11 @@ $(document).ready(function () {
                     for (var j=0; j<sorted_concentrations.length; j++) {
                         concentration = sorted_concentrations[j];
 
-                        var row_id = compound + '_' + concentration.replace('.', '_');
+                        var row_id = compound + '_' + concentration;
                         // If the concentration does not have a row, add it to the table
-                        if (!$('#' + row_id)[0]) {
+                        if (!$(valid_selector((row_id)))[0]) {
                             // Add the row
-                            $('#' + compound + '_table').append($('<tr>')
+                            $(valid_selector(compound + '_table')).append($('<tr>')
                                 .attr('id', row_id)
                                 .append($('<td>')
                                     .text(concentration.replace('_', ' '))));
@@ -287,9 +296,9 @@ $(document).ready(function () {
                         for (var x=0; x<sorted_assays.length; x++) {
                             var every_assay = sorted_assays[x];
                             // Add a cell for the assay given concentration
-                            if (!$('#' + compound + '_' + every_assay.replace(/\s/g, "_").replace('.', '_') + '_' + concentration.replace(/\s/g, "_").replace('.', '_'))[0]) {
-                                $('#' + row_id).append($('<td>')
-                                    .attr('id', compound + '_' + every_assay.replace(/\s/g, "_").replace('.', '_') + '_' + concentration.replace(/\s/g, "_").replace('.', '_')));
+                            if (!$(valid_selector(compound + '_' + every_assay + '_' + concentration))[0]) {
+                                $(valid_selector(row_id)).append($('<td>')
+                                    .attr('id', compound + '_' + every_assay + '_' + concentration));
                             }
                         }
                     }
@@ -299,7 +308,7 @@ $(document).ready(function () {
             for (var assay in plot) {
                 for (var concentration in plot[assay]) {
                     sparkline(
-                        '#' + compound + '_' + assay.replace(/\s/g, "_").replace('.','_') + '_' + concentration.replace(/\s/g, "_").replace('.','_'),
+                        '#' + compound + '_' + assay + '_' + concentration,
                         plot[assay][concentration],
                         x_max[assay],
                         y_max[assay]

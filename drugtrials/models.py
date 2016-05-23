@@ -293,7 +293,7 @@ class TestResult(models.Model):
         return u''
 
 FREQUENCIES = (
-    ('>= 10%','>= 10% : Very Common'), ('1 - < 10%', '1 - < 10% : Common'),
+    ('>= 10%', '>= 10% : Very Common'), ('1 - < 10%', '1 - < 10% : Common'),
     ('0.1 - < 1%', '0.1 - < 1% : Uncommon'), ('0.01 - < 0.1%', '0.01 - < 0.1% : Rare'),
     ('< 0.01%', '< 0.01% : Very Rare')
 )
@@ -372,7 +372,7 @@ class OpenFDACompound(LockableModel):
     nonclinical_toxicology = models.TextField(blank=True, default='')
 
     # Deemed less than useful
-    #clinical_studies = models.TextField(blank=True, default='')
+    # clinical_studies = models.TextField(blank=True, default='')
     # Deemed less than useful
     # laboratory_tests = models.TextField(blank=True, default='')
 
@@ -394,5 +394,4 @@ class CompoundAdverseEvent(models.Model):
     frequency = models.IntegerField()
 
     def __unicode__(self):
-        return u'{}:{}'.format(self.compound,self.event)
-
+        return u'{}:{}'.format(self.compound, self.event)
