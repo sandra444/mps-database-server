@@ -265,8 +265,8 @@
     {# TODO MAKE SURE TARGETS ARE WORKING #}
     <legend>Targets/Interactions</legend>
 
-    <a id="add_button" class="btn btn-success" role="button">Add Target</a>
-    <table class="table table-striped assays" id="compoundtarget_set-group"  name="inlines">
+    <a id="add_button-compoundtarget_set" class="btn btn-success" role="button">Add Target</a>
+    <table class="table table-striped inlines" id="compoundtarget_set-group"  name="targets">
         <thead>
             <tr>
                 <th>Name</th>
@@ -323,27 +323,27 @@
     </div>
 
     <table class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>ChEMBL ID</th>
-                    <th>Name</th>
-                    <th>Synonyms</th>
-                    <th>Image</th>
-                    <th>Select</th>
-                </tr>
-            </thead>
+        <thead>
+            <tr>
+                <th>ChEMBL ID</th>
+                <th>Name</th>
+                <th>Synonyms</th>
+                <th>Image</th>
+                <th>Select</th>
+            </tr>
+        </thead>
 
-            <tfoot>
-                <tr>
-                    <th>ChEMBL ID</th>
-                    <th>Name</th>
-                    <th>Synonyms</th>
-                    <th>Image</th>
-                    <th>Select</th>
-                </tr>
-            </tfoot>
+        <tfoot>
+            <tr>
+                <th>ChEMBL ID</th>
+                <th>Name</th>
+                <th>Synonyms</th>
+                <th>Image</th>
+                <th>Select</th>
+            </tr>
+        </tfoot>
 
-            <tbody id="chembl_search_results"></tbody>
+        <tbody id="chembl_search_results"></tbody>
     </table>
 </div>
 {% endblock %}

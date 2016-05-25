@@ -12,7 +12,7 @@ $(document).ready(function () {
     var title_property = 'property';
     var add_property = $('#compoundproperty_set-group .inline:last').html();
 
-    $('#add_button_property').click(function() {
+    $('#add_button-compoundproperty_set').click(function() {
         var tag = '<tr class="inline" id="' + title_property + '-' + next_id_property + '">';
         // Use a regular expression to replace all the places where ID is needed
         // In case the RegExp looks a little obfuscated, it means to replace any number of digits that fall between two hyphens
@@ -81,7 +81,7 @@ $(document).ready(function () {
     var title_summary = 'summary';
     var add_summary = $('#compoundsummary_set-group .inline:last').html();
 
-    $('#add_button_summary').click(function() {
+    $('#add_button-compoundsummary_set').click(function() {
         var tag = '<tr class="inline" id="' + title_summary + '-' + next_id_summary + '">';
         // Use a regular expression to replace all the places where ID is needed
         // In case the RegExp looks a little obfuscated, it means to replace any number of digits that fall between two hyphens

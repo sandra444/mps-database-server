@@ -5,7 +5,7 @@
 
 {% block load %}
     <script src="{% static "js/enter_override.js" %}"></script>
-    <script src="{% static "compounds/compound_update.js" %}"></script>
+    <script src="{% static "js/inline_add.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -53,8 +53,8 @@
         {% endfor %}
     {% endif %}
 
-    <a id="add_button_property" class="btn btn-success" role="button">Add Additional Property</a>
-    <table class="table table-striped assays" id="compoundproperty_set-group"  name="inlines_property">
+    <a id="add_button-compoundproperty_set" class="btn btn-success" role="button">Add Additional Property</a>
+    <table class="table table-striped inlines" id="compoundproperty_set-group"  name="inlines_property">
         <thead>
             <tr>
                 <th>Property</th>
@@ -96,8 +96,8 @@
         {% endfor %}
     {% endif %}
 
-    <a id="add_button_summary" class="btn btn-success" role="button">Add Summary</a>
-    <table class="table table-striped assays" id="compoundsummary_set-group"  name="inlines_summary">
+    <a id="add_button-compoundsummary_set" class="btn btn-success" role="button">Add Summary</a>
+    <table class="table table-striped inlines" id="compoundsummary_set-group"  name="inlines_summary">
         <thead>
             <tr>
                 <th>Summary Type</th>
