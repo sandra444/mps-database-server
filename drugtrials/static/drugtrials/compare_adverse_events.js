@@ -98,10 +98,8 @@ $(document).ready(function () {
         adverse_events_table.search('');
         $('input[type=search]').val('');
 
-        adverse_events_table.page.len(-1).draw();
-        compounds_table.page.len(-1).draw();
-
-        $('.checkbox').prop('checked', false);
+        adverse_events_checkboxes.prop('checked', false);
+        compounds_checkboxes.prop('checked', false);
 
         adverse_events = {};
         compounds = {};
@@ -163,6 +161,14 @@ $(document).ready(function () {
         $('.ui-dialog :button').blur();
     }
 
+    function check_selection(value, checkboxes) {
+        $.each(checkboxes, function(index, checkbox) {
+            if (checkbox.value == value) {
+                $(checkbox).prop('checked', true);
+            }
+        });
+    }
+
     function load_selections(selection_index) {
         clear_selections(false);
 
@@ -174,21 +180,17 @@ $(document).ready(function () {
 
         $.each(ae_selections, function(index, adverse_event) {
             adverse_events[adverse_event] = adverse_event;
-            var current_checkbox = $('input[value="' + adverse_event +'"');
-            current_checkbox.prop('checked', true);
+            check_selection(adverse_event, adverse_events_checkboxes);
         });
 
         adverse_events_table.order([[0, 'asc']]);
-        adverse_events_table.page.len(10).draw();
 
         $.each(compound_selections, function(index, compound) {
             compounds[compound] = compound;
-            var current_checkbox = $('input[value="' + compound +'"');
-            current_checkbox.prop('checked', true);
+            check_selection(compound, compounds_checkboxes);
         });
 
         compounds_table.order([[0, 'asc']]);
-        compounds_table.page.len(10).draw();
 
         dialog.dialog('close');
 
@@ -455,6 +457,12 @@ $(document).ready(function () {
     var adverse_events_table = $('#adverse_events').DataTable(table_options);
 
     var compounds_table = $('#compounds').DataTable(table_options);
+
+    var adverse_events_cells = adverse_events_table.cells().nodes();
+    var adverse_events_checkboxes = $(adverse_events_cells).find(':checkbox');
+
+    var compounds_cells = compounds_table.cells().nodes();
+    var compounds_checkboxes = $(compounds_cells).find(':checkbox');
 
     create_initial_plot();
 
