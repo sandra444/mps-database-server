@@ -39,8 +39,8 @@ $(document).ready(function () {
 
         // Prevent user from removing ALL inlines (can cause unexpected behavior)
         if ($("[id^=id_"+current_set_title+"-][id$=-DELETE]").length < 2) {
-            // Uncheck all
-            $("input[name*='DELETE']").prop('checked', false);
+            // Uncheck all in current inline
+            $("[id^=id_"+current_set_title+"-][id$=-DELETE]").prop('checked', false);
             return;
         }
 
