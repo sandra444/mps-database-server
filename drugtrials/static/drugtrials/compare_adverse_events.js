@@ -184,6 +184,7 @@ $(document).ready(function () {
         });
 
         adverse_events_table.order([[0, 'asc']]);
+        adverse_events_table.page.len(10).draw();
 
         $.each(compound_selections, function(index, compound) {
             compounds[compound] = compound;
@@ -191,6 +192,7 @@ $(document).ready(function () {
         });
 
         compounds_table.order([[0, 'asc']]);
+        compounds_table.page.len(10).draw();
 
         dialog.dialog('close');
 
