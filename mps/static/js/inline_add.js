@@ -37,15 +37,15 @@ $(document).ready(function () {
         var current_set_title = this.id.split('_').slice(1).join('_').split('-')[0];
         var current_title = $('#'+current_set_title+'-group').find('.inline')[0].id.split('-')[0];
 
+        // Exit the function if this is an update page (if it has an original, it already exists)
+        if ($('#' + current_title + '-' + id + ' .original')[0]) {
+            return;
+        }
+
         // Prevent user from removing ALL inlines (can cause unexpected behavior)
         if ($("[id^=id_"+current_set_title+"-][id$=-DELETE]").length < 2) {
             // Uncheck all in current inline
             $("[id^=id_"+current_set_title+"-][id$=-DELETE]").prop('checked', false);
-            return;
-        }
-
-        // Exit the function if this is an update page (if it has an original, it already exists)
-        if ($('#' + current_title + '-' + id + ' .original')[0]) {
             return;
         }
 
