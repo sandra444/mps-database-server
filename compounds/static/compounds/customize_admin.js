@@ -184,7 +184,7 @@ $(document).ready(function () {
                 }
                 else {
                     // TODO Think of a better way to generate the rows
-                    var add_button = $('#add_button');
+                    var add_button = $('#add_button-compoundtarget_set');
                     if (add_button[0]) {
                         for (var x in json.targets) {
                             add_button.trigger('click');
@@ -194,7 +194,7 @@ $(document).ready(function () {
                     else {
                         // WHY DOES IT SAY django.jQuery?
                         // It is because Django admin has a namespace for its jQuery copy!
-                        add_button = django.jQuery(django.jQuery('table')[2]).find('a');
+                        add_button = django.jQuery(django.jQuery('table')[0]).find('a');
                         for (var x in json.targets) {
                            add_button.trigger('click');
                         }

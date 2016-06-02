@@ -78,10 +78,8 @@ $(document).ready(function () {
         // Remove search terms
         $('input[type=search]').val('');
         compounds_table.search('');
-        // Show all checkboxes
-        compounds_table.page.len(-1).draw();
         // Uncheck all checkboxes
-        $('.checkbox').prop('checked', false);
+        checkboxes.prop('checked', false);
         // Remove all compounds
         compounds = {};
 
@@ -134,6 +132,14 @@ $(document).ready(function () {
         $('.ui-dialog :button').blur();
     }
 
+    function check_selection(value) {
+        $.each(checkboxes, function(index, checkbox) {
+            if (checkbox.value == value) {
+                $(checkbox).prop('checked', true);
+            }
+        });
+    }
+
     function load_selections(selection_index) {
         clear_selections(false);
 
@@ -144,8 +150,7 @@ $(document).ready(function () {
 
         $.each(compound_selections, function(index, compound) {
             compounds[compound] = compound;
-            var current_checkbox = $('input[value="' + compound +'"');
-            current_checkbox.prop('checked', true);
+            check_selection(compound);
         });
 
         compounds_table.order([[0, 'asc']]);
@@ -412,6 +417,9 @@ $(document).ready(function () {
         ],
         "iDisplayLength": 25
     });
+
+    var cells = compounds_table.cells().nodes();
+    var checkboxes = $(cells).find(':checkbox');
 
     $('.table-filter').click(function() {
         filters['MPS'] = show_mps.prop('checked');

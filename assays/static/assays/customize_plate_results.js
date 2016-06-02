@@ -256,7 +256,7 @@ $(document).ready(function () {
     });
 
     // This is to deal with new inline entries when on the frontend
-    $("#add_button").click(function() {
+    $("#add_button-assayplateresult_set").click(function() {
         changeNew();
     });
 
