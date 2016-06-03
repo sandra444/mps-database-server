@@ -23,7 +23,6 @@ except ImportError:
     postgresql_password = ''
 
 if socket.gethostname() in 'prody':
-
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -36,7 +35,6 @@ if socket.gethostname() in 'prody':
     }
 
 else:
-
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -169,8 +167,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'django.contrib.humanize',
-# South is not supported in Django >= 1.7
-#    'south',
+    # South is not supported in Django >= 1.7
+    # 'south',
     'django_extensions',
 
     # django debug toolbar
@@ -185,7 +183,7 @@ INSTALLED_APPS = (
 
     # Comment out captchas for now
     # Django simple captchas
-    #'captcha',
+    'captcha',
 
     # Django admin alphabetical filter
     'alphafilter',
@@ -209,11 +207,9 @@ INSTALLED_APPS = (
     'resources'
 )
 
-# # This should set all indices to use real time processing
-# # Users will have to pay the toll when adding or deleting indexed objects...
-# # However this is useful to prevent having to use a CRON job
-# # Traffic will probably be fairly low, thus we have (some) instantaneous results with little consequence
-# # This is disabled for the moment and a CRON job will be used for the time being
+# This should set all indices to use real time processing
+# Users will have to pay the toll when adding or deleting indexed objects...
+# This is disabled for the moment and a CRON job will be used for now
 # HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 # For whoosh
@@ -222,7 +218,7 @@ HAYSTACK_CONNECTIONS = {
         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
         'PATH': os.path.join(os.path.dirname(__file__), 'whoosh_index'),
         # can cause problems when dealing with data outside ascii
-        #'INCLUDE_SPELLING': True,
+        # 'INCLUDE_SPELLING': True,
     },
 }
 
@@ -377,5 +373,16 @@ DEBUG_TOOLBAR_CONFIG = {
 # A test runner to run unit tests
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
-# This variable exists to avoid a magic number for the location of the validation starting column
+# This variable exists for the location of the validation starting column
 TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX = 52
+
+# One-week activation window for registration
+ACCOUNT_ACTIVATION_DAYS = 7
+
+# Can be used to shutdown registration, if necessary
+REGISTRATION_OPEN = False
+
+LOGIN_REDIRECT_URL = '/accounts/loggedin/'
+
+# The console EmailBackend will post emails in the console
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

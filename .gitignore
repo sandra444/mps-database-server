@@ -7,4 +7,5 @@
 /.idea
 *.iml
 mps_credentials.py
+additional_credentials.py
 *.log
