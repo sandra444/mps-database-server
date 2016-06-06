@@ -5,7 +5,6 @@
 // TODO NEEDS REFACTOR
 // TODO PREFERRABLY CONSOLIDATE THESE DISPLAY FUNCTION (DO NOT REPEAT YOURSELF)
 $(document).ready(function () {
-
     if (!$('#flag')[0]) {
         alert('Sorry, plate readout uploads are not currently available in the admin.');
     }
@@ -52,14 +51,6 @@ $(document).ready(function () {
     var invalid = {};
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
-
-    // Add commas to number
-    // Special thanks to stack overflow
-    function number_with_commas(x) {
-        var parts = x.toString().split(".");
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        return parts.join(".");
-    }
 
     // Get layout
     function get_device_layout() {
@@ -519,15 +510,7 @@ $(document).ready(function () {
             assay_inline = $('#id_assayplatereadoutassay_set-' + current_inline + '-assay_id');
         }
 
-        var all = csv.split('\n');
-        var lines = [];
-
-        for (var index in all) {
-            var values = all[index].split(',');
-            lines.push(values);
-        }
-
-        all = null;
+        var lines = parse_csv(csv);
 
         // Remove old values
         $('.value').remove();

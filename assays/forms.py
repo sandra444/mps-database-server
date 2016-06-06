@@ -903,7 +903,7 @@ def validate_chip_readout_file(
     # Confirm that there is only one chip_id given if this is not a bulk upload
     if not sheet:
         for line in datalist[headers:]:
-            if line[0] not in chip_assays:
+            if line and line[0] not in chip_assays:
                 raise forms.ValidationError(
                     'Chip ID "{0}" does not match current Chip ID. '
                     'You cannot upload data for multiple chips in this interface. '

@@ -266,12 +266,18 @@ def fetch_chip_readout(request):
     csv = ""
 
     for raw in chip_data:
-        csv += str(chip_name) + ','
+        if ',' in chip_name:
+            csv += '"' + str(chip_name) + '"' + ','
+        else:
+            csv += str(chip_name) + ','
         csv += str(raw.elapsed_time) + ','
         # Add time unit
         csv += str(time_unit) + ','
         csv += str(raw.assay_id.assay_id.assay_short_name) + ','
-        csv += str(raw.field_id) + ','
+        if ',' in raw.field_id:
+            csv += '"' + str(raw.field_id) + '"' + ','
+        else:
+            csv += str(raw.field_id) + ','
         # Format to two decimal places
         value = raw.value
         # Check if None first before format
@@ -285,7 +291,10 @@ def fetch_chip_readout(request):
         # Add value unit
         csv += str(raw.assay_id.readout_unit) + ','
         # End with the quality
-        csv += str(raw.quality) + '\n'
+        if ',' in raw.quality:
+            csv += '"' + str(raw.quality) + '"' + '\n'
+        else:
+            csv += str(raw.quality) + '\n'
 
     data = {}
 

@@ -1,13 +1,4 @@
 $(document).ready(function () {
-
-    // Add commas to number
-    // Special thanks to stack overflow
-    function number_with_commas(x) {
-        var parts = x.toString().split(".");
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        return parts.join(".");
-    }
-
     // Function to repeat a string num number of times
     function repeat(str, num) {
         return (new Array(num+1)).join(str);
@@ -20,11 +11,9 @@ $(document).ready(function () {
         else {
             return true;
         }
-
     }
 
     function addChart(id,name,timeUnits,valueUnits) {
-
         $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 2.5%;margin-left: -100%px;">')
             .addClass('chart-container')
             .appendTo('#extra');
@@ -146,16 +135,7 @@ $(document).ready(function () {
             return;
         }
 
-        var all = csv.split('\n');
-        lines = [];
-
-        for (var index in all) {
-            if (all[index].indexOf(",") > -1) {
-                lines.push(all[index].split(','));
-            }
-        }
-
-        all = null;
+        lines = parse_csv(csv);
 
         //Make table
         var table = exist ? "<table class='layout-table' style='width: 100%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 100%;'><tbody>";
