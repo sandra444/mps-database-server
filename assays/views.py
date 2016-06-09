@@ -810,7 +810,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             formset.save()
             if formset.files.get('file', ''):
                 file = formset.files.get('file', '')
-                parseChipCSV(self.object, file, headers, form)
+                parse_chip_csv(self.object, file, headers, form)
             if data['another']:
                 form = self.form_class(
                     study,
@@ -895,13 +895,13 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Save file if it exists
             if formset.files.get('file', ''):
                 file = formset.files.get('file', '')
-                parseChipCSV(self.object, file, headers, form)
+                parse_chip_csv(self.object, file, headers, form)
             # If no file, try to update the qc_status
             else:
                 modify_qc_status_chip(self.object, form)
             # Clear data if clear is checked
             if self.request.POST.get('file-clear', ''):
-                removeExistingChip(self.object)
+                AssayChipRawData.objects.filter(assay_chip_id=self.object).delete()
             # Otherwise do nothing (the file remained the same)
             return redirect(self.object.get_post_submission_url())
         else:
@@ -1575,7 +1575,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             formset.save()
             if formset.files.get('file', ''):
                 file = formset.files.get('file', '')
-                parseReadoutCSV(self.object, file, upload_type)
+                parse_readout_csv(self.object, file, upload_type)
                 # Check QC
                 modify_qc_status_plate(self.object, form)
             if data['another']:
@@ -1658,10 +1658,11 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Save file if it exists
             if formset.files.get('file', ''):
                 file = formset.files.get('file', '')
-                parseReadoutCSV(self.object, file, upload_type)
+                parse_readout_csv(self.object, file, upload_type)
             # Clear data if clear is checked
             if self.request.POST.get('file-clear', ''):
-                removeExistingReadout(self.object)
+                # remove_existing_readout(self.object)
+                AssayReadout.objects.filter(assay_device_readout=self.object).delete()
             else:
                 # Check QC
                 modify_qc_status_plate(self.object, form)
@@ -2006,7 +2007,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                         readout.save()
 
                         # Note the lack of a form normally used for QC
-                        parseChipCSV(readout, readout.file, headers, None)
+                        parse_chip_csv(readout, readout.file, headers, None)
 
                 elif sheet_type == 'Tabular':
                     # Header if time
@@ -2076,7 +2077,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                         readout.save()
 
                         # Note the lack of a form normally used for QC
-                        parseReadoutCSV(readout, readout.file, 'Tabular')
+                        parse_readout_csv(readout, readout.file, 'Tabular')
 
                 elif sheet_type == 'Block':
                     csv_data = {}
@@ -2123,7 +2124,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                         readout.save()
 
                         # Note the lack of a form normally used for QC
-                        parseReadoutCSV(readout, readout.file, 'Block')
+                        parse_readout_csv(readout, readout.file, 'Block')
 
             return redirect(self.object.get_absolute_url())
         else:

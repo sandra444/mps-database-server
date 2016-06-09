@@ -1,8 +1,20 @@
-import csv
+"""Admin tools for assays alongside helper functions
+
+Note that the code for templates can be found here
+"""
+
+# import csv
 
 from django.contrib import admin
 from django import forms
-from assays.forms import StudyConfigurationForm, AssayChipReadoutInlineFormset, AssayPlateReadoutInlineFormset, label_to_number, process_readout_value, unicode_csv_reader
+from assays.forms import (
+    StudyConfigurationForm,
+    AssayChipReadoutInlineFormset,
+    AssayPlateReadoutInlineFormset,
+    label_to_number,
+    process_readout_value,
+    unicode_csv_reader
+)
 from django.http import HttpResponseRedirect
 
 from assays.models import *
@@ -26,6 +38,8 @@ import xlsxwriter
 
 
 def modify_templates():
+    """Writes totally new templates for chips and both types of plates"""
+
     # Where will I store the templates?
     template_root = MEDIA_ROOT + '/excel_templates/'
 
@@ -284,6 +298,7 @@ def modify_templates():
 
 
 class AssayModelTypeAdmin(LockableAdmin):
+    """Admin for Assay Model Type ('Biochemical')"""
     save_on_top = True
     list_display = ('assay_type_name', 'assay_type_description', 'locked')
     list_per_page = 300
@@ -313,6 +328,7 @@ admin.site.register(AssayModelType, AssayModelTypeAdmin)
 
 
 class AssayModelAdmin(LockableAdmin):
+    """Admin for Assay Model ('ALT')"""
     save_on_top = True
     list_per_page = 300
     list_display = (
@@ -369,6 +385,10 @@ admin.site.register(AssayModel, AssayModelAdmin)
 
 
 class AssayWellTypeAdmin(LockableAdmin):
+    """Admin for Well Types
+
+    Allows us to specify well type and color
+    """
     save_on_top = True
     list_per_page = 300
     list_display = ('colored_display', 'well_description', 'locked')
@@ -400,6 +420,7 @@ admin.site.register(AssayWellType, AssayWellTypeAdmin)
 
 
 class AssayReaderAdmin(LockableAdmin):
+    """Admin for Assay Reader (the device the readout came from)"""
     save_on_top = True
     list_per_page = 300
     list_display = ('reader_name', 'reader_type')
@@ -428,16 +449,20 @@ class AssayReaderAdmin(LockableAdmin):
 admin.site.register(AssayReader, AssayReaderAdmin)
 
 
-class AssayWellInline(admin.TabularInline):
-    model = AssayWell
-    extra = 1
-
-
-# Saving an Assay Layout is somewhat complicated, so a function is useful here (though perhaps not in this file [spaghetti])
+# Saving an Assay Layout is somewhat complicated, so a function is useful here
+# (though perhaps not in this file [spaghetti code])
 # BE CAREFUL! FIELDS THAT ARE NOT IN THE FORM ARE AUTOMATICALLY SET TO NONE!
 def save_assay_layout(request, obj, form, change):
+    """Method for saving an Assay Layout
+
+    The data to make an assay layout is passed using a custom form.
+    Please note that this function uses raw queries.
+    """
+
+    # Connect to the database
     cursor = connection.cursor()
 
+    # Queries for entering data and lists of queries to be ran by the cursor
     type_query = ''' INSERT INTO "assays_assaywell"
           ("assay_layout_id", "well_type_id", "row", "column")
           VALUES (%s, %s, %s, %s)'''
@@ -458,6 +483,7 @@ def save_assay_layout(request, obj, form, change):
           VALUES (%s, %s, %s, %s)'''
     label_query_list = []
 
+    # Aliases for comprehension
     layout = obj
     layout_id = obj.id
 
@@ -479,10 +505,10 @@ def save_assay_layout(request, obj, form, change):
     else:
         obj.modified_by = obj.created_by = request.user
 
+    # Save the layout model itself (wells are saved in the following portion)
     obj.save()
 
     for key, val in form.data.iteritems():
-
         # Time points
         if key.endswith('_time'):
             # Cut off '_time'
@@ -547,6 +573,7 @@ def save_assay_layout(request, obj, form, change):
                     column
                 ))
 
+    # Execute the queries
     cursor.executemany(type_query, type_query_list)
     cursor.executemany(time_query, time_query_list)
     cursor.executemany(compound_query, compound_query_list)
@@ -558,6 +585,8 @@ def save_assay_layout(request, obj, form, change):
 # TODO REVISE SAVING
 # TODO ADMIN IS NOT FUNCTIONAL AT THE MOMENT
 class AssayLayoutAdmin(LockableAdmin):
+    """Admin for Assay Layouts (not currently functional)"""
+
     class Media(object):
         js = ('assays/customize_layout.js',)
         css = {'all': ('assays/customize_admin.css',)}
@@ -617,7 +646,7 @@ admin.site.register(AssayLayout, AssayLayoutAdmin)
 
 
 class AssayPlateCellsInline(admin.TabularInline):
-    # Cells used to construct the plate
+    """Admin for Cells used to construct a plate"""
     model = AssayPlateCells
     verbose_name = 'Plate Cells'
     verbose_name_plural = 'Plate Cells'
@@ -635,7 +664,7 @@ class AssayPlateCellsInline(admin.TabularInline):
 
 
 class AssayPlateSetupAdmin(LockableAdmin):
-    # Setups for MICROPLATES
+    """Admin for the setup of plates"""
 
     class Media(object):
         js = ('js/inline_fix.js', 'assays/plate_display.js', 'assays/customize_plate_setup.js')
@@ -710,20 +739,20 @@ admin.site.register(AssayPlateSetup, AssayPlateSetupAdmin)
 
 
 # As much as I like being certain, this code is somewhat baffling
-def removeExistingReadout(currentAssayReadout):
-    AssayReadout.objects.filter(assay_device_readout=currentAssayReadout).delete()
-
-    # readouts = AssayReadout.objects.filter(
-    #     assay_device_readout_id=currentAssayReadout.id)
-    #
-    # for readout in readouts:
-    #     if readout.assay_device_readout_id == currentAssayReadout.id:
-    #         readout.delete()
-    # return
+# def remove_existing_readout(currentAssayReadout):
+#     AssayReadout.objects.filter(assay_device_readout=currentAssayReadout).delete()
+#
+#     readouts = AssayReadout.objects.filter(
+#         assay_device_readout_id=currentAssayReadout.id)
+#
+#     for readout in readouts:
+#         if readout.assay_device_readout_id == currentAssayReadout.id:
+#             readout.delete()
+#     return
 
 # TODO FINISH
 def get_qc_status_plate(form):
-    # Get QC status for each line
+    """Get QC status for each line"""
     qc_status = {}
 
     for key, val in form.data.iteritems():
@@ -750,6 +779,10 @@ def get_qc_status_plate(form):
 
 @transaction.atomic
 def modify_qc_status_plate(current_plate_readout, form):
+    """Update the QC status of a plate
+
+    Note that this function uses the @transaction.atomic decorator
+    """
     # Get the readouts
     readouts = AssayReadout.objects.filter(
         assay_device_readout=current_plate_readout
@@ -777,6 +810,7 @@ def modify_qc_status_plate(current_plate_readout, form):
             readout.assay.assay_id.assay_short_name.upper(),
             readout.assay.feature
         )
+        # If the quality marker is present
         if index_long in qc_status or index_short in qc_status:
             readout.quality = 'X'
             readout.save()
@@ -786,33 +820,42 @@ def modify_qc_status_plate(current_plate_readout, form):
             readout.save()
 
 # TODO REVIEW
-# Rows are currenly numeric, not alphabetical, when stored in the database
-def parseReadoutCSV(currentAssayReadout, file, upload_type):
-    removeExistingReadout(currentAssayReadout)
+# Rows are currently numeric, not alphabetical, when stored in the database
+def parse_readout_csv(current_assay_readout, current_file, upload_type):
+    """Stores the readout data parsed from a csv file"""
+    # remove_existing_readout(current_assay_readout)
+    AssayReadout.objects.filter(assay_device_readout=current_assay_readout).delete()
 
+    # Connect to the database
     cursor = connection.cursor()
 
+    # The generic query
     query = ''' INSERT INTO "assays_assayreadout"
           ("assay_device_readout_id", "assay_id", "row", "column", "value", "elapsed_time", "quality")
           VALUES (%s, %s, %s, %s, %s, %s, %s)'''
 
+    # The list of queries to execute
     query_list = []
+    # Current id
+    current_assay_readout_id = current_assay_readout.id
 
-    currentAssayReadoutId = currentAssayReadout.id
-
-    datareader = unicode_csv_reader(file, delimiter=',')
+    # Create a reader for the unicode data
+    datareader = unicode_csv_reader(current_file, delimiter=',')
+    # Turn each row into an entry in a list
     datalist = list(datareader)
 
+    # Create a dictionary that matches (assay, feature) to an AssayPlateReadoutAssay ID
     assays = {}
-    for assay in AssayPlateReadoutAssay.objects.filter(readout_id=currentAssayReadout):
+    for assay in AssayPlateReadoutAssay.objects.filter(readout_id=current_assay_readout):
         assay_name = assay.assay_id.assay_name.upper()
         assay_short_name = assay.assay_id.assay_short_name.upper()
         feature = assay.feature
-        id = assay.id
+        current_apra_id = assay.id
 
-        assays.update({(assay_name, feature): id})
-        assays.update({(assay_short_name, feature): id})
+        assays.update({(assay_name, feature): current_apra_id})
+        assays.update({(assay_short_name, feature): current_apra_id})
 
+    # If the type is a block
     if upload_type == 'Block':
         # Current assay
         assay = None
@@ -822,13 +865,13 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
         # Used to discern number of headers for offset
         number_of_assays = 0
         # Used to discern row offset
-        number_of_rows = currentAssayReadout.setup.assay_layout.device.number_of_rows
+        number_of_rows = current_assay_readout.setup.assay_layout.device.number_of_rows
         # Used to discern where to read values
-        number_of_columns = currentAssayReadout.setup.assay_layout.device.number_of_columns
+        number_of_columns = current_assay_readout.setup.assay_layout.device.number_of_columns
 
         for row_id, line in enumerate(datalist):
             # TODO HOW DO I DEAL WITH BLANK LINES???
-            # If line is blank
+            # If line is blank, move to the next row
             if not line:
                 continue
 
@@ -836,14 +879,17 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
             # Headers should look like:
             # PLATE ID, {{}}, ASSAY, {{}}, FEATURE, {{}}, READOUT UNIT, {{}}, TIME, {{}}. TIME UNIT, {{}}
             if 'PLATE ID' in line[0].upper():
-                # Get the assay
+                # Get the assay and feature
                 assay_name = line[3].upper()
                 feature = line[5]
 
+                # Get the APRA ID
                 assay = assays.get((assay_name, feature))
 
+                # Increase the number of assays
                 number_of_assays += 1
 
+                # Check if there is a time and take it if it exists
                 if len(line) >= 12:
                     time = line[9]
 
@@ -858,6 +904,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                     if not value:
                         continue
 
+                    # Process the value
                     processed_value = process_readout_value(value)
                     value = processed_value.get('value')
                     quality = processed_value.get('quality')
@@ -865,28 +912,20 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                     # MUST OFFSET ROW (due to multiple datablocks)
                     offset_row_id = (row_id-number_of_assays) % number_of_rows
 
-                    if time:
-                        query_list.append((
-                            currentAssayReadoutId,
-                            assay,
-                            offset_row_id,
-                            column_id,
-                            value,
-                            time,
-                            quality,
-                        ))
+                    # Note default elapsed time of 0
+                    if not time:
+                        time = 0
 
-                    else:
-                        # Note default elapsed time of 0
-                        query_list.append((
-                            currentAssayReadoutId,
-                            assay,
-                            offset_row_id,
-                            column_id,
-                            value,
-                            0,
-                            quality,
-                        ))
+                    # Add the row to be saved
+                    query_list.append((
+                        current_assay_readout_id,
+                        assay,
+                        offset_row_id,
+                        column_id,
+                        value,
+                        time,
+                        quality,
+                    ))
 
     # Otherwise if the upload is tabular
     else:
@@ -895,6 +934,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
         # The first line SHOULD be the header
         header = datalist[0]
 
+        # Check if the time has been specified
         if 'TIME' in header[5].upper() and 'UNIT' in header[6].upper():
             time_specified = True
         else:
@@ -935,7 +975,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
                 assay = assays.get((assay_name, feature))
 
                 query_list.append((
-                    currentAssayReadoutId,
+                    current_assay_readout_id,
                     assay,
                     row_label,
                     column_label,
@@ -950,7 +990,7 @@ def parseReadoutCSV(currentAssayReadout, file, upload_type):
 
 
 class AssayPlateReadoutInline(admin.TabularInline):
-    # Assays for ChipReadout
+    """Inline for the Assays of a Plate Readout"""
     formset = AssayPlateReadoutInlineFormset
     model = AssayPlateReadoutAssay
     verbose_name = 'Assay Plate Readout Assay'
@@ -970,6 +1010,7 @@ class AssayPlateReadoutInline(admin.TabularInline):
 # Plate Readout validation occurs in the inline formset
 # This form is just to jam in upload_type into the admin
 class AssayPlateReadoutForm(forms.ModelForm):
+    """Assay Plate Readout Form"""
 
     upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
 
@@ -979,7 +1020,7 @@ class AssayPlateReadoutForm(forms.ModelForm):
 
 
 class AssayPlateReadoutAdmin(LockableAdmin):
-    # Endpoint readouts from MICROPLATES
+    """Admin for Assay Plate Readouts"""
     resource_class = AssayPlateReadoutResource
     form = AssayPlateReadoutForm
 
@@ -1084,11 +1125,12 @@ class AssayPlateReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parseReadoutCSV(obj, request.FILES['file'], upload_type)
+            parse_readout_csv(obj, request.FILES['file'], upload_type)
 
         # Need to delete entries when a file is cleared
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
-            removeExistingReadout(obj)
+            # remove_existing_readout(obj)
+            AssayReadout.objects.filter(assay_device_readout=obj).delete()
 
         else:
             modify_qc_status_plate(obj, form)
@@ -1102,19 +1144,19 @@ admin.site.register(AssayPlateReadout, AssayPlateReadoutAdmin)
 
 # Case and point for why you should not just copy code without carefully reading it
 # TODO these remove functions really should not even exist (one line of code?)
-def removeExistingChip(currentChipReadout):
-    AssayChipRawData.objects.filter(assay_chip_id=currentChipReadout).delete()
-    # readouts = AssayChipRawData.objects.filter(
-    #     assay_chip_id_id=currentChipReadout.id)
-    #
-    # for readout in readouts:
-    #     if readout.assay_chip_id_id == currentChipReadout.id:
-    #         readout.delete()
-    # return
+# def remove_existing_chip(current_chip_readout):
+#     AssayChipRawData.objects.filter(assay_chip_id=current_chip_readout).delete()
+#     readouts = AssayChipRawData.objects.filter(
+#         assay_chip_id_id=current_chip_readout.id)
+#
+#     for readout in readouts:
+#         if readout.assay_chip_id_id == current_chip_readout.id:
+#             readout.delete()
+#     return
 
 
 def get_qc_status_chip(form):
-    # Get QC status for each line
+    """Get QC status for each line"""
     qc_status = {}
 
     if not form:
@@ -1136,6 +1178,7 @@ def get_qc_status_chip(form):
 # Why? The ORDER OF THE VALUES REFLECTS THE FILE WHEN ADDING, BUT IS SORTED IN UPDATE
 @transaction.atomic
 def modify_qc_status_chip(current_chip_readout, form):
+    """Update the QC for a chip"""
     # Get the readouts as they would appear on the front end
     # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
     readouts = AssayChipRawData.objects.filter(assay_chip_id=current_chip_readout).order_by('assay_id', 'elapsed_time')
@@ -1149,13 +1192,15 @@ def modify_qc_status_chip(current_chip_readout, form):
 
 
 @transaction.atomic
-def parseChipCSV(currentChipReadout, file, headers, form):
-    removeExistingChip(currentChipReadout)
+def parse_chip_csv(current_chip_readout, current_file, headers, form):
+    """Parse a csv file to get chip readout data"""
+    # remove_existing_chip(current_chip_readout)
+    AssayChipRawData.objects.filter(assay_chip_id=current_chip_readout).delete()
 
     # Get QC status for each line
     qc_status = get_qc_status_chip(form)
 
-    datareader = unicode_csv_reader(file, delimiter=',')
+    datareader = unicode_csv_reader(current_file, delimiter=',')
     datalist = list(datareader)
 
     # Current index for finding correct QC status
@@ -1204,8 +1249,8 @@ def parseChipCSV(currentChipReadout, file, headers, form):
 
         #How to parse Chip data
         AssayChipRawData(
-            assay_chip_id=currentChipReadout,
-            assay_id=AssayChipReadoutAssay.objects.get(readout_id=currentChipReadout, assay_id=assay),
+            assay_chip_id=current_chip_readout,
+            assay_id=AssayChipReadoutAssay.objects.get(readout_id=current_chip_readout, assay_id=assay),
             field_id=field,
             value=val,
             elapsed_time=time,
@@ -1214,6 +1259,7 @@ def parseChipCSV(currentChipReadout, file, headers, form):
 
 
 class AssayChipCellsInline(admin.TabularInline):
+    """Inline for Chip Cells (for Chip Setup)"""
     # Cells used to construct the model
     model = AssayChipCells
     verbose_name = 'Model Cells'
@@ -1232,6 +1278,7 @@ class AssayChipCellsInline(admin.TabularInline):
 
 
 class AssayChipSetupAdmin(LockableAdmin):
+    """Admin for Chip Setup"""
     # TIMEPOINT readouts from ORGAN CHIPS
     class Media(object):
         js = ('js/inline_fix.js',)
@@ -1353,7 +1400,7 @@ admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
 
 
 class AssayChipReadoutInline(admin.TabularInline):
-    # Assays for ChipReadout
+    """Assays for ChipReadout"""
     formset = AssayChipReadoutInlineFormset
     model = AssayChipReadoutAssay
     verbose_name = 'Assay Readout Assay'
@@ -1372,7 +1419,7 @@ class AssayChipReadoutInline(admin.TabularInline):
 
 # ChipReadout validation occurs in the inline formset
 class AssayChipReadoutForm(forms.ModelForm):
-
+    """Form for Chip Readouts"""
     headers = forms.CharField(required=False)
 
     class Meta(object):
@@ -1381,7 +1428,7 @@ class AssayChipReadoutForm(forms.ModelForm):
 
 
 class AssayChipReadoutAdmin(LockableAdmin):
-    # TIMEPOINT readouts from ORGAN CHIPS
+    """Admin for Assay Chip Readout"""
     class Media(object):
         js = ('js/inline_fix.js', 'assays/customize_chip.js', 'js/d3.min.js', 'js/c3.min.js',)
         css = {'all': ('assays/customize_admin.css', 'css/c3.css',)}
@@ -1395,12 +1442,13 @@ class AssayChipReadoutAdmin(LockableAdmin):
     save_as = True
 
     list_per_page = 100
-    list_display = ('id',
-                    'chip_setup',
-                    'assays',
-                    'readout_start_time',
-                    'scientist'
-                    )
+    list_display = (
+        'id',
+        'chip_setup',
+        'assays',
+        'readout_start_time',
+        'scientist'
+    )
 
     list_display_links = ('id', 'chip_setup',
                           'readout_start_time',)
@@ -1506,7 +1554,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parseChipCSV(obj, request.FILES['file'], headers, form)
+            parse_chip_csv(obj, request.FILES['file'], headers, form)
 
         # Try to update QC status if no file
         else:
@@ -1514,7 +1562,8 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
         # Need to delete entries when a file is cleared
         if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
-            removeExistingChip(obj)
+            # remove_existing_chip(obj)
+            AssayChipRawData.objects.filter(assay_chip_id=obj).delete()
 
     # save_model not used; would save twice otherwise
     def save_model(self, request, obj, form, change):
@@ -1524,6 +1573,8 @@ admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
 
 
 class AssayResultFunctionAdmin(LockableAdmin):
+    """Admin for the different functions for results"""
+
     list_per_page = 30
     save_on_top = True
     list_display = ('function_name', 'function_results', 'description')
@@ -1552,6 +1603,7 @@ admin.site.register(AssayResultFunction, AssayResultFunctionAdmin)
 
 
 class AssayResultTypeAdmin(LockableAdmin):
+    """Admin for the Result Types"""
     list_per_page = 300
     save_on_top = True
     list_display = ('assay_result_type', 'description')
@@ -1579,7 +1631,7 @@ admin.site.register(AssayResultType, AssayResultTypeAdmin)
 
 
 class AssayChipResultInline(admin.TabularInline):
-    # Results calculated from CHIP READOUTS
+    """Adming for results calculated from CHIP READOUTS"""
     model = AssayChipResult
     verbose_name = 'Assay Test'
     verbose_name_plural = 'Assay Test Results'
@@ -1596,6 +1648,7 @@ class AssayChipResultInline(admin.TabularInline):
 
 
 class UnitTypeAdmin(LockableAdmin):
+    """Admin for Unit Types"""
     save_on_top = True
     list_per_page = 300
     list_display = ('unit_type', 'description')
@@ -1623,6 +1676,10 @@ admin.site.register(UnitType, UnitTypeAdmin)
 
 
 class PhysicalUnitsAdmin(LockableAdmin):
+    """Admin for Units
+
+    Note that all assay units should link to Physical Units
+    """
     save_on_top = True
     list_per_page = 300
     list_display = ('unit_type', 'unit', 'base_unit', 'scale_factor', 'availability', 'description')
@@ -1666,7 +1723,7 @@ admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 
 
 class AssayChipTestResultAdmin(LockableAdmin):
-    # Results calculated from RAW CHIP DATA aka 'Chip Result'
+    """Admin for results calculated from RAW CHIP DATA aka 'Chip Result'"""
     class Media(object):
         js = ('js/cookies.js', 'js/whittle.js', 'js/inline_fix.js', 'assays/customize_chip_results_admin.js')
 
@@ -1721,7 +1778,7 @@ admin.site.register(AssayChipTestResult, AssayChipTestResultAdmin)
 
 
 class AssayPlateResultInline(admin.TabularInline):
-    # Results calculated from PLATE READOUTS
+    """Admin for results calculated from PLATE READOUTS"""
     model = AssayPlateResult
     verbose_name = 'Assay Plate Result'
     verbose_name_plural = 'Assay Plate Results'
@@ -1738,9 +1795,15 @@ class AssayPlateResultInline(admin.TabularInline):
 
 
 class AssayPlateTestResultAdmin(LockableAdmin):
-    # Test Results from MICROPLATES
+    """Admin for test Results from MICROPLATES"""
     class Media(object):
-        js = ('js/cookies.js', 'js/whittle.js', 'js/inline_fix.js', 'assays/plate_display.js', 'assays/customize_plate_results.js')
+        js = (
+            'js/cookies.js',
+            'js/whittle.js',
+            'js/inline_fix.js',
+            'assays/plate_display.js',
+            'assays/customize_plate_results.js'
+        )
         css = {'all': ('assays/customize_admin.css',)}
 
     inlines = [AssayPlateResultInline]
@@ -1797,6 +1860,7 @@ admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
 
 class AssayRunFormAdmin(forms.ModelForm):
+    """Admin Form for Assay Runs (now referred to as Studies)"""
     class Meta(object):
         model = AssayRun
         widgets = {
@@ -1821,6 +1885,7 @@ class AssayRunFormAdmin(forms.ModelForm):
 
 
 class AssayRunAdmin(LockableAdmin):
+    """Admin for what are now called Organ Chip Studies"""
     # AssayRun is now Organ Chip Study
     # Organ Chip Study should really be simply Study
     class Media(object):
@@ -1892,7 +1957,7 @@ admin.site.register(AssayRun, AssayRunAdmin)
 
 
 class StudyModelInline(admin.TabularInline):
-
+    """Inline for Study Configurations"""
     model = StudyModel
     verbose_name = 'Study Model'
     fields = (
@@ -1907,6 +1972,8 @@ class StudyModelInline(admin.TabularInline):
 
 
 class StudyConfigurationAdmin(LockableAdmin):
+    """Admin for study configurations"""
+
     class Media(object):
         js = ('js/inline_fix.js',)
 
