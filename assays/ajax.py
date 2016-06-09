@@ -17,28 +17,34 @@ logger = logging.getLogger(__name__)
 
 
 def main(request):
+    """Default to server error"""
     return HttpResponseServerError()
 
 
 # TODO ADD BASE LAYOUT CONTENT TO ASSAY LAYOUT
 def fetch_assay_layout_content(request):
-    """Return compounds in a layout."""
+    """Return compounds in a layout
 
-    id = request.POST.get('id')
+    Receives the following from POST:
+    id -- the id of the model of interest
+    model -- the model of interest
+    """
+
+    current_id = request.POST.get('id')
     model = request.POST.get('model')
 
-    if not model and id:
+    if not model and current_id:
         logger.error('request_id not present in request to fetch_layout_format_labels')
         return HttpResponseServerError()
 
     if model == 'assay_layout':
-        layout = AssayLayout.objects.get(id=id)
+        layout = AssayLayout.objects.get(id=current_id)
 
     elif model == 'assay_device_setup':
-        layout = AssayPlateSetup.objects.get(id=id).assay_layout
+        layout = AssayPlateSetup.objects.get(id=current_id).assay_layout
 
     elif model == 'assay_device_readout':
-        layout = AssayPlateReadout.objects.get(id=id).setup.assay_layout
+        layout = AssayPlateReadout.objects.get(id=current_id).setup.assay_layout
 
     data = defaultdict(dict)
 
@@ -74,14 +80,14 @@ def fetch_assay_layout_content(request):
         data[well].update({'label': label.label})
 
     # Fetch types
-    types = AssayWell.objects.filter(assay_layout=layout).prefetch_related('assay_layout', 'well_type')
+    current_types = AssayWell.objects.filter(assay_layout=layout).prefetch_related('assay_layout', 'well_type')
 
-    for type in types:
-        well = type.row + '_' + type.column
+    for current_type in current_types:
+        well = current_type.row + '_' + current_type.column
         data[well].update({
-            'type': type.well_type.well_type,
-            'type_id': type.well_type_id,
-            'color': type.well_type.background_color
+            'type': current_type.well_type.well_type,
+            'type_id': current_type.well_type_id,
+            'color': current_type.well_type.background_color
         })
 
     return HttpResponse(json.dumps(data),
@@ -89,24 +95,24 @@ def fetch_assay_layout_content(request):
 
 
 def fetch_readout(request):
-    id = request.POST.get('id')
+    current_id = request.POST.get('id')
     model = request.POST.get('model')
 
-    if not model and id:
+    if not model and current_id:
         logger.error('request_id not present in request to fetch_layout_format_labels')
         return HttpResponseServerError()
 
     if model == 'assay_device_readout':
-        current_readout_id = AssayPlateReadout.objects.get(id=id)
+        current_readout_id = AssayPlateReadout.objects.get(id=current_id)
 
     elif model == 'assay_plate_test_results':
-        current_readout_id = AssayPlateTestResult.objects.get(id=id).readout
+        current_readout_id = AssayPlateTestResult.objects.get(id=current_id).readout
 
     # data = defaultdict(list)
     data = []
 
     readouts = AssayReadout.objects.filter(assay_device_readout=current_readout_id)\
-        .prefetch_related('assay_device_readout', 'assay').order_by('assay','elapsed_time')
+        .prefetch_related('assay_device_readout', 'assay').order_by('assay', 'elapsed_time')
 
     time_unit = AssayPlateReadout.objects.filter(id=current_readout_id.id)[0].timeunit.unit
 
@@ -129,26 +135,31 @@ def fetch_readout(request):
 
 
 def fetch_layout_format_labels(request):
-    """Return layout format labels."""
+    """Return layout format labels
 
-    id = request.POST.get('id')
+    Receives the following from POST:
+    id -- the id of the model of interest
+    model -- the model of interest
+    """
+
+    current_id = request.POST.get('id')
     model = request.POST.get('model')
 
-    if not model and id:
+    if not model and current_id:
         logger.error('request_id not present in request to fetch_layout_format_labels')
         return HttpResponseServerError()
 
     if model == 'device':
-        layout = Microdevice.objects.get(id=id)
+        layout = Microdevice.objects.get(id=current_id)
 
     elif model == 'assay_layout':
-        layout = AssayLayout.objects.get(id=id).device
+        layout = AssayLayout.objects.get(id=current_id).device
 
     elif model == 'assay_device_setup':
-        layout = AssayPlateSetup.objects.get(id=id).assay_layout.device
+        layout = AssayPlateSetup.objects.get(id=current_id).assay_layout.device
 
     elif model == 'assay_device_readout':
-        layout = AssayPlateReadout.objects.get(id=id).setup.assay_layout.device
+        layout = AssayPlateReadout.objects.get(id=current_id).setup.assay_layout.device
 
     data = {}
 
@@ -171,7 +182,7 @@ def fetch_layout_format_labels(request):
 
 
 def fetch_well_types(request):
-    """Return well type ids and colors."""
+    """Return well type ids and colors"""
 
     data = {}
 
@@ -191,7 +202,11 @@ def fetch_well_types(request):
 
 #Fetches and displays assay layout from plate readout
 def fetch_plate_info(request):
-    """Returns dynamic info for plate assays"""
+    """Returns dynamic info for plate assays
+
+    Receives the following from POST:
+    id -- the ID of the Assay Plate Readout of interest
+    """
 
     assay_id = request.POST.get('id')
 
@@ -212,7 +227,11 @@ def fetch_plate_info(request):
 
 
 def fetch_center_id(request):
-    """Returns center ID for dynamic run form"""
+    """Returns center ID for dynamic run form
+
+    Receives the following from POST:
+    id -- the ID of the Microphysiology Center of interest
+    """
 
     group = request.POST.get('id')
 
@@ -242,7 +261,11 @@ def fetch_center_id(request):
 
 # TODO Needs refactor
 def fetch_chip_readout(request):
-    """Returns the Raw Chip Data stored for a Chip Readout"""
+    """Returns the Raw Chip Data stored for a Chip Readout
+
+    Receives the following from POST:
+    id -- the ID of the Chip Readout of interest
+    """
 
     chip_id = request.POST.get('id')
 
@@ -309,6 +332,12 @@ def fetch_chip_readout(request):
 # TODO REQUIRES REVISION
 # TODO NEED TO CONFIRM UNITS ARE THE SAME (ELSE CONVERSION)
 def fetch_readouts(request):
+    """Get all readouts for a given study for Study Summary
+
+    Receives the following from POST:
+    study -- the study to acquire readouts from
+    key -- specifies whether to split readouts by compound or device
+    """
     study = request.POST.get('study')
     key = request.POST.get('key')
 
@@ -424,6 +453,11 @@ def fetch_readouts(request):
 
 # Should these be refactored just to use fetch_context instead?
 def fetch_organ_models(request):
+    """Gets a dropdown of organ models for Chip Setup
+
+    Receives the following from POST:
+    device -- the device to acquire organ models from
+    """
     context = u'<option value="">---------</option>'
 
     device = request.POST.get('device')
@@ -446,6 +480,11 @@ def fetch_organ_models(request):
 
 
 def fetch_protocols(request):
+    """Gets a dropdown of protocols for Chip Setup
+
+    Receives the following from POST:
+    organ_model -- the organ model to acquire protocols from
+    """
     context = u'<option value="">---------</option>'
 
     organ_model = request.POST.get('organ_model')
@@ -481,6 +520,11 @@ def fetch_protocols(request):
 
 
 def fetch_protocol(request):
+    """Get the file location for a given protocol
+
+    Receives the following from POST:
+    protocol -- the ID of the protocol of interest
+    """
     data = {}
 
     protocol_id = request.POST.get('protocol')
@@ -499,13 +543,21 @@ def fetch_protocol(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+
 def fetch_context(request):
-    """Acquires context for whittling down number of dropdown"""
+    """Acquires context for whittling down number of dropdown
+
+    Receives the following from POST:
+    master -- master is what determines the subject's drop down choices
+    subject -- subject is the model of interest as selected from the above dictionary
+    next_model -- the next model to filter (if the subject is two FK away)
+    next_filter -- second filter (if the subject is two FK away)
+    """
 
     context = '<option value="">---------</option>'
 
     # the model who's dropdown you want to whittle down
-    models = {
+    all_models = {
         'AssayChipReadout': AssayChipReadout,
         'AssayChipSetup': AssayChipSetup,
         'AssayRun': AssayRun,
@@ -519,7 +571,7 @@ def fetch_context(request):
     master_id = request.POST.get('master_id')
 
     # subject is the model of interest as selected from the above dictionary
-    subject = models.get(request.POST.get('subject'))
+    subject = all_models.get(request.POST.get('subject'))
 
     # filter is for additional filtering (for instance, if a subject is two FK away
     next_model = request.POST.get('next_model')
@@ -528,7 +580,7 @@ def fetch_context(request):
     findings = subject.objects.filter(**{master: master_id})
 
     if next_model and next_filter:
-        next_model = models.get(next_model)
+        next_model = all_models.get(next_model)
         original = list(findings)
         findings = []
 
@@ -566,6 +618,11 @@ switch = {
 
 
 def ajax(request):
+    """Switch to correct function given POST call
+
+    Receives the following from POST:
+    call -- What function to redirect to
+    """
     post_call = request.POST.get('call')
 
     if not post_call:
