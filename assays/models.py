@@ -22,9 +22,7 @@ types = (
 
 
 class UnitType(LockableModel):
-    """
-    Unit types for physical units
-    """
+    """Unit types for physical units"""
 
     unit_type = models.CharField(max_length=100)
     description = models.CharField(max_length=256,
@@ -33,10 +31,9 @@ class UnitType(LockableModel):
     def __unicode__(self):
         return u'{}'.format(self.unit_type)
 
+
 class PhysicalUnits(LockableModel):
-    """
-    Measures of concentration and so on
-    """
+    """Measures of concentration and so on"""
 
     unit = models.CharField(max_length=256)
     description = models.CharField(max_length=256,
@@ -70,9 +67,7 @@ class PhysicalUnits(LockableModel):
 
 
 class AssayModelType(LockableModel):
-    """
-    Defines the type of an ASSAY (biochemical, mass spec, and so on)
-    """
+    """Defines the type of an ASSAY (biochemical, mass spec, and so on)"""
 
     class Meta(object):
         ordering = ('assay_type_name',)
@@ -85,9 +80,7 @@ class AssayModelType(LockableModel):
 
 
 class AssayModel(LockableModel):
-    """
-    Defines an ASSAY such as albumin, BUN, and so on
-    """
+    """Defines an ASSAY such as albumin, BUN, and so on"""
 
     class Meta(object):
         ordering = ('assay_name',)
@@ -115,9 +108,7 @@ class AssayModel(LockableModel):
 
 # Assay layout is now a flaggable model
 class AssayLayout(FlaggableModel):
-    """
-    Defines the layout of a PLATE (parent of all associated wells)
-    """
+    """Defines the layout of a PLATE (parent of all associated wells)"""
 
     class Meta(object):
         verbose_name = 'Assay Layout'
@@ -145,8 +136,9 @@ class AssayLayout(FlaggableModel):
 
 
 class AssayWellType(LockableModel):
-    """
-    PLATE well type
+    """PLATE well type
+
+    Includes the color well types appear as in the interface
     """
 
     class Meta(object):
@@ -173,9 +165,7 @@ class AssayWellType(LockableModel):
 
 
 class AssayWell(models.Model):
-    """
-    An individual PLATE well
-    """
+    """An individual PLATE well"""
 
     class Meta(object):
         unique_together = [('assay_layout', 'row', 'column')]
@@ -189,9 +179,7 @@ class AssayWell(models.Model):
 
 
 class AssayWellTimepoint(models.Model):
-    """
-    Timepoints for PLATE wells
-    """
+    """Timepoints for PLATE wells"""
 
     assay_layout = models.ForeignKey(AssayLayout)
     timepoint = models.FloatField(default=0)
@@ -200,9 +188,7 @@ class AssayWellTimepoint(models.Model):
 
 
 class AssayWellCompound(models.Model):
-    """
-    Compound for PLATE wells
-    """
+    """Compound for PLATE wells"""
 
     assay_layout = models.ForeignKey(AssayLayout)
     compound = models.ForeignKey('compounds.Compound')
@@ -213,9 +199,7 @@ class AssayWellCompound(models.Model):
 
 
 class AssayWellLabel(models.Model):
-    """
-    Arbitrary string label for PLATE wells
-    """
+    """Arbitrary string label for PLATE wells"""
 
     assay_layout = models.ForeignKey(AssayLayout)
     label = models.CharField(max_length=150)
@@ -224,9 +208,7 @@ class AssayWellLabel(models.Model):
 
 
 class AssayPlateCells(models.Model):
-    """
-    Individual cell parameters for PLATE setup used in inline
-    """
+    """Individual cell parameters for PLATE setup used in inline"""
 
     assay_plate = models.ForeignKey('AssayPlateSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
@@ -244,9 +226,7 @@ class AssayPlateCells(models.Model):
 
 
 class AssayPlateSetup(FlaggableModel):
-    """
-    Setup for MICROPLATES
-    """
+    """Setup for MICROPLATES"""
 
     class Meta(object):
         verbose_name = 'Plate Setup'
@@ -284,9 +264,7 @@ class AssayPlateSetup(FlaggableModel):
 
 
 class AssayReader(LockableModel):
-    """
-    Chip and Plate readers
-    """
+    """Chip and Plate readers"""
 
     class Meta(object):
         ordering = ('reader_name',)
@@ -299,9 +277,7 @@ class AssayReader(LockableModel):
 
 
 class AssayPlateReadoutAssay(models.Model):
-    """
-    Inline for PLATE readout assays
-    """
+    """Inline for PLATE readout assays"""
 
     class Meta(object):
         # Remove restriction that readout can only have one copy of an assay
@@ -327,9 +303,7 @@ class AssayPlateReadoutAssay(models.Model):
 
 
 class AssayReadout(models.Model):
-    """
-    An individual value for a PLATE readout
-    """
+    """An individual value for a PLATE readout"""
 
     assay_device_readout = models.ForeignKey('assays.AssayPlateReadout')
     # A plate can have multiple assays, this differentiates between those assays
@@ -363,9 +337,7 @@ def plate_readout_file_location(instance, filename):
 
 
 class AssayPlateReadout(FlaggableModel):
-    """
-    Readout data collected from MICROPLATES
-    """
+    """Readout data collected from MICROPLATES"""
 
     class Meta(object):
         verbose_name = 'Plate Readout'
@@ -424,9 +396,7 @@ POSNEG = (
 
 
 class AssayResultFunction(LockableModel):
-    """
-    Function for analysis of CHIP RESULTS
-    """
+    """Function for analysis of CHIP RESULTS"""
     class Meta(object):
         verbose_name = 'Function'
         ordering = ('function_name', )
@@ -440,9 +410,7 @@ class AssayResultFunction(LockableModel):
 
 
 class AssayResultType(LockableModel):
-    """
-    Result types for CHIP RESULTS
-    """
+    """Result types for CHIP RESULTS"""
 
     class Meta(object):
         verbose_name = 'Result type'
@@ -456,9 +424,7 @@ class AssayResultType(LockableModel):
 
 
 class AssayPlateResult(models.Model):
-    """
-    Individual result parameters for PLATE RESULTS used in inline
-    """
+    """Individual result parameters for PLATE RESULTS used in inline"""
 
     assay_name = models.ForeignKey('assays.AssayPlateReadoutAssay',
                                    verbose_name='Assay')
@@ -494,9 +460,7 @@ class AssayPlateResult(models.Model):
 
 
 class AssayPlateTestResult(FlaggableModel):
-    """
-    Test Results from MICROPLATES
-    """
+    """Test Results from MICROPLATES"""
 
     class Meta(object):
         verbose_name = 'Plate Result'
@@ -519,9 +483,7 @@ class AssayPlateTestResult(FlaggableModel):
 
 
 class StudyConfiguration(LockableModel):
-    """
-    Defines how chips are connected together (for integrated studies to come)
-    """
+    """Defines how chips are connected together (for integrated studies to come)"""
 
     class Meta(object):
         verbose_name = 'Study Configuration'
@@ -548,9 +510,7 @@ class StudyConfiguration(LockableModel):
 
 
 class StudyModel(models.Model):
-    """
-    Individual connections for integrated models
-    """
+    """Individual connections for integrated models"""
 
     study_configuration = models.ForeignKey(StudyConfiguration)
     label = models.CharField(max_length=2)
@@ -562,9 +522,7 @@ class StudyModel(models.Model):
 
 
 class AssayRun(RestrictedModel):
-    """
-    The encapsulation of all data concerning some plate/chip project
-    """
+    """The encapsulation of all data concerning some plate/chip project"""
 
     class Meta(object):
         verbose_name = 'Study'
@@ -595,16 +553,16 @@ class AssayRun(RestrictedModel):
     image = models.ImageField(upload_to='studies', null=True, blank=True)
 
     def study_types(self):
-        types = ''
+        current_types = ''
         if self.toxicity:
-            types += 'TOX '
+            current_types += 'TOX '
         if self.efficacy:
-            types += 'EFF '
+            current_types += 'EFF '
         if self.disease:
-            types += 'DM '
+            current_types += 'DM '
         if self.cell_characterization:
-            types += 'CC '
-        return u'{0}'.format(types)
+            current_types += 'CC '
+        return u'{0}'.format(current_types)
 
     def __unicode__(self):
         return self.assay_run_id
@@ -617,9 +575,7 @@ class AssayRun(RestrictedModel):
 
 
 class AssayChipRawData(models.Model):
-    """
-    Individual lines of readout data
-    """
+    """Individual lines of readout data"""
 
     # class Meta(object):
     #     unique_together = [('assay_chip_id', 'assay_id', 'field_id', 'elapsed_time')]
@@ -638,9 +594,7 @@ class AssayChipRawData(models.Model):
 
 
 class AssayChipCells(models.Model):
-    """
-    Individual cell parameters for CHIP setup used in inline
-    """
+    """Individual cell parameters for CHIP setup used in inline"""
     assay_chip = models.ForeignKey('AssayChipSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
     cell_biosensor = models.ForeignKey('cellsamples.Biosensor')
@@ -658,9 +612,7 @@ class AssayChipCells(models.Model):
 
 
 class AssayChipSetup(FlaggableModel):
-    """
-    The configuration of a Chip for implementing an assay
-    """
+    """The configuration of a Chip for implementing an assay"""
     class Meta(object):
         verbose_name = 'Chip Setup'
         ordering = ('-assay_chip_id', 'assay_run_id', )
@@ -726,9 +678,7 @@ object_types = (
 
 
 class AssayChipReadoutAssay(models.Model):
-    """
-    Inline for CHIP readout assays
-    """
+    """Inline for CHIP readout assays"""
 
     class Meta(object):
         unique_together = [('readout_id', 'assay_id')]
@@ -754,9 +704,7 @@ def chip_readout_file_location(instance, filename):
 
 
 class AssayChipReadout(FlaggableModel):
-    """
-    Readout data for CHIPS
-    """
+    """Readout data for CHIPS"""
 
     class Meta(object):
         verbose_name = 'Chip Readout'
@@ -812,9 +760,7 @@ class AssayChipReadout(FlaggableModel):
 
 
 class AssayChipTestResult(FlaggableModel):
-    """
-    Results calculated from Raw Chip Data
-    """
+    """Results calculated from Raw Chip Data"""
 
     class Meta(object):
         verbose_name = 'Chip Result'
@@ -850,12 +796,9 @@ class AssayChipTestResult(FlaggableModel):
         return ''
 
     def severity(self):
-        SEVERITY_SCORE = dict((
-            ('-1', 'UNKNOWN'), ('0', 'NEGATIVE'), ('1', '+'), ('2', '+ +'),
-            ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
-        ))
+        severity_score_dict = dict(SEVERITY_SCORE)
         if self.id and not len(AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
-            return SEVERITY_SCORE.get(AssayChipResult.objects.filter(
+            return severity_score_dict.get(AssayChipResult.objects.filter(
                 assay_result_id=self.id
             ).order_by('id')[0].severity, 'None')
         return ''
@@ -871,9 +814,7 @@ class AssayChipTestResult(FlaggableModel):
 
 
 class AssayChipResult(models.Model):
-    """
-    Individual result parameters for CHIP RESULTS used in inline
-    """
+    """Individual result parameters for CHIP RESULTS used in inline"""
 
     assay_name = models.ForeignKey('assays.AssayChipReadoutAssay',
                                    verbose_name='Assay')
