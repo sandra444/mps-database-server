@@ -58,9 +58,9 @@ class UnicodeWriter:
 
     def writerow(self, row):
         """This function takes a Unicode string and encodes it to the output"""
-        self.writer.writerow([s.encode("utf-8") for s in row])
+        self.writer.writerow([s.encode('utf-8') for s in row])
         data = self.queue.getvalue()
-        data = data.decode("utf-8")
+        data = data.decode('utf-8')
         data = self.encoder.encode(data)
         self.stream.write(data)
         self.queue.truncate(0)
@@ -257,7 +257,7 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
     def get_form(self, form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
-            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete ")
+            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete ')
         )
 
         # If POST
@@ -364,7 +364,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
     def get_form(self, form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
-            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
+            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete '))
 
         # If POST
         if self.request.method == 'POST':
@@ -724,7 +724,7 @@ class AssayChipSetupDelete(CreatorRequiredMixin, DeleteView):
 
 # Class based views for readouts
 class AssayChipReadoutList(LoginRequiredMixin, ListView):
-    """Dsipalys a list of Chip Readouts"""
+    """Displays a list of Chip Readouts"""
     model = AssayChipReadout
 
     def get_queryset(self):
@@ -1245,7 +1245,7 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
     def get_form(self, form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
-            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete ")
+            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete ')
         )
 
         # If POST
@@ -1282,7 +1282,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     def get_form(self, form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
-            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete ")
+            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete ')
         )
 
         # If POST
@@ -1901,7 +1901,7 @@ def get_valid_csv_location(file_name, study_id, device_type):
     # Get only valid chars
     valid_file_name = ''.join(c for c in file_name if c in valid_chars)
     # Replace spaces with underscores
-    valid_file_name = re.sub(r"\s+", '_', valid_file_name)
+    valid_file_name = re.sub(r'\s+', '_', valid_file_name)
 
     # Check if name is already in use
     if os.path.isfile(os.path.join(media_root, 'csv', study_id, device_type, valid_file_name + '.csv')):

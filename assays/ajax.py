@@ -286,7 +286,7 @@ def fetch_chip_readout(request):
     time_unit = readout.timeunit
     chip_name = readout.chip_setup.assay_chip_id
 
-    csv = ""
+    csv = ''
 
     for raw in chip_data:
         if ',' in chip_name:
@@ -385,7 +385,7 @@ def fetch_readouts(request):
         # Convert all times to days for now
         # Get the conversion unit
         scale = raw.assay_chip_id.timeunit.scale_factor
-        time = "{0:.2f}".format((scale/1440.0) * raw.elapsed_time)
+        time = '{0:.2f}'.format((scale/1440.0) * raw.elapsed_time)
 
         quality = raw.quality
 
@@ -599,7 +599,7 @@ def fetch_context(request):
     })
 
     return HttpResponse(json.dumps(data),
-                        content_type="application/json")
+                        content_type='application/json')
 
 switch = {
     'fetch_assay_layout_content': fetch_assay_layout_content,

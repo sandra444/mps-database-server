@@ -1791,7 +1791,7 @@ class AssayPlateResultInline(admin.TabularInline):
     extra = 0
 
     class Media(object):
-        css = {"all": ("css/hide_admin_original.css",)}
+        css = {'all': ('css/hide_admin_original.css',)}
 
 
 class AssayPlateTestResultAdmin(LockableAdmin):
@@ -1968,7 +1968,7 @@ class StudyModelInline(admin.TabularInline):
     extra = 1
 
     class Media(object):
-        css = {"all": ("css/hide_admin_original.css",)}
+        css = {'all': ('css/hide_admin_original.css',)}
 
 
 class StudyConfigurationAdmin(LockableAdmin):
