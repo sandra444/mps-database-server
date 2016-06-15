@@ -23,12 +23,17 @@ from drugtrials.models import FindingResult
 #import sys
 #sys.setrecursionlimit(10000)
 
-from django.core import serializers
+# from django.core import serializers
 
 # TODO FIX TARGET VS. ASSAY ORGANISM CONFLICT
 
 
 def generate_record_frequency_data(query):
+    """Returns a dictionary such that key -> frequency of key
+
+    Parameters:
+    query -- list of data to be turned into a frequency dictionary
+    """
     result = {}
 
     for element in query:
@@ -48,7 +53,13 @@ def generate_record_frequency_data(query):
 
     return result_list
 
+
 def get_compound_frequency_data(query):
+    """Returns a dictionary such that (key| -> frequency of key
+
+    Parameters:
+    query -- list of lists of compound data to be turned into a frequency dictionary
+    """
     result = {}
 
     for element in query:
@@ -69,7 +80,16 @@ def get_compound_frequency_data(query):
 
     return result_list
 
+
 def generate_list_of_all_data_in_bioactivities(exclude_questionable, pubchem, organisms, targets):
+    """Get a dictionary of frequencies for all pertinent Bioactivity data
+
+    Parameters:
+    exclude_questionable -- boolean indicating whether to exclude entries tagged questionable
+    pubchem -- boolean to indicate whether to use pubchem (False for ChEMBL)
+    organisms -- a list of organisms for filtering targets (special case for "!No Organism")
+    targets -- a list of target types for filtering targets
+    """
     if pubchem:
         initial_targets = PubChemBioactivity.objects.filter(
             assay__target__organism__in=organisms,
@@ -99,8 +119,6 @@ def generate_list_of_all_data_in_bioactivities(exclude_questionable, pubchem, or
             'compound__mps',
             'compound__epa'
         )
-
-
 
     else:
         initial_targets = Bioactivity.objects.filter(
@@ -156,6 +174,11 @@ def generate_list_of_all_data_in_bioactivities(exclude_questionable, pubchem, or
 
 
 def generate_list_of_all_bioactivities_in_bioactivities(exclude_questionable, pubchem):
+    """Get a dictionary of frequencies of all Bioactivities (alone)
+
+    Parameters:
+    pubchem -- boolean to indicate whether to use pubchem (False for ChEMBL)
+    """
     if pubchem:
         bioactivities = PubChemBioactivity.objects.all().values_list('activity_name')
     else:
@@ -170,6 +193,14 @@ def generate_list_of_all_bioactivities_in_bioactivities(exclude_questionable, pu
 
 
 def generate_list_of_all_targets_in_bioactivities(exclude_questionable, pubchem, organisms, targets):
+    """Get a dictionary of frequencies of all Targets
+
+    Parameters:
+    exclude_questionable -- boolean indicating whether to exclude entries tagged questionable
+    pubchem -- boolean to indicate whether to use pubchem (False for ChEMBL)
+    organisms -- a list of organisms for filtering targets (special case for "!No Organism")
+    targets -- a list of target types for filtering targets
+    """
     # Requires revision
     if pubchem:
         initial_targets = PubChemBioactivity.objects.filter(
@@ -217,6 +248,11 @@ def generate_list_of_all_targets_in_bioactivities(exclude_questionable, pubchem,
 # Worry about filtering by organism later
 # FK for organism is a little odd right now
 def generate_list_of_all_drugtrials(desired_organisms):
+    """Generate a dictionary of frequencies for Drug Trial data
+
+    Parameters:
+    desired_organisms -- list of the organisms to filter drug trials
+    """
     # TODO
     # This requires refactoring, magic conversion tables are not good practice
     organisms = {
@@ -237,6 +273,12 @@ def generate_list_of_all_drugtrials(desired_organisms):
 
 
 def generate_list_of_all_compounds_in_bioactivities(exclude_questionable, pubchem):
+    """Generate a dictionary of frequencies (and additional information in key) for compounds
+
+    Parameters:
+    exclude_questionable -- boolean to exclude compounds associated only with dubious bioactivities
+    pubchem -- boolean to specify whether to use PubChem or ChEMBL
+    """
     if pubchem:
         compounds = PubChemBioactivity.objects.all().prefetch_related(
             'compound'
@@ -269,6 +311,11 @@ def generate_list_of_all_compounds_in_bioactivities(exclude_questionable, pubche
 
 
 def get_form_data(request):
+    """Return dictionay containing data from the submitted filter form for bioactivities
+
+    Parameters:
+    request -- the uwsgi request containing the filter's values
+    """
     # convert data sent in request to a dict data type from a string data type
     request_filter = json.loads(request.body)
 
@@ -362,6 +409,16 @@ def get_filtered_bioactivities(
         desired_bioactivities,
         desired_organisms
 ):
+    """Get a queryset of the Bioactivity data matching the given filters
+
+    Parameters:
+    exclude_questionable -- boolean to exclude dubious bioactivity entries
+    pubchem -- boolean to specify whether to use PubChem or ChEMBL
+    desired_compounds -- list of selected compounds
+    desired_target -- list of selected targets
+    desired_bioactivites -- list of selected bioactivity types (e.g. IC50)
+    desired_organisms -- list of organisms to filter bioactivities
+    """
     # Filter based on bioactivity
     if pubchem:
         q = PubChemBioactivity.objects.filter(activity_name__in=desired_bioactivities)
@@ -460,7 +517,6 @@ def get_filtered_bioactivities(
     return q
 
 
-# TODO STANDARD BIOACTIVITIES FOR ChEBML (right now just PubChem)
 def fetch_all_standard_bioactivities_data(
         exclude_questionable,
         pubchem,
@@ -471,6 +527,18 @@ def fetch_all_standard_bioactivities_data(
         normalized,
         log_scale
 ):
+    """Return a list of Bioactivities with each Bioactivity as a dictionary
+
+    Parameters:
+    exclude_questionable -- boolean to exclude dubious bioactivity entries
+    pubchem -- boolean to specify whether to use PubChem or ChEMBL
+    desired_compounds -- list of selected compounds
+    desired_target -- list of selected targets
+    desired_bioactivites -- list of selected bioactivity types (e.g. IC50)
+    desired_organisms -- list of organisms to filter bioactivities
+    normalized -- boolean to specify whether to normalize bioactivities
+    log_scale -- boolean to use log scale on data
+    """
     # First, we acquire all the filtered hits
     filtered_bioactivities = get_filtered_bioactivities(
         exclude_questionable,
@@ -556,6 +624,16 @@ def fetch_all_standard_drugtrials_data(
         normalized,
         log_scale
 ):
+    """Get a list of Drug Trials with each Drug Trial as a dictionary
+
+    Parameters:
+    exclude_questionable -- boolean to exclude dubious bioactivity entries
+    desired_compounds -- list of selected compounds
+    desired_drugtrials -- list of selected Drug Trial types (e.g. Renal Clearance)
+    desired_organisms -- list of organisms to filter bioactivities
+    normalized -- boolean to specify whether to normalize bioactivities
+    log_scale -- boolean to use log scale on data
+    """
     # TODO
     # This requires refactoring, magic conversion tables are not good practice
     organisms = {
@@ -564,7 +642,7 @@ def fetch_all_standard_drugtrials_data(
         'Canis lupus familiaris': 'Dog'
     }
 
-    desired_organisms = [organisms.get(organism,'') for organism in desired_organisms]
+    desired_organisms = [organisms.get(organism, '') for organism in desired_organisms]
 
     # TODO: FIXME
     # Nonstandard values?
@@ -581,16 +659,16 @@ def fetch_all_standard_drugtrials_data(
             drug_trial__species__species_name__in=desired_organisms
         )
         #average = 0
-        min = 999999999
-        max = -999999999
+        current_min = 999999999
+        current_max = -999999999
 
         for result in drugtrial_data:
             value = result.value
             #average += value
-            if value < min:
-                min = value
-            if value > max:
-                max = value
+            if value < current_min:
+                current_min = value
+            if value > current_max:
+                current_max = value
 
         #average = average / len(drugtrial_data)
 
@@ -603,7 +681,7 @@ def fetch_all_standard_drugtrials_data(
 
             if normalized:
                 try:
-                    value = (0.9999)*((value-min)/(max-min)) + 0.0001
+                    value = 0.9999 * ((value-current_min)/(current_max-current_min)) + 0.0001
                 except:
                     value = 1
 
@@ -627,6 +705,10 @@ def fetch_all_standard_drugtrials_data(
 
 
 def fetch_all_standard_mps_assay_data():
+    """Return Assay data
+
+    This function has yet to be implemented
+    """
     # using values for now, FUTURE: use standardized_values
     cursor = connection.cursor()
 
@@ -659,12 +741,16 @@ def fetch_all_standard_mps_assay_data():
 import collections
 
 
-# dic is a dictionary capable of autovivification
 def dic():
+    """Returns a dictionary capable of autovivification"""
     return collections.defaultdict(dic)
 
 
 def heatmap(request):
+    """Returns a heatmap
+
+    request -- the uswsgi request containing data from the filters
+    """
     if len(request.body) == 0:
         return {'error': 'empty request body'}
 
@@ -829,15 +915,15 @@ def heatmap(request):
             for compound in valid_compounds:
                 values.append(initial_dic[compound][bioactivity])
             # Get median from list after excluding all None values
-            median = np.median(np.array([value for value in values if value != None]))
+            median = np.median(np.array([value for value in values if value is not None]))
             maximum = max(values)
 
             # Avoid anomalies by arbitrarily putting median to 10% when max == median
             if median == maximum:
-                median = median * 0.1
+                median *= 0.1
             # Convert values such that there are no None values
-            values = [value if value != None else median for value in values]
-            data.update({bioactivity:values})
+            values = [value if value is not None else median for value in values]
+            data.update({bioactivity: values})
 
     df = pandas.DataFrame(data)
 
@@ -846,29 +932,29 @@ def heatmap(request):
     # Determine distances (default is Euclidean)
     # The data frame should encompass all of the bioactivities and drugtrials
     frame = [bioactivity for bioactivity in bioactivities]
-    dataMatrix = np.array(df[frame])
-    distMat = scipy.spatial.distance.pdist(dataMatrix, metric=metric)
+    data_matrix = np.array(df[frame])
+    distance_matrix = scipy.spatial.distance.pdist(data_matrix, metric=metric)
     # GOTCHA
     # Small numbers appear to trigger a quirk in Scipy (removing them most expedient solution)
-    distMat[abs(distMat)<1e-10] = 0.0
+    distance_matrix[abs(distance_matrix) < 1e-10] = 0.0
     # Large numbers also appear to be problematic
 
     row_leaves = valid_compounds
     col_leaves = frame
 
     # Cluster hierarchicaly using scipy
-    if distMat.any():
-        clusters = scipy.cluster.hierarchy.linkage(distMat, method=method)
+    if distance_matrix.any():
+        clusters = scipy.cluster.hierarchy.linkage(distance_matrix, method=method)
         dendro = scipy.cluster.hierarchy.dendrogram(clusters, orientation='right', no_plot=True)
         row_leaves = [valid_compounds[i] for i in dendro['leaves']]
 
     # For *Columns*
 
-    distMat = scipy.spatial.distance.pdist(dataMatrix.T, metric=metric)
-    distMat[abs(distMat)<1e-10] = 0.0
+    distance_matrix = scipy.spatial.distance.pdist(data_matrix.T, metric=metric)
+    distance_matrix[abs(distance_matrix) < 1e-10] = 0.0
 
-    if distMat.any():
-        clusters = scipy.cluster.hierarchy.linkage(distMat, method=method)
+    if distance_matrix.any():
+        clusters = scipy.cluster.hierarchy.linkage(distance_matrix, method=method)
         dendro = scipy.cluster.hierarchy.dendrogram(clusters, orientation='right', no_plot=True)
         col_leaves = [frame[i] for i in dendro['leaves']]
 
@@ -882,6 +968,10 @@ def heatmap(request):
 
 
 def cluster(request):
+    """Returns a dendrogram
+
+    request -- the uswsgi request containing data from the filters
+    """
     if len(request.body) == 0:
         return {'error': 'empty request body'}
 
@@ -1016,15 +1106,15 @@ def cluster(request):
             for compound in valid_compounds:
                 values.append(initial_dic[compound][bioactivity])
             # Get median from list after excluding all None values
-            median = np.median(np.array([value for value in values if value != None]))
+            median = np.median(np.array([value for value in values if value is not None]))
             maximum = max(values)
 
             # Avoid anomalies by arbitrarily putting median to 10% when max == median
             if median == maximum:
-                median = median * 0.1
+                median *= 0.1
             # Convert values such that there are no None values
-            values = [value if value != None else median for value in values]
-            data.update({bioactivity:values})
+            values = [value if value is not None else median for value in values]
+            data.update({bioactivity: values})
 
     # List of properties
     props = ['molecular_weight',
@@ -1047,18 +1137,18 @@ def cluster(request):
             for compound in compound_data:
                 # Get data for prop here
                 # This is a rather inefficient means of acquiring data
-                values.append(compound.get(prop,None))
+                values.append(compound.get(prop, None))
             # Get median from list after excluding all None values
-            median = np.median(np.array([value for value in values if value != None]))
+            median = np.median(np.array([value for value in values if value is not None]))
             maximum = max(values)
 
             # Avoid anomalies by arbitrarily putting median to 10% when max == median
             if median == maximum:
-                median = median * 0.1
+                median *= 0.1
 
             # Convert values such that there are no None values
-            values = [value if value != None else median for value in values]
-            data.update({prop:values})
+            values = [value if value is not None else median for value in values]
+            data.update({prop: values})
 
     df = pandas.DataFrame(data)
 
@@ -1067,15 +1157,15 @@ def cluster(request):
     frame = [bioactivity for bioactivity in bioactivities]
     if chemical_properties:
         frame.extend(props)
-    dataMatrix = np.array(df[frame])
-    distMat = scipy.spatial.distance.pdist(dataMatrix, metric=metric)
+    data_matrix = np.array(df[frame])
+    distance_matrix = scipy.spatial.distance.pdist(data_matrix, metric=metric)
     # GOTCHA
     # Small numbers appear to trigger a quirk in Scipy (removing them most expedient solution)
-    distMat[abs(distMat)<1e-10] = 0.0
+    distance_matrix[abs(distance_matrix) < 1e-10] = 0.0
 
     # Cluster hierarchicaly using scipy
-    clusters = scipy.cluster.hierarchy.linkage(distMat, method=method)
-    T = scipy.cluster.hierarchy.to_tree(clusters, rd=False)
+    clusters = scipy.cluster.hierarchy.linkage(distance_matrix, method=method)
+    tree = scipy.cluster.hierarchy.to_tree(clusters, rd=False)
 
     # Create dictionary for labeling nodes by their IDs
     labels = list(df['compounds'])
@@ -1084,37 +1174,39 @@ def cluster(request):
     # Create a nested dictionary from the ClusterNode's returned by SciPy
     def add_node(node, parent):
         # First create the new node and append it to its parent's children
-        newNode = dict(node_id=node.id, children=[])
-        parent["children"].append(newNode)
+        new_node = dict(node_id=node.id, children=[])
+        parent["children"].append(new_node)
 
         # Recursively add the current node's children
-        if node.left: add_node(node.left, newNode)
-        if node.right: add_node(node.right, newNode)
+        if node.left:
+            add_node(node.left, new_node)
+        if node.right:
+            add_node(node.right, new_node)
 
     # Initialize nested dictionary for d3, then recursively iterate through tree
-    d3Dendro = dict(children=[], name="Root")
-    add_node(T, d3Dendro)
+    d3_dendro = dict(children=[], name="Root")
+    add_node(tree, d3_dendro)
 
     # Label each node with the names of each leaf in its subtree
     def label_tree(n):
         # If the node is a leaf, then we have its name
         if len(n["children"]) == 0:
-            leafNames = [id2name[n["node_id"]]]
+            leaf_names = [id2name[n["node_id"]]]
 
         # If not, flatten all the leaves in the node's subtree
         else:
-            leafNames = reduce(lambda ls, c: ls + label_tree(c), n["children"], [])
+            leaf_names = reduce(lambda ls, c: ls + label_tree(c), n["children"], [])
 
         # Delete the node id since we don't need it anymore and
         # it makes for cleaner JSON
         del n["node_id"]
 
         # Labeling convention: new-line separated leaf names
-        n["name"] = name = "\n".join(sorted(map(str, leafNames)))
+        n["name"] = "\n".join(sorted(map(str, leaf_names)))
 
-        return leafNames
+        return leaf_names
 
-    label_tree(d3Dendro["children"][0])
+    label_tree(d3_dendro["children"][0])
 
     # Turn bioactivities into a sorted list of bioactivity-target pairs
     bioactivities = sorted(bioactivities.keys())
@@ -1122,14 +1214,14 @@ def cluster(request):
     compounds = {}
 
     for compound in compound_data:
-        CHEMBL = compound.get('chemblid')
+        chembl = compound.get('chemblid')
         name = compound.get('name')
         known_drug = compound.get('known_drug')
         ro3 = compound.get('ro3_passes')
         ro5 = compound.get('ro5_violations')
         species = compound.get('species')
-        data ={
-            'CHEMBL': CHEMBL,
+        data = {
+            'CHEMBL': chembl,
             'name': name,
             'knownDrug': known_drug,
             'ro3': ro3,
@@ -1141,7 +1233,7 @@ def cluster(request):
 
     return {
         # json data
-        'data_json': d3Dendro,
+        'data_json': d3_dendro,
         'bioactivities': bioactivities,
         'compounds': compounds
     }
@@ -1153,7 +1245,7 @@ def cluster(request):
     # )
     #
     # # Output to JSON
-    # json.dump(d3Dendro, open(fullpath, "w"), sort_keys=True, indent=4)
+    # json.dump(d3_dendro, open(fullpath, "w"), sort_keys=True, indent=4)
     #
     # cluster_url_prefix = '/media/cluster/'
     #
@@ -1167,6 +1259,10 @@ def cluster(request):
 
 
 def table(request):
+    """Returns a table of bioactivities
+
+    request -- the uswsgi request containing data from the filters
+    """
     if len(request.body) == 0:
         return {'error': 'empty request body'}
 
@@ -1192,10 +1288,6 @@ def table(request):
     if len(desired_bioactivities) < 1:
         return {'error': 'Select at least one bioactivity.'}
 
-    # throw error for very large queries
-    #if 'Rattus norvegicus' in desired_targets and len(desired_compounds) >= 15:
-    #   return {'error': 'Many bioactivities are listed with Rattus norvegicus as a target, either deselect it or choose fewer than 15 compounds.'}
-
     q = get_filtered_bioactivities(
         exclude_questionable,
         pubchem,
@@ -1218,7 +1310,7 @@ def table(request):
 
     for bioactivity in q:
 
-        id = bioactivity.pk
+        current_id = bioactivity.pk
         compound = bioactivity.compound.name
         compoundid = bioactivity.compound_id
 
@@ -1256,7 +1348,7 @@ def table(request):
         data_validity = bioactivity.get_data_validity_display()
 
         obj = {
-            'id': id,
+            'id': current_id,
             'compound': compound,
             'compoundid': compoundid,
             'target': target,
