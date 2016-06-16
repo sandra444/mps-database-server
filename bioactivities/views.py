@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from django.http import HttpResponse, Http404
-from django.views.decorators.csrf import csrf_exempt
+# from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
@@ -21,25 +21,15 @@ logger = logging.getLogger(__name__)
 
 
 class JSONResponse(HttpResponse):
-
-    """
-    An HttpResponse that renders its content into JSON.
-    """
-
+    """An HttpResponse that renders its content into JSON"""
     def __init__(self, data, **kwargs):
-        """
-
-        :rtype : object
-        """
         content = JSONRenderer().render(data)
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
 
 
 def bioactivities_list(request):
-    """
-    Retrieve a list of Bioactivities
-    """
+    """Retrieve a list of Bioactivities for Quick Search"""
     if request.method == 'GET':
         compound = request.GET.get('compound', '')
         target = request.GET.get('target', '')
@@ -91,7 +81,7 @@ def bioactivities_list(request):
                     ).exclude(assay__target__name="Unchecked").exclude(assay__target__name='')
                 else:
                     data = data.filter(
-                       target__isnull=False
+                        target__isnull=False
                     ).exclude(target__name="Unchecked").exclude(target__name='')
 
             if exclude_organismless:
@@ -180,13 +170,14 @@ def bioactivities_list(request):
 
 
 # TODO NEEDS REVISION
-@csrf_exempt
 def list_of_all_bioactivities_in_bioactivities(request):
-    return JSONResponse(generate_list_of_all_bioactivities_in_bioactivities(True))
+    """List all requested Bioactivities"""
+    pubchem = json.loads(request.GET.get('pubchem'))
+    return JSONResponse(generate_list_of_all_bioactivities_in_bioactivities(True, pubchem))
 
 
-@csrf_exempt
 def list_of_all_targets_in_bioactivities(request):
+    """List all requested Targets related to Bioactivities"""
     exclude_questionable = json.loads(request.GET.get('exclude_questionable'))
     pubchem = json.loads(request.GET.get('pubchem'))
     target_types = json.loads(request.GET.get('target_types'))
@@ -220,8 +211,8 @@ def list_of_all_targets_in_bioactivities(request):
     )
 
 
-@csrf_exempt
 def list_of_all_compounds_in_bioactivities(request):
+    """List all requested Compounds related to Bioactivities"""
     exclude_questionable = json.loads(request.GET.get('exclude_questionable'))
     pubchem = json.loads(request.GET.get('pubchem'))
 
@@ -231,8 +222,8 @@ def list_of_all_compounds_in_bioactivities(request):
     ))
 
 
-@csrf_exempt
 def list_of_all_data_in_bioactivities(request):
+    """Lists all requested data for filtering bioactivities"""
     exclude_questionable = json.loads(request.GET.get('exclude_questionable'))
     pubchem = json.loads(request.GET.get('pubchem'))
     target_types = json.loads(request.GET.get('target_types'))
@@ -266,8 +257,8 @@ def list_of_all_data_in_bioactivities(request):
     )
 
 
-@csrf_exempt
 def gen_heatmap(request):
+    """Generates a heatmap of Bioactivities and Compounds"""
     result = heatmap(request)
     if result:
         # logging.debug('Final JSON response step: returning JSON response'
@@ -278,8 +269,8 @@ def gen_heatmap(request):
         return HttpResponse()
 
 
-@csrf_exempt
 def gen_cluster(request):
+    """Generates a dendrogram of Compounds"""
     result = cluster(request)
     if result:
         # logging.debug('Final JSON response step: returning JSON response'
@@ -290,8 +281,8 @@ def gen_cluster(request):
         return HttpResponse()
 
 
-@csrf_exempt
 def gen_table(request):
+    """Generates a table of Bioactivities"""
     result = table(request)
     if result:
         # logging.debug('Final JSON response step: returning JSON response'
@@ -303,16 +294,19 @@ def gen_table(request):
 
 
 def view_cluster(request):
+    """View the page for a cluster of compounds (can cluster on Bioactivities)"""
     c = RequestContext(request)
     return render_to_response('bioactivities/cluster.html', c)
 
 
 def view_heatmap(request):
+    """View the page for a heatmap of Bioactivities"""
     c = RequestContext(request)
     return render_to_response('bioactivities/heatmap.html', c)
 
 
 def view_table(request):
+    """View the page for a table of Bioactivities"""
     if request.method == 'POST':
         form = SearchForm(request.POST)
         if form.is_valid():
@@ -331,5 +325,6 @@ def view_table(request):
 
 
 def view_model(request):
+    """WIP: View preview page for predictive modelling"""
     c = RequestContext(request)
     return render_to_response('bioactivities/model.html', c)

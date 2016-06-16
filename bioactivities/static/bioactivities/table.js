@@ -1,4 +1,6 @@
 $(document).ready(function () {
+    // Get the middleware token
+    var middleware_token = getCookie('csrftoken');
 
     function table(data) {
         // Show graphic
@@ -108,17 +110,19 @@ $(document).ready(function () {
         $.ajax({
             url:  '/bioactivities/gen_table/',
             type: 'POST',
-            contentType: 'application/json',
-            // Remember to convert to string
-            data: JSON.stringify({
-                'exclude_questionable': FILTER.exclude_questionable,
-                'pubchem': FILTER.pubchem,
-                'bioactivities_filter': bioactivities_filter,
-                'targets_filter': targets_filter,
-                'compounds_filter': compounds_filter,
-                'target_types_filter': FILTER.target_types,
-                'organisms_filter': FILTER.organisms
-            }),
+            dataType: 'json',
+            data: {
+                form: JSON.stringify({
+                    'exclude_questionable': FILTER.exclude_questionable,
+                    'pubchem': FILTER.pubchem,
+                    'bioactivities_filter': bioactivities_filter,
+                    'targets_filter': targets_filter,
+                    'compounds_filter': compounds_filter,
+                    'target_types_filter': FILTER.target_types,
+                    'organisms_filter': FILTER.organisms
+                }),
+                csrfmiddlewaretoken: middleware_token
+            },
             success: function (json) {
                 // Stop spinner
                 window.spinner.stop();

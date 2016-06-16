@@ -317,7 +317,7 @@ def get_form_data(request):
     request -- the uwsgi request containing the filter's values
     """
     # convert data sent in request to a dict data type from a string data type
-    request_filter = json.loads(request.body)
+    request_filter = json.loads(request.POST.get('form', '{}'))
 
     desired_targets = [
         x.get(

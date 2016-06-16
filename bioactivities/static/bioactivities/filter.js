@@ -14,6 +14,9 @@
 window.FILTER = {};
 
 $(document).ready(function () {
+    // Get the middleware token
+    var middleware_token = getCookie('csrftoken');
+
     // Get a list for checkboxes from returned AJAX data
     // Min is a boolean value to see if data should be restricted on min_feat_count
     function get_list(data, min) {
@@ -93,12 +96,13 @@ $(document).ready(function () {
         $.ajax({
             url: '/bioactivities/all_data/',
             type: "GET",
-            dataType: "json",
+            dataType: 'json',
             data: {
                 pubchem: FILTER.pubchem,
                 exclude_questionable: FILTER.exclude_questionable,
                 target_types: JSON.stringify(FILTER.target_types),
-                organisms: JSON.stringify(FILTER.organisms)
+                organisms: JSON.stringify(FILTER.organisms),
+                csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
                 //console.log(json);
