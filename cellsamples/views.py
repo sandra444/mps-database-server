@@ -151,7 +151,7 @@ class CellTypeList(ListView):
     template_name = 'cellsamples/celltype_list.html'
 
     def get_queryset(self):
-        queryset = CellType.objects.all().prefetch_related('cell_subtype', 'organ')
+        queryset = CellType.objects.all().prefetch_related('organ')
         return queryset
 
 

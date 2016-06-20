@@ -39,7 +39,7 @@ class CellType(LockableModel):
     class Meta(object):
         verbose_name = 'Cell Type'
         ordering = ('species', 'cell_type')
-        unique_together = [('cell_type', 'species')]
+        unique_together = [('cell_type', 'species', 'organ')]
 
     def __unicode__(self):
         return u'{} ({} {})'.format(
