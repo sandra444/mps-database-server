@@ -2,17 +2,20 @@ from rest_framework import serializers
 from bioactivities.models import Bioactivity, Target, Assay
 from compounds.models import Compound
 
+
 class CompoundSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = Compound
         fields = ('name',)
 
+
 class TargetSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = Target
         fields = ('name',)
+
 
 class AssaySerializer(serializers.ModelSerializer):
 
@@ -29,7 +32,16 @@ class BioactivitiesSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = Bioactivity
-        fields = ('compound', 'target', 'organism', 'standard_name', 'operator', 'standardized_value', 'standardized_units', 'assay')
+        fields = (
+            'compound',
+            'target',
+            'organism',
+            'standard_name',
+            'operator',
+            'standardized_value',
+            'standardized_units',
+            'assay'
+        )
 
     # Old API
     # pk = serializers.Field()  # Note: `Field` is an untyped read-only field.

@@ -6,32 +6,57 @@ Bioactivities URL router
 
 from django.conf.urls import patterns, url
 
-urlpatterns = patterns('bioactivities.views',
-                       url(r'^bioactivities/$',
-                           'bioactivities_list'),
-                       # Old API
-                       # url(r'^bioactivities/(?P<pk>[0-9]+)/$',
-                       #     'bioactivities_detail'),
-                       url(r'^bioactivities/all_bioactivities/$',
-                           'list_of_all_bioactivities_in_bioactivities'),
-                       url(r'^bioactivities/all_targets/$',
-                           'list_of_all_targets_in_bioactivities'),
-                       url(r'^bioactivities/all_compounds/$',
-                           'list_of_all_compounds_in_bioactivities'),
-                       url(r'^bioactivities/all_data/$',
-                           'list_of_all_data_in_bioactivities'),
-                       url(r'^bioactivities/gen_heatmap/$',
-                           'gen_heatmap'),
-                       url(r'^bioactivities/heatmap/$',
-                           'view_heatmap'),
-                       url(r'^bioactivities/gen_cluster/$',
-                           'gen_cluster'),
-                       url(r'^bioactivities/cluster/$',
-                           'view_cluster'),
-                       url(r'^bioactivities/gen_table/$',
-                           'gen_table'),
-                       url(r'^bioactivities/table/$',
-                           'view_table'),
-                       url(r'^bioactivities/model/$',
-                           'view_model')
-                       )
+urlpatterns = patterns(
+    'bioactivities.views',
+    url(
+        r'^bioactivities/$',
+        'bioactivities_list'
+    ),
+    # Old API
+    # url(r'^bioactivities/(?P<pk>[0-9]+)/$',
+    #     'bioactivities_detail'),
+    url(
+        r'^bioactivities/all_bioactivities/$',
+        'list_of_all_bioactivities_in_bioactivities'
+    ),
+    url(
+        r'^bioactivities/all_targets/$',
+        'list_of_all_targets_in_bioactivities'
+    ),
+    url(
+        r'^bioactivities/all_compounds/$',
+        'list_of_all_compounds_in_bioactivities'
+    ),
+    url(
+        r'^bioactivities/all_data/$',
+        'list_of_all_data_in_bioactivities'
+    ),
+    url(
+        r'^bioactivities/gen_heatmap/$',
+        'gen_heatmap'
+    ),
+    url(
+        r'^bioactivities/heatmap/$',
+        'view_heatmap'
+    ),
+    url(
+        r'^bioactivities/gen_cluster/$',
+        'gen_cluster'
+    ),
+    url(
+        r'^bioactivities/cluster/$',
+        'view_cluster'
+    ),
+    url(
+        r'^bioactivities/gen_table/$',
+        'gen_table'
+    ),
+    url(
+        r'^bioactivities/table/$',
+        'view_table'
+    ),
+    url(
+        r'^bioactivities/model/$',
+        'view_model'
+    )
+)

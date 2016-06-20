@@ -6,6 +6,3 @@ class BioactivityTypeResource(resources.ModelResource):
 
     class Meta(object):
         model = BioactivityType
-
-
-

@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 def main(request):
+    """Default to server error"""
     return HttpResponseServerError()
 
 
@@ -44,6 +45,11 @@ switch = {
 
 
 def ajax(request):
+    """Switch to correct function given POST call
+
+    Receives the following from POST:
+    call -- What function to redirect to
+    """
     post_call = request.POST.get('call')
 
     if not post_call:

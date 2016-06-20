@@ -1,10 +1,6 @@
 # coding=utf-8
 
-"""
-
-CellSamples Admin
-
-"""
+"""CellSamples Admin"""
 
 from django.contrib import admin
 from cellsamples.resource import CellSampleResource
@@ -13,6 +9,7 @@ from cellsamples.models import *
 
 
 class CellTypeAdmin(LockableAdmin):
+    """Admin for Cell Type"""
     save_on_top = True
     list_display = ('organ', 'cell_type', 'species')
 
@@ -42,9 +39,13 @@ admin.site.register(CellType, CellTypeAdmin)
 
 
 class CellTypeInline(admin.TabularInline):
+    """Admin Inline for Cell Type
+
+    May be subject to deprecation
+    """
     model = CellType
 
-    fields = (('cell_type', 'species', 'cell_subtype', 'locked'),)
+    fields = (('cell_type', 'species', 'locked'),)
     extra = 0
 
     class Media(object):
@@ -52,6 +53,7 @@ class CellTypeInline(admin.TabularInline):
 
 
 class OrganAdmin(LockableAdmin):
+    """Admin for Organs"""
 
     class Media(object):
         js = ('js/inline_fix.js',)
@@ -76,6 +78,7 @@ class OrganAdmin(LockableAdmin):
         }
         ),
     )
+    # May be deprecated in the future; seldom used
     inlines = [CellTypeInline]
 
 
@@ -83,6 +86,7 @@ admin.site.register(Organ, OrganAdmin)
 
 
 class CellSubtypeAdmin(LockableAdmin):
+    """Admin for Cell Subtypes"""
     save_on_top = True
 
     list_display = ('cell_subtype', 'cell_type')
@@ -112,19 +116,18 @@ admin.site.register(CellSubtype, CellSubtypeAdmin)
 
 
 class CellSampleAdmin(LockableAdmin):
-
+    """Admin for Cell Samples"""
     resource_class = CellSampleResource
     date_hierarchy = 'receipt_date'
 
     save_on_top = True
     list_per_page = 300
-    list_display = ('receipt_date','barcode','cell_type', 'cell_subtype', 'cell_source',
+    list_display = ('receipt_date', 'barcode', 'cell_type', 'cell_subtype',
                     'supplier',
                     'locked')
 
     search_fields = ['cell_type__cell_type',
                      'cell_subtype__cell_subtype',
-                     'cell_source',
                      'supplier__name',
                      'barcode',
                      'product_id']
@@ -132,14 +135,16 @@ class CellSampleAdmin(LockableAdmin):
     fieldsets = (
         (None, {
             'fields': (
-                ('cell_type','cell_subtype'),
-                ('cell_source', 'receipt_date'),
+                ('cell_type', 'cell_subtype'),
+                ('receipt_date'),
             )
         }),
         ('Supplier Information', {
-            'fields': (('supplier', 'product_id', 'barcode'),
-                        'cell_image',
-                        'notes',)
+            'fields': (
+                ('supplier', 'product_id', 'barcode'),
+                'cell_image',
+                'notes',
+            )
         }),
         ('Isolation Information', {
             'fields': ('isolation_datetime', ('isolation_method',
@@ -169,9 +174,9 @@ class CellSampleAdmin(LockableAdmin):
         ),
         (
             'Group Access', {
-                'fields':(
-                    'group','restricted'
-                 ),
+                'fields': (
+                    'group', 'restricted'
+                ),
             }
         ),
     )
@@ -181,6 +186,7 @@ admin.site.register(CellSample, CellSampleAdmin)
 
 
 class BiosensorAdmin(LockableAdmin):
+    """Admin for Biosensors"""
     save_on_top = True
     list_display = ('name', 'supplier',
                     'lot_number', 'product_id', 'description')
@@ -207,7 +213,9 @@ class BiosensorAdmin(LockableAdmin):
 
 admin.site.register(Biosensor, BiosensorAdmin)
 
+
 class SupplierAdmin(LockableAdmin):
+    """Admin for Cell Suppliers"""
     save_on_top = True
     list_display = ('name', 'phone', 'address')
     list_per_page = 300
