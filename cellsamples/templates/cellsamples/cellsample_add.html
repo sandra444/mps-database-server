@@ -4,6 +4,7 @@
 {% block load %}
     <script src="{% static "js/flag.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/image_display.js" %}"></script>
     <script src="{% static "cellsamples/cellsample_add.js" %}"></script>
 {% endblock %}
 
@@ -203,6 +204,14 @@
         <label for="cell_image" class="col-sm-2 control-label">Cell Image</label>
         <div class="col-sm-10">
           {{ form.cell_image }}
+        </div>
+    </div>
+
+    <div id="image_display">
+        <div id="current_display">
+            {% if object.cell_image %}
+                <img class="img-responsive center-block padded-bottom" src="/media/{{ object.cell_image }}">
+            {% endif %}
         </div>
     </div>
 

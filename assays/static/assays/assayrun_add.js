@@ -1,5 +1,4 @@
 $(document).ready(function () {
-
     var id = $('#id_assay_run_id');
     id.prop('readonly', true);
 
@@ -94,19 +93,20 @@ $(document).ready(function () {
 
     var image = $('#id_image');
     var image_display = $('#image_display');
+    var current_display = $('#current_display');
 
-    //Need to have condition for adding vs. changing data
+    // Need to have condition for adding vs. changing data
     get_center_id();
     get_types();
     data[2] = date.val();
     data[3] = name.val();
 
-    //Needs an AJAX call to get centerID
+    // Needs an AJAX call to get centerID
     group.change(function (evt) {
         get_center_id();
     });
 
-    //Get the types for each checkbox
+    // Get the types for each checkbox
     $.each(type_selectors, function(index, value) {
         value.change(function (evt) {
             get_types();
@@ -114,7 +114,6 @@ $(document).ready(function () {
     });
 
     date.data("value", date.val());
-
 
     // Set interval to regularly check for new date
     setInterval(function () {
@@ -141,38 +140,9 @@ $(document).ready(function () {
         date.datepicker("option","dateFormat","yy-mm-dd");
         date.datepicker("setDate" , curr_date);
 
+        // Change image preview as necessary
         image.change(function() {
-            var file = image[0].files[0];
-
-            if (file) {
-                $('#current_image').hide();
-
-                var imageType = /image.*/;
-
-                if (file.type.match(imageType)) {
-                    var reader = new FileReader();
-
-                    reader.onload = function (e) {
-                        image_display.html('');
-
-                        var img = new Image();
-                        img.src = reader.result;
-                        img.id = 'preview';
-
-                        image_display.append(img);
-                        $('#preview').addClass('img-responsive center-block padded-bottom');
-                    }
-
-                    reader.readAsDataURL(file);
-                }
-
-                else {
-                    image_display.html('File not supported!');
-                }
-            }
-            else {
-                $('#current_image').show();
-            }
+            IMAGES.display_image(image, image_display, current_display);
         });
     }
 });

@@ -29,7 +29,7 @@ def microdevice_list(request, *args, **kwargs):
 
 class OrganModelDetail(DetailView):
     model = OrganModel
-    template_name = 'microdevices/organ_model_detail.html'
+    template_name = 'microdevices/organmodel_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super(OrganModelDetail, self).get_context_data(**kwargs)
@@ -58,7 +58,7 @@ class OrganModelDetail(DetailView):
 #         'protocols': protocols,
 #     })
 #
-#     return render_to_response('microdevices/organ_model_detail.html', c)
+#     return render_to_response('microdevices/organmodel_detail.html', c)
 
 
 class MicrodeviceDetail(DetailView):
@@ -118,7 +118,7 @@ OrganModelProtocolFormset = inlineformset_factory(
 
 class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
     model = OrganModel
-    template_name = 'microdevices/organ_model_add.html'
+    template_name = 'microdevices/organmodel_add.html'
     form_class = OrganModelForm
 
     required_group_name = 'Change Microdevices Front'
@@ -151,7 +151,7 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
 
 class OrganModelUpdate(SpecificGroupRequiredMixin, UpdateView):
     model = OrganModel
-    template_name = 'microdevices/organ_model_add.html'
+    template_name = 'microdevices/organmodel_add.html'
     form_class = OrganModelForm
 
     required_group_name = 'Change Microdevices Front'

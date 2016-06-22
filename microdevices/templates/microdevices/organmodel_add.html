@@ -14,7 +14,9 @@
 
 {% block load %}
     <script src="{% static "js/inline_add.js" %}"></script>
+    <script src="{% static "js/image_display.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "microdevices/organmodel_add.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -43,7 +45,7 @@
 
     <legend>Organ Model</legend>
 
-    {% include 'generic_field.html' with field=form.model_name label="Model Name*"%}
+    {% include 'generic_field.html' with field=form.model_name label="Model Name*" %}
 
     {% if form.device.errors %}
         {% for error in form.device.errors %}
@@ -68,13 +70,21 @@
         </div>
     </div>
 
-    {% include 'generic_field.html' with field=form.organ label="Organ*"%}
+    {% include 'generic_field.html' with field=form.organ label="Organ*" %}
 
-    {% include 'generic_field.html' with field=form.center label="Center"%}
+    {% include 'generic_field.html' with field=form.center label="Center" %}
 
-    {% include 'generic_field.html' with field=form.description label="Description"%}
+    {% include 'generic_field.html' with field=form.description label="Description" %}
 
-    {% include 'generic_field.html' with field=form.model_image label="Image"%}
+    {% include 'generic_field.html' with field=form.model_image label="Image" %}
+
+    <div id="image_display">
+        <div id="current_display">
+            {% if object.model_image %}
+                <img class="img-responsive center-block padded-bottom" src="/media/{{ object.model_image }}">
+            {% endif %}
+        </div>
+    </div>
 
     {# TODO REVISE #}
     <div class="form-group">

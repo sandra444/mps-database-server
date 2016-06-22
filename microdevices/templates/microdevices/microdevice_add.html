@@ -4,8 +4,10 @@
 {% block load %}
     {# TODO REVISE #}
     <link href="{% static "assays/customize_admin.css" %}" rel="stylesheet" type="text/css">
+    <script src="{% static "js/image_display.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "microdevices/layout.js" %}"></script>
+    <script src="{% static "microdevices/microdevice_add.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -46,23 +48,39 @@
 
 <legend>Microdevice</legend>
 
-{% include 'generic_field.html' with field=form.device_type label="Device Type*"%}
+{% include 'generic_field.html' with field=form.device_type label="Device Type*" %}
 
-{% include 'generic_field.html' with field=form.device_name label="Device Name*"%}
+{% include 'generic_field.html' with field=form.device_name label="Device Name*" %}
 
-{% include 'generic_field.html' with field=form.barcode label="Barcode"%}
+{% include 'generic_field.html' with field=form.barcode label="Barcode" %}
 
-{% include 'generic_field.html' with field=form.center label="Center"%}
+{% include 'generic_field.html' with field=form.center label="Center" %}
 
-{% include 'generic_field.html' with field=form.manufacturer label="Manufacturer"%}
+{% include 'generic_field.html' with field=form.manufacturer label="Manufacturer" %}
 
-{% include 'generic_field.html' with field=form.organ label="Organ"%}
+{% include 'generic_field.html' with field=form.organ label="Organ" %}
 
-{% include 'generic_field.html' with field=form.description label="Description"%}
+{% include 'generic_field.html' with field=form.description label="Description" %}
 
-{% include 'generic_field.html' with field=form.device_image label="Device Image"%}
+{% include 'generic_field.html' with field=form.device_image label="Device Image" %}
 
-{% include 'generic_field.html' with field=form.device_cross_section_image label="Device Cross Section Image"%}
+<div id="device_image_display">
+    <div id="device_current_display">
+        {% if object.device_image %}
+            <img class="img-responsive center-block padded-bottom" src="/media/{{ object.device_image }}">
+        {% endif %}
+    </div>
+</div>
+
+{% include 'generic_field.html' with field=form.device_cross_section_image label="Device Cross Section Image" %}
+
+<div id="cross_section_image_display">
+    <div id="cross_section_current_display">
+        {% if object.device_cross_section_image %}
+            <img class="img-responsive center-block padded-bottom" src="/media/{{ object.device_cross_section_image }}">
+        {% endif %}
+    </div>
+</div>
 
 <legend>Dimensions</legend>
 
@@ -123,9 +141,7 @@
     </div>
 </div>
 
-<div id="layout_display">
-
-</div>
+<div id="layout_display"></div>
 
 <br>
 {% endblock %}

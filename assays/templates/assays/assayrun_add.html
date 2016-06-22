@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block load %}
+    <script src="{% static "js/image_display.js" %}"></script>
     <script src="{% static "assays/assayrun_add.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
 {% endblock %}
@@ -212,7 +213,7 @@
     </div>
 
     <div id="image_display">
-        <div id="current_image">
+        <div id="current_display">
             {% if object.image %}
                 <img class="img-responsive center-block padded-bottom" src="/media/{{ object.image }}">
             {% endif %}
