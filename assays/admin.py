@@ -588,7 +588,7 @@ class AssayLayoutAdmin(LockableAdmin):
     """Admin for Assay Layouts (not currently functional)"""
 
     class Media(object):
-        js = ('assays/customize_layout.js',)
+        js = ('assays/assaylayout_add.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
     save_as = True
@@ -667,7 +667,7 @@ class AssayPlateSetupAdmin(LockableAdmin):
     """Admin for the setup of plates"""
 
     class Media(object):
-        js = ('js/inline_fix.js', 'assays/plate_display.js', 'assays/customize_plate_setup.js')
+        js = ('js/inline_fix.js', 'assays/plate_display.js', 'assays/assayplatesetup_add.js')
         css = {'all': ('assays/customize_admin.css',)}
 
     save_on_top = True
@@ -1025,7 +1025,7 @@ class AssayPlateReadoutAdmin(LockableAdmin):
     form = AssayPlateReadoutForm
 
     class Media(object):
-        js = ('js/inline_fix.js', 'assays/plate_display.js', 'assays/customize_plate_readout.js',)
+        js = ('js/inline_fix.js', 'assays/plate_display.js', 'assays/assayplatereadout_add.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
     inlines = [AssayPlateReadoutInline]
@@ -1430,7 +1430,7 @@ class AssayChipReadoutForm(forms.ModelForm):
 class AssayChipReadoutAdmin(LockableAdmin):
     """Admin for Assay Chip Readout"""
     class Media(object):
-        js = ('js/inline_fix.js', 'assays/customize_chip.js', 'js/d3.min.js', 'js/c3.min.js',)
+        js = ('js/inline_fix.js', 'assays/assaychipreadout_add.js', 'js/d3.min.js', 'js/c3.min.js',)
         css = {'all': ('assays/customize_admin.css', 'css/c3.css',)}
 
     form = AssayChipReadoutForm
@@ -1725,7 +1725,7 @@ admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 class AssayChipTestResultAdmin(LockableAdmin):
     """Admin for results calculated from RAW CHIP DATA aka 'Chip Result'"""
     class Media(object):
-        js = ('js/cookies.js', 'js/whittle.js', 'js/inline_fix.js', 'assays/customize_chip_results_admin.js')
+        js = ('js/cookies.js', 'js/whittle.js', 'js/inline_fix.js', 'assays/assaychiptestresult_add.js')
 
     save_as = True
     save_on_top = True
@@ -1802,7 +1802,7 @@ class AssayPlateTestResultAdmin(LockableAdmin):
             'js/whittle.js',
             'js/inline_fix.js',
             'assays/plate_display.js',
-            'assays/customize_plate_results.js'
+            'assays/assayplatetestresult_add.js'
         )
         css = {'all': ('assays/customize_admin.css',)}
 
@@ -1889,7 +1889,7 @@ class AssayRunAdmin(LockableAdmin):
     # AssayRun is now Organ Chip Study
     # Organ Chip Study should really be simply Study
     class Media(object):
-        js = ('assays/customize_run.js',)
+        js = ('assays/assayrun_add.js',)
 
     form = AssayRunFormAdmin
     save_on_top = True
