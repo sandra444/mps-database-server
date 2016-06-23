@@ -1,7 +1,7 @@
 from django.conf.urls import patterns
 from django.contrib import admin
 from django.contrib import messages
-from django import forms
+# from django import forms
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
@@ -9,11 +9,12 @@ from bioservices import ChEMBL as ChEMBLdb
 
 from compounds.resource import CompoundResource
 from mps.base.admin import LockableAdmin
-from compounds.models import *
+# from compounds.models import *
 from compounds.forms import *
 
 
 class CompoundTargetInline(admin.TabularInline):
+    """Admin Inline for Compound Targets"""
     formset = CompoundTargetInlineFormset
     model = CompoundTarget
 
@@ -23,8 +24,9 @@ class CompoundTargetInline(admin.TabularInline):
     extra = 0
 
 
+# SUBJECT TO DEPRECATION
 class CompoundSummaryInline(admin.TabularInline):
-    # Assays for ChipReadout
+    """Admin Inline for Compound Summaries"""
     formset = CompoundSummaryInlineFormset
     model = CompoundSummary
     verbose_name = 'Compound Summary'
@@ -35,12 +37,10 @@ class CompoundSummaryInline(admin.TabularInline):
     )
     extra = 0
 
-    # class Media(object):
-    #     css = {"all": ("css/hide_admin_original.css",)}
 
-
+# SUBJECT TO DEPRECATION
 class CompoundPropertyInline(admin.TabularInline):
-    # Assays for ChipReadout
+    """Admin Inline for Compound Properties"""
     formset = CompoundPropertyInlineFormset
     model = CompoundProperty
     verbose_name = 'Compound Properties'
@@ -53,12 +53,10 @@ class CompoundPropertyInline(admin.TabularInline):
     )
     extra = 0
 
-    # class Media(object):
-    #     css = {"all": ("css/hide_admin_original.css",)}
 
-
+# May want to relocate this to forms file
 class CompoundAdminForm(forms.ModelForm):
-
+    """Form for Compound Admin"""
     class Meta(object):
         model = Compound
         widgets = {
@@ -73,6 +71,10 @@ class CompoundAdminForm(forms.ModelForm):
 
 
 class CompoundAdmin(LockableAdmin):
+    """Admin for Compound
+
+    Contains inline for Compound Targets
+    """
     form = CompoundAdminForm
     resource_class = CompoundResource
 
@@ -129,13 +131,15 @@ class CompoundAdmin(LockableAdmin):
                        'logp', 'logd', 'alogp',)
         }),
         ('Drug(-like) Properties', {
-            'fields': ('known_drug', 'medchem_alerts', 'ro3_passes',
-                       'ro5_violations', 'species', 'drug_class', 'protein_binding',
-                       'half_life', 'bioavailability'
+            'fields': (
+                'known_drug', 'medchem_alerts', 'ro3_passes',
+                'ro5_violations', 'species', 'drug_class', 'protein_binding',
+                'half_life', 'bioavailability'
             )
         }),
         ('Summaries', {
-            'fields': ('absorption', 'clearance', 'pk_metabolism', 'preclinical', 'clinical', 'post_marketing'
+            'fields': (
+                'absorption', 'clearance', 'pk_metabolism', 'preclinical', 'clinical', 'post_marketing'
             )
         }),
         ('Change Tracking', {
@@ -151,13 +155,13 @@ class CompoundAdmin(LockableAdmin):
 
     def get_urls(self):
 
-        return patterns('',
-                        (r'^add_multi/$',
-                         self.admin_site.admin_view(self.add_compounds))
+        return patterns(
+            '',
+            (r'^add_multi/$',
+            self.admin_site.admin_view(self.add_compounds))
         ) + super(CompoundAdmin, self).get_urls()
 
     def add_compounds(self, request):
-
         if '_add' in request.POST:
             form = self.AddMultiForm(request.POST)
             if form.is_valid():
@@ -224,11 +228,13 @@ class CompoundAdmin(LockableAdmin):
 admin.site.register(Compound, CompoundAdmin)
 
 
+# SUBJECT TO DEPRECATION
 class SummaryTypeAdmin(LockableAdmin):
+    """Admin for Summary Type"""
     save_on_top = True
 
-    search_fields = ['name', 'description',]
-    list_filter = ['name',]
+    search_fields = ['name', 'description']
+    list_filter = ['name']
 
     list_display = (
         'name',
@@ -239,34 +245,35 @@ class SummaryTypeAdmin(LockableAdmin):
                        'modified_by', 'modified_on',)
 
     fieldsets = (
-       (
-           "Summary Type Data", {
-               'fields': (
-                   'name',
-                   'description',
-               )
-           }
-       ),
-       ('Change Tracking', {
-           'fields': (
-               'locked',
-               ('created_by', 'created_on'),
-               ('modified_by', 'modified_on'),
-               ('signed_off_by', 'signed_off_date'),
-           )
-       }
-       ),
+        (
+            "Summary Type Data", {
+                'fields': (
+                    'name',
+                    'description',
+                )
+            }
+        ),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }),
     )
 
 
 admin.site.register(SummaryType, SummaryTypeAdmin)
 
 
+# SUBJECT TO DEPRECATION
 class PropertyTypeAdmin(LockableAdmin):
+    """Admin for Property Type"""
     save_on_top = True
 
-    search_fields = ['name', 'description',]
-    list_filter = ['name',]
+    search_fields = ['name', 'description']
+    list_filter = ['name']
 
     list_display = (
         'name',
@@ -277,23 +284,20 @@ class PropertyTypeAdmin(LockableAdmin):
                        'modified_by', 'modified_on',)
 
     fieldsets = (
-       (
-           "Property Data", {
-               'fields': (
-                   'name',
-                   'description',
-               )
-           }
-       ),
-       ('Change Tracking', {
-           'fields': (
-               'locked',
-               ('created_by', 'created_on'),
-               ('modified_by', 'modified_on'),
-               ('signed_off_by', 'signed_off_date'),
-           )
-       }
-       ),
+        ("Property Data", {
+            'fields': (
+                'name',
+                'description',
+            )
+        }),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }),
     )
 
 

@@ -4,7 +4,7 @@ from django.forms.models import BaseInlineFormSet
 
 
 class CompoundForm(forms.ModelForm):
-
+    """Form for Compounds"""
     class Meta(object):
         model = Compound
         widgets = {
@@ -26,7 +26,11 @@ class CompoundForm(forms.ModelForm):
 
     # Deal with nonsense
     def clean(self):
-        super(forms.ModelForm, self).clean()
+        """Clean Compound Form
+
+        Ensures that chemblid, inchikey, and pubchemid, and drugbank_id are unique
+        """
+        super(CompoundForm, self).clean()
 
         chemblid = self.cleaned_data.get('chemblid', '')
         inchikey = self.cleaned_data.get('inchikey', '')
@@ -47,20 +51,24 @@ class CompoundForm(forms.ModelForm):
         return self.cleaned_data
 
 
+# SUBJECT TO DEPRECATION
 class CompoundSummaryInlineFormset(BaseInlineFormSet):
+    """Form for Summary inlines"""
     class Meta(object):
         model = CompoundSummary
         exclude = ('',)
 
 
+# SUBJECT TO DEPRECATION
 class CompoundPropertyInlineFormset(BaseInlineFormSet):
+    """Form for property inlines"""
     class Meta(object):
         model = CompoundProperty
         exclude = ('',)
 
 
 class CompoundTargetInlineFormset(BaseInlineFormSet):
+    """Form for Target inlines"""
     class Meta(object):
         model = CompoundTarget
         exclude = ('',)
-

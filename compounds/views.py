@@ -1,4 +1,4 @@
-from .models import Compound
+# from .models import Compound
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 # from django.utils.decorators import method_decorator
 # from django.contrib.auth.decorators import login_required
@@ -11,6 +11,7 @@ from django.forms.models import inlineformset_factory
 
 
 class CompoundsList(ListView):
+    """Display a list of compounds (not to be confused with CompoundReport"""
     model = Compound
     template_name = 'compounds/compounds_list.html'
     # If variable pagination is desired, just jam that into GET too
@@ -29,6 +30,7 @@ class CompoundsList(ListView):
 
 
 class CompoundsDetail(DetailView):
+    """Show a Compounds details (no editing)"""
     model = Compound
     template_name = 'compounds/compounds_detail.html'
 
@@ -37,17 +39,17 @@ class CompoundsDetail(DetailView):
         current = compounds.index(int(self.kwargs.get('pk')))
 
         if current == 0:
-            previous = compounds[-1]
+            previous_compound = compounds[-1]
         else:
-            previous = compounds[current - 1]
+            previous_compound = compounds[current - 1]
         if current == len(compounds)-1:
-            next = compounds[0]
+            next_compound = compounds[0]
         else:
-            next = compounds[current + 1]
+            next_compound = compounds[current + 1]
 
         context = super(CompoundsDetail, self).get_context_data(**kwargs)
 
-        context.update({'previous':previous, 'next':next})
+        context.update({'previous': previous_compound, 'next': next_compound})
         return context
 
 CompoundTargetFormset = inlineformset_factory(
@@ -67,6 +69,7 @@ CompoundTargetFormset = inlineformset_factory(
 
 
 class CompoundsAdd(SpecificGroupRequiredMixin, CreateView):
+    """Add a compound"""
     form_class = CompoundForm
     template_name = 'compounds/compounds_add.html'
 
@@ -97,6 +100,7 @@ class CompoundsAdd(SpecificGroupRequiredMixin, CreateView):
 
 
 class CompoundsUpdate(SpecificGroupRequiredMixin, UpdateView):
+    """Update a Compound"""
     model = Compound
     form_class = CompoundForm
     template_name = 'compounds/compounds_add.html'
@@ -185,5 +189,6 @@ class CompoundsUpdate(SpecificGroupRequiredMixin, UpdateView):
 
 # Currently, compounds report basically begins as just a compounds list
 class CompoundsReport(ListView):
+    """Displays page for a Compound Report"""
     model = Compound
     template_name = 'compounds/compounds_report.html'

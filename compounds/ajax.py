@@ -76,9 +76,7 @@ def fetch_chemblid_data(request):
                         content_type="application/json")
 
 
-def fetch_chembl_compound_data(request):
-    chemblid = request.POST['chemblid']
-
+def get_chembl_compound_data(chemblid):
     data = {}
 
     url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chemblid)
@@ -111,6 +109,7 @@ def fetch_chembl_compound_data(request):
         molecular_properties = initial_data.get('molecule_properties', {})
 
         if molecular_properties:
+            data['chemblid'] = chemblid
             data['molecular_formula'] = molecular_properties.get('full_molformula', '')
             data['molecular_weight'] = molecular_properties.get('full_mwt', '')
             data['rotatable_bonds'] = molecular_properties.get('rtb', '')
@@ -146,22 +145,29 @@ def fetch_chembl_compound_data(request):
 
         data['medchem_alerts'] = medchem_alerts
 
+    return data
+
+
+def fetch_chembl_compound_data(request):
+    chemblid = request.POST['chemblid']
+
+    data = get_chembl_compound_data(chemblid)
+
     return HttpResponse(json.dumps(data),
                         content_type='application/json')
 
 
-# TODO NEEDS REVISION: SWITCH TO ACD CALCULATED LOGP ETC
 def fetch_compound_report(request):
-    summary_types = (
-        'Pre-clinical Findings',
-        'Clinical Findings',
-        # Recently added
-        'PK/Metabolism',
-    )
-    property_types = (
-        'Dose (xCmax)',
-        'cLogP',
-    )
+    # summary_types = (
+    #     'Pre-clinical Findings',
+    #     'Clinical Findings',
+    #     # Recently added
+    #     'PK/Metabolism',
+    # )
+    # property_types = (
+    #     'Dose (xCmax)',
+    #     'cLogP',
+    # )
 
     compounds_request = json.loads(request.POST.get('compounds'))
 
@@ -237,7 +243,8 @@ def fetch_compound_report(request):
                     averaged_plot.update({time: float(sum(entry.get(time)))/len(entry.get(time))})
                 # Add maximum
                 times = [float(t) for t in entry.keys()]
-                if assay not in data[compound]['table']['max_time'] or max(times) > data[compound]['table']['max_time'][assay]:
+                if assay not in data[compound]['table']['max_time'] or \
+                        max(times) > data[compound]['table']['max_time'][assay]:
                     data[compound]['table']['max_time'].update({assay: max(times)})
                 # Switch to averaged values
                 plot[assay][concentration] = averaged_plot
@@ -391,9 +398,9 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         units = ['week', 'day', 'hour', 'minute', 'second']
 
         # Regex for extracting SPECIFICALLY floats
-        float_extractor = re.compile(r'\d+\.\d+')
+        # float_extractor = re.compile(r'\d+\.\d+')
         # Regex for extracting ints (ignores anything with periods)
-        integer_extractor = re.compile(r'(?<!\.)(?<!\d)\d+(?!\.)')
+        # integer_extractor = re.compile(r'(?<!\.)(?<!\d)\d+(?!\.)')
         # Regex for extracting ints or floats
         integer_and_float_extractor = re.compile(r'\d*\.?\d+')
 
@@ -434,20 +441,29 @@ def get_drugbank_data_from_chembl_id(chembl_id):
 
                     # If regex has failed and 'percent' is in the strings
                     elif 'percent' in protein_binding_initial:
-                        protein_binding_processed = re.findall(re.compile(r'<?\>?\d*\.?\d+\spercent'), protein_binding_initial)
+                        protein_binding_processed = re.findall(
+                            re.compile(r'<?\>?\d*\.?\d+\spercent'),
+                            protein_binding_initial
+                        )
                         if protein_binding_processed:
                             data['protein_binding'] = protein_binding_processed[0]
 
                     # If +/- is in the string, the percent is likely the deviation
                     if u'+/-' in protein_binding_initial:
                         protein_binding_processed = protein_binding_initial.split(u'+/-')
-                        protein_binding_processed = re.findall(integer_and_float_extractor, protein_binding_processed[0])
+                        protein_binding_processed = re.findall(
+                            integer_and_float_extractor,
+                            protein_binding_processed[0]
+                        )
                         if protein_binding_processed:
                             data['protein_binding'] = protein_binding_processed[0]
 
                     if u'±' in protein_binding_initial:
                         protein_binding_processed = protein_binding_initial.split(u'±')
-                        protein_binding_processed = re.findall(integer_and_float_extractor, protein_binding_processed[0])
+                        protein_binding_processed = re.findall(
+                            integer_and_float_extractor,
+                            protein_binding_processed[0]
+                        )
                         if protein_binding_processed:
                             data['protein_binding'] = protein_binding_processed[0]
 
