@@ -9,7 +9,7 @@ from assays.models import AssayChipRawData
 
 from bioservices import ChEMBL as ChEMBLdb
 
-from bioactivities.models import Assay, Target
+# from bioactivities.models import Assay, Target
 
 from bs4 import BeautifulSoup
 import requests
@@ -23,11 +23,16 @@ import re
 
 
 def main(request):
-    return render_to_response('ajax_error.html',
-                              context_instance=RequestContext(request))
+    """Default to Server Error"""
+    return HttpResponseServerError()
 
 
 def fetch_compound_name(request):
+    """Return a compound name from a pk in JSON
+
+    Receives the following from POST:
+    compound_id -- the pk of the requested compound
+    """
     data = {}
 
     data.update(
@@ -38,6 +43,7 @@ def fetch_compound_name(request):
 
 
 def chembl_error(error):
+    """Returns an error from ChEMBL in JSON"""
     data = {}
     data.update({'error': error})
 
@@ -47,6 +53,12 @@ def chembl_error(error):
 
 # Virtually deprecated (gives incorrect values for things like known drug. Sad!
 def fetch_chemblid_data(request):
+    """Uses Bioservices to acquire data from ChEMBL
+
+    Receives the following from POST:
+    chemblid -- the ChEMBL ID for the desired entry
+    selctor -- specifies whether the data is for a compound, assay, or target
+    """
     chemblid = request.POST['chemblid']
     selector = request.POST['selector']
 
@@ -77,6 +89,7 @@ def fetch_chemblid_data(request):
 
 
 def get_chembl_compound_data(chemblid):
+    """Returns a dictionary of ChEMBL data given a chemblid"""
     data = {}
 
     url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chemblid)
@@ -149,6 +162,11 @@ def get_chembl_compound_data(chemblid):
 
 
 def fetch_chembl_compound_data(request):
+    """Returns ChEMBL data in JSON
+
+    Receives the following from POST:
+    chemblid -- the chemblid of the desired compound
+    """
     chemblid = request.POST['chemblid']
 
     data = get_chembl_compound_data(chemblid)
@@ -158,6 +176,11 @@ def fetch_chembl_compound_data(request):
 
 
 def fetch_compound_report(request):
+    """Return in JSON the data required to make a compound report
+
+    Receives the following from POST:
+    compounds -- the names of the desired ChEMBL ids
+    """
     # summary_types = (
     #     'Pre-clinical Findings',
     #     'Clinical Findings',
@@ -169,6 +192,7 @@ def fetch_compound_report(request):
     #     'cLogP',
     # )
 
+    # Should "compounds" be pk's instead of names?
     compounds_request = json.loads(request.POST.get('compounds'))
 
     data = {}
@@ -254,24 +278,20 @@ def fetch_compound_report(request):
 
 
 def fetch_compound_list(request):
-    """This function just gets a list of compounds and returns it as JSON"""
+    """This function just gets a list of compounds and returns it in JSON"""
     # Why does this function exist? To have compound search suggestions without violating SOC
     data = [compound.name for compound in Compound.objects.all()]
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
 
-def fetch_drugbank_data(request):
-    """Get DrugBank data"""
-    chembl_id = request.POST.get('chembl_id')
-
-    data = get_drugbank_data_from_chembl_id(chembl_id)
-
-    return HttpResponse(json.dumps(data),
-                        content_type='application/json')
-
-
 def get_drugbank_target_information(data, type_of_target):
+    """Return a dictionary of DrugBank data
+
+    Parameters:
+    data -- raw html for the target
+    type_of_target -- the type of target (e.g. 'Transporter')
+    """
     target = {
         'name': '',
         # May not be present
@@ -352,6 +372,7 @@ def get_drugbank_target_information(data, type_of_target):
 
 
 def get_drugbank_data_from_chembl_id(chembl_id):
+    """Returns a dictionary of data acquired from DrugBank and PubChem"""
     # Values found in table
     data = {
         'drugbank_id': '',
@@ -368,7 +389,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
     url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/2'.format(chembl_id)
     # Make the http request
     response = requests.get(url)
-    # Get the webpage as JSON
+    # Get the webpage in JSON
     json_data = json.loads(response.text)
 
     if json_data and u'error' not in json_data:
@@ -591,7 +612,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
     url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/22'.format(chembl_id)
     # Make the http request
     response = requests.get(url)
-    # Get the webpage as JSON
+    # Get the webpage in JSON
     json_data = json.loads(response.text)
 
     if json_data and u'error' not in json_data:
@@ -602,13 +623,32 @@ def get_drugbank_data_from_chembl_id(chembl_id):
     return data
 
 
+def fetch_drugbank_data(request):
+    """Get DrugBank and PubChem data and return it as JSON
+
+    Receives the following from POST:
+    chembl_id -- the ChEMBL ID for the desired compound
+    """
+    chembl_id = request.POST.get('chembl_id')
+
+    data = get_drugbank_data_from_chembl_id(chembl_id)
+
+    return HttpResponse(json.dumps(data),
+                        content_type='application/json')
+
+
 def fetch_chembl_search_results(request):
+    """Returns ChEMBL search results as JSON
+
+    Receives the following from POST:
+    query -- the query for ChEMBL
+    """
     query = request.POST.get('query', '')
 
     url = 'https://www.ebi.ac.uk/chembl/api/data/chembl_id_lookup/search.json?q={}'.format(query)
     # Make the http request
     response = requests.get(url)
-    # Get the webpage as JSON
+    # Get the webpage in JSON
     json_data = json.loads(response.text)
 
     lookups = json_data.get('chembl_id_lookups', [])
@@ -622,7 +662,7 @@ def fetch_chembl_search_results(request):
             url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chembl_id)
             # Make the http request
             response = requests.get(url)
-            # Get the webpage as JSON
+            # Get the webpage in JSON
             json_data = json.loads(response.text)
 
             additional_data.update({'name': json_data.get('pref_name', '')})
@@ -653,7 +693,13 @@ switch = {
 }
 
 
+# Should probably consolidate these (DRY)
 def ajax(request):
+    """Switch to correct function given POST call
+
+    Receives the following from POST:
+    call -- What function to redirect to
+    """
     post_call = request.POST['call']
 
     # Abort if there is no valid call sent to us from Javascript
