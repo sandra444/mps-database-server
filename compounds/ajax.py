@@ -115,7 +115,7 @@ def get_chembl_compound_data(chemblid):
                 synonyms.append(synonym)
             # Check whether the synonym is a International, FDA, British Approved, or US Adopted Name
             # This technique includes pesticides, however they are *usually* also used topically, and thus drugs
-            if syn_type in ['INN', 'FDA', 'BAN', 'USAN']:
+            if syn_type in ['INN', 'FDA', 'BAN', 'USAN', 'JAN']:
                 data['known_drug'] = True
         data['synonyms'] = ', '.join(synonyms)
 
