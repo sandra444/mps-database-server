@@ -11,12 +11,12 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li><a href="/microdevices/">Microdevices &amp; Organ Models</a></li>
+    <li><a href="/microdevices/">Devices &amp; Organ Models</a></li>
     <li class="active">
         {% if object %}
             Edit <em>{{ object }}</em>
         {% else %}
-            Add Microdevice
+            Add Device
         {% endif %}
     </li>
 {% endblock %}
@@ -34,7 +34,7 @@
 <form class="form-horizontal" method="post" enctype="multipart/form-data">
 
 <h1>
-    Add Microdevice
+    Add Device
 {% endif %}
 <br>
 {% csrf_token %}

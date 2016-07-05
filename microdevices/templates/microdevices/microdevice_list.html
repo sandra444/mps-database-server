@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li class="active">Microdevices &amp; Organ Models</li>
+    <li class="active">Devices &amp; Organ Models</li>
 {% endblock %}
 
 {% block content %}
@@ -79,7 +79,7 @@
 
         <legend>
             <h2 class="text-center">
-                Microdevices
+                Devices
             </h2>
         </legend>
 
@@ -113,15 +113,15 @@
             </tfoot>
 
             <tbody>
-            {% for microdevice in devices %}
-                <tr class="microdevice" id={{ microdevice.id }} name={{ microdevice.device_name }}>
-                    <td><a class="btn btn-primary" href="device/{{ microdevice.id }}">View</a></td>
-                    <td><a class="btn btn-primary" href="device/{{ microdevice.id }}/update/">Edit</a></td>
-                    <td>{{ microdevice.device_name }}</td>
-                    <td>{{ microdevice.manufacturer|default_if_none:"" }}</td>
-                    <td>{{ microdevice.center|default_if_none:"" }}</td>
-                    <td>{{ microdevice.organ|default_if_none:"" }}</td>
-                    <td>{{ microdevice.description|default_if_none:"" }}</td>
+            {% for device in devices %}
+                <tr class="device" id={{ device.id }} name={{ device.device_name }}>
+                    <td><a class="btn btn-primary" href="device/{{ device.id }}">View</a></td>
+                    <td><a class="btn btn-primary" href="device/{{ device.id }}/update/">Edit</a></td>
+                    <td>{{ device.device_name }}</td>
+                    <td>{{ device.manufacturer|default_if_none:"" }}</td>
+                    <td>{{ device.center|default_if_none:"" }}</td>
+                    <td>{{ device.organ|default_if_none:"" }}</td>
+                    <td>{{ device.description|default_if_none:"" }}</td>
                 </tr>
             {% endfor %}
             </tbody>
