@@ -2,5 +2,6 @@
 {{ object.chip_readout.chip_setup.assay_run_id }}
 {# {{ object.chip_readout }} }#
 {# {{ object.chip_readout.chip_setup.assay_run_id }} #}
-{{ object.created_by }}
+{{ object.created_by.first_name }}
+{{ object.created_by.last_name }}
 {{ object.group }}

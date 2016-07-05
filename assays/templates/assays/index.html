@@ -54,7 +54,10 @@
                     <td>{{ study.study_types }}</td>
                     <td>{{ study.start_date|date:"M d, Y" }}</td>
                     <td>{{ study.description }}</td>
-                    <td>{{ study.created_by }}</td>
+                    <td>
+                        {{ study.created_by.first_name }}
+                        {{ study.created_by.last_name }}
+                    </td>
                     <td>{{ study.group }}</td>
                 </tr>
             {% endfor %}

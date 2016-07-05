@@ -8,7 +8,8 @@
 {{ object.scientist }}
 {{ object.notes }}
 {{ object.notebook }}
-{{ object.created_by }}
+{{ object.created_by.first_name }}
+{{ object.created_by.last_name }}
 {{ object.group }}
 {% for cell in object.assaychipcells_set.all %}
   {{ cell.cell_sample }}

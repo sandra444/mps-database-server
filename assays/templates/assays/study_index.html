@@ -59,7 +59,10 @@
                     {% else %}
                         <td>-control-</td>
                     {% endif %}
-                    <td>{{ setup.created_by }}</td>
+                    <td>
+                        {{ setup.created_by.first_name }}
+                        {{ setup.created_by.last_name }}
+                    </td>
                     <td>
                         {% if setup.signed_off_by %}
                             <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
@@ -103,7 +106,10 @@
                     <td>{{ setup.assay_plate_id }}</td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.assay_layout }}</td>
-                    <td>{{ setup.created_by }}</td>
+                    <td>
+                        {{ setup.created_by.first_name }}
+                        {{ setup.created_by.last_name }}
+                    </td>
                     <td>
                         {% if setup.signed_off_by %}
                             <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
@@ -181,7 +187,10 @@
                         {% endfor %}
                     </td>
                     <td>{{ readout.readout_start_time }}</td>
-                    <td>{{ readout.created_by }}</td>
+                    <td>
+                        {{ readout.created_by.first_name }}
+                        {{ readout.created_by.last_name }}
+                    </td>
                     <td>
                         {% if readout.signed_off_by %}
                             <span title="This entry was reviewed by {{ readout.signed_off_by }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
@@ -231,7 +240,10 @@
                         {% endfor %}
                     </td>
                     <td>{{ readout.readout_start_time }}</td>
-                    <td>{{ readout.created_by }}</td>
+                    <td>
+                        {{ readout.created_by.first_name }}
+                        {{ readout.created_by.last_name }}
+                    </td>
                     <td>
                         {% if readout.signed_off_by %}
                             <span title="This entry was reviewed by {{ readout.signed_off_by }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
@@ -330,7 +342,10 @@
                     <td>{{ result.result_function }}</td>
                     <td>{{ result.result_type }}</td>
                     <td>{{ result.get_severity_display }}</td>
-                    <td>{{ result.assay_result.created_by }}</td>
+                    <td>
+                        {{ result.assay_result.created_by.first_name }}
+                        {{ result.assay_result.created_by.last_name }}
+                    </td>
                     <td>
                         {% if result.assay_result.signed_off_by %}
                             <span title="This entry was reviewed by {{ result.assay_result.signed_off_by }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
@@ -394,7 +409,10 @@
                     <td>{{ result.result_function }}</td>
                     <td>{{ result.result_type }}</td>
                     <td>{{ result.get_severity_display }}</td>
-                    <td>{{ result.assay_result.created_by }}</td>
+                    <td>
+                        {{ result.assay_result.created_by.first_name }}
+                        {{ result.assay_result.created_by.last_name }}
+                    </td>
                     <td>
                         {% if result.assay_result.signed_off_by %}
                             <span title="This entry was reviewed by {{ result.assay_result.signed_off_by }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>

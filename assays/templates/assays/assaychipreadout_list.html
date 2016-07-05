@@ -68,7 +68,10 @@
                         <td></td>
                     {% endif %}
                     <td>{{ readout.scientist }}</td>
-                    <td>{{ readout.created_by }}</td>
+                    <td>
+                        {{ readout.created_by.first_name }}
+                        {{ readout.created_by.last_name }}
+                    </td>
                     <td>{{ readout.group }}</td>
                     <td>
                         {% if readout.signed_off_by %}

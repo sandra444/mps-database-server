@@ -3,7 +3,7 @@
     <div class="bg-primary">
     <p style="margin-left:1em;">
         {% if object.created_by %}
-            Created by <b>{{ object.created_by }}</b> on <b>{{ object.created_on }}</b>
+            Created by <b>{{ object.created_by.first_name }} {{ object.created_by.last_name }}</b> on <b>{{ object.created_on }}</b>
         {% else %}
             Created by <b>Administration</b>
         {% endif %}

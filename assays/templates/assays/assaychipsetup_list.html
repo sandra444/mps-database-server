@@ -70,7 +70,10 @@
                     {% endif %}
 {#                    <td>{{ setup.compound }}</td>#}
                     <td>{{ setup.scientist }}</td>
-                    <td>{{ setup.created_by }}</td>
+                    <td>
+                        {{ setup.created_by.first_name }}
+                        {{ setup.created_by.last_name }}
+                    </td>
                     <td>{{ setup.group }}</td>
                     <td>
                         {% if setup.signed_off_by %}
@@ -88,4 +91,3 @@
 
     <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}
-
