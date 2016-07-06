@@ -44,19 +44,6 @@
 {% endif %}
     <br>
     {% csrf_token %}
-
-{#        <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>#}
-{##}
-{#        {% if not update %}#}
-{#            <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Clone</button>#}
-{#        {% endif %}#}
-{##}
-{#        {% if update %}#}
-{#            <a role="button" class="btn btn-info" href="/assays/{{ object.assay_run_id.id }}/assayplatesetup/add?clone={{ object.id }}">Clone</a>#}
-{#            <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assayplatesetup/{{ object.id }}/delete/">Delete</a>#}
-{#        {% endif %}#}
-{##}
-{#        {% include 'flag.html'%}#}
     </h1>
 
     {% include "submit.html" with flag="y" clone="y" %}
@@ -93,6 +80,9 @@
         <label for="setup_date" class="col-sm-2 control-label">Setup Date*</label>
         <div class="col-sm-10">
           {{ form.setup_date }} [yyyy-mm-dd]
+          <div>
+              This date specifies when the setup was assembled
+          </div>
         </div>
     </div>
 
