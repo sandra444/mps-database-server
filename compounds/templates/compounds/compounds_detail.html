@@ -428,7 +428,15 @@
                     <td><a href="http://www.uniprot.org/uniprot/{{ target.uniprot_id }}">{{ target.uniprot_id }}</a></td>
                     <td>{{ target.type }}</td>
                     <td>{{ target.organism }}</td>
-                    <td>{{ target.pharmacological_action }}</td>
+                    <td>
+                    {% if target.pharmacological_action == 'yes' %}
+                        <span class="label label-success">yes</span>
+                    {% elif target.pharmacological_action == 'no' %}
+                        <span class="label label-danger">no</span>
+                    {% else %}
+                        <span class="label label-default">{{ target.pharmacological_action }}</span>
+                    {% endif %}
+                    </td>
                     <td>{{ target.action }}</td>
                 </tr>
             {% endfor %}
