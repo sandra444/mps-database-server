@@ -351,7 +351,7 @@
 
     </div>
 
-    {% if object.compoundsummary_set.all or object.absorption or object.clearance %}
+    {% if object.absorption or object.clearance %}
         <legend>Summaries</legend>
         <table class="table table-striped table-bordered" style="background-color: #E8CAAF;">
             <tbody>
@@ -407,7 +407,7 @@
         </table>
     {% endif %}
 
-    {% if object.compoundtarget_set.all %}
+    {% if object.targets %}
         <div class="padded-bottom">
         <legend>Targets</legend>
         <table hidden id="target_table" class="display" cellspacing="0" width="100%">
@@ -422,22 +422,50 @@
                 </tr>
             </thead>
             <tbody>
-            {% for target in object.compoundtarget_set.all %}
+            {% for target in object.targets %}
                 <tr>
                     <td>{{ target.name }}</td>
                     <td><a href="http://www.uniprot.org/uniprot/{{ target.uniprot_id }}">{{ target.uniprot_id }}</a></td>
-                    <td>{{ target.type }}</td>
+                    <td>
+                      {% if target.type == 'Target' %}
+                          <span class="label label-danger">{{ target.type }}</span>
+                      {% elif target.type == 'Enzyme' %}
+                          <span class="label label-success">{{ target.type }}</span>
+                      {% elif target.type == 'Transporter' %}
+                          <span class="label label-warning">{{ target.type }}</span>
+                      {% elif target.type == 'Carrier' %}
+                          <span class="label label-info">{{ target.type }}</span>
+                      {% else %}
+                          <span class="label label-default">{{ target.type }}</span>
+                      {% endif %}
+                    </td>
                     <td>{{ target.organism }}</td>
                     <td>
                     {% if target.pharmacological_action == 'yes' %}
-                        <span class="label label-success">yes</span>
+                        <span class="label label-success">{{ target.pharmacological_action }}</span>
                     {% elif target.pharmacological_action == 'no' %}
-                        <span class="label label-danger">no</span>
+                        <span class="label label-danger">{{ target.pharmacological_action }}</span>
                     {% else %}
                         <span class="label label-default">{{ target.pharmacological_action }}</span>
                     {% endif %}
                     </td>
-                    <td>{{ target.action }}</td>
+                    <td>
+                    {% for action in target.actions %}
+                        {% if action == 'inducer' %}
+                            <span class="label label-success">{{ action }}</span>
+                        {% elif action == 'substrate' %}
+                            <span class="label label-primary">{{ action }}</span>
+                        {% elif action == 'inhibitor' %}
+                            <span class="label label-danger">{{ action }}</span>
+                        {% elif action == 'antagonist' %}
+                            <span class="label label-warning">{{ action }}</span>
+                        {% elif action == 'agonist' %}
+                            <span class="label label-info">{{ action }}</span>
+                        {% else %}
+                            <span class="label label-default">{{ action }}</span>
+                        {% endif %}
+                    {% endfor %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>

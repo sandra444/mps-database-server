@@ -34,6 +34,20 @@ class CompoundsDetail(DetailView):
     model = Compound
     template_name = 'compounds/compounds_detail.html'
 
+    def get_object(self, queryset=None):
+        obj = super(CompoundsDetail, self).get_object(queryset)
+
+        # If there is a compound
+        if obj:
+            # Get the associated targets
+            targets = CompoundTarget.objects.filter(compound=obj)
+            # For each target, split up the actions so they can be individual labels
+            for target in targets:
+                target.actions = [action for action in target.action.split(', ') if action]
+            obj.targets = targets
+
+        return obj
+
     def get_context_data(self, **kwargs):
         compounds = list(Compound.objects.all().order_by('name').values_list('id', flat=True))
         current = compounds.index(int(self.kwargs.get('pk')))
