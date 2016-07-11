@@ -2,7 +2,7 @@ from django import forms
 
 
 class DrugTrialForm(forms.ModelForm):
-
+    """Form for Drug Trials"""
     class Meta(object):
         widgets = {
                 'description': forms.Textarea(attrs={'cols': 70, 'rows': 10}),
@@ -11,8 +11,10 @@ class DrugTrialForm(forms.ModelForm):
 
 
 class TestResultForm(forms.ModelForm):
-    """Size the text input boxes"""
+    """Form for Test Results
 
+    DEPRECATED AND SUBJECT TO REMOVAL
+    """
     class Meta(object):
         widgets = {
             'test_time': forms.TextInput(attrs={'size': 3}),
@@ -23,8 +25,7 @@ class TestResultForm(forms.ModelForm):
 
 
 class FindingResultForm(forms.ModelForm):
-    """Size the text input boxes"""
-
+    """Form for Finding Results"""
     class Meta(object):
         widgets = {
             'finding_time': forms.TextInput(attrs={'size': 3}),
@@ -35,7 +36,7 @@ class FindingResultForm(forms.ModelForm):
 
 
 class FindingForm(forms.ModelForm):
-
+    """Form for Findings"""
     class Meta(object):
         widgets = {
             'finding_name': forms.Textarea(attrs={'size': 100, 'rows': 1, 'cols': 100}),

@@ -1,11 +1,12 @@
 from .models import FindingResult,  DrugTrial, AdverseEvent, OpenFDACompound, CompoundAdverseEvent
 
 from django.views.generic import ListView, DetailView
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 
 class DrugTrialList(ListView):
+    """Displays a list of Drug Trials"""
     # model = FindingResult
     template_name = 'drugtrials/drugtrial_list.html'
 
@@ -25,6 +26,10 @@ class DrugTrialList(ListView):
 
 
 class DrugTrialDetail(DetailView):
+    """Details for a Drug Trial
+
+    Contains next and previous buttons
+    """
     model = DrugTrial
     template_name = 'drugtrials/drugtrial_detail.html'
 
@@ -49,18 +54,18 @@ class DrugTrialDetail(DetailView):
         current = trials.index(self.object.id)
 
         if current == 0:
-            previous = trials[-1]
+            previous_trial = trials[-1]
         else:
-            previous = trials[current - 1]
+            previous_trial = trials[current - 1]
         if current == len(trials)-1:
-            next = trials[0]
+            next_trial = trials[0]
         else:
-            next = trials[current + 1]
+            next_trial = trials[current + 1]
 
         context.update({
             'results': results,
-            'previous': previous,
-            'next': next,
+            'previous': previous_trial,
+            'next': next_trial,
         })
 
         return context
@@ -107,6 +112,7 @@ class DrugTrialDetail(DetailView):
 
 
 class AdverseEventsList(ListView):
+    """Displays a list of Compound Adverse Events"""
     template_name = 'drugtrials/adverse_events_list.html'
 
     def get_queryset(self):
@@ -121,6 +127,10 @@ class AdverseEventsList(ListView):
 
 
 class AdverseEventDetail(DetailView):
+    """Details for an Adverse Event (includes a time plot)
+
+    Contains next and previous buttons
+    """
     model = OpenFDACompound
     template_name = 'drugtrials/adverse_events_detail.html'
 
@@ -139,18 +149,18 @@ class AdverseEventDetail(DetailView):
         current = compounds.index(self.object.id)
 
         if current == 0:
-            previous = compounds[-1]
+            previous_events = compounds[-1]
         else:
-            previous = compounds[current - 1]
+            previous_events = compounds[current - 1]
         if current == len(compounds)-1:
-            next = compounds[0]
+            next_events = compounds[0]
         else:
-            next = compounds[current + 1]
+            next_events = compounds[current + 1]
 
         context.update({
             'events': events,
-            'previous': previous,
-            'next': next,
+            'previous': previous_events,
+            'next': next_events,
         })
 
         return context
@@ -192,7 +202,7 @@ class AdverseEventDetail(DetailView):
 
 
 # What to name function?
-def compare_adverse_events(request, *args, **kwargs):
+def compare_adverse_events(request):
     """Adverse event rates for the given adverse event"""
 
     c = RequestContext(request)
