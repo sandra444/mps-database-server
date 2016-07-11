@@ -7,6 +7,10 @@ from mps.base.models import LockableModel
 
 
 class MicrophysiologyCenter(LockableModel):
+    """Microphysiology Center gives details for a collaborating center
+
+    Note that this is the model by which groups are affiliated with assays, cells, etc.
+    """
     class Meta(object):
         ordering = ('center_name', )
 
@@ -23,6 +27,7 @@ class MicrophysiologyCenter(LockableModel):
 
 
 class Manufacturer(LockableModel):
+    """Manufacturer gives details for a manufacturer of devices and/or componentry"""
     class Meta(object):
         ordering = ('manufacturer_name', )
 
@@ -35,6 +40,7 @@ class Manufacturer(LockableModel):
 
 
 class Microdevice(LockableModel):
+    """A Microdevice describes a physical vessel for performing experiments (a plate, chip, etc.)"""
     class Meta(object):
         ordering = ('device_name', 'organ', )
 
@@ -103,6 +109,7 @@ class Microdevice(LockableModel):
 
 
 class OrganModel(LockableModel):
+    """An Organ Model describes a way of preparing a device to emulate a particular organ"""
     class Meta(object):
         verbose_name = 'Organ Model'
         ordering = ('model_name', 'organ', )
@@ -139,15 +146,16 @@ class OrganModel(LockableModel):
 # This was done originally so that additional fields could be added to a validated assay
 # If no new fields become apparent, it may be worthwhile to do away with inlines and move to M2M
 class ValidatedAssay(models.Model):
+    """Validated Assays show which assays have been approved for a particular Organ Model"""
     # Validated assays for an organ model used in inline
     organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model')
     assay = models.ForeignKey('assays.AssayModel', verbose_name='Assay Model')
 
 
 class OrganModelProtocol(models.Model):
-    """
+    """Organ Model Protocols point to a file detailing the preparation of a model
+
     This model is intended to be an inline
-    It contains files for Organ Model Protocols and designates their version
     """
 
     class Meta(object):
