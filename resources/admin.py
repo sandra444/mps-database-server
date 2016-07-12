@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.contrib.admin.widgets import AdminURLFieldWidget
-from django.db.models import URLField
-from django.utils.safestring import mark_safe
+# from django.contrib.admin.widgets import AdminURLFieldWidget
+# from django.db.models import URLField
+# from django.utils.safestring import mark_safe
 
 from mps.base.admin import LockableAdmin
 from resources.models import *
@@ -9,6 +9,7 @@ from resources.forms import *
 
 
 class ResourceAdmin(LockableAdmin):
+    """Admin for Resource"""
     form = ResourceForm
     save_on_top = True
     list_per_page = 300
@@ -50,6 +51,7 @@ admin.site.register(Resource, ResourceAdmin)
 
 
 class ResourceTypeAdmin(LockableAdmin):
+    """Admin for Resource Type"""
     form = ResourceTypeForm
     save_on_top = True
     list_per_page = 300
@@ -83,6 +85,7 @@ admin.site.register(ResourceType, ResourceTypeAdmin)
 
 
 class ResourceSubtypeAdmin(LockableAdmin):
+    """Admin for Resource Subtype"""
     form = ResourceSubtypeForm
     save_on_top = True
     list_per_page = 300
@@ -115,6 +118,7 @@ admin.site.register(ResourceSubtype, ResourceSubtypeAdmin)
 
 
 class DefinitionAdmin(admin.ModelAdmin):
+    """Admin for Definitions"""
     form = DefinitionForm
     save_on_top = True
     list_per_page = 300

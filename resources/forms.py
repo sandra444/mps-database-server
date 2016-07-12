@@ -2,8 +2,7 @@ from django import forms
 
 
 class ResourceForm(forms.ModelForm):
-    """Size the text input boxes"""
-
+    """Form for Resources"""
     class Meta(object):
         widgets = {
             'resource_name': forms.Textarea(attrs={'rows': 1}),
@@ -13,8 +12,7 @@ class ResourceForm(forms.ModelForm):
 
 
 class ResourceTypeForm(forms.ModelForm):
-    """Size the text input boxes"""
-
+    """Form for Resource Types"""
     class Meta(object):
         widgets = {
             'resource_type_name': forms.Textarea(attrs={'rows': 1}),
@@ -23,8 +21,7 @@ class ResourceTypeForm(forms.ModelForm):
 
 
 class ResourceSubtypeForm(forms.ModelForm):
-    """Size the text input boxes"""
-
+    """Form for Resource Subtypes"""
     class Meta(object):
         widgets = {
             'name': forms.Textarea(attrs={'rows': 1}),
@@ -33,8 +30,7 @@ class ResourceSubtypeForm(forms.ModelForm):
 
 
 class DefinitionForm(forms.ModelForm):
-    """Size the text input boxes"""
-
+    """Form for Definitions"""
     class Meta(object):
         widgets = {
             'term': forms.Textarea(attrs={'rows': 1}),
