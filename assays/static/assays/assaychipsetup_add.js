@@ -10,7 +10,6 @@ function search(elem) {
 }
 
 $(document).ready(function() {
-
     var date = $("#id_setup_date");
     var curr_date = date.val();
     //Add datepicker to assay and readout start time

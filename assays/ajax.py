@@ -496,18 +496,12 @@ def fetch_protocols(request):
         'organ_model'
     ).order_by('-version')
 
-    # Default to first finding
-    if len(findings) >= 1:
-        finding = findings[0]
+    # We no longer default to the first protocol to prevent unexpected behavior
+    # Add the protocols
+    for finding in findings:
+        # match value to the desired subject ID
         value = str(finding.id)
-        context += u'<option selected value="' + value + '">' + unicode(finding) + '</option>'
-
-    if len(findings) > 1:
-        # Add the other protocols
-        for finding in findings[1:]:
-            # match value to the desired subject ID
-            value = str(finding.id)
-            context += u'<option value="' + value + '">' + unicode(finding) + '</option>'
+        context += u'<option value="' + value + '">' + unicode(finding) + '</option>'
 
     data = {}
 
