@@ -1128,7 +1128,7 @@ class AssayPlateReadoutAdmin(LockableAdmin):
             parse_readout_csv(obj, request.FILES['file'], upload_type)
 
         # Need to delete entries when a file is cleared
-        if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
+        if request.POST.get('file-clear', '') == 'on':
             # remove_existing_readout(obj)
             AssayReadout.objects.filter(assay_device_readout=obj).delete()
 
@@ -1561,7 +1561,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
             modify_qc_status_chip(obj, form)
 
         # Need to delete entries when a file is cleared
-        if 'file-clear' in request.POST and request.POST['file-clear'] == 'on':
+        if request.POST.get('file-clear', '') == 'on':
             # remove_existing_chip(obj)
             AssayChipRawData.objects.filter(assay_chip_id=obj).delete()
 

@@ -35,8 +35,12 @@ def fetch_compound_name(request):
     """
     data = {}
 
-    data.update(
-        {'name': Compound.objects.get(id=request.POST['compound_id']).name})
+    compound = Compound.objects.filter(id=request.POST.get('compound_id', ''))
+
+    if compound:
+        data.update({'name': compound.name})
+    else:
+        data.update({'name': ''})
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
@@ -59,8 +63,8 @@ def fetch_chemblid_data(request):
     chemblid -- the ChEMBL ID for the desired entry
     selctor -- specifies whether the data is for a compound, assay, or target
     """
-    chemblid = request.POST['chemblid']
-    selector = request.POST['selector']
+    chemblid = request.POST.get('chemblid', '')
+    selector = request.POST.get('selector', '')
 
     if not chemblid or not selector:
         return main(request)
@@ -167,7 +171,7 @@ def fetch_chembl_compound_data(request):
     Receives the following from POST:
     chemblid -- the chemblid of the desired compound
     """
-    chemblid = request.POST['chemblid']
+    chemblid = request.POST.get('chemblid', '')
 
     data = get_chembl_compound_data(chemblid)
 
@@ -193,7 +197,7 @@ def fetch_compound_report(request):
     # )
 
     # Should "compounds" be pk's instead of names?
-    compounds_request = json.loads(request.POST.get('compounds'))
+    compounds_request = json.loads(request.POST.get('compounds', []))
 
     data = {}
 
@@ -629,7 +633,7 @@ def fetch_drugbank_data(request):
     Receives the following from POST:
     chembl_id -- the ChEMBL ID for the desired compound
     """
-    chembl_id = request.POST.get('chembl_id')
+    chembl_id = request.POST.get('chembl_id', '')
 
     data = get_drugbank_data_from_chembl_id(chembl_id)
 
@@ -700,7 +704,7 @@ def ajax(request):
     Receives the following from POST:
     call -- What function to redirect to
     """
-    post_call = request.POST['call']
+    post_call = request.POST.get('call', '')
 
     # Abort if there is no valid call sent to us from Javascript
     if not post_call:

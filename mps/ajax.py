@@ -1,30 +1,36 @@
 # NOTE: Decided it was best to keep AJAX calls app-separated
 import ujson as json
 from django.http import *
-import logging
-logger = logging.getLogger(__name__)
 
 from django.contrib.auth.models import Group
 
 from haystack.query import SearchQuerySet
 
+import logging
+logger = logging.getLogger(__name__)
 
-# Default
+
 def main(request):
+    """Default to Server Error"""
     return HttpResponseServerError()
 
 
 def fetch_global_search_suggestions(request):
+    """Return global search suggestions in JSON
+
+    Receives the following from POST:
+    text - The text the user has entered thus far into the search bar
+    """
     data = []
 
     # Get text from request
-    text = request.POST.get('text')
+    text = request.POST.get('text', '')
 
     # Filter on group: either get all with no group or those with a group the user has
     sqs = SearchQuerySet().exclude(group__in=Group.objects.all())
 
     if request.user and request.user.groups.all():
-          sqs = sqs | SearchQuerySet().filter(group__in=request.user.groups.all())
+        sqs = sqs | SearchQuerySet().filter(group__in=request.user.groups.all())
 
     suggestions = sqs.autocomplete(text=text)
     # At the moment, I just take the first five results
@@ -44,7 +50,12 @@ switch = {
 
 
 def ajax(request):
-    post_call = request.POST.get('call')
+    """Switch to correct function given POST call
+
+    Receives the following from POST:
+    call -- What function to redirect to
+    """
+    post_call = request.POST.get('call', '')
 
     if not post_call:
         logger.error('post_call not present in request to ajax')

@@ -30,8 +30,8 @@ def fetch_assay_layout_content(request):
     model -- the model of interest
     """
 
-    current_id = request.POST.get('id')
-    model = request.POST.get('model')
+    current_id = request.POST.get('id', '')
+    model = request.POST.get('model', '')
 
     if not model and current_id:
         logger.error('request_id not present in request to fetch_layout_format_labels')
@@ -95,8 +95,8 @@ def fetch_assay_layout_content(request):
 
 
 def fetch_readout(request):
-    current_id = request.POST.get('id')
-    model = request.POST.get('model')
+    current_id = request.POST.get('id', '')
+    model = request.POST.get('model', '')
 
     if not model and current_id:
         logger.error('request_id not present in request to fetch_layout_format_labels')
@@ -142,8 +142,8 @@ def fetch_layout_format_labels(request):
     model -- the model of interest
     """
 
-    current_id = request.POST.get('id')
-    model = request.POST.get('model')
+    current_id = request.POST.get('id', '')
+    model = request.POST.get('model', '')
 
     if not model and current_id:
         logger.error('request_id not present in request to fetch_layout_format_labels')
@@ -208,7 +208,7 @@ def fetch_plate_info(request):
     id -- the ID of the Assay Plate Readout of interest
     """
 
-    assay_id = request.POST.get('id')
+    assay_id = request.POST.get('id', '')
 
     if not assay_id:
         logger.error('assay id not present in request to fetch_assay_info')
@@ -233,7 +233,7 @@ def fetch_center_id(request):
     id -- the ID of the Microphysiology Center of interest
     """
 
-    group = request.POST.get('id')
+    group = request.POST.get('id', '')
 
     if not group:
         logger.error('center not present in request to fetch_assay_info')
@@ -267,7 +267,7 @@ def fetch_chip_readout(request):
     id -- the ID of the Chip Readout of interest
     """
 
-    chip_id = request.POST.get('id')
+    chip_id = request.POST.get('id', '')
 
     if not chip_id:
         logger.error('chip not present in request to fetch_chip_readout')
@@ -338,8 +338,8 @@ def fetch_readouts(request):
     study -- the study to acquire readouts from
     key -- specifies whether to split readouts by compound or device
     """
-    study = request.POST.get('study')
-    key = request.POST.get('key')
+    study = request.POST.get('study', '')
+    key = request.POST.get('key', '')
 
     # Get chip readouts
     readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=study)
@@ -460,7 +460,7 @@ def fetch_organ_models(request):
     """
     context = u'<option value="">---------</option>'
 
-    device = request.POST.get('device')
+    device = request.POST.get('device', '')
 
     findings = OrganModel.objects.filter(device_id=device).prefetch_related('device')
 
@@ -487,7 +487,7 @@ def fetch_protocols(request):
     """
     context = u'<option value="">---------</option>'
 
-    organ_model = request.POST.get('organ_model')
+    organ_model = request.POST.get('organ_model', '')
 
     # Order should be from newest to oldest
     findings = OrganModelProtocol.objects.filter(
@@ -527,7 +527,7 @@ def fetch_protocol(request):
     """
     data = {}
 
-    protocol_id = request.POST.get('protocol')
+    protocol_id = request.POST.get('protocol', '')
 
     protocol = OrganModelProtocol.objects.filter(pk=protocol_id)
 
@@ -567,15 +567,15 @@ def fetch_context(request):
 
     # master is what determines the subject's drop down choices
     # master itself is a string for the filter that comes later
-    master = request.POST.get('master')
-    master_id = request.POST.get('master_id')
+    master = request.POST.get('master', '')
+    master_id = request.POST.get('master_id', '')
 
     # subject is the model of interest as selected from the above dictionary
-    subject = all_models.get(request.POST.get('subject'))
+    subject = all_models.get(request.POST.get('subject', ''))
 
     # filter is for additional filtering (for instance, if a subject is two FK away
-    next_model = request.POST.get('next_model')
-    next_filter = request.POST.get('next_filter')
+    next_model = request.POST.get('next_model', '')
+    next_filter = request.POST.get('next_filter', '')
 
     findings = subject.objects.filter(**{master: master_id})
 
@@ -623,7 +623,7 @@ def ajax(request):
     Receives the following from POST:
     call -- What function to redirect to
     """
-    post_call = request.POST.get('call')
+    post_call = request.POST.get('call', '')
 
     if not post_call:
         logger.error('post_call not present in request to ajax')

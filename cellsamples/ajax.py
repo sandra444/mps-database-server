@@ -16,7 +16,7 @@ def get_cell_subtypes(request):
 
     context = u'<option value="">---------</option>'
 
-    cell_type = request.POST.get('cell_type')
+    cell_type = request.POST.get('cell_type', '')
 
     findings = CellSubtype.objects.filter(cell_type__isnull=True)
 
@@ -50,7 +50,7 @@ def ajax(request):
     Receives the following from POST:
     call -- What function to redirect to
     """
-    post_call = request.POST.get('call')
+    post_call = request.POST.get('call', '')
 
     if not post_call:
         logger.error('post_call not present in request to ajax')
