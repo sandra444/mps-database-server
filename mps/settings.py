@@ -380,7 +380,7 @@ TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX = 52
 ACCOUNT_ACTIVATION_DAYS = 7
 
 # Can be used to shutdown registration, if necessary
-REGISTRATION_OPEN = False
+# REGISTRATION_OPEN = False
 
 LOGIN_REDIRECT_URL = '/accounts/loggedin/'
 
