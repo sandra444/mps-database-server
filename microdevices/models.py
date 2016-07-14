@@ -132,7 +132,7 @@ class OrganModel(LockableModel):
     )
 
     # Removed in favor of protocol inline
-    #protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
+    # protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
     #                        blank=True, null=True, help_text='File detailing the protocols for this model')
 
     def __unicode__(self):

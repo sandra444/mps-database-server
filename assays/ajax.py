@@ -525,7 +525,7 @@ def fetch_protocol(request):
 
     protocol = OrganModelProtocol.objects.filter(pk=protocol_id)
 
-    if protocol:
+    if protocol and any(i in protocol[0].organ_model.center.groups.all() for i in request.user.groups.all()):
         protocol_file = protocol[0].file
         file_name = '/'.join(protocol_file.name.split('/')[1:])
         href = '/media/' + protocol_file.name

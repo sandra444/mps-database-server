@@ -1,9 +1,10 @@
-#from microdevices.models import Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
 from django.views.generic import DetailView, CreateView, UpdateView
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
+from django import forms
 from django.forms.models import inlineformset_factory
-from .forms import *
+from .forms import MicrodeviceForm, OrganModelForm, OrganModelProtocolInlineFormset
+from .models import Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
 from mps.mixins import SpecificGroupRequiredMixin
 
 # class MicrodeviceList(ListView):
@@ -36,7 +37,13 @@ class OrganModelDetail(DetailView):
         context = super(OrganModelDetail, self).get_context_data(**kwargs)
 
         assays = ValidatedAssay.objects.filter(organ_model=self.object).prefetch_related('assay', 'assay__assay_type')
-        protocols = OrganModelProtocol.objects.filter(organ_model=self.object).order_by('-version')
+
+        if any(i in self.object.center.groups.all() for i in self.request.user.groups.all()):
+            protocols = OrganModelProtocol.objects.filter(
+                organ_model=self.object
+            ).order_by('-version')
+        else:
+            protocols = None
 
         context.update({
             'assays': assays,
