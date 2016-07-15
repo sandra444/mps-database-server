@@ -3,8 +3,8 @@ from .models import *
 
 
 class OrganModelIndex(indexes.SearchIndex, indexes.Indexable):
+    """Search index for Organ Models"""
     text = indexes.NgramField(document=True, use_template=True)
-
     rendered = indexes.CharField(use_template=True, indexed=False)
 
     def get_model(self):
@@ -12,8 +12,8 @@ class OrganModelIndex(indexes.SearchIndex, indexes.Indexable):
 
 
 class MicrodeviceIndex(indexes.SearchIndex, indexes.Indexable):
+    """Search index for Microdevices"""
     text = indexes.NgramField(document=True, use_template=True)
-
     rendered = indexes.CharField(use_template=True, indexed=False)
 
     def get_model(self):

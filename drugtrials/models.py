@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 
 
 class Species(LockableModel):
+    """A Species defines a particular species"""
     class Meta(object):
         verbose_name_plural = 'species'
         ordering = ('species_name', )
@@ -36,6 +37,7 @@ TRIALSUBTYPES = (
 
 
 class TrialSource(LockableModel):
+    """A Trial Source indicates where a trial came from and provides some information"""
     class Meta(object):
         ordering = ('source_name', )
     source_name = models.CharField(max_length=40, unique=True)
@@ -57,6 +59,7 @@ TRIALTYPES = (
 
 
 class DrugTrial(LockableModel):
+    """A Drug Trial describes the participants and high-level data of a drug trial"""
     class Meta(object):
         verbose_name = 'Drug Trial'
         ordering = ('compound', 'species', )
@@ -132,7 +135,12 @@ class DrugTrial(LockableModel):
         return "/drugtrials/{}/".format(self.id)
 
 
+# DEPRECATED AND SUBJECT TO REMOVAL
 class TestType(LockableModel):
+    """A Test Type describes what sort of test was performed
+
+    THIS MODEL HAS BEEN DEPRECATED IN FAVOR OF FINDINGTYPE
+    """
     class Meta(object):
         ordering = ('test_type',)
     test_type = models.CharField(max_length=60, unique=True)
@@ -142,7 +150,14 @@ class TestType(LockableModel):
         return self.test_type
 
 
+# DEPRECATED AND SUBJECT TO REMOVAL
+# The only difference between Test and Finding is the ability to select and organ model
+# However, it was decided to use DrugTrials for EXTERNAL data only
 class Test(LockableModel):
+    """A Test describes and instance of a test performed
+
+    THIS MODEL HAS BEEN DEPRECATED IN FAVOR OF FINDING
+    """
     class Meta(object):
         unique_together = [('test_type', 'test_name')]
         ordering = ('test_name', 'organ', 'test_type', )
@@ -164,6 +179,7 @@ class Test(LockableModel):
 
 
 class FindingType(LockableModel):
+    """Finding Type describes a type of finding (e.g. biopsy)"""
     class Meta(object):
         ordering = ('finding_type', )
 
@@ -175,6 +191,7 @@ class FindingType(LockableModel):
 
 
 class Finding(LockableModel):
+    """Finding describes a finding relative to what organ (e.g. liver biopsy)"""
     class Meta(object):
         unique_together = [('organ', 'finding_name')]
         ordering = ('organ', 'finding_type', 'finding_name', )
@@ -193,6 +210,7 @@ class Finding(LockableModel):
 
 
 class ResultDescriptor(LockableModel):
+    """A Result Descriptor adds detail to a Finding (e.g. increased, female only, etc."""
     class Meta(object):
         ordering = ('result_descriptor', )
     result_descriptor = models.CharField(max_length=40, unique=True)
@@ -206,7 +224,7 @@ SEVERITY_SCORE = (
     ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
 )
 
-# This is legacy code
+# DEPRECATED
 TIME_UNITS = (
     ('u', 'unknown'), ('h', 'hours'), ('d', 'days'),
     ('w', 'weeks'), ('m', 'months'), ('y', 'years')
@@ -221,8 +239,12 @@ RESULT_TYPE = (
 )
 
 
+# DEPRECATED AND SUBJECT TO REMOVAL
 class TestResult(models.Model):
+    """A Test Result describes a specific discovery from a organ model test
 
+    THIS MODEL IS DEPRECATED
+    """
     drug_trial = models.ForeignKey(DrugTrial)
 
     test_name = models.ForeignKey(Test,
@@ -264,11 +286,7 @@ class TestResult(models.Model):
     value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True, related_name='test_value_units')
 
     def clean(self):
-        """
-
-        Require units to be specified if a value is present
-
-        """
+        """Require units to be specified if a value is present"""
 
         if self.value or self.value_units:
             if not (self.drug_trial.source and self.drug_trial.source_link
@@ -300,7 +318,7 @@ FREQUENCIES = (
 
 
 class FindingResult(models.Model):
-
+    """A Finding Result describes in detail a single finding from a Drug Trial"""
     drug_trial = models.ForeignKey(DrugTrial)
 
     finding_name = models.ForeignKey(Finding,
@@ -347,7 +365,7 @@ class FindingResult(models.Model):
 
 
 class AdverseEvent(models.Model):
-
+    """An Adverse Event describes an adverse event and what organ it affects"""
     event = models.CharField(max_length=100)
     organ = models.ForeignKey(Organ, blank=True, null=True)
 
@@ -360,7 +378,7 @@ class AdverseEvent(models.Model):
 # Theoretically, we would place usage information here, but that is difficult to acquire
 # If we can't think of anything, scrap this model before you put it on production
 class OpenFDACompound(LockableModel):
-
+    """An OpenFDACompound describes a compound with some data from OpenFDA"""
     class Meta(object):
         verbose_name = 'OpenFDA Report'
 
@@ -387,7 +405,7 @@ class OpenFDACompound(LockableModel):
 
 
 class CompoundAdverseEvent(models.Model):
-
+    """A Compound Adverse Event describes an adverse event's frequency as brought on by a compound"""
     # CompoundAdverseEvents are inlines in OpenFDACompound (name subject to change)
     compound = models.ForeignKey('OpenFDACompound')
     event = models.ForeignKey(AdverseEvent)

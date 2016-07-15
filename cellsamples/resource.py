@@ -6,4 +6,3 @@ class CellSampleResource(resources.ModelResource):
 
     class Meta(object):
         model = CellSample
-

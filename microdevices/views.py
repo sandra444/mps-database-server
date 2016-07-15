@@ -1,10 +1,10 @@
-from microdevices.models import Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
 from django.views.generic import DetailView, CreateView, UpdateView
-from django.shortcuts import redirect, render_to_response, get_object_or_404
+from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django import forms
 from django.forms.models import inlineformset_factory
-from .forms import *
+from .forms import MicrodeviceForm, OrganModelForm, OrganModelProtocolInlineFormset
+from .models import Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
 from mps.mixins import SpecificGroupRequiredMixin
 
 # class MicrodeviceList(ListView):
@@ -13,14 +13,15 @@ from mps.mixins import SpecificGroupRequiredMixin
 
 
 # Convert to class?
-def microdevice_list(request, *args, **kwargs):
+def microdevice_list(request):
+    """Displays a list of Devices AND Models"""
     c = RequestContext(request)
 
-    models = OrganModel.objects.prefetch_related('organ', 'center', 'device').all()
+    organ_models = OrganModel.objects.prefetch_related('organ', 'center', 'device').all()
     devices = Microdevice.objects.prefetch_related('organ', 'center', 'manufacturer').all()
 
     c.update({
-        'models': models,
+        'models': organ_models,
         'devices': devices,
     })
 
@@ -28,14 +29,21 @@ def microdevice_list(request, *args, **kwargs):
 
 
 class OrganModelDetail(DetailView):
+    """Displays details for an Organ Model"""
     model = OrganModel
-    template_name = 'microdevices/organ_model_detail.html'
+    template_name = 'microdevices/organmodel_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super(OrganModelDetail, self).get_context_data(**kwargs)
 
         assays = ValidatedAssay.objects.filter(organ_model=self.object).prefetch_related('assay', 'assay__assay_type')
-        protocols = OrganModelProtocol.objects.filter(organ_model=self.object).order_by('-version')
+
+        if any(i in self.object.center.groups.all() for i in self.request.user.groups.all()):
+            protocols = OrganModelProtocol.objects.filter(
+                organ_model=self.object
+            ).order_by('-version')
+        else:
+            protocols = None
 
         context.update({
             'assays': assays,
@@ -58,15 +66,17 @@ class OrganModelDetail(DetailView):
 #         'protocols': protocols,
 #     })
 #
-#     return render_to_response('microdevices/organ_model_detail.html', c)
+#     return render_to_response('microdevices/organmodel_detail.html', c)
 
 
 class MicrodeviceDetail(DetailView):
+    """Displays details for a Device"""
     model = Microdevice
     template_name = 'microdevices/microdevice_detail.html'
 
 
 class MicrodeviceAdd(SpecificGroupRequiredMixin, CreateView):
+    """Allows the addition of Devices"""
     model = Microdevice
     template_name = 'microdevices/microdevice_add.html'
     form_class = MicrodeviceForm
@@ -84,6 +94,7 @@ class MicrodeviceAdd(SpecificGroupRequiredMixin, CreateView):
 
 
 class MicrodeviceUpdate(SpecificGroupRequiredMixin, UpdateView):
+    """Allows Devices to be updated"""
     model = Microdevice
     template_name = 'microdevices/microdevice_add.html'
     form_class = MicrodeviceForm
@@ -117,8 +128,9 @@ OrganModelProtocolFormset = inlineformset_factory(
 
 
 class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
+    """Allows the addition of Organ Models"""
     model = OrganModel
-    template_name = 'microdevices/organ_model_add.html'
+    template_name = 'microdevices/organmodel_add.html'
     form_class = OrganModelForm
 
     required_group_name = 'Change Microdevices Front'
@@ -150,8 +162,9 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
 
 
 class OrganModelUpdate(SpecificGroupRequiredMixin, UpdateView):
+    """Allows Organ Models to be updated"""
     model = OrganModel
-    template_name = 'microdevices/organ_model_add.html'
+    template_name = 'microdevices/organmodel_add.html'
     form_class = OrganModelForm
 
     required_group_name = 'Change Microdevices Front'

@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 def main(request):
+    """Default to server error"""
     return HttpResponseServerError()
 
 
@@ -15,7 +16,7 @@ def get_cell_subtypes(request):
 
     context = u'<option value="">---------</option>'
 
-    cell_type = request.POST.get('cell_type')
+    cell_type = request.POST.get('cell_type', '')
 
     findings = CellSubtype.objects.filter(cell_type__isnull=True)
 
@@ -44,7 +45,12 @@ switch = {
 
 
 def ajax(request):
-    post_call = request.POST.get('call')
+    """Switch to correct function given POST call
+
+    Receives the following from POST:
+    call -- What function to redirect to
+    """
+    post_call = request.POST.get('call', '')
 
     if not post_call:
         logger.error('post_call not present in request to ajax')

@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 
 
 class SearchForm(forms.Form):
+    """Form for Global/Bioactivity searches"""
     app = forms.CharField(max_length=50)
     compound = forms.CharField(max_length=100, required=False)
     target = forms.CharField(max_length=100, required=False)
@@ -33,11 +34,13 @@ class SearchForm(forms.Form):
 
 # Add captcha to registration form
 class CaptchaRegistrationForm(RegistrationFormUniqueEmail):
+    """Extended Registration Form with Captcha"""
     captcha = CaptchaField()
 
 
 # Add captcha to reset form
 class CaptchaResetForm(PasswordResetForm):
+    """Extended Password Reset form with Captcha"""
     captcha = CaptchaField()
 
     def clean_email(self):

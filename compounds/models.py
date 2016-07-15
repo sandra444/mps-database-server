@@ -1,17 +1,16 @@
 from django.db import models
-from mps.base.models import LockableModel, FlaggableModel
-
+from mps.base.models import LockableModel
 
 CHEMBL = None
 
-def get_chembl_handle():
 
+def get_chembl_handle():
+    """Returns the bioservice wrapper for ChEMBL"""
     from bioservices import ChEMBL as ChEMBLdb
     global CHEMBL
     if CHEMBL is None:
         CHEMBL = ChEMBLdb()
     return CHEMBL
-
 
 FIELDS = {
     'acdAcidicPka': 'acidic_pka',
@@ -37,6 +36,7 @@ FIELDS = {
 
 
 def chembl_compound(chemblid):
+    """Get a ChEMBL compound from bioservices and return it as a dictionary"""
     chembl = get_chembl_handle()
     data = chembl.get_compounds_by_chemblId(str(chemblid))['compound']
     return {
@@ -46,7 +46,6 @@ def chembl_compound(chemblid):
 
 
 class Compound(LockableModel):
-
     #compound_id = AutoField(primary_key=True)
     # The name, rather than the chemblid and/or inchikey, is unique
     name = models.CharField(
@@ -130,10 +129,10 @@ class Compound(LockableModel):
     known_drug = models.BooleanField(
         'Known drug?',
         default=False)
-    # TODO This field is now deprecated
-    medchem_friendly = models.BooleanField(
-        'Med Chem friendly?',
-        default=False)
+    # This field is now deprecated
+    # medchem_friendly = models.BooleanField(
+    #     'Med Chem friendly?',
+    #     default=False)
     medchem_alerts = models.BooleanField(
         'Inicates whether structural alerts are listed for this compound',
         default=False)
@@ -221,7 +220,6 @@ class Compound(LockableModel):
         return u'{0}'.format(self.name)
 
     def chembl_link(self):
-
         if self.chemblid:
             return (u'<a href="https://www.ebi.ac.uk/chembl/compound/inspect/'
                     '{0}" target="_blank">{0}</a>').format(self.chemblid)
@@ -232,7 +230,6 @@ class Compound(LockableModel):
     chembl_link.short_description = 'ChEMBL ID'
 
     def thumb_src(self):
-
         if self.chemblid:
             return (u'https://www.ebi.ac.uk/chembldb/compound/'
                     'displayimage/' + self.chemblid)
@@ -240,7 +237,6 @@ class Compound(LockableModel):
             return u''
 
     def thumb(self):
-
         url = self.thumb_src()
         if url:
             return u'<img src="{}" />'.format(url)
@@ -251,7 +247,6 @@ class Compound(LockableModel):
     thumb.short_description = 'Thumbnail'
 
     def image(self):
-
         url = self.image_src()
         if url:
             return u'<img src="{}" />'.format(url)
@@ -259,7 +254,6 @@ class Compound(LockableModel):
             return u''
 
     def image_src(self):
-
         if self.chemblid:
             return (u'https://www.ebi.ac.uk/chembldb/compound/'
                     'displayimage_large/' + self.chemblid)
@@ -278,7 +272,6 @@ class Compound(LockableModel):
 
 # TODO THIS MODEL IS DEPRECATED
 class SummaryType(LockableModel):
-
     class Meta(object):
         verbose_name = 'Summary Type'
         verbose_name_plural = 'Summary Types'
@@ -292,7 +285,6 @@ class SummaryType(LockableModel):
 
 # TODO THIS MODEL IS DEPRECATED
 class PropertyType(LockableModel):
-
     class Meta(object):
         verbose_name = 'Compound Property Type'
 
@@ -307,7 +299,6 @@ class PropertyType(LockableModel):
 # At worst, I suppose I can merge these together or even add them as fields in Compound
 # It would be useful to have a model that catalogues COMPOUND SUMMARIES such as non-clinical/clinical toxicology
 class CompoundSummary(models.Model):
-
     class Meta(object):
         unique_together = [('compound', 'summary_type')]
         verbose_name = 'Compound Summary'
@@ -325,7 +316,6 @@ class CompoundSummary(models.Model):
 # TODO THIS MODEL IS DEPRECATED
 # It would be useful to have a model that catalogues COMPOUND PROPERTIES such as cmax and clogp
 class CompoundProperty(models.Model):
-
     class Meta(object):
         # Remove restriction
         #unique_together = [('compound', 'property_type')]

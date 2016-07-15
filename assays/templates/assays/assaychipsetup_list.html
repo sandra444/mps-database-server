@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block load %}
+    <script src="{% static "assays/assaychipsetup_list.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="active">Chip Setups</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Chip Setups
+            </h2>
+        </legend>
+
+
+        <table hidden id="setups" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Chip Setup ID / Barcode</th>
+                    <th>Study</th>
+                    <th>Date</th>
+                    <th>Device</th>
+                    <th>Organ Model</th>
+{#                    <th>Chip Test Type</th>#}
+                    <th>Compound</th>
+                    <th>Scientist</th>
+                    <th>Creator</th>
+                    <th>Group</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Chip Setup ID / Barcode</th>
+                    <th>Study</th>
+                    <th>Date</th>
+                    <th>Device</th>
+                    <th>Organ Model</th>
+{#                    <th>Chip Test Type</th>#}
+                    <th>Compound</th>
+                    <th>Scientist</th>
+                    <th>Creator</th>
+                    <th>Group</th>
+                    <th>Review</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+            {% for setup in object_list %}
+                <tr class="compound" id={{ setup.id }} name={{ setup.id }}>
+                    <td><a class="btn btn-primary" href="{{ setup.id }}">View/Edit</a></td>
+                    <td>{{ setup.assay_chip_id }}</td>
+                    <td><a href="/assays/organchipstudy/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
+                    <td>{{ setup.setup_date|date:"M d, Y" }}</td>
+                    <td>{{ setup.device }}</td>
+                    <td>{{ setup.organ_model }} {{ setup.organ_model_protocol|default:'' }}</td>
+{#                    <td>{{ setup.chip_test_type }}</td>#}
+                    {% if setup.compound != None %}
+                        <td>{{ setup.compound }} ({{ setup.concentration }} {{ setup.unit }})</td>
+                    {% else %}
+                        <td>-control-</td>
+                    {% endif %}
+{#                    <td>{{ setup.compound }}</td>#}
+                    <td>{{ setup.scientist }}</td>
+                    <td>
+                        {{ setup.created_by.first_name }}
+                        {{ setup.created_by.last_name }}
+                    </td>
+                    <td>{{ setup.group }}</td>
+                    <td>
+                        {% if setup.signed_off_by %}
+                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if setup.flagged %}
+                            <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}

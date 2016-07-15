@@ -6,6 +6,7 @@ register = template.Library()
 # This filter is not currently used within templates, though in theoretically could be
 @register.filter(name='has_group')
 def has_group(user, group_name):
+    """Returns whether or not the user has a specified group"""
     if not group_name:
         return True
 

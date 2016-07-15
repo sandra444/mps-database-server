@@ -15,6 +15,7 @@ from bioactivities.forms import TargetsForm
 
 
 class TargetAdmin(LockableAdmin):
+    """Admin for Bioactivity Target"""
     class Media(object):
         js = ('bioactivities/customize_admin.js',)
 
@@ -27,9 +28,9 @@ class TargetAdmin(LockableAdmin):
 
         chemblids = forms.CharField(
             required=True,
-            label="ChEMBL IDs",
+            label='ChEMBL IDs',
             widget=forms.Textarea(),
-            help_text="<br>ChEMBL IDs separated by a space or a new line."
+            help_text='<br>ChEMBL IDs separated by a space or a new line.'
         )
 
     save_on_top = True
@@ -72,9 +73,9 @@ class TargetAdmin(LockableAdmin):
 
     def get_urls(self):
 
-        return patterns('',
-                        (r'^add_multi/$',
-                         self.admin_site.admin_view(self.add_targets))
+        return patterns(
+            '',
+            (r'^add_multi/$', self.admin_site.admin_view(self.add_targets))
         ) + super(TargetAdmin, self).get_urls()
 
     def add_targets(self, request):
@@ -104,26 +105,26 @@ class TargetAdmin(LockableAdmin):
 
                 if counter:
                     self.message_user(request,
-                                      "Successfully added {} target{}."
+                                      'Successfully added {} target{}.'
                                       .format(counter,
                                               '' if counter == 1 else 's'))
                 if skipped:
-                    self.message_user(request, "Skipped {} target{} that "
-                                               "{} already in the database."
+                    self.message_user(request, 'Skipped {} target{} that '
+                                               '{} already in the database.'
                                       .format(skipped,
                                               '' if skipped == 1 else 's',
                                               'is' if skipped == 1 else 'are'),
                                       level=messages.WARNING)
                 if invalid:
-                    self.message_user(request, "Skipped {} invalid "
-                                               "identifier{}."
+                    self.message_user(request, 'Skipped {} invalid '
+                                               'identifier{}.'
                                       .format(invalid,
                                               '' if invalid == 1 else 's'),
                                       level=messages.WARNING)
                 if notfound:
                     self.message_user(request,
-                                      "Could not find {} identifier{} in "
-                                      "ChEMBL database."
+                                      'Could not find {} identifier{} in '
+                                      'ChEMBL database.'
                                       .format(notfound,
                                               '' if notfound == 1 else 's'),
                                       level=messages.WARNING)
@@ -145,6 +146,7 @@ admin.site.register(Target, TargetAdmin)
 
 
 class AssayAdmin(LockableAdmin):
+    """Admin for Bioactivity Assay (not to be confused with models of the Assay App)"""
     form = AssayForm
 
     change_list_template = 'admin/bioactivities/change_list.html'
@@ -155,10 +157,10 @@ class AssayAdmin(LockableAdmin):
 
     class AddMultiForm(forms.Form):
 
-        chemblids = forms.CharField(required=True, label="ChEMBL IDs",
+        chemblids = forms.CharField(required=True, label='ChEMBL IDs',
                                     widget=forms.Textarea(),
-                                    help_text="<br>ChEMBL IDs separated by a "
-                                              "space or a new line.")
+                                    help_text='<br>ChEMBL IDs separated by a '
+                                              'space or a new line.')
 
     save_on_top = True
     list_per_page = 300
@@ -202,9 +204,9 @@ class AssayAdmin(LockableAdmin):
 
     def get_urls(self):
 
-        return patterns('',
-                        (r'^add_multi/$',
-                         self.admin_site.admin_view(self.add_assays))
+        return patterns(
+            '',
+            (r'^add_multi/$', self.admin_site.admin_view(self.add_assays))
         ) + super(AssayAdmin, self).get_urls()
 
     def add_assays(self, request):
@@ -234,26 +236,26 @@ class AssayAdmin(LockableAdmin):
 
                 if counter:
                     self.message_user(request,
-                                      "Successfully added {} assay{}."
+                                      'Successfully added {} assay{}.'
                                       .format(counter,
                                               '' if counter == 1 else 's'))
                 if skipped:
-                    self.message_user(request, "Skipped {} assay{} that "
-                                               "{} already in the database."
+                    self.message_user(request, 'Skipped {} assay{} that '
+                                               '{} already in the database.'
                                       .format(skipped,
                                               '' if skipped == 1 else 's',
                                               'is' if skipped == 1 else 'are'),
                                       level=messages.WARNING)
                 if invalid:
-                    self.message_user(request, "Skipped {} invalid "
-                                               "identifier{}."
+                    self.message_user(request, 'Skipped {} invalid '
+                                               'identifier{}.'
                                       .format(invalid,
                                               '' if invalid == 1 else 's'),
                                       level=messages.WARNING)
                 if notfound:
                     self.message_user(request,
-                                      "Could not find {} identifier{} in "
-                                      "ChEMBL database."
+                                      'Could not find {} identifier{} in '
+                                      'ChEMBL database.'
                                       .format(notfound,
                                               '' if notfound == 1 else 's'),
                                       level=messages.WARNING)
@@ -275,6 +277,7 @@ admin.site.register(Assay, AssayAdmin)
 
 
 class BioactivityAdmin(LockableAdmin):
+    """Admin for an individual Bioactivity"""
     change_list_template = 'admin/bioactivities/change_list.html'
     alphabet_filter = 'standard_name'
     DEFAULT_ALPHABET = u'ABCDEFGHIJKLMNOPQRSTUVWXYZ%['
@@ -282,7 +285,7 @@ class BioactivityAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 50
     ordering = ('compound', 'standard_name')
-    raw_id_fields = ("compound", 'target', 'assay',)
+    raw_id_fields = ('compound', 'target', 'assay',)
 
     def chembl_link(self, obj):
         return obj.assay.chembl_link()
@@ -344,6 +347,7 @@ admin.site.register(Bioactivity, BioactivityAdmin)
 
 
 class BioactivityTypeAdmin(LockableAdmin):
+    """Admin for Bioactivty Type (for consolidating units and so on)"""
     change_list_template = 'admin/bioactivities/change_list.html'
     alphabet_filter = 'standard_name'
 
@@ -372,8 +376,8 @@ class BioactivityTypeAdmin(LockableAdmin):
         (
             None, {
                 'fields': (
-                    ('chembl_bioactivity','chembl_unit'),
-                    ('scale_factor','mass_flag'),
+                    ('chembl_bioactivity', 'chembl_unit'),
+                    ('scale_factor', 'mass_flag'),
                     'description',
                     ('standard_name', 'standard_unit'),
                 )
@@ -396,10 +400,11 @@ admin.site.register(BioactivityType, BioactivityTypeAdmin)
 
 
 class PubChemBioactivityAdmin(LockableAdmin):
+    """Admin for a PubChem Bioactivity"""
     search_fields = ['compound__name', 'activity_name', 'target__name', 'outcome']
     list_filter = ['compound', ]
 
-    raw_id_fields = ("target",'assay')
+    raw_id_fields = ('target', 'assay')
 
     save_on_top = True
     list_per_page = 50
@@ -432,6 +437,7 @@ class PubChemBioactivityAdmin(LockableAdmin):
 admin.site.register(PubChemBioactivity, PubChemBioactivityAdmin)
 
 
+# DEPRECATED
 #class PubChemTargetAdmin(LockableAdmin):
 #    search_fields = ['name', 'organism', 'GI']
 #

@@ -4,7 +4,8 @@
 {{ object.notes }}
 {{ object.notebook }}
 {{ object.setup }}
-{{ object.created_by }}
+{{ object.created_by.first_name }}
+{{ object.created_by.last_name }}
 {{ object.group }}
 {% for assay in object.assayplatereadoutassay_set.all %}
   {{ assay }}

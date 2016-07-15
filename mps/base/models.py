@@ -1,21 +1,14 @@
 # coding=utf-8
 
-"""
-
-Base Models
-
-"""
+"""Base Models"""
 
 from django.db import models
 
 
 class TrackableModel(models.Model):
-    """
-
-    The base model for Trackable models
+    """The base model for Trackable models
 
     NOTE: the "read-only" configuration method resides in base/admin.py
-
     """
 
     # CREATION DATA #
@@ -53,11 +46,7 @@ class TrackableModel(models.Model):
 
 
 class LockableModel(TrackableModel):
-    """
-
-    The base model for Lockable models
-
-    """
+    """The base model for Lockable models"""
 
     locked = models.BooleanField(default=False,
                                  help_text=
@@ -69,11 +58,7 @@ class LockableModel(TrackableModel):
 
 
 class RestrictedModel(LockableModel):
-    """
-
-    The base model for Restricted models
-
-    """
+    """The base model for Restricted models"""
 
     # It is mandatory to bind a group to a restricted model
     group = models.ForeignKey('auth.Group',
@@ -89,11 +74,7 @@ class RestrictedModel(LockableModel):
 
 
 class FlaggableModel(RestrictedModel):
-    """
-
-    The base model for flaggable models
-
-    """
+    """The base model for flaggable models"""
 
     flagged = models.BooleanField(default=False,
                                   help_text='Check box to flag for review')

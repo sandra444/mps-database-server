@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "js/image_display.js" %}"></script>
+    <script src="{% static "assays/assayrun_add.js" %}"></script>
+    <script src="{% static "js/enter_override.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    {% if object %}
+        <li>
+        <a href="/assays/{{ object.id }}">{{ object }}</a>
+        </li>
+    {% endif %}
+    <li class="active">
+        {% if object %}
+            Edit <em>{{ object }}</em>
+        {% else %}
+            Add Study
+        {% endif %}
+    </li>
+{% endblock %}
+
+{% block content %}
+{% if update %}
+    <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post" >
+
+    {% include 'review.html' %}
+
+    <h1>
+        Edit <em>{{ object }}</em>
+{% else %}
+    <form enctype="multipart/form-data" class="form-horizontal" method="post" >
+
+    <h1>
+        Add Study
+{% endif %}
+    <br>
+    {% csrf_token %}
+    {{ formset.management_form }}
+    </h1>
+
+    {% include "submit.html" %}
+
+    {% include 'errors.html' %}
+
+    {% include 'tracking.html' %}
+
+    <legend>Study Details</legend>
+
+    {% if form.group.errors %}
+        {% for error in form.group.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="group" class="col-sm-2 control-label">Group*</label>
+        <div class="col-sm-10">
+          {{ form.group }}
+          <span id="center_name"></span>
+        </div>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ form.non_field_errors }}
+        </div>
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="study_type" class="col-sm-2 control-label">Study Types*</label>
+        <div class="col-sm-10">
+            <label for="toxicity" style="padding-right: 10px;">Toxicity</label>
+              {{ form.toxicity }}
+            <label for="efficacy" style="padding-left: 20px;padding-right: 10px;">Efficacy</label>
+              {{ form.efficacy }}
+            <label for="disease" style="padding-left: 20px;padding-right: 10px;">Disease</label>
+              {{ form.disease }}
+            <label for="efficacy" style="padding-left: 20px;padding-right: 10px;">Cell Characterization</label>
+              {{ form.cell_characterization }}
+        </div>
+    </div>
+
+    {% if form.name.errors %}
+        {% for error in form.name.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="study_name" class="col-sm-2 control-label">Study Name*</label>
+        <div class="col-sm-10">
+          {{ form.name }}
+        </div>
+    </div>
+
+    {% if form.start_date.errors %}
+        {% for error in form.start_date.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="start_date" class="col-sm-2 control-label">Start Date*</label>
+        <div class="col-sm-10">
+          {{ form.start_date }} [yyyy-mm-dd]
+          <div>
+              This date specifies when the experiment began
+          </div>
+        </div>
+    </div>
+
+    {% if form.assay_run_id.errors %}
+        {% for error in form.assay_run_id.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="assay_run_id" class="col-sm-2 control-label">Study ID</label>
+        <div class="col-sm-10">
+          {{ form.assay_run_id }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="description" class="col-sm-2 control-label">Description</label>
+        <div class="col-sm-10">
+          {{ form.description }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="restricted" class="col-sm-2 control-label">Restrict Access</label>
+        <div class="col-sm-10">
+          {{ form.restricted }}
+        </div>
+    </div>
+
+    {% if form.file.errors %}
+        {% for error in form.file.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{ error }}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="file" class="col-sm-2 control-label">Protocol File</label>
+        <div class="col-sm-10">
+            {{ form.file }}
+            <div>
+                You can upload a word file for this study's protocol.
+                <br>
+                <b>Preferred Format: PDF</b>
+            </div>
+        </div>
+    </div>
+
+    {% if form.image.errors %}
+        {% for error in form.image.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="image" class="col-sm-2 control-label">Image</label>
+        <div class="col-sm-10">
+            {{ form.image }}
+            <p>
+                You can upload an image to clarify this study.
+                <br>
+                <b>Preferred Formats: PNG, JPEG, GIF</b>
+            </p>
+        </div>
+    </div>
+
+    <div id="image_display">
+        <div id="current_display">
+            {% if object.image %}
+                <img class="img-responsive center-block padded-bottom" src="/media/{{ object.image }}">
+            {% endif %}
+        </div>
+    </div>
+
+    <legend>For Integrated Chip Studies</legend>
+    {% if form.study_configuration.errors %}
+        {% for error in form.study_configuration.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="study_configuration" class="col-sm-2 control-label">Study Configuration</label>
+        <div class="col-sm-10">
+            {{ form.study_configuration }}
+            <br>
+            <a href="/assays/studyconfiguration">
+                <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
+                Add/Edit Study Configuration (Must Refresh Page to See Change)
+            </a>
+        </div>
+    </div>
+</form>
+{% endblock %}

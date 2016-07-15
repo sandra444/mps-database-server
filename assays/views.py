@@ -9,18 +9,18 @@ from assays.forms import *
 from django import forms
 
 from django.forms.models import inlineformset_factory
-from django.shortcuts import redirect, get_object_or_404, render_to_response
-from django.contrib.auth.models import Group
-#from django.core.exceptions import PermissionDenied
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
+# from django.shortcuts import redirect, get_object_or_404, render_to_response
+# from django.contrib.auth.models import Group
+# from django.core.exceptions import PermissionDenied
+# from django.contrib.auth.decorators import login_required
+# from django.utils.decorators import method_decorator
 
-from mps.templatetags.custom_filters import *
+# from mps.templatetags.custom_filters import *
 from django.db.models import Q
 
 from mps.mixins import *
 
-import ujson as json
+# import ujson as json
 import xlrd
 
 from django.conf import settings
@@ -28,7 +28,8 @@ from django.conf import settings
 import string
 import re
 import os
-import codecs,cStringIO
+import codecs
+import cStringIO
 
 from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
@@ -41,29 +42,38 @@ from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
 
 class UnicodeWriter:
+    """Used to write UTF-8 CSV files"""
     def __init__(self, f, dialect=csv.excel, encoding="utf-8-sig", **kwds):
+        """Init the UnicodeWriter
+
+        Params:
+        f -- the file stream to write to
+        dialect -- the "dialect" of csv to use (default excel)
+        encoding -- the text encoding set to use (default utf-8)
+        """
         self.queue = cStringIO.StringIO()
         self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
         self.stream = f
         self.encoder = codecs.getincrementalencoder(encoding)()
+
     def writerow(self, row):
-        '''writerow(unicode) -> None
-        This function takes a Unicode string and encodes it to the output.
-        '''
-        self.writer.writerow([s.encode("utf-8") for s in row])
+        """This function takes a Unicode string and encodes it to the output"""
+        self.writer.writerow([s.encode('utf-8') for s in row])
         data = self.queue.getvalue()
-        data = data.decode("utf-8")
+        data = data.decode('utf-8')
         data = self.encoder.encode(data)
         self.stream.write(data)
         self.queue.truncate(0)
 
     def writerows(self, rows):
+        """This function writes out all rows given"""
         for row in rows:
             self.writerow(row)
 
 
 # Class-based views for indexes
 class UserIndex(OneGroupRequiredMixin, ListView):
+    """Displays all of the user's studies"""
     context_object_name = 'user_index'
     template_name = 'assays/index.html'
 
@@ -80,7 +90,9 @@ class UserIndex(OneGroupRequiredMixin, ListView):
         return self.render_to_response(context)
 
 
+# May want to merge with UserIndex?
 class GroupIndex(OneGroupRequiredMixin, ListView):
+    """Displays all of the studies linked to groups that the user is part of"""
     context_object_name = 'group_index'
     template_name = 'assays/index.html'
 
@@ -100,6 +112,7 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
 
 
 class StudyIndex(ObjectGroupRequiredMixin, DetailView):
+    """Show all chip and plate models associated with the given study"""
     model = AssayRun
     context_object_name = 'study_index'
     template_name = 'assays/study_index.html'
@@ -219,6 +232,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
 
 # Class-based views for studies
 class AssayRunList(LoginRequiredMixin, ListView):
+    """A list of all studies"""
     model = AssayRun
 
     def get_queryset(self):
@@ -236,13 +250,14 @@ class AssayRunList(LoginRequiredMixin, ListView):
 
 
 class AssayRunAdd(OneGroupRequiredMixin, CreateView):
+    """Add a study"""
     template_name = 'assays/assayrun_add.html'
     form_class = AssayRunForm
 
     def get_form(self, form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
-            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete ")
+            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete ')
         )
 
         # If POST
@@ -266,6 +281,7 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
 
 
 class AssayRunDetail(DetailView):
+    """Details for a Study"""
     model = AssayRun
 
     # Study detail view does not use DetailRedirectMixin because of differing URL
@@ -340,6 +356,7 @@ class AssayRunDetail(DetailView):
 
 
 class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
+    """Update the fields of a Study"""
     model = AssayRun
     template_name = 'assays/assayrun_add.html'
     form_class = AssayRunForm
@@ -347,7 +364,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
     def get_form(self, form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
-            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete "))
+            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete '))
 
         # If POST
         if self.request.method == 'POST':
@@ -374,6 +391,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 
 def compare_cells(current_model, current_filter, setups):
+    """Compare cells to discern setups use the same sort and amount of cells"""
     cells = {}
 
     for setup in setups:
@@ -409,6 +427,10 @@ def compare_cells(current_model, current_filter, setups):
 
 
 class AssayRunSummary(ObjectGroupRequiredMixin, DetailView):
+    """Displays information for a given study
+
+    Currently only shows data for chip readouts and chip/plate setups
+    """
     model = AssayRun
     template_name = 'assays/assayrun_summary.html'
 
@@ -466,6 +488,7 @@ class AssayRunSummary(ObjectGroupRequiredMixin, DetailView):
 
 
 class AssayRunDelete(CreatorRequiredMixin, DeleteView):
+    """Delete a Setup"""
     model = AssayRun
     template_name = 'assays/assayrun_delete.html'
     success_url = '/assays/user_index/'
@@ -493,6 +516,7 @@ class AssayRunDelete(CreatorRequiredMixin, DeleteView):
 
 # Class based view for chip setups
 class AssayChipSetupList(LoginRequiredMixin, ListView):
+    """Displays a list of Chip Setups"""
     model = AssayChipSetup
 
     def get_queryset(self):
@@ -533,6 +557,7 @@ AssayChipCellsFormset = inlineformset_factory(
 
 # Cloning was recently refactored
 class AssayChipSetupAdd(CreateView):
+    """Add a Chip Setup (with inline for Chip Cells)"""
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
     # May want to define form with initial here
@@ -628,11 +653,13 @@ class AssayChipSetupAdd(CreateView):
 
 
 class AssayChipSetupDetail(DetailRedirectMixin, DetailView):
+    """Details for a Chip Setup"""
     model = AssayChipSetup
 
 
 # TODO IMPROVE METHOD FOR CLONING
 class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
+    """Update a Chip Setup and Chip Cells inline"""
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
     form_class = AssayChipSetupForm
@@ -677,6 +704,7 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 
 class AssayChipSetupDelete(CreatorRequiredMixin, DeleteView):
+    """Delete a Chip Setup and Chip Cells"""
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_delete.html'
 
@@ -696,6 +724,7 @@ class AssayChipSetupDelete(CreatorRequiredMixin, DeleteView):
 
 # Class based views for readouts
 class AssayChipReadoutList(LoginRequiredMixin, ListView):
+    """Displays a list of Chip Readouts"""
     model = AssayChipReadout
 
     def get_queryset(self):
@@ -752,6 +781,7 @@ ACRAFormSet = inlineformset_factory(
 
 
 class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
+    """Add a Chip Readout with inline for Assay Chip Readout Assays"""
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
 
@@ -809,8 +839,8 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             self.object.save()
             formset.save()
             if formset.files.get('file', ''):
-                file = formset.files.get('file', '')
-                parseChipCSV(self.object, file, headers, form)
+                current_file = formset.files.get('file', '')
+                parse_chip_csv(self.object, current_file, headers, form)
             if data['another']:
                 form = self.form_class(
                     study,
@@ -847,10 +877,12 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
 
 class AssayChipReadoutDetail(DetailRedirectMixin, DetailView):
+    """Detail for Chip Readout"""
     model = AssayChipReadout
 
 
 class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
+    """Update Assay Chip Readout and Assay Chip Readout Assays"""
     model = AssayChipReadout
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
@@ -895,13 +927,13 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Save file if it exists
             if formset.files.get('file', ''):
                 file = formset.files.get('file', '')
-                parseChipCSV(self.object, file, headers, form)
+                parse_chip_csv(self.object, file, headers, form)
             # If no file, try to update the qc_status
             else:
                 modify_qc_status_chip(self.object, form)
             # Clear data if clear is checked
             if self.request.POST.get('file-clear', ''):
-                removeExistingChip(self.object)
+                AssayChipRawData.objects.filter(assay_chip_id=self.object).delete()
             # Otherwise do nothing (the file remained the same)
             return redirect(self.object.get_post_submission_url())
         else:
@@ -909,6 +941,7 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 
 class AssayChipReadoutDelete(CreatorRequiredMixin, DeleteView):
+    """Delete Assay Chip Readout"""
     model = AssayChipReadout
     template_name = 'assays/assaychipreadout_delete.html'
 
@@ -927,6 +960,7 @@ class AssayChipReadoutDelete(CreatorRequiredMixin, DeleteView):
 
 # Class-based views for test results
 class AssayChipTestResultList(LoginRequiredMixin, ListView):
+    """Displays a list of Chip Test Results"""
     # model = AssayChipTestResult
     template_name = 'assays/assaychiptestresult_list.html'
 
@@ -966,6 +1000,7 @@ ChipTestResultFormSet = inlineformset_factory(
 
 
 class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
+    """Add a Chip Test Result with inline for individual results"""
     template_name = 'assays/assaychiptestresult_add.html'
     form_class = AssayChipResultForm
 
@@ -1032,10 +1067,12 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
 
 
 class AssayChipTestResultDetail(DetailRedirectMixin, DetailView):
+    """Display details for Chip Test Result"""
     model = AssayChipTestResult
 
 
 class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
+    """Update a Chip Test Result and inline of individual results"""
     model = AssayChipTestResult
     template_name = 'assays/assaychiptestresult_add.html'
     form_class = AssayChipResultForm
@@ -1078,6 +1115,7 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 
 class AssayChipTestResultDelete(CreatorRequiredMixin, DeleteView):
+    """Delete a Chip Test Result"""
     model = AssayChipTestResult
     template_name = 'assays/assaychiptestresult_delete.html'
 
@@ -1087,6 +1125,7 @@ class AssayChipTestResultDelete(CreatorRequiredMixin, DeleteView):
 
 # Class-based views for study configuration
 class StudyConfigurationList(LoginRequiredMixin, ListView):
+    """Display a lsit of Study Configurations"""
     model = StudyConfiguration
     template_name = 'assays/studyconfiguration_list.html'
 
@@ -1105,6 +1144,7 @@ StudyModelFormSet = inlineformset_factory(
 
 
 class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
+    """Add a Study Configuration with inline for Associtated Models"""
     template_name = 'assays/studyconfiguration_add.html'
     form_class = StudyConfigurationForm
 
@@ -1136,6 +1176,7 @@ class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
 
 
 class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
+    """Update a Study Configuration with inline for Associtated Models"""
     model = StudyConfiguration
     template_name = 'assays/studyconfiguration_add.html'
     form_class = StudyConfigurationForm
@@ -1169,6 +1210,7 @@ class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
 
 # Class-based views for LAYOUTS
 class AssayLayoutList(LoginRequiredMixin, ListView):
+    """Display a list of Assay Layouts"""
     model = AssayLayout
 
     def get_queryset(self):
@@ -1195,6 +1237,7 @@ class AssayLayoutList(LoginRequiredMixin, ListView):
 
 
 class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
+    """Add an Assay Layout"""
     model = AssayLayout
     form_class = AssayLayoutForm
     template_name = 'assays/assaylayout_add.html'
@@ -1202,7 +1245,7 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
     def get_form(self, form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
-            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete ")
+            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete ')
         )
 
         # If POST
@@ -1231,6 +1274,7 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
 
 
 class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
+    """Update an Assay Layout"""
     model = AssayLayout
     form_class = AssayLayoutForm
     template_name = 'assays/assaylayout_add.html'
@@ -1238,7 +1282,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     def get_form(self, form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
-            ~Q(name__contains="Add ") & ~Q(name__contains="Change ") & ~Q(name__contains="Delete ")
+            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete ')
         )
 
         # If POST
@@ -1266,6 +1310,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 
 class AssayLayoutDelete(CreatorRequiredMixin, DeleteView):
+    """Delete an Assay Layout"""
     model = AssayLayout
     template_name = 'assays/assaylayout_delete.html'
 
@@ -1286,6 +1331,7 @@ class AssayLayoutDelete(CreatorRequiredMixin, DeleteView):
 
 # Class-based views for LAYOUTS
 class AssayPlateSetupList(LoginRequiredMixin, ListView):
+    """List all Plate Setups"""
     model = AssayPlateSetup
 
     def get_queryset(self):
@@ -1321,6 +1367,7 @@ AssayPlateCellsFormset = inlineformset_factory(
 
 # VIEWS FOR ASSAY PLATE (DEVICE) SETUP
 class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
+    """Add a Plate Setup with inline for Plate Cells"""
     model = AssayPlateSetup
     form_class = AssayPlateSetupForm
     template_name = 'assays/assayplatesetup_add.html'
@@ -1328,8 +1375,8 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
     def get_form(self, form_class):
         if self.request.method == 'POST':
             form = form_class(self.request.POST)
-        elif self.request.GET.get('clone',''):
-            pk = int(self.request.GET.get('clone',''))
+        elif self.request.GET.get('clone', ''):
+            pk = int(self.request.GET.get('clone', ''))
             clone = get_object_or_404(AssayPlateSetup, pk=pk)
             form = form_class(instance=clone)
         else:
@@ -1399,10 +1446,12 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
 
 # TODO Assay Layout Detail does not currently exist (deemed lower priority)
 class AssayPlateSetupDetail(DetailRedirectMixin, DetailView):
+    """Details for a Plate Setup"""
     model = AssayPlateSetup
 
 
 class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
+    """Update a Plate Setup with inline for Plate Cells"""
     model = AssayPlateSetup
     form_class = AssayPlateSetupForm
     template_name = 'assays/assayplatesetup_add.html'
@@ -1447,6 +1496,7 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 
 class AssayPlateSetupDelete(CreatorRequiredMixin, DeleteView):
+    """Delete a Plate Setup"""
     model = AssayPlateSetup
     template_name = 'assays/assayplatesetup_delete.html'
 
@@ -1466,6 +1516,7 @@ class AssayPlateSetupDelete(CreatorRequiredMixin, DeleteView):
 
 # Class based views for readouts
 class AssayPlateReadoutList(LoginRequiredMixin, ListView):
+    """Display a list of Plate Readouts"""
     model = AssayPlateReadout
 
     def get_queryset(self):
@@ -1518,6 +1569,7 @@ APRAFormSet = inlineformset_factory(
 
 
 class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
+    """Add a Plate Readout with inline for Assay Plate Readout Assays"""
     template_name = 'assays/assayplatereadout_add.html'
     form_class = AssayPlateReadoutForm
 
@@ -1574,8 +1626,8 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             self.object.save()
             formset.save()
             if formset.files.get('file', ''):
-                file = formset.files.get('file', '')
-                parseReadoutCSV(self.object, file, upload_type)
+                current_file = formset.files.get('file', '')
+                parse_readout_csv(self.object, current_file, upload_type)
                 # Check QC
                 modify_qc_status_plate(self.object, form)
             if data['another']:
@@ -1614,10 +1666,12 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
 # TODO NEED TO ADD TEMPLATE
 class AssayPlateReadoutDetail(DetailRedirectMixin, DetailView):
+    """Details for a Plate Readout"""
     model = AssayPlateReadout
 
 
 class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
+    """Update a Plate Readout with inline for Assay Plate Readout Assays"""
     model = AssayPlateReadout
     template_name = 'assays/assayplatereadout_add.html'
     form_class = AssayPlateReadoutForm
@@ -1657,11 +1711,12 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             formset.save()
             # Save file if it exists
             if formset.files.get('file', ''):
-                file = formset.files.get('file', '')
-                parseReadoutCSV(self.object, file, upload_type)
+                current_file = formset.files.get('file', '')
+                parse_readout_csv(self.object, current_file, upload_type)
             # Clear data if clear is checked
             if self.request.POST.get('file-clear', ''):
-                removeExistingReadout(self.object)
+                # remove_existing_readout(self.object)
+                AssayReadout.objects.filter(assay_device_readout=self.object).delete()
             else:
                 # Check QC
                 modify_qc_status_plate(self.object, form)
@@ -1673,6 +1728,7 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 # TODO ADD CONTEXT
 class AssayPlateReadoutDelete(CreatorRequiredMixin, DeleteView):
+    """Delete an Assay Plate Readout"""
     model = AssayPlateReadout
     template_name = 'assays/assayplatereadout_delete.html'
 
@@ -1691,6 +1747,7 @@ class AssayPlateReadoutDelete(CreatorRequiredMixin, DeleteView):
 
 # Class-based views for PLATE test results
 class AssayPlateTestResultList(LoginRequiredMixin, ListView):
+    """Display individual Assa Plate Results"""
     # model = AssayChipTestResult
     template_name = 'assays/assayplatetestresult_list.html'
 
@@ -1724,6 +1781,7 @@ PlateTestResultFormSet = inlineformset_factory(
 
 
 class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
+    """Add Plate Test Result with inline for individual Plate Results"""
     template_name = 'assays/assayplatetestresult_add.html'
     form_class = AssayPlateResultForm
 
@@ -1781,10 +1839,12 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
 
 
 class AssayPlateTestResultDetail(DetailRedirectMixin, DetailView):
+    """Details for Plate Test Results"""
     model = AssayPlateTestResult
 
 
 class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
+    """Update a Plate Test Result with inline for individual Plate Results"""
     model = AssayPlateTestResult
     template_name = 'assays/assayplatetestresult_add.html'
     form_class = AssayPlateResultForm
@@ -1826,6 +1886,7 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 
 class AssayPlateTestResultDelete(CreatorRequiredMixin, DeleteView):
+    """Delete a Plate Test Result"""
     model = AssayPlateTestResult
     template_name = 'assays/assayplatetestresult_delete.html'
 
@@ -1834,13 +1895,13 @@ class AssayPlateTestResultDelete(CreatorRequiredMixin, DeleteView):
 
 
 def get_valid_csv_location(file_name, study_id, device_type):
-    media_root = settings.MEDIA_ROOT.replace('mps/../','',1)
+    media_root = settings.MEDIA_ROOT.replace('mps/../', '', 1)
 
     valid_chars = '-_.{0}{1}'.format(string.ascii_letters, string.digits)
     # Get only valid chars
     valid_file_name = ''.join(c for c in file_name if c in valid_chars)
     # Replace spaces with underscores
-    valid_file_name = re.sub(r"\s+", '_', valid_file_name)
+    valid_file_name = re.sub(r'\s+', '_', valid_file_name)
 
     # Check if name is already in use
     if os.path.isfile(os.path.join(media_root, 'csv', study_id, device_type, valid_file_name + '.csv')):
@@ -1855,18 +1916,30 @@ def get_valid_csv_location(file_name, study_id, device_type):
 
 
 def write_out_csv(file_name, data):
+    """Write out a Unicode CSV
+
+    Params:
+    file_name -- name of the file to write
+    data -- data to write to the file (as a list of lists)
+    """
     with open(file_name, 'w') as out_file:
         writer = UnicodeWriter(out_file)
         writer.writerows(data)
 
 
 def get_csv_media_location(file_name):
+    """Returns the location given a full path
+
+    Params:
+    file_name -- name of the file to write
+    """
     split_name = file_name.split('/')
     csv_onward = '/'.join(split_name[-4:])
     return csv_onward
 
 
 class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
+    """Upload an Excel Sheet for storing multiple sets of Readout data at one"""
     model = AssayRun
     template_name = 'assays/readoutbulkupload.html'
     form_class = ReadoutBulkUploadForm
@@ -2006,7 +2079,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                         readout.save()
 
                         # Note the lack of a form normally used for QC
-                        parseChipCSV(readout, readout.file, headers, None)
+                        parse_chip_csv(readout, readout.file, headers, None)
 
                 elif sheet_type == 'Tabular':
                     # Header if time
@@ -2076,7 +2149,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                         readout.save()
 
                         # Note the lack of a form normally used for QC
-                        parseReadoutCSV(readout, readout.file, 'Tabular')
+                        parse_readout_csv(readout, readout.file, 'Tabular')
 
                 elif sheet_type == 'Block':
                     csv_data = {}
@@ -2123,7 +2196,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                         readout.save()
 
                         # Note the lack of a form normally used for QC
-                        parseReadoutCSV(readout, readout.file, 'Block')
+                        parse_readout_csv(readout, readout.file, 'Block')
 
             return redirect(self.object.get_absolute_url())
         else:

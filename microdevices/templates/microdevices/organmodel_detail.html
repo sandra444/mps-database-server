@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block breadcrumbs %}
+    <li><a href="/microdevices/">Devices &amp; Organ Models</a></li>
+    <li class="active">{{ object.model_name }}</li>
+{% endblock %}
+
+{% block content %}
+    <legend><h1>{{ object.model_name }}</h1></legend>
+
+    <div>
+        <div class="col-xs-12">
+        <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
+            <tbody>
+                <tr>
+                    <td>
+                        <b>Center</b>
+                    </td>
+                    <td>
+                        {{ object.center|default:'Unspecified' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Organ</b>
+                    </td>
+                    <td>
+                        {{ object.organ|default:'Unspecified' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Device</b>
+                    </td>
+                    <td>
+                        {% if object.device.id %}
+                            <a href="/microdevices/device/{{ object.device.id }}">{{ object.device }}</a>
+                        {% else %}
+                            Unspecified
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if object.description %}
+                <tr>
+                    <td>
+                        <b>Description</b>
+                    </td>
+                    <td>
+                        {{ object.description }}
+                    </td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>
+                        <b>Project</b>
+                    </td>
+                    <td>
+                        {% if object.mps %}
+                            <span class="label label-primary">MPS</span>
+                        {% endif %}
+                        {% if object.epa %}
+                            <span class="label label-success">EPA</span>
+                        {% endif %}
+                        {% if not object.mps and not object.epa %}
+                            <span class="label label-default">Unassigned</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Model Image</b>
+                    </td>
+                    <td>
+                        {% if object.model_image %}
+                            <img src="/media/{{ object.model_image }}">
+                        {% else %}
+                            No Image Available
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Device Image</b>
+                    </td>
+                    <td>
+                        {% if object.device.device_image %}
+                            <img src="/media/{{ object.device.device_image }}">
+                        {% else %}
+                            No Image Available
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+
+    {% if protocols %}
+    <legend><b>Protocols</b></legend>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Version</th>
+            <th>Protocol</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for protocol in protocols %}
+            <tr>
+                <td>{{ protocol.version }}</td>
+                <td><a href="/media/{{ protocol.file }}">{{ protocol.file }}</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if assays %}
+    <legend><b>Validated Assays</b></legend>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Assay Name</th>
+            <th>Assay Type</th>
+            <th>Test Type</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for assay in assays %}
+            <tr>
+                <td>{{ assay.assay.assay_name }}</td>
+                <td>{{ assay.assay.assay_type }}</td>
+                <td>{{ assay.assay.test_type }}</td>
+                <td>{{ assay.assay.assay_description }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+{% endblock %}

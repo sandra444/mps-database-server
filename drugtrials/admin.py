@@ -13,7 +13,9 @@ from import_export.admin import ImportExportModelAdmin
 
 
 class URLFieldWidget(AdminURLFieldWidget):
+    """Widget for displaying URLs in Admin"""
     def render(self, name, value, attrs=None):
+        """Return the safe HTML"""
         widget = super(URLFieldWidget, self).render(name, value, attrs)
 
         # u'<input type="button" ' \
@@ -42,6 +44,7 @@ class URLFieldWidget(AdminURLFieldWidget):
 
 
 class SpeciesAdmin(LockableAdmin):
+    """Admin for Species"""
     list_per_page = 300
     save_on_top = True
     fieldsets = (
@@ -70,6 +73,7 @@ admin.site.register(Species, SpeciesAdmin)
 
 
 class TrialSourceAdmin(LockableAdmin):
+    """Admin for Trial Source"""
     save_on_top = True
     list_per_page = 300
     list_display = ('source_name', 'source_site', 'description')
@@ -98,12 +102,14 @@ class TrialSourceAdmin(LockableAdmin):
 
     def source_site(self, obj):
         return '<a href="%s" target="_blank">%s</a>' % (obj.source_website, obj.source_website)
+
     source_site.allow_tags = True
 
 admin.site.register(TrialSource, TrialSourceAdmin)
 
 
 class FindingResultInline(admin.TabularInline):
+    """Admin for Finding Result Inlines"""
     model = FindingResult
     form = FindingResultForm
     raw_id_fields = ('finding_name',)
@@ -118,7 +124,7 @@ class FindingResultInline(admin.TabularInline):
 
 
 class DrugTrialAdmin(LockableAdmin):
-
+    """Admin for Drug Trials"""
     form = DrugTrialForm
 
     class Media(object):
@@ -209,6 +215,7 @@ admin.site.register(DrugTrial, DrugTrialAdmin)
 
 
 class FindingTypeAdmin(LockableAdmin):
+    """Admin for Finding Types"""
     list_per_page = 300
     save_on_top = True
     list_display = ('finding_type', 'description')
@@ -236,6 +243,7 @@ admin.site.register(FindingType, FindingTypeAdmin)
 
 
 class ResultDescriptorAdmin(LockableAdmin):
+    """Admin for Result Descriptors"""
     list_per_page = 300
     save_on_top = True
     fieldsets = (
@@ -263,7 +271,7 @@ admin.site.register(ResultDescriptor, ResultDescriptorAdmin)
 
 
 class FindingAdmin(LockableAdmin):
-
+    """Admin for Findings"""
     form = FindingForm
 
     save_on_top = True
@@ -314,7 +322,7 @@ admin.site.register(Finding, FindingAdmin)
 
 
 class AdverseEventAdmin(ImportExportModelAdmin):
-
+    """Admin for Adverse Events"""
     save_on_top = True
     list_per_page = 300
     list_display = ('event', 'organ')
@@ -334,7 +342,7 @@ admin.site.register(AdverseEvent, AdverseEventAdmin)
 
 
 class OpenFDACompoundAdmin(ImportExportModelAdmin):
-
+    """Admin for OpenFDA Compounds"""
     save_on_top = True
     list_per_page = 300
     list_display = ('compound', 'black_box')

@@ -1,0 +1,518 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block load %}
+    <link href="{% static "bioactivities/cluster_style.css" %}" rel="stylesheet" type="text/css">
+    <script src="{% static "js/cookies.js" %}"></script>
+    <script src="{% static "js/spin.min.js" %}"></script>
+    <script src="{% static "js/mps_spinner.js" %}"></script>
+    <script src="{% static "bioactivities/filter.js" %}"></script>
+    <script src="{% static "bioactivities/cluster.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="active">Cluster Compounds</li>
+{% endblock %}
+
+{% block content %}
+    {% block error %}
+        <div class="row">
+            <div hidden class="alert alert-danger" role="alert" id="error_message">
+                <p id="error">
+                    The server could not find the result to your request.
+                </p>
+
+                <p>
+                    Please try a different query.
+                </p>
+            </div>
+        </div>
+    {% endblock %}
+
+    <div id="selection">
+        <div class="row">
+            <div class="text-center">
+                {% block submit %}
+                <a href="#show" class="btn btn-xlarge btn-primary text-center" id="submit">
+                    Generate Dendrogram
+                </a>
+                {% endblock %}
+            </div>
+        </div>
+        <hr>
+        <form id='selection_form' autocomplete="off">
+        {% block extra_row %}
+            <div class="row text-center">
+                <div class="col-xs-4">
+                    <div class="fancy-checkbox" align="left">
+                        <input type="checkbox" name="pubchem" id="pubchem" />
+                        <div class="btn-group">
+                            <label for="pubchem" class="btn btn-success">
+                                <span class="glyphicon glyphicon-ok"></span>
+                                <span> </span>
+                            </label>
+                            <label for="pubchem" class="btn btn-default active">
+                                Use PubChem instead of ChEMBL
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xs-3">
+                    <div class="fancy-checkbox" align="left">
+                        <input type="checkbox" id="exclude_questionable" checked/>
+                        <div class="btn-group">
+                            <label for="exclude_questionable" class="btn btn-default">
+                                <span class="glyphicon glyphicon-ok"></span>
+                                <span> </span>
+                            </label>
+                            <label for="exclude_questionable" class="btn btn-default active">
+                                Exclude Questionable
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xs-3">
+                    <div class="fancy-checkbox" align="left">
+                        <input type="checkbox" name="chemical_properties" id="chemical_properties" checked/>
+                        <div class="btn-group">
+                            <label for="chemical_properties" class="btn btn-info">
+                                <span class="glyphicon glyphicon-ok"></span>
+                                <span> </span>
+                            </label>
+                            <label for="chemical_properties" class="btn btn-default active">
+                                Use Chemical Properties
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xs-2">
+                    <label>Minimum Feature Count Per Record
+                        <input id="minimum_feature_count" type="number" value="10">
+                        <button type="button" id="apply_minimum_feature_count">Apply</button>
+                    </label>
+                </div>
+            </div>
+            <hr>
+            <div class="row text-center">
+                <div class="col-xs-3">
+                    <div title="Currently excludes 0 and negative values" class="fancy-checkbox" align="left">
+                        <input type="checkbox" name="log_scale" id="log_scale" />
+                        <div class="btn-group">
+                            <label for="log_scale" class="btn btn-warning">
+                                <span class="glyphicon glyphicon-ok"></span>
+                                <span> </span>
+                            </label>
+                            <label for="log_scale" class="btn btn-default active">
+                                Log Scale
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xs-4">
+                    <div title="Normalizes to range 0.0001 to 1.0" class="fancy-checkbox" align="left">
+                        <input type="checkbox" name="normalize_bioactivities" id="normalize_bioactivities" checked/>
+                        <div class="btn-group">
+                            <label for="normalize_bioactivities" class="btn btn-danger">
+                                <span class="glyphicon glyphicon-ok"></span>
+                                <span> </span>
+                            </label>
+                            <label for="normalize_bioactivities" class="btn btn-default active">
+                                Normalize Bioactivities
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xs-2">
+                    <label>Method
+                        <select id="method" class="form-control">
+                            <option selected title="Performs single/min/nearest linkage">single</option>
+                            <option title="Performs complete/max/farthest point linkage">complete</option>
+                            <option title="Performs average/UPGMA (Unweighted Pair Group Method with Arithmetic Mean) linkage">average</option>
+                            <option title="Performs weighted/WPGMA (Weighted Pair Group Method with Arithmetic Mean) linkage">weighted</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="col-xs-3">
+                    <label>Metric
+                        <select id="metric" class="form-control">
+                            <option selected title="The ordinary distance in n-dimensional space">euclidean</option>
+                            <option title="Normalized scalar product without subtracting the mean value">cosine</option>
+                            <option title="Manhattan distance, L1 distance, rectilinear distance">cityblock</option>
+                            <option title="Subtract the mean value of the coordinates, normalize and take the scalar product">correlation</option>
+                            <option title="A generalization of both the Euclidean distance and the Cityblock distance">minkowski</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+            <hr>
+        {% endblock %}
+        <div class="row">
+            <div class="col-xs-4">
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered
+                            table-condensed">
+
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Select Target Types
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="control_target_types">
+                            <tr>
+                                <td>
+                                    <input value="CELL-LINE" id="Cell-Line" type="checkbox">
+                                </td>
+                                <td>
+                                    Cell-Line
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="ORGANISM" id="Organism" type="checkbox">
+                                </td>
+                                <td>
+                                    Organism
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="SINGLE PROTEIN" id="Single_Protein" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    Single Protein
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="TISSUE" id="Tissue" type="checkbox">
+                                </td>
+                                <td>
+                                    Tissue
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+            <div class="col-xs-4">
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered
+                            table-condensed">
+
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input id="all_organisms" type="checkbox">
+                                </th>
+                                <th>
+                                    Select Organisms
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="control_organisms">
+                            <tr>
+                                <td>
+                                    <input value="!No Organism" id="No_Organism" type="checkbox">
+                                </td>
+                                <td>
+                                    !No Organism
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="Canis lupus familiaris" id="Canis_Lupus_Familiaris" type="checkbox">
+                                </td>
+                                <td>
+                                    Canis lupus familiaris
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="Homo sapiens" id="Homo_Sapiens" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    Homo sapiens
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="Rattus norvegicus" id="Rattus_Norvegicus" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    Rattus norvegicus
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+            <div class="col-xs-4">
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered
+                            table-condensed">
+
+                        <thead>
+                            <tr>
+                                <th>
+                                    {# Empty for now #}
+                                </th>
+                                <th>
+                                    Filter Compounds
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <input value="drugs" id="drugs" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    Known Drugs
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="non_drugs" id="non_drugs" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    Non-Drugs
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="mps" id="mps" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    MPS
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="epa" id="epa" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    EPA
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input value="unlabelled" id="unlabelled" type="checkbox" checked>
+                                </td>
+                                <td>
+                                    Unlabelled
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <select id="logp_gtlt">
+                                        <option>&gt;</option>
+                                        <option>&lt;</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input id="logp" size="10"> LogP
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <select id="molecular_weight_gtlt">
+                                        <option>&gt;</option>
+                                        <option>&lt;</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input id="molecular_weight" size="10"> Molecular Weight
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+        <hr>
+
+        {% block selections %}
+
+        <div class="row">
+            <div class="col-xs-3">
+
+                <p class="text-center">
+                    <label>
+                        Bioactivities Filter:
+                        <input class="table-filter" id="bioactivity_filter">
+                    </label>
+                </p>
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered
+                            table-condensed">
+
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input id="all_bioactivities" type="checkbox">
+                                </th>
+                                <th>
+                                    Select Bioactivities
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="bioactivities">
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+            <div class="col-xs-3">
+
+                <p class="text-center">
+                    <label>
+                        Targets Filter:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input class="table-filter" id="target_filter">
+                    </label>
+                </p>
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-condensed">
+
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input id="all_targets" type="checkbox">
+                                </th>
+                                <th>
+                                    Select Targets
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="targets">
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-3">
+
+                <p class="text-center">
+                    <label>
+                        Compounds Filter:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input class="table-filter" id="compound_filter">
+                    </label>
+                </p>
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-condensed">
+
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input id="all_compounds" type="checkbox">
+                                </th>
+                                <th>
+                                    Select Compounds
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="compounds">
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-3">
+
+                <p class="text-center">
+                    <label>
+                        Drug Trials Filter:&nbsp;&nbsp;
+                        <input class="table-filter" id="drugtrial_filter">
+                    </label>
+                </p>
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered
+                            table-condensed">
+
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input id="all_drugtrials" type="checkbox">
+                                </th>
+                                <th>
+                                    Select Drug Trials
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="drugtrials">
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {% endblock %}
+        </form>
+    </div>
+{% endblock %}
+
+{% block fluid-content %}
+    {% block graphic %}
+
+        <div hidden id="graphic" class="large-padding-top">
+            <div class="padded-row text-center">
+                <a href="#filter" id="back" class="btn btn-xlarge btn-info">
+                    <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+                    Back to Selection
+                </a>
+            </div>
+
+            <hr>
+
+            <div style="overflow:auto; width:100%; height:100%;">
+                <div id="query_box" class="col-sm-3 hidden-xs">
+                    <div id="query" class="affix"></div>
+                </div>
+                <div id="cluster" class="col-sm-6">
+                </div>
+                <div class="col-sm-3 hidden-xs">
+                    <div id="compound" class="affix pre-scrollable"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="spinner"></div>
+    {% endblock %}
+{% endblock %}

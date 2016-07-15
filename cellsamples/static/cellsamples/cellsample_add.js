@@ -2,23 +2,27 @@ $(function() {
     // Get the CSRF token
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
+    var cell_image = $('#id_cell_image');
+    var image_display = $('#image_display');
+    var current_display = $('#current_display');
+
     var subtype = $('#id_cell_subtype');
     var type = $('#id_cell_type');
 
     // Setup date pickers
     var date = $("#id_receipt_date");
-    var curr_date = date.val();
+    var current_date = date.val();
     //Add datepicker to receipt date
     date.datepicker();
     date.datepicker("option", "dateFormat", "yy-mm-dd");
-    date.datepicker("setDate", curr_date);
+    date.datepicker("setDate", current_date);
 
     var isolation = $("#id_isolation_datetime");
-    var curr_isolation = isolation.val();
+    var current_isolation = isolation.val();
     //Add datepicker to isolation
     isolation.datepicker();
     isolation.datepicker("option", "dateFormat", "yy-mm-dd");
-    isolation.datepicker("setDate", curr_isolation);
+    isolation.datepicker("setDate", current_isolation);
 
     function whittle_subtype(cell_type) {
         $.ajax({
@@ -46,6 +50,11 @@ $(function() {
             }
         });
     }
+
+    // Change cell_image preview as necessary
+    cell_image.change(function() {
+        IMAGES.display_image(cell_image, image_display, current_display);
+    });
 
     // Setup whittling
     type.change(function() {

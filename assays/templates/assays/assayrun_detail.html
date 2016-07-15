@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/organchipstudy/">Studies</a></li>
+    <li class="active">{{ object.assay_run_id }}</li>
+{% endblock %}
+
+{% block content %}
+    <legend><h1>Study: {{ object.assay_run_id }}</h1></legend>
+
+{#    <div class="row">#}
+{#        <div class="col-sm-2 lead text-right-responsive">#}
+{#            <b>Name:</b>#}
+{#        </div>#}
+{#        <div class="col-sm-10 lead">#}
+{#            {{ object.name }}#}
+{#        </div>#}
+{#    </div>#}
+{##}
+{#    <div class="row">#}
+{#        <div class="col-sm-2 lead text-right-responsive">#}
+{#            <b>Types:</b>#}
+{#        </div>#}
+{#        <div class="col-sm-10 lead">#}
+{#            {{ object.study_types }}#}
+{#        </div>#}
+{#    </div>#}
+
+    <div class="row">
+        <div class="col-sm-3 col-md-2 lead text-right-responsive">
+            <b>Configuration:</b>
+        </div>
+        <div class="col-sm-9 col-md-10 lead">
+            {{ object.study_configuration }}
+        </div>
+    </div>
+
+{#    <div class="row">#}
+{#        <div class="col-sm-2 lead text-right-responsive">#}
+{#            <b>Start Date:</b>#}
+{#        </div>#}
+{#        <div class="col-sm-10 lead">#}
+{#            {{ object.start_date }}#}
+{#        </div>#}
+{#    </div>#}
+
+    {% if object.description %}
+        <div class="row">
+            <div class="col-sm-3 col-md-2 lead text-right-responsive">
+                <b>Description:</b>
+            </div>
+            <div class="col-sm-9 col-md-10 lead">
+                {{ object.description }}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if object.file %}
+        <legend><b>Bulk Upload File</b></legend>
+
+        <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
+    {% endif %}
+
+    <legend><h2>Chip Setups</h2></legend>
+
+    {% if setups %}
+        <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Chip Setup ID / Barcode</th>
+                    <th>Date</th>
+                    <th>Organ Model Name</th>
+                    <th>Chip Test Type</th>
+                    <th>Compound</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for setup in setups %}
+                <tr id={{ setup.id }} name={{ setup.id }}>
+                    <td><a href="/assays/assaychipsetup/{{ setup.id }}">{{ setup.assay_chip_id }}</a></td>
+                    <td>{{ setup.setup_date }}</td>
+                    <td>{{ setup.device }}</td>
+                    <td>{{ setup.chip_test_type }}</td>
+                    <td>{{ setup.compound }}</td>
+                    <td>
+                        {{ readout.created_by.first_name }}
+                        {{ readout.created_by.last_name }}
+                    </td>
+                    <td>
+                        {% if setup.signed_off_by %}
+                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if setup.flagged %}
+                            <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No chip setups exist for this study
+        </div>
+        {% endif %}
+
+        <legend><h2>Chip Readouts</h2></legend>
+
+        {% if readouts %}
+        <table id="readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Chip Readout ID</th>
+                    <th>Chip Setup</th>
+                    <th>Assays</th>
+                    <th>Readout Date</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for readout in readouts %}
+                <tr id={{ readout.id }} name={{ readout.id }}>
+                    <td><a href="/assays/assaychipreadout/{{ readout.id }}">{{ readout.id }}</a></td>
+                    <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}">{{ readout.chip_setup }}</a></td>
+                    <td>
+                        {% for assay in readout.related_assays %}
+                            {{ assay.assay_id.assay_short_name }}
+                        {% endfor %}
+                    </td>
+                    <td>{{ readout.readout_start_time }}</td>
+                    <td>
+                        {{ readout.created_by.first_name }}
+                        {{ readout.created_by.last_name }}
+                    </td>
+                    <td>
+                        {% if readout.signed_off_by %}
+                            <span title="This entry was reviewed by {{ readout.signed_off_by }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if readout.flagged %}
+                            <span title="This entry is flagged for review: '{{ readout.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No chip readouts exist for this study
+        </div>
+        {% endif %}
+
+        <legend><h2>Chip Results</h2></legend>
+
+        {% if results %}
+        <table id="results" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Chip Test Results ID</th>
+                    <th>Chip Setup</th>
+                    <th>Chip Readout ID</th>
+                    <th>Assay</th>
+                    <th>Result</th>
+                    <th>Result Function</th>
+                    <th>Result Type</th>
+                    <th>Severity</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for result in results %}
+                <tr class="result" id={{ result.id }} name={{ result.id }}>
+                    <td>
+                        <a href="/assays/assaychiptestresult/{{ result.assay_result.id }}">
+                            {{ result.assay_result.id }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/assaychipsetup/{{ result.assay_result.chip_readout.chip_setup.id }}">
+                            {{ result.assay_result.chip_readout.chip_setup }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/assaychipreadout/{{ result.assay_result.chip_readout.id }}">
+                            {{ result.assay_result.chip_readout.id }}
+                        </a>
+                    </td>
+                    <td>{{ result.assay_name }}</td>
+                    <td>{{ result.get_result_display }}</td>
+                    <td>{{ result.result_function }}</td>
+                    <td>{{ result.result_type }}</td>
+                    <td>{{ result.get_severity_display }}</td>
+                    <td>
+                        {{ result.assay_result.created_by.first_name }}
+                        {{ result.assay_result.created_by.last_name }}
+                    </td>
+                    <td>
+                        {% if result.assay_result.signed_off_by %}
+                            <span title="This entry was reviewed by {{ result.assay_result.signed_off_by }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if result.assay_result.flagged %}
+                            <span title="This entry is flagged for review: '{{ result.assay_result.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No chip results exist for this study
+        </div>
+        {% endif %}
+{% endblock %}

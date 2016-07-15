@@ -6,7 +6,9 @@ from .models import MicrophysiologyCenter, Manufacturer, Microdevice, OrganModel
 from django.core.urlresolvers import resolve
 from django.db.models.fields.files import FieldFile
 
+
 class MicrophysiologyCenterAdmin(LockableAdmin):
+    """Admin for Microphysiology Centers"""
     save_on_top = True
     list_display = (
         'center_name', 'center_id', 'description', 'contact_person', 'center_site')
@@ -44,6 +46,7 @@ admin.site.register(MicrophysiologyCenter, MicrophysiologyCenterAdmin)
 
 
 class ManufacturerAdmin(LockableAdmin):
+    """Admin for Manufacturers"""
     save_on_top = True
     list_per_page = 300
     list_display = ['manufacturer_name', 'contact_person', 'manufacturer_site']
@@ -77,7 +80,7 @@ admin.site.register(Manufacturer, ManufacturerAdmin)
 
 
 class MicrodeviceAdmin(LockableAdmin):
-
+    """Admin for Microdevices"""
     class Media(object):
         js = ('microdevices/layout.js',)
         css = {'all': ('assays/customize_admin.css',)}
@@ -187,14 +190,15 @@ class MicrodeviceAdmin(LockableAdmin):
             for prop, value in vars(original_obj).iteritems():
                 # if the property is an Image (don't forget to import ImageFieldFile!)
                 if isinstance(getattr(original_obj, prop), FieldFile):
-                    setattr(obj,prop,getattr(original_obj, prop)) # Copy it!
+                    # Copy it!
+                    setattr(obj, prop, getattr(original_obj, prop))
         obj.save()
 
 admin.site.register(Microdevice, MicrodeviceAdmin)
 
 
 class OrganModelProtocolInline(admin.TabularInline):
-    """Organ Model Protocols"""
+    """Admin Inline for Organ Model Protocols"""
     model = OrganModelProtocol
     fields = ('version', 'file')
     extra = 1
@@ -202,7 +206,9 @@ class OrganModelProtocolInline(admin.TabularInline):
     class Media(object):
         css = {"all": ("css/hide_admin_original.css",)}
 
+
 class ValidatedAssayInline(admin.TabularInline):
+    """Admin Inline for Validated Assays"""
     # Results calculated from CHIP READOUTS
     model = ValidatedAssay
     verbose_name = 'Validated Assay'
@@ -215,7 +221,7 @@ class ValidatedAssayInline(admin.TabularInline):
 
 
 class OrganModelAdmin(LockableAdmin):
-
+    """Admin for Organ Models"""
     class Media(object):
         js = ('js/inline_fix.js',)
 

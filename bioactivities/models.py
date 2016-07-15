@@ -1,7 +1,6 @@
 from django.db import models
 from mps.base.models import LockableModel
 
-
 CHEMBL = None
 FIELDS = {
     'chemblId': 'chemblid',
@@ -21,6 +20,7 @@ FIELDS = {
 
 
 def chembl_target(chemblid):
+    """Access ChEMBL to get information for related targets"""
     global CHEMBL
     if CHEMBL is None:
         from bioservices import ChEMBL as ChEMBLdb
@@ -34,6 +34,7 @@ def chembl_target(chemblid):
 
 
 def chembl_assay(chemblid):
+    """Access ChEMBL to get information for related assays"""
     global CHEMBL
     if CHEMBL is None:
         from bioservices import ChEMBL as ChEMBLdb
@@ -47,6 +48,7 @@ def chembl_assay(chemblid):
 
 
 class Target(LockableModel):
+    """Information for a Bioactivity Target (usually a protein)"""
     name = models.TextField(help_text="Preferred target name.")
     synonyms = models.TextField(default='', blank=True)
 
@@ -99,6 +101,7 @@ ASSAYTYPES = (('B', 'Binding'), ('F', 'Functional'), ('A', 'ADMET'), ('P', 'Phys
 
 
 class Assay(LockableModel):
+    """Information for a Bioactivity Assay (not to be mistaken for models of Assays app)"""
     # external identifiers, not unique because does go with null on SQL server
     chemblid = models.TextField('ChEMBL ID',
                                 default='', blank=True,
@@ -147,6 +150,7 @@ DATA_VALIDITY_ANNOTATIONS = (('R', 'Outside typical range'), ('T', 'Potential tr
 
 
 class Bioactivity(LockableModel):
+    """A Bioactivity detailing the compound, target, assay, and pertinent values"""
     class Meta(object):
         verbose_name_plural = 'bioactivities'
         unique_together = ('assay', 'target', 'compound')
@@ -206,13 +210,16 @@ class Bioactivity(LockableModel):
 
 
 class BioactivityType(LockableModel):
+    """A unified Bioactivity unit with conversion"""
     class Meta(object):
-        ordering = ('chembl_bioactivity','chembl_unit', )
+        ordering = ('chembl_bioactivity', 'chembl_unit', )
     chembl_bioactivity = models.TextField(default='', blank=True)
     chembl_unit = models.TextField(default='', blank=True)
-    scale_factor = models.FloatField(default=1,blank=True, null=True)
-    mass_flag = models.CharField(max_length=8,default='N',choices=(('Y', 'Yes'),
-                                                        ('N', 'No')))
+    scale_factor = models.FloatField(default=1, blank=True, null=True)
+    mass_flag = models.CharField(
+        max_length=8, default='N',
+        choices=(('Y', 'Yes'), ('N', 'No'))
+    )
     standard_name = models.TextField(default='', blank=True)
     description = models.TextField(default='', blank=True)
     standard_unit = models.TextField(default='', blank=True)
@@ -222,6 +229,7 @@ class BioactivityType(LockableModel):
 
 
 class PubChemBioactivity(LockableModel):
+    """A Bioactivity from PubChem (Bioactivity is from ChEMBL)"""
     # TextFields and CharFields have no performace benefits over eachother, but may want to use CharFields for clarity
     assay = models.ForeignKey('Assay', blank=True, null=True)
 
@@ -244,9 +252,11 @@ class PubChemBioactivity(LockableModel):
 
     # Normalized value for visualization and so on
     # Be sure to normalize on bioactivity-target pair across the entire database
-    normalized_value = models.FloatField(blank=True,
-                                        null=True,
-                                        verbose_name="Normalized Value")
+    normalized_value = models.FloatField(
+        blank=True,
+        null=True,
+        verbose_name="Normalized Value"
+    )
 
     # Column for notes
     notes = models.TextField(default='', blank=True)
@@ -261,6 +271,7 @@ class PubChemBioactivity(LockableModel):
 #    name = models.TextField(default='', blank=True)
 
 
+# DEPRECATED
 # TODO PubChemTarget model is slated for removal
 class PubChemTarget(LockableModel):
     name = models.TextField(default='', blank=True, help_text="Preferred target name.")
@@ -284,6 +295,7 @@ class PubChemTarget(LockableModel):
         return unicode(self.name)
 
 
+# DEPRECATED
 # TODO PubChemAssay model is slated for removal
 class PubChemAssay(LockableModel):
     # Source is an optional field showing where PubChem pulled their data

@@ -1,10 +1,5 @@
 # coding=utf-8
-
-"""
-
-CellSamples Models
-
-"""
+"""CellSamples Models"""
 
 from django.db import models
 
@@ -13,6 +8,7 @@ from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
 
 
 class Organ(LockableModel):
+    """Organ details an organ name and (with an inline) the cell types associated with it"""
     organ_name = models.CharField(max_length=255, unique=True)
 
     class Meta(object):
@@ -23,7 +19,7 @@ class Organ(LockableModel):
 
 
 class CellType(LockableModel):
-
+    """CellType details a type (e.g. hepatocyte), a species, and an organ"""
     # TODO refactor to be a FK instead, should not be using a charfield here
     SPECIESTYPE = (
         ('Human', 'Human'),
@@ -36,14 +32,14 @@ class CellType(LockableModel):
                                choices=SPECIESTYPE, default='Human',
                                blank=True)
 
-    # TODO TO BE REMOVED
-    cell_subtype = models.ForeignKey('CellSubtype', null=True, blank=True)
+    # Deprecated
+    # cell_subtype = models.ForeignKey('CellSubtype', null=True, blank=True)
     organ = models.ForeignKey('Organ')
 
     class Meta(object):
         verbose_name = 'Cell Type'
-        ordering = ('species', 'cell_type', 'cell_subtype',)
-        unique_together = [('cell_type', 'species', 'cell_subtype')]
+        ordering = ('species', 'cell_type')
+        unique_together = [('cell_type', 'species', 'organ')]
 
     def __unicode__(self):
         return u'{} ({} {})'.format(
@@ -52,12 +48,15 @@ class CellType(LockableModel):
             self.organ
         )
 
-    # Will this be useful?
     def get_absolute_url(self):
         return "/cellsamples/celltype/{}".format(self.id)
 
 
 class CellSubtype(LockableModel):
+    """CellSubtype details a subtype (e.g. a cell line)
+
+    It is important to note that CellSubtypes without cell_type are "generic" and can be applied to any cell type
+    """
     class Meta(object):
         ordering = ('cell_subtype', )
 
@@ -65,6 +64,7 @@ class CellSubtype(LockableModel):
                                     help_text="Example: motor (type of neuron), "
                                               "skeletal (type of muscle), etc.")
 
+    # Cell Subtypes with a None value for cell_type are generic
     cell_type = models.ForeignKey(CellType, null=True, blank=True)
 
     def __unicode__(self):
@@ -75,6 +75,7 @@ class CellSubtype(LockableModel):
 
 
 class Supplier(LockableModel):
+    """Supplier gives information for institutions that distribute cell samples and related materials"""
     class Meta(object):
         ordering = ('name', )
     name = models.CharField(max_length=255, unique=True)
@@ -86,6 +87,7 @@ class Supplier(LockableModel):
 
 
 class Biosensor(LockableModel):
+    """Biosensor describes a biosensor used on cell samples"""
     class Meta(object):
         ordering = ('name', )
     name = models.CharField(max_length=255, unique=True)
@@ -100,34 +102,32 @@ class Biosensor(LockableModel):
 
 
 class CellSample(FlaggableModel):
-
+    """A Cell Sample describes a particular selection of cells used for experiments"""
     cell_type = models.ForeignKey('CellType')
     cell_subtype = models.ForeignKey('CellSubtype')
 
-    # TODO TO BE REMOVED
+    # DEPRECATED
     # cell_source CONSIDERED UNINTUITIVE
-    CELLSOURCETYPE = (
-        ('Freshly isolated', 'Freshly isolated'),
-        ('Cryopreserved', 'Cryopreserved'),
-        ('Cultured', 'Cultured'),
-        ('Other', 'Other'),
-    )
-
-    cell_source = models.CharField(max_length=20,
-                                   choices=CELLSOURCETYPE, default='Primary',
-                                   blank=True)
+    # CELLSOURCETYPE = (
+    #     ('Freshly isolated', 'Freshly isolated'),
+    #     ('Cryopreserved', 'Cryopreserved'),
+    #     ('Cultured', 'Cultured'),
+    #     ('Other', 'Other'),
+    # )
+    #
+    # cell_source = models.CharField(max_length=20,
+    #                                choices=CELLSOURCETYPE, default='Primary',
+    #                                blank=True)
 
     notes = models.TextField(blank=True)
     receipt_date = models.DateField()
 
     # SAMPLE
-
     supplier = models.ForeignKey('Supplier')
     barcode = models.CharField(max_length=255, blank=True, verbose_name='Barcode/Lot#')
     product_id = models.CharField(max_length=255, blank=True)
 
-    # PATIENT
-
+    # PATIENT (move to subtype?)
     GENDER_CHOICES = (
         ('N', 'Not-specified'),
         ('F', 'Female'),
@@ -141,8 +141,7 @@ class CellSample(FlaggableModel):
                                          blank=True)
 
     # ISOLATION
-
-    isolation_datetime = models.DateField("Isolation",blank=True,
+    isolation_datetime = models.DateField("Isolation", blank=True,
                                           null=True)
     isolation_method = models.CharField("Method", max_length=255,
                                         blank=True)
@@ -150,7 +149,6 @@ class CellSample(FlaggableModel):
                                        blank=True)
 
     # VIABILITY
-
     viable_count = models.FloatField(null=True, blank=True)
 
     # Removed: Deemed confusing/not useful
@@ -167,6 +165,7 @@ class CellSample(FlaggableModel):
     percent_viability = models.FloatField(null=True, blank=True)
     cell_image = models.ImageField(upload_to='cellsamples',
                                    null=True, blank=True)
+
     class Meta(object):
         verbose_name = 'Cell Sample'
         ordering = ('-receipt_date', )
@@ -186,6 +185,5 @@ class CellSample(FlaggableModel):
                 self.supplier
             )
 
-    # Will this be useful?
     def get_absolute_url(self):
         return "/cellsamples/cellsample/{}".format(self.id)

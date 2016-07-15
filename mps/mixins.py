@@ -8,8 +8,8 @@ from assays.models import AssayRun
 from django.contrib.auth.models import Group
 
 
-# This function will take a string a render 403.html with that string as context
 def PermissionDenied(request, message):
+    """This function will take a string a render 403.html with that string as context"""
     template = loader.get_template('403.html')
     context = RequestContext(request, {
         'message': message
@@ -30,20 +30,21 @@ def PermissionDenied(request, message):
 
 
 def user_is_active(user):
+    """Checks whether the user is active"""
     return user.is_active
 
 
 # Add this mixin via multiple-inheritance and you need not change the dispatch every time
-# Only require log in
 class LoginRequiredMixin(object):
+    """This mixin requires the user to log in before continuing"""
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
         return super(LoginRequiredMixin, self).dispatch(*args, **kwargs)
 
 
-# Require the user to have at least one group
 class OneGroupRequiredMixin(object):
+    """This mixin requires the user to have at least one group"""
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
@@ -52,9 +53,8 @@ class OneGroupRequiredMixin(object):
         return super(OneGroupRequiredMixin, self).dispatch(*args, **kwargs)
 
 
-# Require group matching object's bound group
-# Note that this theoretically might not be accurate if someone meddled around in the admin
 class ObjectGroupRequiredMixin(object):
+    """This mixin requires group matching object's bound group"""
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
@@ -64,8 +64,9 @@ class ObjectGroupRequiredMixin(object):
         return super(ObjectGroupRequiredMixin, self).dispatch(*args, **kwargs)
 
 
-# Require group matching study
+
 class StudyGroupRequiredMixin(object):
+    """This mixin requires the user to have the group matching the study's group"""
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
@@ -76,8 +77,11 @@ class StudyGroupRequiredMixin(object):
 
 
 # WIP
-# Detail redirect mixin
 class DetailRedirectMixin(object):
+    """This mixin checks if the user has the object's group, if so it redirects to the edit page
+
+    If the user does not have the correct group, it redirects to the details page
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
@@ -92,6 +96,7 @@ class DetailRedirectMixin(object):
 
 # Require user to be creator
 class CreatorRequiredMixin(object):
+    """This mixin requires the user to be the creator of the object"""
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
@@ -107,6 +112,10 @@ class CreatorRequiredMixin(object):
 
 # Require the specified group or fail
 class SpecificGroupRequiredMixin(object):
+    """This mixin requires the user to have a specific group
+
+    PLEASE NOTE: you must add the field 'required_group_name' to the view in question
+    """
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):

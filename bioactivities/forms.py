@@ -3,7 +3,7 @@ from bioactivities.models import *
 
 
 class AssayForm(forms.ModelForm):
-    """Size the text input boxes"""
+    """Form for Assays to resize the text input boxes"""
 
     class Meta(object):
         model = Assay
@@ -19,7 +19,7 @@ class AssayForm(forms.ModelForm):
 
 
 class TargetsForm(forms.ModelForm):
-    """Size the text input boxes"""
+    """Form for Targets to resize the text input boxes"""
 
     class Meta(object):
         model = Target

@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/group_index/">Group Studies</a></li>
+    <li class="active">{{ object }}</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <div class="well">
+            <h1 class="text-center">
+                Study: {{ object }}
+                <br>
+                <a href="update" class="btn btn-primary" role="button">Edit This Study</a>
+                <a href="summary" class="btn btn-info" role="button">Study Summary</a>
+            </h1>
+        </div>
+
+        <legend>
+            <h2>
+                Setups
+                <br>
+                <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Chip Setup</a>
+                <a href="assayplatesetup/add" class="btn btn-success" role="button">Add Plate Setup</a>
+            </h2>
+        </legend>
+
+        {% if setups %}
+        <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Chip Setup ID / Barcode</th>
+                    <th>Date</th>
+                    <th>Organ Model</th>
+{#                    <th>Chip Test Type</th>#}
+                    <th>Compound</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for setup in setups %}
+                <tr id={{ setup.id }} name={{ setup.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="/assays/assaychipsetup/{{ setup.id }}/update">
+                            View/Edit
+                        </a>
+                    </td>
+                    <td>{{ setup.assay_chip_id }}</td>
+                    <td>{{ setup.setup_date }}</td>
+                    <td>{{ setup.organ_model }}</td>
+{#                    <td>{{ setup.chip_test_type }}</td>#}
+                    {% if setup.compound != None %}
+                        <td>{{ setup.compound }} ({{ setup.concentration }} {{ setup.unit }})</td>
+                    {% else %}
+                        <td>-control-</td>
+                    {% endif %}
+                    <td>
+                        {{ setup.created_by.first_name }}
+                        {{ setup.created_by.last_name }}
+                    </td>
+                    <td>
+                        {% if setup.signed_off_by %}
+                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if setup.flagged %}
+                            <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No chip setups exist for this study
+        </div>
+        {% endif %}
+
+        {% if plate_setups %}
+        <table id="plate_setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Plate Setup ID / Barcode</th>
+                    <th>Date</th>
+                    <th>Assay Layout</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for setup in plate_setups %}
+                <tr id={{ setup.id }} name={{ setup.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="/assays/assayplatesetup/{{ setup.id }}/update">
+                            View/Edit
+                        </a>
+                    </td>
+                    <td>{{ setup.assay_plate_id }}</td>
+                    <td>{{ setup.setup_date }}</td>
+                    <td>{{ setup.assay_layout }}</td>
+                    <td>
+                        {{ setup.created_by.first_name }}
+                        {{ setup.created_by.last_name }}
+                    </td>
+                    <td>
+                        {% if setup.signed_off_by %}
+                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if setup.flagged %}
+                            <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No plate setups exist for this study
+        </div>
+        {% endif %}
+
+        <legend>
+            <h2>
+                Readouts
+                <br>
+                {% if setups.count == 0 or setups.count == readouts.count %}
+                    <div hidden id="readout_alert" class="alert alert-warning" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Warning:</span>
+                        You must add at least one chip setup before adding a chip readout.
+                    </div>
+                    <a class="btn btn-warning" role="button" onClick="$('#readout_alert').removeProp('hidden');">Add Chip Readout</a>
+                {% else %}
+                    <a href="assaychipreadout/add" class="btn btn-success" role="button">Add Chip Readout</a>
+                {% endif %}
+
+                {% if plate_setups.count == 0 or plate_setups.count == plate_readouts.count %}
+                    <div hidden id="plate_readout_alert" class="alert alert-warning" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Warning:</span>
+                        You must add at least one plate setup before adding a plate readout.
+                    </div>
+                    <a class="btn btn-warning" role="button" onClick="$('#plate_readout_alert').removeProp('hidden');">Add Plate Readout</a>
+                {% else %}
+                    <a href="assayplatereadout/add" class="btn btn-success" role="button">Add Plate Readout</a>
+                {% endif %}
+            </h2>
+        </legend>
+
+        {% if readouts %}
+        <table id="readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Chip Readout ID</th>
+                    <th>Chip Setup</th>
+                    <th>Assays</th>
+                    <th>Readout Date</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for readout in readouts %}
+                <tr id={{ readout.id }} name={{ readout.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="/assays/assaychipreadout/{{ readout.id }}/update/">
+                            View/Edit
+                        </a>
+                    </td>
+                    <td>{{ readout.id }}</td>
+                    <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}/update/">{{ readout.chip_setup }}</a></td>
+                    <td>
+                        {% for assay in readout.related_assays %}
+                            {{ assay.assay_id.assay_short_name }}
+                        {% endfor %}
+                    </td>
+                    <td>{{ readout.readout_start_time }}</td>
+                    <td>
+                        {{ readout.created_by.first_name }}
+                        {{ readout.created_by.last_name }}
+                    </td>
+                    <td>
+                        {% if readout.signed_off_by %}
+                            <span title="This entry was reviewed by {{ readout.signed_off_by }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if readout.flagged %}
+                            <span title="This entry is flagged for review: '{{ readout.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No chip readouts exist for this study
+        </div>
+        {% endif %}
+
+        {% if plate_readouts %}
+        <table id="plate_readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Plate Readout ID</th>
+                    <th>Plate Setup</th>
+                    <th>Assays</th>
+                    <th>Readout Date</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for readout in plate_readouts %}
+                <tr id={{ readout.id }} name={{ readout.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="/assays/assayplatereadout/{{ readout.id }}/update/">
+                            View/Edit
+                        </a>
+                    </td>
+                    <td>{{ readout.id }}</td>
+                    <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}/update/">{{ readout.setup }}</a></td>
+                    <td>
+                        {% for assay in readout.related_assays %}
+                            {{ assay.assay_id.assay_short_name }}
+                        {% endfor %}
+                    </td>
+                    <td>{{ readout.readout_start_time }}</td>
+                    <td>
+                        {{ readout.created_by.first_name }}
+                        {{ readout.created_by.last_name }}
+                    </td>
+                    <td>
+                        {% if readout.signed_off_by %}
+                            <span title="This entry was reviewed by {{ readout.signed_off_by }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if readout.flagged %}
+                            <span title="This entry is flagged for review: '{{ readout.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No plate readouts exist for this study
+        </div>
+        {% endif %}
+
+        <a href="bulk" class="btn btn-block btn-info" role="button">
+            Upload Excel File of Readout Data
+            <br>
+            <small>*Requires respective readouts to be created first</small>
+        </a>
+
+        <legend>
+            <h2>
+                Results
+                <br>
+                {# Later should add condition for when not enough readouts or setups #}
+                {% if readouts.count == 0 or number_of_results == readouts.count %}
+                    <div hidden id="result_alert" class="alert alert-warning" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Warning:</span>
+                        You must add at least one chip readout before adding a chip result.
+                    </div>
+                    <a class="btn btn-warning" role="button" onClick="$('#result_alert').removeProp('hidden');">Add Chip Result</a>
+                {% else %}
+                    <a href="assaychiptestresult/add" class="btn btn-success" role="button">Add Chip Result</a>
+                {% endif %}
+
+                {% if plate_readouts.count == 0 or number_of_plate_results == plate_readouts.count %}
+                    <div hidden id="plate_result_alert" class="alert alert-warning" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Warning:</span>
+                        You must add at least one plate readout before adding a plate result.
+                    </div>
+                    <a class="btn btn-warning" role="button" onClick="$('#plate_result_alert').removeProp('hidden');">Add Plate Result</a>
+                {% else %}
+                    <a href="assayplatetestresult/add" class="btn btn-success" role="button">Add Plate Result</a>
+                {% endif %}
+            </h2>
+        </legend>
+
+        {% if results %}
+        <table id="results" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Chip Test Results ID</th>
+                    <th>Chip Setup</th>
+                    <th>Chip Readout ID</th>
+                    <th>Assay</th>
+                    <th>Result</th>
+                    <th>Result Function</th>
+                    <th>Result Type</th>
+                    <th>Severity</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for result in results %}
+                <tr class="result" id={{ result.id }} name={{ result.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="/assays/assaychiptestresult/{{ result.assay_result.id }}/update/">
+                            View/Edit
+                        </a>
+                    </td>
+                    <td>
+                        {{ result.assay_result.id }}
+                    </td>
+                    <td>
+                        <a href="/assays/assaychipsetup/{{ result.assay_result.chip_readout.chip_setup.id }}/update/">
+                            {{ result.assay_result.chip_readout.chip_setup }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/assaychipreadout/{{ result.assay_result.chip_readout.id }}/update/">
+                            {{ result.assay_result.chip_readout.id }}
+                        </a>
+                    </td>
+                    <td>{{ result.assay_name }}</td>
+                    <td>{{ result.get_result_display }}</td>
+                    <td>{{ result.result_function }}</td>
+                    <td>{{ result.result_type }}</td>
+                    <td>{{ result.get_severity_display }}</td>
+                    <td>
+                        {{ result.assay_result.created_by.first_name }}
+                        {{ result.assay_result.created_by.last_name }}
+                    </td>
+                    <td>
+                        {% if result.assay_result.signed_off_by %}
+                            <span title="This entry was reviewed by {{ result.assay_result.signed_off_by }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if result.assay_result.flagged %}
+                            <span title="This entry is flagged for review: '{{ result.assay_result.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No chip results exist for this study
+        </div>
+        {% endif %}
+
+        {% if plate_results %}
+        <table id="results" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Plate Test Results ID</th>
+                    <th>Plate Setup</th>
+                    <th>Plate Readout ID</th>
+                    <th>Assay &amp; Feature</th>
+                    <th>Result</th>
+                    <th>Result Function</th>
+                    <th>Result Type</th>
+                    <th>Severity</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for result in plate_results %}
+                <tr class="result" id={{ result.id }} name={{ result.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="/assays/assayplatetestresult/{{ result.assay_result.id }}/update/">
+                            View/Edit
+                        </a>
+                    </td>
+                    <td>
+                        {{ result.assay_result.id }}
+                    </td>
+                    <td>
+                        <a href="/assays/assayplatesetup/{{ result.assay_result.readout.setup.id }}/update/">
+                            {{ result.assay_result.readout.setup }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/assays/assayplatereadout/{{ result.assay_result.readout.id }}/update/">
+                            {{ result.assay_result.readout.id }}
+                        </a>
+                    </td>
+                    <td>{{ result.assay_name }}</td>
+                    <td>{{ result.get_result_display }}</td>
+                    <td>{{ result.result_function }}</td>
+                    <td>{{ result.result_type }}</td>
+                    <td>{{ result.get_severity_display }}</td>
+                    <td>
+                        {{ result.assay_result.created_by.first_name }}
+                        {{ result.assay_result.created_by.last_name }}
+                    </td>
+                    <td>
+                        {% if result.assay_result.signed_off_by %}
+                            <span title="This entry was reviewed by {{ result.assay_result.signed_off_by }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if result.assay_result.flagged %}
+                            <span title="This entry is flagged for review: '{{ result.assay_result.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No plate results exist for this study
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,10 +1,12 @@
-import sys, os
+import sys
+import os
 sys.path.append('/home/mps/mps-database-server')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'mps.settings'
-from django.conf import settings
+#from django.conf import settings
 import datetime
 
-from compounds.models import Compound, chembl_compound
+from compounds.models import Compound, CompoundTarget
+from compounds.ajax import get_chembl_compound_data, get_drugbank_data_from_chembl_id
 from bioactivities.models import Assay, Target, Bioactivity
 from bioactivities.models import chembl_target, chembl_assay
 
@@ -29,7 +31,6 @@ FIELDS = {
     'name_in_reference': 'name_in_reference',
     'target_confidence': 'target_confidence'
 }
-
 
 
 def run(days=180):
@@ -64,8 +65,7 @@ def run(days=180):
 
         # if no updates were made, last_update is None
         if (compound.last_update is None or
-            (datetime.date.today() - compound.last_update) >=
-             datetime.timedelta(days)):
+                (datetime.date.today() - compound.last_update) >= datetime.timedelta(days)):
             ncomp += 1
 
             try:
@@ -75,16 +75,26 @@ def run(days=180):
 
             try:
                 for act in acts['bioactivities']:
-                    act = {FIELDS[key]: value for key, value in act.items()
-                            if key in FIELDS}
+                    act = {FIELDS[key]: value for key, value in act.items() if key in FIELDS}
 
-                    tid, aid, cid, pid = (act['target'], act['assay'],
-                        act['compound'], act['parent_compound'])
+                    tid, aid, cid, pid = (
+                        act['target'], act['assay'], act['compound'], act['parent_compound']
+                    )
                     try:
                         parent = Compound.objects.get(chemblid=pid)
                     except Compound.DoesNotExist:
                         try:
-                            parent = Compound.objects.create(locked=True, **chembl_compound(pid))
+                            # Uses implemented methods in lieu of Bioservices
+                            parent_compound_data = get_chembl_compound_data(pid)
+                            parent_compound_data.update(get_drugbank_data_from_chembl_id(pid))
+
+                            parent_compound_targets = parent_compound_data.get('targets', [])
+                            del parent_compound_data['targets']
+
+                            parent = Compound.objects.create(locked=True, **parent_compound_data)
+
+                            for target in parent_compound_targets:
+                                CompoundTarget.objects.create(compound=parent, **target)
                             print "Added Compound:", parent.name
                         except ValueError:
                             error += 1
@@ -113,9 +123,9 @@ def run(days=180):
                             target=target, assay=assay, compound=compound)
                     except Bioactivity.DoesNotExist:
 
-                        (act['target'], act['assay'], act['compound'],
-                            act['parent_compound']) = (
-                            target, assay, compound, parent)
+                        (act['target'], act['assay'], act['compound'], act['parent_compound']) = (
+                            target, assay, compound, parent
+                        )
 
                         try:
                             ba = Bioactivity.objects.create(locked=True, **act)
@@ -261,7 +271,7 @@ def run(days=180):
 
                         # Check for possible transcription errors (1000-fold error mistaking uM for nM)
                         for index, pk in enumerate(bio_pk):
-                            thousand_fold = np.where(bio_value==bio_value[index] * 1000)[0]
+                            thousand_fold = np.where(bio_value == bio_value[index] * 1000)[0]
                             if len(thousand_fold) > 0:
                                 for error_index in thousand_fold:
                                     this_bio = Bioactivity.objects.get(pk=bio_pk[error_index])

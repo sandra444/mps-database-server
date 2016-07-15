@@ -4,6 +4,10 @@ from django.utils.html import format_html
 
 
 class ResourceSubtype(LockableModel):
+    """A Resource Subtype specifies a category (e.g. supplier, database, etc.
+
+    PLEASE NOTE: Subtype is referred to as a 'Category' typically
+    """
     class Meta(object):
         verbose_name = 'Resource category'
         verbose_name_plural = 'Resource categories'
@@ -17,6 +21,7 @@ class ResourceSubtype(LockableModel):
 
 
 class ResourceType(LockableModel):
+    """A Resource Type specifies what a resource specializes in (e.g. images, cells, etc.)"""
     class Meta(object):
         ordering = ['resource_subtype', 'resource_type_name']
 
@@ -30,6 +35,7 @@ class ResourceType(LockableModel):
 
 
 class Resource(LockableModel):
+    """A Resource is a specific website or location to learn more of something"""
     class Meta(object):
         ordering = ['type', 'resource_name']
 
@@ -46,6 +52,7 @@ class Resource(LockableModel):
 
 
 class Definition(models.Model):
+    """A Definition is a definition for the glossary found in Help"""
     term = models.CharField(max_length=60, unique=True)
     definition = models.CharField(max_length=200, default='')
     reference = models.URLField(default='', blank=True)

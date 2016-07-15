@@ -8,7 +8,7 @@ tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_of
 
 
 class MicrodeviceForm(forms.ModelForm):
-
+    """Form for Microdevices"""
     class Meta(object):
         model = Microdevice
         exclude = tracking
@@ -19,9 +19,7 @@ class MicrodeviceForm(forms.ModelForm):
 
 
 class OrganModelForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(OrganModelForm, self).__init__(*args, **kwargs)
-
+    """Form for Organ Models"""
     class Meta(object):
         model = OrganModel
         exclude = tracking
@@ -32,7 +30,7 @@ class OrganModelForm(forms.ModelForm):
 
 
 class OrganModelProtocolInlineFormset(BaseInlineFormSet):
-
+    """Form for Organ Model Protocols (as part of an inline)"""
     class Meta(object):
         model = OrganModelProtocol
         exclude = ('',)

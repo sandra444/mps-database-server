@@ -15,6 +15,7 @@ from mps.settings import MEDIA_ROOT
 
 from resources.models import Definition
 
+
 def main(request):
     if request.method == 'POST':
         form = SearchForm(request.POST)

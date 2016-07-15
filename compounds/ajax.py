@@ -9,7 +9,7 @@ from assays.models import AssayChipRawData
 
 from bioservices import ChEMBL as ChEMBLdb
 
-from bioactivities.models import Assay, Target
+# from bioactivities.models import Assay, Target
 
 from bs4 import BeautifulSoup
 import requests
@@ -23,21 +23,31 @@ import re
 
 
 def main(request):
-    return render_to_response('ajax_error.html',
-                              context_instance=RequestContext(request))
+    """Default to Server Error"""
+    return HttpResponseServerError()
 
 
 def fetch_compound_name(request):
+    """Return a compound name from a pk in JSON
+
+    Receives the following from POST:
+    compound_id -- the pk of the requested compound
+    """
     data = {}
 
-    data.update(
-        {'name': Compound.objects.get(id=request.POST['compound_id']).name})
+    compound = Compound.objects.filter(id=request.POST.get('compound_id', ''))
+
+    if compound:
+        data.update({'name': compound.name})
+    else:
+        data.update({'name': ''})
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
 
 def chembl_error(error):
+    """Returns an error from ChEMBL in JSON"""
     data = {}
     data.update({'error': error})
 
@@ -47,8 +57,14 @@ def chembl_error(error):
 
 # Virtually deprecated (gives incorrect values for things like known drug. Sad!
 def fetch_chemblid_data(request):
-    chemblid = request.POST['chemblid']
-    selector = request.POST['selector']
+    """Uses Bioservices to acquire data from ChEMBL
+
+    Receives the following from POST:
+    chemblid -- the ChEMBL ID for the desired entry
+    selctor -- specifies whether the data is for a compound, assay, or target
+    """
+    chemblid = request.POST.get('chemblid', '')
+    selector = request.POST.get('selector', '')
 
     if not chemblid or not selector:
         return main(request)
@@ -76,9 +92,8 @@ def fetch_chemblid_data(request):
                         content_type="application/json")
 
 
-def fetch_chembl_compound_data(request):
-    chemblid = request.POST['chemblid']
-
+def get_chembl_compound_data(chemblid):
+    """Returns a dictionary of ChEMBL data given a chemblid"""
     data = {}
 
     url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chemblid)
@@ -104,13 +119,14 @@ def fetch_chembl_compound_data(request):
                 synonyms.append(synonym)
             # Check whether the synonym is a International, FDA, British Approved, or US Adopted Name
             # This technique includes pesticides, however they are *usually* also used topically, and thus drugs
-            if syn_type in ['INN', 'FDA', 'BAN', 'USAN']:
+            if syn_type in ['INN', 'FDA', 'BAN', 'USAN', 'JAN']:
                 data['known_drug'] = True
         data['synonyms'] = ', '.join(synonyms)
 
         molecular_properties = initial_data.get('molecule_properties', {})
 
         if molecular_properties:
+            data['chemblid'] = chemblid
             data['molecular_formula'] = molecular_properties.get('full_molformula', '')
             data['molecular_weight'] = molecular_properties.get('full_mwt', '')
             data['rotatable_bonds'] = molecular_properties.get('rtb', '')
@@ -146,24 +162,42 @@ def fetch_chembl_compound_data(request):
 
         data['medchem_alerts'] = medchem_alerts
 
+    return data
+
+
+def fetch_chembl_compound_data(request):
+    """Returns ChEMBL data in JSON
+
+    Receives the following from POST:
+    chemblid -- the chemblid of the desired compound
+    """
+    chemblid = request.POST.get('chemblid', '')
+
+    data = get_chembl_compound_data(chemblid)
+
     return HttpResponse(json.dumps(data),
                         content_type='application/json')
 
 
-# TODO NEEDS REVISION: SWITCH TO ACD CALCULATED LOGP ETC
 def fetch_compound_report(request):
-    summary_types = (
-        'Pre-clinical Findings',
-        'Clinical Findings',
-        # Recently added
-        'PK/Metabolism',
-    )
-    property_types = (
-        'Dose (xCmax)',
-        'cLogP',
-    )
+    """Return in JSON the data required to make a compound report
 
-    compounds_request = json.loads(request.POST.get('compounds'))
+    Receives the following from POST:
+    compounds -- the names of the desired ChEMBL ids
+    """
+    # summary_types = (
+    #     'Pre-clinical Findings',
+    #     'Clinical Findings',
+    #     # Recently added
+    #     'PK/Metabolism',
+    # )
+    # property_types = (
+    #     'Dose (xCmax)',
+    #     'cLogP',
+    # )
+
+    # Should "compounds" be pk's instead of names?
+    compounds_request = json.loads(request.POST.get('compounds', []))
 
     data = {}
 
@@ -237,7 +271,8 @@ def fetch_compound_report(request):
                     averaged_plot.update({time: float(sum(entry.get(time)))/len(entry.get(time))})
                 # Add maximum
                 times = [float(t) for t in entry.keys()]
-                if assay not in data[compound]['table']['max_time'] or max(times) > data[compound]['table']['max_time'][assay]:
+                if assay not in data[compound]['table']['max_time'] or \
+                        max(times) > data[compound]['table']['max_time'][assay]:
                     data[compound]['table']['max_time'].update({assay: max(times)})
                 # Switch to averaged values
                 plot[assay][concentration] = averaged_plot
@@ -247,24 +282,20 @@ def fetch_compound_report(request):
 
 
 def fetch_compound_list(request):
-    """This function just gets a list of compounds and returns it as JSON"""
+    """This function just gets a list of compounds and returns it in JSON"""
     # Why does this function exist? To have compound search suggestions without violating SOC
     data = [compound.name for compound in Compound.objects.all()]
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
 
-def fetch_drugbank_data(request):
-    """Get DrugBank data"""
-    chembl_id = request.POST.get('chembl_id')
-
-    data = get_drugbank_data_from_chembl_id(chembl_id)
-
-    return HttpResponse(json.dumps(data),
-                        content_type='application/json')
-
-
 def get_drugbank_target_information(data, type_of_target):
+    """Return a dictionary of DrugBank data
+
+    Parameters:
+    data -- raw html for the target
+    type_of_target -- the type of target (e.g. 'Transporter')
+    """
     target = {
         'name': '',
         # May not be present
@@ -345,6 +376,7 @@ def get_drugbank_target_information(data, type_of_target):
 
 
 def get_drugbank_data_from_chembl_id(chembl_id):
+    """Returns a dictionary of data acquired from DrugBank and PubChem"""
     # Values found in table
     data = {
         'drugbank_id': '',
@@ -361,7 +393,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
     url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/2'.format(chembl_id)
     # Make the http request
     response = requests.get(url)
-    # Get the webpage as JSON
+    # Get the webpage in JSON
     json_data = json.loads(response.text)
 
     if json_data and u'error' not in json_data:
@@ -391,9 +423,9 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         units = ['week', 'day', 'hour', 'minute', 'second']
 
         # Regex for extracting SPECIFICALLY floats
-        float_extractor = re.compile(r'\d+\.\d+')
+        # float_extractor = re.compile(r'\d+\.\d+')
         # Regex for extracting ints (ignores anything with periods)
-        integer_extractor = re.compile(r'(?<!\.)(?<!\d)\d+(?!\.)')
+        # integer_extractor = re.compile(r'(?<!\.)(?<!\d)\d+(?!\.)')
         # Regex for extracting ints or floats
         integer_and_float_extractor = re.compile(r'\d*\.?\d+')
 
@@ -434,20 +466,29 @@ def get_drugbank_data_from_chembl_id(chembl_id):
 
                     # If regex has failed and 'percent' is in the strings
                     elif 'percent' in protein_binding_initial:
-                        protein_binding_processed = re.findall(re.compile(r'<?\>?\d*\.?\d+\spercent'), protein_binding_initial)
+                        protein_binding_processed = re.findall(
+                            re.compile(r'<?\>?\d*\.?\d+\spercent'),
+                            protein_binding_initial
+                        )
                         if protein_binding_processed:
                             data['protein_binding'] = protein_binding_processed[0]
 
                     # If +/- is in the string, the percent is likely the deviation
                     if u'+/-' in protein_binding_initial:
                         protein_binding_processed = protein_binding_initial.split(u'+/-')
-                        protein_binding_processed = re.findall(integer_and_float_extractor, protein_binding_processed[0])
+                        protein_binding_processed = re.findall(
+                            integer_and_float_extractor,
+                            protein_binding_processed[0]
+                        )
                         if protein_binding_processed:
                             data['protein_binding'] = protein_binding_processed[0]
 
                     if u'±' in protein_binding_initial:
                         protein_binding_processed = protein_binding_initial.split(u'±')
-                        protein_binding_processed = re.findall(integer_and_float_extractor, protein_binding_processed[0])
+                        protein_binding_processed = re.findall(
+                            integer_and_float_extractor,
+                            protein_binding_processed[0]
+                        )
                         if protein_binding_processed:
                             data['protein_binding'] = protein_binding_processed[0]
 
@@ -575,7 +616,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
     url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/22'.format(chembl_id)
     # Make the http request
     response = requests.get(url)
-    # Get the webpage as JSON
+    # Get the webpage in JSON
     json_data = json.loads(response.text)
 
     if json_data and u'error' not in json_data:
@@ -586,13 +627,32 @@ def get_drugbank_data_from_chembl_id(chembl_id):
     return data
 
 
+def fetch_drugbank_data(request):
+    """Get DrugBank and PubChem data and return it as JSON
+
+    Receives the following from POST:
+    chembl_id -- the ChEMBL ID for the desired compound
+    """
+    chembl_id = request.POST.get('chembl_id', '')
+
+    data = get_drugbank_data_from_chembl_id(chembl_id)
+
+    return HttpResponse(json.dumps(data),
+                        content_type='application/json')
+
+
 def fetch_chembl_search_results(request):
+    """Returns ChEMBL search results as JSON
+
+    Receives the following from POST:
+    query -- the query for ChEMBL
+    """
     query = request.POST.get('query', '')
 
     url = 'https://www.ebi.ac.uk/chembl/api/data/chembl_id_lookup/search.json?q={}'.format(query)
     # Make the http request
     response = requests.get(url)
-    # Get the webpage as JSON
+    # Get the webpage in JSON
     json_data = json.loads(response.text)
 
     lookups = json_data.get('chembl_id_lookups', [])
@@ -606,7 +666,7 @@ def fetch_chembl_search_results(request):
             url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chembl_id)
             # Make the http request
             response = requests.get(url)
-            # Get the webpage as JSON
+            # Get the webpage in JSON
             json_data = json.loads(response.text)
 
             additional_data.update({'name': json_data.get('pref_name', '')})
@@ -637,8 +697,14 @@ switch = {
 }
 
 
+# Should probably consolidate these (DRY)
 def ajax(request):
-    post_call = request.POST['call']
+    """Switch to correct function given POST call
+
+    Receives the following from POST:
+    call -- What function to redirect to
+    """
+    post_call = request.POST.get('call', '')
 
     # Abort if there is no valid call sent to us from Javascript
     if not post_call:

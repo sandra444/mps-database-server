@@ -1,0 +1,242 @@
+{% extends "bioactivities/cluster.html" %}
+{% load staticfiles %}
+
+{% block load %}
+    <script src="{% static "js/cookies.js" %}"></script>
+    <script src="{% static "js/spin.min.js" %}"></script>
+    <script src="{% static "js/mps_spinner.js" %}"></script>
+    <script src="{% static "bioactivities/filter.js" %}"></script>
+    <script src="{% static "bioactivities/table.js" %}"></script>
+    <script src="{% static "js/cookies.js" %}"></script>
+    <script src="{% static "bioactivities/bioactivities_search.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="active">Bioactivities Table</li>
+{% endblock %}
+
+{% block submit %}
+    <legend><h1>Quick Search</h1></legend>
+
+    <form action="/bioactivities/table/" method="post">
+        {% csrf_token %}
+        {{ form.app.as_hidden }}
+        {{ form.search_term.as_hidden }}
+        {% include 'bioactivities/bioactivities_search.html'%}
+    </form>
+
+    <legend><h1>Advanced Search</h1></legend>
+
+    <a href="#show" type="button" class="btn btn-xlarge btn-primary text-center" id="submit">
+        Generate Table
+    </a>
+{% endblock %}
+
+{% block extra_row %}
+    <div class="row">
+        <div class="col-xs-5">
+            <div class="fancy-checkbox" align="left">
+                <input type="checkbox" name="pubchem" id="pubchem" />
+                <div class="btn-group">
+                    <label for="pubchem" class="btn btn-success">
+                        <span class="glyphicon glyphicon-ok"></span>
+                        <span> </span>
+                    </label>
+                    <label for="pubchem" class="btn btn-default active">
+                        Use PubChem instead of ChEMBL
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-4">
+            <div class="fancy-checkbox" align="left">
+                <input type="checkbox" id="exclude_questionable" checked/>
+                <div class="btn-group">
+                    <label for="exclude_questionable" class="btn btn-default">
+                        <span class="glyphicon glyphicon-ok"></span>
+                        <span> </span>
+                    </label>
+                    <label for="exclude_questionable" class="btn btn-default active">
+                        Exclude Questionable
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-3">
+            <label>Minimum Feature Count Per Record
+                <input id="minimum_feature_count" type="number" value="10">
+                <button type="button" id="apply_minimum_feature_count">Apply</button>
+            </label>
+        </div>
+    </div>
+    <hr>
+{% endblock %}
+
+{% block selections %}
+    <div class="row">
+        <div class="col-xs-4">
+
+            <p class="text-center">
+                <label>
+                    Bioactivities Filter:
+                    <input class="table-filter" id="bioactivity_filter">
+                </label>
+            </p>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered
+                        table-condensed">
+
+                    <thead>
+                        <tr>
+                            <th>
+                                <input id="all_bioactivities" type="checkbox">
+                            </th>
+                            <th>
+                                Select Bioactivities
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="bioactivities">
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+        <div class="col-xs-4">
+
+            <p class="text-center">
+                <label>
+                    Targets Filter:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input class="table-filter" id="target_filter">
+                </label>
+            </p>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered
+                        table-condensed">
+
+                    <thead>
+                        <tr>
+                            <th>
+                                <input id="all_targets" type="checkbox">
+                            </th>
+                            <th>
+                                Select Targets
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="targets">
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+        <div class="col-xs-4">
+
+            <p class="text-center">
+                <label>
+                    Compounds Filter:&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input class="table-filter" id="compound_filter">
+                </label>
+            </p>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered
+                        table-condensed">
+
+                    <thead>
+                        <tr>
+                            <th>
+                                <input id="all_compounds" type="checkbox">
+                            </th>
+                            <th>
+                                Select Compounds
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="compounds">
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block graphic %}
+    <div hidden id="graphic" class="container large-padding-top padded-bottom">
+        <div class="row text-center">
+            <a href="#filter"  id="back" class="btn btn-xlarge btn-info">
+                <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+                Back to Selection
+            </a>
+{#            <a id="download" class="btn btn-xlarge btn-primary">Download Table</a>#}
+        </div>
+
+        <div id='overflow' hidden class="row">
+            <br>
+            <div class="alert alert-warning" role="alert" id="error_message">
+                <p id="length">
+
+                </p>
+            </div>
+        </div>
+
+        <legend>
+            <h2 class="text-center">
+                Bioactivities
+            </h2>
+        </legend>
+
+        <table id="full" class="display" cellspacing="0" width="100%">
+            <thead id="variable-header">
+                <tr>
+                    <th>Compound</th>
+                    <th>Target</th>
+                    <th>Organism</th>
+                    <th>Standard Name</th>
+                    <th>Operator</th>
+                    <th>Standard Value</th>
+                    <th>Standard Units</th>
+                    <th>ChEMBL Link</th>
+                    <th>PubChem Link</th>
+                    <th>Notes</th>
+                    <th>Data Validity</th>
+                </tr>
+            </thead>
+
+            <tfoot id="variable-footer">
+                <tr>
+                    <th>Compound</th>
+                    <th>Target</th>
+                    <th>Organism</th>
+                    <th>Standard Name</th>
+                    <th>Operator</th>
+                    <th>Standard Value</th>
+                    <th>Standard Units</th>
+                    <th>ChEMBL Link</th>
+                    <th>PubChem Link</th>
+                    <th>Notes</th>
+                    <th>Data Validity</th>
+                </tr>
+            </tfoot>
+
+            <tbody id="table">
+            </tbody>
+        </table>
+
+        {# Headers to plug-in, odd way to achieve this #}
+    </div>
+
+    <div id="spinner"></div>
+{% endblock %}
