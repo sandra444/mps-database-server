@@ -3,7 +3,7 @@ from assays.views import *
 
 urlpatterns = patterns('',
     # User can view their studies
-    url(r'^assays/user_index/$', UserIndex.as_view(), name='user_index'),
+    # url(r'^assays/user_index/$', UserIndex.as_view(), name='user_index'),
     # User can view all group studies
     url(r'^assays/group_index/$', GroupIndex.as_view(), name='group_index'),
     # The main page for a study
