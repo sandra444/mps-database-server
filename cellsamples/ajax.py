@@ -12,9 +12,9 @@ def main(request):
 
 
 def get_cell_subtypes(request):
-    """Acquires context for whittling down number of dropdown"""
+    """Acquires all available cell subtypes for the given cell type"""
 
-    context = u'<option value="">---------</option>'
+    dropdown = u'<option value="">---------</option>'
 
     cell_type = request.POST.get('cell_type', '')
 
@@ -28,12 +28,12 @@ def get_cell_subtypes(request):
     for finding in findings:
         # match value to the desired subject ID
         value = str(finding.id)
-        context += u'<option value="' + value + '">' + unicode(finding) + '</option>'
+        dropdown += u'<option value="' + value + '">' + unicode(finding) + '</option>'
 
     data = {}
 
     data.update({
-        'context': context,
+        'dropdown': dropdown,
     })
 
     return HttpResponse(json.dumps(data),

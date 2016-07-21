@@ -451,14 +451,14 @@ def fetch_readouts(request):
                         content_type="application/json")
 
 
-# Should these be refactored just to use fetch_context instead?
+# Should these be refactored just to use fetch_dropdown instead?
 def fetch_organ_models(request):
     """Gets a dropdown of organ models for Chip Setup
 
     Receives the following from POST:
     device -- the device to acquire organ models from
     """
-    context = u'<option value="">---------</option>'
+    dropdown = u'<option value="">---------</option>'
 
     device = request.POST.get('device', '')
 
@@ -467,12 +467,12 @@ def fetch_organ_models(request):
     for finding in findings:
         # match value to the desired subject ID
         value = str(finding.id)
-        context += u'<option value="' + value + '">' + unicode(finding) + '</option>'
+        dropdown += u'<option value="' + value + '">' + unicode(finding) + '</option>'
 
     data = {}
 
     data.update({
-        'context': context,
+        'dropdown': dropdown,
     })
 
     return HttpResponse(json.dumps(data),
@@ -485,7 +485,7 @@ def fetch_protocols(request):
     Receives the following from POST:
     organ_model -- the organ model to acquire protocols from
     """
-    context = u'<option value="">---------</option>'
+    dropdown = u'<option value="">---------</option>'
 
     organ_model = request.POST.get('organ_model', '')
 
@@ -501,12 +501,12 @@ def fetch_protocols(request):
     for finding in findings:
         # match value to the desired subject ID
         value = str(finding.id)
-        context += u'<option value="' + value + '">' + unicode(finding) + '</option>'
+        dropdown += u'<option value="' + value + '">' + unicode(finding) + '</option>'
 
     data = {}
 
     data.update({
-        'context': context,
+        'dropdown': dropdown,
     })
 
     return HttpResponse(json.dumps(data),
@@ -538,8 +538,8 @@ def fetch_protocol(request):
                         content_type="application/json")
 
 
-def fetch_context(request):
-    """Acquires context for whittling down number of dropdown
+def fetch_dropdown(request):
+    """Acquires options for whittling down number of dropdown
 
     Receives the following from POST:
     master -- master is what determines the subject's drop down choices
@@ -548,7 +548,7 @@ def fetch_context(request):
     next_filter -- second filter (if the subject is two FK away)
     """
 
-    context = '<option value="">---------</option>'
+    dropdown = '<option value="">---------</option>'
 
     # the model who's dropdown you want to whittle down
     all_models = {
@@ -584,12 +584,12 @@ def fetch_context(request):
     for finding in findings:
         # match value to the desired subject ID
         value = str(finding.id)
-        context += '<option value="' + value + '">' + str(finding) + '</option>'
+        dropdown += '<option value="' + value + '">' + str(finding) + '</option>'
 
     data = {}
 
     data.update({
-        'context': context,
+        'dropdown': dropdown,
     })
 
     return HttpResponse(json.dumps(data),
@@ -604,7 +604,7 @@ switch = {
     'fetch_center_id': fetch_center_id,
     'fetch_chip_readout': fetch_chip_readout,
     'fetch_readouts': fetch_readouts,
-    'fetch_context': fetch_context,
+    'fetch_dropdown': fetch_dropdown,
     'fetch_organ_models': fetch_organ_models,
     'fetch_protocols': fetch_protocols,
     'fetch_protocol': fetch_protocol,

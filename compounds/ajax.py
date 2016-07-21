@@ -235,16 +235,13 @@ def fetch_compound_report(request):
         compound = readout.assay_chip_id.chip_setup.compound.name
         plot = data.get(compound).get('plot')
         assay = readout.assay_id.assay_id.assay_short_name
-        if not assay in plot:
+        if assay not in plot:
             plot[assay] = {}
+
+        # TODO SCALE CONCETRATIONS
         concentration = unicode(
             readout.assay_chip_id.chip_setup.concentration
         ) + u'_' + readout.assay_chip_id.chip_setup.unit.unit
-        # Replace unicode characters
-        # This may pose problems should more unicode characters appear
-        # I may want to employ a sort of ASCII heuristic table to deal with this issue
-        # Otherwise I would want to just avoid passing unicode where it shouldn't be (in HTML IDs and so on)
-        # concentration = concentration.replace(u'µ', u'u')
         if not concentration in plot[assay]:
             plot[assay][concentration] = {}
         entry = plot[assay][concentration]

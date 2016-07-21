@@ -11,7 +11,7 @@ function whittle(master,master_id,subject,next_model,next_filter) {
             type: "POST",
             dataType: "json",
             data: {
-                call: 'fetch_context',
+                call: 'fetch_dropdown',
 
                 master: master,
                 master_id: master_id,
@@ -22,7 +22,7 @@ function whittle(master,master_id,subject,next_model,next_filter) {
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
-                all_options.resolve(json.context);
+                all_options.resolve(json.dropdown);
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);

@@ -154,7 +154,7 @@ $(document).ready(function() {
                     csrfmiddlewaretoken: middleware_token
                 },
                 success: function (json) {
-                    var options = json.context;
+                    var options = json.dropdown;
                     var current_value = organ_model.val();
                     organ_model.html(options);
                     if (current_value && $('#id_organ_model option[value=' + current_value + ']')[0]) {
@@ -198,7 +198,7 @@ $(document).ready(function() {
                     csrfmiddlewaretoken: middleware_token
                 },
                 success: function (json) {
-                    var options = json.context;
+                    var options = json.dropdown;
                     var current_value = protocol.val();
                     protocol.html(options);
                     if (current_value && $('#id_organ_model_protocol option[value=' + current_value + ']')[0]) {
