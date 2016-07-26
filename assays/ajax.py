@@ -420,12 +420,7 @@ def fetch_readouts(request):
 
             current_values = current_assay.get(current_key)
 
-            current_value = current_values.get(time, '')
-
-            if current_value:
-                current_values.update({time: (current_value + value) / 2.0})
-            else:
-                current_values.update({time: value})
+            current_values.setdefault(time, []).append(value)
 
     for assay, current_keys in initial_data.items():
         assays.update({assay: {}})
@@ -439,7 +434,7 @@ def fetch_readouts(request):
             assays.get(assay).update({
                 current_key: {
                     'time': times_values.keys(),
-                    'values': times_values.values()
+                    'values': [sum(values) / float(len(values)) for values in times_values.values()]
                 }
             })
 
