@@ -1,6 +1,8 @@
 $(document).ready(function() {
     $('#studies').DataTable( {
         dom: 'B<"row">lfrtip',
+        fixedHeader: true,
+        responsive: true,
         "iDisplayLength": 50,
         // Initially sort on start date (descending), not ID
         "order": [ 4, "desc" ],

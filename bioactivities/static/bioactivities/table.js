@@ -54,6 +54,8 @@ $(document).ready(function () {
 
         $('#full').DataTable({
             dom: 'B<"row">lfrtip',
+            fixedHeader: true,
+            responsive: true,
             "iDisplayLength": 100,
             // Needed to destroy old table
             "bDestroy": true

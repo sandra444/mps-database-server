@@ -29,8 +29,8 @@
                 <tr>
                     <th>View</th>
                     <th>Edit</th>
-                    <th>Organ</th>
                     <th>Model Name</th>
+                    <th>Organ</th>
                     <th>Device</th>
                     <th>Center</th>
                     <th>Project</th>
@@ -42,8 +42,8 @@
                 <tr>
                     <th>View</th>
                     <th>Edit</th>
-                    <th>Organ</th>
                     <th>Model Name</th>
+                    <th>Organ</th>
                     <th>Device</th>
                     <th>Center</th>
                     <th>Project</th>
@@ -56,8 +56,8 @@
                 <tr class="model" id={{ model.id }} name={{ model.device_name }}>
                     <td><a class="btn btn-primary" href="model/{{ model.id }}">View</a></td>
                     <td><a class="btn btn-primary" href="model/{{ model.id }}/update/">Edit</a></td>
-                    <td>{{ model.organ|default_if_none:"" }}</td>
                     <td>{{ model.model_name }}</td>
+                    <td>{{ model.organ|default_if_none:"" }}</td>
                     <td><a href="device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
                     <td>{{ model.center|default_if_none:"" }}</td>
                     <td>

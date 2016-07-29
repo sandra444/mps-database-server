@@ -20,6 +20,8 @@ $(document).ready(function() {
 
     var table = $('#compounds').DataTable({
         dom: 'B<"row">lfrtip',
+        fixedHeader: true,
+        responsive: true,
         "order": [[ 2, "asc" ]],
         "aoColumnDefs": [
             {

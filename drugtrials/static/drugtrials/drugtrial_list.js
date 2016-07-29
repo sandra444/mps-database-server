@@ -33,6 +33,8 @@ $(document).ready(function() {
 
     var drug_trials = $('#drugtrials').DataTable({
         dom: 'B<"row">lfrtip',
+        fixedHeader: true,
+        responsive: true,
         "iDisplayLength": 50,
         "deferRender": true,
         // Initially sort on compound, not arbitrary ID
