@@ -1,6 +1,6 @@
 $(document).ready(function() {
     $('#layouts').DataTable( {
-        dom: 'T<"clear">lfrtip',
+        dom: 'B<"row">lfrtip',
         "iDisplayLength": 50,
         // Initially sort on start date (descending), not ID
         "order": [ 2, "asc" ],

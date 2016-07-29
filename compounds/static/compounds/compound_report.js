@@ -326,7 +326,7 @@ $(document).ready(function () {
         }
 
         $('#results_table').DataTable({
-            dom: 'T<"clear">rt',
+            dom: 'B<"row">rt',
             "iDisplayLength": 100,
             // Needed to destroy old table
             "bDestroy": true,
@@ -401,7 +401,7 @@ $(document).ready(function () {
 
     // Make the initial data table
     var compounds_table = $('#compounds').DataTable({
-        dom: 'T<"clear">lfrtip',
+        dom: 'B<"row">lfrtip',
         "order": [[ 1, "asc" ]],
         "aoColumnDefs": [
             {

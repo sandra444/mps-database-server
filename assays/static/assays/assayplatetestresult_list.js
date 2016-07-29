@@ -1,6 +1,6 @@
 $(document).ready(function() {
     $('#results').DataTable( {
-        dom: 'T<"clear">lfrtip',
+        dom: 'B<"row">lfrtip',
         "iDisplayLength": 50,
         // Initially sort on study not arbitrary ID
         "order": [ 2, "asc" ],

@@ -19,7 +19,7 @@ $(document).ready(function() {
     });
 
     var table = $('#compounds').DataTable({
-        dom: 'T<"clear">lfrtip',
+        dom: 'B<"row">lfrtip',
         "order": [[ 2, "asc" ]],
         "aoColumnDefs": [
             {

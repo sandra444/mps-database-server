@@ -48,6 +48,7 @@ $(document).ready(function () {
         dom: '<"clear">lfrtip',
         "iDisplayLength": 10,
         "order": [[ 2, "desc" ]],
+        "deferRender": true,
         "aoColumnDefs": [
             {
                 "width": "10%",

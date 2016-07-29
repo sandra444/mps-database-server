@@ -32,7 +32,7 @@ $(document).ready(function() {
     };
 
     var drug_trials = $('#drugtrials').DataTable({
-        dom: 'T<"clear">lfrtip',
+        dom: 'B<"row">lfrtip',
         "iDisplayLength": 50,
         "deferRender": true,
         // Initially sort on compound, not arbitrary ID

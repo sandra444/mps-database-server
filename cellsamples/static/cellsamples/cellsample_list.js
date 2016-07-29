@@ -1,6 +1,6 @@
 $(document).ready(function() {
     $('#cellsamples').DataTable({
-        dom: 'T<"clear">lfrtip',
+        dom: 'B<"row">lfrtip',
         "iDisplayLength": 50,
         // Initially sort on receipt date
         "order": [ 2, "desc" ],

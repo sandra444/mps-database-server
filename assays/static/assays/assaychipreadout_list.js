@@ -1,6 +1,6 @@
 $(document).ready(function() {
     $('#readouts').DataTable( {
-        dom: 'T<"clear">lfrtip',
+        dom: 'B<"row">lfrtip',
         "iDisplayLength": 50,
         // Initially sort on setup not arbitrary ID
         "order": [[ 3, "asc" ]],
