@@ -18,7 +18,7 @@
             </h2>
         </legend>
 
-        <div class="row text-center">
+        <div class="row text-center padded-bottom">
             <a href="/microdevices/model/add/" class="btn btn-lg btn-success" role="button">Add Model</a>
         </div>
 
@@ -37,19 +37,6 @@
                     <th>Description</th>
                 </tr>
             </thead>
-
-            <tfoot>
-                <tr>
-                    <th>View</th>
-                    <th>Edit</th>
-                    <th>Model Name</th>
-                    <th>Organ</th>
-                    <th>Device</th>
-                    <th>Center</th>
-                    <th>Project</th>
-                    <th>Description</th>
-                </tr>
-            </tfoot>
 
             <tbody>
             {% for model in models %}
@@ -83,7 +70,7 @@
             </h2>
         </legend>
 
-        <div class="row text-center">
+        <div class="row text-center padded-bottom">
             <a href="/microdevices/device/add/" class="btn btn-lg btn-success" role="button">Add Device</a>
         </div>
 
@@ -99,18 +86,6 @@
                     <th>Description</th>
                 </tr>
             </thead>
-
-            <tfoot>
-                <tr>
-                    <th>View</th>
-                    <th>Edit</th>
-                    <th>Device Name</th>
-                    <th>Manufacturer</th>
-                    <th>Center</th>
-                    <th>Organ</th>
-                    <th>Description</th>
-                </tr>
-            </tfoot>
 
             <tbody>
             {% for device in devices %}

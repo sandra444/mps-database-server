@@ -17,7 +17,7 @@
             </h2>
         </legend>
 
-        <div class="row text-center">
+        <div class="row text-center padded-bottom">
             <a href="/compounds/add/" class="btn btn-lg btn-success" role="button">Add Compound</a>
         </div>
 
@@ -40,23 +40,6 @@
                     <th>Image</th>
                 </tr>
             </thead>
-
-            <tfoot>
-                <tr>
-                    <th>View</th>
-                    <th>Edit</th>
-                    <th>Name</th>
-                    <th>CHEMBL ID</th>
-                    <th>Synonyms</th>
-                    <th>Molecular Weight</th>
-                    <th>LogP</th>
-                    <th>Rule of 5 Violations</th>
-                    <th>Known Drug</th>
-                    <th>Project</th>
-{#                    <th>Last Update</th>#}
-                    <th>Image</th>
-                </tr>
-            </tfoot>
 
             <tbody>
             {% for compound in object_list %}

@@ -36,24 +36,6 @@
                 </tr>
             </thead>
 
-            <tfoot>
-                <tr>
-                    <th>View/Edit</th>
-                    <th>Plate Test Results ID</th>
-                    <th>Study</th>
-                    <th>Plate Setup</th>
-                    <th>Plate Readout ID</th>
-                    <th>Assay &amp; Feature</th>
-                    <th>Result</th>
-                    <th>Result Function</th>
-                    <th>Result Type</th>
-                    <th>Severity</th>
-                    <th>Creator</th>
-                    <th>Group</th>
-                    <th>Review</th>
-                </tr>
-            </tfoot>
-
             <tbody>
             {% for result in object_list %}
                 <tr class="result" id={{ result.id }} name={{ result.id }}>

@@ -32,20 +32,6 @@
                 </tr>
             </thead>
 
-            <tfoot>
-                <tr>
-                    <th>View/Edit</th>
-                    <th>Plate Setup ID / Barcode</th>
-                    <th>Study</th>
-                    <th>Date</th>
-                    <th>Organ Model Name</th>
-                    <th>Scientist</th>
-                    <th>Creator</th>
-                    <th>Group</th>
-                    <th>Review</th>
-                </tr>
-            </tfoot>
-
             <tbody>
             {% for setup in object_list %}
                 <tr class="plate-setups" id={{ setup.id }} name={{ setup.id }}>

@@ -17,7 +17,7 @@
             </h2>
         </legend>
 
-        <div class="row text-center">
+        <div class="row text-center padded-bottom">
             <a href="/cellsamples/cellsample/add/" class="btn btn-lg btn-success" role="button">Add Cell Sample</a>
         </div>
 
@@ -36,21 +36,6 @@
                     <th>Review</th>
                 </tr>
             </thead>
-
-            <tfoot>
-                <tr>
-                    <th>View/Edit</th>
-                    <th>ID #</th>
-                    <th>Receipt Date</th>
-                    <th>Barcode/Lot #</th>
-                    <th>Cell Type</th>
-                    <th>Cell Subtype</th>
-                    <th>Supplier</th>
-                    <th>Patient</th>
-                    <th>Group</th>
-                    <th>Review</th>
-                </tr>
-            </tfoot>
 
             <tbody>
             {% for cellsample in object_list %}

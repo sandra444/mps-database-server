@@ -436,4 +436,9 @@ $(document).ready(function () {
         // Redraw the table
         compounds_table.draw();
     });
+
+    // Crude way to deal with resizing from images
+    setTimeout(function() {
+         $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+    }, 500);
 });

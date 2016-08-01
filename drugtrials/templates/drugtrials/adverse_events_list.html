@@ -32,18 +32,6 @@
                 </tr>
             </thead>
 
-            <tfoot>
-                <tr>
-                    <th>View</th>
-                    <th>Compound</th>
-                    <th>Event</th>
-                    <th>Frequency</th>
-                    <th>Organ</th>
-                    <th>Project</th>
-                    <th>Black Box Warning</th>
-                </tr>
-            </tfoot>
-
             <tbody>
             {% for adverse_event in object_list %}
                 <tr class="adverse_event" id={{ adverse_event.id }}>

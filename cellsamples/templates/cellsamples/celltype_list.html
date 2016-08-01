@@ -17,7 +17,7 @@
             </h2>
         </legend>
 
-        <div class="row text-center">
+        <div class="row text-center padded-bottom">
             <a href="/cellsamples/celltype/add/" class="btn btn-lg btn-success" role="button">Add Cell Type</a>
         </div>
 
@@ -30,15 +30,6 @@
                     <th>Species</th>
                 </tr>
             </thead>
-
-            <tfoot>
-                <tr>
-                    <th>View/Edit</th>
-                    <th>Cell Type</th>
-                    <th>Organ</th>
-                    <th>Species</th>
-                </tr>
-            </tfoot>
 
             <tbody>
             {% for celltype in object_list %}
