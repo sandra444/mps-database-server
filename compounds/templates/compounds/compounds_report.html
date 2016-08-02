@@ -85,7 +85,13 @@
                     </td>
                     {# TODO Tags field is deprecated #}
 {#                    <td>{{ compound.tags|default_if_none:"" }}</td>#}
-                    <td><img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}"></td>
+                    <td>
+                      {% if compound.chemblid %}
+                          <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}">
+                      {% else %}
+                        <span style="width: 128px; height: 128px;" class="glyphicon glyphicon-file text-warning" aria-hidden="true"></span>
+                      {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </form>

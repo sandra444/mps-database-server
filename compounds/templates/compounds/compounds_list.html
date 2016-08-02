@@ -81,7 +81,13 @@
 {#                    <td>{{ compound.logp }}</td>#}
 {#                    <td>{{ compound.ro5_violations }}</td>#}
 {#                    <td>{{ compound.last_update }}</td>#}
-                    <td><img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}"></td>
+                    <td>
+                      {% if compound.chemblid %}
+                          <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}">
+                      {% else %}
+                        <span style="width: 128px; height: 128px;" class="glyphicon glyphicon-file text-warning" aria-hidden="true"></span>
+                      {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
