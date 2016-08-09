@@ -200,7 +200,7 @@ def fetch_well_types(request):
                         content_type="application/json")
 
 
-#Fetches and displays assay layout from plate readout
+# Fetches and displays assay layout from plate readout
 def fetch_plate_info(request):
     """Returns dynamic info for plate assays
 
@@ -520,7 +520,7 @@ def fetch_protocol(request):
 
     protocol = OrganModelProtocol.objects.filter(pk=protocol_id)
 
-    if protocol and any(i in protocol[0].organ_model.center.groups.all() for i in request.user.groups.all()):
+    if protocol and protocol[0].organ_model.center and any(i in protocol[0].organ_model.center.groups.all() for i in request.user.groups.all()):
         protocol_file = protocol[0].file
         file_name = '/'.join(protocol_file.name.split('/')[1:])
         href = '/media/' + protocol_file.name
