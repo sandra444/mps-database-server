@@ -38,7 +38,7 @@ class OrganModelDetail(DetailView):
 
         assays = ValidatedAssay.objects.filter(organ_model=self.object).prefetch_related('assay', 'assay__assay_type')
 
-        if any(i in self.object.center.groups.all() for i in self.request.user.groups.all()):
+        if self.object.center and any(i in self.object.center.groups.all() for i in self.request.user.groups.all()):
             protocols = OrganModelProtocol.objects.filter(
                 organ_model=self.object
             ).order_by('-version')
@@ -86,7 +86,7 @@ class MicrodeviceAdd(SpecificGroupRequiredMixin, CreateView):
     def form_valid(self, form):
         if form.is_valid():
             self.object = form.save()
-            self.object.modified_by = self.request.user
+            self.object.modified_by = self.object.created_by = self.request.user
             self.object.save()
             return redirect('/microdevices/')
         else:
@@ -153,7 +153,7 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
         )
         if form.is_valid() and formset.is_valid():
             self.object = form.save()
-            self.object.modified_by = self.request.user
+            self.object.modified_by = self.object.created_by = self.request.user
             self.object.save()
             formset.save()
             return redirect('/microdevices/')
