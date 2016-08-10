@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block load %}
+    <script src="{% static "assays/study_index.js" %}"></script>
+{% endblock %}
+
 {% block breadcrumbs %}
     <li><a href="/assays/editable_studies/">Editable Studies</a></li>
     <li class="active">{{ object }}</li>
@@ -27,6 +31,7 @@
         </legend>
 
         {% if setups %}
+        <div class="padded-bottom">
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -75,6 +80,7 @@
             {% endfor %}
             </tbody>
         </table>
+        </div>
         {% else %}
         <div class="alert alert-warning" role="alert">
             No chip setups exist for this study
@@ -82,6 +88,7 @@
         {% endif %}
 
         {% if plate_setups %}
+        <div class="padded-bottom">
         <table id="plate_setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -122,6 +129,7 @@
             {% endfor %}
             </tbody>
         </table>
+        </div>
         {% else %}
         <div class="alert alert-warning" role="alert">
             No plate setups exist for this study
@@ -157,6 +165,7 @@
         </legend>
 
         {% if readouts %}
+        <div class="padded-bottom">
         <table id="readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -203,6 +212,7 @@
             {% endfor %}
             </tbody>
         </table>
+        </div>
         {% else %}
         <div class="alert alert-warning" role="alert">
             No chip readouts exist for this study
@@ -210,6 +220,7 @@
         {% endif %}
 
         {% if plate_readouts %}
+        <div class="padded-bottom">
         <table id="plate_readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -256,6 +267,7 @@
             {% endfor %}
             </tbody>
         </table>
+        </div>
         {% else %}
         <div class="alert alert-warning" role="alert">
             No plate readouts exist for this study
@@ -298,6 +310,7 @@
         </legend>
 
         {% if results %}
+        <div class="padded-bottom">
         <table id="results" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -358,6 +371,7 @@
             {% endfor %}
             </tbody>
         </table>
+        </div>
         {% else %}
         <div class="alert alert-warning" role="alert">
             No chip results exist for this study
@@ -365,7 +379,8 @@
         {% endif %}
 
         {% if plate_results %}
-        <table id="results" class="display table table-striped table-hover" cellspacing="0" width="100%">
+        <div class="padded-bottom">
+        <table id="plate_results" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View/Edit</th>
@@ -425,6 +440,7 @@
             {% endfor %}
             </tbody>
         </table>
+        </div>
         {% else %}
         <div class="alert alert-warning" role="alert">
             No plate results exist for this study

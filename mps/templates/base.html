@@ -69,9 +69,6 @@
     <!-- SmartMenus jQuery plugin -->
     <script type="text/javascript" src="{% static "js/jquery.smartmenus.min.js" %}"></script>
 
-    <!-- Custom CSS Rules -->
-    <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
-
     {# Yes, I know this violates SOC #}
     <script>
       // always emulate touch mode
@@ -157,6 +154,9 @@
     <script type="text/javascript" src="{% static "js/jquery.smartmenus.bootstrap.min.js" %}"></script>
     <!-- SmartMenus jQuery Bootstrap Addon CSS -->
     <link rel="stylesheet" href="{% static "css/jquery.smartmenus.bootstrap.css" %}">
+
+    <!-- Custom CSS Rules -->
+    <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
   {% endblock %}
 
   {% block load %}{% endblock %}
