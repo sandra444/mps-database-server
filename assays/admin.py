@@ -1310,7 +1310,10 @@ class AssayChipSetupAdmin(LockableAdmin):
             'Model Parameters', {
                 'fields': (
                     (
-                        'device', 'assay_chip_id',
+                        'assay_chip_id',
+                    ),
+                    (
+                        'device', 'organ_model', 'organ_model_protocol'
                     ),
                     (
                         'variance',
