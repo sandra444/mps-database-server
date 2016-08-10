@@ -5,7 +5,7 @@ $(document).ready(function() {
         responsive: true,
         "iDisplayLength": 50,
         // Initially sort on study not arbitrary ID
-        "order": [ 2, "asc" ],
+        "order": [[2, "asc"], [3, "asc"]],
         "aoColumnDefs": [
             {
                 "bSortable": false,

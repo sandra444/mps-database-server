@@ -4,7 +4,7 @@ $(document).ready(function() {
         fixedHeader: true,
         responsive: true,
         "iDisplayLength": 50,
-        "order": [[ 1, "asc" ]],
+        "order": [[3, "desc"], [2, "asc"], [1, "asc"]],
         "aoColumnDefs": [
             {
                 "bSortable": false,
