@@ -12,7 +12,7 @@
     {% if object.created_on|date:"U" != object.modified_on|date:"U" %}
         <div class="bg-info">
         <p style="margin-left:1em;">
-            Last Modified by <b>{{ object.modified_by }}</b> on <b>{{ object.modified_on }}</b>
+            Last Modified by <b>{{ object.modified_by.first_name }} {{ object.modified_by.last_name }}</b> on <b>{{ object.modified_on }}</b>
         </p>
         </div>
     {% endif %}
