@@ -491,7 +491,7 @@ class AssayRunDelete(CreatorRequiredMixin, DeleteView):
     """Delete a Setup"""
     model = AssayRun
     template_name = 'assays/assayrun_delete.html'
-    success_url = '/assays/group_index/'
+    success_url = '/assays/editable_studies/'
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()

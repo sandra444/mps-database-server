@@ -4,8 +4,8 @@ from assays.views import *
 urlpatterns = patterns('',
     # User can view their studies
     # url(r'^assays/user_index/$', UserIndex.as_view(), name='user_index'),
-    # User can view all group studies
-    url(r'^assays/group_index/$', GroupIndex.as_view(), name='group_index'),
+    # User can view all Editable Studies
+    url(r'^assays/editable_studies/$', GroupIndex.as_view(), name='editable_studies'),
     # The main page for a study
     url(r'^assays/(?P<pk>[0-9]+)/$', StudyIndex.as_view(), name='study_index'),
     # Update page for studies
@@ -52,9 +52,9 @@ urlpatterns = patterns('',
     url(r'^assays/assaylayout/(?P<pk>[0-9]+)/$', AssayLayoutUpdate.as_view(), name='assaylayout_update'),
     url(r'^assays/assaylayout/(?P<pk>[0-9]+)/delete/$', AssayLayoutDelete.as_view(), name='assaylayout_delete'),
 
-    url(r'^assays/organchipstudy/$', AssayRunList.as_view(), name='study_list'),
-    url(r'^assays/organchipstudy/add/$', AssayRunAdd.as_view(), name='study_add'),
-    url(r'^assays/organchipstudy/(?P<pk>[0-9]+)/$', AssayRunDetail.as_view(), name='study_detail'),
+    url(r'^assays/study/$', AssayRunList.as_view(), name='study_list'),
+    url(r'^assays/study/add/$', AssayRunAdd.as_view(), name='study_add'),
+    url(r'^assays/study/(?P<pk>[0-9]+)/$', AssayRunDetail.as_view(), name='study_detail'),
 
     url(r'^assays/assaychipsetup/$', AssayChipSetupList.as_view(), name='setup_list'),
     #url(r'^assays/assaychipsetup/add$', AssayChipSetupAdd.as_view()),
