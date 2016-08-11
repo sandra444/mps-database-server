@@ -28,4 +28,8 @@ $(document).ready(function() {
 
     // Reveal the table, as loading is complete
     $('table').prop('hidden', false)
+
+    // Recalculate responsive and fixed headers
+    $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+    $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
 });

@@ -35,7 +35,7 @@ $(function() {
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
-                var options = json.context;
+                var options = json.dropdown;
                 var current_value = subtype.val();
                 subtype.html(options);
                 if (current_value && $('#id_cell_subtype option[value='+current_value+']')[0]) {

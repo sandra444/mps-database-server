@@ -51,22 +51,6 @@
                 </tr>
             </thead>
 
-            <tfoot>
-                <tr>
-                    <th>Compound</th>
-                    <th>Target</th>
-                    <th>Organism</th>
-                    <th>Standard Name</th>
-                    <th>Operator</th>
-                    <th>Standard Value</th>
-                    <th>Standard Units</th>
-                    <th>ChEMBL Link</th>
-                    <th>PubChem Link</th>
-                    <th>Notes</th>
-                    <th>Data Validity</th>
-                </tr>
-            </tfoot>
-
             <tbody>
             {% for bioactivity in bioactivities %}
                 <tr>
@@ -107,7 +91,9 @@
     <script>
         $(document).ready(function() {
             $('#bioactivities').DataTable( {
-                dom: 'T<"clear">lfrtip',
+                dom: 'B<"row">lfrtip',
+                fixedHeader: true,
+                responsive: true,
                 "iDisplayLength": 100,
                 // Initially sort on start date (descending), not ID
                 "order": [[ 0, "asc" ], [ 1, "asc"], [ 2, "asc"], [ 3, "asc"]]

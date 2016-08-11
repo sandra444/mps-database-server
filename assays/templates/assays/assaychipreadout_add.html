@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li><a href="/assays/group_index/">Group Studies</a></li>
+    <li><a href="/assays/editable_studies/">Editable Studies</a></li>
     <li>
         {% if object %}
             <a href="/assays/{{ object.chip_setup.assay_run_id.id }}">{{ object.chip_setup.assay_run_id }}</a>

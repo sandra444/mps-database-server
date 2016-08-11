@@ -200,7 +200,7 @@ def fetch_well_types(request):
                         content_type="application/json")
 
 
-#Fetches and displays assay layout from plate readout
+# Fetches and displays assay layout from plate readout
 def fetch_plate_info(request):
     """Returns dynamic info for plate assays
 
@@ -420,12 +420,7 @@ def fetch_readouts(request):
 
             current_values = current_assay.get(current_key)
 
-            current_value = current_values.get(time, '')
-
-            if current_value:
-                current_values.update({time: (current_value + value) / 2.0})
-            else:
-                current_values.update({time: value})
+            current_values.setdefault(time, []).append(value)
 
     for assay, current_keys in initial_data.items():
         assays.update({assay: {}})
@@ -439,7 +434,7 @@ def fetch_readouts(request):
             assays.get(assay).update({
                 current_key: {
                     'time': times_values.keys(),
-                    'values': times_values.values()
+                    'values': [sum(values) / float(len(values)) for values in times_values.values()]
                 }
             })
 
@@ -451,14 +446,14 @@ def fetch_readouts(request):
                         content_type="application/json")
 
 
-# Should these be refactored just to use fetch_context instead?
+# Should these be refactored just to use fetch_dropdown instead?
 def fetch_organ_models(request):
     """Gets a dropdown of organ models for Chip Setup
 
     Receives the following from POST:
     device -- the device to acquire organ models from
     """
-    context = u'<option value="">---------</option>'
+    dropdown = u'<option value="">---------</option>'
 
     device = request.POST.get('device', '')
 
@@ -467,12 +462,12 @@ def fetch_organ_models(request):
     for finding in findings:
         # match value to the desired subject ID
         value = str(finding.id)
-        context += u'<option value="' + value + '">' + unicode(finding) + '</option>'
+        dropdown += u'<option value="' + value + '">' + unicode(finding) + '</option>'
 
     data = {}
 
     data.update({
-        'context': context,
+        'dropdown': dropdown,
     })
 
     return HttpResponse(json.dumps(data),
@@ -485,7 +480,7 @@ def fetch_protocols(request):
     Receives the following from POST:
     organ_model -- the organ model to acquire protocols from
     """
-    context = u'<option value="">---------</option>'
+    dropdown = u'<option value="">---------</option>'
 
     organ_model = request.POST.get('organ_model', '')
 
@@ -501,12 +496,12 @@ def fetch_protocols(request):
     for finding in findings:
         # match value to the desired subject ID
         value = str(finding.id)
-        context += u'<option value="' + value + '">' + unicode(finding) + '</option>'
+        dropdown += u'<option value="' + value + '">' + unicode(finding) + '</option>'
 
     data = {}
 
     data.update({
-        'context': context,
+        'dropdown': dropdown,
     })
 
     return HttpResponse(json.dumps(data),
@@ -525,7 +520,7 @@ def fetch_protocol(request):
 
     protocol = OrganModelProtocol.objects.filter(pk=protocol_id)
 
-    if protocol and any(i in protocol[0].organ_model.center.groups.all() for i in request.user.groups.all()):
+    if protocol and protocol[0].organ_model.center and any(i in protocol[0].organ_model.center.groups.all() for i in request.user.groups.all()):
         protocol_file = protocol[0].file
         file_name = '/'.join(protocol_file.name.split('/')[1:])
         href = '/media/' + protocol_file.name
@@ -538,8 +533,8 @@ def fetch_protocol(request):
                         content_type="application/json")
 
 
-def fetch_context(request):
-    """Acquires context for whittling down number of dropdown
+def fetch_dropdown(request):
+    """Acquires options for whittling down number of dropdown
 
     Receives the following from POST:
     master -- master is what determines the subject's drop down choices
@@ -548,7 +543,7 @@ def fetch_context(request):
     next_filter -- second filter (if the subject is two FK away)
     """
 
-    context = '<option value="">---------</option>'
+    dropdown = '<option value="">---------</option>'
 
     # the model who's dropdown you want to whittle down
     all_models = {
@@ -584,12 +579,12 @@ def fetch_context(request):
     for finding in findings:
         # match value to the desired subject ID
         value = str(finding.id)
-        context += '<option value="' + value + '">' + str(finding) + '</option>'
+        dropdown += '<option value="' + value + '">' + str(finding) + '</option>'
 
     data = {}
 
     data.update({
-        'context': context,
+        'dropdown': dropdown,
     })
 
     return HttpResponse(json.dumps(data),
@@ -604,7 +599,7 @@ switch = {
     'fetch_center_id': fetch_center_id,
     'fetch_chip_readout': fetch_chip_readout,
     'fetch_readouts': fetch_readouts,
-    'fetch_context': fetch_context,
+    'fetch_dropdown': fetch_dropdown,
     'fetch_organ_models': fetch_organ_models,
     'fetch_protocols': fetch_protocols,
     'fetch_protocol': fetch_protocol,

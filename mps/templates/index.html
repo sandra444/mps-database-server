@@ -37,20 +37,18 @@
 
     <div class="text-center">
         <div class="row" id="title">
-            <div class="col-xs-12">
-                <div class="row">
-                    <span class="col-sm-2">
-                    <img src="/static/img/test_dots.png" style="width:70px;height: 70px;">
-                    </span>
-                    <h1 class="col-sm-8">Microphysiology Systems Database</h1>
-                    <span class="col-sm-2">
-                        <img src="/static/img/Pitt_Logo.png" style="width:70px;height: 70px;">
-                    </span>
-                </div>
-                <div class="row">
-                    <h5>University of Pittsburgh Drug Discovery Institute</h5>
-                </div>
-            </div>
+            <span class="col-sm-2">
+              <img src="/static/img/test_dots.png" style="width:100px;height:100px;">
+            </span>
+            <h1 class="col-sm-8">
+              Microphysiology Systems Database
+              <div class="row">
+                  <h5>University of Pittsburgh Drug Discovery Institute</h5>
+              </div>
+            </h1>
+            <span class="col-sm-2">
+                <img src="/static/img/Pitt_Logo.png" style="width:100px;height:100px;">
+            </span>
         </div>
         <div class="row">
             <h4>Study Design</h4>
@@ -121,22 +119,15 @@
         <div class="row">
             <div class="col-sm-6 col-md-4">
                 <div title="Add/edit studies, setups, readouts, and results" class="well">
-                    <a href="/assays/group_index">
+                    <a href="/assays/editable_studies/">
                         <img src="/static/img/button_study.png"
                              style="height: 70px;">
                     </a>
                     <div class="caption">
-                        <div class="btn-group">
-                        <button type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            Studies <span class="caret"></span>
-                        </button>
-                          <ul class="dropdown-menu" role="menu">
-                            <li><a href="/assays/user_index/">Your Studies</a></li>
-                            <li><a href="/assays/group_index/">Group Studies</a></li>
-                            <li class="divider"></li>
-                            <li><a href="/assays/organchipstudy/">All Studies</a></li>
-                          </ul>
-                        </div>
+                        <a href="/assays/editable_studies/"
+                           class="btn btn-primary btn-large">
+                            Add/Edit Studies
+                        </a>
                     </div>
                 </div>
             </div>

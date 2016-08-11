@@ -33,9 +33,6 @@
     <!-- Underscore.js Library -->
     <script src="{% static "js/underscore.js" %}"></script>
 
-    <!-- Modernizr Library -->
-    <script src="{% static "js/modernizr-2.7.1.js" %}"></script>
-
     <!-- Polyfill for SVG pathSegList -->
     <script src="{% static "js/pathseg.js" %}"></script>
 
@@ -50,22 +47,27 @@
 
     <!-- DataTables CSS -->
     <link rel="stylesheet" type="text/css" href="{% static "css/jquery.dataTables.min.css" %}">
-    <link rel="stylesheet" type="text/css" href="{% static "css/dataTables.tableTools.min.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "css/fixedHeader.dataTables.min.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "css/responsive.dataTables.min.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "css/buttons.dataTables.min.css" %}">
 
     <!-- DataTables -->
     <script type="text/javascript" charset="utf8" src="{% static "js/jquery.dataTables.min.js" %}"></script>
-    <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.tableTools.min.js" %}"></script>
+    <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.fixedHeader.min.js" %}"></script>
+    <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.responsive.min.js" %}"></script>
+    <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.buttons.min.js" %}"></script>
+    {# We will just be using html5 for buttons (no fallback) #}
+    {# <script type="text/javascript" charset="utf8" src="{% static "js/buttons.flash.min.js" %}"></script>#}
+    <script type="text/javascript" charset="utf8" src="{% static "js/buttons.html5.min.js" %}"></script>
+    <script type="text/javascript" charset="utf8" src="{% static "js/buttons.print.min.js" %}"></script>
 
-{#    This script sets defaults for Tabletools#}
+{#    This script sets defaults for Buttons #}
 {#    Currently I exclude Excel (as it is confusingly given a csv extension) and PDF (requires heavier SWF)#}
 {#    I may add these later, however, but I will have to remember to use the PDF enabled SWF if PDFs are desired#}
     <script type="text/javascript" charset="utf8" src="{% static "js/datatable_options.js" %}"></script>
 
     <!-- SmartMenus jQuery plugin -->
     <script type="text/javascript" src="{% static "js/jquery.smartmenus.min.js" %}"></script>
-
-    <!-- Custom CSS Rules -->
-    <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
 
     {# Yes, I know this violates SOC #}
     <script>
@@ -152,6 +154,9 @@
     <script type="text/javascript" src="{% static "js/jquery.smartmenus.bootstrap.min.js" %}"></script>
     <!-- SmartMenus jQuery Bootstrap Addon CSS -->
     <link rel="stylesheet" href="{% static "css/jquery.smartmenus.bootstrap.css" %}">
+
+    <!-- Custom CSS Rules -->
+    <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
   {% endblock %}
 
   {% block load %}{% endblock %}
@@ -181,18 +186,18 @@
         <a class="dropdown-toggle">Assays<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
           <li class="dropdown-header">Add/Edit Studies</li>
-          <li title="Index of all the studies created by you"><a href="/assays/user_index/">Your Studies</a></li>
+          {# <li title="Index of all the studies created by you"><a href="/assays/user_index/">Your Studies</a></li>#}
           <li title="Index of all the studies created by groups you are a member of">
-              <a href="/assays/group_index/">Group Studies</a>
+              <a href="/assays/editable_studies/">Add/Edit Studies</a>
           </li>
           <li class="divider"></li>
           <li class="dropdown-header">Add Study Data</li>
-          <li><a href="/assays/organchipstudy/add/">Add Study</a></li>
+          <li><a href="/assays/study/add/">Add Study</a></li>
           <li><a href="/assays/studyconfiguration/add/">Add Study Configuration</a></li>
           <li><a href="/assays/assaylayout/add/">Add Assay Layout</a></li>
           <li class="divider"></li>
           <li class="dropdown-header">View/Edit Study Data</li>
-          <li><a href="/assays/organchipstudy/">All Studies</a></li>
+          <li><a href="/assays/study/">All Studies</a></li>
           <li><a href="/assays/studyconfiguration/">Study Configurations</a></li>
           <li><a href="/assays/assaylayout/">Assay Layouts</a></li>
           <li class="dropdown-submenu">

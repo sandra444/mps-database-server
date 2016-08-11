@@ -45,9 +45,10 @@ $(document).ready(function () {
 
     var table_options =
     {
-        dom: '<"clear">lfrtip',
+        dom: 'lfrtip',
         "iDisplayLength": 10,
         "order": [[ 2, "desc" ]],
+        "deferRender": true,
         "aoColumnDefs": [
             {
                 "width": "10%",

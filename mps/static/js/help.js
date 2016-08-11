@@ -18,7 +18,7 @@ $(document).ready(function () {
 
     // Call datatables for glossary
     $('#glossary_table').DataTable({
-        dom: 'T<"clear">lfrtip',
+        dom: 'B<"row">lfrtip',
         "iDisplayLength": 10
     });
 });

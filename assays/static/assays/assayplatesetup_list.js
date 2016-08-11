@@ -1,8 +1,10 @@
 $(document).ready(function() {
     $('#setups').DataTable( {
-        dom: 'T<"clear">lfrtip',
+        dom: 'B<"row">lfrtip',
+        fixedHeader: true,
+        responsive: true,
         "iDisplayLength": 50,
-        "order": [[ 1, "asc" ]],
+        "order": [[3, "desc"], [2, "asc"], [1, "asc"]],
         "aoColumnDefs": [
             {
                 "bSortable": false,

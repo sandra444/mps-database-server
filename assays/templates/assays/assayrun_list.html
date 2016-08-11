@@ -17,8 +17,8 @@
             </h2>
         </legend>
 
-        <div class="row text-center">
-            <a href="/assays/organchipstudy/add" class="btn btn-lg btn-success" role="button">Add Study</a>
+        <div class="row text-center padded-bottom">
+            <a href="/assays/study/add" class="btn btn-lg btn-success" role="button">Add Study</a>
         </div>
 
         <table hidden id="studies" class="display" cellspacing="0" width="100%">
@@ -34,19 +34,6 @@
                     <th>Group</th>
                 </tr>
             </thead>
-
-            <tfoot>
-                <tr>
-                    <th>View/Edit</th>
-                    <th>Study ID</th>
-                    <th>Study Types</th>
-                    <th>Study Configuration</th>
-                    <th>Start Date</th>
-                    <th>Description</th>
-                    <th>Creator</th>
-                    <th>Group</th>
-                </tr>
-            </tfoot>
 
             <tbody>
             {% for study in object_list %}

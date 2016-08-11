@@ -1,6 +1,8 @@
 $(document).ready(function() {
     $('#celltypes').DataTable({
-        dom: 'T<"clear">lfrtip',
+        dom: 'B<"row">lfrtip',
+        fixedHeader: true,
+        responsive: true,
         "iDisplayLength": 50,
         // Initially sort on organ
         "order": [ 1, "asc" ],

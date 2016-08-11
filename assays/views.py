@@ -71,44 +71,44 @@ class UnicodeWriter:
             self.writerow(row)
 
 
+# Removed User Index as it caused confusion
 # Class-based views for indexes
-class UserIndex(OneGroupRequiredMixin, ListView):
-    """Displays all of the user's studies"""
-    context_object_name = 'user_index'
-    template_name = 'assays/index.html'
-
-    def get_context_data(self, request, **kwargs):
-        self.object_list = AssayRun.objects.filter(created_by=request.user).prefetch_related('created_by', 'group')
-
-        return super(UserIndex, self).get_context_data(**kwargs)
-
-    def get(self, request, **kwargs):
-        context = self.get_context_data(request, **kwargs)
-        self.queryset = self.object_list
-        context['title'] = request.user.first_name + "'s Studies"
-
-        return self.render_to_response(context)
+# class UserIndex(OneGroupRequiredMixin, ListView):
+#     """Displays all of the user's studies"""
+#     context_object_name = 'user_index'
+#     template_name = 'assays/index.html'
+#
+#     def get_context_data(self, request, **kwargs):
+#         self.object_list = AssayRun.objects.filter(created_by=request.user).prefetch_related('created_by', 'group')
+#
+#         return super(UserIndex, self).get_context_data(**kwargs)
+#
+#     def get(self, request, **kwargs):
+#         context = self.get_context_data(request, **kwargs)
+#         self.queryset = self.object_list
+#         context['title'] = request.user.first_name + "'s Studies"
+#
+#         return self.render_to_response(context)
 
 
 # May want to merge with UserIndex?
 class GroupIndex(OneGroupRequiredMixin, ListView):
     """Displays all of the studies linked to groups that the user is part of"""
-    context_object_name = 'group_index'
     template_name = 'assays/index.html'
 
-    def get_context_data(self, request, **kwargs):
-        groups = request.user.groups.values_list('pk', flat=True)
-        groups = Group.objects.filter(pk__in=groups)
-        self.object_list = AssayRun.objects.filter(group__in=groups).prefetch_related('created_by', 'group')
+    def get_queryset(self):
+        return AssayRun.objects.filter(
+            group__in=self.request.user.groups.all()
+        ).prefetch_related('created_by', 'group')
 
-        return super(GroupIndex, self).get_context_data(**kwargs)
-
-    def get(self, request, **kwargs):
-        context = self.get_context_data(request, **kwargs)
-        self.queryset = self.object_list
-        context['title'] = 'Group Study Index'
-
-        return self.render_to_response(context)
+    # def get_context_data(self, request, **kwargs):
+    #     groups = request.user.groups.values_list('pk', flat=True)
+    #     groups = Group.objects.filter(pk__in=groups)
+    #     self.object_list = AssayRun.objects.filter(group__in=groups).prefetch_related('created_by', 'group')
+    #
+    #     return super(GroupIndex, self).get_context_data(**kwargs)
+    #
+    #     return self.render_to_response(context)
 
 
 class StudyIndex(ObjectGroupRequiredMixin, DetailView):
@@ -491,7 +491,7 @@ class AssayRunDelete(CreatorRequiredMixin, DeleteView):
     """Delete a Setup"""
     model = AssayRun
     template_name = 'assays/assayrun_delete.html'
-    success_url = '/assays/user_index/'
+    success_url = '/assays/editable_studies/'
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()

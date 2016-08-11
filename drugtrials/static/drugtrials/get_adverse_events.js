@@ -71,7 +71,7 @@ $(document).ready(function () {
 
             $('#ae_table').DataTable( {
                 "iDisplayLength": 200,
-                "sDom": '<T<"clear">t>',
+                "sDom": '<B<"row">t>',
                 "order": [[ 1, "desc" ]],
                 // Needed to destroy old table
                 "bDestroy": true
@@ -368,7 +368,7 @@ $(document).ready(function () {
     // Initialize and adjust data table
     $('#reported_events').DataTable({
         "iDisplayLength": 200,
-        "sDom": '<T<"clear">ft>',
+        "sDom": '<B<"row">ft>',
         "order": [[ 2, "desc" ]],
         "aoColumnDefs": [
             {

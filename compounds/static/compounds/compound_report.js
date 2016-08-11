@@ -326,7 +326,9 @@ $(document).ready(function () {
         }
 
         $('#results_table').DataTable({
-            dom: 'T<"clear">rt',
+            dom: 'B<"row">rt',
+            fixedHeader: true,
+            responsive: true,
             "iDisplayLength": 100,
             // Needed to destroy old table
             "bDestroy": true,
@@ -401,7 +403,9 @@ $(document).ready(function () {
 
     // Make the initial data table
     var compounds_table = $('#compounds').DataTable({
-        dom: 'T<"clear">lfrtip',
+        dom: 'B<"row">lfrtip',
+        fixedHeader: true,
+        responsive: true,
         "order": [[ 1, "asc" ]],
         "aoColumnDefs": [
             {
@@ -432,4 +436,9 @@ $(document).ready(function () {
         // Redraw the table
         compounds_table.draw();
     });
+
+    // Crude way to deal with resizing from images
+    setTimeout(function() {
+         $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+    }, 500);
 });

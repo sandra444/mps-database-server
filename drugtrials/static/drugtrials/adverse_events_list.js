@@ -19,7 +19,9 @@ $(document).ready(function() {
     });
 
     var adverse_events = $('#adverse_events').DataTable({
-        dom: 'T<"clear">lfrtip',
+        dom: 'B<"row">lfrtip',
+        fixedHeader: true,
+        responsive: true,
         "iDisplayLength": 50,
         // Initially sort on compound and frequency
         "order": [[ 1, "asc" ], [ 3, "desc"]],

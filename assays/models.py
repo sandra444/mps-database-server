@@ -635,7 +635,7 @@ class AssayChipSetup(FlaggableModel):
     assay_chip_id = models.CharField(max_length=512, verbose_name='Chip ID/ Barcode')
 
     #Control => control, Compound => compound; Abbreviate? Capitalize?
-    chip_test_type = models.CharField(max_length=8, choices=(("control", "Control"), ("compound", "Compound")))
+    chip_test_type = models.CharField(max_length=8, choices=(("control", "Control"), ("compound", "Compound")), default="control")
 
     compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
     concentration = models.FloatField(default=0, verbose_name='Conc.',

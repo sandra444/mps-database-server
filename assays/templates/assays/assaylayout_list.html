@@ -17,7 +17,7 @@
             </h2>
         </legend>
 
-        <div class="row text-center">
+        <div class="row text-center padded-bottom">
             <a href="/assays/assaylayout/add/" class="btn btn-lg btn-success" role="button">Add Layout</a>
         </div>
 
@@ -29,15 +29,6 @@
                     <th>Device</th>
                     <th>Review</th>
             </thead>
-
-            <tfoot>
-                <tr>
-                    <th>View/Edit</th>
-                    <th>Assay Layout Name</th>
-                    <th>Device</th>
-                    <th>Review</th>
-                </tr>
-            </tfoot>
 
             <tbody>
             {% for layout in object_list %}
@@ -61,4 +52,3 @@
 
     <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}
-

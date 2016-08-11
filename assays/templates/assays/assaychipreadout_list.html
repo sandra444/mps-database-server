@@ -33,23 +33,7 @@
 {#                    <th>Group</th>#}
                 </tr>
             </thead>
-
-            <tfoot>
-                <tr>
-                    <th>View/Edit</th>
-                    <th>Chip Readout ID</th>
-                    <th>Study</th>
-                    <th>Chip Setup</th>
-                    <th>Assays</th>
-                    <th>Readout Date</th>
-                    <th>Scientist</th>
-                    <th>Creator</th>
-                    <th>Group</th>
-                    <th>Review</th>
-{#                    <th>Group</th>#}
-                </tr>
-            </tfoot>
-
+            
             <tbody>
             {% for readout in object_list %}
                 <tr class="readout" id={{ readout.id }} name={{ readout.id }}>

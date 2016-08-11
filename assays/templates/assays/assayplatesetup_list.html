@@ -32,26 +32,12 @@
                 </tr>
             </thead>
 
-            <tfoot>
-                <tr>
-                    <th>View/Edit</th>
-                    <th>Plate Setup ID / Barcode</th>
-                    <th>Study</th>
-                    <th>Date</th>
-                    <th>Organ Model Name</th>
-                    <th>Scientist</th>
-                    <th>Creator</th>
-                    <th>Group</th>
-                    <th>Review</th>
-                </tr>
-            </tfoot>
-
             <tbody>
             {% for setup in object_list %}
                 <tr class="plate-setups" id={{ setup.id }} name={{ setup.id }}>
                     <td><a class="btn btn-primary" href="{{ setup.id }}">View/Edit</a></td>
                     <td>{{ setup.assay_plate_id }}</td>
-                    <td><a href="/assays/organchipstudy/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
+                    <td><a href="/assays/study/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
                     <td>{{ setup.setup_date|date:"M d, Y" }}</td>
                     <td>{{ setup.assay_layout }}</td>
                     <td>{{ setup.scientist }}</td>

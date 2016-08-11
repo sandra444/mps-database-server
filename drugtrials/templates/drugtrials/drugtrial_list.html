@@ -38,24 +38,6 @@
                 </tr>
             </thead>
 
-            <tfoot>
-                <tr>
-                    <th>View</th>
-                    <th>Drug Trial ID</th>
-                    <th>Compound</th>
-                    <th>Species</th>
-                    <th>Trial Type</th>
-                    <th>Finding</th>
-                    <th>Descriptor</th>
-                    <th>+/-</th>
-{#                    <th>Max Affected</th>#}
-                    <th>Frequency</th>
-                    <th>Value</th>
-                    <th>Value Units</th>
-                    <th>Project</th>
-                </tr>
-            </tfoot>
-
             <tbody>
             {% for finding in object_list %}
                 <tr class="finding" id={{ finding.id }}>

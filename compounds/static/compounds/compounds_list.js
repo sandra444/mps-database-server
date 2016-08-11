@@ -19,7 +19,9 @@ $(document).ready(function() {
     });
 
     var table = $('#compounds').DataTable({
-        dom: 'T<"clear">lfrtip',
+        dom: 'B<"row">lfrtip',
+        fixedHeader: true,
+        responsive: true,
         "order": [[ 2, "asc" ]],
         "aoColumnDefs": [
             {
@@ -47,4 +49,9 @@ $(document).ready(function() {
         // Redraw the table
         table.draw();
     });
+
+    // Crude way to deal with resizing from images
+    setTimeout(function() {
+         $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+    }, 500);
 });

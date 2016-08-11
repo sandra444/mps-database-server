@@ -36,29 +36,12 @@
                 </tr>
             </thead>
 
-            <tfoot>
-                <tr>
-                    <th>View/Edit</th>
-                    <th>Chip Setup ID / Barcode</th>
-                    <th>Study</th>
-                    <th>Date</th>
-                    <th>Device</th>
-                    <th>Organ Model</th>
-{#                    <th>Chip Test Type</th>#}
-                    <th>Compound</th>
-                    <th>Scientist</th>
-                    <th>Creator</th>
-                    <th>Group</th>
-                    <th>Review</th>
-                </tr>
-            </tfoot>
-
             <tbody>
             {% for setup in object_list %}
                 <tr class="compound" id={{ setup.id }} name={{ setup.id }}>
                     <td><a class="btn btn-primary" href="{{ setup.id }}">View/Edit</a></td>
                     <td>{{ setup.assay_chip_id }}</td>
-                    <td><a href="/assays/organchipstudy/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
+                    <td><a href="/assays/study/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
                     <td>{{ setup.setup_date|date:"M d, Y" }}</td>
                     <td>{{ setup.device }}</td>
                     <td>{{ setup.organ_model }} {{ setup.organ_model_protocol|default:'' }}</td>

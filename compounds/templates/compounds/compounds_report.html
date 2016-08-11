@@ -49,21 +49,6 @@
                 </tr>
             </thead>
 
-            <tfoot>
-                <tr>
-                    <th>Select</th>
-                    <th>Name</th>
-                    <th>CHEMBL ID</th>
-                    <th>Synonyms</th>
-                    <th>Molecular Weight</th>
-                    <th>LogP</th>
-                    <th>Rule of 5 Violations</th>
-                    <th>Known Drug</th>
-                    <th>Project</th>
-                    <th>Image</th>
-                </tr>
-            </tfoot>
-
             <tbody>
             <form autocomplete="off">
             {% for compound in object_list %}
@@ -100,7 +85,13 @@
                     </td>
                     {# TODO Tags field is deprecated #}
 {#                    <td>{{ compound.tags|default_if_none:"" }}</td>#}
-                    <td><img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}"></td>
+                    <td>
+                      {% if compound.chemblid %}
+                          <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}">
+                      {% else %}
+                        <span style="width: 128px; height: 128px;" class="glyphicon glyphicon-file text-warning" aria-hidden="true"></span>
+                      {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </form>
@@ -122,12 +113,6 @@
                     </tr>
                 </thead>
 
-                <tfoot>
-                    <tr>
-                        <th>Compounds</th>
-                    </tr>
-                </tfoot>
-
                 <tbody id="selections">
                 </tbody>
         </table>
@@ -138,7 +123,7 @@
     {# Right now the fields of a report are static, but that will likely change #}
     {# Need to switch to hide full #}
     <div hidden id="graphic" class="padded-bottom">
-        <div class="row text-center">
+        <div class="row text-center padded-bottom">
             <a href="#filter"  id="back" class="btn btn-xlarge btn-info">
                 <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
                 Back to Selection

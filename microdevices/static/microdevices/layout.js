@@ -1,6 +1,5 @@
 // TODO add previews for images
 $(document).ready(function () {
-
     var insert_into = $('fieldset')[2];
 
     if ($('#footer')[0]) {
@@ -87,10 +86,10 @@ $(document).ready(function () {
         build_table()
     });
 
-    $('#id_row_labels').change( function() {
+    $('#id_row_labels').change(function() {
         build_table();
     });
-    $('#id_column_labels').change( function() {
+    $('#id_column_labels').change(function() {
         build_table()
     });
 

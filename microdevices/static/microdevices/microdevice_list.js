@@ -24,7 +24,9 @@ $(document).ready(function() {
 
     $('#microdevices').DataTable({
         "iDisplayLength": 100,
-        "sDom": '<T<"clear">lfrtip>',
+        "sDom": '<B<"row">lfrtip>',
+        fixedHeader: true,
+        responsive: true,
         "order": [[ 2, "asc" ]],
         "aoColumnDefs": [
             {
@@ -40,8 +42,10 @@ $(document).ready(function() {
 
     var models = $('#models').DataTable({
         "iDisplayLength": 100,
-        "sDom": '<T<"clear">lfrtip>',
-        "order": [[ 2, "asc" ]],
+        "sDom": '<B<"row">lfrtip>',
+        fixedHeader: true,
+        responsive: true,
+        "order": [[3, "asc"], [2, "asc"]],
         "aoColumnDefs": [
             {
                 "bSortable": false,
