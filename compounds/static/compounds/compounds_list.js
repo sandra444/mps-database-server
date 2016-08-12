@@ -18,6 +18,18 @@ $(document).ready(function() {
         }
     });
 
+    // Shrinks the name column when on small screen (illegible otherwise)
+    function resize() {
+        if($(document).width() < 335) {
+            $('.text-wrapped').css('font-size', '11px');
+            $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+        }
+        else {
+            $('.text-wrapped').css('font-size', '14px');
+            $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+        }
+    }
+
     var table = $('#compounds').DataTable({
         dom: 'B<"row">lfrtip',
         fixedHeader: true,
@@ -34,12 +46,23 @@ $(document).ready(function() {
                 "searchable": true
             },
             {
-                "width": "10%",
-                "targets": [0]
+                "width": "5%",
+                "targets": [0, 1]
+            },
+            {
+                responsivePriority: 1,
+                targets: [0, 2]
+            },
+            {
+                responsivePriority: 2,
+                targets: [1]
             }
         ],
         "iDisplayLength": 25
     });
+
+    // Initial resize
+    resize();
 
     $('.table-filter').click(function() {
         filters['MPS'] = show_mps.prop('checked');
@@ -48,6 +71,11 @@ $(document).ready(function() {
 
         // Redraw the table
         table.draw();
+    });
+
+    // Run resize function on resize
+    $(window).resize(function() {
+      resize();
     });
 
     // Crude way to deal with resizing from images
