@@ -19,6 +19,10 @@ $(document).ready(function () {
     // Call datatables for glossary
     $('#glossary_table').DataTable({
         dom: 'B<"row">lfrtip',
-        "iDisplayLength": 10
+        "iDisplayLength": 10,
+        responsive: true,
+        fixedHeader: {
+            headerOffset: 50
+        }
     });
 });

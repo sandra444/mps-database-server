@@ -22,10 +22,18 @@
   <link rel="stylesheet" href="{% static "css/bootstrap-theme.min.css" %}">
   <!-- DataTables CSS -->
   <link rel="stylesheet" type="text/css" href="{% static "css/jquery.dataTables.min.css" %}">
-  <link rel="stylesheet" type="text/css" href="{% static "css/dataTables.tableTools.min.css" %}">
+  <link rel="stylesheet" type="text/css" href="{% static "css/buttons.dataTables.min.css" %}">
+  <link rel="stylesheet" type="text/css" href="{% static "css/fixedHeader.dataTables.min.css" %}">
+  <link rel="stylesheet" type="text/css" href="{% static "css/responsive.dataTables.min.css" %}">
   <!-- DataTables -->
   <script type="text/javascript" charset="utf8" src="{% static "js/jquery.dataTables.min.js" %}"></script>
-  <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.tableTools.min.js" %}"></script>
+  <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.responsive.min.js" %}"></script>
+  <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.buttons.min.js" %}"></script>
+  <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.fixedHeader.min.js" %}"></script>
+  {# We will just be using html5 for buttons (no fallback) #}
+  {# <script type="text/javascript" charset="utf8" src="{% static "js/buttons.flash.min.js" %}"></script>#}
+  <script type="text/javascript" charset="utf8" src="{% static "js/buttons.html5.min.js" %}"></script>
+  <script type="text/javascript" charset="utf8" src="{% static "js/buttons.print.min.js" %}"></script>
   <script type="text/javascript" charset="utf8" src="{% static "js/datatable_options.js" %}"></script>
   <!-- Custom CSS Rules -->
   <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
@@ -423,8 +431,55 @@
             A <b>Chip Readout</b> describes the assays performed and the raw values from these assays
         </li>
     </ul>
+    <h4>Adding or Editing Assays</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Before uploading data, please be sure to add every assay performed in the section entitled <b>Assays</b>
+        </li>
+        <li class="list-group-item">
+            The column for <b>Assay</b> specifies what assay was performed
+            <br>
+            If an assay you desire is not on the list, please contact an administrator or post in <b>Feedback</b>
+        </li>
+        <li class="list-group-item">
+            The column <b>Object of Interest</b> clarifies what the <b>Object</b> section of uploaded data describes
+        </li>
+        <li class="list-group-item">
+            The <b>Object</b> section differentiates data points that come from the same device but were measured in a distinct way
+            <br>
+            For instance, when performing an imaging assay different fields may be used. In this case, <b>Field</b> would be selected and the <b>Object</b> column of the uploaded file would have entries like "1" or "2" for Field 1 and Field 2 respectively
+        </li>
+        <li class="list-group-item">
+            The following is a list of options for <b>Object of Interest</b>
+            <ul>
+                <li><b>Field</b>: Used when multiple fields are used during imaging</li>
+                <li><b>Colony</b>: Used when different cell colonies are viewed</li>
+                <li><b>Media</b>: Used to indicate that this assay takes samples from a device's effluent</li>
+                <li><b>Other</b>: Used when the other options do not accurately describe the object of interest</li>
+            </ul>
+        </li>
+        <li class="list-group-item">
+          The column <b>Reader</b> shows what reader device was used
+          <br>
+          If the reader you used is not on the list, please contact an administrator or post in <b>Feedback</b>
+        </li>
+        <li class="list-group-item">
+          The column for <b>Readout Unit</b> shows what units the data (namely the data you wish to upload) from the assay were recorded in
+          <br>
+          If a unit you need is not on the list, please contact an administrator or post in <b>Feedback</b>
+        </li>
+        <li class="list-group-item">
+            If you need another row, click the <b>Add Assay</b> button
+        </li>
+    </ul>
     <h4>Uploading Data</h4>
     <ul class="list-group">
+        <li class="list-group-item">
+            <h4>If you are uploading data for a single Readout, use the .csv format</h4>
+              In Excel, you will see an option reading "CSV (Comma delimited)" in the "save as type" drop down in the "save as" menu
+              <br>
+              If you want to upload data for multiple Readouts, see <a href="#bulk"> Uploading an Excel File of Readout Data</a>
+        </li>
         <li class="list-group-item">
             <h4>The format for chip uploads is as follows:</h4>
             <table class="table table-bordered small" style="background-color: #F0FFFF;">
@@ -666,8 +721,55 @@
             A <b>Plate Readout</b> describes the assays performed and the raw values from these assays
         </li>
     </ul>
+    <h4>Adding or Editing Assays</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Before uploading data, please be sure to add every assay performed in the section entitled <b>Assays</b>
+        </li>
+        <li class="list-group-item">
+            The column for <b>Assay</b> specifies what assay was performed
+            <br>
+            If an assay you desire is not on the list, please contact an administrator or post in <b>Feedback</b>
+        </li>
+        <li class="list-group-item">
+            The column <b>Object of Interest</b> clarifies what the <b>Object</b> section of uploaded data describes
+        </li>
+        <li class="list-group-item">
+            The <b>Object</b> section differentiates data points that come from the same device but were measured in a distinct way
+            <br>
+            For instance, when performing an imaging assay different fields may be used. In this case, <b>Field</b> would be selected and the <b>Object</b> column of the uploaded file would have entries like "1" or "2" for Field 1 and Field 2 respectively
+        </li>
+        <li class="list-group-item">
+            The following is a list of options for <b>Object of Interest</b>
+            <ul>
+                <li><b>Field</b>: Used when multiple fields are used during imaging</li>
+                <li><b>Colony</b>: Used when different cell colonies are viewed</li>
+                <li><b>Media</b>: Used to indicate that this assay takes samples from a device's effluent</li>
+                <li><b>Other</b>: Used when the other options do not accurately describe the object of interest</li>
+            </ul>
+        </li>
+        <li class="list-group-item">
+          The column <b>Reader</b> shows what reader device was used
+          <br>
+          If the reader you used is not on the list, please contact an administrator or post in <b>Feedback</b>
+        </li>
+        <li class="list-group-item">
+          The column for <b>Readout Unit</b> shows what units the data (namely the data you wish to upload) from the assay were recorded in
+          <br>
+          If a unit you need is not on the list, please contact an administrator or post in <b>Feedback</b>
+        </li>
+        <li class="list-group-item">
+            If you need another row, click the <b>Add Assay</b> button
+        </li>
+    </ul>
     <h4>Uploading Data</h4>
     <ul class="list-group">
+        <li class="list-group-item">
+            <h4>If you are uploading data for a single Readout, use the .csv format</h4>
+              In Excel, you will see an option reading "CSV (Comma delimited)" in the "save as type" drop down in the "save as" menu
+              <br>
+              If you want to upload data for multiple Readouts, see <a href="#bulk"> Uploading an Excel File of Readout Data</a>
+        </li>
         <li class="list-group-item">
             <h4>You may choose between <b>Block</b> and <b>Tabular</b> formats</h4>
         </li>
@@ -1510,14 +1612,6 @@
         <th>Ref</th>
       </tr>
     </thead>
-
-    <tfoot>
-      <tr>
-        <th>Term</th>
-        <th>Definition</th>
-        <th>Ref</th>
-      </tr>
-    </tfoot>
 
     <tbody>
       {% for term in glossary %}
