@@ -1,7 +1,7 @@
 $(document).ready(function() {
     $('#studyconfigurations').DataTable( {
         dom: 'B<"row">lfrtip',
-        fixedHeader: true,
+        fixedHeader: {headerOffset: 50},
         responsive: true,
         "iDisplayLength": 50,
         "order": [[ 1, "asc" ]],

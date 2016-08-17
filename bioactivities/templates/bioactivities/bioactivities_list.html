@@ -92,7 +92,7 @@
         $(document).ready(function() {
             $('#bioactivities').DataTable( {
                 dom: 'B<"row">lfrtip',
-                fixedHeader: true,
+                fixedHeader: {headerOffset: 50},
                 responsive: true,
                 "iDisplayLength": 100,
                 // Initially sort on start date (descending), not ID

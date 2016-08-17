@@ -32,7 +32,7 @@ $(document).ready(function() {
 
     var table = $('#compounds').DataTable({
         dom: 'B<"row">lfrtip',
-        fixedHeader: true,
+        fixedHeader: {headerOffset: 50},
         responsive: true,
         "order": [[ 2, "asc" ]],
         "aoColumnDefs": [
