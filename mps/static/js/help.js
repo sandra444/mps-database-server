@@ -4,9 +4,11 @@ $(document).ready(function () {
 
     $('.navbar li a').click(function(event) {
         event.preventDefault();
-    $('html, body').animate({
-            scrollTop: $($(this).attr('href')).offset().top -offset
-        }, 500);
+        if ($($(this).attr('href'))[0]) {
+            $('html, body').animate({
+                scrollTop: $($(this).attr('href')).offset().top -offset
+            }, 500);
+        }
     });
 
     var initial_hash = window.location.hash;
