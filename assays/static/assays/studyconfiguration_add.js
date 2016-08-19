@@ -48,8 +48,8 @@ $(document).ready(function () {
             var sequence = $('#id_studymodel_set-'+ i +'-sequence_number').val();
             // Get the outputs
             var output = $('#id_studymodel_set-'+ i +'-output').val();
-            // Get the integration mode (1 for connected and 0 for not connected)
-            var connection = Math.floor($('#id_studymodel_set-'+ i +'-integration_mode').val());
+            // Get the integration mode (coupling) (1 for connected and 0 for not connected)
+            var connection = Math.floor($('#id_studymodel_set-'+ i + '-integration_mode').val());
 
             // Only add complete nodes
             if (label && organ && sequence) {

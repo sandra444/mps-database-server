@@ -483,13 +483,14 @@ class AssayPlateTestResult(FlaggableModel):
 
 
 class StudyConfiguration(LockableModel):
-    """Defines how chips are connected together (for integrated studies to come)"""
+    """Defines how chips are connected together (for integrated studies)"""
 
     class Meta(object):
         verbose_name = 'Study Configuration'
 
     # Length subject to change
     name = models.CharField(max_length=50)
+    # Subject to change, when would we ever want an individual configuration?
     study_format = models.CharField(
         max_length=11,
         choices=(('individual', 'Individual'), ('integrated', 'Integrated'),)
@@ -518,7 +519,7 @@ class StudyModel(models.Model):
     sequence_number = models.IntegerField()
     output = models.CharField(max_length=20, blank=True, default='')
     # Subject to change
-    integration_mode = models.CharField(max_length=13, choices=(('0', 'Not Connected'), ('1', 'Connected')))
+    integration_mode = models.CharField(max_length=13, default='1', choices=(('0', 'Functional'), ('1', 'Physical')))
 
 
 class AssayRun(RestrictedModel):

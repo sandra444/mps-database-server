@@ -141,7 +141,7 @@
             {% endfor %}
         {% endif %}
 
-        <p>Define model outputs by separating labels with dashes: "AB-CD" means the model is connected to AB and CD.</p>
+        <p>Define model outputs by separating labels with dashes: "AB-CD" means the model AB is connected to model CD.</p>
         <a id="add_button-studymodel_set" class="btn btn-success" role="button">Add Model</a>
 
         <table class="table table-striped inlines" id="studymodel_set-group" name="studymodels">
@@ -151,7 +151,7 @@
                     <th>Organ</th>
                     <th>Sequence Number</th>
                     <th>Output</th>
-                    <th>Integration Mode</th>
+                    <th>Coupling</th>
                     <th>Delete</th>
                 </tr>
             </thead>
@@ -190,9 +190,9 @@
 
     <div class="well">
         <p>
-            <span class="text-success">Green = Connected</span>
+            <span class="text-success">Green = Physical (Connected)</span>
             &nbsp;&nbsp;&nbsp;&nbsp;
-            <span class="text-danger">Red = Not Connected</span>
+            <span class="text-danger">Red = Functional (Not Connected)</span>
         </p>
 
         <p class="lead text-info">
