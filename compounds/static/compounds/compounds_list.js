@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    // TODO REFACTOR PROJECT FILTERS
     var show_mps = $('#show_mps');
     var show_epa = $('#show_epa');
     var show_unassigned = $('#show_unassigned');

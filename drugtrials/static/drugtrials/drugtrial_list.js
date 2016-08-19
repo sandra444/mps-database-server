@@ -57,6 +57,10 @@ $(document).ready(function() {
                 "targets": [11],
                 "visible": false,
                 "searchable": true
+            },
+            {
+                responsivePriority: 1,
+                targets: [0, 2]
             }
         ]
     });
