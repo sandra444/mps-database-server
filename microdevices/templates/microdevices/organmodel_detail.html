@@ -72,7 +72,7 @@
                     </td>
                     <td>
                         {% if object.model_image %}
-                            <img src="/media/{{ object.model_image }}">
+                            <img class="img-responsive" src="/media/{{ object.model_image }}">
                         {% else %}
                             No Image Available
                         {% endif %}
@@ -84,7 +84,7 @@
                     </td>
                     <td>
                         {% if object.device.device_image %}
-                            <img src="/media/{{ object.device.device_image }}">
+                            <img class="img-responsive" src="/media/{{ object.device.device_image }}">
                         {% else %}
                             No Image Available
                         {% endif %}
