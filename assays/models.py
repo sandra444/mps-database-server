@@ -547,8 +547,21 @@ class AssayRun(RestrictedModel):
                                     help_text="Standard format 'CenterID-YYYY-MM-DD-Name-###'")
     description = models.TextField(blank=True, default='')
 
-    file = models.FileField(upload_to='study_protocol', verbose_name='Protocol File',
-                            blank=True, null=True, help_text='Protocol File for Study')
+    protocol = models.FileField(
+        upload_to='study_protocol',
+        verbose_name='Protocol File',
+        blank=True,
+        null=True,
+        help_text='Protocol File for Study'
+    )
+
+    # File (an Excel file, I assume) of supporting data
+    supporting_data = models.FileField(
+        upload_to='supporting_data',
+        blank=True,
+        null=True,
+        help_text='Supporting Data for Study'
+    )
 
     # Image for the study (some illustrative image)
     image = models.ImageField(upload_to='studies', null=True, blank=True)
