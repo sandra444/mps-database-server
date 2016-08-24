@@ -493,7 +493,8 @@ class StudyConfiguration(LockableModel):
     # Subject to change, when would we ever want an individual configuration?
     study_format = models.CharField(
         max_length=11,
-        choices=(('individual', 'Individual'), ('integrated', 'Integrated'),)
+        choices=(('individual', 'Individual'), ('integrated', 'Integrated'),),
+        default='integrated'
     )
     media_composition = models.CharField(max_length=1000, blank=True, default='')
     hardware_description = models.CharField(max_length=1000, blank=True, default='')
