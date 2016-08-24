@@ -9,12 +9,12 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li><a href="/assays/assaylayout/">Assay Layouts</a></li>
+    <li><a href="/assays/assaylayout/">Plate Layouts</a></li>
     <li class="active">
         {% if object %}
             Edit <em>{{ object }}</em>
         {% else %}
-            Add Assay Layout
+            Add Plate Layout
         {% endif %}
     </li>
 {% endblock %}
@@ -34,7 +34,7 @@
 
     <div class="container">
     <h1>
-        Add Assay Layout
+        Add Plate Layout
 {% endif %}
     <br>
     {% csrf_token %}
@@ -43,7 +43,7 @@
 {##}
         {# TODO MUST FIND WAY TO HANDLE CLONING BUTTONS #}
 {#        {% if update %}#}
-            {# An assay layout clone will be handled in javascript #}
+            {# An Plate Layout clone will be handled in javascript #}
 {#            <a role="button" class="btn btn-info" href="/assays/assaylayout/add?base={{ object.id }}">Clone Base</a>#}
 {#            <a role="button" class="btn btn-info" href="/assays/assaylayout/add?clone={{ object.id }}">Clone All</a>#}
 {#            <a role="button" class="btn btn-danger pull-right readjust-pulled" href="delete/">Delete</a>#}
@@ -58,7 +58,7 @@
 
     {% include 'tracking.html' %}
 
-    <legend>Assay Layout Details</legend>
+    <legend>Plate Layout Details</legend>
 
     {% if form.layout_name.errors %}
         {% for error in form.layout_name.errors %}

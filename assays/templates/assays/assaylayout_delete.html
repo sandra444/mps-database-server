@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block breadcrumbs %}
-    <li><a href="/assays/assaylayout/">Assay Layouts</a></li>
+    <li><a href="/assays/assaylayout/">Plate Layouts</a></li>
     <li>
         <a href="{{ object.get_absolute_url }}"><em>{{ object }}</em></a>
     </li>
@@ -10,7 +10,7 @@
 
 {% block content %}
     <form method="post">{% csrf_token %}
-        <h2 class="text-danger">Are you sure you want to delete the Assay Layout:<br><b>{{ object }}</b>?</h2>
+        <h2 class="text-danger">Are you sure you want to delete the Plate Layout:<br><b>{{ object }}</b>?</h2>
 
         <hr>
 
