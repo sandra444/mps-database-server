@@ -8,12 +8,12 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li><a href="/assays/studyconfiguration">Study Configurations</a></li>
+    <li><a href="/assays/studyconfiguration">Integrated Study Configurations</a></li>
     <li class="active">
         {% if object %}
              Edit Configuration <em>{{ object.name }}</em>
         {% else %}
-            Add Study Configuration
+            Add Integrated Study Configuration
         {% endif %}
     </li>
 {% endblock %}
@@ -28,7 +28,7 @@
         <form class="form-horizontal" method="post" >
 
         <h1>
-            Add Study Configuration
+            Add Integrated Study Configuration
     {% endif %}
         <br>
         {% csrf_token %}
@@ -42,7 +42,7 @@
 
         {% include 'tracking.html' %}
 
-        <legend>Study Configuration Details</legend>
+        <legend>Integrated Study Configuration Details</legend>
 
         {% if form.name.errors %}
             {% for error in form.name.errors %}
@@ -59,24 +59,6 @@
             <label for="name" class="col-sm-2 control-label">Name*</label>
             <div class="col-sm-10">
                 {{ form.name }}
-            </div>
-        </div>
-
-        {% if form.study_format.errors %}
-            {% for error in form.study_format.errors %}
-                <div class="alert alert-danger" role="alert">
-                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                    <span class="sr-only">Error:</span>
-                    {{error}}
-                </div>
-            {% endfor %}
-        <div class="form-group has-error">
-        {% else %}
-        <div class="form-group">
-        {% endif %}
-            <label for="study_format" class="col-sm-2 control-label">Study Format*</label>
-            <div class="col-sm-10">
-                {{ form.study_format }}
             </div>
         </div>
 
