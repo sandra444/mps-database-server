@@ -61,10 +61,15 @@
                              style="height: 70px;">
                     </a>
                     <div class="caption">
-                        <a href="/microdevices/"
-                           class="btn btn-primary btn-large">
-                            Models &amp; Devices
-                        </a>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                Models &amp; Devices <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li title="View organ models"><a href="/microdevices/model">View Models</a></li>
+                                <li title="View microdevices"><a href="/microdevices/device">View Devices</a></li>
+                            </ul>
+                          </div>
                     </div>
                 </div>
             </div>
@@ -76,19 +81,19 @@
                     </a>
                     <div class="caption">
                         <div class="btn-group">
-                        <button type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            Compounds <span class="caret"></span>
-                          </button>
-                          <ul class="dropdown-menu" role="menu">
-                            <li><a href="/compounds/">View Chemical Data</a></li>
-                            <li><a href="/bioactivities/table/#filter">View Bioactivities</a></li>
-                            <li><a href="/drugtrials/">View Drug Trials</a></li>
-                            <li><a href="/adverse_events/">View Adverse Events</a></li>
-                            <li class="divider"></li>
-                            <li><a href="/compare_adverse_events/">Compare Adverse Events</a></li>
-                            <li><a href="/compounds/report/#filter">Compound Report</a></li>
-                          </ul>
-                        </div>
+                            <button type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                Compounds <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="/compounds/">View Chemical Data</a></li>
+                                <li><a href="/bioactivities/table/#filter">View Bioactivities</a></li>
+                                <li><a href="/drugtrials/">View Drug Trials</a></li>
+                                <li><a href="/adverse_events/">View Adverse Events</a></li>
+                                <li class="divider"></li>
+                                <li><a href="/compare_adverse_events/">Compare Adverse Events</a></li>
+                                <li><a href="/compounds/report/#filter">Compound Report</a></li>
+                            </ul>
+                          </div>
                     </div>
                 </div>
             </div>
