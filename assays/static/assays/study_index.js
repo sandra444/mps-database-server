@@ -13,7 +13,7 @@ $(document).ready(function() {
             $(table_id).DataTable({
                 "iDisplayLength": 400,
                 dom: 'rt',
-                fixedHeader: true,
+                fixedHeader: {headerOffset: 50},
                 responsive: true,
                 // Initially sort on start date (descending), not ID
                 "order": [[1, "asc"], [2, "desc"]],

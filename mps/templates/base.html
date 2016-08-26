@@ -166,7 +166,7 @@
 
 <body>
   <!-- Fixed navbar -->
-  <nav class="navbar navbar-default navbar-static-top" role="navigation">
+  <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -183,23 +183,21 @@
       <ul class="nav navbar-nav">
         {#      <li title="Administrative interface for authorized users only"><a href="/admin">Admin</a></li>#}
         <li title="Add, edit, or view assay data" class="dropdown">
-        <a class="dropdown-toggle">Assays<span class="caret"></span></a>
+        <a class="dropdown-toggle">Studies<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
           <li class="dropdown-header">Add/Edit Studies</li>
           {# <li title="Index of all the studies created by you"><a href="/assays/user_index/">Your Studies</a></li>#}
           <li title="Index of all the studies created by groups you are a member of">
               <a href="/assays/editable_studies/">Add/Edit Studies</a>
           </li>
-          <li class="divider"></li>
-          <li class="dropdown-header">Add Study Data</li>
           <li><a href="/assays/study/add/">Add Study</a></li>
-          <li><a href="/assays/studyconfiguration/add/">Add Study Configuration</a></li>
-          <li><a href="/assays/assaylayout/add/">Add Assay Layout</a></li>
+          <li><a href="/assays/assaylayout/add/">Add Plate Layout</a></li>
+          <li><a href="/assays/studyconfiguration/add/">Add Integrated Study Configuration</a></li>
           <li class="divider"></li>
           <li class="dropdown-header">View/Edit Study Data</li>
           <li><a href="/assays/study/">All Studies</a></li>
-          <li><a href="/assays/studyconfiguration/">Study Configurations</a></li>
-          <li><a href="/assays/assaylayout/">Assay Layouts</a></li>
+          <li><a href="/assays/assaylayout/">Plate Layouts</a></li>
+          <li><a href="/assays/studyconfiguration/">Integrated Study Configurations</a></li>
           <li class="dropdown-submenu">
           <a href="#">Chips &amp; Plates <span class="caret"></span></a>
           <ul class="dropdown-menu">
@@ -223,10 +221,22 @@
           </li>
         </ul>
         </li>
+        <li title="Analyze bioactivity and drugtrial data" class="dropdown">
+        <a class="dropdown-toggle">Analysis<span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+          <li title="Generate a heatmap for selected bioactivity data">
+              <a href="/bioactivities/heatmap/#filter">Heatmap</a>
+          </li>
+          <li title="Generate a dendrogram for selected compound/bioactivity data">
+              <a href="/bioactivities/cluster/#filter">Cluster</a>
+          </li>
+        </ul>
+        </li>
         <li title="View/add organ models and microdevices" class="dropdown">
         <a class="dropdown-toggle">Models<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
-          <li title="View organ models and microdevices"><a href="/microdevices/">View Models &amp; Devices</a></li>
+          <li title="View organ models"><a href="/microdevices/model">View Models</a></li>
+          <li title="View microdevices"><a href="/microdevices/device">View Devices</a></li>
           <li class="divider"></li>
           <li class="dropdown-header">Requires Permission</li>
           <li><a href="/microdevices/device/add/">Add Microdevice</a></li>
@@ -263,17 +273,6 @@
           <li><a href="/cellsamples/cellsample/add/">Add Cell Sample</a></li>
         </ul>
         </li>
-        <li title="Analyze bioactivity and drugtrial data" class="dropdown">
-        <a class="dropdown-toggle">Analysis<span class="caret"></span></a>
-        <ul class="dropdown-menu" role="menu">
-          <li title="Generate a heatmap for selected bioactivity data">
-              <a href="/bioactivities/heatmap/#filter">Heatmap</a>
-          </li>
-          <li title="Generate a dendrogram for selected compound/bioactivity data">
-              <a href="/bioactivities/cluster/#filter">Cluster</a>
-          </li>
-        </ul>
-        </li>
         <li title="View help">
             <a id="view_help" class="navbar-help"
                onclick="window.open('/help/',
@@ -308,7 +307,7 @@
     </div>
   </nav>
 
-  <div id="page">
+  <div id="page" style="margin-top: 70px;">
 
   {# Have yet to use sidebar #}
 {#  <div id="sidebar">#}
@@ -341,8 +340,6 @@
   <div id="fluid-content" class="fluid-container">
 
   {% block fluid-content %}{% endblock %}
-  </div>
-
   </div>
 
   <div id="footer" class="container hidden-print">
@@ -378,6 +375,7 @@
         </div>
       </div>
     </footer>
+  </div>
   </div>
 </body>
 </html>

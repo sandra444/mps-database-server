@@ -879,7 +879,10 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
 
         Validate unique, existing PLATE READOUTS
         """
-        setup_pk = int(self.data.get('setup'))
+        if self.data.get('setup', ''):
+            setup_pk = int(self.data.get('setup'))
+        else:
+            raise forms.ValidationError('Please choose a plate setup.')
         setup_id = AssayPlateSetup.objects.get(pk=setup_pk).assay_plate_id
 
         # TODO REVIEW
@@ -1099,7 +1102,10 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
 
     def clean(self):
         """Validate unique, existing Chip Readout IDs"""
-        setup_pk = int(self.data.get('chip_setup'))
+        if self.data.get('chip_setup', ''):
+            setup_pk = int(self.data.get('chip_setup'))
+        else:
+            raise forms.ValidationError('Please choose a chip setup.')
         setup_id = AssayChipSetup.objects.get(pk=setup_pk).assay_chip_id
 
         # Throw error if headers is not valid

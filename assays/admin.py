@@ -1983,16 +1983,14 @@ class StudyConfigurationAdmin(LockableAdmin):
     form = StudyConfigurationForm
     save_on_top = True
     list_per_page = 300
-    list_display = ('name', 'study_format',)
+    list_display = ('name',)
     fieldsets = (
         (
             'Study Configuration', {
                 'fields': (
                     'name',
-                    'study_format',
                     'media_composition',
                     'hardware_description',
-                    # 'image',
                 )
             }
         ),

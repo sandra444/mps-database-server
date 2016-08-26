@@ -4,9 +4,11 @@ $(document).ready(function () {
 
     $('.navbar li a').click(function(event) {
         event.preventDefault();
-    $('html, body').animate({
-            scrollTop: $($(this).attr('href')).offset().top -offset
-        }, 500);
+        if ($($(this).attr('href'))[0]) {
+            $('html, body').animate({
+                scrollTop: $($(this).attr('href')).offset().top -offset
+            }, 500);
+        }
     });
 
     var initial_hash = window.location.hash;
@@ -19,6 +21,10 @@ $(document).ready(function () {
     // Call datatables for glossary
     $('#glossary_table').DataTable({
         dom: 'B<"row">lfrtip',
-        "iDisplayLength": 10
+        "iDisplayLength": 10,
+        responsive: true,
+        fixedHeader: {
+            headerOffset: 50
+        }
     });
 });

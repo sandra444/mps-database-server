@@ -483,17 +483,21 @@ class AssayPlateTestResult(FlaggableModel):
 
 
 class StudyConfiguration(LockableModel):
-    """Defines how chips are connected together (for integrated studies to come)"""
+    """Defines how chips are connected together (for integrated studies)"""
 
     class Meta(object):
         verbose_name = 'Study Configuration'
 
     # Length subject to change
     name = models.CharField(max_length=50)
-    study_format = models.CharField(
-        max_length=11,
-        choices=(('individual', 'Individual'), ('integrated', 'Integrated'),)
-    )
+
+    # DEPRECATED when would we ever want an individual configuration?
+    # study_format = models.CharField(
+    #     max_length=11,
+    #     choices=(('individual', 'Individual'), ('integrated', 'Integrated'),),
+    #     default='integrated'
+    # )
+
     media_composition = models.CharField(max_length=1000, blank=True, default='')
     hardware_description = models.CharField(max_length=1000, blank=True, default='')
     # Subject to removal
@@ -518,7 +522,7 @@ class StudyModel(models.Model):
     sequence_number = models.IntegerField()
     output = models.CharField(max_length=20, blank=True, default='')
     # Subject to change
-    integration_mode = models.CharField(max_length=13, choices=(('0', 'Not Connected'), ('1', 'Connected')))
+    integration_mode = models.CharField(max_length=13, default='1', choices=(('0', 'Functional'), ('1', 'Physical')))
 
 
 class AssayRun(RestrictedModel):
@@ -546,8 +550,21 @@ class AssayRun(RestrictedModel):
                                     help_text="Standard format 'CenterID-YYYY-MM-DD-Name-###'")
     description = models.TextField(blank=True, default='')
 
-    file = models.FileField(upload_to='study_protocol', verbose_name='Protocol File',
-                            blank=True, null=True, help_text='Protocol File for Study')
+    protocol = models.FileField(
+        upload_to='study_protocol',
+        verbose_name='Protocol File',
+        blank=True,
+        null=True,
+        help_text='Protocol File for Study'
+    )
+
+    # File (an Excel file, I assume) of supporting data
+    supporting_data = models.FileField(
+        upload_to='supporting_data',
+        blank=True,
+        null=True,
+        help_text='Supporting Data for Study'
+    )
 
     # Image for the study (some illustrative image)
     image = models.ImageField(upload_to='studies', null=True, blank=True)

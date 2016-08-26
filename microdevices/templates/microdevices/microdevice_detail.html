@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block breadcrumbs %}
-    <li><a href="/microdevices/">Devices &amp; Organ Models</a></li>
+    <li><a href="/microdevices/device">Devices</a></li>
     <li class="active">{{ object.device_name }}</li>
 {% endblock %}
 
@@ -58,7 +58,7 @@
                 </td>
                 <td>
                     {% if object.device_image %}
-                        <img src="/media/{{ object.device_image }}">
+                        <img class="img-responsive" src="/media/{{ object.device_image }}">
                     {% else %}
                         No Image Available
                     {% endif %}
@@ -70,7 +70,7 @@
                 </td>
                 <td>
                     {% if object.device_cross_section_image %}
-                        <img src="/media/{{ object.device_cross_section_image }}">
+                        <img class="img-responsive" src="/media/{{ object.device_cross_section_image }}">
                     {% else %}
                         No Image Available
                     {% endif %}

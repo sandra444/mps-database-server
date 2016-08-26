@@ -11,35 +11,36 @@ $(document).ready(function() {
 
     // This function filters the dataTable rows
     $.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
+        if (oSettings.nTable.getAttribute('id') != 'models') {
+            return true;
+        }
+
         for (var filter in filters) {
-            if (filters[filter] && aData[5].indexOf(filter) > -1) {
+            if (filters[filter] && aData[6].indexOf(filter) > -1) {
                 return true;
             }
         }
     });
 
-    var adverse_events = $('#adverse_events').DataTable({
-        dom: 'B<"row">lfrtip',
+    var models = $('#models').DataTable({
+        "iDisplayLength": 100,
+        "sDom": '<B<"row">lfrtip>',
         fixedHeader: {headerOffset: 50},
         responsive: true,
-        "iDisplayLength": 50,
-        // Initially sort on compound and frequency
-        "order": [[ 1, "asc" ], [ 3, "desc"]],
-        // Try to improve speed
-        "deferRender": true,
+        "order": [[3, "asc"], [2, "asc"]],
         "aoColumnDefs": [
             {
                 "bSortable": false,
-                "aTargets": [0]
+                "aTargets": [0, 1]
+            },
+            {
+                'sortable': true,
+                'visible': false,
+                'targets': [6]
             },
             {
                 "width": "10%",
-                "targets": [0]
-            },
-            {
-                "targets": [5],
-                "visible": false,
-                "searchable": true
+                "targets": [0, 1]
             }
         ]
     });
@@ -50,6 +51,6 @@ $(document).ready(function() {
         filters['Unassigned'] = show_unassigned.prop('checked');
 
         // Redraw the table
-        adverse_events.draw();
+        models.draw();
     });
 });

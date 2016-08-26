@@ -46,7 +46,7 @@
                 <tr class="compound" id="{{ compound.id }}" name="{{ compound.name }}">
                     <td><a class="btn btn-primary" href="{{ compound.id }}">View</a></td>
                     <td><a class="btn btn-primary" href="{{ compound.id }}/update/">Edit</a></td>
-                    <td>{{ compound.name }}</td>
+                    <td class="text-wrapped">{{ compound.name }}</td>
                     <td><a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.chemblid }}">{{ compound.chemblid }}</a></td>
                     <td>{{ compound.synonyms }}</td>
                     <td>{{ compound.molecular_weight|default_if_none:"" }}</td>

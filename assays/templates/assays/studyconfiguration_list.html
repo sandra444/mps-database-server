@@ -6,14 +6,14 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li class="active">Study Configurations</li>
+    <li class="active">Integrated Study Configurations</li>
 {% endblock %}
 
 {% block content %}
     <div class="padded-bottom">
         <legend>
             <h2 class="text-center">
-                Study Configurations
+                Integrated Study Configurations
             </h2>
         </legend>
 
@@ -26,7 +26,6 @@
                 <tr>
                     <th>View/Edit</th>
                     <th>Name</th>
-                    <th>Study Format</th>
                     <th>Media Composition</th>
                     <th>Hardware Description</th>
                 </tr>
@@ -37,7 +36,6 @@
                 <tr class="studyconfiguration" id={{ configuration.id }} name={{ configuration.name }}>
                     <td><a class="btn btn-primary" href="{{ configuration.id }}">View/Edit</a></td>
                     <td>{{ configuration.name }}</td>
-                    <td>{{ configuration.study_format }}</td>
                     <td>{{ configuration.media_composition }}</td>
                     <td>{{ configuration.hardware_description }}</td>
                 </tr>

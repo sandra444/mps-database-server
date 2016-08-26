@@ -33,7 +33,7 @@ $(document).ready(function() {
 
     var drug_trials = $('#drugtrials').DataTable({
         dom: 'B<"row">lfrtip',
-        fixedHeader: true,
+        fixedHeader: {headerOffset: 50},
         responsive: true,
         "iDisplayLength": 50,
         "deferRender": true,
@@ -57,6 +57,10 @@ $(document).ready(function() {
                 "targets": [11],
                 "visible": false,
                 "searchable": true
+            },
+            {
+                responsivePriority: 1,
+                targets: [0, 2]
             }
         ]
     });

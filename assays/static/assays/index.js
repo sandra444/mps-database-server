@@ -1,7 +1,7 @@
 $(document).ready(function() {
     $('#studies').DataTable( {
         "iDisplayLength": 50,
-        fixedHeader: true,
+        fixedHeader: {headerOffset: 50},
         responsive: true,
         // Initially sort on start date (descending), not ID
         "order": [ 3, "desc" ],

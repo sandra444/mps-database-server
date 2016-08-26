@@ -6,64 +6,11 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li class="active">Devices &amp; Organ Models</li>
+    <li class="active">Devices</li>
 {% endblock %}
 
 {% block content %}
     <div class="padded-bottom">
-
-        <legend>
-            <h2 class="text-center">
-                Organ Models
-            </h2>
-        </legend>
-
-        <div class="row text-center padded-bottom">
-            <a href="/microdevices/model/add/" class="btn btn-lg btn-success" role="button">Add Model</a>
-        </div>
-
-        {% include 'project_filters.html' %}
-
-        <table hidden id="models" class="display" cellspacing="0" width="100%">
-            <thead>
-                <tr>
-                    <th>View</th>
-                    <th>Edit</th>
-                    <th>Model Name</th>
-                    <th>Organ</th>
-                    <th>Device</th>
-                    <th>Center</th>
-                    <th>Project</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-
-            <tbody>
-            {% for model in models %}
-                <tr class="model" id={{ model.id }} name={{ model.device_name }}>
-                    <td><a class="btn btn-primary" href="model/{{ model.id }}">View</a></td>
-                    <td><a class="btn btn-primary" href="model/{{ model.id }}/update/">Edit</a></td>
-                    <td>{{ model.model_name }}</td>
-                    <td>{{ model.organ|default_if_none:"" }}</td>
-                    <td><a href="device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
-                    <td>{{ model.center|default_if_none:"" }}</td>
-                    <td>
-                        {% if model.mps %}
-                            MPS
-                        {% endif %}
-                        {% if model.epa %}
-                            EPA
-                        {% endif %}
-                        {% if not model.epa and not model.mps %}
-                            Unassigned
-                        {% endif %}
-                    </td>
-                    <td>{{ model.description }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-
         <legend>
             <h2 class="text-center">
                 Devices
@@ -88,10 +35,10 @@
             </thead>
 
             <tbody>
-            {% for device in devices %}
+            {% for device in object_list %}
                 <tr class="device" id={{ device.id }} name={{ device.device_name }}>
-                    <td><a class="btn btn-primary" href="device/{{ device.id }}">View</a></td>
-                    <td><a class="btn btn-primary" href="device/{{ device.id }}/update/">Edit</a></td>
+                    <td><a class="btn btn-primary" href="{{ device.id }}">View</a></td>
+                    <td><a class="btn btn-primary" href="{{ device.id }}/update/">Edit</a></td>
                     <td>{{ device.device_name }}</td>
                     <td>{{ device.manufacturer|default_if_none:"" }}</td>
                     <td>{{ device.center|default_if_none:"" }}</td>
@@ -101,7 +48,6 @@
             {% endfor %}
             </tbody>
         </table>
-
     </div>
 
     <script src="{% static "js/display_datatable.js" %}"></script>

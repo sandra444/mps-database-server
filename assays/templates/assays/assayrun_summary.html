@@ -29,20 +29,32 @@
         </div>
     </div>
 
-    {% if object.description or object.study_configuration or object.file %}
+    {% if object.description or object.study_configuration or object.protocol or object.supporting_data %}
         <legend><h3>Description</h3></legend>
-        {{ object.description }}
+
+        {% if object.description %}
+            <p>
+                {{ object.description }}
+            </p>
+        {% endif %}
 
         {% if object.study_configuration %}
-            <br><br>
-            <b>Configuration:</b> {{ object.study_configuration }}
+            <p>
+                <b>Configuration:</b> {{ object.study_configuration }}
+            </p>
         {% endif %}
 
-        {% if object.file %}
-            <br><br>
-            <b>Protocol:</b> <a href="/media/{{ object.file }}">{{ object.file }}</a>
+        {% if object.protocol %}
+            <p>
+                <b>Protocol:</b> <a href="/media/{{ object.protocol }}">{{ object.protocol }}</a>
+            </p>
         {% endif %}
-        <br>
+
+        {% if object.supporting_data %}
+            <p>
+                <b>Supporting Data:</b> <a href="/media/{{ object.supporting_data }}">{{ object.supporting_data }}</a>
+            </p>
+        {% endif %}
     {% endif %}
 
     <legend><h3>Chip Setups</h3></legend>
@@ -145,7 +157,7 @@
                     <th class="hidden-print">View/Edit</th>
                     <th>Plate Setup ID / Barcode</th>
                     <th>Date</th>
-                    <th>Assay Layout</th>
+                    <th>Plate Layout</th>
                     <th>Creator</th>
                     <th>Review</th>
                 </tr>

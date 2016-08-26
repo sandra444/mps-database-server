@@ -1,7 +1,7 @@
 $(document).ready(function() {
     $('#layouts').DataTable( {
         dom: 'B<"row">lfrtip',
-        fixedHeader: true,
+        fixedHeader: {headerOffset: 50},
         responsive: true,
         "iDisplayLength": 50,
         // Initially sort on start date (descending), not ID

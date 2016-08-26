@@ -51,7 +51,7 @@
             </span>
         </div>
         <div class="row">
-            <h4>Study Design</h4>
+            <h4>Study Components</h4>
         </div>
         <div class="row">
             <div class="col-sm-6 col-md-4">
@@ -61,10 +61,15 @@
                              style="height: 70px;">
                     </a>
                     <div class="caption">
-                        <a href="/microdevices/"
-                           class="btn btn-primary btn-large">
-                            View Models &amp; Devices
-                        </a>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                Models &amp; Devices <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li title="View organ models"><a href="/microdevices/model">View Models</a></li>
+                                <li title="View microdevices"><a href="/microdevices/device">View Devices</a></li>
+                            </ul>
+                          </div>
                     </div>
                 </div>
             </div>
@@ -76,19 +81,19 @@
                     </a>
                     <div class="caption">
                         <div class="btn-group">
-                        <button type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            View Compounds <span class="caret"></span>
-                          </button>
-                          <ul class="dropdown-menu" role="menu">
-                            <li><a href="/compounds/">View Chemical Data</a></li>
-                            <li><a href="/bioactivities/table/#filter">View Bioactivities</a></li>
-                            <li><a href="/drugtrials/">View Drug Trials</a></li>
-                            <li><a href="/adverse_events/">View Adverse Events</a></li>
-                            <li class="divider"></li>
-                            <li><a href="/compare_adverse_events/">Compare Adverse Events</a></li>
-                            <li><a href="/compounds/report/#filter">Compound Report</a></li>
-                          </ul>
-                        </div>
+                            <button type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                Compounds <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="/compounds/">View Chemical Data</a></li>
+                                <li><a href="/bioactivities/table/#filter">View Bioactivities</a></li>
+                                <li><a href="/drugtrials/">View Drug Trials</a></li>
+                                <li><a href="/adverse_events/">View Adverse Events</a></li>
+                                <li class="divider"></li>
+                                <li><a href="/compare_adverse_events/">Compare Adverse Events</a></li>
+                                <li><a href="/compounds/report/#filter">Compound Report</a></li>
+                            </ul>
+                          </div>
                     </div>
                 </div>
             </div>
@@ -101,7 +106,7 @@
                     <div class="caption">
                         <div class="btn-group">
                         <button type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            View Cell Samples <span class="caret"></span>
+                            Cell Samples <span class="caret"></span>
                         </button>
                           <ul class="dropdown-menu" role="menu">
                             <li><a href="/cellsamples/celltype/">View Cell Types</a></li>
@@ -114,7 +119,7 @@
             </div>
         </div>
         <div class="row">
-            <h4>Perform Studies</h4>
+            <h4>Create/Perform Studies</h4>
         </div>
         <div class="row">
             <div class="col-sm-6 col-md-4">
@@ -143,11 +148,11 @@
                             Chip Data <span class="caret"></span>
                         </button>
                           <ul class="dropdown-menu" role="menu">
-                            <li><a href="/assays/studyconfiguration/">Study Configurations</a></li>
-                            <li class="divider"></li>
                             <li><a href="/assays/assaychipsetup/">Setups</a></li>
                             <li><a href="/assays/assaychipreadout/">Readouts</a></li>
                             <li><a href="/assays/assaychiptestresult/">Results</a></li>
+                            <li class="divider"></li>
+                            <li><a href="/assays/studyconfiguration/">Integrated Study Configurations</a></li>
                           </ul>
                         </div>
                     </div>
@@ -165,11 +170,11 @@
                             Plate Data <span class="caret"></span>
                           </button>
                           <ul class="dropdown-menu" role="menu">
-                            <li><a href="/assays/assaylayout/">Assay Layouts</a></li>
-                            <li class="divider"></li>
                             <li><a href="/assays/assayplatesetup/">Setups</a></li>
                             <li><a href="/assays/assayplatereadout/">Readouts</a></li>
                             <li><a href="/assays/assayplatetestresult/">Results</a></li>
+                            <li class="divider"></li>
+                            <li><a href="/assays/assaylayout/">Plate Layouts</a></li>
                           </ul>
                         </div>
                     </div>

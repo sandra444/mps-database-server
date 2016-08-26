@@ -1,4 +1,4 @@
-from django.views.generic import DetailView, CreateView, UpdateView
+from django.views.generic import DetailView, CreateView, UpdateView, ListView
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django import forms
@@ -26,6 +26,22 @@ def microdevice_list(request):
     })
 
     return render_to_response('microdevices/microdevice_list.html', c)
+
+
+class OrganModelList(ListView):
+    """Displays """
+    template_name = ''
+
+    def get_queryset(self):
+        return OrganModel.objects.prefetch_related('organ', 'center', 'device').all()
+
+
+class MicrodeviceList(ListView):
+    """Displays """
+    template_name = ''
+
+    def get_queryset(self):
+        return Microdevice.objects.prefetch_related('organ', 'center', 'manufacturer').all()
 
 
 class OrganModelDetail(DetailView):
