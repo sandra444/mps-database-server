@@ -1434,7 +1434,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
     """Admin for Assay Chip Readout"""
     class Media(object):
         js = ('js/inline_fix.js', 'assays/assaychipreadout_add.js', 'js/d3.min.js', 'js/c3.min.js',)
-        css = {'all': ('assays/customize_admin.css', 'css/c3.css',)}
+        css = {'all': ('assays/customize_admin.css', 'css/c3.min.css',)}
 
     form = AssayChipReadoutForm
     date_hierarchy = 'readout_start_time'
