@@ -104,7 +104,7 @@ class MicrodeviceAdd(SpecificGroupRequiredMixin, CreateView):
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
             self.object.save()
-            return redirect('/microdevices/')
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -127,7 +127,7 @@ class MicrodeviceUpdate(SpecificGroupRequiredMixin, UpdateView):
             self.object = form.save()
             self.object.modified_by = self.request.user
             self.object.save()
-            return redirect('/microdevices/')
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -172,7 +172,7 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
             self.object.modified_by = self.object.created_by = self.request.user
             self.object.save()
             formset.save()
-            return redirect('/microdevices/')
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -212,6 +212,6 @@ class OrganModelUpdate(SpecificGroupRequiredMixin, UpdateView):
             self.object.modified_by = self.request.user
             self.object.save()
             formset.save()
-            return redirect('/microdevices/')
+            return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
