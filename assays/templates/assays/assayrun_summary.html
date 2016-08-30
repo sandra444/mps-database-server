@@ -65,7 +65,8 @@
                     <th class="hidden-print">View/Edit</th>
                     <th>Chip Setup ID / Barcode</th>
                     <th>Date</th>
-                    <th>Organ Model Name</th>
+                    <th>Device</th>
+                    <th>Organ Model</th>
                     <th>Compound</th>
                     <th>Creator</th>
                     <th>Review</th>
@@ -79,6 +80,7 @@
                     <td>{{ setup.assay_chip_id }}</td>
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.device }}</td>
+                    <td>{{ setup.organ_model }}</td>
                     {% if setup.compound != None %}
                         <td>{{ setup.compound }} ({{ setup.concentration }} {{ setup.unit }})</td>
                     {% else %}
