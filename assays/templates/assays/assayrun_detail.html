@@ -55,28 +55,6 @@
         </div>
     {% endif %}
 
-    {% if object.protocol %}
-        <div class="row">
-            <div class="col-sm-3 col-md-2 lead text-right-responsive">
-                <b>Protocol:</b>
-            </div>
-            <div class="col-sm-9 col-md-10 lead">
-                <a href="/media/{{ object.protocol }}">{{ object.protocol }}</a>
-            </div>
-        </div>
-    {% endif %}
-
-    {% if object.supporting_data %}
-        <div class="row">
-            <div class="col-sm-3 col-md-2 lead text-right-responsive">
-                <b>Supporting Data:</b>
-            </div>
-            <div class="col-sm-9 col-md-10 lead">
-                <a href="/media/{{ object.supporting_data }}">{{ object.supporting_data }}</a>
-            </div>
-        </div>
-    {% endif %}
-
     <legend><h2>Chip Setups</h2></legend>
 
     {% if setups %}

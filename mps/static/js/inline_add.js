@@ -63,15 +63,15 @@ $(document).ready(function () {
 
         var end = next_id;
         for (var i=id+1; i<=end; i++){
-            var current = $('#'+current_title+'-'+i);
+            var current = $('#' + current_title + '-' + i);
 
             // Need to update values before creating the replacement text
             // Add values to input
-            $('#'+ current_title +'-'+ i + ' input').each(function () {
+            $('#'+ current_title + '-' + i + ' input').each(function () {
                 $(this).attr("value", this.value);
             });
             // Add selected attribute to selected option of each select
-            $('#'+ current_title +'-'+ i + ' select').each(function (){
+            $('#'+ current_title + '-' + i + ' select').each(function (){
                 //console.log(this.id);
                 $('#' + this.id + ' option[value="' + $(this).val() + '"]').attr("selected", true);
             });

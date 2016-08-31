@@ -107,6 +107,9 @@ class Microdevice(LockableModel):
     def get_absolute_url(self):
         return "/microdevices/device/{}/".format(self.id)
 
+    def get_post_submission_url(self):
+        return '/microdevices/device/'
+
 
 class OrganModel(LockableModel):
     """An Organ Model describes a way of preparing a device to emulate a particular organ"""
@@ -140,6 +143,9 @@ class OrganModel(LockableModel):
 
     def get_absolute_url(self):
         return "/microdevices/model/{}/".format(self.id)
+
+    def get_post_submission_url(self):
+        return '/microdevices/model/'
 
 
 # It is somewhat odd that ValidatedAssays are inlines in lieu of a manytomany field

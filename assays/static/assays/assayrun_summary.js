@@ -17,6 +17,34 @@ $(document).ready(function() {
         '#CCCCCC'
     ];
 
+    var ids = [
+        '#setups',
+        '#plate_setups',
+    ];
+
+    $.each(ids, function(index, table_id) {
+        if ($(table_id)[0]) {
+            $(table_id).DataTable({
+                "iDisplayLength": 400,
+                dom: 'rt',
+                fixedHeader: {headerOffset: 50},
+                responsive: true,
+                // Initially sort on start date (descending), not ID
+                "order": [[1, "asc"], [2, "desc"]],
+                "aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0]
+                    },
+                    {
+                        "width": "10%",
+                        "targets": [0]
+                    }
+                ]
+            });
+        }
+    });
+
     function make_charts(assays) {
         // Clear existing charts
         charts.empty();
@@ -146,7 +174,8 @@ $(document).ready(function() {
 
                 num += 1;
             }
-            $(window).trigger('resize');
+            // Callously triggering resizes can solve problems... but cause others
+            // $(window).trigger('resize');
         }
     }
 

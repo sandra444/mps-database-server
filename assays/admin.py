@@ -1434,7 +1434,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
     """Admin for Assay Chip Readout"""
     class Media(object):
         js = ('js/inline_fix.js', 'assays/assaychipreadout_add.js', 'js/d3.min.js', 'js/c3.min.js',)
-        css = {'all': ('assays/customize_admin.css', 'css/c3.css',)}
+        css = {'all': ('assays/customize_admin.css', 'css/c3.min.css',)}
 
     form = AssayChipReadoutForm
     date_hierarchy = 'readout_start_time'
@@ -1887,6 +1887,18 @@ class AssayRunFormAdmin(forms.ModelForm):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
 
+class StudySupportingDataInline(admin.TabularInline):
+    """Inline for Studies"""
+    model = StudySupportingData
+    verbose_name = 'Study Supporting Data'
+    fields = (
+        (
+            'description', 'supporting_data'
+        ),
+    )
+    extra = 1
+
+
 class AssayRunAdmin(LockableAdmin):
     """Admin for what are now called Organ Chip Studies"""
     # AssayRun is now Organ Chip Study
@@ -1922,7 +1934,7 @@ class AssayRunAdmin(LockableAdmin):
         (
             'Protocol File Upload', {
                 'fields': (
-                    'file',
+                    'protocol',
                 )
             }
         ),
@@ -1944,6 +1956,8 @@ class AssayRunAdmin(LockableAdmin):
             }
         ),
     )
+
+    inlines = [StudySupportingDataInline]
 
     def save_model(self, request, obj, form, change):
 

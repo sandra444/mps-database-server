@@ -75,7 +75,7 @@ $(document).ready(function () {
     ];
 
     // Keep types same length as number of study types
-    var types = ['','','',''];
+    var types = ['', '', '', ''];
 
     // Individual selectors for booleans
     var tox = $('#id_toxicity');

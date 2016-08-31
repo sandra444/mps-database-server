@@ -225,10 +225,13 @@ def fetch_compound_report(request):
         assay_chip_id__chip_setup__compound__in=compounds,
         assay_id__readout_unit__unit='%Control',
         quality=u'',
-    ).select_related(
+        assay_chip_id__chip_setup__assay_run_id__use_in_calculations=True
+    ).prefetch_related(
+        'assay_chip_id__chip_setup',
         'assay_chip_id__chip_setup__compound',
         'assay_chip_id__chip_setup__unit',
-        'assay_chip_id__timeunit'
+        'assay_chip_id__timeunit',
+        'assay_chip_id__chip_setup__assay_run_id'
     )
 
     for readout in readouts:
