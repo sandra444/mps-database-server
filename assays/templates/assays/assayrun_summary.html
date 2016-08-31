@@ -29,7 +29,7 @@
         </div>
     </div>
 
-    {% if object.description or object.study_configuration or object.protocol or object.supporting_data %}
+    {% if object.description or object.study_configuration or object.protocol %}
         <legend><h3>Description</h3></legend>
 
         {% if object.description %}
@@ -49,12 +49,31 @@
                 <b>Protocol:</b> <a href="/media/{{ object.protocol }}">{{ object.protocol }}</a>
             </p>
         {% endif %}
+    {% endif %}
 
-        {% if object.supporting_data %}
-            <p>
-                <b>Supporting Data:</b> <a href="/media/{{ object.supporting_data }}">{{ object.supporting_data }}</a>
-            </p>
-        {% endif %}
+    {% if object.studysupportingdata_set %}
+        <legend><h3>Supporting Data</h3></legend>
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+              <th>Description</th>
+              <th>Supporting Data File</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for supporting_data in object.studysupportingdata_set.all %}
+                    <tr>
+                        <td>{{ supporting_data.description }}</td>
+                        <td>
+                            <a href="/media/{{ supporting_data.supporting_data }}">
+                              {{ supporting_data.supporting_data }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% endif %}
 
     <legend><h3>Chip Setups</h3></legend>

@@ -1888,7 +1888,7 @@ class AssayRunFormAdmin(forms.ModelForm):
 
 
 class StudySupportingDataInline(admin.TabularInline):
-    """Inline for Study Configurations"""
+    """Inline for Studies"""
     model = StudySupportingData
     verbose_name = 'Study Supporting Data'
     fields = (
