@@ -36,7 +36,6 @@
     </h1>
 
     {% csrf_token %}
-    {{ formset.management_form }}
 
     {% include "submit.html" %}
 
@@ -263,6 +262,7 @@
     {% include 'generic_field.html' with field=form.post_marketing label="Post-marketing" %}
 
     {# TODO MAKE SURE TARGETS ARE WORKING #}
+    {{ formset.management_form }}
     <legend>Targets/Interactions</legend>
 
     <a id="add_button-compoundtarget_set" class="btn btn-success" role="button">Add Target</a>

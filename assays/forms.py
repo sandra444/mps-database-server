@@ -115,6 +115,13 @@ class AssayRunForm(forms.ModelForm):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
 
+class StudySupportingDataInlineFormset(BaseInlineFormSet):
+    """Form for Study Supporting Data (as part of an inline)"""
+    class Meta(object):
+        model = StudySupportingData
+        exclude = ('',)
+
+
 class AssayChipResultForm(forms.ModelForm):
     """Frontend form for Chip Test Results"""
     def __init__(self, study, current, *args, **kwargs):

@@ -248,11 +248,32 @@ class AssayRunList(LoginRequiredMixin, ListView):
             'group'
         )
 
+StudySupportingDataFormset = inlineformset_factory(
+    AssayRun,
+    StudySupportingData,
+    formset=StudySupportingDataInlineFormset,
+    extra=1,
+    exclude=[],
+    widgets={
+        'description': forms.Textarea(attrs={'rows': 3}),
+    }
+)
+
 
 class AssayRunAdd(OneGroupRequiredMixin, CreateView):
     """Add a study"""
     template_name = 'assays/assayrun_add.html'
     form_class = AssayRunForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayRunAdd, self).get_context_data(**kwargs)
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = StudySupportingDataFormset(self.request.POST, self.request.FILES)
+            else:
+                context['formset'] = StudySupportingDataFormset()
+
+        return context
 
     def get_form(self, form_class):
         # Get group selection possibilities
@@ -269,11 +290,17 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
 
     # Test form validity
     def form_valid(self, form):
-        if form.is_valid():
+        formset = StudySupportingDataFormset(
+            self.request.POST,
+            self.request.FILES,
+            instance=form.instance
+        )
+        if form.is_valid() and formset.is_valid():
             self.object = form.save()
             self.object.modified_by = self.object.created_by = self.request.user
             # Save Study
             self.object.save()
+            formset.save()
             return redirect(
                 self.object.get_absolute_url())
         else:
@@ -361,6 +388,22 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
     template_name = 'assays/assayrun_add.html'
     form_class = AssayRunForm
 
+    def get_context_data(self, **kwargs):
+        context = super(AssayRunUpdate, self).get_context_data(**kwargs)
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = StudySupportingDataFormset(
+                    self.request.POST,
+                    self.request.FILES,
+                    instance=self.object
+                )
+            else:
+                context['formset'] = StudySupportingDataFormset(instance=self.object)
+
+        context['update'] = True
+
+        return context
+
     def get_form(self, form_class):
         # Get group selection possibilities
         groups = self.request.user.groups.filter(
@@ -373,18 +416,18 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
         else:
             return form_class(groups, instance=self.get_object())
 
-    def get_context_data(self, **kwargs):
-        context = super(AssayRunUpdate, self).get_context_data(**kwargs)
-        context['update'] = True
-
-        return context
-
     def form_valid(self, form):
-        if form.is_valid():
+        formset = StudySupportingDataFormset(
+            self.request.POST,
+            self.request.FILES,
+            instance=form.instance
+        )
+        if form.is_valid() and formset.is_valid():
             self.object = form.save()
             self.object.modified_by = self.request.user
             # Save study
             self.object.save()
+            formset.save()
             return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))

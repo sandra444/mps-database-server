@@ -1887,6 +1887,18 @@ class AssayRunFormAdmin(forms.ModelForm):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
 
+class StudySupportingDataInline(admin.TabularInline):
+    """Inline for Study Configurations"""
+    model = StudySupportingData
+    verbose_name = 'Study Supporting Data'
+    fields = (
+        (
+            'description', 'supporting_data'
+        ),
+    )
+    extra = 1
+
+
 class AssayRunAdmin(LockableAdmin):
     """Admin for what are now called Organ Chip Studies"""
     # AssayRun is now Organ Chip Study
@@ -1922,7 +1934,7 @@ class AssayRunAdmin(LockableAdmin):
         (
             'Protocol File Upload', {
                 'fields': (
-                    'file',
+                    'protocol',
                 )
             }
         ),
@@ -1944,6 +1956,8 @@ class AssayRunAdmin(LockableAdmin):
             }
         ),
     )
+
+    inlines = [StudySupportingDataInline]
 
     def save_model(self, request, obj, form, change):
 

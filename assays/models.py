@@ -558,13 +558,14 @@ class AssayRun(RestrictedModel):
         help_text='Protocol File for Study'
     )
 
+    # Deprecated
     # File (an Excel file, I assume) of supporting data
-    supporting_data = models.FileField(
-        upload_to='supporting_data',
-        blank=True,
-        null=True,
-        help_text='Supporting Data for Study'
-    )
+    # supporting_data = models.FileField(
+    #     upload_to='supporting_data',
+    #     blank=True,
+    #     null=True,
+    #     help_text='Supporting Data for Study'
+    # )
 
     # Image for the study (some illustrative image)
     image = models.ImageField(upload_to='studies', null=True, blank=True)
@@ -589,6 +590,27 @@ class AssayRun(RestrictedModel):
 
     def get_delete_url(self):
         return '/assays/{}/delete/'.format(self.id)
+
+
+# Get readout file location
+def study_supporting_data_location(instance, filename):
+    return '/'.join(['supporting_data', str(instance.study_id), filename])
+
+
+class StudySupportingData(models.Model):
+    """A file (with description) that gives extra data for a Study"""
+    study = models.ForeignKey(AssayRun)
+
+    description = models.CharField(
+        max_length=1000,
+        help_text='Describes the contents of the supporting data file'
+    )
+
+    # Not named file in order to avoid shadowing
+    supporting_data = models.FileField(
+        upload_to=study_supporting_data_location,
+        help_text='Supporting Data for Study'
+    )
 
 
 class AssayChipRawData(models.Model):

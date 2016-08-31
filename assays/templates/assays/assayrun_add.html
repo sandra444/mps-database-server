@@ -2,9 +2,10 @@
 {% load static %}
 
 {% block load %}
+    <script src="{% static "js/inline_add.js" %}"></script>
     <script src="{% static "js/image_display.js" %}"></script>
-    <script src="{% static "assays/assayrun_add.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "assays/assayrun_add.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -39,7 +40,6 @@
 {% endif %}
     <br>
     {% csrf_token %}
-    {{ formset.management_form }}
     </h1>
 
     {% include "submit.html" %}
@@ -186,29 +186,6 @@
         </div>
     </div>
 
-    {% if form.supporting_data.errors %}
-        {% for error in form.supporting_data.errors %}
-            <div class="alert alert-danger" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Error:</span>
-                {{ error }}
-            </div>
-        {% endfor %}
-    <div class="form-group has-error">
-    {% else %}
-    <div class="form-group">
-    {% endif %}
-        <label for="supporting_data" class="col-sm-2 control-label">Supporting Data</label>
-        <div class="col-sm-10">
-            {{ form.supporting_data }}
-            <div>
-                You can upload an Excel file containing supporting data.
-                <br>
-                <b>Preferred Format: XLSX</b>
-            </div>
-        </div>
-    </div>
-
     {% if form.image.errors %}
         {% for error in form.image.errors %}
             <div class="alert alert-danger" role="alert">
@@ -263,5 +240,57 @@
             </a>
         </div>
     </div>
+
+    {{ formset.management_form }}
+    <legend>Supporting Data</legend>
+    {% if formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ formset.non_form_errors }}
+        </div>
+    {% endif %}
+
+    {% if formset.errors %}
+        {% for dict in formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    <a id="add_button-studysupportingdata_set" class="btn btn-success" role="button">Add Supporting Data</a>
+    <table class="table table-striped inlines" id="studysupportingdata_set-group" name="supporting_data">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Supporting Data File (XLSX)</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supporting_data in formset %}
+                <tr class="inline" id="supporting_data-{{ forloop.counter0 }}">
+                    {% if supporting_data.id.value %}
+                    <td class="original" hidden>
+                        <input type="hidden"
+                               id="id_studysupportingdata_set-{{ forloop.counter0 }}-id"
+                               name="studysupportingdata_set-{{ forloop.counter0 }}-id"
+                               value="{{ supporting_data.id.value }}">
+                    </td>
+                    {% endif %}
+                    <td>{{ supporting_data.description }}</td>
+                    <td>{{ supporting_data.supporting_data }}</td>
+                    <td>{{ supporting_data.DELETE }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </form>
 {% endblock %}
