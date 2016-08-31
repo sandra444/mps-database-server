@@ -570,6 +570,8 @@ class AssayRun(RestrictedModel):
     # Image for the study (some illustrative image)
     image = models.ImageField(upload_to='studies', null=True, blank=True)
 
+    use_in_calculations = models.BooleanField(default=False)
+
     def study_types(self):
         current_types = ''
         if self.toxicity:
