@@ -57,21 +57,21 @@ def modify_templates():
 
     # Set up formats
     chip_red = chip.add_format()
-    chip_red.set_bg_color('red')
+    chip_red.set_bg_color('#ff6f69')
     chip_green = chip.add_format()
-    chip_green.set_bg_color('green')
+    chip_green.set_bg_color('#96ceb4')
 
     plate_tabular_red = plate_tabular.add_format()
-    plate_tabular_red.set_bg_color('red')
+    plate_tabular_red.set_bg_color('#ff6f69')
     plate_tabular_green = plate_tabular.add_format()
-    plate_tabular_green.set_bg_color('green')
+    plate_tabular_green.set_bg_color('#96ceb4')
 
     plate_block_red = plate_block.add_format()
-    plate_block_red.set_bg_color('red')
+    plate_block_red.set_bg_color('#ff6f69')
     plate_block_green = plate_block.add_format()
-    plate_block_green.set_bg_color('green')
+    plate_block_green.set_bg_color('#96ceb4')
     plate_block_yellow = plate_block.add_format()
-    plate_block_yellow.set_bg_color('yellow')
+    plate_block_yellow.set_bg_color('#ffeead')
 
     # Write the base files
     chip_initial = [
