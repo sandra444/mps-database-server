@@ -242,9 +242,9 @@
             <tr>
                 <td>{{ setup }}</td>
                 {% if same %}
-                    <td class="text-success">Same as {{ plate_indicative }}</td>
+                    <td class="text-success">Same cells as {{ plate_indicative }}</td>
                 {% else %}
-                    <td class="text-danger">Differs from {{ plate_indicative }}</td>
+                    <td class="text-danger">Different cells from {{ plate_indicative }}</td>
                 {% endif %}
             </tr>
         {% endfor %}
