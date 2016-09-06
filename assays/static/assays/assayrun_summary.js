@@ -60,8 +60,12 @@ $(document).ready(function() {
             radio_buttons_display.show();
         }
 
+        var sorted_assays = _.sortBy(_.keys(assays));
+
         var previous = null;
-        for (var assay in assays) {
+        for (var index in sorted_assays) {
+            var assay = sorted_assays[index];
+
             var assay_id = assay.split('  ')[0];
 
             if (!assay_ids[assay_id]) {
@@ -100,7 +104,9 @@ $(document).ready(function() {
                 previous = null;
             }
         }
-        for (assay in assays) {
+        for (index in sorted_assays) {
+            var assay = sorted_assays[index];
+
             var current_assay_id = assay_to_id[assay];
 
             var current_chart = c3.generate({
