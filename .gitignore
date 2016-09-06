@@ -1,5 +1,6 @@
 *.pyc
 *.db
+/testing
 /static
 /media
 /venv
