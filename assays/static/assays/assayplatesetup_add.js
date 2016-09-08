@@ -205,6 +205,14 @@ $(document).ready(function () {
                 var cell_name = $('#' + current_input.val()).attr('name');
                 $('#id_assayplatecells_set-' + current_id + '-cell_sample_label').text(cell_name);
             }
+
+            // Turn density into scientific notation
+            var current_density = $('#id_assayplatecells_set-' + current_id + '-cellsample_density');
+            var current_number = Number(current_density.val());
+            if (current_number) {
+                current_density.val(current_number.toExponential());
+            }
+
             current_id += 1;
             current_input = $('#id_assayplatecells_set-' + current_id + '-cell_sample');
         }

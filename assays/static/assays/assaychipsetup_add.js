@@ -112,11 +112,20 @@ $(document).ready(function() {
     // This code should populate cell labels when data is already given
     var current_id = 0;
     var current_input = $('#id_assaychipcells_set-' + current_id + '-cell_sample');
-    while(current_input[0]) {
-        if(current_input.val()) {
+
+    while (current_input[0]) {
+        if (current_input.val()) {
             var cell_name = $('#' + current_input.val()).attr('name');
             $('#id_assaychipcells_set-' + current_id + '-cell_sample_label').text(cell_name);
         }
+
+        // Turn density into scientific notation
+        var current_density = $('#id_assaychipcells_set-' + current_id + '-cellsample_density');
+        var current_number = Number(current_density.val());
+        if (current_number) {
+            current_density.val(current_number.toExponential());
+        }
+
         current_id += 1;
         current_input = $('#id_assaychipcells_set-' + current_id + '-cell_sample');
     }
