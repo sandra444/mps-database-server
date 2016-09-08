@@ -67,9 +67,7 @@ $(document).ready(function () {
                     + " data-molecular_weight=" + molecular_weight
                     + " data-mps=" + mps
                     + " data-epa=" + epa
-                    + ' data-filters=\'{"is_drug": false, "LogP": false,' +
-                    ' "molecular_weight": false, "mps": false, "epa": false,' +
-                    ' "unlabelled": false, "contains": false}\''
+                    + " data-contains= true"
                     + ">";
                 row += "<td>" + "<input type='checkbox' value='" + compound_name.replace(/'/g, "&#39;") + "'></td>";
                 row += "<td>" + compound_name + "</td>";
@@ -77,7 +75,7 @@ $(document).ready(function () {
                 $('#' + name).append(row);
             }
             else {
-                row = "<tr id='" + add + list[i].name.replace(/ /g, "_").replace(/'/g, "&#39;") + "'>";
+                row = "<tr id='" + list[i].name.replace(/ /g, "_").replace(/'/g, "&#39;") + "'>";
                 row += "<td>" + "<input type='checkbox' value='" + list[i].name.replace(/'/g, "&#39;") + "'></td>";
                 row += "<td>" + list[i].name + "</td>";
                 row += "</tr>";
@@ -132,8 +130,7 @@ $(document).ready(function () {
                     $('.table-filter').val('');
                 }
 
-                // Trigger compound filters
-                trigger_compound_filters();
+                compound_search.trigger('input');
 
                 // Enable everything
                 $(":input").prop("disabled", false);
@@ -347,18 +344,88 @@ $(document).ready(function () {
         var drugtrial_string = drugtrial_search.val().toLowerCase().replace(/ /g, "_");
     }
 
-    // Discern whether row is to be hidden for compounds
-    function hide_row_and_set_values(row, filters) {
-        // If any of the of the filters are true, the row should be hidden
-        if (_.some(_.values(filters))) {
-            row.hidden = true;
+    var drugs = $('#drugs');
+    var non_drugs = $('#non_drugs');
+
+    var mps = $('#mps');
+    var epa = $('#epa');
+    var unlabelled = $('#unlabelled');
+
+    var logp = $('#logp');
+    var logp_gtlt = $('#logp_gtlt');
+
+    var molecular_weight = $('#molecular_weight');
+    var molecular_weight_gtlt = $('#molecular_weight_gtlt');
+
+    $.each([drugs, non_drugs, mps, epa, unlabelled, logp, logp_gtlt, molecular_weight, molecular_weight_gtlt], function(index, element) {
+        element.change(function() {
+            compound_search.trigger('input');
+        });
+    });
+
+    function gtlt_check(operator, value, compare_against) {
+        // If the value to compare against is not valid, just return true
+        if (isNaN(compare_against) || $.trim(compare_against) === '') {
+            return true;
         }
+
+        value = Math.floor(value);
+        compare_against = Math.floor(compare_against);
+
+        // If greater than
+        if (operator == '>') {
+            if (value > compare_against) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        // If less than
         else {
-            row.hidden = false;
+            if (value < compare_against) {
+                return true;
+            }
+            else {
+                return false;
+            }
         }
-        // Set the filters to the new values
-        filters = JSON.stringify(filters);
-        row.setAttribute('data-filters', filters);
+    }
+
+    function filter_compounds() {
+        var drugs_checked = drugs.prop('checked');
+        var non_drugs_checked = non_drugs.prop('checked');
+        var mps_checked = mps.prop('checked');
+        var epa_checked = epa.prop('checked');
+        var unlabelled_checked = unlabelled.prop('checked');
+
+        var logp_compare_against = logp.val();
+        var logp_gtlt_operator = logp_gtlt.val();
+
+        var molecular_weight_compare_against = molecular_weight.val();
+        var molecular_weight_gtlt_operator = molecular_weight_gtlt.val();
+
+        $("#compounds tr").each(function(index) {
+            var row_values = {};
+            for (var attribute, i=0, attributes=this.attributes, n=attributes.length; i<n; i++) {
+                attribute = attributes[i];
+                row_values[attribute.nodeName] = attribute.nodeValue;
+            }
+
+            if(
+                ((drugs_checked && row_values['data-is_drug'] == 'True') || (non_drugs_checked && row_values['data-is_drug'] != 'True'))
+                &&
+                ((mps_checked && row_values['data-mps'] == 'True') || (epa_checked && row_values['data-epa'] == 'True') || (unlabelled_checked && row_values['data-mps'] != 'True' && row_values['data-epa'] != 'True'))
+                && gtlt_check(logp_gtlt_operator, row_values['data-logp'], logp_compare_against)
+                && gtlt_check(molecular_weight_gtlt_operator, row_values['data-molecular_weight'], molecular_weight_compare_against)
+                && row_values['data-contains'] == 'true'
+            ) {
+                this.hidden = false;
+            }
+            else {
+                this.hidden = true;
+            }
+        });
     }
 
     function reset_all_checkbox(selector) {
@@ -383,17 +450,15 @@ $(document).ready(function () {
             if (add) {
                 // For every row in the given table
                 $("#" + selector + " tr").each(function () {
-                    var filters = JSON.parse(this.getAttribute('data-filters'));
-                    // If the row contains the requested string, do not hide it
                     if (this.id.toLowerCase().indexOf(string) > -1) {
-                        filters.contains = false;
+                        this.setAttribute('data-contains', true);
                     }
                     // If it does not contain the string hide it
                     else {
-                        filters.contains = true;
+                        this.setAttribute('data-contains', false);
                     }
-                    hide_row_and_set_values(this, filters);
                 });
+                filter_compounds();
             }
             // For every other type of data
             else {
@@ -428,261 +493,6 @@ $(document).ready(function () {
         // When the drugtrial search changes
         search_filter(drugtrial_search, drugtrial_string, 'drugtrials', '');
     }
-
-    // Special filtering for compounds
-
-    function trigger_compound_filters() {
-        drugs.trigger('change');
-        non_drugs.trigger('change');
-        logp.trigger('change');
-        molecular_weight.trigger('change');
-        mps.trigger('change');
-        epa.trigger('change');
-        unlabelled.trigger('change');
-    }
-
-    var drugs = $('#drugs');
-    var non_drugs = $('#non_drugs');
-
-    var mps = $('#mps');
-    var epa = $('#epa');
-    var unlabelled = $('#unlabelled');
-
-    // Check to see if the "drugs" button has been clicked
-    drugs.change(function (evt) {
-        // Show all drugs
-        if (this.checked) {
-            $("#compounds tr").each(function () {
-                // If the row contains a drug, do not hide it
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (this.getAttribute('data-is_drug') == 'True') {
-                    filters.is_drug = false;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        // Hide all drugs
-        else {
-            $("#compounds tr").each(function () {
-                // If the row contains a drug, hide it
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (this.getAttribute('data-is_drug') == 'True') {
-                    filters.is_drug = true;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        reset_all_checkbox('compounds');
-    });
-
-    // Check to see if the "non-drugs" button has been clicked
-    non_drugs.change(function (evt) {
-        // Show all non-drugs
-        if (this.checked) {
-            $("#compounds tr").each(function () {
-                // If the row contains a drug, do not hide it
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (this.getAttribute('data-is_drug') == 'False') {
-                    filters.is_drug = false;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        // Hide all non-drugs
-        else {
-            $("#compounds tr").each(function () {
-                // If the row contains a drug, hide it
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (this.getAttribute('data-is_drug') == 'False') {
-                    filters.is_drug = true;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        reset_all_checkbox('compounds');
-    });
-
-    // Check to see if the "non-drugs" button has been clicked
-    mps.change(function (evt) {
-        // Show all mps
-        if (this.checked) {
-            $("#compounds tr").each(function () {
-                // If the row is for an mps drug
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (this.getAttribute('data-mps') == 'True') {
-                    filters.mps = false;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        // Hide all mps
-        else {
-            $("#compounds tr").each(function () {
-                // If the row mps
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (this.getAttribute('data-mps') == 'True') {
-                    filters.mps = true;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        reset_all_checkbox('compounds');
-    });
-
-    // Check to see if the "epa" button has been clicked
-    epa.change(function (evt) {
-        // Show all epa
-        if (this.checked) {
-            $("#compounds tr").each(function () {
-                // If the row is for an epa drug
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (this.getAttribute('data-epa') == 'True') {
-                    filters.epa = false;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        // Hide all epa
-        else {
-            $("#compounds tr").each(function () {
-                // If the row epa, hide it
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (this.getAttribute('data-epa') == 'True') {
-                    filters.epa = true;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        reset_all_checkbox('compounds');
-    });
-
-    // Check to see if the "unlabelled" button has been clicked
-    unlabelled.change(function (evt) {
-        // Show all unlabelled
-        if (this.checked) {
-            $("#compounds tr").each(function () {
-                // If the row is for an unlabelled drug
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (this.getAttribute('data-mps') == 'False' && this.getAttribute('data-epa') == 'False') {
-                    filters.unlabelled = false;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        // Hide all unlabelled
-        else {
-            $("#compounds tr").each(function () {
-                // If the row unlabelled, hide it
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (this.getAttribute('data-mps') == 'False' && this.getAttribute('data-epa') == 'False') {
-                    filters.unlabelled = true;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        reset_all_checkbox('compounds');
-    });
-
-    var logp = $('#logp');
-    var logp_gtlt = $('#logp_gtlt');
-
-    var molecular_weight = $('#molecular_weight');
-    var molecular_weight_gtlt = $('#molecular_weight_gtlt');
-
-    // Check logp
-    logp.change(function (evt) {
-        // First need to check if value is valid
-        if (isNaN(logp.val()) || $.trim(logp.val()) === '') {
-            $("#compounds tr").each(function () {
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                filters.LogP = false;
-                hide_row_and_set_values(this, filters);
-            });
-            return;
-        }
-        // If gtlt is set to greater than
-        if (logp_gtlt.val() == '>') {
-            $("#compounds tr").each(function () {
-                // If the row contains a drug, do not hide it
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (Math.floor(this.getAttribute('data-LogP')) > Math.floor(logp.val())) {
-                    filters.LogP = false;
-                }
-                else {
-                    filters.LogP = true;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        // If gtlt is set to less than
-        else {
-            $("#compounds tr").each(function () {
-                // If the row contains a drug, do not hide it
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (Math.floor(this.getAttribute('data-LogP')) < Math.floor(logp.val())) {
-                    filters.LogP = false;
-                }
-                else {
-                    filters.LogP = true;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        reset_all_checkbox('compounds');
-    });
-
-    // Trigger logp changes when changing operator
-    logp_gtlt.change(function () {
-        logp.trigger('change');
-    });
-
-    // Check molecular_weight
-    molecular_weight.change(function (evt) {
-        // First need to check if value is valid
-        // On invalid/empty, treat all as passing
-        if (isNaN(molecular_weight.val()) || $.trim(molecular_weight.val()) === '') {
-            $("#compounds tr").each(function () {
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                filters.molecular_weight = false;
-                hide_row_and_set_values(this, filters);
-            });
-            return;
-        }
-        // If gtlt is set to greater than
-        if (molecular_weight_gtlt.val() == '>') {
-            $("#compounds tr").each(function () {
-                // If the row contains a drug, do not hide it
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (Math.floor(this.getAttribute('data-molecular_weight')) > Math.floor(molecular_weight.val())) {
-                    filters.molecular_weight = false;
-                }
-                else {
-                    filters.molecular_weight = true;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        // If gtlt is set to less than
-        else {
-            $("#compounds tr").each(function () {
-                // If the row contains a drug, do not hide it
-                var filters = JSON.parse(this.getAttribute('data-filters'));
-                if (Math.floor(this.getAttribute('data-molecular_weight')) < Math.floor(molecular_weight.val())) {
-                    filters.molecular_weight = false;
-                }
-                else {
-                    filters.molecular_weight = true;
-                }
-                hide_row_and_set_values(this, filters);
-            });
-        }
-        reset_all_checkbox('compounds');
-    });
-
-    // Trigger molecular_weight changes when changing operator
-    molecular_weight_gtlt.change(function () {
-        molecular_weight.trigger('change');
-    });
 
     window.onhashchange = function() {
         if (location.hash != '#show') {
