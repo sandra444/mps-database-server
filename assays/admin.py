@@ -1025,7 +1025,7 @@ class AssayPlateReadoutAdmin(LockableAdmin):
     form = AssayPlateReadoutForm
 
     class Media(object):
-        js = ('js/inline_fix.js', 'assays/plate_display.js', 'assays/assayplatereadout_add.js',)
+        js = ('js/inline_fix.js', 'js/csv_functions.js', 'assays/plate_display.js', 'assays/assayplatereadout_add.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
     inlines = [AssayPlateReadoutInline]
@@ -1433,7 +1433,7 @@ class AssayChipReadoutForm(forms.ModelForm):
 class AssayChipReadoutAdmin(LockableAdmin):
     """Admin for Assay Chip Readout"""
     class Media(object):
-        js = ('js/inline_fix.js', 'assays/assaychipreadout_add.js', 'js/d3.min.js', 'js/c3.min.js',)
+        js = ('js/inline_fix.js', 'js/csv_functions.js', 'assays/assaychipreadout_add.js', 'js/d3.min.js', 'js/c3.min.js',)
         css = {'all': ('assays/customize_admin.css', 'css/c3.min.css',)}
 
     form = AssayChipReadoutForm
