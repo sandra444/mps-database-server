@@ -82,7 +82,7 @@
             <thead>
                 <tr>
                     <th class="hidden-print">View/Edit</th>
-                    <th>Chip Setup ID / Barcode</th>
+                    <th>Chip Setup</th>
                     <th>Date</th>
                     <th>Device</th>
                     <th>Organ Model</th>
@@ -176,7 +176,7 @@
             <thead>
                 <tr>
                     <th class="hidden-print">View/Edit</th>
-                    <th>Plate Setup ID / Barcode</th>
+                    <th>Plate Setup</th>
                     <th>Date</th>
                     <th>Plate Layout</th>
                     <th>Creator</th>
@@ -242,9 +242,9 @@
             <tr>
                 <td>{{ setup }}</td>
                 {% if same %}
-                    <td class="text-success">Same as {{ plate_indicative }}</td>
+                    <td class="text-success">Same cells as {{ plate_indicative }}</td>
                 {% else %}
-                    <td class="text-danger">Differs from {{ plate_indicative }}</td>
+                    <td class="text-danger">Different cells from {{ plate_indicative }}</td>
                 {% endif %}
             </tr>
         {% endfor %}
@@ -259,6 +259,9 @@
         </label>
         <label class="radio-inline">
             <input type="radio" name="chart_type_radio" id="compound_select" value="compound"> View By Compound
+        </label>
+        <label for="convert_to_percent_control" class="pull-right">
+            <input type="checkbox" name="convert_to_percent_control" id="convert_to_percent_control" /> Convert to Percent of Control
         </label>
     </div>
 

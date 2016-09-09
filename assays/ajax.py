@@ -340,17 +340,25 @@ def fetch_readouts(request):
     """
     study = request.POST.get('study', '')
     key = request.POST.get('key', '')
+    percent_control = request.POST.get('percent_control', '')
+
+    if percent_control == 'true':
+        percent_control = True
+    else:
+        percent_control = False
 
     # Get chip readouts
-    readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=study)
+    readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=study).prefetch_related(
+        'chip_setup',
+        'chip_setup__assay_run_id_id'
+    )
 
     if key == 'compound':
         raw_data = AssayChipRawData.objects.filter(
             assay_chip_id=readouts
         ).prefetch_related(
             'assay_id',
-            'assay_chip_id'
-        ).select_related(
+            'assay_chip_id',
             'assay_chip_id__chip_setup',
             'assay_chip_id__chip_setup__compound',
             'assay_chip_id__chip_setup__unit',
@@ -363,22 +371,23 @@ def fetch_readouts(request):
             assay_chip_id=readouts
         ).prefetch_related(
             'assay_id',
-            'assay_chip_id'
-        ).select_related(
+            'assay_chip_id',
             'assay_chip_id__chip_setup',
             'assay_id__assay_id',
             'assay_id__readout_unit'
         )
 
+    # TODO ACCOUNT FOR CASE WHERE ASSAY HAS TWO DIFFERENT UNITS?
+    # TODO MAY FORBID THIS CASE, MUST ASK FIRST
+    # Organization is assay -> unit -> compound/tag -> field -> time -> value
     assays = {}
     initial_data = {}
-    fields = {}
+    averaged_data = {}
+    controls = {}
 
     for raw in raw_data:
         assay = raw.assay_id.assay_id.assay_short_name
         unit = raw.assay_id.readout_unit.unit
-        assay_label = assay + '  (' + unit + ')'
-
         field = raw.field_id
         value = raw.value
 
@@ -390,7 +399,10 @@ def fetch_readouts(request):
         quality = raw.quality
 
         if not quality:
-            if key == 'compound':
+            # Get tag for data point
+            if percent_control and raw.assay_chip_id.chip_setup.chip_test_type == 'control':
+                tag = 'Control'
+            elif key == 'compound':
                 if raw.assay_chip_id.chip_setup.compound:
                     tag = raw.assay_chip_id.chip_setup.compound.name
                     tag += ' ' + str(raw.assay_chip_id.chip_setup.concentration)
@@ -400,43 +412,58 @@ def fetch_readouts(request):
             else:
                 tag = raw.assay_chip_id.chip_setup.assay_chip_id
 
-            current_key = tag + '_' + field
+             # Set data in nested monstrosity that is initial_data
+            initial_data.setdefault(assay, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(field, {}).setdefault(time, []).append(value)
 
-            if assay_label not in initial_data:
-                initial_data.update({assay_label: {}})
-                fields.update({assay_label: {}})
+    for assay, units in initial_data.items():
+        for unit, tags in units.items():
+            for tag, fields in tags.items():
+                for field, time_values in fields.items():
+                    for time, values in time_values.items():
+                        if percent_control and tag == 'Control':
+                            controls.update({(assay, unit, field, time): sum(values) / float(len(values))})
+                        else:
+                            averaged_data.setdefault(assay, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(field, {}).update({
+                                time: sum(values) / float(len(values))
+                            })
 
-            current_assay = initial_data.get(assay_label)
-            if current_key not in current_assay:
-                current_assay.update({
-                    current_key: {}
-                })
-                fields.get(assay_label).update({
-                    current_key: {}
-                })
+    for assay, units in averaged_data.items():
+        for unit, tags in units.items():
+            accomadate_units = len(units) > 1
+            for tag, fields in tags.items():
+                accomadate_field = len(fields) > 1
+                for field, time_values in fields.items():
+                    for time, value in time_values.items():
+                        if not percent_control:
+                            # Not converted to percent control
+                            assay_label = assay + '  (' + unit + ')'
 
-            # Enumerate all fields for current_key
-            fields.get(assay_label).get(current_key).update({field: True})
+                            if accomadate_field:
+                                current_key = tag + ' ' + field
+                            else:
+                                current_key = tag
 
-            current_values = current_assay.get(current_key)
+                            assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('time', []).append(time)
+                            assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('values', []).append(value)
 
-            current_values.setdefault(time, []).append(value)
+                        elif controls.get((assay, unit, field, time), False):
+                            control_value = controls.get((assay, unit, field, time))
+                            # Convert to percent control
+                            if accomadate_units:
+                                current_unit = '%Control [' + unit + ']'
+                            else:
+                                current_unit = '%Control'
 
-    for assay, current_keys in initial_data.items():
-        assays.update({assay: {}})
+                            assay_label = assay + '  (' + current_unit + ')'
 
-        for current_key, times_values in current_keys.items():
-            # If the field label is superfluous (there are not multiple fields)
-            # Remove the field from the key
-            if len(fields.get(assay).get(current_key)) == 1:
-                current_key = '_'.join(current_key.split('_')[:-1])
+                            if accomadate_field:
+                                current_key = tag + ' ' + field
+                            else:
+                                current_key = tag
 
-            assays.get(assay).update({
-                current_key: {
-                    'time': times_values.keys(),
-                    'values': [sum(values) / float(len(values)) for values in times_values.values()]
-                }
-            })
+                            assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('time', []).append(time)
+                            # Perform conversion
+                            assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('values', []).append((value / control_value) * 100)
 
     data = {
         'assays': assays,

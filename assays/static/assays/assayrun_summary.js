@@ -3,6 +3,9 @@ $(document).ready(function() {
     var middleware_token = getCookie('csrftoken');
     var study_id = Math.floor(window.location.href.split('/')[4]);
 
+    var current_key = 'chip'
+    var percent_control = false;
+
     var radio_buttons_display = $('#radio_buttons');
 
     var pattern = [
@@ -57,8 +60,12 @@ $(document).ready(function() {
             radio_buttons_display.show();
         }
 
+        var sorted_assays = _.sortBy(_.keys(assays));
+
         var previous = null;
-        for (var assay in assays) {
+        for (var index in sorted_assays) {
+            var assay = sorted_assays[index];
+
             var assay_id = assay.split('  ')[0];
 
             if (!assay_ids[assay_id]) {
@@ -85,19 +92,21 @@ $(document).ready(function() {
                 charts.append(previous
                     .append($('<div>')
                         .attr('id', 'chart_' + assay_id)
-                        .addClass('col-sm-6 no-padding chart-container')
+                        .addClass('col-sm-12 col-md-6 no-padding chart-container')
                     )
                 );
             }
             else {
                 previous.append($('<div>')
                     .attr('id', 'chart_' + assay_id)
-                    .addClass('col-sm-6 no-padding chart-container')
+                    .addClass('col-sm-12 col-md-6 no-padding chart-container')
                 );
                 previous = null;
             }
         }
-        for (assay in assays) {
+        for (index in sorted_assays) {
+            var assay = sorted_assays[index];
+
             var current_assay_id = assay_to_id[assay];
 
             var current_chart = c3.generate({
@@ -179,7 +188,7 @@ $(document).ready(function() {
         }
     }
 
-    function get_readouts(current_key) {
+    function get_readouts() {
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
@@ -190,10 +199,12 @@ $(document).ready(function() {
                 study: study_id,
                 // TODO SET UP A WAY TO SWITCH BETWEEN CHIP AND COMPOUND
                 key: current_key,
+                // Tells whether to convert to percent Control
+                percent_control: percent_control,
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
-                //console.log(json);
+                // console.log(json);
                 make_charts(json.assays);
             },
             error: function (xhr, errmsg, err) {
@@ -203,10 +214,17 @@ $(document).ready(function() {
     }
 
     // Initially by device
-    get_readouts('chip');
+    get_readouts();
 
     // Check when radio buttons changed
     $('input[type=radio][name=chart_type_radio]').change(function() {
-        get_readouts(this.value);
+        current_key = this.value;
+        get_readouts();
+    });
+
+    // Check if convert_to_percent_control is clicked
+    $('#convert_to_percent_control').click(function() {
+        percent_control = this.checked;
+        get_readouts();
     });
 });

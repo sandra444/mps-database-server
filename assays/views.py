@@ -692,7 +692,7 @@ class AssayChipSetupAdd(CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayChipSetupDetail(DetailRedirectMixin, DetailView):
@@ -743,7 +743,7 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             formset.save()
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayChipSetupDelete(CreatorRequiredMixin, DeleteView):
@@ -895,7 +895,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
     # Redirect when there are no available setups
     def render_to_response(self, context):
@@ -980,7 +980,7 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Otherwise do nothing (the file remained the same)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayChipReadoutDelete(CreatorRequiredMixin, DeleteView):
@@ -1085,7 +1085,7 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
             formset.save()
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
     # Redirect when there are no available setups
     # TODO REFACTOR
@@ -1154,7 +1154,7 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
             formset.save()
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayChipTestResultDelete(CreatorRequiredMixin, DeleteView):
@@ -1215,7 +1215,7 @@ class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
             formset.save()
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
@@ -1248,7 +1248,7 @@ class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
             formset.save()
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 # Class-based views for LAYOUTS
@@ -1484,7 +1484,7 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 # TODO Assay Layout Detail does not currently exist (deemed lower priority)
@@ -1535,7 +1535,7 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             formset.save()
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayPlateSetupDelete(CreatorRequiredMixin, DeleteView):
@@ -1684,7 +1684,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
     # Redirect when there are no available setups
     # TODO REFACTOR
@@ -1766,7 +1766,7 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Otherwise do nothing (the file remained the same)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 # TODO ADD CONTEXT
@@ -1866,7 +1866,7 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
             formset.save()
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
     # Redirect when there are no available setups
     # TODO REFACTOR
@@ -1925,7 +1925,7 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
             formset.save()
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayPlateTestResultDelete(CreatorRequiredMixin, DeleteView):
