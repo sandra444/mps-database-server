@@ -33,8 +33,6 @@
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post" >
 
-    {% include 'review.html' %}
-
     <h1>
         Edit Readout for <em>Chip-{{ object.chip_setup.assay_chip_id }}</em>
 {% else %}
