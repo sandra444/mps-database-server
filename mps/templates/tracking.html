@@ -1,9 +1,9 @@
 {# Tracking for certain models #}
 {% if update %}
     {% if object.signed_off_by %}
-        <div id="info" class="alert alert-info" role="alert">
-            <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-            <span class="sr-only">Info:</span>
+        <div class="alert alert-success" role="alert">
+            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            <span class="sr-only">Success:</span>
             This entry was reviewed by <b>{{ object.signed_off_by.first_name }} {{ object.signed_off_by.last_name }}</b> on <b>{{ object.signed_off_date }}</b>
         </div>
     {% endif %}
