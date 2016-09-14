@@ -268,13 +268,23 @@ $(document).ready(function () {
         }
 
         var chart = 0;
+        var bar_chart_list = [];
+
         for (var assay in assays) {
-            addChart(chart,assay,timeUnits[assay],valueUnits[assay]);
+            var add_to_bar_charts = true;
+
+            addChart(chart, assay, timeUnits[assay], valueUnits[assay]);
 
             var xs = {};
             var num = 1;
+
             for (var object in assays[assay]) {
                 object = '' + object;
+
+                // Add to bar charts if no time scale exceeds 3 points
+                if (add_to_bar_charts && assays[assay][object].time.length > 3) {
+                    add_to_bar_charts = false;
+                }
 
                 xs[object] = 'x' + num;
 
@@ -293,7 +303,18 @@ $(document).ready(function () {
 
                 num += 1;
             }
+            // Add to bar charts if no time scale exceeds 3 points
+            if (add_to_bar_charts) {
+                bar_chart_list.push(chart);
+            }
+
             chart += 1;
+        }
+
+        // Make bar charts
+        for (var index in bar_chart_list) {
+            chart_index = bar_chart_list[index];
+            charts[chart_index].transform('bar');
         }
     }
 
