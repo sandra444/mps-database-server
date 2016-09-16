@@ -6,6 +6,7 @@ from django.forms.models import inlineformset_factory
 from .forms import MicrodeviceForm, OrganModelForm, OrganModelProtocolInlineFormset
 from .models import Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
 from mps.mixins import SpecificGroupRequiredMixin
+from mps.base.models import save_forms_with_tracking
 
 # class MicrodeviceList(ListView):
 #     model = Microdevice
@@ -101,9 +102,7 @@ class MicrodeviceAdd(SpecificGroupRequiredMixin, CreateView):
 
     def form_valid(self, form):
         if form.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
-            self.object.save()
+            save_forms_with_tracking(self, form, formset=False, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -124,9 +123,7 @@ class MicrodeviceUpdate(SpecificGroupRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         if form.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            self.object.save()
+            save_forms_with_tracking(self, form, formset=False, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -168,10 +165,7 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
             instance=form.instance
         )
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -208,10 +202,7 @@ class OrganModelUpdate(SpecificGroupRequiredMixin, UpdateView):
             instance=form.instance
         )
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))

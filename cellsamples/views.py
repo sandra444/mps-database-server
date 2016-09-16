@@ -1,15 +1,16 @@
 # coding=utf-8
 
 from django.views.generic import ListView, CreateView, UpdateView
-#from .models import *
+# from .models import *
 from .forms import *
 # Best practice would be to put this in base or something of that sort (avoid spaghetti code)
 # Did this ^
 from mps.mixins import OneGroupRequiredMixin, SpecificGroupRequiredMixin
+from mps.templatetags.custom_filters import filter_groups
 from django.shortcuts import redirect
 
-#from mps.templatetags.custom_filters import *
-from django.db.models import Q
+# from mps.templatetags.custom_filters import *
+from mps.base.models import save_forms_with_tracking
 
 
 class CellSampleAdd(OneGroupRequiredMixin, CreateView):
@@ -19,9 +20,7 @@ class CellSampleAdd(OneGroupRequiredMixin, CreateView):
 
     def get_form(self, form_class):
         # Get group selection possibilities
-        groups = self.request.user.groups.filter(
-            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete ')
-        )
+        groups = filter_groups(self.request.user)
 
         # If POST
         if self.request.method == 'POST':
@@ -34,10 +33,7 @@ class CellSampleAdd(OneGroupRequiredMixin, CreateView):
     def form_valid(self, form):
         # get user via self.request.user
         if form.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Cell Sample
-            self.object.save()
+            save_forms_with_tracking(self, form, formset=None, update=False)
             return redirect('/cellsamples/cellsample')
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -54,8 +50,7 @@ class CellSampleUpdate(SpecificGroupRequiredMixin, UpdateView):
 
     def get_form(self, form_class):
         # Get group selection possibilities
-        groups = self.request.user.groups.filter(
-            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete '))
+        groups = filter_groups(self.request.user)
 
         # If POST
         if self.request.method == 'POST':
@@ -73,10 +68,7 @@ class CellSampleUpdate(SpecificGroupRequiredMixin, UpdateView):
     def form_valid(self, form):
         # get user via self.request.user
         if form.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save Cell Sample
-            self.object.save()
+            save_forms_with_tracking(self, form, formset=None, update=True)
             return redirect('/cellsamples/cellsample')
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -110,10 +102,7 @@ class CellTypeAdd(OneGroupRequiredMixin, CreateView):
     def form_valid(self, form):
         # get user via self.request.user
         if form.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Cell Sample
-            self.object.save()
+            save_forms_with_tracking(self, form, formset=None, update=False)
             return redirect('/cellsamples/celltype')
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -137,10 +126,7 @@ class CellTypeUpdate(SpecificGroupRequiredMixin, UpdateView):
     def form_valid(self, form):
         # get user via self.request.user
         if form.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save Cell Sample
-            self.object.save()
+            save_forms_with_tracking(self, form, formset=None, update=True)
             return redirect('/cellsamples/celltype')
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -165,10 +151,7 @@ class CellSubtypeAdd(OneGroupRequiredMixin, CreateView):
     def form_valid(self, form):
         # get user via self.request.user
         if form.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Cell Sample
-            self.object.save()
+            save_forms_with_tracking(self, form, formset=None, update=False)
             return redirect('/cellsamples/cellsubtype')
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -191,10 +174,7 @@ class CellSubtypeUpdate(SpecificGroupRequiredMixin, UpdateView):
     def form_valid(self, form):
         # get user via self.request.user
         if form.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save Cell Sample
-            self.object.save()
+            save_forms_with_tracking(self, form, formset=None, update=True)
             return redirect('/cellsamples/cellsubtype')
         else:
             return self.render_to_response(self.get_context_data(form=form))

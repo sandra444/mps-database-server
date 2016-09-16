@@ -16,9 +16,9 @@ from django.forms.models import inlineformset_factory
 # from django.utils.decorators import method_decorator
 
 # from mps.templatetags.custom_filters import *
-from django.db.models import Q
 
 from mps.mixins import *
+from mps.base.models import save_forms_with_tracking, add_study_fields_to_form
 
 # import ujson as json
 import xlrd
@@ -277,9 +277,7 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
 
     def get_form(self, form_class):
         # Get group selection possibilities
-        groups = self.request.user.groups.filter(
-            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete ')
-        )
+        groups = filter_groups(self.request.user)
 
         # If POST
         if self.request.method == 'POST':
@@ -296,13 +294,10 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
             instance=form.instance
         )
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Study
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(
-                self.object.get_absolute_url())
+                self.object.get_absolute_url()
+            )
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -316,7 +311,7 @@ class AssayRunDetail(DetailView):
     def dispatch(self, *args, **kwargs):
         self.object = self.get_object()
         # If user CAN edit the item, redirect to the respective edit page
-        if has_group(self.request.user, self.object.group):
+        if has_group(self.request.user, self.object.group.name):
             return redirect('/assays/' + str(self.object.id))
         elif self.object.restricted:
             return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
@@ -406,8 +401,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
 
     def get_form(self, form_class):
         # Get group selection possibilities
-        groups = self.request.user.groups.filter(
-            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete '))
+        groups = filter_groups(self.request.user)
 
         # If POST
         if self.request.method == 'POST':
@@ -423,11 +417,17 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             instance=form.instance
         )
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save study
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
+
+            # TODO Update the group and restricted status of children
+            # TODO REVISE KLUDGE; MAY WANT TO TOTALLY ELIMINATE THESE FIELDS?
+            AssayChipSetup.objects.filter(assay_run_id=self.object).update(group=self.object.group, restricted=self.object.restricted)
+            AssayChipReadout.objects.filter(chip_setup__assay_run_id=self.object).update(group=self.object.group, restricted=self.object.restricted)
+            AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=self.object).update(group=self.object.group, restricted=self.object.restricted)
+            AssayPlateSetup.objects.filter(assay_run_id=self.object).update(group=self.object.group, restricted=self.object.restricted)
+            AssayPlateReadout.objects.filter(setup__assay_run_id=self.object).update(group=self.object.group, restricted=self.object.restricted)
+            AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=self.object).update(group=self.object.group, restricted=self.object.restricted)
+
             return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -530,7 +530,7 @@ class AssayRunSummary(ObjectGroupRequiredMixin, DetailView):
         return self.render_to_response(context)
 
 
-class AssayRunDelete(CreatorRequiredMixin, DeleteView):
+class AssayRunDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete a Setup"""
     model = AssayRun
     template_name = 'assays/assayrun_delete.html'
@@ -610,12 +610,12 @@ class AssayChipSetupAdd(CreateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        if not has_group(self.request.user, study.group):
+        if not has_group(self.request.user, study.group.name):
             return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
 
         if self.request.GET.get('clone', ''):
             clone = get_object_or_404(AssayChipSetup, pk=self.request.GET.get('clone', ''))
-            if not has_group(self.request.user, clone.assay_run_id.group):
+            if not has_group(self.request.user, clone.assay_run_id.group.name):
                 return PermissionDenied(
                     self.request,
                     'You must be a member of the group ' + str(clone.assay_run_id.group) + ' to clone this setup'
@@ -633,10 +633,7 @@ class AssayChipSetupAdd(CreateView):
         else:
             form = form_class()
 
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-
-        form.instance.assay_run_id = study
-        form.instance.group = study.group
+        add_study_fields_to_form(self.kwargs['study_id'], form, add_study=True)
 
         return form
 
@@ -669,20 +666,11 @@ class AssayChipSetupAdd(CreateView):
 
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        # TODO THIS SHOULD BE IN get_form AND NOT HERE
-        form.instance.assay_run_id = study
-        form.instance.group = study.group
         formset = AssayChipCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
-            self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Chip Readout
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
             if data['another']:
                 form = self.form_class(
                     instance=self.object,
@@ -736,17 +724,13 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         formset = AssayChipCellsFormset(self.request.POST, instance=form.instance)
 
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save overall setup result
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayChipSetupDelete(CreatorRequiredMixin, DeleteView):
+class AssayChipSetupDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete a Chip Setup and Chip Cells"""
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_delete.html'
@@ -861,26 +845,20 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
+        add_study_fields_to_form(self.kwargs['study_id'], form)
+
         return context
 
     def form_valid(self, form):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        form.instance.group = study.group
         formset = ACRAFormSet(self.request.POST, self.request.FILES, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
-
             # Get headers
             headers = int(data.get('headers'))
 
-            self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Chip Readout
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
+
             if formset.files.get('file', ''):
                 current_file = formset.files.get('file', '')
                 parse_chip_csv(self.object, current_file, headers, form)
@@ -958,15 +936,11 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
-
             # Get headers
             headers = int(data.get('headers'))
 
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save overall readout result
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
+
             # Save file if it exists
             if formset.files.get('file', ''):
                 file = formset.files.get('file', '')
@@ -983,7 +957,7 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayChipReadoutDelete(CreatorRequiredMixin, DeleteView):
+class AssayChipReadoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete Assay Chip Readout"""
     model = AssayChipReadout
     template_name = 'assays/assaychipreadout_delete.html'
@@ -1066,23 +1040,14 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
+        add_study_fields_to_form(self.kwargs['study_id'], form)
+
         return context
 
     def form_valid(self, form):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        form.instance.group = study.group
-        context = self.get_context_data()
-        formset = context['formset']
-        # get user via self.request.user
+        formset = ChipTestResultFormSet(self.request.POST, instance=form.instance)
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save overall test result
-            self.object.save()
-            formset.instance = self.object
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -1144,20 +1109,16 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        formset = ChipTestResultFormSet(self.request.POST, instance=form.instance)
+        formset = ChipTestResultFormSet(self.request.POST, instance=self.object)
 
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save overall test result
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayChipTestResultDelete(CreatorRequiredMixin, DeleteView):
+class AssayChipTestResultDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete a Chip Test Result"""
     model = AssayChipTestResult
     template_name = 'assays/assaychiptestresult_delete.html'
@@ -1203,16 +1164,10 @@ class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        context = self.get_context_data()
-        formset = context['formset']
-        # get user via self.request.user
+        formset = StudyModelFormSet(self.request.POST, instance=form.instance)
+
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save overall configuration
-            self.object.save()
-            formset.instance = self.object
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -1237,15 +1192,10 @@ class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        formset = StudyModelFormSet(self.request.POST, instance=form.instance)
+        formset = StudyModelFormSet(self.request.POST, instance=self.object)
 
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            # TODO refactor original created by
-            self.object.modified_by = self.request.user
-            # Save overall test result
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -1287,9 +1237,7 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
 
     def get_form(self, form_class):
         # Get group selection possibilities
-        groups = self.request.user.groups.filter(
-            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete ')
-        )
+        groups = filter_groups(self.request.user)
 
         # If POST
         if self.request.method == 'POST':
@@ -1301,8 +1249,7 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
     # Test form validity
     def form_valid(self, form):
         if form.is_valid():
-            # Confirm form and get object
-            self.object = form.save()
+            save_forms_with_tracking(self, form, formset=None, update=False)
             # Save assay layout
             save_assay_layout(self.request, self.object, form, False)
             return redirect(self.object.get_post_submission_url())
@@ -1324,9 +1271,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
     def get_form(self, form_class):
         # Get group selection possibilities
-        groups = self.request.user.groups.filter(
-            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete ')
-        )
+        groups = filter_groups(self.request.user)
 
         # If POST
         if self.request.method == 'POST':
@@ -1343,8 +1288,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         if form.is_valid():
-            # Confirm form and get object
-            self.object = form.save()
+            save_forms_with_tracking(self, form, formset=None, update=True)
             # Save assay layout
             save_assay_layout(self.request, self.object, form, True)
             return redirect(self.object.get_post_submission_url())
@@ -1352,7 +1296,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayLayoutDelete(CreatorRequiredMixin, DeleteView):
+class AssayLayoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete an Assay Layout"""
     model = AssayLayout
     template_name = 'assays/assaylayout_delete.html'
@@ -1425,10 +1369,7 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
         else:
             form = form_class()
 
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-
-        form.instance.assay_run_id = study
-        form.instance.group = study.group
+        add_study_fields_to_form(self.kwargs['study_id'], form)
 
         return form
 
@@ -1460,21 +1401,13 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        # TODO THIS SHOULD BE IN get_form AND NOT HERE
-        form.instance.assay_run_id = study
-        form.instance.group = study.group
         formset = AssayPlateCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
-            self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Plate Setup
-            self.object.save()
-            formset.save()
+
+            save_forms_with_tracking(self, form, formset=formset, update=False)
+
             if data['another']:
                 form = self.form_class(
                     instance=self.object,
@@ -1528,17 +1461,13 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         formset = AssayPlateCellsFormset(self.request.POST, instance=form.instance)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save Plate Setup
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayPlateSetupDelete(CreatorRequiredMixin, DeleteView):
+class AssayPlateSetupDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete a Plate Setup"""
     model = AssayPlateSetup
     template_name = 'assays/assayplatesetup_delete.html'
@@ -1648,11 +1577,11 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
+        add_study_fields_to_form(self.kwargs['study_id'], form)
+
         return context
 
     def form_valid(self, form):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        form.instance.group = study.group
         formset = APRAFormSet(self.request.POST, self.request.FILES, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
@@ -1661,13 +1590,8 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             # Get upload_type
             upload_type = data.get('upload_type')
 
-            self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Chip Readout
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
+
             if formset.files.get('file', ''):
                 current_file = formset.files.get('file', '')
                 parse_readout_csv(self.object, current_file, upload_type)
@@ -1747,11 +1671,8 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Get upload_type
             upload_type = data.get('upload_type')
 
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save Chip Readout
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
+
             # Save file if it exists
             if formset.files.get('file', ''):
                 current_file = formset.files.get('file', '')
@@ -1770,7 +1691,7 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 
 # TODO ADD CONTEXT
-class AssayPlateReadoutDelete(CreatorRequiredMixin, DeleteView):
+class AssayPlateReadoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete an Assay Plate Readout"""
     model = AssayPlateReadout
     template_name = 'assays/assayplatereadout_delete.html'
@@ -1847,23 +1768,14 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
+        add_study_fields_to_form(self.kwargs['study_id'], form)
+
         return context
 
     def form_valid(self, form):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        form.instance.group = study.group
-        context = self.get_context_data()
-        formset = context['formset']
-        # get user via self.request.user
+        formset = PlateTestResultFormSet(self.request.POST, instance=form.instance)
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save overall test result
-            self.object.save()
-            formset.instance = self.object
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -1914,21 +1826,16 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        context = self.get_context_data()
-        formset = context['formset']
+        formset = PlateTestResultFormSet(self.request.POST, instance=self.object)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save overall test result
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayPlateTestResultDelete(CreatorRequiredMixin, DeleteView):
+class AssayPlateTestResultDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete a Plate Test Result"""
     model = AssayPlateTestResult
     template_name = 'assays/assayplatetestresult_delete.html'

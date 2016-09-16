@@ -5,6 +5,10 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.models import User
 
 
+class SignOffMixin(forms.ModelForm):
+    signed_off = forms.BooleanField(required=False)
+
+
 class SearchForm(forms.Form):
     """Form for Global/Bioactivity searches"""
     app = forms.CharField(max_length=50)

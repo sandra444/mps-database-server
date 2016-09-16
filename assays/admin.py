@@ -500,14 +500,7 @@ def save_assay_layout(request, obj, form, change):
         # Delete old labels for this assay
         AssayWellLabel.objects.filter(assay_layout=layout).delete()
 
-        obj.modified_by = request.user
-
-    else:
-        obj.modified_by = obj.created_by = request.user
-
-    # Save the layout model itself (wells are saved in the following portion)
-    obj.save()
-
+    # Wells are saved in the following portion
     for key, val in form.data.iteritems():
         # Time points
         if key.endswith('_time'):

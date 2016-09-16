@@ -40,7 +40,7 @@
     {% csrf_token %}
     </h1>
 
-    {% include "submit.html" %}
+    {% include "submit.html" group=object.group %}
 
     {% include 'errors.html' %}
 
