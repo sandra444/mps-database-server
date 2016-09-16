@@ -308,6 +308,7 @@ class AssayRunDetail(DetailView):
 
     # Study detail view does not use DetailRedirectMixin because of differing URL
     @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
         self.object = self.get_object()
         # If user CAN edit the item, redirect to the respective edit page
@@ -608,6 +609,7 @@ class AssayChipSetupAdd(CreateView):
 
     # Due to the ability to clone, AssayChipSetupAdd is an exception to normal StudyGroupRequired permission
     @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         if not has_group(self.request.user, study.group.name):
