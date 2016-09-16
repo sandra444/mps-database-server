@@ -278,7 +278,7 @@ def fetch_chip_readout(request):
     ).filter(
         assay_chip_id=chip_id
     ).order_by(
-        'assay_id',
+        'assay_id__assay_id__assay_short_name',
         'elapsed_time'
     )
 
