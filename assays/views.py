@@ -116,7 +116,7 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
     def get_queryset(self):
         return AssayRun.objects.filter(
             group__in=self.request.user.groups.all()
-        ).prefetch_related('created_by', 'group')
+        ).prefetch_related('created_by', 'group', 'signed_off_by')
 
     # def get_context_data(self, request, **kwargs):
     #     groups = request.user.groups.values_list('pk', flat=True)
@@ -253,16 +253,16 @@ class AssayRunList(LoginRequiredMixin, ListView):
     model = AssayRun
 
     def get_queryset(self):
-        return AssayRun.objects.filter(
+        queryset = AssayRun.objects.prefetch_related(
+            'created_by',
+            'group',
+            'signed_off_by'
+        )
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        return queryset.filter(
             restricted=False
-        ).prefetch_related(
-            'created_by',
-            'group'
-        ) | AssayRun.objects.filter(
-            group__in=self.request.user.groups.all()
-        ).prefetch_related(
-            'created_by',
-            'group'
+        ) | queryset.filter(
+            group__name__in=group_names
         )
 
 StudySupportingDataFormset = inlineformset_factory(
@@ -581,25 +581,21 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
     model = AssayChipSetup
 
     def get_queryset(self):
-        return AssayChipSetup.objects.filter(
-            assay_run_id__restricted=False
-        ).prefetch_related(
+        queryset = AssayChipSetup.objects.prefetch_related(
             'assay_run_id',
             'device',
             'organ_model',
             'compound',
             'unit',
             'created_by',
-            'group'
-        ) | AssayChipSetup.objects.filter(
-            assay_run_id__group__in=self.request.user.groups.all()
-        ).prefetch_related(
-            'assay_run_id',
-            'device',
-            'compound',
-            'unit',
-            'created_by',
-            'group'
+            'group',
+            'signed_off_by'
+        )
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        return queryset.filter(
+            restricted=False
+        ) | queryset.filter(
+            group__name__in=group_names
         )
 
 
@@ -774,30 +770,26 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
     model = AssayChipReadout
 
     def get_queryset(self):
-        readouts = AssayChipReadout.objects.filter(
+        queryset = AssayChipReadout.objects.filter(
             chip_setup__assay_run_id__restricted=False
         ).prefetch_related(
-            'chip_setup',
-            'created_by',
-            'group'
-        ).select_related(
             'chip_setup__assay_run_id',
             'chip_setup__compound',
-            'chip_setup__unit'
-        ) | AssayChipReadout.objects.filter(
-            chip_setup__assay_run_id__group__in=self.request.user.groups.all()
-        ).prefetch_related(
-            'chip_setup',
+            'chip_setup__unit',
             'created_by',
-            'group'
-        ).select_related(
-            'chip_setup__assay_run_id',
-            'chip_setup__compound',
-            'chip_setup__unit'
+            'group',
+            'signed_off_by'
+        )
+
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        queryset = queryset.filter(
+            restricted=False
+        ) | queryset.filter(
+            group__name__in=group_names
         )
 
         related_assays = AssayChipReadoutAssay.objects.filter(
-            readout_id__in=readouts
+            readout_id__in=queryset
         ).prefetch_related(
             'readout_id',
             'assay_id'
@@ -810,11 +802,11 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
             # start appending to a list keyed by the readout ID for all related images
             related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
 
-        for readout in readouts:
+        for readout in queryset:
             # set an attribute on the readout that is the list created above
             readout.related_assays = related_assays_map.get(readout.id)
 
-        return readouts
+        return queryset
 
 
 ACRAFormSet = inlineformset_factory(
@@ -1001,27 +993,25 @@ class AssayChipTestResultList(LoginRequiredMixin, ListView):
     template_name = 'assays/assaychiptestresult_list.html'
 
     def get_queryset(self):
-        initial_query = AssayChipResult.objects.prefetch_related(
-            'assay_name',
-            'assay_result',
-            'result_function',
-            'result_type',
-            'test_unit'
-        ).select_related(
-            'assay_result__chip_readout',
+        queryset = AssayChipResult.objects.prefetch_related(
+            'assay_name__assay_id',
             'assay_result__chip_readout__chip_setup',
             'assay_result__chip_readout__chip_setup__compound',
             'assay_result__chip_readout__chip_setup__unit',
             'assay_result__chip_readout__chip_setup__assay_run_id',
-            'assay_name__assay_id',
             'assay_result__created_by',
-            'assay_result__group'
+            'assay_result__group',
+            'assay_result__signed_off_by',
+            'result_function',
+            'result_type',
+            'test_unit'
         )
 
-        return initial_query.filter(
-            assay_result__chip_readout__chip_setup__assay_run_id__restricted=False
-        ) | initial_query.filter(
-            assay_result__chip_readout__chip_setup__assay_run_id__group__in=self.request.user.groups.all()
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        return queryset.filter(
+            assay_result__restricted=False
+        ) | queryset.filter(
+            assay_result__group__name__in=group_names
         )
 
 
@@ -1244,7 +1234,8 @@ class AssayLayoutList(LoginRequiredMixin, ListView):
         ).prefetch_related(
             'created_by',
             'group',
-            'device'
+            'device',
+            'signed_off_by'
         )
 
 
@@ -1341,21 +1332,21 @@ class AssayPlateSetupList(LoginRequiredMixin, ListView):
     model = AssayPlateSetup
 
     def get_queryset(self):
-        return AssayPlateSetup.objects.filter(
-            restricted=False
-        ).prefetch_related(
+        queryset = AssayPlateSetup.objects.prefetch_related(
             'created_by',
             'group',
             'assay_run_id',
-            'assay_layout'
-        ) | AssayPlateSetup.objects.filter(
-            group__in=self.request.user.groups.all()
-        ).prefetch_related(
-            'created_by',
-            'group',
-            'assay_run_id',
-            'assay_layout'
+            'assay_layout',
+            'signed_off_by'
         )
+
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        return queryset.filter(
+            restricted=False
+        ) | queryset.filter(
+            group__name__in=group_names
+        )
+
 
 # Formset for plate cells
 AssayPlateCellsFormset = inlineformset_factory(
@@ -1511,26 +1502,22 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
     model = AssayPlateReadout
 
     def get_queryset(self):
-        readouts = AssayPlateReadout.objects.filter(
-            setup__assay_run_id__restricted=False
-        ).prefetch_related(
-            'setup',
+        queryset = AssayPlateReadout.objects.prefetch_related(
             'created_by',
-            'group'
-        ).select_related(
-            'setup__assay_run_id'
-        ) | AssayPlateReadout.objects.filter(
-            setup__assay_run_id__group__in=self.request.user.groups.all()
-        ).prefetch_related(
-            'setup',
-            'created_by',
-            'group'
-        ).select_related(
-            'setup__assay_run_id'
+            'group',
+            'setup__assay_run_id',
+            'signed_off_by'
+        )
+
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        queryset = queryset.filter(
+            restricted=False
+        ) | queryset.filter(
+            group__name__in=group_names
         )
 
         related_assays = AssayPlateReadoutAssay.objects.filter(
-            readout_id__in=readouts
+            readout_id__in=queryset
         ).prefetch_related(
             'readout_id',
             'assay_id'
@@ -1543,11 +1530,11 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
             # start appending to a list keyed by the readout ID for all related images
             related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
 
-        for readout in readouts:
+        for readout in queryset:
             # set an attribute on the readout that is the list created above
             readout.related_assays = related_assays_map.get(readout.id)
 
-        return readouts
+        return queryset
 
 
 APRAFormSet = inlineformset_factory(
@@ -1735,21 +1722,22 @@ class AssayPlateTestResultList(LoginRequiredMixin, ListView):
     template_name = 'assays/assayplatetestresult_list.html'
 
     def get_queryset(self):
-        initial_query = AssayPlateResult.objects.prefetch_related(
+        queryset = AssayPlateResult.objects.prefetch_related(
             'result_function',
             'result_type',
-            'test_unit'
-        ).select_related(
+            'test_unit',
             'assay_result__readout__setup__assay_run_id',
             'assay_name__assay_id',
             'assay_result__created_by',
-            'assay_result__group'
+            'assay_result__group',
+            'assay_result__signed_off_by'
         )
 
-        return initial_query.filter(
-            assay_result__readout__setup__assay_run_id__restricted=False
-        ) | initial_query.filter(
-            assay_result__readout__setup__assay_run_id__group__in=self.request.user.groups.all()
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        return queryset.filter(
+            assay_result__restricted=False
+        ) | queryset.filter(
+            assay_result__group__name__in=group_names
         )
 
 

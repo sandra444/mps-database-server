@@ -8,26 +8,6 @@ from .models import Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
 from mps.mixins import SpecificGroupRequiredMixin
 from mps.base.models import save_forms_with_tracking
 
-# class MicrodeviceList(ListView):
-#     model = Microdevice
-#     template_name = 'microdevices/microdevice_list.html'
-
-
-# Convert to class?
-def microdevice_list(request):
-    """Displays a list of Devices AND Models"""
-    c = RequestContext(request)
-
-    organ_models = OrganModel.objects.prefetch_related('organ', 'center', 'device').all()
-    devices = Microdevice.objects.prefetch_related('organ', 'center', 'manufacturer').all()
-
-    c.update({
-        'models': organ_models,
-        'devices': devices,
-    })
-
-    return render_to_response('microdevices/microdevice_list.html', c)
-
 
 class OrganModelList(ListView):
     """Displays """
@@ -68,22 +48,6 @@ class OrganModelDetail(DetailView):
         })
 
         return context
-
-
-# def organ_model_detail(request, *args, **kwargs):
-#     c = RequestContext(request)
-#
-#     model = get_object_or_404(OrganModel, pk=kwargs.get('pk'))
-#     assays = ValidatedAssay.objects.filter(organ_model=model).prefetch_related('assay', 'assay__assay_type')
-#     protocols = OrganModelProtocol.objects.filter(organ_model=model).order_by('-version')
-#
-#     c.update({
-#         'model': model,
-#         'assays': assays,
-#         'protocols': protocols,
-#     })
-#
-#     return render_to_response('microdevices/organmodel_detail.html', c)
 
 
 class MicrodeviceDetail(DetailView):
