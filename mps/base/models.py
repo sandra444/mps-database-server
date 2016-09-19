@@ -4,6 +4,7 @@
 
 from django.db import models
 from datetime import datetime
+from django.shortcuts import redirect, get_object_or_404
 
 
 class TrackableModel(models.Model):
@@ -82,23 +83,6 @@ class FlaggableModel(RestrictedModel):
 
     class Meta(object):
         abstract = True
-
-
-def add_study_fields_to_form(study_id, form, add_study=False):
-    """Adds study, group, and restricted to a form
-
-    Params:
-    study_id -- the study associated with the model
-    form -- the form to be added to
-    add_study -- boolean indicating whether to add the study to the model
-    """
-    study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-
-    if add_study:
-        form.instance.assay_run_id = study
-
-    form.instance.group = study.group
-    form.instance.restricted = study.restricted
 
 
 def save_forms_with_tracking(self, form, formset=None, update=False):

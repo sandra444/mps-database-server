@@ -18,7 +18,7 @@ from django.forms.models import inlineformset_factory
 # from mps.templatetags.custom_filters import *
 
 from mps.mixins import *
-from mps.base.models import save_forms_with_tracking, add_study_fields_to_form
+from mps.base.models import save_forms_with_tracking
 
 # import ujson as json
 import xlrd
@@ -69,6 +69,23 @@ class UnicodeWriter:
         """This function writes out all rows given"""
         for row in rows:
             self.writerow(row)
+
+
+def add_study_fields_to_form(self, form, add_study=False):
+    """Adds study, group, and restricted to a form
+
+    Params:
+    self -- the object in question
+    form -- the form to be added to
+    add_study -- boolean indicating whether to add the study to the model
+    """
+    study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+    if add_study:
+        form.instance.assay_run_id = study
+
+    form.instance.group = study.group
+    form.instance.restricted = study.restricted
 
 
 # Removed User Index as it caused confusion
@@ -635,7 +652,7 @@ class AssayChipSetupAdd(CreateView):
         else:
             form = form_class()
 
-        add_study_fields_to_form(self.kwargs['study_id'], form, add_study=True)
+        add_study_fields_to_form(self, form, add_study=True)
 
         return form
 
@@ -847,7 +864,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
-        add_study_fields_to_form(self.kwargs['study_id'], form)
+        add_study_fields_to_form(self, form)
 
         return context
 
@@ -1042,7 +1059,7 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
-        add_study_fields_to_form(self.kwargs['study_id'], form)
+        add_study_fields_to_form(self, form)
 
         return context
 
@@ -1371,7 +1388,7 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
         else:
             form = form_class()
 
-        add_study_fields_to_form(self.kwargs['study_id'], form)
+        add_study_fields_to_form(self, form)
 
         return form
 
@@ -1579,7 +1596,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
-        add_study_fields_to_form(self.kwargs['study_id'], form)
+        add_study_fields_to_form(self, form)
 
         return context
 
@@ -1770,7 +1787,7 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
-        add_study_fields_to_form(self.kwargs['study_id'], form)
+        add_study_fields_to_form(self, form)
 
         return context
 
