@@ -88,7 +88,7 @@ class CompoundsAdd(SpecificGroupRequiredMixin, CreateView):
     form_class = CompoundForm
     template_name = 'compounds/compounds_add.html'
 
-    required_group_name = 'Change Compounds Front'
+    required_group_name = 'Add Compounds Front'
 
     def get_context_data(self, **kwargs):
         context = super(CompoundsAdd, self).get_context_data(**kwargs)

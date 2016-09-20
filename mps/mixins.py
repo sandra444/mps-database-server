@@ -65,13 +65,29 @@ class ObjectGroupRequiredMixin(object):
 
 
 class StudyGroupRequiredMixin(object):
-    """This mixin requires the user to have the group matching the study's group"""
+    """This mixin requires the user to have the group matching the study's group
+
+    Attributes:
+    cloning_permitted - Specifies whether cloning is permitted
+    """
+    # Default value for whether or not cloning is permitted
+    cloning_permitted = False
+
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         if not has_group(self.request.user, study.group.name):
             return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
+
+        if self.cloning_permitted and self.request.GET.get('clone', ''):
+            clone = get_object_or_404(self.model, pk=self.request.GET.get('clone', ''))
+            if not has_group(self.request.user, clone.group.name):
+                return PermissionDenied(
+                    self.request,
+                    'You must be a member of the group ' + str(clone.group) + ' to clone this'
+                )
+
         return super(StudyGroupRequiredMixin, self).dispatch(*args, **kwargs)
 
 
@@ -80,14 +96,22 @@ class DetailRedirectMixin(object):
     """This mixin checks if the user has the object's group, if so it redirects to the edit page
 
     If the user does not have the correct group, it redirects to the details page
+
+    Attributes:
+    update_redirect_url - where to redirect it update is possible
     """
+    # Default value for url to redirect to
+    update_redirect_url = 'update/'
+
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
         self.object = self.get_object()
         # If user CAN edit the item, redirect to the respective edit page
         if has_group(self.request.user, self.object.group.name):
-            return redirect('update/')
+            # Redirects either to url + update or the specified url + object ID (as an attribute)
+            # This is a little tricky if you don't look for {} in update_redirect_url
+            redirect(self.update_redirect_url.format(self.object.id))
         # If the object is not restricted and the user is NOT a listed viewer
         elif self.object.restricted and not is_group_viewer(self.request.user, self.object.group.name):
             return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
@@ -125,6 +149,5 @@ class SpecificGroupRequiredMixin(object):
         else:
             return PermissionDenied(
                 self.request,
-                'You do not have permission to view this page <br>'
                 'Contact an administrator if you would like to gain permission'
             )

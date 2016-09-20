@@ -13,10 +13,12 @@ from django.shortcuts import redirect
 from mps.base.models import save_forms_with_tracking
 
 
-class CellSampleAdd(OneGroupRequiredMixin, CreateView):
+class CellSampleAdd(SpecificGroupRequiredMixin, CreateView):
     """Add a Cell Sample"""
     template_name = 'cellsamples/cellsample_add.html'
     form_class = CellSampleForm
+
+    required_group_name = 'Add Cell Samples Front'
 
     def get_form(self, form_class):
         # Get group selection possibilities
@@ -92,10 +94,12 @@ class CellSampleList(OneGroupRequiredMixin, ListView):
         return queryset
 
 
-class CellTypeAdd(OneGroupRequiredMixin, CreateView):
+class CellTypeAdd(SpecificGroupRequiredMixin, CreateView):
     """Add a Cell Type"""
     template_name = 'cellsamples/celltype_add.html'
     form_class = CellTypeForm
+
+    required_group_name = 'Add Cell Samples Front'
 
     # Test form validity
     def form_valid(self, form):
@@ -141,10 +145,12 @@ class CellTypeList(ListView):
 
 
 # # TODO
-class CellSubtypeAdd(OneGroupRequiredMixin, CreateView):
+class CellSubtypeAdd(SpecificGroupRequiredMixin, CreateView):
     """Add a Cell Subtype"""
     template_name = 'cellsamples/cellsubtype_add.html'
     form_class = CellSubtypeForm
+
+    required_group_name = 'Add Cell Samples Front'
 
     # Test form validity
     def form_valid(self, form):

@@ -319,21 +319,11 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayRunDetail(DetailView):
+class AssayRunDetail(DetailRedirectMixin, DetailView):
     """Details for a Study"""
     model = AssayRun
 
-    # Study detail view does not use DetailRedirectMixin because of differing URL
-    @method_decorator(login_required)
-    @method_decorator(user_passes_test(user_is_active))
-    def dispatch(self, *args, **kwargs):
-        self.object = self.get_object()
-        # If user CAN edit the item, redirect to the respective edit page
-        if has_group(self.request.user, self.object.group.name):
-            return redirect('/assays/' + str(self.object.id))
-        elif self.object.restricted:
-            return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
-        return super(AssayRunDetail, self).dispatch(*args, **kwargs)
+    update_redirect_url = '/assays/{}'
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -613,30 +603,15 @@ AssayChipCellsFormset = inlineformset_factory(
 
 
 # Cloning was recently refactored
-class AssayChipSetupAdd(CreateView):
+class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
     """Add a Chip Setup (with inline for Chip Cells)"""
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
     # May want to define form with initial here
     form_class = AssayChipSetupForm
 
-    # Due to the ability to clone, AssayChipSetupAdd is an exception to normal StudyGroupRequired permission
-    @method_decorator(login_required)
-    @method_decorator(user_passes_test(user_is_active))
-    def dispatch(self, *args, **kwargs):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        if not has_group(self.request.user, study.group.name):
-            return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
-
-        if self.request.GET.get('clone', ''):
-            clone = get_object_or_404(AssayChipSetup, pk=self.request.GET.get('clone', ''))
-            if not has_group(self.request.user, clone.assay_run_id.group.name):
-                return PermissionDenied(
-                    self.request,
-                    'You must be a member of the group ' + str(clone.assay_run_id.group) + ' to clone this setup'
-                )
-
-        return super(AssayChipSetupAdd, self).dispatch(*args, **kwargs)
+    # Specify that cloning is permitted
+    cloning_permitted = True
 
     def get_form(self, form_class):
         if self.request.method == 'POST':
@@ -822,6 +797,9 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
     """Add a Chip Readout with inline for Assay Chip Readout Assays"""
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
+
+    # Specify that cloning is permitted
+    cloning_permitted = True
 
     def get_form(self, form_class):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
@@ -1369,6 +1347,9 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
     form_class = AssayPlateSetupForm
     template_name = 'assays/assayplatesetup_add.html'
 
+    # Specify that cloning is permitted
+    cloning_permitted = True
+
     def get_form(self, form_class):
         if self.request.method == 'POST':
             form = form_class(self.request.POST)
@@ -1550,6 +1531,9 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
     """Add a Plate Readout with inline for Assay Plate Readout Assays"""
     template_name = 'assays/assayplatereadout_add.html'
     form_class = AssayPlateReadoutForm
+
+    # Specify that cloning is permitted
+    cloning_permitted = True
 
     def get_form(self, form_class):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])

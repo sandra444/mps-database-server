@@ -10,16 +10,16 @@ from mps.base.models import save_forms_with_tracking
 
 
 class OrganModelList(ListView):
-    """Displays """
-    template_name = ''
+    """Displays list of Organ Models"""
+    template_name = 'microdevices/organmodel_list.html'
 
     def get_queryset(self):
         return OrganModel.objects.prefetch_related('organ', 'center', 'device').all()
 
 
 class MicrodeviceList(ListView):
-    """Displays """
-    template_name = ''
+    """Displays list of Microdevices"""
+    template_name = 'microdevices/microdevice_list.html'
 
     def get_queryset(self):
         return Microdevice.objects.prefetch_related('organ', 'center', 'manufacturer').all()
@@ -62,7 +62,7 @@ class MicrodeviceAdd(SpecificGroupRequiredMixin, CreateView):
     template_name = 'microdevices/microdevice_add.html'
     form_class = MicrodeviceForm
 
-    required_group_name = 'Change Microdevices Front'
+    required_group_name = 'Add Microdevices Front'
 
     def form_valid(self, form):
         if form.is_valid():
@@ -110,7 +110,7 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
     template_name = 'microdevices/organmodel_add.html'
     form_class = OrganModelForm
 
-    required_group_name = 'Change Microdevices Front'
+    required_group_name = 'Add Microdevices Front'
 
     def get_context_data(self, **kwargs):
         context = super(OrganModelAdd, self).get_context_data(**kwargs)
