@@ -111,7 +111,7 @@ class DetailRedirectMixin(object):
         if has_group(self.request.user, self.object.group.name):
             # Redirects either to url + update or the specified url + object ID (as an attribute)
             # This is a little tricky if you don't look for {} in update_redirect_url
-            redirect(self.update_redirect_url.format(self.object.id))
+            return redirect(self.update_redirect_url.format(self.object.id))
         # If the object is not restricted and the user is NOT a listed viewer
         elif self.object.restricted and not is_group_viewer(self.request.user, self.object.group.name):
             return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
