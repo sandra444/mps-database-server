@@ -24,6 +24,11 @@ class CellSampleForm(SignOffMixin, forms.ModelForm):
     class Meta(object):
         model = CellSample
         exclude = tracking + restricted
+        widgets = {
+            'isolation_method': forms.Textarea(attrs={'rows': 3}),
+            'isolation_notes': forms.Textarea(attrs={'rows': 3}),
+            'patient_condition': forms.Textarea(attrs={'rows': 3}),
+        }
 
 
 class CellTypeForm(SignOffMixin, forms.ModelForm):
