@@ -655,7 +655,6 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         formset = AssayChipCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
@@ -797,6 +796,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
     """Add a Chip Readout with inline for Assay Chip Readout Assays"""
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
+    model = AssayChipReadout
 
     # Specify that cloning is permitted
     cloning_permitted = True
@@ -805,7 +805,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
         if self.request.method == 'POST':
-            return form_class(study, current, self.request.POST, self.request.FILES)
+            form = form_class(study, current, self.request.POST, self.request.FILES)
         elif self.request.GET.get('clone', ''):
             pk = int(self.request.GET.get('clone', ''))
             clone = get_object_or_404(AssayChipReadout, pk=pk)
@@ -815,10 +815,12 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
                 instance=clone,
                 initial={'file': None}
             )
-            # We do not want to keep the file (setup automatically excluded)
-            return form
         else:
-            return form_class(study, current)
+            form = form_class(study, current)
+
+        add_study_fields_to_form(self, form)
+
+        return form
 
     def get_context_data(self, **kwargs):
         context = super(AssayChipReadoutAdd, self).get_context_data(**kwargs)
@@ -834,11 +836,10 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
-        add_study_fields_to_form(self, form)
-
         return context
 
     def form_valid(self, form):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         formset = ACRAFormSet(self.request.POST, self.request.FILES, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
@@ -1013,9 +1014,13 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
         current = None
 
         if self.request.method == 'POST':
-            return form_class(study, current, self.request.POST)
+            form = form_class(study, current, self.request.POST)
         else:
-            return form_class(study, current)
+            form = form_class(study, current)
+
+        add_study_fields_to_form(self, form)
+
+        return form
 
     def get_context_data(self, **kwargs):
         context = super(AssayChipTestResultAdd, self).get_context_data(**kwargs)
@@ -1026,8 +1031,6 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
                 context['formset'] = ChipTestResultFormSet()
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-
-        add_study_fields_to_form(self, form)
 
         return context
 
@@ -1360,7 +1363,7 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
         else:
             form = form_class()
 
-        add_study_fields_to_form(self, form)
+        add_study_fields_to_form(self, form, add_study=True)
 
         return form
 
@@ -1531,6 +1534,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
     """Add a Plate Readout with inline for Assay Plate Readout Assays"""
     template_name = 'assays/assayplatereadout_add.html'
     form_class = AssayPlateReadoutForm
+    model = AssayPlateReadout
 
     # Specify that cloning is permitted
     cloning_permitted = True
@@ -1539,11 +1543,11 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
         if self.request.method == 'POST':
-            return form_class(study, current, self.request.POST, self.request.FILES)
+            form = form_class(study, current, self.request.POST, self.request.FILES)
         elif self.request.GET.get('clone', ''):
             pk = int(self.request.GET.get('clone', ''))
             clone = get_object_or_404(AssayPlateReadout, pk=pk)
-            return form_class(
+            form = form_class(
                 study,
                 current,
                 instance=clone,
@@ -1551,7 +1555,11 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             )
             # We do not want to keep the file (setup automatically excluded))
         else:
-            return form_class(study, current)
+            form = form_class(study, current)
+
+        add_study_fields_to_form(self, form)
+
+        return form
 
     def get_context_data(self, **kwargs):
         context = super(AssayPlateReadoutAdd, self).get_context_data(**kwargs)
@@ -1567,11 +1575,10 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
-        add_study_fields_to_form(self, form)
-
         return context
 
     def form_valid(self, form):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         formset = APRAFormSet(self.request.POST, self.request.FILES, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
@@ -1745,9 +1752,13 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
         current = None
 
         if self.request.method == 'POST':
-            return form_class(study, current, self.request.POST)
+            form = form_class(study, current, self.request.POST)
         else:
-            return form_class(study, current)
+            form = form_class(study, current)
+
+        add_study_fields_to_form(self, form)
+
+        return form
 
     def get_context_data(self, **kwargs):
         context = super(AssayPlateTestResultAdd, self).get_context_data(**kwargs)
@@ -1758,8 +1769,6 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
                 context['formset'] = PlateTestResultFormSet()
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-
-        add_study_fields_to_form(self, form)
 
         return context
 
