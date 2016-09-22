@@ -273,6 +273,8 @@ def fetch_chip_readout(request):
         logger.error('chip not present in request to fetch_chip_readout')
         return HttpResponseServerError()
 
+    # PLEASE NOTE: THIS AFFECTS PROCESSING OF QC
+    # DO NOT MODIFY THIS WITHOUT ALSO CHANGING modify_qc_status_chip
     chip_data = AssayChipRawData.objects.prefetch_related(
         'assay_id'
     ).filter(

@@ -1174,7 +1174,14 @@ def modify_qc_status_chip(current_chip_readout, form):
     """Update the QC for a chip"""
     # Get the readouts as they would appear on the front end
     # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
-    readouts = AssayChipRawData.objects.filter(assay_chip_id=current_chip_readout).order_by('assay_id', 'elapsed_time')
+    readouts = AssayChipRawData.objects.prefetch_related(
+        'assay_id'
+    ).filter(
+        assay_chip_id=current_chip_readout
+    ).order_by(
+        'assay_id__assay_id__assay_short_name',
+        'elapsed_time'
+    )
 
     # Get QC status for each line
     qc_status = get_qc_status_chip(form)
