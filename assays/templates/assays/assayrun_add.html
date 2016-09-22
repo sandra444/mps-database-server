@@ -5,6 +5,7 @@
     <script src="{% static "js/inline_add.js" %}"></script>
     <script src="{% static "js/image_display.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/flag.js" %}"></script>
     <script src="{% static "assays/assayrun_add.js" %}"></script>
 {% endblock %}
 
@@ -40,7 +41,7 @@
     {% csrf_token %}
     </h1>
 
-    {% include "submit.html" with group=form.instance.group.name %}
+    {% include "submit.html" with flag="y" group=form.instance.group.name %}
 
     {% include 'errors.html' %}
 

@@ -525,7 +525,7 @@ class StudyModel(models.Model):
     integration_mode = models.CharField(max_length=13, default='1', choices=(('0', 'Functional'), ('1', 'Physical')))
 
 
-class AssayRun(RestrictedModel):
+class AssayRun(FlaggableModel):
     """The encapsulation of all data concerning some plate/chip project"""
 
     class Meta(object):

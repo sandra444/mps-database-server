@@ -32,6 +32,7 @@
                     <th>Description</th>
                     <th>Creator</th>
                     <th>Group</th>
+                    <th>Review</th>
                 </tr>
             </thead>
 
@@ -49,6 +50,14 @@
                         {{ study.created_by.last_name }}
                     </td>
                     <td>{{ study.group }}</td>
+                    <td>
+                        {% if study.signed_off_by %}
+                            <span title="This entry was reviewed by {{ study.signed_off_by }} on {{ study.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if study.flagged %}
+                            <span title="This entry is flagged for review: '{{ study.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
