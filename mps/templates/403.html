@@ -12,7 +12,7 @@
     <h2 class="text-danger">{{ message }}</h2>
 
     <div class="padded-row large-padding-top padded-bottom text-center">
-        <a class="btn btn-xlarge btn-warning" onclick="window.history.back()">
+        <a class="btn btn-xlarge btn-warning" onclick="if(document.referrer.indexOf(window.location.host) !== -1){window.history.back()}else{window.location.href='/'};setTimeout(function(){window.location.href='/';},500);">
             <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
             Go Back
         </a>
