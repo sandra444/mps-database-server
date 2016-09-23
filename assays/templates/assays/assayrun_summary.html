@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
 
 {% block load %}
     <script src="{% static "js/cookies.js" %}"></script>
@@ -142,7 +143,7 @@
                 <tr>
                     <td>{{ cell.cell_sample }}</td>
                     <td>{{ cell.cell_biosensor }}</td>
-                    <td>{{ cell.cellsample_density }}</td>
+                    <td>{{ cell.cellsample_density|intcomma }}</td>
                     <td>{{ cell.get_cellsample_density_unit_display }}</td>
                     <td>{{ cell.cell_passage }}</td>
                 </tr>
