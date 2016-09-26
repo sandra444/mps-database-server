@@ -54,6 +54,10 @@
             </div>
         {% endif %}
 
+        <div hidden>
+            {{ form.signed_off }}
+        </div>
+
         {# Check to see if the user has the 'review' group #}
         {# Perhaps the logic should be removed from here and added to JS? #}
         {% if update and group and user|is_group_admin:group %}
@@ -62,17 +66,11 @@
             onclick="$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');">
                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
             </a>
-            <div hidden>
-                <input type="checkbox" id="id_signed_off" name="signed_off" checked>
-            </div>
             {% else %}
             <a role='button' id="mark_reviewed" class="btn btn-sm" title="Mark entry as reviewed"
             onclick="$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');">
                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
             </a>
-            <div hidden>
-                {{ form.signed_off }}
-            </div>
             {% endif %}
         {% endif %}
 
