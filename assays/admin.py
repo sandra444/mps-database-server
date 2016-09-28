@@ -458,7 +458,6 @@ def save_assay_layout(request, obj, form, change):
     The data to make an assay layout is passed using a custom form.
     Please note that this function uses raw queries.
     """
-
     # Connect to the database
     cursor = connection.cursor()
 
@@ -581,7 +580,7 @@ class AssayLayoutAdmin(LockableAdmin):
     """Admin for Assay Layouts (not currently functional)"""
 
     class Media(object):
-        js = ('assays/assaylayout_add.js',)
+        js = ('assays/plate_display.js', 'assays/assaylayout_add.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
     save_as = True
