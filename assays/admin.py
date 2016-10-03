@@ -1803,6 +1803,7 @@ class AssayPlateTestResultAdmin(LockableAdmin):
             'js/cookies.js',
             'js/whittle.js',
             'js/inline_fix.js',
+            'js/csv_functions.js',
             'assays/plate_display.js',
             'assays/assayplatetestresult_add.js'
         )

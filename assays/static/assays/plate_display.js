@@ -30,8 +30,8 @@ $(document).ready(function () {
     ];
 
     // It is useful to have a list of row and column labels
-    var row_labels = null;
-    var column_labels = null;
+    window.LAYOUT.row_labels = null;
+    window.LAYOUT.column_labels = null;
 
     // Feature select for heatmap
     var assay_select = $('#assay_select');
@@ -113,10 +113,8 @@ $(document).ready(function () {
                     window.LAYOUT.row_labels = json.row_labels;
                     window.LAYOUT.column_labels = json.column_labels;
 
-                    var row_labels = json.row_labels;
-                    var column_labels = json.column_labels;
-                    if (row_labels && column_labels) {
-                        window.LAYOUT.build_table(row_labels, column_labels);
+                    if (window.LAYOUT.row_labels && window.LAYOUT.column_labels) {
+                        window.LAYOUT.build_table();
                     }
                     else {
                         alert('This device is not configured correctly');
@@ -136,7 +134,7 @@ $(document).ready(function () {
     };
 
     // Build table
-    window.LAYOUT.build_table = function (row_labels, column_labels) {
+    window.LAYOUT.build_table = function () {
         // Remove old
         $('#layout_table').remove();
 
@@ -155,19 +153,19 @@ $(document).ready(function () {
         // make first row
         var row = $('<tr>');
         row.append($('<th>'));
-        $.each(column_labels, function (index, value) {
+        $.each(window.LAYOUT.column_labels, function (index, value) {
             row.append($('<th>')
                 .text(value));
         });
         table.append(row);
 
         // make rest of the rows
-        $.each(row_labels, function (row_index, row_value) {
+        $.each(window.LAYOUT.row_labels, function (row_index, row_value) {
             var row = $('<tr>');
             row.append($('<th>')
                 .text(row_value));
             // Note that the "lists" are added here
-            $.each(column_labels, function (column_index, column_value) {
+            $.each(window.LAYOUT.column_labels, function (column_index, column_value) {
                 row.append($('<td>')
                     .attr('id', row_value + '_' + column_value)
                     // Add class
