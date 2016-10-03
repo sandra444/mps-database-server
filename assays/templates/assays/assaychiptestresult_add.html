@@ -34,6 +34,9 @@
 
         <h1>
             Edit Test Results for <em>Chip-{{ object.chip_readout.chip_setup.assay_chip_id }}</em>
+
+        <a href="{% url 'setup_update' object.chip_readout.chip_setup.id %}" class="btn btn-primary">View/Edit Chip Setup</a>
+        <a href="{% url 'readout_update' object.chip_readout.id %}" class="btn btn-primary">View/Edit Chip Readout</a>
     {% else %}
         <form class="form-horizontal" method="post" >
 
