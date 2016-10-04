@@ -471,30 +471,32 @@ $(document).ready(function () {
     }
 
     function get_existing_readout(readout_id) {
-        $.ajax({
-            url: "/assays_ajax/",
-            type: "POST",
-            dataType: "json",
-            data: {
-                // Function to call within the view is defined by `call:`
-                call: 'fetch_readout',
+        if(readout_id) {
+            $.ajax({
+                url: "/assays_ajax/",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    // Function to call within the view is defined by `call:`
+                    call: 'fetch_readout',
 
-                // First token is the var name within views.py
-                // Second token is the var name in this JS file
-                id: readout_id,
+                    // First token is the var name within views.py
+                    // Second token is the var name in this JS file
+                    id: readout_id,
 
-                model: 'assay_device_readout',
+                    model: 'assay_device_readout',
 
-                // Always pass the CSRF middleware token with every AJAX call
-                csrfmiddlewaretoken: middleware_token
-            },
-            success: function (json) {
-                fill_readout_from_existing(json);
-            },
-            error: function (xhr, errmsg, err) {
-                console.log(xhr.status + ": " + xhr.responseText);
-            }
-        });
+                    // Always pass the CSRF middleware token with every AJAX call
+                    csrfmiddlewaretoken: middleware_token
+                },
+                success: function (json) {
+                    fill_readout_from_existing(json);
+                },
+                error: function (xhr, errmsg, err) {
+                    console.log(xhr.status + ": " + xhr.responseText);
+                }
+            });
+        }
     }
 
     function fill_readout_from_existing(data) {

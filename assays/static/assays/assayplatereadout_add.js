@@ -417,10 +417,13 @@ $(document).ready(function () {
         window.LAYOUT.get_device_layout(setup.val(), 'assay_device_setup', false);
     });
 
-    // If a setup is initially chosen
     // (implies readout exists)
-    if (setup.val()) {
+    if (window.LAYOUT.models['assay_device_readout']) {
         // Initial table and so on
+        window.LAYOUT.get_device_layout(window.LAYOUT.models['assay_device_readout'], 'assay_device_readout', false);
+    }
+    // If a setup is initially chosen
+    else if (setup.val()) {
         window.LAYOUT.get_device_layout(setup.val(), 'assay_device_setup', false);
     }
 

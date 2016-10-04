@@ -146,13 +146,12 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
             'organ_model',
             'compound',
             'unit',
-            'created_by'
+            'created_by',
         )
         readouts = AssayChipReadout.objects.filter(
             chip_setup=context['setups']
         ).prefetch_related(
-            'created_by'
-        ).select_related(
+            'created_by',
             'chip_setup__compound',
             'chip_setup__unit'
         )
@@ -180,9 +179,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
         context['results'] = AssayChipResult.objects.prefetch_related(
             'result_function',
             'result_type',
-            'test_unit'
-        ).select_related(
-            'assay_result__chip_readout__chip_setup',
+            'test_unit',
             'assay_result__chip_readout__chip_setup__unit',
             'assay_result__chip_readout__chip_setup__compound',
             'assay_name__assay_id',
@@ -231,8 +228,6 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
             'result_function',
             'result_type',
             'test_unit',
-            'assay_result'
-        ).select_related(
             'assay_result__readout__setup',
             'assay_name__assay_id',
             'assay_result__created_by'
