@@ -3,7 +3,7 @@ $(document).ready(function() {
     var middleware_token = getCookie('csrftoken');
     var study_id = Math.floor(window.location.href.split('/')[4]);
 
-    var current_key = 'chip'
+    var current_key = 'chip';
     var percent_control = false;
 
     var radio_buttons_display = $('#radio_buttons');

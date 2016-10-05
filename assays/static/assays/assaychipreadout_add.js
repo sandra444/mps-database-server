@@ -325,7 +325,7 @@ $(document).ready(function () {
 
         // Make bar charts
         for (var index in bar_chart_list) {
-            chart_index = bar_chart_list[index];
+            var chart_index = bar_chart_list[index];
             charts[chart_index].transform('bar');
         }
     }
