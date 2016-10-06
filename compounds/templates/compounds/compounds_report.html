@@ -4,6 +4,7 @@
 {% block load %}
     <script src="{% static "js/spin.min.js" %}"></script>
     <script src="{% static "js/mps_spinner.js" %}"></script>
+    <script src="{% static "js/project_filter.js" %}"></script>
     <script src="{% static "compounds/compound_report.js" %}"></script>
     <script src="{% static "js/cookies.js" %}"></script>
 {% endblock %}
@@ -44,8 +45,8 @@
                     <th>LogP</th>
                     <th>Rule of 5 Violations</th>
                     <th>Known Drug</th>
-                    <th>Project</th>
                     <th>Image</th>
+                    <th>Project</th>
                 </tr>
             </thead>
 
@@ -72,17 +73,6 @@
                         {% endif %}
                     </td>
 
-                    <td>
-                        {% if compound.mps %}
-                            MPS
-                        {% endif %}
-                        {% if compound.epa %}
-                            EPA
-                        {% endif %}
-                        {% if not compound.epa and not compound.mps %}
-                            Unassigned
-                        {% endif %}
-                    </td>
                     {# TODO Tags field is deprecated #}
 {#                    <td>{{ compound.tags|default_if_none:"" }}</td>#}
                     <td>
@@ -91,6 +81,21 @@
                       {% else %}
                         <span style="width: 128px; height: 128px;" class="glyphicon glyphicon-file text-warning" aria-hidden="true"></span>
                       {% endif %}
+                    </td>
+
+                    <td>
+                        {% if compound.mps %}
+                            MPS
+                        {% endif %}
+                        {% if compound.epa %}
+                            EPA
+                        {% endif %}
+                        {% if compound.tctc %}
+                            TCTC
+                        {% endif %}
+                        {% if not compound.epa and not compound.mps and not compound.tctc %}
+                            Unassigned
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}

@@ -40,8 +40,20 @@
 
     <div class="padded-row">
 
-        <div class="col-sm-3 col-md-2 thumbnail">
+        <div class="col-sm-3 col-md-2 thumbnail text-center">
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.compound.chemblid }}">
+            {% if object.compound.mps %}
+                <span class="label label-primary">MPS</span>
+            {% endif %}
+            {% if object.compound.epa %}
+                <span class="label label-success">EPA</span>
+            {% endif %}
+            {% if object.compound.tctc %}
+                <span class="label label-info">TCTC</span>
+            {% endif %}
+            {% if not object.compound.mps and not object.compound.epa and not object.compound.tctc %}
+                <span class="label label-default">Unassigned</span>
+            {% endif %}
         </div>
 
         <div class="col-sm-9 col-md-10">

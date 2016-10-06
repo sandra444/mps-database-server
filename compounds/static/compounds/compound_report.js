@@ -41,33 +41,10 @@ $(document).ready(function () {
     });
     dialog.removeProp('hidden');
 
-    var show_mps = $('#show_mps');
-    var show_epa = $('#show_epa');
-    var show_unassigned = $('#show_unassigned');
-
-    var filters = {
-        'MPS': true,
-        'EPA': true,
-        'Unassigned': true
-    };
-
     // Convert ID to valid selector
     function valid_selector(id) {
         return "#" + id.replace(/(:|\.|\[|\]|,|'|\(|\))/g, "\\$1");
     }
-
-    // This function filters the dataTable rows
-    $.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
-        if (oSettings.nTable.getAttribute('id') != 'compounds') {
-            return true;
-        }
-
-        for (var filter in filters) {
-            if (filters[filter] && aData[8].indexOf(filter) > -1) {
-                return true;
-            }
-        }
-    });
 
     // Add method to sort by checkbox
     // (I reversed it so that ascending will place checked first)
@@ -80,7 +57,7 @@ $(document).ready(function () {
     function clear_selections(reset) {
         // Remove search terms
         $('input[type=search]').val('');
-        compounds_table.search('');
+        window.TABLE.search('');
         // Uncheck all checkboxes
         checkboxes.prop('checked', false);
         // Remove all compounds
@@ -88,7 +65,7 @@ $(document).ready(function () {
 
         if (reset) {
             // Return to default length (maintains previous sorting and so on)
-            compounds_table.page.len(25).draw();
+            window.TABLE.page.len(25).draw();
         }
     }
 
@@ -156,8 +133,8 @@ $(document).ready(function () {
             check_selection(compound);
         });
 
-        compounds_table.order([[0, 'asc']]);
-        compounds_table.page.len(10).draw();
+        window.TABLE.order([[0, 'asc']]);
+        window.TABLE.page.len(10).draw();
 
         dialog.dialog('close');
     }
@@ -402,7 +379,7 @@ $(document).ready(function () {
     };
 
     // Make the initial data table
-    var compounds_table = $('#compounds').DataTable({
+    window.TABLE = $('#compounds').DataTable({
         dom: 'B<"row">lfrtip',
         fixedHeader: {headerOffset: 50},
         responsive: true,
@@ -410,10 +387,10 @@ $(document).ready(function () {
         "aoColumnDefs": [
             {
                 "bSortable": false,
-                "aTargets": [9]
+                "aTargets": [8]
             },
             {
-                "targets": [3, 8],
+                "targets": [3, 9],
                 "visible": false,
                 "searchable": true
             },
@@ -425,17 +402,8 @@ $(document).ready(function () {
         "iDisplayLength": 25
     });
 
-    var cells = compounds_table.cells().nodes();
+    var cells = window.TABLE.cells().nodes();
     var checkboxes = $(cells).find(':checkbox');
-
-    $('.table-filter').click(function() {
-        filters['MPS'] = show_mps.prop('checked');
-        filters['EPA'] = show_epa.prop('checked');
-        filters['Unassigned'] = show_unassigned.prop('checked');
-
-        // Redraw the table
-        compounds_table.draw();
-    });
 
     // Crude way to deal with resizing from images
     setTimeout(function() {

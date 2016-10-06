@@ -78,6 +78,10 @@ class Compound(LockableModel):
         default=False,
         help_text='Whether this compound is part of the MPS project'
     )
+    tctc = models.BooleanField(
+        default=False,
+        help_text='Whether this compound is part of the TCTC project'
+    )
 
     # standard names/identifiers
     inchikey = models.CharField(
