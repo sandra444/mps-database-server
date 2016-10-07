@@ -61,7 +61,10 @@
                         {% if object.epa %}
                             <span class="label label-success">EPA</span>
                         {% endif %}
-                        {% if not object.mps and not object.epa %}
+                        {% if object.tctc %}
+                            <span class="label label-info">TCTC</span>
+                        {% endif %}
+                        {% if not object.mps and not object.epa and not object.tctc %}
                             <span class="label label-default">Unassigned</span>
                         {% endif %}
                     </td>

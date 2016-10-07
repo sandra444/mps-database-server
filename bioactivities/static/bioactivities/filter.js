@@ -61,12 +61,14 @@ $(document).ready(function () {
                 var molecular_weight = data[3];
                 var mps = data[4];
                 var epa = data[5];
+                var tctc = data[6];
                 row = "<tr id='" + add + compound_name.replace(/ /g, "_").replace(/'/g, "&#39;")
                     + "' data-is_drug=" + is_drug
                     + " data-LogP=" + LogP
                     + " data-molecular_weight=" + molecular_weight
                     + " data-mps=" + mps
                     + " data-epa=" + epa
+                    + " data-tctc=" + tctc
                     + " data-contains= true"
                     + ">";
                 row += "<td>" + "<input type='checkbox' value='" + compound_name.replace(/'/g, "&#39;") + "'></td>";
@@ -349,6 +351,7 @@ $(document).ready(function () {
 
     var mps = $('#mps');
     var epa = $('#epa');
+    var tctc = $('#tctc');
     var unlabelled = $('#unlabelled');
 
     var logp = $('#logp');
@@ -357,7 +360,7 @@ $(document).ready(function () {
     var molecular_weight = $('#molecular_weight');
     var molecular_weight_gtlt = $('#molecular_weight_gtlt');
 
-    $.each([drugs, non_drugs, mps, epa, unlabelled, logp, logp_gtlt, molecular_weight, molecular_weight_gtlt], function(index, element) {
+    $.each([drugs, non_drugs, mps, epa, tctc, unlabelled, logp, logp_gtlt, molecular_weight, molecular_weight_gtlt], function(index, element) {
         element.change(function() {
             compound_search.trigger('input');
         });
@@ -397,6 +400,7 @@ $(document).ready(function () {
         var non_drugs_checked = non_drugs.prop('checked');
         var mps_checked = mps.prop('checked');
         var epa_checked = epa.prop('checked');
+        var tctc_checked = tctc.prop('checked');
         var unlabelled_checked = unlabelled.prop('checked');
 
         var logp_compare_against = logp.val();
@@ -415,7 +419,15 @@ $(document).ready(function () {
             if(
                 ((drugs_checked && row_values['data-is_drug'] == 'True') || (non_drugs_checked && row_values['data-is_drug'] != 'True'))
                 &&
-                ((mps_checked && row_values['data-mps'] == 'True') || (epa_checked && row_values['data-epa'] == 'True') || (unlabelled_checked && row_values['data-mps'] != 'True' && row_values['data-epa'] != 'True'))
+                (
+                    (mps_checked && row_values['data-mps'] == 'True')
+                    ||
+                    (epa_checked && row_values['data-epa'] == 'True')
+                    ||
+                    (tctc_checked && row_values['data-tctc'] == 'True')
+                    ||
+                    (unlabelled_checked && row_values['data-mps'] != 'True' && row_values['data-epa'] != 'True' && row_values['data-tctc'] != 'True')
+                )
                 && gtlt_check(logp_gtlt_operator, row_values['data-logp'], logp_compare_against)
                 && gtlt_check(molecular_weight_gtlt_operator, row_values['data-molecular_weight'], molecular_weight_compare_against)
                 && row_values['data-contains'] == 'true'
@@ -498,10 +510,14 @@ $(document).ready(function () {
         if (location.hash != '#show') {
             $('#graphic').prop('hidden', true);
             $('#selection').prop('hidden', false);
+            // Ensure table header (if present) is hidden
+            $('#table_header').hide();
         }
         else {
             $('#graphic').prop('hidden', false);
             $('#selection').prop('hidden', true);
+            // Ensure table header (if present) is shown
+            $('#table_header').show();
         }
     };
 });

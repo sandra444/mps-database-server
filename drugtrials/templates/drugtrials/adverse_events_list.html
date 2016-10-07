@@ -2,6 +2,7 @@
 {% load staticfiles %}
 
 {% block load %}
+    <script src="{% static "js/project_filter.js" %}"></script>
     <script src="{% static "drugtrials/adverse_events_list.js" %}"></script>
 {% endblock %}
 
@@ -27,8 +28,8 @@
                     <th>Event</th>
                     <th>Frequency</th>
                     <th>Organ</th>
-                    <th>Project</th>
                     <th>Black Box Warning</th>
+                    <th>Project</th>
                 </tr>
             </thead>
 
@@ -41,19 +42,22 @@
                     <td>{{ adverse_event.frequency }}</td>
                     <td>{{ adverse_event.event.organ|default:"" }}</td>
                     <td>
+                        {% if adverse_event.compound.black_box %}
+                            <span title="This compound has a Black Box Warning" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                    <td>
                         {% if adverse_event.compound.compound.mps %}
                             MPS
                         {% endif %}
                         {% if adverse_event.compound.compound.epa %}
                             EPA
                         {% endif %}
-                        {% if not adverse_event.compound.compound.epa and not adverse_event.compound.compound.mps %}
-                            Unassigned
+                        {% if adverse_event.compound.compound.tctc %}
+                            TCTC
                         {% endif %}
-                    </td>
-                    <td>
-                        {% if adverse_event.compound.black_box %}
-                            <span title="This compound has a Black Box Warning" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        {% if not adverse_event.compound.compound.epa and not adverse_event.compound.compound.mps and not adverse_event.compound.compound.tctc %}
+                            Unassigned
                         {% endif %}
                     </td>
                 </tr>

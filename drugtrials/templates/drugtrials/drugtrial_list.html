@@ -2,6 +2,7 @@
 {% load staticfiles %}
 
 {% block load %}
+    <script src="{% static "js/project_filter.js" %}"></script>
     <script src="{% static "drugtrials/drugtrial_list.js" %}"></script>
 {% endblock %}
 
@@ -30,7 +31,6 @@
                     <th>Finding</th>
                     <th>Descriptor</th>
                     <th>+/-</th>
-{#                    <th>Max Affected</th>#}
                     <th>Frequency</th>
                     <th>Value</th>
                     <th>Value Units</th>
@@ -64,13 +64,13 @@
                         {% if finding.drug_trial.compound.epa %}
                             EPA
                         {% endif %}
-                        {% if not finding.drug_trial.compound.epa and not finding.drug_trial.compound.mps %}
+                        {% if finding.drug_trial.compound.tctc %}
+                            TCTC
+                        {% endif %}
+                        {% if not finding.drug_trial.compound.epa and not finding.drug_trial.compound.mps and not finding.drug_trial.compound.tctc %}
                             Unassigned
                         {% endif %}
                     </td>
-{#                    <td>{{ finding.percent_max }}</td>#}
-{#                    <td>{{ finding.value }}</td>#}
-{#                    <td>{{ finding.value_units }}</td>#}
                 </tr>
             {% endfor %}
             </tbody>

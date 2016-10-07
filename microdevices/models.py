@@ -133,6 +133,10 @@ class OrganModel(LockableModel):
         default=False,
         help_text='Whether this compound is part of the MPS project'
     )
+    tctc = models.BooleanField(
+        default=False,
+        help_text='Whether this compound is part of the TCTC project'
+    )
 
     # Removed in favor of protocol inline
     # protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
