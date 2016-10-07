@@ -66,19 +66,13 @@ $(document).ready(function () {
         $('.dataTables_length').css('float','right');
         // Reposition download/print/copy
         $('.DTTT_container').css('float', 'none');
+
+        // Recalculate responsive and fixed headers
+        $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+        $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
     }
 
     function submit() {
-        // Set the headers relative to pubchem or chembl
-//        if (pubchem) {
-//            $('#variable-header').html(pubchem_header);
-//            $('#variable-footer').html(pubchem_header);
-//        }
-//        else {
-//            $('#variable-header').html(chembl_header);
-//            $('#variable-footer').html(chembl_header);
-//        }
-
         // Clear all filters
         bioactivities_filter = [];
         targets_filter = [];

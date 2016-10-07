@@ -2,6 +2,7 @@
 {% load staticfiles %}
 
 {% block load %}
+    <script src="{% static "js/project_filter.js" %}"></script>
     <script src="{% static "microdevices/organmodel_list.js" %}"></script>
 {% endblock %}
 
@@ -32,8 +33,8 @@
                     <th>Organ</th>
                     <th>Device</th>
                     <th>Center</th>
-                    <th>Project</th>
                     <th>Description</th>
+                    <th>Project</th>
                 </tr>
             </thead>
 
@@ -46,6 +47,7 @@
                     <td>{{ model.organ|default_if_none:"" }}</td>
                     <td><a href="device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
                     <td>{{ model.center|default_if_none:"" }}</td>
+                    <td>{{ model.description }}</td>
                     <td>
                         {% if model.mps %}
                             MPS
@@ -53,11 +55,13 @@
                         {% if model.epa %}
                             EPA
                         {% endif %}
-                        {% if not model.epa and not model.mps %}
+                        {% if model.tctc %}
+                            TCTC
+                        {% endif %}
+                        {% if not model.epa and not model.mps and not model.tctc %}
                             Unassigned
                         {% endif %}
                     </td>
-                    <td>{{ model.description }}</td>
                 </tr>
             {% endfor %}
             </tbody>

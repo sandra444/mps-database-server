@@ -117,7 +117,8 @@ def generate_list_of_all_data_in_bioactivities(exclude_questionable, pubchem, or
             'compound__logp',
             'compound__molecular_weight',
             'compound__mps',
-            'compound__epa'
+            'compound__epa',
+            'compound__tctc'
         )
 
     else:
@@ -147,7 +148,8 @@ def generate_list_of_all_data_in_bioactivities(exclude_questionable, pubchem, or
             'compound__logp',
             'compound__molecular_weight',
             'compound__mps',
-            'compound__epa'
+            'compound__epa',
+            'compound__tctc'
         )
 
     bioactivities_data = [data[0] for data in all_data]
@@ -288,7 +290,8 @@ def generate_list_of_all_compounds_in_bioactivities(exclude_questionable, pubche
             'compound__logp',
             'compound__molecular_weight',
             'compound__mps',
-            'compound__epa'
+            'compound__epa',
+            'compound__tctc'
         )
     else:
         compounds = Bioactivity.objects.all().prefetch_related(
@@ -299,7 +302,8 @@ def generate_list_of_all_compounds_in_bioactivities(exclude_questionable, pubche
             'compound__logp',
             'compound__molecular_weight',
             'compound__mps',
-            'compound__epa'
+            'compound__epa',
+            'compound__tctc'
         )
 
     if exclude_questionable:
