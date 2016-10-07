@@ -69,16 +69,6 @@ $(document).ready(function () {
     }
 
     function submit() {
-        // Set the headers relative to pubchem or chembl
-//        if (pubchem) {
-//            $('#variable-header').html(pubchem_header);
-//            $('#variable-footer').html(pubchem_header);
-//        }
-//        else {
-//            $('#variable-header').html(chembl_header);
-//            $('#variable-footer').html(chembl_header);
-//        }
-
         // Clear all filters
         bioactivities_filter = [];
         targets_filter = [];

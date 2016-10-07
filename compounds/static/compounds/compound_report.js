@@ -371,10 +371,18 @@ $(document).ready(function () {
         if (location.hash != '#show') {
             $('#graphic').prop('hidden', true);
             $('#selection').prop('hidden', false);
+            // Hide the header for results
+            $('#results_header').hide();
+            // Show the header for compounds
+            $('#compounds_header').show();
         }
         else {
             $('#graphic').prop('hidden', false);
             $('#selection').prop('hidden', true);
+            // Show the header for results
+            $('#results_header').show();
+            // Hide the header for compounds
+            $('#compounds_header').hide();
         }
     };
 

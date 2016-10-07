@@ -510,10 +510,14 @@ $(document).ready(function () {
         if (location.hash != '#show') {
             $('#graphic').prop('hidden', true);
             $('#selection').prop('hidden', false);
+            // Ensure table header (if present) is hidden
+            $('#table_header').hide();
         }
         else {
             $('#graphic').prop('hidden', false);
             $('#selection').prop('hidden', true);
+            // Ensure table header (if present) is shown
+            $('#table_header').show();
         }
     };
 });
