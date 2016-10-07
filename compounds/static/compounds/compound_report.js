@@ -133,10 +133,16 @@ $(document).ready(function () {
             check_selection(compound);
         });
 
+        // Sort first column ascending
         window.TABLE.order([[0, 'asc']]);
+        // Go back to 10 items per page
         window.TABLE.page.len(10).draw();
 
         dialog.dialog('close');
+
+        // Recalculate responsive and fixed headers
+        $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+        $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
     }
 
     function sparkline(elem_id, plot, x_domain, y_domain) {

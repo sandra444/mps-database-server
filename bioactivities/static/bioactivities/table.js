@@ -66,6 +66,10 @@ $(document).ready(function () {
         $('.dataTables_length').css('float','right');
         // Reposition download/print/copy
         $('.DTTT_container').css('float', 'none');
+
+        // Recalculate responsive and fixed headers
+        $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+        $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
     }
 
     function submit() {
