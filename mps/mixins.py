@@ -91,6 +91,18 @@ class StudyGroupRequiredMixin(object):
         return super(StudyGroupRequiredMixin, self).dispatch(*args, **kwargs)
 
 
+class ViewershipMixin(object):
+    """This mixin checks if the user has the group neccessary to at least view the entry"""
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+        # If the object is not restricted and the user is NOT a listed viewer, deny permission
+        if self.object.restricted and not is_group_viewer(self.request.user, self.object.group.name):
+            return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
+        # Otherwise return the detail view
+        return super(ViewershipMixin, self).dispatch(*args, **kwargs)
+
 # WIP
 class DetailRedirectMixin(object):
     """This mixin checks if the user has the object's group, if so it redirects to the edit page

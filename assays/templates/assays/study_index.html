@@ -1,12 +1,18 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load custom_filters %}
 
 {% block load %}
     <script src="{% static "assays/study_index.js" %}"></script>
 {% endblock %}
 
+{% with edit_permission=user|has_group:object.group.name %}
 {% block breadcrumbs %}
+    {% if edit_permission %}
     <li><a href="/assays/editable_studies/">Editable Studies</a></li>
+    {% else %}
+    <li><a href="/assays/study">Studies</a></li>
+    {% endif %}
     <li class="active">{{ object }}</li>
 {% endblock %}
 
@@ -14,19 +20,25 @@
     <div class="padded-bottom">
         <div class="well">
             <h1 class="text-center">
-                Study: {{ object }}
-                <br>
-                <a href="update" class="btn btn-primary" role="button">Edit This Study</a>
-                <a href="summary" class="btn btn-info" role="button">Study Summary</a>
+                {{ object }}
+                <div>
+                    {% if edit_permission %}
+                        <a href="update" class="btn btn-primary" role="button">Edit This Study</a>
+                    {% endif %}
+                    <a href="summary" class="btn btn-info" role="button">Study Summary</a>
+                </div>
             </h1>
         </div>
 
         <legend>
             <h2>
                 Setups
-                <br>
-                <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Chip Setup</a>
-                <a href="assayplatesetup/add" class="btn btn-success" role="button">Add Plate Setup</a>
+                {% if edit_permission %}
+                <div>
+                    <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Chip Setup</a>
+                    <a href="assayplatesetup/add" class="btn btn-success" role="button">Add Plate Setup</a>
+                </div>
+                {% endif %}
             </h2>
         </legend>
 
@@ -141,7 +153,8 @@
         <legend>
             <h2>
                 Readouts
-                <br>
+                {% if edit_permission %}
+                <div>
                 {% if setups.count == 0 or setups.count == readouts.count %}
                     <div hidden id="readout_alert" class="alert alert-warning" role="alert">
                         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -162,6 +175,8 @@
                     <a class="btn btn-warning" role="button" onClick="$('#plate_readout_alert').removeProp('hidden');">Add Plate Readout</a>
                 {% else %}
                     <a href="assayplatereadout/add" class="btn btn-success" role="button">Add Plate Readout</a>
+                {% endif %}
+                </div>
                 {% endif %}
             </h2>
         </legend>
@@ -276,16 +291,19 @@
         </div>
         {% endif %}
 
+        {% if edit_permission %}
         <a href="bulk" class="btn btn-block btn-info" role="button">
             Upload Excel File of Readout Data
             <br>
             <small>*Requires respective readouts to be created first</small>
         </a>
+        {% endif %}
 
         <legend>
             <h2>
                 Results
-                <br>
+                {% if edit_permission %}
+                <div>
                 {# Later should add condition for when not enough readouts or setups #}
                 {% if readouts.count == 0 or number_of_results == readouts.count %}
                     <div hidden id="result_alert" class="alert alert-warning" role="alert">
@@ -307,6 +325,8 @@
                     <a class="btn btn-warning" role="button" onClick="$('#plate_result_alert').removeProp('hidden');">Add Plate Result</a>
                 {% else %}
                     <a href="assayplatetestresult/add" class="btn btn-success" role="button">Add Plate Result</a>
+                {% endif %}
+                </div>
                 {% endif %}
             </h2>
         </legend>
@@ -450,3 +470,4 @@
         {% endif %}
     </div>
 {% endblock %}
+{% endwith %}

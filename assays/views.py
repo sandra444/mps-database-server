@@ -128,7 +128,7 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
     #     return self.render_to_response(context)
 
 
-class StudyIndex(ObjectGroupRequiredMixin, DetailView):
+class StudyIndex(ViewershipMixin, DetailView):
     """Show all chip and plate models associated with the given study"""
     model = AssayRun
     context_object_name = 'study_index'
@@ -144,6 +144,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
             assay_run_id=self.object
         ).prefetch_related(
             'organ_model',
+            'device',
             'compound',
             'unit',
             'created_by',
@@ -314,70 +315,70 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayRunDetail(DetailRedirectMixin, DetailView):
-    """Details for a Study"""
-    model = AssayRun
-
-    update_redirect_url = '/assays/{}'
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        context = self.get_context_data(object=self.object)
-        context['setups'] = AssayChipSetup.objects.filter(
-            assay_run_id=self.object
-        ).prefetch_related(
-            'assay_run_id',
-            'device',
-            'compound',
-            'unit',
-            'created_by'
-        )
-        readouts = AssayChipReadout.objects.filter(
-            chip_setup=context['setups']
-        ).prefetch_related(
-            'chip_setup',
-            'created_by'
-        ).select_related(
-            'chip_setup__compound',
-            'chip_setup__unit'
-        )
-
-        related_assays = AssayChipReadoutAssay.objects.filter(
-            readout_id__in=readouts
-        ).prefetch_related(
-            'readout_id',
-            'assay_id'
-        ).order_by(
-            'assay_id__assay_short_name'
-        )
-        related_assays_map = {}
-
-        for assay in related_assays:
-            # start appending to a list keyed by the readout ID for all related images
-            related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
-
-        for readout in readouts:
-            # set an attribute on the readout that is the list created above
-            readout.related_assays = related_assays_map.get(readout.id)
-
-        context['readouts'] = readouts
-
-        context['results'] = AssayChipResult.objects.prefetch_related(
-            'assay_name',
-            'assay_result',
-            'result_function',
-            'result_type',
-            'test_unit'
-        ).select_related(
-            'assay_result__chip_readout__chip_setup',
-            'assay_result__chip_readout__chip_setup__unit',
-            'assay_name__assay_id',
-            'assay_result__created_by'
-        ).filter(
-            assay_result__chip_readout=context['readouts']
-        )
-
-        return self.render_to_response(context)
+# class AssayRunDetail(DetailRedirectMixin, DetailView):
+#     """Details for a Study"""
+#     model = AssayRun
+#
+#     update_redirect_url = '/assays/{}'
+#
+#     def get(self, request, *args, **kwargs):
+#         self.object = self.get_object()
+#         context = self.get_context_data(object=self.object)
+#         context['setups'] = AssayChipSetup.objects.filter(
+#             assay_run_id=self.object
+#         ).prefetch_related(
+#             'assay_run_id',
+#             'device',
+#             'compound',
+#             'unit',
+#             'created_by'
+#         )
+#         readouts = AssayChipReadout.objects.filter(
+#             chip_setup=context['setups']
+#         ).prefetch_related(
+#             'chip_setup',
+#             'created_by'
+#         ).select_related(
+#             'chip_setup__compound',
+#             'chip_setup__unit'
+#         )
+#
+#         related_assays = AssayChipReadoutAssay.objects.filter(
+#             readout_id__in=readouts
+#         ).prefetch_related(
+#             'readout_id',
+#             'assay_id'
+#         ).order_by(
+#             'assay_id__assay_short_name'
+#         )
+#         related_assays_map = {}
+#
+#         for assay in related_assays:
+#             # start appending to a list keyed by the readout ID for all related images
+#             related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
+#
+#         for readout in readouts:
+#             # set an attribute on the readout that is the list created above
+#             readout.related_assays = related_assays_map.get(readout.id)
+#
+#         context['readouts'] = readouts
+#
+#         context['results'] = AssayChipResult.objects.prefetch_related(
+#             'assay_name',
+#             'assay_result',
+#             'result_function',
+#             'result_type',
+#             'test_unit'
+#         ).select_related(
+#             'assay_result__chip_readout__chip_setup',
+#             'assay_result__chip_readout__chip_setup__unit',
+#             'assay_name__assay_id',
+#             'assay_result__created_by'
+#         ).filter(
+#             assay_result__chip_readout=context['readouts']
+#         )
+#
+#         return self.render_to_response(context)
 
 
 class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
@@ -472,7 +473,7 @@ def compare_cells(current_model, current_filter, setups):
     return (best_setup, sameness.get(best_setup))
 
 
-class AssayRunSummary(ObjectGroupRequiredMixin, DetailView):
+class AssayRunSummary(ViewershipMixin, DetailView):
     """Displays information for a given study
 
     Currently only shows data for chip readouts and chip/plate setups

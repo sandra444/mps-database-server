@@ -37,7 +37,7 @@
                 <tr class="plate-setups" id={{ setup.id }} name={{ setup.id }}>
                     <td><a class="btn btn-primary" href="{{ setup.id }}">View/Edit</a></td>
                     <td>{{ setup.assay_plate_id }}</td>
-                    <td><a href="/assays/study/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
+                    <td><a href="/assays/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
                     <td>{{ setup.setup_date|date:"M d, Y" }}</td>
                     <td>{{ setup.assay_layout }}</td>
                     <td>{{ setup.scientist }}</td>

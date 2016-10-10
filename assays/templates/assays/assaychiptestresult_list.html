@@ -42,7 +42,7 @@
                     <td><a class="btn btn-primary" href="{{ result.assay_result.id }}">View/Edit</a></td>
                     <td>{{ result.assay_result.id }}</td>
                     <td>
-                        <a href="/assays/study/{{ result.assay_result.chip_readout.chip_setup.assay_run_id.id }}">
+                        <a href="/assays/{{ result.assay_result.chip_readout.chip_setup.assay_run_id.id }}">
                             {{ result.assay_result.chip_readout.chip_setup.assay_run_id }}
                         </a>
                     </td>

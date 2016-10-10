@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    <legend><h1>Chip Test Results ID #{{ object.id }} for Study:<br><a href="/assays/study/{{ object.assay_device_readout.id }}">{{ object.assay_device_readout }}</a></h1></legend>
+    <legend><h1>Chip Test Results ID #{{ object.id }} for Study:<br><a href="/assays/{{ object.assay_device_readout.id }}">{{ object.assay_device_readout }}</a></h1></legend>
 
     <div class="row">
         <div class="col-sm-2 lead text-right-responsive">

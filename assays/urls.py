@@ -54,7 +54,7 @@ urlpatterns = patterns('',
 
     url(r'^assays/study/$', AssayRunList.as_view(), name='study_list'),
     url(r'^assays/study/add/$', AssayRunAdd.as_view(), name='study_add'),
-    url(r'^assays/study/(?P<pk>[0-9]+)/$', AssayRunDetail.as_view(), name='study_detail'),
+    # url(r'^assays/study/(?P<pk>[0-9]+)/$', AssayRunDetail.as_view(), name='study_detail'),
 
     url(r'^assays/assaychipsetup/$', AssayChipSetupList.as_view(), name='setup_list'),
     #url(r'^assays/assaychipsetup/add$', AssayChipSetupAdd.as_view()),
