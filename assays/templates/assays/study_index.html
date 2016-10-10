@@ -6,9 +6,8 @@
     <script src="{% static "assays/study_index.js" %}"></script>
 {% endblock %}
 
-{% with edit_permission=user|has_group:object.group.name %}
 {% block breadcrumbs %}
-    {% if edit_permission %}
+    {% if user|has_group:object.group.name %}
     <li><a href="/assays/editable_studies/">Editable Studies</a></li>
     {% else %}
     <li><a href="/assays/study">Studies</a></li>
@@ -22,7 +21,7 @@
             <h1 class="text-center">
                 {{ object }}
                 <div>
-                    {% if edit_permission %}
+                    {% if user|has_group:object.group.name %}
                         <a href="update" class="btn btn-primary" role="button">Edit This Study</a>
                     {% endif %}
                     <a href="summary" class="btn btn-info" role="button">Study Summary</a>
@@ -33,7 +32,7 @@
         <legend>
             <h2>
                 Setups
-                {% if edit_permission %}
+                {% if user|has_group:object.group.name %}
                 <div>
                     <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Chip Setup</a>
                     <a href="assayplatesetup/add" class="btn btn-success" role="button">Add Plate Setup</a>
@@ -153,7 +152,7 @@
         <legend>
             <h2>
                 Readouts
-                {% if edit_permission %}
+                {% if user|has_group:object.group.name %}
                 <div>
                 {% if setups.count == 0 or setups.count == readouts.count %}
                     <div hidden id="readout_alert" class="alert alert-warning" role="alert">
@@ -291,7 +290,7 @@
         </div>
         {% endif %}
 
-        {% if edit_permission %}
+        {% if user|has_group:object.group.name %}
         <a href="bulk" class="btn btn-block btn-info" role="button">
             Upload Excel File of Readout Data
             <br>
@@ -302,7 +301,7 @@
         <legend>
             <h2>
                 Results
-                {% if edit_permission %}
+                {% if user|has_group:object.group.name %}
                 <div>
                 {# Later should add condition for when not enough readouts or setups #}
                 {% if readouts.count == 0 or number_of_results == readouts.count %}
@@ -470,4 +469,3 @@
         {% endif %}
     </div>
 {% endblock %}
-{% endwith %}
