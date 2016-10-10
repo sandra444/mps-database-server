@@ -402,17 +402,21 @@ def fetch_readouts(request):
 
         if not quality:
             # Get tag for data point
-            if percent_control and raw.assay_chip_id.chip_setup.chip_test_type == 'control':
-                tag = 'Control'
-            elif key == 'compound':
+            # If by compound
+            if key == 'compound':
                 if raw.assay_chip_id.chip_setup.compound:
                     tag = raw.assay_chip_id.chip_setup.compound.name
                     tag += ' ' + str(raw.assay_chip_id.chip_setup.concentration)
                     tag += ' ' + raw.assay_chip_id.chip_setup.unit.unit
                 else:
                     tag = 'Control'
+            # If by device
             else:
                 tag = raw.assay_chip_id.chip_setup.assay_chip_id
+
+                # Specifically add to consolidated control if this is a device-by-device control
+                if percent_control and raw.assay_chip_id.chip_setup.chip_test_type == 'control':
+                    initial_data.setdefault(assay, {}).setdefault(unit, {}).setdefault('Control', {}).setdefault(field, {}).setdefault(time, []).append(value)
 
              # Set data in nested monstrosity that is initial_data
             initial_data.setdefault(assay, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(field, {}).setdefault(time, []).append(value)
@@ -424,7 +428,8 @@ def fetch_readouts(request):
                     for time, values in time_values.items():
                         if percent_control and tag == 'Control':
                             controls.update({(assay, unit, field, time): sum(values) / float(len(values))})
-                        else:
+                        # Add to averaged data if this isn't a average control value for device-by-device
+                        if not (tag == 'Control' and key != 'compound'):
                             averaged_data.setdefault(assay, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(field, {}).update({
                                 time: sum(values) / float(len(values))
                             })
