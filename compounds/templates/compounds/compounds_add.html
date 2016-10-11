@@ -160,14 +160,14 @@
         </div>
     </div>
 
+    {% include 'generic_field.html' with field=form.drug_class label="Drug Class" %}
+
     <div class="form-group">
         <label for="species" class="col-sm-2 control-label">Species</label>
         <div class="col-sm-10">
           {{ form.species }}
         </div>
     </div>
-
-    {% include 'generic_field.html' with field=form.drug_class label="Drug Class" %}
 
     {% include 'generic_field.html' with field=form.protein_binding label="Protein Binding" %}
 

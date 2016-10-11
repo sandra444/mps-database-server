@@ -11,9 +11,10 @@ class CompoundForm(forms.ModelForm):
             'name': forms.Textarea(attrs={'rows': 1}),
             'tags': forms.Textarea(attrs={'rows': 1}),
             'smiles': forms.Textarea(attrs={'size': 50, 'rows': 3}),
-            'inchikey': forms.Textarea(attrs={'size': 50, 'rows': 3}),
+            'inchikey': forms.Textarea(attrs={'size': 50, 'rows': 1}),
             'molecular_formula': forms.Textarea(attrs={'size': 50, 'rows': 3}),
             'ro5_violations': forms.TextInput(attrs={'size': 2}),
+            'drug_class': forms.Textarea(attrs={'rows': 1}),
 
             'clearance': forms.Textarea(attrs={'size': 50, 'rows': 3}),
             'absorption': forms.Textarea(attrs={'size': 50, 'rows': 3}),
