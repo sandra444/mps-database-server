@@ -1,12 +1,16 @@
 # coding=utf-8
 
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
+from django.http import HttpResponse
 from assays.models import *
 from cellsamples.models import CellSample
 # TODO TRIM THIS IMPORT
 from assays.admin import *
 from assays.forms import *
 from django import forms
+
+# TODO REVISE SPAGHETTI CODE
+from assays.ajax import get_chip_readout_data_as_csv
 
 from django.forms.models import inlineformset_factory
 # from django.shortcuts import redirect, get_object_or_404, render_to_response
@@ -2014,14 +2018,14 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
                         # Get valid file location
                         # Note added csv extension
-                        file_loc = get_valid_csv_location(chip_id, study_id, 'chip')
+                        file_location = get_valid_csv_location(chip_id, study_id, 'chip')
                         # Write the csv
-                        write_out_csv(file_loc, datalist)
+                        write_out_csv(file_location, datalist)
 
-                        media_loc = get_csv_media_location(file_loc)
+                        media_location = get_csv_media_location(file_location)
 
                         # Add the file to the readout
-                        readout.file = media_loc
+                        readout.file = media_location
                         readout.save()
 
                         # Note the lack of a form normally used for QC
@@ -2084,14 +2088,14 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
                         # Get valid file location
                         # Note added csv extension
-                        file_loc = get_valid_csv_location(plate_id, study_id, 'plate')
+                        file_location = get_valid_csv_location(plate_id, study_id, 'plate')
                         # Write the csv
-                        write_out_csv(file_loc, datalist)
+                        write_out_csv(file_location, datalist)
 
-                        media_loc = get_csv_media_location(file_loc)
+                        media_location = get_csv_media_location(file_location)
 
                         # Add the file to the readout
-                        readout.file = media_loc
+                        readout.file = media_location
                         readout.save()
 
                         # Note the lack of a form normally used for QC
@@ -2131,14 +2135,14 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
                         # Get valid file location
                         # Note added csv extension
-                        file_loc = get_valid_csv_location(plate_id, study_id, 'plate')
+                        file_location = get_valid_csv_location(plate_id, study_id, 'plate')
                         # Write the csv
-                        write_out_csv(file_loc, datalist)
+                        write_out_csv(file_location, datalist)
 
-                        media_loc = get_csv_media_location(file_loc)
+                        media_location = get_csv_media_location(file_location)
 
                         # Add the file to the readout
-                        readout.file = media_loc
+                        readout.file = media_location
                         readout.save()
 
                         # Note the lack of a form normally used for QC
@@ -2147,3 +2151,47 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+
+class ReturnStudyData(ViewershipMixin, DetailView):
+    """Returns a combined file for all data in a study"""
+    model = AssayRun
+
+    def render_to_response(self, context, **response_kwargs):
+        # Make sure that the study exists, then continue
+        if self.object:
+            # Set response to binary
+            # For xlsx
+            # response = HttpResponse(mimetype="application/ms-excel")
+            # response['Content-Disposition'] = 'attachment; filename=%s' % self.object.assay_run_id
+            #
+            # workbook = xlsxwriter.Workbook(self.object.assay_run_id + '.xlsx')
+
+            # If chip data
+            chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=self.object).prefetch_related(
+                'chip_setup',
+                'chip_setup__assay_run_id_id'
+            )
+
+            chip_data = ','.join([
+                'Chip ID',
+                'Time',
+                'Time Units',
+                'Assay',
+                'Object',
+                'Value',
+                'Value Unit',
+                'QC Status',
+                'Note: ANY value in QC Status will mark a row as invalid\n'
+            ])
+
+            chip_data += get_chip_readout_data_as_csv(chip_readouts)
+
+            # For specifically text
+            response = HttpResponse(chip_data, content_type='text/csv')
+            response['Content-Disposition'] = 'attachment;filename=' + self.object.assay_run_id + '.csv'
+
+            return response
+        # Return nothing otherwise
+        else:
+            return HttpResponse('', content_type='text/plain')
