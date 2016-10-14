@@ -1190,6 +1190,7 @@ def modify_qc_status_chip(current_chip_readout, form):
         readout.save()
 
 
+# TODO REFACTOR CAMEL CASE
 @transaction.atomic
 def parse_chip_csv(current_chip_readout, current_file, headers, form):
     """Parse a csv file to get chip readout data"""
@@ -1210,13 +1211,13 @@ def parse_chip_csv(current_chip_readout, current_file, headers, form):
         # rowValue holds all of the row elements
         # rowID is the index of the current row from top to bottom
 
-        # Skip any row with insufficient commas
+        # Skip any row with insufficient columns
         if len(rowValue) < 7:
             continue
 
         # Skip any row with incomplete data
-        # This does not include the quality
-        if not all(rowValue[:7]):
+        # This does not include the quality and value (which can be null)
+        if not all(rowValue[:5] + [rowValue[6]]):
             continue
 
         # Try getting the assay from long name
@@ -1242,9 +1243,12 @@ def parse_chip_csv(current_chip_readout, current_file, headers, form):
         # Increment current index acquisition
         current_index += 1
 
-        # Originally permitted none values, will now ignore empty values
-        # if not val:
-        #     val = None
+        # Treat empty strings as None
+        if not val:
+            val = None
+            # Set quality to 'NULL' if quality was not set by user
+            if not quality:
+                quality = 'NULL'
 
         #How to parse Chip data
         AssayChipRawData(
