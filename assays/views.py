@@ -2086,8 +2086,8 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                         row = row[:TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX]
 
                         # Make sure the data is valid before adding it
-                        # The first 7 cells need to be filled for a row to be valid
-                        if row and all(row[:7]):
+                        # Everything but value and QC Status must exist to be valid
+                        if row and all(row[:5] + [row[6]]):
                             chip_id = row[0]
 
                             if chip_id not in csv_data:

@@ -242,9 +242,9 @@ $(document).ready(function () {
 
             var quality = $.trim(line[7]);
 
-            // Crash if the time or value are not numeric
-            if (isNaN(time) || isNaN(value)) {
-                alert("Improperly Configured: Please check your file and the number of header rows selected.");
+            // Crash if the time is not numeric
+            if (isNaN(time)) {
+                alert("Improperly Configured: Please check the number of header rows selected and also make sure all times are numeric.");
                 return;
             }
 
