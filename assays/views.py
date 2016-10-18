@@ -2169,8 +2169,7 @@ class ReturnStudyData(ViewershipMixin, DetailView):
 
             # If chip data
             chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=self.object).prefetch_related(
-                'chip_setup',
-                'chip_setup__assay_run_id_id'
+                'chip_setup__assay_run_id'
             )
 
             chip_data = ','.join([
