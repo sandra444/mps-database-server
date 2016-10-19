@@ -1156,7 +1156,9 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
                     'The time unit "%s" does not correspond with the selected readout time unit of "%s"'
                     % (new_time_unit, old_time_unit))
 
-            saved_data = AssayChipRawData.objects.filter(assay_chip_id=self.instance).prefetch_related('assay_id')
+            saved_data = AssayChipRawData.objects.filter(assay_chip_id=self.instance).prefetch_related(
+                'assay_id__assay_id'
+            )
 
             for raw in saved_data:
 

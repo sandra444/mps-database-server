@@ -1174,7 +1174,7 @@ def modify_qc_status_chip(current_chip_readout, form):
     # Get the readouts as they would appear on the front end
     # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
     readouts = AssayChipRawData.objects.prefetch_related(
-        'assay_id'
+        'assay_id__assay_id'
     ).filter(
         assay_chip_id=current_chip_readout
     ).order_by(

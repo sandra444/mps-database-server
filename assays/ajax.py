@@ -266,7 +266,7 @@ def get_chip_readout_data_as_csv(chip_ids):
     # PLEASE NOTE: THIS AFFECTS PROCESSING OF QC
     # DO NOT MODIFY THIS WITHOUT ALSO CHANGING modify_qc_status_chip
     chip_data = AssayChipRawData.objects.prefetch_related(
-        'assay_id',
+        'assay_id__assay_id',
         'assay_chip_id__chip_setup'
     ).filter(
         assay_chip_id__in=chip_ids
