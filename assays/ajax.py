@@ -295,7 +295,7 @@ def get_chip_readout_data_as_csv(chip_ids):
         value = raw.value
         # Check if None first before format
         if value is not None:
-            value = '%.2f' % raw.value
+            value = '%.2f' % value
         else:
             value = unicode(value)
         # Get rid of trailing zero and decimal if necessary

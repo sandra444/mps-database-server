@@ -424,17 +424,91 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             self.request.FILES,
             instance=form.instance
         )
+
+        # Get the original sign off data (may be None)
+        original_sign_off_date = self.object.signed_off_date
+
         if form.is_valid() and formset.is_valid():
             save_forms_with_tracking(self, form, formset=formset, update=True)
 
             # TODO Update the group and restricted status of children
             # TODO REVISE KLUDGE; MAY WANT TO TOTALLY ELIMINATE THESE FIELDS?
-            AssayChipSetup.objects.filter(assay_run_id=self.object).update(group=self.object.group, restricted=self.object.restricted)
-            AssayChipReadout.objects.filter(chip_setup__assay_run_id=self.object).update(group=self.object.group, restricted=self.object.restricted)
-            AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=self.object).update(group=self.object.group, restricted=self.object.restricted)
-            AssayPlateSetup.objects.filter(assay_run_id=self.object).update(group=self.object.group, restricted=self.object.restricted)
-            AssayPlateReadout.objects.filter(setup__assay_run_id=self.object).update(group=self.object.group, restricted=self.object.restricted)
-            AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=self.object).update(group=self.object.group, restricted=self.object.restricted)
+            all_chip_setups = AssayChipSetup.objects.filter(assay_run_id=self.object)
+            all_chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=self.object)
+            all_chip_results = AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=self.object)
+            all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=self.object)
+            all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=self.object)
+            all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=self.object)
+
+            # Marking a study should mark/unmark only setups that have not been individually reviewed
+            # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
+            if original_sign_off_date:
+                unreviewed_chip_setups = all_chip_setups.filter(signed_off_date=original_sign_off_date)
+                # unreviewed_chip_readouts = all_chip_readouts.exclude(signed_off_date=self.object.signed_off_date)
+                # unreviewed_chip_results = all_chip_results.exclude(signed_off_date=self.object.signed_off_date)
+                unreviewed_plate_setups = all_plate_setups.filter(signed_off_date=original_sign_off_date)
+                # unreviewed_plate_readouts = all_plate_readouts.exclude(signed_off_date=self.object.signed_off_date)
+                # unreviewed_plate_results = all_plate_results.exclude(signed_off_date=self.object.signed_off_date)
+            # If the study is being signed off, then treat any setups with no sign off as unreviewed
+            else:
+                unreviewed_chip_setups = all_chip_setups.filter(signed_off_by=None)
+                # unreviewed_chip_readouts = all_chip_readouts.filter(signed_off_by=None)
+                # unreviewed_chip_results = all_chip_results.filter(signed_off_by=None)
+                unreviewed_plate_setups = all_plate_setups.filter(signed_off_by=None)
+                # unreviewed_plate_readouts = all_plate_readouts.filter(signed_off_by=None)
+                # unreviewed_plate_results = all_plate_results.filter(signed_off_by=None)
+
+            # Add group and restricted to all
+            all_chip_setups.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+            all_chip_readouts.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+            all_chip_results.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+            all_plate_setups.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+            all_plate_readouts.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+            all_plate_results.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+
+            # Change signed off data only for unreviewed entries
+            unreviewed_chip_setups.update(
+                signed_off_by=self.object.signed_off_by,
+                signed_off_date=self.object.signed_off_date
+            )
+            # unreviewed_chip_readouts.update(
+            #     signed_off_by=self.object.signed_off_by,
+            #     signed_off_date=self.object.signed_off_date
+            # )
+            # unreviewed_chip_results.update(
+            #     signed_off_by=self.object.signed_off_by,
+            #     signed_off_date=self.object.signed_off_date
+            # )
+            unreviewed_plate_setups.update(
+                signed_off_by=self.object.signed_off_by,
+                signed_off_date=self.object.signed_off_date
+            )
+            # unreviewed_plate_readouts.update(
+            #     signed_off_by=self.object.signed_off_by,
+            #     signed_off_date=self.object.signed_off_date
+            # )
+            # unreviewed_plate_results.update(
+            #     signed_off_by=self.object.signed_off_by,
+            #     signed_off_date=self.object.signed_off_date
+            # )
 
             return redirect(self.object.get_absolute_url())
         else:
@@ -744,9 +818,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
     model = AssayChipReadout
 
     def get_queryset(self):
-        queryset = AssayChipReadout.objects.filter(
-            chip_setup__assay_run_id__restricted=False
-        ).prefetch_related(
+        queryset = AssayChipReadout.objects.prefetch_related(
             'chip_setup__assay_run_id',
             'chip_setup__compound',
             'chip_setup__unit',
