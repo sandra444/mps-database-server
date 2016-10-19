@@ -6,15 +6,15 @@
     <div class="container large-padding-top">
         {# If entry is reviewed, just show an indication showing that it has been reviewed #}
         {% if update and group and not user|is_group_admin:group and object.signed_off_by %}
-            <a class="btn btn-warning" onclick="if(document.referrer.indexOf(window.location.host) !== -1){window.history.back()}else{window.location.href='/'};setTimeout(function(){window.location.href='/';},500);">
-                <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
-                    Go Back
-            </a>
-            <span class="alert alert-success" role="alert">
+            <div class="alert alert-success" role="alert">
+                <a class="btn btn-warning" onclick="if(document.referrer.indexOf(window.location.host) !== -1){window.history.back()}else{window.location.href='/'};setTimeout(function(){window.location.href='/';},500);">
+                    <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+                        Go Back
+                </a>
                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
                 <span class="sr-only">Success:</span>
                 This entry was reviewed by <b>{{ object.signed_off_by.first_name }} {{ object.signed_off_by.last_name }}</b> on <b>{{ object.signed_off_date }}</b>
-            </span>
+            </div>
         {# Only show options if this entry is not locked due to being reviewed #}
         {% else %}
         {% if clone %}

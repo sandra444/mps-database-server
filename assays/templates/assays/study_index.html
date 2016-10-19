@@ -32,7 +32,8 @@
         <legend>
             <h2>
                 Setups
-                {% if user|has_group:object.group.name %}
+                {# Hide setup add buttons if the study is marked reviewed #}
+                {% if user|has_group:object.group.name and not object.signed_off_date %}
                 <div>
                     <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Chip Setup</a>
                     <a href="assayplatesetup/add" class="btn btn-success" role="button">Add Plate Setup</a>
