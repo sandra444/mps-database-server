@@ -64,7 +64,7 @@
                 <tr id={{ setup.id }} name={{ setup.id }}>
                     <td>
                         <a class="btn btn-primary"
-                           href="/assays/assaychipsetup/{{ setup.id }}/update">
+                           href="/assays/assaychipsetup/{{ setup.id }}/">
                             View/Edit
                         </a>
                     </td>
@@ -120,7 +120,7 @@
                 <tr id={{ setup.id }} name={{ setup.id }}>
                     <td>
                         <a class="btn btn-primary"
-                           href="/assays/assayplatesetup/{{ setup.id }}/update">
+                           href="/assays/assayplatesetup/{{ setup.id }}/">
                             View/Edit
                         </a>
                     </td>
@@ -200,11 +200,11 @@
                 <tr id={{ readout.id }} name={{ readout.id }}>
                     <td>
                         <a class="btn btn-primary"
-                           href="/assays/assaychipreadout/{{ readout.id }}/update/">
+                           href="/assays/assaychipreadout/{{ readout.id }}/">
                             View/Edit
                         </a>
                     </td>
-                    <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}/update/">{{ readout.chip_setup }}</a></td>
+                    <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}/">{{ readout.chip_setup }}</a></td>
                     <td>
                         {% for assay in readout.related_assays %}
                             {{ assay.assay_id.assay_short_name }}
@@ -253,11 +253,11 @@
                 <tr id={{ readout.id }} name={{ readout.id }}>
                     <td>
                         <a class="btn btn-primary"
-                           href="/assays/assayplatereadout/{{ readout.id }}/update/">
+                           href="/assays/assayplatereadout/{{ readout.id }}/">
                             View/Edit
                         </a>
                     </td>
-                    <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}/update/">{{ readout.setup }}</a></td>
+                    <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}/">{{ readout.setup }}</a></td>
                     <td>
                         {% for assay in readout.related_assays %}
                             {{ assay.assay_id.assay_short_name }}
@@ -351,7 +351,7 @@
                 <tr class="result" id={{ result.id }} name={{ result.id }}>
                     <td>
                         <a class="btn btn-primary"
-                           href="/assays/assaychiptestresult/{{ result.assay_result.id }}/update/">
+                           href="/assays/assaychiptestresult/{{ result.assay_result.id }}/">
                             View/Edit
                         </a>
                     </td>
@@ -359,12 +359,12 @@
                         {{ result.assay_result.id }}
                     </td>
                     <td>
-                        <a href="/assays/assaychipsetup/{{ result.assay_result.chip_readout.chip_setup.id }}/update/">
+                        <a href="/assays/assaychipsetup/{{ result.assay_result.chip_readout.chip_setup.id }}/">
                             {{ result.assay_result.chip_readout.chip_setup }}
                         </a>
                     </td>
                     <td>
-                        <a href="/assays/assaychipreadout/{{ result.assay_result.chip_readout.id }}/update/">
+                        <a href="/assays/assaychipreadout/{{ result.assay_result.chip_readout.id }}/">
                             {{ result.assay_result.chip_readout.id }}
                         </a>
                     </td>
@@ -420,7 +420,7 @@
                 <tr class="result" id={{ result.id }} name={{ result.id }}>
                     <td>
                         <a class="btn btn-primary"
-                           href="/assays/assayplatetestresult/{{ result.assay_result.id }}/update/">
+                           href="/assays/assayplatetestresult/{{ result.assay_result.id }}/">
                             View/Edit
                         </a>
                     </td>
@@ -428,12 +428,12 @@
                         {{ result.assay_result.id }}
                     </td>
                     <td>
-                        <a href="/assays/assayplatesetup/{{ result.assay_result.readout.setup.id }}/update/">
+                        <a href="/assays/assayplatesetup/{{ result.assay_result.readout.setup.id }}/">
                             {{ result.assay_result.readout.setup }}
                         </a>
                     </td>
                     <td>
-                        <a href="/assays/assayplatereadout/{{ result.assay_result.readout.id }}/update/">
+                        <a href="/assays/assayplatereadout/{{ result.assay_result.readout.id }}/">
                             {{ result.assay_result.readout.id }}
                         </a>
                     </td>
