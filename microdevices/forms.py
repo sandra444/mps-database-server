@@ -15,6 +15,7 @@ class MicrodeviceForm(SignOffMixin, forms.ModelForm):
         exclude = tracking
 
         widgets = {
+            'device_name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
 
@@ -26,6 +27,7 @@ class OrganModelForm(SignOffMixin, forms.ModelForm):
         exclude = tracking
 
         widgets = {
+            'model_name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
 

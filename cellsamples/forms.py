@@ -36,6 +36,9 @@ class CellTypeForm(SignOffMixin, forms.ModelForm):
     class Meta(object):
         model = CellType
         exclude = tracking
+        widgets = {
+            'cell_type': forms.Textarea(attrs={'rows': 1}),
+        }
 
 
 class CellSubtypeForm(SignOffMixin, forms.ModelForm):
@@ -47,3 +50,6 @@ class CellSubtypeForm(SignOffMixin, forms.ModelForm):
     class Meta(object):
         model = CellSubtype
         exclude = tracking
+        widgets = {
+            'cell_subtype': forms.Textarea(attrs={'rows': 1}),
+        }
