@@ -35,7 +35,7 @@
     {% csrf_token %}
     </h1>
 
-    {% include "submit.html" %}
+    {% include "submit.html" with creator=object.created_by.id %}
 
     {% include 'errors.html' %}
 

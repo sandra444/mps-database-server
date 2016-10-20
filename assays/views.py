@@ -258,6 +258,8 @@ class AssayRunList(LoginRequiredMixin, ListView):
             'group',
             'signed_off_by'
         )
+
+        # Display to users with either editor or viewer group or if unrestricted
         group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
         return queryset.filter(
             restricted=False
@@ -655,6 +657,7 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
             'group',
             'signed_off_by'
         )
+        # Display to users with either editor or viewer group or if unrestricted
         group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
         return queryset.filter(
             restricted=False
@@ -827,6 +830,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
             'signed_off_by'
         )
 
+        # Display to users with either editor or viewer group or if unrestricted
         group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
         queryset = queryset.filter(
             restricted=False
@@ -834,6 +838,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
             group__name__in=group_names
         )
 
+        # Map assays
         related_assays = AssayChipReadoutAssay.objects.filter(
             readout_id__in=queryset
         ).prefetch_related(
@@ -1058,6 +1063,7 @@ class AssayChipTestResultList(LoginRequiredMixin, ListView):
             'test_unit'
         )
 
+        # Display to users with either editor or viewer group or if unrestricted
         group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
         return queryset.filter(
             assay_result__restricted=False
@@ -1191,7 +1197,7 @@ class AssayChipTestResultDelete(CreatorOrAdminRequiredMixin, DeleteView):
 
 # Class-based views for study configuration
 class StudyConfigurationList(LoginRequiredMixin, ListView):
-    """Display a lsit of Study Configurations"""
+    """Display a list of Study Configurations"""
     model = StudyConfiguration
     template_name = 'assays/studyconfiguration_list.html'
 
@@ -1282,6 +1288,8 @@ class AssayLayoutList(LoginRequiredMixin, ListView):
         # 'group',
         # 'device'
         # )
+
+        # Assay Layouts do not currently have a detail page, so only allow editors to see
         return AssayLayout.objects.filter(
             group__in=self.request.user.groups.all()
         ).prefetch_related(
@@ -1393,6 +1401,7 @@ class AssayPlateSetupList(LoginRequiredMixin, ListView):
             'signed_off_by'
         )
 
+        # Display to users with either editor or viewer group or if unrestricted
         group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
         return queryset.filter(
             restricted=False
@@ -1565,6 +1574,7 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
             'signed_off_by'
         )
 
+        # Display to users with either editor or viewer group or if unrestricted
         group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
         queryset = queryset.filter(
             restricted=False
@@ -1572,6 +1582,7 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
             group__name__in=group_names
         )
 
+        # Map assays
         related_assays = AssayPlateReadoutAssay.objects.filter(
             readout_id__in=queryset
         ).prefetch_related(
@@ -1796,6 +1807,7 @@ class AssayPlateTestResultList(LoginRequiredMixin, ListView):
             'assay_result__signed_off_by'
         )
 
+        # Display to users with either editor or viewer group or if unrestricted
         group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
         return queryset.filter(
             assay_result__restricted=False
