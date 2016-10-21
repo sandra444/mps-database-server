@@ -1,16 +1,17 @@
 # coding=utf-8
 
 from django.views.generic import ListView, CreateView, UpdateView
-# from .models import *
-from .forms import *
-# Best practice would be to put this in base or something of that sort (avoid spaghetti code)
-# Did this ^
-from mps.mixins import OneGroupRequiredMixin, SpecificGroupRequiredMixin
+from .models import CellSample, CellType, CellSubtype
+from .forms import CellSampleForm, CellTypeForm, CellSubtypeForm
+from mps.mixins import OneGroupRequiredMixin, SpecificGroupRequiredMixin, PermissionDenied, user_is_active
 from mps.templatetags.custom_filters import filter_groups
 from django.shortcuts import redirect
 
-# from mps.templatetags.custom_filters import *
 from mps.base.models import save_forms_with_tracking
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.utils.decorators import method_decorator
+from mps.templatetags.custom_filters import has_group
 
 
 class CellSampleAdd(SpecificGroupRequiredMixin, CreateView):
@@ -41,14 +42,29 @@ class CellSampleAdd(SpecificGroupRequiredMixin, CreateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
+# NOTE THAT CELL SAMPLE DOES NOT USE A PERMISSION MIXIN
 # Note that updating a model clears technically blank fields (exclude in form to avoid this)
-class CellSampleUpdate(SpecificGroupRequiredMixin, UpdateView):
+class CellSampleUpdate(UpdateView):
     """Update a Cell Sample"""
     model = CellSample
     template_name = 'cellsamples/cellsample_add.html'
     form_class = CellSampleForm
 
     required_group_name = 'Change Cell Samples Front'
+
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        """Special dispatch for Cell Sample
+
+        Rejects users that lack either the Change Cell Samples group or the Cell Sample's bound group
+        """
+        self.object = self.get_object()
+        if not has_group(self.request.user, self.required_group_name):
+            return PermissionDenied(self.request, 'Contact an administrator if you would like to gain permission')
+        if not has_group(self.request.user, self.object.group.name):
+            return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
+        return super(CellSampleUpdate, self).dispatch(*args, **kwargs)
 
     def get_form(self, form_class):
         # Get group selection possibilities
@@ -144,7 +160,6 @@ class CellTypeList(ListView):
         return queryset
 
 
-# # TODO
 class CellSubtypeAdd(SpecificGroupRequiredMixin, CreateView):
     """Add a Cell Subtype"""
     template_name = 'cellsamples/cellsubtype_add.html'
