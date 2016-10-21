@@ -134,7 +134,7 @@ $(document).ready(function () {
     };
 
     // Build table
-    window.LAYOUT.build_table = function () {
+    window.LAYOUT.build_table = function() {
         // Remove old
         $('#layout_table').remove();
 
@@ -238,7 +238,10 @@ $(document).ready(function () {
             current_model = 'assay_device_readout';
         }
 
-        window.LAYOUT.get_layout_data(current_id, current_model, window.LAYOUT.base_only);
+
+        if (current_id && current_model) {
+            window.LAYOUT.get_layout_data(current_id, current_model, window.LAYOUT.base_only);
+        }
     };
 
     window.LAYOUT.get_layout_data = function(current_id, current_model) {

@@ -565,7 +565,9 @@ $(document).ready(function () {
                     window.LAYOUT.models['assay_layout'] = layout_id;
                     window.LAYOUT.base_only = base_only;
                     window.LAYOUT.is_input = true;
-                    window.LAYOUT.build_table(row_labels, column_labels);
+                    window.LAYOUT.row_labels = row_labels;
+                    window.LAYOUT.column_labels = column_labels;
+                    window.LAYOUT.build_table();
                 }
                 else {
                     alert('This device is not configured correctly.');
@@ -576,8 +578,6 @@ $(document).ready(function () {
             }
         });
     }
-
-    // Fill table with values of preexisting assay layout
 
     // On device change, acquire labels and build table
     device.change(function() {
@@ -590,27 +590,6 @@ $(document).ready(function () {
     }
     else {
         get_well_type_selector();
-    }
-
-    // If a device is initially chosen
-    // (implies the layout is saved)
-    if (device.val()) {
-        // gets the id of existing layout object from the delete link
-        var delete_link = $('.deletelink');
-        var layout_id = undefined;
-        if (delete_link.length > 0) {
-            layout_id = delete_link.first().attr('href').split('/')[4];
-            window.LAYOUT.models['assay_layout'] = layout_id
-        }
-        else {
-            layout_id = Math.floor(window.location.href.split('/')[5]);
-            window.LAYOUT.models['assay_layout'] = layout_id
-        }
-
-        // Make sure all data is acquired
-        window.LAYOUT.base_only = false;
-
-        window.LAYOUT.get_device_layout(device.val(), 'device', true);
     }
 
     // When the action changes, hide unrelated and show related class
@@ -629,9 +608,28 @@ $(document).ready(function () {
         var clone_id = get_parameters[1];
         clone_base_layout(clone_id, base_only);
     }
-    // No action taken if nothing to clone
+    // If nothing to clone
     catch (e) {
+        // Fill table with values of preexisting assay layout
+        // If a device is initially chosen
+        // (implies the layout is saved)
+        if (device.val()) {
+            // gets the id of existing layout object from the delete link
+            var delete_link = $('.deletelink');
+            var layout_id = undefined;
+            if (delete_link.length > 0) {
+                layout_id = delete_link.first().attr('href').split('/')[4];
+                window.LAYOUT.models['assay_layout'] = layout_id
+            }
+            else {
+                layout_id = Math.floor(window.location.href.split('/')[5]);
+                window.LAYOUT.models['assay_layout'] = layout_id
+            }
 
+            // Make sure all data is acquired
+            window.LAYOUT.base_only = false;
+
+            window.LAYOUT.get_device_layout(device.val(), 'device', true);
+        }
     }
-
 });
