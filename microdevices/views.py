@@ -1,13 +1,13 @@
 from django.views.generic import DetailView, CreateView, UpdateView, ListView
-from django.shortcuts import redirect, render_to_response
-from django.template import RequestContext
+from django.shortcuts import redirect
 from django import forms
 from django.forms.models import inlineformset_factory
 from .forms import MicrodeviceForm, OrganModelForm, OrganModelProtocolInlineFormset
 from .models import Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
-from mps.mixins import SpecificGroupRequiredMixin
+from mps.mixins import SpecificGroupRequiredMixin, PermissionDenied, user_is_active
 from mps.base.models import save_forms_with_tracking
-
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.utils.decorators import method_decorator
 
 class OrganModelList(ListView):
     """Displays list of Organ Models"""
@@ -135,13 +135,27 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class OrganModelUpdate(SpecificGroupRequiredMixin, UpdateView):
+# PLEASE NOTE THAT ORGAN MODEL DOES NOT USE A PERMISSION MIXIN
+class OrganModelUpdate(UpdateView):
     """Allows Organ Models to be updated"""
     model = OrganModel
     template_name = 'microdevices/organmodel_add.html'
     form_class = OrganModelForm
 
-    required_group_name = 'Change Microdevices Front'
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        """Special dispatch for Organ Model
+
+        Rejects users with no groups and then rejects users without groups matching the center
+        (if there is a center listed)
+        """
+        self.object = self.get_object()
+        if self.request.user.groups.all().count() == 0 or self.object.center and not any(
+            i in self.object.center.groups.all() for i in self.request.user.groups.all()
+        ):
+            return PermissionDenied(self.request, 'You must be a member of the center ' + str(self.object.center))
+        return super(OrganModelUpdate, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(OrganModelUpdate, self).get_context_data(**kwargs)
