@@ -164,7 +164,7 @@ $(document).ready(function () {
             }
 
             // If the row is marked an outlier
-            else if (line[7]) {
+            else if (line[7] && $.trim(line[7])) {
                 table += "<tr class='bg-warning'>";
             }
 
