@@ -132,7 +132,7 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
             save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 # PLEASE NOTE THAT ORGAN MODEL DOES NOT USE A PERMISSION MIXIN
@@ -183,4 +183,4 @@ class OrganModelUpdate(UpdateView):
             save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))

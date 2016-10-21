@@ -318,7 +318,7 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
                 self.object.get_absolute_url()
             )
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 # class AssayRunDetail(DetailRedirectMixin, DetailView):
@@ -514,7 +514,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
 
             return redirect(self.object.get_absolute_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 def compare_cells(current_model, current_filter, setups):
@@ -746,7 +746,7 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 class AssayChipSetupDetail(DetailRedirectMixin, DetailView):
@@ -793,7 +793,7 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 class AssayChipSetupDelete(CreatorOrAdminRequiredMixin, DeleteView):
@@ -940,7 +940,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     # Redirect when there are no available setups
     def render_to_response(self, context):
@@ -1021,7 +1021,7 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Otherwise do nothing (the file remained the same)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 class AssayChipReadoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
@@ -1118,7 +1118,7 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
             save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     # Redirect when there are no available setups
     # TODO REFACTOR
@@ -1183,7 +1183,7 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
             save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 class AssayChipTestResultDelete(CreatorOrAdminRequiredMixin, DeleteView):
@@ -1238,7 +1238,7 @@ class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
             save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
@@ -1266,7 +1266,7 @@ class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
             save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 # Class-based views for LAYOUTS
@@ -1492,7 +1492,7 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 # TODO Assay Layout Detail does not currently exist (deemed lower priority)
@@ -1539,7 +1539,7 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 class AssayPlateSetupDelete(CreatorOrAdminRequiredMixin, DeleteView):
@@ -1688,7 +1688,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     # Redirect when there are no available setups
     # TODO REFACTOR
@@ -1767,7 +1767,7 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Otherwise do nothing (the file remained the same)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 # TODO ADD CONTEXT
@@ -1862,7 +1862,7 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
             save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     # Redirect when there are no available setups
     # TODO REFACTOR
@@ -1916,7 +1916,7 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
             save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 class AssayPlateTestResultDelete(CreatorOrAdminRequiredMixin, DeleteView):
