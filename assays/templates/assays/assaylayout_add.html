@@ -4,6 +4,7 @@
 {% block load %}
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
+    <script src="{% static "assays/plate_display.js" %}"></script>
     <script src="{% static "assays/assaylayout_add.js" %}"></script>
     <link href="{% static "assays/customize_admin.css" %}" rel="stylesheet" type="text/css">
 {% endblock %}
@@ -24,8 +25,6 @@
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post" autocomplete="off">
 
     <div class="container">
-
-    {% include 'review.html' %}
 
     <h1>
         Edit <em>{{ object }}</em>
@@ -52,7 +51,7 @@
 {#        {% include 'flag.html'%}#}
     </h1>
 
-    {% include "submit.html" with flag="y" assay_layout="y" %}
+    {% include "submit.html" with flag="y" assay_layout="y" group=form.instance.group.name %}
 
     {% include 'errors.html' %}
 

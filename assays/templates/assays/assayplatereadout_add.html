@@ -14,7 +14,7 @@
 {% block breadcrumbs %}
     <li><a href="/assays/editable_studies/">Editable Studies</a></li>
     <li>
-        {% if object %}
+        {% if object and not form.success.value %}
             <a href="/assays/{{ object.setup.assay_run_id.id }}">{{ object.setup.assay_run_id }}</a>
         {% else %}
             <a href="/assays/{{ study.id }}">{{ study }}</a>
@@ -35,10 +35,13 @@
 
     <div class="container">
 
-    {% include 'review.html' %}
-
     <h1>
         Edit Readout for <em>{{ object.setup }}</em>
+
+        <a href="{% url 'plate_setup_update' object.setup.id %}" class="btn btn-primary">View/Edit Plate Setup</a>
+        {% if object.assayplatetestresult_set.all.0 %}
+            <a href="{% url 'plate_result_update' object.assayplatetestresult_set.all.0.id %}" class="btn btn-primary">View/Edit Plate Test Results</a>
+        {% endif %}
 {% else %}
     <form enctype="multipart/form-data" class="form-horizontal" method="post" >
 
@@ -50,7 +53,7 @@
     {% csrf_token %}
     </h1>
 
-    {% include "submit.html" with flag="y" clone="y" %}
+    {% include "submit.html" with flag="y" clone="y" group=study.group %}
 
     {% include 'errors.html' %}
 

@@ -9,148 +9,24 @@ $(document).ready(function () {
         alert('Sorry, plate readout uploads are not currently available in the admin.');
     }
 
-    // Pulled from heatmap
-    var colors = [
-        '#008000', '#1A8C00', '#339800', '#4DA400', '#66B000',
-        '#80BC00',
-        '#99C800', '#B3D400', '#CCE000', '#E6EC00', '#FFFF00',
-        '#F3E600',
-        '#E7CC00', '#DBB300', '#CF9900', '#C38000', '#B76600',
-        '#AB4D00',
-        '#9F3300', '#931A00', '#870000'
-    ];
-
-    // It is useful to have a list of row and column labels
-    var row_labels = null;
-    var column_labels = null;
-
     // The setup
     var setup = $('#id_setup');
 
     // The file
     var file = $('#id_file');
 
-    // Feature select for heatmap
-    var assay_select = $('#assay_select');
-    // Time select for heatmap
-    var time_select = $('#time_select');
-    // Data toggle for heatmap
-    var data_toggle = $('#data_toggle');
-    // This will contain the min, max, and median values for a feature (for the heatmap)
-    //var feature_parameters = {};
-    // This contains all values for a feature
-    var assay_feature_values = {};
+    //  TODO REFACTOR
+    // Specify that the location for the table is different
+    window.LAYOUT.insert_after = $('.inline-group');
 
-    // This matches assay_feature_pairs to their respective assay and feature
-    var selection_to_assay_feature = {};
-
-    // This will contain the respective colors for each feature on a well to well basis
-    var heatmaps = {};
-
-    // This will contain all the wells tagged invalid with assay selection -> time -> value
-    var invalid = {};
-
-    var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
-
-    // Get layout
-    function get_device_layout() {
-        var setup_id = setup.val();
-        if (setup_id) {
-            $.ajax({
-                url: "/assays_ajax/",
-                type: "POST",
-                dataType: "json",
-                data: {
-                    // Function to call within the view is defined by `call:`
-                    call: 'fetch_layout_format_labels',
-
-                    // First token is the var name within views.py
-                    // Second token is the var name in this JS file
-                    id: setup_id,
-
-                    model: 'assay_device_setup',
-
-                    // Always pass the CSRF middleware token with every AJAX call
-                    csrfmiddlewaretoken: middleware_token
-                },
-                success: function (json) {
-                    // Global in readout scope
-                    row_labels = json.row_labels;
-                    column_labels = json.column_labels;
-                    if (row_labels && column_labels) {
-                        build_table(row_labels, column_labels);
-                    }
-                    else {
-                        alert('This device is not configured correctly');
-                    }
-                },
-                error: function (xhr, errmsg, err) {
-                    console.log(xhr.status + ": " + xhr.responseText);
-                }
-            });
-        }
-        else {
-            // Remove when invalid/nonextant layout chosen
-            $('#layout_table').remove();
-        }
+    // gets the id of existing readout object from the delete link (admin)
+    var delete_link = $('.deletelink');
+    if (delete_link.length > 0) {
+        window.LAYOUT.models['assay_device_readout'] = delete_link.first().attr('href').split('/')[4];
     }
-
-    function get_invalid_id(well_id, assay_feature_selection, time) {
-        var split = well_id.split('_');
-        var row = row_labels.indexOf(split[0]);
-        var column = column_labels.indexOf(split[1]);
-        return row + '_' + column + '_' + assay_feature_selection +  '_' + time + '_QC';
-    }
-
-    function get_invalid_name(well_id, assay_feature_selection, time) {
-        var split = well_id.split('_');
-        var row = row_labels.indexOf(split[0]);
-        var column = column_labels.indexOf(split[1]);
-
-        var assay_feature = selection_to_assay_feature[assay_feature_selection];
-        var assay = assay_feature.assay;
-        var feature = assay_feature.feature;
-
-        var full_object = {
-            'row': row,
-            'column': column,
-            'time': time,
-            'assay': assay,
-            'feature': feature
-        };
-
-        return JSON.stringify(full_object);
-    }
-
-    function set_invalid(id, well_id, current_selection, current_time) {
-        var invalid_id = get_invalid_id(id, current_selection, current_time);
-        var invalid_name = get_invalid_name(id, current_selection, current_time);
-
-        // Make an empty object for this selection if it doesn't exist
-        if (!invalid[current_selection]) {
-            invalid[current_selection] = {};
-        }
-
-        // Make an empty array for this time if it doesn't exist
-        if (!invalid[current_selection][current_time]) {
-            invalid[current_selection][current_time] = [];
-        }
-
-        $(well_id)
-            .addClass('invalid-well')
-            .append($('<input>')
-                .attr('id', invalid_id)
-                .attr('name', invalid_name)
-                .attr('size', '7')
-                .attr('readonly', 'true')
-                .addClass('invalid')
-                .attr('hidden', 'true')
-                .val('X'));
-
-        invalid[current_selection][current_time].push(well_id);
-
-        // THIS MAY CAUSE ISSUES, INVESTIGATE
-        build_heatmap(assay_feature_values);
+    // Otherwise, if this is the frontend, get the id from the URL
+    else {
+        window.LAYOUT.models['assay_device_readout'] = Math.floor(window.location.href.split('/')[5]);
     }
 
     // Process a value from a readout file
@@ -165,7 +41,7 @@ $(document).ready(function () {
                 return NaN
             }
             else {
-                set_invalid(id, well_id, current_selection, current_time);
+                window.LAYOUT.set_invalid(id, well_id, current_selection, current_time);
                 return sliced_value;
             }
         }
@@ -174,162 +50,7 @@ $(document).ready(function () {
         }
     }
 
-
-    function refresh_invalid() {
-        var current_selection = assay_select.val();
-        var current_time = time_select.val();
-        var current_invalid = null;
-
-        if (invalid[current_selection]) {
-            current_invalid = invalid[current_selection][current_time];
-        }
-
-        if ($('.plate-well')[0]) {
-            $('.plate-well').removeClass('invalid-well');
-        }
-
-        if (current_invalid) {
-            $.each(current_invalid, function (index, well) {
-                $(well).addClass('invalid-well');
-            });
-        }
-    }
-
-    // Build table
-    function build_table(row_labels, column_labels) {
-        // Remove old
-        $('#layout_table').remove();
-
-        // Choice of inserting after fieldset is contrived; for admin
-        var table = $('<table>')
-            .css('width','100%')
-            .addClass('layout-table')
-            // CONTRIVED PLACE AFTER INLINE FOR ADMIN
-            // TODO CHANGE
-            .attr('id','layout_table').insertAfter($('.inline-group'));
-
-        // make first row
-        var row = $('<tr>');
-        row.append($('<th>'));
-        $.each(column_labels, function (index, value) {
-            row.append($('<th>')
-                .text(value));
-        });
-        table.append(row);
-
-        // make rest of the rows
-        $.each(row_labels, function (row_index, row_value) {
-            var row = $('<tr>');
-            row.append($('<th>')
-                .text(row_value));
-            // Note that the "lists" are added here
-            $.each(column_labels, function (column_index, column_value) {
-                row.append($('<td>')
-                    .attr('id', row_value + '_' + column_value)
-                    // Add class
-                    .addClass('plate-well')
-                    .append($('<div>')
-                        .css('text-align','center')
-                        .css('font-weight', 'bold')
-                        .attr('id',row_value + '_' + column_value + '_type'))
-                    .append($('<ul>')
-                        .attr('id',row_value + '_' + column_value + '_list')
-                        .addClass('layout-list')));
-            });
-            table.append(row);
-        });
-
-        $('.plate-well').click(function() {
-            var id = this.id;
-            var well_id = '#' + id;
-            // Check if qc mode is checked and if there is a readout value
-            if ($('#qc_mode').prop('checked') && $('#' + id + ' .value')[0]) {
-                // Get the current selection
-                var current_selection = assay_select.val();
-
-                // Get the current time
-                var current_time = time_select.val();
-
-                // Make an id for the invalid input: <row>_<col>_<assay_feature_select>_<time>_QC
-                var invalid_id = get_invalid_id(id, current_selection, current_time);
-
-//                // Make an empty object for this selection if it doesn't exist
-//                if (!invalid[current_selection]) {
-//                    invalid[current_selection] = {};
-//                }
-//
-//                // Make an empty array for this time if it doesn't exist
-//                if (!invalid[current_selection][current_time]) {
-//                    invalid[current_selection][current_time] = [];
-//                }
-
-                // Check if there is already an input, if so, delete it
-                if ($('[id="'+ invalid_id + '"]')[0]) {
-                    $('[id="'+ invalid_id + '"]').remove();
-                    $(this).removeClass('invalid-well');
-
-                    invalid[current_selection][current_time] = _.without(invalid[current_selection][current_time], '#' + id);
-                    // THIS MAY CAUSE ISSUES, INVESTIGATE
-                    build_heatmap(assay_feature_values);
-                }
-                else {
-                    set_invalid(id, well_id, current_selection, current_time);
-//                    $(this)
-//                        .addClass('invalid-well')
-//                        .append($('<input>')
-//                            .attr('id', invalid_id)
-//                            .attr('name', invalid_name)
-//                            .attr('size', '7')
-//                            .attr('readonly', 'true')
-//                            .addClass('invalid')
-//                            .attr('hidden', 'true')
-//                            .val('X'));
-//
-//                    invalid[current_selection][current_time].push(id);
-                }
-            }
-            //console.log(invalid);
-        });
-
-        get_layout_data(setup.val());
-    }
-
-    function get_layout_data(setup_id) {
-        $.ajax({
-            url: "/assays_ajax/",
-            type: "POST",
-            dataType: "json",
-            data: {
-                // Function to call within the view is defined by `call:`
-                call: 'fetch_assay_layout_content',
-
-                // First token is the var name within views.py
-                // Second token is the var name in this JS file
-                id: setup_id,
-
-                model: 'assay_device_setup',
-
-                // Always pass the CSRF middleware token with every AJAX call
-                csrfmiddlewaretoken: middleware_token
-            },
-            success: function (json) {
-                fill_layout(json);
-            },
-            error: function (xhr, errmsg, err) {
-                console.log(xhr.status + ": " + xhr.responseText);
-            }
-        });
-    }
-
-    function fill_layout(layout_data) {
-        window.LAYOUT.fill_layout(layout_data);
-
-        // Attempt to acquire the readout
-        // (AVOID RACE CONDITIONS AT ALL COST)
-        get_readout();
-    }
-
-    function get_readout() {
+    function get_readout_from_file() {
         if (!setup.val()) {
             alert('Please select a setup first then select the file again.');
             // This resets the file
@@ -340,136 +61,6 @@ $(document).ready(function () {
         var file = $('#id_file')[0].files[0];
         if (file) {
             get_text(file);
-        }
-        // If readout already exists
-        else {
-            // gets the id of existing readout object from the delete link (admin)
-            var readout_id = undefined;
-            var delete_link = $('.deletelink');
-            if (delete_link.length > 0) {
-                readout_id = delete_link.first().attr('href').split('/')[4];
-                get_existing_readout(readout_id);
-            }
-            // Otherwise, if this is the frontend, get the id from the URL
-            else {
-                readout_id = Math.floor(window.location.href.split('/')[5]);
-                if (!isNaN(readout_id)) {
-                    get_existing_readout(readout_id);
-                }
-            }
-        }
-    }
-
-    function heatmap_options(pairs, times) {
-        // Clear old features
-        assay_select.empty();
-
-        var unique_pairs = {};
-
-        $.each(pairs, function (pair, value) {
-            var pair_without_time = pair.split('_').slice(0, -1).join('_');
-            var assay_feature = selection_to_assay_feature[pair_without_time];
-            var text_display = assay_feature.assay + '-' + assay_feature.feature;
-            if (!unique_pairs[pair_without_time]) {
-                var option = $('<option>')
-                    .attr('value', pair_without_time)
-                    .text(text_display);
-                assay_select.append(option);
-
-                unique_pairs[pair_without_time] = true;
-            }
-        });
-        // Clear old times
-        time_select.empty();
-
-        // Convert times to sorted array?
-        $.each(times, function (index, time) {
-            var option = $('<option>')
-                .attr('value', time)
-                .text(time);
-            time_select.append(option);
-        });
-
-        // If the only timepoint is zero, no need to display time selection
-//        if (_.size(times) == 1 && times[0] == 0) {
-//            $('#time_select_row').hide();
-//        }
-//        else {
-//            $('#time_select_row').show();
-//        }
-
-        // Always show time (?)
-        $('#time_select_row').show();
-
-        $('#heatmap_options').show();
-        assay_select.trigger('change');
-    }
-
-    function apply_heatmap(current_assay_feature) {
-        // Use heatmaps to get the respective colors
-        var well_colors = heatmaps[current_assay_feature];
-
-        if (well_colors) {
-            $.each(well_colors, function (well, color) {
-                $(well).css('background-color', color);
-            });
-
-            $.each(row_labels, function (row_index, row) {
-                $.each(column_labels, function (col_index, col) {
-                    var well = '#' + row + '_' + col;
-                    if (!well_colors[well]) {
-                        $(well).css('background-color', '#606060');
-                    }
-                })
-            });
-        }
-    }
-
-    function build_heatmap(assay_feature_values) {
-        // For each feature
-        $.each(assay_feature_values, function(pair, values) {
-            // Start the heatmap for this assay feature (class) pair
-            heatmaps[pair] = {};
-
-            var current_selection = pair.split('_').slice(0, -1).join('_');
-            var current_time = pair.split('_').slice(-1).join('_');
-            var current_invalid_wells = [];
-
-            if (invalid[current_selection]) {
-                current_invalid_wells = invalid[current_selection][current_time];
-            }
-
-            // Exclude invalidated wells from values
-            //console.log(values);
-            //console.log(_.omit(values, function(value, key, object) {return _.contains(current_invalid_wells, key);}));
-            values = _.omit(values, function(value, key, object) {return _.contains(current_invalid_wells, key);});
-
-            // Get the values list
-            // Be sure to exclude null values
-            var values_list = _.without(_.values(values), NaN);
-            // Get the min
-            var min_value = _.min(values_list);
-            min_value -= min_value * 0.000001;
-            // Get the max
-            var max_value = _.max(values_list);
-            max_value += max_value * 0.000001;
-            // Get the median
-            var median = d3.median(values_list);
-            // Get the colorscale
-            var color_scale = d3.scale.quantile()
-                .domain([min_value , median, max_value])
-                .range(colors);
-
-            // For each value
-            $.each(values, function(well, value) {
-                heatmaps[pair][well] = value != undefined ? color_scale(value) : '#606060';
-            });
-        });
-
-        // If build_heatmap is being called due to a change in invalid
-        if (assay_select.val()) {
-            var current_assay_feature = assay_select.val() + '_' + time_select.val();
-            apply_heatmap(current_assay_feature);
         }
     }
 
@@ -517,9 +108,9 @@ $(document).ready(function () {
         // Remove old invalid
         $('.invalid').remove();
         // Reset invalid
-        invalid = {};
+        window.LAYOUT.invalid = {};
         // Reset heatmaps
-        heatmaps = {};
+        window.LAYOUT.heatmaps = {};
 
         // Whether or not the upload should fail
         var failed = false;
@@ -527,10 +118,10 @@ $(document).ready(function () {
         var upload_type = $('#id_upload_type').val();
         // Get a unique array of features
         var unique_features = [];
-        var times = {};
+        window.LAYOUT.times = {};
 
         // Get all values in a dict with features as keys
-        assay_feature_values = {};
+        window.LAYOUT.assay_feature_values = {};
 
         if (upload_type == 'Block') {
             // Current assay
@@ -570,7 +161,7 @@ $(document).ready(function () {
                     }
 
                     // Add time
-                    times[time] = [time];
+                    window.LAYOUT.times[time] = [time];
 
                     // Add feature to features (keeping it unique)
                     if (unique_features.indexOf(feature) < 0) {
@@ -582,12 +173,12 @@ $(document).ready(function () {
 
                     // Add pair to assay_feature_values
                     //assay_feature_class = 'f_'+ assay_feature_pair.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
-                    assay_feature_values[assay_feature_pair] = {};
+                    window.LAYOUT.assay_feature_values[assay_feature_pair] = {};
 
                     assay_feature_selection = assay + '_' + feature;
 
                     // Ensure unaltered assay and feature are available
-                    selection_to_assay_feature[assay_feature_selection] = {'assay': assay, 'feature': feature};
+                    window.LAYOUT.selection_to_assay_feature[assay_feature_selection] = {'assay': assay, 'feature': feature};
 
                     if (!assay || !feature || !value_unit || (time && !time_unit)) {
                         failed += 'headers';
@@ -609,7 +200,7 @@ $(document).ready(function () {
                     else {
                         // Register a new data block if this is the first reading
                         // OR if the row index
-                        if (number_of_data_blocks == 0 || (row_index - number_of_features) % row_labels.length == 0) {
+                        if (number_of_data_blocks == 0 || (row_index - number_of_features) % window.LAYOUT.row_labels.length == 0) {
                             number_of_data_blocks += 1;
                         }
 
@@ -623,8 +214,8 @@ $(document).ready(function () {
                                 // TODO REVISE
                                 // Must offset row due to headers
                                 // Employ modulo
-                                var row_label = row_labels[(row_index - number_of_features) % row_labels.length];
-                                var column_label = column_labels[column_index];
+                                var row_label = window.LAYOUT.row_labels[(row_index - number_of_features) % window.LAYOUT.row_labels.length];
+                                var column_label = window.LAYOUT.column_labels[column_index];
 
                                 var well_id = '#' + row_label + '_' + column_label;
                                 var id = row_label + '_' + column_label;
@@ -646,7 +237,7 @@ $(document).ready(function () {
                                 $(well_id).append(readout);
 
                                 // Add value to assay_feature_values
-                                assay_feature_values[assay_feature_pair][well_id] = parseFloat(value);
+                                window.LAYOUT.assay_feature_values[assay_feature_pair][well_id] = parseFloat(value);
                             });
                         }
                     }
@@ -724,7 +315,7 @@ $(document).ready(function () {
                     }
 
                     // Add time
-                    times[time] = time;
+                    window.LAYOUT.times[time] = time;
 
                     // Add feature to features (keeping it unique)
                     if (unique_features.indexOf(feature) < 0) {
@@ -740,7 +331,7 @@ $(document).ready(function () {
                     var assay_feature_selection = assay + '_' + feature;
 
                     // Ensure unaltered assay and feature are available
-                    selection_to_assay_feature[assay_feature_selection] = {'assay': assay, 'feature': feature};
+                    window.LAYOUT.selection_to_assay_feature[assay_feature_selection] = {'assay': assay, 'feature': feature};
 
                     value = process_value(value, id, well_id, assay_feature_selection, time);
 
@@ -759,12 +350,12 @@ $(document).ready(function () {
 
                     // If feature not in assay_feature_values, add it
                     // Otherwise tack on the value
-                    if (assay_feature_values[assay_feature_pair]) {
-                        assay_feature_values[assay_feature_pair][well_id] = parseFloat(value);
+                    if (window.LAYOUT.assay_feature_values[assay_feature_pair]) {
+                        window.LAYOUT.assay_feature_values[assay_feature_pair][well_id] = parseFloat(value);
                     }
                     else {
-                        assay_feature_values[assay_feature_pair] = {};
-                        assay_feature_values[assay_feature_pair][well_id] = parseFloat(value);
+                        window.LAYOUT.assay_feature_values[assay_feature_pair] = {};
+                        window.LAYOUT.assay_feature_values[assay_feature_pair][well_id] = parseFloat(value);
                     }
                 });
             }
@@ -814,185 +405,31 @@ $(document).ready(function () {
             });
             $('#binding').show();
 
-            build_heatmap(assay_feature_values);
-            // Heatmap dialog
-            heatmap_options(assay_feature_values, times);
+            window.LAYOUT.build_heatmap();
+            window.LAYOUT.heatmap_options();
 
             alert('Please link features to assays');
         }
     }
 
-    function get_existing_readout(readout_id) {
-        $.ajax({
-            url: "/assays_ajax/",
-            type: "POST",
-            dataType: "json",
-            data: {
-                // Function to call within the view is defined by `call:`
-                call: 'fetch_readout',
-
-                // First token is the var name within views.py
-                // Second token is the var name in this JS file
-                id: readout_id,
-
-                model: 'assay_device_readout',
-
-                // Always pass the CSRF middleware token with every AJAX call
-                csrfmiddlewaretoken: middleware_token
-            },
-            success: function (json) {
-                fill_readout_from_existing(json);
-            },
-            error: function (xhr, errmsg, err) {
-                console.log(xhr.status + ": " + xhr.responseText);
-            }
-        });
-    }
-
-    function fill_readout_from_existing(data) {
-        // Clear any leftover values from previews
-        $('.value').remove();
-        $('.invalid').remove();
-
-        var times = {};
-
-        // Reset invalid
-        invalid = {};
-
-        $.each(data, function(index, well_data) {
-            var value = well_data.value;
-
-            // TODO
-            // HOW WILL THESE BE DISPLAYED (IF AT ALL)?
-            var value_unit = well_data.value_unit;
-            var time = well_data.time;
-            var time_unit = well_data.time_unit;
-            var assay = well_data.assay;
-            var quality = well_data.quality;
-
-            var row_label = row_labels[well_data.row];
-            var column_label = column_labels[well_data.column];
-            var well_id = '#' + row_label + '_' + column_label;
-
-            var feature = well_data.feature;
-
-            // Add time to times
-            times[time] = time;
-
-            // Add for multiple readings
-            var assay_feature_pair = assay + '_' + feature + '_' + time;
-
-            // Add feature to assay_feature_values
-            //var assay_feature_class = 'f_'+ assay_feature_pair.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
-
-            var assay_feature_selection = assay + '_' + feature;
-
-            // Ensure unaltered assay and feature are available
-            selection_to_assay_feature[assay_feature_selection] = {'assay': assay, 'feature': feature};
-
-            // Consider adding lead if people demand a larger font
-            var readout = $('<p>')
-                .addClass('value')
-                .attr('data-assay-feature-time', assay_feature_pair)
-                .text(number_with_commas(value));
-
-            $(well_id).append(readout);
-
-            // If feature not in assay_feature_values, add it
-            // Otherwise tack on the value
-            if (assay_feature_values[assay_feature_pair]) {
-                assay_feature_values[assay_feature_pair][well_id] = parseFloat(value);
-            }
-            else {
-                assay_feature_values[assay_feature_pair] = {};
-                assay_feature_values[assay_feature_pair][well_id] = parseFloat(value);
-            }
-
-            var id = row_label + '_' + column_label;
-            // Current time alias
-            var current_time = time;
-            // Alias for readability
-            var current_selection = assay_feature_selection;
-
-//            // Make an empty object for this selection if it doesn't exist
-//            if (!invalid[current_selection]) {
-//                invalid[current_selection] = {};
-//            }
-//
-//            // Make an empty array for this time if it doesn't exist
-//            if (!invalid[current_selection][current_time]) {
-//                invalid[current_selection][current_time] = [];
-//            }
-
-            // if (quality && !(invalid[current_selection][current_time].indexOf(id) > -1)) {
-            if (quality) {
-                set_invalid(id, well_id, current_selection, current_time);
-//                $(well_id)
-//                    .addClass('invalid-well')
-//                    .append($('<input>')
-//                        .attr('id', invalid_id)
-//                        .attr('name', invalid_name)
-//                        .attr('size', '7')
-//                        .attr('readonly', 'true')
-//                        .addClass('invalid')
-//                        .attr('hidden', 'true')
-//                        .val('X'));
-//
-//                // Add to invalid
-//                invalid[current_selection][current_time].push(id);
-            }
-        });
-
-        build_heatmap(assay_feature_values);
-        heatmap_options(assay_feature_values, times);
-    }
-
     // On setup change, acquire labels and build table
     setup.change(function() {
-        get_device_layout();
+        window.LAYOUT.get_device_layout(setup.val(), 'assay_device_setup', false);
     });
 
-    // If a setup is initially chosen
     // (implies readout exists)
-    if (setup.val()) {
+    if (window.LAYOUT.models['assay_device_readout']) {
         // Initial table and so on
-        get_device_layout();
+        window.LAYOUT.get_device_layout(window.LAYOUT.models['assay_device_readout'], 'assay_device_readout', false);
+    }
+    // If a setup is initially chosen
+    else if (setup.val()) {
+        window.LAYOUT.get_device_layout(setup.val(), 'assay_device_setup', false);
     }
 
     // If the file changes
     file.change(function () {
-        get_readout();
-    });
-
-    // When the assay_select changes, get the correct values
-    assay_select.change(function() {
-        var current_assay_feature = assay_select.val();
-        // Append the value of time_select
-        current_assay_feature = current_assay_feature + '_' + time_select.val();
-
-        // Hide all values
-        $('.value').hide();
-
-        // console.log(heatmaps);
-
-        apply_heatmap(current_assay_feature);
-
-        // Escape periods for the sizzle selector
-        current_assay_feature = current_assay_feature.replace('.', '\\.');
-
-        // Show this feature's values
-        $('p[data-assay-feature-time="' + current_assay_feature + '"]').show();
-        refresh_invalid();
-    });
-
-    // Trigger feature select change on time change
-    time_select.change(function() {
-        assay_select.trigger('change');
-    });
-
-    // When the 'toggle data only' button is clicked
-    data_toggle.click(function() {
-         $('.layout-list').toggle();
+        get_readout_from_file();
     });
 
     // Datepicker superfluous on admin, use this check to apply only in frontend

@@ -5,7 +5,7 @@ $(document).ready(function() {
         responsive: true,
         "iDisplayLength": 50,
         // Initially sort on setup not arbitrary ID
-        "order": [[5, "desc"], [2, "asc"] ,[3, "asc"]],
+        "order": [[4, "desc"], [1, "asc"] ,[2, "asc"]],
         "aoColumnDefs": [
             {
                 "bSortable": false,

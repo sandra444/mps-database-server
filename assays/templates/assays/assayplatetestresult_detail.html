@@ -1,28 +1,28 @@
 {% extends "base.html" %}
 
 {% block breadcrumbs %}
-    <li><a href="/assays/assaychiptestresult/">Chip Results</a></li>
-    <li class="active">Test Results for <em>Chip-{{ object.chip_readout.chip_setup.assay_chip_id }}</em></li>
+    <li><a href="/assays/assayplatetestresult/">Plate Results</a></li>
+    <li class="active">Test Results for <em>Plate-{{ object.plate_readout.setup.assay_plate_id }}</em></li>
 {% endblock %}
 
 {% block content %}
-    <legend><h1>Chip Test Results ID #{{ object.id }} for Study:<br><a href="/assays/{{ object.assay_device_readout.id }}">{{ object.assay_device_readout }}</a></h1></legend>
+    <legend><h1>Plate Test Results ID #{{ object.id }} for Study:<br><a href="/assays/{{ object.assay_device_readout.id }}">{{ object.assay_device_readout }}</a></h1></legend>
 
     <div class="row">
         <div class="col-sm-2 lead text-right-responsive">
             <b>Setup:</b>
         </div>
         <div class="col-sm-10 lead">
-            <a href="/assays/assaychipsetup/{{ object.chip_readout.chip_setup.id }}">
-                {{ object.chip_readout.chip_setup.id }}
+            <a href="/assays/assayplatesetup/{{ object.readout.plate_setup.id }}">
+                {{ object.readout.plate_setup.id }}
             </a>
         </div>
         <div class="col-sm-2 lead text-right-responsive">
             <b>Readout:</b>
         </div>
         <div class="col-sm-10 lead">
-            <a href="/assays/assaychipreadout/{{ object.chip_readout.id }}">
-                {{ object.chip_readout.id }}
+            <a href="/assays/assayplatereadout/{{ object.plate_readout.id }}">
+                {{ object.plate_readout.id }}
             </a>
         </div>
     </div>
@@ -42,7 +42,7 @@
         </tr>
         </thead>
         <tbody>
-        {% for result in object.assaychipresult_set.all %}
+        {% for result in object.assayplateresult_set.all %}
             <tr>
                 <td>{{ result.assay_name }}</td>
                 <td>{{ result.get_result_display }}</td>

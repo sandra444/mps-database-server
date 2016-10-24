@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
 
 {% block load %}
     <script src="{% static "js/cookies.js" %}"></script>
@@ -13,11 +14,12 @@
 {% endblock %}
 
 {% block content %}
-    {% include 'review.html' %}
-
     <div class="well">
         <h1 class="text-center">
             {{ object }}
+            <div>
+                <a href="/assays/{{ object.id }}/data/" class="btn btn-info" role="button">Download Data</a>
+            </div>
          </h1>
     </div>
 
@@ -111,7 +113,7 @@
                     </td>
                     <td>
                         {% if setup.signed_off_by %}
-                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if setup.flagged %}
                             <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -144,7 +146,7 @@
                 <tr>
                     <td>{{ cell.cell_sample }}</td>
                     <td>{{ cell.cell_biosensor }}</td>
-                    <td>{{ cell.cellsample_density }}</td>
+                    <td>{{ cell.cellsample_density|intcomma }}</td>
                     <td>{{ cell.get_cellsample_density_unit_display }}</td>
                     <td>{{ cell.cell_passage }}</td>
                 </tr>
@@ -197,7 +199,7 @@
                     </td>
                     <td>
                         {% if setup.signed_off_by %}
-                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if setup.flagged %}
                             <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -265,5 +267,5 @@
         </label>
     </div>
 
-    <div id="charts"></div>
+    <div id="charts" class="padded-bottom"></div>
 {% endblock %}

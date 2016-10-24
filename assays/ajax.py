@@ -259,6 +259,59 @@ def fetch_center_id(request):
                         content_type="application/json")
 
 
+# TODO THIS WAS A STRING TO BE EXPEDIENT WRT TO THE JAVSCRIPT IN READOUT ADD, BUT SHOULD BE REVISED
+def get_chip_readout_data_as_csv(chip_ids):
+    """Returns readout data as a csv in the form of a string"""
+
+    # PLEASE NOTE: THIS AFFECTS PROCESSING OF QC
+    # DO NOT MODIFY THIS WITHOUT ALSO CHANGING modify_qc_status_chip
+    chip_data = AssayChipRawData.objects.prefetch_related(
+        'assay_id__assay_id',
+        'assay_chip_id__chip_setup'
+    ).filter(
+        assay_chip_id__in=chip_ids
+    ).order_by(
+        'assay_chip_id__chip_setup__assay_chip_id',
+        'assay_id__assay_id__assay_short_name',
+        'elapsed_time'
+    )
+
+    csv = ''
+
+    for raw in chip_data:
+        if ',' in raw.assay_chip_id.chip_setup.assay_chip_id:
+            csv += '"' + unicode(raw.assay_chip_id.chip_setup.assay_chip_id) + '"' + ','
+        else:
+            csv += raw.assay_chip_id.chip_setup.assay_chip_id + ','
+        csv += unicode(raw.elapsed_time) + ','
+        # Add time unit
+        csv += unicode(raw.assay_chip_id.timeunit) + ','
+        csv += unicode(raw.assay_id.assay_id.assay_short_name) + ','
+        if ',' in raw.field_id:
+            csv += '"' + unicode(raw.field_id) + '"' + ','
+        else:
+            csv += unicode(raw.field_id) + ','
+        # Format to two decimal places
+        value = raw.value
+        # Check if None first before format
+        if value is not None:
+            value = '%.2f' % value
+        else:
+            value = unicode(value)
+        # Get rid of trailing zero and decimal if necessary
+        value = value.rstrip('0').rstrip('.') if '.' in value else value
+        csv += value + ','
+        # Add value unit
+        csv += unicode(raw.assay_id.readout_unit) + ','
+        # End with the quality
+        if ',' in raw.quality:
+            csv += '"' + unicode(raw.quality) + '"' + '\n'
+        else:
+            csv += unicode(raw.quality) + '\n'
+
+    return csv
+
+
 # TODO Needs refactor
 def fetch_chip_readout(request):
     """Returns the Raw Chip Data stored for a Chip Readout
@@ -273,53 +326,9 @@ def fetch_chip_readout(request):
         logger.error('chip not present in request to fetch_chip_readout')
         return HttpResponseServerError()
 
-    chip_data = AssayChipRawData.objects.prefetch_related(
-        'assay_id'
-    ).filter(
-        assay_chip_id=chip_id
-    ).order_by(
-        'assay_id',
-        'elapsed_time'
-    )
-
-    readout = AssayChipReadout.objects.filter(id=chip_id)[0]
-    time_unit = readout.timeunit
-    chip_name = readout.chip_setup.assay_chip_id
-
-    csv = ''
-
-    for raw in chip_data:
-        if ',' in chip_name:
-            csv += '"' + str(chip_name) + '"' + ','
-        else:
-            csv += str(chip_name) + ','
-        csv += str(raw.elapsed_time) + ','
-        # Add time unit
-        csv += str(time_unit) + ','
-        csv += str(raw.assay_id.assay_id.assay_short_name) + ','
-        if ',' in raw.field_id:
-            csv += '"' + str(raw.field_id) + '"' + ','
-        else:
-            csv += str(raw.field_id) + ','
-        # Format to two decimal places
-        value = raw.value
-        # Check if None first before format
-        if value is not None:
-            value = '%.2f' % raw.value
-        else:
-            value = str(value)
-        # Get rid of trailing zero and decimal if necessary
-        value = value.rstrip('0').rstrip('.') if '.' in value else value
-        csv += value + ','
-        # Add value unit
-        csv += str(raw.assay_id.readout_unit) + ','
-        # End with the quality
-        if ',' in raw.quality:
-            csv += '"' + str(raw.quality) + '"' + '\n'
-        else:
-            csv += str(raw.quality) + '\n'
-
     data = {}
+
+    csv = get_chip_readout_data_as_csv([chip_id])
 
     data.update({
         'csv': csv,
@@ -400,17 +409,21 @@ def fetch_readouts(request):
 
         if not quality:
             # Get tag for data point
-            if percent_control and raw.assay_chip_id.chip_setup.chip_test_type == 'control':
-                tag = 'Control'
-            elif key == 'compound':
+            # If by compound
+            if key == 'compound':
                 if raw.assay_chip_id.chip_setup.compound:
                     tag = raw.assay_chip_id.chip_setup.compound.name
                     tag += ' ' + str(raw.assay_chip_id.chip_setup.concentration)
                     tag += ' ' + raw.assay_chip_id.chip_setup.unit.unit
                 else:
                     tag = 'Control'
+            # If by device
             else:
                 tag = raw.assay_chip_id.chip_setup.assay_chip_id
+
+                # Specifically add to consolidated control if this is a device-by-device control
+                if percent_control and raw.assay_chip_id.chip_setup.chip_test_type == 'control':
+                    initial_data.setdefault(assay, {}).setdefault(unit, {}).setdefault('Control', {}).setdefault(field, {}).setdefault(time, []).append(value)
 
              # Set data in nested monstrosity that is initial_data
             initial_data.setdefault(assay, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(field, {}).setdefault(time, []).append(value)
@@ -422,7 +435,8 @@ def fetch_readouts(request):
                     for time, values in time_values.items():
                         if percent_control and tag == 'Control':
                             controls.update({(assay, unit, field, time): sum(values) / float(len(values))})
-                        else:
+                        # Add to averaged data if this isn't a average control value for device-by-device
+                        if not (tag == 'Control' and key != 'compound'):
                             averaged_data.setdefault(assay, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(field, {}).update({
                                 time: sum(values) / float(len(values))
                             })

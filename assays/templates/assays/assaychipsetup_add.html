@@ -14,7 +14,7 @@
         <a href="/assays/{{ form.instance.assay_run_id.id }}">{{ form.instance.assay_run_id }}</a>
     </li>
     <li class="active">
-        {% if object %}
+        {% if object and not form.success.value %}
             Edit <em>{{ object }}</em>
         {% else %}
             Add Chip Setup
@@ -26,10 +26,16 @@
 {% if update %}
     <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
-    {% include 'review.html' %}
-
     <h1>
         Edit <em>{{ object }}</em>
+
+        {% if object.assaychipreadout_set.all %}
+            <a href="{% url 'readout_update' object.assaychipreadout_set.all.0.id %}" class="btn btn-primary">View/Edit Chip Readout</a>
+
+            {% if object.assaychipreadout_set.all.0.assaychiptestresult_set.all %}
+                <a href="{% url 'result_update' object.assaychipreadout_set.all.0.assaychiptestresult_set.all.0.id %}" class="btn btn-primary">View/Edit Chip Test Results</a>
+            {% endif %}
+        {% endif %}
 {% else %}
     <form class="form-horizontal" method="post" >
 
@@ -40,7 +46,7 @@
     {% csrf_token %}
     </h1>
 
-    {% include "submit.html" with flag="y" clone="y" %}
+    {% include "submit.html" with flag="y" clone="y" group=form.instance.assay_run_id.group.name %}
 
     {% include 'errors.html' %}
 

@@ -12,277 +12,6 @@ $(document).ready(function () {
     $('#id_layout_name').attr('required', true);
     device.attr('required', true);
 
-    // Get layout
-    function get_device_layout() {
-        var device_id = device.val();
-        if (device_id) {
-            $.ajax({
-                url: "/assays_ajax/",
-                type: "POST",
-                dataType: "json",
-                data: {
-                    // Function to call within the view is defined by `call:`
-                    call: 'fetch_layout_format_labels',
-
-                    // First token is the var name within views.py
-                    // Second token is the var name in this JS file
-                    id: device_id,
-
-                    model: 'device',
-
-                    // Always pass the CSRF middleware token with every AJAX call
-                    csrfmiddlewaretoken: middleware_token
-                },
-                success: function (json) {
-                    var row_labels = json.row_labels;
-                    var column_labels = json.column_labels;
-                    if (row_labels && column_labels) {
-                        build_table(row_labels, column_labels);
-                    }
-                    else {
-                        alert('This device is not configured correctly');
-                    }
-                },
-                error: function (xhr, errmsg, err) {
-                    console.log(xhr.status + ": " + xhr.responseText);
-                }
-            });
-        }
-        else {
-            // Remove when invalid/nonextant layout chosen
-            $('#layout_table').remove();
-            // Show the help
-            $('#help').attr('hidden', false);
-        }
-    }
-
-    // Build table
-    function build_table(row_labels, column_labels) {
-        // Remove old
-        $('#layout_table').remove();
-
-        // Show buttons for changing text size
-        $('#change_text_size').attr('hidden', false);
-
-        // Hide the help
-        $('#help').attr('hidden', true);
-
-        // Choice of inserting after fieldset is contrived; for admin
-        var table = $('<table>')
-            .css('width','100%')
-            .addClass('layout-table')
-            .attr('id','layout_table').insertAfter($('fieldset')[0]);
-
-        // make first row
-        var row = $('<tr>');
-        row.append($('<th>'));
-        $.each(column_labels, function (index, value) {
-            row.append($('<th>')
-                .text(value));
-        });
-        table.append(row);
-
-        // make rest of the rows
-        $.each(row_labels, function (row_index, row_value) {
-            var row = $('<tr>');
-            row.append($('<th>')
-                .text(row_value));
-            // Note that the "lists" are added here
-            $.each(column_labels, function (column_index, column_value) {
-                row.append($('<td>')
-                    .attr('id', row_value + '_' + column_value)
-                    .append($('<div>')
-                        .css('text-align','center')
-                        .css('font-weight', 'bold')
-                        .attr('id',row_value + '_' + column_value + '_type'))
-                    .append($('<ul>')
-                        .attr('id',row_value + '_' + column_value + '_list')
-                        .addClass('layout-list')));
-            });
-            table.append(row);
-        });
-
-        // make selectable
-        if (!$('#id_locked').prop('checked')) {
-            $('#layout_table').selectable({
-                filter: "td",
-                distance: 1,
-                stop: layout_add_content
-            });
-        }
-    }
-
-    function get_layout_data(layout_id, clone) {
-        clone = clone || false;
-
-        $.ajax({
-            url: "/assays_ajax/",
-            type: "POST",
-            dataType: "json",
-            data: {
-                // Function to call within the view is defined by `call:`
-                call: 'fetch_assay_layout_content',
-
-                // First token is the var name within views.py
-                // Second token is the var name in this JS file
-                id: layout_id,
-
-                model: 'assay_layout',
-
-                // Always pass the CSRF middleware token with every AJAX call
-                csrfmiddlewaretoken: middleware_token
-            },
-            success: function (json) {
-                fill_layout(json, clone);
-            },
-            error: function (xhr, errmsg, err) {
-                console.log(xhr.status + ": " + xhr.responseText);
-            }
-        });
-    }
-
-    var time_conversions = [
-        1,
-        60,
-        1440,
-        10080
-    ];
-
-    var time_units = [
-        'min',
-        'hour',
-        'days',
-        'weeks'
-    ];
-
-    function get_best_time_index(value) {
-        var index = 0;
-        while (time_conversions[index+1]
-            && time_conversions[index+1] <= value
-            && (value % time_conversions[index+1] == 0
-                || value % time_conversions[index] != 0
-                || (value > 1440 && index != 2))) {
-            index += 1;
-        }
-        return index;
-    }
-
-    // This function differs from the other "fill_layout" functions because the data needs to be editable
-    function fill_layout(layout_data, clone) {
-        $.each(layout_data, function(well, data) {
-            var list = $('#' + well + '_list');
-
-            var stamp =  '';
-            var text = '';
-            var li = '';
-
-            // Set type
-
-            stamp = well + '_type';
-
-            $('#' + stamp)
-                .text(data.type)
-                .append($('<input>')
-                    .attr('type', 'hidden')
-                    .attr('name', stamp)
-                    .attr('id', stamp)
-                    .attr('value', data.type_id));
-
-            if (data.color) {
-                $('#' + well).css('background-color', data.color);
-            }
-
-
-            // Only add times, compounds, and labels if this is not a clone
-            if (!clone) {
-
-                // Set time
-                stamp = well + '_time';
-                // Only display text if timepoint or compounds (timepoint of zero acceptable)
-                if (data.timepoint !== undefined) {
-                    // Get best units and convert
-                    var best_index = get_best_time_index(data.timepoint);
-                    var best_unit = time_units[best_index];
-                    var converted_time = data.timepoint / time_conversions[best_index];
-
-                    // Display time with best value
-                    text = 'Time: ' + converted_time + ' ' + best_unit;
-
-                    // Be sure to add event when necessary
-                    li = $('<li>')
-                        .attr('id', stamp)
-                        .text(text)
-                        .click(function () {
-                            if(confirm('Are you sure you want to remove this time point?\n' + $(this).text())) {
-                                $(this).remove();
-                            }
-                        })
-                        .append($('<input>')
-                            .attr('type', 'hidden')
-                            .attr('name', stamp)
-                            .attr('value', data.timepoint));
-
-                    list.prepend(li);
-                }
-
-                // Set compounds
-                if (data.compounds) {
-                    $.each(data.compounds, function (index, compound) {
-
-                        // BE CERTAIN THAT STAMPS DO NOT COLLIDE
-                        stamp = well + '_' + index;
-
-                        text = compound.name + ' (' + compound.concentration +
-                            ' ' + compound.concentration_unit + ')';
-
-                        li = $('<li>')
-                            .text(text)
-                            .attr('compound', compound.id)
-                            .click(function () {
-                                if(confirm('Are you sure you want to remove this compound?\n' + $(this).text())) {
-                                    $(this).remove();
-                                }
-                            });
-
-                        var info = '{"well":"' + well + '"' +
-                            ',"compound":"' + compound.id + '","concentration":"' +
-                            compound.concentration + '","concentration_unit":"' +
-                            compound.concentration_unit_id + '"}';
-
-                        li.append($('<input>')
-                            .attr('type', 'hidden')
-                            .attr('name', 'well_' + stamp)
-                            .attr('value', info));
-
-                        list.append(li);
-                    });
-                }
-
-                // Set label
-                stamp = well + '_label';
-                if (data.label) {
-                    // Be sure to add event when necessary
-                    li = $('<li>')
-                        .attr('id', stamp)
-                        .text(data.label)
-                        .click(function () {
-                            // Confirm the user wants to remove first
-                            if(confirm('Are you sure you want to remove this label?\n' + $(this).text())) {
-                                $(this).remove();
-                            }
-                        })
-                        .append($('<input>')
-                            .attr('type', 'hidden')
-                            .attr('name', stamp)
-                            .attr('value', data.label));
-
-                    list.append(li);
-                }
-
-            }
-        });
-    }
-
     function get_well_type_selector() {
         $.ajax({
             url: "/assays_ajax/",
@@ -417,8 +146,7 @@ $(document).ready(function () {
     }
 
     // Perform an action on the table
-    function layout_add_content() {
-
+    window.LAYOUT.layout_add_content = function() {
         var act = $('#id_action').val();
         // using time to create a unique ID for a cell content
         var date = new Date();
@@ -483,7 +211,6 @@ $(document).ready(function () {
 
         // TODO NEEDS REFACTOR
         else if (act === 'compound') {
-
             var compound_id = $('#id_compound').val();
 
             var how_to_increment = $('#id_howtoincr:checked').val();
@@ -645,7 +372,6 @@ $(document).ready(function () {
 
         // TODO needs refactor
         else if (act === 'timepoint') {
-
             // Legacy code: apparently with the intention of converting to minutes
             var tpunit = parseFloat($('#id_timeunit').val());
             var tptext = $('#id_timeunit option:selected').text();
@@ -809,7 +535,7 @@ $(document).ready(function () {
         else {
             alert('Select action.');
         }
-    }
+    };
 
     function clone_base_layout(layout_id, base_only) {
         $.ajax({
@@ -835,12 +561,16 @@ $(document).ready(function () {
                 var id = json.id;
                 device.val(id);
                 if (row_labels && column_labels) {
-                    $.when(build_table(row_labels, column_labels)).done(function() {
-                        get_layout_data(layout_id, base_only);
-                    });
+                    // Build the table after setting attributes
+                    window.LAYOUT.models['assay_layout'] = layout_id;
+                    window.LAYOUT.base_only = base_only;
+                    window.LAYOUT.is_input = true;
+                    window.LAYOUT.row_labels = row_labels;
+                    window.LAYOUT.column_labels = column_labels;
+                    window.LAYOUT.build_table();
                 }
                 else {
-                    alert('This device is not configured correctly');
+                    alert('This device is not configured correctly.');
                 }
             },
             error: function (xhr, errmsg, err) {
@@ -849,11 +579,9 @@ $(document).ready(function () {
         });
     }
 
-    // Fill table with values of preexisting assay layout
-
     // On device change, acquire labels and build table
-    device.change( function() {
-        get_device_layout();
+    device.change(function() {
+        window.LAYOUT.get_device_layout(device.val(), 'device', true);
     });
 
     // Add options if admin
@@ -862,24 +590,6 @@ $(document).ready(function () {
     }
     else {
         get_well_type_selector();
-    }
-
-    // If a device is initially chosen
-    // (implies the layout is saved)
-    if (device.val()) {
-        get_device_layout();
-
-        // gets the id of existing layout object from the delete link
-        var delete_link = $('.deletelink');
-        var layout_id = undefined;
-        if (delete_link.length > 0) {
-            layout_id = delete_link.first().attr('href').split('/')[4];
-            get_layout_data(layout_id);
-        }
-        else {
-            layout_id = Math.floor(window.location.href.split('/')[5]);
-            get_layout_data(layout_id);
-        }
     }
 
     // When the action changes, hide unrelated and show related class
@@ -898,9 +608,28 @@ $(document).ready(function () {
         var clone_id = get_parameters[1];
         clone_base_layout(clone_id, base_only);
     }
-    // No action taken if nothing to clone
+    // If nothing to clone
     catch (e) {
+        // Fill table with values of preexisting assay layout
+        // If a device is initially chosen
+        // (implies the layout is saved)
+        if (device.val()) {
+            // gets the id of existing layout object from the delete link
+            var delete_link = $('.deletelink');
+            var layout_id = undefined;
+            if (delete_link.length > 0) {
+                layout_id = delete_link.first().attr('href').split('/')[4];
+                window.LAYOUT.models['assay_layout'] = layout_id
+            }
+            else {
+                layout_id = Math.floor(window.location.href.split('/')[5]);
+                window.LAYOUT.models['assay_layout'] = layout_id
+            }
 
+            // Make sure all data is acquired
+            window.LAYOUT.base_only = false;
+
+            window.LAYOUT.get_device_layout(device.val(), 'device', true);
+        }
     }
-
 });

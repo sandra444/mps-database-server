@@ -48,7 +48,7 @@ class OneGroupRequiredMixin(object):
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
-        if len(self.request.user.groups.values_list('pk', flat=True)) == 0:
+        if self.request.user.groups.all().count() == 0:
             return PermissionDenied(self.request, 'You must be a member of at least one group')
         return super(OneGroupRequiredMixin, self).dispatch(*args, **kwargs)
 
@@ -59,55 +59,92 @@ class ObjectGroupRequiredMixin(object):
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
         self.object = self.get_object()
-        if not has_group(self.request.user, self.object.group):
+        if not has_group(self.request.user, self.object.group.name):
             return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
         return super(ObjectGroupRequiredMixin, self).dispatch(*args, **kwargs)
 
 
-
 class StudyGroupRequiredMixin(object):
-    """This mixin requires the user to have the group matching the study's group"""
+    """This mixin requires the user to have the group matching the study's group
+
+    Attributes:
+    cloning_permitted - Specifies whether cloning is permitted
+    """
+    # Default value for whether or not cloning is permitted
+    cloning_permitted = False
+
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        if not has_group(self.request.user, study.group):
+        if not has_group(self.request.user, study.group.name):
             return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
+
+        if self.cloning_permitted and self.request.GET.get('clone', ''):
+            clone = get_object_or_404(self.model, pk=self.request.GET.get('clone', ''))
+            if not has_group(self.request.user, clone.group.name):
+                return PermissionDenied(
+                    self.request,
+                    'You must be a member of the group ' + str(clone.group) + ' to clone this'
+                )
+
         return super(StudyGroupRequiredMixin, self).dispatch(*args, **kwargs)
 
+
+class ViewershipMixin(object):
+    """This mixin checks if the user has the group neccessary to at least view the entry"""
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+        # If the object is not restricted and the user is NOT a listed viewer, deny permission
+        if self.object.restricted and not is_group_viewer(self.request.user, self.object.group.name):
+            return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
+        # Otherwise return the detail view
+        return super(ViewershipMixin, self).dispatch(*args, **kwargs)
 
 # WIP
 class DetailRedirectMixin(object):
     """This mixin checks if the user has the object's group, if so it redirects to the edit page
 
     If the user does not have the correct group, it redirects to the details page
+
+    Attributes:
+    update_redirect_url - where to redirect it update is possible
     """
+    # Default value for url to redirect to
+    update_redirect_url = 'update/'
+
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
         self.object = self.get_object()
         # If user CAN edit the item, redirect to the respective edit page
-        if has_group(self.request.user, self.object.group):
-            return redirect('update/')
-        elif self.object.restricted:
+        if has_group(self.request.user, self.object.group.name):
+            # Redirects either to url + update or the specified url + object ID (as an attribute)
+            # This is a little tricky if you don't look for {} in update_redirect_url
+            return redirect(self.update_redirect_url.format(self.object.id))
+        # If the object is not restricted and the user is NOT a listed viewer
+        elif self.object.restricted and not is_group_viewer(self.request.user, self.object.group.name):
             return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
+        # Otherwise return the detail view
         return super(DetailRedirectMixin, self).dispatch(*args, **kwargs)
 
 
-# Require user to be creator
-class CreatorRequiredMixin(object):
+# Require user to be the creator or a group admin
+class CreatorOrAdminRequiredMixin(object):
     """This mixin requires the user to be the creator of the object"""
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
+    # Deny access if not the CREATOR
+    # Note the call for request.user.is_authenticated
+    # Interestingly, Django wraps request.user until it is accessed
+    # Thus, to perform this comparison it is necessary to access request.user via authentication
     def dispatch(self, *args, **kwargs):
         self.object = self.get_object()
-        # Deny access if not the CREATOR
-        # Note the call for request.user.is_authenticated
-        # Interestingly, Django wraps request.user until it is accessed
-        # Thus, to perform this comparison it is necessary to access request.user via authentication
-        if not self.request.user.is_authenticated() or self.request.user != self.object.created_by:
+        if not self.request.user.is_authenticated() or (self.request.user != self.object.created_by and not is_group_admin(self.request.user, self.object.group.name)):
             return PermissionDenied(self.request, 'You can only delete entries that you have created')
-        return super(CreatorRequiredMixin, self).dispatch(*args, **kwargs)
+        return super(CreatorOrAdminRequiredMixin, self).dispatch(*args, **kwargs)
 
 
 # Require the specified group or fail
@@ -119,12 +156,10 @@ class SpecificGroupRequiredMixin(object):
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
-        group = Group.objects.get(name=self.required_group_name)
-        if has_group(self.request.user, group):
+        if has_group(self.request.user, self.required_group_name):
             return super(SpecificGroupRequiredMixin, self).dispatch(*args, **kwargs)
         else:
             return PermissionDenied(
                 self.request,
-                'You do not have permission to view this page <br>'
                 'Contact an administrator if you would like to gain permission'
             )

@@ -1,44 +1,25 @@
 from django.views.generic import DetailView, CreateView, UpdateView, ListView
-from django.shortcuts import redirect, render_to_response
-from django.template import RequestContext
+from django.shortcuts import redirect
 from django import forms
 from django.forms.models import inlineformset_factory
 from .forms import MicrodeviceForm, OrganModelForm, OrganModelProtocolInlineFormset
 from .models import Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
-from mps.mixins import SpecificGroupRequiredMixin
-
-# class MicrodeviceList(ListView):
-#     model = Microdevice
-#     template_name = 'microdevices/microdevice_list.html'
-
-
-# Convert to class?
-def microdevice_list(request):
-    """Displays a list of Devices AND Models"""
-    c = RequestContext(request)
-
-    organ_models = OrganModel.objects.prefetch_related('organ', 'center', 'device').all()
-    devices = Microdevice.objects.prefetch_related('organ', 'center', 'manufacturer').all()
-
-    c.update({
-        'models': organ_models,
-        'devices': devices,
-    })
-
-    return render_to_response('microdevices/microdevice_list.html', c)
-
+from mps.mixins import SpecificGroupRequiredMixin, PermissionDenied, user_is_active
+from mps.base.models import save_forms_with_tracking
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.utils.decorators import method_decorator
 
 class OrganModelList(ListView):
-    """Displays """
-    template_name = ''
+    """Displays list of Organ Models"""
+    template_name = 'microdevices/organmodel_list.html'
 
     def get_queryset(self):
         return OrganModel.objects.prefetch_related('organ', 'center', 'device').all()
 
 
 class MicrodeviceList(ListView):
-    """Displays """
-    template_name = ''
+    """Displays list of Microdevices"""
+    template_name = 'microdevices/microdevice_list.html'
 
     def get_queryset(self):
         return Microdevice.objects.prefetch_related('organ', 'center', 'manufacturer').all()
@@ -69,22 +50,6 @@ class OrganModelDetail(DetailView):
         return context
 
 
-# def organ_model_detail(request, *args, **kwargs):
-#     c = RequestContext(request)
-#
-#     model = get_object_or_404(OrganModel, pk=kwargs.get('pk'))
-#     assays = ValidatedAssay.objects.filter(organ_model=model).prefetch_related('assay', 'assay__assay_type')
-#     protocols = OrganModelProtocol.objects.filter(organ_model=model).order_by('-version')
-#
-#     c.update({
-#         'model': model,
-#         'assays': assays,
-#         'protocols': protocols,
-#     })
-#
-#     return render_to_response('microdevices/organmodel_detail.html', c)
-
-
 class MicrodeviceDetail(DetailView):
     """Displays details for a Device"""
     model = Microdevice
@@ -97,13 +62,11 @@ class MicrodeviceAdd(SpecificGroupRequiredMixin, CreateView):
     template_name = 'microdevices/microdevice_add.html'
     form_class = MicrodeviceForm
 
-    required_group_name = 'Change Microdevices Front'
+    required_group_name = 'Add Microdevices Front'
 
     def form_valid(self, form):
         if form.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
-            self.object.save()
+            save_forms_with_tracking(self, form, formset=False, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -124,9 +87,7 @@ class MicrodeviceUpdate(SpecificGroupRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         if form.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            self.object.save()
+            save_forms_with_tracking(self, form, formset=False, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -149,7 +110,7 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
     template_name = 'microdevices/organmodel_add.html'
     form_class = OrganModelForm
 
-    required_group_name = 'Change Microdevices Front'
+    required_group_name = 'Add Microdevices Front'
 
     def get_context_data(self, **kwargs):
         context = super(OrganModelAdd, self).get_context_data(**kwargs)
@@ -168,22 +129,33 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
             instance=form.instance
         )
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class OrganModelUpdate(SpecificGroupRequiredMixin, UpdateView):
+# PLEASE NOTE THAT ORGAN MODEL DOES NOT USE A PERMISSION MIXIN
+class OrganModelUpdate(UpdateView):
     """Allows Organ Models to be updated"""
     model = OrganModel
     template_name = 'microdevices/organmodel_add.html'
     form_class = OrganModelForm
 
-    required_group_name = 'Change Microdevices Front'
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        """Special dispatch for Organ Model
+
+        Rejects users with no groups and then rejects users without groups matching the center
+        (if there is a center listed)
+        """
+        self.object = self.get_object()
+        if self.request.user.groups.all().count() == 0 or self.object.center and not any(
+            i in self.object.center.groups.all() for i in self.request.user.groups.all()
+        ):
+            return PermissionDenied(self.request, 'You must be a member of the center ' + str(self.object.center))
+        return super(OrganModelUpdate, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(OrganModelUpdate, self).get_context_data(**kwargs)
@@ -208,10 +180,7 @@ class OrganModelUpdate(SpecificGroupRequiredMixin, UpdateView):
             instance=form.instance
         )
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))

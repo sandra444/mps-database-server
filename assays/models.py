@@ -4,7 +4,9 @@ from django.db import models
 from microdevices.models import Microdevice, OrganModel, OrganModelProtocol
 from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
 
-# DEPRECATED, REMOVE SOON
+# TODO MAKE MODEL AND FIELD NAMES MORE CONSISTENT/COHERENT
+
+# TODO DEPRECATED, REMOVE SOON
 PHYSICAL_UNIT_TYPES = (
     (u'V', u'Volume'),
     (u'C', u'Concentration'),
@@ -525,7 +527,7 @@ class StudyModel(models.Model):
     integration_mode = models.CharField(max_length=13, default='1', choices=(('0', 'Functional'), ('1', 'Physical')))
 
 
-class AssayRun(RestrictedModel):
+class AssayRun(FlaggableModel):
     """The encapsulation of all data concerning some plate/chip project"""
 
     class Meta(object):

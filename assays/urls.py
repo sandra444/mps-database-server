@@ -14,6 +14,8 @@ urlpatterns = patterns('',
     url(r'^assays/(?P<pk>[0-9]+)/delete/$', AssayRunDelete.as_view(), name='study-delete'),
     # Summary view for studies
     url(r'^assays/(?P<pk>[0-9]+)/summary/$', AssayRunSummary.as_view(), name='study-summary'),
+    # All data for a study
+    url(r'^assays/(?P<pk>[0-9]+)/data/$', ReturnStudyData.as_view(), name='study-data'),
     # Bulk Readout Upload for Studies
     url(r'^assays/(?P<pk>[0-9]+)/bulk/$', ReadoutBulkUpload.as_view(), name='readout-bulk-upload'),
     # # Change pages for respective models
@@ -54,7 +56,7 @@ urlpatterns = patterns('',
 
     url(r'^assays/study/$', AssayRunList.as_view(), name='study_list'),
     url(r'^assays/study/add/$', AssayRunAdd.as_view(), name='study_add'),
-    url(r'^assays/study/(?P<pk>[0-9]+)/$', AssayRunDetail.as_view(), name='study_detail'),
+    # url(r'^assays/study/(?P<pk>[0-9]+)/$', AssayRunDetail.as_view(), name='study_detail'),
 
     url(r'^assays/assaychipsetup/$', AssayChipSetupList.as_view(), name='setup_list'),
     #url(r'^assays/assaychipsetup/add$', AssayChipSetupAdd.as_view()),

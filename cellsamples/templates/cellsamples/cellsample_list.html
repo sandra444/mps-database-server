@@ -39,7 +39,7 @@
 
             <tbody>
             {% for cellsample in object_list %}
-                <tr class="cellsample" id={{ cellsample.id }} name={{ cellsample }}>
+                <tr class="cellsample" id={{ cellsample.id }}>
                     <td><a class="btn btn-primary" href="{{ cellsample.id }}">View/Edit</a></td>
                     {# May seem odd, but including the id can help demystify the ID that appears in add interface #}
                     <td>{{ cellsample.id }}</td>
@@ -66,7 +66,7 @@
                     <td>{{ cellsample.group }}</td>
                     <td>
                         {% if cellsample.signed_off_by %}
-                            <span title="This entry was reviewed by {{ cellsample.signed_off_by }} on {{ cellsample.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ cellsample.signed_off_by }} on {{ cellsample.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if cellsample.flagged %}
                             <span title="This entry is flagged for review: '{{ cellsample.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>

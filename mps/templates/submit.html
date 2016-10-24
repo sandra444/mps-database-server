@@ -1,6 +1,24 @@
 {# Consolidated submit row #}
+{# Parameters passed via with: group -- group needed for sign off, creator -- user needed for sign off #}
+{% load custom_filters %}
+
 <nav id="floating-submit-row" class="footer navbar-fixed-bottom hidden-print floating-submit-row">
     <div class="container large-padding-top">
+        {# TODO REFACTOR #}
+        {# Creator is passed using with to differentiate entries that use user vs. group for sign off qualification #}
+        {# If entry is reviewed, just show an indication showing that it has been reviewed #}
+        {% if update and group and object.signed_off_by and not user|is_group_admin:group or update and creator and object.signed_off_by and not user.id == creator %}
+            <div class="alert alert-success" role="alert">
+                <a class="btn btn-warning" onclick="if(document.referrer.indexOf(window.location.host) !== -1){window.history.back()}else{window.location.href='/'};setTimeout(function(){window.location.href='/';},500);">
+                    <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+                        Go Back
+                </a>
+                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                <span class="sr-only">Success:</span>
+                This entry was reviewed by <b>{{ object.signed_off_by.first_name }} {{ object.signed_off_by.last_name }}</b> on <b>{{ object.signed_off_date }}</b>
+            </div>
+        {# Only show options if this entry is not locked due to being reviewed #}
+        {% else %}
         {% if clone %}
             <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
         {% else %}
@@ -51,6 +69,28 @@
             </div>
         {% endif %}
 
+        <div hidden>
+            {{ form.signed_off }}
+        </div>
+
+        {# TODO REFACTOR #}
+        {# Check to see if the user has the 'review' group #}
+        {# Alternatively, some entries check to see if the user is the creator instead #}
+        {# Perhaps the logic should be removed from here and added to JS? #}
+        {% if update and group and user|is_group_admin:group or update and creator and user.id == creator %}
+            {% if object.signed_off_by %}
+            <a role='button' id="mark_reviewed" class="btn btn-sm btn-success" title="Mark entry as reviewed"
+            onclick="$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');">
+                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            </a>
+            {% else %}
+            <a role='button' id="mark_reviewed" class="btn btn-sm" title="Mark entry as reviewed"
+            onclick="$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');">
+                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            </a>
+            {% endif %}
+        {% endif %}
+
         {# TODO THIS WAY OF HANDLING HELP HAS BEEN DEPRECATED #}
 {#        {% if help %}#}
 {#            <a role="button" class="btn btn-default" id="help_button">#}
@@ -65,6 +105,6 @@
                 name="reason_for_flag" type="text" style="display: none;" value="{{ form.reason_for_flag.value|default:'' }}">
             </div>
         </div>
-
+        {% endif %}
     </div>
 </nav>

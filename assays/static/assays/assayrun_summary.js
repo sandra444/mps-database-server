@@ -3,7 +3,7 @@ $(document).ready(function() {
     var middleware_token = getCookie('csrftoken');
     var study_id = Math.floor(window.location.href.split('/')[4]);
 
-    var current_key = 'chip'
+    var current_key = 'chip';
     var percent_control = false;
 
     var radio_buttons_display = $('#radio_buttons');
@@ -92,22 +92,25 @@ $(document).ready(function() {
                 charts.append(previous
                     .append($('<div>')
                         .attr('id', 'chart_' + assay_id)
-                        .addClass('col-sm-12 col-md-6 no-padding chart-container')
+                        .addClass('col-sm-12 col-md-6 chart-container')
                     )
                 );
             }
             else {
                 previous.append($('<div>')
                     .attr('id', 'chart_' + assay_id)
-                    .addClass('col-sm-12 col-md-6 no-padding chart-container')
+                    .addClass('col-sm-12 col-md-6 chart-container')
                 );
                 previous = null;
             }
         }
+
+        var bar_chart_list = [];
+
         for (index in sorted_assays) {
             var assay = sorted_assays[index];
-
             var current_assay_id = assay_to_id[assay];
+            var add_to_bar_charts = true;
 
             var current_chart = c3.generate({
                 bindto: '#chart_' + current_assay_id,
@@ -167,6 +170,11 @@ $(document).ready(function() {
                 var current_key = sorted_keys[i];
                 var current_data = assays[assay][current_key];
 
+                // Add to bar charts if no time scale exceeds 3 points
+                if (add_to_bar_charts && current_data.time.length > 3) {
+                    add_to_bar_charts = false;
+                }
+
                 xs[current_key] = 'x' + num;
 
                 current_data.time.unshift('x' + num);
@@ -185,6 +193,16 @@ $(document).ready(function() {
             }
             // Callously triggering resizes can solve problems... but cause others
             // $(window).trigger('resize');
+
+            // Add to bar charts if no time scale exceeds 3 points
+            if (add_to_bar_charts) {
+                bar_chart_list.push(current_chart);
+            }
+        }
+
+        // Make bar charts
+        for (var chart_index in bar_chart_list) {
+            bar_chart_list[chart_index].transform('bar');
         }
     }
 

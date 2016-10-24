@@ -3,6 +3,8 @@
 """Base Models"""
 
 from django.db import models
+from django.utils import timezone
+from django.shortcuts import redirect, get_object_or_404
 
 
 class TrackableModel(models.Model):
@@ -49,8 +51,7 @@ class LockableModel(TrackableModel):
     """The base model for Lockable models"""
 
     locked = models.BooleanField(default=False,
-                                 help_text=
-                                 'Check the box and save to lock the entry. '
+                                 help_text='Check the box and save to lock the entry. '
                                  'Uncheck and save to enable editing.')
 
     class Meta(object):
@@ -62,12 +63,10 @@ class RestrictedModel(LockableModel):
 
     # It is mandatory to bind a group to a restricted model
     group = models.ForeignKey('auth.Group',
-                              help_text=
-                              'Bind to a group')
+                              help_text='Bind to a group')
 
     restricted = models.BooleanField(default=True,
-                                     help_text=
-                                     'Check box to restrict to selected group')
+                                     help_text='Check box to restrict to selected group')
 
     class Meta(object):
         abstract = True
@@ -84,3 +83,37 @@ class FlaggableModel(RestrictedModel):
 
     class Meta(object):
         abstract = True
+
+
+def save_forms_with_tracking(self, form, formset=None, update=False):
+    """Save tracking data
+
+    Params:
+    self -- the view in question (passed as self)
+    form -- the form for the view
+    formset -- the formset for the view
+    update -- whether this is an update to an existing instance
+    """
+    data = form.cleaned_data
+
+    # TODO SUBJECT TO REVISION
+    # Only update review if the entry has not already been reviewed
+    if not form.instance.signed_off_by and data.get('signed_off', ''):
+        form.instance.signed_off_by = self.request.user
+        form.instance.signed_off_date = timezone.now()
+    # Remove sign off if necessary
+    elif form.instance.signed_off_by and not data.get('signed_off', 'NOT_IN_FORM'):
+        form.instance.signed_off_by = None
+        form.instance.signed_off_date = None
+
+    self.object = form.save()
+    # If Update
+    if update:
+        self.object.modified_by = self.request.user
+    # Else if Add
+    else:
+        self.object.modified_by = self.object.created_by = self.request.user
+    # Save Study
+    self.object.save()
+    if formset:
+        formset.save()

@@ -2,29 +2,32 @@ from django import forms
 from django.forms.models import BaseInlineFormSet
 from .models import *
 from assays.models import AssayChipSetup
+from mps.forms import SignOffMixin
 
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
 
 
-class MicrodeviceForm(forms.ModelForm):
+class MicrodeviceForm(SignOffMixin, forms.ModelForm):
     """Form for Microdevices"""
     class Meta(object):
         model = Microdevice
         exclude = tracking
 
         widgets = {
+            'device_name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
 
 
-class OrganModelForm(forms.ModelForm):
+class OrganModelForm(SignOffMixin, forms.ModelForm):
     """Form for Organ Models"""
     class Meta(object):
         model = OrganModel
         exclude = tracking
 
         widgets = {
+            'model_name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
 

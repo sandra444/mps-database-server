@@ -21,7 +21,6 @@
             <thead>
                 <tr>
                     <th>View/Edit</th>
-                    <th>Plate Readout ID</th>
                     <th>Study</th>
                     <th>Plate Setup</th>
                     <th>Assays</th>
@@ -37,7 +36,6 @@
             {% for readout in object_list %}
                 <tr class="readout" id={{ readout.id }} name={{ readout.id }}>
                     <td><a class="btn btn-primary" href="{{ readout.id }}">View/Edit</a></td>
-                    <td>{{ readout.id }}</td>
                     <td><a href="/assays/{{ readout.setup.assay_run_id.id }}">{{ readout.setup.assay_run_id }}</a></td>
                     <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}">{{ readout.setup }}</a></td>
                     <td>
@@ -58,7 +56,7 @@
                     <td>{{ readout.group }}</td>
                     <td>
                         {% if readout.signed_off_by %}
-                            <span title="This entry was reviewed by {{ readout.signed_off_by }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ readout.signed_off_by }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if readout.flagged %}
                             <span title="This entry is flagged for review: '{{ readout.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>

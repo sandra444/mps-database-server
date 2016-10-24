@@ -32,13 +32,14 @@
                     <th>Description</th>
                     <th>Creator</th>
                     <th>Group</th>
+                    <th>Review</th>
                 </tr>
             </thead>
 
             <tbody>
             {% for study in object_list %}
                 <tr class="compound" id={{ study.id }} name={{ study.id }}>
-                    <td><a class="btn btn-primary" href="{{ study.id }}">View/Edit</a></td>
+                    <td><a class="btn btn-primary" href="/assays/{{ study.id }}">View/Edit</a></td>
                     <td>{{ study.assay_run_id }}</td>
                     <td>{{ study.study_types }}</td>
                     <td>{{ study.study_configuration }}</td>
@@ -49,6 +50,14 @@
                         {{ study.created_by.last_name }}
                     </td>
                     <td>{{ study.group }}</td>
+                    <td>
+                        {% if study.signed_off_by %}
+                            <span title="This entry was reviewed by {{ study.signed_off_by }} on {{ study.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if study.flagged %}
+                            <span title="This entry is flagged for review: '{{ study.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>

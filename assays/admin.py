@@ -458,7 +458,6 @@ def save_assay_layout(request, obj, form, change):
     The data to make an assay layout is passed using a custom form.
     Please note that this function uses raw queries.
     """
-
     # Connect to the database
     cursor = connection.cursor()
 
@@ -500,14 +499,7 @@ def save_assay_layout(request, obj, form, change):
         # Delete old labels for this assay
         AssayWellLabel.objects.filter(assay_layout=layout).delete()
 
-        obj.modified_by = request.user
-
-    else:
-        obj.modified_by = obj.created_by = request.user
-
-    # Save the layout model itself (wells are saved in the following portion)
-    obj.save()
-
+    # Wells are saved in the following portion
     for key, val in form.data.iteritems():
         # Time points
         if key.endswith('_time'):
@@ -588,7 +580,7 @@ class AssayLayoutAdmin(LockableAdmin):
     """Admin for Assay Layouts (not currently functional)"""
 
     class Media(object):
-        js = ('assays/assaylayout_add.js',)
+        js = ('assays/plate_display.js', 'assays/assaylayout_add.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
     save_as = True
@@ -1181,7 +1173,14 @@ def modify_qc_status_chip(current_chip_readout, form):
     """Update the QC for a chip"""
     # Get the readouts as they would appear on the front end
     # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
-    readouts = AssayChipRawData.objects.filter(assay_chip_id=current_chip_readout).order_by('assay_id', 'elapsed_time')
+    readouts = AssayChipRawData.objects.prefetch_related(
+        'assay_id__assay_id'
+    ).filter(
+        assay_chip_id=current_chip_readout
+    ).order_by(
+        'assay_id__assay_id__assay_short_name',
+        'elapsed_time'
+    )
 
     # Get QC status for each line
     qc_status = get_qc_status_chip(form)
@@ -1808,6 +1807,7 @@ class AssayPlateTestResultAdmin(LockableAdmin):
             'js/cookies.js',
             'js/whittle.js',
             'js/inline_fix.js',
+            'js/csv_functions.js',
             'assays/plate_display.js',
             'assays/assayplatetestresult_add.js'
         )
@@ -1817,7 +1817,6 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 
     save_as = True
     save_on_top = True
-    # raw_id_fields = ('readout',)
     list_per_page = 300
     list_display = (
         'readout',

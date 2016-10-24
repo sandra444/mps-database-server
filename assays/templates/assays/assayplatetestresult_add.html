@@ -32,10 +32,11 @@
     {% if update %}
         <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" class="form-horizontal" method="post">
 
-        {% include 'review.html' %}
-
         <h1>
             Edit Test Results for <em>{{ object.readout.setup }}</em>
+
+        <a href="{% url 'plate_setup_update' object.readout.setup.id %}" class="btn btn-primary">View/Edit Plate Setup</a>
+        <a href="{% url 'plate_readout_update' object.readout.id %}" class="btn btn-primary">View/Edit Plate Readout</a>
     {% else %}
         <form class="form-horizontal" method="post" >
 
@@ -45,16 +46,9 @@
         <br>
         {% csrf_token %}
 
-{#            <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
-{##}
-{#            {% if update %}#}
-{#                <a role="button" class="btn btn-danger pull-right readjust-pulled" href="/assays/assayplatetestresult/{{ object.id }}/delete/">Delete</a>#}
-{#            {% endif %}#}
-{##}
-{#            {% include 'flag.html'%}#}
         </h1>
 
-        {% include "submit.html" with flag="y" %}
+        {% include "submit.html" with flag="y" group=study.group %}
 
         {% include 'errors.html' %}
 

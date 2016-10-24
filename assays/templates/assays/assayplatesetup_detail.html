@@ -1,14 +1,23 @@
 {% extends "base.html" %}
+{% load static %}
 {% load humanize %}
 
 {% block breadcrumbs %}
-    <li><a href="/assays/assaychipsetup/">Chip Setups</a></li>
+    <li><a href="/assays/assayplatesetup/">Plate Setups</a></li>
     <li class="active">{{ object }}</li>
 {% endblock %}
 
+{% block load %}
+    <link href="{% static "assays/customize_admin.css" %}" rel="stylesheet" type="text/css">
+    <script src="{% static "js/cookies.js" %}"></script>
+    <script src="{% static "assays/plate_display.js" %}"></script>
+    <script src="{% static "assays/assayplatesetup_add.js" %}"></script>
+{% endblock %}
+
 {# TODO REVIEW THIS AND OTHER DETAIL PAGES #}
-{% block content %}
-    <legend><h1>Chip Setup: {{ object.assay_chip_id }}</h1></legend>
+{% block fluid-content %}
+    <div class="container">
+    <legend><h1>Plate Setup: {{ object.assay_plate_id }}</h1></legend>
 
     <div class="row">
         <div class="col-sm-2 lead text-right-responsive">
@@ -21,58 +30,12 @@
 
     <div class="row">
         <div class="col-sm-2 lead text-right-responsive">
-            <b>Device:</b>
+            <b>Plate Layout:</b>
         </div>
         <div class="col-sm-10 lead">
-            <a href="/microdevices/device/{{ object.device.id }}">{{ object.device }}</a>
+            <a href="/assays/assaylayout/{{ object.assay_layout.id }}">{{ object.assay_layout }}</a>
         </div>
     </div>
-
-    {% if object.organ_model %}
-    <div class="row">
-        <div class="col-sm-2 lead text-right-responsive">
-            <b>Model:</b>
-        </div>
-        <div class="col-sm-10 lead">
-            <a href="/microdevices/model/{{ object.organ_model.id }}">{{ object.organ_model }}</a>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if object.organ_model_protocol %}
-    <div class="row">
-        <div class="col-sm-2 lead text-right-responsive">
-            <b>Protocol:</b>
-        </div>
-        <div class="col-sm-10 lead">
-            <a target="_blank" href="/media/{{ object.organ_model_protocol.file }}">
-                {{ object.organ_model_protocol.file }}
-            </a>
-        </div>
-    </div>
-    {% endif %}
-
-    <div class="row">
-        <div class="col-sm-2 lead text-right-responsive">
-            <b>Test Type:</b>
-        </div>
-        <div class="col-sm-10 lead">
-            {{ object.chip_test_type }}
-        </div>
-    </div>
-
-    {% if object.compound %}
-
-    <div class="row">
-        <div class="col-sm-2 lead text-right-responsive">
-            <b>Compound:</b>
-        </div>
-        <div class="col-sm-10 lead">
-            <a href="/compounds/{{ object.compound.id }}">{{ object.compound }}</a> {{ object.concentration }} {{ object.unit }}
-        </div>
-    </div>
-
-    {% endif %}
 
     {% if object.scientist %}
         <div class="row">
@@ -107,7 +70,7 @@
         </div>
     {% endif %}
 
-    {% if object.assaychipcells_set.all %}
+    {% if object.assayplatecells_set.all %}
         <legend><b>Cells</b></legend>
         <table class="table table-striped">
             <thead>
@@ -120,7 +83,7 @@
             </tr>
             </thead>
             <tbody>
-            {% for cell in object.assaychipcells_set.all %}
+            {% for cell in object.assayplatecells_set.all %}
                 <tr>
                     <td>{{ cell.cell_sample }}</td>
                     <td>{{ cell.cell_biosensor }}</td>
@@ -132,5 +95,11 @@
             </tbody>
         </table>
     {% endif %}
+    </div>
+
+    {# CONTRIVED: REFACTOR SOON #}
+    <div class="padded-row">
+        <div class="inline-group"></div>
+    </div>
 
 {% endblock %}

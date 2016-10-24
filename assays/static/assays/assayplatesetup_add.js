@@ -13,139 +13,32 @@ function search(elem) {
 }
 
 $(document).ready(function () {
-
     var layout = $('#id_assay_layout');
-    var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
+    //  TODO REFACTOR
+    // Specify that the location for the table is different
+    window.LAYOUT.insert_after = $('.inline-group');
 
-    // Get layout
-    function get_device_layout() {
-        var layout_id = layout.val();
-        if (layout_id) {
-            $.ajax({
-                url: "/assays_ajax/",
-                type: "POST",
-                dataType: "json",
-                data: {
-                    // Function to call within the view is defined by `call:`
-                    call: 'fetch_layout_format_labels',
-
-                    // First token is the var name within views.py
-                    // Second token is the var name in this JS file
-                    id: layout_id,
-
-                    model: 'assay_layout',
-
-                    // Always pass the CSRF middleware token with every AJAX call
-                    csrfmiddlewaretoken: middleware_token
-                },
-                success: function (json) {
-                    var row_labels = json.row_labels;
-                    var column_labels = json.column_labels;
-                    if (row_labels && column_labels) {
-                        build_table(row_labels, column_labels);
-                    }
-                    else {
-                        alert('This device is not configured correctly');
-                    }
-                },
-                error: function (xhr, errmsg, err) {
-                    console.log(xhr.status + ": " + xhr.responseText);
-                }
-            });
-        }
-        else {
-            // Remove when invalid/nonextant layout chosen
-            $('#layout_table').remove();
-        }
+    var delete_link = $('.deletelink');
+    if (delete_link.length > 0) {
+        window.LAYOUT.models['assay_device_setup'] = delete_link.first().attr('href').split('/')[4];
     }
-
-    // Build table
-    function build_table(row_labels, column_labels) {
-        // Remove old
-        $('#layout_table').remove();
-
-        // Choice of inserting after fieldset is contrived; for admin
-        var table = $('<table>')
-            .css('width','100%')
-            .addClass('layout-table')
-            // CONTRIVED PLACE AFTER INLINE FOR ADMIN
-            // TODO CHANGE
-            .attr('id','layout_table').insertAfter($('.inline-group'));
-
-        // make first row
-        var row = $('<tr>');
-        row.append($('<th>'));
-        $.each(column_labels, function (index, value) {
-            row.append($('<th>')
-                .text(value));
-        });
-        table.append(row);
-
-        // make rest of the rows
-        $.each(row_labels, function (row_index, row_value) {
-            var row = $('<tr>');
-            row.append($('<th>')
-                .text(row_value));
-            // Note that the "lists" are added here
-            $.each(column_labels, function (column_index, column_value) {
-                row.append($('<td>')
-                    .attr('id', row_value + '_' + column_value)
-                    .append($('<div>')
-                        .css('text-align','center')
-                        .css('font-weight', 'bold')
-                        .attr('id',row_value + '_' + column_value + '_type'))
-                    .append($('<ul>')
-                        .attr('id',row_value + '_' + column_value + '_list')
-                        .addClass('layout-list')));
-            });
-            table.append(row);
-
-        });
-
-        get_layout_data(layout.val());
-    }
-
-    function get_layout_data(layout_id) {
-        $.ajax({
-            url: "/assays_ajax/",
-            type: "POST",
-            dataType: "json",
-            data: {
-                // Function to call within the view is defined by `call:`
-                call: 'fetch_assay_layout_content',
-
-                // First token is the var name within views.py
-                // Second token is the var name in this JS file
-                id: layout_id,
-
-                model: 'assay_layout',
-
-                // Always pass the CSRF middleware token with every AJAX call
-                csrfmiddlewaretoken: middleware_token
-            },
-            success: function (json) {
-                fill_layout(json);
-            },
-            error: function (xhr, errmsg, err) {
-                console.log(xhr.status + ": " + xhr.responseText);
-            }
-        });
-    }
-
-    // TODO FILL_LAYOUT
-    function fill_layout(layout_data) {
-        window.LAYOUT.fill_layout(layout_data);
+    // Otherwise, if this is the frontend, get the id from the URL
+    else {
+        window.LAYOUT.models['assay_device_setup'] = Math.floor(window.location.href.split('/')[5]);
     }
 
     // On layout change, acquire labels and build table
     layout.change( function() {
-        get_device_layout();
+        window.LAYOUT.get_device_layout(layout.val(), 'assay_layout', false);
     });
 
-    // If a layout is initially chosen
     // (implies the setup is saved)
-    if (layout.val()) {
-        get_device_layout();
+    if (window.LAYOUT.models['assay_device_setup']) {
+        window.LAYOUT.get_device_layout(window.LAYOUT.models['assay_device_setup'], 'assay_device_setup', false);
+    }
+    // If a layout is initially chosen
+    else if (layout.val()) {
+        window.LAYOUT.get_device_layout(layout.val(), 'assay_layout', false);
     }
 
     // Datepicker superfluous on admin, use this check to apply only in frontend

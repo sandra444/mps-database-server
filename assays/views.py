@@ -1,12 +1,16 @@
 # coding=utf-8
 
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
+from django.http import HttpResponse
 from assays.models import *
 from cellsamples.models import CellSample
 # TODO TRIM THIS IMPORT
 from assays.admin import *
 from assays.forms import *
 from django import forms
+
+# TODO REVISE SPAGHETTI CODE
+from assays.ajax import get_chip_readout_data_as_csv
 
 from django.forms.models import inlineformset_factory
 # from django.shortcuts import redirect, get_object_or_404, render_to_response
@@ -16,9 +20,9 @@ from django.forms.models import inlineformset_factory
 # from django.utils.decorators import method_decorator
 
 # from mps.templatetags.custom_filters import *
-from django.db.models import Q
 
 from mps.mixins import *
+from mps.base.models import save_forms_with_tracking
 
 # import ujson as json
 import xlrd
@@ -71,6 +75,23 @@ class UnicodeWriter:
             self.writerow(row)
 
 
+def add_study_fields_to_form(self, form, add_study=False):
+    """Adds study, group, and restricted to a form
+
+    Params:
+    self -- the object in question
+    form -- the form to be added to
+    add_study -- boolean indicating whether to add the study to the model
+    """
+    study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+
+    if add_study:
+        form.instance.assay_run_id = study
+
+    form.instance.group = study.group
+    form.instance.restricted = study.restricted
+
+
 # Removed User Index as it caused confusion
 # Class-based views for indexes
 # class UserIndex(OneGroupRequiredMixin, ListView):
@@ -99,7 +120,7 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
     def get_queryset(self):
         return AssayRun.objects.filter(
             group__in=self.request.user.groups.all()
-        ).prefetch_related('created_by', 'group')
+        ).prefetch_related('created_by', 'group', 'signed_off_by')
 
     # def get_context_data(self, request, **kwargs):
     #     groups = request.user.groups.values_list('pk', flat=True)
@@ -111,7 +132,7 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
     #     return self.render_to_response(context)
 
 
-class StudyIndex(ObjectGroupRequiredMixin, DetailView):
+class StudyIndex(ViewershipMixin, DetailView):
     """Show all chip and plate models associated with the given study"""
     model = AssayRun
     context_object_name = 'study_index'
@@ -127,15 +148,15 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
             assay_run_id=self.object
         ).prefetch_related(
             'organ_model',
+            'device',
             'compound',
             'unit',
-            'created_by'
+            'created_by',
         )
         readouts = AssayChipReadout.objects.filter(
             chip_setup=context['setups']
         ).prefetch_related(
-            'created_by'
-        ).select_related(
+            'created_by',
             'chip_setup__compound',
             'chip_setup__unit'
         )
@@ -163,9 +184,7 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
         context['results'] = AssayChipResult.objects.prefetch_related(
             'result_function',
             'result_type',
-            'test_unit'
-        ).select_related(
-            'assay_result__chip_readout__chip_setup',
+            'test_unit',
             'assay_result__chip_readout__chip_setup__unit',
             'assay_result__chip_readout__chip_setup__compound',
             'assay_name__assay_id',
@@ -214,8 +233,6 @@ class StudyIndex(ObjectGroupRequiredMixin, DetailView):
             'result_function',
             'result_type',
             'test_unit',
-            'assay_result'
-        ).select_related(
             'assay_result__readout__setup',
             'assay_name__assay_id',
             'assay_result__created_by'
@@ -236,16 +253,18 @@ class AssayRunList(LoginRequiredMixin, ListView):
     model = AssayRun
 
     def get_queryset(self):
-        return AssayRun.objects.filter(
+        queryset = AssayRun.objects.prefetch_related(
+            'created_by',
+            'group',
+            'signed_off_by'
+        )
+
+        # Display to users with either editor or viewer group or if unrestricted
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        return queryset.filter(
             restricted=False
-        ).prefetch_related(
-            'created_by',
-            'group'
-        ) | AssayRun.objects.filter(
-            group__in=self.request.user.groups.all()
-        ).prefetch_related(
-            'created_by',
-            'group'
+        ) | queryset.filter(
+            group__name__in=group_names
         )
 
 StudySupportingDataFormset = inlineformset_factory(
@@ -277,9 +296,7 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
 
     def get_form(self, form_class):
         # Get group selection possibilities
-        groups = self.request.user.groups.filter(
-            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete ')
-        )
+        groups = filter_groups(self.request.user)
 
         # If POST
         if self.request.method == 'POST':
@@ -296,90 +313,78 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
             instance=form.instance
         )
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Study
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(
-                self.object.get_absolute_url())
+                self.object.get_absolute_url()
+            )
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayRunDetail(DetailView):
-    """Details for a Study"""
-    model = AssayRun
-
-    # Study detail view does not use DetailRedirectMixin because of differing URL
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        self.object = self.get_object()
-        # If user CAN edit the item, redirect to the respective edit page
-        if has_group(self.request.user, self.object.group):
-            return redirect('/assays/' + str(self.object.id))
-        elif self.object.restricted:
-            return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
-        return super(AssayRunDetail, self).dispatch(*args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        context = self.get_context_data(object=self.object)
-        context['setups'] = AssayChipSetup.objects.filter(
-            assay_run_id=self.object
-        ).prefetch_related(
-            'assay_run_id',
-            'device',
-            'compound',
-            'unit',
-            'created_by'
-        )
-        readouts = AssayChipReadout.objects.filter(
-            chip_setup=context['setups']
-        ).prefetch_related(
-            'chip_setup',
-            'created_by'
-        ).select_related(
-            'chip_setup__compound',
-            'chip_setup__unit'
-        )
-
-        related_assays = AssayChipReadoutAssay.objects.filter(
-            readout_id__in=readouts
-        ).prefetch_related(
-            'readout_id',
-            'assay_id'
-        ).order_by(
-            'assay_id__assay_short_name'
-        )
-        related_assays_map = {}
-
-        for assay in related_assays:
-            # start appending to a list keyed by the readout ID for all related images
-            related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
-
-        for readout in readouts:
-            # set an attribute on the readout that is the list created above
-            readout.related_assays = related_assays_map.get(readout.id)
-
-        context['readouts'] = readouts
-
-        context['results'] = AssayChipResult.objects.prefetch_related(
-            'assay_name',
-            'assay_result',
-            'result_function',
-            'result_type',
-            'test_unit'
-        ).select_related(
-            'assay_result__chip_readout__chip_setup',
-            'assay_result__chip_readout__chip_setup__unit',
-            'assay_name__assay_id',
-            'assay_result__created_by'
-        ).filter(
-            assay_result__chip_readout=context['readouts']
-        )
-
-        return self.render_to_response(context)
+# class AssayRunDetail(DetailRedirectMixin, DetailView):
+#     """Details for a Study"""
+#     model = AssayRun
+#
+#     update_redirect_url = '/assays/{}'
+#
+#     def get(self, request, *args, **kwargs):
+#         self.object = self.get_object()
+#         context = self.get_context_data(object=self.object)
+#         context['setups'] = AssayChipSetup.objects.filter(
+#             assay_run_id=self.object
+#         ).prefetch_related(
+#             'assay_run_id',
+#             'device',
+#             'compound',
+#             'unit',
+#             'created_by'
+#         )
+#         readouts = AssayChipReadout.objects.filter(
+#             chip_setup=context['setups']
+#         ).prefetch_related(
+#             'chip_setup',
+#             'created_by'
+#         ).select_related(
+#             'chip_setup__compound',
+#             'chip_setup__unit'
+#         )
+#
+#         related_assays = AssayChipReadoutAssay.objects.filter(
+#             readout_id__in=readouts
+#         ).prefetch_related(
+#             'readout_id',
+#             'assay_id'
+#         ).order_by(
+#             'assay_id__assay_short_name'
+#         )
+#         related_assays_map = {}
+#
+#         for assay in related_assays:
+#             # start appending to a list keyed by the readout ID for all related images
+#             related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
+#
+#         for readout in readouts:
+#             # set an attribute on the readout that is the list created above
+#             readout.related_assays = related_assays_map.get(readout.id)
+#
+#         context['readouts'] = readouts
+#
+#         context['results'] = AssayChipResult.objects.prefetch_related(
+#             'assay_name',
+#             'assay_result',
+#             'result_function',
+#             'result_type',
+#             'test_unit'
+#         ).select_related(
+#             'assay_result__chip_readout__chip_setup',
+#             'assay_result__chip_readout__chip_setup__unit',
+#             'assay_name__assay_id',
+#             'assay_result__created_by'
+#         ).filter(
+#             assay_result__chip_readout=context['readouts']
+#         )
+#
+#         return self.render_to_response(context)
 
 
 class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
@@ -406,8 +411,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
 
     def get_form(self, form_class):
         # Get group selection possibilities
-        groups = self.request.user.groups.filter(
-            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete '))
+        groups = filter_groups(self.request.user)
 
         # If POST
         if self.request.method == 'POST':
@@ -422,15 +426,95 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             self.request.FILES,
             instance=form.instance
         )
+
+        # Get the original sign off data (may be None)
+        original_sign_off_date = self.object.signed_off_date
+
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save study
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
+
+            # TODO Update the group and restricted status of children
+            # TODO REVISE KLUDGE; MAY WANT TO TOTALLY ELIMINATE THESE FIELDS?
+            all_chip_setups = AssayChipSetup.objects.filter(assay_run_id=self.object)
+            all_chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=self.object)
+            all_chip_results = AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=self.object)
+            all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=self.object)
+            all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=self.object)
+            all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=self.object)
+
+            # Marking a study should mark/unmark only setups that have not been individually reviewed
+            # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
+            if original_sign_off_date:
+                unreviewed_chip_setups = all_chip_setups.filter(signed_off_date=original_sign_off_date)
+                # unreviewed_chip_readouts = all_chip_readouts.exclude(signed_off_date=self.object.signed_off_date)
+                # unreviewed_chip_results = all_chip_results.exclude(signed_off_date=self.object.signed_off_date)
+                unreviewed_plate_setups = all_plate_setups.filter(signed_off_date=original_sign_off_date)
+                # unreviewed_plate_readouts = all_plate_readouts.exclude(signed_off_date=self.object.signed_off_date)
+                # unreviewed_plate_results = all_plate_results.exclude(signed_off_date=self.object.signed_off_date)
+            # If the study is being signed off, then treat any setups with no sign off as unreviewed
+            else:
+                unreviewed_chip_setups = all_chip_setups.filter(signed_off_by=None)
+                # unreviewed_chip_readouts = all_chip_readouts.filter(signed_off_by=None)
+                # unreviewed_chip_results = all_chip_results.filter(signed_off_by=None)
+                unreviewed_plate_setups = all_plate_setups.filter(signed_off_by=None)
+                # unreviewed_plate_readouts = all_plate_readouts.filter(signed_off_by=None)
+                # unreviewed_plate_results = all_plate_results.filter(signed_off_by=None)
+
+            # Add group and restricted to all
+            all_chip_setups.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+            all_chip_readouts.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+            all_chip_results.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+            all_plate_setups.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+            all_plate_readouts.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+            all_plate_results.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+
+            # Change signed off data only for unreviewed entries
+            unreviewed_chip_setups.update(
+                signed_off_by=self.object.signed_off_by,
+                signed_off_date=self.object.signed_off_date
+            )
+            # unreviewed_chip_readouts.update(
+            #     signed_off_by=self.object.signed_off_by,
+            #     signed_off_date=self.object.signed_off_date
+            # )
+            # unreviewed_chip_results.update(
+            #     signed_off_by=self.object.signed_off_by,
+            #     signed_off_date=self.object.signed_off_date
+            # )
+            unreviewed_plate_setups.update(
+                signed_off_by=self.object.signed_off_by,
+                signed_off_date=self.object.signed_off_date
+            )
+            # unreviewed_plate_readouts.update(
+            #     signed_off_by=self.object.signed_off_by,
+            #     signed_off_date=self.object.signed_off_date
+            # )
+            # unreviewed_plate_results.update(
+            #     signed_off_by=self.object.signed_off_by,
+            #     signed_off_date=self.object.signed_off_date
+            # )
+
             return redirect(self.object.get_absolute_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 def compare_cells(current_model, current_filter, setups):
@@ -469,7 +553,7 @@ def compare_cells(current_model, current_filter, setups):
     return (best_setup, sameness.get(best_setup))
 
 
-class AssayRunSummary(ObjectGroupRequiredMixin, DetailView):
+class AssayRunSummary(ViewershipMixin, DetailView):
     """Displays information for a given study
 
     Currently only shows data for chip readouts and chip/plate setups
@@ -530,7 +614,7 @@ class AssayRunSummary(ObjectGroupRequiredMixin, DetailView):
         return self.render_to_response(context)
 
 
-class AssayRunDelete(CreatorRequiredMixin, DeleteView):
+class AssayRunDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete a Setup"""
     model = AssayRun
     template_name = 'assays/assayrun_delete.html'
@@ -563,25 +647,22 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
     model = AssayChipSetup
 
     def get_queryset(self):
-        return AssayChipSetup.objects.filter(
-            assay_run_id__restricted=False
-        ).prefetch_related(
+        queryset = AssayChipSetup.objects.prefetch_related(
             'assay_run_id',
             'device',
             'organ_model',
             'compound',
             'unit',
             'created_by',
-            'group'
-        ) | AssayChipSetup.objects.filter(
-            assay_run_id__group__in=self.request.user.groups.all()
-        ).prefetch_related(
-            'assay_run_id',
-            'device',
-            'compound',
-            'unit',
-            'created_by',
-            'group'
+            'group',
+            'signed_off_by'
+        )
+        # Display to users with either editor or viewer group or if unrestricted
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        return queryset.filter(
+            restricted=False
+        ) | queryset.filter(
+            group__name__in=group_names
         )
 
 
@@ -599,29 +680,15 @@ AssayChipCellsFormset = inlineformset_factory(
 
 
 # Cloning was recently refactored
-class AssayChipSetupAdd(CreateView):
+class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
     """Add a Chip Setup (with inline for Chip Cells)"""
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
     # May want to define form with initial here
     form_class = AssayChipSetupForm
 
-    # Due to the ability to clone, AssayChipSetupAdd is an exception to normal StudyGroupRequired permission
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        if not has_group(self.request.user, study.group):
-            return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
-
-        if self.request.GET.get('clone', ''):
-            clone = get_object_or_404(AssayChipSetup, pk=self.request.GET.get('clone', ''))
-            if not has_group(self.request.user, clone.assay_run_id.group):
-                return PermissionDenied(
-                    self.request,
-                    'You must be a member of the group ' + str(clone.assay_run_id.group) + ' to clone this setup'
-                )
-
-        return super(AssayChipSetupAdd, self).dispatch(*args, **kwargs)
+    # Specify that cloning is permitted
+    cloning_permitted = True
 
     def get_form(self, form_class):
         if self.request.method == 'POST':
@@ -633,10 +700,7 @@ class AssayChipSetupAdd(CreateView):
         else:
             form = form_class()
 
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-
-        form.instance.assay_run_id = study
-        form.instance.group = study.group
+        add_study_fields_to_form(self, form, add_study=True)
 
         return form
 
@@ -668,21 +732,11 @@ class AssayChipSetupAdd(CreateView):
         return context
 
     def form_valid(self, form):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        # TODO THIS SHOULD BE IN get_form AND NOT HERE
-        form.instance.assay_run_id = study
-        form.instance.group = study.group
         formset = AssayChipCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
-            self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Chip Readout
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
             if data['another']:
                 form = self.form_class(
                     instance=self.object,
@@ -692,7 +746,7 @@ class AssayChipSetupAdd(CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 class AssayChipSetupDetail(DetailRedirectMixin, DetailView):
@@ -736,17 +790,13 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         formset = AssayChipCellsFormset(self.request.POST, instance=form.instance)
 
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save overall setup result
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayChipSetupDelete(CreatorRequiredMixin, DeleteView):
+class AssayChipSetupDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete a Chip Setup and Chip Cells"""
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_delete.html'
@@ -771,30 +821,26 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
     model = AssayChipReadout
 
     def get_queryset(self):
-        readouts = AssayChipReadout.objects.filter(
-            chip_setup__assay_run_id__restricted=False
-        ).prefetch_related(
-            'chip_setup',
-            'created_by',
-            'group'
-        ).select_related(
+        queryset = AssayChipReadout.objects.prefetch_related(
             'chip_setup__assay_run_id',
             'chip_setup__compound',
-            'chip_setup__unit'
-        ) | AssayChipReadout.objects.filter(
-            chip_setup__assay_run_id__group__in=self.request.user.groups.all()
-        ).prefetch_related(
-            'chip_setup',
+            'chip_setup__unit',
             'created_by',
-            'group'
-        ).select_related(
-            'chip_setup__assay_run_id',
-            'chip_setup__compound',
-            'chip_setup__unit'
+            'group',
+            'signed_off_by'
         )
 
+        # Display to users with either editor or viewer group or if unrestricted
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        queryset = queryset.filter(
+            restricted=False
+        ) | queryset.filter(
+            group__name__in=group_names
+        )
+
+        # Map assays
         related_assays = AssayChipReadoutAssay.objects.filter(
-            readout_id__in=readouts
+            readout_id__in=queryset
         ).prefetch_related(
             'readout_id',
             'assay_id'
@@ -807,11 +853,11 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
             # start appending to a list keyed by the readout ID for all related images
             related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
 
-        for readout in readouts:
+        for readout in queryset:
             # set an attribute on the readout that is the list created above
             readout.related_assays = related_assays_map.get(readout.id)
 
-        return readouts
+        return queryset
 
 
 ACRAFormSet = inlineformset_factory(
@@ -827,12 +873,16 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
     """Add a Chip Readout with inline for Assay Chip Readout Assays"""
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
+    model = AssayChipReadout
+
+    # Specify that cloning is permitted
+    cloning_permitted = True
 
     def get_form(self, form_class):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
         if self.request.method == 'POST':
-            return form_class(study, current, self.request.POST, self.request.FILES)
+            form = form_class(study, current, self.request.POST, self.request.FILES)
         elif self.request.GET.get('clone', ''):
             pk = int(self.request.GET.get('clone', ''))
             clone = get_object_or_404(AssayChipReadout, pk=pk)
@@ -842,10 +892,12 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
                 instance=clone,
                 initial={'file': None}
             )
-            # We do not want to keep the file (setup automatically excluded)
-            return form
         else:
-            return form_class(study, current)
+            form = form_class(study, current)
+
+        add_study_fields_to_form(self, form)
+
+        return form
 
     def get_context_data(self, **kwargs):
         context = super(AssayChipReadoutAdd, self).get_context_data(**kwargs)
@@ -865,22 +917,15 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        form.instance.group = study.group
         formset = ACRAFormSet(self.request.POST, self.request.FILES, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
-
             # Get headers
             headers = int(data.get('headers'))
 
-            self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Chip Readout
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
+
             if formset.files.get('file', ''):
                 current_file = formset.files.get('file', '')
                 parse_chip_csv(self.object, current_file, headers, form)
@@ -895,7 +940,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     # Redirect when there are no available setups
     def render_to_response(self, context):
@@ -958,15 +1003,11 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
-
             # Get headers
             headers = int(data.get('headers'))
 
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save overall readout result
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
+
             # Save file if it exists
             if formset.files.get('file', ''):
                 file = formset.files.get('file', '')
@@ -980,10 +1021,10 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Otherwise do nothing (the file remained the same)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayChipReadoutDelete(CreatorRequiredMixin, DeleteView):
+class AssayChipReadoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete Assay Chip Readout"""
     model = AssayChipReadout
     template_name = 'assays/assaychipreadout_delete.html'
@@ -1008,27 +1049,26 @@ class AssayChipTestResultList(LoginRequiredMixin, ListView):
     template_name = 'assays/assaychiptestresult_list.html'
 
     def get_queryset(self):
-        initial_query = AssayChipResult.objects.prefetch_related(
-            'assay_name',
-            'assay_result',
-            'result_function',
-            'result_type',
-            'test_unit'
-        ).select_related(
-            'assay_result__chip_readout',
+        queryset = AssayChipResult.objects.prefetch_related(
+            'assay_name__assay_id',
             'assay_result__chip_readout__chip_setup',
             'assay_result__chip_readout__chip_setup__compound',
             'assay_result__chip_readout__chip_setup__unit',
             'assay_result__chip_readout__chip_setup__assay_run_id',
-            'assay_name__assay_id',
             'assay_result__created_by',
-            'assay_result__group'
+            'assay_result__group',
+            'assay_result__signed_off_by',
+            'result_function',
+            'result_type',
+            'test_unit'
         )
 
-        return initial_query.filter(
-            assay_result__chip_readout__chip_setup__assay_run_id__restricted=False
-        ) | initial_query.filter(
-            assay_result__chip_readout__chip_setup__assay_run_id__group__in=self.request.user.groups.all()
+        # Display to users with either editor or viewer group or if unrestricted
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        return queryset.filter(
+            assay_result__restricted=False
+        ) | queryset.filter(
+            assay_result__group__name__in=group_names
         )
 
 
@@ -1052,9 +1092,13 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
         current = None
 
         if self.request.method == 'POST':
-            return form_class(study, current, self.request.POST)
+            form = form_class(study, current, self.request.POST)
         else:
-            return form_class(study, current)
+            form = form_class(study, current)
+
+        add_study_fields_to_form(self, form)
+
+        return form
 
     def get_context_data(self, **kwargs):
         context = super(AssayChipTestResultAdd, self).get_context_data(**kwargs)
@@ -1069,23 +1113,12 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        form.instance.group = study.group
-        context = self.get_context_data()
-        formset = context['formset']
-        # get user via self.request.user
+        formset = ChipTestResultFormSet(self.request.POST, instance=form.instance)
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save overall test result
-            self.object.save()
-            formset.instance = self.object
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     # Redirect when there are no available setups
     # TODO REFACTOR
@@ -1144,20 +1177,16 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        formset = ChipTestResultFormSet(self.request.POST, instance=form.instance)
+        formset = ChipTestResultFormSet(self.request.POST, instance=self.object)
 
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save overall test result
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayChipTestResultDelete(CreatorRequiredMixin, DeleteView):
+class AssayChipTestResultDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete a Chip Test Result"""
     model = AssayChipTestResult
     template_name = 'assays/assaychiptestresult_delete.html'
@@ -1168,7 +1197,7 @@ class AssayChipTestResultDelete(CreatorRequiredMixin, DeleteView):
 
 # Class-based views for study configuration
 class StudyConfigurationList(LoginRequiredMixin, ListView):
-    """Display a lsit of Study Configurations"""
+    """Display a list of Study Configurations"""
     model = StudyConfiguration
     template_name = 'assays/studyconfiguration_list.html'
 
@@ -1203,19 +1232,13 @@ class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        context = self.get_context_data()
-        formset = context['formset']
-        # get user via self.request.user
+        formset = StudyModelFormSet(self.request.POST, instance=form.instance)
+
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save overall configuration
-            self.object.save()
-            formset.instance = self.object
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
@@ -1237,18 +1260,13 @@ class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        formset = StudyModelFormSet(self.request.POST, instance=form.instance)
+        formset = StudyModelFormSet(self.request.POST, instance=self.object)
 
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            # TODO refactor original created by
-            self.object.modified_by = self.request.user
-            # Save overall test result
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 # Class-based views for LAYOUTS
@@ -1270,12 +1288,15 @@ class AssayLayoutList(LoginRequiredMixin, ListView):
         # 'group',
         # 'device'
         # )
+
+        # Assay Layouts do not currently have a detail page, so only allow editors to see
         return AssayLayout.objects.filter(
             group__in=self.request.user.groups.all()
         ).prefetch_related(
             'created_by',
             'group',
-            'device'
+            'device',
+            'signed_off_by'
         )
 
 
@@ -1287,9 +1308,7 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
 
     def get_form(self, form_class):
         # Get group selection possibilities
-        groups = self.request.user.groups.filter(
-            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete ')
-        )
+        groups = filter_groups(self.request.user)
 
         # If POST
         if self.request.method == 'POST':
@@ -1301,8 +1320,7 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
     # Test form validity
     def form_valid(self, form):
         if form.is_valid():
-            # Confirm form and get object
-            self.object = form.save()
+            save_forms_with_tracking(self, form, formset=None, update=False)
             # Save assay layout
             save_assay_layout(self.request, self.object, form, False)
             return redirect(self.object.get_post_submission_url())
@@ -1324,9 +1342,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
     def get_form(self, form_class):
         # Get group selection possibilities
-        groups = self.request.user.groups.filter(
-            ~Q(name__contains='Add ') & ~Q(name__contains='Change ') & ~Q(name__contains='Delete ')
-        )
+        groups = filter_groups(self.request.user)
 
         # If POST
         if self.request.method == 'POST':
@@ -1343,8 +1359,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         if form.is_valid():
-            # Confirm form and get object
-            self.object = form.save()
+            save_forms_with_tracking(self, form, formset=None, update=True)
             # Save assay layout
             save_assay_layout(self.request, self.object, form, True)
             return redirect(self.object.get_post_submission_url())
@@ -1352,7 +1367,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayLayoutDelete(CreatorRequiredMixin, DeleteView):
+class AssayLayoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete an Assay Layout"""
     model = AssayLayout
     template_name = 'assays/assaylayout_delete.html'
@@ -1378,21 +1393,22 @@ class AssayPlateSetupList(LoginRequiredMixin, ListView):
     model = AssayPlateSetup
 
     def get_queryset(self):
-        return AssayPlateSetup.objects.filter(
-            restricted=False
-        ).prefetch_related(
+        queryset = AssayPlateSetup.objects.prefetch_related(
             'created_by',
             'group',
             'assay_run_id',
-            'assay_layout'
-        ) | AssayPlateSetup.objects.filter(
-            group__in=self.request.user.groups.all()
-        ).prefetch_related(
-            'created_by',
-            'group',
-            'assay_run_id',
-            'assay_layout'
+            'assay_layout',
+            'signed_off_by'
         )
+
+        # Display to users with either editor or viewer group or if unrestricted
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        return queryset.filter(
+            restricted=False
+        ) | queryset.filter(
+            group__name__in=group_names
+        )
+
 
 # Formset for plate cells
 AssayPlateCellsFormset = inlineformset_factory(
@@ -1415,6 +1431,9 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
     form_class = AssayPlateSetupForm
     template_name = 'assays/assayplatesetup_add.html'
 
+    # Specify that cloning is permitted
+    cloning_permitted = True
+
     def get_form(self, form_class):
         if self.request.method == 'POST':
             form = form_class(self.request.POST)
@@ -1425,10 +1444,7 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
         else:
             form = form_class()
 
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-
-        form.instance.assay_run_id = study
-        form.instance.group = study.group
+        add_study_fields_to_form(self, form, add_study=True)
 
         return form
 
@@ -1460,21 +1476,13 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        # TODO THIS SHOULD BE IN get_form AND NOT HERE
-        form.instance.assay_run_id = study
-        form.instance.group = study.group
         formset = AssayPlateCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
-            self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Plate Setup
-            self.object.save()
-            formset.save()
+
+            save_forms_with_tracking(self, form, formset=formset, update=False)
+
             if data['another']:
                 form = self.form_class(
                     instance=self.object,
@@ -1484,7 +1492,7 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 # TODO Assay Layout Detail does not currently exist (deemed lower priority)
@@ -1528,17 +1536,13 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         formset = AssayPlateCellsFormset(self.request.POST, instance=form.instance)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save Plate Setup
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayPlateSetupDelete(CreatorRequiredMixin, DeleteView):
+class AssayPlateSetupDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete a Plate Setup"""
     model = AssayPlateSetup
     template_name = 'assays/assayplatesetup_delete.html'
@@ -1563,26 +1567,24 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
     model = AssayPlateReadout
 
     def get_queryset(self):
-        readouts = AssayPlateReadout.objects.filter(
-            setup__assay_run_id__restricted=False
-        ).prefetch_related(
-            'setup',
+        queryset = AssayPlateReadout.objects.prefetch_related(
             'created_by',
-            'group'
-        ).select_related(
-            'setup__assay_run_id'
-        ) | AssayPlateReadout.objects.filter(
-            setup__assay_run_id__group__in=self.request.user.groups.all()
-        ).prefetch_related(
-            'setup',
-            'created_by',
-            'group'
-        ).select_related(
-            'setup__assay_run_id'
+            'group',
+            'setup__assay_run_id',
+            'signed_off_by'
         )
 
+        # Display to users with either editor or viewer group or if unrestricted
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        queryset = queryset.filter(
+            restricted=False
+        ) | queryset.filter(
+            group__name__in=group_names
+        )
+
+        # Map assays
         related_assays = AssayPlateReadoutAssay.objects.filter(
-            readout_id__in=readouts
+            readout_id__in=queryset
         ).prefetch_related(
             'readout_id',
             'assay_id'
@@ -1595,11 +1597,11 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
             # start appending to a list keyed by the readout ID for all related images
             related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
 
-        for readout in readouts:
+        for readout in queryset:
             # set an attribute on the readout that is the list created above
             readout.related_assays = related_assays_map.get(readout.id)
 
-        return readouts
+        return queryset
 
 
 APRAFormSet = inlineformset_factory(
@@ -1615,16 +1617,20 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
     """Add a Plate Readout with inline for Assay Plate Readout Assays"""
     template_name = 'assays/assayplatereadout_add.html'
     form_class = AssayPlateReadoutForm
+    model = AssayPlateReadout
+
+    # Specify that cloning is permitted
+    cloning_permitted = True
 
     def get_form(self, form_class):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
         if self.request.method == 'POST':
-            return form_class(study, current, self.request.POST, self.request.FILES)
+            form = form_class(study, current, self.request.POST, self.request.FILES)
         elif self.request.GET.get('clone', ''):
             pk = int(self.request.GET.get('clone', ''))
             clone = get_object_or_404(AssayPlateReadout, pk=pk)
-            return form_class(
+            form = form_class(
                 study,
                 current,
                 instance=clone,
@@ -1632,7 +1638,11 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             )
             # We do not want to keep the file (setup automatically excluded))
         else:
-            return form_class(study, current)
+            form = form_class(study, current)
+
+        add_study_fields_to_form(self, form)
+
+        return form
 
     def get_context_data(self, **kwargs):
         context = super(AssayPlateReadoutAdd, self).get_context_data(**kwargs)
@@ -1652,7 +1662,6 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        form.instance.group = study.group
         formset = APRAFormSet(self.request.POST, self.request.FILES, instance=form.instance, save_as_new=True)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
@@ -1661,13 +1670,8 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             # Get upload_type
             upload_type = data.get('upload_type')
 
-            self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Chip Readout
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
+
             if formset.files.get('file', ''):
                 current_file = formset.files.get('file', '')
                 parse_readout_csv(self.object, current_file, upload_type)
@@ -1684,7 +1688,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     # Redirect when there are no available setups
     # TODO REFACTOR
@@ -1747,11 +1751,8 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Get upload_type
             upload_type = data.get('upload_type')
 
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save Chip Readout
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
+
             # Save file if it exists
             if formset.files.get('file', ''):
                 current_file = formset.files.get('file', '')
@@ -1766,11 +1767,11 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Otherwise do nothing (the file remained the same)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 # TODO ADD CONTEXT
-class AssayPlateReadoutDelete(CreatorRequiredMixin, DeleteView):
+class AssayPlateReadoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete an Assay Plate Readout"""
     model = AssayPlateReadout
     template_name = 'assays/assayplatereadout_delete.html'
@@ -1795,21 +1796,23 @@ class AssayPlateTestResultList(LoginRequiredMixin, ListView):
     template_name = 'assays/assayplatetestresult_list.html'
 
     def get_queryset(self):
-        initial_query = AssayPlateResult.objects.prefetch_related(
+        queryset = AssayPlateResult.objects.prefetch_related(
             'result_function',
             'result_type',
-            'test_unit'
-        ).select_related(
+            'test_unit',
             'assay_result__readout__setup__assay_run_id',
             'assay_name__assay_id',
             'assay_result__created_by',
-            'assay_result__group'
+            'assay_result__group',
+            'assay_result__signed_off_by'
         )
 
-        return initial_query.filter(
-            assay_result__readout__setup__assay_run_id__restricted=False
-        ) | initial_query.filter(
-            assay_result__readout__setup__assay_run_id__group__in=self.request.user.groups.all()
+        # Display to users with either editor or viewer group or if unrestricted
+        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        return queryset.filter(
+            assay_result__restricted=False
+        ) | queryset.filter(
+            assay_result__group__name__in=group_names
         )
 
 
@@ -1833,9 +1836,13 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
         current = None
 
         if self.request.method == 'POST':
-            return form_class(study, current, self.request.POST)
+            form = form_class(study, current, self.request.POST)
         else:
-            return form_class(study, current)
+            form = form_class(study, current)
+
+        add_study_fields_to_form(self, form)
+
+        return form
 
     def get_context_data(self, **kwargs):
         context = super(AssayPlateTestResultAdd, self).get_context_data(**kwargs)
@@ -1850,23 +1857,12 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        form.instance.group = study.group
-        context = self.get_context_data()
-        formset = context['formset']
-        # get user via self.request.user
+        formset = PlateTestResultFormSet(self.request.POST, instance=form.instance)
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            # Set restricted
-            self.object.restricted = study.restricted
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save overall test result
-            self.object.save()
-            formset.instance = self.object
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     # Redirect when there are no available setups
     # TODO REFACTOR
@@ -1914,21 +1910,16 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        context = self.get_context_data()
-        formset = context['formset']
+        formset = PlateTestResultFormSet(self.request.POST, instance=self.object)
         # get user via self.request.user
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save overall test result
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayPlateTestResultDelete(CreatorRequiredMixin, DeleteView):
+class AssayPlateTestResultDelete(CreatorOrAdminRequiredMixin, DeleteView):
     """Delete a Plate Test Result"""
     model = AssayPlateTestResult
     template_name = 'assays/assayplatetestresult_delete.html'
@@ -2111,14 +2102,14 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
                         # Get valid file location
                         # Note added csv extension
-                        file_loc = get_valid_csv_location(chip_id, study_id, 'chip')
+                        file_location = get_valid_csv_location(chip_id, study_id, 'chip')
                         # Write the csv
-                        write_out_csv(file_loc, datalist)
+                        write_out_csv(file_location, datalist)
 
-                        media_loc = get_csv_media_location(file_loc)
+                        media_location = get_csv_media_location(file_location)
 
                         # Add the file to the readout
-                        readout.file = media_loc
+                        readout.file = media_location
                         readout.save()
 
                         # Note the lack of a form normally used for QC
@@ -2181,14 +2172,14 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
                         # Get valid file location
                         # Note added csv extension
-                        file_loc = get_valid_csv_location(plate_id, study_id, 'plate')
+                        file_location = get_valid_csv_location(plate_id, study_id, 'plate')
                         # Write the csv
-                        write_out_csv(file_loc, datalist)
+                        write_out_csv(file_location, datalist)
 
-                        media_loc = get_csv_media_location(file_loc)
+                        media_location = get_csv_media_location(file_location)
 
                         # Add the file to the readout
-                        readout.file = media_loc
+                        readout.file = media_location
                         readout.save()
 
                         # Note the lack of a form normally used for QC
@@ -2228,14 +2219,14 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
                         # Get valid file location
                         # Note added csv extension
-                        file_loc = get_valid_csv_location(plate_id, study_id, 'plate')
+                        file_location = get_valid_csv_location(plate_id, study_id, 'plate')
                         # Write the csv
-                        write_out_csv(file_loc, datalist)
+                        write_out_csv(file_location, datalist)
 
-                        media_loc = get_csv_media_location(file_loc)
+                        media_location = get_csv_media_location(file_location)
 
                         # Add the file to the readout
-                        readout.file = media_loc
+                        readout.file = media_location
                         readout.save()
 
                         # Note the lack of a form normally used for QC
@@ -2244,3 +2235,46 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+
+class ReturnStudyData(ViewershipMixin, DetailView):
+    """Returns a combined file for all data in a study"""
+    model = AssayRun
+
+    def render_to_response(self, context, **response_kwargs):
+        # Make sure that the study exists, then continue
+        if self.object:
+            # Set response to binary
+            # For xlsx
+            # response = HttpResponse(mimetype="application/ms-excel")
+            # response['Content-Disposition'] = 'attachment; filename=%s' % self.object.assay_run_id
+            #
+            # workbook = xlsxwriter.Workbook(self.object.assay_run_id + '.xlsx')
+
+            # If chip data
+            chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=self.object).prefetch_related(
+                'chip_setup__assay_run_id'
+            )
+
+            chip_data = ','.join([
+                'Chip ID',
+                'Time',
+                'Time Units',
+                'Assay',
+                'Object',
+                'Value',
+                'Value Unit',
+                'QC Status',
+                'Note: ANY value in QC Status will mark a row as invalid\n'
+            ])
+
+            chip_data += get_chip_readout_data_as_csv(chip_readouts)
+
+            # For specifically text
+            response = HttpResponse(chip_data, content_type='text/csv')
+            response['Content-Disposition'] = 'attachment;filename=' + self.object.assay_run_id + '.csv'
+
+            return response
+        # Return nothing otherwise
+        else:
+            return HttpResponse('', content_type='text/plain')

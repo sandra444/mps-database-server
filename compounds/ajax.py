@@ -231,7 +231,8 @@ def fetch_compound_report(request):
         'assay_chip_id__chip_setup__compound',
         'assay_chip_id__chip_setup__unit',
         'assay_chip_id__timeunit',
-        'assay_chip_id__chip_setup__assay_run_id'
+        'assay_chip_id__chip_setup__assay_run_id',
+        'assay_id__assay_id'
     )
 
     for readout in readouts:

@@ -8,6 +8,7 @@ from mps.mixins import SpecificGroupRequiredMixin
 from .forms import *
 from django.shortcuts import redirect
 from django.forms.models import inlineformset_factory
+from mps.base.models import save_forms_with_tracking
 
 
 class CompoundsList(ListView):
@@ -87,7 +88,7 @@ class CompoundsAdd(SpecificGroupRequiredMixin, CreateView):
     form_class = CompoundForm
     template_name = 'compounds/compounds_add.html'
 
-    required_group_name = 'Change Compounds Front'
+    required_group_name = 'Add Compounds Front'
 
     def get_context_data(self, **kwargs):
         context = super(CompoundsAdd, self).get_context_data(**kwargs)
@@ -103,14 +104,10 @@ class CompoundsAdd(SpecificGroupRequiredMixin, CreateView):
         formset = CompoundTargetFormset(self.request.POST, instance=form.instance)
 
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.object.created_by = self.request.user
-            # Save Compound
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 class CompoundsUpdate(SpecificGroupRequiredMixin, UpdateView):
@@ -137,14 +134,10 @@ class CompoundsUpdate(SpecificGroupRequiredMixin, UpdateView):
         formset = CompoundTargetFormset(self.request.POST, instance=form.instance)
 
         if form.is_valid() and formset.is_valid():
-            self.object = form.save()
-            self.object.modified_by = self.request.user
-            # Save Compound
-            self.object.save()
-            formset.save()
+            save_forms_with_tracking(self, form, formset=formset, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
 # TODO OLD COMPOUNDS UPDATE

@@ -138,9 +138,9 @@ $(document).ready(function () {
         lines = parse_csv(csv);
 
         //Make table
-        var table = exist ? "<table class='layout-table' style='width: 100%;background: #7FFF00'><tbody>" : "<table class='layout-table' style='width: 100%;'><tbody>";
+        var table = exist ? "<table class='layout-table bg-success' style='width: 100%;'><tbody>" : "<table class='layout-table' style='width: 100%;'><tbody>";
 
-        table += exist ? "<tr style='background: #FF2400'>" + header + "</tr>" : "";
+        table += exist ? "<tr class='bg-info'>" + header + "</tr>" : "";
 
         // Current index for saving QC values
         var current_index = 0;
@@ -155,12 +155,17 @@ $(document).ready(function () {
 
             // If the row will be excluded (highlighted red)
             if ((i < headers && !exist) || !every) {
-                table += "<tr style='background: #FF2400'>";
+                table += "<tr class='bg-danger'>";
             }
 
             // If the row has no value (residue code, may be used later)
             else if (value == 'None') {
                 table += "<tr style='background: #606060'>";
+            }
+
+            // If the row is marked an outlier
+            else if (line[7] && $.trim(line[7])) {
+                table += "<tr class='bg-warning'>";
             }
 
             else {
@@ -208,6 +213,13 @@ $(document).ready(function () {
 
         // Bind change event to quality
         $('.quality').change(function() {
+            // Change color of parent if there is input
+            if (this.value) {
+                $(this).parent().parent().addClass('bg-warning');
+            }
+            else {
+                $(this).parent().parent().removeClass('bg-warning');
+            }
             var index = +this.id;
             lines[index][7] = this.value;
             resetChart();
@@ -268,13 +280,23 @@ $(document).ready(function () {
         }
 
         var chart = 0;
+        var bar_chart_list = [];
+
         for (var assay in assays) {
-            addChart(chart,assay,timeUnits[assay],valueUnits[assay]);
+            var add_to_bar_charts = true;
+
+            addChart(chart, assay, timeUnits[assay], valueUnits[assay]);
 
             var xs = {};
             var num = 1;
+
             for (var object in assays[assay]) {
                 object = '' + object;
+
+                // Add to bar charts if no time scale exceeds 3 points
+                if (add_to_bar_charts && assays[assay][object].time.length > 3) {
+                    add_to_bar_charts = false;
+                }
 
                 xs[object] = 'x' + num;
 
@@ -293,7 +315,18 @@ $(document).ready(function () {
 
                 num += 1;
             }
+            // Add to bar charts if no time scale exceeds 3 points
+            if (add_to_bar_charts) {
+                bar_chart_list.push(chart);
+            }
+
             chart += 1;
+        }
+
+        // Make bar charts
+        for (var index in bar_chart_list) {
+            var chart_index = bar_chart_list[index];
+            charts[chart_index].transform('bar');
         }
     }
 
@@ -331,7 +364,7 @@ $(document).ready(function () {
     }
 
     var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
-        "<tr style='background: #FF2400'>" + header + "</tr>" +
+        "<tr class='bg-info'>" + header + "</tr>" +
         "<tr>" + repeat('<th><br><br></th>',8) + "</tr>" +
         "<tr>" + repeat('<th><br><br></th>',8) + "</tr>" +
         "</tbody></table>";

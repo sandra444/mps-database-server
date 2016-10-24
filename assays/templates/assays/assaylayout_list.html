@@ -38,7 +38,7 @@
                     <td><a href="/microdevices/device/{{ layout.device.id }}">{{ layout.device}}</a></td>
                     <td>
                         {% if layout.signed_off_by %}
-                            <span title="This entry was reviewed by {{ layout.signed_off_by }} on {{ layout.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ layout.signed_off_by }} on {{ layout.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if layout.flagged %}
                             <span title="This entry is flagged for review: '{{ layout.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>

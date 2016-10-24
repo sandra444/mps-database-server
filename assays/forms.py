@@ -4,6 +4,7 @@ from django import forms
 from django.forms.models import BaseInlineFormSet
 from assays.models import *
 from compounds.models import Compound
+from mps.forms import SignOffMixin
 # Use regular expressions for a string split at one point
 import re
 import string
@@ -82,7 +83,7 @@ class CloneableBaseInlineFormSet(BaseInlineFormSet):
         return form
 
 
-class AssayRunForm(forms.ModelForm):
+class AssayRunForm(SignOffMixin, forms.ModelForm):
     """Frontend Form for Studies"""
     def __init__(self, groups, *args, **kwargs):
         """Init the Study Form
@@ -122,7 +123,7 @@ class StudySupportingDataInlineFormset(BaseInlineFormSet):
         exclude = ('',)
 
 
-class AssayChipResultForm(forms.ModelForm):
+class AssayChipResultForm(SignOffMixin, forms.ModelForm):
     """Frontend form for Chip Test Results"""
     def __init__(self, study, current, *args, **kwargs):
         """Init the Chip Test Results Form
@@ -156,7 +157,7 @@ class AssayChipResultForm(forms.ModelForm):
         exclude = group + tracking + restricted
 
 
-class AssayChipReadoutForm(CloneableForm):
+class AssayChipReadoutForm(SignOffMixin, CloneableForm):
     """Frontend form for Chip Readouts"""
     def __init__(self, study, current, *args, **kwargs):
         """Init the Chip Readout Form
@@ -196,7 +197,7 @@ class AssayChipReadoutForm(CloneableForm):
     # Set chip setup to unique instead of throwing error in validation
 
 
-class AssayChipSetupForm(CloneableForm):
+class AssayChipSetupForm(SignOffMixin, CloneableForm):
     """Frontend form for Chip Setups"""
     def __init__(self, *args, **kwargs):
         """Init Chip Setup Form
@@ -322,7 +323,7 @@ class ChipTestResultInlineFormset(BaseInlineFormSet):
             raise forms.ValidationError('You must have at least one result.')
 
 
-class StudyConfigurationForm(forms.ModelForm):
+class StudyConfigurationForm(SignOffMixin, forms.ModelForm):
     """Frontend Form for Study Configurations"""
     class Meta(object):
         model = StudyConfiguration
@@ -335,7 +336,7 @@ class StudyConfigurationForm(forms.ModelForm):
 
 
 # Forms for plates may become more useful later
-class AssayLayoutForm(forms.ModelForm):
+class AssayLayoutForm(SignOffMixin, forms.ModelForm):
     """Frontend Form for Assay Layouts
 
     Additional fields (not part of model):
@@ -369,7 +370,7 @@ class AssayLayoutForm(forms.ModelForm):
         exclude = tracking + restricted
 
 
-class AssayPlateSetupForm(CloneableForm):
+class AssayPlateSetupForm(SignOffMixin, CloneableForm):
     """Frontend Form for Plate Setups"""
     def __init__(self, *args, **kwargs):
         """Init Plate Setup Form
@@ -431,7 +432,7 @@ class AssayPlateCellsInlineFormset(CloneableBaseInlineFormSet):
         exclude = ('',)
 
 
-class AssayPlateReadoutForm(CloneableForm):
+class AssayPlateReadoutForm(SignOffMixin, CloneableForm):
     """Frontend Form for Assay Plate Readouts"""
     def __init__(self, study, current, *args, **kwargs):
         """Init Assay Plate Readout Form
@@ -470,7 +471,7 @@ class AssayPlateReadoutForm(CloneableForm):
         exclude = group + tracking + restricted
 
 
-class AssayPlateResultForm(forms.ModelForm):
+class AssayPlateResultForm(SignOffMixin, forms.ModelForm):
     """Frontend Form for Plate Test Results"""
     def __init__(self, study, current, *args, **kwargs):
         """Init Plate Test Results Form
@@ -1155,7 +1156,9 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
                     'The time unit "%s" does not correspond with the selected readout time unit of "%s"'
                     % (new_time_unit, old_time_unit))
 
-            saved_data = AssayChipRawData.objects.filter(assay_chip_id=self.instance).prefetch_related('assay_id')
+            saved_data = AssayChipRawData.objects.filter(assay_chip_id=self.instance).prefetch_related(
+                'assay_id__assay_id'
+            )
 
             for raw in saved_data:
 

@@ -42,7 +42,7 @@
                     <td><a class="btn btn-primary" href="{{ result.assay_result.id }}">View/Edit</a></td>
                     <td>{{ result.assay_result.id }}</td>
                     <td>
-                        <a href="/assays/study/{{ result.assay_result.chip_readout.chip_setup.assay_run_id.id }}">
+                        <a href="/assays/{{ result.assay_result.chip_readout.chip_setup.assay_run_id.id }}">
                             {{ result.assay_result.chip_readout.chip_setup.assay_run_id }}
                         </a>
                     </td>
@@ -68,7 +68,7 @@
                     <td>{{ result.assay_result.group }}</td>
                     <td>
                         {% if result.assay_result.signed_off_by %}
-                            <span title="This entry was reviewed by {{ result.assay_result.signed_off_by }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ result.assay_result.signed_off_by }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if result.assay_result.flagged %}
                             <span title="This entry is flagged for review: '{{ result.assay_result.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>

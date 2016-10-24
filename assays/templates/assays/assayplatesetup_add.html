@@ -16,7 +16,7 @@
         <a href="/assays/{{ form.instance.assay_run_id.id }}">{{ form.instance.assay_run_id }}</a>
     </li>
     <li class="active">
-        {% if object %}
+        {% if object and not form.success.value %}
             Edit <em>{{ object }}</em>
         {% else %}
             Add Plate Setup
@@ -30,10 +30,16 @@
 
     <div class="container">
 
-    {% include 'review.html' %}
-
     <h1>
         Edit <em>{{ object }}</em>
+
+    {% if object.assayplatereadout_set.all %}
+        <a href="{% url 'plate_readout_update' object.assayplatereadout_set.all.0.id %}" class="btn btn-primary">View/Edit Plate Readout</a>
+
+        {% if object.assayplatereadout_set.all.0.assayplatetestresult_set.all %}
+            <a href="{% url 'plate_result_update' object.assayplatereadout_set.all.0.assayplatetestresult_set.all.0.id %}" class="btn btn-primary">View/Edit Plate Test Results</a>
+        {% endif %}
+    {% endif %}
 {% else %}
     <form class="form-horizontal" method="post" >
 
@@ -46,7 +52,7 @@
     {% csrf_token %}
     </h1>
 
-    {% include "submit.html" with flag="y" clone="y" %}
+    {% include "submit.html" with flag="y" clone="y" group=form.instance.assay_run_id.group %}
 
     {% include 'errors.html' %}
 

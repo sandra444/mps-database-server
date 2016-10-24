@@ -38,7 +38,7 @@
 {#        {% include 'flag.html'%}#}
     </h1>
 
-    {% include "submit.html" with flag="y" %}
+    {% include "submit.html" with flag="y" group=form.instance.group.name %}
 
     {% include 'errors.html' %}
 

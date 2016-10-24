@@ -41,10 +41,10 @@
                 <tr class="compound" id={{ setup.id }} name={{ setup.id }}>
                     <td><a class="btn btn-primary" href="{{ setup.id }}">View/Edit</a></td>
                     <td>{{ setup.assay_chip_id }}</td>
-                    <td><a href="/assays/study/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
+                    <td><a href="/assays/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
                     <td>{{ setup.setup_date|date:"M d, Y" }}</td>
                     <td>{{ setup.device }}</td>
-                    <td>{{ setup.organ_model }} {{ setup.organ_model_protocol|default:'' }}</td>
+                    <td>{{ setup.organ_model }}</td>
 {#                    <td>{{ setup.chip_test_type }}</td>#}
                     {% if setup.compound != None %}
                         <td>{{ setup.compound }} ({{ setup.concentration }} {{ setup.unit }})</td>
@@ -60,7 +60,7 @@
                     <td>{{ setup.group }}</td>
                     <td>
                         {% if setup.signed_off_by %}
-                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-thumbs-up text-primary" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if setup.flagged %}
                             <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>

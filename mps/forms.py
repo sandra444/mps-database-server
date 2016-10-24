@@ -5,6 +5,18 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.models import User
 
 
+class SignOffMixin(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SignOffMixin, self).__init__(*args, **kwargs)
+
+        instance = kwargs.get('instance', None)
+
+        if instance and instance.signed_off_by:
+            self.fields['signed_off'].initial = True
+
+    signed_off = forms.BooleanField(required=False)
+
+
 class SearchForm(forms.Form):
     """Form for Global/Bioactivity searches"""
     app = forms.CharField(max_length=50)
