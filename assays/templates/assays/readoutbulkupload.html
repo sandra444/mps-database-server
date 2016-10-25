@@ -3,6 +3,8 @@
 
 {% block load %}
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/cookies.js" %}"></script>
+    <script src="{% static "assays/readoutbulkupload.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -110,4 +112,10 @@
     {% endif %}
 
     </form>
+
+    <legend>Current Data</legend>
+    <div id="current_charts" class="padded-bottom">No Current Chip Data</div>
+
+    <legend>New Data</legend>
+    <div id="new_charts" class="padded-bottom">Preview Unavailable</div>
 {% endblock %}

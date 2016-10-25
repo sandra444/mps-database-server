@@ -2078,7 +2078,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
                         # Make sure the data is valid before adding it
                         # Everything but value and QC Status must exist to be valid
-                        if row and all(row[:5] + [row[6]]):
+                        if valid_chip_row(row):
                             chip_id = row[0]
 
                             if chip_id not in csv_data:

@@ -1005,11 +1005,14 @@ def validate_chip_readout_file(
     sheet=''
 ):
     """Validates CSV Uploads for Chip Readouts"""
+    # A list of errors
+    errors = []
+
     # Confirm that there is only one chip_id given if this is not a bulk upload
     if not sheet:
         for line in datalist[headers:]:
-            if line and line[0] not in chip_assays:
-                raise forms.ValidationError(
+            if chip_assays and line and line[0] not in chip_assays:
+                errors.append(
                     'Chip ID "{0}" does not match current Chip ID. '
                     'You cannot upload data for multiple chips in this interface. '
                     'If you want to upload multiple set of data, '
@@ -1042,7 +1045,7 @@ def validate_chip_readout_file(
         val_unit = line[6].strip()
 
         if chip_id not in chip_assays:
-            raise forms.ValidationError(
+            errors.append(
                 sheet + 'No Chip with the ID "{0}" exists; please change your file or add this assay.'.format(chip_id)
             )
 
@@ -1051,12 +1054,13 @@ def validate_chip_readout_file(
 
         # Raise error when an assay does not exist
         if assay not in assays:
-            raise forms.ValidationError(
+            errors.append(
                 sheet + 'Chip-%s: No assay with the name "%s" exists; please change your file or add this assay'
-                % (chip_id, assay))
+                % (chip_id, assay)
+            )
         # Raise error if val_unit not equal to one listed in ACRA
         if val_unit != assays.get(assay, ''):
-            raise forms.ValidationError(
+            errors.append(
                 sheet + 'Chip-%s: The value unit "%s" does not correspond with the selected readout unit of "%s"'
                 % (chip_id, val_unit, assays.get(assay, ''))
             )
@@ -1064,7 +1068,7 @@ def validate_chip_readout_file(
         # Fail if time unit does not match
         # TODO make a better fuzzy match, right now just checks to see if the first letters correspond
         if not time_unit or (time_unit[0] != readout_time_unit[0]):
-            raise forms.ValidationError(
+            errors.append(
                 sheet + 'Chip-%s: The time unit "%s" does not correspond with the selected readout time unit of "%s"'
                 % (chip_id, time_unit, readout_time_unit)
             )
@@ -1080,7 +1084,7 @@ def validate_chip_readout_file(
             if val != '':
                 float(val)
         except:
-            raise forms.ValidationError(
+            errors.append(
                 sheet + 'The value "%s" is invalid; please make sure all values are numerical' % str(val)
             )
 
@@ -1089,9 +1093,12 @@ def validate_chip_readout_file(
             float(time)
 
         except:
-            raise forms.ValidationError(
+            errors.append(
                 sheet + 'The time "%s" is invalid; please make sure all times are numerical' % str(time)
             )
+
+    if errors:
+        raise forms.ValidationError(errors)
 
 
 class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
@@ -1255,7 +1262,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
         except:
             raise forms.ValidationError('The given file does not appear to be a properly formatted Excel file.')
 
-        # For the moment, just have headers be equal to two?
+        # For the moment, just have headers be equal to one?
         headers = 1
         sheet_names = excel_file.sheet_names()
 

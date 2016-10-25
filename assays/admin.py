@@ -323,6 +323,9 @@ class AssayModelTypeAdmin(LockableAdmin):
         ),
     )
 
+# SPAGHETTI CODE FIND A BETTER PLACE TO PUT THIS
+def valid_chip_row(row):
+    return row and all(row[:5] + [row[6]])
 
 admin.site.register(AssayModelType, AssayModelTypeAdmin)
 
@@ -1207,35 +1210,32 @@ def parse_chip_csv(current_chip_readout, current_file, headers, form):
     current_index = 0
 
     # Only take values from headers onward
-    for rowID, rowValue in enumerate(datalist[headers:]):
-        # rowValue holds all of the row elements
-        # rowID is the index of the current row from top to bottom
-
+    for row in datalist[headers:]:
         # Skip any row with insufficient columns
-        if len(rowValue) < 7:
+        if len(row) < 7:
             continue
 
         # Skip any row with incomplete data
         # This does not include the quality and value (which can be null)
-        if not all(rowValue[:5] + [rowValue[6]]):
+        if not valid_chip_row(row):
             continue
 
         # Try getting the assay from long name
         try:
-            assay = AssayModel.objects.get(assay_name__iexact=rowValue[3])
+            assay = AssayModel.objects.get(assay_name__iexact=row[3])
         # If this fails, then use the short name
         except:
-            assay = AssayModel.objects.get(assay_short_name__iexact=rowValue[3])
+            assay = AssayModel.objects.get(assay_short_name__iexact=row[3])
 
-        field = rowValue[4]
-        val = rowValue[5]
-        time = rowValue[1]
+        field = row[4]
+        val = row[5]
+        time = row[1]
 
         # PLEASE NOTE Database inputs, not the csv, have the final say
         # Get quality if possible
         quality = u''
-        if len(rowValue) > 7:
-            quality = rowValue[7]
+        if len(row) > 7:
+            quality = row[7]
 
         # Get quality from added form inputs if possible
         if current_index in qc_status:

@@ -4,6 +4,15 @@ from collections import defaultdict
 from django.http import *
 from .models import *
 from microdevices.models import MicrophysiologyCenter, Microdevice
+
+from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
+from .forms import validate_chip_readout_file, stringify_excel_value
+import xlrd
+
+# TODO FIX SPAGHETTI CODE
+from .forms import ReadoutBulkUploadForm
+from .admin import valid_chip_row
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -19,6 +28,72 @@ logger = logging.getLogger(__name__)
 def main(request):
     """Default to server error"""
     return HttpResponseServerError()
+
+
+def sheet_to_datalist(sheet):
+    datalist = []
+
+    for row_index in range(sheet.nrows):
+        # Stringify the the values
+        row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
+        # Trim row to exclude validation columns and beyond
+        row = row[:TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX]
+        datalist.append(row)
+
+    return datalist
+
+
+def datalist_to_chip_data(headers, datalist, study):
+    chip_data = []
+
+    chip_readouts = {
+        readout.chip_setup.assay_chip_id: readout for readout in AssayChipReadout.objects.filter(
+            chip_setup__assay_run_id=study
+        ).prefetch_related(
+            'chip_setup__assay_run_id'
+        )
+    }
+
+    assay_models = {
+        assay.assay_name: assay for assay in AssayModel.objects.all()
+    }
+
+    assay_models.update({
+        assay.assay_short_name: assay for assay in AssayModel.objects.all()
+    })
+
+    physical_units = {
+        unit.unit: unit for unit in PhysicalUnits.objects.filter(availability__icontains='readout')
+    }
+
+    dummy_reader = AssayReader.objects.all()[0]
+
+    # TODO CLARIFY WHAT EACH ROW VALUE IS
+    for row in datalist[headers:]:
+        if valid_chip_row(row):
+            value = row[5]
+            if not value:
+                value = None
+            else:
+                value = float(value)
+            chip_data.append(
+                AssayChipRawData(
+                    assay_chip_id=chip_readouts.get(row[0]),
+                    assay_id=AssayChipReadoutAssay(
+                        readout_id=chip_readouts.get(row[0]),
+                        assay_id=assay_models.get(row[3]),
+                        # Arbitrary value for reader
+                        reader_id=dummy_reader,
+                        readout_unit=physical_units.get(row[6])
+                    ),
+                    field_id=row[4],
+                    value=value,
+                    elapsed_time=float(row[1]),
+                    quality=row[7]
+                )
+            )
+
+    return chip_data
 
 
 # TODO ADD BASE LAYOUT CONTENT TO ASSAY LAYOUT
@@ -338,54 +413,7 @@ def fetch_chip_readout(request):
                         content_type="application/json")
 
 
-# TODO REQUIRES REVISION
-# TODO NEED TO CONFIRM UNITS ARE THE SAME (ELSE CONVERSION)
-def fetch_readouts(request):
-    """Get all readouts for a given study for Study Summary
-
-    Receives the following from POST:
-    study -- the study to acquire readouts from
-    key -- specifies whether to split readouts by compound or device
-    """
-    study = request.POST.get('study', '')
-    key = request.POST.get('key', '')
-    percent_control = request.POST.get('percent_control', '')
-
-    if percent_control == 'true':
-        percent_control = True
-    else:
-        percent_control = False
-
-    # Get chip readouts
-    readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=study).prefetch_related(
-        'chip_setup',
-        'chip_setup__assay_run_id_id'
-    )
-
-    if key == 'compound':
-        raw_data = AssayChipRawData.objects.filter(
-            assay_chip_id=readouts
-        ).prefetch_related(
-            'assay_id',
-            'assay_chip_id',
-            'assay_chip_id__chip_setup',
-            'assay_chip_id__chip_setup__compound',
-            'assay_chip_id__chip_setup__unit',
-            'assay_id__assay_id',
-            'assay_id__readout_unit'
-        )
-
-    else:
-        raw_data = AssayChipRawData.objects.filter(
-            assay_chip_id=readouts
-        ).prefetch_related(
-            'assay_id',
-            'assay_chip_id',
-            'assay_chip_id__chip_setup',
-            'assay_id__assay_id',
-            'assay_id__readout_unit'
-        )
-
+def get_readout_data(raw_data, key, percent_control, include_all):
     # TODO ACCOUNT FOR CASE WHERE ASSAY HAS TWO DIFFERENT UNITS?
     # TODO MAY FORBID THIS CASE, MUST ASK FIRST
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
@@ -407,7 +435,7 @@ def fetch_readouts(request):
 
         quality = raw.quality
 
-        if not quality:
+        if value and (include_all or not quality):
             # Get tag for data point
             # If by compound
             if key == 'compound':
@@ -478,6 +506,61 @@ def fetch_readouts(request):
                             assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('time', []).append(time)
                             # Perform conversion
                             assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('values', []).append((value / control_value) * 100)
+
+    return assays
+
+# TODO REQUIRES REVISION
+# TODO NEED TO CONFIRM UNITS ARE THE SAME (ELSE CONVERSION)
+def fetch_readouts(request):
+    """Get all readouts for a given study for Study Summary
+
+    Receives the following from POST:
+    study -- the study to acquire readouts from
+    key -- specifies whether to split readouts by compound or device
+    percent_control -- specifies whether to convert to percent control
+    include_all -- specifies whether to include all data (exclude invalid if null string)
+    """
+    study = request.POST.get('study', '')
+    key = request.POST.get('key', '')
+    percent_control = request.POST.get('percent_control', '')
+    include_all = request.POST.get('include_all', '')
+
+    if percent_control == 'true':
+        percent_control = True
+    else:
+        percent_control = False
+
+    # Get chip readouts
+    readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=study).prefetch_related(
+        'chip_setup',
+        'chip_setup__assay_run_id_id'
+    )
+
+    if key == 'compound':
+        raw_data = AssayChipRawData.objects.filter(
+            assay_chip_id=readouts
+        ).prefetch_related(
+            'assay_id',
+            'assay_chip_id',
+            'assay_chip_id__chip_setup',
+            'assay_chip_id__chip_setup__compound',
+            'assay_chip_id__chip_setup__unit',
+            'assay_id__assay_id',
+            'assay_id__readout_unit'
+        )
+
+    else:
+        raw_data = AssayChipRawData.objects.filter(
+            assay_chip_id=readouts
+        ).prefetch_related(
+            'assay_id',
+            'assay_chip_id',
+            'assay_chip_id__chip_setup',
+            'assay_id__assay_id',
+            'assay_id__readout_unit'
+        )
+
+    assays = get_readout_data(raw_data, key, percent_control, include_all)
 
     data = {
         'assays': assays,
@@ -631,6 +714,65 @@ def fetch_dropdown(request):
     return HttpResponse(json.dumps(data),
                         content_type='application/json')
 
+
+# USE THE POST DATA TO BUILD A BULKUPLOAD FORM
+# DO NOT EXPLICITLY CALL VALIDATION
+def validate_bulk_file(request):
+    """Validates a bulk file and returns either errors or a preview of the data entered
+
+    Receives the following from POST:
+    study -- the study to acquire readouts from
+    key -- specifies whether to split readouts by compound or device
+    percent_control -- specifies whether to convert to percent control
+    include_all -- specifies whether to include all data (exclude invalid if null string)
+    """
+    study = request.POST.get('study', '')
+    key = request.POST.get('key', '')
+    percent_control = request.POST.get('percent_control', '')
+    include_all = request.POST.get('include_all', '')
+    # bulk_file = request.FILES.get('bulk_file', None)
+
+    this_study = AssayRun.objects.get(pk=int(study))
+
+    form = ReadoutBulkUploadForm(request.POST, request.FILES, instance=this_study)
+
+    if form.is_valid():
+        form_data = form.cleaned_data
+
+        bulk_file = form_data.get('bulk_file')
+
+        # Turn bulk file to sheets
+        excel_file = xlrd.open_workbook(file_contents=bulk_file)
+        sheets = excel_file.sheets()
+
+        # For the moment, just have headers be equal to one?
+        headers = 1
+
+        raw_data = []
+
+        for sheet in sheets:
+            datalist = sheet_to_datalist(sheet)
+
+            header = datalist[0]
+
+            # Check if chip
+            if 'CHIP' in header[0].upper() and 'ASSAY' in header[3].upper():
+                raw_data.extend(datalist_to_chip_data(headers, datalist, study))
+
+        assays = get_readout_data(raw_data, key, percent_control, include_all)
+
+        data = {'assays': assays}
+
+        return HttpResponse(json.dumps(data),
+                            content_type="application/json")
+
+    else:
+        data = {
+            'errors': form.errors.get('bulk_file').as_text()
+        }
+        return HttpResponse(json.dumps(data),
+                            content_type='application/json')
+
 switch = {
     'fetch_assay_layout_content': fetch_assay_layout_content,
     'fetch_readout': fetch_readout,
@@ -644,6 +786,7 @@ switch = {
     'fetch_organ_models': fetch_organ_models,
     'fetch_protocols': fetch_protocols,
     'fetch_protocol': fetch_protocol,
+    'validate_bulk_file': validate_bulk_file
 }
 
 
