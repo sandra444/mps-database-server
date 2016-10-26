@@ -262,16 +262,17 @@ class AssayChipSetupForm(SignOffMixin, CloneableForm):
                 or (compound and not all([concentration, unit])):
             raise forms.ValidationError('Please complete all data for compound.')
 
+        # RENAMING CHIPS WITH DATA IS NOW ALLOWED
         # Check to see if data has been uploaded for this setup
         # Prevent changing chip id if this is the case
         # Get readouts
-        readout = AssayChipReadout.objects.filter(chip_setup=self.instance)
-        if readout:
-            if AssayChipRawData.objects.filter(assay_chip_id=readout) \
-                    and self.cleaned_data.get('assay_chip_id') != self.instance.assay_chip_id:
-                raise forms.ValidationError(
-                    {'assay_chip_id': ['Chip ID/Barcode cannot be changed after data has been uploaded.']}
-                )
+        # readout = AssayChipReadout.objects.filter(chip_setup=self.instance)
+        # if readout:
+        #     if AssayChipRawData.objects.filter(assay_chip_id=readout) \
+        #             and self.cleaned_data.get('assay_chip_id') != self.instance.assay_chip_id:
+        #         raise forms.ValidationError(
+        #             {'assay_chip_id': ['Chip ID/Barcode cannot be changed after data has been uploaded.']}
+        #         )
 
 
 class AssayChipCellsInlineFormset(CloneableBaseInlineFormSet):
@@ -427,12 +428,13 @@ class AssayPlateSetupForm(SignOffMixin, CloneableForm):
                 raise forms.ValidationError(
                     {'assay_layout': ['Assay layout cannot be changed after data has been uploaded.']}
                 )
-            if AssayReadout.objects.filter(
-                    assay_device_readout=readout
-            ) and self.cleaned_data.get('assay_plate_id') != self.instance.assay_plate_id:
-                raise forms.ValidationError(
-                    {'assay_plate_id': ['Plate ID/Barcode cannot be changed after data has been uploaded.']}
-                )
+            # RENAMING PLATES WITH DATA IS NOW ALLOWED
+            # if AssayReadout.objects.filter(
+            #         assay_device_readout=readout
+            # ) and self.cleaned_data.get('assay_plate_id') != self.instance.assay_plate_id:
+            #     raise forms.ValidationError(
+            #         {'assay_plate_id': ['Plate ID/Barcode cannot be changed after data has been uploaded.']}
+            #     )
 
 
 class AssayPlateCellsInlineFormset(CloneableBaseInlineFormSet):
