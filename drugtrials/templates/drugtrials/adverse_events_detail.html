@@ -102,13 +102,11 @@
                 <span title="This compound has a Black Box Warning" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
             {% endif %}
 
-            <button class="btn btn-info" type="button" data-toggle="collapse"
-                data-target="#warnings" aria-expanded="false" aria-controls="warnings">
-                Show
-            </button>
+            <button class="btn btn-info" onclick="$('#warnings').toggle('slow');
+                $(this).html($(this).html() == 'Show' ? 'Hide' : 'Show');">Show</button>
         </legend>
 
-        <div id="warnings" class="row collapse">
+        <div hidden id="warnings" class="row">
 {#            <blockquote>#}
             <div class="col-xs-12">
                 <p>
@@ -123,13 +121,11 @@
         <legend>
             Nonclinical Toxicology
 
-            <button class="btn btn-info" type="button" data-toggle="collapse"
-                data-target="#nonclinical_toxicology" aria-expanded="false" aria-controls="nonclinical_toxicology">
-                Show
-            </button>
+            <button class="btn btn-info" onclick="$('#nonclinical_toxicology').toggle('slow');
+                $(this).html($(this).html() == 'Show' ? 'Hide' : 'Show');">Show</button>
         </legend>
 
-        <div id="nonclinical_toxicology" class="row collapse">
+        <div hidden id="nonclinical_toxicology" class="row">
 {#            <blockquote>#}
             <div class="col-xs-12">
                 <p>

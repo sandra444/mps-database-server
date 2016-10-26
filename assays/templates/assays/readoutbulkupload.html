@@ -72,8 +72,12 @@
     {% endif %}
 
     {% if chip_readouts %}
-        <legend>Available Chip Readouts</legend>
-        <table class="table table-striped table-bordered">
+        <legend>
+            Available Chip Readouts
+            <a class="btn btn-info" onclick="$('#chip_readouts_table').toggle('slow');
+            $(this).html($(this).html() == 'Show' ? 'Hide' : 'Show');">Show</a>
+        </legend>
+        <table hidden id="chip_readouts_table" class="table table-striped table-bordered">
             <tbody>
                 {% for readout in chip_readouts %}
                     <tr>
@@ -92,8 +96,12 @@
     {% endif %}
 
     {% if plate_readouts %}
-        <legend>Available Plate Readouts</legend>
-        <table class="table table-striped table-bordered">
+        <legend>
+            Available Plate Readouts
+            <a class="btn btn-info" onclick="$('#plate_readouts_table').toggle('slow');
+            $(this).html($(this).html() == 'Show' ? 'Hide' : 'Show');">Show</a>
+        </legend>
+        <table hidden id="plate_readouts_table" class="table table-striped table-bordered">
             <tbody>
                 {% for readout in plate_readouts %}
                     <tr>
@@ -113,9 +121,9 @@
 
     </form>
 
-    <legend>Current Data</legend>
+    <legend>Current Chip Data</legend>
     <div id="current_charts" class="padded-bottom">No Current Chip Data</div>
 
-    <legend>New Data</legend>
+    <legend>New Chip Data</legend>
     <div id="new_charts" class="padded-bottom">Preview Unavailable</div>
 {% endblock %}
