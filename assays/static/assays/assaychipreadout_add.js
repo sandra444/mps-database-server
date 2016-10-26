@@ -14,7 +14,7 @@ $(document).ready(function () {
     }
 
     function addChart(id,name,timeUnits,valueUnits) {
-        $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 2.5%;margin-left: -100%px;">')
+        $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 0.5%;margin-left: -100%px;">')
             .addClass('chart-container')
             .appendTo('#extra');
 
@@ -149,7 +149,7 @@ $(document).ready(function () {
             var line = lines[i];
 
             // Need to take a slice to avoid treating missing QC as invalid
-            var every = line.slice(0,7).every(isTrue);
+            var every = line.slice(0,5).every(isTrue) && isTrue(line[6]);
 
             var value = line[5];
 
@@ -159,7 +159,7 @@ $(document).ready(function () {
             }
 
             // If the row has no value (residue code, may be used later)
-            else if (value == 'None') {
+            else if (value == 'None' || !value) {
                 table += "<tr style='background: #606060'>";
             }
 
@@ -374,7 +374,7 @@ $(document).ready(function () {
             .appendTo('body');
         $("#extra").insertAfter($("#assaychipreadoutassay_set-group")[0]);
 
-        $('<div id="csv_table" style="width: 30%;float: left;margin-left: 2.5%;">')
+        $('<div id="csv_table" style="width: 34%;float: left;margin-left: 0.5%;">')
             .appendTo('#extra').html(add);
 
         var charts = [];

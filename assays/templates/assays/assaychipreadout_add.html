@@ -216,6 +216,8 @@
         </div>
     </div>
 
+    {% include 'generic_field.html' with field=form.overwrite_option label="Overwrite Option*" %}
+
     {{ formset.management_form }}
     <legend>Assays</legend>
 

@@ -237,6 +237,7 @@ $(document).ready(function () {
     function validate_bulk_file() {
         var formData = new FormData();
         formData.append('bulk_file', $("#id_bulk_file")[0].files[0]);
+        formData.append('overwrite_option', $("#id_overwrite_option").val());
         formData.append('call', 'validate_bulk_file');
         formData.append('study', study_id);
         formData.append('percent_control', percent_control);
@@ -279,7 +280,7 @@ $(document).ready(function () {
                     }
                 },
                 error: function (xhr, errmsg, err) {
-                    alert('An unknown error has .');
+                    alert('An unknown error has occurred.');
                     console.log(xhr.status + ": " + xhr.responseText);
                     // Remove file selection
                     $('#id_bulk_file').val('');

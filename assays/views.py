@@ -923,12 +923,13 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             data = form.cleaned_data
             # Get headers
             headers = int(data.get('headers'))
+            overwrite_option = data.get('overwrite_option')
 
             save_forms_with_tracking(self, form, formset=formset, update=False)
 
             if formset.files.get('file', ''):
                 current_file = formset.files.get('file', '')
-                parse_chip_csv(self.object, current_file, headers, form)
+                parse_chip_csv(self.object, current_file, headers, overwrite_option, form)
             if data['another']:
                 form = self.form_class(
                     study,
@@ -1005,13 +1006,14 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             data = form.cleaned_data
             # Get headers
             headers = int(data.get('headers'))
+            overwrite_option = data.get('overwrite_option')
 
             save_forms_with_tracking(self, form, formset=formset, update=True)
 
             # Save file if it exists
             if formset.files.get('file', ''):
                 file = formset.files.get('file', '')
-                parse_chip_csv(self.object, file, headers, form)
+                parse_chip_csv(self.object, file, headers, overwrite_option, form)
             # If no file, try to update the qc_status
             else:
                 modify_qc_status_chip(self.object, form)
@@ -1928,12 +1930,12 @@ class AssayPlateTestResultDelete(CreatorOrAdminRequiredMixin, DeleteView):
         return '/assays/' + str(self.object.readout.setup.assay_run_id_id)
 
 
-def get_valid_csv_location(file_name, study_id, device_type):
+def get_valid_csv_location(file_name, study_id, device_type, overwrite_option):
     media_root = settings.MEDIA_ROOT.replace('mps/../', '', 1)
 
     valid_chars = '-_.{0}{1}'.format(string.ascii_letters, string.digits)
     # Get only valid chars
-    valid_file_name = ''.join(c for c in file_name if c in valid_chars)
+    valid_file_name = ''.join(c for c in file_name if c in valid_chars) + '_' + overwrite_option
     # Replace spaces with underscores
     valid_file_name = re.sub(r'\s+', '_', valid_file_name)
 
@@ -2022,6 +2024,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
             data = form.cleaned_data
             bulk_file = data.get('bulk_file')
+            overwrite_option = data.get('overwrite_option')
 
             excel_file = xlrd.open_workbook(file_contents=bulk_file)
 
@@ -2102,7 +2105,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
                         # Get valid file location
                         # Note added csv extension
-                        file_location = get_valid_csv_location(chip_id, study_id, 'chip')
+                        file_location = get_valid_csv_location(chip_id, study_id, 'chip', overwrite_option)
                         # Write the csv
                         write_out_csv(file_location, datalist)
 
@@ -2113,7 +2116,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                         readout.save()
 
                         # Note the lack of a form normally used for QC
-                        parse_chip_csv(readout, readout.file, headers, None)
+                        parse_chip_csv(readout, readout.file, headers, overwrite_option, None)
 
                 elif sheet_type == 'Tabular':
                     # Header if time
@@ -2172,7 +2175,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
                         # Get valid file location
                         # Note added csv extension
-                        file_location = get_valid_csv_location(plate_id, study_id, 'plate')
+                        file_location = get_valid_csv_location(plate_id, study_id, 'plate', overwrite_option)
                         # Write the csv
                         write_out_csv(file_location, datalist)
 
@@ -2219,7 +2222,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
                         # Get valid file location
                         # Note added csv extension
-                        file_location = get_valid_csv_location(plate_id, study_id, 'plate')
+                        file_location = get_valid_csv_location(plate_id, study_id, 'plate', overwrite_option)
                         # Write the csv
                         write_out_csv(file_location, datalist)
 

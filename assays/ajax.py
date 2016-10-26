@@ -348,7 +348,8 @@ def get_chip_readout_data_as_csv(chip_ids):
     ).order_by(
         'assay_chip_id__chip_setup__assay_chip_id',
         'assay_id__assay_id__assay_short_name',
-        'elapsed_time'
+        'elapsed_time',
+        'quality'
     )
 
     csv = ''
@@ -730,6 +731,7 @@ def validate_bulk_file(request):
     key = request.POST.get('key', '')
     percent_control = request.POST.get('percent_control', '')
     include_all = request.POST.get('include_all', '')
+    # overwrite_option = request.POST.get('overwrite_option', '')
     # bulk_file = request.FILES.get('bulk_file', None)
 
     this_study = AssayRun.objects.get(pk=int(study))
@@ -768,7 +770,7 @@ def validate_bulk_file(request):
 
     else:
         data = {
-            'errors': form.errors.get('bulk_file').as_text()
+            'errors': form.errors.get('bulk_file').as_text() + form.errors.get('overwrite_option').as_text()
         }
         return HttpResponse(json.dumps(data),
                             content_type='application/json')

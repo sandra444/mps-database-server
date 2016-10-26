@@ -159,6 +159,16 @@ class AssayChipResultForm(SignOffMixin, forms.ModelForm):
 
 class AssayChipReadoutForm(SignOffMixin, CloneableForm):
     """Frontend form for Chip Readouts"""
+    overwrite_option = forms.ChoiceField(
+        choices=(
+            ('mark_conflicting_data', 'Mark Conflicting Data'),
+            ('mark_all_old_data', 'Mark All Old Data'),
+            ('delete_conflicting_data', 'Delete Conflicting Data'),
+            ('delete_all_old_data', 'Delete All Old Data')
+        ),
+        initial='Mark Conflicting Data'
+    )
+
     def __init__(self, study, current, *args, **kwargs):
         """Init the Chip Readout Form
 
@@ -1238,6 +1248,16 @@ def get_bulk_datalist(sheet):
 class ReadoutBulkUploadForm(forms.ModelForm):
     """Form for Bulk Uploads"""
     bulk_file = forms.FileField()
+
+    overwrite_option = forms.ChoiceField(
+        choices=(
+            ('mark_conflicting_data', 'Mark Conflicting Data'),
+            ('mark_all_old_data', 'Mark All Old Data'),
+            ('delete_conflicting_data', 'Delete Conflicting Data'),
+            ('delete_all_old_data', 'Delete All Old Data')
+        ),
+        initial='Mark Conflicting Data'
+    )
 
     class Meta(object):
         model = AssayRun

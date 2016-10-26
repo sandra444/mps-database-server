@@ -1177,12 +1177,15 @@ def modify_qc_status_chip(current_chip_readout, form):
     # Get the readouts as they would appear on the front end
     # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
     readouts = AssayChipRawData.objects.prefetch_related(
+        'assay_chip_id__chip_setup',
         'assay_id__assay_id'
     ).filter(
         assay_chip_id=current_chip_readout
     ).order_by(
+        'assay_chip_id__chip_setup__assay_chip_id',
         'assay_id__assay_id__assay_short_name',
-        'elapsed_time'
+        'elapsed_time',
+        'quality'
     )
 
     # Get QC status for each line
@@ -1195,10 +1198,39 @@ def modify_qc_status_chip(current_chip_readout, form):
 
 # TODO REFACTOR CAMEL CASE
 @transaction.atomic
-def parse_chip_csv(current_chip_readout, current_file, headers, form):
+def parse_chip_csv(current_chip_readout, current_file, headers, overwrite_option, form):
     """Parse a csv file to get chip readout data"""
     # remove_existing_chip(current_chip_readout)
-    AssayChipRawData.objects.filter(assay_chip_id=current_chip_readout).delete()
+    old_readout_data = AssayChipRawData.objects.filter(
+        assay_chip_id=current_chip_readout
+    ).prefetch_related(
+        'assay_id__assay_id',
+        'assay_chip_id'
+    )
+
+    conflicting_data = {}
+
+    # Delete all old data
+    if overwrite_option == 'delete_all_old_data':
+        old_readout_data.delete()
+    # Add 'OLD' to qc status of all old data
+    elif overwrite_option == 'mark_all_old_data':
+        for readout in old_readout_data:
+            modified_qc_status = 'OLD ' + readout.quality
+            modified_qc_status = modified_qc_status[:19]
+            readout.quality = modified_qc_status
+            readout.save()
+    # Fill check for conflicting otherwise
+    else:
+        for readout in old_readout_data:
+            conflicting_data.setdefault(
+                (readout.assay_id_id, readout.field_id, readout.elapsed_time), []
+            ).append(readout)
+
+    # Get assay chip readout assays
+    assay_ids = {
+        acra.assay_id_id: acra for acra in AssayChipReadoutAssay.objects.filter(readout_id=current_chip_readout)
+    }
 
     # Get QC status for each line
     qc_status = get_qc_status_chip(form)
@@ -1227,9 +1259,11 @@ def parse_chip_csv(current_chip_readout, current_file, headers, form):
         except:
             assay = AssayModel.objects.get(assay_short_name__iexact=row[3])
 
+        assay_id = assay_ids.get(assay.id)
+
         field = row[4]
         val = row[5]
-        time = row[1]
+        time = float(row[1])
 
         # PLEASE NOTE Database inputs, not the csv, have the final say
         # Get quality if possible
@@ -1250,10 +1284,22 @@ def parse_chip_csv(current_chip_readout, current_file, headers, form):
             if not quality:
                 quality = 'NULL'
 
+        # Deal with conflicting data
+        conflicting_entries = conflicting_data.get((assay_id.id, field, time), [])
+
+        for entry in conflicting_entries:
+            if overwrite_option == 'delete_conflicting_data':
+                entry.delete()
+            elif overwrite_option == 'mark_conflicting_data':
+                modified_qc_status = 'OLD ' + entry.quality
+                modified_qc_status = modified_qc_status[:19]
+                entry.quality = modified_qc_status
+                entry.save()
+
         #How to parse Chip data
         AssayChipRawData(
             assay_chip_id=current_chip_readout,
-            assay_id=AssayChipReadoutAssay.objects.get(readout_id=current_chip_readout, assay_id=assay),
+            assay_id=assay_id,
             field_id=field,
             value=val,
             elapsed_time=time,

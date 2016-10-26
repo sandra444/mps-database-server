@@ -51,16 +51,18 @@
         <label for="bulk_file" class="col-sm-2 control-label">Excel File*</label>
         <div class="col-sm-10">
             {{ form.bulk_file }}
-
-            <p>
-                <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">Click Here For Chip Template</a>
-                <br>
-                <a href="/media/excel_templates/plate_tabular_template-{{ version }}.xlsx">Click Here For Plate (Tabular) Template</a>
-                <br>
-                <a href="/media/excel_templates/plate_block_template-{{ version }}.xlsx">Click Here For Plate (Block) Template</a>
-            </p>
         </div>
     </div>
+
+    {% include 'generic_field.html' with field=form.overwrite_option label="Overwrite Option*" %}
+
+    <p>
+        <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">Click Here For Chip Template</a>
+        <br>
+        <a href="/media/excel_templates/plate_tabular_template-{{ version }}.xlsx">Click Here For Plate (Tabular) Template</a>
+        <br>
+        <a href="/media/excel_templates/plate_block_template-{{ version }}.xlsx">Click Here For Plate (Block) Template</a>
+    </p>
 
     {% if not chip_readouts and not plate_readouts %}
         <div class="alert alert-danger" role="alert">
