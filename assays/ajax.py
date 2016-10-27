@@ -379,11 +379,12 @@ def get_chip_readout_data_as_csv(chip_ids):
         csv += value + ','
         # Add value unit
         csv += unicode(raw.assay_id.readout_unit) + ','
-        # End with the quality
+        # End with the quality and notes
         if ',' in raw.quality:
-            csv += '"' + unicode(raw.quality) + '"' + '\n'
+            csv += '"' + unicode(raw.quality) + '"' + ','
         else:
-            csv += unicode(raw.quality) + '\n'
+            csv += unicode(raw.quality) + ','
+        csv += '"' + unicode(raw.notes) + '"' + '\n'
 
     return csv
 

@@ -635,6 +635,9 @@ class AssayChipRawData(models.Model):
     # This value will act as quality control, if it evaluates True then the value is considered invalid
     quality = models.CharField(max_length=20, default='')
 
+    # This value contains notes for the data point
+    notes = models.CharField(max_length=255, default='')
+
 
 class AssayChipCells(models.Model):
     """Individual cell parameters for CHIP setup used in inline"""

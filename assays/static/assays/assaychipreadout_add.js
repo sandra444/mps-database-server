@@ -14,7 +14,7 @@ $(document).ready(function () {
     }
 
     function addChart(id,name,timeUnits,valueUnits) {
-        $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 0.5%;margin-left: -100%px;">')
+        $('<div id="chart' + id + '" align="right" style="width: 45%;float: right;margin-left: -100%px;">')
             .addClass('chart-container')
             .appendTo('#extra');
 
@@ -205,6 +205,14 @@ $(document).ready(function () {
                 current_index += 1;
             }
 
+            // Add notes
+            if (line[8]) {
+                table += '<th><span class="glyphicon glyphicon-info-sign" title="' + line[8] + '"></span></th>';
+            }
+            else {
+                table += "<th></th>";
+            }
+
             table += "</tr>";
         }
 
@@ -357,7 +365,15 @@ $(document).ready(function () {
     var exist = false;
 
     var headers = 0;
-    var header = "<th>Chip ID</th><th>Time</th><th>Time Unit</th><th>Assay</th><th>Object</th><th>Value</th><th>Value Unit</th><th>QC Status</th>";
+    var header = "<th>Chip ID</th>" +
+        "<th>Time</th>" +
+        "<th>Time Unit</th>" +
+        "<th>Assay</th>" +
+        "<th>Object</th>" +
+        "<th>Value</th>" +
+        "<th>Value Unit</th>" +
+        "<th>QC Status</th>" +
+        "<th></th>";
 
     if ($('#id_headers')[0]) {
         headers = Math.floor($('#id_headers').val());
@@ -374,7 +390,7 @@ $(document).ready(function () {
             .appendTo('body');
         $("#extra").insertAfter($("#assaychipreadoutassay_set-group")[0]);
 
-        $('<div id="csv_table" style="width: 34%;float: left;margin-left: 0.5%;">')
+        $('<div id="csv_table" style="width: 50%;float: left;">')
             .appendTo('#extra').html(add);
 
         var charts = [];

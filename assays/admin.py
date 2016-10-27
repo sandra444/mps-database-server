@@ -1264,6 +1264,8 @@ def parse_chip_csv(current_chip_readout, current_file, headers, overwrite_option
         field = row[4]
         val = row[5]
         time = float(row[1])
+        # The notes are trimmed to 255 characters
+        notes = row[8][:255]
 
         # PLEASE NOTE Database inputs, not the csv, have the final say
         # Get quality if possible
@@ -1304,6 +1306,7 @@ def parse_chip_csv(current_chip_readout, current_file, headers, overwrite_option
             value=val,
             elapsed_time=time,
             quality=quality,
+            notes=notes
         ).save()
 
 
