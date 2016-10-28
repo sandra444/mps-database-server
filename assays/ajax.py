@@ -373,7 +373,7 @@ def get_chip_readout_data_as_csv(chip_ids):
         if value is not None:
             value = '%.2f' % value
         else:
-            value = unicode(value)
+            value = ''
         # Get rid of trailing zero and decimal if necessary
         value = value.rstrip('0').rstrip('.') if '.' in value else value
         csv += value + ','
@@ -770,8 +770,13 @@ def validate_bulk_file(request):
                             content_type="application/json")
 
     else:
+        errors = ''
+        if form.errors.get('bulk_file', ''):
+            errors += form.errors.get('bulk_file').as_text()
+        if form.errors.get('overwrite_option', ''):
+            errors += form.errors.get('overwrite_option').as_text()
         data = {
-            'errors': form.errors.get('bulk_file').as_text() + form.errors.get('overwrite_option').as_text()
+            'errors': errors
         }
         return HttpResponse(json.dumps(data),
                             content_type='application/json')
