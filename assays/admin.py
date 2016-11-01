@@ -13,7 +13,8 @@ from assays.forms import (
     AssayPlateReadoutInlineFormset,
     label_to_number,
     process_readout_value,
-    unicode_csv_reader
+    unicode_csv_reader,
+    valid_chip_row
 )
 from django.http import HttpResponseRedirect
 
@@ -322,10 +323,6 @@ class AssayModelTypeAdmin(LockableAdmin):
             }
         ),
     )
-
-# SPAGHETTI CODE FIND A BETTER PLACE TO PUT THIS
-def valid_chip_row(row):
-    return row and all(row[:5] + [row[6]])
 
 admin.site.register(AssayModelType, AssayModelTypeAdmin)
 
@@ -1209,27 +1206,26 @@ def parse_chip_csv(current_chip_readout, current_file, headers, overwrite_option
     )
 
     conflicting_data = {}
-
-    # Delete all old data
-    if overwrite_option == 'delete_all_old_data':
-        old_readout_data.delete()
-    # Add 'OLD' to qc status of all old data
-    elif overwrite_option == 'mark_all_old_data':
-        for readout in old_readout_data:
-            modified_qc_status = 'OLD ' + readout.quality
-            modified_qc_status = modified_qc_status[:19]
-            readout.quality = modified_qc_status
-            readout.save()
     # Fill check for conflicting otherwise
-    else:
+    if overwrite_option not in ['delete_all_old_data', 'mark_all_old_data']:
         for readout in old_readout_data:
             conflicting_data.setdefault(
                 (readout.assay_id_id, readout.field_id, readout.elapsed_time), []
             ).append(readout)
 
+    assay_models = {}
+
+    for assay in AssayModel.objects.all():
+        assay_models.update({
+            assay.assay_name: assay,
+            assay.assay_short_name: assay
+        })
+
     # Get assay chip readout assays
     assay_ids = {
-        acra.assay_id_id: acra for acra in AssayChipReadoutAssay.objects.filter(readout_id=current_chip_readout)
+        (acra.assay_id_id, acra.readout_unit.unit) : acra for acra in AssayChipReadoutAssay.objects.filter(
+            readout_id=current_chip_readout
+        ).prefetch_related('readout_unit')
     }
 
     # Get QC status for each line
@@ -1252,20 +1248,17 @@ def parse_chip_csv(current_chip_readout, current_file, headers, overwrite_option
         if not valid_chip_row(row):
             continue
 
-        # Try getting the assay from long name
-        try:
-            assay = AssayModel.objects.get(assay_name__iexact=row[3])
-        # If this fails, then use the short name
-        except:
-            assay = AssayModel.objects.get(assay_short_name__iexact=row[3])
-
-        assay_id = assay_ids.get(assay.id)
-
+        assay_name = row[3]
         field = row[4]
         val = row[5]
+        unit = row[6]
         time = float(row[1])
         # The notes are trimmed to 255 characters
         notes = row[8][:255]
+
+        # Try getting the assay
+        assay = assay_models.get(assay_name)
+        assay_id = assay_ids.get((assay.id, unit))
 
         # PLEASE NOTE Database inputs, not the csv, have the final say
         # Get quality if possible
