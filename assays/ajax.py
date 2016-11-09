@@ -6,12 +6,15 @@ from .models import *
 from microdevices.models import MicrophysiologyCenter, Microdevice
 
 from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
-from .forms import validate_chip_readout_file, stringify_excel_value
+from .forms import stringify_excel_value, unicode_csv_reader, AssayChipReadoutForm, AssayChipReadoutInlineFormset
 import xlrd
 
 # TODO FIX SPAGHETTI CODE
-from .forms import ReadoutBulkUploadForm
+from .forms import ReadoutBulkUploadForm, get_sheet_type
 from .admin import valid_chip_row
+from django.forms.models import inlineformset_factory
+
+from django.utils import timezone
 
 import logging
 logger = logging.getLogger(__name__)
@@ -31,6 +34,11 @@ def main(request):
 
 
 def sheet_to_datalist(sheet):
+    """Convert an excel sheet to a datalist
+
+    Params:
+    sheet - excel sheet from xlrd
+    """
     datalist = []
 
     for row_index in range(sheet.nrows):
@@ -44,6 +52,13 @@ def sheet_to_datalist(sheet):
 
 
 def datalist_to_chip_data(headers, datalist, study):
+    """Convert a datalist to chip raw data
+
+    Params:
+    headers - the number of header rows
+    datalist - the data as a list of lists
+    study - the study in question
+    """
     chip_data = []
 
     chip_readouts = {
@@ -68,6 +83,24 @@ def datalist_to_chip_data(headers, datalist, study):
 
     dummy_reader = AssayReader.objects.all()[0]
 
+    row_index = headers
+    invalid_row = True
+    dummy_readout = None
+
+    while invalid_row:
+        row = datalist[row_index]
+        if valid_chip_row(row):
+            dummy_readout = AssayChipReadout(
+                chip_setup=AssayChipSetup.objects.filter(
+                    assay_chip_id=row[0],
+                    assay_run_id=study
+                )[0],
+                timeunit=PhysicalUnits.objects.filter(unit=row[2])[0],
+                readout_start_time=timezone.now()
+            )
+            invalid_row = False
+        row_index += 1
+
     # TODO CLARIFY WHAT EACH ROW VALUE IS
     for row in datalist[headers:]:
         if valid_chip_row(row):
@@ -78,7 +111,7 @@ def datalist_to_chip_data(headers, datalist, study):
                 value = float(value)
             chip_data.append(
                 AssayChipRawData(
-                    assay_chip_id=chip_readouts.get(row[0]),
+                    assay_chip_id=chip_readouts.get(row[0], dummy_readout),
                     assay_id=AssayChipReadoutAssay(
                         readout_id=chip_readouts.get(row[0]),
                         assay_id=assay_models.get(row[3]),
@@ -89,7 +122,8 @@ def datalist_to_chip_data(headers, datalist, study):
                     field_id=row[4],
                     value=value,
                     elapsed_time=float(row[1]),
-                    quality=row[7]
+                    quality=row[7],
+                    notes=row[8][:254]
                 )
             )
 
@@ -170,6 +204,12 @@ def fetch_assay_layout_content(request):
 
 
 def fetch_readout(request):
+    """Get the current plate readout data
+
+    From POST:
+    current_id - the current ID
+    model - what model the ID is for
+    """
     current_id = request.POST.get('id', '')
     model = request.POST.get('model', '')
 
@@ -335,22 +375,28 @@ def fetch_center_id(request):
 
 
 # TODO THIS WAS A STRING TO BE EXPEDIENT WRT TO THE JAVSCRIPT IN READOUT ADD, BUT SHOULD BE REVISED
-def get_chip_readout_data_as_csv(chip_ids):
-    """Returns readout data as a csv in the form of a string"""
+def get_chip_readout_data_as_csv(chip_ids, chip_data=None):
+    """Returns readout data as a csv in the form of a string
+
+    Params:
+    chip_ids - Readout IDs to use to acquire chip data (if data not provided)
+    chip_data - Readout raw data, optional, acquired with chip_ids if not provided
+    """
 
     # PLEASE NOTE: THIS AFFECTS PROCESSING OF QC
     # DO NOT MODIFY THIS WITHOUT ALSO CHANGING modify_qc_status_chip
-    chip_data = AssayChipRawData.objects.prefetch_related(
-        'assay_id__assay_id',
-        'assay_chip_id__chip_setup'
-    ).filter(
-        assay_chip_id__in=chip_ids
-    ).order_by(
-        'assay_chip_id__chip_setup__assay_chip_id',
-        'assay_id__assay_id__assay_short_name',
-        'elapsed_time',
-        'quality'
-    )
+    if not chip_data:
+        chip_data = AssayChipRawData.objects.prefetch_related(
+            'assay_id__assay_id',
+            'assay_chip_id__chip_setup'
+        ).filter(
+            assay_chip_id__in=chip_ids
+        ).order_by(
+            'assay_chip_id__chip_setup__assay_chip_id',
+            'assay_id__assay_id__assay_short_name',
+            'elapsed_time',
+            'quality'
+        )
 
     csv = ''
 
@@ -416,6 +462,15 @@ def fetch_chip_readout(request):
 
 
 def get_readout_data(raw_data, key, percent_control, include_all):
+    """Get all readout data for a study and return it in JSON format
+
+    From POST:
+    raw_data - the AssayChipRawData needed to create the JSON
+    key - whether this data should be considered by device or by compound
+    percent_control - whether to use percent control
+    include_all - whether to include all values
+    """
+
     # TODO ACCOUNT FOR CASE WHERE ASSAY HAS TWO DIFFERENT UNITS?
     # TODO MAY FORBID THIS CASE, MUST ASK FIRST
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
@@ -744,23 +799,33 @@ def validate_bulk_file(request):
 
         bulk_file = form_data.get('bulk_file')
 
-        # Turn bulk file to sheets
-        excel_file = xlrd.open_workbook(file_contents=bulk_file)
-        sheets = excel_file.sheets()
-
         # For the moment, just have headers be equal to one?
         headers = 1
 
         raw_data = []
 
-        for sheet in sheets:
-            datalist = sheet_to_datalist(sheet)
+        # If this is Excel
+        try:
+            # Turn bulk file to sheets
+            excel_file = xlrd.open_workbook(file_contents=bulk_file)
+            sheets = excel_file.sheets()
 
-            header = datalist[0]
+            for sheet in sheets:
+                datalist = sheet_to_datalist(sheet)
 
-            # Check if chip
-            if 'CHIP' in header[0].upper() and 'ASSAY' in header[3].upper():
-                raw_data.extend(datalist_to_chip_data(headers, datalist, study))
+                header = datalist[0]
+
+                sheet_type = get_sheet_type(header)
+
+                # Check if chip
+                if sheet_type == 'Chip':
+                    raw_data.extend(datalist_to_chip_data(headers, datalist, study))
+
+        # If this is a csv
+        # TypeError is to deal with bulk_file actually being a datalist, when it comes from a csv clean
+        except (xlrd.XLRDError, TypeError):
+            datalist = bulk_file
+            raw_data.extend(datalist_to_chip_data(headers, datalist, study))
 
         assays = get_readout_data(raw_data, key, percent_control, include_all)
 
@@ -781,6 +846,105 @@ def validate_bulk_file(request):
         return HttpResponse(json.dumps(data),
                             content_type='application/json')
 
+# TODO DUPLICATED THUS VIOLATING DRY
+ACRAFormSet = inlineformset_factory(
+    AssayChipReadout,
+    AssayChipReadoutAssay,
+    formset=AssayChipReadoutInlineFormset,
+    extra=1,
+    exclude=[],
+)
+
+# USE THE POST DATA TO BUILD A BULKUPLOAD FORM
+# DO NOT EXPLICITLY CALL VALIDATION
+def validate_individual_file(request):
+    """Validates a bulk file and returns either errors or a preview of the data entered
+
+    Receives the following from POST:
+    study -- the study to acquire readouts from
+    key -- specifies whether to split readouts by compound or device
+    percent_control -- specifies whether to convert to percent control
+    include_all -- specifies whether to include all data (exclude invalid if null string)
+    """
+    study_id = request.POST.get('study', '')
+    key = request.POST.get('key', '')
+    percent_control = request.POST.get('percent_control', '')
+    include_all = request.POST.get('include_all', '')
+    readout_id = request.POST.get('readout', '')
+    # overwrite_option = request.POST.get('overwrite_option', '')
+    # bulk_file = request.FILES.get('bulk_file', None)
+
+    if readout_id:
+        readout = AssayChipReadout.objects.filter(pk=readout_id)
+        readout = readout[0]
+        study = readout.chip_setup.assay_run_id
+    else:
+        readout = None
+        study = AssayRun.objects.get(pk=int(study_id))
+
+    form = AssayChipReadoutForm(study.id, readout.id, request.POST)
+    formset = ACRAFormSet(request.POST, request.FILES, instance=form.instance)
+
+    if formset.is_valid():
+        # Validate form but don't look at whether it is valid
+        form.is_valid()
+        form_data = form.cleaned_data
+        headers = int(form_data.get('headers'))
+
+        #formset_data = [f for f in formset.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
+
+        # Just reset the file to the beginning
+        request.FILES.get('file').seek(0, 0)
+        file_data = request.FILES.get('file')
+
+        raw_data = []
+
+        # If this is Excel
+        try:
+            # Turn bulk file to sheets
+            file_data = file_data.read()
+            excel_file = xlrd.open_workbook(file_contents=file_data)
+            sheets = excel_file.sheets()
+
+            for sheet in sheets:
+                datalist = sheet_to_datalist(sheet)
+
+                header = datalist[0]
+
+                sheet_type = get_sheet_type(header)
+
+                # Check if chip
+                if sheet_type == 'Chip':
+                    raw_data.extend(datalist_to_chip_data(headers, datalist, study))
+
+        # If this is a csv
+        # TypeError is to deal with bulk_file actually being a datalist, when it comes from a csv clean
+        # except (xlrd.XLRDError, TypeError):
+        except (xlrd.XLRDError):
+            datareader = unicode_csv_reader(file_data, delimiter=',')
+            datalist = list(datareader)
+            raw_data.extend(datalist_to_chip_data(headers, datalist, study))
+
+        csv = get_chip_readout_data_as_csv([readout_id], chip_data=raw_data)
+
+        data = {'csv': csv}
+
+        return HttpResponse(json.dumps(data),
+                            content_type="application/json")
+
+    else:
+        errors = ''
+        if formset.__dict__.get('_non_form_errors', ''):
+            errors += formset.__dict__.get('_non_form_errors', '').as_text()
+        if form.errors:
+            errors += form.errors.as_text()
+        data = {
+            'errors': errors
+        }
+        return HttpResponse(json.dumps(data),
+                            content_type='application/json')
+
+
 switch = {
     'fetch_assay_layout_content': fetch_assay_layout_content,
     'fetch_readout': fetch_readout,
@@ -794,7 +958,8 @@ switch = {
     'fetch_organ_models': fetch_organ_models,
     'fetch_protocols': fetch_protocols,
     'fetch_protocol': fetch_protocol,
-    'validate_bulk_file': validate_bulk_file
+    'validate_bulk_file': validate_bulk_file,
+    'validate_individual_file': validate_individual_file
 }
 
 

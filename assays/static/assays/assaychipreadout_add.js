@@ -13,8 +13,8 @@ $(document).ready(function () {
         }
     }
 
-    function addChart(id,name,timeUnits,valueUnits) {
-        $('<div id="chart' + id + '" align="right" style="width: 45%;float: right;margin-left: -100%px;">')
+    function addChart(id, name, timeUnits, valueUnits) {
+        $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 2.5%;margin-left: -100%px;">')
             .addClass('chart-container')
             .appendTo('#extra');
 
@@ -92,7 +92,7 @@ $(document).ready(function () {
             data: {
                 // Function to call within the view is defined by `call:`
                 call: 'fetch_chip_readout',
-                id: id,
+                id: readout_id,
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
@@ -101,6 +101,55 @@ $(document).ready(function () {
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    }
+
+    function validate_readout_file() {
+        var serializedData = $('form').serializeArray();
+        var formData = new FormData();
+        $.each(serializedData, function(index, field) {
+            formData.append(field.name, field.value);
+        });
+        formData.append('file', $('#id_file')[0].files[0]);
+        if (readout_id) {
+            formData.append('readout', readout_id);
+        }
+        else {
+            formData.append('study', Math.floor(window.location.href.split('/')[4]));
+        }
+        formData.append('call', 'validate_individual_file');
+        $.ajax({
+            url: "/assays_ajax/",
+            type: "POST",
+            dataType: "json",
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: formData,
+            success: function (json) {
+                // console.log(json);
+                if (json.errors) {
+                    // Display errors
+                    alert(json.errors);
+                    // Remove file selection
+                    $('#id_file').val('');
+                    $('#csv_table').html(add);
+                }
+                else {
+                    exist = false;
+                    alert('Success! Please see "New Chip Data" below for preview.');
+                    resetChart();
+                    parseAndReplace(json.csv);
+                }
+            },
+            error: function (xhr, errmsg, err) {
+                alert('An unknown error has occurred.');
+                console.log(xhr.status + ": " + xhr.responseText);
+                // Remove file selection
+                $('#id_file').val('');
+                resetChart();
+                $('#csv_table').html(add);
             }
         });
     }
@@ -140,7 +189,8 @@ $(document).ready(function () {
         //Make table
         var table = exist ? "<table class='layout-table bg-success' style='width: 100%;'><tbody>" : "<table class='layout-table' style='width: 100%;'><tbody>";
 
-        table += exist ? "<tr class='bg-info'>" + header + "</tr>" : "";
+        // table += exist ? "<tr class='bg-info'>" + header + "</tr>" : "";
+        table += "<tr class='bg-info'>" + header + "</tr>";
 
         // Current index for saving QC values
         var current_index = 0;
@@ -154,7 +204,8 @@ $(document).ready(function () {
             var value = line[5];
 
             // If the row will be excluded (highlighted red)
-            if ((i < headers && !exist) || !every) {
+            // if ((i < headers && !exist) || !every) {
+            if (!exist && !every) {
                 table += "<tr class='bg-danger'>";
             }
 
@@ -188,7 +239,8 @@ $(document).ready(function () {
 
             // Just add text if this is a header row for QC OR if this row is invalid
             // (QC status of an ignored row does not really matter)
-            if (i < headers && !exist || !every) {
+            // if (i < headers && !exist || !every) {
+            if (!exist && !every) {
                 if (line[7]) {
                     table += "<th>" + line[7] + "</th>";
                 }
@@ -249,7 +301,8 @@ $(document).ready(function () {
             // Need to take a slice to avoid treating missing QC as invalid
             var every = line.slice(0,7).every(isTrue);
 
-            if (!every || (i < headers && !exist)) {
+            // if (!every || (i < headers && !exist)) {
+            if (!every && !exist) {
                 continue;
             }
 
@@ -342,10 +395,11 @@ $(document).ready(function () {
         resetChart();
         var file = $('#id_file')[0].files[0];
         if (file) {
-            getText(file);
+            validate_readout_file();
+            // getText(file);
         }
         else {
-            if (id) {
+            if (readout_id) {
                getReadout()
             }
             else {
@@ -359,7 +413,7 @@ $(document).ready(function () {
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
-    var id = getReadoutValue();
+    var readout_id = getReadoutValue();
 
     // Indicates whether the data exists in the database or not
     var exist = false;
@@ -390,13 +444,13 @@ $(document).ready(function () {
             .appendTo('body');
         $("#extra").insertAfter($("#assaychipreadoutassay_set-group")[0]);
 
-        $('<div id="csv_table" style="width: 50%;float: left;">')
+        $('<div id="csv_table" style="width: 35%;float: left;">')
             .appendTo('#extra').html(add);
 
         var charts = [];
     }
 
-    if (id) {
+    if (readout_id) {
         getReadout();
     }
 

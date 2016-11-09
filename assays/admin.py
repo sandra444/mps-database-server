@@ -1193,6 +1193,7 @@ def modify_qc_status_chip(current_chip_readout, form):
         readout.save()
 
 
+# TODO WE CAN PROBABLY DO AWAY WITH PASSING FORM
 # TODO REFACTOR CAMEL CASE
 @transaction.atomic
 def parse_chip_csv(current_chip_readout, current_file, headers, overwrite_option, form):

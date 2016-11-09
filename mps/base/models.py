@@ -4,7 +4,7 @@
 
 from django.db import models
 from django.utils import timezone
-from django.shortcuts import redirect, get_object_or_404
+# from django.shortcuts import redirect, get_object_or_404
 
 
 class TrackableModel(models.Model):
