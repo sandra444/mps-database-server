@@ -21,6 +21,7 @@ class MicrophysiologyCenterAdmin(LockableAdmin):
                     'center_id',
                     'description',
                     'contact_person',
+                    'contact_email',
                     'center_website',
                     'groups',
                 )

@@ -18,6 +18,7 @@ class MicrophysiologyCenter(LockableModel):
     center_id = models.CharField(max_length=20, default='-')
     description = models.CharField(max_length=400, blank=True, default='')
     contact_person = models.CharField(max_length=250, blank=True, default='')
+    contact_email = models.EmailField(blank=True, default='')
     center_website = models.URLField(blank=True, null=True)
 
     groups = models.ManyToManyField(Group)
