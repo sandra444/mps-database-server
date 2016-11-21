@@ -109,8 +109,8 @@
                 </td>
                 <td>
                     {% if object.substrate_thickness %}
-                        {# Specify that substrate thickness is in micrometers #}
-                        {{ object.substrate_thickness }} µm
+                        {# Specify that substrate thickness is in millimeters #}
+                        {{ object.substrate_thickness }} mm
                     {% else %}
                         Unspecified
                     {% endif %}
@@ -121,7 +121,8 @@
                     <b>Fluid Volume</b>
                 </td>
                 <td>
-                    {{ object.device_fluid_volume|default:'Unspecified' }} {{ object.device_fluid_volume_unit|default:'' }}
+                    {# NOTE THAT VOLUME UNIT IS NOW ALWAYS μL #}
+                    {{ object.device_fluid_volume|default:'Unspecified' }} μL
                 </td>
             </tr>
         </tbody>

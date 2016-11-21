@@ -45,7 +45,7 @@
                     <td><a class="btn btn-primary" href="{{ model.id }}/update/">Edit</a></td>
                     <td>{{ model.model_name }}</td>
                     <td>{{ model.organ|default_if_none:"" }}</td>
-                    <td><a href="device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
+                    <td><a href="/microdevices/device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
                     <td>{{ model.center|default_if_none:"" }}</td>
                     <td>{{ model.description }}</td>
                     <td>
