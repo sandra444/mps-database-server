@@ -318,6 +318,10 @@ class AssayReadout(models.Model):
     # Quality, if it is not the empty string, indicates that a readout is INVALID
     quality = models.CharField(default='', max_length=10)
 
+    # This value contains notes for the data point
+    notes = models.CharField(max_length=255, default='')
+
+
 #class ReadoutUnit(LockableModel):
 #    """
 #    Units specific to readouts (AU, RFU, so on)

@@ -302,16 +302,19 @@ $(document).ready(function () {
                     var value = null;
                     var time = 0;
                     var time_unit = null;
+                    var notes = '';
 
                     // If TIME specified
                     if (time_specified) {
                         time = row[5];
                         time_unit = row[6];
                         value = row[7];
+                        notes = row[8];
                     }
                     // If NO TIME specified
                     else {
                         value = row[5];
+                        notes = row[6];
                     }
 
                     // Add time
@@ -344,6 +347,7 @@ $(document).ready(function () {
                     var readout = $('<p>')
                         .addClass('value')
                         .attr('data-assay-feature-time', assay_feature_pair)
+                        .prop('tooltipText', notes)
                         .text(number_with_commas(value));
 
                     $(well_id).append(readout);

@@ -522,6 +522,7 @@ $(document).ready(function () {
             var time_unit = well_data.time_unit;
             var assay = well_data.assay;
             var quality = well_data.quality;
+            var notes = well_data.notes;
 
             var row_label = window.LAYOUT.row_labels[well_data.row];
             var column_label = window.LAYOUT.column_labels[well_data.column];
@@ -546,6 +547,7 @@ $(document).ready(function () {
             // Consider adding lead if people demand a larger font
             var readout = $('<p>')
                 .addClass('value')
+                .prop('tooltipText', notes)
                 .attr('data-assay-feature-time', assay_feature_pair)
                 .text(number_with_commas(value));
 

@@ -24,6 +24,17 @@ restricted = ('restricted',)
 # Group
 group = ('group',)
 
+# Overwrite options
+OVERWRITE_OPTIONS = forms.ChoiceField(
+    choices=(
+        ('keep_conflicting_data', 'Keep Confilicting Data as Replicate'),
+        ('mark_conflicting_data', 'Mark Conflicting Data'),
+        ('mark_all_old_data', 'Mark All Old Data'),
+        ('delete_conflicting_data', 'Delete Conflicting Data'),
+        ('delete_all_old_data', 'Delete All Old Data')
+    ),
+    initial='Keep Confilicting Data as Replicate'
+)
 
 def charset_detect(in_file, chunk_size=4096):
     """Use chardet library to detect what encoding is being used"""
@@ -159,15 +170,7 @@ class AssayChipResultForm(SignOffMixin, forms.ModelForm):
 
 class AssayChipReadoutForm(SignOffMixin, CloneableForm):
     """Frontend form for Chip Readouts"""
-    overwrite_option = forms.ChoiceField(
-        choices=(
-            ('mark_conflicting_data', 'Mark Conflicting Data'),
-            ('mark_all_old_data', 'Mark All Old Data'),
-            ('delete_conflicting_data', 'Delete Conflicting Data'),
-            ('delete_all_old_data', 'Delete All Old Data')
-        ),
-        initial='Mark Conflicting Data'
-    )
+    overwrite_option = OVERWRITE_OPTIONS
 
     def __init__(self, study, current, *args, **kwargs):
         """Init the Chip Readout Form
@@ -472,6 +475,7 @@ class AssayPlateReadoutForm(SignOffMixin, CloneableForm):
         self.fields['setup'].queryset = setups
 
     upload_type = forms.ChoiceField(choices=(('Block', 'Block'), ('Tabular', 'Tabular')))
+    overwrite_option = OVERWRITE_OPTIONS
 
     class Meta(object):
         model = AssayPlateReadout
@@ -576,10 +580,39 @@ def process_readout_value(value):
             return None
 
 
+def get_row_and_column(well_id, offset):
+    """Takes a well ID in the form A1 and returns a row and column index as a tuple
+
+    Params:
+    well_id - the well ID as a string
+    offset - offset to resulting row and column indexes (to start at zero, for instance)
+    """
+     # Split the well into alphabetical and numeric
+    row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well_id)
+
+    # PLEASE NOTE THAT THE VALUES ARE OFFSET BY ONE (to begin with 0)
+    # Convert row_label to a number
+    row_label = label_to_number(row_label) - offset
+    # Convert column label to an integer
+    column_label = int(column_label) - offset
+
+    return (row_label, column_label)
+
+
+# def get_tabular_data(datalist, plate_details, sheet=''):
+#     """Consolidated way for acquiring tabular data"""
+#     pass
+
+
+# def get_block_data(datalist, plate_details, sheet=''):
+#     """Consolidated way for acquiring block data"""
+#     pass
+
+
 def validate_plate_readout_file(
         upload_type,
-        plate_details,
         datalist,
+        plate_details,
         sheet=''
 ):
     """Validates a Plate Readout CSV file"""
@@ -840,11 +873,7 @@ def validate_plate_readout_file(
             # Check if well id is valid
             try:
                 # Split the well into alphabetical and numeric
-                row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
-                # Convert row_label to a number
-                row_label = label_to_number(row_label)
-                # Convert column label to an integer
-                column_label = int(column_label)
+                row_label, column_label = get_row_and_column(well, 0)
 
                 if row_label > number_of_rows:
                     raise forms.ValidationError(
@@ -1149,6 +1178,7 @@ def stringify_excel_value(value):
 
 # SPAGHETTI CODE FIND A BETTER PLACE TO PUT THIS?
 def valid_chip_row(row):
+    """Confirm that a row is valid"""
     return row and all(row[:5] + [row[6]])
 
 
@@ -1164,7 +1194,14 @@ def get_bulk_datalist(sheet):
     return datalist
 
 
+# TODO FIX ORDER OF ARGUMENTS
 def get_sheet_type(header, sheet_name=''):
+    """Get the sheet type from a given header (chip, tabular, block, or unknown)
+
+    Param:
+    header - the header in question
+    sheet_name - the sheet name for reporting errors (default empty string)
+    """
     # From the header we need to discern the type of upload
     # Check if chip
     if 'CHIP' in header[0].upper() and 'ASSAY' in header[3].upper():
@@ -1182,6 +1219,7 @@ def get_sheet_type(header, sheet_name=''):
 
     # Throw error if can not be determined
     else:
+        # For if we decide not to throw errors
         sheet_type = 'Unknown'
         raise forms.ValidationError(
             'The header of sheet "{0}" was not recognized.'.format(sheet_name)
@@ -1191,6 +1229,13 @@ def get_sheet_type(header, sheet_name=''):
 
 
 def get_chip_details(self, study=None, readout=None):
+    """Get the assays and units as a dictionary with chip ID as the key
+
+    Params:
+    self - the form in question
+    study - the study in question
+    readout - the readout in question
+    """
     if study:
         readouts = AssayChipReadout.objects.filter(
             chip_setup__assay_run_id=study
@@ -1278,6 +1323,13 @@ def get_chip_details(self, study=None, readout=None):
 
 
 def get_plate_details(self, study=None, readout=None):
+    """Get the assays and units as a dictionary with plate ID as the key
+
+    Params:
+    self - the form in question
+    study - the study in question
+    readout - the readout in question
+    """
     if study:
         readouts = AssayPlateReadout.objects.filter(
             setup__assay_run_id=study
@@ -1397,6 +1449,18 @@ def get_plate_details(self, study=None, readout=None):
 
 
 def process_file(self, test_file, headers=1, chip_details=None, plate_details=None, study=None, readout=None, upload_type=None):
+    """Get data from a file: returns read data from excel and datalist from csv
+
+    Params:
+    self - the form in question
+    test_file - the file in question
+    headers - the number of header rows (default=1)
+    chip_details - dictionary of assays and units for each chip (optional)
+    plate_details - dictionary of assay and units for each plate (optional)
+    study - the study in question (optional)
+    readout - the readout in question (optional)
+    upload_type - upload type for plates (optional)
+    """
     try:
         file_data = test_file.read()
         excel_file = xlrd.open_workbook(file_contents=file_data)
@@ -1419,6 +1483,18 @@ def process_file(self, test_file, headers=1, chip_details=None, plate_details=No
 # TODO NEEDS REVISION
 def validate_excel_file(self, excel_file, headers=1, study=None, readout=None,
                         chip_details=None, plate_details=None, upload_type=None):
+    """Validate an excel file
+
+    Params:
+    self - the form in question
+    excel_file - the excel_file as an xlrd object
+    headers - the number of header rows (default=1)
+    study - the study in question (optional)
+    readout - the readout in question (optional)
+    chip_details - dictionary of assays and units for each chip (optional)
+    plate_details - dictionary of assay and units for each plate (optional)
+    upload_type - upload type for plates (optional)
+    """
     sheet_names = excel_file.sheet_names()
 
     for index, sheet in enumerate(excel_file.sheets()):
@@ -1468,6 +1544,18 @@ def validate_excel_file(self, excel_file, headers=1, study=None, readout=None,
 # TODO NEEDS REVISION
 def validate_csv_file(self, datalist, study=None, readout=None,
                       chip_details=None, plate_details=None, headers=1, upload_type=None):
+    """Validates a CSV file
+
+    Params:
+    self - the form in question
+    datalist - the data as a list of lists
+    study - the study in question (optional)
+    readout - the readout in question (optional)
+    chip_details - dictionary of assays and units for each chip (optional)
+    plate_details - dictionary of assay and units for each plate (optional)
+    headers - the number of header rows (default=1)
+    upload_type - upload type for plates (optional)
+    """
     # From the header we need to discern the type of upload
     header = datalist[0]
     sheet_type = get_sheet_type(header, 'CSV')
@@ -1496,15 +1584,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
     """Form for Bulk Uploads"""
     bulk_file = forms.FileField()
 
-    overwrite_option = forms.ChoiceField(
-        choices=(
-            ('mark_conflicting_data', 'Mark Conflicting Data'),
-            ('mark_all_old_data', 'Mark All Old Data'),
-            ('delete_conflicting_data', 'Delete Conflicting Data'),
-            ('delete_all_old_data', 'Delete All Old Data')
-        ),
-        initial='Mark Conflicting Data'
-    )
+    overwrite_option = OVERWRITE_OPTIONS
 
     class Meta(object):
         model = AssayRun

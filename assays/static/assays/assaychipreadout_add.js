@@ -118,7 +118,7 @@ $(document).ready(function () {
         else {
             formData.append('study', Math.floor(window.location.href.split('/')[4]));
         }
-        formData.append('call', 'validate_individual_file');
+        formData.append('call', 'validate_individual_chip_file');
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
