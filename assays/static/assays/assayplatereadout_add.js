@@ -347,7 +347,7 @@ $(document).ready(function () {
                     var readout = $('<p>')
                         .addClass('value')
                         .attr('data-assay-feature-time', assay_feature_pair)
-                        .prop('tooltipText', notes)
+                        .attr('title', notes)
                         .text(number_with_commas(value));
 
                     $(well_id).append(readout);

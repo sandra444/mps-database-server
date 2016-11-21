@@ -547,7 +547,7 @@ $(document).ready(function () {
             // Consider adding lead if people demand a larger font
             var readout = $('<p>')
                 .addClass('value')
-                .prop('tooltipText', notes)
+                .attr('title', notes)
                 .attr('data-assay-feature-time', assay_feature_pair)
                 .text(number_with_commas(value));
 
