@@ -9,10 +9,10 @@ $(document).ready(function() {
 
     // Whether the checkbox for a filter is checked
     var filters = {
-        'MPS': true,
-        'EPA': true,
-        'TCTC': true,
-        'Unassigned': true
+        'MPS': show_mps.prop('checked'),
+        'EPA': show_epa.prop('checked'),
+        'TCTC': show_tctc.prop('checked'),
+        'Unassigned': show_unassigned.prop('checked')
     };
 
     // This function filters the dataTable rows
