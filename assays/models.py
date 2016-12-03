@@ -321,6 +321,9 @@ class AssayReadout(models.Model):
     # This value contains notes for the data point
     notes = models.CharField(max_length=255, default='')
 
+    # Indicates what replicate this is (1 is for original)
+    replicate = models.IntegerField(default=0)
+
 
 #class ReadoutUnit(LockableModel):
 #    """
@@ -641,6 +644,10 @@ class AssayChipRawData(models.Model):
 
     # This value contains notes for the data point
     notes = models.CharField(max_length=255, default='')
+
+    # Indicates what replicate this is (1 is for original)
+    replicate = models.IntegerField(default=0)
+
 
 
 class AssayChipCells(models.Model):

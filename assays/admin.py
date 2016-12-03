@@ -14,8 +14,6 @@ from assays.forms import (
 )
 from assays.utils import (
     save_assay_layout,
-    parse_chip_csv,
-    parse_readout_csv,
     modify_qc_status_chip,
     modify_qc_status_plate
 )
@@ -765,7 +763,8 @@ class AssayPlateReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parse_readout_csv(obj, request.FILES['file'], upload_type, overwrite_option, form)
+            # parse_readout_csv(obj, request.FILES['file'], upload_type, overwrite_option, form)
+            pass
 
         # Need to delete entries when a file is cleared
         if request.POST.get('file-clear', '') == 'on':
@@ -1094,7 +1093,8 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parse_chip_csv(obj, request.FILES['file'], headers, form)
+            pass
+            # parse_chip_csv(obj, request.FILES['file'], headers, form)
 
         # Try to update QC status if no file
         else:

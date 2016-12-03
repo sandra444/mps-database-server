@@ -493,7 +493,7 @@ $(document).ready(function () {
                     csrfmiddlewaretoken: middleware_token
                 },
                 success: function (json) {
-                    fill_readout_from_existing(json);
+                    window.LAYOUT.fill_readout_from_existing(json);
                 },
                 error: function (xhr, errmsg, err) {
                     console.log(xhr.status + ": " + xhr.responseText);
@@ -502,7 +502,7 @@ $(document).ready(function () {
         }
     }
 
-    function fill_readout_from_existing(data) {
+    window.LAYOUT.fill_readout_from_existing = function(data) {
         // Clear any leftover values from previews
         $('.value').remove();
         $('.invalid').remove();
@@ -576,7 +576,7 @@ $(document).ready(function () {
 
         window.LAYOUT.build_heatmap();
         window.LAYOUT.heatmap_options();
-    }
+    };
 
     window.LAYOUT.build_heatmap = function() {
         // For each feature

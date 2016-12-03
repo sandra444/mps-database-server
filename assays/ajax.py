@@ -7,20 +7,22 @@ from microdevices.models import MicrophysiologyCenter, Microdevice
 
 from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 from .forms import (
-    stringify_excel_value,
-    unicode_csv_reader,
-    get_row_and_column,
-    process_readout_value,
     AssayChipReadoutForm,
     AssayPlateReadoutForm,
     AssayChipReadoutInlineFormset,
     AssayPlateReadoutInlineFormset
 )
+from.utils import(
+    valid_chip_row,
+    stringify_excel_value,
+    unicode_csv_reader,
+    get_row_and_column,
+    process_readout_value
+)
 import xlrd
 
 # TODO FIX SPAGHETTI CODE
 from .forms import ReadoutBulkUploadForm, get_sheet_type
-from .utils import valid_chip_row
 from django.forms.models import inlineformset_factory
 
 from django.utils import timezone
@@ -42,149 +44,138 @@ def main(request):
     return HttpResponseServerError()
 
 
-def sheet_to_datalist(sheet):
-    """Convert an excel sheet to a datalist
-
-    Params:
-    sheet - excel sheet from xlrd
-    """
-    datalist = []
-
-    for row_index in range(sheet.nrows):
-        # Stringify the the values
-        row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
-        # Trim row to exclude validation columns and beyond
-        row = row[:TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX]
-        datalist.append(row)
-
-    return datalist
+# def sheet_to_datalist(sheet):
+#     """Convert an excel sheet to a datalist
+#
+#     Params:
+#     sheet - excel sheet from xlrd
+#     """
+#     datalist = []
+#
+#     for row_index in range(sheet.nrows):
+#         # Stringify the the values
+#         row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
+#         # Trim row to exclude validation columns and beyond
+#         row = row[:TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX]
+#         datalist.append(row)
+#
+#     return datalist
 
 
 # TODO
 # Probably more than necessary
-def tabular_datalist_to_plate_data(datalist, study):
-    """Convert a tabular datalist to plate data
+# def tabular_datalist_to_plate_data(datalist, study):
+#     """Convert a tabular datalist to plate data
+#
+#     Params:
+#     headers - the number of header rows
+#     datalist - the data as a list of lists
+#     study - the study in question
+#     """
+#     plate_data = []
+#
+#     plate_readouts = {
+#         readout.setup.assay_chip_id: readout for readout in AssayPlateReadout.objects.filter(
+#             setup__assay_run_id=study
+#         ).prefetch_related(
+#             'setup__assay_run_id'
+#         )
+#     }
+#
+#     assay_models = {
+#         assay.assay_name.upper(): assay for assay in AssayModel.objects.all()
+#     }
+#
+#     assay_models.update({
+#         assay.assay_short_name.upper(): assay for assay in AssayModel.objects.all()
+#     })
+#
+#     physical_units = {
+#         unit.unit: unit for unit in PhysicalUnits.objects.filter(availability__icontains='readout')
+#     }
+#
+#     dummy_reader = AssayReader.objects.all()[0]
+#
+#     # START AT ONE, CONTRIVED
+#     row_index = 1
+#     invalid_row = True
+#     dummy_readout = None
+#
+#     while invalid_row:
+#         row = datalist[row_index]
+#         if valid_chip_row(row):
+#             dummy_readout = AssayPlateReadout(
+#                 setup=AssayPlateSetup.objects.filter(
+#                     assay_plate_id=row[0],
+#                     assay_run_id=study
+#                 )[0],
+#                 timeunit=PhysicalUnits.objects.filter(unit=row[1])[0],
+#                 readout_start_time=timezone.now()
+#             )
+#             invalid_row = False
+#         row_index += 1
+#
+#     # Check if time is specified
+#     header = datalist[0]
+#     if 'TIME' in header[5].upper() and 'UNIT' in header[6].upper():
+#         time_specified = True
+#     else:
+#         time_specified = False
+#
+#     # TODO CLARIFY WHAT EACH ROW VALUE IS
+#     # CONTRIVED START AT ROW 1
+#     for row in datalist[1:]:
+#         if valid_chip_row(row):
+#             plate_id = row[0]
+#             assay = row[2].upper().strip()
+#             feature = row[3]
+#             val_unit = row[4]
+#             well_id = row[1]
+#             notes = ''
+#             if time_specified:
+#                 time = float(row[5])
+#                 # time_unit = row[6].strip().lower()
+#                 value = row[7]
+#                 if len(row) > 8:
+#                     notes = row[8][:255]
+#             else:
+#                 value = row[5]
+#                 if len(row) > 6:
+#                     notes = row[6][:255]
+#                 time = 0
+#                 # time_unit = ''
+#
+#             if value != '':
+#                 processed_value = process_readout_value(value)
+#                 value = processed_value.get('value')
+#                 quality = processed_value.get('quality')
+#             else:
+#                 quality = ''
+#
+#             # PLEASE NOTE THAT THE VALUES ARE OFFSET BY ONE (to begin with 0)
+#             row, column = get_row_and_column(well_id, 1)
+#             plate_data.append(
+#                 AssayReadout(
+#                     assay_chip_id=plate_readouts.get(plate_id, dummy_readout),
+#                     assay_id=AssayPlateReadoutAssay(
+#                         readout_id=plate_readouts.get(plate_id),
+#                         assay_id=assay_models.get(assay),
+#                         # Arbitrary value for reader
+#                         reader_id=dummy_reader,
+#                         readout_unit=physical_units.get(val_unit),
+#                         feature=feature
+#                     ),
+#                     row=row,
+#                     column=column,
+#                     value=value,
+#                     elapsed_time=time,
+#                     quality=quality,
+#                     notes=notes
+#                 )
+#             )
+#
+#     return plate_data
 
-    Params:
-    headers - the number of header rows
-    datalist - the data as a list of lists
-    study - the study in question
-    """
-    plate_data = []
-
-    plate_readouts = {
-        readout.setup.assay_chip_id: readout for readout in AssayPlateReadout.objects.filter(
-            setup__assay_run_id=study
-        ).prefetch_related(
-            'setup__assay_run_id'
-        )
-    }
-
-    assay_models = {
-        assay.assay_name.upper(): assay for assay in AssayModel.objects.all()
-    }
-
-    assay_models.update({
-        assay.assay_short_name.upper(): assay for assay in AssayModel.objects.all()
-    })
-
-    physical_units = {
-        unit.unit: unit for unit in PhysicalUnits.objects.filter(availability__icontains='readout')
-    }
-
-    dummy_reader = AssayReader.objects.all()[0]
-
-    # START AT ONE, CONTRIVED
-    row_index = 1
-    invalid_row = True
-    dummy_readout = None
-
-    while invalid_row:
-        row = datalist[row_index]
-        if valid_chip_row(row):
-            dummy_readout = AssayPlateReadout(
-                setup=AssayPlateSetup.objects.filter(
-                    assay_plate_id=row[0],
-                    assay_run_id=study
-                )[0],
-                timeunit=PhysicalUnits.objects.filter(unit=row[1])[0],
-                readout_start_time=timezone.now()
-            )
-            invalid_row = False
-        row_index += 1
-
-    # Check if time is specified
-    header = datalist[0]
-    if 'TIME' in header[5].upper() and 'UNIT' in header[6].upper():
-        time_specified = True
-    else:
-        time_specified = False
-
-    # TODO CLARIFY WHAT EACH ROW VALUE IS
-    # CONTRIVED START AT ROW 1
-    for row in datalist[1:]:
-        if valid_chip_row(row):
-            plate_id = row[0]
-            assay = row[2].upper().strip()
-            feature = row[3]
-            val_unit = row[4]
-            well_id = row[1]
-            notes = ''
-            if time_specified:
-                time = float(row[5])
-                # time_unit = row[6].strip().lower()
-                value = row[7]
-                if len(row) > 8:
-                    notes = row[8][:255]
-            else:
-                value = row[5]
-                if len(row) > 6:
-                    notes = row[6][:255]
-                time = 0
-                # time_unit = ''
-
-            if value != '':
-                processed_value = process_readout_value(value)
-                value = processed_value.get('value')
-                quality = processed_value.get('quality')
-            else:
-                quality = ''
-
-            # PLEASE NOTE THAT THE VALUES ARE OFFSET BY ONE (to begin with 0)
-            row, column = get_row_and_column(well_id, 1)
-            plate_data.append(
-                AssayReadout(
-                    assay_chip_id=plate_readouts.get(plate_id, dummy_readout),
-                    assay_id=AssayPlateReadoutAssay(
-                        readout_id=plate_readouts.get(plate_id),
-                        assay_id=assay_models.get(assay),
-                        # Arbitrary value for reader
-                        reader_id=dummy_reader,
-                        readout_unit=physical_units.get(val_unit),
-                        feature=feature
-                    ),
-                    row=row,
-                    column=column,
-                    value=value,
-                    elapsed_time=time,
-                    quality=quality,
-                    notes=notes
-                )
-            )
-
-    return plate_data
-
-
-# TODO
-def block_datalist_to_plate_data(datalist, study):
-    """Convert a tabular datalist to plate data
-
-    Params:
-    headers - the number of header rows
-    datalist - the data as a list of lists
-    study - the study in question
-    """
-    pass
 
 # Considered alternative
 # def get_plate_data_from_tabular(datalist, time_unit):
@@ -239,90 +230,90 @@ def block_datalist_to_plate_data(datalist, study):
 #             })
 
 
-def datalist_to_chip_data(headers, datalist, study):
-    """Convert a datalist to chip raw data
-
-    Params:
-    headers - the number of header rows
-    datalist - the data as a list of lists
-    study - the study in question
-    """
-    chip_data = []
-
-    chip_readouts = {
-        readout.chip_setup.assay_chip_id: readout for readout in AssayChipReadout.objects.filter(
-            chip_setup__assay_run_id=study
-        ).prefetch_related(
-            'chip_setup__assay_run_id'
-        )
-    }
-
-    assay_models = {
-        assay.assay_name.upper(): assay for assay in AssayModel.objects.all()
-    }
-
-    assay_models.update({
-        assay.assay_short_name.upper(): assay for assay in AssayModel.objects.all()
-    })
-
-    physical_units = {
-        unit.unit: unit for unit in PhysicalUnits.objects.filter(availability__icontains='readout')
-    }
-
-    dummy_reader = AssayReader.objects.all()[0]
-
-    row_index = headers
-    invalid_row = True
-    dummy_readout = None
-
-    while invalid_row:
-        row = datalist[row_index]
-        if valid_chip_row(row):
-            dummy_readout = AssayChipReadout(
-                chip_setup=AssayChipSetup.objects.filter(
-                    assay_chip_id=row[0],
-                    assay_run_id=study
-                )[0],
-                timeunit=PhysicalUnits.objects.filter(unit=row[2])[0],
-                readout_start_time=timezone.now()
-            )
-            invalid_row = False
-        row_index += 1
-
-    # TODO CLARIFY WHAT EACH ROW VALUE IS
-    for row in datalist[headers:]:
-        if valid_chip_row(row):
-            value = row[5]
-            if not value:
-                value = None
-            else:
-                value = float(value)
-            chip_id = row[0]
-            assay_id = row[3].upper().strip()
-            value_unit = row[6]
-            field = row[4]
-            time = float(row[1])
-            quality = row[7]
-            notes = row[8][:254]
-            chip_data.append(
-                AssayChipRawData(
-                    assay_chip_id=chip_readouts.get(chip_id, dummy_readout),
-                    assay_id=AssayChipReadoutAssay(
-                        readout_id=chip_readouts.get(chip_id),
-                        assay_id=assay_models.get(assay_id),
-                        # Arbitrary value for reader
-                        reader_id=dummy_reader,
-                        readout_unit=physical_units.get(value_unit)
-                    ),
-                    field_id=field,
-                    value=value,
-                    elapsed_time=time,
-                    quality=quality,
-                    notes=notes
-                )
-            )
-
-    return chip_data
+# def datalist_to_chip_data(headers, datalist, study):
+#     """Convert a datalist to chip raw data
+#
+#     Params:
+#     headers - the number of header rows
+#     datalist - the data as a list of lists
+#     study - the study in question
+#     """
+#     chip_data = []
+#
+#     chip_readouts = {
+#         readout.chip_setup.assay_chip_id: readout for readout in AssayChipReadout.objects.filter(
+#             chip_setup__assay_run_id=study
+#         ).prefetch_related(
+#             'chip_setup__assay_run_id'
+#         )
+#     }
+#
+#     assay_models = {
+#         assay.assay_name.upper(): assay for assay in AssayModel.objects.all()
+#     }
+#
+#     assay_models.update({
+#         assay.assay_short_name.upper(): assay for assay in AssayModel.objects.all()
+#     })
+#
+#     physical_units = {
+#         unit.unit: unit for unit in PhysicalUnits.objects.filter(availability__icontains='readout')
+#     }
+#
+#     dummy_reader = AssayReader.objects.all()[0]
+#
+#     row_index = headers
+#     invalid_row = True
+#     dummy_readout = None
+#
+#     while invalid_row:
+#         row = datalist[row_index]
+#         if valid_chip_row(row):
+#             dummy_readout = AssayChipReadout(
+#                 chip_setup=AssayChipSetup.objects.filter(
+#                     assay_chip_id=row[0],
+#                     assay_run_id=study
+#                 )[0],
+#                 timeunit=PhysicalUnits.objects.filter(unit=row[2])[0],
+#                 readout_start_time=timezone.now()
+#             )
+#             invalid_row = False
+#         row_index += 1
+#
+#     # TODO CLARIFY WHAT EACH ROW VALUE IS
+#     for row in datalist[headers:]:
+#         if valid_chip_row(row):
+#             value = row[5]
+#             if not value:
+#                 value = None
+#             else:
+#                 value = float(value)
+#             chip_id = row[0]
+#             assay_id = row[3].upper().strip()
+#             value_unit = row[6]
+#             field = row[4]
+#             time = float(row[1])
+#             quality = row[7]
+#             notes = row[8][:254]
+#             chip_data.append(
+#                 AssayChipRawData(
+#                     assay_chip_id=chip_readouts.get(chip_id, dummy_readout),
+#                     assay_id=AssayChipReadoutAssay(
+#                         readout_id=chip_readouts.get(chip_id),
+#                         assay_id=assay_models.get(assay_id),
+#                         # Arbitrary value for reader
+#                         reader_id=dummy_reader,
+#                         readout_unit=physical_units.get(value_unit)
+#                     ),
+#                     field_id=field,
+#                     value=value,
+#                     elapsed_time=time,
+#                     quality=quality,
+#                     notes=notes
+#                 )
+#             )
+#
+#     return chip_data
 
 
 # TODO ADD BASE LAYOUT CONTENT TO ASSAY LAYOUT
@@ -626,7 +617,10 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None):
             csv += '"' + unicode(raw.quality) + '"' + ','
         else:
             csv += unicode(raw.quality) + ','
-        csv += '"' + unicode(raw.notes) + '"' + '\n'
+        if raw.replicate:
+            csv += '"' + unicode(raw.notes) + '\nReplicate #' + unicode(raw.replicate) + '"' + '\n'
+        else:
+            csv += '"' + unicode(raw.notes) + '"' + '\n'
 
     return csv
 
@@ -993,37 +987,11 @@ def validate_bulk_file(request):
     if form.is_valid():
         form_data = form.cleaned_data
 
-        bulk_file = form_data.get('bulk_file')
+        preview_data = form_data.get('bulk_file')
 
-        # For the moment, just have headers be equal to one?
-        headers = 1
+        chip_raw_data = preview_data.get('chip_preview')
 
-        raw_data = []
-
-        # If this is Excel
-        try:
-            # Turn bulk file to sheets
-            excel_file = xlrd.open_workbook(file_contents=bulk_file)
-            sheets = excel_file.sheets()
-
-            for sheet in sheets:
-                datalist = sheet_to_datalist(sheet)
-
-                header = datalist[0]
-
-                sheet_type = get_sheet_type(header)
-
-                # Check if chip
-                if sheet_type == 'Chip':
-                    raw_data.extend(datalist_to_chip_data(headers, datalist, study))
-
-        # If this is a csv
-        # TypeError is to deal with bulk_file actually being a datalist, when it comes from a csv clean
-        except (xlrd.XLRDError, TypeError):
-            datalist = bulk_file
-            raw_data.extend(datalist_to_chip_data(headers, datalist, study))
-
-        assays = get_readout_data(raw_data, key, percent_control, include_all)
+        assays = get_readout_data(chip_raw_data, key, percent_control, include_all)
 
         data = {'assays': assays}
 
@@ -1073,56 +1041,31 @@ def validate_individual_chip_file(request):
 
     if readout_id:
         readout = AssayChipReadout.objects.filter(pk=readout_id)
-        readout = readout[0]
-        study = readout.chip_setup.assay_run_id
+        if readout:
+            readout = readout[0]
+            setup_id = readout.chip_setup.id
+            study = readout.chip_setup.assay_run_id
+        else:
+            setup_id = None
+            study = AssayRun.objects.get(pk=int(study_id))
     else:
-        readout = None
+        setup_id = None
         study = AssayRun.objects.get(pk=int(study_id))
 
-    form = AssayChipReadoutForm(study.id, readout.id, request.POST)
+    form = AssayChipReadoutForm(study, setup_id, request.POST)
     formset = ACRAFormSet(request.POST, request.FILES, instance=form.instance)
 
     if formset.is_valid():
-        # Validate form but don't look at whether it is valid
-        form.is_valid()
-        form_data = form.cleaned_data
-        headers = int(form_data.get('headers'))
+        # Validate form
+        # form.is_valid()
 
-        #formset_data = [f for f in formset.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
+        form_data = formset.forms[0].cleaned_data
 
-        # Just reset the file to the beginning
-        request.FILES.get('file').seek(0, 0)
-        file_data = request.FILES.get('file')
+        preview_data = form_data.get('preview_data')
 
-        raw_data = []
+        chip_raw_data = preview_data.get('chip_preview')
 
-        # If this is Excel
-        try:
-            # Turn bulk file to sheets
-            file_data = file_data.read()
-            excel_file = xlrd.open_workbook(file_contents=file_data)
-            sheets = excel_file.sheets()
-
-            for sheet in sheets:
-                datalist = sheet_to_datalist(sheet)
-
-                header = datalist[0]
-
-                sheet_type = get_sheet_type(header)
-
-                # Check if chip
-                if sheet_type == 'Chip':
-                    raw_data.extend(datalist_to_chip_data(headers, datalist, study))
-
-        # If this is a csv
-        # TypeError is to deal with bulk_file actually being a datalist, when it comes from a csv clean
-        # except (xlrd.XLRDError, TypeError):
-        except (xlrd.XLRDError):
-            datareader = unicode_csv_reader(file_data, delimiter=',')
-            datalist = list(datareader)
-            raw_data.extend(datalist_to_chip_data(headers, datalist, study))
-
-        csv = get_chip_readout_data_as_csv([readout_id], chip_data=raw_data)
+        csv = get_chip_readout_data_as_csv([readout_id], chip_data=chip_raw_data)
 
         data = {'csv': csv}
 
@@ -1131,8 +1074,8 @@ def validate_individual_chip_file(request):
 
     else:
         errors = ''
-        if formset.__dict__.get('_non_form_errors', ''):
-            errors += formset.__dict__.get('_non_form_errors', '').as_text()
+        if formset.non_form_errors():
+            errors += formset.non_form_errors().as_text()
         if form.errors:
             errors += form.errors.as_text()
         data = {
@@ -1150,96 +1093,60 @@ APRAFormSet = inlineformset_factory(
 )
 
 
-# def validate_individual_plate_file(request):
-#     """Validates a bulk file and returns either errors or a preview of the data entered
-#
-#     Receives the following from POST:
-#     study -- the study to acquire readouts from
-#     key -- specifies whether to split readouts by compound or device
-#     percent_control -- specifies whether to convert to percent control
-#     include_all -- specifies whether to include all data (exclude invalid if null string)
-#     """
-#     study_id = request.POST.get('study', '')
-#     readout_id = request.POST.get('readout', '')
-#     # overwrite_option = request.POST.get('overwrite_option', '')
-#     # bulk_file = request.FILES.get('bulk_file', None)
-#
-#     if readout_id:
-#         readout = AssayPlateReadout.objects.filter(pk=readout_id)
-#         readout = readout[0]
-#         study = readout.setup.assay_run_id
-#     else:
-#         readout = None
-#         study = AssayRun.objects.get(pk=int(study_id))
-#
-#     form = AssayPlateReadoutForm(study.id, readout.id, request.POST)
-#     formset = APRAFormSet(request.POST, request.FILES, instance=form.instance)
-#
-#     if formset.is_valid():
-#         # Validate form but don't look at whether it is valid
-#         form.is_valid()
-#         form_data = form.cleaned_data
-#         # upload_type = form_data.get('upload_type', '')
-#
-#         #formset_data = [f for f in formset.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
-#
-#         # Just reset the file to the beginning
-#         request.FILES.get('file').seek(0, 0)
-#         file_data = request.FILES.get('file')
-#
-#         raw_data = []
-#
-#         # If this is Excel
-#         try:
-#             # Turn bulk file to sheets
-#             file_data = file_data.read()
-#             excel_file = xlrd.open_workbook(file_contents=file_data)
-#             sheets = excel_file.sheets()
-#
-#             for sheet in sheets:
-#                 datalist = sheet_to_datalist(sheet)
-#
-#                 header = datalist[0]
-#
-#                 sheet_type = get_sheet_type(header)
-#
-#                 # Check sheet type
-#                 if sheet_type == 'Tabular':
-#                     raw_data.extend(tabular_datalist_to_plate_data(datalist, study))
-#                 elif sheet_type == 'Block':
-#                     raw_data.extend(block_datalist_to_plate_data(datalist, study))
-#
-#         # If this is a csv
-#         # TypeError is to deal with bulk_file actually being a datalist, when it comes from a csv clean
-#         # except (xlrd.XLRDError, TypeError):
-#         except (xlrd.XLRDError):
-#             datareader = unicode_csv_reader(file_data, delimiter=',')
-#             datalist = list(datareader)
-#             header = datalist[0]
-#             sheet_type = get_sheet_type(header)
-#             if sheet_type == 'Tabular':
-#                 raw_data.extend(tabular_datalist_to_plate_data(datalist, study))
-#             elif sheet_type == 'Block':
-#                 raw_data.extend(block_datalist_to_plate_data(datalist, study))
-#
-#         csv = get_plate_readout_data_as_csv([readout_id], plate_data=raw_data)
-#
-#         data = {'csv': csv}
-#
-#         return HttpResponse(json.dumps(data),
-#                             content_type="application/json")
-#
-#     else:
-#         errors = ''
-#         if formset.__dict__.get('_non_form_errors', ''):
-#             errors += formset.__dict__.get('_non_form_errors', '').as_text()
-#         if form.errors:
-#             errors += form.errors.as_text()
-#         data = {
-#             'errors': errors
-#         }
-#         return HttpResponse(json.dumps(data),
-#                             content_type='application/json')
+def validate_individual_plate_file(request):
+    """Validates a bulk file and returns either errors or a preview of the data entered
+
+    Receives the following from POST:
+    study -- the study to acquire readouts from
+    key -- specifies whether to split readouts by compound or device
+    percent_control -- specifies whether to convert to percent control
+    include_all -- specifies whether to include all data (exclude invalid if null string)
+    """
+    study_id = request.POST.get('study', '')
+    readout_id = request.POST.get('readout', '')
+    # overwrite_option = request.POST.get('overwrite_option', '')
+    # bulk_file = request.FILES.get('bulk_file', None)
+
+    if readout_id:
+        readout = AssayPlateReadout.objects.filter(pk=readout_id)
+        if readout:
+            readout = readout[0]
+            setup_id = readout.setup.id
+            study = readout.setup.assay_run_id
+        else:
+            setup_id = None
+            study = AssayRun.objects.get(pk=int(study_id))
+    else:
+        setup_id = None
+        study = AssayRun.objects.get(pk=int(study_id))
+
+    form = AssayPlateReadoutForm(study, setup_id, request.POST)
+    formset = APRAFormSet(request.POST, request.FILES, instance=form.instance)
+
+    if formset.is_valid():
+        # Validate form
+        # form.is_valid()
+
+        form_data = formset.forms[0].cleaned_data
+
+        preview_data = form_data.get('preview_data')
+
+        data = preview_data.get('plate_preview')
+
+        return HttpResponse(json.dumps(data),
+                            content_type="application/json")
+
+    else:
+        errors = ''
+        if formset.__dict__.get('_non_form_errors', ''):
+            errors += formset.__dict__.get('_non_form_errors', '').as_text()
+        if form.errors:
+            errors += form.errors.as_text()
+        data = {
+            'errors': errors
+        }
+        return HttpResponse(json.dumps(data),
+                            content_type='application/json')
 
 
 switch = {
@@ -1257,7 +1164,7 @@ switch = {
     'fetch_protocol': fetch_protocol,
     'validate_bulk_file': validate_bulk_file,
     'validate_individual_chip_file': validate_individual_chip_file,
-    # 'validate_individual_plate_file': validate_individual_plate_file
+    'validate_individual_plate_file': validate_individual_plate_file
 }
 
 
