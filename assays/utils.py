@@ -165,7 +165,7 @@ def stringify_excel_value(value):
 # SPAGHETTI CODE FIND A BETTER PLACE TO PUT THIS?
 def valid_chip_row(row):
     """Confirm that a row is valid"""
-    return row and all(row[:5] + [row[6]])
+    return row and all(row[:4] + [row[6]])
 
 
 def get_bulk_datalist(sheet):
@@ -1336,6 +1336,12 @@ def validate_chip_readout_file(
         field = line[4]
         value = line[5]
         value_unit = line[6].strip()
+
+        # Throw error if no Object
+        if not field:
+            errors.append(
+                sheet + 'Please make sure all rows have an Object. Additionally, check to see if all related data have the SAME Object.'
+            )
 
         # Get notes, if possible
         notes = ''
