@@ -505,21 +505,24 @@ def get_qc_status_plate(form):
     for key, val in form.data.iteritems():
         # If this is a QC input
         if key.startswith('{') and key.endswith('}'):
-            # Evaluate the key
-            key = unquote(key)
-            values = json.loads(key)
-            row = unicode(values.get('row'))
-            col = unicode(values.get('column'))
-            # Be sure to convert time to a float
-            time = float(values.get('time'))
-            # Assay needs to be case insensitive
-            assay = values.get('assay').upper()
-            feature = values.get('feature')
-            # Combine values in a tuple for index
-            index = (row, col, time, assay, feature)
-            # Just make value X for now (isn't even used)
-            value = 'X'
-            qc_status.update({index: value})
+            # Check to see if this is marked invalid
+            if val:
+                # Evaluate the key
+                key = unquote(key)
+                values = json.loads(key)
+                row = unicode(values.get('row'))
+                col = unicode(values.get('column'))
+                # Be sure to convert time to a float
+                time = float(values.get('time'))
+                # Assay needs to be case insensitive
+                assay = values.get('assay').upper()
+                feature = values.get('feature')
+                replicate = int(values.get('replicate'))
+                # Combine values in a tuple for index
+                index = (row, col, time, assay, feature, replicate)
+                # Just make value X for now (isn't even used)
+                value = 'X'
+                qc_status.update({index: value})
 
     return qc_status
 
@@ -548,15 +551,18 @@ def modify_qc_status_plate(current_plate_readout, form):
             readout.column,
             readout.elapsed_time,
             readout.assay.assay_id.assay_name.upper(),
-            readout.assay.feature
+            readout.assay.feature,
+            readout.replicate
         )
         index_short = (
             readout.row,
             readout.column,
             readout.elapsed_time,
             readout.assay.assay_id.assay_short_name.upper(),
-            readout.assay.feature
+            readout.assay.feature,
+            readout.replicate
         )
+
         # If the quality marker is present
         if index_long in qc_status or index_short in qc_status:
             readout.quality = 'X'

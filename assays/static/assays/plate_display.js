@@ -49,7 +49,7 @@ $(document).ready(function () {
     // This contains all the times
     window.LAYOUT.times = {};
 
-    // This matches assay_feature_pairs to their respective assay and feature
+    // This matches assay_feature_times to their respective assay and feature
     window.LAYOUT.selection_to_assay_feature = {};
 
     // This will contain the respective colors for each feature on a well to well basis
@@ -191,36 +191,36 @@ $(document).ready(function () {
         }
 
         // Allow QC clicking if readout
-        if (!$('#id_locked').prop('checked') && window.LAYOUT.models['assay_device_setup'] || window.LAYOUT.models['assay_device_readout']) {
-            $('.plate-well').click(function() {
-                var id = this.id;
-                var well_id = '#' + id;
-                // Check if qc mode is checked and if there is a readout value
-                if ($('#qc_mode').prop('checked') && $('#' + id + ' .value')[0]) {
-                    // Get the current selection
-                    var current_selection = assay_select.val();
-
-                    // Get the current time
-                    var current_time = time_select.val();
-
-                    // Make an id for the invalid input: <row>_<col>_<assay_feature_select>_<time>_QC
-                    var invalid_id = get_invalid_id(id, current_selection, current_time);
-
-                    // Check if there is already an input, if so, delete it
-                    if ($('[id="'+ invalid_id + '"]')[0]) {
-                        $('[id="'+ invalid_id + '"]').remove();
-                        $(this).removeClass('invalid-well');
-
-                        window.LAYOUT.invalid[current_selection][current_time] = _.without(window.LAYOUT.invalid[current_selection][current_time], '#' + id);
-                        // THIS MAY CAUSE ISSUES, INVESTIGATE
-                        window.LAYOUT.build_heatmap();
-                    }
-                    else {
-                        window.LAYOUT.set_invalid(id, well_id, current_selection, current_time);
-                    }
-                }
-            });
-        }
+//        if (!$('#id_locked').prop('checked') && window.LAYOUT.models['assay_device_setup'] || window.LAYOUT.models['assay_device_readout']) {
+//            $('.plate-well').click(function() {
+//                var id = this.id;
+//                var well_id = '#' + id;
+//                // Check if qc mode is checked and if there is a readout value
+//                if ($('#qc_mode').prop('checked') && $('#' + id + ' .value')[0]) {
+//                    // Get the current selection
+//                    var current_selection = assay_select.val();
+//
+//                    // Get the current time
+//                    var current_time = time_select.val();
+//
+//                    // Make an id for the invalid input: <row>_<col>_<assay_feature_select>_<time>_QC
+//                    var invalid_id = get_invalid_id(id, current_selection, current_time);
+//
+//                    // Check if there is already an input, if so, delete it
+//                    if ($('[id="'+ invalid_id + '"]')[0]) {
+//                        $('[id="'+ invalid_id + '"]').remove();
+//                        $(this).removeClass('invalid-well');
+//
+//                        window.LAYOUT.invalid[current_selection][current_time] = _.without(window.LAYOUT.invalid[current_selection][current_time], '#' + id);
+//                        // THIS MAY CAUSE ISSUES, INVESTIGATE
+//                        window.LAYOUT.build_heatmap();
+//                    }
+//                    else {
+//                        window.LAYOUT.set_invalid(id, well_id, current_selection, current_time);
+//                    }
+//                }
+//            });
+//        }
 
         var current_id = null;
         var current_model = null;
@@ -395,82 +395,126 @@ $(document).ready(function () {
         }
     };
 
-    function get_invalid_id(well_id, assay_feature_selection, time) {
-        var split = well_id.split('_');
-        var row = window.LAYOUT.row_labels.indexOf(split[0]);
-        var column = window.LAYOUT.column_labels.indexOf(split[1]);
-        return row + '_' + column + '_' + assay_feature_selection +  '_' + time + '_QC';
+    function get_invalid_id(row, column, assay_feature_selection, time, replicate) {
+        return row + '_' + column + '_' + assay_feature_selection +  '_' + time + '_' + replicate + '_QC';
     }
 
-    function get_invalid_name(well_id, assay_feature_selection, time) {
-        var split = well_id.split('_');
-        var row = window.LAYOUT.row_labels.indexOf(split[0]);
-        var column = window.LAYOUT.column_labels.indexOf(split[1]);
-
+    function get_invalid_name(row_label, column_label, assay_feature_selection, time, replicate) {
         var assay_feature = window.LAYOUT.selection_to_assay_feature[assay_feature_selection];
         var assay = assay_feature.assay;
         var feature = assay_feature.feature;
+
+        var row = window.LAYOUT.row_labels.indexOf(row_label);
+        var column = window.LAYOUT.column_labels.indexOf(column_label);
 
         var full_object = {
             'row': row,
             'column': column,
             'time': time,
             'assay': assay,
-            'feature': feature
+            'feature': feature,
+            'replicate': replicate
         };
 
         return JSON.stringify(full_object);
     }
 
-    window.LAYOUT.set_invalid = function(id, well_id, current_selection, current_time) {
-        var invalid_id = get_invalid_id(id, current_selection, current_time);
-        var invalid_name = get_invalid_name(id, current_selection, current_time);
+//    window.LAYOUT.set_invalid = function(id, well_id, current_selection, current_time, replicate) {
+//        var invalid_id = get_invalid_id(id, current_selection, current_time);
+//        var invalid_name = get_invalid_name(id, current_selection, current_time);
+//
+//        // Make an empty object for this selection if it doesn't exist
+//        if (!window.LAYOUT.invalid[current_selection]) {
+//            window.LAYOUT.invalid[current_selection] = {};
+//        }
+//
+//        // Make an empty array for this time if it doesn't exist
+//        if (!window.LAYOUT.invalid[current_selection][current_time]) {
+//            window.LAYOUT.invalid[current_selection][current_time] = [];
+//        }
+//
+//        $(well_id)
+//            .addClass('invalid-well')
+//            .append($('<input>')
+//                .attr('id', invalid_id)
+//                .attr('name', invalid_name)
+//                .attr('size', '7')
+//                .attr('readonly', 'true')
+//                .addClass('invalid')
+//                .attr('hidden', 'true')
+//                .val('X'));
+//
+//        window.LAYOUT.invalid[current_selection][current_time].push(well_id);
+//
+//        // THIS MAY CAUSE ISSUES, INVESTIGATE
+//        window.LAYOUT.build_heatmap();
+//    };
 
-        // Make an empty object for this selection if it doesn't exist
-        if (!window.LAYOUT.invalid[current_selection]) {
-            window.LAYOUT.invalid[current_selection] = {};
+    window.LAYOUT.set_invalid = function(invalid_id, assay_feature_time, well_id, replicate) {
+        var invalid_key = well_id + '_' + replicate;
+        if (window.LAYOUT.invalid[assay_feature_time][invalid_key]) {
+            window.LAYOUT.invalid[assay_feature_time][invalid_key] = false;
+            $(invalid_id).children('input').val('');
         }
-
-        // Make an empty array for this time if it doesn't exist
-        if (!window.LAYOUT.invalid[current_selection][current_time]) {
-            window.LAYOUT.invalid[current_selection][current_time] = [];
+        else {
+            window.LAYOUT.invalid[assay_feature_time][invalid_key] = true;
+            $(invalid_id).children('input').val('X');
         }
-
-        $(well_id)
-            .addClass('invalid-well')
-            .append($('<input>')
-                .attr('id', invalid_id)
-                .attr('name', invalid_name)
-                .attr('size', '7')
-                .attr('readonly', 'true')
-                .addClass('invalid')
-                .attr('hidden', 'true')
-                .val('X'));
-
-        window.LAYOUT.invalid[current_selection][current_time].push(well_id);
-
-        // THIS MAY CAUSE ISSUES, INVESTIGATE
-        window.LAYOUT.build_heatmap();
     };
+
+    // Trigger invalid on clicking value
+    $(document).on('click', '.value', function() {
+        if ($('#qc_mode').prop('checked')) {
+            var current_selection = assay_select.val();
+            var current_time = time_select.val();
+            var assay_feature_time = current_selection + '_' + current_time;
+            var invalid_id = '#' + this.id;
+
+            var split_id = this.id.split('_');
+
+            var well_id = '#' + split_id[0] + '_' + split_id[1];
+            var replicate = split_id[split_id.length-2];
+
+            // Add class as necessary
+            $(invalid_id).toggleClass('invalid');
+
+            window.LAYOUT.set_invalid(invalid_id, assay_feature_time, well_id, replicate);
+            // THIS MAY CAUSE ISSUES, INVESTIGATE
+            window.LAYOUT.build_heatmap();
+        }
+    });
 
     function refresh_invalid() {
         var current_selection = assay_select.val();
         var current_time = time_select.val();
         var current_invalid = null;
 
-        if (window.LAYOUT.invalid[current_selection]) {
-            current_invalid = window.LAYOUT.invalid[current_selection][current_time];
+        var assay_feature_time = current_selection + '_' + current_time;
+
+        if (window.LAYOUT.invalid[assay_feature_time]) {
+            current_invalid = window.LAYOUT.invalid[assay_feature_time];
         }
 
-        if ($('.plate-well')[0]) {
-            $('.plate-well').removeClass('invalid-well');
-        }
+        $('.value').removeClass('invalid');
 
         if (current_invalid) {
-            $.each(current_invalid, function (index, well) {
-                $(well).addClass('invalid-well');
+            $.each(current_invalid, function (invalid_key, invalid) {
+                var split_key = invalid_key.split('_');
+                var invalid_id = split_key[0] + '_' + split_key[1] + '_' + assay_feature_time + '_' + split_key[2] + '_QC';
+                if(invalid) {
+                    $(invalid_id).addClass('invalid');
+                }
             });
         }
+//        if ($('.plate-well')[0]) {
+//            $('.plate-well').removeClass('invalid-well');
+//        }
+//
+//        if (current_invalid) {
+//            $.each(current_invalid, function (index, well) {
+//                $(well).addClass('invalid-well');
+//            });
+//        }
     }
 
     function get_existing_readout(readout_id) {
@@ -523,6 +567,7 @@ $(document).ready(function () {
             var assay = well_data.assay;
             var quality = well_data.quality;
             var notes = well_data.notes;
+            var replicate = well_data.replicate;
 
             var row_label = window.LAYOUT.row_labels[well_data.row];
             var column_label = window.LAYOUT.column_labels[well_data.column];
@@ -534,43 +579,59 @@ $(document).ready(function () {
             window.LAYOUT.times[time] = time;
 
             // Add for multiple readings
-            var assay_feature_pair = assay + '_' + feature + '_' + time;
+            var assay_feature_time = assay + '_' + feature + '_' + time;
 
             // Add feature to assay_feature_values
-            //var assay_feature_class = 'f_'+ assay_feature_pair.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
+            //var assay_feature_class = 'f_'+ assay_feature_time.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/g,'');
 
             var assay_feature_selection = assay + '_' + feature;
 
             // Ensure unaltered assay and feature are available
             window.LAYOUT.selection_to_assay_feature[assay_feature_selection] = {'assay': assay, 'feature': feature};
 
+            var invalid_id = get_invalid_id(row_label, column_label, assay_feature_selection, time, replicate);
+            var invalid_name = get_invalid_name(row_label, column_label, assay_feature_selection, time, replicate);
+
             // Consider adding lead if people demand a larger font
             var readout = $('<p>')
+                .attr('id', invalid_id)
                 .addClass('value')
                 .attr('title', notes)
-                .attr('data-assay-feature-time', assay_feature_pair)
-                .text(number_with_commas(value));
+                .attr('data-assay-feature-time', assay_feature_time)
+                .text(number_with_commas(value))
+                .append($('<input>')
+                    .attr('name', invalid_name)
+                    .attr('size', '20')
+                    .attr('hidden', 'true')
+                    .val(quality));
 
             $(well_id).append(readout);
 
             // If feature not in assay_feature_values, add it
             // Otherwise tack on the value
-            if (window.LAYOUT.assay_feature_values[assay_feature_pair]) {
-                window.LAYOUT.assay_feature_values[assay_feature_pair][well_id] = parseFloat(value);
+            if (window.LAYOUT.assay_feature_values[assay_feature_time]) {
+                window.LAYOUT.assay_feature_values[assay_feature_time][well_id] = {};
+                window.LAYOUT.assay_feature_values[assay_feature_time][well_id][replicate] = parseFloat(value);
             }
             else {
-                window.LAYOUT.assay_feature_values[assay_feature_pair] = {};
-                window.LAYOUT.assay_feature_values[assay_feature_pair][well_id] = parseFloat(value);
+                window.LAYOUT.assay_feature_values[assay_feature_time] = {};
+                window.LAYOUT.assay_feature_values[assay_feature_time][well_id] = {};
+                window.LAYOUT.assay_feature_values[assay_feature_time][well_id][replicate] = parseFloat(value);
             }
 
-            var id = row_label + '_' + column_label;
-            // Current time alias
-            var current_time = time;
-            // Alias for readability
-            var current_selection = assay_feature_selection;
+//            var id = row_label + '_' + column_label;
+//            // Current time alias
+//            var current_time = time;
+//            // Alias for readability
+//            var current_selection = assay_feature_selection;
+
+            // Start object for invalid check
+            if (!window.LAYOUT.invalid[assay_feature_time]) {
+                window.LAYOUT.invalid[assay_feature_time] = {};
+            }
 
             if (quality) {
-                window.LAYOUT.set_invalid(id, well_id, current_selection, current_time);
+                window.LAYOUT.set_invalid('#' + invalid_id, assay_feature_time, well_id, replicate);
             }
         });
 
@@ -580,24 +641,42 @@ $(document).ready(function () {
 
     window.LAYOUT.build_heatmap = function() {
         // For each feature
-        $.each(window.LAYOUT.assay_feature_values, function(pair, values) {
+        $.each(window.LAYOUT.assay_feature_values, function(assay_feature_time, values) {
             // Start the heatmap for this assay feature (class) pair
-            window.LAYOUT.heatmaps[pair] = {};
+            window.LAYOUT.heatmaps[assay_feature_time] = {};
 
-            var current_selection = pair.split('_').slice(0, -1).join('_');
-            var current_time = pair.split('_').slice(-1).join('_');
-            var current_invalid_wells = [];
+            var current_invalid_values = [];
 
-            if (window.LAYOUT.invalid[current_selection]) {
-                current_invalid_wells = window.LAYOUT.invalid[current_selection][current_time];
+            if (window.LAYOUT.invalid[assay_feature_time]) {
+                current_invalid_values = window.LAYOUT.invalid[assay_feature_time];
             }
 
             // Exclude invalidated wells from values
-            values = _.omit(values, function(value, key, object) {return _.contains(current_invalid_wells, key);});
+            // values = _.omit(values, function(value, key, object) {return _.contains(current_invalid_values, key);});
+            var all_valid_values = {};
+            for (var current_well in values) {
+                for (var current_replicate in values[current_well]) {
+                    var invalid_key = current_well + '_' + current_replicate;
+                    var current_value = values[current_well][current_replicate];
+                    if (!current_invalid_values[invalid_key]) {
+                        if (!all_valid_values[current_well]) {
+                            all_valid_values[current_well] = [current_value];
+                        }
+                        else {
+                            all_valid_values[current_well].push(current_value);
+                        }
+                    }
+                }
+            }
+
+            var averaged_valid_values = {};
+            for (current_well in all_valid_values) {
+                averaged_valid_values[current_well] = d3.mean(all_valid_values[current_well]);
+            }
 
             // Get the values list
             // Be sure to exclude null values
-            var values_list = _.without(_.values(values), NaN);
+            var values_list = _.without(_.values(averaged_valid_values), NaN);
             // Get the min
             var min_value = _.min(values_list);
             min_value -= min_value * 0.000001;
@@ -612,8 +691,8 @@ $(document).ready(function () {
                 .range(colors);
 
             // For each value
-            $.each(values, function(well, value) {
-                window.LAYOUT.heatmaps[pair][well] = value != undefined ? color_scale(value) : '#606060';
+            $.each(averaged_valid_values, function(well, value) {
+                window.LAYOUT.heatmaps[assay_feature_time][well] = value != undefined ? color_scale(value) : '#606060';
             });
         });
 
@@ -630,8 +709,8 @@ $(document).ready(function () {
 
         var unique_pairs = {};
 
-        $.each(window.LAYOUT.assay_feature_values, function (pair, value) {
-            var pair_without_time = pair.split('_').slice(0, -1).join('_');
+        $.each(window.LAYOUT.assay_feature_values, function (assay_feature_time, value) {
+            var pair_without_time = assay_feature_time.split('_').slice(0, -1).join('_');
             var assay_feature = window.LAYOUT.selection_to_assay_feature[pair_without_time];
             var text_display = assay_feature.assay + '-' + assay_feature.feature;
             if (!unique_pairs[pair_without_time]) {

@@ -29,6 +29,84 @@ $(document).ready(function () {
         window.LAYOUT.models['assay_device_readout'] = Math.floor(window.location.href.split('/')[5]);
     }
 
+    // Get preview from AJAX file validation
+    function validate_readout_file() {
+        var serializedData = $('form').serializeArray();
+        var formData = new FormData();
+        $.each(serializedData, function(index, field) {
+            formData.append(field.name, field.value);
+        });
+        formData.append('file', $('#id_file')[0].files[0]);
+        if (window.LAYOUT.models['assay_device_readout']) {
+            formData.append('readout', window.LAYOUT.models['assay_device_readout']);
+        }
+        else {
+            formData.append('study', Math.floor(window.location.href.split('/')[4]));
+        }
+        formData.append('call', 'validate_individual_plate_file');
+        $.ajax({
+            url: "/assays_ajax/",
+            type: "POST",
+            dataType: "json",
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: formData,
+            success: function (json) {
+                // console.log(json);
+                if (json.errors) {
+                    // Display errors
+                    alert(json.errors);
+                    // Remove file selection
+                    $('#id_file').val('');
+                }
+                else {
+                    alert('Success! Please see "New Chip Data" below for preview.');
+                    // Fill heatmap
+                    window.LAYOUT.fill_readout_from_existing(json);
+                }
+            },
+            error: function (xhr, errmsg, err) {
+                alert('An unknown error has occurred.');
+                console.log(xhr.status + ": " + xhr.responseText);
+                // Remove file selection
+                $('#id_file').val('');
+            }
+        });
+    }
+
+    // On setup change, acquire labels and build table
+    setup.change(function() {
+        window.LAYOUT.get_device_layout(setup.val(), 'assay_device_setup', false);
+    });
+
+    // (implies readout exists)
+    if (window.LAYOUT.models['assay_device_readout']) {
+        // Initial table and so on
+        window.LAYOUT.get_device_layout(window.LAYOUT.models['assay_device_readout'], 'assay_device_readout', false);
+    }
+    // If a setup is initially chosen
+    else if (setup.val()) {
+        window.LAYOUT.get_device_layout(setup.val(), 'assay_device_setup', false);
+    }
+
+    // If the file changes
+    file.change(function () {
+        validate_readout_file();
+    });
+
+    // Datepicker superfluous on admin, use this check to apply only in frontend
+    if ($('#fluid-content')[0]) {
+        // Add datepicker
+        var date = $("#id_readout_start_time");
+        var curr_date = date.val();
+        date.datepicker();
+        date.datepicker("option", "dateFormat", "yy-mm-dd");
+        date.datepicker("setDate", curr_date);
+    }
+});
+
+// DEPRECATED
 //    // Process a value from a readout file
 //    function process_value(value, id, well_id, current_selection, current_time) {
 //        // Check if the value is not a number
@@ -415,80 +493,3 @@ $(document).ready(function () {
 //            alert('Please link features to assays');
 //        }
 //    }
-
-    // Get preview from AJAX file validation
-    function validate_readout_file() {
-        var serializedData = $('form').serializeArray();
-        var formData = new FormData();
-        $.each(serializedData, function(index, field) {
-            formData.append(field.name, field.value);
-        });
-        formData.append('file', $('#id_file')[0].files[0]);
-        if (window.LAYOUT.models['assay_device_readout']) {
-            formData.append('readout', window.LAYOUT.models['assay_device_readout']);
-        }
-        else {
-            formData.append('study', Math.floor(window.location.href.split('/')[4]));
-        }
-        formData.append('call', 'validate_individual_plate_file');
-        $.ajax({
-            url: "/assays_ajax/",
-            type: "POST",
-            dataType: "json",
-            cache: false,
-            contentType: false,
-            processData: false,
-            data: formData,
-            success: function (json) {
-                // console.log(json);
-                if (json.errors) {
-                    // Display errors
-                    alert(json.errors);
-                    // Remove file selection
-                    $('#id_file').val('');
-                }
-                else {
-                    alert('Success! Please see "New Chip Data" below for preview.');
-                    // Fill heatmap
-                    window.LAYOUT.fill_readout_from_existing(json);
-                }
-            },
-            error: function (xhr, errmsg, err) {
-                alert('An unknown error has occurred.');
-                console.log(xhr.status + ": " + xhr.responseText);
-                // Remove file selection
-                $('#id_file').val('');
-            }
-        });
-    }
-
-    // On setup change, acquire labels and build table
-    setup.change(function() {
-        window.LAYOUT.get_device_layout(setup.val(), 'assay_device_setup', false);
-    });
-
-    // (implies readout exists)
-    if (window.LAYOUT.models['assay_device_readout']) {
-        // Initial table and so on
-        window.LAYOUT.get_device_layout(window.LAYOUT.models['assay_device_readout'], 'assay_device_readout', false);
-    }
-    // If a setup is initially chosen
-    else if (setup.val()) {
-        window.LAYOUT.get_device_layout(setup.val(), 'assay_device_setup', false);
-    }
-
-    // If the file changes
-    file.change(function () {
-        validate_readout_file();
-    });
-
-    // Datepicker superfluous on admin, use this check to apply only in frontend
-    if ($('#fluid-content')[0]) {
-        // Add datepicker
-        var date = $("#id_readout_start_time");
-        var curr_date = date.val();
-        date.datepicker();
-        date.datepicker("option", "dateFormat", "yy-mm-dd");
-        date.datepicker("setDate", curr_date);
-    }
-});
