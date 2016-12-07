@@ -596,14 +596,14 @@ def validate_plate_readout_file(
         assay_device_readout=current_plate_readout
     ).prefetch_related(
         'assay__assay_id',
-        'assay_chip_id'
+        'assay_device_readout'
     )
 
     conflicting_entries = []
     possible_conflicting_data = {}
     for readout in old_readout_data:
         possible_conflicting_data.setdefault(
-            (readout.assay_id.assay_id, readout.assay_id.feature, readout.row, readout.column, readout.elapsed_time), []
+            (readout.assay.assay_id, readout.assay.feature, readout.row, readout.column, readout.elapsed_time), []
         ).append(readout)
 
     # Get assay models
@@ -1766,7 +1766,7 @@ def parse_file_and_save(input_file, study_id, overwrite_option, interface, reado
         old_plate_data = AssayReadout.objects.filter(
             assay_device_readout__setup__assay_run_id_id=study_id
         ).prefetch_related(
-            'assay_device_readout__setup__assay_run_id_id'
+            'assay_device_readout__setup__assay_run_id'
         )
 
         # Delete all old data
