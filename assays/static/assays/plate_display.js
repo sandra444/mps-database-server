@@ -556,6 +556,9 @@ $(document).ready(function () {
         // Reset invalid
         window.LAYOUT.invalid = {};
 
+        // Sort by replicate
+        data = _.sortBy(data, function(o) { return o.replicate; });
+
         $.each(data, function(index, well_data) {
             var value = well_data.value;
 
@@ -610,7 +613,9 @@ $(document).ready(function () {
             // If feature not in assay_feature_values, add it
             // Otherwise tack on the value
             if (window.LAYOUT.assay_feature_values[assay_feature_time]) {
-                window.LAYOUT.assay_feature_values[assay_feature_time][well_id] = {};
+                if (!window.LAYOUT.assay_feature_values[assay_feature_time][well_id]) {
+                    window.LAYOUT.assay_feature_values[assay_feature_time][well_id] = {};
+                }
                 window.LAYOUT.assay_feature_values[assay_feature_time][well_id][replicate] = parseFloat(value);
             }
             else {

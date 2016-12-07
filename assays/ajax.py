@@ -146,6 +146,11 @@ def fetch_readout(request):
     time_unit = AssayPlateReadout.objects.filter(id=current_readout_id.id)[0].timeunit.unit
 
     for readout in readouts:
+        # TODO DRY DICTATES THAT I SHOULDN'T JUST COPY THIS TO UTILS
+        notes = readout.notes
+        if readout.replicate:
+            notes = notes + '\nReplicate #' + unicode(readout.replicate)
+
         data.append({
             'row': readout.row,
             'column': readout.column,
@@ -157,7 +162,7 @@ def fetch_readout(request):
             'value_unit': readout.assay.readout_unit.unit,
             'feature': readout.assay.feature,
             'quality': readout.quality,
-            'notes': readout.notes,
+            'notes': notes,
             'replicate': readout.replicate
         })
 

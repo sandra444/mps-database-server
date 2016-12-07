@@ -603,7 +603,7 @@ def validate_plate_readout_file(
     possible_conflicting_data = {}
     for readout in old_readout_data:
         possible_conflicting_data.setdefault(
-            (readout.assay.assay_id, readout.assay.feature, readout.row, readout.column, readout.elapsed_time), []
+            (readout.assay.assay_id_id, readout.assay.feature, readout.row, readout.column, readout.elapsed_time), []
         ).append(readout)
 
     # Get assay models
@@ -629,7 +629,7 @@ def validate_plate_readout_file(
         number_of_rows = u''
         number_of_columns = u''
 
-        time = 0
+        time = float(0)
         time_unit = u''
         value_unit = u''
         feature = u''
@@ -719,6 +719,9 @@ def validate_plate_readout_file(
                     try:
                         if time != '':
                             time = float(time)
+                        # Time is zero if not specified
+                        else:
+                            time = float(0)
                     except:
                         errors.append(
                             sheet + 'The time "{}" is invalid. Please only enter numeric times'.format(time))
@@ -779,6 +782,10 @@ def validate_plate_readout_file(
                         notes = ''
 
                         if not errors:
+                            # Convert row and column to strings
+                            offset_row_id = unicode(offset_row_id)
+                            column_id = unicode(column_id)
+
                             # The current assay
                             assay_model_id = assay_models.get(assay_name).id
 
@@ -818,6 +825,9 @@ def validate_plate_readout_file(
                                 ))
 
                             else:
+                                if replicate:
+                                    notes = notes + '\nReplicate #' + unicode(replicate)
+
                                 readout_data.append({
                                     # Tentative may become useful soon
                                     'plate': plate_id,
@@ -919,7 +929,7 @@ def validate_plate_readout_file(
                     % (plate_id, value_unit, assay_feature_to_unit.get((assay_name, feature), ''))
                 )
 
-            time = 0
+            time = float(0)
             time_unit = u''
             notes = u''
             # If time is specified
@@ -941,7 +951,11 @@ def validate_plate_readout_file(
 
                 # Check time
                 try:
-                    float(time)
+                    if time != '':
+                        time = float(time)
+                    # Time is zero if not specified
+                    else:
+                        time = float(0)
                 except:
                     errors.append(
                         sheet + 'Error while parsing time "{}"'.format(time))
@@ -992,6 +1006,10 @@ def validate_plate_readout_file(
                     quality = processed_value.get('quality')
 
                 if not errors:
+                    # Convert row and column to strings
+                    row_label = unicode(row_label)
+                    column_label = unicode(column_label)
+
                     # Get assay model
                     assay_model_id = assay_models.get(assay_name).id
 
@@ -1031,6 +1049,9 @@ def validate_plate_readout_file(
                         ))
 
                     else:
+                        if replicate:
+                            notes = notes + '\nReplicate #' + unicode(replicate)
+
                         readout_data.append({
                             # Tentative may become useful soon
                             'plate': plate_id,
@@ -1420,7 +1441,7 @@ def validate_chip_readout_file(
             )
 
         # Treat empty strings as None
-        if not value:
+        if value == '':
             value = None
             # Set quality to 'NULL' if quality was not set by user
             if not quality:
@@ -1930,6 +1951,7 @@ def validate_excel_file(self, excel_file, interface, headers=1, study=None, read
                 sheet_type,
                 datalist,
                 plate_details,
+                current_plate_readout=readout,
                 sheet='Sheet "' + sheet_name + '": ',
             )
 
@@ -1996,7 +2018,8 @@ def validate_csv_file(self, datalist, interface, study=None, readout=None,
         plate_preview = validate_plate_readout_file(
             upload_type,
             datalist,
-            plate_details
+            plate_details,
+            current_plate_readout=readout
         )
 
     if not errors:
