@@ -21,6 +21,7 @@ from assays.utils import (
 from django.http import HttpResponseRedirect
 
 from assays.models import *
+from .utils import parse_file_and_save
 # from compounds.models import Compound
 from mps.base.admin import LockableAdmin
 from assays.resource import *
@@ -646,20 +647,20 @@ class AssayPlateReadoutInline(admin.TabularInline):
 
 # Plate Readout validation occurs in the inline formset
 # This form is just to jam in upload_type into the admin
-class AssayPlateReadoutForm(forms.ModelForm):
-    """Assay Plate Readout Form"""
-
-    upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
-
-    class Meta(object):
-        model = AssayPlateReadout
-        exclude = ('',)
+# class AssayPlateReadoutForm(forms.ModelForm):
+#     """Assay Plate Readout Form"""
+#
+#     upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
+#
+#     class Meta(object):
+#         model = AssayPlateReadout
+#         exclude = ('',)
 
 
 class AssayPlateReadoutAdmin(LockableAdmin):
     """Admin for Assay Plate Readouts"""
     resource_class = AssayPlateReadoutResource
-    form = AssayPlateReadoutForm
+    # form = AssayPlateReadoutForm
 
     class Media(object):
         js = ('js/inline_fix.js', 'js/csv_functions.js', 'assays/plate_display.js', 'assays/assayplatereadout_add.js',)
@@ -695,7 +696,7 @@ class AssayPlateReadoutAdmin(LockableAdmin):
                         'timeunit', 'treatment_time_length', 'readout_start_time',
                     ),
                     (
-                        'file', 'upload_type'
+                        'file'
                     ),
                 )
             }
@@ -747,7 +748,7 @@ class AssayPlateReadoutAdmin(LockableAdmin):
         obj = form.instance
 
         # Need to get the upload type
-        upload_type = form.data.get('upload_type')
+        # upload_type = form.data.get('upload_type')
         overwrite_option = form.data.get('overwrite_option')
 
         if change:
@@ -764,7 +765,9 @@ class AssayPlateReadoutAdmin(LockableAdmin):
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
             # parse_readout_csv(obj, request.FILES['file'], upload_type, overwrite_option, form)
-            pass
+            parse_file_and_save(
+                request.FILES['file'], obj.study.assay_run_id, overwrite_option, 'Plate', readout=self.object
+            )
 
         # Need to delete entries when a file is cleared
         if request.POST.get('file-clear', '') == 'on':
@@ -1079,6 +1082,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
         obj = form.instance
 
         headers = int(form.data.get('headers')) if form.data.get('headers') else 0
+        overwrite_option = form.data.get('overwrite_option')
 
         if change:
             obj.modified_by = request.user
@@ -1093,8 +1097,10 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            pass
             # parse_chip_csv(obj, request.FILES['file'], headers, form)
+            parse_file_and_save(
+                request.FILES['file'], obj.chip_setup.assay_run_id, overwrite_option, 'Chip', headers=headers, form=form, readout=self.object
+            )
 
         # Try to update QC status if no file
         else:
