@@ -382,13 +382,15 @@ def get_plate_details(self=None, study=None, readout=None):
         readouts = AssayPlateReadout.objects.filter(
             setup__assay_run_id=study
         ).prefetch_related(
-            'setup__assay_run_id'
+            'setup__assay_run_id',
+            'timeunit'
         )
     elif readout:
         readouts = AssayPlateReadout.objects.filter(
             pk=readout.id
         ).prefetch_related(
-            'setup__assay_run_id'
+            'setup__assay_run_id',
+            'timeunit'
         )
     else:
         readouts = None
@@ -537,9 +539,8 @@ def modify_qc_status_plate(current_plate_readout, form):
     readouts = AssayReadout.objects.filter(
         assay_device_readout=current_plate_readout
     ).prefetch_related(
-        'assay'
-    ).select_related(
-        'assay__assay_id'
+        'assay__assay_id',
+        'assay_device_readout'
     )
 
     # Get QC status for each line
@@ -579,7 +580,7 @@ def validate_plate_readout_file(
         plate_details,
         sheet='',
         overwrite_option=None,
-        current_plate_readout=None,
+        readout=None,
         form=None,
         save=False
 ):
@@ -593,7 +594,7 @@ def validate_plate_readout_file(
     current_data = {}
 
     old_readout_data = AssayReadout.objects.filter(
-        assay_device_readout=current_plate_readout
+        assay_device_readout=readout
     ).prefetch_related(
         'assay__assay_id',
         'assay_device_readout'
@@ -601,10 +602,10 @@ def validate_plate_readout_file(
 
     conflicting_entries = []
     possible_conflicting_data = {}
-    for readout in old_readout_data:
+    for old_readout in old_readout_data:
         possible_conflicting_data.setdefault(
-            (readout.assay.assay_id_id, readout.assay.feature, readout.row, readout.column, readout.elapsed_time), []
-        ).append(readout)
+            (old_readout.assay.assay_id_id, old_readout.assay.feature, old_readout.row, old_readout.column, old_readout.elapsed_time), []
+        ).append(old_readout)
 
     # Get assay models
     assay_models = {}
@@ -813,7 +814,7 @@ def validate_plate_readout_file(
                                 apra_id = assay_feature_to_apra_id.get((assay_model_id, feature))
 
                                 query_list.append((
-                                    current_plate_readout.id,
+                                    readout.id,
                                     apra_id,
                                     offset_row_id,
                                     column_id,
@@ -1037,7 +1038,7 @@ def validate_plate_readout_file(
                         apra_id = assay_feature_to_apra_id.get((assay_model_id, feature))
 
                         query_list.append((
-                            current_plate_readout.id,
+                            readout.id,
                             apra_id,
                             row_label,
                             column_label,
@@ -1096,7 +1097,7 @@ def validate_plate_readout_file(
         transaction.commit()
 
         if form:
-            modify_qc_status_plate(current_plate_readout, form)
+            modify_qc_status_plate(readout, form)
 
         return True
     else:
@@ -1115,11 +1116,13 @@ def get_chip_details(self=None, study=None, readout=None):
         readouts = AssayChipReadout.objects.filter(
             chip_setup__assay_run_id=study
         ).prefetch_related(
-            'chip_setup__assay_run_id'
+            'chip_setup__assay_run_id',
+            'timeunit'
         )
     elif readout:
         readouts = AssayChipReadout.objects.filter(pk=readout.id).prefetch_related(
-            'chip_setup__assay_run_id'
+            'chip_setup__assay_run_id',
+            'timeunit'
         )
     else:
         readouts = None
@@ -1297,7 +1300,10 @@ def validate_chip_readout_file(
     assay_ids = {
         (acra.assay_id_id, acra.readout_unit.unit): acra for acra in AssayChipReadoutAssay.objects.filter(
             readout_id=readouts
-        ).prefetch_related('readout_unit')
+        ).prefetch_related(
+            'readout_unit',
+            'assay_id'
+        )
     }
 
     old_readout_data = AssayChipRawData.objects.filter(
@@ -1640,7 +1646,7 @@ def save_plate_files(plate_data, study_id, upload_type, overwrite_option, form=N
             plate_details,
             sheet='',
             overwrite_option=overwrite_option,
-            current_plate_readout=readout,
+            readout=readout,
             form=form,
             save=True
         )
@@ -1753,7 +1759,32 @@ def mark_readout_value(readout_value):
     modified_qc_status = modified_qc_status[:19]
     readout_value.quality = modified_qc_status
     readout_value.notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + readout_value.notes
+    readout_value.notes = readout_value.notes[:255]
     readout_value.save()
+
+
+def mark_plate_readout_values(readout_ids_and_notes):
+    # Connect to the database
+    cursor = connection.cursor()
+
+    # The query to set a quality to something new
+    query = ''' UPDATE "assays_assayreadout"
+                SET quality=%s,notes=%s
+                WHERE id=%s;'''
+
+    query_list = []
+
+    # Just make quality 'X' for now
+    for readout_id_and_notes in readout_ids_and_notes:
+        readout_id = readout_id_and_notes[0]
+        quality = 'X'
+        notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + readout_id_and_notes[1]
+        notes = notes[:255]
+        query_list.append((quality, notes, readout_id))
+
+    # Execute the queries and close the connection
+    cursor.executemany(query, query_list)
+    transaction.commit()
 
 
 # TODO BE SURE TO CHECK IF SAVE=TRUE WHEN IT NEEDS TO BE
@@ -1773,7 +1804,8 @@ def parse_file_and_save(input_file, study_id, overwrite_option, interface, reado
         old_chip_data = AssayChipRawData.objects.filter(
             assay_chip_id__chip_setup__assay_run_id_id=study_id
         ).prefetch_related(
-            'assay_chip_id__chip_setup__assay_run_id'
+            'assay_chip_id__chip_setup__assay_run_id',
+            'assay_id__assay_id'
         )
 
         # Delete all old data
@@ -1787,7 +1819,8 @@ def parse_file_and_save(input_file, study_id, overwrite_option, interface, reado
         old_plate_data = AssayReadout.objects.filter(
             assay_device_readout__setup__assay_run_id_id=study_id
         ).prefetch_related(
-            'assay_device_readout__setup__assay_run_id'
+            'assay_device_readout__setup__assay_run_id',
+            'assay__assay_id'
         )
 
         # Delete all old data
@@ -1795,14 +1828,15 @@ def parse_file_and_save(input_file, study_id, overwrite_option, interface, reado
             old_plate_data.delete()
         # Add 'OLD' to qc status of all old data
         elif overwrite_option == 'mark_all_old_data':
-            for readout in old_plate_data:
-                mark_readout_value(readout)
+            readout_ids_and_notes = old_plate_data.values_list('id', 'notes', 'quality')
+            mark_plate_readout_values(readout_ids_and_notes)
 
     elif interface == 'Chip':
         old_chip_data = AssayChipRawData.objects.filter(
             assay_chip_id=readout
         ).prefetch_related(
-            'assay_chip_id'
+            'assay_chip_id__chip_setup__assay_run_id',
+            'assay_id__assay_id'
         )
 
         # Delete all old data
@@ -1817,7 +1851,8 @@ def parse_file_and_save(input_file, study_id, overwrite_option, interface, reado
         old_plate_data = AssayReadout.objects.filter(
             assay_device_readout=readout
         ).prefetch_related(
-            'assay_device_readout'
+            'assay_device_readout__setup__assay_run_id',
+            'assay__assay_id'
         )
 
         # Delete all old data
@@ -1825,8 +1860,8 @@ def parse_file_and_save(input_file, study_id, overwrite_option, interface, reado
             old_plate_data.delete()
         # Add 'OLD' to qc status of all old data
         elif overwrite_option == 'mark_all_old_data':
-            for readout in old_plate_data:
-                mark_readout_value(readout)
+            readout_ids_and_notes = old_plate_data.values_list('id', 'notes', 'quality')
+            mark_plate_readout_values(readout_ids_and_notes)
 
     excel_file = None
     datalist = None
@@ -1892,7 +1927,7 @@ def validate_excel_file(self, excel_file, interface, headers=1, study=None, read
     readout - the readout in question (optional)
     chip_details - dictionary of assays and units for each chip (optional)
     plate_details - dictionary of assay and units for each plate (optional)
-    upload_type - upload type for plates (optional)
+    upload_type - upload type for plates (optional) [DEPRECATED]
     """
     sheet_names = excel_file.sheet_names()
 
@@ -1944,14 +1979,15 @@ def validate_excel_file(self, excel_file, interface, headers=1, study=None, read
             if not plate_details:
                 plate_details = get_plate_details(self, study, readout)
 
-            if upload_type:
-                sheet_type = upload_type
+            # DO NOT USE upload_type IN LIEU OF sheet_type
+            # if upload_type:
+            #     sheet_type = upload_type
 
             current_plate_preview = validate_plate_readout_file(
                 sheet_type,
                 datalist,
                 plate_details,
-                current_plate_readout=readout,
+                readout=readout,
                 sheet='Sheet "' + sheet_name + '": ',
             )
 
@@ -1996,7 +2032,6 @@ def validate_csv_file(self, datalist, interface, study=None, readout=None,
     if error_message:
         errors.append(error_message)
 
-
     if sheet_type == 'Chip':
         if not chip_details:
             chip_details = get_chip_details(self, study, readout)
@@ -2019,7 +2054,7 @@ def validate_csv_file(self, datalist, interface, study=None, readout=None,
             upload_type,
             datalist,
             plate_details,
-            current_plate_readout=readout
+            readout=readout
         )
 
     if not errors:

@@ -316,7 +316,8 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None):
             'assay_chip_id__chip_setup__assay_chip_id',
             'assay_id__assay_id__assay_short_name',
             'elapsed_time',
-            'quality'
+            'quality',
+            'replicate'
         )
 
     csv = ''

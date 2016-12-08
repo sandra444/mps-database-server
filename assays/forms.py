@@ -444,7 +444,8 @@ class AssayPlateReadoutForm(SignOffMixin, CloneableForm):
             setups = setups | AssayPlateSetup.objects.filter(pk=current)
         self.fields['setup'].queryset = setups
 
-    upload_type = forms.ChoiceField(choices=(('Block', 'Block'), ('Tabular', 'Tabular')))
+    # upload_type = forms.ChoiceField(choices=(('Block', 'Block'), ('Tabular', 'Tabular')))
+
     overwrite_option = OVERWRITE_OPTIONS
 
     class Meta(object):
@@ -601,7 +602,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
 
         # TODO REVIEW
         # Get upload type
-        upload_type = self.data.get('upload_type')
+        # upload_type = self.data.get('upload_type')
 
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
@@ -651,7 +652,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                 test_file,
                 'Plate',
                 plate_details=plate_details,
-                upload_type=upload_type,
+                # upload_type=upload_type,
                 study=setup.assay_run_id
             )
             # Evil attempt to acquire preview data

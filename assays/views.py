@@ -1647,7 +1647,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             data = form.cleaned_data
 
             # Get upload_type
-            upload_type = data.get('upload_type')
+            # upload_type = data.get('upload_type')
             overwrite_option = data.get('overwrite_option')
 
             save_forms_with_tracking(self, form, formset=formset, update=False)
@@ -1733,7 +1733,7 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
             # Get upload_type
-            upload_type = data.get('upload_type')
+            # upload_type = data.get('upload_type')
             overwrite_option = data.get('overwrite_option')
 
             save_forms_with_tracking(self, form, formset=formset, update=True)
