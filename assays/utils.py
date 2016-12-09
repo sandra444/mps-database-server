@@ -507,71 +507,94 @@ def get_qc_status_plate(form):
     for key, val in form.data.iteritems():
         # If this is a QC input
         if key.startswith('{') and key.endswith('}'):
-            # Check to see if this is marked invalid
-            if val:
-                # Evaluate the key
-                key = unquote(key)
-                values = json.loads(key)
-                row = unicode(values.get('row'))
-                col = unicode(values.get('column'))
-                # Be sure to convert time to a float
-                time = float(values.get('time'))
-                # Assay needs to be case insensitive
-                assay = values.get('assay').upper()
-                feature = values.get('feature')
-                replicate = int(values.get('replicate'))
-                # Combine values in a tuple for index
-                index = (row, col, time, assay, feature, replicate)
-                # Just make value X for now (isn't even used)
-                value = 'X'
-                qc_status.update({index: value})
+            # Evaluate the key
+            key = unquote(key)
+            values = json.loads(key)
+            row = unicode(values.get('row'))
+            col = unicode(values.get('column'))
+            # Be sure to convert time to a float
+            time = float(values.get('time'))
+            # Assay needs to be case insensitive
+            assay = values.get('assay').upper()
+            feature = values.get('feature')
+            replicate = int(values.get('replicate'))
+            # Combine values in a tuple for index
+            index = (row, col, time, assay, feature, replicate)
+            # Set to val
+            qc_status.update({index: val})
 
     return qc_status
 
 
-@transaction.atomic
 def modify_qc_status_plate(current_plate_readout, form):
-    """Update the QC status of a plate
-
-    Note that this function uses the @transaction.atomic decorator
-    """
+    """Update the QC status of a plate"""
     # Get the readouts
     readouts = AssayReadout.objects.filter(
         assay_device_readout=current_plate_readout
     ).prefetch_related(
         'assay__assay_id',
         'assay_device_readout'
+    ).values_list(
+        'id',
+        'row',
+        'column',
+        'elapsed_time',
+        'assay__assay_id__assay_name',
+        'assay__assay_id__assay_short_name',
+        'assay__feature',
+        'replicate',
+        'quality',
+        'notes'
     )
 
     # Get QC status for each line
     qc_status = get_qc_status_plate(form)
+    readout_ids_and_notes = []
 
-    for readout in readouts:
+    for readout_values in readouts:
         index_long = (
-            readout.row,
-            readout.column,
-            readout.elapsed_time,
-            readout.assay.assay_id.assay_name.upper(),
-            readout.assay.feature,
-            readout.replicate
+            readout_values[1],
+            readout_values[2],
+            readout_values[3],
+            readout_values[4],
+            readout_values[6],
+            readout_values[7]
         )
         index_short = (
-            readout.row,
-            readout.column,
-            readout.elapsed_time,
-            readout.assay.assay_id.assay_short_name.upper(),
-            readout.assay.feature,
-            readout.replicate
+            readout_values[1],
+            readout_values[2],
+            readout_values[3],
+            readout_values[5],
+            readout_values[6],
+            readout_values[7]
         )
 
+        id = readout_values[0]
+        quality = readout_values[8]
+        notes = readout_values[9]
+
+        long_name_check = qc_status.get(index_long, None)
+        short_name_check = qc_status.get(index_short, None)
+
+        # long_name_removed = not long_name_check and not long_name_check is None
+        long_name_empty = long_name_check == u''
+        short_name_empty = short_name_check == u''
+
+        if long_name_check:
+            new_quality = long_name_check
+        elif short_name_check:
+            new_quality = short_name_check
+        else:
+            new_quality = u''
+
         # If the quality marker is present
-        if index_long in qc_status or index_short in qc_status:
-            readout.quality = 'X'
-            readout.save()
+        if long_name_check or short_name_check:
+            readout_ids_and_notes.append((id, notes, new_quality))
         # If the quality marker has been removed
-        elif index_long not in qc_status and index_short not in qc_status and readout.quality:
-            readout.quality = u''
-            readout.save()
+        elif (long_name_empty or short_name_empty) and quality:
+            readout_ids_and_notes.append((id, notes, new_quality))
+
+    mark_plate_readout_values(readout_ids_and_notes)
 
 
 def validate_plate_readout_file(
@@ -1080,11 +1103,14 @@ def validate_plate_readout_file(
     if errors:
         raise forms.ValidationError(errors)
     elif save:
-        for entry in conflicting_entries:
-            if overwrite_option == 'delete_conflicting_data':
+        if overwrite_option == 'delete_conflicting_data':
+            for entry in conflicting_entries:
                 entry.delete()
-            elif overwrite_option == 'mark_conflicting_data':
-                mark_readout_value(entry)
+        elif overwrite_option == 'mark_conflicting_data':
+            readout_ids_and_notes = []
+            for entry in conflicting_entries:
+                readout_ids_and_notes.append((entry.id, entry.notes, entry.quality))
+            mark_plate_readout_values(readout_ids_and_notes, stamp=True)
 
         # Connect to the database
         cursor = connection.cursor()
@@ -1200,50 +1226,140 @@ def get_chip_details(self=None, study=None, readout=None):
     return chip_details
 
 
+# def get_qc_status_chip(form):
+#     """Get QC status for each line"""
+#     qc_status = {}
+#
+#     if not form:
+#         return qc_status
+#
+#     for key, val in form.data.iteritems():
+#         # If this is a QC input
+#         if key.startswith('QC_'):
+#             # Get index from key
+#             index = int(key.split('_')[-1])
+#             # Truncate value to be less than 20 characters to avoid errors
+#             quality = val[:19]
+#             qc_status.update({index: quality})
+#
+#     return qc_status
+#
+#
+# # NOTE: Tricky thing about chip QC is IT DEPENDS ON WHETHER IT IS BEING ADDED OR UPDATED
+# # Why? The ORDER OF THE VALUES REFLECTS THE FILE WHEN ADDING, BUT IS SORTED IN UPDATE
+# @transaction.atomic
+# def modify_qc_status_chip(current_chip_readout, form):
+#     """Update the QC for a chip"""
+#     # Get the readouts as they would appear on the front end
+#     # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
+#     readouts = AssayChipRawData.objects.prefetch_related(
+#         'assay_chip_id__chip_setup',
+#         'assay_id__assay_id'
+#     ).filter(
+#         assay_chip_id=current_chip_readout
+#     ).order_by(
+#         'assay_chip_id__chip_setup__assay_chip_id',
+#         'assay_id__assay_id__assay_short_name',
+#         'elapsed_time',
+#         'quality'
+#     )
+#
+#     # Get QC status for each line
+#     qc_status = get_qc_status_chip(form)
+#
+#     for index, readout in enumerate(readouts):
+#         readout.quality = qc_status.get(index)
+#         readout.save()
+
+
 def get_qc_status_chip(form):
     """Get QC status for each line"""
     qc_status = {}
 
-    if not form:
-        return qc_status
-
     for key, val in form.data.iteritems():
         # If this is a QC input
-        if key.startswith('QC_'):
-            # Get index from key
-            index = int(key.split('_')[-1])
-            # Truncate value to be less than 20 characters to avoid errors
-            quality = val[:19]
-            qc_status.update({index: quality})
+        if key.startswith('{') and key.endswith('}'):
+            # Evaluate the key
+            key = unquote(key)
+            values = json.loads(key)
+            object_field = unicode(values.get('field'))
+            # Be sure to convert time to a float
+            time = float(values.get('time'))
+            # Assay needs to be case insensitive
+            assay = values.get('assay').upper()
+            replicate = int(values.get('replicate'))
+            # Combine values in a tuple for index
+            index = (object_field, time, assay, replicate)
+            # Set to stripped val
+            qc_status.update({index: val.strip()})
 
     return qc_status
 
 
-# NOTE: Tricky thing about chip QC is IT DEPENDS ON WHETHER IT IS BEING ADDED OR UPDATED
-# Why? The ORDER OF THE VALUES REFLECTS THE FILE WHEN ADDING, BUT IS SORTED IN UPDATE
-@transaction.atomic
+#TODO TODO TODO
 def modify_qc_status_chip(current_chip_readout, form):
-    """Update the QC for a chip"""
-    # Get the readouts as they would appear on the front end
-    # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
-    readouts = AssayChipRawData.objects.prefetch_related(
-        'assay_chip_id__chip_setup',
-        'assay_id__assay_id'
-    ).filter(
+    """Update the QC status of a plate"""
+    # Get the readouts
+    readouts = AssayChipRawData.objects.filter(
         assay_chip_id=current_chip_readout
-    ).order_by(
-        'assay_chip_id__chip_setup__assay_chip_id',
-        'assay_id__assay_id__assay_short_name',
+    ).prefetch_related(
+        'assay_id__assay_id',
+        'assay_chip_id__chip__setup__assay_run_id'
+    ).values_list(
+        'id',
+        'field_id',
         'elapsed_time',
-        'quality'
+        'assay_id__assay_id__assay_name',
+        'assay_id__assay_id__assay_short_name',
+        'replicate',
+        'quality',
+        'notes'
     )
 
     # Get QC status for each line
     qc_status = get_qc_status_chip(form)
+    readout_ids_and_notes = []
 
-    for index, readout in enumerate(readouts):
-        readout.quality = qc_status.get(index)
-        readout.save()
+    for readout_values in readouts:
+        index_long = (
+            readout_values[1],
+            readout_values[2],
+            readout_values[3],
+            readout_values[5]
+        )
+        index_short = (
+            readout_values[1],
+            readout_values[2],
+            readout_values[4],
+            readout_values[5]
+        )
+
+        id = readout_values[0]
+        quality = readout_values[6]
+        notes = readout_values[7]
+
+        long_name_check = qc_status.get(index_long, None)
+        short_name_check = qc_status.get(index_short, None)
+
+        # long_name_removed = not long_name_check and not long_name_check is None
+        long_name_empty = long_name_check == u''
+        short_name_empty = short_name_check == u''
+
+        if long_name_check:
+            new_quality = long_name_check
+        elif short_name_check:
+            new_quality = short_name_check
+        else:
+            new_quality = u''
+
+        # If the quality marker is present
+        if long_name_check or short_name_check:
+            readout_ids_and_notes.append((id, notes, new_quality))
+        # If the quality marker has been removed
+        elif (long_name_empty or short_name_empty) and quality:
+            readout_ids_and_notes.append((id, notes, new_quality))
+
+    mark_chip_readout_values(readout_ids_and_notes)
 
 
 # TODO BE SURE TO CHECK CHECK FOR DUPLICATES
@@ -1348,8 +1464,9 @@ def validate_chip_readout_file(
                     .format(line[0])
                 )
 
+    # OLD
     # Get QC status for each line
-    qc_status = get_qc_status_chip(form)
+    # qc_status = get_qc_status_chip(form)
 
     # Current index for finding correct QC status
     current_index = 0
@@ -1387,11 +1504,12 @@ def validate_chip_readout_file(
         if len(line) > 7:
             quality = line[7]
 
-        # Get quality from added form inputs if possible
-        if current_index in qc_status:
-            quality = qc_status.get(current_index)
-        # Increment current index acquisition
-        current_index += 1
+        # OLD
+        # # Get quality from added form inputs if possible
+        # if current_index in qc_status:
+        #     quality = qc_status.get(current_index)
+        # # Increment current index acquisition
+        # current_index += 1
 
         if chip_id not in chip_details:
             errors.append(
@@ -1521,14 +1639,20 @@ def validate_chip_readout_file(
     if errors:
         raise forms.ValidationError(errors)
     elif save:
-        for entry in conflicting_entries:
-            if overwrite_option == 'delete_conflicting_data':
+        if overwrite_option == 'delete_conflicting_data':
+            for entry in conflicting_entries:
                 entry.delete()
-            elif overwrite_option == 'mark_conflicting_data':
-                mark_readout_value(entry)
+        elif overwrite_option == 'mark_conflicting_data':
+            readout_ids_and_notes = []
+            for entry in conflicting_entries:
+                readout_ids_and_notes.append((entry.id, entry.notes, entry.quality))
+            mark_chip_readout_values(readout_ids_and_notes, stamp=True)
 
         for readout in readout_data:
             readout.save()
+
+        if form:
+            modify_qc_status_chip(readout, form)
 
         return True
     else:
@@ -1753,17 +1877,43 @@ def acquire_valid_data(datalist, sheet_type, chip_data, tabular_data, block_data
 
 
 # TODO SPAGHETTI CODE
-def mark_readout_value(readout_value):
-    """Marks a readout value"""
-    modified_qc_status = 'OLD ' + readout_value.quality
-    modified_qc_status = modified_qc_status[:19]
-    readout_value.quality = modified_qc_status
-    readout_value.notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + readout_value.notes
-    readout_value.notes = readout_value.notes[:255]
-    readout_value.save()
+# def mark_readout_value(readout_value):
+#     """Marks a readout value"""
+#     modified_qc_status = 'OLD ' + readout_value.quality
+#     modified_qc_status = modified_qc_status[:19]
+#     readout_value.quality = modified_qc_status
+#     readout_value.notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + readout_value.notes
+#     readout_value.notes = readout_value.notes[:255]
+#     readout_value.save()
 
 
-def mark_plate_readout_values(readout_ids_and_notes):
+def mark_chip_readout_values(readout_ids_and_notes, stamp=False):
+    # Connect to the database
+    cursor = connection.cursor()
+
+    # The query to set a quality to something new
+    query = ''' UPDATE "assays_assaychiprawdata"
+                SET quality=%s,notes=%s
+                WHERE id=%s;'''
+
+    query_list = []
+
+    # Just make quality 'X' for now
+    for readout_id_and_notes in readout_ids_and_notes:
+        readout_id = readout_id_and_notes[0]
+        notes = readout_id_and_notes[1]
+        if stamp:
+            notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + notes
+            notes = notes[:255]
+        quality = readout_id_and_notes[2]
+        query_list.append((quality, notes, readout_id))
+
+    # Execute the queries and close the connection
+    cursor.executemany(query, query_list)
+    transaction.commit()
+
+
+def mark_plate_readout_values(readout_ids_and_notes, stamp=False):
     # Connect to the database
     cursor = connection.cursor()
 
@@ -1777,9 +1927,11 @@ def mark_plate_readout_values(readout_ids_and_notes):
     # Just make quality 'X' for now
     for readout_id_and_notes in readout_ids_and_notes:
         readout_id = readout_id_and_notes[0]
-        quality = 'X'
-        notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + readout_id_and_notes[1]
-        notes = notes[:255]
+        notes = readout_id_and_notes[1]
+        if stamp:
+            notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + notes
+            notes = notes[:255]
+        quality = readout_id_and_notes[2]
         query_list.append((quality, notes, readout_id))
 
     # Execute the queries and close the connection
@@ -1813,8 +1965,8 @@ def parse_file_and_save(input_file, study_id, overwrite_option, interface, reado
             old_chip_data.delete()
         # Add 'OLD' to qc status of all old data
         elif overwrite_option == 'mark_all_old_data':
-            for readout in old_chip_data:
-                mark_readout_value(readout)
+            readout_ids_and_notes = old_chip_data.values_list('id', 'notes', 'quality')
+            mark_chip_readout_values(readout_ids_and_notes, stamp=True)
 
         old_plate_data = AssayReadout.objects.filter(
             assay_device_readout__setup__assay_run_id_id=study_id
@@ -1829,7 +1981,7 @@ def parse_file_and_save(input_file, study_id, overwrite_option, interface, reado
         # Add 'OLD' to qc status of all old data
         elif overwrite_option == 'mark_all_old_data':
             readout_ids_and_notes = old_plate_data.values_list('id', 'notes', 'quality')
-            mark_plate_readout_values(readout_ids_and_notes)
+            mark_plate_readout_values(readout_ids_and_notes, stamp=True)
 
     elif interface == 'Chip':
         old_chip_data = AssayChipRawData.objects.filter(
@@ -1844,8 +1996,8 @@ def parse_file_and_save(input_file, study_id, overwrite_option, interface, reado
             old_chip_data.delete()
         # Add 'OLD' to qc status of all old data
         elif overwrite_option == 'mark_all_old_data':
-            for readout in old_chip_data:
-                mark_readout_value(readout)
+            readout_ids_and_notes = old_chip_data.values_list('id', 'notes', 'quality')
+            mark_chip_readout_values(readout_ids_and_notes, stamp=True)
 
     elif interface == 'Plate':
         old_plate_data = AssayReadout.objects.filter(
@@ -1861,7 +2013,7 @@ def parse_file_and_save(input_file, study_id, overwrite_option, interface, reado
         # Add 'OLD' to qc status of all old data
         elif overwrite_option == 'mark_all_old_data':
             readout_ids_and_notes = old_plate_data.values_list('id', 'notes', 'quality')
-            mark_plate_readout_values(readout_ids_and_notes)
+            mark_plate_readout_values(readout_ids_and_notes, stamp=True)
 
     excel_file = None
     datalist = None

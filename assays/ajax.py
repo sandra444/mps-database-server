@@ -352,10 +352,8 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None):
             csv += '"' + unicode(raw.quality) + '"' + ','
         else:
             csv += unicode(raw.quality) + ','
-        if raw.replicate:
-            csv += '"' + unicode(raw.notes) + '\nReplicate #' + unicode(raw.replicate) + '"' + '\n'
-        else:
-            csv += '"' + unicode(raw.notes) + '"' + '\n'
+        csv += '"' + unicode(raw.notes) + '"' + ','
+        csv += '"' + unicode(raw.replicate) + '"\n'
 
     return csv
 

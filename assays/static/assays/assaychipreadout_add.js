@@ -166,6 +166,17 @@ $(document).ready(function () {
         parseAndReplace(fileString);
     };
 
+    function get_index_for_value(field, time, assay, replicate) {
+        var full_index = {
+            'field': field,
+            'time': time,
+            'assay': assay,
+            'replicate': replicate
+        };
+
+        return JSON.stringify(full_index);
+    }
+
     var parseAndReplace = function (csv) {
         if (!csv) {
             $('#csv_table').html(add);
@@ -184,7 +195,7 @@ $(document).ready(function () {
             return;
         }
 
-        lines = parse_csv(csv);
+        var lines = parse_csv(csv);
 
         //Make table
         var table = exist ? "<table class='layout-table bg-success' style='width: 100%;'><tbody>" : "<table class='layout-table' style='width: 100%;'><tbody>";
@@ -198,10 +209,28 @@ $(document).ready(function () {
         for (var i in lines) {
             var line = lines[i];
 
-            // Need to take a slice to avoid treating missing QC as invalid
-            var every = line.slice(0,5).every(isTrue) && isTrue(line[6]);
-
+            var chip_id = line[0];
+            var time = line[1];
+            // var time_unit = line[2];
+            var assay = line[3];
+            var object = line[4];
             var value = line[5];
+            // var value_unit = line[6];
+
+            var quality = $.trim(line[7]);
+            var notes = $.trim(line[8]);
+            var replicate = $.trim(line[9]);
+
+            // Add replicate to notes if this is a replicate (i.e. replicate > 1)
+            if (replicate) {
+                notes += '\nReplicate #' + replicate;
+            }
+
+            // Index in data
+            var index = '';
+
+            // Need to take a slice to avoid treating missing QC as invalid
+            var every = line.slice(0,5).every(isTrue) && isTrue(line[6]) && isTrue(line[9]);
 
             // If the row will be excluded (highlighted red)
             // if ((i < headers && !exist) || !every) {
@@ -224,8 +253,8 @@ $(document).ready(function () {
             }
 
             // DO NOT ADD COMMAS TO CHIP ID
-            if (line[0]) {
-                table += "<th>" + line[0] + "</th>";
+            if (chip_id) {
+                table += "<th>" + chip_id + "</th>";
             }
 
             for (var j=1; j<7; j++) {
@@ -241,8 +270,8 @@ $(document).ready(function () {
             // (QC status of an ignored row does not really matter)
             // if (i < headers && !exist || !every) {
             if (!exist && !every) {
-                if (line[7]) {
-                    table += "<th>" + line[7] + "</th>";
+                if (quality) {
+                    table += "<th>" + quality + "</th>";
                 }
                 else {
                     table += "<th></th>";
@@ -252,20 +281,26 @@ $(document).ready(function () {
             // QC inputs NAME begin with "QC_"
             // QC input IDS are the row index (for plotting accurately)
             else {
-                table += "<th><input size='4' class='quality text-danger' id='" + i + "' name='QC_" + current_index + "' value='" + line[7] + "'></th>";
+                index = get_index_for_value(object, time, assay, replicate);
+                table += "<th><input size='4' class='quality text-danger' id='" + i + "' name='" + index + "' value='" + quality + "'></th>";
                 // Increment the current index
                 current_index += 1;
             }
 
             // Add notes
-            if (line[8]) {
-                table += '<th><span class="glyphicon glyphicon-info-sign" title="' + line[8] + '"></span></th>';
+            if (notes) {
+                table += '<th><span class="glyphicon glyphicon-info-sign" title="' + notes + '"></span></th>';
             }
             else {
                 table += "<th></th>";
             }
 
             table += "</tr>";
+
+            // Add to data if index
+            if (index) {
+                data[index] = line;
+            }
         }
 
         table += "</tbody></table>";
@@ -280,8 +315,8 @@ $(document).ready(function () {
             else {
                 $(this).parent().parent().removeClass('bg-warning');
             }
-            var index = +this.id;
-            lines[index][7] = this.value;
+            var index = this.name;
+            data[index][7] = this.value;
             resetChart();
             plot();
         });
@@ -295,16 +330,17 @@ $(document).ready(function () {
         var valueUnits = {};
         var timeUnits = {};
 
-        for (var i in lines) {
-            var line = lines[i];
+        for (var i in data) {
+            var line = data[i];
 
+            // This is done before hand now
             // Need to take a slice to avoid treating missing QC as invalid
-            var every = line.slice(0,7).every(isTrue);
-
-            // if (!every || (i < headers && !exist)) {
-            if (!every && !exist) {
-                continue;
-            }
+//            var every = line.slice(0,7).every(isTrue);
+//
+//            // if (!every || (i < headers && !exist)) {
+//            if (!every && !exist) {
+//                continue;
+//            }
 
             var time = line[1];
             var time_unit = line[2];
@@ -408,8 +444,8 @@ $(document).ready(function () {
         }
     };
 
-    // The data in question
-    var lines = [];
+    // The data in question as a Object pairing 'time|time_unit|assay|object|value_unit|replicate
+    var data = {};
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 
