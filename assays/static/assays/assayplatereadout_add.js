@@ -31,12 +31,13 @@ $(document).ready(function () {
 
     // Get preview from AJAX file validation
     function validate_readout_file() {
+        var current_file = $('#id_file')[0].files[0];
         var serializedData = $('form').serializeArray();
         var formData = new FormData();
         $.each(serializedData, function(index, field) {
             formData.append(field.name, field.value);
         });
-        formData.append('file', $('#id_file')[0].files[0]);
+        formData.append('file', current_file);
         if (window.LAYOUT.models['assay_device_readout']) {
             formData.append('readout', window.LAYOUT.models['assay_device_readout']);
         }
@@ -44,35 +45,37 @@ $(document).ready(function () {
             formData.append('study', Math.floor(window.location.href.split('/')[4]));
         }
         formData.append('call', 'validate_individual_plate_file');
-        $.ajax({
-            url: "/assays_ajax/",
-            type: "POST",
-            dataType: "json",
-            cache: false,
-            contentType: false,
-            processData: false,
-            data: formData,
-            success: function (json) {
-                // console.log(json);
-                if (json.errors) {
-                    // Display errors
-                    alert(json.errors);
+        if (current_file) {
+            $.ajax({
+                url: "/assays_ajax/",
+                type: "POST",
+                dataType: "json",
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (json) {
+                    // console.log(json);
+                    if (json.errors) {
+                        // Display errors
+                        alert(json.errors);
+                        // Remove file selection
+                        $('#id_file').val('');
+                    }
+                    else {
+                        alert('Success! Please see "New Chip Data" below for preview.');
+                        // Fill heatmap
+                        window.LAYOUT.fill_readout_from_existing(json);
+                    }
+                },
+                error: function (xhr, errmsg, err) {
+                    alert('An unknown error has occurred.');
+                    console.log(xhr.status + ": " + xhr.responseText);
                     // Remove file selection
                     $('#id_file').val('');
                 }
-                else {
-                    alert('Success! Please see "New Chip Data" below for preview.');
-                    // Fill heatmap
-                    window.LAYOUT.fill_readout_from_existing(json);
-                }
-            },
-            error: function (xhr, errmsg, err) {
-                alert('An unknown error has occurred.');
-                console.log(xhr.status + ": " + xhr.responseText);
-                // Remove file selection
-                $('#id_file').val('');
-            }
-        });
+            });
+        }
     }
 
     // On setup change, acquire labels and build table
