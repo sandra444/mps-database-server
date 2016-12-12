@@ -198,7 +198,7 @@ $(document).ready(function () {
         var lines = parse_csv(csv);
 
         //Make table
-        var table = exist ? "<table class='layout-table bg-success' style='width: 100%;'><tbody>" : "<table class='layout-table' style='width: 100%;'><tbody>";
+        var table = exist ? "<table class='chip-table bg-success' style='width: 100%;'><tbody>" : "<table class='chip-table' style='width: 100%;'><tbody>";
 
         // table += exist ? "<tr class='bg-info'>" + header + "</tr>" : "";
         table += "<tr class='bg-info'>" + header + "</tr>";
@@ -222,7 +222,7 @@ $(document).ready(function () {
             var replicate = $.trim(line[9]);
 
             // Add replicate to notes if this is a replicate (i.e. replicate > 1)
-            if (replicate) {
+            if (replicate && replicate != 0) {
                 notes += '\nReplicate #' + replicate;
             }
 
@@ -469,7 +469,7 @@ $(document).ready(function () {
         headers = Math.floor($('#id_headers').val());
     }
 
-    var add = "<table class='layout-table' style='width: 100%;'><tbody>" +
+    var add = "<table class='chip-table' style='width: 100%;'><tbody>" +
         "<tr class='bg-info'>" + header + "</tr>" +
         "<tr>" + repeat('<th><br><br></th>',8) + "</tr>" +
         "<tr>" + repeat('<th><br><br></th>',8) + "</tr>" +
