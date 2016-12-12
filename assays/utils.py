@@ -1291,7 +1291,7 @@ def get_qc_status_chip(form):
             # Combine values in a tuple for index
             index = (object_field, time, assay, replicate)
             # Set to stripped val
-            qc_status.update({index: val.strip()})
+            qc_status.update({index: val.strip()[:19]})
 
     return qc_status
 
@@ -1366,8 +1366,6 @@ def modify_qc_status_chip(current_chip_readout, form):
 # TODO BE SURE TO FIX DELETION OF DUPLICATES
 # TODO GET CURRENT CHIP READOUT DEPENDING ON SETUP FIELD FOR BULK UPLOADS
 # TODO RATHER THAN DELETING/MARKING FIRST, WAIT UNTIL END TO DELETE AND MARK (SET CONFLICTING NUMBER TO ZERO IF NECESSARY
-# Atomic transaction may cause issues
-@transaction.atomic
 def validate_chip_readout_file(
     headers,
     datalist,
@@ -1380,7 +1378,9 @@ def validate_chip_readout_file(
     save=False
 ):
     """Validates CSV Uploads for Chip Readouts"""
-    # A list of readout data
+    # A query list to execute to save chip data
+    query_list = []
+    # A list of readout data for preview
     readout_data = []
     # A list of errors
     errors = []
@@ -1467,9 +1467,8 @@ def validate_chip_readout_file(
     # OLD
     # Get QC status for each line
     # qc_status = get_qc_status_chip(form)
-
     # Current index for finding correct QC status
-    current_index = 0
+    # current_index = 0
 
     # Read headers going onward
     for line in datalist[headers:]:
@@ -1618,18 +1617,30 @@ def validate_chip_readout_file(
             # Discern what replicate this is (default 1)
             replicate = 0 + number_conflicting_entries + number_duplicate_current
 
-            readout_data.append(
-                AssayChipRawData(
-                    assay_chip_id=current_chip_readout,
-                    assay_id=assay_id,
-                    field_id=field,
-                    value=value,
-                    elapsed_time=time,
-                    quality=quality,
-                    notes=notes,
-                    replicate=replicate
+            if save:
+                query_list.append((
+                    current_chip_readout.id,
+                    assay_id.id,
+                    field,
+                    value,
+                    time,
+                    quality,
+                    notes,
+                    replicate
+                ))
+            else:
+                readout_data.append(
+                    AssayChipRawData(
+                        assay_chip_id=current_chip_readout,
+                        assay_id=assay_id,
+                        field_id=field,
+                        value=value,
+                        elapsed_time=time,
+                        quality=quality,
+                        notes=notes,
+                        replicate=replicate
+                    )
                 )
-            )
 
             # Add to current_data
             current_data.setdefault(
@@ -1648,8 +1659,15 @@ def validate_chip_readout_file(
                 readout_ids_and_notes.append((entry.id, entry.notes, entry.quality))
             mark_chip_readout_values(readout_ids_and_notes, stamp=True)
 
-        for readout in readout_data:
-            readout.save()
+        # Connect to the database
+        cursor = connection.cursor()
+        # The generic query
+        query = ''' INSERT INTO "assays_assaychiprawdata"
+              ("assay_chip_id_id", "assay_id_id", "field_id", "value", "elapsed_time", "quality", "notes", "replicate")
+              VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'''
+
+        cursor.executemany(query, query_list)
+        transaction.commit()
 
         if form:
             modify_qc_status_chip(readout, form)
@@ -1906,6 +1924,9 @@ def mark_chip_readout_values(readout_ids_and_notes, stamp=False):
             notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + notes
             notes = notes[:255]
         quality = readout_id_and_notes[2]
+        # Add OLD to quality
+        quality = 'OLD ' + quality
+        quality = quality[:19]
         query_list.append((quality, notes, readout_id))
 
     # Execute the queries and close the connection
@@ -1932,6 +1953,9 @@ def mark_plate_readout_values(readout_ids_and_notes, stamp=False):
             notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + notes
             notes = notes[:255]
         quality = readout_id_and_notes[2]
+        # Change quality to X if it is blank currently
+        if not quality:
+            quality = 'X'
         query_list.append((quality, notes, readout_id))
 
     # Execute the queries and close the connection
