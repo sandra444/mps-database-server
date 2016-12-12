@@ -982,8 +982,11 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
             save_forms_with_tracking(self, form, formset=formset, update=True)
 
+            # Clear data if clear is checked
+            if self.request.POST.get('file-clear', ''):
+                AssayChipRawData.objects.filter(assay_chip_id=self.object).delete()
             # Save file if it exists
-            if formset.files.get('file', ''):
+            elif formset.files.get('file', ''):
                 current_file = formset.files.get('file', '')
                 study_id = str(self.object.chip_setup.assay_run_id.id)
                 parse_file_and_save(
@@ -994,9 +997,6 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # If no file, try to update the qc_status
             else:
                 modify_qc_status_chip(self.object, form)
-            # Clear data if clear is checked
-            if self.request.POST.get('file-clear', ''):
-                AssayChipRawData.objects.filter(assay_chip_id=self.object).delete()
             # Otherwise do nothing (the file remained the same)
             return redirect(self.object.get_post_submission_url())
         else:
@@ -1738,18 +1738,18 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
             save_forms_with_tracking(self, form, formset=formset, update=True)
 
+            # Clear data if clear is checked
+            if self.request.POST.get('file-clear', ''):
+                # remove_existing_readout(self.object)
+                AssayReadout.objects.filter(assay_device_readout=self.object).delete()
             # Save file if it exists
-            if formset.files.get('file', ''):
+            elif formset.files.get('file', ''):
                 current_file = formset.files.get('file', '')
                 study_id = str(self.object.setup.assay_run_id.id)
                 parse_file_and_save(
                     current_file, study_id, overwrite_option, 'Plate', readout=self.object
                 )
                 # parse_readout_csv(self.object, current_file, upload_type)
-            # Clear data if clear is checked
-            if self.request.POST.get('file-clear', ''):
-                # remove_existing_readout(self.object)
-                AssayReadout.objects.filter(assay_device_readout=self.object).delete()
             else:
                 # Check QC
                 modify_qc_status_plate(self.object, form)
