@@ -606,7 +606,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
 
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
-        plate_details = get_plate_details(self)
+        plate_details = get_plate_details(self=self)
 
         assays = plate_details.get(setup_id, {}).get('assays', {})
         features = plate_details.get(setup_id, {}).get('features', {})
@@ -653,7 +653,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
                 'Plate',
                 plate_details=plate_details,
                 # upload_type=upload_type,
-                study=setup.assay_run_id
+                study=setup.assay_run_id,
             )
             # Evil attempt to acquire preview data
             self.forms[0].cleaned_data['preview_data'] = file_data
@@ -696,7 +696,7 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
 
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
-        chip_details = get_chip_details(self)
+        chip_details = get_chip_details(self=self)
 
         assays = chip_details.get(setup_id, {}).get('assays', {})
 
@@ -742,7 +742,7 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
                 headers=headers,
                 chip_details=chip_details,
                 plate_details=None,
-                study=setup.assay_run_id
+                study=setup.assay_run_id,
             )
             # Evil attempt to acquire preview data
             self.forms[0].cleaned_data['preview_data'] = file_data

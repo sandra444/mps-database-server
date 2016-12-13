@@ -1747,7 +1747,7 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
                 current_file = formset.files.get('file', '')
                 study_id = str(self.object.setup.assay_run_id.id)
                 parse_file_and_save(
-                    current_file, study_id, overwrite_option, 'Plate', readout=self.object
+                    current_file, study_id, overwrite_option, 'Plate', readout=self.object, form=form
                 )
                 # parse_readout_csv(self.object, current_file, upload_type)
             else:

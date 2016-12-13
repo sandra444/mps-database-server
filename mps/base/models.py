@@ -113,7 +113,6 @@ def save_forms_with_tracking(self, form, formset=None, update=False):
     # Else if Add
     else:
         self.object.modified_by = self.object.created_by = self.request.user
-    # Save Study
     self.object.save()
     if formset:
         formset.save()

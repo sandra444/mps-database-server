@@ -409,7 +409,8 @@ def get_plate_details(self=None, study=None, readout=None):
                     'assay_feature_to_unit': {},
                     'timeunit': readout.timeunit.unit,
                     'number_of_rows': readout.setup.assay_layout.device.number_of_rows,
-                    'number_of_columns': readout.setup.assay_layout.device.number_of_columns
+                    'number_of_columns': readout.setup.assay_layout.device.number_of_columns,
+                    'readout': readout
                 }
             })
 
@@ -449,6 +450,7 @@ def get_plate_details(self=None, study=None, readout=None):
             raise forms.ValidationError('Please choose a plate setup.')
         setup = AssayPlateSetup.objects.get(pk=setup_pk)
         setup_id = setup.assay_plate_id
+        study_id = setup.assay_run_id_id
 
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
@@ -459,7 +461,8 @@ def get_plate_details(self=None, study=None, readout=None):
                 'assay_feature_to_unit': {},
                 'timeunit': PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit,
                 'number_of_rows': setup.assay_layout.device.number_of_columns,
-                'number_of_columns': setup.assay_layout.device.number_of_columns
+                'number_of_columns': setup.assay_layout.device.number_of_columns,
+                'readout': AssayPlateReadout.objects.filter(setup__assay_run_id_id=study_id, setup__assay_plate_id=setup_id)
             }
         })
 
@@ -521,7 +524,7 @@ def get_qc_status_plate(form):
             # Combine values in a tuple for index
             index = (row, col, time, assay, feature, replicate)
             # Set to val
-            qc_status.update({index: val})
+            qc_status.update({index: val[:19]})
 
     return qc_status
 
@@ -533,7 +536,7 @@ def modify_qc_status_plate(current_plate_readout, form):
         assay_device_readout=current_plate_readout
     ).prefetch_related(
         'assay__assay_id',
-        'assay_device_readout'
+        'assay_device_readout__setup__assay_run_id'
     ).values_list(
         'id',
         'row',
@@ -616,8 +619,20 @@ def validate_plate_readout_file(
     # Current data to check for replicates
     current_data = {}
 
+    readouts = []
+    # Get readouts
+    if readout:
+        readouts = [readout]
+    else:
+        for setup_id, values in plate_details.items():
+            current_readout = values.get('readout', '')
+            if current_readout:
+                readouts.append(current_readout)
+    if not readout and len(readouts) == 1:
+        readout = readouts[0]
+
     old_readout_data = AssayReadout.objects.filter(
-        assay_device_readout=readout
+        assay_device_readout__in=readouts
     ).prefetch_related(
         'assay__assay_id',
         'assay_device_readout'
@@ -827,7 +842,7 @@ def validate_plate_readout_file(
                             number_duplicate_current = len(duplicate_current)
                             number_conflicting_entries = len(current_conflicting_entries)
 
-                            if overwrite_option == 'delete_conflicting_data':
+                            if overwrite_option in ['delete_conflicting_data', 'delete_all_old_data']:
                                 number_conflicting_entries = 0
 
                             # Discern what replicate this is (default 1)
@@ -1051,7 +1066,7 @@ def validate_plate_readout_file(
                     number_duplicate_current = len(duplicate_current)
                     number_conflicting_entries = len(current_conflicting_entries)
 
-                    if overwrite_option == 'delete_conflicting_data':
+                    if overwrite_option in ['delete_conflicting_data', 'delete_all_old_data']:
                         number_conflicting_entries = 0
 
                     # Discern what replicate this is (default 1)
@@ -1163,6 +1178,7 @@ def get_chip_details(self=None, study=None, readout=None):
             chip_details.update({setup_id: {
                 'assays': {},
                 'timeunit': None,
+                'readout': readout
             }})
             current_assays = chip_details.get(setup_id, {}).get('assays', {})
 
@@ -1192,7 +1208,9 @@ def get_chip_details(self=None, study=None, readout=None):
             setup_pk = int(self.data.get('chip_setup'))
         else:
             raise forms.ValidationError('Please choose a chip setup.')
-        setup_id = AssayChipSetup.objects.get(pk=setup_pk).assay_chip_id
+        setup = AssayChipSetup.objects.get(pk=setup_pk)
+        setup_id = setup.assay_chip_id
+        study_id = setup.assay_run_id_id
 
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
@@ -1201,6 +1219,7 @@ def get_chip_details(self=None, study=None, readout=None):
             'assays': {},
             # Tedious way of getting timeunit; probably should refactor
             'timeunit': PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit,
+            'readout': AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=study_id, chip_setup__assay_chip_id=setup_id)
         }})
 
         current_assays = chip_details.get(setup_id, {}).get('assays', {})
@@ -1399,12 +1418,17 @@ def validate_chip_readout_file(
 
     dummy_reader = AssayReader.objects.all()[0]
 
-    readouts = readout
-    study_readouts = []
-
-    if not readout and study:
-        readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=study)
-        study_readouts = readouts
+    readouts = []
+    # Get readouts
+    if readout:
+        readouts = [readout]
+    else:
+        for setup_id, values in chip_details.items():
+            current_readout = values.get('readout', '')
+            if current_readout:
+                readouts.append(current_readout)
+    if not readout and len(readouts) == 1:
+        readout = readouts[0]
 
     if not study and readout:
         study = readout.chip_setup.assay_run_id
@@ -1429,17 +1453,17 @@ def validate_chip_readout_file(
         'assay_chip_id'
     )
 
-    chip_id_to_readout = {}
-
-    for current_readout in study_readouts:
-        chip_id_to_readout.update({
-            current_readout.chip_setup.assay_chip_id: current_readout
-        })
-
-    if not study_readouts and readout:
-        chip_id_to_readout.update({
-            readout.chip_setup.assay_chip_id: readout
-        })
+    # chip_id_to_readout = {}
+    #
+    # for current_readout in study_readouts:
+    #     chip_id_to_readout.update({
+    #         current_readout.chip_setup.assay_chip_id: current_readout
+    #     })
+    #
+    # if not study_readouts and readout:
+    #     chip_id_to_readout.update({
+    #         readout.chip_setup.assay_chip_id: readout
+    #     })
 
     current_data = {}
 
@@ -1572,7 +1596,7 @@ def validate_chip_readout_file(
 
         if not errors:
             # Try to get readout
-            current_chip_readout = chip_id_to_readout.get(chip_id, '')
+            current_chip_readout = chip_details.get(chip_id, {}).get('readout', '')
 
             # Get a dummy readout
             if not current_chip_readout:
@@ -1611,7 +1635,7 @@ def validate_chip_readout_file(
             number_duplicate_current = len(duplicate_current)
             number_conflicting_entries = len(current_conflicting_entries)
 
-            if overwrite_option == 'delete_conflicting_data':
+            if overwrite_option in ['delete_conflicting_data', 'delete_all_old_data']:
                 number_conflicting_entries = 0
 
             # Discern what replicate this is (default 1)
@@ -1732,7 +1756,7 @@ def save_chip_files(chip_data, study_id, headers, overwrite_option, form=None):
             chip_details,
             sheet='',
             overwrite_option=overwrite_option,
-            readout=None,
+            readout=readout,
             study=study_id,
             form=form,
             save=True
@@ -2091,7 +2115,7 @@ def validate_sheet_type(interface, sheet_type, sheet='csv'):
 
 
 # TODO NEEDS REVISION
-def validate_excel_file(self, excel_file, interface, headers=1, study=None, readout=None,
+def validate_excel_file(self, excel_file, interface, overwrite_option, headers=1, study=None, readout=None,
                         chip_details=None, plate_details=None, upload_type=None):
     """Validate an excel file
 
@@ -2144,6 +2168,7 @@ def validate_excel_file(self, excel_file, interface, headers=1, study=None, read
                 headers,
                 datalist,
                 chip_details,
+                overwrite_option=overwrite_option,
                 sheet='Sheet "' + sheet_name + '": ',
                 study=study,
                 readout=readout
@@ -2163,6 +2188,7 @@ def validate_excel_file(self, excel_file, interface, headers=1, study=None, read
                 sheet_type,
                 datalist,
                 plate_details,
+                overwrite_option=overwrite_option,
                 readout=readout,
                 sheet='Sheet "' + sheet_name + '": ',
             )
@@ -2179,7 +2205,7 @@ def validate_excel_file(self, excel_file, interface, headers=1, study=None, read
 
 
 # TODO NEEDS REVISION
-def validate_csv_file(self, datalist, interface, study=None, readout=None,
+def validate_csv_file(self, datalist, interface, overwrite_option, study=None, readout=None,
                       chip_details=None, plate_details=None, headers=1, upload_type=None):
     """Validates a CSV file
 
@@ -2216,6 +2242,7 @@ def validate_csv_file(self, datalist, interface, study=None, readout=None,
             headers,
             datalist,
             chip_details,
+            overwrite_option=overwrite_option,
             readout=readout,
             study=study
         )
@@ -2230,6 +2257,7 @@ def validate_csv_file(self, datalist, interface, study=None, readout=None,
             upload_type,
             datalist,
             plate_details,
+            overwrite_option=overwrite_option,
             readout=readout
         )
 
@@ -2242,7 +2270,17 @@ def validate_csv_file(self, datalist, interface, study=None, readout=None,
         raise forms.ValidationError(errors)
 
 
-def validate_file(self, test_file, interface, headers=1, chip_details=None, plate_details=None, study=None, readout=None, upload_type=None):
+def validate_file(
+        self,
+        test_file,
+        interface,
+        headers=1,
+        chip_details=None,
+        plate_details=None,
+        study=None,
+        readout=None,
+        upload_type=None
+):
     """Get data from a file: returns read data from excel and datalist from csv
 
     Params:
@@ -2255,6 +2293,9 @@ def validate_file(self, test_file, interface, headers=1, chip_details=None, plat
     readout - the readout in question (optional)
     upload_type - upload type for plates (optional)
     """
+    # Get overwrite option
+    overwrite_option = self.data.get('overwrite_option')
+
     try:
         file_data = test_file.read()
         excel_file = xlrd.open_workbook(file_contents=file_data)
@@ -2262,12 +2303,13 @@ def validate_file(self, test_file, interface, headers=1, chip_details=None, plat
             self,
             excel_file,
             interface,
+            overwrite_option,
             headers,
-            study,
-            readout,
-            chip_details,
-            plate_details,
-            upload_type
+            study=study,
+            readout=readout,
+            chip_details=chip_details,
+            plate_details=plate_details,
+            upload_type=upload_type
         )
 
         return preview_data
@@ -2280,12 +2322,13 @@ def validate_file(self, test_file, interface, headers=1, chip_details=None, plat
             self,
             datalist,
             interface,
-            study,
-            readout,
-            chip_details,
-            plate_details,
-            headers,
-            upload_type
+            overwrite_option,
+            study=study,
+            readout=readout,
+            chip_details=chip_details,
+            plate_details=plate_details,
+            headers=headers,
+            upload_type=upload_type
         )
 
         return preview_data
