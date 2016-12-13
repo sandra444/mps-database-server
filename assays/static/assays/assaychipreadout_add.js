@@ -490,7 +490,13 @@ $(document).ready(function () {
         getReadout();
     }
 
+    // Refresh on file change
     $('#id_file').change(function(evt) {
+        refresh();
+    });
+
+    // Refresh on change in overwrite option NEED REPLCATE TO BE ACCURATE
+    $('#id_overwrite_option').change(function() {
         refresh();
     });
 

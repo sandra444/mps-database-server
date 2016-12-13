@@ -98,6 +98,12 @@ $(document).ready(function () {
         validate_readout_file();
     });
 
+    // TODO AVOID MAGIC CALLS TO DOM
+    // Refresh on change in overwrite option NEED REPLCATE TO BE ACCURATE
+    $('#id_overwrite_option').change(function() {
+        validate_readout_file();
+    });
+
     // Datepicker superfluous on admin, use this check to apply only in frontend
     if ($('#fluid-content')[0]) {
         // Add datepicker
