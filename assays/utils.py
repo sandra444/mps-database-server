@@ -454,6 +454,13 @@ def get_plate_details(self=None, study=None, readout=None):
 
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
+        current_readout = AssayPlateReadout.objects.filter(setup__assay_run_id_id=study_id, setup__assay_plate_id=setup_id)
+
+        if current_readout:
+            current_readout = current_readout[0]
+        else:
+            current_readout = []
+
         plate_details.update({
             setup_id: {
                 'assays': {},
@@ -462,7 +469,7 @@ def get_plate_details(self=None, study=None, readout=None):
                 'timeunit': PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit,
                 'number_of_rows': setup.assay_layout.device.number_of_columns,
                 'number_of_columns': setup.assay_layout.device.number_of_columns,
-                'readout': AssayPlateReadout.objects.filter(setup__assay_run_id_id=study_id, setup__assay_plate_id=setup_id)
+                'readout': current_readout
             }
         })
 
@@ -1214,12 +1221,19 @@ def get_chip_details(self=None, study=None, readout=None):
 
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
+        current_readout = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=study_id, chip_setup__assay_chip_id=setup_id)
+        
+        if current_readout:
+            current_readout = current_readout[0]
+        else:
+            current_readout = []
+
         # Dic of assay names from inline with respective unit as value
         chip_details.update({setup_id: {
             'assays': {},
             # Tedious way of getting timeunit; probably should refactor
             'timeunit': PhysicalUnits.objects.get(id=self.data.get('timeunit')).unit,
-            'readout': AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=study_id, chip_setup__assay_chip_id=setup_id)
+            'readout': current_readout
         }})
 
         current_assays = chip_details.get(setup_id, {}).get('assays', {})
@@ -1439,7 +1453,7 @@ def validate_chip_readout_file(
     # Get assay chip readout assays (for existing readouts)
     assay_ids = {
         (acra.assay_id_id, acra.readout_unit.unit): acra for acra in AssayChipReadoutAssay.objects.filter(
-            readout_id=readouts
+            readout_id__in=readouts
         ).prefetch_related(
             'readout_unit',
             'assay_id'
@@ -1447,7 +1461,7 @@ def validate_chip_readout_file(
     }
 
     old_readout_data = AssayChipRawData.objects.filter(
-        assay_chip_id=readouts
+        assay_chip_id__in=readouts
     ).prefetch_related(
         'assay_id__assay_id',
         'assay_chip_id'
@@ -1948,9 +1962,10 @@ def mark_chip_readout_values(readout_ids_and_notes, stamp=False):
             notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + notes
             notes = notes[:255]
         quality = readout_id_and_notes[2]
-        # Add OLD to quality
-        quality = 'OLD ' + quality
-        quality = quality[:19]
+        if stamp:
+            # Add OLD to quality
+            quality = 'OLD ' + quality
+            quality = quality[:19]
         query_list.append((quality, notes, readout_id))
 
     # Execute the queries and close the connection

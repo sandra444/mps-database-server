@@ -140,8 +140,15 @@ def fetch_readout(request):
     # data = defaultdict(list)
     data = []
 
-    readouts = AssayReadout.objects.filter(assay_device_readout=current_readout_id)\
-        .prefetch_related('assay_device_readout', 'assay').order_by('assay', 'elapsed_time')
+    readouts = AssayReadout.objects.filter(
+        assay_device_readout=current_readout_id
+    ).prefetch_related(
+        'assay_device_readout__setup__assay_run_id',
+        'assay__assay_id'
+    ).order_by(
+        'assay',
+        'elapsed_time'
+    )
 
     time_unit = AssayPlateReadout.objects.filter(id=current_readout_id.id)[0].timeunit.unit
 
