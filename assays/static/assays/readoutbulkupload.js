@@ -234,6 +234,8 @@ $(document).ready(function () {
         });
     }
 
+    // Please note that bulk upload does not currently allow changing QC or notes
+    // Before permitting this, ensure that the replicate numbers are accurate!
     function validate_bulk_file() {
         var formData = new FormData();
         formData.append('bulk_file', $("#id_bulk_file")[0].files[0]);

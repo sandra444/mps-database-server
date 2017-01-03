@@ -574,7 +574,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
     """Frontend Inline for Assay Plate Readout Assays (APRA)"""
 
     # EVIL WAY TO GET PREVIEW DATA
-    preview_data = forms.BooleanField(initial=False)
+    preview_data = forms.BooleanField(initial=False, required=False)
 
     def __init__(self, *args, **kwargs):
         """Init APRA inline
@@ -665,7 +665,7 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
     """Frontend Inline for Chip Readout Assays (ACRA)"""
 
     # EVIL WAY TO GET PREVIEW DATA
-    preview_data = forms.BooleanField(initial=False)
+    preview_data = forms.BooleanField(initial=False, required=False)
 
     def __init__(self, *args, **kwargs):
         """Init ACRA Inline
@@ -824,15 +824,19 @@ def get_sheet_type(header, sheet_name=''):
 
 class ReadoutBulkUploadForm(forms.ModelForm):
     """Form for Bulk Uploads"""
-    bulk_file = forms.FileField()
+    # Now in Study (AssayRun) to make saving easier
+    # bulk_file = forms.FileField()
 
     overwrite_option = OVERWRITE_OPTIONS
+
+    # EVIL WAY TO GET PREVIEW DATA
+    preview_data = forms.BooleanField(initial=False, required=False)
 
     class Meta(object):
         model = AssayRun
         fields = ('bulk_file',)
 
-    def clean_bulk_file(self):
+    def clean(self):
         data = super(ReadoutBulkUploadForm, self).clean()
 
         # Get the study in question
@@ -854,4 +858,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
             study=study
         )
 
-        return file_data
+        # Evil attempt to acquire preview data
+        self.cleaned_data['preview_data'] = file_data
+
+        return self.cleaned_data

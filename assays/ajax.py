@@ -17,12 +17,13 @@ from.utils import(
     stringify_excel_value,
     unicode_csv_reader,
     get_row_and_column,
-    process_readout_value
+    process_readout_value,
+    get_sheet_type
 )
 import xlrd
 
 # TODO FIX SPAGHETTI CODE
-from .forms import ReadoutBulkUploadForm, get_sheet_type
+from .forms import ReadoutBulkUploadForm
 from django.forms.models import inlineformset_factory
 
 from django.utils import timezone
@@ -85,7 +86,7 @@ def fetch_assay_layout_content(request):
             'concentration': compound.concentration,
             'concentration_unit_id': compound.concentration_unit_id,
             'concentration_unit': compound.concentration_unit.unit
-            #'well': well
+            # 'well': well
         })
 
     # Fetch timepoints
@@ -418,7 +419,7 @@ def get_readout_data(raw_data, key, percent_control, include_all):
         # Convert all times to days for now
         # Get the conversion unit
         scale = raw.assay_chip_id.timeunit.scale_factor
-        time = '{0:.2f}'.format((scale/1440.0) * raw.elapsed_time)
+        time = '{0:.2f}'.format((scale / 1440.0) * raw.elapsed_time)
 
         quality = raw.quality
 
@@ -727,8 +728,9 @@ def validate_bulk_file(request):
     if form.is_valid():
         form_data = form.cleaned_data
 
-        preview_data = form_data.get('bulk_file')
+        preview_data = form_data.get('preview_data')
 
+        # Only chip preview right now
         chip_raw_data = preview_data.get('chip_preview')
 
         assays = get_readout_data(chip_raw_data, key, percent_control, include_all)
@@ -740,10 +742,8 @@ def validate_bulk_file(request):
 
     else:
         errors = ''
-        if form.errors.get('bulk_file', ''):
-            errors += form.errors.get('bulk_file').as_text()
-        if form.errors.get('overwrite_option', ''):
-            errors += form.errors.get('overwrite_option').as_text()
+        if form.errors.get('__all__'):
+            errors += form.errors.get('__all__').as_text()
         data = {
             'errors': errors
         }

@@ -122,7 +122,7 @@ class AssayLayout(FlaggableModel):
     # Specifies whether this is a standard (oft used layout)
     standard = models.BooleanField(default=False)
 
-    #base_layout = models.ForeignKey(AssayBaseLayout)
+    # base_layout = models.ForeignKey(AssayBaseLayout)
 
     def __unicode__(self):
         return self.layout_name
@@ -172,7 +172,7 @@ class AssayWell(models.Model):
     class Meta(object):
         unique_together = [('assay_layout', 'row', 'column')]
 
-    #base_layout = models.ForeignKey(AssayBaseLayout)
+    # base_layout = models.ForeignKey(AssayBaseLayout)
     assay_layout = models.ForeignKey(AssayLayout)
     well_type = models.ForeignKey(AssayWellType)
 
@@ -325,7 +325,7 @@ class AssayReadout(models.Model):
     replicate = models.IntegerField(default=0)
 
 
-#class ReadoutUnit(LockableModel):
+# class ReadoutUnit(LockableModel):
 #    """
 #    Units specific to readouts (AU, RFU, so on)
 #    """
@@ -408,7 +408,7 @@ class AssayResultFunction(LockableModel):
     """Function for analysis of CHIP RESULTS"""
     class Meta(object):
         verbose_name = 'Function'
-        ordering = ('function_name', )
+        ordering = ('function_name',)
 
     function_name = models.CharField(max_length=100, unique=True)
     function_results = models.CharField(max_length=100, blank=True, default='')
@@ -423,7 +423,7 @@ class AssayResultType(LockableModel):
 
     class Meta(object):
         verbose_name = 'Result type'
-        ordering = ('assay_result_type', )
+        ordering = ('assay_result_type',)
 
     assay_result_type = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=200, blank=True, default='')
@@ -534,13 +534,18 @@ class StudyModel(models.Model):
     integration_mode = models.CharField(max_length=13, default='1', choices=(('0', 'Functional'), ('1', 'Physical')))
 
 
+# Get readout file location
+def bulk_readout_file_location(instance, filename):
+    return '/'.join(['csv', str(instance.id), 'bulk', filename])
+
+
 class AssayRun(FlaggableModel):
     """The encapsulation of all data concerning some plate/chip project"""
 
     class Meta(object):
         verbose_name = 'Study'
         verbose_name_plural = 'Studies'
-        ordering = ('assay_run_id', )
+        ordering = ('assay_run_id',)
 
     # Removed center_id for now: this field is basically for admins anyway
     # May add center_id back later, but group mostly serves the same purpose
@@ -565,6 +570,12 @@ class AssayRun(FlaggableModel):
         blank=True,
         null=True,
         help_text='Protocol File for Study'
+    )
+
+    bulk_file = models.FileField(
+        upload_to=bulk_readout_file_location,
+        verbose_name='Data File',
+        blank=True, null=True
     )
 
     # Deprecated
@@ -672,7 +683,7 @@ class AssayChipSetup(FlaggableModel):
     """The configuration of a Chip for implementing an assay"""
     class Meta(object):
         verbose_name = 'Chip Setup'
-        ordering = ('-assay_chip_id', 'assay_run_id', )
+        ordering = ('-assay_chip_id', 'assay_run_id',)
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name='Study')
     setup_date = models.DateField(help_text='YYYY-MM-DD')
@@ -691,7 +702,7 @@ class AssayChipSetup(FlaggableModel):
     # can be a barcode or a hand written identifier
     assay_chip_id = models.CharField(max_length=512, verbose_name='Chip ID/ Barcode')
 
-    #Control => control, Compound => compound; Abbreviate? Capitalize?
+    # Control => control, Compound => compound; Abbreviate? Capitalize?
     chip_test_type = models.CharField(max_length=8, choices=(("control", "Control"), ("compound", "Compound")), default="control")
 
     compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
@@ -738,7 +749,8 @@ class AssayChipReadoutAssay(models.Model):
     """Inline for CHIP readout assays"""
 
     class Meta(object):
-        unique_together = [('readout_id', 'assay_id')]
+        # Changed uniqueness check to include unit (extend to include object?)
+        unique_together = [('readout_id', 'assay_id', 'readout_unit')]
 
     readout_id = models.ForeignKey('assays.AssayChipReadout', verbose_name='Readout')
     assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True)
@@ -904,3 +916,13 @@ class AssayChipResult(models.Model):
     test_unit = models.ForeignKey(PhysicalUnits,
                                   blank=True,
                                   null=True)
+
+
+class AssayDataUpload(FlaggableModel):
+    """Shows the history of data uploads for a readout; functions as inline"""
+
+    # date_created, created_by, and other fields are used but come from FlaggableModel
+    file_location = models.URLField(null=True, blank=True)
+    # Note that there are both chip and plate readouts listed as one file may supply both
+    chip_readout = models.ManyToManyField(AssayChipReadout)
+    plate_readout = models.ManyToManyField(AssayPlateReadout)

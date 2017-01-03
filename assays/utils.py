@@ -1,5 +1,6 @@
 from django import forms
 from .models import (
+    AssayRun,
     AssayWell,
     AssayWellCompound,
     AssayWellTimepoint,
@@ -14,7 +15,8 @@ from .models import (
     AssayChipRawData,
     AssayChipReadout,
     AssayChipReadoutAssay,
-    PhysicalUnits
+    PhysicalUnits,
+    AssayDataUpload
 )
 
 from django.db import connection, transaction
@@ -608,7 +610,6 @@ def modify_qc_status_plate(current_plate_readout, form):
 
 
 def validate_plate_readout_file(
-        upload_type,
         datalist,
         plate_details,
         sheet='',
@@ -665,6 +666,9 @@ def validate_plate_readout_file(
             'assay_id'
         )
     }
+
+    # Get upload_type
+    upload_type = get_sheet_type(datalist[0])
 
     if upload_type == 'Block':
         # Number of assays found
@@ -784,7 +788,7 @@ def validate_plate_readout_file(
             # Otherwise the line contains datapoints for the current assay
             else:
                 # TODO REVISE HOW DATA_BLOCKS ARE ACQUIRED
-                if data_blocks_found == 0 or (row_index-assays_found) % number_of_rows == 0:
+                if data_blocks_found == 0 or (row_index - assays_found) % number_of_rows == 0:
                     data_blocks_found += 1
 
                 # This should handle blocks that have too many rows or do not have a header
@@ -822,12 +826,14 @@ def validate_plate_readout_file(
                             quality = processed_value.get('quality')
 
                         # MUST OFFSET ROW (due to multiple datablocks)
-                        offset_row_id = (row_index-assays_found) % number_of_rows
+                        offset_row_id = (row_index - assays_found) % number_of_rows
 
                         # Right now notes are not available in block
                         notes = ''
 
                         if not errors:
+                            current_plate_readout = plate_details.get(plate_id, {}).get('readout', '')
+
                             # Convert row and column to strings
                             offset_row_id = unicode(offset_row_id)
                             column_id = unicode(column_id)
@@ -859,7 +865,7 @@ def validate_plate_readout_file(
                                 apra_id = assay_feature_to_apra_id.get((assay_model_id, feature))
 
                                 query_list.append((
-                                    readout.id,
+                                    current_plate_readout.id,
                                     apra_id,
                                     offset_row_id,
                                     column_id,
@@ -1052,6 +1058,8 @@ def validate_plate_readout_file(
                     quality = processed_value.get('quality')
 
                 if not errors:
+                    current_plate_readout = plate_details.get(plate_id, {}).get('readout', '')
+
                     # Convert row and column to strings
                     row_label = unicode(row_label)
                     column_label = unicode(column_label)
@@ -1083,7 +1091,7 @@ def validate_plate_readout_file(
                         apra_id = assay_feature_to_apra_id.get((assay_model_id, feature))
 
                         query_list.append((
-                            readout.id,
+                            current_plate_readout.id,
                             apra_id,
                             row_label,
                             column_label,
@@ -1205,10 +1213,13 @@ def get_chip_details(self=None, study=None, readout=None):
                 assay_name = assay.assay_id.assay_name.upper()
                 assay_short_name = assay.assay_id.assay_short_name.upper()
 
-                current_assays.update({
-                    assay_name: readout_unit,
-                    assay_short_name: readout_unit
-                })
+#                 current_assays.update({
+#                     assay_name: readout_unit,
+#                     assay_short_name: readout_unit
+#                 })
+                current_assays.setdefault(assay_name, []).append(readout_unit)
+                current_assays.setdefault(assay_short_name, []).append(readout_unit)
+
     # If this is for an individual upload
     else:
         if self.data.get('chip_setup', ''):
@@ -1222,7 +1233,7 @@ def get_chip_details(self=None, study=None, readout=None):
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
         current_readout = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=study_id, chip_setup__assay_chip_id=setup_id)
-        
+
         if current_readout:
             current_readout = current_readout[0]
         else:
@@ -1243,14 +1254,18 @@ def get_chip_details(self=None, study=None, readout=None):
                     assay_name = form.cleaned_data.get('assay_id').assay_name.upper()
                     assay_short_name = form.cleaned_data.get('assay_id').assay_short_name.upper()
                     unit = form.cleaned_data.get('readout_unit').unit
-                    if assay_name not in current_assays:
-                        current_assays.update({
-                            assay_name: unit,
-                            assay_short_name: unit
-                        })
+                    is_duplicate = current_assays.get(assay_name, '') == unit
+                    if not is_duplicate:
+#                         current_assays.update({
+#                             assay_name: unit,
+#                             assay_short_name: unit
+#                         })
+                        current_assays.setdefault(assay_name, []).append(unit)
+                        current_assays.setdefault(assay_short_name, []).append(unit)
                     else:
                         raise forms.ValidationError(
-                            'Duplicate assays are not permitted; please blank out or change the duplicate')
+                            'Duplicate assays are not permitted; please blank out or change the duplicate'
+                        )
             except AttributeError:
                 pass
         if len(current_assays) < 1:
@@ -1329,7 +1344,7 @@ def get_qc_status_chip(form):
     return qc_status
 
 
-#TODO TODO TODO
+# TODO TODO TODO
 def modify_qc_status_chip(current_chip_readout, form):
     """Update the QC status of a plate"""
     # Get the readouts
@@ -1464,7 +1479,8 @@ def validate_chip_readout_file(
         assay_chip_id__in=readouts
     ).prefetch_related(
         'assay_id__assay_id',
-        'assay_chip_id'
+        'assay_chip_id',
+        'assay_id__readout_unit'
     )
 
     # chip_id_to_readout = {}
@@ -1487,13 +1503,18 @@ def validate_chip_readout_file(
     # TODO IS THIS OPTIMAL WAY TO CHECK CONFLICTING?
     for entry in old_readout_data:
         possible_conflicting_data.setdefault(
-            (entry.assay_chip_id.chip_setup.assay_chip_id, entry.assay_id.assay_id_id, entry.field_id, entry.elapsed_time), []
+            (
+                entry.assay_chip_id.chip_setup.assay_chip_id,
+                entry.assay_id.assay_id_id,
+                entry.assay_id.readout_unit.unit,
+                entry.field_id, entry.elapsed_time
+            ), []
         ).append(entry)
 
     # Confirm that there is only one chip_id given if this is not a bulk upload
     if not sheet:
         for line in datalist[headers:]:
-            if chip_details and line and line[0] not in chip_details:
+            if valid_chip_row(line) and chip_details and line and line[0] not in chip_details:
                 errors.append(
                     'Chip ID "{0}" does not match current Chip ID. '
                     'You cannot upload data for multiple chips in this interface. '
@@ -1562,8 +1583,8 @@ def validate_chip_readout_file(
                 sheet + 'Chip-%s: No assay with the name "%s" exists; please change your file or add this assay'
                 % (chip_id, assay_name)
             )
-        # Raise error if value_unit not equal to one listed in ACRA
-        elif value_unit != assays.get(assay_name, ''):
+        # Raise error if value_unit not in any matching ACRA
+        elif value_unit not in assays.get(assay_name, []):
             errors.append(
                 sheet + 'Chip-%s: The value unit "%s" does not correspond with the selected readout unit of "%s"'
                 % (chip_id, value_unit, assays.get(assay_name, ''))
@@ -1638,12 +1659,12 @@ def validate_chip_readout_file(
                 )
 
             # Deal with conflicting data
-            current_conflicting_entries = possible_conflicting_data.get((chip_id, assay.id, field, time), [])
+            current_conflicting_entries = possible_conflicting_data.get((chip_id, assay.id, value_unit, field, time), [])
             conflicting_entries.extend(current_conflicting_entries)
 
             # Get possible duplicate current entries
             duplicate_current = current_data.get(
-                (chip_id, assay.id, field, time), []
+                (chip_id, assay.id, value_unit, field, time), []
             )
 
             number_duplicate_current = len(duplicate_current)
@@ -1682,7 +1703,7 @@ def validate_chip_readout_file(
 
             # Add to current_data
             current_data.setdefault(
-                (chip_id, assay.id, field, time), []
+                (chip_id, assay.id, value_unit, field, time), []
             ).append(1)
 
     if errors:
@@ -1715,18 +1736,6 @@ def validate_chip_readout_file(
         return readout_data
 
 
-def write_out_csv(file_name, data):
-    """Write out a Unicode CSV
-
-    Params:
-    file_name -- name of the file to write
-    data -- data to write to the file (as a list of lists)
-    """
-    with open(file_name, 'w') as out_file:
-        writer = UnicodeWriter(out_file)
-        writer.writerows(data)
-
-
 def get_csv_media_location(file_name):
     """Returns the location given a full path
 
@@ -1743,204 +1752,74 @@ CSV_ROOT = settings.MEDIA_ROOT.replace('mps/../', '', 1) + '/csv/'
 
 # TODO MAY CAUSE SILENT FAILURE
 # TODO WE CAN PROBABLY DO AWAY WITH PASSING FORM
-def save_chip_files(chip_data, study_id, headers, overwrite_option, form=None):
-    """Process all the chip files
+def save_chip_files(datalist, current_file, study_id, headers, overwrite_option, readout=None, form=None):
+    """Process chip file data
 
-    chip_data - chip data as a dictionary linking chip_id to the respective datalist
+    datalist - all data from the file datalist
+    current_file - the AssayDataFile object to link to
     study_id - the study ID in question
     headers - the number of header rows (may be passed as 1 by default)
-    overwrite_option - what overwrite option was used
+    overwrite_option - what overwrite option was used\
+    readout - the readout in question
     form - the form used so that QC Status can be modified
     """
     # Make sure path exists for study
     if not os.path.exists(CSV_ROOT + study_id):
         os.makedirs(CSV_ROOT + study_id)
 
-    for chip_id, datalist in chip_data.items():
-        readout = AssayChipReadout.objects.get(
-            chip_setup__assay_run_id_id=study_id,
-            chip_setup__assay_chip_id=chip_id
-        )
+#     for chip_id, datalist in chip_data.items():
+#         readout = AssayChipReadout.objects.get(
+#             chip_setup__assay_run_id_id=study_id,
+#             chip_setup__assay_chip_id=chip_id
+#         )
 
-        chip_details = get_chip_details(readout=readout)
+    chip_details = get_chip_details(readout=readout, study=study_id)
 
-        success = validate_chip_readout_file(
-            headers,
-            datalist,
-            chip_details,
-            sheet='',
-            overwrite_option=overwrite_option,
-            readout=readout,
-            study=study_id,
-            form=form,
-            save=True
-        )
+    validate_chip_readout_file(
+        headers,
+        datalist,
+        chip_details,
+        sheet='',
+        overwrite_option=overwrite_option,
+        readout=readout,
+        study=study_id,
+        form=form,
+        save=True
+    )
 
-        if success:
-            # Make sure path exists for chip
-            if not os.path.exists(CSV_ROOT + study_id + '/chip'):
-                os.makedirs(CSV_ROOT + study_id + '/chip')
-
-            # Get valid file location
-            # Note added csv extension
-            file_location = get_valid_csv_location(chip_id, study_id, 'chip', overwrite_option)
-            # Write the csv
-            write_out_csv(file_location, datalist)
-
-            media_location = get_csv_media_location(file_location)
-
-            # Add the file to the readout
-            readout.file = media_location
-            readout.save()
-
-        # Note that form may be None
-        # parse_chip_csv(readout, readout.file, headers, overwrite_option, form)
+    for chip_id, readout_details in chip_details.items():
+        current_file.chip_readout.add(readout_details.get('readout'))
 
 
 # TODO MAY CAUSE SILENT FAILURE
-def save_plate_files(plate_data, study_id, upload_type, overwrite_option, form=None):
-    """Process all plate files
+def save_plate_files(datalist, current_file, study_id, overwrite_option, readout=None, form=None):
+    """Process plate file data
 
-    plate_data - plate data as a dictionary linking plate_id to the respective datalist
+    datalist - all data from the file datalist
+    current_file - the AssayDataFile object to link to
     study_id - the study ID in question
-    upload_type - what upload type option was used
-    overwrite_option - what overwrite option was used
+    overwrite_option - what overwrite option was used\
+    readout - the readout in question
+    form - the form used so that QC Status can be modified
     """
     # Make sure path exists for study
     if not os.path.exists(CSV_ROOT + study_id):
         os.makedirs(CSV_ROOT + study_id)
 
-    for plate_id, datalist in plate_data.items():
-        datalist = plate_data.get(plate_id)
+    plate_details = get_plate_details(readout=readout, study=study_id)
 
-        readout = AssayPlateReadout.objects.get(
-            setup__assay_run_id_id=study_id,
-            setup__assay_plate_id=plate_id
-        )
+    validate_plate_readout_file(
+        datalist,
+        plate_details,
+        sheet='',
+        overwrite_option=overwrite_option,
+        readout=readout,
+        form=form,
+        save=True
+    )
 
-        plate_details = get_plate_details(readout=readout)
-
-        success = validate_plate_readout_file(
-            upload_type,
-            datalist,
-            plate_details,
-            sheet='',
-            overwrite_option=overwrite_option,
-            readout=readout,
-            form=form,
-            save=True
-        )
-
-        if success:
-            # Make sure path exists for chip
-            if not os.path.exists(CSV_ROOT + study_id + '/plate'):
-                os.makedirs(CSV_ROOT + study_id + '/plate')
-
-            # Get valid file location
-            # Note added csv extension
-            file_location = get_valid_csv_location(plate_id, study_id, 'plate', overwrite_option)
-            # Write the csv
-            write_out_csv(file_location, datalist)
-
-            media_location = get_csv_media_location(file_location)
-
-            # Add the file to the readout
-            readout.file = media_location
-            readout.save()
-
-        # Note may lack of a form normally used for QC
-        # parse_readout_csv(readout, readout.file, upload_type, overwrite_option, form)
-
-
-def acquire_valid_data(datalist, sheet_type, chip_data, tabular_data, block_data, headers=1):
-    """Acquire valid data for the different template types
-
-    datalist - the data in question as a list of lists
-    sheet_type - whether the sheet is a chip, tabular, or block
-    chip_data - dictionary of chip data to be modified {chip_id: datalist} MAY OR MAY NOT BE MODIFIED
-    tabular_data - dictionary of tabular plate data to be modified {plate_id: datalist} MAY OR MAY NOT BE MODIFIED
-    block_data - dictionary of block plate data to be modified {plate_id: datalist} MAY OR MAY NOT BE MODIFIED
-    headers - number of header rows
-    """
-
-    chip_header = [
-        u'Chip ID',
-        u'Time',
-        u'Time Unit',
-        u'Assay',
-        u'Object',
-        u'Value',
-        u'Value Unit',
-        u'QC Status',
-        u'Notes'
-    ]
-
-    tabular_header_time = [
-        u'Plate ID',
-        u'Well Name',
-        u'Assay',
-        u'Feature',
-        u'Unit',
-        u'Time',
-        u'Time Unit',
-        u'Value',
-        u'Notes'
-    ]
-
-    tabular_header_no_time = [
-        u'Plate ID',
-        u'Well Name',
-        u'Assay',
-        u'Feature',
-        u'Unit',
-        u'Value'
-    ]
-
-    if sheet_type == 'Chip':
-        header = chip_header
-        # Skip header
-        for row in datalist[headers:]:
-            # Make sure the data is valid before adding it
-            # Everything but value and QC Status must exist to be valid
-            if valid_chip_row(row):
-                chip_id = row[0]
-                chip_data.setdefault(chip_id, [header]).append(row)
-
-    elif sheet_type == 'Tabular':
-        header = datalist[0]
-        # Header if time
-        if 'TIME' in header[5].upper() and 'UNIT' in header[6].upper():
-            header = tabular_header_time
-        # Header if no time
-        else:
-            header = tabular_header_no_time
-
-        # Skip header
-        for row in datalist[1:]:
-            # Make sure the data is valid before adding it
-            # The first 6 cells must be filled (time and time unit are not required)
-            if row and all(row[:6]):
-                plate_id = row[0]
-                tabular_data.setdefault(plate_id, [header]).append(row)
-
-    elif sheet_type == 'Block':
-        # DO NOT skip header
-        plate_id = None
-        for row in datalist:
-            if 'PLATE' in row[0].upper():
-                plate_id = row[1]
-            block_data.setdefault(plate_id, []).append(row)
-
-
-# TODO SPAGHETTI CODE
-# def mark_readout_value(readout_value):
-#     """Marks a readout value"""
-#     modified_qc_status = 'OLD ' + readout_value.quality
-#     modified_qc_status = modified_qc_status[:19]
-#     readout_value.quality = modified_qc_status
-#     readout_value.notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + readout_value.notes
-#     readout_value.notes = readout_value.notes[:255]
-#     readout_value.save()
+    for plate_id, readout_details in plate_details.items():
+        current_file.plate_readout.add(readout_details.get('readout'))
 
 
 def mark_chip_readout_values(readout_ids_and_notes, stamp=False):
@@ -2003,17 +1882,38 @@ def mark_plate_readout_values(readout_ids_and_notes, stamp=False):
 
 
 # TODO BE SURE TO CHECK IF SAVE=TRUE WHEN IT NEEDS TO BE
-def parse_file_and_save(input_file, study_id, overwrite_option, interface, readout=None, headers=1, form=None):
+def parse_file_and_save(current_file, created_by, study_id, overwrite_option, interface, readout=None, headers=1, form=None):
     """Parse the given file and save the associated chip/plate reaodut data
 
-    input_file - the file in question
+    input_file - the file to reference for input
+    input_file_location - the location of the file on the disk
+    created_by - who created the file (ie who made this modification)
     study_id - the study ID (as a string PK)
     overwrite_option - the overwrite option selected
     headers - the number of headers (default 1)
     form - the form for saving QC data for chips (likely to be deprecated)
     """
+    input_file = current_file.file
+    input_file_location = current_file.url
+
+    # TODO CHANGE TO MATCH
     # Set input file to beginning
     input_file.seek(0, 0)
+
+    # Get the study in question for more data
+    current_study = AssayRun.objects.get(pk=int(study_id))
+
+    # Create a AssayDataUpload entry for the upload in question
+    current_file = AssayDataUpload(
+        file_location=input_file_location,
+        created_by=created_by,
+        modified_by=created_by,
+        group_id=current_study.group_id,
+        restricted=current_study.restricted
+    )
+
+    # Save the current file
+    current_file.save()
 
     if interface == 'Bulk':
         old_chip_data = AssayChipRawData.objects.filter(
@@ -2089,9 +1989,9 @@ def parse_file_and_save(input_file, study_id, overwrite_option, interface, reado
         datareader = unicode_csv_reader(input_file, delimiter=',')
         datalist = list(datareader)
 
-    chip_data = {}
-    tabular_data = {}
-    block_data = {}
+#     chip_data = {}
+#     tabular_data = {}
+#     block_data = {}
 
     if excel_file:
         for index, sheet in enumerate(excel_file.sheets()):
@@ -2103,21 +2003,33 @@ def parse_file_and_save(input_file, study_id, overwrite_option, interface, reado
             # Get the header row
             header = datalist[0]
             sheet_type = get_sheet_type(header)
-            acquire_valid_data(datalist, sheet_type, chip_data, tabular_data, block_data, headers=headers)
+
+            if sheet_type in ['Chip']:
+                save_chip_files(datalist, current_file, study_id, headers, overwrite_option, readout=readout, form=form)
+            elif sheet_type in ['Tabular', 'Block']:
+                save_plate_files(datalist, current_file, study_id, overwrite_option, readout=readout, form=form)
+
+            # acquire_valid_data(datalist, sheet_type, chip_data, tabular_data, block_data, headers=headers)
+
 
     # Otherwise, if csv
     else:
         # Get the header row
         header = datalist[0]
         sheet_type = get_sheet_type(header)
-        acquire_valid_data(datalist, sheet_type, chip_data, tabular_data, block_data, headers=headers)
 
-    if chip_data:
-        save_chip_files(chip_data, study_id, headers, overwrite_option, form)
-    if tabular_data:
-        save_plate_files(tabular_data, study_id, 'Tabular', overwrite_option, form)
-    if block_data:
-        save_plate_files(block_data, study_id, 'Block', overwrite_option, form)
+        if sheet_type in ['Chip']:
+            save_chip_files(datalist, current_file, study_id, headers, overwrite_option, readout=readout, form=form)
+        elif sheet_type in ['Tabular', 'Block']:
+            save_plate_files(datalist, current_file, study_id, overwrite_option, readout=readout, form=form)
+        # acquire_valid_data(datalist, sheet_type, chip_data, tabular_data, block_data, headers=headers)
+
+#     if chip_data:
+#         save_chip_files(chip_data, study_id, headers, overwrite_option, form)
+#     if tabular_data:
+#         save_plate_files(tabular_data, study_id, 'Tabular', overwrite_option, form)
+#     if block_data:
+#         save_plate_files(block_data, study_id, 'Block', overwrite_option, form)
 
 
 def validate_sheet_type(interface, sheet_type, sheet='csv'):
@@ -2200,7 +2112,6 @@ def validate_excel_file(self, excel_file, interface, overwrite_option, headers=1
             #     sheet_type = upload_type
 
             current_plate_preview = validate_plate_readout_file(
-                sheet_type,
                 datalist,
                 plate_details,
                 overwrite_option=overwrite_option,
@@ -2269,7 +2180,6 @@ def validate_csv_file(self, datalist, interface, overwrite_option, study=None, r
             upload_type = sheet_type
 
         plate_preview = validate_plate_readout_file(
-            upload_type,
             datalist,
             plate_details,
             overwrite_option=overwrite_option,

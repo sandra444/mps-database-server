@@ -408,6 +408,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=self.object)
             all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=self.object)
             all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=self.object)
+            all_data_uploads = AssayDataUpload.objects.filter(chip_readout__in=all_chip_readouts, plate_readout__in=all_plate_readouts)
 
             # Marking a study should mark/unmark only setups that have not been individually reviewed
             # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
@@ -449,6 +450,10 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
                 restricted=self.object.restricted
             )
             all_plate_results.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+            all_data_uploads.update(
                 group=self.object.group,
                 restricted=self.object.restricted
             )
@@ -895,10 +900,9 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             save_forms_with_tracking(self, form, formset=formset, update=False)
 
             if formset.files.get('file', ''):
-                current_file = formset.files.get('file', '')
                 study_id = str(self.kwargs['study_id'])
                 parse_file_and_save(
-                    current_file, study_id, overwrite_option, 'Chip', headers=headers, form=form, readout=self.object
+                    self.object.file, self.object.modified_by, study_id, overwrite_option, 'Chip', headers=headers, form=form, readout=self.object
                 )
                 # DEPRECATED
                 # parse_chip_csv(self.object, current_file, headers, overwrite_option, form)
@@ -932,7 +936,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             id__in=list(set(exclude_list))
         )
         if not setups:
-            return redirect('/assays/'+str(study.id))
+            return redirect('/assays/' + str(study.id))
 
         return super(AssayChipReadoutAdd, self).render_to_response(context)
 
@@ -987,10 +991,9 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
                 AssayChipRawData.objects.filter(assay_chip_id=self.object).delete()
             # Save file if it exists
             elif formset.files.get('file', ''):
-                current_file = formset.files.get('file', '')
                 study_id = str(self.object.chip_setup.assay_run_id.id)
                 parse_file_and_save(
-                    current_file, study_id, overwrite_option, 'Chip', headers=headers, form=form, readout=self.object
+                    self.object.file, self.object.modified_by, study_id, overwrite_option, 'Chip', headers=headers, form=form, readout=self.object
                 )
                 # Deprecated
                 # parse_chip_csv(self.object, file, headers, overwrite_option, form)
@@ -1116,7 +1119,7 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
         )
 
         if not readouts:
-            return redirect('/assays/'+str(study.id))
+            return redirect('/assays/' + str(study.id))
 
         return super(AssayChipTestResultAdd, self).render_to_response(context)
 
@@ -1653,10 +1656,9 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             save_forms_with_tracking(self, form, formset=formset, update=False)
 
             if formset.files.get('file', ''):
-                current_file = formset.files.get('file', '')
                 study_id = self.kwargs['study_id']
                 parse_file_and_save(
-                    current_file, study_id, overwrite_option, 'Plate', form=form, readout=self.object
+                    self.object.file, self.object.modified_by, study_id, overwrite_option, 'Plate', form=form, readout=self.object
                 )
                 # parse_readout_csv(self.object, current_file, upload_type)
                 # Check QC
@@ -1690,7 +1692,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
         )
 
         if not setups:
-            return redirect('/assays/'+str(study.id))
+            return redirect('/assays/' + str(study.id))
 
         return super(AssayPlateReadoutAdd, self).render_to_response(context)
 
@@ -1747,7 +1749,7 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
                 current_file = formset.files.get('file', '')
                 study_id = str(self.object.setup.assay_run_id.id)
                 parse_file_and_save(
-                    current_file, study_id, overwrite_option, 'Plate', readout=self.object, form=form
+                    self.object.file, self.object.modified_by, study_id, overwrite_option, 'Plate', readout=self.object, form=form
                 )
                 # parse_readout_csv(self.object, current_file, upload_type)
             else:
@@ -1861,7 +1863,7 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
         readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
 
         if not readouts:
-            return redirect('/assays/'+str(study.id))
+            return redirect('/assays/' + str(study.id))
 
         return super(AssayPlateTestResultAdd, self).render_to_response(context)
 
@@ -1964,15 +1966,19 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
     def form_valid(self, form):
         if form.is_valid():
             data = form.cleaned_data
-            # bulk_file = data.get('bulk_file')
-            bulk_file = self.request.FILES.get('bulk_file')
             overwrite_option = data.get('overwrite_option')
 
             # For the moment, just have headers be equal to two?
             headers = 1
             study_id = str(self.object.id)
 
-            parse_file_and_save(bulk_file, study_id, overwrite_option, 'Bulk', headers=headers, form=None)
+            # Add user to Study's modified by
+            # TODO
+            self.object.bulk_file = data.get('bulk_file')
+            self.modified_by = self.request.user
+            self.object.save()
+
+            parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', headers=headers, form=None)
 
             return redirect(self.object.get_absolute_url())
         else:
