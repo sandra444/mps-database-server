@@ -64,6 +64,8 @@
         <a href="/media/excel_templates/plate_block_template-{{ version }}.xlsx">Click Here For Plate (Block) Template</a>
     </p>
 
+    {% include 'assays/data_upload_table.html' %}
+
     {% if not chip_readouts and not plate_readouts %}
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>

@@ -162,9 +162,9 @@
             <tr>
                 <td>{{ setup }}</td>
                 {% if same %}
-                    <td class="text-success">Same as {{indicative}}</td>
+                    <td class="text-success">Same Cells as {{indicative}}</td>
                 {% else %}
-                    <td class="text-danger">Differs from {{indicative}}</td>
+                    <td class="text-danger">Different Cells from {{indicative}}</td>
                 {% endif %}
             </tr>
         {% endfor %}
@@ -244,15 +244,17 @@
             <tr>
                 <td>{{ setup }}</td>
                 {% if same %}
-                    <td class="text-success">Same cells as {{ plate_indicative }}</td>
+                    <td class="text-success">Same Cells as {{ plate_indicative }}</td>
                 {% else %}
-                    <td class="text-danger">Different cells from {{ plate_indicative }}</td>
+                    <td class="text-danger">Different Cells from {{ plate_indicative }}</td>
                 {% endif %}
             </tr>
         {% endfor %}
             </tbody>
         </table>
     {% endif %}
+
+    {% include 'assays/data_upload_table.html' %}
 
     <div id="radio_buttons" hidden class="well hidden-print">
         <h3 class="text-center">Chip Readout Data</h3>

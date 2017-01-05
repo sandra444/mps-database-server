@@ -926,3 +926,10 @@ class AssayDataUpload(FlaggableModel):
     # Note that there are both chip and plate readouts listed as one file may supply both
     chip_readout = models.ManyToManyField(AssayChipReadout)
     plate_readout = models.ManyToManyField(AssayPlateReadout)
+
+    # Supplying study may seem redundant, however:
+    # This ensures that uploads for readouts that have been (for whatever reason) deleted will no longer be hidden
+    study = models.ForeignKey(AssayRun)
+
+    def __unicode__(self):
+        return self.file_location.split('/')[-1]

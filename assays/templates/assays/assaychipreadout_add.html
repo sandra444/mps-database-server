@@ -218,6 +218,8 @@
 
     {% include 'generic_field.html' with field=form.overwrite_option label="Overwrite Option*" %}
 
+    {% include 'assays/data_upload_table.html' %}
+
     {{ formset.management_form }}
     <legend>Assays</legend>
 

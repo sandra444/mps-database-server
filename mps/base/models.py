@@ -13,6 +13,9 @@ class TrackableModel(models.Model):
     NOTE: the "read-only" configuration method resides in base/admin.py
     """
 
+    class Meta(object):
+        abstract = True
+
     # CREATION DATA #
 
     created_by = models.ForeignKey('auth.User',
@@ -43,8 +46,14 @@ class TrackableModel(models.Model):
     signed_off_date = models.DateTimeField(blank=True,
                                            null=True)
 
-    class Meta(object):
-        abstract = True
+    def full_creator(self):
+        return self.created_by.first_name + ' ' + self.created_by.last_name
+
+    def full_modified(self):
+        return self.modified_by.first_name + ' ' + self.modified_by.last_name
+
+    def full_reviewer(self):
+        return self.signed_off_by.first_name + ' ' + self.signed_off_by.last_name
 
 
 class LockableModel(TrackableModel):

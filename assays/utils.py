@@ -1168,15 +1168,15 @@ def get_chip_details(self=None, study=None, readout=None):
     study - the study in question
     readout - the readout in question
     """
-    if study:
-        readouts = AssayChipReadout.objects.filter(
-            chip_setup__assay_run_id=study
-        ).prefetch_related(
+    if readout:
+        readouts = AssayChipReadout.objects.filter(pk=readout.id).prefetch_related(
             'chip_setup__assay_run_id',
             'timeunit'
         )
-    elif readout:
-        readouts = AssayChipReadout.objects.filter(pk=readout.id).prefetch_related(
+    elif study:
+        readouts = AssayChipReadout.objects.filter(
+            chip_setup__assay_run_id=study
+        ).prefetch_related(
             'chip_setup__assay_run_id',
             'timeunit'
         )

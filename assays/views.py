@@ -408,7 +408,8 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=self.object)
             all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=self.object)
             all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=self.object)
-            all_data_uploads = AssayDataUpload.objects.filter(chip_readout__in=all_chip_readouts, plate_readout__in=all_plate_readouts)
+
+            data_uploads = AssayDataUpload.objects.filter(study=self.object)
 
             # Marking a study should mark/unmark only setups that have not been individually reviewed
             # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
@@ -582,6 +583,21 @@ class AssayRunSummary(ViewershipMixin, DetailView):
 
         context['plate_sameness'] = sameness
         context['plate_indicative'] = indicative
+
+        chip_readouts = AssayChipReadout.objects.filter(
+            chip_setup__assay_run_id=self.object
+        ).prefetch_related('chip_setup')
+        plate_readouts = AssayPlateReadout.objects.filter(
+            setup__assay_run_id=self.object
+        ).prefetch_related('setup')
+
+        data_uploads = AssayDataUpload.objects.filter(
+            study=self.object
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        context['data_uploads'] = data_uploads
 
         return self.render_to_response(context)
 
@@ -945,6 +961,19 @@ class AssayChipReadoutDetail(DetailRedirectMixin, DetailView):
     """Detail for Chip Readout"""
     model = AssayChipReadout
 
+    def get_context_data(self, **kwargs):
+        context = super(AssayChipReadoutDetail, self).get_context_data(**kwargs)
+
+        data_uploads = AssayDataUpload.objects.filter(
+            chip_readout=self.object
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        context['data_uploads'] = data_uploads
+
+        return context
+
 
 class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     """Update Assay Chip Readout and Assay Chip Readout Assays"""
@@ -970,6 +999,14 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
                 context['formset'] = ACRAFormSet(self.request.POST, instance=self.object)
             else:
                 context['formset'] = ACRAFormSet(instance=self.object)
+
+        data_uploads = AssayDataUpload.objects.filter(
+            chip_readout=self.object
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        context['data_uploads'] = data_uploads
 
         context['update'] = True
 
@@ -1702,6 +1739,18 @@ class AssayPlateReadoutDetail(DetailRedirectMixin, DetailView):
     """Details for a Plate Readout"""
     model = AssayPlateReadout
 
+    def get_context_data(self, **kwargs):
+        context = super(AssayPlateReadoutDetail, self).get_context_data(**kwargs)
+
+        data_uploads = AssayDataUpload.objects.filter(
+            plate_readout=self.object
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        context['data_uploads'] = data_uploads
+
+        return context
 
 class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     """Update a Plate Readout with inline for Assay Plate Readout Assays"""
@@ -1724,6 +1773,14 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
                 context['formset'] = APRAFormSet(self.request.POST, self.request.FILES, instance=self.object)
             else:
                 context['formset'] = APRAFormSet(instance=self.object)
+
+        data_uploads = AssayDataUpload.objects.filter(
+            plate_readout=self.object
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        context['data_uploads'] = data_uploads
 
         context['update'] = True
 
@@ -1952,6 +2009,14 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
         for readout in plate_readouts:
             if AssayReadout.objects.filter(assay_device_readout=readout):
                 plate_has_data.update({readout: True})
+
+        data_uploads = AssayDataUpload.objects.filter(
+            study=self.object
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        context['data_uploads'] = data_uploads
 
         context['chip_readouts'] = chip_readouts
         context['plate_readouts'] = plate_readouts
