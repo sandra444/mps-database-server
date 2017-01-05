@@ -34,10 +34,13 @@ $(document).ready(function () {
                     },
                     y: {
                         label: {
-                            text: name + ' (' + valueUnits + ')',
+                            text: valueUnits,
                             position: 'outer-middle'
                         }
                     }
+                },
+                title: {
+                	text: name
                 },
                 tooltip: {
                     format: {

@@ -54,8 +54,8 @@ $(document).ready(function () {
         var charts_id = $('#' + charts);
         charts_id.empty();
 
-        var assay_to_id = {};
-        var assay_ids = {};
+//        var assay_to_id = {};
+//        var assay_ids = {};
 
         // Show radio_buttons if there is data
         if (Object.keys(assays).length > 0) {
@@ -66,26 +66,26 @@ $(document).ready(function () {
 
         var previous = null;
         for (var index in sorted_assays) {
-            var assay = sorted_assays[index];
+            var assay_unit = sorted_assays[index];
 
-            var assay_id = assay.split('  ')[0];
+            var current_chart_id = assay_unit.replace(/\W/g,'_');
 
-            if (!assay_ids[assay_id]) {
-                assay_ids[assay_id] = true;
-                assay_to_id[assay] = assay_id;
-            }
-            else {
-                var assay_number = 2;
-
-                while (assay_ids[assay_id + '_' + assay_number]) {
-                    assay_number += 1;
-                }
-
-                assay_id = assay_id + '_' + assay_number;
-
-                assay_ids[assay_id] = true;
-                assay_to_id[assay] = assay_id;
-            }
+//            if (!assay_ids[assay_id]) {
+//                assay_ids[assay_id] = true;
+//                assay_to_id[assay] = assay_id;
+//            }
+//            else {
+//                var assay_number = 2;
+//
+//                while (assay_ids[assay_id + '_' + assay_number]) {
+//                    assay_number += 1;
+//                }
+//
+//                assay_id = assay_id + '_' + assay_number;
+//
+//                assay_ids[assay_id] = true;
+//                assay_to_id[assay] = assay_id;
+//            }
 
             if (!previous) {
                 previous = $('<div>')
@@ -93,14 +93,14 @@ $(document).ready(function () {
                     .css('min-height', 320);
                 charts_id.append(previous
                     .append($('<div>')
-                        .attr('id', charts + '_' + assay_id)
+                        .attr('id', charts + '_' + current_chart_id)
                         .addClass('col-sm-12 col-md-6 chart-container')
                     )
                 );
             }
             else {
                 previous.append($('<div>')
-                    .attr('id', charts + '_' + assay_id)
+                    .attr('id', charts + '_' + current_chart_id)
                     .addClass('col-sm-12 col-md-6 chart-container')
                 );
                 previous = null;
@@ -110,12 +110,14 @@ $(document).ready(function () {
         var bar_chart_list = [];
 
         for (index in sorted_assays) {
-            var assay = sorted_assays[index];
-            var current_assay_id = assay_to_id[assay];
+        	var assay_unit = sorted_assays[index];
+            var assay = assay_unit.split('\n')[0];
+            var unit = assay_unit.split('\n')[1];
+            var current_chart_id = assay_unit.replace(/\W/g,'_');
             var add_to_bar_charts = true;
 
             var current_chart = c3.generate({
-                bindto: '#' + charts + '_' + current_assay_id,
+                bindto: '#' + charts + '_' + current_chart_id,
 
                 data: {
                     columns: []
@@ -135,11 +137,13 @@ $(document).ready(function () {
                     // TODO Y AXIS LABEL
                     y: {
                         label: {
-                            text: assay,
-                            //text: name + ' (' + valueUnits + ')',
+                            text: unit,
                             position: 'outer-middle'
                         }
                     }
+                },
+                title: {
+                	text: assay
                 },
                 tooltip: {
                     format: {
@@ -166,11 +170,11 @@ $(document).ready(function () {
             var num = 1;
             var xs = {};
 
-            var sorted_keys = _.sortBy(_.keys(assays[assay]));
+            var sorted_keys = _.sortBy(_.keys(assays[assay_unit]));
 
             for (var i=0; i<sorted_keys.length; i++) {
                 var current_key = sorted_keys[i];
-                var current_data = assays[assay][current_key];
+                var current_data = assays[assay_unit][current_key];
 
                 // Add to bar charts if no time scale exceeds 3 points
                 if (add_to_bar_charts && current_data.time.length > 3) {

@@ -1,32 +1,33 @@
 # coding=utf-8
 import ujson as json
 from collections import defaultdict
+# TODO STOP USING WILDCARD IMPORTS
 from django.http import *
 from .models import *
 from microdevices.models import MicrophysiologyCenter, Microdevice
 
-from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
+# from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 from .forms import (
     AssayChipReadoutForm,
     AssayPlateReadoutForm,
     AssayChipReadoutInlineFormset,
     AssayPlateReadoutInlineFormset
 )
-from.utils import(
-    valid_chip_row,
-    stringify_excel_value,
-    unicode_csv_reader,
-    get_row_and_column,
-    process_readout_value,
-    get_sheet_type
-)
-import xlrd
+# from.utils import(
+#     valid_chip_row,
+#     stringify_excel_value,
+#     unicode_csv_reader,
+#     get_row_and_column,
+#     process_readout_value,
+#     get_sheet_type
+# )
+# import xlrd
 
 # TODO FIX SPAGHETTI CODE
 from .forms import ReadoutBulkUploadForm
 from django.forms.models import inlineformset_factory
 
-from django.utils import timezone
+# from django.utils import timezone
 
 import logging
 logger = logging.getLogger(__name__)
@@ -304,12 +305,13 @@ def fetch_center_id(request):
 
 
 # TODO THIS WAS A STRING TO BE EXPEDIENT WRT TO THE JAVSCRIPT IN READOUT ADD, BUT SHOULD BE REVISED
-def get_chip_readout_data_as_csv(chip_ids, chip_data=None):
+def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=False):
     """Returns readout data as a csv in the form of a string
 
     Params:
     chip_ids - Readout IDs to use to acquire chip data (if data not provided)
     chip_data - Readout raw data, optional, acquired with chip_ids if not provided
+    both_assay_names - Indicates that both assay names should be returned (not currently used)
     """
 
     # PLEASE NOTE: THIS AFFECTS PROCESSING OF QC
@@ -338,7 +340,9 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None):
         csv += unicode(raw.elapsed_time) + ','
         # Add time unit
         csv += unicode(raw.assay_chip_id.timeunit) + ','
-        csv += unicode(raw.assay_id.assay_id.assay_short_name) + ','
+        # Now uses full name
+        # csv += unicode(raw.assay_id.assay_id.assay_short_name) + ','
+        csv += unicode(raw.assay_id.assay_id.assay_name) + ','
         if ',' in raw.field_id:
             csv += '"' + unicode(raw.field_id) + '"' + ','
         else:
@@ -411,7 +415,9 @@ def get_readout_data(raw_data, key, percent_control, include_all):
     controls = {}
 
     for raw in raw_data:
-        assay = raw.assay_id.assay_id.assay_short_name
+        # Now uses full name
+        # assay = raw.assay_id.assay_id.assay_short_name
+        assay = raw.assay_id.assay_id.assay_name
         unit = raw.assay_id.readout_unit.unit
         field = raw.field_id
         value = raw.value
@@ -466,7 +472,8 @@ def get_readout_data(raw_data, key, percent_control, include_all):
                     for time, value in time_values.items():
                         if not percent_control:
                             # Not converted to percent control
-                            assay_label = assay + '  (' + unit + ')'
+                            # Newline is used as a delimiter
+                            assay_label = assay + '\n' + unit
 
                             if accomadate_field:
                                 current_key = tag + ' ' + field
@@ -484,7 +491,8 @@ def get_readout_data(raw_data, key, percent_control, include_all):
                             else:
                                 current_unit = '%Control'
 
-                            assay_label = assay + '  (' + current_unit + ')'
+                            # Newline is used as a delimiter
+                            assay_label = assay + '\n' + current_unit
 
                             if accomadate_field:
                                 current_key = tag + ' ' + field
@@ -496,6 +504,7 @@ def get_readout_data(raw_data, key, percent_control, include_all):
                             assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('values', []).append((value / control_value) * 100)
 
     return assays
+
 
 # TODO REQUIRES REVISION
 # TODO NEED TO CONFIRM UNITS ARE THE SAME (ELSE CONVERSION)
