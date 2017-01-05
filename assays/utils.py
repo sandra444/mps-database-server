@@ -39,6 +39,9 @@ from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
 from chardet.universaldetector import UniversalDetector
 
+PLATE_FORMATS = ['Tabular', 'Block']
+CHIP_FORMATS = ['Chip']
+
 
 def charset_detect(in_file, chunk_size=4096):
     """Use chardet library to detect what encoding is being used"""
@@ -192,16 +195,17 @@ def get_sheet_type(header, sheet_name=''):
     """
     # From the header we need to discern the type of upload
     # Check if chip
-    if 'CHIP' in header[0].upper() and 'ASSAY' in header[3].upper():
+    if len(header) >= 7 and 'CHIP' in header[0].upper() and 'TIME' in header[1].upper() and 'TIME UNIT' in header[2].upper() and 'ASSAY' in header[3].upper()\
+        and 'VALUE' in header[5].upper() and 'VALUE UNIT' in header[6].upper():
         sheet_type = 'Chip'
 
     # Check if plate tabular
-    elif 'PLATE' in header[0].upper() and 'WELL' in header[1].upper() and 'ASSAY' in header[2].upper()\
-            and 'FEATURE' in header[3].upper() and 'UNIT' in header[4].upper():
+    elif len(header) >= 8 and 'PLATE' in header[0].upper() and 'WELL' in header[1].upper() and 'ASSAY' in header[2].upper()\
+            and 'FEATURE' in header[3].upper() and 'UNIT' in header[4].upper() and 'VALUE' in header[7].upper():
         sheet_type = 'Tabular'
 
     # Check if plate block
-    elif 'PLATE' in header[0].upper() and 'ASSAY' in header[2].upper() and 'FEATURE' in header[4].upper()\
+    elif len(header) >= 7 and 'PLATE' in header[0].upper() and 'ASSAY' in header[2].upper() and 'FEATURE' in header[4].upper()\
             and 'UNIT' in header[6].upper():
         sheet_type = 'Block'
 
@@ -209,9 +213,9 @@ def get_sheet_type(header, sheet_name=''):
     else:
         # For if we decide not to throw errors
         sheet_type = 'Unknown'
-        raise forms.ValidationError(
-            'The header of sheet "{0}" was not recognized.'.format(sheet_name)
-        )
+#         raise forms.ValidationError(
+#             'The header of sheet "{0}" was not recognized.'.format(sheet_name)
+#         )
 
     return sheet_type
 
@@ -1586,8 +1590,8 @@ def validate_chip_readout_file(
         # Raise error if value_unit not in any matching ACRA
         elif value_unit not in assays.get(assay_name, []):
             errors.append(
-                sheet + 'Chip-%s: The value unit "%s" does not correspond with the selected readout unit of "%s"'
-                % (chip_id, value_unit, assays.get(assay_name, ''))
+                sheet + 'Chip-%s: The value unit "%s" does not correspond with the selected readout units of "%s"'
+                % (chip_id, value_unit, ' OR '.join(assays.get(assay_name, '')))
             )
 
         # Fail if time unit does not match
@@ -1909,7 +1913,8 @@ def parse_file_and_save(current_file, created_by, study_id, overwrite_option, in
         created_by=created_by,
         modified_by=created_by,
         group_id=current_study.group_id,
-        restricted=current_study.restricted
+        restricted=current_study.restricted,
+        study=current_study
     )
 
     # Save the current file
@@ -2004,9 +2009,9 @@ def parse_file_and_save(current_file, created_by, study_id, overwrite_option, in
             header = datalist[0]
             sheet_type = get_sheet_type(header)
 
-            if sheet_type in ['Chip']:
+            if sheet_type in CHIP_FORMATS:
                 save_chip_files(datalist, current_file, study_id, headers, overwrite_option, readout=readout, form=form)
-            elif sheet_type in ['Tabular', 'Block']:
+            elif sheet_type in PLATE_FORMATS:
                 save_plate_files(datalist, current_file, study_id, overwrite_option, readout=readout, form=form)
 
             # acquire_valid_data(datalist, sheet_type, chip_data, tabular_data, block_data, headers=headers)
@@ -2018,9 +2023,9 @@ def parse_file_and_save(current_file, created_by, study_id, overwrite_option, in
         header = datalist[0]
         sheet_type = get_sheet_type(header)
 
-        if sheet_type in ['Chip']:
+        if sheet_type in CHIP_FORMATS:
             save_chip_files(datalist, current_file, study_id, headers, overwrite_option, readout=readout, form=form)
-        elif sheet_type in ['Tabular', 'Block']:
+        elif sheet_type in PLATE_FORMATS:
             save_plate_files(datalist, current_file, study_id, overwrite_option, readout=readout, form=form)
         # acquire_valid_data(datalist, sheet_type, chip_data, tabular_data, block_data, headers=headers)
 
@@ -2034,9 +2039,9 @@ def parse_file_and_save(current_file, created_by, study_id, overwrite_option, in
 
 def validate_sheet_type(interface, sheet_type, sheet='csv'):
     message = None
-    if sheet_type == 'Chip' and interface == 'Plate':
+    if sheet_type in CHIP_FORMATS and interface == 'Plate':
         message = 'That sheet "{}" was recognized as using a chip format. Please use a plate format in this interface.'.format(sheet)
-    elif sheet_type in ['Tabular', 'Block'] and interface == 'Chip':
+    elif sheet_type in PLATE_FORMATS and interface == 'Chip':
         message = 'That sheet "{}" was recognized as using a plate format. Please use a chip format in this interface.'.format(sheet)
     return message
 
@@ -2063,6 +2068,8 @@ def validate_excel_file(self, excel_file, interface, overwrite_option, headers=1
 
     errors = []
 
+    at_least_one_valid_sheet = False
+
     for index, sheet in enumerate(excel_file.sheets()):
         sheet_name = sheet_names[index]
 
@@ -2086,7 +2093,7 @@ def validate_excel_file(self, excel_file, interface, overwrite_option, headers=1
             errors.append(error_message)
 
         # If chip
-        if sheet_type == 'Chip':
+        if sheet_type in CHIP_FORMATS:
             if not chip_details:
                 chip_details = get_chip_details(self, study, readout)
 
@@ -2101,9 +2108,10 @@ def validate_excel_file(self, excel_file, interface, overwrite_option, headers=1
                 readout=readout
             )
 
+            at_least_one_valid_sheet = True
             chip_preview.extend(current_chip_preview)
         # If plate
-        else:
+        elif sheet_type in PLATE_FORMATS:
             if not plate_details:
                 plate_details = get_plate_details(self, study, readout)
 
@@ -2119,7 +2127,11 @@ def validate_excel_file(self, excel_file, interface, overwrite_option, headers=1
                 sheet='Sheet "' + sheet_name + '": ',
             )
 
+            at_least_one_valid_sheet = True
             plate_preview.extend(current_plate_preview)
+
+    if not at_least_one_valid_sheet:
+        errors.append('No valid sheets were detected in the file. Please check to make sure your headers are correct and start in the top-left corner.')
 
     if not errors:
         return {
@@ -2160,7 +2172,7 @@ def validate_csv_file(self, datalist, interface, overwrite_option, study=None, r
     if error_message:
         errors.append(error_message)
 
-    if sheet_type == 'Chip':
+    if sheet_type in CHIP_FORMATS:
         if not chip_details:
             chip_details = get_chip_details(self, study, readout)
 

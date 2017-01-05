@@ -788,40 +788,6 @@ def get_bulk_datalist(sheet):
     return datalist
 
 
-# TODO FIX ORDER OF ARGUMENTS
-def get_sheet_type(header, sheet_name=''):
-    """Get the sheet type from a given header (chip, tabular, block, or unknown)
-
-    Param:
-    header - the header in question
-    sheet_name - the sheet name for reporting errors (default empty string)
-    """
-    # From the header we need to discern the type of upload
-    # Check if chip
-    if 'CHIP' in header[0].upper() and 'ASSAY' in header[3].upper():
-        sheet_type = 'Chip'
-
-    # Check if plate tabular
-    elif 'PLATE' in header[0].upper() and 'WELL' in header[1].upper() and 'ASSAY' in header[2].upper()\
-            and 'FEATURE' in header[3].upper() and 'UNIT' in header[4].upper():
-        sheet_type = 'Tabular'
-
-    # Check if plate block
-    elif 'PLATE' in header[0].upper() and 'ASSAY' in header[2].upper() and 'FEATURE' in header[4].upper()\
-            and 'UNIT' in header[6].upper():
-        sheet_type = 'Block'
-
-    # Throw error if can not be determined
-    else:
-        # For if we decide not to throw errors
-        sheet_type = 'Unknown'
-        raise forms.ValidationError(
-            'The header of sheet "{0}" was not recognized.'.format(sheet_name)
-        )
-
-    return sheet_type
-
-
 class ReadoutBulkUploadForm(forms.ModelForm):
     """Form for Bulk Uploads"""
     # Now in Study (AssayRun) to make saving easier
