@@ -36,6 +36,18 @@ $(document).ready(function () {
                         label: {
                             text: valueUnits,
                             position: 'outer-middle'
+                        },
+                        tick: {
+                            format: function (value, ratio, id) {
+                                var format = d3.format(',.2f');
+                                if (Math.abs(value) > 100000) {
+                                	format = d3.format('.2e');
+                                }
+                                else if (value % 1 === 0){
+                                	format = d3.format(',d');
+                                }
+                                return format(value);
+                            }
                         }
                     }
                 },
