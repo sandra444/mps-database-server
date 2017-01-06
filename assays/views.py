@@ -409,7 +409,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=self.object)
             all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=self.object)
 
-            data_uploads = AssayDataUpload.objects.filter(study=self.object)
+            all_data_uploads = AssayDataUpload.objects.filter(study=self.object)
 
             # Marking a study should mark/unmark only setups that have not been individually reviewed
             # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
