@@ -726,9 +726,9 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
                     raise forms.ValidationError(
                         'You can not remove the assay "%s" because it is in your uploaded data.' % assay)
                 # Raise error if value_unit not equal to one listed in ACRA
-                elif value_unit != assays.get(assay, ''):
+                elif value_unit not in assays.get(assay, ''):
                     raise forms.ValidationError(
-                        'The current value unit "%s" does not correspond with the readout unit of "%s"'
+                        'The current value unit "%s" does not correspond with the readout units "%s"'
                         % (value_unit, assays.get(assay, ''))
                     )
 
