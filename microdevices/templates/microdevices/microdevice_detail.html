@@ -88,8 +88,8 @@
                     <b>Dimensions</b>
                 </td>
                 <td>
-                    {% if object.device_width and object.device_width and object.device_thickness %}
-                        {{ object.device_width }} mm X {{ object.device_width }} mm X {{ object.device_thickness }} mm
+                    {% if object.device_width and object.device_length and object.device_thickness %}
+                        {{ object.device_width }} mm X {{ object.device_length }} mm X {{ object.device_thickness }} mm
                     {% else %}
                         Unspecified
                     {% endif %}
