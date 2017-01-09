@@ -13,13 +13,7 @@
 
 {% block breadcrumbs %}
     <li><a href="/assays/editable_studies/">Editable Studies</a></li>
-    <li>
-        {% if object %}
-            <a href="/assays/{{ object.chip_setup.assay_run_id.id }}">{{ object.chip_setup.assay_run_id }}</a>
-        {% else %}
-            <a href="/assays/{{ study.id }}">{{ study }}</a>
-        {% endif %}
-    </li>
+    <li><a href="/assays/{{ study.id }}">{{ study }}</a></li>
     <li class="active">
         {% if object and not form.success.value %}
             Edit Readout for <em>Chip-{{ object.chip_setup.assay_chip_id }}</em>

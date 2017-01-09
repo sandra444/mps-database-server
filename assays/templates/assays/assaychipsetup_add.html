@@ -10,9 +10,7 @@
 
 {% block breadcrumbs %}
     <li><a href="/assays/editable_studies/">Editable Studies</a></li>
-    <li>
-        <a href="/assays/{{ form.instance.assay_run_id.id }}">{{ form.instance.assay_run_id }}</a>
-    </li>
+    <li><a href="/assays/{{ form.instance.assay_run_id.id }}">{{ form.instance.assay_run_id }}</a></li>
     <li class="active">
         {% if object and not form.success.value %}
             Edit <em>{{ object }}</em>

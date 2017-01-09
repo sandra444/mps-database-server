@@ -959,7 +959,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             id__in=list(set(exclude_list))
         )
         if not setups:
-            return redirect('/assays/'+str(study.id))
+            return redirect('/assays/' + str(study.id))
 
         return super(AssayChipReadoutAdd, self).render_to_response(context)
 
@@ -993,6 +993,8 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
                 context['formset'] = ACRAFormSet(self.request.POST, instance=self.object)
             else:
                 context['formset'] = ACRAFormSet(instance=self.object)
+
+        context['study'] = self.object.chip_setup.assay_run_id
 
         context['update'] = True
 
@@ -1137,7 +1139,7 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
         )
 
         if not readouts:
-            return redirect('/assays/'+str(study.id))
+            return redirect('/assays/' + str(study.id))
 
         return super(AssayChipTestResultAdd, self).render_to_response(context)
 
@@ -1171,6 +1173,8 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
                 context['formset'] = ChipTestResultFormSet(self.request.POST, instance=self.object)
             else:
                 context['formset'] = ChipTestResultFormSet(instance=self.object)
+
+        context['study'] = self.object.chip_readout.chip_setup.assay_run_id
 
         context['update'] = True
 
@@ -1706,7 +1710,7 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
         )
 
         if not setups:
-            return redirect('/assays/'+str(study.id))
+            return redirect('/assays/' + str(study.id))
 
         return super(AssayPlateReadoutAdd, self).render_to_response(context)
 
@@ -1738,6 +1742,8 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
                 context['formset'] = APRAFormSet(self.request.POST, self.request.FILES, instance=self.object)
             else:
                 context['formset'] = APRAFormSet(instance=self.object)
+
+        context['study'] = self.object.setup.assay_run_id
 
         context['update'] = True
 
@@ -1872,7 +1878,7 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
         readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=study).exclude(id__in=list(set(exclude_list)))
 
         if not readouts:
-            return redirect('/assays/'+str(study.id))
+            return redirect('/assays/' + str(study.id))
 
         return super(AssayPlateTestResultAdd, self).render_to_response(context)
 
@@ -1904,6 +1910,8 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
                 context['formset'] = PlateTestResultFormSet(self.request.POST, instance=self.object)
             else:
                 context['formset'] = PlateTestResultFormSet(instance=self.object)
+
+        context['study'] = self.object.readout.setup.assay_run_id
 
         context['update'] = True
 

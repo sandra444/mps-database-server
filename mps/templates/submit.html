@@ -77,8 +77,8 @@
         {# Check to see if the user has the 'review' group #}
         {# Alternatively, some entries check to see if the user is the creator instead #}
         {# Perhaps the logic should be removed from here and added to JS? #}
-        {% if update and group and user|is_group_admin:group or update and creator and user.id == creator %}
-            {% if object.signed_off_by %}
+        {% if group and user|is_group_admin:group or update and creator and user.id == creator %}
+            {% if form.signed_off.value %}
             <a role='button' id="mark_reviewed" class="btn btn-sm btn-success" title="Mark entry as reviewed"
             onclick="$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');">
                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>

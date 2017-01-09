@@ -52,7 +52,7 @@
     {% csrf_token %}
     </h1>
 
-    {% include "submit.html" with flag="y" clone="y" group=form.instance.assay_run_id.group %}
+    {% include "submit.html" with flag="y" clone="y" group=form.instance.assay_run_id.group.name %}
 
     {% include 'errors.html' %}
 

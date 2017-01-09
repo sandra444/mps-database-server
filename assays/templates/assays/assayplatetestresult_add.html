@@ -12,13 +12,7 @@
 
 {% block breadcrumbs %}
     <li><a href="/assays/editable_studies/">Editable Studies</a></li>
-    <li>
-        {% if object %}
-            <a href="/assays/{{ object.readout.setup.assay_run_id.id }}">{{ object.readout.setup.assay_run_id }}</a>
-        {% else %}
-            <a href="/assays/{{ study.id }}">{{ study }}</a>
-        {% endif %}
-    </li>
+    <li><a href="/assays/{{ study.id }}">{{ study }}</a></li>
     <li class="active">
         {% if object %}
             Edit Test Results for <em>Plate-{{ object.readout.setup.assay_plate_id }}</em>
@@ -48,7 +42,7 @@
 
         </h1>
 
-        {% include "submit.html" with flag="y" group=study.group %}
+        {% include "submit.html" with flag="y" group=study.group.name %}
 
         {% include 'errors.html' %}
 
