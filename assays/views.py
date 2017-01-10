@@ -699,9 +699,9 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
         ).order_by(
             '-receipt_date'
         ).prefetch_related(
-            'cell_type',
+            'cell_type__organ',
             'supplier',
-            'cell_subtype'
+            'cell_subtype__cell_type'
         )
         context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
         if 'formset' not in context:
@@ -756,9 +756,9 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         ).order_by(
             '-receipt_date'
         ).prefetch_related(
-            'cell_type',
+            'cell_type__organ',
             'supplier',
-            'cell_subtype'
+            'cell_subtype__cell_type'
         )
 
         context = super(AssayChipSetupUpdate, self).get_context_data(**kwargs)
@@ -1478,9 +1478,9 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
         ).order_by(
             '-receipt_date'
         ).prefetch_related(
-            'cell_type',
+            'cell_type__organ',
             'supplier',
-            'cell_subtype'
+            'cell_subtype__cell_type'
         )
         context = super(AssayPlateSetupAdd, self).get_context_data(**kwargs)
         if 'formset' not in context:
@@ -1537,9 +1537,9 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         ).order_by(
             '-receipt_date'
         ).prefetch_related(
-            'cell_type',
+            'cell_type__organ',
             'supplier',
-            'cell_subtype'
+            'cell_subtype__cell_type'
         )
         context = super(AssayPlateSetupUpdate, self).get_context_data(**kwargs)
         if 'formset' not in context:
