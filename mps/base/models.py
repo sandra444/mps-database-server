@@ -47,13 +47,22 @@ class TrackableModel(models.Model):
                                            null=True)
 
     def full_creator(self):
-        return self.created_by.first_name + ' ' + self.created_by.last_name
+        if self.created_by:
+            return self.created_by.first_name + ' ' + self.created_by.last_name
+        else:
+            return 'Admin'
 
-    def full_modified(self):
-        return self.modified_by.first_name + ' ' + self.modified_by.last_name
+    def full_modifier(self):
+        if self.modified_by:
+            return self.modified_by.first_name + ' ' + self.modified_by.last_name
+        else:
+            return 'Admin'
 
     def full_reviewer(self):
-        return self.signed_off_by.first_name + ' ' + self.signed_off_by.last_name
+        if self.signed_off_by:
+            return self.signed_off_by.first_name + ' ' + self.signed_off_by.last_name
+        else:
+            return 'Admin'
 
 
 class LockableModel(TrackableModel):

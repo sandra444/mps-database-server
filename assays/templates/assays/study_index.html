@@ -79,12 +79,11 @@
                         <td>-control-</td>
                     {% endif %}
                     <td>
-                        {{ setup.created_by.first_name }}
-                        {{ setup.created_by.last_name }}
+                        {{ setup.full_creator }}
                     </td>
                     <td>
                         {% if setup.signed_off_by %}
-                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if setup.flagged %}
                             <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -128,12 +127,11 @@
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.assay_layout }}</td>
                     <td>
-                        {{ setup.created_by.first_name }}
-                        {{ setup.created_by.last_name }}
+                        {{ setup.full_creator }}
                     </td>
                     <td>
                         {% if setup.signed_off_by %}
-                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if setup.flagged %}
                             <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -212,12 +210,11 @@
                     </td>
                     <td>{{ readout.readout_start_time }}</td>
                     <td>
-                        {{ readout.created_by.first_name }}
-                        {{ readout.created_by.last_name }}
+                        {{ readout.full_creator }}
                     </td>
                     <td>
                         {% if readout.signed_off_by %}
-                            <span title="This entry was reviewed by {{ readout.signed_off_by }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ readout.full_reviewer }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if readout.flagged %}
                             <span title="This entry is flagged for review: '{{ readout.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -265,12 +262,11 @@
                     </td>
                     <td>{{ readout.readout_start_time }}</td>
                     <td>
-                        {{ readout.created_by.first_name }}
-                        {{ readout.created_by.last_name }}
+                        {{ readout.full_creator }}
                     </td>
                     <td>
                         {% if readout.signed_off_by %}
-                            <span title="This entry was reviewed by {{ readout.signed_off_by }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ readout.full_reviewer }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if readout.flagged %}
                             <span title="This entry is flagged for review: '{{ readout.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -374,12 +370,11 @@
                     <td>{{ result.result_type }}</td>
                     <td>{{ result.get_severity_display }}</td>
                     <td>
-                        {{ result.assay_result.created_by.first_name }}
-                        {{ result.assay_result.created_by.last_name }}
+                        {{ result.assay_result.full_creator }}
                     </td>
                     <td>
                         {% if result.assay_result.signed_off_by %}
-                            <span title="This entry was reviewed by {{ result.assay_result.signed_off_by }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ result.assay_result.full_reviewer }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if result.assay_result.flagged %}
                             <span title="This entry is flagged for review: '{{ result.assay_result.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -443,12 +438,11 @@
                     <td>{{ result.result_type }}</td>
                     <td>{{ result.get_severity_display }}</td>
                     <td>
-                        {{ result.assay_result.created_by.first_name }}
-                        {{ result.assay_result.created_by.last_name }}
+                        {{ result.assay_result.full_creator }}
                     </td>
                     <td>
                         {% if result.assay_result.signed_off_by %}
-                            <span title="This entry was reviewed by {{ result.assay_result.signed_off_by }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ result.assay_result.full_reviewer }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if result.assay_result.flagged %}
                             <span title="This entry is flagged for review: '{{ result.assay_result.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
