@@ -13,13 +13,7 @@
 
 {% block breadcrumbs %}
     <li><a href="/assays/editable_studies/">Editable Studies</a></li>
-    <li>
-        {% if object and not form.success.value %}
-            <a href="/assays/{{ object.setup.assay_run_id.id }}">{{ object.setup.assay_run_id }}</a>
-        {% else %}
-            <a href="/assays/{{ study.id }}">{{ study }}</a>
-        {% endif %}
-    </li>
+    <li><a href="/assays/{{ study.id }}">{{ study }}</a></li>
     <li class="active">
         {% if object %}
             Edit Readout for <em>Plate-{{ object.setup.assay_plate_id }}</em>
@@ -53,7 +47,7 @@
     {% csrf_token %}
     </h1>
 
-    {% include "submit.html" with flag="y" clone="y" group=study.group %}
+    {% include "submit.html" with flag="y" clone="y" group=study.group.name %}
 
     {% include 'errors.html' %}
 

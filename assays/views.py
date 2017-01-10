@@ -1008,6 +1008,8 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         context['data_uploads'] = data_uploads
 
+        context['study'] = self.object.chip_setup.assay_run_id
+
         context['update'] = True
 
         return context
@@ -1190,6 +1192,8 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
                 context['formset'] = ChipTestResultFormSet(self.request.POST, instance=self.object)
             else:
                 context['formset'] = ChipTestResultFormSet(instance=self.object)
+
+        context['study'] = self.object.chip_readout.chip_setup.assay_run_id
 
         context['update'] = True
 
@@ -1782,6 +1786,8 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         context['data_uploads'] = data_uploads
 
+        context['study'] = self.object.setup.assay_run_id
+
         context['update'] = True
 
         return context
@@ -1952,6 +1958,8 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
                 context['formset'] = PlateTestResultFormSet(self.request.POST, instance=self.object)
             else:
                 context['formset'] = PlateTestResultFormSet(instance=self.object)
+
+        context['study'] = self.object.readout.setup.assay_run_id
 
         context['update'] = True
 
