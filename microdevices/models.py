@@ -12,7 +12,7 @@ class MicrophysiologyCenter(LockableModel):
     Note that this is the model by which groups are affiliated with assays, cells, etc.
     """
     class Meta(object):
-        ordering = ('center_name', )
+        ordering = ('center_name',)
 
     center_name = models.CharField(max_length=100)
     center_id = models.CharField(max_length=20, default='-')
@@ -20,7 +20,10 @@ class MicrophysiologyCenter(LockableModel):
     contact_person = models.CharField(max_length=250, blank=True, default='')
     center_website = models.URLField(blank=True, null=True)
 
-    groups = models.ManyToManyField(Group)
+    groups = models.ManyToManyField(
+        Group,
+        help_text='***PLEASE DO NOT INCLUDE "Admin" OR "Viewer": ONLY SELECT THE BASE GROUP (ie "Taylor_MPS" NOT "Taylor_MPS Admin")***<br>'
+    )
 
     def __unicode__(self):
         return self.center_name
@@ -29,7 +32,7 @@ class MicrophysiologyCenter(LockableModel):
 class Manufacturer(LockableModel):
     """Manufacturer gives details for a manufacturer of devices and/or componentry"""
     class Meta(object):
-        ordering = ('manufacturer_name', )
+        ordering = ('manufacturer_name',)
 
     manufacturer_name = models.CharField(max_length=100)
     contact_person = models.CharField(max_length=250, blank=True, default='')
@@ -42,7 +45,7 @@ class Manufacturer(LockableModel):
 class Microdevice(LockableModel):
     """A Microdevice describes a physical vessel for performing experiments (a plate, chip, etc.)"""
     class Meta(object):
-        ordering = ('device_name', 'organ', )
+        ordering = ('device_name', 'organ',)
 
     device_name = models.CharField(max_length=200)
 
@@ -115,7 +118,7 @@ class OrganModel(LockableModel):
     """An Organ Model describes a way of preparing a device to emulate a particular organ"""
     class Meta(object):
         verbose_name = 'Organ Model'
-        ordering = ('model_name', 'organ', )
+        ordering = ('model_name', 'organ',)
 
     model_name = models.CharField(max_length=200)
     organ = models.ForeignKey('cellsamples.Organ')
