@@ -560,6 +560,7 @@ class AssayRun(FlaggableModel):
     name = models.TextField(default='Study-01', verbose_name='Study Name',
                             help_text='Name-###')
     start_date = models.DateField(help_text='YYYY-MM-DD')
+    # TODO REMOVE AS SOON AS POSSIBLE
     assay_run_id = models.TextField(unique=True, verbose_name='Study ID',
                                     help_text="Standard format 'CenterID-YYYY-MM-DD-Name-###'")
     description = models.TextField(blank=True, default='')

@@ -33,9 +33,9 @@ def fetch_global_search_suggestions(request):
         sqs = sqs | SearchQuerySet().filter(group__in=request.user.groups.all())
 
     suggestions = sqs.autocomplete(text=text)
-    # At the moment, I just take the first five results
+    # At the moment, I just take the first ten results
     for suggestion in suggestions[:10]:
-        #data.append(suggestion.suggestion)
+        # data.append(suggestion.suggestion)
         data.append({
             'label': suggestion.text.split('\n')[0],
             'value': suggestion.text.split('\n')[1]
