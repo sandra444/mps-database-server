@@ -6,6 +6,7 @@
     <script src="{% static "js/inline_add.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
+    <script src="{% static "assays/cell_sample_selection.js" %}"></script>
     <script src="{% static "assays/plate_display.js" %}"></script>
     <script src="{% static "assays/assayplatesetup_add.js" %}"></script>
 {% endblock %}
@@ -224,13 +225,13 @@
                         <input id="id_assayplatecells_set-{{ forloop.counter0 }}-id" name="assayplatecells_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ cell.id.value }}">
                     </td>
                     {% endif %}
-                    <td><input readonly=true id="id_assayplatecells_set-{{ forloop.counter0 }}-cell_sample"
+                    <td>
+                    	<input readonly=true id="id_assayplatecells_set-{{ forloop.counter0 }}-cell_sample"
                                name="assayplatecells_set-{{ forloop.counter0 }}-cell_sample" size="5" value={{ cell.cell_sample.value|default_if_none:'' }}>
-                        <button id='search-{{ forloop.counter0 }}-' type="button" class="btn btn-xs btn-info" onclick="search(this)">
+                        <button id='search-{{ forloop.counter0 }}-' type="button" class="btn btn-xs btn-info open-cellsample-dialog">
                             <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                         </button>
-                        <label class="small" id="id_assayplatecells_set-{{ forloop.counter0 }}-cell_sample_label">
-                        </label>
+                        <label class="small" id="id_assayplatecells_set-{{ forloop.counter0 }}-cell_sample_label"></label>
                     </td>
                     <td>{{ cell.cell_biosensor }}</td>
                     <td title="Use 'e' for scientific notation: 1e+3 = 1000">{{ cell.cellsample_density }}</td>

@@ -1,13 +1,5 @@
 // TODO refactor
 // Global variables are in poor taste
-var id = null;
-
-function search(elem) {
-    id = elem.id.replace(/\D/g,'');
-    $("#dialog").dialog('open');
-    // Remove focus
-    $('.ui-dialog :button').blur();
-}
 
 $(document).ready(function() {
     var date = $("#id_setup_date");
@@ -16,22 +8,6 @@ $(document).ready(function() {
     date.datepicker();
     date.datepicker("option", "dateFormat", "yy-mm-dd");
     date.datepicker("setDate", curr_date);
-
-    // Open and then close dialog so it doesn't get placed in window itself
-    var dialog = $('#dialog');
-    dialog.dialog({
-        width: 825,
-        height: 500,
-        closeOnEscape: true,
-        autoOpen: false,
-        close: function() {
-            $('body').removeClass('stop-scrolling');
-        },
-        open: function() {
-            $('body').addClass('stop-scrolling');
-        }
-    });
-    dialog.removeProp('hidden');
 
     var warning = $('#warning');
     warning.dialog({
@@ -86,57 +62,6 @@ $(document).ready(function() {
     compound_selector.change(function() {
         compound = compound_selector.val();
         toggle_warning(false);
-    });
-
-    $('.cellsample').click(function (evt) {
-        var cellsampleId = this.id;
-        var selectedInput = $('#id_assaychipcells_set-' + id + '-cell_sample');
-        selectedInput.prop('value', cellsampleId);
-        var cellsampleName = this.attributes["name"].value;
-        var selectedLabel = $('#id_assaychipcells_set-' + id + '-cell_sample_label');
-        selectedLabel.text(cellsampleName);
-        $('#dialog').dialog('close');
-    });
-
-    $('#cellsamples').DataTable({
-        "iDisplayLength": 50,
-        // Initially sort on receipt date
-        "order": [ 0, "desc" ],
-        // If one wants to display top and bottom
-        "sDom": '<"wrapper"fti>'
-    });
-
-    // Move filter to left
-    $('.dataTables_filter').css('float', 'left');
-
-    // This code should populate cell labels when data is already given
-    var current_id = 0;
-    var current_input = $('#id_assaychipcells_set-' + current_id + '-cell_sample');
-
-    while (current_input[0]) {
-        if (current_input.val()) {
-            var cell_name = $('#' + current_input.val()).attr('name');
-            $('#id_assaychipcells_set-' + current_id + '-cell_sample_label').text(cell_name);
-        }
-
-        // Turn density into scientific notation
-        var current_density = $('#id_assaychipcells_set-' + current_id + '-cellsample_density');
-        var current_number = Number(current_density.val());
-        if (current_number) {
-            current_density.val(current_number.toExponential());
-        }
-
-        current_id += 1;
-        current_input = $('#id_assaychipcells_set-' + current_id + '-cell_sample');
-    }
-
-    // This will clear a cell sample when the button is pressed
-    $('#clear_cell_sample').click(function() {
-        var selectedInput = $('#id_assaychipcells_set-' + id + '-cell_sample');
-        selectedInput.prop('value', '');
-        var selectedLabel = $('#id_assaychipcells_set-' + id + '-cell_sample_label');
-        selectedLabel.text('');
-        $('#dialog').dialog('close');
     });
 
     var device = $('#id_device');

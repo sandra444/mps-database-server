@@ -667,6 +667,53 @@ AssayChipCellsFormset = inlineformset_factory(
 )
 
 
+def get_cell_samples(user, chip_setup=None, plate_setup=None):
+    """Returns the cell samples to be listed in setup views
+
+    Params:
+    user_groups -
+    chip_setup -
+    plate_setup -
+    """
+    user_groups = user.groups.values_list('id', flat=True)
+
+    # Get cell samples with group
+    cellsamples_with_group = CellSample.objects.filter(
+        group__in=user_groups
+    ).prefetch_related(
+        'cell_type__organ',
+        'supplier',
+        'cell_subtype__cell_type'
+    )
+
+    current_cell_samples = CellSample.objects.none()
+
+    if chip_setup:
+        # Get the currently used cell samples
+        current_cell_samples = CellSample.objects.filter(
+            assaychipcells__assay_chip=chip_setup
+        ).prefetch_related(
+            'cell_type__organ',
+            'supplier',
+            'cell_subtype__cell_type'
+        )
+    elif plate_setup:
+        # Get the currently used cell samples
+        current_cell_samples = CellSample.objects.filter(
+            assayplatecells__assay_plate=plate_setup
+        ).prefetch_related(
+            'cell_type__organ',
+            'supplier',
+            'cell_subtype__cell_type'
+        )
+
+    combined_query = cellsamples_with_group | current_cell_samples
+    combined_query = combined_query.order_by('-receipt_date').distinct()
+
+    # Return the combination of the querysets
+    return combined_query
+
+
 # Cloning was recently refactored
 class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
     """Add a Chip Setup (with inline for Chip Cells)"""
@@ -693,17 +740,10 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
         return form
 
     def get_context_data(self, **kwargs):
-        groups = self.request.user.groups.values_list('id', flat=True)
-        cellsamples = CellSample.objects.filter(
-            group__in=groups
-        ).order_by(
-            '-receipt_date'
-        ).prefetch_related(
-            'cell_type__organ',
-            'supplier',
-            'cell_subtype__cell_type'
-        )
+        cellsamples = get_cell_samples(self.request.user)
+
         context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
+
         if 'formset' not in context:
             if self.request.POST:
                 context['formset'] = AssayChipCellsFormset(self.request.POST)
@@ -750,16 +790,7 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
     form_class = AssayChipSetupForm
 
     def get_context_data(self, **kwargs):
-        groups = self.request.user.groups.values_list('id', flat=True)
-        cellsamples = CellSample.objects.filter(
-            group__in=groups
-        ).order_by(
-            '-receipt_date'
-        ).prefetch_related(
-            'cell_type__organ',
-            'supplier',
-            'cell_subtype__cell_type'
-        )
+        cellsamples = get_cell_samples(self.request.user, chip_setup=self.object)
 
         context = super(AssayChipSetupUpdate, self).get_context_data(**kwargs)
 
@@ -1472,17 +1503,10 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
         return form
 
     def get_context_data(self, **kwargs):
-        groups = self.request.user.groups.values_list('id', flat=True)
-        cellsamples = CellSample.objects.filter(
-            group__in=groups
-        ).order_by(
-            '-receipt_date'
-        ).prefetch_related(
-            'cell_type__organ',
-            'supplier',
-            'cell_subtype__cell_type'
-        )
+        cellsamples = get_cell_samples(self.request.user)
+
         context = super(AssayPlateSetupAdd, self).get_context_data(**kwargs)
+
         if 'formset' not in context:
             if self.request.POST:
                 context['formset'] = AssayPlateCellsFormset(self.request.POST)
@@ -1531,17 +1555,10 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
     template_name = 'assays/assayplatesetup_add.html'
 
     def get_context_data(self, **kwargs):
-        groups = self.request.user.groups.values_list('id', flat=True)
-        cellsamples = CellSample.objects.filter(
-            group__in=groups
-        ).order_by(
-            '-receipt_date'
-        ).prefetch_related(
-            'cell_type__organ',
-            'supplier',
-            'cell_subtype__cell_type'
-        )
+        cellsamples = get_cell_samples(self.request.user, plate_setup=self.object)
+
         context = super(AssayPlateSetupUpdate, self).get_context_data(**kwargs)
+
         if 'formset' not in context:
             if self.request.POST:
                 context['formset'] = AssayPlateCellsFormset(self.request.POST, instance=self.object)
