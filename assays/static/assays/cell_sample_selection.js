@@ -1,21 +1,21 @@
 // This script was made to prevent redundant code in setup pages
 $(document).ready(function () {
-	// The current interface (in all lowercase, set in corresponding scripts)
-	var current_interface = '';
-	
-	// SENSITIVE AND POTENTIALLY SUBJECT TO CHANGE
-	// Get interface from url
-	if (window.location.href.split('/')[4] == 'assaychipsetup') {
-		current_interface = 'chip';
-	}
-	else {
-		current_interface = 'plate';
-	}
-	
-	// The id of the current id
-	current_cellsample_id = null;
-	
-	// Open and then close dialog so it doesn't get placed in window itself
+    // The current interface (in all lowercase, set in corresponding scripts)
+    var current_interface = '';
+
+    // SENSITIVE AND POTENTIALLY SUBJECT TO CHANGE
+    // Get interface from url
+    if (window.location.href.indexOf('/assaychipsetup/') > -1) {
+        current_interface = 'chip';
+    }
+    else {
+        current_interface = 'plate';
+    }
+
+    // The id of the current id
+    current_cellsample_id = null;
+
+    // Open and then close dialog so it doesn't get placed in window itself
     var dialog = $('#dialog');
     dialog.dialog({
         width: 825,
@@ -30,14 +30,14 @@ $(document).ready(function () {
         }
     });
     dialog.removeProp('hidden');
-    
+
     $(document).on('click', '.open-cellsample-dialog', function (evt) {
-    	current_cellsample_id = this.id.replace(/\D/g,'');
-	    $("#dialog").dialog('open');
-	    // Remove focus
-	    $('.ui-dialog :button').blur();
+        current_cellsample_id = this.id.replace(/\D/g,'');
+        $("#dialog").dialog('open');
+        // Remove focus
+        $('.ui-dialog :button').blur();
     });
-    
+
     $('.cellsample').click(function (evt) {
         var cellsampleId = this.id;
         var selectedInput = $('#id_assay' + current_interface + 'cells_set-' + current_cellsample_id + '-cell_sample');
