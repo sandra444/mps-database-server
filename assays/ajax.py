@@ -402,7 +402,7 @@ def get_readout_data(raw_data, key, percent_control, include_all):
     From POST:
     raw_data - the AssayChipRawData needed to create the JSON
     key - whether this data should be considered by device or by compound
-    percent_control - whether to use percent control
+    percent_control - whether to use percent control (WIP)
     include_all - whether to include all values
     """
 
@@ -429,7 +429,7 @@ def get_readout_data(raw_data, key, percent_control, include_all):
 
         quality = raw.quality
 
-        if value and (include_all or not quality):
+        if value is not None and (include_all or not quality):
             # Get tag for data point
             # If by compound
             if key == 'compound':
