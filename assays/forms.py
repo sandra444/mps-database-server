@@ -22,13 +22,13 @@ group = ('group',)
 # Overwrite options
 OVERWRITE_OPTIONS = forms.ChoiceField(
     choices=(
-        ('keep_conflicting_data', 'Keep Confilicting Data as Replicate'),
+        ('keep_conflicting_data', 'Keep Confilicting Data Unmodified'),
         ('mark_conflicting_data', 'Mark Conflicting Data'),
         ('mark_all_old_data', 'Mark All Old Data'),
         ('delete_conflicting_data', 'Delete Conflicting Data'),
         ('delete_all_old_data', 'Delete All Old Data')
     ),
-    initial='Keep Confilicting Data as Replicate'
+    initial='keep_conflicting_data'
 )
 
 

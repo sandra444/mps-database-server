@@ -181,12 +181,12 @@ $(document).ready(function () {
         parseAndReplace(fileString);
     };
 
-    function get_index_for_value(field, time, assay, replicate) {
+    function get_index_for_value(field, time, assay, update_number) {
         var full_index = {
             'field': field,
             'time': time,
             'assay': assay,
-            'replicate': replicate
+            'update_number': update_number
         };
 
         return JSON.stringify(full_index);
@@ -234,11 +234,11 @@ $(document).ready(function () {
 
             var quality = $.trim(line[7]);
             var notes = $.trim(line[8]);
-            var replicate = $.trim(line[9]);
+            var update_number = $.trim(line[9]);
 
-            // Add replicate to notes if this is a replicate (i.e. replicate > 1)
-            if (replicate && replicate != 0) {
-                notes += '\nReplicate #' + replicate;
+            // Add update_number to notes if this is a replicate (i.e. update_number > 0)
+            if (update_number && update_number != 0) {
+                notes += '\nUpdate #' + update_number;
             }
 
             // Index in data
@@ -296,7 +296,7 @@ $(document).ready(function () {
             // QC inputs NAME begin with "QC_"
             // QC input IDS are the row index (for plotting accurately)
             else {
-                index = get_index_for_value(object, time, assay, replicate);
+                index = get_index_for_value(object, time, assay, update_number);
                 table += "<th><input size='4' class='quality text-danger' id='" + i + "' name='" + index + "' value='" + quality + "'></th>";
                 // Increment the current index
                 current_index += 1;
@@ -459,7 +459,7 @@ $(document).ready(function () {
         }
     };
 
-    // The data in question as a Object pairing 'time|time_unit|assay|object|value_unit|replicate
+    // The data in question as a Object pairing 'time|time_unit|assay|object|value_unit|update_number
     var data = {};
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');

@@ -533,9 +533,9 @@ def get_qc_status_plate(form):
             # Assay needs to be case insensitive
             assay = values.get('assay').upper()
             feature = values.get('feature')
-            replicate = int(values.get('replicate'))
+            update_number = int(values.get('update_number'))
             # Combine values in a tuple for index
-            index = (row, col, time, assay, feature, replicate)
+            index = (row, col, time, assay, feature, update_number)
             # Set to val
             qc_status.update({index: val[:19]})
 
@@ -558,7 +558,7 @@ def modify_qc_status_plate(current_plate_readout, form):
         'assay__assay_id__assay_name',
         'assay__assay_id__assay_short_name',
         'assay__feature',
-        'replicate',
+        'update_number',
         'quality',
         'notes'
     )
@@ -628,7 +628,7 @@ def validate_plate_readout_file(
     query_list = []
     readout_data = []
 
-    # Current data to check for replicates
+    # Current data to check for update_numbers
     current_data = {}
 
     readouts = []
@@ -862,8 +862,8 @@ def validate_plate_readout_file(
                             if overwrite_option in ['delete_conflicting_data', 'delete_all_old_data']:
                                 number_conflicting_entries = 0
 
-                            # Discern what replicate this is (default 1)
-                            replicate = 0 + number_conflicting_entries + number_duplicate_current
+                            # Discern what update_number this is (default 0)
+                            update_number = 0 + number_conflicting_entries + number_duplicate_current
 
                             if save:
                                 apra_id = assay_feature_to_apra_id.get((assay_model_id, feature))
@@ -877,12 +877,12 @@ def validate_plate_readout_file(
                                     time,
                                     quality,
                                     notes,
-                                    replicate
+                                    update_number
                                 ))
 
                             else:
-                                if replicate:
-                                    notes = notes + '\nReplicate #' + unicode(replicate)
+                                if update_number:
+                                    notes = notes + '\nUpdate #' + unicode(update_number)
 
                                 readout_data.append({
                                     # Tentative may become useful soon
@@ -900,7 +900,7 @@ def validate_plate_readout_file(
                                     'feature': feature,
                                     'quality': quality,
                                     'notes': notes,
-                                    'replicate': replicate
+                                    'update_number': update_number
                                 })
 
                             # Add to current_data
@@ -1088,8 +1088,8 @@ def validate_plate_readout_file(
                     if overwrite_option in ['delete_conflicting_data', 'delete_all_old_data']:
                         number_conflicting_entries = 0
 
-                    # Discern what replicate this is (default 1)
-                    replicate = 0 + number_conflicting_entries + number_duplicate_current
+                    # Discern what update_number this is (default 0)
+                    update_number = 0 + number_conflicting_entries + number_duplicate_current
 
                     if save:
                         apra_id = assay_feature_to_apra_id.get((assay_model_id, feature))
@@ -1103,12 +1103,12 @@ def validate_plate_readout_file(
                             time,
                             quality,
                             notes,
-                            replicate
+                            update_number
                         ))
 
                     else:
-                        if replicate:
-                            notes = notes + '\nReplicate #' + unicode(replicate)
+                        if update_number:
+                            notes = notes + '\nUpdate #' + unicode(update_number)
 
                         readout_data.append({
                             # Tentative may become useful soon
@@ -1126,7 +1126,7 @@ def validate_plate_readout_file(
                             'feature': feature,
                             'quality': quality,
                             'notes': notes,
-                            'replicate': replicate
+                            'update_number': update_number
                         })
 
                     # Add to current_data
@@ -1150,7 +1150,7 @@ def validate_plate_readout_file(
         cursor = connection.cursor()
         # The generic query
         query = ''' INSERT INTO "assays_assayreadout"
-              ("assay_device_readout_id", "assay_id", "row", "column", "value", "elapsed_time", "quality", "notes", "replicate")
+              ("assay_device_readout_id", "assay_id", "row", "column", "value", "elapsed_time", "quality", "notes", "update_number")
               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'''
 
         cursor.executemany(query, query_list)
@@ -1339,9 +1339,9 @@ def get_qc_status_chip(form):
             time = float(values.get('time'))
             # Assay needs to be case insensitive
             assay = values.get('assay').upper()
-            replicate = int(values.get('replicate'))
+            update_number = int(values.get('update_number'))
             # Combine values in a tuple for index
-            index = (object_field, time, assay, replicate)
+            index = (object_field, time, assay, update_number)
             # Set to stripped val
             qc_status.update({index: val.strip()[:19]})
 
@@ -1363,7 +1363,7 @@ def modify_qc_status_chip(current_chip_readout, form):
         'elapsed_time',
         'assay_id__assay_id__assay_name',
         'assay_id__assay_id__assay_short_name',
-        'replicate',
+        'update_number',
         'quality',
         'notes'
     )
@@ -1677,8 +1677,8 @@ def validate_chip_readout_file(
             if overwrite_option in ['delete_conflicting_data', 'delete_all_old_data']:
                 number_conflicting_entries = 0
 
-            # Discern what replicate this is (default 1)
-            replicate = 0 + number_conflicting_entries + number_duplicate_current
+            # Discern what update_number this is (default 0)
+            update_number = 0 + number_conflicting_entries + number_duplicate_current
 
             if save:
                 query_list.append((
@@ -1689,7 +1689,7 @@ def validate_chip_readout_file(
                     time,
                     quality,
                     notes,
-                    replicate
+                    update_number
                 ))
             else:
                 readout_data.append(
@@ -1701,7 +1701,7 @@ def validate_chip_readout_file(
                         elapsed_time=time,
                         quality=quality,
                         notes=notes,
-                        replicate=replicate
+                        update_number=update_number
                     )
                 )
 
@@ -1726,7 +1726,7 @@ def validate_chip_readout_file(
         cursor = connection.cursor()
         # The generic query
         query = ''' INSERT INTO "assays_assaychiprawdata"
-              ("assay_chip_id_id", "assay_id_id", "field_id", "value", "elapsed_time", "quality", "notes", "replicate")
+              ("assay_chip_id_id", "assay_id_id", "field_id", "value", "elapsed_time", "quality", "notes", "update_number")
               VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'''
 
         cursor.executemany(query, query_list)
@@ -2015,7 +2015,6 @@ def parse_file_and_save(current_file, created_by, study_id, overwrite_option, in
                 save_plate_files(datalist, current_file, study_id, overwrite_option, readout=readout, form=form)
 
             # acquire_valid_data(datalist, sheet_type, chip_data, tabular_data, block_data, headers=headers)
-
 
     # Otherwise, if csv
     else:

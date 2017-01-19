@@ -157,8 +157,8 @@ def fetch_readout(request):
     for readout in readouts:
         # TODO DRY DICTATES THAT I SHOULDN'T JUST COPY THIS TO UTILS
         notes = readout.notes
-        if readout.replicate:
-            notes = notes + '\nReplicate #' + unicode(readout.replicate)
+        if readout.update_number:
+            notes = notes + '\nUpdate #' + unicode(readout.update_number)
 
         data.append({
             'row': readout.row,
@@ -172,7 +172,7 @@ def fetch_readout(request):
             'feature': readout.assay.feature,
             'quality': readout.quality,
             'notes': notes,
-            'replicate': readout.replicate
+            'update_number': readout.update_number
         })
 
     return HttpResponse(json.dumps(data),
@@ -327,7 +327,7 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
             'assay_id__assay_id__assay_short_name',
             'elapsed_time',
             'quality',
-            'replicate'
+            'update_number'
         )
 
     csv = ''
@@ -365,7 +365,7 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         else:
             csv += unicode(raw.quality) + ','
         csv += '"' + unicode(raw.notes) + '"' + ','
-        csv += '"' + unicode(raw.replicate) + '"\n'
+        csv += '"' + unicode(raw.update_number) + '"\n'
 
     return csv
 

@@ -395,11 +395,11 @@ $(document).ready(function () {
         }
     };
 
-    function get_invalid_id(row, column, assay_feature_selection, time, replicate) {
-        return row + '_' + column + '_' + assay_feature_selection +  '_' + time + '_' + replicate + '_QC';
+    function get_invalid_id(row, column, assay_feature_selection, time, update_number) {
+        return row + '_' + column + '_' + assay_feature_selection +  '_' + time + '_' + update_number + '_QC';
     }
 
-    function get_invalid_name(row_label, column_label, assay_feature_selection, time, replicate) {
+    function get_invalid_name(row_label, column_label, assay_feature_selection, time, update_number) {
         var assay_feature = window.LAYOUT.selection_to_assay_feature[assay_feature_selection];
         var assay = assay_feature.assay;
         var feature = assay_feature.feature;
@@ -413,13 +413,13 @@ $(document).ready(function () {
             'time': time,
             'assay': assay,
             'feature': feature,
-            'replicate': replicate
+            'update_number': update_number
         };
 
         return JSON.stringify(full_object);
     }
 
-//    window.LAYOUT.set_invalid = function(id, well_id, current_selection, current_time, replicate) {
+//    window.LAYOUT.set_invalid = function(id, well_id, current_selection, current_time, update_number) {
 //        var invalid_id = get_invalid_id(id, current_selection, current_time);
 //        var invalid_name = get_invalid_name(id, current_selection, current_time);
 //
@@ -450,8 +450,8 @@ $(document).ready(function () {
 //        window.LAYOUT.build_heatmap();
 //    };
 
-    window.LAYOUT.set_invalid = function(invalid_id, assay_feature_time, well_id, replicate) {
-        var invalid_key = well_id + '_' + replicate;
+    window.LAYOUT.set_invalid = function(invalid_id, assay_feature_time, well_id, update_number) {
+        var invalid_key = well_id + '_' + update_number;
         if (window.LAYOUT.invalid[assay_feature_time][invalid_key]) {
             window.LAYOUT.invalid[assay_feature_time][invalid_key] = false;
             $(invalid_id).children('input').val('');
@@ -473,12 +473,12 @@ $(document).ready(function () {
             var split_id = this.id.split('_');
 
             var well_id = '#' + split_id[0] + '_' + split_id[1];
-            var replicate = split_id[split_id.length-2];
+            var update_number = split_id[split_id.length-2];
 
             // Add class as necessary
             $(invalid_id).toggleClass('invalid');
 
-            window.LAYOUT.set_invalid(invalid_id, assay_feature_time, well_id, replicate);
+            window.LAYOUT.set_invalid(invalid_id, assay_feature_time, well_id, update_number);
             // THIS MAY CAUSE ISSUES, INVESTIGATE
             window.LAYOUT.build_heatmap();
         }
@@ -556,8 +556,8 @@ $(document).ready(function () {
         // Reset invalid
         window.LAYOUT.invalid = {};
 
-        // Sort by replicate
-        data = _.sortBy(data, function(o) { return o.replicate; });
+        // Sort by update_number
+        data = _.sortBy(data, function(o) { return o.update_number; });
 
         $.each(data, function(index, well_data) {
             var value = well_data.value;
@@ -570,7 +570,7 @@ $(document).ready(function () {
             var assay = well_data.assay;
             var quality = well_data.quality;
             var notes = well_data.notes;
-            var replicate = well_data.replicate;
+            var update_number = well_data.update_number;
 
             var row_label = window.LAYOUT.row_labels[well_data.row];
             var column_label = window.LAYOUT.column_labels[well_data.column];
@@ -592,8 +592,8 @@ $(document).ready(function () {
             // Ensure unaltered assay and feature are available
             window.LAYOUT.selection_to_assay_feature[assay_feature_selection] = {'assay': assay, 'feature': feature};
 
-            var invalid_id = get_invalid_id(row_label, column_label, assay_feature_selection, time, replicate);
-            var invalid_name = get_invalid_name(row_label, column_label, assay_feature_selection, time, replicate);
+            var invalid_id = get_invalid_id(row_label, column_label, assay_feature_selection, time, update_number);
+            var invalid_name = get_invalid_name(row_label, column_label, assay_feature_selection, time, update_number);
 
             // Consider adding lead if people demand a larger font
             var readout = $('<p>')
@@ -616,12 +616,12 @@ $(document).ready(function () {
                 if (!window.LAYOUT.assay_feature_values[assay_feature_time][well_id]) {
                     window.LAYOUT.assay_feature_values[assay_feature_time][well_id] = {};
                 }
-                window.LAYOUT.assay_feature_values[assay_feature_time][well_id][replicate] = parseFloat(value);
+                window.LAYOUT.assay_feature_values[assay_feature_time][well_id][update_number] = parseFloat(value);
             }
             else {
                 window.LAYOUT.assay_feature_values[assay_feature_time] = {};
                 window.LAYOUT.assay_feature_values[assay_feature_time][well_id] = {};
-                window.LAYOUT.assay_feature_values[assay_feature_time][well_id][replicate] = parseFloat(value);
+                window.LAYOUT.assay_feature_values[assay_feature_time][well_id][update_number] = parseFloat(value);
             }
 
 //            var id = row_label + '_' + column_label;
@@ -636,7 +636,7 @@ $(document).ready(function () {
             }
 
             if (quality) {
-                window.LAYOUT.set_invalid('#' + invalid_id, assay_feature_time, well_id, replicate);
+                window.LAYOUT.set_invalid('#' + invalid_id, assay_feature_time, well_id, update_number);
             }
         });
 
@@ -660,9 +660,9 @@ $(document).ready(function () {
             // values = _.omit(values, function(value, key, object) {return _.contains(current_invalid_values, key);});
             var all_valid_values = {};
             for (var current_well in values) {
-                for (var current_replicate in values[current_well]) {
-                    var invalid_key = current_well + '_' + current_replicate;
-                    var current_value = values[current_well][current_replicate];
+                for (var current_update_number in values[current_well]) {
+                    var invalid_key = current_well + '_' + current_update_number;
+                    var current_value = values[current_well][current_update_number];
                     if (!current_invalid_values[invalid_key]) {
                         if (!all_valid_values[current_well]) {
                             all_valid_values[current_well] = [current_value];
