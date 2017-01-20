@@ -4,6 +4,8 @@ from django.db import models
 from microdevices.models import Microdevice, OrganModel, OrganModelProtocol
 from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
 
+import urllib
+
 # TODO MAKE MODEL AND FIELD NAMES MORE CONSISTENT/COHERENT
 
 # TODO DEPRECATED, REMOVE SOON
@@ -933,4 +935,4 @@ class AssayDataUpload(FlaggableModel):
     study = models.ForeignKey(AssayRun)
 
     def __unicode__(self):
-        return self.file_location.split('/')[-1]
+        return urllib.unquote(self.file_location.split('/')[-1])
