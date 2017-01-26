@@ -181,11 +181,12 @@ $(document).ready(function () {
         parseAndReplace(fileString);
     };
 
-    function get_index_for_value(field, time, assay, update_number) {
+    function get_index_for_value(field, time, assay, value_unit, update_number) {
         var full_index = {
             'field': field,
             'time': time,
             'assay': assay,
+            'value_unit': value_unit,
             'update_number': update_number
         };
 
@@ -226,11 +227,11 @@ $(document).ready(function () {
 
             var chip_id = line[0];
             var time = line[1];
-            // var time_unit = line[2];
+            var time_unit = line[2];
             var assay = line[3];
             var object = line[4];
             var value = line[5];
-            // var value_unit = line[6];
+            var value_unit = line[6];
 
             var quality = $.trim(line[7]);
             var notes = $.trim(line[8]);
@@ -296,7 +297,7 @@ $(document).ready(function () {
             // QC inputs NAME begin with "QC_"
             // QC input IDS are the row index (for plotting accurately)
             else {
-                index = get_index_for_value(object, time, assay, update_number);
+                index = get_index_for_value(object, time, assay, value_unit, update_number);
                 table += "<th><input size='4' class='quality text-danger' id='" + i + "' name='" + index + "' value='" + quality + "'></th>";
                 // Increment the current index
                 current_index += 1;

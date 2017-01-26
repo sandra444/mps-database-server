@@ -572,7 +572,7 @@ def modify_qc_status_plate(current_plate_readout, form):
             readout_values[1],
             readout_values[2],
             readout_values[3],
-            readout_values[4],
+            readout_values[4].upper(),
             readout_values[6],
             readout_values[7]
         )
@@ -580,7 +580,7 @@ def modify_qc_status_plate(current_plate_readout, form):
             readout_values[1],
             readout_values[2],
             readout_values[3],
-            readout_values[5],
+            readout_values[5].upper(),
             readout_values[6],
             readout_values[7]
         )
@@ -607,7 +607,7 @@ def modify_qc_status_plate(current_plate_readout, form):
         if long_name_check or short_name_check:
             readout_ids_and_notes.append((id, notes, new_quality))
         # If the quality marker has been removed
-        elif (long_name_empty or short_name_empty) and quality:
+        elif (long_name_empty and short_name_empty) and quality:
             readout_ids_and_notes.append((id, notes, new_quality))
 
     mark_plate_readout_values(readout_ids_and_notes)
@@ -1339,9 +1339,10 @@ def get_qc_status_chip(form):
             time = float(values.get('time'))
             # Assay needs to be case insensitive
             assay = values.get('assay').upper()
+            value_unit = values.get('value_unit')
             update_number = int(values.get('update_number'))
             # Combine values in a tuple for index
-            index = (object_field, time, assay, update_number)
+            index = (object_field, time, assay, value_unit, update_number)
             # Set to stripped val
             qc_status.update({index: val.strip()[:19]})
 
@@ -1365,7 +1366,8 @@ def modify_qc_status_chip(current_chip_readout, form):
         'assay_id__assay_id__assay_short_name',
         'update_number',
         'quality',
-        'notes'
+        'notes',
+        'assay_id__readout_unit__unit'
     )
 
     # Get QC status for each line
@@ -1376,13 +1378,15 @@ def modify_qc_status_chip(current_chip_readout, form):
         index_long = (
             readout_values[1],
             readout_values[2],
-            readout_values[3],
+            readout_values[3].upper(),
+            readout_values[8],
             readout_values[5]
         )
         index_short = (
             readout_values[1],
             readout_values[2],
-            readout_values[4],
+            readout_values[4].upper(),
+            readout_values[8],
             readout_values[5]
         )
 
@@ -1408,7 +1412,7 @@ def modify_qc_status_chip(current_chip_readout, form):
         if long_name_check or short_name_check:
             readout_ids_and_notes.append((id, notes, new_quality))
         # If the quality marker has been removed
-        elif (long_name_empty or short_name_empty) and quality:
+        elif (long_name_empty and short_name_empty) and quality:
             readout_ids_and_notes.append((id, notes, new_quality))
 
     mark_chip_readout_values(readout_ids_and_notes)

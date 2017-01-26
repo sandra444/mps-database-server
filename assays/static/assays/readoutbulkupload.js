@@ -237,7 +237,8 @@ $(document).ready(function () {
                 key: current_key,
                 // Tells whether to convert to percent Control
                 percent_control: percent_control,
-                include_all: 'True',
+                // TODO REVISE
+                include_all: $('#show_all').val(),
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
@@ -314,6 +315,19 @@ $(document).ready(function () {
     // Validate file if file selected
     $('#id_bulk_file').change(function() {
         validate_bulk_file();
+    });
+
+    // Trigger on change in show all (TO BE REVISED)
+    $('#show_all').click(function() {
+        if (this.value) {
+            this.value = '';
+            $(this).text('Show All');
+        }
+        else {
+            this.value = 'True';
+            $(this).text('Show Unmarked Only');
+        }
+        get_readouts();
     });
 });
 
