@@ -816,6 +816,12 @@ class AssayChipCellsInline(admin.TabularInline):
         css = {"all": ("css/hide_admin_original.css",)}
 
 
+class AssayCompoundInstanceInline(admin.TabularInline):
+    model = AssayCompoundInstance
+    exclude = []
+    extra = 0
+
+
 class AssayChipSetupAdmin(LockableAdmin):
     """Admin for Chip Setup"""
     # TIMEPOINT readouts from ORGAN CHIPS
@@ -912,7 +918,7 @@ class AssayChipSetupAdmin(LockableAdmin):
     )
 
     actions = ['update_fields']
-    inlines = [AssayChipCellsInline]
+    inlines = [AssayChipCellsInline, AssayCompoundInstanceInline]
 
     def response_add(self, request, obj):
         """If save and add another, have same response as save and continue"""

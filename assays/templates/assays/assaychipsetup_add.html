@@ -3,9 +3,10 @@
 
 {% block load %}
     <script src="{% static "js/inline_add.js" %}"></script>
+    <script src="{% static "js/datepicker.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "assays/cell_sample_selection.js" %}"></script>
-    <script src="{% static "assays/assaychipsetup_add.js" %}"></script>
+<script src="{% static "assays/assaychipsetup_add.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
 {% endblock %}
 
@@ -212,6 +213,7 @@
         {% endfor %}
     {% endif %}
 
+    <div class="text-danger lead">THIS COMPOUND SECTION IS DEPRECATED AND WILL BE REMOVED<br>SEE BELOW FOR CORRECT INTERFACE</div>
     {% if form.non_field_errors %}
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -280,11 +282,11 @@
         </div>
     </div>
 
-    {{ formset.management_form }}
-    <legend>Cell Samples</legend>
+    {{ compound_formset.management_form }}
+    <legend>Compounds</legend>
 
-    {% if formset.errors %}
-        {% for dict in formset.errors %}
+    {% if compound_formset.errors %}
+        {% for dict in compound_formset.errors %}
             {% for key,value in dict.items %}
                 {% if key %}
                     <div class="alert alert-danger" role="alert">
@@ -297,11 +299,143 @@
         {% endfor %}
     {% endif %}
 
-    {% if formset.non_form_errors %}
+    {% if compound_formset.non_form_errors %}
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
             <span class="sr-only">Error:</span>
-            {{ formset.non_form_errors }}
+            {{ compound_formset.non_form_errors }}
+        </div>
+    {% endif %}
+
+    <p>
+        Existing suppliers, lots, and receipt dates will be listed as suggestions. Please only modify when necessary.
+    </p>
+    <a id="add_button-assaycompoundinstance_set" class="btn btn-success" role="button">Add Compounds</a>
+
+    <table class="table table-striped table-condensed table-bordered inlines" id="assaycompoundinstance_set-group" name="compounds">
+{#        <thead>#}
+{#            <tr>#}
+{#            <td>#}
+{#                <table>#}
+{#                <tr>#}
+{#                    <th>Compound</th>#}
+{#                    <th>Supplier</th>#}
+{#                    <th>Lot</th>#}
+{#                    <th>Reciept Date</th>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <th>Concentration</th>#}
+{#                    <th>Concentration Unit</th>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <th>Start Time</th>#}
+{#                    <th>Start Time Unit</th>#}
+{#                    <th>Duration</th>#}
+{#                    <th>Duration Unit</th>#}
+{#                    <th>Delete</th>#}
+{#                </tr>#}
+{#            </table>#}
+{#            </td>#}
+{#            </tr>#}
+{#        </thead>#}
+        <tbody>
+            {% for compound in compound_formset %}
+                <tr class="inline compound-inline" id="compounds-{{ forloop.counter0 }}">
+                <td>
+                <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
+                    <tr>
+                        <th>Compound</th>
+                        <th>Supplier</th>
+                        <th>Lot</th>
+                        <th>Reciept Date</th>
+                    </tr>
+                    <tr>
+                        {# Hidden input for Update (need id to associate) #}
+                        {% if compound.id.value %}
+                        <td class="original" hidden>
+                            <input id="id_assaycompoundinstance_set-{{ forloop.counter0 }}-id" name="assaycompoundinstance_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ compound.id.value }}">
+                        </td>
+                        {% endif %}
+                        <td hidden>
+                            {# Hidden foreign key fields #}
+                            {{ compound.compound_instance }}
+                        </td>
+                        <td>{{ compound.compound }}</td>
+                        <td>{{ compound.supplier_text }}</td>
+                        <td>{{ compound.lot_text }}</td>
+                        <td>{{ compound.receipt_date }}</td>
+                    </tr>
+                </table>
+                <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
+                    <tr>
+                        <th>Concentration</th>
+                        <th>Concentration Unit</th>
+                    </tr>
+                    <tr>
+                        <td>{{ compound.concentration }}</td>
+                        <td>{{ compound.concentration_unit }}</td>
+                    </tr>
+                </table>
+                <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
+                    <tr>
+                        <th class="bg-success" colspan="3">Addition Time</th>
+                        <th class="bg-info" colspan="3">Duration</th>
+                    </tr>
+                    <tr>
+                        <th class="bg-success">Day</th>
+                        <th class="bg-success">Hour</th>
+                        <th class="bg-success">Minute</th>
+                        <th class="bg-info">Day</th>
+                        <th class="bg-info">Hour</th>
+                        <th class="bg-info">Minute</th>
+                        <th class="bg-danger">Delete</th>
+                    </tr>
+                    <tr>
+                        <td hidden>
+                            {{ compound.addition_time }}
+                            {{ compound.duration }}
+                        </td>
+                        <td class="bg-success">{{ compound.addition_time_day }}</td>
+                        <td class="bg-success">{{ compound.addition_time_hour }}</td>
+                        <td class="bg-success">{{ compound.addition_time_minute }}</td>
+                        <td class="bg-info">{{ compound.duration_day }}</td>
+                        <td class="bg-info">{{ compound.duration_hour }}</td>
+                        <td class="bg-info">{{ compound.duration_minute }}</td>
+{#                        <td>{{ compound.start_time }}</td>#}
+{#                        <td>{{ compound.start_time_unit }}</td>#}
+{#                        <td>{{ compound.duration }}</td>#}
+{#                        <td>{{ compound.duration_unit }}</td>#}
+                        <td class="bg-danger">{{ compound.DELETE }}</td>
+                    </tr>
+                </table>
+                </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {{ cell_formset.management_form }}
+    <legend>Cell Samples</legend>
+
+    {% if cell_formset.errors %}
+        {% for dict in cell_formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    {% if cell_formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ cell_formset.non_form_errors }}
         </div>
     {% endif %}
 
@@ -327,8 +461,8 @@
             </tr>
         </thead>
         <tbody>
-            {% for cell in formset %}
-                <tr class="inline" id="results-{{ forloop.counter0 }}">
+            {% for cell in cell_formset %}
+                <tr class="inline" id="cells-{{ forloop.counter0 }}">
                     {# Hidden input for Update (need id to associate) #}
                     {% if cell.id.value %}
                     <td class="original" hidden>

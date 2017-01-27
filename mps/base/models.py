@@ -133,4 +133,10 @@ def save_forms_with_tracking(self, form, formset=None, update=False):
         self.object.modified_by = self.object.created_by = self.request.user
     self.object.save()
     if formset:
-        formset.save()
+        # If a list of formsets, save each
+        if type(formset) == list:
+            for current_formset in formset:
+                current_formset.save()
+        # Otherwise, just save the one
+        else:
+            formset.save()

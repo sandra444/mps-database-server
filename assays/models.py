@@ -184,29 +184,56 @@ class AssayWell(models.Model):
 
 class AssayWellTimepoint(models.Model):
     """Timepoints for PLATE wells"""
-
     assay_layout = models.ForeignKey(AssayLayout)
     timepoint = models.FloatField(default=0)
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
 
 
-class AssayWellCompound(models.Model):
-    """Compound for PLATE wells"""
-
+class AssayWellLabel(models.Model):
+    """Arbitrary string label for PLATE wells"""
     assay_layout = models.ForeignKey(AssayLayout)
-    compound = models.ForeignKey('compounds.Compound')
-    concentration = models.FloatField(default=0)
-    concentration_unit = models.ForeignKey(PhysicalUnits)
+    label = models.CharField(max_length=150)
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
 
 
-class AssayWellLabel(models.Model):
-    """Arbitrary string label for PLATE wells"""
+class AssayCompoundInstance(models.Model):
+    """An instance of a compound used in an assay; used as an inline"""
+    # Stop-gap, subject to change
+    chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True)
 
+    # COMPOUND INSTANCE IS REQUIRED, however null=True was done to avoid a submission issue
+    compound_instance = models.ForeignKey('compounds.CompoundInstance', null=True, blank=True)
+    concentration = models.FloatField()
+    concentration_unit = models.ForeignKey(
+        'assays.PhysicalUnits',
+        verbose_name='Concentration Unit'
+    )
+
+    # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
+    addition_time = models.FloatField(blank=True)
+    # RENAMED
+    # start_time = models.FloatField()
+    # DECIDED AGAINST
+    # start_time_unit = models.ForeignKey(PhysicalUnits, related_name='start_time_unit')
+
+    # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
+    duration = models.FloatField(blank=True)
+    # DECIDED AGAINST
+    # duration_unit = models.ForeignKey(PhysicalUnits, related_name='duration_time_unit')
+
+
+class AssayWellCompound(models.Model):
+    """Compound for PLATE wells"""
     assay_layout = models.ForeignKey(AssayLayout)
-    label = models.CharField(max_length=150)
+    # TO BE DEPRECATED: USE AssayCompoundInstance instead
+    compound = models.ForeignKey('compounds.Compound')
+    assay_compound_instance = models.ForeignKey(AssayCompoundInstance, blank=True)
+    # TO BE DEPRECATED: USE AssayCompoundInstance instead
+    concentration = models.FloatField(default=0)
+    # TO BE DEPRECATED: USE AssayCompoundInstance instead
+    concentration_unit = models.ForeignKey(PhysicalUnits)
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
 

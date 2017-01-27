@@ -218,4 +218,12 @@ $(document).ready(function() {
     device.trigger('change');
     organ_model.trigger('change');
     protocol.trigger('change');
+
+    // Iterate over every compound inline and apply correct data
+    // NOTE SUBJECT TO CHANGE, CAN ADD INITIAL VIA FORMSET
+//    $('.compound-inline').each(function() {
+//    });
+
+    // Add autocomplete to supplier and lot
+
 });

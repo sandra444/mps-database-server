@@ -21,7 +21,7 @@ FIELDS = {
     'chemblId': 'chemblid',
     'knownDrug': 'known_drug',
     # Deprecated
-    #'medChemFriendly': 'medchem_friendly',
+    # 'medChemFriendly': 'medchem_friendly',
     'molecularFormula': 'molecular_formula',
     'molecularWeight': 'molecular_weight',
     'numRo5Violations': 'ro5_violations',
@@ -46,7 +46,7 @@ def chembl_compound(chemblid):
 
 
 class Compound(LockableModel):
-    #compound_id = AutoField(primary_key=True)
+    # compound_id = AutoField(primary_key=True)
     # The name, rather than the chemblid and/or inchikey, is unique
     name = models.CharField(
         max_length=200, unique=True,
@@ -218,7 +218,7 @@ class Compound(LockableModel):
         help_text="Summary of post-marketing findings")
 
     class Meta(object):
-        ordering = ('name', )
+        ordering = ('name',)
 
     def __unicode__(self):
         return u'{0}'.format(self.name)
@@ -322,7 +322,7 @@ class CompoundSummary(models.Model):
 class CompoundProperty(models.Model):
     class Meta(object):
         # Remove restriction
-        #unique_together = [('compound', 'property_type')]
+        # unique_together = [('compound', 'property_type')]
         verbose_name = 'Compound Property'
         verbose_name_plural = 'Compound Properties'
 
@@ -336,8 +336,8 @@ class CompoundProperty(models.Model):
         return unicode(self.value)
 
 
-# # Should these be treated separately from bioactivity targets?
-# # Whatever the case, the following information was requested:
+# Should these be treated separately from bioactivity targets?
+# Whatever the case, the following information was requested:
 class CompoundTarget(models.Model):
     # Must link back to a compound
     compound = models.ForeignKey(Compound)
@@ -349,3 +349,25 @@ class CompoundTarget(models.Model):
     pharmacological_action = models.CharField(max_length=20)
     organism = models.CharField(max_length=150)
     type = models.CharField(max_length=30)
+
+
+# Should this be trackable?
+class CompoundSupplier(LockableModel):
+    """Compound suppliers so that we can track where compounds come from"""
+    name = models.CharField(max_length=255)
+
+
+# TODO Add uniqueness contraints
+class CompoundInstance(LockableModel):
+    """An instance of a compound that includes its supplier and lot number"""
+    class Meta(object):
+        unique_together = [('compound', 'supplier', 'lot', 'receipt_date')]
+
+    compound = models.ForeignKey(Compound)
+    # Required, though N/A should be an option
+    supplier = models.ForeignKey(CompoundSupplier, blank=True)
+    # Required, though N/A should be an option
+    # It is possible that the lot_number will not be solely numeric
+    lot = models.CharField(max_length=255)
+    # Receipt date
+    receipt_date = models.DateTimeField(null=True, blank=True)

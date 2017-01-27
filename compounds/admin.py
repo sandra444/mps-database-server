@@ -24,6 +24,12 @@ class CompoundTargetInline(admin.TabularInline):
     extra = 0
 
 
+class CompoundInstanceInline(admin.TabularInline):
+    model = CompoundInstance
+    exclude = []
+    extra = 0
+
+
 # SUBJECT TO DEPRECATION
 class CompoundSummaryInline(admin.TabularInline):
     """Admin Inline for Compound Summaries"""
@@ -89,7 +95,7 @@ class CompoundAdmin(LockableAdmin):
                                               "space or a new line.")
     # Compound summary and compound properties are deprecated
     #inlines = [CompoundSummaryInline, CompoundPropertyInline, CompoundTargetInline]
-    inlines = [CompoundTargetInline]
+    inlines = [CompoundTargetInline, CompoundInstanceInline]
 
     save_on_top = True
     list_per_page = 300
@@ -302,3 +308,74 @@ class PropertyTypeAdmin(LockableAdmin):
 
 
 admin.site.register(PropertyType, PropertyTypeAdmin)
+
+
+class CompoundSupplierAdmin(LockableAdmin):
+    """Admin for Property Type"""
+    save_on_top = True
+
+    search_fields = ['name']
+    list_filter = ['name']
+
+    list_display = (
+        'name',
+    )
+
+    readonly_fields = ('created_by', 'created_on',
+                       'modified_by', 'modified_on',)
+
+    fieldsets = (
+        ("Property Data", {
+            'fields': (
+                'name',
+            )
+        }),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }),
+    )
+
+
+admin.site.register(CompoundSupplier, CompoundSupplierAdmin)
+
+
+class CompoundInstanceAdmin(LockableAdmin):
+    """Admin for Property Type"""
+    save_on_top = True
+
+    list_display = (
+        'compound',
+        'supplier',
+        'lot',
+        'receipt_date'
+    )
+
+    readonly_fields = ('created_by', 'created_on',
+                       'modified_by', 'modified_on',)
+
+    fieldsets = (
+        ("Property Data", {
+            'fields': (
+                'compound',
+                'supplier',
+                'lot',
+                'receipt_date'
+            )
+        }),
+        ('Change Tracking', {
+            'fields': (
+                'locked',
+                ('created_by', 'created_on'),
+                ('modified_by', 'modified_on'),
+                ('signed_off_by', 'signed_off_date'),
+            )
+        }),
+    )
+
+
+admin.site.register(CompoundInstance, CompoundInstanceAdmin)

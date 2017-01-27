@@ -654,6 +654,14 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
         )
 
 
+AssayCompoundInstanceFormset = inlineformset_factory(
+    AssayChipSetup,
+    AssayCompoundInstance,
+    formset=AssayCompoundInstanceInlineFormset,
+    extra=1,
+    exclude=[],
+)
+
 AssayChipCellsFormset = inlineformset_factory(
     AssayChipSetup,
     AssayChipCells,
@@ -671,9 +679,9 @@ def get_cell_samples(user, chip_setup=None, plate_setup=None):
     """Returns the cell samples to be listed in setup views
 
     Params:
-    user_groups -
-    chip_setup -
-    plate_setup -
+    user - the user in the request
+    chip_setup - the chip setup in question
+    plate_setup - the plate setup in question
     """
     user_groups = user.groups.values_list('id', flat=True)
 
@@ -744,15 +752,18 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
 
         context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
 
-        if 'formset' not in context:
+        if 'cell_formset' not in context or 'compound_formset' not in context:
             if self.request.POST:
-                context['formset'] = AssayChipCellsFormset(self.request.POST)
+                context['cell_formset'] = AssayChipCellsFormset(self.request.POST)
+                context['compound_formset'] = AssayCompoundInstanceFormset(self.request.POST)
             elif self.request.GET.get('clone', ''):
                 pk = int(self.request.GET.get('clone', ''))
                 clone = get_object_or_404(AssayChipSetup, pk=pk)
-                context['formset'] = AssayChipCellsFormset(instance=clone)
+                context['cell_formset'] = AssayChipCellsFormset(instance=clone)
+                context['compound_formset'] = AssayCompoundInstanceFormset(instance=clone)
             else:
-                context['formset'] = AssayChipCellsFormset()
+                context['cell_formset'] = AssayChipCellsFormset()
+                context['compound_formset'] = AssayCompoundInstanceFormset()
 
         # Cellsamples will always be the same
         context['cellsamples'] = cellsamples
@@ -760,11 +771,13 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        formset = AssayChipCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
+        cell_formset = AssayChipCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
+        compound_formset = AssayCompoundInstanceFormset(self.request.POST, instance=form.instance, save_as_new=True)
         # get user via self.request.user
-        if form.is_valid() and formset.is_valid():
+        if form.is_valid() and cell_formset.is_valid() and compound_formset.is_valid():
             data = form.cleaned_data
-            save_forms_with_tracking(self, form, formset=formset, update=False)
+            # Note that both formsets are passed
+            save_forms_with_tracking(self, form, formset=[cell_formset, compound_formset], update=False)
             if data['another']:
                 form = self.form_class(
                     instance=self.object,
@@ -774,7 +787,12 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            # Note that both formsets are passed
+            return self.render_to_response(self.get_context_data(
+                form=form,
+                cell_formset=cell_formset,
+                compound_formset=compound_formset
+            ))
 
 
 class AssayChipSetupDetail(DetailRedirectMixin, DetailView):
@@ -794,11 +812,13 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         context = super(AssayChipSetupUpdate, self).get_context_data(**kwargs)
 
-        if 'formset' not in context:
+        if 'cell_formset' not in context or 'compound_formset' not in context:
             if self.request.POST:
-                context['formset'] = AssayChipCellsFormset(self.request.POST, instance=self.object)
+                context['cell_formset'] = AssayChipCellsFormset(self.request.POST, instance=self.object)
+                context['compound_formset'] = AssayCompoundInstanceFormset(self.request.POST, instance=self.object)
             else:
-                context['formset'] = AssayChipCellsFormset(instance=self.object)
+                context['cell_formset'] = AssayChipCellsFormset(instance=self.object)
+                context['compound_formset'] = AssayCompoundInstanceFormset(instance=self.object)
 
         context['cellsamples'] = cellsamples
         context['update'] = True
@@ -806,13 +826,19 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        formset = AssayChipCellsFormset(self.request.POST, instance=form.instance)
+        cell_formset = AssayChipCellsFormset(self.request.POST, instance=form.instance)
+        compound_formset = AssayCompoundInstanceFormset(self.request.POST, instance=form.instance)
 
-        if form.is_valid() and formset.is_valid():
-            save_forms_with_tracking(self, form, formset=formset, update=True)
+        if form.is_valid() and cell_formset.is_valid() and compound_formset.is_valid():
+            # Notice that both formsets are added
+            save_forms_with_tracking(self, form, formset=[cell_formset, compound_formset], update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(
+                form=form,
+                cell_formset=cell_formset,
+                compound_formset=compound_formset
+            ))
 
 
 class AssayChipSetupDelete(CreatorOrAdminRequiredMixin, DeleteView):
