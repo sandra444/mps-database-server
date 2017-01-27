@@ -395,7 +395,7 @@ $(document).ready(function () {
         }
     };
 
-    function get_invalid_id(row, column, assay_feature_selection, time, update_number) {
+    function get_invalid_index(row, column, assay_feature_selection, time, update_number) {
         return row + '_' + column + '_' + assay_feature_selection +  '_' + time + '_' + update_number + '_QC';
     }
 
@@ -450,15 +450,20 @@ $(document).ready(function () {
 //        window.LAYOUT.build_heatmap();
 //    };
 
-    window.LAYOUT.set_invalid = function(invalid_id, assay_feature_time, well_id, update_number) {
+    window.LAYOUT.set_invalid = function(invalid_index, assay_feature_time, well_id, update_number) {
+        var invalid_selected = $('p[data-invalid-index="' + invalid_index + '"]');
+
+        // Add class as necessary
+        invalid_selected.toggleClass('invalid');
+
         var invalid_key = well_id + '_' + update_number;
         if (window.LAYOUT.invalid[assay_feature_time][invalid_key]) {
             window.LAYOUT.invalid[assay_feature_time][invalid_key] = false;
-            $(invalid_id).children('input').val('');
+            invalid_selected.children('input').val('');
         }
         else {
             window.LAYOUT.invalid[assay_feature_time][invalid_key] = true;
-            $(invalid_id).children('input').val('X');
+            invalid_selected.children('input').val('X');
         }
     };
 
@@ -468,17 +473,14 @@ $(document).ready(function () {
             var current_selection = assay_select.val();
             var current_time = time_select.val();
             var assay_feature_time = current_selection + '_' + current_time;
-            var invalid_id = '#' + this.id;
 
-            var split_id = this.id.split('_');
+            var invalid_index = $(this).attr('data-invalid-index');
+            var split_index = invalid_index.split('_');
 
-            var well_id = '#' + split_id[0] + '_' + split_id[1];
-            var update_number = split_id[split_id.length-2];
+            var well_id = '#' + split_index[0] + '_' + split_index[1];
+            var update_number = split_index[split_index.length-2];
 
-            // Add class as necessary
-            $(invalid_id).toggleClass('invalid');
-
-            window.LAYOUT.set_invalid(invalid_id, assay_feature_time, well_id, update_number);
+            window.LAYOUT.set_invalid(invalid_index, assay_feature_time, well_id, update_number);
             // THIS MAY CAUSE ISSUES, INVESTIGATE
             window.LAYOUT.build_heatmap();
         }
@@ -499,10 +501,12 @@ $(document).ready(function () {
 
         if (current_invalid) {
             $.each(current_invalid, function (invalid_key, invalid) {
-                var split_key = invalid_key.split('_');
-                var invalid_id = split_key[0] + '_' + split_key[1] + '_' + assay_feature_time + '_' + split_key[2] + '_QC';
+                // Remove #
+                var split_key = invalid_key.substring(1);
+                split_key = split_key.split('_');
+                var invalid_index = get_invalid_index(split_key[0], split_key[1], current_selection, current_time, split_key[2]);
                 if(invalid) {
-                    $(invalid_id).addClass('invalid');
+                    $('p[data-invalid-index="' + invalid_index + '"]').addClass('invalid');
                 }
             });
         }
@@ -592,12 +596,12 @@ $(document).ready(function () {
             // Ensure unaltered assay and feature are available
             window.LAYOUT.selection_to_assay_feature[assay_feature_selection] = {'assay': assay, 'feature': feature};
 
-            var invalid_id = get_invalid_id(row_label, column_label, assay_feature_selection, time, update_number);
+            var invalid_index = get_invalid_index(row_label, column_label, assay_feature_selection, time, update_number);
             var invalid_name = get_invalid_name(row_label, column_label, assay_feature_selection, time, update_number);
 
             // Consider adding lead if people demand a larger font
             var readout = $('<p>')
-                .attr('id', invalid_id)
+                .attr('data-invalid-index', invalid_index)
                 .addClass('value')
                 .attr('title', notes)
                 .attr('data-assay-feature-time', assay_feature_time)
@@ -636,7 +640,7 @@ $(document).ready(function () {
             }
 
             if (quality) {
-                window.LAYOUT.set_invalid('#' + invalid_id, assay_feature_time, well_id, update_number);
+                window.LAYOUT.set_invalid(invalid_index, assay_feature_time, well_id, update_number);
             }
         });
 

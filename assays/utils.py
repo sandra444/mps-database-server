@@ -607,7 +607,7 @@ def modify_qc_status_plate(current_plate_readout, form):
         if long_name_check or short_name_check:
             readout_ids_and_notes.append((id, notes, new_quality))
         # If the quality marker has been removed
-        elif (long_name_empty and short_name_empty) and quality:
+        elif (long_name_empty or short_name_empty) and quality:
             readout_ids_and_notes.append((id, notes, new_quality))
 
     mark_plate_readout_values(readout_ids_and_notes)
@@ -1412,7 +1412,7 @@ def modify_qc_status_chip(current_chip_readout, form):
         if long_name_check or short_name_check:
             readout_ids_and_notes.append((id, notes, new_quality))
         # If the quality marker has been removed
-        elif (long_name_empty and short_name_empty) and quality:
+        elif (long_name_empty or short_name_empty) and quality:
             readout_ids_and_notes.append((id, notes, new_quality))
 
     mark_chip_readout_values(readout_ids_and_notes)
@@ -1879,9 +1879,6 @@ def mark_plate_readout_values(readout_ids_and_notes, stamp=False):
             notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + notes
             notes = notes[:255]
         quality = readout_id_and_notes[2]
-        # Change quality to X if it is blank currently
-        if not quality:
-            quality = 'X'
         query_list.append((quality, notes, readout_id))
 
     # Execute the queries and close the connection
