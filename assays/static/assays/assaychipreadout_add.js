@@ -13,8 +13,19 @@ $(document).ready(function () {
         }
     }
 
+    function data_format(value, ratio, id) {
+        var format = d3.format(',.2f');
+        if (Math.abs(value) > 100000) {
+            format = d3.format('.2e');
+        }
+        else if (value % 1 === 0){
+            format = d3.format(',d');
+        }
+        return format(value);
+    }
+
     function addChart(id, name, timeUnits, valueUnits) {
-        $('<div id="chart' + id + '" align="right" style="width: 50%;float: right;margin-right: 2.5%;margin-left: -100%px;">')
+        $('<div id="chart' + id + '" align="right" style="width: 44.9%;float: right;margin-right: 0.1%;margin-left: -100%px;">')
             .addClass('chart-container')
             .appendTo('#extra');
 
@@ -38,16 +49,7 @@ $(document).ready(function () {
                             position: 'outer-middle'
                         },
                         tick: {
-                            format: function (value, ratio, id) {
-                                var format = d3.format(',.2f');
-                                if (Math.abs(value) > 100000) {
-                                	format = d3.format('.2e');
-                                }
-                                else if (value % 1 === 0){
-                                	format = d3.format(',d');
-                                }
-                                return format(value);
-                            }
+                            format: data_format
                         }
                     }
                 },
@@ -63,7 +65,7 @@ $(document).ready(function () {
                     }
                 },
                 padding: {
-                  right: 10
+                    right: 10
                 },
                 // TODO this is not optimal
                 // manually reposition axis label
@@ -273,14 +275,20 @@ $(document).ready(function () {
                 table += "<th>" + chip_id + "</th>";
             }
 
-            for (var j=1; j<7; j++) {
+            table += "<th>" + data_format(line[1]) + "</th>";
+
+            for (var j=2; j<5; j++) {
                 if (line[j]) {
-                    table += "<th>" + number_with_commas(line[j]) + "</th>";
+                    table += "<th>" + line[j] + "</th>";
                 }
                 else {
                     table += "<th></th>";
                 }
             }
+
+            table += "<th>" + data_format(line[5]) + "</th>";
+
+            table += "<th>" + line[6] + "</th>";
 
             // Just add text if this is a header row for QC OR if this row is invalid
             // (QC status of an ignored row does not really matter)
@@ -496,7 +504,7 @@ $(document).ready(function () {
             .appendTo('body');
         $("#extra").insertAfter($("#assaychipreadoutassay_set-group")[0]);
 
-        $('<div id="csv_table" style="width: 35%;float: left;">')
+        $('<div id="csv_table" style="width: 55%;float: left;">')
             .appendTo('#extra').html(add);
 
         var charts = [];
