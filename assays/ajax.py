@@ -97,7 +97,7 @@ def fetch_assay_layout_content(request):
             'supplier': compound.assay_compound_instance.compound_instance.supplier.name,
             'lot': compound.assay_compound_instance.compound_instance.lot,
             'receipt_date': receipt_date,
-            'additon_time': compound.assay_compound_instance.addition_time,
+            'addition_time': compound.assay_compound_instance.addition_time,
             'duration': compound.assay_compound_instance.duration
             # 'well': well
         })
