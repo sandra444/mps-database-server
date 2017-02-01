@@ -8,7 +8,8 @@
 // Global variable for sharing data with other files
 window.COMPOUND_INSTANCES = {
     'data_map': {},
-    'instances': {}
+    'instances': {},
+    'suppliers': {}
 };
 
 $(document).ready(function() {
@@ -17,6 +18,7 @@ $(document).ready(function() {
     // Alias for global variable
     var data_map = window.COMPOUND_INSTANCES.data_map;
     var instances = window.COMPOUND_INSTANCES.instances;
+    var suppliers = window.COMPOUND_INSTANCES.suppliers;
 
     $.ajax({
         url: "/compounds_ajax/",
@@ -37,6 +39,9 @@ $(document).ready(function() {
 
                 // Add to instance
                 instances[compound_instance_id] = compound_instance;
+
+                // Add to suppliers
+                suppliers[supplier_name] = supplier_name;
 
                 // Add to data map
                 if(!data_map[compound_id]) {
@@ -64,6 +69,7 @@ $(document).ready(function() {
 
             // Notice that all of this is in the AJAX success call
             // When a compound is selected
+            // ALL SUPPLIERS ARE SHOWN INSTEAD NOW
             $(document).on('change', 'select[id$="compound"]', function() {
                 var current_supplier_text = $(this)
                     .parent()
@@ -76,7 +82,8 @@ $(document).ready(function() {
                 }
 
                 current_supplier_text.autocomplete({
-                    source: _.keys(data_map[$(this).val()]),
+                    // source: _.keys(data_map[$(this).val()]),
+                    source: _.sortBy(_.keys(suppliers)),
                     select: function (a, b) {
                         $(this).val(b.item.value);
                         $(this).trigger('change');
