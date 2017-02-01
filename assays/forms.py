@@ -362,6 +362,7 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
     def save(self, commit=True):
         # Get forms_data (excluding those with delete or no data)
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
+        forms_to_delete = [f for f in self.forms if f.cleaned_data and f.cleaned_data.get('DELETE', False)]
 
         # Get all Compound Instances
         compound_instances = {
@@ -381,6 +382,7 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
             supplier.name:supplier for supplier in CompoundSupplier.objects.all()
         }
 
+        # Forms to save
         for form in forms_data:
             instance = super(forms.ModelForm, form).save(commit=False)
 
@@ -460,6 +462,12 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
             #     concentration_unit=concentration_unit
             # ).save()
 
+        # Forms to be deleted
+        for form in forms_to_delete:
+            instance = super(forms.ModelForm, form).save(commit=False)
+
+            if instance and commit:
+                instance.delete()
 
 # Considered using form, stuck with formset to avoid extra database hits
 # class AssayCompoundInstanceInlineForm(forms.ModelForm):
