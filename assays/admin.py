@@ -454,8 +454,23 @@ class AssayReaderAdmin(LockableAdmin):
         )
     )
 
-
 admin.site.register(AssayReader, AssayReaderAdmin)
+
+
+class AssayCompoundInstanceAdmin(admin.ModelAdmin):
+    """Admin for Assay Compound Instance"""
+    save_on_top = True
+
+    list_display = (
+        'compound_instance',
+        'chip_setup',
+        'concentration',
+        'concentration_unit',
+        'addition_time',
+        'duration'
+    )
+
+admin.site.register(AssayCompoundInstance, AssayCompoundInstanceAdmin)
 
 
 # TODO REVISE SAVING

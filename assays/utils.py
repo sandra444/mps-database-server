@@ -295,7 +295,8 @@ def save_assay_layout(request, obj, form, change):
     layout = obj
     layout_id = obj.id
 
-    # Get all Assay Compound Instance
+    # Get all Assay Compound Instance for those NOT BOUND TO A CHIP SETUP
+    # AGAIN: NOTE THAT THESE ASSAY COMPOUNDS ARE NOT RELATED TO A CHIP SETUP TO AVOID PROBLEMS ON DELETE
     assay_compound_instances = {
         (
             instance.compound_instance.id,
@@ -303,7 +304,9 @@ def save_assay_layout(request, obj, form, change):
             instance.concentration_unit.id,
             instance.addition_time,
             instance.duration
-        ): instance for instance in AssayCompoundInstance.objects.all().prefetch_related(
+        ): instance for instance in AssayCompoundInstance.objects.filter(
+            chip_setup=None
+        ).prefetch_related(
             'compound_instance__compound',
             'concentration_unit'
         )
