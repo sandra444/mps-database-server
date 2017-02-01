@@ -302,7 +302,7 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
         # Text field (un-saved) for lot
         form.fields['lot_text'] = forms.CharField()
         # Receipt date
-        form.fields['receipt_date'] = forms.DateTimeField(required=False)
+        form.fields['receipt_date'] = forms.DateField(required=False)
 
         # Add fields for splitting time into days, hours, and minutes
         # Times are trickier to fill in, uses formula that prioritizes larger denominations
@@ -370,7 +370,10 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
                 instance.supplier.id,
                 instance.lot,
                 instance.receipt_date
-            ): instance for instance in CompoundInstance.objects.all()
+            ): instance for instance in CompoundInstance.objects.all().prefetch_related(
+                'compound',
+                'supplier'
+            )
         }
 
         # Get all suppliers
@@ -469,7 +472,7 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
 #     compound = forms.ModelChoiceField(queryset=Compound.objects.all())
 #     supplier_text = forms.CharField()
 #     lot_text = forms.CharField()
-#     receipt_date = forms.DateTimeField(required=False)
+#     receipt_date = forms.DateField(required=False)
 #
 #     def __init__(self, *args, **kwargs):
 #         """Init AssayCompoundInstance
@@ -580,7 +583,7 @@ class AssayLayoutForm(SignOffMixin, forms.ModelForm):
 
     Additional fields (not part of model):
     compound -- dropdown for selecting compounds to add to the Layout map
-    concunit -- dropdown for selecting a concentration unit for the Layout map
+    concentration_unit -- dropdown for selecting a concentration unit for the Layout map
     """
     def __init__(self, groups, *args, **kwargs):
         super(AssayLayoutForm, self).__init__(*args, **kwargs)
@@ -589,9 +592,20 @@ class AssayLayoutForm(SignOffMixin, forms.ModelForm):
             device_type='plate'
         )
 
+        for time_unit in TIME_CONVERSIONS.keys():
+            # Create fields for Days, Hours, Minutes
+            self.fields['addition_time_' + time_unit] = forms.FloatField(initial=0, required=False)
+            self.fields['duration_' + time_unit] = forms.FloatField(initial=0, required=False)
+            # Change style
+            self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
+            self.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
+
+        # Set CSS class to receipt date to use date picker
+        self.fields['receipt_date'].widget.attrs['class'] = 'datepicker-input'
+
     compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
     # Notice the special exception for %
-    concunit = forms.ModelChoiceField(
+    concentration_unit = forms.ModelChoiceField(
         queryset=(PhysicalUnits.objects.filter(
             unit_type__unit_type='Concentration'
         ).order_by(
@@ -600,6 +614,14 @@ class AssayLayoutForm(SignOffMixin, forms.ModelForm):
         ) | PhysicalUnits.objects.filter(unit='%')),
         required=False, initial=4
     )
+    concentration = forms.FloatField(required=False)
+
+     # Text field (un-saved) for supplier
+    supplier_text = forms.CharField(required=False)
+    # Text field (un-saved) for lot
+    lot_text = forms.CharField(required=False)
+    # Receipt date
+    receipt_date = forms.DateField(required=False)
 
     class Meta(object):
         model = AssayLayout

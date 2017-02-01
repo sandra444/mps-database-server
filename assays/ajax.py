@@ -75,18 +75,30 @@ def fetch_assay_layout_content(request):
 
     # Fetch compounds
     compounds = AssayWellCompound.objects.filter(assay_layout=layout).prefetch_related(
-        'assay_layout', 'compound', 'concentration_unit').order_by('compound__name')
+        'assay_layout',
+        'assay_compound_instance__compound_instance__compound',
+        'assay_compound_instance__compound_instance__supplier',
+        'assay_compound_instance__concentration_unit'
+    ).order_by('compound__name')
 
     for compound in compounds:
         well = compound.row + '_' + compound.column
         if not 'compounds' in data[well]:
             data[well]['compounds'] = []
+        receipt_date = ''
+        if compound.assay_compound_instance.compound_instance.receipt_date:
+            receipt_date = compound.assay_compound_instance.compound_instance.receipt_date
         data[well]['compounds'].append({
-            'name': compound.compound.name,
-            'id': compound.compound_id,
-            'concentration': compound.concentration,
-            'concentration_unit_id': compound.concentration_unit_id,
-            'concentration_unit': compound.concentration_unit.unit
+            'name': compound.assay_compound_instance.compound_instance.compound.name,
+            'id': compound.assay_compound_instance.compound_instance.compound_id,
+            'concentration': compound.assay_compound_instance.concentration,
+            'concentration_unit_id': compound.assay_compound_instance.concentration_unit_id,
+            'concentration_unit': compound.assay_compound_instance.concentration_unit.unit,
+            'supplier': compound.assay_compound_instance.compound_instance.supplier.name,
+            'lot': compound.assay_compound_instance.compound_instance.lot,
+            'receipt_date': receipt_date,
+            'additon_time': compound.assay_compound_instance.addition_time,
+            'duration': compound.assay_compound_instance.duration
             # 'well': well
         })
 

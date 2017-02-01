@@ -16,7 +16,12 @@ from .models import (
     AssayChipReadout,
     AssayChipReadoutAssay,
     PhysicalUnits,
-    AssayDataUpload
+    AssayDataUpload,
+    AssayCompoundInstance
+)
+from compounds.models import (
+    CompoundSupplier,
+    CompoundInstance
 )
 
 from django.db import connection, transaction
@@ -34,6 +39,7 @@ import codecs
 import cStringIO
 
 import csv
+from django.utils.dateparse import parse_date
 
 from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
@@ -254,6 +260,7 @@ def get_valid_csv_location(file_name, study_id, device_type, overwrite_option):
 # Saving an Assay Layout is somewhat complicated, so a function is useful here
 # (though perhaps not in this file [spaghetti code])
 # BE CAREFUL! FIELDS THAT ARE NOT IN THE FORM ARE AUTOMATICALLY SET TO NONE!
+# TODO NEEDS TO BE REFACTORED
 def save_assay_layout(request, obj, form, change):
     """Method for saving an Assay Layout
 
@@ -275,8 +282,8 @@ def save_assay_layout(request, obj, form, change):
     time_query_list = []
 
     compound_query = ''' INSERT INTO "assays_assaywellcompound"
-          ("assay_layout_id", "compound_id", "concentration", "concentration_unit_id", "row", "column")
-          VALUES (%s, %s, %s, %s, %s, %s)'''
+          ("assay_layout_id", "assay_compound_instance_id", "row", "column")
+          VALUES (%s, %s, %s, %s)'''
     compound_query_list = []
 
     label_query = ''' INSERT INTO "assays_assaywelllabel"
@@ -288,6 +295,40 @@ def save_assay_layout(request, obj, form, change):
     layout = obj
     layout_id = obj.id
 
+    # Get all Assay Compound Instance
+    assay_compound_instances = {
+        (
+            instance.compound_instance.id,
+            instance.concentration,
+            instance.concentration_unit.id,
+            instance.addition_time,
+            instance.duration
+        ): instance for instance in AssayCompoundInstance.objects.all().prefetch_related(
+            'compound_instance__compound',
+            'concentration_unit'
+        )
+    }
+
+    # Get all Compound Instances
+    compound_instances = {
+        (
+            instance.compound.id,
+            instance.supplier.id,
+            instance.lot,
+            instance.receipt_date
+        ): instance for instance in CompoundInstance.objects.all().prefetch_related(
+            'compound',
+            'supplier'
+        )
+    }
+
+    # Get all suppliers
+    suppliers = {
+        supplier.name:supplier for supplier in CompoundSupplier.objects.all()
+    }
+
+    # This is extremely foolish and will be revised soon
+    # TODO REMOVE THIS AND HAVE A METHOD FOR TELLING IF AN ENTRY EXISTS ALREADY
     if change:
         # Delete old types for this assay
         AssayWell.objects.filter(assay_layout=layout).delete()
@@ -321,20 +362,105 @@ def save_assay_layout(request, obj, form, change):
         # Should refactor soon
         elif key.startswith('well_'):
             # Evaluate val as a JSON dict
-            content = json.loads(val)
+            # Note that the ' are removed
+            content = json.loads(val.replace('\'', ''))
             well = content['well']
             row, col = well.split('_')
 
-            if 'compound' in content:
-                # Add compound info
+            compound_id = int(content.get('compound', 0))
+            supplier_text = content.get('supplier_text', 'N/A')
+            lot_text = content.get('lot_text', 'N/A')
+
+            # Be sure to convert to datetime
+            receipt_date = content.get('receipt_date', None)
+            if receipt_date:
+                receipt_date = parse_date(str(receipt_date))
+
+            addition_time = content.get('addition_time', 0)
+            duration = content.get('duration', 0)
+
+            concentration = content.get('concentration', 0)
+            concentration_unit = int(content.get('concentration_unit', 0))
+
+            # Ignore invalid compounds
+            if compound_id and duration > 0 and concentration and concentration_unit:
+                supplier = suppliers.get(supplier_text, '')
+
+                if not supplier:
+                    supplier = CompoundSupplier(
+                        name=supplier_text,
+                        created_by=layout.created_by,
+                        created_on=layout.created_on,
+                        modified_by=layout.modified_by,
+                        modified_on=layout.modified_on
+                    )
+                    supplier.save()
+                    suppliers.update({
+                        supplier_text: supplier
+                    })
+
+                # Check if compound instance exists
+                compound_instance = compound_instances.get(
+                    (compound_id, supplier.id, lot_text, receipt_date), ''
+                )
+                if not compound_instance:
+                    compound_instance = CompoundInstance(
+                        compound_id=compound_id,
+                        supplier=supplier,
+                        lot=lot_text,
+                        receipt_date=receipt_date,
+                        created_by=layout.created_by,
+                        created_on=layout.created_on,
+                        modified_by=layout.modified_by,
+                        modified_on=layout.modified_on
+                    )
+                    compound_instance.save()
+                    compound_instances.update({
+                        (compound_id, supplier.id, lot_text, receipt_date): compound_instance
+                    })
+
+                assay_compound_instance = assay_compound_instances.get(
+                    (
+                        compound_instance.id,
+                        concentration,
+                        concentration_unit,
+                        addition_time,
+                        duration
+                    ), ''
+                )
+                if not assay_compound_instance:
+                    assay_compound_instance = AssayCompoundInstance(
+                        compound_instance=compound_instance,
+                        concentration=concentration,
+                        concentration_unit_id=concentration_unit,
+                        addition_time=addition_time,
+                        duration=duration
+                    )
+                    assay_compound_instance.save()
+                    assay_compound_instances.update({
+                        (
+                            compound_instance.id,
+                            concentration,
+                            concentration_unit,
+                            addition_time,
+                            duration
+                        ): assay_compound_instance
+                    })
                 compound_query_list.append((
                     layout_id,
-                    content['compound'],
-                    content['concentration'],
-                    content['concentration_unit'],
+                    assay_compound_instance.id,
                     row,
                     col
                 ))
+                # # Add compound info
+                # compound_query_list.append((
+                #     layout_id,
+                #     content['compound'],
+                #     content['concentration'],
+                #     content['concentration_unit'],
+                #     row,
+                #     col
+                # ))
 
         # Labels
         elif key.endswith('_label'):

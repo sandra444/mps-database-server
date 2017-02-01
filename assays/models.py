@@ -213,27 +213,21 @@ class AssayCompoundInstance(models.Model):
 
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
     addition_time = models.FloatField(blank=True)
-    # RENAMED
-    # start_time = models.FloatField()
-    # DECIDED AGAINST
-    # start_time_unit = models.ForeignKey(PhysicalUnits, related_name='start_time_unit')
 
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
     duration = models.FloatField(blank=True)
-    # DECIDED AGAINST
-    # duration_unit = models.ForeignKey(PhysicalUnits, related_name='duration_time_unit')
-
 
 class AssayWellCompound(models.Model):
     """Compound for PLATE wells"""
     assay_layout = models.ForeignKey(AssayLayout)
     # TO BE DEPRECATED: USE AssayCompoundInstance instead
-    compound = models.ForeignKey('compounds.Compound')
-    assay_compound_instance = models.ForeignKey(AssayCompoundInstance, blank=True)
+    compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
+    # Null=True temporarily
+    assay_compound_instance = models.ForeignKey(AssayCompoundInstance, null=True, blank=True)
     # TO BE DEPRECATED: USE AssayCompoundInstance instead
-    concentration = models.FloatField(default=0)
+    concentration = models.FloatField(default=0, null=True, blank=True)
     # TO BE DEPRECATED: USE AssayCompoundInstance instead
-    concentration_unit = models.ForeignKey(PhysicalUnits)
+    concentration_unit = models.ForeignKey(PhysicalUnits, null=True, blank=True)
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
 

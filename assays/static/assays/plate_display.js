@@ -1,4 +1,5 @@
 // This script was made to prevent redundant code in plate pages
+// TODO NEEDS TO BE REFACTORED
 
 // Namespace for layout functions
 window.LAYOUT = {};
@@ -335,8 +336,45 @@ $(document).ready(function () {
                         // BE CERTAIN THAT STAMPS DO NOT COLLIDE
                         stamp = well + '_' + index;
 
+                        var info = {
+                            'well': well,
+                            'compound': compound.id,
+                            'supplier_text': compound.supplier,
+                            'lot_text': compound.lot,
+                            'receipt_date': compound.receipt_date,
+                            'concentration': compound.concentration,
+                            'concentration_unit': compound.concentration_unit_id,
+                            'addition_time': compound.addition_time,
+                            'duration': compound.duration
+                        };
+
+                        // Times in question
+                        var time_conversions = {
+                            'day': 1440,
+                            'hour': 60,
+                            'minute': 1
+                        };
+
+                        // Add split times to info
+                        var addition_time_left = info.addition_time;
+                        var duration_left = info.duration;
+                        $.each(time_conversions, function(unit, conversion) {
+                            var current_addition_time = Math.floor(addition_time_left / conversion);
+                            info['addition_time_'+unit] = current_addition_time ? current_addition_time: 0;
+                            addition_time_left -= info['addition_time_'+unit] * conversion;
+                            var current_duration = Math.floor(duration_left / conversion);
+                            info['duration_'+unit] = current_duration ? current_duration: 0;
+                            duration_left -= info['duration_'+unit] * conversion;
+                        });
+
+                        var time_indicator = ' [ ' +
+                            [info.addition_time_day, info.addition_time_hour, info.addition_time_minute].join('|') +
+                            ' => ' +
+                            [info.duration_day, info.duration_hour, info.duration_minute].join('|')
+                            + '  ]';
+
                         text = compound.name + ' (' + compound.concentration +
-                            ' ' + compound.concentration_unit + ')';
+                            ' ' + compound.concentration_unit + ')' + time_indicator;
 
                         li = $('<li>')
                             .text(text)
@@ -349,10 +387,7 @@ $(document).ready(function () {
                                 }
                             });
 
-                            var info = '{"well":"' + well + '"' +
-                            ',"compound":"' + compound.id + '","concentration":"' +
-                            compound.concentration + '","concentration_unit":"' +
-                            compound.concentration_unit_id + '"}';
+                            info = JSON.stringify(info);
 
                             li.append($('<input>')
                                 .attr('type', 'hidden')

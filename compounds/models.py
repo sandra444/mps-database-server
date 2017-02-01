@@ -354,7 +354,10 @@ class CompoundTarget(models.Model):
 # Should this be trackable?
 class CompoundSupplier(LockableModel):
     """Compound suppliers so that we can track where compounds come from"""
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
+
+    def __unicode__(self):
+        return unicode(self.name)
 
 
 # TODO Add uniqueness contraints
@@ -370,4 +373,10 @@ class CompoundInstance(LockableModel):
     # It is possible that the lot_number will not be solely numeric
     lot = models.CharField(max_length=255)
     # Receipt date
-    receipt_date = models.DateTimeField(null=True, blank=True)
+    receipt_date = models.DateField(null=True, blank=True)
+
+    def __unicode__(self):
+        items = [
+            str(self.compound), str(self.supplier), str(self.lot), str(self.receipt_date)
+        ]
+        return u' '.join(items)

@@ -167,7 +167,7 @@ $(document).ready(function() {
                         position: {
                             my: "left bottom",
                             at: "left top",
-                            collision: "opposite"
+                            collision: "flipfit"
                         }
                     });
 
