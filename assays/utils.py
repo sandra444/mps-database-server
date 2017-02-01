@@ -368,8 +368,8 @@ def save_assay_layout(request, obj, form, change):
             row, col = well.split('_')
 
             compound_id = int(content.get('compound', 0))
-            supplier_text = content.get('supplier_text', 'N/A')
-            lot_text = content.get('lot_text', 'N/A')
+            supplier_text = content.get('supplier_text', 'N/A').strip()
+            lot_text = content.get('lot_text', 'N/A').strip()
 
             # Be sure to convert to datetime
             receipt_date = content.get('receipt_date', None)

@@ -390,7 +390,7 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
 
             compound = current_data.get('compound')
             supplier_text = current_data.get('supplier_text').strip()
-            lot_text = current_data.get('supplier_text').strip()
+            lot_text = current_data.get('lot_text').strip()
             receipt_date = current_data.get('receipt_date')
 
             # Should be acquired straight from form
