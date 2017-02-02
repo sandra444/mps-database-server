@@ -200,6 +200,19 @@ class AssayWellLabel(models.Model):
 
 class AssayCompoundInstance(models.Model):
     """An instance of a compound used in an assay; used as an inline"""
+
+    class Meta(object):
+        unique_together = [
+            (
+                'chip_setup',
+                'compound_instance',
+                'concentration',
+                'concentration_unit',
+                'addition_time',
+                'duration'
+            )
+        ]
+
     # Stop-gap, subject to change
     chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True)
 
