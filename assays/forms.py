@@ -270,7 +270,7 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
     def __init__(self, *args, **kwargs):
         """Init Chip Setup Form
 
-        Filters physical units to include only Time
+        Filters physical units to include only Concentration
         """
         super(AssayCompoundInstanceInlineFormset, self).__init__(*args, **kwargs)
         # Filter on Time
@@ -280,6 +280,16 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
         #     'base_unit',
         #     'scale_factor'
         # )
+
+        # Filter compound instances
+        compound_instances = CompoundInstance.objects.all().prefetch_related(
+            'compound',
+            'supplier'
+        )
+        compound_instances_dic = {
+            instance.id: instance for instance in compound_instances
+        }
+
         # Filter on concentration but make a special exception for percent (%)
         concentration_unit_queryset = PhysicalUnits.objects.filter(
             unit_type__unit_type='Concentration'
@@ -287,77 +297,84 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
             'base_unit',
             'scale_factor'
         ) | PhysicalUnits.objects.filter(unit='%')
+
         for form in self.forms:
             # form.fields['start_time_unit'].queryset = time_unit_queryset
             # form.fields['duration_unit'].queryset = time_unit_queryset
             form.fields['concentration_unit'].queryset = concentration_unit_queryset
+            form.fields['compound_instance'].queryset = compound_instances
+
+            # All available compounds
+            form.fields['compound'] = forms.ModelChoiceField(queryset=Compound.objects.all())
+            # Text field (un-saved) for supplier
+            form.fields['supplier_text'] = forms.CharField()
+            # Text field (un-saved) for lot
+            form.fields['lot_text'] = forms.CharField()
+            # Receipt date
+            form.fields['receipt_date'] = forms.DateField(required=False)
+
+            # Add fields for splitting time into days, hours, and minutes
+            # Times are trickier to fill in, uses formula that prioritizes larger denominations
+            for time_unit in TIME_CONVERSIONS.keys():
+                # Create fields for Days, Hours, Minutes
+                form.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
+                form.fields['duration_' + time_unit] = forms.FloatField(initial=0)
+                # Change style
+                form.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
+                form.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
+
+            # If instance, apply initial values
+            if form.instance.compound_instance_id:
+                current_compound_instance = compound_instances_dic.get(form.instance.compound_instance_id)
+
+                form.fields['compound_instance'].initial = current_compound_instance
+
+                form.fields['compound'].initial = current_compound_instance.compound
+                form.fields['supplier_text'].initial = current_compound_instance.supplier.name
+                form.fields['lot_text'].initial = current_compound_instance.lot
+                form.fields['receipt_date'].initial = current_compound_instance.receipt_date
+
+                # Fill additional time
+                addition_time_in_minutes_remaining = form.instance.addition_time
+                for time_unit, conversion in TIME_CONVERSIONS.items():
+                    initial_time_for_current_field = int(addition_time_in_minutes_remaining / conversion)
+                    if initial_time_for_current_field:
+                        form.fields['addition_time_' + time_unit].initial = initial_time_for_current_field
+                        addition_time_in_minutes_remaining -= initial_time_for_current_field * conversion
+                # Add fractions of minutes if necessary
+                if addition_time_in_minutes_remaining:
+                    form.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
+
+                # Fill duration
+                duration_in_minutes_remaining = form.instance.duration
+                for time_unit, conversion in TIME_CONVERSIONS.items():
+                    initial_time_for_current_field = int(duration_in_minutes_remaining / conversion)
+                    if initial_time_for_current_field:
+                        form.fields['duration_' + time_unit].initial = initial_time_for_current_field
+                        duration_in_minutes_remaining -= initial_time_for_current_field * conversion
+                # Add fractions of minutes if necessary
+                if duration_in_minutes_remaining:
+                    form.fields['duration_minute'].initial += duration_in_minutes_remaining
+
+            # Set CSS class to receipt date to use date picker
+            form.fields['receipt_date'].widget.attrs['class'] = 'datepicker-input'
 
 
-    def add_fields(self, form, index):
-        super(AssayCompoundInstanceInlineFormset, self).add_fields(form, index)
-        # All available compounds
-        form.fields['compound'] = forms.ModelChoiceField(queryset=Compound.objects.all())
-        # Text field (un-saved) for supplier
-        form.fields['supplier_text'] = forms.CharField()
-        # Text field (un-saved) for lot
-        form.fields['lot_text'] = forms.CharField()
-        # Receipt date
-        form.fields['receipt_date'] = forms.DateField(required=False)
+    def clean(self):
+        """Checks to make sure duration is valid"""
+        for index, form in enumerate(self.forms):
+            current_data = form.cleaned_data
 
-        # Add fields for splitting time into days, hours, and minutes
-        # Times are trickier to fill in, uses formula that prioritizes larger denominations
-        for time_unit in TIME_CONVERSIONS.keys():
-            # Create fields for Days, Hours, Minutes
-            form.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
-            form.fields['duration_' + time_unit] = forms.FloatField(initial=0)
-            # Change style
-            form.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
-            form.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
+            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                addition_time = 0
+                duration = 0
+                for time_unit, conversion in TIME_CONVERSIONS.items():
+                    addition_time += current_data.get('addition_time_' + time_unit, 0) * conversion
+                    duration += current_data.get('duration_' + time_unit, 0) * conversion
 
-        # If instance, apply initial values
-        if form.instance.compound_instance:
-            form.fields['compound'].initial = form.instance.compound_instance.compound
-            form.fields['supplier_text'].initial = form.instance.compound_instance.supplier.name
-            form.fields['lot_text'].initial = form.instance.compound_instance.lot
-            form.fields['receipt_date'].initial = form.instance.compound_instance.receipt_date
+                if duration <= 0:
+                    form.add_error('duration', 'Duration cannot be zero or negative.')
 
-            # Fill additional time
-            addition_time_in_minutes_remaining = form.instance.addition_time
-            for time_unit, conversion in TIME_CONVERSIONS.items():
-                initial_time_for_current_field = int(addition_time_in_minutes_remaining / conversion)
-                if initial_time_for_current_field:
-                    form.fields['addition_time_' + time_unit].initial = initial_time_for_current_field
-                    addition_time_in_minutes_remaining -= initial_time_for_current_field * conversion
-            # Add fractions of minutes if necessary
-            if addition_time_in_minutes_remaining:
-                form.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
-
-            # Fill duration
-            duration_in_minutes_remaining = form.instance.duration
-            for time_unit, conversion in TIME_CONVERSIONS.items():
-                initial_time_for_current_field = int(duration_in_minutes_remaining / conversion)
-                if initial_time_for_current_field:
-                    form.fields['duration_' + time_unit].initial = initial_time_for_current_field
-                    duration_in_minutes_remaining -= initial_time_for_current_field * conversion
-            # Add fractions of minutes if necessary
-            if duration_in_minutes_remaining:
-                form.fields['duration_minute'].initial += duration_in_minutes_remaining
-
-        # Set CSS class to receipt date to use date picker
-        form.fields['receipt_date'].widget.attrs['class'] = 'datepicker-input'
-
-    # def clean(self):
-    #     """Checks to make sure at least one time is entered of both addition_time and duration"""
-    #     # TODO RUN DEFAULT AND THEN MAKE SURE EACH HAS AT LEAST ONE OF THREE TIME INPUTS FILLED
-    #     forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
-    #
-    #     raise Exception(self.errors)
-    #
-    #     for form in forms_data:
-    #         if no_addition_time:
-    #             raise forms.ValidationError('You must have a addition time listed for every compound.')
-    #         if no_duration:
-    #             raise forms.ValidationError('You must have a duration listed for every compound.')
 
     def save(self, commit=True):
         # Get forms_data (excluding those with delete or no data)
@@ -382,13 +399,13 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
             supplier.name:supplier for supplier in CompoundSupplier.objects.all()
         }
 
+        chip_setup = self.instance
+
         # Forms to save
         for form in forms_data:
             instance = super(forms.ModelForm, form).save(commit=False)
 
             current_data = form.cleaned_data
-
-            chip_setup = self.instance
 
             compound = current_data.get('compound')
             supplier_text = current_data.get('supplier_text').strip()
@@ -444,10 +461,11 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
 
             # Update the instance with new data
             instance.chip_setup = chip_setup
-
             instance.compound_instance = compound_instance
+
             instance.addition_time = addition_time
             instance.duration = duration
+
             # Save the AssayCompoundInstance
             if commit:
                 instance.save()
@@ -468,49 +486,6 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
 
             if instance and commit:
                 instance.delete()
-
-# Considered using form, stuck with formset to avoid extra database hits
-# class AssayCompoundInstanceInlineForm(forms.ModelForm):
-#     """Frontend Inline Formset for Compound Instances"""
-#
-#     class Meta(object):
-#         model = AssayCompoundInstance
-#         exclude = ('',)
-#
-#     compound = forms.ModelChoiceField(queryset=Compound.objects.all())
-#     supplier_text = forms.CharField()
-#     lot_text = forms.CharField()
-#     receipt_date = forms.DateField(required=False)
-#
-#     def __init__(self, *args, **kwargs):
-#         """Init AssayCompoundInstance
-#
-#         Filters time units to include only time
-#         Filters concentration units to include only concentration
-#         Adds datepicker class
-#         """
-#         super(AssayCompoundInstanceInlineForm, self).__init__(*args, **kwargs)
-#         # Filter on Time
-#         time_unit_queryset = PhysicalUnits.objects.filter(
-#             unit_type__unit_type='Time'
-#         ).order_by(
-#             'base_unit',
-#             'scale_factor'
-#         )
-#         # Filter on concentration but make a special exception for percent (%)
-#         concentration_unit_queryset = PhysicalUnits.objects.filter(
-#             unit_type__unit_type='Concentration'
-#         ).order_by(
-#             'base_unit',
-#             'scale_factor'
-#         ) | PhysicalUnits.objects.filter(unit='%')
-#
-#         self.fields['start_time_unit'].queryset = time_unit_queryset
-#         self.fields['duration_unit'].queryset = time_unit_queryset
-#         self.fields['concentration_unit'].queryset = concentration_unit_queryset
-#
-#         # Set CSS class to receipt date to use date picker
-#         self.fields['receipt_date'].widget.attrs['class'] = 'datepicker-input'
 
 
 class AssayChipCellsInlineFormset(CloneableBaseInlineFormSet):
