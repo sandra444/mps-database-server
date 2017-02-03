@@ -21,15 +21,26 @@ restricted = ('restricted',)
 group = ('group',)
 
 # Overwrite options
-OVERWRITE_OPTIONS = forms.ChoiceField(
+OVERWRITE_OPTIONS_BULK = forms.ChoiceField(
     choices=(
-        ('keep_conflicting_data', 'Keep Confilicting Data Unmodified'),
-        ('mark_conflicting_data', 'Mark Conflicting Data'),
-        ('mark_all_old_data', 'Mark All Old Data'),
-        ('delete_conflicting_data', 'Delete Conflicting Data'),
-        ('delete_all_old_data', 'Delete All Old Data')
+        ('mark_conflicting_data', 'Replace Conflicting Data'),
+        ('mark_all_old_data', 'Replace All Current Study Data'),
+        ('keep_conflicting_data', 'Add New Data and Keep Current All Data'),
+        # ('delete_conflicting_data', 'Delete Conflicting Data'),
+        # ('delete_all_old_data', 'Delete All Old Data')
     ),
-    initial='keep_conflicting_data'
+    initial='mark_conflicting_data'
+)
+
+OVERWRITE_OPTIONS_INDIVIDUAL = forms.ChoiceField(
+    choices=(
+        ('mark_conflicting_data', 'Replace Conflicting Data'),
+        ('mark_all_old_data', 'Replace All Current Readout Data'),
+        ('keep_conflicting_data', 'Add New Data and Keep Current All Data'),
+        # ('delete_conflicting_data', 'Delete Conflicting Data'),
+        # ('delete_all_old_data', 'Delete All Old Data')
+    ),
+    initial='mark_conflicting_data'
 )
 
 
@@ -141,7 +152,7 @@ class AssayChipResultForm(SignOffMixin, forms.ModelForm):
 
 class AssayChipReadoutForm(SignOffMixin, CloneableForm):
     """Frontend form for Chip Readouts"""
-    overwrite_option = OVERWRITE_OPTIONS
+    overwrite_option = OVERWRITE_OPTIONS_INDIVIDUAL
 
     def __init__(self, study, current, *args, **kwargs):
         """Init the Chip Readout Form
@@ -327,8 +338,6 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
             if form.instance.compound_instance_id:
                 current_compound_instance = compound_instances_dic.get(form.instance.compound_instance_id)
 
-                form.fields['compound_instance'].initial = current_compound_instance
-
                 form.fields['compound'].initial = current_compound_instance.compound
                 form.fields['supplier_text'].initial = current_compound_instance.supplier.name
                 form.fields['lot_text'].initial = current_compound_instance.lot
@@ -358,7 +367,6 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
 
             # Set CSS class to receipt date to use date picker
             form.fields['receipt_date'].widget.attrs['class'] = 'datepicker-input'
-
 
     def clean(self):
         """Checks to make sure duration is valid"""
@@ -706,7 +714,7 @@ class AssayPlateReadoutForm(SignOffMixin, CloneableForm):
 
     # upload_type = forms.ChoiceField(choices=(('Block', 'Block'), ('Tabular', 'Tabular')))
 
-    overwrite_option = OVERWRITE_OPTIONS
+    overwrite_option = OVERWRITE_OPTIONS_INDIVIDUAL
 
     class Meta(object):
         model = AssayPlateReadout
@@ -1054,7 +1062,7 @@ class ReadoutBulkUploadForm(forms.ModelForm):
     # Now in Study (AssayRun) to make saving easier
     # bulk_file = forms.FileField()
 
-    overwrite_option = OVERWRITE_OPTIONS
+    overwrite_option = OVERWRITE_OPTIONS_BULK
 
     # EVIL WAY TO GET PREVIEW DATA
     preview_data = forms.BooleanField(initial=False, required=False)
