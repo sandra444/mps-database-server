@@ -257,7 +257,7 @@ $(document).ready(function () {
             }
 
             // If the row has no value (residue code, may be used later)
-            else if (value == 'None' || !value) {
+            else if (value === 'None' || value === '') {
                 table += "<tr style='background: #606060'>";
             }
 
@@ -286,7 +286,12 @@ $(document).ready(function () {
                 }
             }
 
-            table += "<th>" + data_format(line[5]) + "</th>";
+            if(value === 'None' || value === '') {
+                table += "<th></th>";
+            }
+            else {
+                table += "<th>" + data_format(line[5]) + "</th>";
+            }
 
             table += "<th>" + line[6] + "</th>";
 
