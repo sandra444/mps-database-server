@@ -73,11 +73,12 @@
                     <td>{{ setup.device }}</td>
                     <td>{{ setup.organ_model|default:"No Model" }}</td>
 {#                    <td>{{ setup.chip_test_type }}</td>#}
-                    {% if setup.compound != None %}
-                        <td>{{ setup.compound }} ({{ setup.concentration }} {{ setup.unit }})</td>
-                    {% else %}
-                        <td>-control-</td>
-                    {% endif %}
+{#                    {% if setup.compound != None %}#}
+{#                        <td>{{ setup.compound }} ({{ setup.concentration }} {{ setup.unit }})</td>#}
+{#                    {% else %}#}
+{#                        <td>-control-</td>#}
+{#                    {% endif %}#}
+                    <td>{{ setup.related_compounds_as_string|linebreaks }}</td>
                     <td>
                         {{ setup.full_creator }}
                     </td>

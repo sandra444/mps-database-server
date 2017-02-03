@@ -106,12 +106,11 @@ class StudyIndex(ViewershipMixin, DetailView):
     template_name = 'assays/study_index.html'
 
     # TODO OPTIMIZE DATABASE HITS
-    def get(self, request, **kwargs):
-        self.object = self.get_object()
+    def get_context_data(self, **kwargs):
+        context = super(StudyIndex, self).get_context_data(**kwargs)
 
-        context = self.get_context_data()
-
-        context['setups'] = AssayChipSetup.objects.filter(
+        # THIS CODE SHOULD NOT GET REPEATED AS OFTEN AS IT IS
+        setups = AssayChipSetup.objects.filter(
             assay_run_id=self.object
         ).prefetch_related(
             'organ_model',
@@ -120,6 +119,31 @@ class StudyIndex(ViewershipMixin, DetailView):
             'unit',
             'created_by',
         )
+
+        related_compounds = AssayCompoundInstance.objects.filter(
+            chip_setup=setups
+        ).prefetch_related(
+            'compound_instance__compound',
+            'compound_instance__supplier',
+            'concentration_unit',
+            'chip_setup'
+        )
+        related_compounds_map = {}
+
+        # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
+        for compound in related_compounds:
+            related_compounds_map.setdefault(compound.chip_setup_id, []).append(
+                compound.compound_instance.compound.name +
+                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
+            )
+
+        for setup in setups:
+            setup.related_compounds_as_string = ',\n'.join(sorted(
+                related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
+            ))
+
+        context['setups'] = setups
+
         readouts = AssayChipReadout.objects.filter(
             chip_setup=context['setups']
         ).prefetch_related(
@@ -211,7 +235,7 @@ class StudyIndex(ViewershipMixin, DetailView):
             readout=context['plate_readouts']
         ).count()
 
-        return self.render_to_response(context)
+        return context
 
 
 # Class-based views for studies
@@ -537,15 +561,40 @@ class AssayRunSummary(ViewershipMixin, DetailView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
-        context['setups'] = AssayChipSetup.objects.filter(
+
+        setups = AssayChipSetup.objects.filter(
             assay_run_id=self.object
         ).prefetch_related(
-            'assay_run_id',
+            'organ_model',
             'device',
             'compound',
             'unit',
-            'created_by'
+            'created_by',
         )
+
+        related_compounds = AssayCompoundInstance.objects.filter(
+            chip_setup=setups
+        ).prefetch_related(
+            'compound_instance__compound',
+            'compound_instance__supplier',
+            'concentration_unit',
+            'chip_setup'
+        )
+        related_compounds_map = {}
+
+        # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
+        for compound in related_compounds:
+            related_compounds_map.setdefault(compound.chip_setup_id, []).append(
+                compound.compound_instance.compound.name +
+                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
+            )
+
+        for setup in setups:
+            setup.related_compounds_as_string = ',\n'.join(sorted(
+                related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
+            ))
+
+        context['setups'] = setups
 
         # TODO THIS SAME BUSINESS NEEDS TO BE REFACTORED
         # For chips
@@ -584,12 +633,12 @@ class AssayRunSummary(ViewershipMixin, DetailView):
         context['plate_sameness'] = sameness
         context['plate_indicative'] = indicative
 
-        chip_readouts = AssayChipReadout.objects.filter(
-            chip_setup__assay_run_id=self.object
-        ).prefetch_related('chip_setup')
-        plate_readouts = AssayPlateReadout.objects.filter(
-            setup__assay_run_id=self.object
-        ).prefetch_related('setup')
+        # chip_readouts = AssayChipReadout.objects.filter(
+        #     chip_setup__assay_run_id=self.object
+        # ).prefetch_related('chip_setup')
+        # plate_readouts = AssayPlateReadout.objects.filter(
+        #     setup__assay_run_id=self.object
+        # ).prefetch_related('setup')
 
         data_uploads = AssayDataUpload.objects.filter(
             study=self.object
@@ -647,11 +696,35 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
         )
         # Display to users with either editor or viewer group or if unrestricted
         group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
-        return queryset.filter(
+        queryset = queryset.filter(
             restricted=False
         ) | queryset.filter(
             group__name__in=group_names
         )
+
+        related_compounds = AssayCompoundInstance.objects.filter(
+            chip_setup=queryset
+        ).prefetch_related(
+            'compound_instance__compound',
+            'compound_instance__supplier',
+            'concentration_unit',
+            'chip_setup'
+        )
+        related_compounds_map = {}
+
+        # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
+        for compound in related_compounds:
+            related_compounds_map.setdefault(compound.chip_setup_id, []).append(
+                compound.compound_instance.compound.name +
+                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
+            )
+
+        for setup in queryset:
+            setup.related_compounds_as_string = ',\n'.join(sorted(
+                related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
+            ))
+
+        return queryset
 
 
 AssayCompoundInstanceFormset = inlineformset_factory(

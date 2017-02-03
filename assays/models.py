@@ -286,7 +286,7 @@ class AssayPlateSetup(FlaggableModel):
     notes = models.CharField(max_length=2048, blank=True, default='')
 
     def __unicode__(self):
-        return u'Plate-{}'.format(self.assay_plate_id)
+        return u'{}'.format(self.assay_plate_id)
 
     def get_absolute_url(self):
         return '/assays/assayplatesetup/{}/'.format(self.id)
@@ -755,15 +755,16 @@ class AssayChipSetup(FlaggableModel):
     notes = models.CharField(max_length=2048, blank=True, default='')
 
     def __unicode__(self):
-        if self.compound:
-            return u'Chip-{}:{}({}{})'.format(
-                self.assay_chip_id,
-                self.compound,
-                self.concentration,
-                self.unit
-            )
-        else:
-            return u'Chip-{}:Control'.format(self.assay_chip_id)
+        return u'{}'.format(self.assay_chip_id)
+        # if self.compound:
+        #     return u'Chip-{}:{}({}{})'.format(
+        #         self.assay_chip_id,
+        #         self.compound,
+        #         self.concentration,
+        #         self.unit
+        #     )
+        # else:
+        #     return u'Chip-{}:Control'.format(self.assay_chip_id)
 
     def get_absolute_url(self):
         return '/assays/assaychipsetup/{}/'.format(self.id)

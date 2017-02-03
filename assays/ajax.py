@@ -408,7 +408,7 @@ def fetch_chip_readout(request):
                         content_type="application/json")
 
 
-def get_readout_data(raw_data, key, percent_control, include_all):
+def get_readout_data(raw_data, related_compounds_map, key, percent_control, include_all):
     """Get all readout data for a study and return it in JSON format
 
     From POST:
@@ -420,6 +420,7 @@ def get_readout_data(raw_data, key, percent_control, include_all):
 
     # TODO ACCOUNT FOR CASE WHERE ASSAY HAS TWO DIFFERENT UNITS?
     # TODO MAY FORBID THIS CASE, MUST ASK FIRST
+    # TODO ACCOUNT FOR CASE WHERE STUDY HAS MORE THAN ONE COMPOUND
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
     assays = {}
     initial_data = {}
@@ -438,6 +439,8 @@ def get_readout_data(raw_data, key, percent_control, include_all):
         # Get the conversion unit
         scale = raw.assay_chip_id.timeunit.scale_factor
         time = '{0:.2f}'.format((scale / 1440.0) * raw.elapsed_time)
+        # Have time in minutes for comparing to addition_time and duration
+        time_minutes = scale * raw.elapsed_time
 
         quality = raw.quality
 
@@ -445,10 +448,21 @@ def get_readout_data(raw_data, key, percent_control, include_all):
             # Get tag for data point
             # If by compound
             if key == 'compound':
-                if raw.assay_chip_id.chip_setup.compound:
-                    tag = raw.assay_chip_id.chip_setup.compound.name
-                    tag += ' ' + str(raw.assay_chip_id.chip_setup.concentration)
-                    tag += ' ' + raw.assay_chip_id.chip_setup.unit.unit
+                compounds = related_compounds_map.get(raw.assay_chip_id.chip_setup_id, [])
+                if compounds:
+                    compounds_to_add = []
+
+                    for compound in compounds:
+                        if compound.addition_time <= time_minutes and compound.duration + compound.addition_time >= time_minutes:
+                            compounds_to_add.append(
+                                compound.compound_instance.compound.name +
+                                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
+                            )
+
+                    if not compounds_to_add:
+                        tag = '-Control-'
+                    else:
+                        tag = ' | '.join(sorted(compounds_to_add))
                 else:
                     tag = '-Control-'
             # If by device
@@ -540,23 +554,41 @@ def fetch_readouts(request):
         percent_control = False
 
     # Get chip readouts
-    readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=study).prefetch_related(
+    readouts = AssayChipReadout.objects.filter(
+        chip_setup__assay_run_id_id=study
+    ).prefetch_related(
         'chip_setup',
         'chip_setup__assay_run_id_id'
     )
 
+    related_compounds_map = {}
+
     if key == 'compound':
+        setups = readouts.values_list('chip_setup_id')
+
         raw_data = AssayChipRawData.objects.filter(
             assay_chip_id=readouts
         ).prefetch_related(
             'assay_id',
             'assay_chip_id',
             'assay_chip_id__chip_setup',
-            'assay_chip_id__chip_setup__compound',
+            # 'assay_chip_id__chip_setup__compound',
             'assay_chip_id__chip_setup__unit',
             'assay_id__assay_id',
-            'assay_id__readout_unit'
+            'assay_id__readout_unit',
         )
+
+        related_compounds = AssayCompoundInstance.objects.filter(
+            chip_setup=setups
+        ).prefetch_related(
+            'compound_instance__compound',
+            'compound_instance__supplier',
+            'concentration_unit',
+            'chip_setup'
+        )
+
+        for compound in related_compounds:
+            related_compounds_map.setdefault(compound.chip_setup_id, []).append(compound)
 
     else:
         raw_data = AssayChipRawData.objects.filter(
@@ -569,7 +601,7 @@ def fetch_readouts(request):
             'assay_id__readout_unit'
         )
 
-    assays = get_readout_data(raw_data, key, percent_control, include_all)
+    assays = get_readout_data(raw_data, related_compounds_map, key, percent_control, include_all)
 
     data = {
         'assays': assays,
@@ -754,7 +786,8 @@ def validate_bulk_file(request):
         # Only chip preview right now
         chip_raw_data = preview_data.get('chip_preview')
 
-        assays = get_readout_data(chip_raw_data, key, percent_control, include_all)
+        # NOTE THE EMPTY DIC, RIGHT NOW BULK PREVIEW NEVER SHOWS COMPOUND JUST DEVICE
+        assays = get_readout_data(chip_raw_data, {}, key, percent_control, include_all)
 
         data = {'assays': assays}
 
