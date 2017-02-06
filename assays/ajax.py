@@ -453,7 +453,10 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
                     compounds_to_add = []
 
                     for compound in compounds:
-                        if compound.addition_time <= time_minutes and compound.duration + compound.addition_time >= time_minutes:
+                        # Previously included only compounds within duration
+                        # if compound.addition_time <= time_minutes and compound.duration + compound.addition_time >= time_minutes:
+                        # Everything past addition time will be listed as effected
+                        if compound.addition_time <= time_minutes:
                             compounds_to_add.append(
                                 compound.compound_instance.compound.name +
                                 ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
