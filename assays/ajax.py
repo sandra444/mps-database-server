@@ -465,7 +465,7 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
                     if not compounds_to_add:
                         tag = '-Control-'
                     else:
-                        tag = ' | '.join(sorted(compounds_to_add))
+                        tag = ' & '.join(sorted(compounds_to_add))
                 else:
                     tag = '-Control-'
             # If by device
