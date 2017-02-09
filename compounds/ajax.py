@@ -691,18 +691,27 @@ def fetch_chembl_search_results(request):
 # TODO this function should initially split the date in lieu of doing that in JS
 def fetch_compound_instances(request):
     """Returns all compound instances as JSON"""
-    data = []
+    data = {
+        'suppliers': [],
+        'instances': []
+    }
 
     for compound_instance in CompoundInstance.objects.all().prefetch_related(
         'compound',
         'supplier'
     ):
-        data.append({
+        data.get('instances').append({
             'id': compound_instance.id,
             'compound_id': compound_instance.compound.id,
             'supplier_name': compound_instance.supplier.name,
             'lot': compound_instance.lot,
             'receipt_date': compound_instance.receipt_date
+        })
+
+    for supplier in CompoundSupplier.objects.all():
+        data.get('suppliers').append({
+            'id': supplier.id,
+            'name': supplier.name
         })
 
     return HttpResponse(json.dumps(data),
