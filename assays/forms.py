@@ -238,14 +238,15 @@ class AssayChipSetupForm(SignOffMixin, CloneableForm):
         ).exclude(id=self.instance.id):
             raise forms.ValidationError({'assay_chip_id': ['ID/Barcode must be unique within study.']})
 
+        # THIS CHECK IS NO LONGER PERFORMED
         # Check to see if compound data is complete if: 1.) compound test type 2.) compound is selected
-        current_type = self.cleaned_data.get('chip_test_type', '')
-        compound = self.cleaned_data.get('compound', '')
-        concentration = self.cleaned_data.get('concentration', '')
-        unit = self.cleaned_data.get('unit', '')
-        if current_type == 'compound' and not all([compound, concentration, unit]) \
-                or (compound and not all([concentration, unit])):
-            raise forms.ValidationError('Please complete all data for compound.')
+        # current_type = self.cleaned_data.get('chip_test_type', '')
+        # compound = self.cleaned_data.get('compound', '')
+        # concentration = self.cleaned_data.get('concentration', '')
+        # unit = self.cleaned_data.get('unit', '')
+        # if current_type == 'compound' and not all([compound, concentration, unit]) \
+        #         or (compound and not all([concentration, unit])):
+        #     raise forms.ValidationError('Please complete all data for compound.')
 
         # RENAMING CHIPS WITH DATA IS NOW ALLOWED
         # Check to see if data has been uploaded for this setup
@@ -258,6 +259,7 @@ class AssayChipSetupForm(SignOffMixin, CloneableForm):
         #         raise forms.ValidationError(
         #             {'assay_chip_id': ['Chip ID/Barcode cannot be changed after data has been uploaded.']}
         #         )
+
 
 def update_compound_instance_and_supplier():
     """This function is intended to unify the processes involved in updating instances and suppliers"""
