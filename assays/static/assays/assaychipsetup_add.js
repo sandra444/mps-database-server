@@ -9,60 +9,61 @@ $(document).ready(function() {
     date.datepicker("option", "dateFormat", "yy-mm-dd");
     date.datepicker("setDate", curr_date);
 
-    var warning = $('#warning');
-    warning.dialog({
-        height:200,
-        modal: true,
-        closeOnEscape: true,
-        autoOpen: false,
-        buttons: {
-            Yes: function() {
-                    $(this).dialog("close");
-                },
-            No: function() {
-                    $('#id_chip_test_type').val('compound');
-                    $('#id_chip_test_type').trigger('change');
-                    $(this).dialog("close");
-                }
-        },
-        close: function() {
-            $('body').removeClass('stop-scrolling');
-        },
-        open: function() {
-            $('body').addClass('stop-scrolling');
-        }
-    });
-    warning.removeProp('hidden');
-
-    function toggle_warning(first) {
-        if (test_type == 'control' && compound) {
-            $('#control_warning').prop('hidden',false);
-            if (!first) {
-                $('#warning').dialog('open');
-            }
-        }
-        else{
-            $('#control_warning').prop('hidden',true);
-        }
-    }
-
-    var test_type_selector = $('#id_chip_test_type');
-    var compound_selector = $('#id_compound');
-
-    var test_type = test_type_selector.val();
-    var compound = compound_selector.val();
-
-    toggle_warning(true);
-
-    test_type_selector.change(function() {
-        test_type = test_type_selector.val();
-        toggle_warning(false);
-    });
-
-    compound_selector.change(function() {
-        compound = compound_selector.val();
-        toggle_warning(false);
-    });
+    // Warning deprecated
+//    var warning = $('#warning');
+//    warning.dialog({
+//        height:200,
+//        modal: true,
+//        closeOnEscape: true,
+//        autoOpen: false,
+//        buttons: {
+//            Yes: function() {
+//                    $(this).dialog("close");
+//                },
+//            No: function() {
+//                    $('#id_chip_test_type').val('compound');
+//                    $('#id_chip_test_type').trigger('change');
+//                    $(this).dialog("close");
+//                }
+//        },
+//        close: function() {
+//            $('body').removeClass('stop-scrolling');
+//        },
+//        open: function() {
+//            $('body').addClass('stop-scrolling');
+//        }
+//    });
+//    warning.removeProp('hidden');
+//
+//    function toggle_warning(first) {
+//        if (test_type == 'control' && compound) {
+//            $('#control_warning').prop('hidden',false);
+//            if (!first) {
+//                $('#warning').dialog('open');
+//            }
+//        }
+//        else{
+//            $('#control_warning').prop('hidden',true);
+//        }
+//    }
+//
+//    var test_type_selector = $('#id_chip_test_type');
+//    var compound_selector = $('#id_compound');
+//
+//    var test_type = test_type_selector.val();
+//    var compound = compound_selector.val();
+//
+//    toggle_warning(true);
+//
+//    test_type_selector.change(function() {
+//        test_type = test_type_selector.val();
+//        toggle_warning(false);
+//    });
+//
+//    compound_selector.change(function() {
+//        compound = compound_selector.val();
+//        toggle_warning(false);
+//    });
 
     var device = $('#id_device');
     var organ_model = $('#id_organ_model');
@@ -218,12 +219,4 @@ $(document).ready(function() {
     device.trigger('change');
     organ_model.trigger('change');
     protocol.trigger('change');
-
-    // Iterate over every compound inline and apply correct data
-    // NOTE SUBJECT TO CHANGE, CAN ADD INITIAL VIA FORMSET
-//    $('.compound-inline').each(function() {
-//    });
-
-    // Add autocomplete to supplier and lot
-
 });
