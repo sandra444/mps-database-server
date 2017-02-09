@@ -385,11 +385,34 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
                 if duration <= 0:
                     form.add_error('duration', 'Duration cannot be zero or negative.')
 
-
+    # TODO THIS IS NOT DRY
     def save(self, commit=True):
         # Get forms_data (excluding those with delete or no data)
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
         forms_to_delete = [f for f in self.forms if f.cleaned_data and f.cleaned_data.get('DELETE', False)]
+
+        # Forms to be deleted
+        for form in forms_to_delete:
+            instance = super(forms.ModelForm, form).save(commit=False)
+
+            if instance and commit:
+                instance.delete()
+
+        # Get all chip setup assay compound instances
+        assay_compound_instances = {
+            (
+                instance.compound_instance.id,
+                instance.concentration,
+                instance.concentration_unit.id,
+                instance.addition_time,
+                instance.duration
+            ): True for instance in AssayCompoundInstance.objects.exclude(
+                chip_setup=None
+            ).prefetch_related(
+                'compound_instance__compound',
+                'concentration_unit'
+            )
+        }
 
         # Get all Compound Instances
         compound_instances = {
@@ -478,7 +501,26 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
 
             # Save the AssayCompoundInstance
             if commit:
-                instance.save()
+                conflicting_assay_compound_instance = assay_compound_instances.get(
+                    (
+                        instance.compound_instance.id,
+                        instance.concentration,
+                        instance.concentration_unit.id,
+                        instance.addition_time,
+                        instance.duration
+                    ), None
+                )
+                if not conflicting_assay_compound_instance:
+                    instance.save()
+                    assay_compound_instances.update({
+                        (
+                            instance.compound_instance.id,
+                            instance.concentration,
+                            instance.concentration_unit.id,
+                            instance.addition_time,
+                            instance.duration
+                        ): True
+                    })
             # AssayCompoundInstance(
             #     chip_setup=chip_setup,
             #     compound_instance=compound_instance,
@@ -489,13 +531,6 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
             #     concentration=concentration,
             #     concentration_unit=concentration_unit
             # ).save()
-
-        # Forms to be deleted
-        for form in forms_to_delete:
-            instance = super(forms.ModelForm, form).save(commit=False)
-
-            if instance and commit:
-                instance.delete()
 
 
 class AssayChipCellsInlineFormset(CloneableBaseInlineFormSet):
