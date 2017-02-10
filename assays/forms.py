@@ -398,6 +398,8 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
             if instance and commit:
                 instance.delete()
 
+        chip_setup = self.instance
+
         # Get all chip setup assay compound instances
         assay_compound_instances = {
             (
@@ -406,8 +408,8 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
                 instance.concentration_unit.id,
                 instance.addition_time,
                 instance.duration
-            ): True for instance in AssayCompoundInstance.objects.exclude(
-                chip_setup=None
+            ): True for instance in AssayCompoundInstance.objects.filter(
+                chip_setup=chip_setup
             ).prefetch_related(
                 'compound_instance__compound',
                 'concentration_unit'
@@ -431,8 +433,6 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
         suppliers = {
             supplier.name:supplier for supplier in CompoundSupplier.objects.all()
         }
-
-        chip_setup = self.instance
 
         # Forms to save
         for form in forms_data:
@@ -512,15 +512,16 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
                 )
                 if not conflicting_assay_compound_instance:
                     instance.save()
-                    assay_compound_instances.update({
-                        (
-                            instance.compound_instance.id,
-                            instance.concentration,
-                            instance.concentration_unit.id,
-                            instance.addition_time,
-                            instance.duration
-                        ): True
-                    })
+
+            assay_compound_instances.update({
+                (
+                    instance.compound_instance.id,
+                    instance.concentration,
+                    instance.concentration_unit.id,
+                    instance.addition_time,
+                    instance.duration
+                ): True
+            })
             # AssayCompoundInstance(
             #     chip_setup=chip_setup,
             #     compound_instance=compound_instance,
