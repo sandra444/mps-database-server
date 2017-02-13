@@ -356,7 +356,7 @@ $(document).ready(function () {
     function plot() {
         //Make chart
         var assays = {};
-        var valueUnits = {};
+        // var valueUnits = {};
         var timeUnits = {};
 
         for (var i in data) {
@@ -391,15 +391,19 @@ $(document).ready(function () {
                     assays[assay] = {};
                 }
 
-                if (object && object != 'None' && !assays[assay][object]) {
-                    assays[assay][object] = {'time': [], 'data': []};
+                if (!assays[assay][value_unit]) {
+                    assays[assay][value_unit] = {};
                 }
 
-                if (assays[assay][object] && value && value != 'None') {
-                    assays[assay][object].time.push(time);
-                    assays[assay][object].data.push(value);
+                if (object && object != 'None' && !assays[assay][value_unit][object]) {
+                    assays[assay][value_unit][object] = {'time': [], 'data': []};
+                }
 
-                    valueUnits[assay] = value_unit;
+                if (assays[assay][value_unit][object] && value && value != 'None') {
+                    assays[assay][value_unit][object].time.push(time);
+                    assays[assay][value_unit][object].data.push(value);
+
+                    // valueUnits[assay] = value_unit;
                     timeUnits[assay] = time_unit;
                 }
             }
@@ -409,44 +413,46 @@ $(document).ready(function () {
         var bar_chart_list = [];
 
         for (var assay in assays) {
-            var add_to_bar_charts = true;
+            for (var value_unit in assays[assay]) {
+                var add_to_bar_charts = true;
 
-            addChart(chart, assay, timeUnits[assay], valueUnits[assay]);
+                addChart(chart, assay, timeUnits[assay], value_unit);
 
-            var xs = {};
-            var num = 1;
+                var xs = {};
+                var num = 1;
 
-            for (var object in assays[assay]) {
-                object = '' + object;
+                for (var object in assays[assay][value_unit]) {
+                    object = '' + object;
 
+                    // Add to bar charts if no time scale exceeds 3 points
+                    if (add_to_bar_charts && assays[assay][value_unit][object].time.length > 3) {
+                        add_to_bar_charts = false;
+                    }
+
+                    xs[object] = 'x' + num;
+
+                    assays[assay][value_unit][object].data.unshift(object);
+                    assays[assay][value_unit][object].time.unshift('x' + num);
+
+                    //Load for correct assay chart
+                    charts[chart].load({
+                        xs: xs,
+
+                        columns: [
+                            assays[assay][value_unit][object].data,
+                            assays[assay][value_unit][object].time
+                        ]
+                    });
+
+                    num += 1;
+                }
                 // Add to bar charts if no time scale exceeds 3 points
-                if (add_to_bar_charts && assays[assay][object].time.length > 3) {
-                    add_to_bar_charts = false;
+                if (add_to_bar_charts) {
+                    bar_chart_list.push(chart);
                 }
 
-                xs[object] = 'x' + num;
-
-                assays[assay][object].data.unshift(object);
-                assays[assay][object].time.unshift('x' + num);
-
-                //Load for correct assay chart
-                charts[chart].load({
-                    xs: xs,
-
-                    columns: [
-                        assays[assay][object].data,
-                        assays[assay][object].time
-                    ]
-                });
-
-                num += 1;
+                chart += 1;
             }
-            // Add to bar charts if no time scale exceeds 3 points
-            if (add_to_bar_charts) {
-                bar_chart_list.push(chart);
-            }
-
-            chart += 1;
         }
 
         // Make bar charts
