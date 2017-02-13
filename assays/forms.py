@@ -25,7 +25,7 @@ OVERWRITE_OPTIONS_BULK = forms.ChoiceField(
     choices=(
         ('mark_conflicting_data', 'Replace Conflicting Data'),
         ('mark_all_old_data', 'Replace All Current Study Data'),
-        ('keep_conflicting_data', 'Add New Data and Keep Current All Data'),
+        ('keep_conflicting_data', 'Add New Data and Keep Current Data'),
         # ('delete_conflicting_data', 'Delete Conflicting Data'),
         # ('delete_all_old_data', 'Delete All Old Data')
     ),
@@ -36,7 +36,7 @@ OVERWRITE_OPTIONS_INDIVIDUAL = forms.ChoiceField(
     choices=(
         ('mark_conflicting_data', 'Replace Conflicting Data'),
         ('mark_all_old_data', 'Replace All Current Readout Data'),
-        ('keep_conflicting_data', 'Add New Data and Keep Current All Data'),
+        ('keep_conflicting_data', 'Add New Data and Keep Current Data'),
         # ('delete_conflicting_data', 'Delete Conflicting Data'),
         # ('delete_all_old_data', 'Delete All Old Data')
     ),
