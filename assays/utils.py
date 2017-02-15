@@ -1975,13 +1975,14 @@ def mark_chip_readout_values(readout_ids_and_notes, stamp=False):
         readout_id = readout_id_and_notes[0]
         notes = readout_id_and_notes[1]
         if stamp:
-            notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + notes
+            notes = 'Marked replaced on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + notes
             notes = notes[:255]
         quality = readout_id_and_notes[2]
         if stamp:
-            # Add OLD to quality
-            quality = 'OLD ' + quality
-            quality = quality[:19]
+            # Add OLD to quality (R is code for replaced) [SUBJECT TO CHANGE]
+            if 'R' not in quality:
+                quality = 'R' + quality
+                quality = quality[:19]
         query_list.append((quality, notes, readout_id))
 
     # Execute the queries and close the connection
@@ -2005,9 +2006,14 @@ def mark_plate_readout_values(readout_ids_and_notes, stamp=False):
         readout_id = readout_id_and_notes[0]
         notes = readout_id_and_notes[1]
         if stamp:
-            notes = 'Marked on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + notes
+            notes = 'Marked replaced on ' + timezone.now().strftime("%Y-%m-%d") + ' ' + notes
             notes = notes[:255]
         quality = readout_id_and_notes[2]
+        if stamp:
+            # Add OLD to quality (R is code for replaced) [SUBJECT TO CHANGE]
+            if 'R' not in quality:
+                quality = 'R' + quality
+                quality = quality[:19]
         query_list.append((quality, notes, readout_id))
 
     # Execute the queries and close the connection
