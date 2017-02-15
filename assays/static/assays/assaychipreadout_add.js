@@ -1,8 +1,42 @@
 $(document).ready(function () {
-    // Function to repeat a string num number of times
-    function repeat(str, num) {
-        return (new Array(num+1)).join(str);
+    // Get the middleware token
+    var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value') ?
+            $('[name=csrfmiddlewaretoken]').attr('value'):
+            getCookie('csrftoken');
+
+    // Get the quality indicators
+    var quality_indicators = [];
+    $.ajax({
+        url: "/assays_ajax/",
+        type: "POST",
+        dataType: "json",
+        data: {
+            call: 'fetch_quality_indicators',
+            csrfmiddlewaretoken: middleware_token
+        },
+        success: function (json) {
+            quality_indicators = json;
+        },
+        error: function (xhr, errmsg, err) {
+            console.log(xhr.status + ": " + xhr.responseText);
+        }
+    });
+
+    // The data in question as a Object pairing 'time|time_unit|assay|object|value_unit|replicate
+    var data = {};
+
+    var readout_id = getReadoutValue();
+
+    // Indicates whether the data exists in the database or not
+    var exist = false;
+
+    var headers = 0;
+
+    if ($('#id_headers')[0]) {
+        headers = Math.floor($('#id_headers').val());
     }
+
+    var charts = [];
 
     function isTrue(element, index, array) {
         if (!element) {
@@ -25,8 +59,10 @@ $(document).ready(function () {
     }
 
     function addChart(id, name, timeUnits, valueUnits) {
-        $('<div id="chart' + id + '" align="right" style="width: 44.9%;float: right;margin-right: 0.1%;margin-left: -100%px;">')
-            .addClass('chart-container')
+        $('<div>')
+            .attr('id', 'chart' + id)
+            .attr('align', 'right')
+            .addClass('chart-container single-chip-chart')
             .appendTo('#extra');
 
         charts.push(
@@ -54,7 +90,7 @@ $(document).ready(function () {
                     }
                 },
                 title: {
-                	text: name
+                    text: name
                 },
                 tooltip: {
                     format: {
@@ -122,6 +158,15 @@ $(document).ready(function () {
         });
     }
 
+    function clear_new_data() {
+        $('.new-value').each(function() {
+            // Delete this value from data
+            delete data[$(this).attr('data-chart-index')];
+            // Remove the row itself
+            $(this).remove();
+        });
+    }
+
     function validate_readout_file() {
         var serializedData = $('form').serializeArray();
         var formData = new FormData();
@@ -151,7 +196,9 @@ $(document).ready(function () {
                     alert(json.errors);
                     // Remove file selection
                     $('#id_file').val('');
-                    $('#csv_table').html(add);
+                    // $('#table_body').empty();
+                    clear_new_data();
+                    plot();
                 }
                 else {
                     exist = false;
@@ -165,8 +212,9 @@ $(document).ready(function () {
                 console.log(xhr.status + ": " + xhr.responseText);
                 // Remove file selection
                 $('#id_file').val('');
-                resetChart();
-                $('#csv_table').html(add);
+                // $('#table_body').empty();
+                clear_new_data();
+                plot();
             }
         });
     }
@@ -196,8 +244,13 @@ $(document).ready(function () {
     }
 
     var parseAndReplace = function (csv) {
+        var table_body = $('#table_body');
+
+        // Do not empty entire table, only delete new values
+        // table_body.empty();
+        clear_new_data();
+
         if (!csv) {
-            $('#csv_table').html(add);
             return;
         }
 
@@ -215,14 +268,21 @@ $(document).ready(function () {
 
         var lines = parse_csv(csv);
 
-        //Make table
-        var table = exist ? "<table class='chip-table bg-success' style='width: 100%;'><tbody>" : "<table class='chip-table' style='width: 100%;'><tbody>";
+        // If this is in the database
+//        if(exist) {
+//            table_body.addClass('bg-success');
+//        }
+//        else {
+//            table_body.removeClass('bg-success')
+//        }
 
         // table += exist ? "<tr class='bg-info'>" + header + "</tr>" : "";
-        table += "<tr class='bg-info'>" + header + "</tr>";
+        // table += "<tr class='bg-info'>" + header + "</tr>";
 
         // Current index for saving QC values
         var current_index = 0;
+
+        // var table = '';
 
         for (var i in lines) {
             var line = lines[i];
@@ -245,86 +305,152 @@ $(document).ready(function () {
             }
 
             // Index in data
-            var index = '';
+            var index = get_index_for_value(object, time, assay, value_unit, update_number);
+
+            // Notice attribute to assist in deleting old data
+            var new_row = $('<tr>')
+                .attr('data-chart-index', index);
 
             // Need to take a slice to avoid treating missing QC as invalid
             var every = line.slice(0,5).every(isTrue) && isTrue(line[6]) && isTrue(line[9]);
 
-            // If the row will be excluded (highlighted red)
-            // if ((i < headers && !exist) || !every) {
+            if (exist) {
+                new_row.addClass('bg-success');
+            }
+
+            else {
+                new_row.addClass('new-value');
+            }
+
             if (!exist && !every) {
-                table += "<tr class='bg-danger'>";
+                new_row.addClass('bg-danger');
             }
 
-            // If the row has no value (residue code, may be used later)
-            else if (value === 'None' || value === '') {
-                table += "<tr style='background: #606060'>";
+            else if (value == 'None' || !value) {
+                new_row.css('background', '#606060');
             }
 
-            // If the row is marked an outlier
             else if (line[7] && $.trim(line[7])) {
-                table += "<tr class='bg-warning'>";
+                new_row.addClass('bg-warning');
             }
 
-            else {
-                table += "<tr>";
+            var col_chip_id = $('<td>').text(chip_id);
+            var col_time = $('<td>').text(time);
+            var col_time_unit = $('<td>').text(time_unit);
+            var col_assay = $('<td>').text(assay);
+            var col_object = $('<td>').text(object);
+            var col_value = $('<td>').text(value ? data_format(value) : value);
+            var col_value_unit = $('<td>').text(value_unit);
+
+            var col_quality = $('<td>');
+
+            var quality_input = $('<input>')
+                .attr('name', index)
+                // .attr('id', i)
+                .css('width', 50)
+                .addClass('text-danger quality')
+                .val(quality);
+
+            if (exist || every) {
+                col_quality.append(quality_input);
             }
 
-            // DO NOT ADD COMMAS TO CHIP ID
-            if (chip_id) {
-                table += "<th>" + chip_id + "</th>";
-            }
-
-            table += "<th>" + data_format(line[1]) + "</th>";
-
-            for (var j=2; j<5; j++) {
-                if (line[j]) {
-                    table += "<th>" + line[j] + "</th>";
-                }
-                else {
-                    table += "<th></th>";
-                }
-            }
-
-            if(value === 'None' || value === '') {
-                table += "<th></th>";
-            }
-            else {
-                table += "<th>" + data_format(line[5]) + "</th>";
-            }
-
-            table += "<th>" + line[6] + "</th>";
-
-            // Just add text if this is a header row for QC OR if this row is invalid
-            // (QC status of an ignored row does not really matter)
-            // if (i < headers && !exist || !every) {
-            if (!exist && !every) {
-                if (quality) {
-                    table += "<th>" + quality + "</th>";
-                }
-                else {
-                    table += "<th></th>";
-                }
-            }
-            // Add an input for the QC if this isn't a header
-            // QC inputs NAME begin with "QC_"
-            // QC input IDS are the row index (for plotting accurately)
-            else {
-                index = get_index_for_value(object, time, assay, value_unit, update_number);
-                table += "<th><input size='4' class='quality text-danger' id='" + i + "' name='" + index + "' value='" + quality + "'></th>";
-                // Increment the current index
-                current_index += 1;
-            }
-
-            // Add notes
+            var col_notes = $('<td>');
             if (notes) {
-                table += '<th><span class="glyphicon glyphicon-info-sign" title="' + notes + '"></span></th>';
-            }
-            else {
-                table += "<th></th>";
+                col_notes.append(
+                    $('<span>')
+                        .addClass('glyphicon glyphicon-info-sign')
+                        .attr('title', notes)
+                );
             }
 
-            table += "</tr>";
+            new_row.append(
+                col_chip_id,
+                col_time,
+                col_time_unit,
+                col_assay,
+                col_object,
+                col_value,
+                col_value_unit,
+                col_quality,
+                col_notes
+            );
+            table_body.append(new_row);
+//            // If the row will be excluded (highlighted red)
+//            // if ((i < headers && !exist) || !every) {
+//            if (!exist && !every) {
+//                table += "<tr class='bg-danger'>";
+//            }
+//
+//            // If the row has no value (residue code, may be used later)
+//            else if (value === 'None' || value === '') {
+//                table += "<tr style='background: #606060'>";
+//            }
+//
+//            // If the row is marked an outlier
+//            else if (line[7] && $.trim(line[7])) {
+//                table += "<tr class='bg-warning'>";
+//            }
+//
+//            else {
+//                table += "<tr>";
+//            }
+//
+//            // DO NOT ADD COMMAS TO CHIP ID
+//            if (chip_id) {
+//                table += "<td>" + chip_id + "</td>";
+//            }
+//
+//            table += "<td>" + data_format(line[1]) + "</td>";
+//
+//            for (var j=2; j<5; j++) {
+//                if (line[j]) {
+//                    table += "<td>" + line[j] + "</td>";
+//                }
+//                else {
+//                    table += "<td></td>";
+//                }
+//            }
+//
+//            if(value === 'None' || value === '') {
+//                table += "<td></td>";
+//            }
+//            else {
+//                table += "<td>" + data_format(line[5]) + "</td>";
+//            }
+//
+//            table += "<td>" + line[6] + "</td>";
+//
+//            // Just add text if this is a header row for QC OR if this row is invalid
+//            // (QC status of an ignored row does not really matter)
+//            // if (i < headers && !exist || !every) {
+//            if (!exist && !every) {
+//                if (quality) {
+//                    table += "<td>" + quality + "</td>";
+//                }
+//                else {
+//                    table += "<td></td>";
+//                }
+//            }
+//            // Add an input for the QC if this isn't a header
+//            // QC inputs NAME begin with "QC_"
+//            // QC input IDS are the row index (for plotting accurately)
+//            else {
+//                index = get_index_for_value(object, time, assay, value_unit, update_number);
+//                table += "<td><input size='5' class='quality text-danger' id='" + i + "' name='" + index + "' value='" + quality + "'></td>";
+//                // Increment the current index
+//                current_index += 1;
+//            }
+//
+//            // Add notes
+//            if (notes) {
+//                table += '<td><span class="glyphicon glyphicon-info-sign" title="' + notes + '"></span></td>';
+//            }
+//            else {
+//                table += "<td></td>";
+//            }
+//
+//            table += "</tr>";
 
             // Add to data if index
             if (index) {
@@ -332,11 +458,96 @@ $(document).ready(function () {
             }
         }
 
-        table += "</tbody></table>";
-        $('#csv_table').html(table);
+        var all_qualities = $('.quality');
+
+        // Bind click event to quality
+        all_qualities.click(function() {
+            // Remove other tables to avoid quirk when jumping from quality to quality
+            $('.quality-indicator-table').remove();
+
+            var current_quality = $(this);
+
+            var table_container = $('<div>')
+                .css('width', '180px')
+                .css('background-color', '#FDFEFD')
+                .addClass('quality-indicator-table');
+
+            var indicator_table = $('<table>')
+                .css('width', '100%')
+                .attr('align', 'center')
+                .addClass('table table-striped table-bordered table-hover table-condensed');
+
+            $.each(quality_indicators, function(index, indicator) {
+                var prechecked = false;
+
+                // ASSUMES SINGLE CHARACTER CODES
+                if (current_quality.val().indexOf(indicator.code) > -1) {
+                    prechecked = true;
+                }
+
+                var new_row = $('<tr>');
+                var name = $('<td>').text(indicator.name + ' ');
+
+                // Add the description
+                name.append(
+                    $('<span>')
+                        .addClass('glyphicon glyphicon-question-sign')
+                        .attr('title', indicator.description)
+                );
+
+                var code = $('<td>')
+                    .text(indicator.code)
+                    .addClass('lead');
+
+                var select = $('<td>')
+                    .append($('<input>')
+                        .attr('type', 'checkbox')
+                        .val(indicator.code)
+                        .prop('checked', prechecked)
+                        .addClass('quality-indicator')
+                        .click(function() {
+                            var current_quality_value = current_quality.val();
+
+                            // If it is being checked
+                            if ($(this).prop('checked') == true) {
+                                if (current_quality_value.indexOf($(this).val()) < 0) {
+                                    current_quality.val(current_quality_value + $(this).val());
+                                }
+                            }
+                            else {
+                                // Otherwise get rid of flag
+                                current_quality.val(current_quality_value.replace($(this).val(), ''));
+                            }
+
+                            current_quality.focus();
+                            current_quality.trigger('change');
+                        }));
+                new_row.append(name, code, select);
+                indicator_table.append(new_row);
+            });
+
+            table_container.append(indicator_table);
+
+            $('body').append(table_container);
+
+            table_container.position({
+              of: current_quality,
+              my: 'left-125 top',
+              at: 'left bottom'
+            });
+        });
+
+        // Bind unfocus event to qualities
+        all_qualities.focusout(function(event) {
+            var related_target = $(event.relatedTarget);
+            // Remove any quality indicator tables if not quality-indicator-table or quality
+            if (!related_target.hasClass('quality-indicator')) {
+                $('.quality-indicator-table').remove();
+            }
+        });
 
         // Bind change event to quality
-        $('.quality').change(function() {
+        all_qualities.change(function() {
             // Change color of parent if there is input
             if (this.value) {
                 $(this).parent().parent().addClass('bg-warning');
@@ -470,56 +681,9 @@ $(document).ready(function () {
             // getText(file);
         }
         else {
-            if (readout_id) {
-               getReadout()
-            }
-            else {
-                $('#csv_table').html(add);
-            }
+            $('#table_body').empty();
         }
     };
-
-    // The data in question as a Object pairing 'time|time_unit|assay|object|value_unit|update_number
-    var data = {};
-
-    var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
-
-    var readout_id = getReadoutValue();
-
-    // Indicates whether the data exists in the database or not
-    var exist = false;
-
-    var headers = 0;
-    var header = "<th>Chip ID</th>" +
-        "<th>Time</th>" +
-        "<th>Time Unit</th>" +
-        "<th>Assay</th>" +
-        "<th>Object</th>" +
-        "<th>Value</th>" +
-        "<th>Value Unit</th>" +
-        "<th>QC Status</th>" +
-        "<th></th>";
-
-    if ($('#id_headers')[0]) {
-        headers = Math.floor($('#id_headers').val());
-    }
-
-    var add = "<table class='chip-table' style='width: 100%;'><tbody>" +
-        "<tr class='bg-info'>" + header + "</tr>" +
-        "<tr>" + repeat('<th><br><br></th>',8) + "</tr>" +
-        "<tr>" + repeat('<th><br><br></th>',8) + "</tr>" +
-        "</tbody></table>";
-
-    if ($('#assaychipreadoutassay_set-group')[0] != undefined) {
-        $('<div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;min-width: 975px;overflow: hidden;">')
-            .appendTo('body');
-        $("#extra").insertAfter($("#assaychipreadoutassay_set-group")[0]);
-
-        $('<div id="csv_table" style="width: 55%;float: left;">')
-            .appendTo('#extra').html(add);
-
-        var charts = [];
-    }
 
     if (readout_id) {
         getReadout();

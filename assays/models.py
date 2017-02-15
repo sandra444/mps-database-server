@@ -245,6 +245,22 @@ class AssayWellCompound(models.Model):
     column = models.CharField(max_length=25)
 
 
+class AssayQualityIndicator(LockableModel):
+    """AssayQualityIndicators show whether a data point needs to be excluded"""
+    # Name of the indicator
+    name = models.CharField(max_length=255, unique=True)
+
+    # Short version of the indicator for input in the quality field
+    # Theoretically, the code should be a single character, but I will err on the side of caution
+    code = models.CharField(max_length=10, unique=True)
+
+    # Description of the indicator (for tooltips)
+    description = models.CharField(max_length=2000)
+
+    # Is this necessary? Do we assume that all need to be excluded?
+    # exclude = models.BooleanField(default=True)
+
+# TO BE DEPRECATED To be merged into single "AssayCells" model
 class AssayPlateCells(models.Model):
     """Individual cell parameters for PLATE setup used in inline"""
 
@@ -263,6 +279,7 @@ class AssayPlateCells(models.Model):
                                     blank=True, default='')
 
 
+# TO BE DEPRECATED To be merged into single "AssaySetup" model
 class AssayPlateSetup(FlaggableModel):
     """Setup for MICROPLATES"""
 
@@ -314,6 +331,7 @@ class AssayReader(LockableModel):
         return u'{0} - {1}'.format(self.reader_name, self.reader_type)
 
 
+# TO BE DEPRECATED To be merged into single "AssayInstance" model
 class AssayPlateReadoutAssay(models.Model):
     """Inline for PLATE readout assays"""
 
@@ -340,6 +358,7 @@ class AssayPlateReadoutAssay(models.Model):
         return u'{0}-{1}'.format(self.assay_id.assay_short_name, self.feature)
 
 
+# TO BE DEPRECATED To be merged into single "AssayData" model
 class AssayReadout(models.Model):
     """An individual value for a PLATE readout"""
 
@@ -353,6 +372,11 @@ class AssayReadout(models.Model):
 
     # Quality, if it is not the empty string, indicates that a readout is INVALID
     quality = models.CharField(default='', max_length=10)
+
+    # IT WAS DECIDED THAT A FK WOULD NOT BE USED
+    # Use quality with each flag separated with a '-' (SUBJECT TO CHANGE)
+    # Quality indicator from QualityIndicator table (so that additional can be added)
+    # quality_indicator = models.ForeignKey(AssayQualityIndicator, null=True, blank=True)
 
     # This value contains notes for the data point
     notes = models.CharField(max_length=255, default='')
@@ -376,11 +400,13 @@ class AssayReadout(models.Model):
 #        return self.readout_unit
 
 
+# Likely to become deprecated
 # Get readout file location
 def plate_readout_file_location(instance, filename):
     return '/'.join(['csv', str(instance.setup.assay_run_id_id), 'plate', filename])
 
 
+# TO BE DEPRECATED To be merged into single "AssayDataset" model
 class AssayPlateReadout(FlaggableModel):
     """Readout data collected from MICROPLATES"""
 
@@ -468,6 +494,7 @@ class AssayResultType(LockableModel):
         return self.assay_result_type
 
 
+# TO BE DEPRECATED To be merged into single "AssayResult" model
 class AssayPlateResult(models.Model):
     """Individual result parameters for PLATE RESULTS used in inline"""
 
@@ -504,6 +531,7 @@ class AssayPlateResult(models.Model):
                                   null=True)
 
 
+# TO BE DEPRECATED To be merged into single "AssayResultset" model
 class AssayPlateTestResult(FlaggableModel):
     """Test Results from MICROPLATES"""
 
@@ -575,6 +603,9 @@ def bulk_readout_file_location(instance, filename):
     return '/'.join(['csv', str(instance.id), 'bulk', filename])
 
 
+# To be renamed "AssayStudy" for clarity
+# Handling of study type will be changed
+# Nature of assay_run_id subject to revision
 class AssayRun(FlaggableModel):
     """The encapsulation of all data concerning some plate/chip project"""
 
@@ -672,6 +703,7 @@ class StudySupportingData(models.Model):
     )
 
 
+# TO BE DEPRECATED To be merged into single "AssayData" model
 class AssayChipRawData(models.Model):
     """Individual lines of readout data"""
 
@@ -689,6 +721,11 @@ class AssayChipRawData(models.Model):
 
     # This value will act as quality control, if it evaluates True then the value is considered invalid
     quality = models.CharField(max_length=20, default='')
+
+    # IT WAS DECIDED THAT A FK WOULD NOT BE USED
+    # Use quality with each flag separated with a '-' (SUBJECT TO CHANGE)
+    # Quality indicator from QualityIndicator table (so that additional can be added)
+    # quality_indicator = models.ForeignKey(AssayQualityIndicator, null=True, blank=True)
 
     # This value contains notes for the data point
     notes = models.CharField(max_length=255, default='')
@@ -716,6 +753,7 @@ class AssayChipCells(models.Model):
                                     blank=True, default='')
 
 
+# TO BE DEPRECATED To be merged into single "AssaySetup" model
 class AssayChipSetup(FlaggableModel):
     """The configuration of a Chip for implementing an assay"""
     class Meta(object):
@@ -783,6 +821,7 @@ object_types = (
 )
 
 
+# TO BE DEPRECATED To be merged into single "AssayInstance" model
 class AssayChipReadoutAssay(models.Model):
     """Inline for CHIP readout assays"""
 
@@ -805,11 +844,13 @@ class AssayChipReadoutAssay(models.Model):
         return u'{}'.format(self.assay_id)
 
 
+# Likely to become deprecated
 # Get readout file location
 def chip_readout_file_location(instance, filename):
     return '/'.join(['csv', str(instance.chip_setup.assay_run_id_id), 'chip', filename])
 
 
+# TO BE DEPRECATED To be merged into single "AssayDataset" model
 class AssayChipReadout(FlaggableModel):
     """Readout data for CHIPS"""
 
@@ -866,6 +907,7 @@ class AssayChipReadout(FlaggableModel):
         return '/assays/assaychipreadout/{}/delete/'.format(self.id)
 
 
+# TO BE DEPRECATED To be merged into single "AssayResultSet" model
 class AssayChipTestResult(FlaggableModel):
     """Results calculated from Raw Chip Data"""
 
@@ -920,6 +962,7 @@ class AssayChipTestResult(FlaggableModel):
         return '/assays/assaychiptestresult/{}/delete/'.format(self.id)
 
 
+# TO BE DEPRECATED To be merged into single "AssayResult" model
 class AssayChipResult(models.Model):
     """Individual result parameters for CHIP RESULTS used in inline"""
 
@@ -962,7 +1005,9 @@ class AssayDataUpload(FlaggableModel):
     # date_created, created_by, and other fields are used but come from FlaggableModel
     file_location = models.URLField(null=True, blank=True)
     # Note that there are both chip and plate readouts listed as one file may supply both
+    # TO BE DEPRECATED
     chip_readout = models.ManyToManyField(AssayChipReadout)
+    # TO BE DEPRECATED
     plate_readout = models.ManyToManyField(AssayPlateReadout)
 
     # Supplying study may seem redundant, however:

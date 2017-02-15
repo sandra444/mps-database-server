@@ -56,7 +56,7 @@ var MODELS = {
         'Assay well types': [20, 'Virtual Well Types', 4, true],
         'Assay readers': [32, 'Reader Devices', 2],
         'Readout units': [36, 'Readout Units', 0, true],
-        'Physical Units': [38, 'Measurement Units', 0, true],
+        'Physical Units': [38, 'Physical Units', 0],
         'Time Units' : [40, 'Time Units', 0, true],
     },
     'Compounds': {

@@ -268,5 +268,28 @@
             {% endfor %}
         </tbody>
     </table>
+
+    {# Inline CSS is very distasteful #}
+    <div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;min-width: 975px;overflow: hidden;">
+        <div id="csv_table" style="width: 55%;float: left;">
+            <table class="data-table" align="left">
+                <thead>
+                    <tr class="bg-info">
+                        <th>Chip ID</th>
+                        <th>Time</th>
+                        <th>Time Unit</th>
+                        <th>Assay</th>
+                        <th>Object</th>
+                        <th>Value</th>
+                        <th>Value Unit</th>
+                        <th>QC Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="table_body">
+                </tbody>
+            </table>
+        </div>
+    </div>
 </form>
 {% endblock %}

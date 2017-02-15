@@ -476,7 +476,7 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
                 if percent_control and raw.assay_chip_id.chip_setup.chip_test_type == 'control':
                     initial_data.setdefault(assay, {}).setdefault(unit, {}).setdefault('-Control-', {}).setdefault(field, {}).setdefault(time, []).append(value)
 
-             # Set data in nested monstrosity that is initial_data
+            # Set data in nested monstrosity that is initial_data
             initial_data.setdefault(assay, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(field, {}).setdefault(time, []).append(value)
 
     for assay, units in initial_data.items():
@@ -946,6 +946,28 @@ def validate_individual_plate_file(request):
                             content_type='application/json')
 
 
+def fetch_quality_indicators(request):
+    """Returns quality indicators as JSON for populating dropdowns"""
+
+    # The JSON data to return; initialize with an entry for None
+    # data = [{
+    #     'id': '',
+    #     'code': '',
+    #     'name': '',
+    #     'description': 'No quality indicator selected'
+    # }]
+    data = []
+
+    for quality_indicator in AssayQualityIndicator.objects.all().order_by('code'):
+        data.append({
+            'id': quality_indicator.id,
+            'code': quality_indicator.code,
+            'name': quality_indicator.name,
+            'description': quality_indicator.description
+        })
+
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
 switch = {
     'fetch_assay_layout_content': fetch_assay_layout_content,
     'fetch_readout': fetch_readout,
@@ -961,7 +983,8 @@ switch = {
     'fetch_protocol': fetch_protocol,
     'validate_bulk_file': validate_bulk_file,
     'validate_individual_chip_file': validate_individual_chip_file,
-    'validate_individual_plate_file': validate_individual_plate_file
+    'validate_individual_plate_file': validate_individual_plate_file,
+    'fetch_quality_indicators': fetch_quality_indicators
 }
 
 

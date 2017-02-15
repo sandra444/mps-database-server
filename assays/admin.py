@@ -43,7 +43,6 @@ import xlsxwriter
 
 def modify_templates():
     """Writes totally new templates for chips and both types of plates"""
-
     # Where will I store the templates?
     template_root = MEDIA_ROOT + '/excel_templates/'
 
@@ -95,8 +94,10 @@ def modify_templates():
     ]
 
     chip_initial_format = [
-        [chip_red] * 10,
-        [
+        [chip_red] * 10
+    ]
+    for x in range(200):
+        chip_initial_format.append([
             None,
             None,
             chip_green,
@@ -104,11 +105,10 @@ def modify_templates():
             None,
             None,
             chip_green,
-            None,
+            chip_green,
             None,
             None
-        ]
-    ]
+        ])
 
     plate_tabular_initial = [
         [
@@ -241,6 +241,9 @@ def modify_templates():
 
     plate_block_sheet.set_column('BA:BC', 30)
 
+    # Get a list of quality indicators
+    quality_indicators = AssayQualityIndicator.objects.all().values_list('name', flat=True)
+
     # Get list of time units
     time_units = PhysicalUnits.objects.filter(
         unit_type__unit_type='Time'
@@ -261,25 +264,34 @@ def modify_templates():
         'assay_name'
     ).values_list('assay_name', flat=True)
 
+#     for index, value in enumerate(quality_indicators):
+#         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
+#         plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
+#         # Plate templates are slated to be deprecated
+# #         plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
+
     for index, value in enumerate(time_units):
-        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+2, value)
-        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+2, value)
-        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+2, value)
+        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
+        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
+        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
 
     for index, value in enumerate(value_units):
-        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+1, value)
-        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+1, value)
-        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+1, value)
+        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
+        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
+        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
 
     for index, value in enumerate(assays):
         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
         plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
         plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
 
+    # quality_indicators_range = '=$BD$1:$BD$' + str(len(quality_indicators))
     time_units_range = '=$BC$1:$BC$' + str(len(time_units))
     value_units_range = '=$BB$1:$BB$' + str(len(value_units))
     assays_range = '=$BA$1:$BA$' + str(len(assays))
 
+    # chip_sheet.data_validation('H2', {'validate': 'list',
+    #                            'source': quality_indicators_range})
     chip_sheet.data_validation('C2', {'validate': 'list',
                                'source': time_units_range})
     chip_sheet.data_validation('D2', {'validate': 'list',
@@ -305,6 +317,35 @@ def modify_templates():
     chip.close()
     plate_tabular.close()
     plate_block.close()
+
+
+class AssayQualityIndicatorAdmin(LockableAdmin):
+    save_on_top = True
+    list_display = ('code', 'name', 'description')
+
+    def save_model(self, request, obj, form, change):
+        template_change = False
+
+        # Check whether template needs to change
+        # Change if assay name has changed or it is new
+        if obj.pk is not None:
+            original = AssayQualityIndicator.objects.get(pk=obj.pk)
+            if original.name != obj.name:
+                template_change = True
+        else:
+            template_change = True
+
+        if change:
+            obj.modified_by = request.user
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        obj.save()
+
+        if template_change:
+            modify_templates()
+
+admin.site.register(AssayQualityIndicator, AssayQualityIndicatorAdmin)
 
 
 class AssayModelTypeAdmin(LockableAdmin):
@@ -351,7 +392,7 @@ class AssayModelAdmin(LockableAdmin):
                 'fields': (
                     ('assay_name', 'assay_short_name',),
                     ('assay_type', 'test_type',),
-                    ('version_number', 'assay_protocol_file', ),
+                    ('version_number', 'assay_protocol_file',),
                     ('assay_description',))
             }
         ),
@@ -359,9 +400,9 @@ class AssayModelAdmin(LockableAdmin):
             'Change Tracking', {
                 'fields': (
                     'locked',
-                    ('created_by', 'created_on', ),
-                    ('modified_by', 'modified_on', ),
-                    ('signed_off_by', 'signed_off_date', ),
+                    ('created_by', 'created_on',),
+                    ('modified_by', 'modified_on',),
+                    ('signed_off_by', 'signed_off_date',),
                 )
             }
         ),
@@ -1474,7 +1515,7 @@ class AssayRunAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     date_hierarchy = 'start_date'
-    list_display = ('assay_run_id', 'study_types', 'start_date', 'description', )
+    list_display = ('assay_run_id', 'study_types', 'start_date', 'description',)
     fieldsets = (
         (
             'Study', {
