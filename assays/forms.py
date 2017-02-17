@@ -24,7 +24,7 @@ group = ('group',)
 OVERWRITE_OPTIONS_BULK = forms.ChoiceField(
     choices=(
         ('mark_conflicting_data', 'Replace Conflicting Data'),
-        ('mark_all_old_data', 'Replace All Current Study Data'),
+        # ('mark_all_old_data', 'Replace All Current Study Data'),
         ('keep_conflicting_data', 'Add New Data and Keep Current Data'),
         # ('delete_conflicting_data', 'Delete Conflicting Data'),
         # ('delete_all_old_data', 'Delete All Old Data')
@@ -265,7 +265,7 @@ def update_compound_instance_and_supplier():
     """This function is intended to unify the processes involved in updating instances and suppliers"""
     pass
 
- # Converts: days -> minutes, hours -> minutes, minutes->minutes
+# Converts: days -> minutes, hours -> minutes, minutes->minutes
 TIME_CONVERSIONS = [
     ('day', 1440),
     ('hour', 60),
@@ -273,6 +273,7 @@ TIME_CONVERSIONS = [
 ]
 
 TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
+
 
 class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
     """Frontend Inline Formset for Compound Instances"""
@@ -431,7 +432,7 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
 
         # Get all suppliers
         suppliers = {
-            supplier.name:supplier for supplier in CompoundSupplier.objects.all()
+            supplier.name: supplier for supplier in CompoundSupplier.objects.all()
         }
 
         # Forms to save
@@ -490,7 +491,6 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
                 compound_instances.update({
                     (compound.id, supplier.id, lot_text, receipt_date): compound_instance
                 })
-
 
             # Update the instance with new data
             instance.chip_setup = chip_setup
@@ -645,7 +645,7 @@ class AssayLayoutForm(SignOffMixin, forms.ModelForm):
     )
     concentration = forms.FloatField(required=False)
 
-     # Text field (un-saved) for supplier
+    # Text field (un-saved) for supplier
     supplier_text = forms.CharField(required=False)
     # Text field (un-saved) for lot
     lot_text = forms.CharField(required=False)
@@ -864,7 +864,7 @@ def get_row_and_column(well_id, offset):
     well_id - the well ID as a string
     offset - offset to resulting row and column indexes (to start at zero, for instance)
     """
-     # Split the well into alphabetical and numeric
+    # Split the well into alphabetical and numeric
     row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well_id)
 
     # PLEASE NOTE THAT THE VALUES ARE OFFSET BY ONE (to begin with 0)

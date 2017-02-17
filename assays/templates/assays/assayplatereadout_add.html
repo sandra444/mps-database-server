@@ -281,18 +281,18 @@
     </div>
 
     {# CONTRIVED: REFACTOR SOON #}
-    <div class="fancy-checkbox form-group" style="padding-left:40px;">
-        <input type="checkbox" id="qc_mode" />
-        <div class="btn-group" style="min-width: 550px;">
-            <label for="qc_mode" class="btn btn-danger">
-                <span class="glyphicon glyphicon-ok"></span>
-                <span> </span>
-            </label>
-            <label for="qc_mode" class="btn btn-default active">
-                Click Values to Invalidate/Validate Them <small>(click here to toggle this function on and off)</small>
-            </label>
-        </div>
-    </div>
+{#    <div class="fancy-checkbox form-group" style="padding-left:40px;">#}
+{#        <input type="checkbox" id="qc_mode" />#}
+{#        <div class="btn-group" style="min-width: 550px;">#}
+{#            <label for="qc_mode" class="btn btn-danger">#}
+{#                <span class="glyphicon glyphicon-ok"></span>#}
+{#                <span> </span>#}
+{#            </label>#}
+{#            <label for="qc_mode" class="btn btn-default active">#}
+{#                Click Values to Invalidate/Validate Them <small>(click here to toggle this function on and off)</small>#}
+{#            </label>#}
+{#        </div>#}
+{#    </div>#}
 
     <div class="padded-row">
         <div hidden id="heatmap_options" class="inline-group row">
@@ -391,6 +391,27 @@
                     </g>
                 </g>
             </svg>
+        </div>
+
+        <div align="center">
+            <table class="data-table">
+                <thead>
+                    <tr class="bg-info">
+                        <th>Plate ID</th>
+                        <th>Well ID</th>
+                        <th>Time</th>
+                        <th>Time Unit</th>
+                        <th>Assay</th>
+                        <th>Feature</th>
+                        <th>Value</th>
+                        <th>Value Unit</th>
+                        <th>QC Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="table_body">
+                </tbody>
+            </table>
         </div>
     </div>
 </form>

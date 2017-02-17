@@ -61,11 +61,13 @@ $(document).ready(function () {
                         alert(json.errors);
                         // Remove file selection
                         $('#id_file').val('');
+                        window.LAYOUT.clear_new_data();
+                        window.LAYOUT.build_heatmap();
                     }
                     else {
-                        alert('Success! Please see "New Chip Data" below for preview.');
+                        alert('Success! Please see below for preview.');
                         // Fill heatmap
-                        window.LAYOUT.fill_readout_from_existing(json);
+                        window.LAYOUT.fill_readout_from_existing(json, false);
                     }
                 },
                 error: function (xhr, errmsg, err) {
@@ -73,6 +75,8 @@ $(document).ready(function () {
                     console.log(xhr.status + ": " + xhr.responseText);
                     // Remove file selection
                     $('#id_file').val('');
+                    window.LAYOUT.clear_new_data();
+                    window.LAYOUT.build_heatmap();
                 }
             });
         }

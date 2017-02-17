@@ -1015,7 +1015,7 @@ def validate_plate_readout_file(
 
                                 readout_data.append({
                                     # Tentative may become useful soon
-                                    'plate': plate_id,
+                                    'plate_id': plate_id,
                                     'row': offset_row_id,
                                     'column': column_id,
                                     'value': value,
@@ -1241,7 +1241,7 @@ def validate_plate_readout_file(
 
                         readout_data.append({
                             # Tentative may become useful soon
-                            'plate': plate_id,
+                            'plate_id': plate_id,
                             'row': row_label,
                             'column': column_label,
                             'value': value,
@@ -1266,15 +1266,6 @@ def validate_plate_readout_file(
     if errors:
         raise forms.ValidationError(errors)
     elif save:
-        if overwrite_option == 'delete_conflicting_data':
-            for entry in conflicting_entries:
-                entry.delete()
-        elif overwrite_option == 'mark_conflicting_data':
-            readout_ids_and_notes = []
-            for entry in conflicting_entries:
-                readout_ids_and_notes.append((entry.id, entry.notes, entry.quality))
-            mark_plate_readout_values(readout_ids_and_notes, stamp=True)
-
         # Connect to the database
         cursor = connection.cursor()
         # The generic query
@@ -1287,6 +1278,21 @@ def validate_plate_readout_file(
 
         if form:
             modify_qc_status_plate(readout, form)
+
+        if overwrite_option == 'delete_conflicting_data':
+            for entry in conflicting_entries:
+                entry.delete()
+        elif overwrite_option == 'mark_conflicting_data':
+            readout_ids_and_notes = []
+            for entry in conflicting_entries:
+                readout_ids_and_notes.append((entry.id, entry.notes, entry.quality))
+            mark_plate_readout_values(readout_ids_and_notes, stamp=True)
+        elif overwrite_option == 'mark_all_old_data':
+            readout_ids_and_notes = []
+            for key, entries in possible_conflicting_data.items():
+                for entry in entries:
+                    readout_ids_and_notes.append((entry.id, entry.notes, entry.quality))
+            mark_plate_readout_values(readout_ids_and_notes, stamp=True)
 
         return True
     else:
@@ -1846,15 +1852,6 @@ def validate_chip_readout_file(
     if errors:
         raise forms.ValidationError(errors)
     elif save:
-        if overwrite_option == 'delete_conflicting_data':
-            for entry in conflicting_entries:
-                entry.delete()
-        elif overwrite_option == 'mark_conflicting_data':
-            readout_ids_and_notes = []
-            for entry in conflicting_entries:
-                readout_ids_and_notes.append((entry.id, entry.notes, entry.quality))
-            mark_chip_readout_values(readout_ids_and_notes, stamp=True)
-
         # Connect to the database
         cursor = connection.cursor()
         # The generic query
@@ -1867,6 +1864,21 @@ def validate_chip_readout_file(
 
         if form:
             modify_qc_status_chip(readout, form)
+
+        if overwrite_option == 'delete_conflicting_data':
+            for entry in conflicting_entries:
+                entry.delete()
+        elif overwrite_option == 'mark_conflicting_data':
+            readout_ids_and_notes = []
+            for entry in conflicting_entries:
+                readout_ids_and_notes.append((entry.id, entry.notes, entry.quality))
+            mark_chip_readout_values(readout_ids_and_notes, stamp=True)
+        elif overwrite_option == 'mark_all_old_data':
+            readout_ids_and_notes = []
+            for key, entries in possible_conflicting_data.items():
+                for entry in entries:
+                    readout_ids_and_notes.append((entry.id, entry.notes, entry.quality))
+            mark_chip_readout_values(readout_ids_and_notes, stamp=True)
 
         return True
     else:
@@ -2056,68 +2068,68 @@ def parse_file_and_save(current_file, created_by, study_id, overwrite_option, in
     # Save the current file
     current_file.save()
 
-    if interface == 'Bulk':
-        old_chip_data = AssayChipRawData.objects.filter(
-            assay_chip_id__chip_setup__assay_run_id_id=study_id
-        ).prefetch_related(
-            'assay_chip_id__chip_setup__assay_run_id',
-            'assay_id__assay_id'
-        )
-
-        # Delete all old data
-        if overwrite_option == 'delete_all_old_data':
-            old_chip_data.delete()
-        # Add 'OLD' to qc status of all old data
-        elif overwrite_option == 'mark_all_old_data':
-            readout_ids_and_notes = old_chip_data.values_list('id', 'notes', 'quality')
-            mark_chip_readout_values(readout_ids_and_notes, stamp=True)
-
-        old_plate_data = AssayReadout.objects.filter(
-            assay_device_readout__setup__assay_run_id_id=study_id
-        ).prefetch_related(
-            'assay_device_readout__setup__assay_run_id',
-            'assay__assay_id'
-        )
-
-        # Delete all old data
-        if overwrite_option == 'delete_all_old_data':
-            old_plate_data.delete()
-        # Add 'OLD' to qc status of all old data
-        elif overwrite_option == 'mark_all_old_data':
-            readout_ids_and_notes = old_plate_data.values_list('id', 'notes', 'quality')
-            mark_plate_readout_values(readout_ids_and_notes, stamp=True)
-
-    elif interface == 'Chip':
-        old_chip_data = AssayChipRawData.objects.filter(
-            assay_chip_id=readout
-        ).prefetch_related(
-            'assay_chip_id__chip_setup__assay_run_id',
-            'assay_id__assay_id'
-        )
-
-        # Delete all old data
-        if overwrite_option == 'delete_all_old_data':
-            old_chip_data.delete()
-        # Add 'OLD' to qc status of all old data
-        elif overwrite_option == 'mark_all_old_data':
-            readout_ids_and_notes = old_chip_data.values_list('id', 'notes', 'quality')
-            mark_chip_readout_values(readout_ids_and_notes, stamp=True)
-
-    elif interface == 'Plate':
-        old_plate_data = AssayReadout.objects.filter(
-            assay_device_readout=readout
-        ).prefetch_related(
-            'assay_device_readout__setup__assay_run_id',
-            'assay__assay_id'
-        )
-
-        # Delete all old data
-        if overwrite_option == 'delete_all_old_data':
-            old_plate_data.delete()
-        # Add 'OLD' to qc status of all old data
-        elif overwrite_option == 'mark_all_old_data':
-            readout_ids_and_notes = old_plate_data.values_list('id', 'notes', 'quality')
-            mark_plate_readout_values(readout_ids_and_notes, stamp=True)
+    # if interface == 'Bulk':
+    #     old_chip_data = AssayChipRawData.objects.filter(
+    #         assay_chip_id__chip_setup__assay_run_id_id=study_id
+    #     ).prefetch_related(
+    #         'assay_chip_id__chip_setup__assay_run_id',
+    #         'assay_id__assay_id'
+    #     )
+    #
+    #     # Delete all old data
+    #     if overwrite_option == 'delete_all_old_data':
+    #         old_chip_data.delete()
+    #     # Add 'OLD' to qc status of all old data
+    #     elif overwrite_option == 'mark_all_old_data':
+    #         readout_ids_and_notes = old_chip_data.values_list('id', 'notes', 'quality')
+    #         mark_chip_readout_values(readout_ids_and_notes, stamp=True)
+    #
+    #     old_plate_data = AssayReadout.objects.filter(
+    #         assay_device_readout__setup__assay_run_id_id=study_id
+    #     ).prefetch_related(
+    #         'assay_device_readout__setup__assay_run_id',
+    #         'assay__assay_id'
+    #     )
+    #
+    #     # Delete all old data
+    #     if overwrite_option == 'delete_all_old_data':
+    #         old_plate_data.delete()
+    #     # Add 'OLD' to qc status of all old data
+    #     elif overwrite_option == 'mark_all_old_data':
+    #         readout_ids_and_notes = old_plate_data.values_list('id', 'notes', 'quality')
+    #         mark_plate_readout_values(readout_ids_and_notes, stamp=True)
+    #
+    # elif interface == 'Chip':
+    #     old_chip_data = AssayChipRawData.objects.filter(
+    #         assay_chip_id=readout
+    #     ).prefetch_related(
+    #         'assay_chip_id__chip_setup__assay_run_id',
+    #         'assay_id__assay_id'
+    #     )
+    #
+    #     # Delete all old data
+    #     if overwrite_option == 'delete_all_old_data':
+    #         old_chip_data.delete()
+    #     # Add 'OLD' to qc status of all old data
+    #     elif overwrite_option == 'mark_all_old_data':
+    #         readout_ids_and_notes = old_chip_data.values_list('id', 'notes', 'quality')
+    #         mark_chip_readout_values(readout_ids_and_notes, stamp=True)
+    #
+    # elif interface == 'Plate':
+    #     old_plate_data = AssayReadout.objects.filter(
+    #         assay_device_readout=readout
+    #     ).prefetch_related(
+    #         'assay_device_readout__setup__assay_run_id',
+    #         'assay__assay_id'
+    #     )
+    #
+    #     # Delete all old data
+    #     if overwrite_option == 'delete_all_old_data':
+    #         old_plate_data.delete()
+    #     # Add 'OLD' to qc status of all old data
+    #     elif overwrite_option == 'mark_all_old_data':
+    #         readout_ids_and_notes = old_plate_data.values_list('id', 'notes', 'quality')
+    #         mark_plate_readout_values(readout_ids_and_notes, stamp=True)
 
     excel_file = None
     datalist = None
@@ -2319,7 +2331,7 @@ def validate_csv_file(self, datalist, interface, overwrite_option, study=None, r
             readout=readout,
             study=study
         )
-    else:
+    elif sheet_type in PLATE_FORMATS:
         if not plate_details:
             plate_details = get_plate_details(self, study, readout)
 
@@ -2332,6 +2344,9 @@ def validate_csv_file(self, datalist, interface, overwrite_option, study=None, r
             overwrite_option=overwrite_option,
             readout=readout
         )
+    # IF NOT IN PLATE OR CHIP FORMATS, THROW ERROR
+    else:
+        errors.append('The file is not formatted correctly. Please check the header of the file.')
 
     if not errors:
         return {

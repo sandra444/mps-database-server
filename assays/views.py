@@ -1925,7 +1925,7 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
                 AssayReadout.objects.filter(assay_device_readout=self.object).delete()
             # Save file if it exists
             elif formset.files.get('file', ''):
-                current_file = formset.files.get('file', '')
+                # current_file = formset.files.get('file', '')
                 study_id = str(self.object.setup.assay_run_id.id)
                 parse_file_and_save(
                     self.object.file, self.object.modified_by, study_id, overwrite_option, 'Plate', readout=self.object, form=form

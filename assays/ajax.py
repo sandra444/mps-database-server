@@ -154,14 +154,21 @@ def fetch_readout(request):
     # data = defaultdict(list)
     data = []
 
+    # TODO NOTE THAT THIS DOES NOT ORDER THE ROWS AND COLUMNS CORRECTLY
+    # TODO PLEASE NOTE THIS IS A STOP GAP; CHANGE AFTER REVISING ROW AND COLUMN
     readouts = AssayReadout.objects.filter(
         assay_device_readout=current_readout_id
     ).prefetch_related(
         'assay_device_readout__setup__assay_run_id',
-        'assay__assay_id'
+        'assay__assay_id',
+        'assay__readout_unit'
     ).order_by(
         'assay',
-        'elapsed_time'
+        'row',
+        'column',
+        'elapsed_time',
+        'update_number',
+        'quality'
     )
 
     time_unit = AssayPlateReadout.objects.filter(id=current_readout_id.id)[0].timeunit.unit
@@ -173,6 +180,7 @@ def fetch_readout(request):
             notes = notes + '\nUpdate #' + unicode(readout.update_number)
 
         data.append({
+            'plate_id': readout.assay_device_readout.setup.assay_plate_id,
             'row': readout.row,
             'column': readout.column,
             'value': readout.value,

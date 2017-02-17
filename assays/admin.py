@@ -117,11 +117,11 @@ def modify_templates():
             'Assay',
             'Feature',
             'Unit',
-            '[Time]',
-            '[Time Units]',
+            'Time',
+            'Time Units',
             'Value',
             'Notes',
-            'Totally remove the contents of the Time and Time Units columns if you are not using them'
+            ''
         ],
         [''] * 10
     ]
