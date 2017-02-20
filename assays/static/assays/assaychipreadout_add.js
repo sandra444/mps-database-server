@@ -674,14 +674,11 @@ $(document).ready(function () {
     }
 
     var refresh = function() {
-        resetChart();
         var file = $('#id_file')[0].files[0];
         if (file) {
+            resetChart();
             validate_readout_file();
             // getText(file);
-        }
-        else {
-            $('#table_body').empty();
         }
     };
 
