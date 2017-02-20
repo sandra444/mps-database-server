@@ -87,7 +87,7 @@ def fetch_assay_layout_content(request):
             data[well]['compounds'] = []
         receipt_date = ''
         if compound.assay_compound_instance.compound_instance.receipt_date:
-            receipt_date = compound.assay_compound_instance.compound_instance.receipt_date
+            receipt_date = compound.assay_compound_instance.compound_instance.receipt_date.isoformat()
         data[well]['compounds'].append({
             'name': compound.assay_compound_instance.compound_instance.compound.name,
             'id': compound.assay_compound_instance.compound_instance.compound_id,

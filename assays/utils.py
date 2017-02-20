@@ -376,8 +376,11 @@ def save_assay_layout(request, obj, form, change):
 
             # Be sure to convert to datetime
             receipt_date = content.get('receipt_date', None)
-            if receipt_date:
-                receipt_date = parse_date(str(receipt_date))
+            if receipt_date is not None:
+                try:
+                    receipt_date = parse_date(str(receipt_date))
+                except:
+                    receipt_date = None
 
             addition_time = content.get('addition_time', 0)
             duration = content.get('duration', 0)
