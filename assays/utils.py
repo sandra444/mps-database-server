@@ -1772,8 +1772,8 @@ def validate_chip_readout_file(
         if value == '':
             value = None
             # Set quality to 'NULL' if quality was not set by user
-            if not quality:
-                quality = 'NULL'
+            if not quality and 'N' not in quality:
+                quality += 'N'
 
         if not errors:
             # Try to get readout
