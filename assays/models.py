@@ -118,7 +118,7 @@ class AssayLayout(FlaggableModel):
         verbose_name = 'Assay Layout'
         ordering = ('layout_name',)
 
-    layout_name = models.CharField(max_length=200)
+    layout_name = models.CharField(max_length=200, unique=True)
     device = models.ForeignKey(Microdevice)
 
     # Specifies whether this is a standard (oft used layout)
