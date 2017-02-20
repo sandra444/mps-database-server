@@ -94,10 +94,8 @@ def modify_templates():
     ]
 
     chip_initial_format = [
-        [chip_red] * 10
-    ]
-    for x in range(200):
-        chip_initial_format.append([
+        [chip_red] * 10,
+        [
             None,
             None,
             chip_green,
@@ -105,10 +103,12 @@ def modify_templates():
             None,
             None,
             chip_green,
-            chip_green,
+            None,
+            None,
             None,
             None
-        ])
+        ]
+    ]
 
     plate_tabular_initial = [
         [
