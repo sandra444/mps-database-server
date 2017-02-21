@@ -568,6 +568,10 @@ $(document).ready(function () {
         // Remove other tables to avoid quirk when jumping from quality to quality
         $('.quality-indicator-table').remove();
 
+        // Set focus on current input
+        // Notice that this uses a custom function
+        current_quality.focusWithoutScrolling();
+
         var table_container = $('<div>')
             .css('width', '180px')
             .css('background-color', '#FDFEFD')
