@@ -516,16 +516,16 @@ def get_plate_details(self=None, study=None, readout=None):
     study - the study in question
     readout - the readout in question
     """
-    if study:
+    if readout:
         readouts = AssayPlateReadout.objects.filter(
-            setup__assay_run_id=study
+            pk=readout.id
         ).prefetch_related(
             'setup__assay_run_id',
             'timeunit'
         )
-    elif readout:
+    elif study:
         readouts = AssayPlateReadout.objects.filter(
-            pk=readout.id
+            setup__assay_run_id=study
         ).prefetch_related(
             'setup__assay_run_id',
             'timeunit'
