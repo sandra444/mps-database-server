@@ -1035,21 +1035,23 @@ $(document).ready(function () {
         // Use heatmaps to get the respective colors
         var well_colors = window.LAYOUT.heatmaps[current_assay_feature];
 
-        if (well_colors) {
-            $.each(well_colors, function (well, color) {
-                $(well).css('background-color', color);
-            });
-
-            // TODO DANGEROUS
-            $.each(window.LAYOUT.row_labels, function (row_index, row) {
-                $.each(window.LAYOUT.column_labels, function (col_index, col) {
-                    var well = '#' + row + '_' + col;
-                    if (!well_colors[well]) {
-                        $(well).css('background-color', '#606060');
-                    }
-                });
-            });
+        if (!well_colors) {
+            well_colors = {};
         }
+
+        $.each(well_colors, function (well, color) {
+            $(well).css('background-color', color);
+        });
+
+        // TODO DANGEROUS
+        $.each(window.LAYOUT.row_labels, function (row_index, row) {
+            $.each(window.LAYOUT.column_labels, function (col_index, col) {
+                var well = '#' + row + '_' + col;
+                if (!well_colors[well]) {
+                    $(well).css('background-color', '#606060');
+                }
+            });
+        });
     }
 
     // When the assay_select changes, get the correct values
@@ -1061,9 +1063,8 @@ $(document).ready(function () {
         // Hide all values
         $('.value').hide();
 
-        // Do not just apply heatmap
-        // apply_heatmap(current_assay_feature);
-        window.LAYOUT.build_heatmap();
+        // Apply heatmap
+        apply_heatmap(current_assay_feature);
 
         // Escape periods for the sizzle selector
         current_assay_feature = current_assay_feature.replace('.', '\\.');
