@@ -10,3 +10,7 @@
 mps_credentials.py
 additional_credentials.py
 *.log
+# Ignore Eclipse files
+.project
+.pydevproject
+.settings/*

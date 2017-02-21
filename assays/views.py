@@ -1,16 +1,21 @@
 # coding=utf-8
-
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.http import HttpResponse
-from assays.models import *
+# from assays.models import *
 from cellsamples.models import CellSample
 # TODO TRIM THIS IMPORT
-from assays.admin import *
+# from assays.admin import *
 from assays.forms import *
 from django import forms
 
 # TODO REVISE SPAGHETTI CODE
 from assays.ajax import get_chip_readout_data_as_csv
+from assays.utils import (
+    parse_file_and_save,
+    modify_qc_status_plate,
+    modify_qc_status_chip,
+    save_assay_layout
+)
 
 from django.forms.models import inlineformset_factory
 # from django.shortcuts import redirect, get_object_or_404, render_to_response
@@ -25,15 +30,7 @@ from mps.mixins import *
 from mps.base.models import save_forms_with_tracking
 
 # import ujson as json
-import xlrd
-
-from django.conf import settings
-# Convert to valid file name
-import string
-import re
 import os
-import codecs
-import cStringIO
 
 from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
@@ -43,36 +40,6 @@ from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 # TODO It is probably more semantic to overwrite get_context_data and form_valid in lieu of post and get for updates
 # TODO ^ Update Views should be refactored soon
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
-
-
-class UnicodeWriter:
-    """Used to write UTF-8 CSV files"""
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8-sig", **kwds):
-        """Init the UnicodeWriter
-
-        Params:
-        f -- the file stream to write to
-        dialect -- the "dialect" of csv to use (default excel)
-        encoding -- the text encoding set to use (default utf-8)
-        """
-        self.queue = cStringIO.StringIO()
-        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
-        self.stream = f
-        self.encoder = codecs.getincrementalencoder(encoding)()
-
-    def writerow(self, row):
-        """This function takes a Unicode string and encodes it to the output"""
-        self.writer.writerow([s.encode('utf-8') for s in row])
-        data = self.queue.getvalue()
-        data = data.decode('utf-8')
-        data = self.encoder.encode(data)
-        self.stream.write(data)
-        self.queue.truncate(0)
-
-    def writerows(self, rows):
-        """This function writes out all rows given"""
-        for row in rows:
-            self.writerow(row)
 
 
 def add_study_fields_to_form(self, form, add_study=False):
@@ -139,12 +106,11 @@ class StudyIndex(ViewershipMixin, DetailView):
     template_name = 'assays/study_index.html'
 
     # TODO OPTIMIZE DATABASE HITS
-    def get(self, request, **kwargs):
-        self.object = self.get_object()
+    def get_context_data(self, **kwargs):
+        context = super(StudyIndex, self).get_context_data(**kwargs)
 
-        context = self.get_context_data()
-
-        context['setups'] = AssayChipSetup.objects.filter(
+        # THIS CODE SHOULD NOT GET REPEATED AS OFTEN AS IT IS
+        setups = AssayChipSetup.objects.filter(
             assay_run_id=self.object
         ).prefetch_related(
             'organ_model',
@@ -153,6 +119,31 @@ class StudyIndex(ViewershipMixin, DetailView):
             'unit',
             'created_by',
         )
+
+        related_compounds = AssayCompoundInstance.objects.filter(
+            chip_setup=setups
+        ).prefetch_related(
+            'compound_instance__compound',
+            'compound_instance__supplier',
+            'concentration_unit',
+            'chip_setup'
+        )
+        related_compounds_map = {}
+
+        # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
+        for compound in related_compounds:
+            related_compounds_map.setdefault(compound.chip_setup_id, []).append(
+                compound.compound_instance.compound.name +
+                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
+            )
+
+        for setup in setups:
+            setup.related_compounds_as_string = ',\n'.join(sorted(
+                related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
+            ))
+
+        context['setups'] = setups
+
         readouts = AssayChipReadout.objects.filter(
             chip_setup=context['setups']
         ).prefetch_related(
@@ -244,7 +235,7 @@ class StudyIndex(ViewershipMixin, DetailView):
             readout=context['plate_readouts']
         ).count()
 
-        return self.render_to_response(context)
+        return context
 
 
 # Class-based views for studies
@@ -442,6 +433,8 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=self.object)
             all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=self.object)
 
+            all_data_uploads = AssayDataUpload.objects.filter(study=self.object)
+
             # Marking a study should mark/unmark only setups that have not been individually reviewed
             # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
             if original_sign_off_date:
@@ -482,6 +475,10 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
                 restricted=self.object.restricted
             )
             all_plate_results.update(
+                group=self.object.group,
+                restricted=self.object.restricted
+            )
+            all_data_uploads.update(
                 group=self.object.group,
                 restricted=self.object.restricted
             )
@@ -564,15 +561,40 @@ class AssayRunSummary(ViewershipMixin, DetailView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
-        context['setups'] = AssayChipSetup.objects.filter(
+
+        setups = AssayChipSetup.objects.filter(
             assay_run_id=self.object
         ).prefetch_related(
-            'assay_run_id',
+            'organ_model',
             'device',
             'compound',
             'unit',
-            'created_by'
+            'created_by',
         )
+
+        related_compounds = AssayCompoundInstance.objects.filter(
+            chip_setup=setups
+        ).prefetch_related(
+            'compound_instance__compound',
+            'compound_instance__supplier',
+            'concentration_unit',
+            'chip_setup'
+        )
+        related_compounds_map = {}
+
+        # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
+        for compound in related_compounds:
+            related_compounds_map.setdefault(compound.chip_setup_id, []).append(
+                compound.compound_instance.compound.name +
+                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
+            )
+
+        for setup in setups:
+            setup.related_compounds_as_string = ',\n'.join(sorted(
+                related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
+            ))
+
+        context['setups'] = setups
 
         # TODO THIS SAME BUSINESS NEEDS TO BE REFACTORED
         # For chips
@@ -610,6 +632,21 @@ class AssayRunSummary(ViewershipMixin, DetailView):
 
         context['plate_sameness'] = sameness
         context['plate_indicative'] = indicative
+
+        # chip_readouts = AssayChipReadout.objects.filter(
+        #     chip_setup__assay_run_id=self.object
+        # ).prefetch_related('chip_setup')
+        # plate_readouts = AssayPlateReadout.objects.filter(
+        #     setup__assay_run_id=self.object
+        # ).prefetch_related('setup')
+
+        data_uploads = AssayDataUpload.objects.filter(
+            study=self.object
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        context['data_uploads'] = data_uploads
 
         return self.render_to_response(context)
 
@@ -659,12 +696,44 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
         )
         # Display to users with either editor or viewer group or if unrestricted
         group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
-        return queryset.filter(
+        queryset = queryset.filter(
             restricted=False
         ) | queryset.filter(
             group__name__in=group_names
         )
 
+        related_compounds = AssayCompoundInstance.objects.filter(
+            chip_setup=queryset
+        ).prefetch_related(
+            'compound_instance__compound',
+            'compound_instance__supplier',
+            'concentration_unit',
+            'chip_setup'
+        )
+        related_compounds_map = {}
+
+        # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
+        for compound in related_compounds:
+            related_compounds_map.setdefault(compound.chip_setup_id, []).append(
+                compound.compound_instance.compound.name +
+                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
+            )
+
+        for setup in queryset:
+            setup.related_compounds_as_string = ',\n'.join(sorted(
+                related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
+            ))
+
+        return queryset
+
+
+AssayCompoundInstanceFormset = inlineformset_factory(
+    AssayChipSetup,
+    AssayCompoundInstance,
+    formset=AssayCompoundInstanceInlineFormset,
+    extra=1,
+    exclude=[],
+)
 
 AssayChipCellsFormset = inlineformset_factory(
     AssayChipSetup,
@@ -677,6 +746,53 @@ AssayChipCellsFormset = inlineformset_factory(
         'cell_passage': forms.TextInput(attrs={'size': 5})
     }
 )
+
+
+def get_cell_samples(user, chip_setup=None, plate_setup=None):
+    """Returns the cell samples to be listed in setup views
+
+    Params:
+    user - the user in the request
+    chip_setup - the chip setup in question
+    plate_setup - the plate setup in question
+    """
+    user_groups = user.groups.values_list('id', flat=True)
+
+    # Get cell samples with group
+    cellsamples_with_group = CellSample.objects.filter(
+        group__in=user_groups
+    ).prefetch_related(
+        'cell_type__organ',
+        'supplier',
+        'cell_subtype__cell_type'
+    )
+
+    current_cell_samples = CellSample.objects.none()
+
+    if chip_setup:
+        # Get the currently used cell samples
+        current_cell_samples = CellSample.objects.filter(
+            assaychipcells__assay_chip=chip_setup
+        ).prefetch_related(
+            'cell_type__organ',
+            'supplier',
+            'cell_subtype__cell_type'
+        )
+    elif plate_setup:
+        # Get the currently used cell samples
+        current_cell_samples = CellSample.objects.filter(
+            assayplatecells__assay_plate=plate_setup
+        ).prefetch_related(
+            'cell_type__organ',
+            'supplier',
+            'cell_subtype__cell_type'
+        )
+
+    combined_query = cellsamples_with_group | current_cell_samples
+    combined_query = combined_query.order_by('-receipt_date').distinct()
+
+    # Return the combination of the querysets
+    return combined_query
 
 
 # Cloning was recently refactored
@@ -705,26 +821,22 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
         return form
 
     def get_context_data(self, **kwargs):
-        groups = self.request.user.groups.values_list('id', flat=True)
-        cellsamples = CellSample.objects.filter(
-            group__in=groups
-        ).order_by(
-            '-receipt_date'
-        ).prefetch_related(
-            'cell_type',
-            'supplier',
-            'cell_subtype'
-        )
+        cellsamples = get_cell_samples(self.request.user)
+
         context = super(AssayChipSetupAdd, self).get_context_data(**kwargs)
-        if 'formset' not in context:
+
+        if 'cell_formset' not in context or 'compound_formset' not in context:
             if self.request.POST:
-                context['formset'] = AssayChipCellsFormset(self.request.POST)
+                context['cell_formset'] = AssayChipCellsFormset(self.request.POST)
+                context['compound_formset'] = AssayCompoundInstanceFormset(self.request.POST)
             elif self.request.GET.get('clone', ''):
                 pk = int(self.request.GET.get('clone', ''))
                 clone = get_object_or_404(AssayChipSetup, pk=pk)
-                context['formset'] = AssayChipCellsFormset(instance=clone)
+                context['cell_formset'] = AssayChipCellsFormset(instance=clone)
+                context['compound_formset'] = AssayCompoundInstanceFormset(instance=clone)
             else:
-                context['formset'] = AssayChipCellsFormset()
+                context['cell_formset'] = AssayChipCellsFormset()
+                context['compound_formset'] = AssayCompoundInstanceFormset()
 
         # Cellsamples will always be the same
         context['cellsamples'] = cellsamples
@@ -732,11 +844,13 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        formset = AssayChipCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
+        cell_formset = AssayChipCellsFormset(self.request.POST, instance=form.instance, save_as_new=True)
+        compound_formset = AssayCompoundInstanceFormset(self.request.POST, instance=form.instance, save_as_new=True)
         # get user via self.request.user
-        if form.is_valid() and formset.is_valid():
+        if form.is_valid() and cell_formset.is_valid() and compound_formset.is_valid():
             data = form.cleaned_data
-            save_forms_with_tracking(self, form, formset=formset, update=False)
+            # Note that both formsets are passed
+            save_forms_with_tracking(self, form, formset=[cell_formset, compound_formset], update=False)
             if data['another']:
                 form = self.form_class(
                     instance=self.object,
@@ -746,7 +860,12 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            # Note that both formsets are passed
+            return self.render_to_response(self.get_context_data(
+                form=form,
+                cell_formset=cell_formset,
+                compound_formset=compound_formset
+            ))
 
 
 class AssayChipSetupDetail(DetailRedirectMixin, DetailView):
@@ -762,24 +881,17 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
     form_class = AssayChipSetupForm
 
     def get_context_data(self, **kwargs):
-        groups = self.request.user.groups.values_list('id', flat=True)
-        cellsamples = CellSample.objects.filter(
-            group__in=groups
-        ).order_by(
-            '-receipt_date'
-        ).prefetch_related(
-            'cell_type',
-            'supplier',
-            'cell_subtype'
-        )
+        cellsamples = get_cell_samples(self.request.user, chip_setup=self.object)
 
         context = super(AssayChipSetupUpdate, self).get_context_data(**kwargs)
 
-        if 'formset' not in context:
+        if 'cell_formset' not in context or 'compound_formset' not in context:
             if self.request.POST:
-                context['formset'] = AssayChipCellsFormset(self.request.POST, instance=self.object)
+                context['cell_formset'] = AssayChipCellsFormset(self.request.POST, instance=self.object)
+                context['compound_formset'] = AssayCompoundInstanceFormset(self.request.POST, instance=self.object)
             else:
-                context['formset'] = AssayChipCellsFormset(instance=self.object)
+                context['cell_formset'] = AssayChipCellsFormset(instance=self.object)
+                context['compound_formset'] = AssayCompoundInstanceFormset(instance=self.object)
 
         context['cellsamples'] = cellsamples
         context['update'] = True
@@ -787,13 +899,19 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        formset = AssayChipCellsFormset(self.request.POST, instance=form.instance)
+        cell_formset = AssayChipCellsFormset(self.request.POST, instance=form.instance)
+        compound_formset = AssayCompoundInstanceFormset(self.request.POST, instance=form.instance)
 
-        if form.is_valid() and formset.is_valid():
-            save_forms_with_tracking(self, form, formset=formset, update=True)
+        if form.is_valid() and cell_formset.is_valid() and compound_formset.is_valid():
+            # Notice that both formsets are added
+            save_forms_with_tracking(self, form, formset=[cell_formset, compound_formset], update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(
+                form=form,
+                cell_formset=cell_formset,
+                compound_formset=compound_formset
+            ))
 
 
 class AssayChipSetupDelete(CreatorOrAdminRequiredMixin, DeleteView):
@@ -923,12 +1041,17 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             data = form.cleaned_data
             # Get headers
             headers = int(data.get('headers'))
+            overwrite_option = data.get('overwrite_option')
 
             save_forms_with_tracking(self, form, formset=formset, update=False)
 
             if formset.files.get('file', ''):
-                current_file = formset.files.get('file', '')
-                parse_chip_csv(self.object, current_file, headers, form)
+                study_id = str(self.kwargs['study_id'])
+                parse_file_and_save(
+                    self.object.file, self.object.modified_by, study_id, overwrite_option, 'Chip', headers=headers, form=form, readout=self.object
+                )
+                # DEPRECATED
+                # parse_chip_csv(self.object, current_file, headers, overwrite_option, form)
             if data['another']:
                 form = self.form_class(
                     study,
@@ -968,6 +1091,19 @@ class AssayChipReadoutDetail(DetailRedirectMixin, DetailView):
     """Detail for Chip Readout"""
     model = AssayChipReadout
 
+    def get_context_data(self, **kwargs):
+        context = super(AssayChipReadoutDetail, self).get_context_data(**kwargs)
+
+        data_uploads = AssayDataUpload.objects.filter(
+            chip_readout=self.object
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        context['data_uploads'] = data_uploads
+
+        return context
+
 
 class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     """Update Assay Chip Readout and Assay Chip Readout Assays"""
@@ -994,6 +1130,14 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             else:
                 context['formset'] = ACRAFormSet(instance=self.object)
 
+        data_uploads = AssayDataUpload.objects.filter(
+            chip_readout=self.object
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        context['data_uploads'] = data_uploads
+
         context['study'] = self.object.chip_setup.assay_run_id
 
         context['update'] = True
@@ -1007,19 +1151,24 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             data = form.cleaned_data
             # Get headers
             headers = int(data.get('headers'))
+            overwrite_option = data.get('overwrite_option')
 
             save_forms_with_tracking(self, form, formset=formset, update=True)
 
-            # Save file if it exists
-            if formset.files.get('file', ''):
-                file = formset.files.get('file', '')
-                parse_chip_csv(self.object, file, headers, form)
-            # If no file, try to update the qc_status
-            else:
-                modify_qc_status_chip(self.object, form)
             # Clear data if clear is checked
             if self.request.POST.get('file-clear', ''):
                 AssayChipRawData.objects.filter(assay_chip_id=self.object).delete()
+            # Save file if it exists
+            elif formset.files.get('file', ''):
+                study_id = str(self.object.chip_setup.assay_run_id.id)
+                parse_file_and_save(
+                    self.object.file, self.object.modified_by, study_id, overwrite_option, 'Chip', headers=headers, form=form, readout=self.object
+                )
+                # Deprecated
+                # parse_chip_csv(self.object, file, headers, overwrite_option, form)
+            # If no file, try to update the qc_status
+            else:
+                modify_qc_status_chip(self.object, form)
             # Otherwise do nothing (the file remained the same)
             return redirect(self.object.get_post_submission_url())
         else:
@@ -1453,17 +1602,10 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
         return form
 
     def get_context_data(self, **kwargs):
-        groups = self.request.user.groups.values_list('id', flat=True)
-        cellsamples = CellSample.objects.filter(
-            group__in=groups
-        ).order_by(
-            '-receipt_date'
-        ).prefetch_related(
-            'cell_type',
-            'supplier',
-            'cell_subtype'
-        )
+        cellsamples = get_cell_samples(self.request.user)
+
         context = super(AssayPlateSetupAdd, self).get_context_data(**kwargs)
+
         if 'formset' not in context:
             if self.request.POST:
                 context['formset'] = AssayPlateCellsFormset(self.request.POST)
@@ -1512,17 +1654,10 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
     template_name = 'assays/assayplatesetup_add.html'
 
     def get_context_data(self, **kwargs):
-        groups = self.request.user.groups.values_list('id', flat=True)
-        cellsamples = CellSample.objects.filter(
-            group__in=groups
-        ).order_by(
-            '-receipt_date'
-        ).prefetch_related(
-            'cell_type',
-            'supplier',
-            'cell_subtype'
-        )
+        cellsamples = get_cell_samples(self.request.user, plate_setup=self.object)
+
         context = super(AssayPlateSetupUpdate, self).get_context_data(**kwargs)
+
         if 'formset' not in context:
             if self.request.POST:
                 context['formset'] = AssayPlateCellsFormset(self.request.POST, instance=self.object)
@@ -1607,7 +1742,6 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
 
         return queryset
 
-
 APRAFormSet = inlineformset_factory(
     AssayPlateReadout,
     AssayPlateReadoutAssay,
@@ -1617,6 +1751,7 @@ APRAFormSet = inlineformset_factory(
 )
 
 
+# TODO MODIFY PLATES TO USE UNIFIED FUNCTIONS FOR PROCESSING DATA
 class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
     """Add a Plate Readout with inline for Assay Plate Readout Assays"""
     template_name = 'assays/assayplatereadout_add.html'
@@ -1672,15 +1807,19 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
             data = form.cleaned_data
 
             # Get upload_type
-            upload_type = data.get('upload_type')
+            # upload_type = data.get('upload_type')
+            overwrite_option = data.get('overwrite_option')
 
             save_forms_with_tracking(self, form, formset=formset, update=False)
 
             if formset.files.get('file', ''):
-                current_file = formset.files.get('file', '')
-                parse_readout_csv(self.object, current_file, upload_type)
+                study_id = self.kwargs['study_id']
+                parse_file_and_save(
+                    self.object.file, self.object.modified_by, study_id, overwrite_option, 'Plate', form=form, readout=self.object
+                )
+                # parse_readout_csv(self.object, current_file, upload_type)
                 # Check QC
-                modify_qc_status_plate(self.object, form)
+                # modify_qc_status_plate(self.object, form)
             if data['another']:
                 form = self.form_class(
                     study,
@@ -1720,6 +1859,18 @@ class AssayPlateReadoutDetail(DetailRedirectMixin, DetailView):
     """Details for a Plate Readout"""
     model = AssayPlateReadout
 
+    def get_context_data(self, **kwargs):
+        context = super(AssayPlateReadoutDetail, self).get_context_data(**kwargs)
+
+        data_uploads = AssayDataUpload.objects.filter(
+            plate_readout=self.object
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        context['data_uploads'] = data_uploads
+
+        return context
 
 class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     """Update a Plate Readout with inline for Assay Plate Readout Assays"""
@@ -1743,6 +1894,14 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             else:
                 context['formset'] = APRAFormSet(instance=self.object)
 
+        data_uploads = AssayDataUpload.objects.filter(
+            plate_readout=self.object
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        context['data_uploads'] = data_uploads
+
         context['study'] = self.object.setup.assay_run_id
 
         context['update'] = True
@@ -1755,18 +1914,23 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
         if form.is_valid() and formset.is_valid():
             data = form.cleaned_data
             # Get upload_type
-            upload_type = data.get('upload_type')
+            # upload_type = data.get('upload_type')
+            overwrite_option = data.get('overwrite_option')
 
             save_forms_with_tracking(self, form, formset=formset, update=True)
 
-            # Save file if it exists
-            if formset.files.get('file', ''):
-                current_file = formset.files.get('file', '')
-                parse_readout_csv(self.object, current_file, upload_type)
             # Clear data if clear is checked
             if self.request.POST.get('file-clear', ''):
                 # remove_existing_readout(self.object)
                 AssayReadout.objects.filter(assay_device_readout=self.object).delete()
+            # Save file if it exists
+            elif formset.files.get('file', ''):
+                # current_file = formset.files.get('file', '')
+                study_id = str(self.object.setup.assay_run_id.id)
+                parse_file_and_save(
+                    self.object.file, self.object.modified_by, study_id, overwrite_option, 'Plate', readout=self.object, form=form
+                )
+                # parse_readout_csv(self.object, current_file, upload_type)
             else:
                 # Check QC
                 modify_qc_status_plate(self.object, form)
@@ -1936,50 +2100,6 @@ class AssayPlateTestResultDelete(CreatorOrAdminRequiredMixin, DeleteView):
         return '/assays/' + str(self.object.readout.setup.assay_run_id_id)
 
 
-def get_valid_csv_location(file_name, study_id, device_type):
-    media_root = settings.MEDIA_ROOT.replace('mps/../', '', 1)
-
-    valid_chars = '-_.{0}{1}'.format(string.ascii_letters, string.digits)
-    # Get only valid chars
-    valid_file_name = ''.join(c for c in file_name if c in valid_chars)
-    # Replace spaces with underscores
-    valid_file_name = re.sub(r'\s+', '_', valid_file_name)
-
-    # Check if name is already in use
-    if os.path.isfile(os.path.join(media_root, 'csv', study_id, device_type, valid_file_name + '.csv')):
-        append = 1
-        while os.path.isfile(
-            os.path.join(media_root, 'csv', study_id, device_type, valid_file_name + '_' + str(append) + '.csv')
-        ):
-            append += 1
-        valid_file_name += '_' + str(append)
-
-    return os.path.join(media_root, 'csv', study_id, device_type, valid_file_name + '.csv')
-
-
-def write_out_csv(file_name, data):
-    """Write out a Unicode CSV
-
-    Params:
-    file_name -- name of the file to write
-    data -- data to write to the file (as a list of lists)
-    """
-    with open(file_name, 'w') as out_file:
-        writer = UnicodeWriter(out_file)
-        writer.writerows(data)
-
-
-def get_csv_media_location(file_name):
-    """Returns the location given a full path
-
-    Params:
-    file_name -- name of the file to write
-    """
-    split_name = file_name.split('/')
-    csv_onward = '/'.join(split_name[-4:])
-    return csv_onward
-
-
 class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
     """Upload an Excel Sheet for storing multiple sets of Readout data at one"""
     model = AssayRun
@@ -2014,6 +2134,14 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             if AssayReadout.objects.filter(assay_device_readout=readout):
                 plate_has_data.update({readout: True})
 
+        data_uploads = AssayDataUpload.objects.filter(
+            study=self.object
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        context['data_uploads'] = data_uploads
+
         context['chip_readouts'] = chip_readouts
         context['plate_readouts'] = plate_readouts
 
@@ -2026,219 +2154,20 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         if form.is_valid():
-            csv_root = settings.MEDIA_ROOT.replace('mps/../', '', 1) + '/csv/'
-
             data = form.cleaned_data
-            bulk_file = data.get('bulk_file')
-
-            excel_file = xlrd.open_workbook(file_contents=bulk_file)
+            overwrite_option = data.get('overwrite_option')
 
             # For the moment, just have headers be equal to two?
             headers = 1
-            study = self.object
             study_id = str(self.object.id)
 
-            # Make sure path exists for study
-            if not os.path.exists(csv_root + study_id):
-                os.makedirs(csv_root + study_id)
+            # Add user to Study's modified by
+            # TODO
+            self.object.bulk_file = data.get('bulk_file')
+            self.modified_by = self.request.user
+            self.object.save()
 
-            for index, sheet in enumerate(excel_file.sheets()):
-                # Skip sheets without anything
-                if sheet.nrows < 1:
-                    continue
-
-                # Get the header row
-                header = [unicode(value) for value in sheet.row_values(0)]
-
-                sheet_type = ''
-
-                if 'CHIP' in header[0].upper() and 'ASSAY' in header[3].upper():
-                    sheet_type = 'Chip'
-
-                # Check if plate tabular
-                elif 'PLATE' in header[0].upper() and 'WELL' in header[1].upper() and 'ASSAY' in header[2].upper()\
-                        and 'FEATURE' in header[3].upper() and 'UNIT' in header[4].upper():
-                    sheet_type = 'Tabular'
-
-                # Check if plate block
-                elif 'PLATE' in header[0].upper() and 'ASSAY' in header[2].upper() and 'FEATURE' in header[4].upper()\
-                        and 'UNIT' in header[6].upper():
-                    sheet_type = 'Block'
-
-                if sheet_type == 'Chip':
-                    header = [
-                        u'Chip ID',
-                        u'Time',
-                        u'Time Unit',
-                        u'Assay',
-                        u'Object',
-                        u'Value',
-                        u'Value Unit',
-                        u'QC Status'
-                    ]
-                    csv_data = {}
-                    # Skip header
-                    for row_index in range(1, sheet.nrows):
-                        row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
-
-                        # Trim row to exclude validation columns and beyond
-                        row = row[:TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX]
-
-                        # Make sure the data is valid before adding it
-                        # Everything but value and QC Status must exist to be valid
-                        if row and all(row[:5] + [row[6]]):
-                            chip_id = row[0]
-
-                            if chip_id not in csv_data:
-                                csv_data.update({
-                                    chip_id: [header]
-                                })
-
-                            csv_data.get(chip_id).append(row)
-
-                    for chip_id in csv_data:
-                        datalist = csv_data.get(chip_id)
-
-                        readout = AssayChipReadout.objects.get(
-                            chip_setup__assay_run_id=study,
-                            chip_setup__assay_chip_id=chip_id
-                        )
-
-                        # Make sure path exists for chip
-                        if not os.path.exists(csv_root + study_id + '/chip'):
-                            os.makedirs(csv_root + study_id + '/chip')
-
-                        # Get valid file location
-                        # Note added csv extension
-                        file_location = get_valid_csv_location(chip_id, study_id, 'chip')
-                        # Write the csv
-                        write_out_csv(file_location, datalist)
-
-                        media_location = get_csv_media_location(file_location)
-
-                        # Add the file to the readout
-                        readout.file = media_location
-                        readout.save()
-
-                        # Note the lack of a form normally used for QC
-                        parse_chip_csv(readout, readout.file, headers, None)
-
-                elif sheet_type == 'Tabular':
-                    # Header if time
-                    if 'TIME' in header[5].upper() and 'UNIT' in header[6].upper():
-                        header = [
-                            u'Plate ID',
-                            u'Well Name',
-                            u'Assay',
-                            u'Feature',
-                            u'Unit',
-                            u'Time',
-                            u'Time Unit',
-                            u'Value'
-                        ]
-                    # Header if no time
-                    else:
-                        header = [
-                            u'Plate ID',
-                            u'Well Name',
-                            u'Assay',
-                            u'Feature',
-                            u'Unit',
-                            u'Value'
-                        ]
-                    csv_data = {}
-                    # Skip header
-                    for row_index in range(1, sheet.nrows):
-                        row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
-
-                        # Trim row to exclude validation columns and beyond
-                        row = row[:TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX]
-
-                        # Make sure the data is valid before adding it
-                        # The first 6 cells must be filled (time and time unit are not required)
-                        if row and all(row[:6]):
-                            plate_id = row[0]
-
-                            if plate_id not in csv_data:
-                                csv_data.update({
-                                    plate_id: [header]
-                                })
-
-                            csv_data.get(plate_id).append(row)
-
-                    for plate_id in csv_data:
-                        datalist = csv_data.get(plate_id)
-
-                        readout = AssayPlateReadout.objects.get(
-                            setup__assay_run_id=study,
-                            setup__assay_plate_id=plate_id
-                        )
-
-                        # Make sure path exists for chip
-                        if not os.path.exists(csv_root + study_id + '/plate'):
-                            os.makedirs(csv_root + study_id + '/plate')
-
-                        # Get valid file location
-                        # Note added csv extension
-                        file_location = get_valid_csv_location(plate_id, study_id, 'plate')
-                        # Write the csv
-                        write_out_csv(file_location, datalist)
-
-                        media_location = get_csv_media_location(file_location)
-
-                        # Add the file to the readout
-                        readout.file = media_location
-                        readout.save()
-
-                        # Note the lack of a form normally used for QC
-                        parse_readout_csv(readout, readout.file, 'Tabular')
-
-                elif sheet_type == 'Block':
-                    csv_data = {}
-                    # DO NOT skip header
-                    plate_id = None
-                    for row_index in range(sheet.nrows):
-                        row = [stringify_excel_value(value) for value in sheet.row_values(row_index)]
-
-                        # Trim row to exclude validation columns and beyond
-                        row = row[:TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX]
-
-                        if 'PLATE' in row[0].upper():
-                            plate_id = row[1]
-
-                            if plate_id not in csv_data:
-                                csv_data.update({
-                                    plate_id: []
-                                })
-
-                        csv_data.get(plate_id).append(row)
-
-                    for plate_id in csv_data:
-                        datalist = csv_data.get(plate_id)
-
-                        readout = AssayPlateReadout.objects.get(
-                            setup__assay_run_id=study,
-                            setup__assay_plate_id=plate_id
-                        )
-
-                        # Make sure path exists for chip
-                        if not os.path.exists(csv_root + study_id + '/plate'):
-                            os.makedirs(csv_root + study_id + '/plate')
-
-                        # Get valid file location
-                        # Note added csv extension
-                        file_location = get_valid_csv_location(plate_id, study_id, 'plate')
-                        # Write the csv
-                        write_out_csv(file_location, datalist)
-
-                        media_location = get_csv_media_location(file_location)
-
-                        # Add the file to the readout
-                        readout.file = media_location
-                        readout.save()
-
-                        # Note the lack of a form normally used for QC
-                        parse_readout_csv(readout, readout.file, 'Block')
+            parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', headers=headers, form=None)
 
             return redirect(self.object.get_absolute_url())
         else:

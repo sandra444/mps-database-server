@@ -1,6 +1,7 @@
 // TODO This script does many things which will not be necessary on the frontend
 // TODO Perhaps a separate script will be made for the front (to avoid AJAX and so on)
 // This script provides the means to make an assay layout
+// TODO NEEDS TO BE REFACTORED
 $(document).ready(function () {
 
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
@@ -95,7 +96,7 @@ $(document).ready(function () {
             controls.append($('<div class="form-row field-timepoint"><ul class="control_list">' +
                 '<li><div class="field-box"><label for="timepoint">Timepoint:</label>' +
                 '<input id="id_timepoint" maxlength="6" name="timepoint" type="number" step="any" value="0">' +
-                '<select id="id_timeunit" name="concunit">' +
+                '<select id="id_timeunit" name="concentration_unit">' +
                 '<option value="1" selected="selected">min</option>' +
                 '<option value="60">hour</option>' +
                 '<option value="1440">days</option>' +
@@ -125,7 +126,7 @@ $(document).ready(function () {
                 '<img src="/static/admin/img/selector-search.gif" width="16" height="16" alt="Lookup"></a></div></li>' +
                 '<li><div class="field-box"><label for="concentration">Concentration:</label>' +
                 '<input id="id_concentration" maxlength="6" name="concentration" type="number" step="any" value="10">' +
-                '<select id="id_concunit" name="concunit">' +
+                '<select id="id_concentration_unit" name="concentration_uit">' +
                 '<option value="1">mM</option>' +
                 '<option value="2" selected="selected">μM</option>' +
                 '<option value="3">nM</option></select></div></li>' +
@@ -221,8 +222,8 @@ $(document).ready(function () {
                 $('#id_concentration').val()
             );
 
-            var concentration_unit = $('#id_concunit option:selected').text();
-            var concentration_unit_id = $('#id_concunit').val();
+            var concentration_unit = $('#id_concentration_unit option:selected').text();
+            var concentration_unit_id = $('#id_concentration_unit').val();
 
             var incr = parseFloat($('#id_increment').val());
 
@@ -260,15 +261,14 @@ $(document).ready(function () {
                         var tablecellid = tablecell.attr('id');
                         var list = $('#' + tablecellid + '_list');
 
-                        // Current concentration
-                        var concentration = concentration_value;
-
                         if (list.length) {
-                            list.find('[compound=' + compound_id + ']').remove();
+                            // Do not remove old instances of this compound
+                            // list.find('[compound=' + compound_id + ']').remove();
 
                             var stamp = time + '_' + index;
 
                             var result = 0;
+                            var concentration = concentration_value;
 
                             // Add
                             if (how_to_increment === 'add') {
@@ -314,8 +314,46 @@ $(document).ready(function () {
                                 }
                             }
 
+                            var supplier_text = $('#id_supplier_text').val();
+                            var lot_text = $('#id_lot_text').val();
+                            var receipt_date = $('#id_receipt_date').val();
+
+                            var info = {
+                                'well': tablecellid,
+                                'compound': compound_id,
+                                'supplier_text': supplier_text,
+                                'lot_text': lot_text,
+                                'receipt_date': receipt_date,
+                                'concentration': concentration,
+                                'concentration_unit': concentration_unit_id,
+                                'addition_time': 0,
+                                'duration': 0
+                            };
+
+                            // Times in question
+                            var time_conversions = {
+                                'day': 1440,
+                                'hour': 60,
+                                'minute': 1
+                            };
+
+                            // Add times to info
+                            $.each(time_conversions, function(unit, conversion) {
+                                info['addition_time_'+unit] = $('#id_addition_time_' + unit).val();
+                                info['duration_'+unit] = $('#id_duration_' + unit).val();
+                                // Perform the conversion to minutes
+                                info['addition_time'] += $('#id_addition_time_' + unit).val() * conversion;
+                                info['duration'] += $('#id_duration_' + unit).val() * conversion;
+                            });
+
+                            var time_indicator = ' [ ' +
+                            [info.addition_time_day, info.addition_time_hour, info.addition_time_minute].join('|') +
+                            ' => ' +
+                            [info.duration_day, info.duration_hour, info.duration_minute].join('|')
+                            + '  ]';
+
                             var text = compound_name + ' (' + concentration +
-                                ' ' + concentration_unit + ')';
+                                ' ' + concentration_unit + ')' + time_indicator;
 
                             var li = $('<li>')
                                 .text(text)
@@ -326,10 +364,12 @@ $(document).ready(function () {
                                     }
                                 });
 
-                            var info = '{"well":"' + tablecellid + '"' +
-                                ',"compound":"' + compound_id + '","concentration":"' +
-                                concentration + '","concentration_unit":"' +
-                                concentration_unit_id + '"}';
+//                            var info = '{"well":"' + tablecellid + '"' +
+//                                ',"compound":"' + compound_id + '","concentration":"' +
+//                                concentration + '","concentration_unit":"' +
+//                                concentration_unit_id + '"}';
+
+                            info = JSON.stringify(info);
 
                             li.append($('<input>')
                                 .attr('type','hidden')

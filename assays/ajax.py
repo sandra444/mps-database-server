@@ -1,9 +1,34 @@
 # coding=utf-8
 import ujson as json
 from collections import defaultdict
+# TODO STOP USING WILDCARD IMPORTS
 from django.http import *
 from .models import *
 from microdevices.models import MicrophysiologyCenter, Microdevice
+
+# from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
+from .forms import (
+    AssayChipReadoutForm,
+    AssayPlateReadoutForm,
+    AssayChipReadoutInlineFormset,
+    AssayPlateReadoutInlineFormset
+)
+# from.utils import(
+#     valid_chip_row,
+#     stringify_excel_value,
+#     unicode_csv_reader,
+#     get_row_and_column,
+#     process_readout_value,
+#     get_sheet_type
+# )
+# import xlrd
+
+# TODO FIX SPAGHETTI CODE
+from .forms import ReadoutBulkUploadForm
+from django.forms.models import inlineformset_factory
+
+# from django.utils import timezone
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -50,19 +75,31 @@ def fetch_assay_layout_content(request):
 
     # Fetch compounds
     compounds = AssayWellCompound.objects.filter(assay_layout=layout).prefetch_related(
-        'assay_layout', 'compound', 'concentration_unit').order_by('compound__name')
+        'assay_layout',
+        'assay_compound_instance__compound_instance__compound',
+        'assay_compound_instance__compound_instance__supplier',
+        'assay_compound_instance__concentration_unit'
+    ).order_by('compound__name')
 
     for compound in compounds:
         well = compound.row + '_' + compound.column
         if not 'compounds' in data[well]:
             data[well]['compounds'] = []
+        receipt_date = ''
+        if compound.assay_compound_instance.compound_instance.receipt_date:
+            receipt_date = compound.assay_compound_instance.compound_instance.receipt_date.isoformat()
         data[well]['compounds'].append({
-            'name': compound.compound.name,
-            'id': compound.compound_id,
-            'concentration': compound.concentration,
-            'concentration_unit_id': compound.concentration_unit_id,
-            'concentration_unit': compound.concentration_unit.unit
-            #'well': well
+            'name': compound.assay_compound_instance.compound_instance.compound.name,
+            'id': compound.assay_compound_instance.compound_instance.compound_id,
+            'concentration': compound.assay_compound_instance.concentration,
+            'concentration_unit_id': compound.assay_compound_instance.concentration_unit_id,
+            'concentration_unit': compound.assay_compound_instance.concentration_unit.unit,
+            'supplier': compound.assay_compound_instance.compound_instance.supplier.name,
+            'lot': compound.assay_compound_instance.compound_instance.lot,
+            'receipt_date': receipt_date,
+            'addition_time': compound.assay_compound_instance.addition_time,
+            'duration': compound.assay_compound_instance.duration
+            # 'well': well
         })
 
     # Fetch timepoints
@@ -95,6 +132,12 @@ def fetch_assay_layout_content(request):
 
 
 def fetch_readout(request):
+    """Get the current plate readout data
+
+    From POST:
+    current_id - the current ID
+    model - what model the ID is for
+    """
     current_id = request.POST.get('id', '')
     model = request.POST.get('model', '')
 
@@ -111,13 +154,33 @@ def fetch_readout(request):
     # data = defaultdict(list)
     data = []
 
-    readouts = AssayReadout.objects.filter(assay_device_readout=current_readout_id)\
-        .prefetch_related('assay_device_readout', 'assay').order_by('assay', 'elapsed_time')
+    # TODO NOTE THAT THIS DOES NOT ORDER THE ROWS AND COLUMNS CORRECTLY
+    # TODO PLEASE NOTE THIS IS A STOP GAP; CHANGE AFTER REVISING ROW AND COLUMN
+    readouts = AssayReadout.objects.filter(
+        assay_device_readout=current_readout_id
+    ).prefetch_related(
+        'assay_device_readout__setup__assay_run_id',
+        'assay__assay_id',
+        'assay__readout_unit'
+    ).order_by(
+        'assay',
+        'row',
+        'column',
+        'elapsed_time',
+        'update_number',
+        'quality'
+    )
 
     time_unit = AssayPlateReadout.objects.filter(id=current_readout_id.id)[0].timeunit.unit
 
     for readout in readouts:
+        # TODO DRY DICTATES THAT I SHOULDN'T JUST COPY THIS TO UTILS
+        notes = readout.notes
+        if readout.update_number:
+            notes = notes + '\nUpdate #' + unicode(readout.update_number)
+
         data.append({
+            'plate_id': readout.assay_device_readout.setup.assay_plate_id,
             'row': readout.row,
             'column': readout.column,
             'value': readout.value,
@@ -128,6 +191,8 @@ def fetch_readout(request):
             'value_unit': readout.assay.readout_unit.unit,
             'feature': readout.assay.feature,
             'quality': readout.quality,
+            'notes': notes,
+            'update_number': readout.update_number
         })
 
     return HttpResponse(json.dumps(data),
@@ -260,21 +325,30 @@ def fetch_center_id(request):
 
 
 # TODO THIS WAS A STRING TO BE EXPEDIENT WRT TO THE JAVSCRIPT IN READOUT ADD, BUT SHOULD BE REVISED
-def get_chip_readout_data_as_csv(chip_ids):
-    """Returns readout data as a csv in the form of a string"""
+def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=False):
+    """Returns readout data as a csv in the form of a string
+
+    Params:
+    chip_ids - Readout IDs to use to acquire chip data (if data not provided)
+    chip_data - Readout raw data, optional, acquired with chip_ids if not provided
+    both_assay_names - Indicates that both assay names should be returned (not currently used)
+    """
 
     # PLEASE NOTE: THIS AFFECTS PROCESSING OF QC
     # DO NOT MODIFY THIS WITHOUT ALSO CHANGING modify_qc_status_chip
-    chip_data = AssayChipRawData.objects.prefetch_related(
-        'assay_id__assay_id',
-        'assay_chip_id__chip_setup'
-    ).filter(
-        assay_chip_id__in=chip_ids
-    ).order_by(
-        'assay_chip_id__chip_setup__assay_chip_id',
-        'assay_id__assay_id__assay_short_name',
-        'elapsed_time'
-    )
+    if not chip_data:
+        chip_data = AssayChipRawData.objects.prefetch_related(
+            'assay_id__assay_id',
+            'assay_chip_id__chip_setup'
+        ).filter(
+            assay_chip_id__in=chip_ids
+        ).order_by(
+            'assay_chip_id__chip_setup__assay_chip_id',
+            'assay_id__assay_id__assay_short_name',
+            'elapsed_time',
+            'quality',
+            'update_number'
+        )
 
     csv = ''
 
@@ -286,7 +360,9 @@ def get_chip_readout_data_as_csv(chip_ids):
         csv += unicode(raw.elapsed_time) + ','
         # Add time unit
         csv += unicode(raw.assay_chip_id.timeunit) + ','
-        csv += unicode(raw.assay_id.assay_id.assay_short_name) + ','
+        # Now uses full name
+        # csv += unicode(raw.assay_id.assay_id.assay_short_name) + ','
+        csv += unicode(raw.assay_id.assay_id.assay_name) + ','
         if ',' in raw.field_id:
             csv += '"' + unicode(raw.field_id) + '"' + ','
         else:
@@ -297,17 +373,19 @@ def get_chip_readout_data_as_csv(chip_ids):
         if value is not None:
             value = '%.2f' % value
         else:
-            value = unicode(value)
+            value = ''
         # Get rid of trailing zero and decimal if necessary
         value = value.rstrip('0').rstrip('.') if '.' in value else value
         csv += value + ','
         # Add value unit
         csv += unicode(raw.assay_id.readout_unit) + ','
-        # End with the quality
+        # End with the quality and notes
         if ',' in raw.quality:
-            csv += '"' + unicode(raw.quality) + '"' + '\n'
+            csv += '"' + unicode(raw.quality) + '"' + ','
         else:
-            csv += unicode(raw.quality) + '\n'
+            csv += unicode(raw.quality) + ','
+        csv += '"' + unicode(raw.notes) + '"' + ','
+        csv += '"' + unicode(raw.update_number) + '"\n'
 
     return csv
 
@@ -338,56 +416,19 @@ def fetch_chip_readout(request):
                         content_type="application/json")
 
 
-# TODO REQUIRES REVISION
-# TODO NEED TO CONFIRM UNITS ARE THE SAME (ELSE CONVERSION)
-def fetch_readouts(request):
-    """Get all readouts for a given study for Study Summary
+def get_readout_data(raw_data, related_compounds_map, key, percent_control, include_all):
+    """Get all readout data for a study and return it in JSON format
 
-    Receives the following from POST:
-    study -- the study to acquire readouts from
-    key -- specifies whether to split readouts by compound or device
+    From POST:
+    raw_data - the AssayChipRawData needed to create the JSON
+    key - whether this data should be considered by device or by compound
+    percent_control - whether to use percent control (WIP)
+    include_all - whether to include all values
     """
-    study = request.POST.get('study', '')
-    key = request.POST.get('key', '')
-    percent_control = request.POST.get('percent_control', '')
-
-    if percent_control == 'true':
-        percent_control = True
-    else:
-        percent_control = False
-
-    # Get chip readouts
-    readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id_id=study).prefetch_related(
-        'chip_setup',
-        'chip_setup__assay_run_id_id'
-    )
-
-    if key == 'compound':
-        raw_data = AssayChipRawData.objects.filter(
-            assay_chip_id=readouts
-        ).prefetch_related(
-            'assay_id',
-            'assay_chip_id',
-            'assay_chip_id__chip_setup',
-            'assay_chip_id__chip_setup__compound',
-            'assay_chip_id__chip_setup__unit',
-            'assay_id__assay_id',
-            'assay_id__readout_unit'
-        )
-
-    else:
-        raw_data = AssayChipRawData.objects.filter(
-            assay_chip_id=readouts
-        ).prefetch_related(
-            'assay_id',
-            'assay_chip_id',
-            'assay_chip_id__chip_setup',
-            'assay_id__assay_id',
-            'assay_id__readout_unit'
-        )
 
     # TODO ACCOUNT FOR CASE WHERE ASSAY HAS TWO DIFFERENT UNITS?
     # TODO MAY FORBID THIS CASE, MUST ASK FIRST
+    # TODO ACCOUNT FOR CASE WHERE STUDY HAS MORE THAN ONE COMPOUND
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
     assays = {}
     initial_data = {}
@@ -395,7 +436,9 @@ def fetch_readouts(request):
     controls = {}
 
     for raw in raw_data:
-        assay = raw.assay_id.assay_id.assay_short_name
+        # Now uses full name
+        # assay = raw.assay_id.assay_id.assay_short_name
+        assay = raw.assay_id.assay_id.assay_name
         unit = raw.assay_id.readout_unit.unit
         field = raw.field_id
         value = raw.value
@@ -403,29 +446,45 @@ def fetch_readouts(request):
         # Convert all times to days for now
         # Get the conversion unit
         scale = raw.assay_chip_id.timeunit.scale_factor
-        time = '{0:.2f}'.format((scale/1440.0) * raw.elapsed_time)
+        time = '{0:.2f}'.format((scale / 1440.0) * raw.elapsed_time)
+        # Have time in minutes for comparing to addition_time and duration
+        time_minutes = scale * raw.elapsed_time
 
         quality = raw.quality
 
-        if not quality:
+        if value is not None and (include_all or not quality):
             # Get tag for data point
             # If by compound
             if key == 'compound':
-                if raw.assay_chip_id.chip_setup.compound:
-                    tag = raw.assay_chip_id.chip_setup.compound.name
-                    tag += ' ' + str(raw.assay_chip_id.chip_setup.concentration)
-                    tag += ' ' + raw.assay_chip_id.chip_setup.unit.unit
+                compounds = related_compounds_map.get(raw.assay_chip_id.chip_setup_id, [])
+                if compounds:
+                    compounds_to_add = []
+
+                    for compound in compounds:
+                        # Previously included only compounds within duration
+                        # if compound.addition_time <= time_minutes and compound.duration + compound.addition_time >= time_minutes:
+                        # Everything past addition time will be listed as effected
+                        if compound.addition_time <= time_minutes:
+                            compounds_to_add.append(
+                                compound.compound_instance.compound.name +
+                                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
+                            )
+
+                    if not compounds_to_add:
+                        tag = '-Control-'
+                    else:
+                        tag = ' & '.join(sorted(compounds_to_add))
                 else:
-                    tag = 'Control'
+                    tag = '-Control-'
             # If by device
             else:
                 tag = raw.assay_chip_id.chip_setup.assay_chip_id
 
                 # Specifically add to consolidated control if this is a device-by-device control
                 if percent_control and raw.assay_chip_id.chip_setup.chip_test_type == 'control':
-                    initial_data.setdefault(assay, {}).setdefault(unit, {}).setdefault('Control', {}).setdefault(field, {}).setdefault(time, []).append(value)
+                    initial_data.setdefault(assay, {}).setdefault(unit, {}).setdefault('-Control-', {}).setdefault(field, {}).setdefault(time, []).append(value)
 
-             # Set data in nested monstrosity that is initial_data
+            # Set data in nested monstrosity that is initial_data
             initial_data.setdefault(assay, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(field, {}).setdefault(time, []).append(value)
 
     for assay, units in initial_data.items():
@@ -433,10 +492,10 @@ def fetch_readouts(request):
             for tag, fields in tags.items():
                 for field, time_values in fields.items():
                     for time, values in time_values.items():
-                        if percent_control and tag == 'Control':
+                        if percent_control and tag == '-Control-':
                             controls.update({(assay, unit, field, time): sum(values) / float(len(values))})
                         # Add to averaged data if this isn't a average control value for device-by-device
-                        if not (tag == 'Control' and key != 'compound'):
+                        if not (tag == '-Control-' and key != 'compound'):
                             averaged_data.setdefault(assay, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(field, {}).update({
                                 time: sum(values) / float(len(values))
                             })
@@ -450,7 +509,8 @@ def fetch_readouts(request):
                     for time, value in time_values.items():
                         if not percent_control:
                             # Not converted to percent control
-                            assay_label = assay + '  (' + unit + ')'
+                            # Newline is used as a delimiter
+                            assay_label = assay + '\n' + unit
 
                             if accomadate_field:
                                 current_key = tag + ' ' + field
@@ -468,7 +528,8 @@ def fetch_readouts(request):
                             else:
                                 current_unit = '%Control'
 
-                            assay_label = assay + '  (' + current_unit + ')'
+                            # Newline is used as a delimiter
+                            assay_label = assay + '\n' + current_unit
 
                             if accomadate_field:
                                 current_key = tag + ' ' + field
@@ -478,6 +539,80 @@ def fetch_readouts(request):
                             assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('time', []).append(time)
                             # Perform conversion
                             assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('values', []).append((value / control_value) * 100)
+
+    return assays
+
+
+# TODO REQUIRES REVISION
+# TODO NEED TO CONFIRM UNITS ARE THE SAME (ELSE CONVERSION)
+def fetch_readouts(request):
+    """Get all readouts for a given study for Study Summary
+
+    Receives the following from POST:
+    study -- the study to acquire readouts from
+    key -- specifies whether to split readouts by compound or device
+    percent_control -- specifies whether to convert to percent control
+    include_all -- specifies whether to include all data (exclude invalid if null string)
+    """
+    study = request.POST.get('study', '')
+    key = request.POST.get('key', '')
+    percent_control = request.POST.get('percent_control', '')
+    include_all = request.POST.get('include_all', '')
+
+    if percent_control == 'true':
+        percent_control = True
+    else:
+        percent_control = False
+
+    # Get chip readouts
+    readouts = AssayChipReadout.objects.filter(
+        chip_setup__assay_run_id_id=study
+    ).prefetch_related(
+        'chip_setup',
+        'chip_setup__assay_run_id_id'
+    )
+
+    related_compounds_map = {}
+
+    if key == 'compound':
+        setups = readouts.values_list('chip_setup_id')
+
+        raw_data = AssayChipRawData.objects.filter(
+            assay_chip_id=readouts
+        ).prefetch_related(
+            'assay_id',
+            'assay_chip_id',
+            'assay_chip_id__chip_setup',
+            # 'assay_chip_id__chip_setup__compound',
+            'assay_chip_id__chip_setup__unit',
+            'assay_id__assay_id',
+            'assay_id__readout_unit',
+        )
+
+        related_compounds = AssayCompoundInstance.objects.filter(
+            chip_setup=setups
+        ).prefetch_related(
+            'compound_instance__compound',
+            'compound_instance__supplier',
+            'concentration_unit',
+            'chip_setup'
+        )
+
+        for compound in related_compounds:
+            related_compounds_map.setdefault(compound.chip_setup_id, []).append(compound)
+
+    else:
+        raw_data = AssayChipRawData.objects.filter(
+            assay_chip_id=readouts
+        ).prefetch_related(
+            'assay_id',
+            'assay_chip_id',
+            'assay_chip_id__chip_setup',
+            'assay_id__assay_id',
+            'assay_id__readout_unit'
+        )
+
+    assays = get_readout_data(raw_data, related_compounds_map, key, percent_control, include_all)
 
     data = {
         'assays': assays,
@@ -631,6 +766,216 @@ def fetch_dropdown(request):
     return HttpResponse(json.dumps(data),
                         content_type='application/json')
 
+
+# USE THE POST DATA TO BUILD A BULKUPLOAD FORM
+# DO NOT EXPLICITLY CALL VALIDATION
+def validate_bulk_file(request):
+    """Validates a bulk file and returns either errors or a preview of the data entered
+
+    Receives the following from POST:
+    study -- the study to acquire readouts from
+    key -- specifies whether to split readouts by compound or device
+    percent_control -- specifies whether to convert to percent control
+    include_all -- specifies whether to include all data (exclude invalid if null string)
+    """
+    study = request.POST.get('study', '')
+    key = request.POST.get('key', '')
+    percent_control = request.POST.get('percent_control', '')
+    include_all = request.POST.get('include_all', '')
+    # overwrite_option = request.POST.get('overwrite_option', '')
+    # bulk_file = request.FILES.get('bulk_file', None)
+
+    this_study = AssayRun.objects.get(pk=int(study))
+
+    form = ReadoutBulkUploadForm(request.POST, request.FILES, instance=this_study)
+
+    if form.is_valid():
+        form_data = form.cleaned_data
+
+        preview_data = form_data.get('preview_data')
+
+        # Only chip preview right now
+        chip_raw_data = preview_data.get('chip_preview')
+
+        # NOTE THE EMPTY DIC, RIGHT NOW BULK PREVIEW NEVER SHOWS COMPOUND JUST DEVICE
+        assays = get_readout_data(chip_raw_data, {}, key, percent_control, include_all)
+
+        data = {'assays': assays}
+
+        return HttpResponse(json.dumps(data),
+                            content_type="application/json")
+
+    else:
+        errors = ''
+        if form.errors.get('__all__'):
+            errors += form.errors.get('__all__').as_text()
+        data = {
+            'errors': errors
+        }
+        return HttpResponse(json.dumps(data),
+                            content_type='application/json')
+
+# TODO DUPLICATED THUS VIOLATING DRY
+ACRAFormSet = inlineformset_factory(
+    AssayChipReadout,
+    AssayChipReadoutAssay,
+    formset=AssayChipReadoutInlineFormset,
+    extra=1,
+    exclude=[],
+)
+
+
+# USE THE POST DATA TO BUILD A BULKUPLOAD FORM
+# DO NOT EXPLICITLY CALL VALIDATION
+def validate_individual_chip_file(request):
+    """Validates a bulk file and returns either errors or a preview of the data entered
+
+    Receives the following from POST:
+    study -- the study to acquire readouts from
+    key -- specifies whether to split readouts by compound or device
+    percent_control -- specifies whether to convert to percent control
+    include_all -- specifies whether to include all data (exclude invalid if null string)
+    """
+    study_id = request.POST.get('study', '')
+    key = request.POST.get('key', '')
+    percent_control = request.POST.get('percent_control', '')
+    include_all = request.POST.get('include_all', '')
+    readout_id = request.POST.get('readout', '')
+    # overwrite_option = request.POST.get('overwrite_option', '')
+    # bulk_file = request.FILES.get('bulk_file', None)
+
+    if readout_id:
+        readout = AssayChipReadout.objects.filter(pk=readout_id)
+        if readout:
+            readout = readout[0]
+            setup_id = readout.chip_setup.id
+            study = readout.chip_setup.assay_run_id
+        else:
+            setup_id = None
+            study = AssayRun.objects.get(pk=int(study_id))
+    else:
+        setup_id = None
+        study = AssayRun.objects.get(pk=int(study_id))
+
+    form = AssayChipReadoutForm(study, setup_id, request.POST)
+    formset = ACRAFormSet(request.POST, request.FILES, instance=form.instance)
+
+    if formset.is_valid():
+        # Validate form
+        # form.is_valid()
+
+        form_data = formset.forms[0].cleaned_data
+
+        preview_data = form_data.get('preview_data')
+
+        chip_raw_data = preview_data.get('chip_preview')
+
+        csv = get_chip_readout_data_as_csv([readout_id], chip_data=chip_raw_data)
+
+        data = {'csv': csv}
+
+        return HttpResponse(json.dumps(data),
+                            content_type="application/json")
+
+    else:
+        errors = ''
+        if formset.non_form_errors():
+            errors += formset.non_form_errors().as_text()
+        if form.errors:
+            errors += form.errors.as_text()
+        data = {
+            'errors': errors
+        }
+        return HttpResponse(json.dumps(data),
+                            content_type='application/json')
+
+APRAFormSet = inlineformset_factory(
+    AssayPlateReadout,
+    AssayPlateReadoutAssay,
+    formset=AssayPlateReadoutInlineFormset,
+    extra=1,
+    exclude=[],
+)
+
+
+def validate_individual_plate_file(request):
+    """Validates a bulk file and returns either errors or a preview of the data entered
+
+    Receives the following from POST:
+    study -- the study to acquire readouts from
+    key -- specifies whether to split readouts by compound or device
+    percent_control -- specifies whether to convert to percent control
+    include_all -- specifies whether to include all data (exclude invalid if null string)
+    """
+    study_id = request.POST.get('study', '')
+    readout_id = request.POST.get('readout', '')
+    # overwrite_option = request.POST.get('overwrite_option', '')
+    # bulk_file = request.FILES.get('bulk_file', None)
+
+    if readout_id:
+        readout = AssayPlateReadout.objects.filter(pk=readout_id)
+        if readout:
+            readout = readout[0]
+            setup_id = readout.setup.id
+            study = readout.setup.assay_run_id
+        else:
+            setup_id = None
+            study = AssayRun.objects.get(pk=int(study_id))
+    else:
+        setup_id = None
+        study = AssayRun.objects.get(pk=int(study_id))
+
+    form = AssayPlateReadoutForm(study, setup_id, request.POST)
+    formset = APRAFormSet(request.POST, request.FILES, instance=form.instance)
+
+    if formset.is_valid():
+        # Validate form
+        # form.is_valid()
+
+        form_data = formset.forms[0].cleaned_data
+
+        preview_data = form_data.get('preview_data')
+
+        data = preview_data.get('plate_preview')
+
+        return HttpResponse(json.dumps(data),
+                            content_type="application/json")
+
+    else:
+        errors = ''
+        if formset.__dict__.get('_non_form_errors', ''):
+            errors += formset.__dict__.get('_non_form_errors', '').as_text()
+        if form.errors:
+            errors += form.errors.as_text()
+        data = {
+            'errors': errors
+        }
+        return HttpResponse(json.dumps(data),
+                            content_type='application/json')
+
+
+def fetch_quality_indicators(request):
+    """Returns quality indicators as JSON for populating dropdowns"""
+
+    # The JSON data to return; initialize with an entry for None
+    # data = [{
+    #     'id': '',
+    #     'code': '',
+    #     'name': '',
+    #     'description': 'No quality indicator selected'
+    # }]
+    data = []
+
+    for quality_indicator in AssayQualityIndicator.objects.all().order_by('code'):
+        data.append({
+            'id': quality_indicator.id,
+            'code': quality_indicator.code,
+            'name': quality_indicator.name,
+            'description': quality_indicator.description
+        })
+
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
 switch = {
     'fetch_assay_layout_content': fetch_assay_layout_content,
     'fetch_readout': fetch_readout,
@@ -644,6 +989,10 @@ switch = {
     'fetch_organ_models': fetch_organ_models,
     'fetch_protocols': fetch_protocols,
     'fetch_protocol': fetch_protocol,
+    'validate_bulk_file': validate_bulk_file,
+    'validate_individual_chip_file': validate_individual_chip_file,
+    'validate_individual_plate_file': validate_individual_plate_file,
+    'fetch_quality_indicators': fetch_quality_indicators
 }
 
 

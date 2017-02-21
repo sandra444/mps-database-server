@@ -4,7 +4,7 @@
 
 from django.db import models
 from django.utils import timezone
-from django.shortcuts import redirect, get_object_or_404
+# from django.shortcuts import redirect, get_object_or_404
 
 
 class TrackableModel(models.Model):
@@ -12,6 +12,9 @@ class TrackableModel(models.Model):
 
     NOTE: the "read-only" configuration method resides in base/admin.py
     """
+
+    class Meta(object):
+        abstract = True
 
     # CREATION DATA #
 
@@ -43,8 +46,23 @@ class TrackableModel(models.Model):
     signed_off_date = models.DateTimeField(blank=True,
                                            null=True)
 
-    class Meta(object):
-        abstract = True
+    def full_creator(self):
+        if self.created_by:
+            return self.created_by.first_name + ' ' + self.created_by.last_name
+        else:
+            return 'Admin'
+
+    def full_modifier(self):
+        if self.modified_by:
+            return self.modified_by.first_name + ' ' + self.modified_by.last_name
+        else:
+            return 'Admin'
+
+    def full_reviewer(self):
+        if self.signed_off_by:
+            return self.signed_off_by.first_name + ' ' + self.signed_off_by.last_name
+        else:
+            return 'Admin'
 
 
 class LockableModel(TrackableModel):
@@ -113,7 +131,12 @@ def save_forms_with_tracking(self, form, formset=None, update=False):
     # Else if Add
     else:
         self.object.modified_by = self.object.created_by = self.request.user
-    # Save Study
     self.object.save()
     if formset:
-        formset.save()
+        # If a list of formsets, save each
+        if type(formset) == list:
+            for current_formset in formset:
+                current_formset.save()
+        # Otherwise, just save the one
+        else:
+            formset.save()

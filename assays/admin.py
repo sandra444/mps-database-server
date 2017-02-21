@@ -11,13 +11,17 @@ from assays.forms import (
     StudyConfigurationForm,
     AssayChipReadoutInlineFormset,
     AssayPlateReadoutInlineFormset,
-    label_to_number,
-    process_readout_value,
-    unicode_csv_reader
 )
+from assays.utils import (
+    save_assay_layout,
+    modify_qc_status_chip,
+    modify_qc_status_plate
+)
+# TODO SPAGHETTI CODE
 from django.http import HttpResponseRedirect
 
 from assays.models import *
+from .utils import parse_file_and_save
 # from compounds.models import Compound
 from mps.base.admin import LockableAdmin
 from assays.resource import *
@@ -25,11 +29,11 @@ from assays.resource import *
 # from compounds.models import *
 # import unicodedata
 # from io import BytesIO
-import ujson as json
+# import ujson as json
 # I use regular expressions for a string split at one point
-import re
-from django.db import connection, transaction
-from urllib import unquote
+# import re
+# from django.db import connection, transaction
+# from urllib import unquote
 
 from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 import os
@@ -39,7 +43,6 @@ import xlsxwriter
 
 def modify_templates():
     """Writes totally new templates for chips and both types of plates"""
-
     # Where will I store the templates?
     template_root = MEDIA_ROOT + '/excel_templates/'
 
@@ -84,13 +87,14 @@ def modify_templates():
             'Value',
             'Value Unit',
             'QC Status',
-            'Note: ANY value in QC Status will mark a row as invalid'
+            'Notes',
+            'ANY value in QC Status will mark a row as invalid'
         ],
-        [''] * 9
+        [''] * 10
     ]
 
     chip_initial_format = [
-        [chip_red] * 9,
+        [chip_red] * 10,
         [
             None,
             None,
@@ -99,6 +103,8 @@ def modify_templates():
             None,
             None,
             chip_green,
+            None,
+            None,
             None,
             None
         ]
@@ -111,16 +117,17 @@ def modify_templates():
             'Assay',
             'Feature',
             'Unit',
-            '[Time]',
-            '[Time Units]',
+            'Time',
+            'Time Units',
             'Value',
-            'Note: Totally remove the contents of the Time and Time Units columns if you are not using them',
+            'Notes',
+            ''
         ],
-        [''] * 9
+        [''] * 10
     ]
 
     plate_tabular_initial_format = [
-        [plate_tabular_red] * 9,
+        [plate_tabular_red] * 10,
         [
             None,
             None,
@@ -129,6 +136,7 @@ def modify_templates():
             plate_tabular_green,
             None,
             plate_tabular_green,
+            None,
             None,
             None
         ]
@@ -197,6 +205,7 @@ def modify_templates():
     chip_sheet.set_column('G:G', 15)
     chip_sheet.set_column('H:H', 10)
     chip_sheet.set_column('I:I', 100)
+    chip_sheet.set_column('J:J', 100)
 
     chip_sheet.set_column('BA:BC', 30)
 
@@ -210,6 +219,7 @@ def modify_templates():
     plate_tabular_sheet.set_column('G:G', 15)
     plate_tabular_sheet.set_column('H:H', 15)
     plate_tabular_sheet.set_column('I:I', 100)
+    plate_tabular_sheet.set_column('J:J', 100)
 
     plate_tabular_sheet.set_column('BA:BC', 30)
 
@@ -231,6 +241,9 @@ def modify_templates():
 
     plate_block_sheet.set_column('BA:BC', 30)
 
+    # Get a list of quality indicators
+    quality_indicators = AssayQualityIndicator.objects.all().values_list('name', flat=True)
+
     # Get list of time units
     time_units = PhysicalUnits.objects.filter(
         unit_type__unit_type='Time'
@@ -251,25 +264,34 @@ def modify_templates():
         'assay_name'
     ).values_list('assay_name', flat=True)
 
+#     for index, value in enumerate(quality_indicators):
+#         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
+#         plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
+#         # Plate templates are slated to be deprecated
+# #         plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
+
     for index, value in enumerate(time_units):
-        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+2, value)
-        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+2, value)
-        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+2, value)
+        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
+        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
+        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
 
     for index, value in enumerate(value_units):
-        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+1, value)
-        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+1, value)
-        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX+1, value)
+        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
+        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
+        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
 
     for index, value in enumerate(assays):
         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
         plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
         plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
 
+    # quality_indicators_range = '=$BD$1:$BD$' + str(len(quality_indicators))
     time_units_range = '=$BC$1:$BC$' + str(len(time_units))
     value_units_range = '=$BB$1:$BB$' + str(len(value_units))
     assays_range = '=$BA$1:$BA$' + str(len(assays))
 
+    # chip_sheet.data_validation('H2', {'validate': 'list',
+    #                            'source': quality_indicators_range})
     chip_sheet.data_validation('C2', {'validate': 'list',
                                'source': time_units_range})
     chip_sheet.data_validation('D2', {'validate': 'list',
@@ -295,6 +317,35 @@ def modify_templates():
     chip.close()
     plate_tabular.close()
     plate_block.close()
+
+
+class AssayQualityIndicatorAdmin(LockableAdmin):
+    save_on_top = True
+    list_display = ('code', 'name', 'description')
+
+    def save_model(self, request, obj, form, change):
+        template_change = False
+
+        # Check whether template needs to change
+        # Change if assay name has changed or it is new
+        if obj.pk is not None:
+            original = AssayQualityIndicator.objects.get(pk=obj.pk)
+            if original.name != obj.name:
+                template_change = True
+        else:
+            template_change = True
+
+        if change:
+            obj.modified_by = request.user
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        obj.save()
+
+        if template_change:
+            modify_templates()
+
+admin.site.register(AssayQualityIndicator, AssayQualityIndicatorAdmin)
 
 
 class AssayModelTypeAdmin(LockableAdmin):
@@ -323,7 +374,6 @@ class AssayModelTypeAdmin(LockableAdmin):
         ),
     )
 
-
 admin.site.register(AssayModelType, AssayModelTypeAdmin)
 
 
@@ -342,7 +392,7 @@ class AssayModelAdmin(LockableAdmin):
                 'fields': (
                     ('assay_name', 'assay_short_name',),
                     ('assay_type', 'test_type',),
-                    ('version_number', 'assay_protocol_file', ),
+                    ('version_number', 'assay_protocol_file',),
                     ('assay_description',))
             }
         ),
@@ -350,9 +400,9 @@ class AssayModelAdmin(LockableAdmin):
             'Change Tracking', {
                 'fields': (
                     'locked',
-                    ('created_by', 'created_on', ),
-                    ('modified_by', 'modified_on', ),
-                    ('signed_off_by', 'signed_off_date', ),
+                    ('created_by', 'created_on',),
+                    ('modified_by', 'modified_on',),
+                    ('signed_off_by', 'signed_off_date',),
                 )
             }
         ),
@@ -445,133 +495,23 @@ class AssayReaderAdmin(LockableAdmin):
         )
     )
 
-
 admin.site.register(AssayReader, AssayReaderAdmin)
 
 
-# Saving an Assay Layout is somewhat complicated, so a function is useful here
-# (though perhaps not in this file [spaghetti code])
-# BE CAREFUL! FIELDS THAT ARE NOT IN THE FORM ARE AUTOMATICALLY SET TO NONE!
-def save_assay_layout(request, obj, form, change):
-    """Method for saving an Assay Layout
+class AssayCompoundInstanceAdmin(admin.ModelAdmin):
+    """Admin for Assay Compound Instance"""
+    save_on_top = True
 
-    The data to make an assay layout is passed using a custom form.
-    Please note that this function uses raw queries.
-    """
-    # Connect to the database
-    cursor = connection.cursor()
+    list_display = (
+        'compound_instance',
+        'chip_setup',
+        'concentration',
+        'concentration_unit',
+        'addition_time',
+        'duration'
+    )
 
-    # Queries for entering data and lists of queries to be ran by the cursor
-    type_query = ''' INSERT INTO "assays_assaywell"
-          ("assay_layout_id", "well_type_id", "row", "column")
-          VALUES (%s, %s, %s, %s)'''
-    type_query_list = []
-
-    time_query = ''' INSERT INTO "assays_assaywelltimepoint"
-          ("assay_layout_id", "timepoint", "row", "column")
-          VALUES (%s, %s, %s, %s)'''
-    time_query_list = []
-
-    compound_query = ''' INSERT INTO "assays_assaywellcompound"
-          ("assay_layout_id", "compound_id", "concentration", "concentration_unit_id", "row", "column")
-          VALUES (%s, %s, %s, %s, %s, %s)'''
-    compound_query_list = []
-
-    label_query = ''' INSERT INTO "assays_assaywelllabel"
-          ("assay_layout_id", "label", "row", "column")
-          VALUES (%s, %s, %s, %s)'''
-    label_query_list = []
-
-    # Aliases for comprehension
-    layout = obj
-    layout_id = obj.id
-
-    if change:
-        # Delete old types for this assay
-        AssayWell.objects.filter(assay_layout=layout).delete()
-
-        # Delete old compound data for this assay
-        AssayWellCompound.objects.filter(assay_layout=layout).delete()
-
-        # Delete old timepoint data for this assay
-        AssayWellTimepoint.objects.filter(assay_layout=layout).delete()
-
-        # Delete old labels for this assay
-        AssayWellLabel.objects.filter(assay_layout=layout).delete()
-
-    # Wells are saved in the following portion
-    for key, val in form.data.iteritems():
-        # Time points
-        if key.endswith('_time'):
-            # Cut off '_time'
-            content = key[:-5]
-            row, column = content.split('_')
-
-            # Add new timepoint info
-            time_query_list.append((
-                layout_id,
-                val,
-                row,
-                column
-            ))
-
-        # Compounds
-        # Should refactor soon
-        elif key.startswith('well_'):
-            # Evaluate val as a JSON dict
-            content = json.loads(val)
-            well = content['well']
-            row, col = well.split('_')
-
-            if 'compound' in content:
-                # Add compound info
-                compound_query_list.append((
-                    layout_id,
-                    content['compound'],
-                    content['concentration'],
-                    content['concentration_unit'],
-                    row,
-                    col
-                ))
-
-        # Labels
-        elif key.endswith('_label'):
-            # Cut off '_label'
-            content = key[:-6]
-            row, column = content.split('_')
-
-            # Add new label info
-            label_query_list.append((
-                layout_id,
-                val,
-                row,
-                column
-            ))
-
-        # Types
-        elif key.endswith('_type'):
-            # Uncertain as to why empty values are passed
-            # TODO EXPLORE EMPTY VALUES
-            if val:
-                # Cut fof '_type'
-                content = key[:-5]
-                row, column = content.split('_')
-
-                # Add new timepoint info
-                type_query_list.append((
-                    layout_id,
-                    val,
-                    row,
-                    column
-                ))
-
-    # Execute the queries
-    cursor.executemany(type_query, type_query_list)
-    cursor.executemany(time_query, time_query_list)
-    cursor.executemany(compound_query, compound_query_list)
-    cursor.executemany(label_query, label_query_list)
-
-    transaction.commit()
+admin.site.register(AssayCompoundInstance, AssayCompoundInstanceAdmin)
 
 
 # TODO REVISE SAVING
@@ -742,244 +682,6 @@ admin.site.register(AssayPlateSetup, AssayPlateSetupAdmin)
 #             readout.delete()
 #     return
 
-# TODO FINISH
-def get_qc_status_plate(form):
-    """Get QC status for each line"""
-    qc_status = {}
-
-    for key, val in form.data.iteritems():
-        # If this is a QC input
-        if key.startswith('{') and key.endswith('}'):
-            # Evaluate the key
-            key = unquote(key)
-            values = json.loads(key)
-            row = unicode(values.get('row'))
-            col = unicode(values.get('column'))
-            # Be sure to convert time to a float
-            time = float(values.get('time'))
-            # Assay needs to be case insensitive
-            assay = values.get('assay').upper()
-            feature = values.get('feature')
-            # Combine values in a tuple for index
-            index = (row, col, time, assay, feature)
-            # Just make value X for now (isn't even used)
-            value = 'X'
-            qc_status.update({index: value})
-
-    return qc_status
-
-
-@transaction.atomic
-def modify_qc_status_plate(current_plate_readout, form):
-    """Update the QC status of a plate
-
-    Note that this function uses the @transaction.atomic decorator
-    """
-    # Get the readouts
-    readouts = AssayReadout.objects.filter(
-        assay_device_readout=current_plate_readout
-    ).prefetch_related(
-        'assay'
-    ).select_related(
-        'assay__assay_id'
-    )
-
-    # Get QC status for each line
-    qc_status = get_qc_status_plate(form)
-
-    for readout in readouts:
-        index_long = (
-            readout.row,
-            readout.column,
-            readout.elapsed_time,
-            readout.assay.assay_id.assay_name.upper(),
-            readout.assay.feature
-        )
-        index_short = (
-            readout.row,
-            readout.column,
-            readout.elapsed_time,
-            readout.assay.assay_id.assay_short_name.upper(),
-            readout.assay.feature
-        )
-        # If the quality marker is present
-        if index_long in qc_status or index_short in qc_status:
-            readout.quality = 'X'
-            readout.save()
-        # If the quality marker has been removed
-        elif index_long not in qc_status and index_short not in qc_status and readout.quality:
-            readout.quality = u''
-            readout.save()
-
-# TODO REVIEW
-# Rows are currently numeric, not alphabetical, when stored in the database
-def parse_readout_csv(current_assay_readout, current_file, upload_type):
-    """Stores the readout data parsed from a csv file"""
-    # remove_existing_readout(current_assay_readout)
-    AssayReadout.objects.filter(assay_device_readout=current_assay_readout).delete()
-
-    # Connect to the database
-    cursor = connection.cursor()
-
-    # The generic query
-    query = ''' INSERT INTO "assays_assayreadout"
-          ("assay_device_readout_id", "assay_id", "row", "column", "value", "elapsed_time", "quality")
-          VALUES (%s, %s, %s, %s, %s, %s, %s)'''
-
-    # The list of queries to execute
-    query_list = []
-    # Current id
-    current_assay_readout_id = current_assay_readout.id
-
-    # Create a reader for the unicode data
-    datareader = unicode_csv_reader(current_file, delimiter=',')
-    # Turn each row into an entry in a list
-    datalist = list(datareader)
-
-    # Create a dictionary that matches (assay, feature) to an AssayPlateReadoutAssay ID
-    assays = {}
-    for assay in AssayPlateReadoutAssay.objects.filter(readout_id=current_assay_readout):
-        assay_name = assay.assay_id.assay_name.upper()
-        assay_short_name = assay.assay_id.assay_short_name.upper()
-        feature = assay.feature
-        current_apra_id = assay.id
-
-        assays.update({(assay_name, feature): current_apra_id})
-        assays.update({(assay_short_name, feature): current_apra_id})
-
-    # If the type is a block
-    if upload_type == 'Block':
-        # Current assay
-        assay = None
-        # Current time
-        time = None
-
-        # Used to discern number of headers for offset
-        number_of_assays = 0
-        # Used to discern row offset
-        number_of_rows = current_assay_readout.setup.assay_layout.device.number_of_rows
-        # Used to discern where to read values
-        number_of_columns = current_assay_readout.setup.assay_layout.device.number_of_columns
-
-        for row_id, line in enumerate(datalist):
-            # TODO HOW DO I DEAL WITH BLANK LINES???
-            # If line is blank, move to the next row
-            if not line:
-                continue
-
-            # If this line is a header
-            # Headers should look like:
-            # PLATE ID, {{}}, ASSAY, {{}}, FEATURE, {{}}, READOUT UNIT, {{}}, TIME, {{}}. TIME UNIT, {{}}
-            if 'PLATE ID' in line[0].upper():
-                # Get the assay and feature
-                assay_name = line[3].upper()
-                feature = line[5]
-
-                # Get the APRA ID
-                assay = assays.get((assay_name, feature))
-
-                # Increase the number of assays
-                number_of_assays += 1
-
-                # Check if there is a time and take it if it exists
-                if len(line) >= 12:
-                    time = line[9]
-
-                else:
-                    time = None
-
-            # Otherwise the line contains datapoints for the current assay
-            # Break if the column_id exceeds the number of columns
-            else:
-                for column_id, value in enumerate(line[:number_of_columns]):
-                    # Treat empty strings as NULL values and do not save the data point
-                    if not value:
-                        continue
-
-                    # Process the value
-                    processed_value = process_readout_value(value)
-                    value = processed_value.get('value')
-                    quality = processed_value.get('quality')
-
-                    # MUST OFFSET ROW (due to multiple datablocks)
-                    offset_row_id = (row_id-number_of_assays) % number_of_rows
-
-                    # Note default elapsed time of 0
-                    if not time:
-                        time = 0
-
-                    # Add the row to be saved
-                    query_list.append((
-                        current_assay_readout_id,
-                        assay,
-                        offset_row_id,
-                        column_id,
-                        value,
-                        time,
-                        quality,
-                    ))
-
-    # Otherwise if the upload is tabular
-    else:
-        # Purge empty lines, they are useless for tabular uploads
-        datalist = [row for row in datalist if any(row)]
-        # The first line SHOULD be the header
-        header = datalist[0]
-
-        # Check if the time has been specified
-        if 'TIME' in header[5].upper() and 'UNIT' in header[6].upper():
-            time_specified = True
-        else:
-            time_specified = False
-
-        # Exclude the header to get only the data points
-        data = datalist[1:]
-
-        for row_index, row in enumerate(data):
-            # The well identifier given
-            well = row[1]
-            assay_name = row[2].upper()
-            feature = row[3]
-
-            # Split the well into alphabetical and numeric
-            row_label, column_label = re.findall(r"[^\W\d_]+|\d+", well)
-
-            # PLEASE NOTE THAT THE VALUES ARE OFFSET BY ONE (to begin with 0)
-            # Convert row_label to a number
-            row_label = label_to_number(row_label) - 1
-            # Convert column label to an integer
-            column_label = int(column_label) - 1
-
-            if time_specified:
-                time = row[5]
-                value = row[7]
-
-            else:
-                value = row[5]
-                time = 0
-
-            # NOTE THAT BLANKS ARE CURRENTLY COMPLETELY EXCLUDED
-            if value != '':
-                processed_value = process_readout_value(value)
-                value = processed_value.get('value')
-                quality = processed_value.get('quality')
-
-                assay = assays.get((assay_name, feature))
-
-                query_list.append((
-                    current_assay_readout_id,
-                    assay,
-                    row_label,
-                    column_label,
-                    value,
-                    time,
-                    quality
-                ))
-
-    cursor.executemany(query, query_list)
-
-    transaction.commit()
-
 
 class AssayPlateReadoutInline(admin.TabularInline):
     """Inline for the Assays of a Plate Readout"""
@@ -1001,20 +703,20 @@ class AssayPlateReadoutInline(admin.TabularInline):
 
 # Plate Readout validation occurs in the inline formset
 # This form is just to jam in upload_type into the admin
-class AssayPlateReadoutForm(forms.ModelForm):
-    """Assay Plate Readout Form"""
-
-    upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
-
-    class Meta(object):
-        model = AssayPlateReadout
-        exclude = ('',)
+# class AssayPlateReadoutForm(forms.ModelForm):
+#     """Assay Plate Readout Form"""
+#
+#     upload_type = forms.ChoiceField(choices=(('Tabular', 'Tabular'), ('Block', 'Block')))
+#
+#     class Meta(object):
+#         model = AssayPlateReadout
+#         exclude = ('',)
 
 
 class AssayPlateReadoutAdmin(LockableAdmin):
     """Admin for Assay Plate Readouts"""
     resource_class = AssayPlateReadoutResource
-    form = AssayPlateReadoutForm
+    # form = AssayPlateReadoutForm
 
     class Media(object):
         js = ('js/inline_fix.js', 'js/csv_functions.js', 'assays/plate_display.js', 'assays/assayplatereadout_add.js',)
@@ -1050,7 +752,7 @@ class AssayPlateReadoutAdmin(LockableAdmin):
                         'timeunit', 'treatment_time_length', 'readout_start_time',
                     ),
                     (
-                        'file', 'upload_type'
+                        'file'
                     ),
                 )
             }
@@ -1102,7 +804,8 @@ class AssayPlateReadoutAdmin(LockableAdmin):
         obj = form.instance
 
         # Need to get the upload type
-        upload_type = form.data.get('upload_type')
+        # upload_type = form.data.get('upload_type')
+        overwrite_option = form.data.get('overwrite_option')
 
         if change:
             obj.modified_by = request.user
@@ -1117,7 +820,10 @@ class AssayPlateReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parse_readout_csv(obj, request.FILES['file'], upload_type)
+            # parse_readout_csv(obj, request.FILES['file'], upload_type, overwrite_option, form)
+            parse_file_and_save(
+                request.FILES['file'], obj.study.assay_run_id, overwrite_option, 'Plate', readout=self.object
+            )
 
         # Need to delete entries when a file is cleared
         if request.POST.get('file-clear', '') == 'on':
@@ -1147,120 +853,6 @@ admin.site.register(AssayPlateReadout, AssayPlateReadoutAdmin)
 #     return
 
 
-def get_qc_status_chip(form):
-    """Get QC status for each line"""
-    qc_status = {}
-
-    if not form:
-        return qc_status
-
-    for key, val in form.data.iteritems():
-        # If this is a QC input
-        if key.startswith('QC_'):
-            # Get index from key
-            index = int(key.split('_')[-1])
-            # Truncate value to be less than 20 characters to avoid errors
-            value = val[:19]
-            qc_status.update({index: value})
-
-    return qc_status
-
-
-# NOTE: Tricky thing about chip QC is IT DEPENDS ON WHETHER IT IS BEING ADDED OR UPDATED
-# Why? The ORDER OF THE VALUES REFLECTS THE FILE WHEN ADDING, BUT IS SORTED IN UPDATE
-@transaction.atomic
-def modify_qc_status_chip(current_chip_readout, form):
-    """Update the QC for a chip"""
-    # Get the readouts as they would appear on the front end
-    # PLEASE NOTE THAT ORDER IS IMPORTANT HERE TO MATCH UP WITH THE INPUTS
-    readouts = AssayChipRawData.objects.prefetch_related(
-        'assay_id__assay_id'
-    ).filter(
-        assay_chip_id=current_chip_readout
-    ).order_by(
-        'assay_id__assay_id__assay_short_name',
-        'elapsed_time'
-    )
-
-    # Get QC status for each line
-    qc_status = get_qc_status_chip(form)
-
-    for index, readout in enumerate(readouts):
-        readout.quality = qc_status.get(index)
-        readout.save()
-
-
-# TODO REFACTOR CAMEL CASE
-@transaction.atomic
-def parse_chip_csv(current_chip_readout, current_file, headers, form):
-    """Parse a csv file to get chip readout data"""
-    # remove_existing_chip(current_chip_readout)
-    AssayChipRawData.objects.filter(assay_chip_id=current_chip_readout).delete()
-
-    # Get QC status for each line
-    qc_status = get_qc_status_chip(form)
-
-    datareader = unicode_csv_reader(current_file, delimiter=',')
-    datalist = list(datareader)
-
-    # Current index for finding correct QC status
-    current_index = 0
-
-    # Only take values from headers onward
-    for rowID, rowValue in enumerate(datalist[headers:]):
-        # rowValue holds all of the row elements
-        # rowID is the index of the current row from top to bottom
-
-        # Skip any row with insufficient columns
-        if len(rowValue) < 7:
-            continue
-
-        # Skip any row with incomplete data
-        # This does not include the quality and value (which can be null)
-        if not all(rowValue[:5] + [rowValue[6]]):
-            continue
-
-        # Try getting the assay from long name
-        try:
-            assay = AssayModel.objects.get(assay_name__iexact=rowValue[3])
-        # If this fails, then use the short name
-        except:
-            assay = AssayModel.objects.get(assay_short_name__iexact=rowValue[3])
-
-        field = rowValue[4]
-        val = rowValue[5]
-        time = rowValue[1]
-
-        # PLEASE NOTE Database inputs, not the csv, have the final say
-        # Get quality if possible
-        quality = u''
-        if len(rowValue) > 7:
-            quality = rowValue[7]
-
-        # Get quality from added form inputs if possible
-        if current_index in qc_status:
-            quality = qc_status.get(current_index)
-        # Increment current index acquisition
-        current_index += 1
-
-        # Treat empty strings as None
-        if not val:
-            val = None
-            # Set quality to 'NULL' if quality was not set by user
-            if not quality:
-                quality = 'NULL'
-
-        #How to parse Chip data
-        AssayChipRawData(
-            assay_chip_id=current_chip_readout,
-            assay_id=AssayChipReadoutAssay.objects.get(readout_id=current_chip_readout, assay_id=assay),
-            field_id=field,
-            value=val,
-            elapsed_time=time,
-            quality=quality,
-        ).save()
-
-
 class AssayChipCellsInline(admin.TabularInline):
     """Inline for Chip Cells (for Chip Setup)"""
     # Cells used to construct the model
@@ -1278,6 +870,12 @@ class AssayChipCellsInline(admin.TabularInline):
 
     class Media(object):
         css = {"all": ("css/hide_admin_original.css",)}
+
+
+class AssayCompoundInstanceInline(admin.TabularInline):
+    model = AssayCompoundInstance
+    exclude = []
+    extra = 0
 
 
 class AssayChipSetupAdmin(LockableAdmin):
@@ -1376,7 +974,7 @@ class AssayChipSetupAdmin(LockableAdmin):
     )
 
     actions = ['update_fields']
-    inlines = [AssayChipCellsInline]
+    inlines = [AssayChipCellsInline, AssayCompoundInstanceInline]
 
     def response_add(self, request, obj):
         """If save and add another, have same response as save and continue"""
@@ -1546,6 +1144,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
         obj = form.instance
 
         headers = int(form.data.get('headers')) if form.data.get('headers') else 0
+        overwrite_option = form.data.get('overwrite_option')
 
         if change:
             obj.modified_by = request.user
@@ -1560,7 +1159,10 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
         if request.FILES:
             # pass the upload file name to the CSV reader if a file exists
-            parse_chip_csv(obj, request.FILES['file'], headers, form)
+            # parse_chip_csv(obj, request.FILES['file'], headers, form)
+            parse_file_and_save(
+                request.FILES['file'], obj.chip_setup.assay_run_id, overwrite_option, 'Chip', headers=headers, form=form, readout=self.object
+            )
 
         # Try to update QC status if no file
         else:
@@ -1913,7 +1515,7 @@ class AssayRunAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     date_hierarchy = 'start_date'
-    list_display = ('assay_run_id', 'study_types', 'start_date', 'description', )
+    list_display = ('assay_run_id', 'study_types', 'start_date', 'description',)
     fieldsets = (
         (
             'Study', {

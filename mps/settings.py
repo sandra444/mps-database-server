@@ -215,7 +215,7 @@ INSTALLED_APPS = (
 # For whoosh
 HAYSTACK_CONNECTIONS = {
     'default': {
-        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'ENGINE': 'mps.backends.ConfigurableWhooshEngine',
         'PATH': os.path.join(os.path.dirname(__file__), 'whoosh_index'),
         # can cause problems when dealing with data outside ascii
         # 'INCLUDE_SPELLING': True,

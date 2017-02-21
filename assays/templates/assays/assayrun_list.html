@@ -46,13 +46,12 @@
                     <td>{{ study.start_date|date:"M d, Y" }}</td>
                     <td>{{ study.description }}</td>
                     <td>
-                        {{ study.created_by.first_name }}
-                        {{ study.created_by.last_name }}
+                        {{ study.full_creator }}
                     </td>
                     <td>{{ study.group }}</td>
                     <td>
                         {% if study.signed_off_by %}
-                            <span title="This entry was reviewed by {{ study.signed_off_by }} on {{ study.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ study.full_reviewer }} on {{ study.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if study.flagged %}
                             <span title="This entry is flagged for review: '{{ study.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>

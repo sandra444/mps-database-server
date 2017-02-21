@@ -1,5 +1,11 @@
 // Adding this script will override enter such that it will display a modal confirmation
 // This script will additionally help prevent the multiple submission issue
+
+// This global variable checks whether there is an exception to the override
+window.OVERRIDE = {
+    'exceptions': []
+};
+
 $(document).ready(function () {
     // On submit, disable all submit buttons
     // This only really matters on add pages and causes a bug on update pages when 'cancel' is selected
@@ -43,8 +49,24 @@ $(document).ready(function () {
 
     $(window).keydown(function(event) {
         if(event.keyCode == 13) {
+            // Make sure this isn't the exception
+            var exception_focused = false;
+            if(window.OVERRIDE.exceptions) {
+                $.each(window.OVERRIDE.exceptions, function(index, exception_selector) {
+                    if(exception_selector.is(':focus')) {
+                        exception_focused = true;
+                    }
+                });
+            }
+
+            // If this is an exception
+            if(exception_focused) {
+                // Just prevent default if this is an exception
+                event.preventDefault();
+                return false;
+            }
             // Only perform the override if an input is focused
-            if($('input:focus')[0]) {
+            else if($('input:focus')[0]) {
                 event.preventDefault();
                 dialogConfirm.dialog('open');
                 return false;

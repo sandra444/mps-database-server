@@ -70,11 +70,13 @@
         </div>
     {% endif %}
 
-    {% if object.file %}
-        <legend><b>Readout File</b></legend>
-        <a href="/media/{{ object.file }}">File: {{ object.file }}</a>
-        <br><br>
-    {% endif %}
+{#    {% if object.file %}#}
+{#        <legend><b>Readout File</b></legend>#}
+{#        <a href="/media/{{ object.file }}">File: {{ object.file }}</a>#}
+{#        <br><br>#}
+{#    {% endif %}#}
+
+	{% include 'assays/data_upload_table.html' %}
 
     {% if object.assaychipreadoutassay_set.all %}
         <legend><b>Assays</b></legend>

@@ -285,29 +285,29 @@
             Marking wells with a type can make the layout (and any data associated with it) much more legible
         </li>
     </ul>
-    <h4>Set Time Point</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Selecting this option will allow you to specify time points for each well
-        </li>
-        <li class="list-group-item">
-            The input <b>Timepoint:</b> is the initial time point and the dropdown next to it specifies the unit
-        </li>
-        <li class="list-group-item">
-            You can create a series where the value is increased from well to well
-            <br>
-            To do this, set a number in the input <b>Increment:</b>
-        </li>
-        <li class="list-group-item">
-            When creating a time point series, you can choose to <b>Add</b> or <b>Multiply</b>
-            <br>
-            You can also choose which direction to apply the series
-        </li>
-        <li class="list-group-item">
-            Each well can contain only one time point, so previous time points will be overwritten
-        </li>
-    </ul>
-    <h4>Add Compound</h4>
+{#    <h4>Set Time Point</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item">#}
+{#            Selecting this option will allow you to specify time points for each well#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            The input <b>Timepoint:</b> is the initial time point and the dropdown next to it specifies the unit#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            You can create a series where the value is increased from well to well#}
+{#            <br>#}
+{#            To do this, set a number in the input <b>Increment:</b>#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            When creating a time point series, you can choose to <b>Add</b> or <b>Multiply</b>#}
+{#            <br>#}
+{#            You can also choose which direction to apply the series#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Each well can contain only one time point, so previous time points will be overwritten#}
+{#        </li>#}
+{#    </ul>#}
+{#    <h4>Add Compound</h4>#}
     <ul class="list-group">
         <li class="list-group-item">
             Selecting this option will allow you to specify compounds and their concentrations
@@ -320,9 +320,9 @@
             <br>
             The default is <b>Divide</b>, but you can also <b>Add</b>, <b>Multiply</b>, or <b>Subtract</b>
         </li>
-        <li class="list-group-item">
-            Wells can contain only one copy of each compound (e.g. a well can only have one instance of Acetaminophen)
-        </li>
+{#        <li class="list-group-item">#}
+{#            Wells can contain only one copy of each compound (e.g. a well can only have one instance of Acetaminophen)#}
+{#        </li>#}
     </ul>
     <h4>Add Label</h4>
     <ul class="list-group">
@@ -395,14 +395,47 @@
         </li>
         <li class="list-group-item">
             <b>Test Type</b> specifies whether the chip functions as a control or not
-            <br>
-            If the chip is not a control chip, you must specify a compound, concentration, and unit
+{#            <br>#}
+{#            If the chip is not a control chip, you must specify a compound, concentration, and unit#}
+        </li>
+    </ul>
+    <h4>Adding Compounds</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Each row under the header <b>Compounds</b> describes a compound added to the chip
+        </li>
+        <li class="list-group-item">
+            If this chip does not have any compounds, do not modify this section
+        </li>
+        <li class="list-group-item">
+            To get another row, click the <b>Add Compounds</b> button
+        </li>
+        <li class="list-group-item">
+            Be sure to specify the supplier, lot, receipt date, concentration (and unit), addition time, and duration
+        </li>
+        <li class="list-group-item">
+            If necessary, please use "N/A" for suppliers and lots that are unknown
+        </li>
+        <li class="list-group-item">
+            If necessary, please enter <b>nothing</b> into the receipt date if the date is unknown
+        </li>
+        <li class="list-group-item">
+            Suggestions for supplier and lot will be shown depending on your previous selections
+        </li>
+        <li class="list-group-item">
+            Suggestion lists are shortened depending on what you type into the text boxes
+        </li>
+        <li class="list-group-item">
+            Please choose applicable suggestions when possible
+        </li>
+        <li class="list-group-item">
+            Use 'e' for scientific notation: e.g. 1e+3 = 1000.
         </li>
     </ul>
     <h4>Adding Cells</h4>
     <ul class="list-group">
         <li class="list-group-item">
-            Each row under the header <b>Model Cells</b> describes cells added to the chip
+            Each row under the header <b>Cell Samples</b> describes cells added to the chip
         </li>
         <li class="list-group-item">
             If this chip does not have any cells, do not modify this section
@@ -451,7 +484,7 @@
     <h4>Adding or Editing a Chip Readout</h4>
     <ul class="list-group">
         <li class="list-group-item active">
-            A <b>Chip Readout</b> describes the assays performed and the raw values from these assays
+            A <b>Chip Readout</b> describes the assays performed and the data from these assays
         </li>
     </ul>
     <h4>Adding or Editing Assays</h4>
@@ -498,7 +531,7 @@
     <h4>Uploading Data</h4>
     <ul class="list-group">
         <li class="list-group-item">
-            <h4>If you are uploading data for a single Readout, use the .csv format</h4>
+            <h4>If you are uploading data for a single Readout, use the .csv or .xlsx format</h4>
               In Excel, you will see an option reading "CSV (Comma delimited)" in the "save as type" drop down in the "save as" menu
               <br>
               If you want to upload data for multiple Readouts, see <a href="#bulk"> Uploading an Excel File of Readout Data</a>
@@ -516,6 +549,7 @@
                         <th>Value</th>
                         <th>Value Unit</th>
                         <th>QC Status</th>
+                        <th>Notes</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -528,6 +562,7 @@
                         <td>[Value]</td>
                         <td>[Value Unit]</td>
                         <td>[Leave Blank to Pass]</td>
+                        <td>[Notes]</td>
                     </tr>
                     <tr>
                         <td>[Chip ID]</td>
@@ -538,6 +573,7 @@
                         <td>[Value]</td>
                         <td>[Value Unit]</td>
                         <td>[Any Value in this Column Marks the Reading Invalid]</td>
+                        <td>[Notes]</td>
                     </tr>
                 </tbody>
             </table>
@@ -695,7 +731,7 @@
     <h4>Adding Cells</h4>
     <ul class="list-group">
         <li class="list-group-item">
-            Each row under the header <b>Model Cells</b> describes cells added to the plate
+            Each row under the header <b>Cell Samples</b> describes cells added to the plate
         </li>
         <li class="list-group-item">
             If this plate does not have any cells, do not modify this section
@@ -744,7 +780,7 @@
     <h4>Adding or Editing a Chip Readout</h4>
     <ul class="list-group">
         <li class="list-group-item active">
-            A <b>Plate Readout</b> describes the assays performed and the raw values from these assays
+            A <b>Plate Readout</b> describes the assays performed and the data from these assays
         </li>
     </ul>
     <h4>Adding or Editing Assays</h4>
@@ -859,7 +895,7 @@
                     </tr>
                 </tbody>
             </table>
-            *Optional (if not using time, totally exclude cells)
+            *Optional (if not using time, cells may be left blank)
         </li>
         <li class="list-group-item">
             <h4>The above example in <b>Tabular</b> format would be as follows:</h4>
@@ -999,7 +1035,7 @@
                     </tr>
                 </tbody>
             </table>
-            *Optional (if not using time, totally exclude columns)
+            *Optional (if not using time, cells may be left blank)
         </li>
         <li class="list-group-item">
             File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays
@@ -1059,7 +1095,7 @@
                         <span> </span>
                     </label>
                     <label class="btn btn-default active">
-                        Click Wells to Invalidate/Validate Them <small>(click here to toggle this function on and off)</small>
+                        Click Values to Invalidate/Validate Them <small>(click here to toggle this function on and off)</small>
                     </label>
                 </div>
             </div>

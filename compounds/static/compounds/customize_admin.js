@@ -1,10 +1,22 @@
 $(document).ready(function () {
-
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
     var chemblid = null;
 
     var chembl_search_results = $('#chembl_search_results');
     var chembl_search_submit = $('#chembl_search_submit');
+    var chembl_search = $('#chembl_search');
+
+    var chembl_id_selector = $('#id_chemblid');
+
+    // Add the retrieve button
+    // TODO REVISE
+    $('<input type="button" value="Retrieve" id="retrieve" name="_fetch">')
+            .insertAfter(chembl_id_selector);
+    var retrieve_selector = $('#retrieve');
+
+    // Set override exception to include chembl_search (so it doesn't trigger the submission)
+    window.OVERRIDE.exceptions.push(chembl_search);
+    window.OVERRIDE.exceptions.push(chembl_id_selector);
 
     // Open and then close dialog so it doesn't get placed in window itself
     var dialog = $('#dialog');
@@ -128,7 +140,7 @@ $(document).ready(function () {
 
                 if (json.error) {
                     alert(json.error);
-                    $('#retrieve').removeAttr('disabled').val('Retrieve');
+                    retrieve_selector.removeAttr('disabled').val('Retrieve');
                 } else {
                     if ('compound' === selection) {
                         compound_finalizer(json);
@@ -164,7 +176,7 @@ $(document).ready(function () {
             }
         }
 
-        $('#retrieve').removeAttr('disabled').val('Retrieve');
+        retrieve_selector.removeAttr('disabled').val('Retrieve');
     }
 
     function get_drugbank_data() {
@@ -204,7 +216,7 @@ $(document).ready(function () {
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
-                $('#retrieve').removeAttr('disabled').val('Retrieve');
+                retrieve_selector.removeAttr('disabled').val('Retrieve');
             }
         });
     }
@@ -221,7 +233,7 @@ $(document).ready(function () {
             dataType: "json",
             data: {
                 call: 'fetch_chembl_search_results',
-                query: $('#chembl_search').val(),
+                query: chembl_search.val(),
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
@@ -279,7 +291,7 @@ $(document).ready(function () {
 
     function apply_selection(selection) {
         var chembl_id = selection.getAttribute('data-chemblid');
-        $('#id_chemblid').val(chembl_id);
+        chembl_id_selector.val(chembl_id);
         dialog.dialog('close');
     }
 
@@ -292,16 +304,13 @@ $(document).ready(function () {
 
     // FOR ADMIN ONLY
     if (!$('#id_locked').prop('checked')) {
-        $('<input type="button" value="Retrieve" id="retrieve" name="_fetch">')
-            .insertAfter('#id_chemblid');
-
-        $('#retrieve').click(function () {
-            chemblid = $('#id_chemblid').val();
+        retrieve_selector.click(function () {
+            chemblid = chembl_id_selector.val();
 
             if (chemblid.match("^CHEMBL")) {
                 /* If we match CHEMBL, display the fact that we are in the
                  * process of retrieving data */
-                $('#retrieve').val('Retrieving').attr('disabled', 'disabled');
+                retrieve_selector.val('Retrieving').attr('disabled', 'disabled');
 
                 // Not sure why this was originally written like this
                 // Should perform refactor soon
@@ -321,5 +330,21 @@ $(document).ready(function () {
 
     chembl_search_submit.click(function() {
         get_search_results();
+    });
+
+    // Override the enter key (again) to search when entering on chembl_search
+    $(window).keydown(function(event) {
+        if(event.keyCode == 13) {
+            // If SPECIFICALLY chembl search is focused
+            if(chembl_search.is(":focus")) {
+                chembl_search_submit.trigger('click');
+                return false;
+            }
+            // If SPECIFICALLY chemblid selector is focused
+            else if(chembl_id_selector.is(":focus")) {
+                retrieve_selector.trigger('click');
+                return false;
+            }
+        }
     });
 });

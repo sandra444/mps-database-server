@@ -4,6 +4,8 @@ from django.db import models
 from microdevices.models import Microdevice, OrganModel, OrganModelProtocol
 from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
 
+import urllib
+
 # TODO MAKE MODEL AND FIELD NAMES MORE CONSISTENT/COHERENT
 
 # TODO DEPRECATED, REMOVE SOON
@@ -116,13 +118,13 @@ class AssayLayout(FlaggableModel):
         verbose_name = 'Assay Layout'
         ordering = ('layout_name',)
 
-    layout_name = models.CharField(max_length=200)
+    layout_name = models.CharField(max_length=200, unique=True)
     device = models.ForeignKey(Microdevice)
 
     # Specifies whether this is a standard (oft used layout)
     standard = models.BooleanField(default=False)
 
-    #base_layout = models.ForeignKey(AssayBaseLayout)
+    # base_layout = models.ForeignKey(AssayBaseLayout)
 
     def __unicode__(self):
         return self.layout_name
@@ -172,7 +174,7 @@ class AssayWell(models.Model):
     class Meta(object):
         unique_together = [('assay_layout', 'row', 'column')]
 
-    #base_layout = models.ForeignKey(AssayBaseLayout)
+    # base_layout = models.ForeignKey(AssayBaseLayout)
     assay_layout = models.ForeignKey(AssayLayout)
     well_type = models.ForeignKey(AssayWellType)
 
@@ -182,33 +184,83 @@ class AssayWell(models.Model):
 
 class AssayWellTimepoint(models.Model):
     """Timepoints for PLATE wells"""
-
     assay_layout = models.ForeignKey(AssayLayout)
     timepoint = models.FloatField(default=0)
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
 
 
-class AssayWellCompound(models.Model):
-    """Compound for PLATE wells"""
-
-    assay_layout = models.ForeignKey(AssayLayout)
-    compound = models.ForeignKey('compounds.Compound')
-    concentration = models.FloatField(default=0)
-    concentration_unit = models.ForeignKey(PhysicalUnits)
-    row = models.CharField(max_length=25)
-    column = models.CharField(max_length=25)
-
-
 class AssayWellLabel(models.Model):
     """Arbitrary string label for PLATE wells"""
-
     assay_layout = models.ForeignKey(AssayLayout)
     label = models.CharField(max_length=150)
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
 
 
+class AssayCompoundInstance(models.Model):
+    """An instance of a compound used in an assay; used as an inline"""
+
+    class Meta(object):
+        unique_together = [
+            (
+                'chip_setup',
+                'compound_instance',
+                'concentration',
+                'concentration_unit',
+                'addition_time',
+                'duration'
+            )
+        ]
+
+    # Stop-gap, subject to change
+    chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True)
+
+    # COMPOUND INSTANCE IS REQUIRED, however null=True was done to avoid a submission issue
+    compound_instance = models.ForeignKey('compounds.CompoundInstance', null=True, blank=True)
+    concentration = models.FloatField()
+    concentration_unit = models.ForeignKey(
+        'assays.PhysicalUnits',
+        verbose_name='Concentration Unit'
+    )
+
+    # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
+    addition_time = models.FloatField(blank=True)
+
+    # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
+    duration = models.FloatField(blank=True)
+
+class AssayWellCompound(models.Model):
+    """Compound for PLATE wells"""
+    assay_layout = models.ForeignKey(AssayLayout)
+    # TO BE DEPRECATED: USE AssayCompoundInstance instead
+    compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
+    # Null=True temporarily
+    assay_compound_instance = models.ForeignKey(AssayCompoundInstance, null=True, blank=True)
+    # TO BE DEPRECATED: USE AssayCompoundInstance instead
+    concentration = models.FloatField(default=0, null=True, blank=True)
+    # TO BE DEPRECATED: USE AssayCompoundInstance instead
+    concentration_unit = models.ForeignKey(PhysicalUnits, null=True, blank=True)
+    row = models.CharField(max_length=25)
+    column = models.CharField(max_length=25)
+
+
+class AssayQualityIndicator(LockableModel):
+    """AssayQualityIndicators show whether a data point needs to be excluded"""
+    # Name of the indicator
+    name = models.CharField(max_length=255, unique=True)
+
+    # Short version of the indicator for input in the quality field
+    # Theoretically, the code should be a single character, but I will err on the side of caution
+    code = models.CharField(max_length=10, unique=True)
+
+    # Description of the indicator (for tooltips)
+    description = models.CharField(max_length=2000)
+
+    # Is this necessary? Do we assume that all need to be excluded?
+    # exclude = models.BooleanField(default=True)
+
+# TO BE DEPRECATED To be merged into single "AssayCells" model
 class AssayPlateCells(models.Model):
     """Individual cell parameters for PLATE setup used in inline"""
 
@@ -227,6 +279,7 @@ class AssayPlateCells(models.Model):
                                     blank=True, default='')
 
 
+# TO BE DEPRECATED To be merged into single "AssaySetup" model
 class AssayPlateSetup(FlaggableModel):
     """Setup for MICROPLATES"""
 
@@ -250,7 +303,7 @@ class AssayPlateSetup(FlaggableModel):
     notes = models.CharField(max_length=2048, blank=True, default='')
 
     def __unicode__(self):
-        return u'Plate-{}'.format(self.assay_plate_id)
+        return u'{}'.format(self.assay_plate_id)
 
     def get_absolute_url(self):
         return '/assays/assayplatesetup/{}/'.format(self.id)
@@ -278,6 +331,7 @@ class AssayReader(LockableModel):
         return u'{0} - {1}'.format(self.reader_name, self.reader_type)
 
 
+# TO BE DEPRECATED To be merged into single "AssayInstance" model
 class AssayPlateReadoutAssay(models.Model):
     """Inline for PLATE readout assays"""
 
@@ -304,6 +358,7 @@ class AssayPlateReadoutAssay(models.Model):
         return u'{0}-{1}'.format(self.assay_id.assay_short_name, self.feature)
 
 
+# TO BE DEPRECATED To be merged into single "AssayData" model
 class AssayReadout(models.Model):
     """An individual value for a PLATE readout"""
 
@@ -318,7 +373,19 @@ class AssayReadout(models.Model):
     # Quality, if it is not the empty string, indicates that a readout is INVALID
     quality = models.CharField(default='', max_length=10)
 
-#class ReadoutUnit(LockableModel):
+    # IT WAS DECIDED THAT A FK WOULD NOT BE USED
+    # Use quality with each flag separated with a '-' (SUBJECT TO CHANGE)
+    # Quality indicator from QualityIndicator table (so that additional can be added)
+    # quality_indicator = models.ForeignKey(AssayQualityIndicator, null=True, blank=True)
+
+    # This value contains notes for the data point
+    notes = models.CharField(max_length=255, default='')
+
+    # Indicates what replicate this is (0 is for original)
+    update_number = models.IntegerField(default=0)
+
+
+# class ReadoutUnit(LockableModel):
 #    """
 #    Units specific to readouts (AU, RFU, so on)
 #    """
@@ -333,11 +400,13 @@ class AssayReadout(models.Model):
 #        return self.readout_unit
 
 
+# Likely to become deprecated
 # Get readout file location
 def plate_readout_file_location(instance, filename):
     return '/'.join(['csv', str(instance.setup.assay_run_id_id), 'plate', filename])
 
 
+# TO BE DEPRECATED To be merged into single "AssayDataset" model
 class AssayPlateReadout(FlaggableModel):
     """Readout data collected from MICROPLATES"""
 
@@ -401,7 +470,7 @@ class AssayResultFunction(LockableModel):
     """Function for analysis of CHIP RESULTS"""
     class Meta(object):
         verbose_name = 'Function'
-        ordering = ('function_name', )
+        ordering = ('function_name',)
 
     function_name = models.CharField(max_length=100, unique=True)
     function_results = models.CharField(max_length=100, blank=True, default='')
@@ -416,7 +485,7 @@ class AssayResultType(LockableModel):
 
     class Meta(object):
         verbose_name = 'Result type'
-        ordering = ('assay_result_type', )
+        ordering = ('assay_result_type',)
 
     assay_result_type = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=200, blank=True, default='')
@@ -425,6 +494,7 @@ class AssayResultType(LockableModel):
         return self.assay_result_type
 
 
+# TO BE DEPRECATED To be merged into single "AssayResult" model
 class AssayPlateResult(models.Model):
     """Individual result parameters for PLATE RESULTS used in inline"""
 
@@ -461,6 +531,7 @@ class AssayPlateResult(models.Model):
                                   null=True)
 
 
+# TO BE DEPRECATED To be merged into single "AssayResultset" model
 class AssayPlateTestResult(FlaggableModel):
     """Test Results from MICROPLATES"""
 
@@ -527,13 +598,21 @@ class StudyModel(models.Model):
     integration_mode = models.CharField(max_length=13, default='1', choices=(('0', 'Functional'), ('1', 'Physical')))
 
 
+# Get readout file location
+def bulk_readout_file_location(instance, filename):
+    return '/'.join(['csv', str(instance.id), 'bulk', filename])
+
+
+# To be renamed "AssayStudy" for clarity
+# Handling of study type will be changed
+# Nature of assay_run_id subject to revision
 class AssayRun(FlaggableModel):
     """The encapsulation of all data concerning some plate/chip project"""
 
     class Meta(object):
         verbose_name = 'Study'
         verbose_name_plural = 'Studies'
-        ordering = ('assay_run_id', )
+        ordering = ('assay_run_id',)
 
     # Removed center_id for now: this field is basically for admins anyway
     # May add center_id back later, but group mostly serves the same purpose
@@ -548,6 +627,7 @@ class AssayRun(FlaggableModel):
     name = models.TextField(default='Study-01', verbose_name='Study Name',
                             help_text='Name-###')
     start_date = models.DateField(help_text='YYYY-MM-DD')
+    # TODO REMOVE AS SOON AS POSSIBLE
     assay_run_id = models.TextField(unique=True, verbose_name='Study ID',
                                     help_text="Standard format 'CenterID-YYYY-MM-DD-Name-###'")
     description = models.TextField(blank=True, default='')
@@ -558,6 +638,12 @@ class AssayRun(FlaggableModel):
         blank=True,
         null=True,
         help_text='Protocol File for Study'
+    )
+
+    bulk_file = models.FileField(
+        upload_to=bulk_readout_file_location,
+        verbose_name='Data File',
+        blank=True, null=True
     )
 
     # Deprecated
@@ -617,6 +703,7 @@ class StudySupportingData(models.Model):
     )
 
 
+# TO BE DEPRECATED To be merged into single "AssayData" model
 class AssayChipRawData(models.Model):
     """Individual lines of readout data"""
 
@@ -634,6 +721,18 @@ class AssayChipRawData(models.Model):
 
     # This value will act as quality control, if it evaluates True then the value is considered invalid
     quality = models.CharField(max_length=20, default='')
+
+    # IT WAS DECIDED THAT A FK WOULD NOT BE USED
+    # Use quality with each flag separated with a '-' (SUBJECT TO CHANGE)
+    # Quality indicator from QualityIndicator table (so that additional can be added)
+    # quality_indicator = models.ForeignKey(AssayQualityIndicator, null=True, blank=True)
+
+    # This value contains notes for the data point
+    notes = models.CharField(max_length=255, default='')
+
+    # Indicates what replicate this is (0 is for original)
+    update_number = models.IntegerField(default=0)
+
 
 
 class AssayChipCells(models.Model):
@@ -654,11 +753,12 @@ class AssayChipCells(models.Model):
                                     blank=True, default='')
 
 
+# TO BE DEPRECATED To be merged into single "AssaySetup" model
 class AssayChipSetup(FlaggableModel):
     """The configuration of a Chip for implementing an assay"""
     class Meta(object):
         verbose_name = 'Chip Setup'
-        ordering = ('-assay_chip_id', 'assay_run_id', )
+        ordering = ('-assay_chip_id', 'assay_run_id',)
 
     assay_run_id = models.ForeignKey(AssayRun, verbose_name='Study')
     setup_date = models.DateField(help_text='YYYY-MM-DD')
@@ -677,7 +777,7 @@ class AssayChipSetup(FlaggableModel):
     # can be a barcode or a hand written identifier
     assay_chip_id = models.CharField(max_length=512, verbose_name='Chip ID/ Barcode')
 
-    #Control => control, Compound => compound; Abbreviate? Capitalize?
+    # Control => control, Compound => compound; Abbreviate? Capitalize?
     chip_test_type = models.CharField(max_length=8, choices=(("control", "Control"), ("compound", "Compound")), default="control")
 
     compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
@@ -693,15 +793,16 @@ class AssayChipSetup(FlaggableModel):
     notes = models.CharField(max_length=2048, blank=True, default='')
 
     def __unicode__(self):
-        if self.compound:
-            return u'Chip-{}:{}({}{})'.format(
-                self.assay_chip_id,
-                self.compound,
-                self.concentration,
-                self.unit
-            )
-        else:
-            return u'Chip-{}:Control'.format(self.assay_chip_id)
+        return u'{}'.format(self.assay_chip_id)
+        # if self.compound:
+        #     return u'Chip-{}:{}({}{})'.format(
+        #         self.assay_chip_id,
+        #         self.compound,
+        #         self.concentration,
+        #         self.unit
+        #     )
+        # else:
+        #     return u'Chip-{}:Control'.format(self.assay_chip_id)
 
     def get_absolute_url(self):
         return '/assays/assaychipsetup/{}/'.format(self.id)
@@ -720,11 +821,13 @@ object_types = (
 )
 
 
+# TO BE DEPRECATED To be merged into single "AssayInstance" model
 class AssayChipReadoutAssay(models.Model):
     """Inline for CHIP readout assays"""
 
     class Meta(object):
-        unique_together = [('readout_id', 'assay_id')]
+        # Changed uniqueness check to include unit (extend to include object?)
+        unique_together = [('readout_id', 'assay_id', 'readout_unit')]
 
     readout_id = models.ForeignKey('assays.AssayChipReadout', verbose_name='Readout')
     assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True)
@@ -741,11 +844,13 @@ class AssayChipReadoutAssay(models.Model):
         return u'{}'.format(self.assay_id)
 
 
+# Likely to become deprecated
 # Get readout file location
 def chip_readout_file_location(instance, filename):
     return '/'.join(['csv', str(instance.chip_setup.assay_run_id_id), 'chip', filename])
 
 
+# TO BE DEPRECATED To be merged into single "AssayDataset" model
 class AssayChipReadout(FlaggableModel):
     """Readout data for CHIPS"""
 
@@ -802,6 +907,7 @@ class AssayChipReadout(FlaggableModel):
         return '/assays/assaychipreadout/{}/delete/'.format(self.id)
 
 
+# TO BE DEPRECATED To be merged into single "AssayResultSet" model
 class AssayChipTestResult(FlaggableModel):
     """Results calculated from Raw Chip Data"""
 
@@ -856,6 +962,7 @@ class AssayChipTestResult(FlaggableModel):
         return '/assays/assaychiptestresult/{}/delete/'.format(self.id)
 
 
+# TO BE DEPRECATED To be merged into single "AssayResult" model
 class AssayChipResult(models.Model):
     """Individual result parameters for CHIP RESULTS used in inline"""
 
@@ -890,3 +997,22 @@ class AssayChipResult(models.Model):
     test_unit = models.ForeignKey(PhysicalUnits,
                                   blank=True,
                                   null=True)
+
+
+class AssayDataUpload(FlaggableModel):
+    """Shows the history of data uploads for a readout; functions as inline"""
+
+    # date_created, created_by, and other fields are used but come from FlaggableModel
+    file_location = models.URLField(null=True, blank=True)
+    # Note that there are both chip and plate readouts listed as one file may supply both
+    # TO BE DEPRECATED
+    chip_readout = models.ManyToManyField(AssayChipReadout)
+    # TO BE DEPRECATED
+    plate_readout = models.ManyToManyField(AssayPlateReadout)
+
+    # Supplying study may seem redundant, however:
+    # This ensures that uploads for readouts that have been (for whatever reason) deleted will no longer be hidden
+    study = models.ForeignKey(AssayRun)
+
+    def __unicode__(self):
+        return urllib.unquote(self.file_location.split('/')[-1])

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block load %}
-    <link href="{% static "assays/customize_admin.css" %}" rel="stylesheet" type="text/css">
+{#    <link href="{% static "assays/customize_admin.css" %}" rel="stylesheet" type="text/css">#}
     <script src="{% static "js/inline_add.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
@@ -189,20 +189,24 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="file" class="col-sm-2 control-label">.csv Data File</label>
+        <label for="file" class="col-sm-2 control-label">Data File</label>
         <div class="col-sm-10">
           {{ form.file }}
-          <b>***Uploading overwrites old data***</b>
         </div>
     </div>
 
+    {% include 'generic_field.html' with field=form.overwrite_option label="Overwrite Option*" %}
+
+    {% include 'assays/data_upload_table.html' %}
+
+    {# DEPRECATED #}
     {# Upload type indicates whether tabular or block #}
-    <div class="form-group">
-        <label for="upload_type" class="col-sm-2 control-label">Upload Type*</label>
-        <div class="col-sm-10">
-          {{ form.upload_type }}
-        </div>
-    </div>
+{#    <div class="form-group">#}
+{#        <label for="upload_type" class="col-sm-2 control-label">Upload Type*</label>#}
+{#        <div class="col-sm-10">#}
+{#          {{ form.upload_type }}#}
+{#        </div>#}
+{#    </div>#}
 
     {{ formset.management_form }}
     <legend>Assays</legend>
@@ -248,10 +252,10 @@
     <table class="table table-striped inlines" id="assayplatereadoutassay_set-group"  name="assays">
         <thead>
             <tr>
-                <th>Assay</th>
-                <th>Reader</th>
-                <th>Readout Unit</th>
-                <th>Feature</th>
+                <th>Assay*</th>
+                <th>Reader*</th>
+                <th>Readout Unit*</th>
+                <th>Feature*</th>
                 <th>Delete</th>
             </tr>
         </thead>
@@ -277,18 +281,18 @@
     </div>
 
     {# CONTRIVED: REFACTOR SOON #}
-    <div class="fancy-checkbox form-group" style="padding-left:40px;">
-        <input type="checkbox" id="qc_mode" />
-        <div class="btn-group" style="min-width: 550px;">
-            <label for="qc_mode" class="btn btn-danger">
-                <span class="glyphicon glyphicon-ok"></span>
-                <span> </span>
-            </label>
-            <label for="qc_mode" class="btn btn-default active">
-                Click Wells to Invalidate/Validate Them <small>(click here to toggle this function on and off)</small>
-            </label>
-        </div>
-    </div>
+{#    <div class="fancy-checkbox form-group" style="padding-left:40px;">#}
+{#        <input type="checkbox" id="qc_mode" />#}
+{#        <div class="btn-group" style="min-width: 550px;">#}
+{#            <label for="qc_mode" class="btn btn-danger">#}
+{#                <span class="glyphicon glyphicon-ok"></span>#}
+{#                <span> </span>#}
+{#            </label>#}
+{#            <label for="qc_mode" class="btn btn-default active">#}
+{#                Click Values to Invalidate/Validate Them <small>(click here to toggle this function on and off)</small>#}
+{#            </label>#}
+{#        </div>#}
+{#    </div>#}
 
     <div class="padded-row">
         <div hidden id="heatmap_options" class="inline-group row">
@@ -387,6 +391,27 @@
                     </g>
                 </g>
             </svg>
+        </div>
+
+        <div align="center">
+            <table class="data-table">
+                <thead>
+                    <tr class="bg-info">
+                        <th>Plate ID</th>
+                        <th>Well ID</th>
+                        <th>Time</th>
+                        <th>Time Unit</th>
+                        <th>Assay</th>
+                        <th>Feature</th>
+                        <th>Value</th>
+                        <th>Value Unit</th>
+                        <th>QC Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="table_body">
+                </tbody>
+            </table>
         </div>
     </div>
 </form>

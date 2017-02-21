@@ -1,10 +1,39 @@
-$(document).ready(function() {
-    var charts = $('#charts');
+// This script allows previews to be shown for bulk uploads
+// CURRENTLY ONLY CHIP PREVIEWS ARE SHOWN
+// TODO CONSOLIDATE CODE WITH ASSAYRUN SUMMARY (DRY)
+$(document).ready(function () {
+//    var current_charts = $('#current_charts');
+//    var new_charts = $('#new_charts');
     var middleware_token = getCookie('csrftoken');
     var study_id = Math.floor(window.location.href.split('/')[4]);
 
+//    $.ajaxSetup({
+//         beforeSend: function(xhr, settings) {
+//             function getCookie(name) {
+//                 var cookieValue = null;
+//                 if (document.cookie && document.cookie != '') {
+//                     var cookies = document.cookie.split(';');
+//                     for (var i = 0; i < cookies.length; i++) {
+//                         var cookie = jQuery.trim(cookies[i]);
+//                         // Does this cookie string begin with the name we want?
+//                         if (cookie.substring(0, name.length + 1) == (name + '=')) {
+//                             cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+//                             break;
+//                         }
+//                     }
+//                 }
+//                 return cookieValue;
+//             }
+//             if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+//                 // Only send the token to relative URLs i.e. locally.
+//                 xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+//             }
+//         }
+//    });
+
     var current_key = 'chip';
-    var percent_control = false;
+    // Do not convert to percent control at the moment
+    var percent_control = '';
 
     var radio_buttons_display = $('#radio_buttons');
 
@@ -20,35 +49,6 @@ $(document).ready(function() {
         '#CCCCCC'
     ];
 
-    var ids = [
-        '#setups',
-        '#plate_setups'
-    ];
-
-    $.each(ids, function(index, table_id) {
-        if ($(table_id)[0]) {
-            $(table_id).DataTable({
-                "iDisplayLength": 400,
-                dom: 'rt',
-                fixedHeader: {headerOffset: 50},
-                responsive: true,
-                // Initially sort on start date (descending), not ID
-                "order": [[1, "asc"], [2, "desc"]],
-                "aoColumnDefs": [
-                    {
-                        "bSortable": false,
-                        "aTargets": [0]
-                    },
-                    {
-                        "width": "10%",
-                        "targets": [0]
-                    }
-                ]
-            });
-        }
-    });
-
-    // TODO Copy-pasting is irresponsible, please refrain from doing so in the future
     function make_charts(assays, charts) {
         // Clear existing charts
         var charts_id = $('#' + charts);
@@ -233,14 +233,17 @@ $(document).ready(function() {
                 // Function to call within the view is defined by `call:`
                 call: 'fetch_readouts',
                 study: study_id,
+                // TODO SET UP A WAY TO SWITCH BETWEEN CHIP AND COMPOUND
                 key: current_key,
                 // Tells whether to convert to percent Control
                 percent_control: percent_control,
+                // TODO REVISE
+                include_all: $('#show_all').val(),
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
                 // console.log(json);
-                make_charts(json.assays, 'charts');
+                make_charts(json.assays, 'current_charts');
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
@@ -248,18 +251,83 @@ $(document).ready(function() {
         });
     }
 
-    // Initially by device
+    // Please note that bulk upload does not currently allow changing QC or notes
+    // Before permitting this, ensure that the update_number numbers are accurate!
+    function validate_bulk_file() {
+        var formData = new FormData();
+        formData.append('bulk_file', $("#id_bulk_file")[0].files[0]);
+        formData.append('overwrite_option', $("#id_overwrite_option").val());
+        formData.append('call', 'validate_bulk_file');
+        formData.append('study', study_id);
+        formData.append('percent_control', percent_control);
+        // Always include all for previews
+        formData.append('include_all', 'True');
+        formData.append('csrfmiddlewaretoken', middleware_token);
+        formData.append('key', current_key);
+        if ($("#id_bulk_file")[0].files[0]) {
+            $.ajax({
+                url: "/assays_ajax/",
+                type: "POST",
+                dataType: "json",
+                cache: false,
+                contentType: false,
+                processData: false,
+//                data: {
+//                    // Function to call within the view is defined by `call:`
+//                    call: 'validate_bulk_file',
+//                    study: study_id,
+//                    key: current_key,
+//                    // Tells whether to convert to percent Control
+//                    percent_control: percent_control,
+//                    include_all: 'True',
+//                    bulk_file: bulk_file,
+//                    csrfmiddlewaretoken: middleware_token
+//                },
+                data: formData,
+                success: function (json) {
+                    // console.log(json);
+                    if (json.errors) {
+                        // Display errors
+                        alert(json.errors);
+                        // Remove file selection
+                        $('#id_bulk_file').val('');
+                        $('#new_charts').empty();
+                    }
+                    else {
+                        alert('Success! Please see "New Chip Data" below for preview.');
+                        make_charts(json.assays, 'new_charts');
+                    }
+                },
+                error: function (xhr, errmsg, err) {
+                    alert('An unknown error has occurred.');
+                    console.log(xhr.status + ": " + xhr.responseText);
+                    // Remove file selection
+                    $('#id_bulk_file').val('');
+                    $('#new_charts').empty();
+                }
+            });
+        }
+    }
+
+    // Initial data (by device)
     get_readouts();
 
-    // Check when radio buttons changed
-    $('input[type=radio][name=chart_type_radio]').change(function() {
-        current_key = this.value;
-        get_readouts();
+    // Validate file if file selected
+    $('#id_bulk_file').change(function() {
+        validate_bulk_file();
     });
 
-    // Check if convert_to_percent_control is clicked
-    $('#convert_to_percent_control').click(function() {
-        percent_control = this.checked;
+    // Trigger on change in show all (TO BE REVISED)
+    $('#show_all').click(function() {
+        if (this.value) {
+            this.value = '';
+            $(this).text('Show All');
+        }
+        else {
+            this.value = 'True';
+            $(this).text('Show Unmarked Only');
+        }
         get_readouts();
     });
 });
+

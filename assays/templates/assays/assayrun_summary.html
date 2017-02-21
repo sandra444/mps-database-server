@@ -102,18 +102,18 @@
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.device }}</td>
                     <td>{{ setup.organ_model }}</td>
-                    {% if setup.compound != None %}
-                        <td>{{ setup.compound }} ({{ setup.concentration }} {{ setup.unit }})</td>
-                    {% else %}
-                        <td>-control-</td>
-                    {% endif %}
+{#                    {% if setup.compound != None %}#}
+{#                        <td>{{ setup.compound }} ({{ setup.concentration }} {{ setup.unit }})</td>#}
+{#                    {% else %}#}
+{#                        <td>-control-</td>#}
+{#                    {% endif %}#}
+                    <td>{{ setup.related_compounds_as_string|linebreaks }}</td>
                     <td>
-                        {{ setup.created_by.first_name }}
-                        {{ setup.created_by.last_name }}
+                        {{ setup.full_creator }}
                     </td>
                     <td>
                         {% if setup.signed_off_by %}
-                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if setup.flagged %}
                             <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -162,9 +162,9 @@
             <tr>
                 <td>{{ setup }}</td>
                 {% if same %}
-                    <td class="text-success">Same as {{indicative}}</td>
+                    <td class="text-success">Same Cells as {{indicative}}</td>
                 {% else %}
-                    <td class="text-danger">Differs from {{indicative}}</td>
+                    <td class="text-danger">Different Cells from {{indicative}}</td>
                 {% endif %}
             </tr>
         {% endfor %}
@@ -194,12 +194,11 @@
                     <td>{{ setup.setup_date }}</td>
                     <td>{{ setup.assay_layout }}</td>
                     <td>
-                        {{ setup.created_by.first_name }}
-                        {{ setup.created_by.last_name }}
+                        {{ setup.full_creator }}
                     </td>
                     <td>
                         {% if setup.signed_off_by %}
-                            <span title="This entry was reviewed by {{ setup.signed_off_by }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was reviewed by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if setup.flagged %}
                             <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -244,15 +243,17 @@
             <tr>
                 <td>{{ setup }}</td>
                 {% if same %}
-                    <td class="text-success">Same cells as {{ plate_indicative }}</td>
+                    <td class="text-success">Same Cells as {{ plate_indicative }}</td>
                 {% else %}
-                    <td class="text-danger">Different cells from {{ plate_indicative }}</td>
+                    <td class="text-danger">Different Cells from {{ plate_indicative }}</td>
                 {% endif %}
             </tr>
         {% endfor %}
             </tbody>
         </table>
     {% endif %}
+
+    {% include 'assays/data_upload_table.html' %}
 
     <div id="radio_buttons" hidden class="well hidden-print">
         <h3 class="text-center">Chip Readout Data</h3>
