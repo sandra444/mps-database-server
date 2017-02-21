@@ -72,7 +72,7 @@ $(document).ready(function () {
         // Turn density into scientific notation
         var current_density = $('#id_assay' + current_interface + 'cells_set-' + current_id + '-cellsample_density');
         var current_number = Number(current_density.val());
-        if (current_number) {
+        if (current_number && current_number > 9999) {
             current_density.val(current_number.toExponential());
         }
 
