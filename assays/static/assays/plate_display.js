@@ -44,14 +44,24 @@ $(document).ready(function () {
     ];
 
     // Pulled from heatmap
+    // var colors = [
+    //     '#008000', '#1A8C00', '#339800', '#4DA400', '#66B000',
+    //     '#80BC00',
+    //     '#99C800', '#B3D400', '#CCE000', '#E6EC00', '#FFFF00',
+    //     '#F3E600',
+    //     '#E7CC00', '#DBB300', '#CF9900', '#C38000', '#B76600',
+    //     '#AB4D00',
+    //     '#9F3300', '#931A00', '#870000'
+    // ];
+
     var colors = [
-        '#008000', '#1A8C00', '#339800', '#4DA400', '#66B000',
-        '#80BC00',
-        '#99C800', '#B3D400', '#CCE000', '#E6EC00', '#FFFF00',
-        '#F3E600',
-        '#E7CC00', '#DBB300', '#CF9900', '#C38000', '#B76600',
-        '#AB4D00',
-        '#9F3300', '#931A00', '#870000'
+        "rgba(0,128,0,0.4)", "rgba(26,140,0,0.4)", "rgba(51,152,0,0.4)",
+        "rgba(77,164,0,0.4)", "rgba(102,176,0,0.4)", "rgba(128,188,0,0.4)",
+        "rgba(153,200,0,0.4)", "rgba(179,212,0,0.4)", "rgba(204,224,0,0.4)",
+        "rgba(230,236,0,0.4)", "rgba(255,255,0,0.4)", "rgba(243,230,0,0.4)",
+        "rgba(231,204,0,0.4)", "rgba(219,179,0,0.4)", "rgba(207,153,0,0.4)",
+        "rgba(195,128,0,0.4)", "rgba(183,102,0,0.4)", "rgba(171,77,0,0.4)",
+        "rgba(159,51,0,0.4)", "rgba(147,26,0,0.4)", "rgba(135,0,0,0.4)"
     ];
 
     // It is useful to have a list of row and column labels
@@ -66,7 +76,7 @@ $(document).ready(function () {
     var data_toggle = $('#data_toggle');
 
     // This will contain the min, max, and median values for a feature (for the heatmap)
-    //var feature_parameters = {};
+    // var feature_parameters = {};
 
     // This contains all values for a feature
     window.LAYOUT.assay_feature_values = {};
