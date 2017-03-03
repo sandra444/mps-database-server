@@ -22,7 +22,7 @@ $(document).ready(function () {
         }
     });
 
-    // The data in question as a Object pairing 'time|time_unit|assay|object|value_unit|replicate
+    // The data in question as a Sample Location pairing 'time|time_unit|assay|sample_location|value_unit|replicate
     var data = {};
 
     var readout_id = getReadoutValue();
@@ -291,7 +291,7 @@ $(document).ready(function () {
             var time = line[1];
             var time_unit = line[2];
             var assay = line[3];
-            var object = line[4];
+            var sample_location = line[4];
             var value = line[5];
             var value_unit = line[6];
 
@@ -305,7 +305,7 @@ $(document).ready(function () {
             }
 
             // Index in data
-            var index = get_index_for_value(object, time, assay, value_unit, update_number);
+            var index = get_index_for_value(sample_location, time, assay, value_unit, update_number);
 
             // Notice attribute to assist in deleting old data
             var new_row = $('<tr>')
@@ -338,7 +338,7 @@ $(document).ready(function () {
             var col_time = $('<td>').text(time);
             var col_time_unit = $('<td>').text(time_unit);
             var col_assay = $('<td>').text(assay);
-            var col_object = $('<td>').text(object);
+            var col_sample_location = $('<td>').text(sample_location);
             var col_value = $('<td>').text(value ? data_format(value) : value);
             var col_value_unit = $('<td>').text(value_unit);
 
@@ -369,7 +369,7 @@ $(document).ready(function () {
                 col_time,
                 col_time_unit,
                 col_assay,
-                col_object,
+                col_sample_location,
                 col_value,
                 col_value_unit,
                 col_quality,
@@ -436,7 +436,7 @@ $(document).ready(function () {
 //            // QC inputs NAME begin with "QC_"
 //            // QC input IDS are the row index (for plotting accurately)
 //            else {
-//                index = get_index_for_value(object, time, assay, value_unit, update_number);
+//                index = get_index_for_value(sample_location, time, assay, value_unit, update_number);
 //                table += "<td><input size='5' class='quality text-danger' id='" + i + "' name='" + index + "' value='" + quality + "'></td>";
 //                // Increment the current index
 //                current_index += 1;
@@ -585,7 +585,7 @@ $(document).ready(function () {
             var time = line[1];
             var time_unit = line[2];
             var assay = line[3];
-            var object = line[4];
+            var sample_location = line[4];
             var value = line[5];
             var value_unit = line[6];
 
@@ -606,13 +606,13 @@ $(document).ready(function () {
                     assays[assay][value_unit] = {};
                 }
 
-                if (object && object != 'None' && !assays[assay][value_unit][object]) {
-                    assays[assay][value_unit][object] = {'time': [], 'data': []};
+                if (sample_location && sample_location != 'None' && !assays[assay][value_unit][sample_location]) {
+                    assays[assay][value_unit][sample_location] = {'time': [], 'data': []};
                 }
 
-                if (assays[assay][value_unit][object] && value && value != 'None') {
-                    assays[assay][value_unit][object].time.push(time);
-                    assays[assay][value_unit][object].data.push(value);
+                if (assays[assay][value_unit][sample_location] && value && value != 'None') {
+                    assays[assay][value_unit][sample_location].time.push(time);
+                    assays[assay][value_unit][sample_location].data.push(value);
 
                     // valueUnits[assay] = value_unit;
                     timeUnits[assay] = time_unit;
@@ -632,26 +632,26 @@ $(document).ready(function () {
                 var xs = {};
                 var num = 1;
 
-                for (var object in assays[assay][value_unit]) {
-                    object = '' + object;
+                for (var sample_location in assays[assay][value_unit]) {
+                    sample_location = '' + sample_location;
 
                     // Add to bar charts if no time scale exceeds 3 points
-                    if (add_to_bar_charts && assays[assay][value_unit][object].time.length > 3) {
+                    if (add_to_bar_charts && assays[assay][value_unit][sample_location].time.length > 3) {
                         add_to_bar_charts = false;
                     }
 
-                    xs[object] = 'x' + num;
+                    xs[sample_location] = 'x' + num;
 
-                    assays[assay][value_unit][object].data.unshift(object);
-                    assays[assay][value_unit][object].time.unshift('x' + num);
+                    assays[assay][value_unit][sample_location].data.unshift(sample_location);
+                    assays[assay][value_unit][sample_location].time.unshift('x' + num);
 
                     //Load for correct assay chart
                     charts[chart].load({
                         xs: xs,
 
                         columns: [
-                            assays[assay][value_unit][object].data,
-                            assays[assay][value_unit][object].time
+                            assays[assay][value_unit][sample_location].data,
+                            assays[assay][value_unit][sample_location].time
                         ]
                     });
 

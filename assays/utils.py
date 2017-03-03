@@ -1691,10 +1691,10 @@ def validate_chip_readout_file(
         value = line[5]
         value_unit = line[6].strip()
 
-        # Throw error if no Object
+        # Throw error if no Sample Location
         if not field:
             errors.append(
-                sheet + 'Please make sure all rows have an Object. Additionally, check to see if all related data have the SAME Object.'
+                sheet + 'Please make sure all rows have a Sample Location. Additionally, check to see if all related data have the SAME Sample Location.'
             )
 
         # Get notes, if possible

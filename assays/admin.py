@@ -83,7 +83,7 @@ def modify_templates():
             'Time',
             'Time Units',
             'Assay',
-            'Object',
+            'Sample Location',
             'Value',
             'Value Unit',
             'QC Status',

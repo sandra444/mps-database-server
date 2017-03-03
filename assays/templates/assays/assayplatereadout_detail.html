@@ -87,18 +87,18 @@
             <thead>
             <tr>
                 <th>Assay</th>
-                <th>Object of Interest</th>
                 <th>Reader</th>
                 <th>Readout Unit</th>
+                <th>Feature</th>
             </tr>
             </thead>
             <tbody>
             {% for assay in object.assayplatereadoutassay_set.all %}
                 <tr>
                     <td>{{ assay.assay_id }}</td>
-                    <td>{{ assay.get_object_type_display }}</td>
                     <td>{{ assay.reader_id }}</td>
                     <td>{{ assay.readout_unit }}</td>
+                    <td>{{ assay.feature }}</td>
                 </tr>
             {% endfor %}
             </tbody>

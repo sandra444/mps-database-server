@@ -498,13 +498,9 @@
             If an assay you desire is not on the list, please contact an administrator or post in <b>Feedback</b>
         </li>
         <li class="list-group-item">
-            The column <b>Object of Interest</b> clarifies what the <b>Object</b> section of uploaded data describes
+            The column <b>Object of Interest</b> clarifies what the assay examined
         </li>
-        <li class="list-group-item">
-            The <b>Object</b> section differentiates data points that come from the same device but were measured in a distinct way
-            <br>
-            For instance, when performing an imaging assay different fields may be used. In this case, <b>Field</b> would be selected and the <b>Object</b> column of the uploaded file would have entries like "1" or "2" for Field 1 and Field 2 respectively
-        </li>
+
         <li class="list-group-item">
             The following is a list of options for <b>Object of Interest</b>
             <ul>
@@ -545,7 +541,7 @@
                         <th>Time</th>
                         <th>Time Unit</th>
                         <th>Assay</th>
-                        <th>Object</th>
+                        <th>Sample Location</th>
                         <th>Value</th>
                         <th>Value Unit</th>
                         <th>QC Status</th>
@@ -558,7 +554,7 @@
                         <td>[Time]</td>
                         <td>[Time Unit]</td>
                         <td>[Assay]</td>
-                        <td>[Object]</td>
+                        <td>[Sample Location]</td>
                         <td>[Value]</td>
                         <td>[Value Unit]</td>
                         <td>[Leave Blank to Pass]</td>
@@ -569,7 +565,7 @@
                         <td>[Time]</td>
                         <td>[Time Unit]</td>
                         <td>[Assay]</td>
-                        <td>[Object]</td>
+                        <td>[Sample Location]</td>
                         <td>[Value]</td>
                         <td>[Value Unit]</td>
                         <td>[Any Value in this Column Marks the Reading Invalid]</td>
@@ -580,6 +576,11 @@
         </li>
         <li class="list-group-item">
             File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays
+        </li>
+        <li class="list-group-item">
+            The <b>Sample Location</b> indicates from where in a device the tested sample was acquired
+            <br>
+            For instance, if an Organ Model is split into a top and bottom compartment, one might put terms like "Apical" or "Basal" in the Sample Location column
         </li>
         <li class="list-group-item">
             Rows in <span class="text-danger">red</span> will be excluded
@@ -792,23 +793,6 @@
             The column for <b>Assay</b> specifies what assay was performed
             <br>
             If an assay you desire is not on the list, please contact an administrator or post in <b>Feedback</b>
-        </li>
-        <li class="list-group-item">
-            The column <b>Object of Interest</b> clarifies what the <b>Object</b> section of uploaded data describes
-        </li>
-        <li class="list-group-item">
-            The <b>Object</b> section differentiates data points that come from the same device but were measured in a distinct way
-            <br>
-            For instance, when performing an imaging assay different fields may be used. In this case, <b>Field</b> would be selected and the <b>Object</b> column of the uploaded file would have entries like "1" or "2" for Field 1 and Field 2 respectively
-        </li>
-        <li class="list-group-item">
-            The following is a list of options for <b>Object of Interest</b>
-            <ul>
-                <li><b>Field</b>: Used when multiple fields are used during imaging</li>
-                <li><b>Colony</b>: Used when different cell colonies are viewed</li>
-                <li><b>Media</b>: Used to indicate that this assay takes samples from a device's effluent</li>
-                <li><b>Other</b>: Used when the other options do not accurately describe the object of interest</li>
-            </ul>
         </li>
         <li class="list-group-item">
           The column <b>Reader</b> shows what reader device was used
