@@ -114,6 +114,23 @@ def label_to_number(label):
     return num
 
 
+def number_to_label(num):
+    """Returns a alphabetical label from a numeric index"""
+    if num < 1:
+        return ''
+    mod = num % 26
+    pow = num / 26
+    if mod:
+        out = chr(64 + mod).upper()
+    else:
+        out = 'Z'
+        pow -= 1
+    if pow:
+        return number_to_label(pow) + out
+    else:
+        return out
+
+
 def process_readout_value(value):
     """Returns processed readout value and whether or not to mark it invalid"""
 

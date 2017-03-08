@@ -1,4 +1,6 @@
 // TODO add previews for images
+// TODO REMOVE COLUMN_LABELS AND ROW_LABELS FIELDS
+// TODO MAY WANT TO PREVENT EXTREMELY LARGE VALUES
 $(document).ready(function () {
     var insert_into = $('fieldset')[2];
 
@@ -6,13 +8,18 @@ $(document).ready(function () {
         insert_into = $('#layout_display');
     }
 
+    var number_of_rows = $('#id_number_of_rows');
+    var number_of_columns = $('#id_number_of_columns');
+
+    var column_labels = [];
+    var row_labels = [];
+
+    var max_number = 100;
+
     // Build table
     function build_table() {
         // Be sure to split the labels on the premise of a single space character
-        var column_labels = $('#id_column_labels').val().split(' ');
-        var row_labels = $('#id_row_labels').val().split(' ');
-
-        if (column_labels && row_labels) {
+        if (column_labels.length && row_labels.length) {
             // Remove old
             $('#layout_table').remove();
 
@@ -54,45 +61,59 @@ $(document).ready(function () {
         return pow ? toLetters(pow) + out : out;
     }
 
-    $('#id_number_of_rows').change( function() {
-        var rows = $('#id_number_of_rows').val();
-        var labels = '';
-        // All but the final row
-        for (var i=1; i<rows; i++) {
-            labels += toLetters(i) + ' ';
+    number_of_rows.change(function() {
+        var rows = number_of_rows.val();
+
+        // Check if rows exceed 100, throw alert and reset if so
+        if (rows > max_number) {
+            alert('Too many rows: Decreasing to ' + max_number);
+            rows = max_number;
+            number_of_rows.val(rows);
         }
-        // The final row
-        labels += toLetters(rows);
+
+        row_labels = [];
+        // All but the final row
+        for (var i=1; i<=rows; i++) {
+            row_labels.push(toLetters(i));
+        }
 
         // Insert into row labels
-        $('#id_row_labels').val(labels);
+        // $('#id_row_labels').val(labels);
 
         build_table()
     });
 
-    $('#id_number_of_columns').change( function() {
-        var columns = $('#id_number_of_columns').val();
-        var labels = '';
-        // All but the final row
-        for (var i=1; i<columns; i++) {
-            labels += i + ' ';
+    number_of_columns.change(function() {
+        var columns = number_of_columns.val();
+
+        if (columns > max_number) {
+            alert('Too many columns: Decreasing to ' + max_number);
+            columns = max_number;
+            number_of_columns.val(columns);
         }
-        // The final row
-        labels += columns;
+
+        column_labels = [];
+        // All but the final row
+        for (var i=1; i<=columns; i++) {
+            column_labels.push(i);
+        }
 
         // Insert into row labels
-        $('#id_column_labels').val(labels);
+        // $('#id_column_labels').val(labels);
 
         build_table()
     });
 
-    $('#id_row_labels').change(function() {
-        build_table();
-    });
-    $('#id_column_labels').change(function() {
-        build_table()
-    });
+    // Deprecated
+    // $('#id_row_labels').change(function() {
+    //     build_table();
+    // });
+    // $('#id_column_labels').change(function() {
+    //     build_table()
+    // });
 
     // Attempt to build initial table
+    number_of_rows.trigger('change');
+    number_of_columns.trigger('change');
     build_table()
 });

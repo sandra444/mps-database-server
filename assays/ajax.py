@@ -13,6 +13,9 @@ from .forms import (
     AssayChipReadoutInlineFormset,
     AssayPlateReadoutInlineFormset
 )
+
+from .utils import number_to_label
+
 # from.utils import(
 #     valid_chip_row,
 #     stringify_excel_value,
@@ -228,13 +231,24 @@ def fetch_layout_format_labels(request):
 
     data = {}
 
-    if layout.column_labels and layout.row_labels:
-        column_labels = layout.column_labels.split()
-        row_labels = layout.row_labels.split()
-    # Contrived way to deal with models without labels
-    else:
-        column_labels = None
-        row_labels = None
+    # if layout.column_labels and layout.row_labels:
+    #     column_labels = layout.column_labels.split()
+    #     row_labels = layout.row_labels.split()
+    # # Contrived way to deal with models without labels
+    # else:
+    #     column_labels = None
+    #     row_labels = None
+
+    column_labels = []
+    row_labels = []
+
+    if layout.number_of_columns:
+        for x in range(layout.number_of_columns):
+            column_labels.append(x + 1)
+
+    if layout.number_of_rows:
+        for x in range(layout.number_of_rows):
+            row_labels.append(number_to_label(x + 1))
 
     data.update({
         'id': layout.id,

@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.auth.models import Group
 
 from mps.base.models import LockableModel
-
+from django.core.validators import MaxValueValidator
 
 class MicrophysiologyCenter(LockableModel):
     """Microphysiology Center gives details for a collaborating center
@@ -87,8 +87,22 @@ class Microdevice(LockableModel):
 
     # Optional fields primarily intended for plates
     # (though certain chips appear in a series)
-    number_of_rows = models.IntegerField(blank=True, null=True)
-    number_of_columns = models.IntegerField(blank=True, null=True)
+    number_of_rows = models.IntegerField(
+        blank=True,
+        null=True,
+        validators=[
+            MaxValueValidator(100)
+        ]
+    )
+    number_of_columns = models.IntegerField(
+        blank=True,
+        null=True,
+        validators=[
+            MaxValueValidator(100)
+        ]
+    )
+
+    # DEPRECATED
     row_labels = models.CharField(blank=True,
                                   default='',
                                   max_length=1000,
@@ -97,6 +111,7 @@ class Microdevice(LockableModel):
                                   'e.g. "A B C D ..."'
                                   ' Number of items must match'
                                   ' number of columns.')
+    # DEPRECATED
     column_labels = models.CharField(blank=True,
                                      default='',
                                      max_length=1000,
