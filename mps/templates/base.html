@@ -182,21 +182,15 @@
         <li title="Add, edit, or view assay data" class="dropdown">
         <a class="dropdown-toggle">Studies<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
-          <li class="dropdown-header">Add/Edit Studies</li>
           {# <li title="Index of all the studies created by you"><a href="/assays/user_index/">Your Studies</a></li>#}
           <li title="Index of all the studies created by groups you are a member of">
-              <a href="/assays/editable_studies/">Add/Edit Studies</a>
+              <a href="/assays/editable_studies/">View Group Studies</a>
           </li>
-          <li><a href="/assays/study/add/">Add Study</a></li>
-          <li><a href="/assays/assaylayout/add/">Add Plate Layout</a></li>
-          <li><a href="/assays/studyconfiguration/add/">Add Integrated Study Configuration</a></li>
-          <li class="divider"></li>
-          <li class="dropdown-header">View/Edit Study Data</li>
-          <li><a href="/assays/study/">All Studies</a></li>
-          <li><a href="/assays/assaylayout/">Plate Layouts</a></li>
-          <li><a href="/assays/studyconfiguration/">Integrated Study Configurations</a></li>
+          <li><a href="/assays/study/">View All Studies</a></li>
+          <li><a href="/assays/assaylayout/">View Plate Layouts</a></li>
+          <li><a href="/assays/studyconfiguration/">View Integrated Study Configurations</a></li>
           <li class="dropdown-submenu">
-          <a href="#">Chips &amp; Plates <span class="caret"></span></a>
+          <a href="#">View Chips &amp; Plates <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li class="dropdown-submenu">
             <a href="#">Chips <span class="caret"></span></a>
@@ -216,6 +210,11 @@
             </li>
           </ul>
           </li>
+          <li class="divider"></li>
+          <li class="dropdown-header">Requires Permission</li>
+          <li><a href="/assays/study/add/">Add Study</a></li>
+          <li><a href="/assays/assaylayout/add/">Add Plate Layout</a></li>
+          <li><a href="/assays/studyconfiguration/add/">Add Integrated Study Configuration</a></li>
         </ul>
         </li>
         <li title="Analyze bioactivity and drugtrial data" class="dropdown">

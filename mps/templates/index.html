@@ -70,7 +70,7 @@
                                 <li title="View organ models"><a href="/microdevices/model">View Organ Models</a></li>
                                 <li title="View microdevices"><a href="/microdevices/device">View Microdevices</a></li>
                             </ul>
-                          </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -125,15 +125,29 @@
         <div class="row">
             <div class="col-sm-6 col-md-4">
                 <div title="Add/edit studies, setups, readouts, and results" class="well">
-                    <a href="/assays/editable_studies/">
+                    <a onclick="event.stopPropagation(); $('#studies_button').click();">
                         <img src="/static/img/button_study.png"
                              style="height: 70px;">
                     </a>
                     <div class="caption">
-                        <a href="/assays/editable_studies/"
-                           class="btn btn-primary btn-large">
-                            Add/Edit Studies
-                        </a>
+{#                        <a href="/assays/editable_studies/"#}
+{#                           class="btn btn-primary btn-large">#}
+{#                            Add/Edit Studies#}
+{#                        </a>#}
+                        <div class="btn-group">
+                            <button id="studies_button" type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                Studies <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li title="Index of all the studies created by groups you are a member of">
+                                    <a href="/assays/editable_studies/">View Group Studies</a>
+                                </li>
+                                <li><a href="/assays/study/">View All Studies</a></li>
+                                <li class="divider"></li>
+                                <li class="dropdown-header">Requires Permission</li>
+                                <li><a href="/assays/study/add/">Add Study</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -149,12 +163,13 @@
                             Chip Data <span class="caret"></span>
                         </button>
                           <ul class="dropdown-menu" role="menu">
-                            <li><a href="/assays/assaychipsetup/">Setups</a></li>
-                            <li><a href="/assays/assaychipreadout/">Readouts</a></li>
-                            <li><a href="/assays/assaychiptestresult/">Results</a></li>
+                            <li><a href="/assays/assaychipsetup/">View Setups</a></li>
+                            <li><a href="/assays/assaychipreadout/">View Readouts</a></li>
+                            <li><a href="/assays/assaychiptestresult/">View Results</a></li>
                             <li class="divider"></li>
-                            <li><a href="/assays/studyconfiguration/">Integrated Study Configurations</a></li>
+                            <li><a href="/assays/studyconfiguration/">View Integrated Study Configurations</a></li>
                           </ul>
+
                         </div>
                     </div>
                 </div>
@@ -171,11 +186,11 @@
                             Plate Data <span class="caret"></span>
                           </button>
                           <ul class="dropdown-menu" role="menu">
-                            <li><a href="/assays/assayplatesetup/">Setups</a></li>
-                            <li><a href="/assays/assayplatereadout/">Readouts</a></li>
-                            <li><a href="/assays/assayplatetestresult/">Results</a></li>
+                            <li><a href="/assays/assayplatesetup/">View Setups</a></li>
+                            <li><a href="/assays/assayplatereadout/">View Readouts</a></li>
+                            <li><a href="/assays/assayplatetestresult/">View Results</a></li>
                             <li class="divider"></li>
-                            <li><a href="/assays/assaylayout/">Plate Layouts</a></li>
+                            <li><a href="/assays/assaylayout/">View Plate Layouts</a></li>
                           </ul>
                         </div>
                     </div>
