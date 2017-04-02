@@ -202,18 +202,42 @@
 {#        {% endfor %}#}
 {#    <div class="form-group has-error">#}
 {#    {% else %}#}
-    <div class="form-group">
+{#    <div class="form-group">#}
 {#    {% endif %}#}
-        <label for="headers" class="col-sm-2 control-label">Number of Header Rows</label>
-        <div class="col-sm-10">
-          <input id="id_headers" type="number" name="headers" style="width:50px;" value="{{ form.headers.value|default:"1" }}">
-        </div>
-    </div>
+{#        <label for="headers" class="col-sm-2 control-label">Number of Header Rows</label>#}
+{#        <div class="col-sm-10">#}
+{#          <input id="id_headers" type="number" name="headers" style="width:50px;" value="{{ form.headers.value|default:"1" }}">#}
+{#        </div>#}
+{#    </div>#}
 
     {% include 'generic_field.html' with field=form.overwrite_option label="Overwrite Option*" %}
 
     {% include 'assays/data_upload_table.html' %}
 
+    {% if study.assayinstance_set.all %}
+        <legend><b>Assays</b></legend>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Target/Analyte</th>
+                <th>Method/Kit</th>
+                <th>Readout Unit</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for assay in study.assayinstance_set.all %}
+                <tr>
+                    <td>{{ assay.target }}</td>
+                    <td>{{ assay.method }}</td>
+                    <td>{{ assay.unit }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+{# DEPRECATED #}
+<div hidden>
     {{ formset.management_form }}
     <legend>Assays</legend>
 
@@ -253,7 +277,7 @@
         <tbody>
             {% for assay in formset %}
                 <tr class="inline" id="assay-{{ forloop.counter0 }}">
-                    {# Hidden input for Update (need id to associate) #}
+                     Hidden input for Update (need id to associate)
                     {% if assay.id.value %}
                     <td class="original" hidden>
                         <input id="id_assaychipreadoutassay_set-{{ forloop.counter0 }}-id" name="assaychipreadoutassay_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ assay.id.value }}">
@@ -268,6 +292,7 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
 
     {# Inline CSS is very distasteful #}
     <div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;min-width: 975px;overflow: hidden;">
@@ -275,10 +300,21 @@
             <table class="data-table" align="left">
                 <thead>
                     <tr class="bg-info">
+{#                        <th>Chip ID</th>#}
+{#                        <th>Time</th>#}
+{#                        <th>Time Unit</th>#}
+{#                        <th>Assay</th>#}
+{#                        <th>Sample Location</th>#}
+{#                        <th>Value</th>#}
+{#                        <th>Value Unit</th>#}
+{#                        <th>QC Status</th>#}
+{#                        <th></th>#}
                         <th>Chip ID</th>
+{#                        <th>Assay Plate ID</th>#}
+{#                        <th>Assay Well ID</th>#}
                         <th>Time</th>
-                        <th>Time Unit</th>
-                        <th>Assay</th>
+                        <th>Target Analyte</th>
+                        <th>Method Kit</th>
                         <th>Sample Location</th>
                         <th>Value</th>
                         <th>Value Unit</th>

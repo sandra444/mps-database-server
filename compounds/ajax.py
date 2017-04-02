@@ -252,8 +252,10 @@ def fetch_compound_report(request):
 
         # Convert all times to days for now
         # Get the conversion unit
-        scale = readout.assay_chip_id.timeunit.scale_factor
-        readout_time = "{0:.2f}".format((scale/1440.0) * readout.elapsed_time)
+        # scale = readout.assay_chip_id.timeunit.scale_factor
+        # readout_time = "{0:.2f}".format((scale/1440.0) * readout.time)
+        # readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
+        readout_time = "{0:.2f}".format(readout.time / 1440)
         readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
 
         if readout_time not in entry:

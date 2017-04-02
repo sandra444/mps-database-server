@@ -150,7 +150,7 @@ $(document).ready(function () {
             },
             success: function (json) {
                 exist = true;
-                parseAndReplace(json.csv);
+                process_data(json);
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
@@ -204,7 +204,7 @@ $(document).ready(function () {
                     exist = false;
                     alert('Success! Please see "New Chip Data" below for preview.');
                     resetChart();
-                    parseAndReplace(json.csv);
+                    process_data(json);
                 }
             },
             error: function (xhr, errmsg, err) {
@@ -219,54 +219,57 @@ $(document).ready(function () {
         });
     }
 
-    var getText = function (readFile) {
-        var reader = new FileReader();
-        reader.readAsText(readFile, "UTF-8");
-        reader.onload = loaded;
-    };
+    // var getText = function (readFile) {
+    //     var reader = new FileReader();
+    //     reader.readAsText(readFile, "UTF-8");
+    //     reader.onload = loaded;
+    // };
+    //
+    // var loaded = function (evt) {
+    //     var fileString = evt.target.result;
+    //     exist = false;
+    //     parseAndReplace(fileString);
+    // };
 
-    var loaded = function (evt) {
-        var fileString = evt.target.result;
-        exist = false;
-        parseAndReplace(fileString);
-    };
-
-    function get_index_for_value(field, time, assay, value_unit, update_number) {
+    function get_index_for_value(chip_id, sample_location_id, time, assay_instance_id, replicate, update_number) {
         var full_index = {
-            'field': field,
+            // Chip ID added for future proofing (maybe we will have study-wide changes to quality)
+            'chip_id': chip_id,
+            'sample_location_id': sample_location_id,
             'time': time,
-            'assay': assay,
-            'value_unit': value_unit,
+            'assay_instance_id': assay_instance_id,
+            // 'value_unit': value_unit,
+            'replicate': replicate,
             'update_number': update_number
         };
 
         return JSON.stringify(full_index);
     }
 
-    var parseAndReplace = function (csv) {
+    var process_data = function (json) {
         var table_body = $('#table_body');
 
         // Do not empty entire table, only delete new values
         // table_body.empty();
         clear_new_data();
 
-        if (!csv) {
+        if (!json) {
             return;
         }
 
         // Check if headers exists (it doesn't in detail)
-        if ($('#id_headers')[0]) {
-            // Update headers
-            headers = Math.floor($('#id_headers').val());
-        }
+        // if ($('#id_headers')[0]) {
+        //     // Update headers
+        //     headers = Math.floor($('#id_headers').val());
+        // }
 
         // Crash if the first time is not numeric
-        if (isNaN(headers)) {
-            alert("Please make sure you choose a valid number for number of header rows.");
-            return;
-        }
+        // if (isNaN(headers)) {
+        //     alert("Please make sure you choose a valid number for number of header rows.");
+        //     return;
+        // }
 
-        var lines = parse_csv(csv);
+        // var lines = parse_csv(csv);
 
         // If this is in the database
 //        if(exist) {
@@ -284,35 +287,91 @@ $(document).ready(function () {
 
         // var table = '';
 
-        for (var i in lines) {
-            var line = lines[i];
+        var data_points = json.data_points;
+        var assay_instances = json.assay_instances;
+        var sample_locations = json.sample_locations;
 
-            var chip_id = line[0];
-            var time = line[1];
-            var time_unit = line[2];
-            var assay = line[3];
-            var sample_location = line[4];
-            var value = line[5];
-            var value_unit = line[6];
+        for (var i in data_points) {
+            // Based on csv method, using JSON now
+            // var line = lines[i];
+            //
+            // var chip_id = line[0];
+            //
+            // var assay_plate_id = line[1];
+            // var assay_well_id = line[2];
+            //
+            // var day = Math.floor(line[3]);
+            // var hour = Math.floor(line[4]);
+            // var minute = Math.floor(line[5]);
+            //
+            // // Just convert to day for now
+            // var time = day + hour / 24 + minute / 1440;
+            //
+            // var target = line[6];
+            // var method = line[7];
+            //
+            // // var time = line[1];
+            // // var time_unit = line[2];
+            // // var assay = line[3];
+            // var sample_location = line[8];
+            // var value = line[9];
+            // var value_unit = line[10];
+            //
+            // var quality = $.trim(line[11]);
+            // var notes = $.trim(line[12]);
+            // var replicate = $.trim(line[13]);
+            // var update_number = $.trim(line[14]);
 
-            var quality = $.trim(line[7]);
-            var notes = $.trim(line[8]);
-            var update_number = $.trim(line[9]);
+            var data_point = data_points[i];
 
-            // Add update_number to notes if this is a replicate (i.e. update_number > 0)
+            var chip_id = data_point.chip_id;
+
+            var assay_plate_id = data_point.assay_plate_id;
+            var assay_well_id = data_point.assay_well_id;
+
+            var day = Math.floor(data_point.day);
+            var hour = Math.floor(data_point.hour);
+            var minute = Math.floor(data_point.minute);
+
+            // Just convert to day for now
+            var time_in_minutes = data_point.time_in_minutes;
+            var time_in_days = time_in_minutes / 1440.0;
+
+            var assay_instance_id = data_point.assay_instance_id;
+            var target_name = assay_instances[assay_instance_id].target_name;
+            var method_name = assay_instances[assay_instance_id].method_name;
+
+            var sample_location_id = data_point.sample_location_id;
+            var sample_location_name = sample_locations[sample_location_id].name;
+
+            var value = data_point.value;
+            var value_unit = assay_instances[assay_instance_id].unit;
+
+            var quality = data_point.quality;
+            var notes = data_point.notes;
+            var replicate = data_point.replicate;
+            var update_number = data_point.update_number;
+
+            // Add update_number to notes if this is an update (i.e. update_number > 0)
             if (update_number && update_number != 0) {
                 notes += '\nUpdate #' + update_number;
             }
 
+            // Add replicate to notes if this is a replicate (i.e. replicate > 0)
+            if (replicate && replicate != 0) {
+                notes += '\nReplicate ' + update_number;
+            }
+
             // Index in data
-            var index = get_index_for_value(sample_location, time, assay, value_unit, update_number);
+            // TODO FIX!
+            var index = get_index_for_value(chip_id, sample_location_id, time_in_minutes, assay_instance_id, replicate, update_number);
 
             // Notice attribute to assist in deleting old data
             var new_row = $('<tr>')
                 .attr('data-chart-index', index);
 
             // Need to take a slice to avoid treating missing QC as invalid
-            var every = line.slice(0,5).every(isTrue) && isTrue(line[6]) && isTrue(line[9]);
+            var every = [chip_id, time_in_minutes, assay_instance_id, sample_location_id, value].every(isTrue);
 
             if (exist) {
                 new_row.addClass('bg-success');
@@ -330,15 +389,26 @@ $(document).ready(function () {
                 new_row.css('background', '#606060');
             }
 
-            else if (line[7] && $.trim(line[7])) {
+            else if (quality) {
                 new_row.addClass('bg-warning');
             }
 
             var col_chip_id = $('<td>').text(chip_id);
-            var col_time = $('<td>').text(time);
-            var col_time_unit = $('<td>').text(time_unit);
-            var col_assay = $('<td>').text(assay);
-            var col_sample_location = $('<td>').text(sample_location);
+
+            // var col_assay_plate_id = $('<td>').text(assay_plate_id);
+            // var col_assay_well_id = $('<td>').text(assay_well_id);
+
+            // var col_day = $('<td>').text(day);
+            // var col_hour = $('<td>').text(hour);
+            // var col_minute = $('<td>').text(minute);
+            var col_time = $('<td>').text('D' + day + ' H' + hour + ' M' + minute);
+
+            var col_target = $('<td>').text(target_name);
+            var col_method = $('<td>').text(method_name);
+            // var col_time = $('<td>').text(time);
+            // var col_time_unit = $('<td>').text(time_unit);
+            // var col_assay = $('<td>').text(assay);
+            var col_sample_location = $('<td>').text(sample_location_name);
             var col_value = $('<td>').text(value ? data_format(value) : value);
             var col_value_unit = $('<td>').text(value_unit);
 
@@ -366,9 +436,17 @@ $(document).ready(function () {
 
             new_row.append(
                 col_chip_id,
+                // col_assay_plate_id,
+                // col_assay_well_id,
                 col_time,
-                col_time_unit,
-                col_assay,
+                // col_day,
+                // col_hour,
+                // col_minute,
+                col_target,
+                col_method,
+                // col_time,
+                // col_time_unit,
+                // col_assay,
                 col_sample_location,
                 col_value,
                 col_value_unit,
@@ -454,7 +532,18 @@ $(document).ready(function () {
 
             // Add to data if index
             if (index) {
-                data[index] = line;
+                data[index] = {
+                    'time': time_in_days,
+                    // Arbitrarily set to days
+                    // 'time_unit': 'days',
+                    'value': value,
+                    'value_unit': value_unit,
+                    'target': target_name,
+                    // 'replicate': replicate,
+                    // 'update_number': update_number,
+                    'sample_location': sample_location_name,
+                    'quality': quality
+                };
             }
         }
 
@@ -556,11 +645,12 @@ $(document).ready(function () {
                 $(this).parent().parent().removeClass('bg-warning');
             }
             var index = this.name;
-            data[index][7] = this.value;
+            data[index]['quality'] = this.value;
             resetChart();
             plot();
         });
 
+        // TODO FIX PLOT
         plot();
     };
 
@@ -582,14 +672,14 @@ $(document).ready(function () {
 //                continue;
 //            }
 
-            var time = line[1];
-            var time_unit = line[2];
-            var assay = line[3];
-            var sample_location = line[4];
-            var value = line[5];
-            var value_unit = line[6];
+            var time = line['time'];
+            var time_unit = 'days';
+            var assay = line['target'];
+            var sample_location = line['sample_location'];
+            var value = line['value'];
+            var value_unit = line['value_unit'];
 
-            var quality = $.trim(line[7]);
+            var quality = $.trim(line['quality']);
 
             // Crash if the time is not numeric
             if (isNaN(time)) {

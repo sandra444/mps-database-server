@@ -14,7 +14,10 @@ from .forms import (
     AssayPlateReadoutInlineFormset
 )
 
-from .utils import number_to_label
+from .utils import number_to_label, TIME_CONVERSIONS, DEFAULT_CSV_HEADER, CHIP_DATA_PREFETCH
+
+import csv
+from StringIO import StringIO
 
 # from.utils import(
 #     valid_chip_row,
@@ -339,7 +342,93 @@ def fetch_center_id(request):
 
 
 # TODO THIS WAS A STRING TO BE EXPEDIENT WRT TO THE JAVSCRIPT IN READOUT ADD, BUT SHOULD BE REVISED
-def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=False):
+# def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=False):
+#     """Returns readout data as a csv in the form of a string
+#
+#     Params:
+#     chip_ids - Readout IDs to use to acquire chip data (if data not provided)
+#     chip_data - Readout raw data, optional, acquired with chip_ids if not provided
+#     both_assay_names - Indicates that both assay names should be returned (not currently used)
+#     """
+#
+#     # PLEASE NOTE: THIS AFFECTS PROCESSING OF QC
+#     # DO NOT MODIFY THIS WITHOUT ALSO CHANGING modify_qc_status_chip
+#     if not chip_data:
+#         chip_data = AssayChipRawData.objects.prefetch_related(
+#             'assay_id__assay_id',
+#             'assay_chip_id__chip_setup'
+#         ).filter(
+#             assay_chip_id__in=chip_ids
+#         ).order_by(
+#             'assay_chip_id__chip_setup__assay_chip_id',
+#             'assay_id__assay_id__assay_short_name',
+#             'time',
+#             'quality',
+#             'update_number'
+#         )
+#
+#     csv = ''
+#
+#     for raw in chip_data:
+#         if ',' in raw.assay_chip_id.chip_setup.assay_chip_id:
+#             csv += '"' + unicode(raw.assay_chip_id.chip_setup.assay_chip_id) + '"' + ','
+#         else:
+#             csv += raw.assay_chip_id.chip_setup.assay_chip_id + ','
+#         csv += unicode(raw.time) + ','
+#         # Add time unit
+#         csv += unicode(raw.assay_chip_id.timeunit) + ','
+#         # Now uses full name
+#         # csv += unicode(raw.assay_id.assay_id.assay_short_name) + ','
+#         csv += unicode(raw.assay_id.assay_id.assay_name) + ','
+#         if ',' in raw.field_id:
+#             csv += '"' + unicode(raw.field_id) + '"' + ','
+#         else:
+#             csv += unicode(raw.field_id) + ','
+#         # Format to two decimal places
+#         value = raw.value
+#         # Check if None first before format
+#         if value is not None:
+#             value = '%.2f' % value
+#         else:
+#             value = ''
+#         # Get rid of trailing zero and decimal if necessary
+#         value = value.rstrip('0').rstrip('.') if '.' in value else value
+#         csv += value + ','
+#         # Add value unit
+#         csv += unicode(raw.assay_id.readout_unit) + ','
+#         # End with the quality and notes
+#         if ',' in raw.quality:
+#             csv += '"' + unicode(raw.quality) + '"' + ','
+#         else:
+#             csv += unicode(raw.quality) + ','
+#         csv += '"' + unicode(raw.notes) + '"' + ','
+#         csv += '"' + unicode(raw.update_number) + '"\n'
+#
+#     return csv
+
+
+# TODO EMPLOY THIS FUNCTION ELSEWHERE
+def get_split_times(time_in_minutes):
+    """Takes time_in_minutes and returns a dic with the time split into day, hour, minute"""
+    times = {
+        'day': 0,
+        'hour': 0,
+        'minute': 0
+    }
+    time_in_minutes_remaining = time_in_minutes
+    for time_unit, conversion in TIME_CONVERSIONS.items():
+        initial_time_for_current_field = int(time_in_minutes_remaining / conversion)
+        if initial_time_for_current_field:
+            times[time_unit] = initial_time_for_current_field
+            time_in_minutes_remaining -= initial_time_for_current_field * conversion
+    # Add fractions of minutes if necessary
+    if time_in_minutes_remaining:
+        times['minute'] += time_in_minutes_remaining
+
+    return times
+
+
+def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=False, include_header=False):
     """Returns readout data as a csv in the form of a string
 
     Params:
@@ -347,61 +436,158 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
     chip_data - Readout raw data, optional, acquired with chip_ids if not provided
     both_assay_names - Indicates that both assay names should be returned (not currently used)
     """
-
-    # PLEASE NOTE: THIS AFFECTS PROCESSING OF QC
-    # DO NOT MODIFY THIS WITHOUT ALSO CHANGING modify_qc_status_chip
     if not chip_data:
         chip_data = AssayChipRawData.objects.prefetch_related(
-            'assay_id__assay_id',
-            'assay_chip_id__chip_setup'
+            *CHIP_DATA_PREFETCH
         ).filter(
             assay_chip_id__in=chip_ids
         ).order_by(
             'assay_chip_id__chip_setup__assay_chip_id',
-            'assay_id__assay_id__assay_short_name',
-            'elapsed_time',
+            'assay_instance__target__name',
+            'assay_instance__method__name',
+            'sample_location__name',
+            'time',
             'quality',
             'update_number'
         )
 
-    csv = ''
+    data = []
 
-    for raw in chip_data:
-        if ',' in raw.assay_chip_id.chip_setup.assay_chip_id:
-            csv += '"' + unicode(raw.assay_chip_id.chip_setup.assay_chip_id) + '"' + ','
-        else:
-            csv += raw.assay_chip_id.chip_setup.assay_chip_id + ','
-        csv += unicode(raw.elapsed_time) + ','
-        # Add time unit
-        csv += unicode(raw.assay_chip_id.timeunit) + ','
-        # Now uses full name
-        # csv += unicode(raw.assay_id.assay_id.assay_short_name) + ','
-        csv += unicode(raw.assay_id.assay_id.assay_name) + ','
-        if ',' in raw.field_id:
-            csv += '"' + unicode(raw.field_id) + '"' + ','
-        else:
-            csv += unicode(raw.field_id) + ','
-        # Format to two decimal places
-        value = raw.value
-        # Check if None first before format
-        if value is not None:
-            value = '%.2f' % value
-        else:
-            value = ''
-        # Get rid of trailing zero and decimal if necessary
-        value = value.rstrip('0').rstrip('.') if '.' in value else value
-        csv += value + ','
-        # Add value unit
-        csv += unicode(raw.assay_id.readout_unit) + ','
-        # End with the quality and notes
-        if ',' in raw.quality:
-            csv += '"' + unicode(raw.quality) + '"' + ','
-        else:
-            csv += unicode(raw.quality) + ','
-        csv += '"' + unicode(raw.notes) + '"' + ','
-        csv += '"' + unicode(raw.update_number) + '"\n'
+    if include_header:
+        data.append(
+            DEFAULT_CSV_HEADER
+        )
 
-    return csv
+    for data_point in chip_data:
+        chip_id = data_point.assay_chip_id.chip_setup.assay_chip_id
+        assay_plate_id = data_point.assay_plate_id
+        assay_well_id = data_point.assay_well_id
+
+        # Add time here
+        time_in_minutes = data_point.time
+        times = get_split_times(time_in_minutes)
+
+        target = data_point.assay_instance.target.name
+        method = data_point.assay_instance.method.name
+        sample_location = data_point.sample_location.name
+        value = data_point.value
+        value_unit = data_point.assay_instance.unit.unit
+        quality = data_point.quality
+        # TODO ADD OTHER STUFF
+        notes = data_point.notes
+
+        data.append(
+            [
+                chip_id,
+                assay_plate_id,
+                assay_well_id,
+                times.get('day'),
+                times.get('hour'),
+                times.get('minute'),
+                target,
+                method,
+                sample_location,
+                value,
+                value_unit,
+                quality,
+                notes
+            ]
+        )
+
+    string_io = StringIO()
+    csv_writer = csv.writer(string_io)
+    for one_line_of_data in data:
+        csv_writer.writerow(one_line_of_data)
+
+    return string_io.getvalue()
+
+
+def get_chip_readout_data_as_json(chip_ids, chip_data=None):
+    if not chip_data:
+        chip_data = AssayChipRawData.objects.prefetch_related(
+            *CHIP_DATA_PREFETCH
+        ).filter(
+            assay_chip_id__in=chip_ids
+        ).order_by(
+            'assay_chip_id__chip_setup__assay_chip_id',
+            'assay_instance__target__name',
+            'assay_instance__method__name',
+            'sample_location__name',
+            'time',
+            'quality',
+            'update_number'
+        )
+
+    data = {}
+
+    data_points = []
+    sample_locations = {}
+    assay_instances = {}
+
+    for data_point in chip_data:
+        chip_id = data_point.assay_chip_id.chip_setup.assay_chip_id
+        assay_plate_id = data_point.assay_plate_id
+        assay_well_id = data_point.assay_well_id
+        # Add time here
+        time_in_minutes = data_point.time
+        times = get_split_times(time_in_minutes)
+        assay_instance = data_point.assay_instance
+        sample_location = data_point.sample_location
+        value = data_point.value
+        quality = data_point.quality
+        # TODO ADD OTHER STUFF
+        notes = data_point.notes
+
+        update_number = data_point.update_number
+        replicate = data_point.replicate
+
+        if sample_location.id not in sample_locations:
+            sample_locations.update(
+                {
+                    sample_location.id: {
+                        'name': sample_location.name,
+                        'description': sample_location.description
+                    }
+                }
+            )
+
+        if assay_instance.id not in assay_instances:
+            assay_instances.update(
+                {
+                    assay_instance.id: {
+                        'target_name': assay_instance.target.name,
+                        'target_short_name': assay_instance.target.short_name,
+                        'method_name': assay_instance.method.name,
+                        'unit': assay_instance.unit.unit,
+                    }
+                }
+            )
+
+        data_point_fields = {
+            'chip_id': chip_id,
+            'assay_plate_id': assay_plate_id,
+            'assay_well_id': assay_well_id,
+            'time_in_minutes': time_in_minutes,
+            'day': times.get('day'),
+            'hour': times.get('hour'),
+            'minute': times.get('minute'),
+            'assay_instance_id': assay_instance.id,
+            'sample_location_id': sample_location.id,
+            'value': value,
+            'quality': quality.strip(),
+            # TODO ADD OTHER STUFF
+            'notes': notes.strip(),
+            'update_number': update_number,
+            'replicate': replicate.strip()
+        }
+        data_points.append(data_point_fields)
+
+    data.update({
+        'data_points': data_points,
+        'sample_locations': sample_locations,
+        'assay_instances': assay_instances
+    })
+    return data
 
 
 # TODO Needs refactor
@@ -418,13 +604,7 @@ def fetch_chip_readout(request):
         logger.error('chip not present in request to fetch_chip_readout')
         return HttpResponseServerError()
 
-    data = {}
-
-    csv = get_chip_readout_data_as_csv([chip_id])
-
-    data.update({
-        'csv': csv,
-    })
+    data = get_chip_readout_data_as_json([chip_id])
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
@@ -452,17 +632,31 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
     for raw in raw_data:
         # Now uses full name
         # assay = raw.assay_id.assay_id.assay_short_name
-        assay = raw.assay_id.assay_id.assay_name
+        # Deprecated
+        # assay = raw.assay_id.assay_id.assay_name
         unit = raw.assay_id.readout_unit.unit
-        field = raw.field_id
+        # Deprecated
+        # field = raw.field_id
         value = raw.value
+
+        # TODO CHANGE TO USE FOLLOWING
+        assay_instance = raw.assay_instance
+        target = assay_instance.target.name
+        # Not currently used
+        method = assay_instance.method.name
+
+        sample_location = raw.sample_location.name
 
         # Convert all times to days for now
         # Get the conversion unit
-        scale = raw.assay_chip_id.timeunit.scale_factor
-        time = '{0:.2f}'.format((scale / 1440.0) * raw.elapsed_time)
-        # Have time in minutes for comparing to addition_time and duration
-        time_minutes = scale * raw.elapsed_time
+        # scale = raw.assay_chip_id.timeunit.scale_factor
+        # time = '{0:.2f}'.format((scale / 1440.0) * raw.time)
+        # # Have time in minutes for comparing to addition_time and duration
+        # time_minutes = scale * raw.time
+
+        time_minutes = raw.time
+        # Time will always be in days
+        time = '{0:.2f}'.format(raw.time / 1440.0)
 
         quality = raw.quality
 
@@ -496,46 +690,46 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
 
                 # Specifically add to consolidated control if this is a device-by-device control
                 if percent_control and raw.assay_chip_id.chip_setup.chip_test_type == 'control':
-                    initial_data.setdefault(assay, {}).setdefault(unit, {}).setdefault('-Control-', {}).setdefault(field, {}).setdefault(time, []).append(value)
+                    initial_data.setdefault(target, {}).setdefault(unit, {}).setdefault('-Control-', {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
 
             # Set data in nested monstrosity that is initial_data
-            initial_data.setdefault(assay, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(field, {}).setdefault(time, []).append(value)
+            initial_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
 
-    for assay, units in initial_data.items():
+    for target, units in initial_data.items():
         for unit, tags in units.items():
-            for tag, fields in tags.items():
-                for field, time_values in fields.items():
+            for tag, sample_locations in tags.items():
+                for sample_location, time_values in sample_locations.items():
                     for time, values in time_values.items():
                         if percent_control and tag == '-Control-':
-                            controls.update({(assay, unit, field, time): sum(values) / float(len(values))})
+                            controls.update({(target, unit, sample_location, time): sum(values) / float(len(values))})
                         # Add to averaged data if this isn't a average control value for device-by-device
                         if not (tag == '-Control-' and key != 'compound'):
-                            averaged_data.setdefault(assay, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(field, {}).update({
+                            averaged_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).update({
                                 time: sum(values) / float(len(values))
                             })
 
-    for assay, units in averaged_data.items():
+    for target, units in averaged_data.items():
         for unit, tags in units.items():
             accomadate_units = len(units) > 1
-            for tag, fields in tags.items():
-                accomadate_field = len(fields) > 1
-                for field, time_values in fields.items():
+            for tag, sample_locations in tags.items():
+                accomadate_sample_location = len(sample_locations) > 1
+                for sample_location, time_values in sample_locations.items():
                     for time, value in time_values.items():
                         if not percent_control:
                             # Not converted to percent control
                             # Newline is used as a delimiter
-                            assay_label = assay + '\n' + unit
+                            assay_label = target + '\n' + unit
 
-                            if accomadate_field:
-                                current_key = tag + ' ' + field
+                            if accomadate_sample_location:
+                                current_key = tag + ' ' + sample_location
                             else:
                                 current_key = tag
 
                             assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('time', []).append(time)
                             assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('values', []).append(value)
 
-                        elif controls.get((assay, unit, field, time), False):
-                            control_value = controls.get((assay, unit, field, time))
+                        elif controls.get((target, unit, sample_location, time), False):
+                            control_value = controls.get((target, unit, sample_location, time))
                             # Convert to percent control
                             if accomadate_units:
                                 current_unit = '%Control [' + unit + ']'
@@ -543,10 +737,10 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
                                 current_unit = '%Control'
 
                             # Newline is used as a delimiter
-                            assay_label = assay + '\n' + current_unit
+                            assay_label = target + '\n' + current_unit
 
-                            if accomadate_field:
-                                current_key = tag + ' ' + field
+                            if accomadate_sample_location:
+                                current_key = tag + ' ' + sample_location
                             else:
                                 current_key = tag
 
@@ -594,13 +788,7 @@ def fetch_readouts(request):
         raw_data = AssayChipRawData.objects.filter(
             assay_chip_id=readouts
         ).prefetch_related(
-            'assay_id',
-            'assay_chip_id',
-            'assay_chip_id__chip_setup',
-            # 'assay_chip_id__chip_setup__compound',
-            'assay_chip_id__chip_setup__unit',
-            'assay_id__assay_id',
-            'assay_id__readout_unit',
+            *CHIP_DATA_PREFETCH
         )
 
         related_compounds = AssayCompoundInstance.objects.filter(
@@ -619,11 +807,7 @@ def fetch_readouts(request):
         raw_data = AssayChipRawData.objects.filter(
             assay_chip_id=readouts
         ).prefetch_related(
-            'assay_id',
-            'assay_chip_id',
-            'assay_chip_id__chip_setup',
-            'assay_id__assay_id',
-            'assay_id__readout_unit'
+            *CHIP_DATA_PREFETCH
         )
 
     assays = get_readout_data(raw_data, related_compounds_map, key, percent_control, include_all)
