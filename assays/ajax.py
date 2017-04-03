@@ -640,7 +640,7 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
         # assay = raw.assay_id.assay_id.assay_short_name
         # Deprecated
         # assay = raw.assay_id.assay_id.assay_name
-        unit = raw.assay_id.readout_unit.unit
+        # unit = raw.assay_id.readout_unit.unit
         # Deprecated
         # field = raw.field_id
         value = raw.value
@@ -648,6 +648,7 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
         # TODO CHANGE TO USE FOLLOWING
         assay_instance = raw.assay_instance
         target = assay_instance.target.name
+        unit = assay_instance.unit.unit
         # Not currently used
         method = assay_instance.method.name
 
