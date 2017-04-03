@@ -14,7 +14,13 @@ from .forms import (
     AssayPlateReadoutInlineFormset
 )
 
-from .utils import number_to_label, TIME_CONVERSIONS, DEFAULT_CSV_HEADER, CHIP_DATA_PREFETCH
+from .utils import (
+    number_to_label,
+    validate_file,
+    TIME_CONVERSIONS,
+    DEFAULT_CSV_HEADER,
+    CHIP_DATA_PREFETCH
+)
 
 import csv
 from StringIO import StringIO
@@ -1055,30 +1061,27 @@ def validate_individual_chip_file(request):
         setup_id = None
         study = AssayRun.objects.get(pk=int(study_id))
 
-    form = AssayChipReadoutForm(study, setup_id, request.POST)
-    formset = ACRAFormSet(request.POST, request.FILES, instance=form.instance)
+    form = AssayChipReadoutForm(study, setup_id, request.POST, request.FILES)
+    # formset = ACRAFormSet(request.POST, request.FILES, instance=form.instance)
 
-    if formset.is_valid():
-        # Validate form
-        # form.is_valid()
-
-        form_data = formset.forms[0].cleaned_data
+    # if formset.is_valid():
+    if form.is_valid():
+        form_data = form.cleaned_data
 
         preview_data = form_data.get('preview_data')
 
+        # Only chip preview right now
         chip_raw_data = preview_data.get('chip_preview')
 
-        csv = get_chip_readout_data_as_csv([readout_id], chip_data=chip_raw_data)
-
-        data = {'csv': csv}
+        data = get_chip_readout_data_as_json([readout_id], chip_data=chip_raw_data)
 
         return HttpResponse(json.dumps(data),
                             content_type="application/json")
 
     else:
         errors = ''
-        if formset.non_form_errors():
-            errors += formset.non_form_errors().as_text()
+        # if formset.non_form_errors():
+        #     errors += formset.non_form_errors().as_text()
         if form.errors:
             errors += form.errors.as_text()
         data = {

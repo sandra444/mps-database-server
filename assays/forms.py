@@ -154,6 +154,9 @@ class AssayChipReadoutForm(SignOffMixin, CloneableForm):
     """Frontend form for Chip Readouts"""
     overwrite_option = OVERWRITE_OPTIONS_INDIVIDUAL
 
+    # EVIL WAY TO GET PREVIEW DATA
+    preview_data = forms.BooleanField(initial=False, required=False)
+
     def __init__(self, study, current, *args, **kwargs):
         """Init the Chip Readout Form
 
@@ -178,7 +181,7 @@ class AssayChipReadoutForm(SignOffMixin, CloneableForm):
         self.fields['chip_setup'].queryset = setups
 
     # Specifies the number of headers in the uploaded csv
-    headers = forms.CharField(required=True, initial=1)
+    # headers = forms.CharField(required=True, initial=1)
 
     class Meta(object):
         model = AssayChipReadout
@@ -190,6 +193,26 @@ class AssayChipReadoutForm(SignOffMixin, CloneableForm):
         exclude = group + tracking + restricted
 
     # Set chip setup to unique instead of throwing error in validation
+    def clean(self):
+        super(AssayChipReadoutForm, self).clean()
+
+        setup = self.cleaned_data.get('chip_setup')
+        if setup:
+            self.instance.chip_setup = setup
+
+        if setup and self.cleaned_data.get('file'):
+            test_file = self.cleaned_data.get('file')
+            file_data = validate_file(
+                self,
+                test_file,
+                'Chip',
+                # headers=headers,
+                # chip_details=chip_details,
+                readout=self.instance,
+                study=setup.assay_run_id
+            )
+            # Evil attempt to acquire preview data
+            self.cleaned_data['preview_data'] = file_data
 
 
 class AssayChipSetupForm(SignOffMixin, CloneableForm):
@@ -229,7 +252,7 @@ class AssayChipSetupForm(SignOffMixin, CloneableForm):
         Ensures that the data for a compound is complete
         Prevents changes to the chip if data has been uploaded (avoiding conflicts between data and entries)
         """
-        super(forms.ModelForm, self).clean()
+        super(AssayChipSetupForm, self).clean()
 
         # Make sure the barcode/ID is unique in the study
         if AssayChipSetup.objects.filter(
@@ -969,6 +992,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
         return self.forms
 
 
+# DEPRECATED
 class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
     """Frontend Inline for Chip Readout Assays (ACRA)"""
 
@@ -1040,7 +1064,7 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
         #             )
 
         # If there is a new file
-        if forms_data[0].files:
+        if forms_data and forms_data[0].files:
             test_file = forms_data[0].files.get('file', '')
             file_data = validate_file(
                 self,
@@ -1121,13 +1145,13 @@ class ReadoutBulkUploadForm(forms.ModelForm):
             raise forms.ValidationError('No file was supplied.')
 
         # For the moment, just have headers be equal to one?
-        headers = 1
+        # headers = 1
 
         file_data = validate_file(
             self,
             test_file,
             'Bulk',
-            headers=headers,
+            # headers=headers,
             study=study
         )
 

@@ -1767,9 +1767,7 @@ TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
 # TODO RATHER THAN DELETING/MARKING FIRST, WAIT UNTIL END TO DELETE AND MARK (SET CONFLICTING NUMBER TO ZERO IF NECESSARY
 # I HAVE REMOVED HEADERS
 def validate_chip_readout_file(
-    # headers,
     datalist,
-    # chip_details,
     sheet='',
     overwrite_option=None,
     readout=None,
@@ -1784,6 +1782,8 @@ def validate_chip_readout_file(
     readout_data = []
     # A list of errors
     errors = []
+    # A dic of readouts found in the file for binding to the DataUpload instance
+    used_readouts = {}
 
     readouts = []
     # Get readouts
@@ -1829,7 +1829,7 @@ def validate_chip_readout_file(
 
     # Get sample locations
     sample_locations =  {
-        sample_location.name: sample_location.id for sample_location in AssaySampleLocation.objects.all()
+        sample_location.name.upper(): sample_location.id for sample_location in AssaySampleLocation.objects.all()
     }
 
     # TODO THIS CALL WILL CHANGE IN FUTURE VERSIONS
@@ -2005,6 +2005,7 @@ def validate_chip_readout_file(
             # Try to get readout
             # current_chip_readout = chip_details.get(chip_id, {}).get('readout', '')
             current_chip_readout = setup_id_to_readout.get(chip_id, None)
+            used_readouts.update({chip_id: current_chip_readout})
 
             # Get a dummy readout
             if not current_chip_readout:
@@ -2058,6 +2059,8 @@ def validate_chip_readout_file(
             if save:
                 query_list.append((
                     current_chip_readout.id,
+                    assay_plate_id,
+                    assay_well_id,
                     assay_instance_id,
                     sample_location_id,
                     value,
@@ -2071,6 +2074,8 @@ def validate_chip_readout_file(
                 readout_data.append(
                     AssayChipRawData(
                         assay_chip_id=current_chip_readout,
+                        assay_plate_id=assay_plate_id,
+                        assay_well_id=assay_well_id,
                         assay_instance_id=assay_instance_id,
                         sample_location_id=sample_location_id,
                         value=value,
@@ -2107,8 +2112,8 @@ def validate_chip_readout_file(
         cursor = connection.cursor()
         # The generic query
         query = ''' INSERT INTO "assays_assaychiprawdata"
-              ("assay_chip_id_id", "assay_instance_id", "sample_location_id", "value", "time", "quality", "notes", "replicate", "update_number")
-              VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'''
+              ("assay_chip_id_id", "assay_plate_id", "assay_well_id", "assay_instance_id", "sample_location_id", "value", "time", "quality", "notes", "replicate", "update_number")
+              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
 
         cursor.executemany(query, query_list)
         transaction.commit()
@@ -2131,7 +2136,7 @@ def validate_chip_readout_file(
                     readout_ids_and_notes.append((entry.id, entry.notes, entry.quality))
             mark_chip_readout_values(readout_ids_and_notes, stamp=True)
 
-        return True
+        return used_readouts
     # If this is a successful preview
     else:
         return readout_data
@@ -2153,13 +2158,12 @@ CSV_ROOT = settings.MEDIA_ROOT.replace('mps/../', '', 1) + '/csv/'
 
 # TODO MAY CAUSE SILENT FAILURE
 # TODO WE CAN PROBABLY DO AWAY WITH PASSING FORM
-def save_chip_files(datalist, current_file, study_id, headers, overwrite_option, readout=None, form=None):
+def save_chip_files(datalist, current_file, study_id, overwrite_option, readout=None, form=None):
     """Process chip file data
 
     datalist - all data from the file datalist
     current_file - the AssayDataFile object to link to
     study_id - the study ID in question
-    headers - the number of header rows (may be passed as 1 by default)
     overwrite_option - what overwrite option was used\
     readout - the readout in question
     form - the form used so that QC Status can be modified
@@ -2174,12 +2178,10 @@ def save_chip_files(datalist, current_file, study_id, headers, overwrite_option,
 #             chip_setup__assay_chip_id=chip_id
 #         )
 
-    chip_details = get_chip_details(readout=readout, study=study_id)
+    # chip_details = get_chip_details(readout=readout, study=study_id)
 
-    validate_chip_readout_file(
-        # headers,
+    used_readouts = validate_chip_readout_file(
         datalist,
-        # chip_details,
         sheet='',
         overwrite_option=overwrite_option,
         readout=readout,
@@ -2188,8 +2190,11 @@ def save_chip_files(datalist, current_file, study_id, headers, overwrite_option,
         save=True
     )
 
-    for chip_id, readout_details in chip_details.items():
-        current_file.chip_readout.add(readout_details.get('readout'))
+    # TODO TEST THIS
+    # for chip_id, readout_details in chip_details.items():
+    #     current_file.chip_readout.add(readout_details.get('readout'))
+    for chip_id, readout in used_readouts.items():
+        current_file.chip_readout.add(readout)
 
 
 # TODO MAY CAUSE SILENT FAILURE
@@ -2286,7 +2291,7 @@ def mark_plate_readout_values(readout_ids_and_notes, stamp=False):
 
 
 # TODO BE SURE TO CHECK IF SAVE=TRUE WHEN IT NEEDS TO BE
-def parse_file_and_save(current_file, created_by, study_id, overwrite_option, interface, readout=None, headers=1, form=None):
+def parse_file_and_save(current_file, created_by, study_id, overwrite_option, interface, readout=None, form=None):
     """Parse the given file and save the associated chip/plate reaodut data
 
     input_file - the file to reference for input
@@ -2294,7 +2299,6 @@ def parse_file_and_save(current_file, created_by, study_id, overwrite_option, in
     created_by - who created the file (ie who made this modification)
     study_id - the study ID (as a string PK)
     overwrite_option - the overwrite option selected
-    headers - the number of headers (default 1)
     form - the form for saving QC data for chips (likely to be deprecated)
     """
     input_file = current_file.file
@@ -2412,7 +2416,7 @@ def parse_file_and_save(current_file, created_by, study_id, overwrite_option, in
             # STOPGAP WILL REVISE SOON
             # if sheet_type in CHIP_FORMATS:
             if type(sheet_type) == dict:
-                save_chip_files(datalist, current_file, study_id, headers, overwrite_option, readout=readout, form=form)
+                save_chip_files(datalist, current_file, study_id, overwrite_option, readout=readout, form=form)
             elif sheet_type in PLATE_FORMATS:
                 save_plate_files(datalist, current_file, study_id, overwrite_option, readout=readout, form=form)
 
@@ -2427,7 +2431,7 @@ def parse_file_and_save(current_file, created_by, study_id, overwrite_option, in
         # STOPGAP WILL REVISE SOON
         # if sheet_type in CHIP_FORMATS:
         if type(sheet_type) == dict:
-            save_chip_files(datalist, current_file, study_id, headers, overwrite_option, readout=readout, form=form)
+            save_chip_files(datalist, current_file, study_id, overwrite_option, readout=readout, form=form)
         elif sheet_type in PLATE_FORMATS:
             save_plate_files(datalist, current_file, study_id, overwrite_option, readout=readout, form=form)
         # acquire_valid_data(datalist, sheet_type, chip_data, tabular_data, block_data, headers=headers)
@@ -2450,14 +2454,13 @@ def validate_sheet_type(interface, sheet_type, sheet='csv'):
 
 
 # TODO NEEDS REVISION
-def validate_excel_file(self, excel_file, interface, overwrite_option, headers=1, study=None, readout=None,
+def validate_excel_file(self, excel_file, interface, overwrite_option, study=None, readout=None,
                         chip_details=None, plate_details=None, upload_type=None):
     """Validate an excel file
 
     Params:
     self - the form in question
     excel_file - the excel_file as an xlrd object
-    headers - the number of header rows (default=1)
     study - the study in question (optional)
     readout - the readout in question (optional)
     chip_details - dictionary of assays and units for each chip (optional)
@@ -2499,12 +2502,11 @@ def validate_excel_file(self, excel_file, interface, overwrite_option, headers=1
         # STOPGAP WILL REVISE SOON
         # if sheet_type in CHIP_FORMATS:
         if type(sheet_type) == dict:
-            if not chip_details:
-                chip_details = get_chip_details(self, study, readout)
+            # if not chip_details:
+            #     chip_details = get_chip_details(self, study, readout)
 
             # Validate this sheet
             current_chip_preview = validate_chip_readout_file(
-                # headers,
                 datalist,
                 # chip_details,
                 overwrite_option=overwrite_option,
@@ -2549,7 +2551,7 @@ def validate_excel_file(self, excel_file, interface, overwrite_option, headers=1
 
 # TODO NEEDS REVISION
 def validate_csv_file(self, datalist, interface, overwrite_option, study=None, readout=None,
-                      chip_details=None, plate_details=None, headers=1, upload_type=None):
+                      chip_details=None, plate_details=None, upload_type=None):
     """Validates a CSV file
 
     Params:
@@ -2559,7 +2561,6 @@ def validate_csv_file(self, datalist, interface, overwrite_option, study=None, r
     readout - the readout in question (optional)
     chip_details - dictionary of assays and units for each chip (optional)
     plate_details - dictionary of assay and units for each plate (optional)
-    headers - the number of header rows (default=1)
     upload_type - upload type for plates (optional)
     """
     # From the header we need to discern the type of upload
@@ -2580,11 +2581,10 @@ def validate_csv_file(self, datalist, interface, overwrite_option, study=None, r
     # STOPGAP WILL REVISE SOON
     # if sheet_type in CHIP_FORMATS:
     if type(sheet_type) == dict:
-        if not chip_details:
-            chip_details = get_chip_details(self, study, readout)
+        # if not chip_details:
+        #     chip_details = get_chip_details(self, study, readout)
 
         chip_preview = validate_chip_readout_file(
-            # headers,
             datalist,
             # chip_details,
             overwrite_option=overwrite_option,
@@ -2621,7 +2621,6 @@ def validate_file(
         self,
         test_file,
         interface,
-        headers=1,
         chip_details=None,
         plate_details=None,
         study=None,
@@ -2633,7 +2632,6 @@ def validate_file(
     Params:
     self - the form in question
     test_file - the file in question
-    headers - the number of header rows (default=1)
     chip_details - dictionary of assays and units for each chip (optional)
     plate_details - dictionary of assay and units for each plate (optional)
     study - the study in question (optional)
@@ -2651,7 +2649,6 @@ def validate_file(
             excel_file,
             interface,
             overwrite_option,
-            headers,
             study=study,
             readout=readout,
             chip_details=chip_details,
@@ -2674,7 +2671,6 @@ def validate_file(
             readout=readout,
             chip_details=chip_details,
             plate_details=plate_details,
-            headers=headers,
             upload_type=upload_type
         )
 

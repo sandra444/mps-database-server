@@ -716,13 +716,13 @@ class AssayChipRawData(models.Model):
     assay_id = models.ForeignKey('assays.AssayChipReadoutAssay', null=True, blank=True)
 
     # DEPRECATED: REPLACED BY SAMPLE LOCATION
-    field_id = models.CharField(max_length=255, default='0')
+    field_id = models.CharField(max_length=255, default='0', null=True, blank=True)
 
     value = models.FloatField(null=True)
 
     # TO BE RENAMED SIMPLY "time" IN FUTURE MODELS
     # PLEASE NOTE THAT THIS IS NOW ALWAYS MINUTES <-IMPORTANT
-    elapsed_time = models.FloatField(default=0)
+    elapsed_time = models.FloatField(default=0, null=True, blank=True)
 
     # This value will act as quality control, if it evaluates True then the value is considered invalid
     quality = models.CharField(max_length=20, default='')
@@ -754,6 +754,7 @@ class AssayChipRawData(models.Model):
 
     # Replaces elapsed_time
     time = models.FloatField(default=0)
+
 
 class AssayChipCells(models.Model):
     """Individual cell parameters for CHIP setup used in inline"""

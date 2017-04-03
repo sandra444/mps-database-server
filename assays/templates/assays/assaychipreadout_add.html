@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block load %}
-    <script src="{% static "js/inline_add.js" %}"></script>
+{#    <script src="{% static "js/inline_add.js" %}"></script>#}
     {# Is this necessary? #}
     <script src="{% static "js/cookies.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
@@ -237,62 +237,62 @@
     {% endif %}
 
 {# DEPRECATED #}
-<div hidden>
-    {{ formset.management_form }}
-    <legend>Assays</legend>
-
-    {% if formset.non_form_errors %}
-        <div class="alert alert-danger" role="alert">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            <span class="sr-only">Error:</span>
-            {{ formset.non_form_errors }}
-        </div>
-    {% endif %}
-
-    {% if formset.errors %}
-        {% for dict in formset.errors %}
-            {% for key,value in dict.items %}
-                {% if key %}
-                    <div class="alert alert-danger" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
-                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        {% endfor %}
-    {% endif %}
-
-    <a id="add_button-assaychipreadoutassay_set" class="btn btn-success" role="button">Add Assay</a>
-    <table class="table table-striped inlines" id="assaychipreadoutassay_set-group"  name="assays">
-        <thead>
-            <tr>
-                <th>Assay*</th>
-                <th>Object of Interest*</th>
-                <th>Reader*</th>
-                <th>Readout Unit*</th>
-                <th>Delete</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for assay in formset %}
-                <tr class="inline" id="assay-{{ forloop.counter0 }}">
-                     Hidden input for Update (need id to associate)
-                    {% if assay.id.value %}
-                    <td class="original" hidden>
-                        <input id="id_assaychipreadoutassay_set-{{ forloop.counter0 }}-id" name="assaychipreadoutassay_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ assay.id.value }}">
-                    </td>
-                    {% endif %}
-                    <td>{{ assay.assay_id }}</td>
-                    <td>{{ assay.object_type }}</td>
-                    <td>{{ assay.reader_id }}</td>
-                    <td>{{ assay.readout_unit }}</td>
-                    <td>{{ assay.DELETE }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+{#<div hidden>#}
+{#    {{ formset.management_form }}#}
+{#    <legend>Assays</legend>#}
+{##}
+{#    {% if formset.non_form_errors %}#}
+{#        <div class="alert alert-danger" role="alert">#}
+{#            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#            <span class="sr-only">Error:</span>#}
+{#            {{ formset.non_form_errors }}#}
+{#        </div>#}
+{#    {% endif %}#}
+{##}
+{#    {% if formset.errors %}#}
+{#        {% for dict in formset.errors %}#}
+{#            {% for key,value in dict.items %}#}
+{#                {% if key %}#}
+{#                    <div class="alert alert-danger" role="alert">#}
+{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                        <span class="sr-only">Error:</span>#}
+{#                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}#}
+{#                    </div>#}
+{#                {% endif %}#}
+{#            {% endfor %}#}
+{#        {% endfor %}#}
+{#    {% endif %}#}
+{##}
+{#    <a id="add_button-assaychipreadoutassay_set" class="btn btn-success" role="button">Add Assay</a>#}
+{#    <table class="table table-striped inlines" id="assaychipreadoutassay_set-group"  name="assays">#}
+{#        <thead>#}
+{#            <tr>#}
+{#                <th>Assay*</th>#}
+{#                <th>Object of Interest*</th>#}
+{#                <th>Reader*</th>#}
+{#                <th>Readout Unit*</th>#}
+{#                <th>Delete</th>#}
+{#            </tr>#}
+{#        </thead>#}
+{#        <tbody>#}
+{#            {% for assay in formset %}#}
+{#                <tr class="inline" id="assay-{{ forloop.counter0 }}">#}
+{#                     Hidden input for Update (need id to associate)#}
+{#                    {% if assay.id.value %}#}
+{#                    <td class="original" hidden>#}
+{#                        <input id="id_assaychipreadoutassay_set-{{ forloop.counter0 }}-id" name="assaychipreadoutassay_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ assay.id.value }}">#}
+{#                    </td>#}
+{#                    {% endif %}#}
+{#                    <td>{{ assay.assay_id }}</td>#}
+{#                    <td>{{ assay.object_type }}</td>#}
+{#                    <td>{{ assay.reader_id }}</td>#}
+{#                    <td>{{ assay.readout_unit }}</td>#}
+{#                    <td>{{ assay.DELETE }}</td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#        </tbody>#}
+{#    </table>#}
+{#</div>#}
 
     {# Inline CSS is very distasteful #}
     <div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;min-width: 975px;overflow: hidden;">

@@ -987,15 +987,15 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(AssayChipReadoutAdd, self).get_context_data(**kwargs)
-        if 'formset' not in context:
-            if self.request.POST:
-                context['formset'] = ACRAFormSet(self.request.POST, self.request.FILES)
-            elif self.request.GET.get('clone', ''):
-                pk = int(self.request.GET.get('clone', ''))
-                clone = get_object_or_404(AssayChipReadout, pk=pk)
-                context['formset'] = ACRAFormSet(instance=clone)
-            else:
-                context['formset'] = ACRAFormSet()
+        # if 'formset' not in context:
+        #     if self.request.POST:
+        #         context['formset'] = ACRAFormSet(self.request.POST)
+        #     elif self.request.GET.get('clone', ''):
+        #         pk = int(self.request.GET.get('clone', ''))
+        #         clone = get_object_or_404(AssayChipReadout, pk=pk)
+        #         context['formset'] = ACRAFormSet(instance=clone)
+        #     else:
+        #         context['formset'] = ACRAFormSet()
 
         context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
@@ -1003,20 +1003,22 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
     def form_valid(self, form):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        formset = ACRAFormSet(self.request.POST, self.request.FILES, instance=form.instance, save_as_new=True)
+        # formset = ACRAFormSet(self.request.POST, instance=form.instance, save_as_new=True)
         # get user via self.request.user
-        if form.is_valid() and formset.is_valid():
+        # if form.is_valid() and formset.is_valid():
+        if form.is_valid():
             data = form.cleaned_data
             # Get headers
-            headers = int(data.get('headers'))
+            # headers = int(data.get('headers'))
             overwrite_option = data.get('overwrite_option')
 
-            save_forms_with_tracking(self, form, formset=formset, update=False)
+            # save_forms_with_tracking(self, form, formset=formset, update=False)
+            save_forms_with_tracking(self, form, update=False)
 
-            if formset.files.get('file', ''):
+            if self.request.FILES:
                 study_id = str(self.kwargs['study_id'])
                 parse_file_and_save(
-                    self.object.file, self.object.modified_by, study_id, overwrite_option, 'Chip', headers=headers, form=form, readout=self.object
+                    self.object.file, self.object.modified_by, study_id, overwrite_option, 'Chip', form=form, readout=self.object
                 )
                 # DEPRECATED
                 # parse_chip_csv(self.object, current_file, headers, overwrite_option, form)
@@ -1031,7 +1033,8 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
             else:
                 return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            # return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
     # Redirect when there are no available setups
     def render_to_response(self, context):
@@ -1092,11 +1095,11 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(AssayChipReadoutUpdate, self).get_context_data(**kwargs)
-        if 'formset' not in context:
-            if self.request.POST:
-                context['formset'] = ACRAFormSet(self.request.POST, instance=self.object)
-            else:
-                context['formset'] = ACRAFormSet(instance=self.object)
+        # if 'formset' not in context:
+        #     if self.request.POST:
+        #         context['formset'] = ACRAFormSet(self.request.POST, instance=self.object)
+        #     else:
+        #         context['formset'] = ACRAFormSet(instance=self.object)
 
         data_uploads = AssayDataUpload.objects.filter(
             chip_readout=self.object
@@ -1113,24 +1116,26 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        formset = ACRAFormSet(self.request.POST, self.request.FILES, instance=form.instance)
+        # formset = ACRAFormSet(self.request.POST, instance=form.instance)
 
-        if form.is_valid() and formset.is_valid():
+        # if form.is_valid() and formset.is_valid():
+        if form.is_valid():
             data = form.cleaned_data
             # Get headers
-            headers = int(data.get('headers'))
+            # headers = int(data.get('headers'))
             overwrite_option = data.get('overwrite_option')
 
-            save_forms_with_tracking(self, form, formset=formset, update=True)
+            # save_forms_with_tracking(self, form, formset=formset, update=True)
+            save_forms_with_tracking(self, form, update=True)
 
             # Clear data if clear is checked
             if self.request.POST.get('file-clear', ''):
                 AssayChipRawData.objects.filter(assay_chip_id=self.object).delete()
             # Save file if it exists
-            elif formset.files.get('file', ''):
+            elif self.request.FILES:
                 study_id = str(self.object.chip_setup.assay_run_id.id)
                 parse_file_and_save(
-                    self.object.file, self.object.modified_by, study_id, overwrite_option, 'Chip', headers=headers, form=form, readout=self.object
+                    self.object.file, self.object.modified_by, study_id, overwrite_option, 'Chip', form=form, readout=self.object
                 )
                 # Deprecated
                 # parse_chip_csv(self.object, file, headers, overwrite_option, form)
@@ -1140,7 +1145,8 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             # Otherwise do nothing (the file remained the same)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            # return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 class AssayChipReadoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
@@ -2126,7 +2132,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             overwrite_option = data.get('overwrite_option')
 
             # For the moment, just have headers be equal to two?
-            headers = 1
+            # headers = 1
             study_id = str(self.object.id)
 
             # Add user to Study's modified by
@@ -2135,7 +2141,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             self.modified_by = self.request.user
             self.object.save()
 
-            parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', headers=headers, form=None)
+            parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
 
             return redirect(self.object.get_absolute_url())
         else:
