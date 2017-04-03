@@ -187,7 +187,7 @@
                 <tr>
                     <th>View/Edit</th>
                     <th>Chip Setup</th>
-                    <th>Assays</th>
+{#                    <th>Assays</th>#}
                     <th>Readout Date</th>
                     <th>Creator</th>
                     <th>Review</th>
@@ -204,11 +204,11 @@
                         </a>
                     </td>
                     <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}/">{{ readout.chip_setup }}</a></td>
-                    <td>
-                        {% for assay in readout.related_assays %}
-                            {{ assay.assay_id.assay_short_name }}
-                        {% endfor %}
-                    </td>
+{#                    <td>#}
+{#                        {% for assay in readout.related_assays %}#}
+{#                            {{ assay.assay_id.assay_short_name }}#}
+{#                        {% endfor %}#}
+{#                    </td>#}
                     <td>{{ readout.readout_start_time }}</td>
                     <td>
                         {{ readout.full_creator }}

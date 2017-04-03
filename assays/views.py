@@ -152,23 +152,23 @@ class StudyIndex(ViewershipMixin, DetailView):
             'chip_setup__unit'
         )
 
-        related_assays = AssayChipReadoutAssay.objects.filter(
-            readout_id__in=readouts
-        ).prefetch_related(
-            'readout_id',
-            'assay_id'
-        ).order_by(
-            'assay_id__assay_short_name'
-        )
-        related_assays_map = {}
-
-        for assay in related_assays:
-            # start appending to a list keyed by the readout ID for all related images
-            related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
-
-        for readout in readouts:
-            # set an attribute on the readout that is the list created above
-            readout.related_assays = related_assays_map.get(readout.id)
+        # related_assays = AssayChipReadoutAssay.objects.filter(
+        #     readout_id__in=readouts
+        # ).prefetch_related(
+        #     'readout_id',
+        #     'assay_id'
+        # ).order_by(
+        #     'assay_id__assay_short_name'
+        # )
+        # related_assays_map = {}
+        #
+        # for assay in related_assays:
+        #     # start appending to a list keyed by the readout ID for all related images
+        #     related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
+        #
+        # for readout in readouts:
+        #     # set an attribute on the readout that is the list created above
+        #     readout.related_assays = related_assays_map.get(readout.id)
 
         context['readouts'] = readouts
 
@@ -924,24 +924,24 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
             group__name__in=group_names
         )
 
-        # Map assays
-        related_assays = AssayChipReadoutAssay.objects.filter(
-            readout_id__in=queryset
-        ).prefetch_related(
-            'readout_id',
-            'assay_id'
-        ).order_by(
-            'assay_id__assay_short_name'
-        )
-        related_assays_map = {}
-
-        for assay in related_assays:
-            # start appending to a list keyed by the readout ID for all related images
-            related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
-
-        for readout in queryset:
-            # set an attribute on the readout that is the list created above
-            readout.related_assays = related_assays_map.get(readout.id)
+        # # Map assays
+        # related_assays = AssayChipReadoutAssay.objects.filter(
+        #     readout_id__in=queryset
+        # ).prefetch_related(
+        #     'readout_id',
+        #     'assay_id'
+        # ).order_by(
+        #     'assay_id__assay_short_name'
+        # )
+        # related_assays_map = {}
+        #
+        # for assay in related_assays:
+        #     # start appending to a list keyed by the readout ID for all related images
+        #     related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
+        #
+        # for readout in queryset:
+        #     # set an attribute on the readout that is the list created above
+        #     readout.related_assays = related_assays_map.get(readout.id)
 
         return queryset
 
