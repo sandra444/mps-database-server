@@ -1922,7 +1922,7 @@ def validate_chip_readout_file(
         sample_location_id = sample_locations.get(sample_location_name.upper())
         if not sample_location_id:
             errors.append(
-                '{0}The Sample Location "{1}" was not recognized.'.format(sheet, sample_location_name)
+                unicode(sheet +  'The Sample Location "{0}" was not recognized.').format(sample_location_name)
             )
 
         # Get notes, if possible
@@ -1944,7 +1944,7 @@ def validate_chip_readout_file(
 
         if chip_id not in setup_id_to_readout:
             errors.append(
-                sheet + 'No Chip with the ID "{0}" exists; please change your file or add this assay.'.format(chip_id)
+                unicode(sheet + 'No Chip with the ID "{0}" exists; please change your file or add this assay.').format(chip_id)
             )
 
         # Raise error when an assay does not exist
@@ -1955,9 +1955,8 @@ def validate_chip_readout_file(
         ), None)
         if not assay_instance_id:
             errors.append(
-                '{0}Chip-{1}: No assay with the target "{2}", the method "{3}", and the unit "{4}" exists. '
-                'Please review your data and add this assay to your study if necessary.'.format(
-                    sheet,
+                unicode(sheet + 'Chip-{0}: No assay with the target "{1}", the method "{2}", and the unit "{3}" exists. '
+                'Please review your data and add this assay to your study if necessary.').format(
                     chip_id,
                     target_name,
                     method_name,
@@ -1987,8 +1986,7 @@ def validate_chip_readout_file(
                 time += current_time_value * conversion
             except:
                 errors.append(
-                    '{0}The {1} "{2}" is invalid; please make sure all times are numerical'.format(
-                        sheet,
+                    sheet + 'The {0} "{1}" is invalid; please make sure all times are numerical'.format(
                         time_unit,
                         current_time_value
                     )
