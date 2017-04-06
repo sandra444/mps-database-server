@@ -222,6 +222,10 @@ $(document).ready(function() {
         for (var chart_index in bar_chart_list) {
             bar_chart_list[chart_index].transform('bar');
         }
+
+        // Recalculate responsive and fixed headers
+        $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+        $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
     }
 
     function get_readouts() {
