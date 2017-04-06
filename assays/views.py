@@ -484,19 +484,22 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 def compare_cells(current_model, current_filter, setups):
     """Compare cells to discern setups use the same sort and amount of cells"""
-    cells = {}
-
-    for setup in setups:
-        cells.update(
-            {
-                setup: sorted(current_model.objects.filter(**{current_filter: setup.id}).values_list(
-                    'cell_sample',
-                    'cell_biosensor',
-                    'cellsample_density',
-                    'cellsample_density_unit',
-                    'cell_passage'))
-            }
+    cells = {
+        result[-1]: result[:-1] for result in current_model.objects.prefetch_related(
+            'cell_sample',
+            'cell_biosensor',
+            'cellsample_density_unit'
+        ).filter(
+            **{current_filter + '__in': setups}
+        ).values_list(
+            'cell_sample',
+            'cell_biosensor',
+            'cellsample_density',
+            'cellsample_density_unit',
+            'cell_passage',
+            current_filter
         )
+    }
 
     sameness = {setup: {} for setup in setups}
     max_same = 0
