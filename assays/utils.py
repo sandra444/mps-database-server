@@ -2402,8 +2402,8 @@ def parse_file_and_save(current_file, created_by, study_id, overwrite_option, in
 
     if excel_file:
         for index, sheet in enumerate(excel_file.sheets()):
-            # Skip sheets without anything
-            if sheet.nrows < 1:
+            # Skip sheets without anything and skip sheets that are hidden
+            if sheet.nrows < 1 or sheet.visibility != 0:
                 continue
 
             datalist = get_bulk_datalist(sheet)
@@ -2477,8 +2477,8 @@ def validate_excel_file(self, excel_file, interface, overwrite_option, study=Non
     for index, sheet in enumerate(excel_file.sheets()):
         sheet_name = sheet_names[index]
 
-        # Skip sheets without anything
-        if sheet.nrows < 1:
+        # Skip sheets without anything and skip sheets that are hidden
+        if sheet.nrows < 1 or sheet.visibility != 0:
             continue
 
         # Get datalist
