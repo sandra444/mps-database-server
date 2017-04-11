@@ -971,7 +971,7 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
         if self.request.method == 'POST':
-            form = form_class(study, current, self.request.POST, self.request.FILES)
+            form = form_class(study, current, self.request.POST, self.request.FILES, request=self.request)
         elif self.request.GET.get('clone', ''):
             pk = int(self.request.GET.get('clone', ''))
             clone = get_object_or_404(AssayChipReadout, pk=pk)
@@ -1091,7 +1091,7 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         # If POST
         if self.request.method == 'POST':
-            return form_class(study, current, self.request.POST, self.request.FILES, instance=self.get_object())
+            return form_class(study, current, self.request.POST, self.request.FILES, request=self.request, instance=self.get_object())
         # If GET
         else:
             return form_class(study, current, instance=self.get_object())

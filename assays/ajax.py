@@ -41,6 +41,8 @@ from django.forms.models import inlineformset_factory
 
 # from django.utils import timezone
 
+import numpy as np
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -616,7 +618,14 @@ def fetch_chip_readout(request):
                         content_type="application/json")
 
 
-def get_readout_data(raw_data, related_compounds_map, key, percent_control, include_all):
+def get_readout_data(
+        raw_data,
+        related_compounds_map,
+        key,
+        percent_control,
+        include_all,
+        dynamic_quality
+):
     """Get all readout data for a study and return it in JSON format
 
     From POST:
@@ -630,8 +639,17 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
     # TODO MAY FORBID THIS CASE, MUST ASK FIRST
     # TODO ACCOUNT FOR CASE WHERE STUDY HAS MORE THAN ONE COMPOUND
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
-    assays = {}
+    # assays = {}
+
+    final_data = {
+        'sorted_assays': [],
+        'assays': []
+    }
+
+    intermediate_data = {}
+
     initial_data = {}
+
     averaged_data = {}
     controls = {}
 
@@ -654,6 +672,20 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
 
         sample_location = raw.sample_location.name
 
+        chip_id = raw.assay_chip_id.chip_setup.assay_chip_id
+
+        # TODO DO THIS IN JS
+        quality_index = '~'.join([
+            chip_id,
+            str(raw.assay_plate_id),
+            str(raw.assay_well_id),
+            str(raw.assay_instance.id),
+            str(raw.sample_location.id),
+            str(raw.time).rstrip('0').rstrip('.'),
+            raw.replicate,
+            str(raw.update_number)
+        ])
+
         # Convert all times to days for now
         # Get the conversion unit
         # scale = raw.assay_chip_id.timeunit.scale_factor
@@ -663,11 +695,13 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
 
         time_minutes = raw.time
         # Time will always be in days
-        time = '{0:.2f}'.format(raw.time / 1440.0)
+        # time = '{0:.2f}'.format(raw.time / 1440.0)
+        time = raw.time / 1440.0
 
         quality = raw.quality
 
-        if value is not None and (include_all or not quality):
+        # TODO Should probably just use dynamic_quality instead of quality for this
+        if value is not None and (include_all or not dynamic_quality.get(quality_index, quality)):
             # Get tag for data point
             # If by compound
             if key == 'compound':
@@ -682,7 +716,7 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
                         if compound.addition_time <= time_minutes:
                             compounds_to_add.append(
                                 compound.compound_instance.compound.name +
-                                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
+                                ' ' + str(compound.concentration) + ' ' + compound.concentration_unit.unit
                             )
 
                     if not compounds_to_add:
@@ -693,7 +727,7 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
                     tag = '-Control-'
             # If by device
             else:
-                tag = raw.assay_chip_id.chip_setup.assay_chip_id
+                tag = chip_id
 
                 # Specifically add to consolidated control if this is a device-by-device control
                 if percent_control and raw.assay_chip_id.chip_setup.chip_test_type == 'control':
@@ -712,50 +746,126 @@ def get_readout_data(raw_data, related_compounds_map, key, percent_control, incl
                         # Add to averaged data if this isn't a average control value for device-by-device
                         if not (tag == '-Control-' and key != 'compound'):
                             averaged_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).update({
-                                time: sum(values) / float(len(values))
+                                # Subject to change
+                                # time: {
+                                #     'average': np.average(values),
+                                #     'standard_deviation': np.std(values)
+                                # }
+                                time: (
+                                    np.average(values),
+                                    np.std(values)
+                                )
                             })
+
+    initial_data = None
 
     for target, units in averaged_data.items():
         for unit, tags in units.items():
+            # row_indices = {}
             accomadate_units = len(units) > 1
+
+            if not percent_control:
+                # Not converted to percent control
+                # Newline is used as a delimiter
+                assay_label = target + '\n' + unit
+            else:
+                # Convert to percent control
+                if accomadate_units:
+                    current_unit = '%Control ' + unit
+                else:
+                    current_unit = '%Control'
+                # Newline is used as a delimiter
+                assay_label = target + '\n' + current_unit
+
+            current_table = intermediate_data.setdefault(assay_label, [['Time']])
+            # row_indices = {}
+            current_data = {}
+            x_header = []
+            y_header = {}
+            final_data.get('sorted_assays').append(assay_label)
+
             for tag, sample_locations in tags.items():
                 accomadate_sample_location = len(sample_locations) > 1
                 for sample_location, time_values in sample_locations.items():
-                    for time, value in time_values.items():
+                    accomadate_intervals = False
+                    include_current = False
+
+                    if accomadate_sample_location:
+                        current_key = tag + ' ' + sample_location
+                    else:
+                        current_key = tag
+
+                    for time, value_and_standard_deviation in time_values.items():
+                        value = value_and_standard_deviation[0]
+                        standard_deviation = value_and_standard_deviation[1]
+
+                        if standard_deviation != 0:
+                            accomadate_intervals = True
+
                         if not percent_control:
-                            # Not converted to percent control
-                            # Newline is used as a delimiter
-                            assay_label = target + '\n' + unit
-
-                            if accomadate_sample_location:
-                                current_key = tag + ' ' + sample_location
-                            else:
-                                current_key = tag
-
-                            assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('time', []).append(time)
-                            assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('values', []).append(value)
+                            # assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('time', []).append(time)
+                            # assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('values', []).append(value)
+                            current_data.setdefault(current_key, {}).update({time: value})
+                            current_data.setdefault(current_key+'_i1', {}).update({time: value - standard_deviation})
+                            current_data.setdefault(current_key+'_i2', {}).update({time: value + standard_deviation})
+                            y_header.update({time: True})
+                            include_current = True
 
                         elif controls.get((target, unit, sample_location, time), False):
                             control_value = controls.get((target, unit, sample_location, time))
-                            # Convert to percent control
-                            if accomadate_units:
-                                current_unit = '%Control [' + unit + ']'
-                            else:
-                                current_unit = '%Control'
 
-                            # Newline is used as a delimiter
-                            assay_label = target + '\n' + current_unit
+                            adjusted_value = (value / control_value) * 100
+                            adjusted_standard_deviation = (standard_deviation / control_value) * 100
 
-                            if accomadate_sample_location:
-                                current_key = tag + ' ' + sample_location
-                            else:
-                                current_key = tag
-
-                            assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('time', []).append(time)
+                            current_data.setdefault(current_key, {}).update({time: adjusted_value})
+                            current_data.setdefault(current_key+'_i1', {}).update({time: adjusted_value - adjusted_standard_deviation})
+                            current_data.setdefault(current_key+'_i2', {}).update({time: adjusted_value + adjusted_standard_deviation})
+                            y_header.update({time: True})
+                            include_current = True
+                            # assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('time', []).append(time)
                             # Perform conversion
-                            assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('values', []).append((value / control_value) * 100)
+                            # assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('values', []).append((value / control_value) * 100)
 
-    return assays
+                    if include_current:
+                        x_header.append(current_key)
+
+                    # Only include intervals if necessary
+                    if accomadate_intervals:
+                        x_header.extend([
+                            current_key + '_i1',
+                            current_key + '_i2'
+                        ])
+                    else:
+                        if current_key+'_i1' in current_data:
+                            del current_data[current_key+'_i1']
+                            del current_data[current_key + '_i2']
+
+            x_header.sort(key=lambda s: s.upper())
+            current_table[0].extend(x_header)
+
+            x_header = {x_header[index]: index + 1 for index in range(len(x_header))}
+
+            y_header = y_header.keys()
+            y_header.sort(key=float)
+
+            for y in y_header:
+                current_table.append([y] + [None] * (len(x_header)))
+
+            y_header = {float(y_header[index]): index + 1 for index in range(len(y_header))}
+
+            for x, data_point in current_data.items():
+                for y, value in data_point.items():
+                    current_table[y_header.get(y)][x_header.get(x)] = value
+
+    averaged_data = None
+
+    final_data.get('sorted_assays').sort(key=lambda s: s.upper())
+    final_data['assays'] = [[] for x in range(len(final_data.get('sorted_assays')))]
+
+    for assay, assay_data in intermediate_data.items():
+        final_data.get('assays')[final_data.get('sorted_assays').index(assay)] = assay_data
+
+    return final_data
 
 
 # TODO REQUIRES REVISION
@@ -770,9 +880,11 @@ def fetch_readouts(request):
     include_all -- specifies whether to include all data (exclude invalid if null string)
     """
     study = request.POST.get('study', '')
+    readout = request.POST.get('readout', '')
     key = request.POST.get('key', '')
     percent_control = request.POST.get('percent_control', '')
     include_all = request.POST.get('include_all', '')
+    dynamic_quality = json.loads(request.POST.get('dynamic_quality', '{}'))
 
     if percent_control == 'true':
         percent_control = True
@@ -780,12 +892,18 @@ def fetch_readouts(request):
         percent_control = False
 
     # Get chip readouts
-    readouts = AssayChipReadout.objects.filter(
-        chip_setup__assay_run_id_id=study
-    ).prefetch_related(
-        'chip_setup',
-        'chip_setup__assay_run_id_id'
-    )
+    if study:
+        readouts = AssayChipReadout.objects.filter(
+            chip_setup__assay_run_id_id=study
+        ).prefetch_related(
+            'chip_setup__assay_run_id_id'
+        )
+    else:
+        readouts = AssayChipReadout.objects.filter(
+            id=readout
+        ).prefetch_related(
+            'chip_setup__assay_run_id_id'
+        )
 
     related_compounds_map = {}
 
@@ -817,11 +935,7 @@ def fetch_readouts(request):
             *CHIP_DATA_PREFETCH
         )
 
-    assays = get_readout_data(raw_data, related_compounds_map, key, percent_control, include_all)
-
-    data = {
-        'assays': assays,
-    }
+    data = get_readout_data(raw_data, related_compounds_map, key, percent_control, include_all, dynamic_quality)
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
@@ -989,6 +1103,7 @@ def validate_bulk_file(request):
     include_all = request.POST.get('include_all', '')
     # overwrite_option = request.POST.get('overwrite_option', '')
     # bulk_file = request.FILES.get('bulk_file', None)
+    dynamic_quality = json.loads(request.POST.get('dynamic_quality', '{}'))
 
     this_study = AssayRun.objects.get(pk=int(study))
 
@@ -1003,7 +1118,7 @@ def validate_bulk_file(request):
         chip_raw_data = preview_data.get('chip_preview')
 
         # NOTE THE EMPTY DIC, RIGHT NOW BULK PREVIEW NEVER SHOWS COMPOUND JUST DEVICE
-        assays = get_readout_data(chip_raw_data, {}, key, percent_control, include_all)
+        assays = get_readout_data(chip_raw_data, {}, key, percent_control, include_all, dynamic_quality)
 
         data = {'assays': assays}
 
@@ -1046,8 +1161,10 @@ def validate_individual_chip_file(request):
     percent_control = request.POST.get('percent_control', '')
     include_all = request.POST.get('include_all', '')
     readout_id = request.POST.get('readout', '')
+    include_table = request.POST.get('include_table', '')
     # overwrite_option = request.POST.get('overwrite_option', '')
     # bulk_file = request.FILES.get('bulk_file', None)
+    dynamic_quality = json.loads(request.POST.get('dynamic_quality', '{}'))
 
     if readout_id:
         readout = AssayChipReadout.objects.filter(pk=readout_id)
@@ -1062,7 +1179,7 @@ def validate_individual_chip_file(request):
         setup_id = None
         study = AssayRun.objects.get(pk=int(study_id))
 
-    form = AssayChipReadoutForm(study, setup_id, request.POST, request.FILES)
+    form = AssayChipReadoutForm(study, setup_id, request.POST, request.FILES, request=request)
     # formset = ACRAFormSet(request.POST, request.FILES, instance=form.instance)
 
     # if formset.is_valid():
@@ -1074,7 +1191,27 @@ def validate_individual_chip_file(request):
         # Only chip preview right now
         chip_raw_data = preview_data.get('chip_preview')
 
-        data = get_chip_readout_data_as_json([readout_id], chip_data=chip_raw_data)
+        # Get the other raw data for this readout
+        full_raw_data = list(
+            AssayChipRawData.objects.filter(
+                assay_chip_id=readout
+            ).prefetch_related(
+                *CHIP_DATA_PREFETCH
+            )
+        )
+        # Append the new data
+        full_raw_data.extend(chip_raw_data)
+
+        table = ''
+        if include_table:
+            table = get_chip_readout_data_as_json([readout_id], chip_data=chip_raw_data)
+
+        charts = get_readout_data(full_raw_data, {}, key, percent_control, include_all, dynamic_quality)
+
+        data = {
+            'table': table,
+            'charts': charts
+        }
 
         return HttpResponse(json.dumps(data),
                             content_type="application/json")

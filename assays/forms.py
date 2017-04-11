@@ -167,7 +167,10 @@ class AssayChipReadoutForm(SignOffMixin, CloneableForm):
         Additional fields (not part of model):
         headers -- specifies the number of header lines in the uploaded csv
         """
+        self.request = kwargs.pop('request', None)
+
         super(AssayChipReadoutForm, self).__init__(*args, **kwargs)
+
         self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(
             unit_type__unit_type='Time'
         ).order_by('scale_factor')
@@ -175,7 +178,8 @@ class AssayChipReadoutForm(SignOffMixin, CloneableForm):
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'device',
             'compound', 'unit',
-            'created_by').exclude(id__in=list(set(exclude_list)))
+            'created_by'
+        ).exclude(id__in=list(set(exclude_list)))
         if current:
             setups = setups | AssayChipSetup.objects.filter(pk=current)
         self.fields['chip_setup'].queryset = setups
@@ -200,7 +204,7 @@ class AssayChipReadoutForm(SignOffMixin, CloneableForm):
         if setup:
             self.instance.chip_setup = setup
 
-        if setup and self.cleaned_data.get('file'):
+        if setup and self.request and self.request.FILES:
             test_file = self.cleaned_data.get('file')
             file_data = validate_file(
                 self,

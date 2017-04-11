@@ -49,7 +49,14 @@ $(document).ready(function () {
         '#CCCCCC'
     ];
 
-    function make_charts(assays, charts) {
+    // Load the Visualization API and the corechart package.
+    google.charts.load('current', {'packages':['corechart']});
+
+    // Set a callback to run when the Google Visualization API is loaded.
+    google.charts.setOnLoadCallback(get_readouts);
+
+// TODO Copy-pasting is irresponsible, please refrain from doing so in the future
+    function make_charts(json, charts) {
         // Clear existing charts
         var charts_id = $('#' + charts);
         charts_id.empty();
@@ -58,17 +65,18 @@ $(document).ready(function () {
 //        var assay_ids = {};
 
         // Show radio_buttons if there is data
-        if (Object.keys(assays).length > 0) {
+        if (Object.keys(json).length > 0) {
             radio_buttons_display.show();
         }
 
-        var sorted_assays = _.sortBy(_.keys(assays));
+        var sorted_assays = json.sorted_assays;
+        var assays = json.assays;
 
         var previous = null;
         for (var index in sorted_assays) {
-            var assay_unit = sorted_assays[index];
+            // var assay_unit = sorted_assays[index];
 
-            var current_chart_id = assay_unit.replace(/\W/g,'_');
+            // var current_chart_id = assay_unit.replace(/\W/g,'_');
 
 //            if (!assay_ids[assay_id]) {
 //                assay_ids[assay_id] = true;
@@ -89,138 +97,138 @@ $(document).ready(function () {
 
             if (!previous) {
                 previous = $('<div>')
-                    .addClass('padded-row')
-                    .css('min-height', 320);
+                    //.addClass('padded-row')
+                    .css('min-height', 400);
                 charts_id.append(previous
                     .append($('<div>')
-                        .attr('id', charts + '_' + current_chart_id)
+                        .attr('id', charts + '_' + index)
                         .addClass('col-sm-12 col-md-6 chart-container')
                     )
                 );
             }
             else {
                 previous.append($('<div>')
-                    .attr('id', charts + '_' + current_chart_id)
+                    .attr('id', charts + '_' + index)
                     .addClass('col-sm-12 col-md-6 chart-container')
                 );
                 previous = null;
             }
         }
 
-        var bar_chart_list = [];
-
         for (index in sorted_assays) {
-        	var assay_unit = sorted_assays[index];
+            var assay_unit = sorted_assays[index];
             var assay = assay_unit.split('\n')[0];
             var unit = assay_unit.split('\n')[1];
-            var current_chart_id = assay_unit.replace(/\W/g,'_');
-            var add_to_bar_charts = true;
+            var current_chart_id = assay_unit.replace(/\W/g, '_');
+            // var add_to_bar_charts = true;
 
-            var current_chart = c3.generate({
-                bindto: '#' + charts + '_' + current_chart_id,
+            // var data = google.visualization.arrayToDataTable([
+            //     ['Year', 'Sales', 'Expenses'],
+            //     ['2004', 1000, 400],
+            //     ['2005', 1170, 460],
+            //     ['2006', 660, 1120],
+            //     ['2007', 1030, 540]
+            // ]);
 
-                data: {
-                    columns: []
+            var data = google.visualization.arrayToDataTable(assays[index]);
+
+            var options = {
+                title: assay,
+                titleTextStyle: {
+                    fontSize: 18,
+                    bold: true,
+                    underline: true
                 },
-                size: {
-                  height: 320
-                },
-                axis: {
-                    x: {
-                        label: {
-                            text: 'Time (days)',
-                            // TODO ADD UNITS
-                            //text: 'Time (' + timeUnits + ')',
-                            position: 'outer-center'
-                        }
-                    },
-                    // TODO Y AXIS LABEL
-                    y: {
-                        label: {
-                            text: unit,
-                            position: 'outer-middle'
-                        },
-                        tick: {
-                            format: function (value, ratio, id) {
-                                var format = d3.format(',.2f');
-                                if (Math.abs(value) > 100000) {
-                                	format = d3.format('.2e');
-                                }
-                                else if (value % 1 === 0){
-                                	format = d3.format(',d');
-                                }
-                                return format(value);
-                            }
-                        }
+                // curveType: 'function',
+                legend: {
+                    position: 'top',
+                    maxLines: 5,
+                    textStyle: {
+                        // fontSize: 8,
+                        bold: true
                     }
                 },
-                title: {
-                	text: assay
-                },
-                tooltip: {
-                    format: {
-                        value: function (value, ratio, id) {
-                            var format = value % 1 === 0 ? d3.format(',d') : d3.format(',.2f');
-                            return format(value);
-                        }
+                hAxis: {
+                    title: 'Time (Days)',
+                    textStyle: {bold: true},
+                    titleTextStyle: {
+                        fontSize: 14,
+                        bold: true,
+                        italic: false
                     }
+                    // baselineColor: 'none',
+                    // ticks: []
                 },
-                padding: {
-                  right: 10
+                vAxis: {
+                    title: unit,
+                    format: 'short',
+                    textStyle: {bold: true},
+                    titleTextStyle: {
+                        fontSize: 14,
+                        bold: true,
+                        italic: false
+                    }
+                    // baselineColor: 'none',
+                    // ticks: []
                 },
-                // TODO this is not optimal
-                // manually reposition axis label
-                onrendered: function() {
-                    $('.c3-axis-x-label').attr('dy', '35px');
+                pointSize: 5,
+                'chartArea': {
+                    'width': '80%',
+                    'height': '65%'
                 },
-                color: {
-                    // May need more colors later (these colors might also be too similar?)
-                    pattern: pattern
+                'height':400,
+                focusTarget: 'category',
+                intervals: { style: 'bars' }
+            };
+
+            // Find out whether to shrink text
+            $.each(assays[index][0], function(index, column_header) {
+                if (column_header.length > 12) {
+                    options.legend.textStyle.fontSize = 8;
                 }
             });
 
-            var num = 1;
-            var xs = {};
+            var chart = null;
 
-            var sorted_keys = _.sortBy(_.keys(assays[assay_unit]));
-
-            for (var i=0; i<sorted_keys.length; i++) {
-                var current_key = sorted_keys[i];
-                var current_data = assays[assay_unit][current_key];
-
-                // Add to bar charts if no time scale exceeds 3 points
-                if (add_to_bar_charts && current_data.time.length > 3) {
-                    add_to_bar_charts = false;
+            if (assays[index].length > 4) {
+                chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
+            }
+            else if (assays[index].length > 1) {
+                // Convert to categories
+                data.insertColumn(0, 'string', data.getColumnLabel(0));
+                // copy values from column 1 (old column 0) to column 0, converted to numbers
+                for (var i = 0; i < data.getNumberOfRows(); i++) {
+                    var val = data.getValue(i, 1);
+                    if (val != null) {
+                        data.setValue(i, 0, val + ''.valueOf());
+                    }
                 }
+                // remove column 1 (the old column 0)
+                data.removeColumn(1);
 
-                xs[current_key] = 'x' + num;
-
-                current_data.time.unshift('x' + num);
-                current_data.values.unshift(current_key);
-
-                current_chart.load({
-                    xs: xs,
-
-                    columns: [
-                        current_data.time,
-                        current_data.values
-                    ]
-                });
-
-                num += 1;
+                chart = new google.visualization.ColumnChart(document.getElementById(charts + '_' + index));
             }
-            // Callously triggering resizes can solve problems... but cause others
-            // $(window).trigger('resize');
 
-            // Add to bar charts if no time scale exceeds 3 points
-            if (add_to_bar_charts) {
-                bar_chart_list.push(current_chart);
+            if (chart) {
+                var dataView = new google.visualization.DataView(data);
+
+                // Change interval columns to intervals
+                var interval_setter = [0];
+
+                i = 1;
+                while (i < data.getNumberOfColumns()) {
+                    interval_setter.push(i);
+                    if (i+2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf('_i1') > -1) {
+                        interval_setter.push({sourceColumn: i + 1, role: 'interval'});
+                        interval_setter.push({sourceColumn: i + 2, role: 'interval'});
+                        i += 2;
+                    }
+                    i += 1;
+                }
+                dataView.setColumns(interval_setter);
+
+                chart.draw(dataView, options);
             }
-        }
-
-        // Make bar charts
-        for (var chart_index in bar_chart_list) {
-            bar_chart_list[chart_index].transform('bar');
         }
     }
 
@@ -243,7 +251,7 @@ $(document).ready(function () {
             },
             success: function (json) {
                 // console.log(json);
-                make_charts(json.assays, 'current_charts');
+                make_charts(json, 'current_charts');
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
@@ -295,7 +303,7 @@ $(document).ready(function () {
                     }
                     else {
                         alert('Success! Please see "New Chip Data" below for preview.');
-                        make_charts(json.assays, 'new_charts');
+                        make_charts(json, 'new_charts');
                     }
                 },
                 error: function (xhr, errmsg, err) {
@@ -310,7 +318,7 @@ $(document).ready(function () {
     }
 
     // Initial data (by device)
-    get_readouts();
+    // get_readouts();
 
     // Validate file if file selected
     $('#id_bulk_file').change(function() {

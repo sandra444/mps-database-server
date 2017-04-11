@@ -23,22 +23,33 @@ $(document).ready(function () {
     });
 
     // The data in question as a Sample Location pairing 'time|time_unit|assay|sample_location|value_unit|replicate
-    var data = {};
+    // var data = {};
 
-    var readout_id = getReadoutValue();
+    // Tracks the quality of data to indicate whether to exclude or include in plots
+    var dynamic_quality_current = {};
+    var dynamic_quality_new = {};
+
+    var readout_id = get_readout_value();
 
     // Indicates whether the data exists in the database or not
     var exist = false;
 
-    var headers = 0;
+    // Deprecated
+    // var headers = 0;
+    //
+    // if ($('#id_headers')[0]) {
+    //     headers = Math.floor($('#id_headers').val());
+    // }
 
-    if ($('#id_headers')[0]) {
-        headers = Math.floor($('#id_headers').val());
-    }
+    // var charts = [];
 
-    var charts = [];
+    // Load the Visualization API and the corechart package.
+    google.charts.load('current', {'packages':['corechart']});
 
-    function isTrue(element, index, array) {
+    // Set a callback to run when the Google Visualization API is loaded.
+    google.charts.setOnLoadCallback(get_readout);
+
+    function is_true(element, index, array) {
         if (!element) {
             return false;
         }
@@ -52,76 +63,76 @@ $(document).ready(function () {
         if (Math.abs(value) > 100000) {
             format = d3.format('.2e');
         }
-        else if (value % 1 === 0){
+        else if (value % 1 === 0) {
             format = d3.format(',d');
         }
         return format(value);
     }
 
-    function addChart(id, name, timeUnits, valueUnits) {
-        $('<div>')
-            .attr('id', 'chart' + id)
-            .attr('align', 'right')
-            .addClass('chart-container single-chip-chart')
-            .appendTo('#extra');
+    // function addChart(id, name, timeUnits, valueUnits) {
+    //     $('<div>')
+    //         .attr('id', 'chart' + id)
+    //         .attr('align', 'right')
+    //         .addClass('chart-container single-chip-chart')
+    //         .appendTo('#extra');
+    //
+    //     charts.push(
+    //         c3.generate({
+    //             bindto: '#chart'+id,
+    //
+    //             data: {
+    //                 columns: []
+    //             },
+    //             axis: {
+    //                 x: {
+    //                     label: {
+    //                         text: 'Time (' + timeUnits + ')',
+    //                         position: 'outer-center'
+    //                     }
+    //                 },
+    //                 y: {
+    //                     label: {
+    //                         text: valueUnits,
+    //                         position: 'outer-middle'
+    //                     },
+    //                     tick: {
+    //                         format: data_format
+    //                     }
+    //                 }
+    //             },
+    //             title: {
+    //                 text: name
+    //             },
+    //             tooltip: {
+    //                 format: {
+    //                     value: function (value, ratio, id) {
+    //                         var format = value % 1 === 0 ? d3.format(',d') : d3.format(',.2f');
+    //                         return format(value);
+    //                     }
+    //                 }
+    //             },
+    //             padding: {
+    //                 right: 10
+    //             },
+    //             // TODO this is not optimal
+    //             // manually reposition axis label
+    //             onrendered: function() {
+    //                 $('.c3-axis-x-label').attr('dy', '35px');
+    //             }
+    //         })
+    //     );
+    // }
+    //
+    // function resetChart() {
+    //     for (var i in charts) {
+    //         $('#chart'+i).remove();
+    //     }
+    //     charts = [];
+    // }
 
-        charts.push(
-            c3.generate({
-                bindto: '#chart'+id,
-
-                data: {
-                    columns: []
-                },
-                axis: {
-                    x: {
-                        label: {
-                            text: 'Time (' + timeUnits + ')',
-                            position: 'outer-center'
-                        }
-                    },
-                    y: {
-                        label: {
-                            text: valueUnits,
-                            position: 'outer-middle'
-                        },
-                        tick: {
-                            format: data_format
-                        }
-                    }
-                },
-                title: {
-                    text: name
-                },
-                tooltip: {
-                    format: {
-                        value: function (value, ratio, id) {
-                            var format = value % 1 === 0 ? d3.format(',d') : d3.format(',.2f');
-                            return format(value);
-                        }
-                    }
-                },
-                padding: {
-                    right: 10
-                },
-                // TODO this is not optimal
-                // manually reposition axis label
-                onrendered: function() {
-                    $('.c3-axis-x-label').attr('dy', '35px');
-                }
-            })
-        );
-    }
-
-    function resetChart() {
-        for (var i in charts) {
-            $('#chart'+i).remove();
-        }
-        charts = [];
-    }
-
-    function getReadoutValue() {
+    function get_readout_value() {
         // Admin (check by looking for content-main ID)
-        if($('#content-main')[0]) {
+        if ($('#content-main')[0]) {
             try {
                 return Math.floor($('.historylink').attr('href').split('/')[4]);
             }
@@ -137,37 +148,48 @@ $(document).ready(function () {
         }
     }
 
-    function getReadout() {
-        $.ajax({
-            url: "/assays_ajax/",
-            type: "POST",
-            dataType: "json",
-            data: {
-                // Function to call within the view is defined by `call:`
-                call: 'fetch_chip_readout',
-                id: readout_id,
-                csrfmiddlewaretoken: middleware_token
-            },
-            success: function (json) {
-                exist = true;
-                process_data(json);
-            },
-            error: function (xhr, errmsg, err) {
-                console.log(xhr.status + ": " + xhr.responseText);
-            }
-        });
+    function get_readout() {
+        if (readout_id) {
+            // Get the table
+            $.ajax({
+                url: "/assays_ajax/",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    // Function to call within the view is defined by `call:`
+                    call: 'fetch_chip_readout',
+                    id: readout_id,
+                    csrfmiddlewaretoken: middleware_token
+                },
+                success: function (json) {
+                    exist = true;
+                    process_data(json);
+                },
+                error: function (xhr, errmsg, err) {
+                    console.log(xhr.status + ": " + xhr.responseText);
+                }
+            });
+            // Get the plots
+            plot_existing_data();
+        }
     }
 
     function clear_new_data() {
         $('.new-value').each(function() {
             // Delete this value from data
-            delete data[$(this).attr('data-chart-index')];
+            // delete data[$(this).attr('data-chart-index')];
             // Remove the row itself
             $(this).remove();
         });
     }
 
-    function validate_readout_file() {
+    function validate_readout_file(include_table) {
+        // Purge dynamic_quality_new if table if being reset
+        if (include_table) {
+            dynamic_quality_new = {};
+        }
+
+        var dynamic_quality = $.extend({}, dynamic_quality_current, dynamic_quality_new);
         var serializedData = $('form').serializeArray();
         var formData = new FormData();
         $.each(serializedData, function(index, field) {
@@ -180,6 +202,8 @@ $(document).ready(function () {
         else {
             formData.append('study', Math.floor(window.location.href.split('/')[4]));
         }
+        formData.append('include_table', include_table);
+        formData.append('dynamic_quality', JSON.stringify(dynamic_quality));
         formData.append('call', 'validate_individual_chip_file');
         $.ajax({
             url: "/assays_ajax/",
@@ -198,13 +222,16 @@ $(document).ready(function () {
                     $('#id_file').val('');
                     // $('#table_body').empty();
                     clear_new_data();
-                    plot();
+                    // plot();
+                    plot_existing_data();
                 }
                 else {
                     exist = false;
                     alert('Success! Please see "New Chip Data" below for preview.');
-                    resetChart();
-                    process_data(json);
+                    if (include_table) {
+                       process_data(json.table);
+                    }
+                    make_charts(json.charts, 'charts');
                 }
             },
             error: function (xhr, errmsg, err) {
@@ -214,7 +241,8 @@ $(document).ready(function () {
                 $('#id_file').val('');
                 // $('#table_body').empty();
                 clear_new_data();
-                plot();
+                // plot();
+                plot_existing_data();
             }
         });
     }
@@ -231,20 +259,20 @@ $(document).ready(function () {
     //     parseAndReplace(fileString);
     // };
 
-    function get_index_for_value(chip_id, sample_location_id, time, assay_instance_id, replicate, update_number) {
-        var full_index = {
-            // Chip ID added for future proofing (maybe we will have study-wide changes to quality)
-            'chip_id': chip_id,
-            'sample_location_id': sample_location_id,
-            'time': time,
-            'assay_instance_id': assay_instance_id,
-            // 'value_unit': value_unit,
-            'replicate': replicate,
-            'update_number': update_number
-        };
-
-        return JSON.stringify(full_index);
-    }
+    // function get_index_for_value(chip_id, sample_location_id, time, assay_instance_id, replicate, update_number) {
+    //     var full_index = {
+    //         // Chip ID added for future proofing (maybe we will have study-wide changes to quality)
+    //         'chip_id': chip_id,
+    //         'sample_location_id': sample_location_id,
+    //         'time': time,
+    //         'assay_instance_id': assay_instance_id,
+    //         // 'value_unit': value_unit,
+    //         'replicate': replicate,
+    //         'update_number': update_number
+    //     };
+    //
+    //     return JSON.stringify(full_index);
+    // }
 
     var process_data = function (json) {
         var table_body = $('#table_body');
@@ -364,14 +392,34 @@ $(document).ready(function () {
 
             // Index in data
             // TODO FIX!
-            var index = get_index_for_value(chip_id, sample_location_id, time_in_minutes, assay_instance_id, replicate, update_number);
+            // var index = get_index_for_value(
+            //     chip_id,
+            //     sample_location_id,
+            //     time_in_minutes,
+            //     assay_instance_id,
+            //     replicate,
+            //     update_number
+            // );
+            var index = {
+                // Chip ID added for future proofing (maybe we will have study-wide changes to quality)
+                'chip_id': chip_id,
+                'assay_plate_id': assay_plate_id,
+                'assay_well_id': assay_well_id,
+                'assay_instance_id': assay_instance_id,
+                'sample_location_id': sample_location_id,
+                'time': time_in_minutes,
+                // 'value_unit': value_unit,
+                'replicate': replicate,
+                'update_number': update_number
+            };
 
-            // Notice attribute to assist in deleting old data
-            var new_row = $('<tr>')
-                .attr('data-chart-index', index);
+            index = JSON.stringify(index);
+
+            var new_row = $('<tr>');
+            //     .attr('data-chart-index', index);
 
             // Need to take a slice to avoid treating missing QC as invalid
-            var every = [chip_id, time_in_minutes, assay_instance_id, sample_location_id, value].every(isTrue);
+            var every = [chip_id, time_in_minutes, assay_instance_id, sample_location_id, value].every(is_true);
 
             if (exist) {
                 new_row.addClass('bg-success');
@@ -385,7 +433,7 @@ $(document).ready(function () {
                 new_row.addClass('bg-danger');
             }
 
-            else if (value == 'None' || !value) {
+            else if (value === null) {
                 new_row.css('background', '#606060');
             }
 
@@ -454,100 +502,16 @@ $(document).ready(function () {
                 col_notes
             );
             table_body.append(new_row);
-//            // If the row will be excluded (highlighted red)
-//            // if ((i < headers && !exist) || !every) {
-//            if (!exist && !every) {
-//                table += "<tr class='bg-danger'>";
-//            }
-//
-//            // If the row has no value (residue code, may be used later)
-//            else if (value === 'None' || value === '') {
-//                table += "<tr style='background: #606060'>";
-//            }
-//
-//            // If the row is marked an outlier
-//            else if (line[7] && $.trim(line[7])) {
-//                table += "<tr class='bg-warning'>";
-//            }
-//
-//            else {
-//                table += "<tr>";
-//            }
-//
-//            // DO NOT ADD COMMAS TO CHIP ID
-//            if (chip_id) {
-//                table += "<td>" + chip_id + "</td>";
-//            }
-//
-//            table += "<td>" + data_format(line[1]) + "</td>";
-//
-//            for (var j=2; j<5; j++) {
-//                if (line[j]) {
-//                    table += "<td>" + line[j] + "</td>";
-//                }
-//                else {
-//                    table += "<td></td>";
-//                }
-//            }
-//
-//            if(value === 'None' || value === '') {
-//                table += "<td></td>";
-//            }
-//            else {
-//                table += "<td>" + data_format(line[5]) + "</td>";
-//            }
-//
-//            table += "<td>" + line[6] + "</td>";
-//
-//            // Just add text if this is a header row for QC OR if this row is invalid
-//            // (QC status of an ignored row does not really matter)
-//            // if (i < headers && !exist || !every) {
-//            if (!exist && !every) {
-//                if (quality) {
-//                    table += "<td>" + quality + "</td>";
-//                }
-//                else {
-//                    table += "<td></td>";
-//                }
-//            }
-//            // Add an input for the QC if this isn't a header
-//            // QC inputs NAME begin with "QC_"
-//            // QC input IDS are the row index (for plotting accurately)
-//            else {
-//                index = get_index_for_value(sample_location, time, assay, value_unit, update_number);
-//                table += "<td><input size='5' class='quality text-danger' id='" + i + "' name='" + index + "' value='" + quality + "'></td>";
-//                // Increment the current index
-//                current_index += 1;
-//            }
-//
-//            // Add notes
-//            if (notes) {
-//                table += '<td><span class="glyphicon glyphicon-info-sign" title="' + notes + '"></span></td>';
-//            }
-//            else {
-//                table += "<td></td>";
-//            }
-//
-//            table += "</tr>";
-
-            // Add to data if index
-            if (index) {
-                data[index] = {
-                    'time': time_in_days,
-                    // Arbitrarily set to days
-                    // 'time_unit': 'days',
-                    'value': value,
-                    'value_unit': value_unit,
-                    'target': target_name,
-                    // 'replicate': replicate,
-                    // 'update_number': update_number,
-                    'sample_location': sample_location_name,
-                    'quality': quality
-                };
-            }
         }
 
-        var all_qualities = $('.quality');
+        var all_qualities = null;
+
+        if (exist) {
+            all_qualities = $('.quality');
+        }
+        else {
+            all_qualities = $('.new-value').find('.quality');
+        }
 
         // Bind click event to quality
         all_qualities.click(function() {
@@ -644,137 +608,359 @@ $(document).ready(function () {
             else {
                 $(this).parent().parent().removeClass('bg-warning');
             }
-            var index = this.name;
-            data[index]['quality'] = this.value;
-            resetChart();
-            plot();
+            var index = JSON.parse(this.name);
+            index = [
+                index.chip_id,
+                index.assay_plate_id,
+                index.assay_well_id,
+                ''+index.assay_instance_id,
+                ''+index.sample_location_id,
+                ''+index.time,
+                index.replicate,
+                ''+index.update_number
+            ];
+
+            var joined_index = index.join('~');
+
+            if (exist) {
+                dynamic_quality_current[joined_index] = this.value;
+            }
+            else {
+                dynamic_quality_new[joined_index] = this.value;
+            }
+            // dynamic_quality[joined_index] = this.value;
+
+            // console.log(dynamic_quality);
+
+            // data[index]['quality'] = this.value;
+            // plot();
+
+            // Validate again if there is a file
+            if ($('#id_file').val()) {
+                validate_readout_file('');
+            }
+            else {
+                plot_existing_data();
+            }
         });
 
         // TODO FIX PLOT
-        plot();
+        // plot();
     };
 
-    function plot() {
-        //Make chart
-        var assays = {};
-        // var valueUnits = {};
-        var timeUnits = {};
+    function plot_existing_data() {
+        var dynamic_quality = $.extend({}, dynamic_quality_current, dynamic_quality_new);
+        $.ajax({
+            url: "/assays_ajax/",
+            type: "POST",
+            dataType: "json",
+            data: {
+                // Function to call within the view is defined by `call:`
+                call: 'fetch_readouts',
+                readout: readout_id,
+                // study: study_id,
+                // TODO CONTRIVED, DEVICE FOR NOW
+                key: 'device',
+                dynamic_quality: JSON.stringify(dynamic_quality),
+                // Tells whether to convert to percent Control
+                // percent_control: percent_control,
+                csrfmiddlewaretoken: middleware_token
+            },
+            success: function (json) {
+                make_charts(json, 'charts');
+            },
+            error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    }
 
-        for (var i in data) {
-            var line = data[i];
+    // TODO Copy-pasting is irresponsible, please refrain from doing so in the future
+    function make_charts(json, charts) {
+        // Clear existing charts
+        var charts_id = $('#' + charts);
+        charts_id.empty();
 
-            // This is done before hand now
-            // Need to take a slice to avoid treating missing QC as invalid
-//            var every = line.slice(0,7).every(isTrue);
+//        var assay_to_id = {};
+//        var assay_ids = {};
+
+        // Show radio_buttons if there is data
+        // if (Object.keys(json).length > 0) {
+        //     radio_buttons_display.show();
+        // }
+
+        var sorted_assays = json.sorted_assays;
+        var assays = json.assays;
+
+        var previous = null;
+        for (var index in sorted_assays) {
+            // var assay_unit = sorted_assays[index];
+
+            // var current_chart_id = assay_unit.replace(/\W/g,'_');
+
+//            if (!assay_ids[assay_id]) {
+//                assay_ids[assay_id] = true;
+//                assay_to_id[assay] = assay_id;
+//            }
+//            else {
+//                var assay_number = 2;
 //
-//            // if (!every || (i < headers && !exist)) {
-//            if (!every && !exist) {
-//                continue;
+//                while (assay_ids[assay_id + '_' + assay_number]) {
+//                    assay_number += 1;
+//                }
+//
+//                assay_id = assay_id + '_' + assay_number;
+//
+//                assay_ids[assay_id] = true;
+//                assay_to_id[assay] = assay_id;
 //            }
 
-            var time = line['time'];
-            var time_unit = 'days';
-            var assay = line['target'];
-            var sample_location = line['sample_location'];
-            var value = line['value'];
-            var value_unit = line['value_unit'];
-
-            var quality = $.trim(line['quality']);
-
-            // Crash if the time is not numeric
-            if (isNaN(time)) {
-                alert("Improperly Configured: Please check the number of header rows selected and also make sure all times are numeric.");
-                return;
-            }
-
-            if (!quality) {
-                if (!assays[assay]) {
-                    assays[assay] = {};
-                }
-
-                if (!assays[assay][value_unit]) {
-                    assays[assay][value_unit] = {};
-                }
-
-                if (sample_location && sample_location != 'None' && !assays[assay][value_unit][sample_location]) {
-                    assays[assay][value_unit][sample_location] = {'time': [], 'data': []};
-                }
-
-                if (assays[assay][value_unit][sample_location] && value && value != 'None') {
-                    assays[assay][value_unit][sample_location].time.push(time);
-                    assays[assay][value_unit][sample_location].data.push(value);
-
-                    // valueUnits[assay] = value_unit;
-                    timeUnits[assay] = time_unit;
-                }
-            }
+            $('<div>')
+                .attr('id', charts + '_' + index)
+                .attr('align', 'right')
+                .addClass('chart-container')
+                .appendTo('#charts');
         }
 
-        var chart = 0;
-        var bar_chart_list = [];
+        for (index in sorted_assays) {
+            var assay_unit = sorted_assays[index];
+            var assay = assay_unit.split('\n')[0];
+            var unit = assay_unit.split('\n')[1];
+            var current_chart_id = assay_unit.replace(/\W/g, '_');
+            // var add_to_bar_charts = true;
 
-        for (var assay in assays) {
-            for (var value_unit in assays[assay]) {
-                var add_to_bar_charts = true;
+            // var data = google.visualization.arrayToDataTable([
+            //     ['Year', 'Sales', 'Expenses'],
+            //     ['2004', 1000, 400],
+            //     ['2005', 1170, 460],
+            //     ['2006', 660, 1120],
+            //     ['2007', 1030, 540]
+            // ]);
 
-                addChart(chart, assay, timeUnits[assay], value_unit);
+            var data = google.visualization.arrayToDataTable(assays[index]);
 
-                var xs = {};
-                var num = 1;
-
-                for (var sample_location in assays[assay][value_unit]) {
-                    sample_location = '' + sample_location;
-
-                    // Add to bar charts if no time scale exceeds 3 points
-                    if (add_to_bar_charts && assays[assay][value_unit][sample_location].time.length > 3) {
-                        add_to_bar_charts = false;
+            var options = {
+                title: assay,
+                titleTextStyle: {
+                    fontSize: 18,
+                    bold: true,
+                    underline: true
+                },
+                // curveType: 'function',
+                legend: {
+                    position: 'top',
+                    maxLines: 5,
+                    textStyle: {
+                        // fontSize: 8,
+                        bold: true
                     }
+                },
+                hAxis: {
+                    title: 'Time (Days)',
+                    textStyle: {bold: true},
+                    titleTextStyle: {
+                        fontSize: 14,
+                        bold: true,
+                        italic: false
+                    }
+                    // baselineColor: 'none',
+                    // ticks: []
+                },
+                vAxis: {
+                    title: unit,
+                    format: 'short',
+                    textStyle: {bold: true},
+                    titleTextStyle: {
+                        fontSize: 14,
+                        bold: true,
+                        italic: false
+                    }
+                    // baselineColor: 'none',
+                    // ticks: []
+                },
+                pointSize: 5,
+                chartArea: {
+                    // Slight change in width
+                    width: '78%',
+                    height: '65%'
+                },
+                height:400,
+                focusTarget: 'category',
+                intervals: { style: 'bars' }
+            };
 
-                    xs[sample_location] = 'x' + num;
-
-                    assays[assay][value_unit][sample_location].data.unshift(sample_location);
-                    assays[assay][value_unit][sample_location].time.unshift('x' + num);
-
-                    //Load for correct assay chart
-                    charts[chart].load({
-                        xs: xs,
-
-                        columns: [
-                            assays[assay][value_unit][sample_location].data,
-                            assays[assay][value_unit][sample_location].time
-                        ]
-                    });
-
-                    num += 1;
+            // Find out whether to shrink text
+            $.each(assays[index][0], function(index, column_header) {
+                if (column_header.length > 12) {
+                    options.legend.textStyle.fontSize = 8;
                 }
-                // Add to bar charts if no time scale exceeds 3 points
-                if (add_to_bar_charts) {
-                    bar_chart_list.push(chart);
-                }
+            });
 
-                chart += 1;
+            var chart = null;
+
+            if (assays[index].length > 4) {
+                chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
             }
-        }
+            else if (assays[index].length > 1) {
+                // Convert to categories
+                data.insertColumn(0, 'string', data.getColumnLabel(0));
+                // copy values from column 1 (old column 0) to column 0, converted to numbers
+                for (var i = 0; i < data.getNumberOfRows(); i++) {
+                    var val = data.getValue(i, 1);
+                    if (val != null) {
+                        data.setValue(i, 0, val + ''.valueOf());
+                    }
+                }
+                // remove column 1 (the old column 0)
+                data.removeColumn(1);
 
-        // Make bar charts
-        for (var index in bar_chart_list) {
-            var chart_index = bar_chart_list[index];
-            charts[chart_index].transform('bar');
+                chart = new google.visualization.ColumnChart(document.getElementById(charts + '_' + index));
+            }
+
+            if (chart) {
+                var dataView = new google.visualization.DataView(data);
+
+                // Change interval columns to intervals
+                var interval_setter = [0];
+
+                i = 1;
+                while (i < data.getNumberOfColumns()) {
+                    interval_setter.push(i);
+                    if (i+2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf('_i1') > -1) {
+                        interval_setter.push({sourceColumn: i + 1, role: 'interval'});
+                        interval_setter.push({sourceColumn: i + 2, role: 'interval'});
+                        i += 2;
+                    }
+                    i += 1;
+                }
+                dataView.setColumns(interval_setter);
+
+                chart.draw(dataView, options);
+            }
         }
     }
+
+//     function plot() {
+//         //Make chart
+//         var assays = {};
+//         // var valueUnits = {};
+//         var timeUnits = {};
+//
+//         for (var i in data) {
+//             var line = data[i];
+//
+//             // This is done before hand now
+//             // Need to take a slice to avoid treating missing QC as invalid
+// //            var every = line.slice(0,7).every(is_true);
+// //
+// //            // if (!every || (i < headers && !exist)) {
+// //            if (!every && !exist) {
+// //                continue;
+// //            }
+//
+//             var time = line['time'];
+//             var time_unit = 'days';
+//             var assay = line['target'];
+//             var sample_location = line['sample_location'];
+//             var value = line['value'];
+//             var value_unit = line['value_unit'];
+//
+//             var quality = $.trim(line['quality']);
+//
+//             // Crash if the time is not numeric
+//             if (isNaN(time)) {
+//                 alert("Improperly Configured: Please check the number of header rows selected and also make sure all times are numeric.");
+//                 return;
+//             }
+//
+//             if (!quality) {
+//                 if (!assays[assay]) {
+//                     assays[assay] = {};
+//                 }
+//
+//                 if (!assays[assay][value_unit]) {
+//                     assays[assay][value_unit] = {};
+//                 }
+//
+//                 if (sample_location && sample_location != 'None' && !assays[assay][value_unit][sample_location]) {
+//                     assays[assay][value_unit][sample_location] = {'time': [], 'data': []};
+//                 }
+//
+//                 if (assays[assay][value_unit][sample_location] && value && value != 'None') {
+//                     assays[assay][value_unit][sample_location].time.push(time);
+//                     assays[assay][value_unit][sample_location].data.push(value);
+//
+//                     // valueUnits[assay] = value_unit;
+//                     timeUnits[assay] = time_unit;
+//                 }
+//             }
+//         }
+//
+//         var chart = 0;
+//         var bar_chart_list = [];
+//
+//         for (var assay in assays) {
+//             for (var value_unit in assays[assay]) {
+//                 var add_to_bar_charts = true;
+//
+//                 addChart(chart, assay, timeUnits[assay], value_unit);
+//
+//                 var xs = {};
+//                 var num = 1;
+//
+//                 for (var sample_location in assays[assay][value_unit]) {
+//                     sample_location = '' + sample_location;
+//
+//                     // Add to bar charts if no time scale exceeds 3 points
+//                     if (add_to_bar_charts && assays[assay][value_unit][sample_location].time.length > 3) {
+//                         add_to_bar_charts = false;
+//                     }
+//
+//                     xs[sample_location] = 'x' + num;
+//
+//                     assays[assay][value_unit][sample_location].data.unshift(sample_location);
+//                     assays[assay][value_unit][sample_location].time.unshift('x' + num);
+//
+//                     //Load for correct assay chart
+//                     charts[chart].load({
+//                         xs: xs,
+//
+//                         columns: [
+//                             assays[assay][value_unit][sample_location].data,
+//                             assays[assay][value_unit][sample_location].time
+//                         ]
+//                     });
+//
+//                     num += 1;
+//                 }
+//                 // Add to bar charts if no time scale exceeds 3 points
+//                 if (add_to_bar_charts) {
+//                     bar_chart_list.push(chart);
+//                 }
+//
+//                 chart += 1;
+//             }
+//         }
+//
+//         // Make bar charts
+//         for (var index in bar_chart_list) {
+//             var chart_index = bar_chart_list[index];
+//             charts[chart_index].transform('bar');
+//         }
+//     }
 
     var refresh = function() {
         var file = $('#id_file')[0].files[0];
         if (file) {
-            resetChart();
-            validate_readout_file();
+            // resetChart();
+            validate_readout_file('True');
             // getText(file);
         }
     };
 
-    if (readout_id) {
-        getReadout();
-    }
+    // if (readout_id) {
+    //     get_readout();
+    // }
 
     // Refresh on file change
     $('#id_file').change(function(evt) {
@@ -786,13 +972,13 @@ $(document).ready(function () {
         refresh();
     });
 
-    if ($('#id_headers')[0]) {
-        $('#id_headers').change(function (evt) {
-            if ($('#id_file')[0].files[0]) {
-                refresh();
-            }
-        });
-    }
+    // if ($('#id_headers')[0]) {
+    //     $('#id_headers').change(function (evt) {
+    //         if ($('#id_file')[0].files[0]) {
+    //             refresh();
+    //         }
+    //     });
+    // }
 
     // Datepicker superfluous on admin, use this check to apply only in frontend
     if ($('#fluid-content')[0]) {

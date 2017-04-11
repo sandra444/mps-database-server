@@ -1631,6 +1631,8 @@ def get_qc_status_chip(form):
             # # Combine values in a tuple for index
             # index = (object_field, time, assay, value_unit, update_number)
             chip_id = values.get('chip_id')
+            assay_plate_id = values.get('assay_plate_id')
+            assay_well_id = values.get('assay_well_id')
             sample_location_id = int(values.get('sample_location_id'))
             time = float(values.get('time'))
             assay_instance_id = int(values.get('assay_instance_id'))
@@ -1638,9 +1640,11 @@ def get_qc_status_chip(form):
             update_number = int(values.get('update_number'))
             index = (
                 chip_id,
+                assay_plate_id,
+                assay_well_id,
+                assay_instance_id,
                 sample_location_id,
                 time,
-                assay_instance_id,
                 replicate,
                 update_number
             )
@@ -1670,9 +1674,11 @@ def modify_qc_status_chip(current_chip_readout, form):
         # 'assay_id__readout_unit__unit'
         'id',
         'assay_chip_id__chip_setup__assay_chip_id',
+        'assay_plate_id',
+        'assay_well_id',
+        'assay_instance_id',
         'sample_location_id',
         'time',
-        'assay_instance_id',
         'replicate',
         'update_number',
         'quality',
@@ -1725,20 +1731,25 @@ def modify_qc_status_chip(current_chip_readout, form):
         #     readout_ids_and_notes.append((id, notes, new_quality))
         id = readout_values[0]
         chip_id = readout_values[1]
-        sample_location_id = readout_values[2]
-        time = readout_values[3]
+        assay_plate_id = readout_values[2]
+        assay_well_id = readout_values[3]
         assay_instance_id = readout_values[4]
-        replicate = readout_values[5]
-        update_number = readout_values[6]
+        sample_location_id = readout_values[5]
+        time = readout_values[6]
 
-        quality = readout_values[7]
-        notes = readout_values[8]
+        replicate = readout_values[7]
+        update_number = readout_values[8]
+
+        quality = readout_values[9]
+        notes = readout_values[10]
 
         index = (
             chip_id,
+            assay_plate_id,
+            assay_well_id,
+            assay_instance_id,
             sample_location_id,
             time,
-            assay_instance_id,
             replicate,
             update_number
         )
