@@ -37,6 +37,7 @@ class Manufacturer(LockableModel):
 
     manufacturer_name = models.CharField(max_length=100)
     contact_person = models.CharField(max_length=250, blank=True, default='')
+    # Why is this in the incorrect case?
     Manufacturer_website = models.URLField(blank=True, null=True)
 
     def __unicode__(self):
