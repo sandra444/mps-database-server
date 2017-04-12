@@ -1107,7 +1107,7 @@ def validate_bulk_file(request):
 
     this_study = AssayRun.objects.get(pk=int(study))
 
-    form = ReadoutBulkUploadForm(request.POST, request.FILES, instance=this_study)
+    form = ReadoutBulkUploadForm(request.POST, request.FILES, request=request, instance=this_study)
 
     if form.is_valid():
         form_data = form.cleaned_data
@@ -1118,9 +1118,7 @@ def validate_bulk_file(request):
         chip_raw_data = preview_data.get('chip_preview')
 
         # NOTE THE EMPTY DIC, RIGHT NOW BULK PREVIEW NEVER SHOWS COMPOUND JUST DEVICE
-        assays = get_readout_data(chip_raw_data, {}, key, percent_control, include_all, dynamic_quality)
-
-        data = {'assays': assays}
+        data = get_readout_data(chip_raw_data, {}, key, percent_control, include_all, dynamic_quality)
 
         return HttpResponse(json.dumps(data),
                             content_type="application/json")

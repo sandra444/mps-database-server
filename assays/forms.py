@@ -166,6 +166,9 @@ class AssayChipReadoutForm(SignOffMixin, CloneableForm):
 
         Additional fields (not part of model):
         headers -- specifies the number of header lines in the uploaded csv
+
+        kwargs:
+        request -- the current request
         """
         self.request = kwargs.pop('request', None)
 
@@ -1137,13 +1140,26 @@ class ReadoutBulkUploadForm(forms.ModelForm):
         model = AssayRun
         fields = ('bulk_file',)
 
+    def __init__(self, *args, **kwargs):
+        """Init the Bulk Form
+
+        kwargs:
+        request -- the current request
+        """
+        self.request = kwargs.pop('request', None)
+
+        super(ReadoutBulkUploadForm, self).__init__(*args, **kwargs)
+
     def clean(self):
         data = super(ReadoutBulkUploadForm, self).clean()
 
         # Get the study in question
         study = self.instance
 
-        test_file = data.get('bulk_file', '')
+        test_file = None
+
+        if self.request and self.request.FILES:
+            test_file = data.get('bulk_file', '')
 
         if not test_file:
             raise forms.ValidationError('No file was supplied.')

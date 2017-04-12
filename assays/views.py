@@ -2086,7 +2086,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
     def get_form(self, form_class):
         # If POST
         if self.request.method == 'POST':
-            return form_class(self.request.POST, self.request.FILES, instance=self.get_object())
+            return form_class(self.request.POST, self.request.FILES, request=self.request, instance=self.get_object())
         # If GET
         else:
             return form_class(instance=self.get_object())
