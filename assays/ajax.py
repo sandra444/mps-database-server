@@ -746,11 +746,7 @@ def get_readout_data(
                         # Add to averaged data if this isn't a average control value for device-by-device
                         if not (tag == '-Control-' and key != 'compound'):
                             averaged_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).update({
-                                # Subject to change
-                                # time: {
-                                #     'average': np.average(values),
-                                #     'standard_deviation': np.std(values)
-                                # }
+                                # Currently standard deviation
                                 time: (
                                     np.average(values),
                                     np.std(values)
@@ -795,19 +791,19 @@ def get_readout_data(
                     else:
                         current_key = tag
 
-                    for time, value_and_standard_deviation in time_values.items():
-                        value = value_and_standard_deviation[0]
-                        standard_deviation = value_and_standard_deviation[1]
+                    for time, value_and_interval in time_values.items():
+                        value = value_and_interval[0]
+                        interval = value_and_interval[1]
 
-                        if standard_deviation != 0:
+                        if interval != 0:
                             accomadate_intervals = True
 
                         if not percent_control:
                             # assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('time', []).append(time)
                             # assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('values', []).append(value)
                             current_data.setdefault(current_key, {}).update({time: value})
-                            current_data.setdefault(current_key+'_i1', {}).update({time: value - standard_deviation})
-                            current_data.setdefault(current_key+'_i2', {}).update({time: value + standard_deviation})
+                            current_data.setdefault(current_key+'_i1', {}).update({time: value - interval})
+                            current_data.setdefault(current_key+'_i2', {}).update({time: value + interval})
                             y_header.update({time: True})
                             include_current = True
 
@@ -815,11 +811,11 @@ def get_readout_data(
                             control_value = controls.get((target, unit, sample_location, time))
 
                             adjusted_value = (value / control_value) * 100
-                            adjusted_standard_deviation = (standard_deviation / control_value) * 100
+                            adjusted_interval = (interval / control_value) * 100
 
                             current_data.setdefault(current_key, {}).update({time: adjusted_value})
-                            current_data.setdefault(current_key+'_i1', {}).update({time: adjusted_value - adjusted_standard_deviation})
-                            current_data.setdefault(current_key+'_i2', {}).update({time: adjusted_value + adjusted_standard_deviation})
+                            current_data.setdefault(current_key+'_i1', {}).update({time: adjusted_value - adjusted_interval})
+                            current_data.setdefault(current_key+'_i2', {}).update({time: adjusted_value + adjusted_interval})
                             y_header.update({time: True})
                             include_current = True
                             # assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('time', []).append(time)

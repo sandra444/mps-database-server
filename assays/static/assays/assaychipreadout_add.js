@@ -1,4 +1,9 @@
 $(document).ready(function () {
+    // Load core chart package
+    google.charts.load('current', {'packages':['corechart']});
+    // Set the callback
+    google.charts.setOnLoadCallback(get_readout);
+
     // Get the middleware token
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value') ?
             $('[name=csrfmiddlewaretoken]').attr('value'):
@@ -22,9 +27,6 @@ $(document).ready(function () {
         }
     });
 
-    // The data in question as a Sample Location pairing 'time|time_unit|assay|sample_location|value_unit|replicate
-    // var data = {};
-
     // Tracks the quality of data to indicate whether to exclude or include in plots
     var dynamic_quality_current = {};
     var dynamic_quality_new = {};
@@ -34,20 +36,13 @@ $(document).ready(function () {
     // Indicates whether the data exists in the database or not
     var exist = false;
 
-    // Deprecated
-    // var headers = 0;
-    //
-    // if ($('#id_headers')[0]) {
-    //     headers = Math.floor($('#id_headers').val());
-    // }
-
-    // var charts = [];
-
-    // Load the Visualization API and the corechart package.
-    google.charts.load('current', {'packages':['corechart']});
-
-    // Set a callback to run when the Google Visualization API is loaded.
-    google.charts.setOnLoadCallback(get_readout);
+    var changes_to_chart_options = {
+        chartArea: {
+            // Slight change in width
+            width: '78%',
+            height: '65%'
+        }
+    };
 
     function is_true(element, index, array) {
         if (!element) {
@@ -68,67 +63,6 @@ $(document).ready(function () {
         }
         return format(value);
     }
-
-    // function addChart(id, name, timeUnits, valueUnits) {
-    //     $('<div>')
-    //         .attr('id', 'chart' + id)
-    //         .attr('align', 'right')
-    //         .addClass('chart-container single-chip-chart')
-    //         .appendTo('#extra');
-    //
-    //     charts.push(
-    //         c3.generate({
-    //             bindto: '#chart'+id,
-    //
-    //             data: {
-    //                 columns: []
-    //             },
-    //             axis: {
-    //                 x: {
-    //                     label: {
-    //                         text: 'Time (' + timeUnits + ')',
-    //                         position: 'outer-center'
-    //                     }
-    //                 },
-    //                 y: {
-    //                     label: {
-    //                         text: valueUnits,
-    //                         position: 'outer-middle'
-    //                     },
-    //                     tick: {
-    //                         format: data_format
-    //                     }
-    //                 }
-    //             },
-    //             title: {
-    //                 text: name
-    //             },
-    //             tooltip: {
-    //                 format: {
-    //                     value: function (value, ratio, id) {
-    //                         var format = value % 1 === 0 ? d3.format(',d') : d3.format(',.2f');
-    //                         return format(value);
-    //                     }
-    //                 }
-    //             },
-    //             padding: {
-    //                 right: 10
-    //             },
-    //             // TODO this is not optimal
-    //             // manually reposition axis label
-    //             onrendered: function() {
-    //                 $('.c3-axis-x-label').attr('dy', '35px');
-    //             }
-    //         })
-    //     );
-    // }
-    //
-    // function resetChart() {
-    //     for (var i in charts) {
-    //         $('#chart'+i).remove();
-    //     }
-    //     charts = [];
-    // }
 
     function get_readout_value() {
         // Admin (check by looking for content-main ID)
@@ -231,7 +165,8 @@ $(document).ready(function () {
                     if (include_table) {
                        process_data(json.table);
                     }
-                    make_charts(json.charts, 'charts');
+                    window.CHARTS.prepare_charts_by_table(json.charts, 'charts');
+                    window.CHARTS.make_charts(json.charts, 'charts', changes_to_chart_options);
                 }
             },
             error: function (xhr, errmsg, err) {
@@ -247,33 +182,6 @@ $(document).ready(function () {
         });
     }
 
-    // var getText = function (readFile) {
-    //     var reader = new FileReader();
-    //     reader.readAsText(readFile, "UTF-8");
-    //     reader.onload = loaded;
-    // };
-    //
-    // var loaded = function (evt) {
-    //     var fileString = evt.target.result;
-    //     exist = false;
-    //     parseAndReplace(fileString);
-    // };
-
-    // function get_index_for_value(chip_id, sample_location_id, time, assay_instance_id, replicate, update_number) {
-    //     var full_index = {
-    //         // Chip ID added for future proofing (maybe we will have study-wide changes to quality)
-    //         'chip_id': chip_id,
-    //         'sample_location_id': sample_location_id,
-    //         'time': time,
-    //         'assay_instance_id': assay_instance_id,
-    //         // 'value_unit': value_unit,
-    //         'replicate': replicate,
-    //         'update_number': update_number
-    //     };
-    //
-    //     return JSON.stringify(full_index);
-    // }
-
     var process_data = function (json) {
         var table_body = $('#table_body');
 
@@ -285,31 +193,6 @@ $(document).ready(function () {
             return;
         }
 
-        // Check if headers exists (it doesn't in detail)
-        // if ($('#id_headers')[0]) {
-        //     // Update headers
-        //     headers = Math.floor($('#id_headers').val());
-        // }
-
-        // Crash if the first time is not numeric
-        // if (isNaN(headers)) {
-        //     alert("Please make sure you choose a valid number for number of header rows.");
-        //     return;
-        // }
-
-        // var lines = parse_csv(csv);
-
-        // If this is in the database
-//        if(exist) {
-//            table_body.addClass('bg-success');
-//        }
-//        else {
-//            table_body.removeClass('bg-success')
-//        }
-
-        // table += exist ? "<tr class='bg-info'>" + header + "</tr>" : "";
-        // table += "<tr class='bg-info'>" + header + "</tr>";
-
         // Current index for saving QC values
         var current_index = 0;
 
@@ -320,36 +203,6 @@ $(document).ready(function () {
         var sample_locations = json.sample_locations;
 
         for (var i in data_points) {
-            // Based on csv method, using JSON now
-            // var line = lines[i];
-            //
-            // var chip_id = line[0];
-            //
-            // var assay_plate_id = line[1];
-            // var assay_well_id = line[2];
-            //
-            // var day = Math.floor(line[3]);
-            // var hour = Math.floor(line[4]);
-            // var minute = Math.floor(line[5]);
-            //
-            // // Just convert to day for now
-            // var time = day + hour / 24 + minute / 1440;
-            //
-            // var target = line[6];
-            // var method = line[7];
-            //
-            // // var time = line[1];
-            // // var time_unit = line[2];
-            // // var assay = line[3];
-            // var sample_location = line[8];
-            // var value = line[9];
-            // var value_unit = line[10];
-            //
-            // var quality = $.trim(line[11]);
-            // var notes = $.trim(line[12]);
-            // var replicate = $.trim(line[13]);
-            // var update_number = $.trim(line[14]);
-
             var data_point = data_points[i];
 
             var chip_id = data_point.chip_id;
@@ -390,16 +243,6 @@ $(document).ready(function () {
                 notes += '\nReplicate ' + update_number;
             }
 
-            // Index in data
-            // TODO FIX!
-            // var index = get_index_for_value(
-            //     chip_id,
-            //     sample_location_id,
-            //     time_in_minutes,
-            //     assay_instance_id,
-            //     replicate,
-            //     update_number
-            // );
             var index = {
                 // Chip ID added for future proofing (maybe we will have study-wide changes to quality)
                 'chip_id': chip_id,
@@ -443,19 +286,10 @@ $(document).ready(function () {
 
             var col_chip_id = $('<td>').text(chip_id);
 
-            // var col_assay_plate_id = $('<td>').text(assay_plate_id);
-            // var col_assay_well_id = $('<td>').text(assay_well_id);
-
-            // var col_day = $('<td>').text(day);
-            // var col_hour = $('<td>').text(hour);
-            // var col_minute = $('<td>').text(minute);
             var col_time = $('<td>').text('D' + day + ' H' + hour + ' M' + minute);
 
             var col_target = $('<td>').text(target_name);
             var col_method = $('<td>').text(method_name);
-            // var col_time = $('<td>').text(time);
-            // var col_time_unit = $('<td>').text(time_unit);
-            // var col_assay = $('<td>').text(assay);
             var col_sample_location = $('<td>').text(sample_location_name);
             var col_value = $('<td>').text(value ? data_format(value) : value);
             var col_value_unit = $('<td>').text(value_unit);
@@ -484,17 +318,9 @@ $(document).ready(function () {
 
             new_row.append(
                 col_chip_id,
-                // col_assay_plate_id,
-                // col_assay_well_id,
                 col_time,
-                // col_day,
-                // col_hour,
-                // col_minute,
                 col_target,
                 col_method,
-                // col_time,
-                // col_time_unit,
-                // col_assay,
                 col_sample_location,
                 col_value,
                 col_value_unit,
@@ -628,12 +454,6 @@ $(document).ready(function () {
             else {
                 dynamic_quality_new[joined_index] = this.value;
             }
-            // dynamic_quality[joined_index] = this.value;
-
-            // console.log(dynamic_quality);
-
-            // data[index]['quality'] = this.value;
-            // plot();
 
             // Validate again if there is a file
             if ($('#id_file').val()) {
@@ -667,287 +487,14 @@ $(document).ready(function () {
                 csrfmiddlewaretoken: middleware_token
             },
             success: function (json) {
-                make_charts(json, 'charts');
+                window.CHARTS.prepare_charts_by_table(json, 'charts');
+                window.CHARTS.make_charts(json, 'charts', changes_to_chart_options);
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
     }
-
-    // TODO Copy-pasting is irresponsible, please refrain from doing so in the future
-    function make_charts(json, charts) {
-        // Clear existing charts
-        var charts_id = $('#' + charts);
-        charts_id.empty();
-
-//        var assay_to_id = {};
-//        var assay_ids = {};
-
-        // Show radio_buttons if there is data
-        // if (Object.keys(json).length > 0) {
-        //     radio_buttons_display.show();
-        // }
-
-        var sorted_assays = json.sorted_assays;
-        var assays = json.assays;
-
-        var previous = null;
-        for (var index in sorted_assays) {
-            // var assay_unit = sorted_assays[index];
-
-            // var current_chart_id = assay_unit.replace(/\W/g,'_');
-
-//            if (!assay_ids[assay_id]) {
-//                assay_ids[assay_id] = true;
-//                assay_to_id[assay] = assay_id;
-//            }
-//            else {
-//                var assay_number = 2;
-//
-//                while (assay_ids[assay_id + '_' + assay_number]) {
-//                    assay_number += 1;
-//                }
-//
-//                assay_id = assay_id + '_' + assay_number;
-//
-//                assay_ids[assay_id] = true;
-//                assay_to_id[assay] = assay_id;
-//            }
-
-            $('<div>')
-                .attr('id', charts + '_' + index)
-                .attr('align', 'right')
-                .addClass('chart-container')
-                .appendTo('#charts');
-        }
-
-        for (index in sorted_assays) {
-            var assay_unit = sorted_assays[index];
-            var assay = assay_unit.split('\n')[0];
-            var unit = assay_unit.split('\n')[1];
-            var current_chart_id = assay_unit.replace(/\W/g, '_');
-            // var add_to_bar_charts = true;
-
-            // var data = google.visualization.arrayToDataTable([
-            //     ['Year', 'Sales', 'Expenses'],
-            //     ['2004', 1000, 400],
-            //     ['2005', 1170, 460],
-            //     ['2006', 660, 1120],
-            //     ['2007', 1030, 540]
-            // ]);
-
-            var data = google.visualization.arrayToDataTable(assays[index]);
-
-            var options = {
-                title: assay,
-                titleTextStyle: {
-                    fontSize: 18,
-                    bold: true,
-                    underline: true
-                },
-                // curveType: 'function',
-                legend: {
-                    position: 'top',
-                    maxLines: 5,
-                    textStyle: {
-                        // fontSize: 8,
-                        bold: true
-                    }
-                },
-                hAxis: {
-                    title: 'Time (Days)',
-                    textStyle: {bold: true},
-                    titleTextStyle: {
-                        fontSize: 14,
-                        bold: true,
-                        italic: false
-                    }
-                    // baselineColor: 'none',
-                    // ticks: []
-                },
-                vAxis: {
-                    title: unit,
-                    format: 'short',
-                    textStyle: {bold: true},
-                    titleTextStyle: {
-                        fontSize: 14,
-                        bold: true,
-                        italic: false
-                    }
-                    // baselineColor: 'none',
-                    // ticks: []
-                },
-                pointSize: 5,
-                chartArea: {
-                    // Slight change in width
-                    width: '78%',
-                    height: '65%'
-                },
-                height:400,
-                focusTarget: 'category',
-                intervals: { style: 'bars' }
-            };
-
-            // Find out whether to shrink text
-            $.each(assays[index][0], function(index, column_header) {
-                if (column_header.length > 12) {
-                    options.legend.textStyle.fontSize = 8;
-                }
-            });
-
-            var chart = null;
-
-            if (assays[index].length > 4) {
-                chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
-            }
-            else if (assays[index].length > 1) {
-                // Convert to categories
-                data.insertColumn(0, 'string', data.getColumnLabel(0));
-                // copy values from column 1 (old column 0) to column 0, converted to numbers
-                for (var i = 0; i < data.getNumberOfRows(); i++) {
-                    var val = data.getValue(i, 1);
-                    if (val != null) {
-                        data.setValue(i, 0, val + ''.valueOf());
-                    }
-                }
-                // remove column 1 (the old column 0)
-                data.removeColumn(1);
-
-                chart = new google.visualization.ColumnChart(document.getElementById(charts + '_' + index));
-            }
-
-            if (chart) {
-                var dataView = new google.visualization.DataView(data);
-
-                // Change interval columns to intervals
-                var interval_setter = [0];
-
-                i = 1;
-                while (i < data.getNumberOfColumns()) {
-                    interval_setter.push(i);
-                    if (i+2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf('_i1') > -1) {
-                        interval_setter.push({sourceColumn: i + 1, role: 'interval'});
-                        interval_setter.push({sourceColumn: i + 2, role: 'interval'});
-                        i += 2;
-                    }
-                    i += 1;
-                }
-                dataView.setColumns(interval_setter);
-
-                chart.draw(dataView, options);
-            }
-        }
-    }
-
-//     function plot() {
-//         //Make chart
-//         var assays = {};
-//         // var valueUnits = {};
-//         var timeUnits = {};
-//
-//         for (var i in data) {
-//             var line = data[i];
-//
-//             // This is done before hand now
-//             // Need to take a slice to avoid treating missing QC as invalid
-// //            var every = line.slice(0,7).every(is_true);
-// //
-// //            // if (!every || (i < headers && !exist)) {
-// //            if (!every && !exist) {
-// //                continue;
-// //            }
-//
-//             var time = line['time'];
-//             var time_unit = 'days';
-//             var assay = line['target'];
-//             var sample_location = line['sample_location'];
-//             var value = line['value'];
-//             var value_unit = line['value_unit'];
-//
-//             var quality = $.trim(line['quality']);
-//
-//             // Crash if the time is not numeric
-//             if (isNaN(time)) {
-//                 alert("Improperly Configured: Please check the number of header rows selected and also make sure all times are numeric.");
-//                 return;
-//             }
-//
-//             if (!quality) {
-//                 if (!assays[assay]) {
-//                     assays[assay] = {};
-//                 }
-//
-//                 if (!assays[assay][value_unit]) {
-//                     assays[assay][value_unit] = {};
-//                 }
-//
-//                 if (sample_location && sample_location != 'None' && !assays[assay][value_unit][sample_location]) {
-//                     assays[assay][value_unit][sample_location] = {'time': [], 'data': []};
-//                 }
-//
-//                 if (assays[assay][value_unit][sample_location] && value && value != 'None') {
-//                     assays[assay][value_unit][sample_location].time.push(time);
-//                     assays[assay][value_unit][sample_location].data.push(value);
-//
-//                     // valueUnits[assay] = value_unit;
-//                     timeUnits[assay] = time_unit;
-//                 }
-//             }
-//         }
-//
-//         var chart = 0;
-//         var bar_chart_list = [];
-//
-//         for (var assay in assays) {
-//             for (var value_unit in assays[assay]) {
-//                 var add_to_bar_charts = true;
-//
-//                 addChart(chart, assay, timeUnits[assay], value_unit);
-//
-//                 var xs = {};
-//                 var num = 1;
-//
-//                 for (var sample_location in assays[assay][value_unit]) {
-//                     sample_location = '' + sample_location;
-//
-//                     // Add to bar charts if no time scale exceeds 3 points
-//                     if (add_to_bar_charts && assays[assay][value_unit][sample_location].time.length > 3) {
-//                         add_to_bar_charts = false;
-//                     }
-//
-//                     xs[sample_location] = 'x' + num;
-//
-//                     assays[assay][value_unit][sample_location].data.unshift(sample_location);
-//                     assays[assay][value_unit][sample_location].time.unshift('x' + num);
-//
-//                     //Load for correct assay chart
-//                     charts[chart].load({
-//                         xs: xs,
-//
-//                         columns: [
-//                             assays[assay][value_unit][sample_location].data,
-//                             assays[assay][value_unit][sample_location].time
-//                         ]
-//                     });
-//
-//                     num += 1;
-//                 }
-//                 // Add to bar charts if no time scale exceeds 3 points
-//                 if (add_to_bar_charts) {
-//                     bar_chart_list.push(chart);
-//                 }
-//
-//                 chart += 1;
-//             }
-//         }
-//
-//         // Make bar charts
-//         for (var index in bar_chart_list) {
-//             var chart_index = bar_chart_list[index];
-//             charts[chart_index].transform('bar');
-//         }
-//     }
 
     var refresh = function() {
         var file = $('#id_file')[0].files[0];
@@ -958,10 +505,6 @@ $(document).ready(function () {
         }
     };
 
-    // if (readout_id) {
-    //     get_readout();
-    // }
-
     // Refresh on file change
     $('#id_file').change(function(evt) {
         refresh();
@@ -971,14 +514,6 @@ $(document).ready(function () {
     $('#id_overwrite_option').change(function() {
         refresh();
     });
-
-    // if ($('#id_headers')[0]) {
-    //     $('#id_headers').change(function (evt) {
-    //         if ($('#id_file')[0].files[0]) {
-    //             refresh();
-    //         }
-    //     });
-    // }
 
     // Datepicker superfluous on admin, use this check to apply only in frontend
     if ($('#fluid-content')[0]) {
