@@ -460,7 +460,6 @@ SEVERITY_SCORE = (
     ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
 )
 
-
 POSNEG = (
     ('0', 'Negative'), ('1', 'Positive'), ('x', 'Failed')
 )
@@ -1070,12 +1069,25 @@ class AssayMeasurementType(LockableModel):
         return self.name
 
 
+class AssaySupplier(LockableModel):
+    """Assay Supplier so we can track where kits came from"""
+    name = models.CharField(max_length=512, unique=True)
+    description = models.CharField(max_length=2000)
+
+    def __unicode__(self):
+        return self.name
+
+
 class AssayMethod(LockableModel):
     """Describes how an assay was performed"""
     # We may want to modify this so that it is unique on name in combination with measurement type?
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
     measurement_type = models.ForeignKey(AssayMeasurementType)
+
+    # May or may not be required in the future
+    supplier = models.ForeignKey(AssaySupplier, blank=True, null=True)
+
     # TODO STORAGE LOCATION
     # TODO TEMPORARILY NOT REQUIRED
     protocol_file = models.FileField(upload_to='assays', null=True, blank=True)

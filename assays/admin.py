@@ -1795,6 +1795,36 @@ class AssayMeasurementTypeAdmin(LockableAdmin):
 admin.site.register(AssayMeasurementType, AssayMeasurementTypeAdmin)
 
 
+class AssaySupplierAdmin(LockableAdmin):
+    model = AssaySupplier
+
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('name', 'description')
+    fieldsets = (
+        (
+            'Measurement Type', {
+                'fields': (
+                    'name',
+                    'description',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
+admin.site.register(AssaySupplier, AssaySupplierAdmin)
+
+
 class AssayMethodAdmin(LockableAdmin):
     model = AssayMethod
 
@@ -1803,6 +1833,7 @@ class AssayMethodAdmin(LockableAdmin):
     list_display = (
         'name',
         'measurement_type',
+        'supplier',
         'protocol_file',
         'description'
     )
@@ -1813,6 +1844,7 @@ class AssayMethodAdmin(LockableAdmin):
                     'name',
                     'description',
                     'measurement_type',
+                    'supplier',
                     'protocol_file'
                 )
             }
