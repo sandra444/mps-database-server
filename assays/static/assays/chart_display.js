@@ -17,6 +17,12 @@ $(document).ready(function () {
         var charts_id = $('#' + charts);
         charts_id.empty();
 
+        // If errors, report them and then terminate
+        if (json.errors) {
+            alert(json.errors);
+            return;
+        }
+
         var sorted_assays = json.sorted_assays;
 
         var previous = null;
@@ -47,6 +53,12 @@ $(document).ready(function () {
         // Clear existing charts
         var charts_id = $('#' + charts);
         charts_id.empty();
+
+        // If errors, report them and then terminate
+        if (json.errors) {
+            alert(json.errors);
+            return;
+        }
 
         var sorted_assays = json.sorted_assays;
 

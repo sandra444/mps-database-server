@@ -42,6 +42,7 @@ from django.forms.models import inlineformset_factory
 # from django.utils import timezone
 
 import numpy as np
+from scipy.stats.mstats import gmean
 
 import logging
 logger = logging.getLogger(__name__)
@@ -349,72 +350,6 @@ def fetch_center_id(request):
                         content_type="application/json")
 
 
-# TODO THIS WAS A STRING TO BE EXPEDIENT WRT TO THE JAVSCRIPT IN READOUT ADD, BUT SHOULD BE REVISED
-# def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=False):
-#     """Returns readout data as a csv in the form of a string
-#
-#     Params:
-#     chip_ids - Readout IDs to use to acquire chip data (if data not provided)
-#     chip_data - Readout raw data, optional, acquired with chip_ids if not provided
-#     both_assay_names - Indicates that both assay names should be returned (not currently used)
-#     """
-#
-#     # PLEASE NOTE: THIS AFFECTS PROCESSING OF QC
-#     # DO NOT MODIFY THIS WITHOUT ALSO CHANGING modify_qc_status_chip
-#     if not chip_data:
-#         chip_data = AssayChipRawData.objects.prefetch_related(
-#             'assay_id__assay_id',
-#             'assay_chip_id__chip_setup'
-#         ).filter(
-#             assay_chip_id__in=chip_ids
-#         ).order_by(
-#             'assay_chip_id__chip_setup__assay_chip_id',
-#             'assay_id__assay_id__assay_short_name',
-#             'time',
-#             'quality',
-#             'update_number'
-#         )
-#
-#     csv = ''
-#
-#     for raw in chip_data:
-#         if ',' in raw.assay_chip_id.chip_setup.assay_chip_id:
-#             csv += '"' + unicode(raw.assay_chip_id.chip_setup.assay_chip_id) + '"' + ','
-#         else:
-#             csv += raw.assay_chip_id.chip_setup.assay_chip_id + ','
-#         csv += unicode(raw.time) + ','
-#         # Add time unit
-#         csv += unicode(raw.assay_chip_id.timeunit) + ','
-#         # Now uses full name
-#         # csv += unicode(raw.assay_id.assay_id.assay_short_name) + ','
-#         csv += unicode(raw.assay_id.assay_id.assay_name) + ','
-#         if ',' in raw.field_id:
-#             csv += '"' + unicode(raw.field_id) + '"' + ','
-#         else:
-#             csv += unicode(raw.field_id) + ','
-#         # Format to two decimal places
-#         value = raw.value
-#         # Check if None first before format
-#         if value is not None:
-#             value = '%.2f' % value
-#         else:
-#             value = ''
-#         # Get rid of trailing zero and decimal if necessary
-#         value = value.rstrip('0').rstrip('.') if '.' in value else value
-#         csv += value + ','
-#         # Add value unit
-#         csv += unicode(raw.assay_id.readout_unit) + ','
-#         # End with the quality and notes
-#         if ',' in raw.quality:
-#             csv += '"' + unicode(raw.quality) + '"' + ','
-#         else:
-#             csv += unicode(raw.quality) + ','
-#         csv += '"' + unicode(raw.notes) + '"' + ','
-#         csv += '"' + unicode(raw.update_number) + '"\n'
-#
-#     return csv
-
-
 # TODO EMPLOY THIS FUNCTION ELSEWHERE
 def get_split_times(time_in_minutes):
     """Takes time_in_minutes and returns a dic with the time split into day, hour, minute"""
@@ -622,6 +557,8 @@ def get_readout_data(
         raw_data,
         related_compounds_map,
         key,
+        mean_type,
+        interval_type,
         percent_control,
         include_all,
         dynamic_quality
@@ -745,12 +682,33 @@ def get_readout_data(
                             controls.update({(target, unit, sample_location, time): sum(values) / float(len(values))})
                         # Add to averaged data if this isn't a average control value for device-by-device
                         if not (tag == '-Control-' and key != 'compound'):
+                            if len(values) > 1:
+                                # If geometric mean
+                                if mean_type == 'geometric':
+                                    # Geometric mean will sometimes fail (due to zero values and so on)
+                                    average = gmean(values)
+                                    if np.isnan(average):
+                                        return {'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'}
+                                # If arithmetic mean
+                                else:
+                                    average = np.average(values)
+                            else:
+                                average = values[0]
+
+                            # If standard deviation
+                            if interval_type == 'std':
+                                interval = np.std(values)
+                            # Standard error if not std
+                            else:
+                                interval = np.std(values) / len(values) ** 0.5
+
+                            average_and_interval = (
+                                average,
+                                interval
+                            )
+
                             averaged_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).update({
-                                # Currently standard deviation
-                                time: (
-                                    np.average(values),
-                                    np.std(values)
-                                )
+                                time: average_and_interval
                             })
 
     initial_data = None
@@ -767,7 +725,7 @@ def get_readout_data(
             else:
                 # Convert to percent control
                 if accomadate_units:
-                    current_unit = '%Control ' + unit
+                    current_unit = '%Control from ' + unit
                 else:
                     current_unit = '%Control'
                 # Newline is used as a delimiter
@@ -809,6 +767,10 @@ def get_readout_data(
 
                         elif controls.get((target, unit, sample_location, time), False):
                             control_value = controls.get((target, unit, sample_location, time))
+
+                            # We can not divide by zero
+                            if control_value == 0:
+                                return {'errors': 'Could not calculate percent control because some control values are zero (divide by zero error).'}
 
                             adjusted_value = (value / control_value) * 100
                             adjusted_interval = (interval / control_value) * 100
@@ -878,6 +840,8 @@ def fetch_readouts(request):
     study = request.POST.get('study', '')
     readout = request.POST.get('readout', '')
     key = request.POST.get('key', '')
+    mean_type = request.POST.get('mean_type', 'arithmetic')
+    interval_type = request.POST.get('interval_type', 'ste')
     percent_control = request.POST.get('percent_control', '')
     include_all = request.POST.get('include_all', '')
     dynamic_quality = json.loads(request.POST.get('dynamic_quality', '{}'))
@@ -931,7 +895,16 @@ def fetch_readouts(request):
             *CHIP_DATA_PREFETCH
         )
 
-    data = get_readout_data(raw_data, related_compounds_map, key, percent_control, include_all, dynamic_quality)
+    data = get_readout_data(
+        raw_data,
+        related_compounds_map,
+        key,
+        mean_type,
+        interval_type,
+        percent_control,
+        include_all,
+        dynamic_quality
+    )
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
@@ -1095,6 +1068,8 @@ def validate_bulk_file(request):
     """
     study = request.POST.get('study', '')
     key = request.POST.get('key', '')
+    mean_type = request.POST.get('mean_type', 'arithmetic')
+    interval_type = request.POST.get('interval_type', 'ste')
     percent_control = request.POST.get('percent_control', '')
     include_all = request.POST.get('include_all', '')
     # overwrite_option = request.POST.get('overwrite_option', '')
@@ -1114,7 +1089,16 @@ def validate_bulk_file(request):
         chip_raw_data = preview_data.get('chip_preview')
 
         # NOTE THE EMPTY DIC, RIGHT NOW BULK PREVIEW NEVER SHOWS COMPOUND JUST DEVICE
-        data = get_readout_data(chip_raw_data, {}, key, percent_control, include_all, dynamic_quality)
+        data = get_readout_data(
+            chip_raw_data,
+            {},
+            key,
+            mean_type,
+            interval_type,
+            percent_control,
+            include_all,
+            dynamic_quality
+        )
 
         return HttpResponse(json.dumps(data),
                             content_type="application/json")
@@ -1152,6 +1136,8 @@ def validate_individual_chip_file(request):
     """
     study_id = request.POST.get('study', '')
     key = request.POST.get('key', '')
+    mean_type = request.POST.get('mean_type', 'arithmetic')
+    interval_type = request.POST.get('interval_type', 'ste')
     percent_control = request.POST.get('percent_control', '')
     include_all = request.POST.get('include_all', '')
     readout_id = request.POST.get('readout', '')
@@ -1200,7 +1186,16 @@ def validate_individual_chip_file(request):
         if include_table:
             table = get_chip_readout_data_as_json([readout_id], chip_data=chip_raw_data)
 
-        charts = get_readout_data(full_raw_data, {}, key, percent_control, include_all, dynamic_quality)
+        charts = get_readout_data(
+            full_raw_data,
+            {},
+            key,
+            mean_type,
+            interval_type,
+            percent_control,
+            include_all,
+            dynamic_quality
+        )
 
         data = {
             'table': table,
