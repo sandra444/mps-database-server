@@ -80,11 +80,11 @@ def modify_templates():
     # Write the base files
     chip_initial = [
         DEFAULT_CSV_HEADER,
-        [''] * 13
+        [''] * 14
     ]
 
     chip_initial_format = [
-        [chip_red] * 13,
+        [chip_red] * 14,
         [
             None,
             None,
@@ -97,6 +97,7 @@ def modify_templates():
             chip_green,
             None,
             chip_green,
+            None,
             None,
             None
         ]
@@ -200,7 +201,8 @@ def modify_templates():
     chip_sheet.set_column('J:J', 10)
     chip_sheet.set_column('K:K', 10)
     chip_sheet.set_column('L:L', 10)
-    chip_sheet.set_column('M:M', 100)
+    chip_sheet.set_column('M:M', 10)
+    chip_sheet.set_column('N:N', 100)
 
     chip_sheet.set_column('BA:BD', 30)
 

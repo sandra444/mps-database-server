@@ -64,10 +64,10 @@ COLUMN_HEADERS = (
     'SAMPLE LOCATION',
     'VALUE',
     'VALUE UNIT',
-    'QC STATUS',
-    'NOTES',
     # SUBJECT TO CHANGE
-    'REPLICATE #'
+    'REPLICATE',
+    'QC STATUS',
+    'NOTES'
 )
 REQUIRED_COLUMN_HEADERS = (
     'CHIP ID',
@@ -98,6 +98,7 @@ DEFAULT_CSV_HEADER  = (
     'Sample Location',
     'Value',
     'Value Unit',
+    'Replicate',
     'QC Status',
     'Notes'
 )
@@ -301,7 +302,7 @@ def get_header_indices(header):
     #     'QC STATUS',
     #     'NOTES',
     #     # SUBJECT TO CHANGE
-    #     'REPLICATE #'
+    #     'REPLICATE'
     # ]
     header_indices = {
         column_header.upper(): index for index, column_header in enumerate(header) if column_header.upper() in COLUMN_HEADERS
@@ -2114,7 +2115,7 @@ def validate_chip_readout_file(
         raise forms.ValidationError(errors)
     # If there wasn't anything
     elif len(query_list) < 1 and len(readout_data) < 1:
-        raise forms.ValidationError('This file does not contain any data. Please upload a file with data.')
+        raise forms.ValidationError('This file does not contain any valid data. Please make sure every row has values in required columns.')
     # If the intention is to save
     elif save:
         # Connect to the database
