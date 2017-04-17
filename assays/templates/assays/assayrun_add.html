@@ -86,7 +86,9 @@
               {{ form.efficacy }}
             <label for="disease" style="padding-left: 20px;padding-right: 10px;">Disease</label>
               {{ form.disease }}
-            <label for="efficacy" style="padding-left: 20px;padding-right: 10px;">Cell Characterization</label>
+            {# Please note superficial edit from Cell Characterization to Chip Characterization #}
+            {# This is subject to change #}
+            <label for="cell_characterization" style="padding-left: 20px;padding-right: 10px;">Chip Characterization</label>
               {{ form.cell_characterization }}
         </div>
     </div>
@@ -160,7 +162,7 @@
         <div class="col-sm-10">
           {{ form.restricted }}
           <div>
-              <em>Check</em> to make this study invisible to unauthorized users.
+              <em>Check</em> to make this study visible only to users with group access.
           </div>
         </div>
     </div>

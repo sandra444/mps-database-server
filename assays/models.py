@@ -620,6 +620,8 @@ class AssayRun(FlaggableModel):
     toxicity = models.BooleanField(default=False)
     efficacy = models.BooleanField(default=False)
     disease = models.BooleanField(default=False)
+    # TODO PLEASE REFACTOR
+    # NOW REFERRED TO AS "Chip Characterization"
     cell_characterization = models.BooleanField(default=False)
     # Subject to change
     study_configuration = models.ForeignKey(StudyConfiguration, blank=True, null=True)
