@@ -19,7 +19,9 @@ from .utils import (
     validate_file,
     TIME_CONVERSIONS,
     DEFAULT_CSV_HEADER,
-    CHIP_DATA_PREFETCH
+    CSV_HEADER_WITH_COMPOUNDS_AND_STUDY,
+    CHIP_DATA_PREFETCH,
+    UnicodeWriter
 )
 
 import csv
@@ -379,6 +381,8 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
     chip_data - Readout raw data, optional, acquired with chip_ids if not provided
     both_assay_names - Indicates that both assay names should be returned (not currently used)
     """
+    related_compounds_map = {}
+
     if not chip_data:
         chip_data = AssayChipRawData.objects.prefetch_related(
             *CHIP_DATA_PREFETCH
@@ -394,14 +398,19 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
             'update_number'
         )
 
+        related_compounds_map = get_related_compounds_map(chip_ids)
+
     data = []
 
     if include_header:
         data.append(
-            DEFAULT_CSV_HEADER
+            CSV_HEADER_WITH_COMPOUNDS_AND_STUDY
         )
 
     for data_point in chip_data:
+        # Definitely need to rename these fields/models...
+        study_id = data_point.assay_chip_id.chip_setup.assay_run_id.assay_run_id
+
         chip_id = data_point.assay_chip_id.chip_setup.assay_chip_id
         assay_plate_id = data_point.assay_plate_id
         assay_well_id = data_point.assay_well_id
@@ -413,32 +422,41 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         target = data_point.assay_instance.target.name
         method = data_point.assay_instance.method.name
         sample_location = data_point.sample_location.name
+
+        compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, '\n')
+
         value = data_point.value
         value_unit = data_point.assay_instance.unit.unit
         quality = data_point.quality
+        replicate = data_point.replicate
         # TODO ADD OTHER STUFF
         notes = data_point.notes
 
         data.append(
-            [
-                chip_id,
-                assay_plate_id,
-                assay_well_id,
-                times.get('day'),
-                times.get('hour'),
-                times.get('minute'),
-                target,
-                method,
-                sample_location,
-                value,
-                value_unit,
-                quality,
-                notes
+            [ unicode(x) for x in
+                [
+                    study_id,
+                    chip_id,
+                    assay_plate_id,
+                    assay_well_id,
+                    times.get('day'),
+                    times.get('hour'),
+                    times.get('minute'),
+                    compound_treatment,
+                    target,
+                    method,
+                    sample_location,
+                    value,
+                    value_unit,
+                    replicate,
+                    quality,
+                    notes
+                ]
             ]
         )
 
     string_io = StringIO()
-    csv_writer = csv.writer(string_io)
+    csv_writer = UnicodeWriter(string_io)
     for one_line_of_data in data:
         csv_writer.writerow(one_line_of_data)
 
@@ -553,6 +571,38 @@ def fetch_chip_readout(request):
                         content_type="application/json")
 
 
+def get_list_of_present_compounds(related_compounds_map, data_point, separator=' & '):
+    """Returns a list of compounds present at a given time point
+
+    Params:
+    related_compounds_map - mapping for chip -> compounds
+    data_point - the data point to find compounds for
+    separator - string used to separate compounds
+    """
+    compounds = related_compounds_map.get(data_point.assay_chip_id.chip_setup_id, [])
+    if compounds:
+        compounds_to_add = []
+
+        for compound in compounds:
+            # Previously included only compounds within duration
+            # if compound.addition_time <= time_minutes and compound.duration + compound.addition_time >= time_minutes:
+            # Everything past addition time will be listed as effected
+            if compound.addition_time <= data_point.time:
+                compounds_to_add.append(
+                    compound.compound_instance.compound.name +
+                    ' ' + str(compound.concentration) + ' ' + compound.concentration_unit.unit
+                )
+
+        if not compounds_to_add:
+            tag = '-Control-'
+        else:
+            tag = separator.join(sorted(compounds_to_add))
+    else:
+        tag = '-Control-'
+
+    return tag
+
+
 def get_readout_data(
         raw_data,
         related_compounds_map,
@@ -642,26 +692,7 @@ def get_readout_data(
             # Get tag for data point
             # If by compound
             if key == 'compound':
-                compounds = related_compounds_map.get(raw.assay_chip_id.chip_setup_id, [])
-                if compounds:
-                    compounds_to_add = []
-
-                    for compound in compounds:
-                        # Previously included only compounds within duration
-                        # if compound.addition_time <= time_minutes and compound.duration + compound.addition_time >= time_minutes:
-                        # Everything past addition time will be listed as effected
-                        if compound.addition_time <= time_minutes:
-                            compounds_to_add.append(
-                                compound.compound_instance.compound.name +
-                                ' ' + str(compound.concentration) + ' ' + compound.concentration_unit.unit
-                            )
-
-                    if not compounds_to_add:
-                        tag = '-Control-'
-                    else:
-                        tag = ' & '.join(sorted(compounds_to_add))
-                else:
-                    tag = '-Control-'
+                tag = get_list_of_present_compounds(related_compounds_map, raw, ' & ')
             # If by device
             else:
                 tag = chip_id
@@ -826,6 +857,31 @@ def get_readout_data(
     return final_data
 
 
+def get_related_compounds_map(readouts):
+    """Returns a map of setup id -> compound
+
+    Params:
+    readouts - A queryset of readouts
+    """
+    related_compounds_map = {}
+
+    setups = readouts.values_list('chip_setup_id')
+
+    related_compounds = AssayCompoundInstance.objects.filter(
+        chip_setup=setups
+    ).prefetch_related(
+        'compound_instance__compound',
+        'compound_instance__supplier',
+        'concentration_unit',
+        'chip_setup__assay_run_id'
+    )
+
+    for compound in related_compounds:
+        related_compounds_map.setdefault(compound.chip_setup_id, []).append(compound)
+
+    return related_compounds_map
+
+
 # TODO REQUIRES REVISION
 # TODO NEED TO CONFIRM UNITS ARE THE SAME (ELSE CONVERSION)
 def fetch_readouts(request):
@@ -865,35 +921,17 @@ def fetch_readouts(request):
             'chip_setup__assay_run_id_id'
         )
 
+    raw_data = AssayChipRawData.objects.filter(
+        assay_chip_id=readouts
+    ).prefetch_related(
+        *CHIP_DATA_PREFETCH
+    )
+
     related_compounds_map = {}
 
     if key == 'compound':
-        setups = readouts.values_list('chip_setup_id')
+        related_compounds_map = get_related_compounds_map(readouts)
 
-        raw_data = AssayChipRawData.objects.filter(
-            assay_chip_id=readouts
-        ).prefetch_related(
-            *CHIP_DATA_PREFETCH
-        )
-
-        related_compounds = AssayCompoundInstance.objects.filter(
-            chip_setup=setups
-        ).prefetch_related(
-            'compound_instance__compound',
-            'compound_instance__supplier',
-            'concentration_unit',
-            'chip_setup'
-        )
-
-        for compound in related_compounds:
-            related_compounds_map.setdefault(compound.chip_setup_id, []).append(compound)
-
-    else:
-        raw_data = AssayChipRawData.objects.filter(
-            assay_chip_id=readouts
-        ).prefetch_related(
-            *CHIP_DATA_PREFETCH
-        )
 
     data = get_readout_data(
         raw_data,

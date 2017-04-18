@@ -102,6 +102,24 @@ DEFAULT_CSV_HEADER  = (
     'QC Status',
     'Notes'
 )
+CSV_HEADER_WITH_COMPOUNDS_AND_STUDY = (
+    'Study ID',
+    'Chip ID',
+    'Assay Plate ID',
+    'Assay Well ID',
+    'Day',
+    'Hour',
+    'Minute',
+    'Compound Treatment(s)',
+    'Target/Analyte',
+    'Method/Kit',
+    'Sample Location',
+    'Value',
+    'Value Unit',
+    'Replicate',
+    'QC Status',
+    'Notes'
+)
 
 # I should have more tuples for containing prefetch arguments
 CHIP_DATA_PREFETCH = (
