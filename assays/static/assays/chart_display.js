@@ -100,7 +100,9 @@ $(document).ready(function () {
                 },
                 hAxis: {
                     title: 'Time (Days)',
-                    textStyle: {bold: true},
+                    textStyle: {
+                        bold: true
+                    },
                     titleTextStyle: {
                         fontSize: 14,
                         bold: true,
@@ -112,12 +114,17 @@ $(document).ready(function () {
                 vAxis: {
                     title: unit,
                     format: 'short',
-                    textStyle: {bold: true},
+                    textStyle: {
+                        bold: true
+                    },
                     titleTextStyle: {
                         fontSize: 14,
                         bold: true,
                         italic: false
-                    }
+                    },
+                    // This doesn't seem to interfere with displaying negative values
+                    minValue: 0,
+                    viewWindowMode: 'explicit'
                     // baselineColor: 'none',
                     // ticks: []
                 },
@@ -128,7 +135,9 @@ $(document).ready(function () {
                 },
                 'height':400,
                 focusTarget: 'category',
-                intervals: { style: 'bars' }
+                intervals: {
+                    style: 'bars'
+                }
             };
 
             // Merge options with the specified changes
