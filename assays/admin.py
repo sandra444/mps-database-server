@@ -828,37 +828,40 @@ class AssayPlateReadoutAdmin(LockableAdmin):
     # save_related takes the place of save_model so that the inline can be saved first
     # this is similar to chip readouts so that we can validate the listed assays THEN the file
     def save_related(self, request, form, formsets, change):
-        obj = form.instance
-
-        # Need to get the upload type
-        # upload_type = form.data.get('upload_type')
-        overwrite_option = form.data.get('overwrite_option')
-
-        if change:
-            obj.modified_by = request.user
-
-        else:
-            obj.modified_by = obj.created_by = request.user
-
-        # Save Plate Readout
-        obj.save()
-        # Save inline
-        super(LockableAdmin, self).save_related(request, form, formsets, change)
-
-        if request.FILES:
-            # pass the upload file name to the CSV reader if a file exists
-            # parse_readout_csv(obj, request.FILES['file'], upload_type, overwrite_option, form)
-            parse_file_and_save(
-                request.FILES['file'], obj.study.assay_run_id, overwrite_option, 'Plate', readout=self.object
-            )
-
-        # Need to delete entries when a file is cleared
-        if request.POST.get('file-clear', '') == 'on':
-            # remove_existing_readout(obj)
-            AssayReadout.objects.filter(assay_device_readout=obj).delete()
-
-        else:
-            modify_qc_status_plate(obj, form)
+        # Prevent saving in Admin for now
+        pass
+        # obj = form.instance
+        #
+        # # Need to get the upload type
+        # # upload_type = form.data.get('upload_type')
+        # overwrite_option = form.data.get('overwrite_option')
+        #
+        # if change:
+        #     obj.modified_by = request.user
+        #
+        # else:
+        #     obj.modified_by = obj.created_by = request.user
+        #
+        # # Save Plate Readout
+        # obj.save()
+        # # Save inline
+        # super(LockableAdmin, self).save_related(request, form, formsets, change)
+        #
+        # if request.FILES:
+        #     # pass the upload file name to the CSV reader if a file exists
+        #     # parse_readout_csv(obj, request.FILES['file'], upload_type, overwrite_option, form)
+        #     pass
+        #     # parse_file_and_save(
+        #     #     request.FILES['file'], obj.study.assay_run_id, overwrite_option, 'Plate', readout=self.object
+        #     # )
+        #
+        # # Need to delete entries when a file is cleared
+        # if request.POST.get('file-clear', '') == 'on':
+        #     # remove_existing_readout(obj)
+        #     AssayReadout.objects.filter(assay_device_readout=obj).delete()
+        #
+        # else:
+        #     modify_qc_status_plate(obj, form)
 
     # save_model not used; would save twice otherwise
     def save_model(self, request, obj, form, change):
@@ -1061,7 +1064,8 @@ class AssayChipReadoutForm(forms.ModelForm):
 class AssayChipReadoutAdmin(LockableAdmin):
     """Admin for Assay Chip Readout"""
     class Media(object):
-        js = ('js/inline_fix.js', 'js/csv_functions.js', 'assays/assaychipreadout_add.js', 'js/d3.min.js', 'js/c3.min.js',)
+        # Removed chip readout display, no need to maintain such scripts
+        js = ('js/inline_fix.js', 'js/csv_functions.js', 'js/d3.min.js', 'js/c3.min.js',)
         css = {'all': ('assays/customize_admin.css', 'css/c3.min.css',)}
 
     form = AssayChipReadoutForm
@@ -1168,37 +1172,40 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
     # save_related takes the place of save_model so that the inline can be saved first
     def save_related(self, request, form, formsets, change):
-        obj = form.instance
-
-        headers = int(form.data.get('headers')) if form.data.get('headers') else 0
-        overwrite_option = form.data.get('overwrite_option')
-
-        if change:
-            obj.modified_by = request.user
-
-        else:
-            obj.modified_by = obj.created_by = request.user
-
-        # Save Chip Readout
-        obj.save()
-        # Save inline
-        super(LockableAdmin, self).save_related(request, form, formsets, change)
-
-        if request.FILES:
-            # pass the upload file name to the CSV reader if a file exists
-            # parse_chip_csv(obj, request.FILES['file'], headers, form)
-            parse_file_and_save(
-                request.FILES['file'], obj.chip_setup.assay_run_id, overwrite_option, 'Chip', headers=headers, form=form, readout=self.object
-            )
-
-        # Try to update QC status if no file
-        else:
-            modify_qc_status_chip(obj, form)
-
-        # Need to delete entries when a file is cleared
-        if request.POST.get('file-clear', '') == 'on':
-            # remove_existing_chip(obj)
-            AssayChipRawData.objects.filter(assay_chip_id=obj).delete()
+        # Prevent saving in Admin for now
+        pass
+        # obj = form.instance
+        #
+        # headers = int(form.data.get('headers')) if form.data.get('headers') else 0
+        # overwrite_option = form.data.get('overwrite_option')
+        #
+        # if change:
+        #     obj.modified_by = request.user
+        #
+        # else:
+        #     obj.modified_by = obj.created_by = request.user
+        #
+        # # Save Chip Readout
+        # obj.save()
+        # # Save inline
+        # super(LockableAdmin, self).save_related(request, form, formsets, change)
+        #
+        # if request.FILES:
+        #     # pass the upload file name to the CSV reader if a file exists
+        #     # parse_chip_csv(obj, request.FILES['file'], headers, form)
+        #     pass
+        #     # parse_file_and_save(
+        #     #     request.FILES['file'], obj.chip_setup.assay_run_id, overwrite_option, 'Chip', form=form, readout=self.object
+        #     # )
+        #
+        # # Try to update QC status if no file
+        # else:
+        #     modify_qc_status_chip(obj, form)
+        #
+        # # Need to delete entries when a file is cleared
+        # if request.POST.get('file-clear', '') == 'on':
+        #     # remove_existing_chip(obj)
+        #     AssayChipRawData.objects.filter(assay_chip_id=obj).delete()
 
     # save_model not used; would save twice otherwise
     def save_model(self, request, obj, form, change):

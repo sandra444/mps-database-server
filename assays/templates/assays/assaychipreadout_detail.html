@@ -3,8 +3,10 @@
 
 {% block load %}
     <script src="{% static "js/cookies.js" %}"></script>
-    <script src="{% static "js/csv_functions.js" %}"></script>
+{#    <script src="{% static "js/csv_functions.js" %}"></script>#}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{% static "assays/assaychipreadout_add.js" %}"></script>
+    <script src="{% static "assays/chart_display.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -78,32 +80,89 @@
 
 	{% include 'assays/data_upload_table.html' %}
 
-    {% if object.assaychipreadoutassay_set.all %}
+{#    {% if object.assaychipreadoutassay_set.all %}#}
+{#        <legend><b>Assays</b></legend>#}
+{#        <table class="table table-striped">#}
+{#            <thead>#}
+{#            <tr>#}
+{#                <th>Assay</th>#}
+{#                <th>Object of Interest</th>#}
+{#                <th>Reader</th>#}
+{#                <th>Readout Unit</th>#}
+{#            </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#            {% for assay in object.assaychipreadoutassay_set.all %}#}
+{#                <tr>#}
+{#                    <td>{{ assay.assay_id }}</td>#}
+{#                    <td>{{ assay.get_object_type_display }}</td>#}
+{#                    <td>{{ assay.reader_id }}</td>#}
+{#                    <td>{{ assay.readout_unit }}</td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#            </tbody>#}
+{#        </table>#}
+{#    {% endif %}#}
+
+    {% if object.chip_setup.assay_run_id.assayinstance_set.all %}
         <legend><b>Assays</b></legend>
         <table class="table table-striped">
             <thead>
             <tr>
-                <th>Assay</th>
-                <th>Object of Interest</th>
-                <th>Reader</th>
+                <th>Target/Analyte</th>
+                <th>Method/Kit</th>
                 <th>Readout Unit</th>
             </tr>
             </thead>
             <tbody>
-            {% for assay in object.assaychipreadoutassay_set.all %}
+            {% for assay in object.chip_setup.assay_run_id.assayinstance_set.all %}
                 <tr>
-                    <td>{{ assay.assay_id }}</td>
-                    <td>{{ assay.get_object_type_display }}</td>
-                    <td>{{ assay.reader_id }}</td>
-                    <td>{{ assay.readout_unit }}</td>
+                    <td>{{ assay.target }}</td>
+                    <td>{{ assay.method }}</td>
+                    <td>{{ assay.unit }}</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     {% endif %}
 
-    <div id="assaychipreadoutassay_set-group"></div>
+    <div id="extra" align="center">
+{#        <div id="csv_table" style="width: 55%;float: left;">#}
+        <div id="csv_table" class="col-sm-12 col-md-7">
+            <table class="data-table">
+                <thead>
+                    <tr class="bg-info">
+{#                        <th>Chip ID</th>#}
+{#                        <th>Time</th>#}
+{#                        <th>Time Unit</th>#}
+{#                        <th>Assay</th>#}
+{#                        <th>Sample Location</th>#}
+{#                        <th>Value</th>#}
+{#                        <th>Value Unit</th>#}
+{#                        <th>QC Status</th>#}
+{#                        <th></th>#}
+                        <th>Chip ID</th>
+{#                        <th>Assay Plate ID</th>#}
+{#                        <th>Assay Well ID</th>#}
+                        <th>Time</th>
+                        <th>Target Analyte</th>
+                        <th>Method Kit</th>
+                        <th>Sample Location</th>
+                        <th>Value</th>
+                        <th>Value Unit</th>
+                        <th>QC Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="table_body">
+                </tbody>
+            </table>
+        </div>
+        <div id="charts" class="col-sm-12 col-md-5"></div>
+{#        <div id="charts" style="width: 42.5%;float: right;"></div>#}
+    </div>
 
-    <br><br>
-
+{#    <div id="assaychipreadoutassay_set-group"></div>#}
+{##}
+{#    <br><br>#}
 {% endblock %}
