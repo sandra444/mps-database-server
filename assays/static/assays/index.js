@@ -1,3 +1,4 @@
+// DEPRECATED: Index and Study List now have the same content
 $(document).ready(function() {
     $('#studies').DataTable( {
         "iDisplayLength": 50,

@@ -6,29 +6,36 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li class="active">Studies</li>
+    <li class="active">{{ editable }}Studies</li>
 {% endblock %}
 
 {% block content %}
     <div class="padded-bottom">
         <legend>
             <h2 class="text-center">
-                Studies
+                {{ editable }}Studies
             </h2>
         </legend>
 
         <div class="row text-center padded-bottom">
             <a href="/assays/study/add" class="btn btn-lg btn-success" role="button">Add Study</a>
+            {% if not editable %}
+                <a href="/assays/editable_studies/" class="btn btn-lg btn-info" role="button">Show Editable Studies Only</a>
+            {% else %}
+                <a href="/assays/study/" class="btn btn-lg btn-info" role="button">Show All Studies</a>
+            {% endif %}
         </div>
 
         <table hidden id="studies" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View/Edit</th>
-                    <th>Study ID</th>
-                    <th>Study Types</th>
-                    <th>Integrated Study Configuration</th>
+{#                    <th>Study ID</th>#}
+                    <th>Study Name</th>
                     <th>Start Date</th>
+                    <th>Study Types</th>
+                    <th>Organ Models</th>
+{#                    <th>Integrated Study Configuration</th>#}
                     <th>Description</th>
                     <th>Creator</th>
                     <th>Group</th>
@@ -40,10 +47,12 @@
             {% for study in object_list %}
                 <tr class="compound" id={{ study.id }} name={{ study.id }}>
                     <td><a class="btn btn-primary" href="/assays/{{ study.id }}">View/Edit</a></td>
-                    <td>{{ study.assay_run_id }}</td>
-                    <td>{{ study.study_types }}</td>
-                    <td>{{ study.study_configuration }}</td>
+{#                    <td>{{ study.assay_run_id }}</td>#}
+                    <td>{{ study.name }}</td>
                     <td>{{ study.start_date|date:"M d, Y" }}</td>
+                    <td>{{ study.study_types }}</td>
+                    <td>{{ study.organ_models|default:"-No Organ Models-" }}</td>
+{#                    <td>{{ study.study_configuration }}</td>#}
                     <td>{{ study.description }}</td>
                     <td>
                         {{ study.full_creator }}

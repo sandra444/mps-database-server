@@ -79,24 +79,55 @@ def add_study_fields_to_form(self, form, add_study=False):
 #         return self.render_to_response(context)
 
 
-# May want to merge with UserIndex?
+def get_queryset_with_organ_model_map(queryset):
+    """Takes a queryset and returns it with a organ model map"""
+    setups = AssayChipSetup.objects.filter(
+        organ_model__isnull=False
+    ).prefetch_related(
+        'assay_run_id',
+        'device',
+        'organ_model',
+        # These two are deprecated
+        'compound',
+        'unit'
+    )
+
+    organ_model_map = {}
+
+    for setup in setups:
+        organ_model_map.setdefault(
+            setup.assay_run_id_id, {}
+        ).update(
+            {
+                setup.organ_model.model_name: True
+            }
+        )
+
+    for study in queryset:
+        study.organ_models = '\n'.join(
+            organ_model_map.get(study.id, {}).keys()
+        )
+
+
 class GroupIndex(OneGroupRequiredMixin, ListView):
     """Displays all of the studies linked to groups that the user is part of"""
-    template_name = 'assays/index.html'
+    template_name = 'assays/assayrun_list.html'
 
     def get_queryset(self):
-        return AssayRun.objects.filter(
+        queryset = AssayRun.objects.filter(
             group__in=self.request.user.groups.all()
         ).prefetch_related('created_by', 'group', 'signed_off_by')
+        get_queryset_with_organ_model_map(queryset)
 
-    # def get_context_data(self, request, **kwargs):
-    #     groups = request.user.groups.values_list('pk', flat=True)
-    #     groups = Group.objects.filter(pk__in=groups)
-    #     self.object_list = AssayRun.objects.filter(group__in=groups).prefetch_related('created_by', 'group')
-    #
-    #     return super(GroupIndex, self).get_context_data(**kwargs)
-    #
-    #     return self.render_to_response(context)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(GroupIndex, self).get_context_data(**kwargs)
+
+        # Adds the word "editable" to the page
+        context['editable'] = 'Editable '
+
+        return context
 
 
 class StudyIndex(ViewershipMixin, DetailView):
@@ -252,11 +283,16 @@ class AssayRunList(LoginRequiredMixin, ListView):
 
         # Display to users with either editor or viewer group or if unrestricted
         group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
-        return queryset.filter(
+
+        queryset = queryset.filter(
             restricted=False
         ) | queryset.filter(
             group__name__in=group_names
         )
+
+        get_queryset_with_organ_model_map(queryset)
+
+        return queryset
 
 StudySupportingDataFormset = inlineformset_factory(
     AssayRun,

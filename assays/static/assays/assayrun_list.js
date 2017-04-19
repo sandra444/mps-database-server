@@ -5,7 +5,7 @@ $(document).ready(function() {
         responsive: true,
         "iDisplayLength": 50,
         // Initially sort on start date (descending), not ID
-        "order": [ 4, "desc" ],
+        "order": [ 2, "desc" ],
         "aoColumnDefs": [
             {
                 "bSortable": false,
