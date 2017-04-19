@@ -162,7 +162,8 @@ $(document).ready(function () {
                 for (var i = 0; i < data.getNumberOfRows(); i++) {
                     var val = data.getValue(i, 1);
                     if (val != null) {
-                        data.setValue(i, 0, val + ''.valueOf());
+                        // PLEASE NOTE: Floats are truncated to 3 decimals
+                        data.setValue(i, 0, parseFloat(val.toFixed(3)) + ''.valueOf());
                     }
                 }
                 // remove column 1 (the old column 0)
