@@ -596,8 +596,8 @@ class ChipTestResultInlineFormset(BaseInlineFormSet):
         """
         super(ChipTestResultInlineFormset, self).__init__(*args, **kwargs)
         unit_queryset = PhysicalUnits.objects.filter(
-            availability__contains='test'
-        ).order_by('base_unit', 'scale_factor')
+            availability__icontains='test'
+        ).order_by('unit_type', 'base_unit', 'scale_factor')
         for form in self.forms:
             form.fields['test_unit'].queryset = unit_queryset
 
@@ -831,8 +831,8 @@ class PlateTestResultInlineFormset(BaseInlineFormSet):
         """
         super(PlateTestResultInlineFormset, self).__init__(*args, **kwargs)
         unit_queryset = PhysicalUnits.objects.filter(
-            availability__contains='test'
-        ).order_by('base_unit', 'scale_factor')
+            availability__icontains='test'
+        ).order_by('unit_type', 'base_unit', 'scale_factor')
         for form in self.forms:
             form.fields['test_unit'].queryset = unit_queryset
 
@@ -921,8 +921,8 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
         """
         super(AssayPlateReadoutInlineFormset, self).__init__(*args, **kwargs)
         unit_queryset = PhysicalUnits.objects.filter(
-            availability__contains='readout'
-        ).order_by('base_unit', 'scale_factor')
+            availability__icontains='readout'
+        ).order_by('unit_type', 'base_unit', 'scale_factor')
         for form in self.forms:
             form.fields['readout_unit'].queryset = unit_queryset
 
@@ -1013,8 +1013,8 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
         """
         super(AssayChipReadoutInlineFormset, self).__init__(*args, **kwargs)
         unit_queryset = PhysicalUnits.objects.filter(
-            availability__contains='readout'
-        ).order_by('base_unit', 'scale_factor')
+            availability__icontains='readout'
+        ).order_by('unit_type', 'base_unit', 'scale_factor')
         for form in self.forms:
             form.fields['readout_unit'].queryset = unit_queryset
 
@@ -1188,8 +1188,16 @@ class AssayInstanceInlineFormset(BaseInlineFormSet):
         Filters units so that only units marked 'readout' appear
         """
         super(AssayInstanceInlineFormset, self).__init__(*args, **kwargs)
+
+        target_queryset = AssayTarget.objects.all().order_by('name')
+
+        method_queryset = AssayMethod.objects.all().order_by('name')
+
         unit_queryset = PhysicalUnits.objects.filter(
-            availability__contains='readout'
-        ).order_by('base_unit', 'scale_factor')
+            availability__icontains='readout'
+        ).order_by('unit_type', 'base_unit', 'scale_factor')
+
         for form in self.forms:
+            form.fields['target'].queryset = target_queryset
+            form.fields['method'].queryset = method_queryset
             form.fields['unit'].queryset = unit_queryset
