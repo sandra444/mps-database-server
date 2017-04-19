@@ -1970,7 +1970,7 @@ def validate_chip_readout_file(
         # DEFAULT IS SUBJECT TO CHANGE PLEASE BE AWARE
         replicate = '0'
         if header_indices.get('REPLICATE', ''):
-            quality = line[header_indices.get('REPLICATE')][:255]
+            replicate = line[header_indices.get('REPLICATE')][:255]
 
         if chip_id not in setup_id_to_readout:
             errors.append(
