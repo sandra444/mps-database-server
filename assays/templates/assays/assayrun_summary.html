@@ -58,7 +58,7 @@
     {% if object.studysupportingdata_set.all %}
         <legend><h3>Supporting Data</h3></legend>
 
-        <table class="table table-striped">
+        <table class="table table-striped table-bordered">
             <thead>
             <tr>
               <th>Description</th>
@@ -168,7 +168,7 @@
 
     {% if indicative.assaychipcells_set.all %}
         <legend><h3>Cells for {{ indicative }}</h3></legend>
-        <table class="table table-striped">
+        <table class="table table-striped table-bordered">
             <thead>
             <tr>
                 <th>Cell Sample</th>
