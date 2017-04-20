@@ -34,7 +34,7 @@
     </div>
 
     {% if object.description or object.study_configuration or object.protocol %}
-        <legend><h3>Description</h3></legend>
+        <legend>Description</legend>
 
         {% if object.description %}
             <p>
@@ -54,33 +54,6 @@
             </p>
         {% endif %}
     {% endif %}
-
-    {% if object.studysupportingdata_set.all %}
-        <legend><h3>Supporting Data</h3></legend>
-
-        <table class="table table-striped table-bordered">
-            <thead>
-            <tr>
-              <th>Description</th>
-              <th>Supporting Data File</th>
-            </tr>
-            </thead>
-            <tbody>
-                {% for supporting_data in object.studysupportingdata_set.all %}
-                    <tr>
-                        <td>{{ supporting_data.description }}</td>
-                        <td>
-                            <a href="/media/{{ supporting_data.supporting_data }}">
-                              {{ supporting_data.supporting_data }}
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
-
-    {% include 'assays/data_upload_table.html' %}
 
     <div id="radio_buttons" hidden class="well hidden-print">
         <h3 class="text-center">Chip Readout Data</h3>
@@ -115,8 +88,36 @@
 
     <div id="charts" class="padded-bottom"></div>
 
-    <legend><h3>Chip Setups</h3></legend>
+    {% if object.studysupportingdata_set.all %}
+        <legend>Supporting Data</legend>
+
+        <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+              <th>Description</th>
+              <th>Supporting Data File</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for supporting_data in object.studysupportingdata_set.all %}
+                    <tr>
+                        <td>{{ supporting_data.description }}</td>
+                        <td>
+                            <a href="/media/{{ supporting_data.supporting_data }}">
+                              {{ supporting_data.supporting_data }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% include 'assays/data_upload_table.html' %}
+
+    <legend>Chip Setups</legend>
     {% if setups %}
+        <div class="padded-bottom">
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -160,6 +161,7 @@
             {% endfor %}
             </tbody>
         </table>
+        </div>
         {% else %}
         <div class="alert alert-warning" role="alert">
             No chip setups exist for this study
@@ -167,7 +169,7 @@
     {% endif %}
 
     {% if indicative.assaychipcells_set.all %}
-        <legend><h3>Cells for {{ indicative }}</h3></legend>
+        <legend>Cells for {{ indicative }}</legend>
         <table class="table table-striped table-bordered">
             <thead>
             <tr>
@@ -210,7 +212,7 @@
     {% endif %}
 
     {% if plate_setups %}
-        <legend><h3>Plate Setups</h3></legend>
+        <legend>Plate Setups</legend>
         <table id="plate_setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -248,7 +250,7 @@
     {% endif %}
 
     {% if plate_indicative.assayplatecells_set.all %}
-        <legend><h3>Cells for {{ plate_indicative }}</h3></legend>
+        <legend>Cells for {{ plate_indicative }}</legend>
         <table class="table table-striped">
             <thead>
             <tr>
