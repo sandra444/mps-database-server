@@ -113,8 +113,6 @@
         </table>
     {% endif %}
 
-    {% include 'assays/data_upload_table.html' %}
-
     <legend>Chip Setups</legend>
     {% if setups %}
         <div class="padded-bottom">
@@ -167,6 +165,8 @@
             No chip setups exist for this study
         </div>
     {% endif %}
+
+    {% include 'assays/data_upload_table.html' %}
 
     {% if indicative.assaychipcells_set.all %}
         <legend>Cells for {{ indicative }}</legend>
