@@ -125,13 +125,14 @@
         </table>
     {% endif %}
 
-    <legend>New Chip Data</legend>
+{#    <legend>New Chip Data</legend>#}
+    {% include 'assays/chart_options.html' with chart_title="New Data" chart_prefix="new_charts" %}
     <div id="new_charts" class="padded-bottom">Preview Unavailable</div>
 
-    <legend>
-        Current Chip Data
-        <a class="btn btn-info" id="show_all" value="">Show All</a>
-    </legend>
+{#    <legend>#}
+{#        Current Chip Data#}
+{#    </legend>#}
+    {% include 'assays/chart_options.html' with chart_title="Current Data" chart_prefix="current_charts" %}
     <div id="current_charts" class="padded-bottom">No Current Chip Data</div>
 
     </form>

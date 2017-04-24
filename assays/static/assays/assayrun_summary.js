@@ -8,12 +8,8 @@ $(document).ready(function() {
     var middleware_token = getCookie('csrftoken');
     var study_id = Math.floor(window.location.href.split('/')[4]);
 
-    var current_key = 'chip';
-    var mean_type = 'arithmetic';
-    var interval_type = 'ste';
-    var percent_control = false;
-
-    var radio_buttons_display = $('#radio_buttons');
+    // Name for the charts for binding events etc
+    var charts_name = 'charts';
 
     var ids = [
         '#setups',
@@ -44,30 +40,24 @@ $(document).ready(function() {
     });
 
     function get_readouts() {
+        var data = {
+            call: 'fetch_readouts',
+            study: study_id,
+            csrfmiddlewaretoken: middleware_token
+        };
+
+        var options = window.CHARTS.prepare_chart_options(charts_name);
+
+        data = $.extend(data, options);
+
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
-            data: {
-                // Function to call within the view is defined by `call:`
-                call: 'fetch_readouts',
-                study: study_id,
-                key: current_key,
-                mean_type: mean_type,
-                interval_type: interval_type,
-                include_all: '',
-                // Tells whether to convert to percent Control
-                percent_control: percent_control,
-                csrfmiddlewaretoken: middleware_token
-            },
+            data: data,
             success: function (json) {
-                // Show radio_buttons if there is data
-                if (Object.keys(json).length > 0) {
-                    radio_buttons_display.show();
-                }
-
-                window.CHARTS.prepare_side_by_side_charts(json, 'charts');
-                window.CHARTS.make_charts(json, 'charts');
+                window.CHARTS.prepare_side_by_side_charts(json, charts_name);
+                window.CHARTS.make_charts(json, charts_name);
 
                 // Recalculate responsive and fixed headers
                 $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
@@ -79,30 +69,8 @@ $(document).ready(function() {
         });
     }
 
-    // Initially by device
-    // get_readouts();
-
-    // Check when chart type changes
-    $('input[type=radio][name=chart_type_radio]').change(function() {
-        current_key = this.value;
-        get_readouts();
-    });
-
-    // Check when mean type changes
-    $('input[type=radio][name=mean_type_radio]').change(function() {
-        mean_type = this.value;
-        get_readouts();
-    });
-
-    // Check when interval type changes
-    $('input[type=radio][name=interval_type_radio]').change(function() {
-        interval_type = this.value;
-        get_readouts();
-    });
-
-    // Check if convert_to_percent_control is clicked
-    $('#convert_to_percent_control').click(function() {
-        percent_control = this.checked;
-        get_readouts();
+    // Setup triggers
+    $('#' + charts_name + 'chart_options').find('input').change(function() {
+        refresh_chart_only();
     });
 });

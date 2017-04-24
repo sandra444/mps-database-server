@@ -12,6 +12,18 @@ window.CHARTS = {};
 // google.charts.setOnLoadCallback(window.CHARTS.callback);
 
 $(document).ready(function () {
+    window.CHARTS.prepare_chart_options = function(charts) {
+        var options = {};
+
+        $.each($('#' + charts + 'chart_options').find('input'), function() {
+            if (this.checked) {
+                options[this.name.replace(charts, '')] = this.value;
+            }
+        });
+
+        return options;
+    };
+
     window.CHARTS.prepare_side_by_side_charts = function(json, charts) {
         // Clear existing charts
         var charts_id = $('#' + charts);
@@ -72,6 +84,9 @@ $(document).ready(function () {
     };
 
     window.CHARTS.make_charts = function(json, charts, changes_to_options) {
+        // Show the chart options
+        // NOTE: the chart options are currently shown by default, subject to change
+
         var sorted_assays = json.sorted_assays;
         var assays = json.assays;
 
@@ -193,5 +208,5 @@ $(document).ready(function () {
                 chart.draw(dataView, options);
             }
         }
-    }
+    };
 });

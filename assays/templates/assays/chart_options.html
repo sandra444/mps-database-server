@@ -1,0 +1,43 @@
+<div id="{{ chart_prefix }}chart_options" class="well hidden-print chart-option-block">
+{#    <h3 class="text-center">Chip Readout Data</h3>#}
+    <h3 class="text-center">{{ chart_title }}</h3>
+    <div class="row">
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}chip_select" value="chip" checked>
+            View by Device
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}compound_select" value="compound">
+            View by Compound
+        </label>
+        <label for="{{ chart_prefix }}percent_control" class="pull-right">
+            <input type="checkbox" name="{{ chart_prefix }}percent_control" id="{{ chart_prefix }}percent_control" />
+            Convert to Percent of Control
+        </label>
+    </div>
+    <div class="row">
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}mean_type" id="{{ chart_prefix }}arithmetic_select" value="arithmetic" checked>
+            Arithmetic Mean
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}mean_type" id="{{ chart_prefix }}geometric_select" value="geometric">
+            Geometric Mean
+        </label>
+        <label for="{{ chart_prefix }}include_all" class="pull-right">
+            <input type="checkbox" name="{{ chart_prefix }}include_all" id="{{ chart_prefix }}include_all" />
+            {# Beyond crude, don't do things like this #}
+            Include Rejected Data&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </label>
+    </div>
+    <div class="row">
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}interval_type" id="{{ chart_prefix }}ste_select" value="ste" checked>
+            Standard Error
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}interval_type" id="{{ chart_prefix }}std_select" value="std">
+            Standard Deviation
+        </label>
+    </div>
+</div>

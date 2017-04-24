@@ -32,6 +32,10 @@ $(document).ready(function () {
     var dynamic_quality_new = {};
 
     var readout_id = get_readout_value();
+    var study_id = get_study_id();
+
+    // Name for the charts for binding events etc
+    var charts_name = 'charts';
 
     // Indicates whether the data exists in the database or not
     var exist = false;
@@ -62,6 +66,16 @@ $(document).ready(function () {
             format = d3.format(',d');
         }
         return format(value);
+    }
+
+    function get_study_id() {
+        var study_id = Math.floor(window.location.href.split('/')[4]);
+        if (study_id) {
+            return study_id
+        }
+        else {
+            return ''
+        }
     }
 
     function get_readout_value() {
@@ -124,21 +138,31 @@ $(document).ready(function () {
         }
 
         var dynamic_quality = $.extend({}, dynamic_quality_current, dynamic_quality_new);
+
+        var data = {
+            call: 'validate_individual_chip_file',
+            study: study_id,
+            readout: readout_id,
+            csrfmiddlewaretoken: middleware_token,
+            dynamic_quality: JSON.stringify(dynamic_quality),
+            include_table: include_table
+        };
+
+        var options = window.CHARTS.prepare_chart_options(charts_name);
+
+        data = $.extend(data, options);
+
         var serializedData = $('form').serializeArray();
         var formData = new FormData();
         $.each(serializedData, function(index, field) {
             formData.append(field.name, field.value);
         });
         formData.append('file', $('#id_file')[0].files[0]);
-        if (readout_id) {
-            formData.append('readout', readout_id);
-        }
-        else {
-            formData.append('study', Math.floor(window.location.href.split('/')[4]));
-        }
-        formData.append('include_table', include_table);
-        formData.append('dynamic_quality', JSON.stringify(dynamic_quality));
-        formData.append('call', 'validate_individual_chip_file');
+
+        $.each(data, function(index, contents) {
+            formData.append(index, contents);
+        });
+
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
@@ -165,8 +189,8 @@ $(document).ready(function () {
                     if (include_table) {
                        process_data(json.table);
                     }
-                    window.CHARTS.prepare_charts_by_table(json.charts, 'charts');
-                    window.CHARTS.make_charts(json.charts, 'charts', changes_to_chart_options);
+                    window.CHARTS.prepare_charts_by_table(json.charts, charts_name);
+                    window.CHARTS.make_charts(json.charts, charts_name, changes_to_chart_options);
                 }
             },
             error: function (xhr, errmsg, err) {
@@ -198,7 +222,8 @@ $(document).ready(function () {
 
         // var table = '';
 
-        var data_points = json.data_points;
+        // PLEASE NOTE THAT THE DATA POINTS ARE REVERSED
+        var data_points = json.data_points.reverse();
         var assay_instances = json.assay_instances;
         var sample_locations = json.sample_locations;
 
@@ -327,7 +352,7 @@ $(document).ready(function () {
                 col_quality,
                 col_notes
             );
-            table_body.append(new_row);
+            table_body.prepend(new_row);
         }
 
         var all_qualities = null;
@@ -456,39 +481,34 @@ $(document).ready(function () {
             }
 
             // Validate again if there is a file
-            if ($('#id_file').val()) {
-                validate_readout_file('');
-            }
-            else {
-                plot_existing_data();
-            }
+            // Only affects charts
+            refresh_chart_only();
         });
-
-        // TODO FIX PLOT
-        // plot();
     };
 
     function plot_existing_data() {
         var dynamic_quality = $.extend({}, dynamic_quality_current, dynamic_quality_new);
+
+        var data = {
+            call: 'fetch_readouts',
+            study: study_id,
+            readout: readout_id,
+            csrfmiddlewaretoken: middleware_token,
+            dynamic_quality: dynamic_quality
+        };
+
+        var options = window.CHARTS.prepare_chart_options(charts_name);
+
+        data = $.extend(data, options);
+
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
-            data: {
-                // Function to call within the view is defined by `call:`
-                call: 'fetch_readouts',
-                readout: readout_id,
-                // study: study_id,
-                // TODO CONTRIVED, DEVICE FOR NOW
-                key: 'device',
-                dynamic_quality: JSON.stringify(dynamic_quality),
-                // Tells whether to convert to percent Control
-                // percent_control: percent_control,
-                csrfmiddlewaretoken: middleware_token
-            },
+            data: data,
             success: function (json) {
-                window.CHARTS.prepare_charts_by_table(json, 'charts');
-                window.CHARTS.make_charts(json, 'charts', changes_to_chart_options);
+                window.CHARTS.prepare_charts_by_table(json, charts_name);
+                window.CHARTS.make_charts(json, charts_name, changes_to_chart_options);
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
@@ -496,23 +516,38 @@ $(document).ready(function () {
         });
     }
 
-    var refresh = function() {
+    var refresh_table_and_charts = function() {
         var file = $('#id_file')[0].files[0];
         if (file) {
             // resetChart();
             validate_readout_file('True');
             // getText(file);
         }
+        else {
+            plot_existing_data();
+        }
+    };
+
+    var refresh_chart_only = function() {
+        var file = $('#id_file')[0].files[0];
+        if (file) {
+            // resetChart();
+            validate_readout_file('');
+            // getText(file);
+        }
+        else {
+            plot_existing_data();
+        }
     };
 
     // Refresh on file change
     $('#id_file').change(function(evt) {
-        refresh();
+        refresh_table_and_charts();
     });
 
     // Refresh on change in overwrite option NEED REPLCATE TO BE ACCURATE
     $('#id_overwrite_option').change(function() {
-        refresh();
+        refresh_table_and_charts();
     });
 
     // Datepicker superfluous on admin, use this check to apply only in frontend
@@ -524,4 +559,9 @@ $(document).ready(function () {
         date.datepicker("option", "dateFormat", "yy-mm-dd");
         date.datepicker("setDate", curr_date);
     }
+
+    // Setup triggers
+    $('#' + charts_name + 'chart_options').find('input').change(function() {
+        refresh_chart_only();
+    });
 });

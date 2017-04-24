@@ -857,7 +857,7 @@ def get_readout_data(
     return final_data
 
 
-def get_related_compounds_map(readouts):
+def get_related_compounds_map(readouts=None, study=None):
     """Returns a map of setup id -> compound
 
     Params:
@@ -865,7 +865,12 @@ def get_related_compounds_map(readouts):
     """
     related_compounds_map = {}
 
-    setups = readouts.values_list('chip_setup_id')
+    if readouts:
+        setups = readouts.values_list('chip_setup_id')
+    elif study:
+        setups = AssayChipSetup.objects.filter(assay_run_id=study)
+    else:
+        setups = None
 
     related_compounds = AssayCompoundInstance.objects.filter(
         chip_setup=setups
@@ -893,6 +898,8 @@ def fetch_readouts(request):
     percent_control -- specifies whether to convert to percent control
     include_all -- specifies whether to include all data (exclude invalid if null string)
     """
+    # This business is a little excessive
+    # Rather, we can refer to the POST as a dictionary and modify as necessary
     study = request.POST.get('study', '')
     readout = request.POST.get('readout', '')
     key = request.POST.get('key', '')
@@ -902,23 +909,18 @@ def fetch_readouts(request):
     include_all = request.POST.get('include_all', '')
     dynamic_quality = json.loads(request.POST.get('dynamic_quality', '{}'))
 
-    if percent_control == 'true':
-        percent_control = True
-    else:
-        percent_control = False
-
     # Get chip readouts
     if study:
         readouts = AssayChipReadout.objects.filter(
             chip_setup__assay_run_id_id=study
         ).prefetch_related(
-            'chip_setup__assay_run_id_id'
+            'chip_setup__assay_run_id'
         )
     else:
         readouts = AssayChipReadout.objects.filter(
             id=readout
         ).prefetch_related(
-            'chip_setup__assay_run_id_id'
+            'chip_setup__assay_run_id'
         )
 
     raw_data = AssayChipRawData.objects.filter(
@@ -930,8 +932,7 @@ def fetch_readouts(request):
     related_compounds_map = {}
 
     if key == 'compound':
-        related_compounds_map = get_related_compounds_map(readouts)
-
+        related_compounds_map = get_related_compounds_map(readouts=readouts)
 
     data = get_readout_data(
         raw_data,
@@ -1126,10 +1127,15 @@ def validate_bulk_file(request):
         # Only chip preview right now
         chip_raw_data = preview_data.get('chip_preview')
 
+        related_compounds_map = {}
+
+        if key == 'compound':
+            related_compounds_map = get_related_compounds_map(study=this_study)
+
         # NOTE THE EMPTY DIC, RIGHT NOW BULK PREVIEW NEVER SHOWS COMPOUND JUST DEVICE
         data = get_readout_data(
             chip_raw_data,
-            {},
+            related_compounds_map,
             key,
             mean_type,
             interval_type,
@@ -1224,9 +1230,14 @@ def validate_individual_chip_file(request):
         if include_table:
             table = get_chip_readout_data_as_json([readout_id], chip_data=chip_raw_data)
 
+        related_compounds_map = {}
+
+        if key == 'compound':
+            related_compounds_map = get_related_compounds_map(readouts=readout)
+
         charts = get_readout_data(
             full_raw_data,
-            {},
+            related_compounds_map,
             key,
             mean_type,
             interval_type,
