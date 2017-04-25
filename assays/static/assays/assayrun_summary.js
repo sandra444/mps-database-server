@@ -71,6 +71,6 @@ $(document).ready(function() {
 
     // Setup triggers
     $('#' + charts_name + 'chart_options').find('input').change(function() {
-        refresh_chart_only();
+        get_readouts();
     });
 });
