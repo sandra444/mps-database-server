@@ -56,6 +56,9 @@ logger = logging.getLogger(__name__)
 # handler function using a simulated Python switch routing function
 
 # TODO OPTIMIZE DATABASE HITS
+# Global variable for what to call control values (avoid magic strings)
+CONTROL_LABEL = '-Control-'
+
 
 
 def main(request):
@@ -594,13 +597,58 @@ def get_list_of_present_compounds(related_compounds_map, data_point, separator='
                 )
 
         if not compounds_to_add:
-            tag = '-Control-'
+            tag = CONTROL_LABEL
         else:
             tag = separator.join(sorted(compounds_to_add))
     else:
-        tag = '-Control-'
+        tag = CONTROL_LABEL
 
     return tag
+
+
+def get_percent_control_data(study, readout, related_compounds_map, key, include_all):
+    control_data = {}
+
+    data_points = AssayChipRawData.objects.exclude(
+        assay_chip_id=readout
+    ).filter(
+        assay_chip_id__chip_setup__assay_run_id=study
+    ).prefetch_related(
+        *CHIP_DATA_PREFETCH
+    )
+
+    # A little too much copy-pasting here, not very DRY
+    for raw in data_points:
+        value = raw.value
+
+        # TODO CHANGE TO USE FOLLOWING
+        assay_instance = raw.assay_instance
+        target = assay_instance.target.name
+        unit = assay_instance.unit.unit
+        # Not currently used
+        method = assay_instance.method.name
+
+        sample_location = raw.sample_location.name
+
+        # chip_id = raw.assay_chip_id.chip_setup.assay_chip_id
+
+        time = raw.time / 1440.0
+
+        quality = raw.quality
+
+        # No dynamic quality here
+        if value is not None and (include_all or not quality):
+            if key == 'compound':
+                tag = get_list_of_present_compounds(related_compounds_map, raw, ' & ')
+                if tag == CONTROL_LABEL:
+                    control_data.setdefault(target, {}).setdefault(unit, {}).setdefault(CONTROL_LABEL, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
+            # If by device
+            else:
+                # Specifically add to consolidated control if this is a device-by-device control
+                if raw.assay_chip_id.chip_setup.chip_test_type == 'control':
+                    control_data.setdefault(target, {}).setdefault(unit, {}).setdefault(CONTROL_LABEL, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
+
+    return control_data
 
 
 def get_readout_data(
@@ -611,15 +659,22 @@ def get_readout_data(
         interval_type,
         percent_control,
         include_all,
-        dynamic_quality
+        dynamic_quality,
+        study=None,
+        readout=None
 ):
     """Get all readout data for a study and return it in JSON format
 
     From POST:
     raw_data - the AssayChipRawData needed to create the JSON
+    related_compounds_map - dic of setup pointing to compounhds
     key - whether this data should be considered by device or by compound
+    interval_type - the type of interval (std, ste, etc)
     percent_control - whether to use percent control (WIP)
     include_all - whether to include all values
+    dynamic_quality - dic of data points to exclude
+    study - supplied only if needed to get percent control values (validating data sets and so on)
+    readout - supplied only when data is for an individual readout
     """
 
     # TODO ACCOUNT FOR CASE WHERE ASSAY HAS TWO DIFFERENT UNITS?
@@ -636,6 +691,10 @@ def get_readout_data(
     intermediate_data = {}
 
     initial_data = {}
+
+    # If this needs to have initial control data
+    if study:
+        initial_data = get_percent_control_data(study, readout, related_compounds_map, key, include_all)
 
     averaged_data = {}
     controls = {}
@@ -680,7 +739,7 @@ def get_readout_data(
         # # Have time in minutes for comparing to addition_time and duration
         # time_minutes = scale * raw.time
 
-        time_minutes = raw.time
+        # time_minutes = raw.time
         # Time will always be in days
         # time = '{0:.2f}'.format(raw.time / 1440.0)
         time = raw.time / 1440.0
@@ -699,7 +758,7 @@ def get_readout_data(
 
                 # Specifically add to consolidated control if this is a device-by-device control
                 if percent_control and raw.assay_chip_id.chip_setup.chip_test_type == 'control':
-                    initial_data.setdefault(target, {}).setdefault(unit, {}).setdefault('-Control-', {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
+                    initial_data.setdefault(target, {}).setdefault(unit, {}).setdefault(CONTROL_LABEL, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
 
             # Set data in nested monstrosity that is initial_data
             initial_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
@@ -709,10 +768,11 @@ def get_readout_data(
             for tag, sample_locations in tags.items():
                 for sample_location, time_values in sample_locations.items():
                     for time, values in time_values.items():
-                        if percent_control and tag == '-Control-':
+                        if percent_control and tag == CONTROL_LABEL:
                             controls.update({(target, unit, sample_location, time): sum(values) / float(len(values))})
                         # Add to averaged data if this isn't a average control value for device-by-device
-                        if not (tag == '-Control-' and key != 'compound'):
+                        # The second clause is to exclude control data from validation and individual readouts
+                        if not (tag == CONTROL_LABEL and key != 'compound') and not (tag == CONTROL_LABEL and key == 'compound' and study):
                             if len(values) > 1:
                                 # If geometric mean
                                 if mean_type == 'geometric':
@@ -846,6 +906,7 @@ def get_readout_data(
                 for y, value in data_point.items():
                     current_table[y_header.get(y)][x_header.get(x)] = value
 
+    controls = None
     averaged_data = None
 
     final_data.get('sorted_assays').sort(key=lambda s: s.upper())
@@ -909,19 +970,38 @@ def fetch_readouts(request):
     include_all = request.POST.get('include_all', '')
     dynamic_quality = json.loads(request.POST.get('dynamic_quality', '{}'))
 
-    # Get chip readouts
-    if study:
-        readouts = AssayChipReadout.objects.filter(
-            chip_setup__assay_run_id_id=study
-        ).prefetch_related(
-            'chip_setup__assay_run_id'
-        )
-    else:
+    if readout:
+        this_readout = AssayChipReadout.objects.get(pk=readout)
+        this_study = this_readout.chip_setup.assay_run_id
+        study = this_study
         readouts = AssayChipReadout.objects.filter(
             id=readout
         ).prefetch_related(
             'chip_setup__assay_run_id'
         )
+    else:
+        this_readout = None
+        this_study = None
+        study = AssayRun.objects.get(pk=study)
+        readouts = AssayChipReadout.objects.filter(
+            chip_setup__assay_run_id_id=study
+        ).prefetch_related(
+            'chip_setup__assay_run_id'
+        )
+
+    # Get chip readouts
+    # if readout:
+    #     readouts = AssayChipReadout.objects.filter(
+    #         id=readout
+    #     ).prefetch_related(
+    #         'chip_setup__assay_run_id'
+    #     )
+    # else:
+    #     readouts = AssayChipReadout.objects.filter(
+    #         chip_setup__assay_run_id_id=study
+    #     ).prefetch_related(
+    #         'chip_setup__assay_run_id'
+    #     )
 
     raw_data = AssayChipRawData.objects.filter(
         assay_chip_id=readouts
@@ -932,7 +1012,7 @@ def fetch_readouts(request):
     related_compounds_map = {}
 
     if key == 'compound':
-        related_compounds_map = get_related_compounds_map(readouts=readouts)
+        related_compounds_map = get_related_compounds_map(study=study)
 
     data = get_readout_data(
         raw_data,
@@ -942,7 +1022,9 @@ def fetch_readouts(request):
         interval_type,
         percent_control,
         include_all,
-        dynamic_quality
+        dynamic_quality,
+        study=this_study,
+        readout=this_readout
     )
 
     return HttpResponse(json.dumps(data),
@@ -1141,7 +1223,8 @@ def validate_bulk_file(request):
             interval_type,
             percent_control,
             include_all,
-            dynamic_quality
+            dynamic_quality,
+            study=this_study
         )
 
         return HttpResponse(json.dumps(data),
@@ -1233,7 +1316,7 @@ def validate_individual_chip_file(request):
         related_compounds_map = {}
 
         if key == 'compound':
-            related_compounds_map = get_related_compounds_map(readouts=readout)
+            related_compounds_map = get_related_compounds_map(study=study)
 
         charts = get_readout_data(
             full_raw_data,
@@ -1243,7 +1326,9 @@ def validate_individual_chip_file(request):
             interval_type,
             percent_control,
             include_all,
-            dynamic_quality
+            dynamic_quality,
+            study=study,
+            readout=readout
         )
 
         data = {
