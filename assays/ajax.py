@@ -606,16 +606,26 @@ def get_list_of_present_compounds(related_compounds_map, data_point, separator='
     return tag
 
 
-def get_percent_control_data(study, readout, related_compounds_map, key, include_all):
-    control_data = {}
+def get_control_data(study, related_compounds_map, key, include_all, new_data_for_control=None):
+    """Gets control data for performing percent control calculations
 
-    data_points = AssayChipRawData.objects.exclude(
-        assay_chip_id=readout
-    ).filter(
+    study - the study in question
+    related_compounds_map - the compounds in case the key is compound
+    key - the key for the legend being used
+    include_all - whether to include all values
+    """
+
+    initial_control_data = {}
+    controls = {}
+
+    data_points = list(AssayChipRawData.objects.filter(
         assay_chip_id__chip_setup__assay_run_id=study
     ).prefetch_related(
         *CHIP_DATA_PREFETCH
-    )
+    ))
+
+    if new_data_for_control:
+        data_points.extend(new_data_for_control)
 
     # A little too much copy-pasting here, not very DRY
     for raw in data_points:
@@ -641,14 +651,23 @@ def get_percent_control_data(study, readout, related_compounds_map, key, include
             if key == 'compound':
                 tag = get_list_of_present_compounds(related_compounds_map, raw, ' & ')
                 if tag == CONTROL_LABEL:
-                    control_data.setdefault(target, {}).setdefault(unit, {}).setdefault(CONTROL_LABEL, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
+                    initial_control_data.setdefault(target, {}).setdefault(unit, {}).setdefault(CONTROL_LABEL, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
             # If by device
             else:
                 # Specifically add to consolidated control if this is a device-by-device control
                 if raw.assay_chip_id.chip_setup.chip_test_type == 'control':
-                    control_data.setdefault(target, {}).setdefault(unit, {}).setdefault(CONTROL_LABEL, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
+                    initial_control_data.setdefault(target, {}).setdefault(unit, {}).setdefault(CONTROL_LABEL, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
 
-    return control_data
+        for target, units in initial_control_data.items():
+            for unit, tags in units.items():
+                for tag, sample_locations in tags.items():
+                    for sample_location, time_values in sample_locations.items():
+                        for time, values in time_values.items():
+                            controls.update(
+                                    {(target, unit, sample_location, time): sum(values) / float(len(values))}
+                            )
+
+    return controls
 
 
 def get_readout_data(
@@ -661,7 +680,9 @@ def get_readout_data(
         include_all,
         dynamic_quality,
         study=None,
-        readout=None
+        readout=None,
+        new_data=False,
+        additional_data=None
 ):
     """Get all readout data for a study and return it in JSON format
 
@@ -675,6 +696,8 @@ def get_readout_data(
     dynamic_quality - dic of data points to exclude
     study - supplied only if needed to get percent control values (validating data sets and so on)
     readout - supplied only when data is for an individual readout
+    new_data - indicates whether data in raw_data is new
+    additional_data - data to merge with raw_data (used when displaying individual readouts for convenience)
     """
 
     # TODO ACCOUNT FOR CASE WHERE ASSAY HAS TWO DIFFERENT UNITS?
@@ -692,12 +715,20 @@ def get_readout_data(
 
     initial_data = {}
 
-    # If this needs to have initial control data
-    if study:
-        initial_data = get_percent_control_data(study, readout, related_compounds_map, key, include_all)
+    controls = {}
+    if percent_control:
+        new_data_for_control = None
+        if new_data:
+            new_data_for_control = raw_data
+
+        controls = get_control_data(study, related_compounds_map, key, include_all, new_data_for_control=new_data_for_control)
 
     averaged_data = {}
-    controls = {}
+
+    # Append the additional_data as necessary
+    # Why is this done? It is an expedient way to avoid duplicating data
+    if additional_data:
+        raw_data.extend(additional_data)
 
     for raw in raw_data:
         # Now uses full name
@@ -756,10 +787,6 @@ def get_readout_data(
             else:
                 tag = chip_id
 
-                # Specifically add to consolidated control if this is a device-by-device control
-                if percent_control and raw.assay_chip_id.chip_setup.chip_test_type == 'control':
-                    initial_data.setdefault(target, {}).setdefault(unit, {}).setdefault(CONTROL_LABEL, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
-
             # Set data in nested monstrosity that is initial_data
             initial_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
 
@@ -768,39 +795,34 @@ def get_readout_data(
             for tag, sample_locations in tags.items():
                 for sample_location, time_values in sample_locations.items():
                     for time, values in time_values.items():
-                        if percent_control and tag == CONTROL_LABEL:
-                            controls.update({(target, unit, sample_location, time): sum(values) / float(len(values))})
-                        # Add to averaged data if this isn't a average control value for device-by-device
-                        # The second clause is to exclude control data from validation and individual readouts
-                        if not (tag == CONTROL_LABEL and key != 'compound') and not (tag == CONTROL_LABEL and key == 'compound' and study):
-                            if len(values) > 1:
-                                # If geometric mean
-                                if mean_type == 'geometric':
-                                    # Geometric mean will sometimes fail (due to zero values and so on)
-                                    average = gmean(values)
-                                    if np.isnan(average):
-                                        return {'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'}
-                                # If arithmetic mean
-                                else:
-                                    average = np.average(values)
+                        if len(values) > 1:
+                            # If geometric mean
+                            if mean_type == 'geometric':
+                                # Geometric mean will sometimes fail (due to zero values and so on)
+                                average = gmean(values)
+                                if np.isnan(average):
+                                    return {'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'}
+                            # If arithmetic mean
                             else:
-                                average = values[0]
+                                average = np.average(values)
+                        else:
+                            average = values[0]
 
-                            # If standard deviation
-                            if interval_type == 'std':
-                                interval = np.std(values)
-                            # Standard error if not std
-                            else:
-                                interval = np.std(values) / len(values) ** 0.5
+                        # If standard deviation
+                        if interval_type == 'std':
+                            interval = np.std(values)
+                        # Standard error if not std
+                        else:
+                            interval = np.std(values) / len(values) ** 0.5
 
-                            average_and_interval = (
-                                average,
-                                interval
-                            )
+                        average_and_interval = (
+                            average,
+                            interval
+                        )
 
-                            averaged_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).update({
-                                time: average_and_interval
-                            })
+                        averaged_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).update({
+                            time: average_and_interval
+                        })
 
     initial_data = None
 
@@ -981,8 +1003,8 @@ def fetch_readouts(request):
         )
     else:
         this_readout = None
-        this_study = None
         study = AssayRun.objects.get(pk=study)
+        this_study = study
         readouts = AssayChipReadout.objects.filter(
             chip_setup__assay_run_id_id=study
         ).prefetch_related(
@@ -1224,7 +1246,8 @@ def validate_bulk_file(request):
             percent_control,
             include_all,
             dynamic_quality,
-            study=this_study
+            study=this_study,
+            new_data=True
         )
 
         return HttpResponse(json.dumps(data),
@@ -1298,16 +1321,25 @@ def validate_individual_chip_file(request):
         # Only chip preview right now
         chip_raw_data = preview_data.get('chip_preview')
 
+        # Now done in get_readout_data
         # Get the other raw data for this readout
-        full_raw_data = list(
+        # full_raw_data = list(
+        #     AssayChipRawData.objects.filter(
+        #         assay_chip_id=readout
+        #     ).prefetch_related(
+        #         *CHIP_DATA_PREFETCH
+        #     )
+        # )
+        # # Append the new data
+        # full_raw_data.extend(chip_raw_data)
+
+        additional_data = list(
             AssayChipRawData.objects.filter(
                 assay_chip_id=readout
             ).prefetch_related(
                 *CHIP_DATA_PREFETCH
             )
         )
-        # Append the new data
-        full_raw_data.extend(chip_raw_data)
 
         table = ''
         if include_table:
@@ -1319,7 +1351,7 @@ def validate_individual_chip_file(request):
             related_compounds_map = get_related_compounds_map(study=study)
 
         charts = get_readout_data(
-            full_raw_data,
+            chip_raw_data,
             related_compounds_map,
             key,
             mean_type,
@@ -1328,7 +1360,9 @@ def validate_individual_chip_file(request):
             include_all,
             dynamic_quality,
             study=study,
-            readout=readout
+            readout=readout,
+            new_data=True,
+            additional_data=additional_data
         )
 
         data = {
