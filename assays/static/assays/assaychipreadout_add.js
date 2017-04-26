@@ -494,7 +494,7 @@ $(document).ready(function () {
             study: study_id,
             readout: readout_id,
             csrfmiddlewaretoken: middleware_token,
-            dynamic_quality: dynamic_quality
+            dynamic_quality: JSON.stringify(dynamic_quality)
         };
 
         var options = window.CHARTS.prepare_chart_options(charts_name);
