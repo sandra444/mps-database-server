@@ -87,6 +87,11 @@ $(document).ready(function () {
         // Show the chart options
         // NOTE: the chart options are currently shown by default, subject to change
 
+        // If nothing to show
+        if (json.assays.length < 1) {
+            $('#' + charts).html('No data to display');
+        }
+
         var sorted_assays = json.sorted_assays;
         var assays = json.assays;
 

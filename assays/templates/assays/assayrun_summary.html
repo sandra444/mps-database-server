@@ -36,6 +36,9 @@
     {% if object.description or object.study_configuration or object.protocol %}
         <legend>Description</legend>
 
+        <div class="padded-bottom">
+        <div class="panel panel-info">
+        <div class="panel-body">
         {% if object.description %}
             <p>
                 {{ object.description }}
@@ -53,11 +56,17 @@
                 <b>Protocol:</b> <a href="/media/{{ object.protocol }}">{{ object.protocol }}</a>
             </p>
         {% endif %}
+        </div>
+        </div>
+        </div>
     {% endif %}
 
     {% include 'assays/chart_options.html' with chart_prefix="charts" chart_title="Current Data" %}
 
-    <div id="charts" class="padded-bottom"></div>
+    {# Note indicating no data to display initially #}
+    <div id="charts" class="padded-bottom">
+        No data to display
+    </div>
 
     {% if object.studysupportingdata_set.all %}
         <legend>Supporting Data</legend>
