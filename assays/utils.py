@@ -1898,6 +1898,7 @@ def validate_chip_readout_file(
     header_indices = header_data.get('header_indices')
 
     if not sheet:
+        # This is redundant, but useful in some ways
         for line in datalist[starting_index:]:
             if valid_chip_row(line, header_indices) and setup_id_to_readout and line[header_indices.get('CHIP ID')] not in setup_id_to_readout:
                 errors.append(
@@ -1905,7 +1906,7 @@ def validate_chip_readout_file(
                     'You cannot upload data for multiple chips in this interface. '
                     'If you want to upload multiple set of data, '
                     'use the "Upload Excel File of Readout Data" interface instead. '
-                    .format(line[0])
+                        .format(line[header_indices.get('CHIP ID')])
                 )
 
     # Read headers going onward
