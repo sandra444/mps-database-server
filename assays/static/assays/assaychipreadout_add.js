@@ -517,8 +517,7 @@ $(document).ready(function () {
     }
 
     var refresh_table_and_charts = function() {
-        var file = $('#id_file')[0].files[0];
-        if (file) {
+        if ($('#id_file')[0] && $('#id_file')[0].files[0]) {
             // resetChart();
             validate_readout_file('True');
             // getText(file);
@@ -529,8 +528,7 @@ $(document).ready(function () {
     };
 
     var refresh_chart_only = function() {
-        var file = $('#id_file')[0].files[0];
-        if (file) {
+        if ($('#id_file')[0] && $('#id_file')[0].files[0]) {
             // resetChart();
             validate_readout_file('');
             // getText(file);
