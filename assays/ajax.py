@@ -1296,6 +1296,7 @@ def validate_individual_chip_file(request):
     # bulk_file = request.FILES.get('bulk_file', None)
     dynamic_quality = json.loads(request.POST.get('dynamic_quality', '{}'))
 
+    readout = None
     if readout_id:
         readout = AssayChipReadout.objects.filter(pk=readout_id)
         if readout:
@@ -1309,7 +1310,10 @@ def validate_individual_chip_file(request):
         setup_id = None
         study = AssayRun.objects.get(pk=int(study_id))
 
-    form = AssayChipReadoutForm(study, setup_id, request.POST, request.FILES, request=request, instance=readout)
+    if readout:
+        form = AssayChipReadoutForm(study, setup_id, request.POST, request.FILES, request=request, instance=readout)
+    else:
+        form = AssayChipReadoutForm(study, setup_id, request.POST, request.FILES, request=request)
     # formset = ACRAFormSet(request.POST, request.FILES, instance=form.instance)
 
     # if formset.is_valid():
@@ -1408,6 +1412,7 @@ def validate_individual_plate_file(request):
     # overwrite_option = request.POST.get('overwrite_option', '')
     # bulk_file = request.FILES.get('bulk_file', None)
 
+    readout = None
     if readout_id:
         readout = AssayPlateReadout.objects.filter(pk=readout_id)
         if readout:
@@ -1421,7 +1426,11 @@ def validate_individual_plate_file(request):
         setup_id = None
         study = AssayRun.objects.get(pk=int(study_id))
 
-    form = AssayPlateReadoutForm(study, setup_id, request.POST, instance=readout)
+    if readout:
+        form = AssayPlateReadoutForm(study, setup_id, request.POST, instance=readout)
+    else:
+        form = AssayPlateReadoutForm(study, setup_id, request.POST)
+
     formset = APRAFormSet(request.POST, request.FILES, instance=form.instance)
 
     if formset.is_valid():

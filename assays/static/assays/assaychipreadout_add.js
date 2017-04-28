@@ -80,6 +80,7 @@ $(document).ready(function () {
 
     function get_readout_value() {
         // Admin (check by looking for content-main ID)
+        // Deprecated
         if ($('#content-main')[0]) {
             try {
                 return Math.floor($('.historylink').attr('href').split('/')[4]);
@@ -92,7 +93,13 @@ $(document).ready(function () {
         else {
             // Details does not have access to CSRF on its own
             middleware_token = getCookie('csrftoken');
-            return Math.floor(window.location.href.split('/')[5]);
+            var current_id = Math.floor(window.location.href.split('/')[5]);
+
+            if (!current_id) {
+                current_id = '';
+            }
+
+            return current_id;
         }
     }
 
