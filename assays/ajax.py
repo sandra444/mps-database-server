@@ -606,7 +606,7 @@ def get_list_of_present_compounds(related_compounds_map, data_point, separator='
     return tag
 
 
-def get_control_data(study, related_compounds_map, key, include_all, new_data_for_control=None):
+def get_control_data(study, related_compounds_map, key, mean_type, include_all, new_data_for_control=None):
     """Gets control data for performing percent control calculations
 
     study - the study in question
@@ -663,8 +663,23 @@ def get_control_data(study, related_compounds_map, key, include_all, new_data_fo
                 for tag, sample_locations in tags.items():
                     for sample_location, time_values in sample_locations.items():
                         for time, values in time_values.items():
+                            if len(values) > 1:
+                                # If geometric mean
+                                if mean_type == 'geometric':
+                                    # Geometric mean will sometimes fail (due to zero values and so on)
+                                    average = gmean(values)
+                                    if np.isnan(average):
+                                        return {
+                                            'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'
+                                        }
+                                # If arithmetic mean
+                                else:
+                                    average = np.average(values)
+                            else:
+                                average = values[0]
+
                             controls.update(
-                                    {(target, unit, sample_location, time): sum(values) / float(len(values))}
+                                    {(target, unit, sample_location, time): average}
                             )
 
     return controls
@@ -721,7 +736,10 @@ def get_readout_data(
         if new_data:
             new_data_for_control = raw_data
 
-        controls = get_control_data(study, related_compounds_map, key, include_all, new_data_for_control=new_data_for_control)
+        controls = get_control_data(study, related_compounds_map, key, mean_type, include_all, new_data_for_control=new_data_for_control)
+
+        if controls.get('errors' , ''):
+            return controls
 
     averaged_data = {}
 
