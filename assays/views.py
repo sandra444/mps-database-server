@@ -2177,7 +2177,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             # Add user to Study's modified by
             # TODO
             self.object.bulk_file = data.get('bulk_file')
-            self.modified_by = self.request.user
+            self.object.modified_by = self.request.user
             self.object.save()
 
             parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)

@@ -1819,8 +1819,6 @@ def validate_chip_readout_file(
     # Get readouts
     if readout:
         readouts = [readout]
-    if not readout and len(readouts) == 1:
-        readout = readouts[0]
 
     if not study and readout:
         study = readout.chip_setup.assay_run_id
@@ -1866,9 +1864,7 @@ def validate_chip_readout_file(
     old_readout_data = AssayChipRawData.objects.filter(
         assay_chip_id__in=readouts
     ).prefetch_related(
-        'assay_chip_id',
-        'sample_location',
-        'assay_instance'
+        *CHIP_DATA_PREFETCH
     )
 
     current_data = {}
@@ -1959,19 +1955,19 @@ def validate_chip_readout_file(
         # Get notes, if possible
         notes = ''
         if header_indices.get('NOTES', ''):
-            notes = line[header_indices.get('NOTES')][:255]
+            notes = line[header_indices.get('NOTES')].strip()[:255]
 
         # PLEASE NOTE Database inputs, not the csv, have the final say
         # Get quality if possible
         quality = u''
         if header_indices.get('QC STATUS', ''):
-            quality = line[header_indices.get('QC STATUS')][:20]
+            quality = line[header_indices.get('QC STATUS')].strip()[:20]
 
         # Get replicate if possible
         # DEFAULT IS SUBJECT TO CHANGE PLEASE BE AWARE
-        replicate = '0'
+        replicate = ''
         if header_indices.get('REPLICATE', ''):
-            replicate = line[header_indices.get('REPLICATE')][:255]
+            replicate = line[header_indices.get('REPLICATE')].strip()[:255]
 
         if chip_id not in setup_id_to_readout:
             errors.append(

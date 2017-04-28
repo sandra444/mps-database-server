@@ -1154,7 +1154,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
         ),
     )
 
-    inlines = [AssayChipReadoutInline]
+    # inlines = [AssayChipReadoutInline]
 
     def response_add(self, request, obj):
         """If save and add another, have same response as save and continue"""

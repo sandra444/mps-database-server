@@ -751,7 +751,7 @@ class AssayChipRawData(models.Model):
 
     # Indicates "technical replicates"
     # SUBJECT TO CHANGE
-    replicate = models.CharField(max_length=255, default='0')
+    replicate = models.CharField(max_length=255, default='')
 
     # Replaces elapsed_time
     time = models.FloatField(default=0)

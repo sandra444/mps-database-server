@@ -436,7 +436,7 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         notes = data_point.notes
 
         data.append(
-            [ unicode(x) for x in
+            [unicode(x) for x in
                 [
                     study_id,
                     chip_id,
@@ -1309,7 +1309,7 @@ def validate_individual_chip_file(request):
         setup_id = None
         study = AssayRun.objects.get(pk=int(study_id))
 
-    form = AssayChipReadoutForm(study, setup_id, request.POST, request.FILES, request=request)
+    form = AssayChipReadoutForm(study, setup_id, request.POST, request.FILES, request=request, instance=readout)
     # formset = ACRAFormSet(request.POST, request.FILES, instance=form.instance)
 
     # if formset.is_valid():
@@ -1395,7 +1395,7 @@ APRAFormSet = inlineformset_factory(
 
 
 def validate_individual_plate_file(request):
-    """Validates a bulk file and returns either errors or a preview of the data entered
+    """Validates an individual plate and returns either errors or a preview of the data entered
 
     Receives the following from POST:
     study -- the study to acquire readouts from
@@ -1421,13 +1421,12 @@ def validate_individual_plate_file(request):
         setup_id = None
         study = AssayRun.objects.get(pk=int(study_id))
 
-    form = AssayPlateReadoutForm(study, setup_id, request.POST)
+    form = AssayPlateReadoutForm(study, setup_id, request.POST, instance=readout)
     formset = APRAFormSet(request.POST, request.FILES, instance=form.instance)
 
     if formset.is_valid():
         # Validate form
         # form.is_valid()
-
         form_data = formset.forms[0].cleaned_data
 
         preview_data = form_data.get('preview_data')

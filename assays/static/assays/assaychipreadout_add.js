@@ -263,9 +263,9 @@ $(document).ready(function () {
                 notes += '\nUpdate #' + update_number;
             }
 
-            // Add replicate to notes if this is a replicate (i.e. replicate > 0)
-            if (replicate && replicate != 0) {
-                notes += '\nReplicate ' + update_number;
+            // Add replicate to notes if replicate is specified
+            if (replicate) {
+                notes += '\nReplicate ' + replicate;
             }
 
             var index = {
