@@ -279,10 +279,16 @@ def stringify_excel_value(value):
 # SPAGHETTI CODE FIND A BETTER PLACE TO PUT THIS?
 def valid_chip_row(row, header_indices):
     """Confirm that a row is valid"""
-    valid_row = True
+    valid_row = False
+
+    for value in row:
+        if value:
+            valid_row = True
+            break
 
     for required_column in REQUIRED_COLUMN_HEADERS:
-        if len(row) < header_indices.get(required_column) or not row[header_indices.get(required_column)]:
+        # if len(row) < header_indices.get(required_column) or not row[header_indices.get(required_column)]:
+        if len(row) < header_indices.get(required_column):
             valid_row = False
             break
 
@@ -1893,7 +1899,7 @@ def validate_chip_readout_file(
     starting_index = header_data.get('header_starting_index') + 1
     header_indices = header_data.get('header_indices')
 
-    if not sheet:
+    if readout:
         # This is redundant, but useful in some ways
         for line in datalist[starting_index:]:
             if valid_chip_row(line, header_indices) and setup_id_to_readout and line[header_indices.get('CHIP ID')] not in setup_id_to_readout:
@@ -1909,7 +1915,6 @@ def validate_chip_readout_file(
     for line in datalist[starting_index:]:
         # Some lines may not be long enough (have sufficient commas), ignore such lines
         # Some lines may be empty or incomplete, ignore these as well
-        # TODO TODO TODO TODO TODO NEED TO REVISE
         if not valid_chip_row(line, header_indices):
             continue
 
@@ -1971,7 +1976,7 @@ def validate_chip_readout_file(
 
         if chip_id not in setup_id_to_readout:
             errors.append(
-                unicode(sheet + 'No Chip with the ID "{0}" exists; please change your file or add this assay.').format(chip_id)
+                unicode(sheet + 'No Chip with the ID "{0}" exists; please change your file or add this chip.').format(chip_id)
             )
 
         # Raise error when an assay does not exist
