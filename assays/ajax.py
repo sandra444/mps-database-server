@@ -60,7 +60,6 @@ logger = logging.getLogger(__name__)
 CONTROL_LABEL = '-Control-'
 
 
-
 def main(request):
     """Default to server error"""
     return HttpResponseServerError()

@@ -23,8 +23,8 @@
                     <th>View/Edit</th>
                     <th>Study</th>
                     <th>Chip Setup</th>
-{#                    <th>Assays</th>#}
                     <th>Readout Date</th>
+                    <th>Assays</th>
                     <th>Scientist</th>
                     <th>Creator</th>
                     <th>Group</th>
@@ -39,16 +39,12 @@
                     <td><a class="btn btn-primary" href="{{ readout.id }}">View/Edit</a></td>
                     <td><a href="/assays/{{ readout.chip_setup.assay_run_id.id }}">{{ readout.chip_setup.assay_run_id }}</a></td>
                     <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}">{{ readout.chip_setup }}</a></td>
-{#                    <td>#}
-{#                        {% for assay in readout.related_assays %}#}
-{#                            {{ assay.assay_id.assay_short_name }}#}
-{#                        {% endfor %}#}
-{#                    </td>#}
                     {% if readout.readout_start_time != None %}
                         <td>{{ readout.readout_start_time|date:"M d, Y" }}</td>
                     {% else %}
                         <td></td>
                     {% endif %}
+                    <td>{{ readout.assays|default:"-No Data-" }}</td>
                     <td>{{ readout.scientist }}</td>
                     <td>
                         {{ readout.full_creator }}

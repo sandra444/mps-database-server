@@ -14,7 +14,8 @@ from assays.utils import (
     parse_file_and_save,
     modify_qc_status_plate,
     modify_qc_status_chip,
-    save_assay_layout
+    save_assay_layout,
+    CHIP_DATA_PREFETCH
 )
 
 from django.forms.models import inlineformset_factory
@@ -104,9 +105,36 @@ def get_queryset_with_organ_model_map(queryset):
         )
 
     for study in queryset:
-        study.organ_models = '\n'.join(
-            organ_model_map.get(study.id, {}).keys()
+        study.organ_models = ',\n'.join(
+            sorted(organ_model_map.get(study.id, {}).keys())
         )
+
+
+def get_queryset_with_assay_map(queryset):
+    """Takes a queryset and returns it with a assay map"""
+    data_points = AssayChipRawData.objects.filter(
+        assay_chip_id__in=queryset
+    ).prefetch_related(
+        *CHIP_DATA_PREFETCH
+    )
+
+    assay_map = {}
+
+    for data_point in data_points:
+        assay_map.setdefault(
+            data_point.assay_chip_id_id, {}
+        ).update(
+            {
+                data_point.assay_instance.target.short_name: True
+            }
+        )
+
+    for readout in queryset:
+        readout.assays = ', '.join(
+            sorted(assay_map.get(readout.id, {}).keys())
+        )
+
+    return queryset
 
 
 class GroupIndex(OneGroupRequiredMixin, ListView):
@@ -183,23 +211,7 @@ class StudyIndex(ViewershipMixin, DetailView):
             'chip_setup__unit'
         )
 
-        # related_assays = AssayChipReadoutAssay.objects.filter(
-        #     readout_id__in=readouts
-        # ).prefetch_related(
-        #     'readout_id',
-        #     'assay_id'
-        # ).order_by(
-        #     'assay_id__assay_short_name'
-        # )
-        # related_assays_map = {}
-        #
-        # for assay in related_assays:
-        #     # start appending to a list keyed by the readout ID for all related images
-        #     related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
-        #
-        # for readout in readouts:
-        #     # set an attribute on the readout that is the list created above
-        #     readout.related_assays = related_assays_map.get(readout.id)
+        get_queryset_with_assay_map(readouts)
 
         context['readouts'] = readouts
 
@@ -963,24 +975,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
             group__name__in=group_names
         )
 
-        # # Map assays
-        # related_assays = AssayChipReadoutAssay.objects.filter(
-        #     readout_id__in=queryset
-        # ).prefetch_related(
-        #     'readout_id',
-        #     'assay_id'
-        # ).order_by(
-        #     'assay_id__assay_short_name'
-        # )
-        # related_assays_map = {}
-        #
-        # for assay in related_assays:
-        #     # start appending to a list keyed by the readout ID for all related images
-        #     related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
-        #
-        # for readout in queryset:
-        #     # set an attribute on the readout that is the list created above
-        #     readout.related_assays = related_assays_map.get(readout.id)
+        get_queryset_with_assay_map(queryset)
 
         return queryset
 
