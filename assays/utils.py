@@ -281,16 +281,13 @@ def valid_chip_row(row, header_indices):
     """Confirm that a row is valid"""
     valid_row = False
 
-    for value in row:
-        if value:
-            valid_row = True
-            break
-
     for required_column in REQUIRED_COLUMN_HEADERS:
         # if len(row) < header_indices.get(required_column) or not row[header_indices.get(required_column)]:
         if len(row) < header_indices.get(required_column):
             valid_row = False
             break
+        elif row[header_indices.get(required_column)]:
+            valid_row = True
 
     return valid_row
 

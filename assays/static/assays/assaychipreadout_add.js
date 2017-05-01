@@ -49,7 +49,7 @@ $(document).ready(function () {
     };
 
     function is_true(element, index, array) {
-        if (!element) {
+        if (!element && element !== 0) {
             return false;
         }
         else {
@@ -294,7 +294,8 @@ $(document).ready(function () {
             //     .attr('data-chart-index', index);
 
             // Need to take a slice to avoid treating missing QC as invalid
-            var every = [chip_id, time_in_minutes, assay_instance_id, sample_location_id, value].every(is_true);
+            // Allow QC changes for NULL value row
+            var every = [chip_id, time_in_minutes, assay_instance_id, sample_location_id].every(is_true);
 
             if (exist) {
                 new_row.addClass('bg-success');
