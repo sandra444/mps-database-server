@@ -191,6 +191,30 @@
         If the <b>Integrated Study Configuration</b> you need is not available, click the provided link to add one
       </li>
     </ul>
+    <h4>Adding or Editing Assays</h4>
+    <ul class="list-group">
+        <li class="list-group-item">
+            The section entitled <b>Assays</b> gives a list of assays performed for the study
+        </li>
+        <li class="list-group-item">
+            The column for <b>Target/Analyte</b> specifies what the assay was analyzing, e.g. the protein Albumin
+            <br>
+            If a target you need is not on the list, please contact an administrator or post in <b>Feedback</b>
+        </li>
+        <li class="list-group-item">
+            The column for <b>Method/Kit</b> shows how the assay was performed
+            <br>
+            If a method you need is not on the list, please contact an administrator or post in <b>Feedback</b>
+        </li>
+        <li class="list-group-item">
+          The column for <b>Readout Unit</b> shows what units the data (namely the data you wish to upload) from the assay were recorded in
+          <br>
+          If a unit you need is not on the list, please contact an administrator or post in <b>Feedback</b>
+        </li>
+        <li class="list-group-item">
+            If you need another row, click the <b>Add Assay</b> button
+        </li>
+    </ul>
     <h4>Adding Supporting Data</h4>
     <ul class="list-group">
       <li class="list-group-item">
@@ -408,7 +432,7 @@
             If this chip does not have any compounds, do not modify this section
         </li>
         <li class="list-group-item">
-            To get another row, click the <b>Add Compounds</b> button
+            To get another row, click the <b>Add Compound</b> button
         </li>
         <li class="list-group-item">
             Be sure to specify the supplier, lot, receipt date, concentration (and unit), addition time, and duration
@@ -429,7 +453,7 @@
             Please choose applicable suggestions when possible
         </li>
         <li class="list-group-item">
-            Use 'e' for scientific notation: e.g. 1e+3 = 1000.
+            Use 'e' for scientific notation: e.g. 1e+3 = 1000
         </li>
     </ul>
     <h4>Adding Cells</h4>
@@ -447,7 +471,7 @@
             Click a magnifying glass to see a list of available cell samples then click the desired row to select that sample
         </li>
         <li class="list-group-item">
-            Use 'e' for scientific notation: e.g. 1e+3 = 1000.
+            Use 'e' for scientific notation: e.g. 1e+3 = 1000
         </li>
         <li class="list-group-item">
             If you need a cell sample that is not listed, click the provided link to add it
@@ -491,37 +515,10 @@
     <ul class="list-group">
         <li class="list-group-item">
             Before uploading data, please be sure to add every assay performed in the section entitled <b>Assays</b>
-        </li>
-        <li class="list-group-item">
-            The column for <b>Assay</b> specifies what assay was performed
             <br>
-            If an assay you desire is not on the list, please contact an administrator or post in <b>Feedback</b>
-        </li>
-        <li class="list-group-item">
-            The column <b>Object of Interest</b> clarifies what the assay examined
-        </li>
-
-        <li class="list-group-item">
-            The following is a list of options for <b>Object of Interest</b>
-            <ul>
-                <li><b>Field</b>: Used when multiple fields are used during imaging</li>
-                <li><b>Colony</b>: Used when different cell colonies are viewed</li>
-                <li><b>Media</b>: Used to indicate that this assay takes samples from a device's effluent</li>
-                <li><b>Other</b>: Used when the other options do not accurately describe the object of interest</li>
-            </ul>
-        </li>
-        <li class="list-group-item">
-          The column <b>Reader</b> shows what reader device was used
-          <br>
-          If the reader you used is not on the list, please contact an administrator or post in <b>Feedback</b>
-        </li>
-        <li class="list-group-item">
-          The column for <b>Readout Unit</b> shows what units the data (namely the data you wish to upload) from the assay were recorded in
-          <br>
-          If a unit you need is not on the list, please contact an administrator or post in <b>Feedback</b>
-        </li>
-        <li class="list-group-item">
-            If you need another row, click the <b>Add Assay</b> button
+            You can change this list by going to the Study's edit page and finding the section <b>Assays</b>
+            <br>
+            Please see <a href="#study">Study</a>
         </li>
     </ul>
     <h4>Uploading Data</h4>
@@ -538,12 +535,17 @@
                 <thead>
                     <tr class="active">
                         <th>Chip ID</th>
-                        <th>Time</th>
-                        <th>Time Unit</th>
-                        <th>Assay</th>
+                        <th>Assay Plate ID</th>
+                        <th>Assay Well ID</th>
+                        <th>Day</th>
+                        <th>Hour</th>
+                        <th>Minute</th>
+                        <th>Target/Analyte</th>
+                        <th>Method/Kit</th>
                         <th>Sample Location</th>
                         <th>Value</th>
                         <th>Value Unit</th>
+                        <th>Replicate</th>
                         <th>QC Status</th>
                         <th>Notes</th>
                     </tr>
@@ -551,23 +553,33 @@
                 <tbody>
                     <tr>
                         <td>[Chip ID]</td>
-                        <td>[Time]</td>
-                        <td>[Time Unit]</td>
-                        <td>[Assay]</td>
+                        <th>[Assay Plate ID]</th>
+                        <th>[Assay Well ID]</th>
+                        <th>[Day]</th>
+                        <th>[Hour]</th>
+                        <th>[Minute]</th>
+                        <th>[Target/Analyte]</th>
+                        <th>[Method/Kit]</th>
                         <td>[Sample Location]</td>
                         <td>[Value]</td>
                         <td>[Value Unit]</td>
+                        <td>[Replicate]</td>
                         <td>[Leave Blank to Pass]</td>
                         <td>[Notes]</td>
                     </tr>
                     <tr>
                         <td>[Chip ID]</td>
-                        <td>[Time]</td>
-                        <td>[Time Unit]</td>
-                        <td>[Assay]</td>
+                        <th>[Assay Plate ID]</th>
+                        <th>[Assay Well ID]</th>
+                        <th>[Day]</th>
+                        <th>[Hour]</th>
+                        <th>[Minute]</th>
+                        <th>[Target/Analyte]</th>
+                        <th>[Method/Kit]</th>
                         <td>[Sample Location]</td>
                         <td>[Value]</td>
                         <td>[Value Unit]</td>
+                        <td>[Replicate]</td>
                         <td>[Any Value in this Column Marks the Reading Invalid]</td>
                         <td>[Notes]</td>
                     </tr>
@@ -575,7 +587,15 @@
             </table>
         </li>
         <li class="list-group-item">
-            File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays
+            File uploads can use either full names ("Albumin") or abbreviations ("ALB") for Target/Analytes
+        </li>
+        <li class="list-group-item">
+            Some assays involve transferring media from a device into a plate
+            <br>
+            For these assays, specify this information with <b>Assay Plate ID</b> and <b>Assay Well ID</b>
+        </li>
+        <li class="list-group-item">
+            Please note that time is split into <b>Day</b>, <b>Hour</b>, and <b>Minute</b>
         </li>
         <li class="list-group-item">
             The <b>Sample Location</b> indicates from where in a device the tested sample was acquired
@@ -587,7 +607,7 @@
             <br>
             Rows in <span class="text-success">green</span> are in the database
             <br>
-            Rows in <span class="text-warning">yellow</span> have been marked as outliers
+            Rows in <span class="text-warning">yellow</span> have been marked as questionable
         </li>
         <li class="list-group-item">
             <b class="text-danger">
@@ -608,7 +628,7 @@
         <li class="list-group-item">
             <b class="text-danger">
                 <span class="glyphicon glyphicon-exclamation-sign"></span>
-                Always start in the top-left corner (the first cell)
+                The correct header must be in the first three rows for a file to be considered valid
             </b>
         </li>
         <li class="list-group-item">
@@ -629,7 +649,7 @@
         <li class="list-group-item">
             QC Status can be changed in the table displayed after data upload
         <li class="list-group-item">
-            To invalidate a reading, type <b><i>anything</i></b> into the corresponding QC status input
+            To invalidate a reading, select one or more of the given QC Status options
         </li>
         <li class="list-group-item">
             After changing a QC value, <b>click away</b> or <b>hit tab</b> to see the effect on the plots
@@ -744,7 +764,7 @@
             Click a magnifying glass to see a list of available cell samples then click the desired row to select that sample
         </li>
         <li class="list-group-item">
-            Use 'e' for scientific notation: e.g. 1e+3 = 1000.
+            Use 'e' for scientific notation: e.g. 1e+3 = 1000
         </li>
         <li class="list-group-item">
             If you need a cell sample that is not listed, click the provided link to add it
@@ -1069,23 +1089,7 @@
             </b>
         </li>
         <li class="list-group-item">
-            Clicking
-            <br>
-            <div class="fancy-checkbox form-group">
-                <input type="checkbox" />
-                <div class="btn-group" style="min-width: 550px;">
-                    <label class="btn btn-danger">
-                        <span class="glyphicon glyphicon-ok"></span>
-                        <span> </span>
-                    </label>
-                    <label class="btn btn-default active">
-                        Click Values to Invalidate/Validate Them <small>(click here to toggle this function on and off)</small>
-                    </label>
-                </div>
-            </div>
-            will toggle whether or not you can invalidate wells by clicking on the displayed heatmap
-        <li class="list-group-item">
-            To invalidate a reading, click the corresponding well (granted the above button is on)
+            To invalidate a reading, click the corresponding well or QC Status column
         </li>
         <li class="list-group-item">
             Invalidated wells will be greyed out and their values put in red

@@ -23,8 +23,8 @@
                     <th>View/Edit</th>
                     <th>Study</th>
                     <th>Plate Setup</th>
-                    <th>Assays</th>
                     <th>Readout Date</th>
+                    <th>Assays</th>
                     <th>Scientist</th>
                     <th>Creator</th>
                     <th>Group</th>
@@ -38,16 +38,16 @@
                     <td><a class="btn btn-primary" href="{{ readout.id }}">View/Edit</a></td>
                     <td><a href="/assays/{{ readout.setup.assay_run_id.id }}">{{ readout.setup.assay_run_id }}</a></td>
                     <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}">{{ readout.setup }}</a></td>
-                    <td>
-                        {% for assay in readout.related_assays %}
-                            {{ assay.assay_id.assay_short_name }}
-                        {% endfor %}
-                    </td>
                     {% if readout.readout_start_time != None %}
                         <td>{{ readout.readout_start_time|date:"M d, Y" }}</td>
                     {% else %}
                         <td></td>
                     {% endif %}
+                    <td>
+                        {% for assay in readout.related_assays %}
+                            {{ assay.assay_id.assay_short_name }}
+                        {% endfor %}
+                    </td>
                     <td>{{ readout.scientist }}</td>
                     <td>
                         {{ readout.full_creator }}

@@ -3,6 +3,8 @@
 
 {% block load %}
     <script src="{% static "drugtrials/get_adverse_events.js" %}"></script>
+    <link href="{% static "css/c3.min.css" %}" rel="stylesheet" type="text/css">
+    <script src="{% static "js/c3.min.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -136,7 +138,7 @@
         </div>
     {% endif %}
 
-    <legend><b>Reported Events</b></legend>
+    <legend>Reported Events</legend>
 
     <table hidden id="reported_events" class="table table-striped table-hover">
         <thead>
@@ -195,7 +197,7 @@
 
     <div id="plot" class="large-chart-container" style="height:400px;"></div>
 
-    <legend><b>Events by Range</b></legend>
+    <legend>Events by Range</legend>
 
     <div hidden id="warning" class="alert alert-danger" role="alert">
         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>

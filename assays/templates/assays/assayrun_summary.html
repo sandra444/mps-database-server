@@ -4,7 +4,9 @@
 
 {% block load %}
     <script src="{% static "js/cookies.js" %}"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{% static "assays/assayrun_summary.js" %}"></script>
+    <script src="{% static "assays/chart_display.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -32,8 +34,11 @@
     </div>
 
     {% if object.description or object.study_configuration or object.protocol %}
-        <legend><h3>Description</h3></legend>
+        <legend>Description</legend>
 
+        <div class="padded-bottom">
+        <div class="panel panel-info">
+        <div class="panel-body">
         {% if object.description %}
             <p>
                 {{ object.description }}
@@ -51,12 +56,22 @@
                 <b>Protocol:</b> <a href="/media/{{ object.protocol }}">{{ object.protocol }}</a>
             </p>
         {% endif %}
+        </div>
+        </div>
+        </div>
     {% endif %}
 
-    {% if object.studysupportingdata_set.all %}
-        <legend><h3>Supporting Data</h3></legend>
+    {% include 'assays/chart_options.html' with chart_prefix="charts" chart_title="Current Data" %}
 
-        <table class="table table-striped">
+    {# Note indicating no data to display initially #}
+    <div id="charts" class="padded-bottom">
+        No data to display
+    </div>
+
+    {% if object.studysupportingdata_set.all %}
+        <legend>Supporting Data</legend>
+
+        <table class="table table-striped table-bordered">
             <thead>
             <tr>
               <th>Description</th>
@@ -78,8 +93,9 @@
         </table>
     {% endif %}
 
-    <legend><h3>Chip Setups</h3></legend>
+    <legend>Chip Setups</legend>
     {% if setups %}
+        <div class="padded-bottom">
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -123,15 +139,18 @@
             {% endfor %}
             </tbody>
         </table>
+        </div>
         {% else %}
         <div class="alert alert-warning" role="alert">
             No chip setups exist for this study
         </div>
     {% endif %}
 
+    {% include 'assays/data_upload_table.html' %}
+
     {% if indicative.assaychipcells_set.all %}
-        <legend><h3>Cells for {{indicative}}</h3></legend>
-        <table class="table table-striped">
+        <legend>Cells for {{ indicative }}</legend>
+        <table class="table table-striped table-bordered">
             <thead>
             <tr>
                 <th>Cell Sample</th>
@@ -173,7 +192,7 @@
     {% endif %}
 
     {% if plate_setups %}
-        <legend><h3>Plate Setups</h3></legend>
+        <legend>Plate Setups</legend>
         <table id="plate_setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -211,7 +230,7 @@
     {% endif %}
 
     {% if plate_indicative.assayplatecells_set.all %}
-        <legend><h3>Cells for {{ plate_indicative }}</h3></legend>
+        <legend>Cells for {{ plate_indicative }}</legend>
         <table class="table table-striped">
             <thead>
             <tr>
@@ -253,20 +272,20 @@
         </table>
     {% endif %}
 
-    {% include 'assays/data_upload_table.html' %}
-
-    <div id="radio_buttons" hidden class="well hidden-print">
-        <h3 class="text-center">Chip Readout Data</h3>
-        <label class="radio-inline">
-            <input type="radio" name="chart_type_radio" id="chip_select" value="chip" checked> View By Device
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="chart_type_radio" id="compound_select" value="compound"> View By Compound
-        </label>
-        <label for="convert_to_percent_control" class="pull-right">
-            <input type="checkbox" name="convert_to_percent_control" id="convert_to_percent_control" /> Convert to Percent of Control
-        </label>
-    </div>
-
-    <div id="charts" class="padded-bottom"></div>
+{#    {% include 'assays/data_upload_table.html' %}#}
+{##}
+{#    <div id="radio_buttons" hidden class="well hidden-print">#}
+{#        <h3 class="text-center">Chip Readout Data</h3>#}
+{#        <label class="radio-inline">#}
+{#            <input type="radio" name="chart_type_radio" id="chip_select" value="chip" checked> View By Device#}
+{#        </label>#}
+{#        <label class="radio-inline">#}
+{#            <input type="radio" name="chart_type_radio" id="compound_select" value="compound"> View By Compound#}
+{#        </label>#}
+{#        <label for="convert_to_percent_control" class="pull-right">#}
+{#            <input type="checkbox" name="convert_to_percent_control" id="convert_to_percent_control" /> Convert to Percent of Control#}
+{#        </label>#}
+{#    </div>#}
+{##}
+{#    <div id="charts" class="padded-bottom"></div>#}
 {% endblock %}

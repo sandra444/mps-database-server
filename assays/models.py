@@ -460,7 +460,6 @@ SEVERITY_SCORE = (
     ('3', '+ + +'), ('4', '+ + + +'), ('5', '+ + + + +')
 )
 
-
 POSNEG = (
     ('0', 'Negative'), ('1', 'Positive'), ('x', 'Failed')
 )
@@ -621,6 +620,8 @@ class AssayRun(FlaggableModel):
     toxicity = models.BooleanField(default=False)
     efficacy = models.BooleanField(default=False)
     disease = models.BooleanField(default=False)
+    # TODO PLEASE REFACTOR
+    # NOW REFERRED TO AS "Chip Characterization"
     cell_characterization = models.BooleanField(default=False)
     # Subject to change
     study_configuration = models.ForeignKey(StudyConfiguration, blank=True, null=True)
@@ -708,16 +709,21 @@ class AssayChipRawData(models.Model):
     """Individual lines of readout data"""
 
     # class Meta(object):
-    #     unique_together = [('assay_chip_id', 'assay_id', 'field_id', 'elapsed_time')]
+    #     unique_together = [('assay_chip_id', 'assay_id', 'field_id', 'time')]
 
+    # TO BE REPLACED (readouts likely will not exist in future versions)
     assay_chip_id = models.ForeignKey('assays.AssayChipReadout')
-    assay_id = models.ForeignKey('assays.AssayChipReadoutAssay')
+    # DEPRECATED: ACRA WILL BE REPLACED BY ASSAY INSTANCE
+    assay_id = models.ForeignKey('assays.AssayChipReadoutAssay', null=True, blank=True)
 
-    field_id = models.CharField(max_length=255, default='0')
+    # DEPRECATED: REPLACED BY SAMPLE LOCATION
+    field_id = models.CharField(max_length=255, default='0', null=True, blank=True)
 
     value = models.FloatField(null=True)
 
-    elapsed_time = models.FloatField(default=0)
+    # TO BE RENAMED SIMPLY "time" IN FUTURE MODELS
+    # PLEASE NOTE THAT THIS IS NOW ALWAYS MINUTES <-IMPORTANT
+    elapsed_time = models.FloatField(default=0, null=True, blank=True)
 
     # This value will act as quality control, if it evaluates True then the value is considered invalid
     quality = models.CharField(max_length=20, default='')
@@ -733,6 +739,22 @@ class AssayChipRawData(models.Model):
     # Indicates what replicate this is (0 is for original)
     update_number = models.IntegerField(default=0)
 
+    # New fields
+    # TEMPORARILY NOT REQUIRED
+    sample_location = models.ForeignKey('assays.AssaySampleLocation', null=True, blank=True)
+    # TEMPORARILY NOT REQUIRED
+    assay_instance = models.ForeignKey('assays.AssayInstance', null=True, blank=True)
+
+    # DEFAULTS SUBJECT TO CHANGE
+    assay_plate_id = models.CharField(max_length=255, default='N/A')
+    assay_well_id = models.CharField(max_length=255, default='N/A')
+
+    # Indicates "technical replicates"
+    # SUBJECT TO CHANGE
+    replicate = models.CharField(max_length=255, default='')
+
+    # Replaces elapsed_time
+    time = models.FloatField(default=0)
 
 
 class AssayChipCells(models.Model):
@@ -822,6 +844,7 @@ object_types = (
 
 
 # TO BE DEPRECATED To be merged into single "AssayInstance" model
+# FURTHERMORE assays will probably be captured at a study, rather than "readout" level
 class AssayChipReadoutAssay(models.Model):
     """Inline for CHIP readout assays"""
 
@@ -830,15 +853,24 @@ class AssayChipReadoutAssay(models.Model):
         unique_together = [('readout_id', 'assay_id', 'readout_unit')]
 
     readout_id = models.ForeignKey('assays.AssayChipReadout', verbose_name='Readout')
-    assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True)
-    reader_id = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
+    # DEPRECATED
+    assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True, blank=True)
+    # DEPRECATED
+    reader_id = models.ForeignKey('assays.AssayReader', verbose_name='Reader', null=True, blank=True)
+    # DEPRECATED
     object_type = models.CharField(
         max_length=6,
         choices=object_types,
         verbose_name='Object of Interest',
-        default='F'
+        default='F',
+        blank=True
     )
+    # Will be renamed unit in future table
     readout_unit = models.ForeignKey(PhysicalUnits)
+
+    # New fields that will be in AssaySpecificAssay (or AssayInstance, not sure about name)
+    # target = models.ForeignKey(AssayTarget)
+    # method = models.ForeignKey(AssayMethod)
 
     def __unicode__(self):
         return u'{}'.format(self.assay_id)
@@ -1016,3 +1048,73 @@ class AssayDataUpload(FlaggableModel):
 
     def __unicode__(self):
         return urllib.unquote(self.file_location.split('/')[-1])
+
+
+# NEW MODELS, TO BE INTEGRATED FURTHER LATER
+class AssayTarget(LockableModel):
+    """Describes what was sought by a given Assay"""
+    name = models.CharField(max_length=512, unique=True)
+    description = models.CharField(max_length=2000)
+
+    short_name = models.CharField(max_length=20, unique=True)
+
+    def __unicode__(self):
+        return '{0} ({1})'.format(self.name, self.short_name)
+
+
+class AssayMeasurementType(LockableModel):
+    """Describes what was measures with a given method"""
+    name = models.CharField(max_length=512, unique=True)
+    description = models.CharField(max_length=2000)
+
+    def __unicode__(self):
+        return self.name
+
+
+class AssaySupplier(LockableModel):
+    """Assay Supplier so we can track where kits came from"""
+    name = models.CharField(max_length=512, unique=True)
+    description = models.CharField(max_length=2000)
+
+    def __unicode__(self):
+        return self.name
+
+
+class AssayMethod(LockableModel):
+    """Describes how an assay was performed"""
+    # We may want to modify this so that it is unique on name in combination with measurement type?
+    name = models.CharField(max_length=512, unique=True)
+    description = models.CharField(max_length=2000)
+    measurement_type = models.ForeignKey(AssayMeasurementType)
+
+    # May or may not be required in the future
+    supplier = models.ForeignKey(AssaySupplier, blank=True, null=True)
+
+    # TODO STORAGE LOCATION
+    # TODO TEMPORARILY NOT REQUIRED
+    protocol_file = models.FileField(upload_to='assays', null=True, blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+
+class AssaySampleLocation(LockableModel):
+    """Describes a location for where a sample was acquired"""
+    name = models.CharField(max_length=512, unique=True)
+    description = models.CharField(max_length=2000)
+
+    def __unicode__(self):
+        return self.name
+
+
+class AssayInstance(models.Model):
+    """Specific assays used in the 'inlines'"""
+    # TODO ARE WE USING SETUPS FOR THIS
+    # setup = models.ForeignKey(AssaySetup)
+    # TODO ARE WE USING STUDIES FOR THIS?
+    # Note that study model name is likely to change
+    study = models.ForeignKey(AssayRun)
+    target = models.ForeignKey(AssayTarget)
+    method = models.ForeignKey(AssayMethod)
+    # Name of model "PhysicalUnits" should be renamed, methinks
+    unit = models.ForeignKey(PhysicalUnits)

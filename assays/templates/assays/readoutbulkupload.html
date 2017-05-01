@@ -4,7 +4,9 @@
 {% block load %}
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/cookies.js" %}"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{% static "assays/readoutbulkupload.js" %}"></script>
+    <script src="{% static "assays/chart_display.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -123,14 +125,16 @@
         </table>
     {% endif %}
 
-    </form>
+{#    <legend>New Chip Data</legend>#}
+    {% include 'assays/chart_options.html' with chart_title="New Data" chart_prefix="new_charts" %}
+    <div id="new_charts" class="padded-bottom">Preview Unavailable</div>
 
-    <legend>
-        Current Chip Data
-        <button id="show_all" value="">Show All</button>
-    </legend>
+{#    <legend>#}
+{#        Current Chip Data#}
+{#    </legend>#}
+    {% include 'assays/chart_options.html' with chart_title="Current Data" chart_prefix="current_charts" %}
     <div id="current_charts" class="padded-bottom">No Current Chip Data</div>
 
-    <legend>New Chip Data</legend>
-    <div id="new_charts" class="padded-bottom">Preview Unavailable</div>
+    </form>
+
 {% endblock %}

@@ -2,12 +2,14 @@
 {% load static %}
 
 {% block load %}
-    <script src="{% static "js/inline_add.js" %}"></script>
+{#    <script src="{% static "js/inline_add.js" %}"></script>#}
     {# Is this necessary? #}
     <script src="{% static "js/cookies.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
-    <script src="{% static "js/csv_functions.js" %}"></script>
+{#    <script src="{% static "js/csv_functions.js" %}"></script>#}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{% static "assays/assaychipreadout_add.js" %}"></script>
+    <script src="{% static "assays/chart_display.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
 {% endblock %}
 
@@ -202,83 +204,123 @@
 {#        {% endfor %}#}
 {#    <div class="form-group has-error">#}
 {#    {% else %}#}
-    <div class="form-group">
+{#    <div class="form-group">#}
 {#    {% endif %}#}
-        <label for="headers" class="col-sm-2 control-label">Number of Header Rows</label>
-        <div class="col-sm-10">
-          <input id="id_headers" type="number" name="headers" style="width:50px;" value="{{ form.headers.value|default:"1" }}">
-        </div>
-    </div>
+{#        <label for="headers" class="col-sm-2 control-label">Number of Header Rows</label>#}
+{#        <div class="col-sm-10">#}
+{#          <input id="id_headers" type="number" name="headers" style="width:50px;" value="{{ form.headers.value|default:"1" }}">#}
+{#        </div>#}
+{#    </div>#}
 
     {% include 'generic_field.html' with field=form.overwrite_option label="Overwrite Option*" %}
 
     {% include 'assays/data_upload_table.html' %}
 
-    {{ formset.management_form }}
-    <legend>Assays</legend>
-
-    {% if formset.non_form_errors %}
-        <div class="alert alert-danger" role="alert">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            <span class="sr-only">Error:</span>
-            {{ formset.non_form_errors }}
-        </div>
-    {% endif %}
-
-    {% if formset.errors %}
-        {% for dict in formset.errors %}
-            {% for key,value in dict.items %}
-                {% if key %}
-                    <div class="alert alert-danger" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
-                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        {% endfor %}
-    {% endif %}
-
-    <a id="add_button-assaychipreadoutassay_set" class="btn btn-success" role="button">Add Assay</a>
-    <table class="table table-striped inlines" id="assaychipreadoutassay_set-group"  name="assays">
-        <thead>
+    {% if study.assayinstance_set.all %}
+        <legend>Assays</legend>
+        <table class="table table-striped table-bordered">
+            <thead>
             <tr>
-                <th>Assay*</th>
-                <th>Object of Interest*</th>
-                <th>Reader*</th>
-                <th>Readout Unit*</th>
-                <th>Delete</th>
+                <th>Target/Analyte</th>
+                <th>Method/Kit</th>
+                <th>Readout Unit</th>
             </tr>
-        </thead>
-        <tbody>
-            {% for assay in formset %}
-                <tr class="inline" id="assay-{{ forloop.counter0 }}">
-                    {# Hidden input for Update (need id to associate) #}
-                    {% if assay.id.value %}
-                    <td class="original" hidden>
-                        <input id="id_assaychipreadoutassay_set-{{ forloop.counter0 }}-id" name="assaychipreadoutassay_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ assay.id.value }}">
-                    </td>
-                    {% endif %}
-                    <td>{{ assay.assay_id }}</td>
-                    <td>{{ assay.object_type }}</td>
-                    <td>{{ assay.reader_id }}</td>
-                    <td>{{ assay.readout_unit }}</td>
-                    <td>{{ assay.DELETE }}</td>
+            </thead>
+            <tbody>
+            {% for assay in study.assayinstance_set.all %}
+                <tr>
+                    <td>{{ assay.target }}</td>
+                    <td>{{ assay.method }}</td>
+                    <td>{{ assay.unit }}</td>
                 </tr>
             {% endfor %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    {% endif %}
+
+{# DEPRECATED #}
+{#<div hidden>#}
+{#    {{ formset.management_form }}#}
+{#    <legend>Assays</legend>#}
+{##}
+{#    {% if formset.non_form_errors %}#}
+{#        <div class="alert alert-danger" role="alert">#}
+{#            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#            <span class="sr-only">Error:</span>#}
+{#            {{ formset.non_form_errors }}#}
+{#        </div>#}
+{#    {% endif %}#}
+{##}
+{#    {% if formset.errors %}#}
+{#        {% for dict in formset.errors %}#}
+{#            {% for key,value in dict.items %}#}
+{#                {% if key %}#}
+{#                    <div class="alert alert-danger" role="alert">#}
+{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                        <span class="sr-only">Error:</span>#}
+{#                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}#}
+{#                    </div>#}
+{#                {% endif %}#}
+{#            {% endfor %}#}
+{#        {% endfor %}#}
+{#    {% endif %}#}
+{##}
+{#    <a id="add_button-assaychipreadoutassay_set" class="btn btn-success" role="button">Add Assay</a>#}
+{#    <table class="table table-striped inlines" id="assaychipreadoutassay_set-group"  name="assays">#}
+{#        <thead>#}
+{#            <tr>#}
+{#                <th>Assay*</th>#}
+{#                <th>Object of Interest*</th>#}
+{#                <th>Reader*</th>#}
+{#                <th>Readout Unit*</th>#}
+{#                <th>Delete</th>#}
+{#            </tr>#}
+{#        </thead>#}
+{#        <tbody>#}
+{#            {% for assay in formset %}#}
+{#                <tr class="inline" id="assay-{{ forloop.counter0 }}">#}
+{#                     Hidden input for Update (need id to associate)#}
+{#                    {% if assay.id.value %}#}
+{#                    <td class="original" hidden>#}
+{#                        <input id="id_assaychipreadoutassay_set-{{ forloop.counter0 }}-id" name="assaychipreadoutassay_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ assay.id.value }}">#}
+{#                    </td>#}
+{#                    {% endif %}#}
+{#                    <td>{{ assay.assay_id }}</td>#}
+{#                    <td>{{ assay.object_type }}</td>#}
+{#                    <td>{{ assay.reader_id }}</td>#}
+{#                    <td>{{ assay.readout_unit }}</td>#}
+{#                    <td>{{ assay.DELETE }}</td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#        </tbody>#}
+{#    </table>#}
+{#</div>#}
+
+    {% include 'assays/chart_options.html' with chart_title="Data" chart_prefix="charts"%}
 
     {# Inline CSS is very distasteful #}
-    <div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;min-width: 975px;overflow: hidden;">
-        <div id="csv_table" style="width: 55%;float: left;">
-            <table class="data-table" align="left">
+{#    <div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;min-width: 1000px;overflow: hidden;">#}
+    <div id="extra" align="center">
+{#        <div id="csv_table" style="width: 55%;float: left;">#}
+        <div id="csv_table" class="col-sm-12 col-md-7">
+            <table class="data-table">
                 <thead>
                     <tr class="bg-info">
+{#                        <th>Chip ID</th>#}
+{#                        <th>Time</th>#}
+{#                        <th>Time Unit</th>#}
+{#                        <th>Assay</th>#}
+{#                        <th>Sample Location</th>#}
+{#                        <th>Value</th>#}
+{#                        <th>Value Unit</th>#}
+{#                        <th>QC Status</th>#}
+{#                        <th></th>#}
                         <th>Chip ID</th>
+{#                        <th>Assay Plate ID</th>#}
+{#                        <th>Assay Well ID</th>#}
                         <th>Time</th>
-                        <th>Time Unit</th>
-                        <th>Assay</th>
+                        <th>Target Analyte</th>
+                        <th>Method Kit</th>
                         <th>Sample Location</th>
                         <th>Value</th>
                         <th>Value Unit</th>
@@ -290,6 +332,8 @@
                 </tbody>
             </table>
         </div>
+        <div id="charts" class="col-sm-12 col-md-5"></div>
+{#        <div id="charts" style="width: 42.5%;float: right;"></div>#}
     </div>
 </form>
 {% endblock %}

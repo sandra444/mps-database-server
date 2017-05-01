@@ -15,7 +15,8 @@ from assays.forms import (
 from assays.utils import (
     save_assay_layout,
     modify_qc_status_chip,
-    modify_qc_status_plate
+    modify_qc_status_plate,
+    DEFAULT_CSV_HEADER
 )
 # TODO SPAGHETTI CODE
 from django.http import HttpResponseRedirect
@@ -78,32 +79,24 @@ def modify_templates():
 
     # Write the base files
     chip_initial = [
-        [
-            'Chip ID',
-            'Time',
-            'Time Units',
-            'Assay',
-            'Sample Location',
-            'Value',
-            'Value Unit',
-            'QC Status',
-            'Notes',
-            'ANY value in QC Status will mark a row as invalid'
-        ],
-        [''] * 10
+        DEFAULT_CSV_HEADER,
+        [''] * 14
     ]
 
     chip_initial_format = [
-        [chip_red] * 10,
+        [chip_red] * 14,
         [
             None,
             None,
-            chip_green,
-            chip_green,
+            None,
+            None,
             None,
             None,
             chip_green,
+            chip_green,
+            chip_green,
             None,
+            chip_green,
             None,
             None,
             None
@@ -197,17 +190,21 @@ def modify_templates():
     # Set column widths
     # Chip
     chip_sheet.set_column('A:A', 20)
-    chip_sheet.set_column('B:B', 10)
-    chip_sheet.set_column('C:C', 20)
-    chip_sheet.set_column('D:D', 30)
+    chip_sheet.set_column('B:B', 20)
+    chip_sheet.set_column('C:C', 15)
+    chip_sheet.set_column('D:D', 10)
     chip_sheet.set_column('E:E', 10)
-    chip_sheet.set_column('F:F', 15)
-    chip_sheet.set_column('G:G', 15)
-    chip_sheet.set_column('H:H', 10)
-    chip_sheet.set_column('I:I', 100)
-    chip_sheet.set_column('J:J', 100)
+    chip_sheet.set_column('F:F', 10)
+    chip_sheet.set_column('G:G', 20)
+    chip_sheet.set_column('H:H', 20)
+    chip_sheet.set_column('I:I', 15)
+    chip_sheet.set_column('J:J', 10)
+    chip_sheet.set_column('K:K', 10)
+    chip_sheet.set_column('L:L', 10)
+    chip_sheet.set_column('M:M', 10)
+    chip_sheet.set_column('N:N', 100)
 
-    chip_sheet.set_column('BA:BC', 30)
+    chip_sheet.set_column('BA:BD', 30)
 
     # Plate Tabular
     plate_tabular_sheet.set_column('A:A', 20)
@@ -259,10 +256,25 @@ def modify_templates():
         'scale_factor'
     ).values_list('unit', flat=True)
 
-    # Get list of assays
+    # Get list of assays (for plates) TO BE REPLACED
     assays = AssayModel.objects.all().order_by(
         'assay_name'
     ).values_list('assay_name', flat=True)
+
+    # List of targets
+    targets = AssayTarget.objects.all().order_by(
+        'name'
+    ).values_list('name', flat=True)
+
+    # List of methods
+    methods = AssayMethod.objects.all().order_by(
+        'name'
+    ).values_list('name', flat=True)
+
+    # List of sample locations
+    sample_locations = AssaySampleLocation.objects.all().order_by(
+        'name'
+    ).values_list('name', flat=True)
 
 #     for index, value in enumerate(quality_indicators):
 #         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
@@ -271,17 +283,26 @@ def modify_templates():
 # #         plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
 
     for index, value in enumerate(time_units):
-        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
+        # chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
         plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
         plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
+
+    for index, value in enumerate(sample_locations):
+        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
+
+    for index, value in enumerate(methods):
+        chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
 
     for index, value in enumerate(value_units):
         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
         plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
         plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
 
-    for index, value in enumerate(assays):
+    for index, value in enumerate(targets):
         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
+
+    for index, value in enumerate(assays):
+        # chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
         plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
         plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
 
@@ -290,13 +311,19 @@ def modify_templates():
     value_units_range = '=$BB$1:$BB$' + str(len(value_units))
     assays_range = '=$BA$1:$BA$' + str(len(assays))
 
+    targets_range = '=$BA$1:$BA$' + str(len(assays))
+    methods_range = '=$BC$1:$BC$' + str(len(assays))
+    sample_locations_range = '=$BD$1:$BD$' + str(len(assays))
+
     # chip_sheet.data_validation('H2', {'validate': 'list',
     #                            'source': quality_indicators_range})
-    chip_sheet.data_validation('C2', {'validate': 'list',
-                               'source': time_units_range})
-    chip_sheet.data_validation('D2', {'validate': 'list',
-                               'source': assays_range})
     chip_sheet.data_validation('G2', {'validate': 'list',
+                                      'source': targets_range})
+    chip_sheet.data_validation('H2', {'validate': 'list',
+                               'source': methods_range})
+    chip_sheet.data_validation('I2', {'validate': 'list',
+                               'source': sample_locations_range})
+    chip_sheet.data_validation('K2', {'validate': 'list',
                                'source': value_units_range})
 
     plate_tabular_sheet.data_validation('C2', {'validate': 'list',
@@ -801,37 +828,40 @@ class AssayPlateReadoutAdmin(LockableAdmin):
     # save_related takes the place of save_model so that the inline can be saved first
     # this is similar to chip readouts so that we can validate the listed assays THEN the file
     def save_related(self, request, form, formsets, change):
-        obj = form.instance
-
-        # Need to get the upload type
-        # upload_type = form.data.get('upload_type')
-        overwrite_option = form.data.get('overwrite_option')
-
-        if change:
-            obj.modified_by = request.user
-
-        else:
-            obj.modified_by = obj.created_by = request.user
-
-        # Save Plate Readout
-        obj.save()
-        # Save inline
-        super(LockableAdmin, self).save_related(request, form, formsets, change)
-
-        if request.FILES:
-            # pass the upload file name to the CSV reader if a file exists
-            # parse_readout_csv(obj, request.FILES['file'], upload_type, overwrite_option, form)
-            parse_file_and_save(
-                request.FILES['file'], obj.study.assay_run_id, overwrite_option, 'Plate', readout=self.object
-            )
-
-        # Need to delete entries when a file is cleared
-        if request.POST.get('file-clear', '') == 'on':
-            # remove_existing_readout(obj)
-            AssayReadout.objects.filter(assay_device_readout=obj).delete()
-
-        else:
-            modify_qc_status_plate(obj, form)
+        # Prevent saving in Admin for now
+        pass
+        # obj = form.instance
+        #
+        # # Need to get the upload type
+        # # upload_type = form.data.get('upload_type')
+        # overwrite_option = form.data.get('overwrite_option')
+        #
+        # if change:
+        #     obj.modified_by = request.user
+        #
+        # else:
+        #     obj.modified_by = obj.created_by = request.user
+        #
+        # # Save Plate Readout
+        # obj.save()
+        # # Save inline
+        # super(LockableAdmin, self).save_related(request, form, formsets, change)
+        #
+        # if request.FILES:
+        #     # pass the upload file name to the CSV reader if a file exists
+        #     # parse_readout_csv(obj, request.FILES['file'], upload_type, overwrite_option, form)
+        #     pass
+        #     # parse_file_and_save(
+        #     #     request.FILES['file'], obj.study.assay_run_id, overwrite_option, 'Plate', readout=self.object
+        #     # )
+        #
+        # # Need to delete entries when a file is cleared
+        # if request.POST.get('file-clear', '') == 'on':
+        #     # remove_existing_readout(obj)
+        #     AssayReadout.objects.filter(assay_device_readout=obj).delete()
+        #
+        # else:
+        #     modify_qc_status_plate(obj, form)
 
     # save_model not used; would save twice otherwise
     def save_model(self, request, obj, form, change):
@@ -1034,7 +1064,8 @@ class AssayChipReadoutForm(forms.ModelForm):
 class AssayChipReadoutAdmin(LockableAdmin):
     """Admin for Assay Chip Readout"""
     class Media(object):
-        js = ('js/inline_fix.js', 'js/csv_functions.js', 'assays/assaychipreadout_add.js', 'js/d3.min.js', 'js/c3.min.js',)
+        # Removed chip readout display, no need to maintain such scripts
+        js = ('js/inline_fix.js', 'js/csv_functions.js', 'js/d3.min.js', 'js/c3.min.js',)
         css = {'all': ('assays/customize_admin.css', 'css/c3.min.css',)}
 
     form = AssayChipReadoutForm
@@ -1123,7 +1154,7 @@ class AssayChipReadoutAdmin(LockableAdmin):
         ),
     )
 
-    inlines = [AssayChipReadoutInline]
+    # inlines = [AssayChipReadoutInline]
 
     def response_add(self, request, obj):
         """If save and add another, have same response as save and continue"""
@@ -1141,37 +1172,40 @@ class AssayChipReadoutAdmin(LockableAdmin):
 
     # save_related takes the place of save_model so that the inline can be saved first
     def save_related(self, request, form, formsets, change):
-        obj = form.instance
-
-        headers = int(form.data.get('headers')) if form.data.get('headers') else 0
-        overwrite_option = form.data.get('overwrite_option')
-
-        if change:
-            obj.modified_by = request.user
-
-        else:
-            obj.modified_by = obj.created_by = request.user
-
-        # Save Chip Readout
-        obj.save()
-        # Save inline
-        super(LockableAdmin, self).save_related(request, form, formsets, change)
-
-        if request.FILES:
-            # pass the upload file name to the CSV reader if a file exists
-            # parse_chip_csv(obj, request.FILES['file'], headers, form)
-            parse_file_and_save(
-                request.FILES['file'], obj.chip_setup.assay_run_id, overwrite_option, 'Chip', headers=headers, form=form, readout=self.object
-            )
-
-        # Try to update QC status if no file
-        else:
-            modify_qc_status_chip(obj, form)
-
-        # Need to delete entries when a file is cleared
-        if request.POST.get('file-clear', '') == 'on':
-            # remove_existing_chip(obj)
-            AssayChipRawData.objects.filter(assay_chip_id=obj).delete()
+        # Prevent saving in Admin for now
+        pass
+        # obj = form.instance
+        #
+        # headers = int(form.data.get('headers')) if form.data.get('headers') else 0
+        # overwrite_option = form.data.get('overwrite_option')
+        #
+        # if change:
+        #     obj.modified_by = request.user
+        #
+        # else:
+        #     obj.modified_by = obj.created_by = request.user
+        #
+        # # Save Chip Readout
+        # obj.save()
+        # # Save inline
+        # super(LockableAdmin, self).save_related(request, form, formsets, change)
+        #
+        # if request.FILES:
+        #     # pass the upload file name to the CSV reader if a file exists
+        #     # parse_chip_csv(obj, request.FILES['file'], headers, form)
+        #     pass
+        #     # parse_file_and_save(
+        #     #     request.FILES['file'], obj.chip_setup.assay_run_id, overwrite_option, 'Chip', form=form, readout=self.object
+        #     # )
+        #
+        # # Try to update QC status if no file
+        # else:
+        #     modify_qc_status_chip(obj, form)
+        #
+        # # Need to delete entries when a file is cleared
+        # if request.POST.get('file-clear', '') == 'on':
+        #     # remove_existing_chip(obj)
+        #     AssayChipRawData.objects.filter(assay_chip_id=obj).delete()
 
     # save_model not used; would save twice otherwise
     def save_model(self, request, obj, form, change):
@@ -1628,3 +1662,234 @@ class StudyConfigurationAdmin(LockableAdmin):
 
 
 admin.site.register(StudyConfiguration, StudyConfigurationAdmin)
+
+
+# TODO MAKE A VARIABLE TO CONTAIN TRACKING DATA TO AVOID COPY/PASTE
+class AssayTargetAdmin(LockableAdmin):
+    model = AssayTarget
+
+    save_on_top = True
+    list_per_page = 300
+    list_display = (
+        'name',
+        'short_name',
+        'description'
+    )
+    fieldsets = (
+        (
+            'Target', {
+                'fields': (
+                    'name',
+                    'short_name',
+                    'description',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
+    def save_model(self, request, obj, form, change):
+        template_change = False
+
+        # Check whether template needs to change
+        # Change if assay name has changed or it is new
+        if obj.pk is not None:
+            original = AssayTarget.objects.get(pk=obj.pk)
+            if original.name != obj.name:
+                template_change = True
+        else:
+            template_change = True
+
+        if change:
+            obj.modified_by = request.user
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        obj.save()
+
+        if template_change:
+            modify_templates()
+
+admin.site.register(AssayTarget, AssayTargetAdmin)
+
+
+class AssaySampleLocationAdmin(LockableAdmin):
+    model = AssaySampleLocation
+
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('name', 'description')
+    fieldsets = (
+        (
+            'Sample Location', {
+                'fields': (
+                    'name',
+                    'description',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
+    def save_model(self, request, obj, form, change):
+        template_change = False
+
+        # Check whether template needs to change
+        # Change if assay name has changed or it is new
+        if obj.pk is not None:
+            original = AssaySampleLocation.objects.get(pk=obj.pk)
+            if original.name != obj.name:
+                template_change = True
+        else:
+            template_change = True
+
+        if change:
+            obj.modified_by = request.user
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        obj.save()
+
+        if template_change:
+            modify_templates()
+
+admin.site.register(AssaySampleLocation, AssaySampleLocationAdmin)
+
+
+class AssayMeasurementTypeAdmin(LockableAdmin):
+    model = AssayMeasurementType
+
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('name', 'description')
+    fieldsets = (
+        (
+            'Measurement Type', {
+                'fields': (
+                    'name',
+                    'description',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
+admin.site.register(AssayMeasurementType, AssayMeasurementTypeAdmin)
+
+
+class AssaySupplierAdmin(LockableAdmin):
+    model = AssaySupplier
+
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('name', 'description')
+    fieldsets = (
+        (
+            'Measurement Type', {
+                'fields': (
+                    'name',
+                    'description',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
+admin.site.register(AssaySupplier, AssaySupplierAdmin)
+
+
+class AssayMethodAdmin(LockableAdmin):
+    model = AssayMethod
+
+    save_on_top = True
+    list_per_page = 300
+    list_display = (
+        'name',
+        'measurement_type',
+        'supplier',
+        'protocol_file',
+        'description'
+    )
+    fieldsets = (
+        (
+            'Measurement Type', {
+                'fields': (
+                    'name',
+                    'description',
+                    'measurement_type',
+                    'supplier',
+                    'protocol_file'
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
+    def save_model(self, request, obj, form, change):
+        template_change = False
+
+        # Check whether template needs to change
+        # Change if assay name has changed or it is new
+        if obj.pk is not None:
+            original = AssayMethod.objects.get(pk=obj.pk)
+            if original.name != obj.name:
+                template_change = True
+        else:
+            template_change = True
+
+        if change:
+            obj.modified_by = request.user
+        else:
+            obj.modified_by = obj.created_by = request.user
+
+        obj.save()
+
+        if template_change:
+            modify_templates()
+
+admin.site.register(AssayMethod, AssayMethodAdmin)

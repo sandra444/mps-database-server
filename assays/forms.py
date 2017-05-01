@@ -8,7 +8,7 @@ import re
 import string
 import collections
 
-from .utils import validate_file, get_chip_details, get_plate_details
+from .utils import validate_file, get_chip_details, get_plate_details, TIME_CONVERSIONS
 
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
@@ -154,6 +154,9 @@ class AssayChipReadoutForm(SignOffMixin, CloneableForm):
     """Frontend form for Chip Readouts"""
     overwrite_option = OVERWRITE_OPTIONS_INDIVIDUAL
 
+    # EVIL WAY TO GET PREVIEW DATA
+    preview_data = forms.BooleanField(initial=False, required=False)
+
     def __init__(self, study, current, *args, **kwargs):
         """Init the Chip Readout Form
 
@@ -163,8 +166,14 @@ class AssayChipReadoutForm(SignOffMixin, CloneableForm):
 
         Additional fields (not part of model):
         headers -- specifies the number of header lines in the uploaded csv
+
+        kwargs:
+        request -- the current request
         """
+        self.request = kwargs.pop('request', None)
+
         super(AssayChipReadoutForm, self).__init__(*args, **kwargs)
+
         self.fields['timeunit'].queryset = PhysicalUnits.objects.filter(
             unit_type__unit_type='Time'
         ).order_by('scale_factor')
@@ -172,13 +181,14 @@ class AssayChipReadoutForm(SignOffMixin, CloneableForm):
         setups = AssayChipSetup.objects.filter(assay_run_id=study).prefetch_related(
             'assay_run_id', 'device',
             'compound', 'unit',
-            'created_by').exclude(id__in=list(set(exclude_list)))
+            'created_by'
+        ).exclude(id__in=list(set(exclude_list)))
         if current:
             setups = setups | AssayChipSetup.objects.filter(pk=current)
         self.fields['chip_setup'].queryset = setups
 
     # Specifies the number of headers in the uploaded csv
-    headers = forms.CharField(required=True, initial=1)
+    # headers = forms.CharField(required=True, initial=1)
 
     class Meta(object):
         model = AssayChipReadout
@@ -190,6 +200,26 @@ class AssayChipReadoutForm(SignOffMixin, CloneableForm):
         exclude = group + tracking + restricted
 
     # Set chip setup to unique instead of throwing error in validation
+    def clean(self):
+        super(AssayChipReadoutForm, self).clean()
+
+        setup = self.cleaned_data.get('chip_setup')
+        if setup:
+            self.instance.chip_setup = setup
+
+        if setup and self.request and self.request.FILES:
+            test_file = self.cleaned_data.get('file')
+            file_data = validate_file(
+                self,
+                test_file,
+                'Chip',
+                # headers=headers,
+                # chip_details=chip_details,
+                readout=self.instance,
+                study=setup.assay_run_id
+            )
+            # Evil attempt to acquire preview data
+            self.cleaned_data['preview_data'] = file_data
 
 
 class AssayChipSetupForm(SignOffMixin, CloneableForm):
@@ -229,7 +259,7 @@ class AssayChipSetupForm(SignOffMixin, CloneableForm):
         Ensures that the data for a compound is complete
         Prevents changes to the chip if data has been uploaded (avoiding conflicts between data and entries)
         """
-        super(forms.ModelForm, self).clean()
+        super(AssayChipSetupForm, self).clean()
 
         # Make sure the barcode/ID is unique in the study
         if AssayChipSetup.objects.filter(
@@ -266,13 +296,13 @@ def update_compound_instance_and_supplier():
     pass
 
 # Converts: days -> minutes, hours -> minutes, minutes->minutes
-TIME_CONVERSIONS = [
-    ('day', 1440),
-    ('hour', 60),
-    ('minute', 1)
-]
-
-TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
+# TIME_CONVERSIONS = [
+#     ('day', 1440),
+#     ('hour', 60),
+#     ('minute', 1)
+# ]
+#
+# TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
 
 
 class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
@@ -566,8 +596,8 @@ class ChipTestResultInlineFormset(BaseInlineFormSet):
         """
         super(ChipTestResultInlineFormset, self).__init__(*args, **kwargs)
         unit_queryset = PhysicalUnits.objects.filter(
-            availability__contains='test'
-        ).order_by('base_unit', 'scale_factor')
+            availability__icontains='test'
+        ).order_by('unit_type', 'base_unit', 'scale_factor')
         for form in self.forms:
             form.fields['test_unit'].queryset = unit_queryset
 
@@ -629,6 +659,7 @@ class AssayLayoutForm(SignOffMixin, forms.ModelForm):
             self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
             self.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
 
+        # Set CSS class to receipt date to use date picker
         # Set CSS class to receipt date to use date picker
         self.fields['receipt_date'].widget.attrs['class'] = 'datepicker-input'
 
@@ -800,8 +831,8 @@ class PlateTestResultInlineFormset(BaseInlineFormSet):
         """
         super(PlateTestResultInlineFormset, self).__init__(*args, **kwargs)
         unit_queryset = PhysicalUnits.objects.filter(
-            availability__contains='test'
-        ).order_by('base_unit', 'scale_factor')
+            availability__icontains='test'
+        ).order_by('unit_type', 'base_unit', 'scale_factor')
         for form in self.forms:
             form.fields['test_unit'].queryset = unit_queryset
 
@@ -890,8 +921,8 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
         """
         super(AssayPlateReadoutInlineFormset, self).__init__(*args, **kwargs)
         unit_queryset = PhysicalUnits.objects.filter(
-            availability__contains='readout'
-        ).order_by('base_unit', 'scale_factor')
+            availability__icontains='readout'
+        ).order_by('unit_type', 'base_unit', 'scale_factor')
         for form in self.forms:
             form.fields['readout_unit'].queryset = unit_queryset
 
@@ -968,6 +999,7 @@ class AssayPlateReadoutInlineFormset(CloneableBaseInlineFormSet):
         return self.forms
 
 
+# DEPRECATED
 class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
     """Frontend Inline for Chip Readout Assays (ACRA)"""
 
@@ -981,8 +1013,8 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
         """
         super(AssayChipReadoutInlineFormset, self).__init__(*args, **kwargs)
         unit_queryset = PhysicalUnits.objects.filter(
-            availability__contains='readout'
-        ).order_by('base_unit', 'scale_factor')
+            availability__icontains='readout'
+        ).order_by('unit_type', 'base_unit', 'scale_factor')
         for form in self.forms:
             form.fields['readout_unit'].queryset = unit_queryset
 
@@ -993,61 +1025,60 @@ class AssayChipReadoutInlineFormset(CloneableBaseInlineFormSet):
         else:
             raise forms.ValidationError('Please choose a chip setup.')
         setup = AssayChipSetup.objects.get(pk=setup_pk)
-        setup_id = setup.assay_chip_id
+        # setup_id = setup.assay_chip_id
 
-        # Throw error if headers is not valid
-        try:
-            headers = int(self.data.get('headers', '')) if self.data.get('headers', '') else 0
-        except:
-            raise forms.ValidationError('Please make number of headers a valid number.')
+        # # Throw error if headers is not valid
+        # try:
+        #     headers = int(self.data.get('headers', '')) if self.data.get('headers', '') else 0
+        # except:
+        #     raise forms.ValidationError('Please make number of headers a valid number.')
 
         forms_data = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
 
-        chip_details = get_chip_details(self=self)
-
-        assays = chip_details.get(setup_id, {}).get('assays', {})
+        # chip_details = get_chip_details(self=self)
+        #
+        # assays = chip_details.get(setup_id, {}).get('assays', {})
 
         # If there is already a file in the database and it is not being replaced or cleared
         #  (check for clear is implicit)
-        if self.instance.file and not forms_data[0].files:
-            new_time_unit = self.instance.timeunit
-            old_time_unit = AssayChipReadout.objects.get(id=self.instance.id).timeunit
-
-            # Fail if time unit does not match
-            if new_time_unit != old_time_unit:
-                raise forms.ValidationError(
-                    'The time unit "%s" does not correspond with the selected readout time unit of "%s"'
-                    % (new_time_unit, old_time_unit))
-
-            saved_data = AssayChipRawData.objects.filter(assay_chip_id=self.instance).prefetch_related(
-                'assay_id__assay_id'
-            )
-
-            for raw in saved_data:
-
-                assay = raw.assay_id.assay_id.assay_name.upper()
-                value_unit = raw.assay_id.readout_unit.unit
-
-                # Raise error when an assay does not exist
-                if assay not in assays:
-                    raise forms.ValidationError(
-                        'You can not remove the assay "%s" because it is in your uploaded data.' % assay)
-                # Raise error if value_unit not equal to one listed in ACRA
-                elif value_unit not in assays.get(assay, ''):
-                    raise forms.ValidationError(
-                        'The current value unit "%s" does not correspond with the readout units "%s"'
-                        % (value_unit, assays.get(assay, ''))
-                    )
+        # if self.instance.file and not forms_data[0].files:
+        #     new_time_unit = self.instance.timeunit
+        #     old_time_unit = AssayChipReadout.objects.get(id=self.instance.id).timeunit
+        #
+        #     # Fail if time unit does not match
+        #     if new_time_unit != old_time_unit:
+        #         raise forms.ValidationError(
+        #             'The time unit "%s" does not correspond with the selected readout time unit of "%s"'
+        #             % (new_time_unit, old_time_unit))
+        #
+        #     saved_data = AssayChipRawData.objects.filter(assay_chip_id=self.instance).prefetch_related(
+        #         'assay_id__assay_id'
+        #     )
+        #
+        #     for raw in saved_data:
+        #         assay = raw.assay_id.assay_id.assay_name.upper()
+        #         value_unit = raw.assay_id.readout_unit.unit
+        #
+        #         # Raise error when an assay does not exist
+        #         if assay not in assays:
+        #             raise forms.ValidationError(
+        #                 'You can not remove the assay "%s" because it is in your uploaded data.' % assay)
+        #         # Raise error if value_unit not equal to one listed in ACRA
+        #         elif value_unit not in assays.get(assay, ''):
+        #             raise forms.ValidationError(
+        #                 'The current value unit "%s" does not correspond with the readout units "%s"'
+        #                 % (value_unit, assays.get(assay, ''))
+        #             )
 
         # If there is a new file
-        if forms_data[0].files:
+        if forms_data and forms_data[0].files:
             test_file = forms_data[0].files.get('file', '')
             file_data = validate_file(
                 self,
                 test_file,
                 'Chip',
-                headers=headers,
-                chip_details=chip_details,
+                # headers=headers,
+                # chip_details=chip_details,
                 plate_details=None,
                 study=setup.assay_run_id,
             )
@@ -1109,25 +1140,38 @@ class ReadoutBulkUploadForm(forms.ModelForm):
         model = AssayRun
         fields = ('bulk_file',)
 
+    def __init__(self, *args, **kwargs):
+        """Init the Bulk Form
+
+        kwargs:
+        request -- the current request
+        """
+        self.request = kwargs.pop('request', None)
+
+        super(ReadoutBulkUploadForm, self).__init__(*args, **kwargs)
+
     def clean(self):
         data = super(ReadoutBulkUploadForm, self).clean()
 
         # Get the study in question
         study = self.instance
 
-        test_file = data.get('bulk_file', '')
+        test_file = None
+
+        if self.request and self.request.FILES:
+            test_file = data.get('bulk_file', '')
 
         if not test_file:
             raise forms.ValidationError('No file was supplied.')
 
         # For the moment, just have headers be equal to one?
-        headers = 1
+        # headers = 1
 
         file_data = validate_file(
             self,
             test_file,
             'Bulk',
-            headers=headers,
+            # headers=headers,
             study=study
         )
 
@@ -1135,3 +1179,25 @@ class ReadoutBulkUploadForm(forms.ModelForm):
         self.cleaned_data['preview_data'] = file_data
 
         return self.cleaned_data
+
+
+class AssayInstanceInlineFormset(BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        """Init APRA inline
+
+        Filters units so that only units marked 'readout' appear
+        """
+        super(AssayInstanceInlineFormset, self).__init__(*args, **kwargs)
+
+        target_queryset = AssayTarget.objects.all().order_by('name')
+
+        method_queryset = AssayMethod.objects.all().order_by('name')
+
+        unit_queryset = PhysicalUnits.objects.filter(
+            availability__icontains='readout'
+        ).order_by('unit_type', 'base_unit', 'scale_factor')
+
+        for form in self.forms:
+            form.fields['target'].queryset = target_queryset
+            form.fields['method'].queryset = method_queryset
+            form.fields['unit'].queryset = unit_queryset
