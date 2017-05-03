@@ -88,7 +88,7 @@ $(document).ready(function () {
         // NOTE: the chart options are currently shown by default, subject to change
 
         // If nothing to show
-        if (json.assays.length < 1) {
+        if (!json.assays) {
             $('#' + charts).html('No data to display');
         }
 
