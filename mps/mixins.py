@@ -103,6 +103,7 @@ class ViewershipMixin(object):
         # Otherwise return the detail view
         return super(ViewershipMixin, self).dispatch(*args, **kwargs)
 
+
 # WIP
 class DetailRedirectMixin(object):
     """This mixin checks if the user has the object's group, if so it redirects to the edit page

@@ -918,7 +918,7 @@ def get_readout_data(
                         x_header.append(current_key)
 
                     # Only include intervals if necessary
-                    if accomadate_intervals:
+                    if accomadate_intervals and include_current:
                         x_header.extend([
                             current_key + '_i1',
                             current_key + '_i2'
@@ -928,7 +928,8 @@ def get_readout_data(
                             del current_data[current_key+'_i1']
                             del current_data[current_key + '_i2']
 
-            x_header.sort(key=lambda s: s.upper())
+            # Note manipulations for sorting
+            x_header.sort(key=lambda s: s.upper().replace(' & ', '~'))
             current_table[0].extend(x_header)
 
             x_header = {x_header[index]: index + 1 for index in range(len(x_header))}

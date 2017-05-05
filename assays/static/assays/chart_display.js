@@ -36,27 +36,29 @@ $(document).ready(function () {
         }
 
         var sorted_assays = json.sorted_assays;
+        var assays = json.assays;
 
         var previous = null;
         for (var index in sorted_assays) {
-
-            if (!previous) {
-                previous = $('<div>')
+            if (assays[index].length > 1) {
+                if (!previous) {
+                    previous = $('<div>')
                     //.addClass('padded-row')
-                    .css('min-height', 400);
-                charts_id.append(previous
-                    .append($('<div>')
+                        .css('min-height', 400);
+                    charts_id.append(previous
+                        .append($('<div>')
+                            .attr('id', charts + '_' + index)
+                            .addClass('col-sm-12 col-md-6 chart-container')
+                        )
+                    );
+                }
+                else {
+                    previous.append($('<div>')
                         .attr('id', charts + '_' + index)
                         .addClass('col-sm-12 col-md-6 chart-container')
-                    )
-                );
-            }
-            else {
-                previous.append($('<div>')
-                    .attr('id', charts + '_' + index)
-                    .addClass('col-sm-12 col-md-6 chart-container')
-                );
-                previous = null;
+                    );
+                    previous = null;
+                }
             }
         }
     };
@@ -73,13 +75,16 @@ $(document).ready(function () {
         }
 
         var sorted_assays = json.sorted_assays;
+        var assays = json.assays;
 
         for (var index in sorted_assays) {
-            $('<div>')
-                .attr('id', charts + '_' + index)
-                .attr('align', 'right')
-                .addClass('chart-container')
-                .appendTo(charts_id);
+            if (assays[index].length > 1) {
+                $('<div>')
+                    .attr('id', charts + '_' + index)
+                    .attr('align', 'right')
+                    .addClass('chart-container')
+                    .appendTo(charts_id);
+            }
         }
     };
 
@@ -88,7 +93,7 @@ $(document).ready(function () {
         // NOTE: the chart options are currently shown by default, subject to change
 
         // If nothing to show
-        if (json.assays.length < 1) {
+        if (!json.assays) {
             $('#' + charts).html('No data to display');
         }
 
