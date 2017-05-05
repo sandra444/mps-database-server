@@ -346,9 +346,21 @@ def modify_templates():
     plate_block.close()
 
 
+class AssayQualityIndicatorFormAdmin(forms.ModelForm):
+    """Admin Form for Quality Indicators"""
+    class Meta(object):
+        model = AssayQualityIndicator
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 10}),
+        }
+        exclude = ('',)
+
+
 class AssayQualityIndicatorAdmin(LockableAdmin):
     save_on_top = True
     list_display = ('code', 'name', 'description')
+
+    form = AssayQualityIndicatorFormAdmin
 
     def save_model(self, request, obj, form, change):
         template_change = False
@@ -1289,8 +1301,20 @@ class AssayChipResultInline(admin.TabularInline):
         css = {"all": ("css/hide_admin_original.css",)}
 
 
+class UnitTypeFormAdmin(forms.ModelForm):
+    """Admin Form for Unit Types"""
+    class Meta(object):
+        model = UnitType
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 10}),
+        }
+        exclude = ('',)
+
+
 class UnitTypeAdmin(LockableAdmin):
     """Admin for Unit Types"""
+    form = UnitTypeFormAdmin
+
     save_on_top = True
     list_per_page = 300
     list_display = ('unit_type', 'description')
@@ -1317,11 +1341,23 @@ class UnitTypeAdmin(LockableAdmin):
 admin.site.register(UnitType, UnitTypeAdmin)
 
 
+class PhysicalUnitsFormAdmin(forms.ModelForm):
+    """Admin Form for Physical Units"""
+    class Meta(object):
+        model = PhysicalUnits
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 10}),
+        }
+        exclude = ('',)
+
+
 class PhysicalUnitsAdmin(LockableAdmin):
     """Admin for Units
 
     Note that all assay units should link to Physical Units
     """
+    form = PhysicalUnitsFormAdmin
+
     save_on_top = True
     list_per_page = 300
     list_display = ('unit_type', 'unit', 'base_unit', 'scale_factor', 'availability', 'description')
@@ -1508,7 +1544,7 @@ class AssayRunFormAdmin(forms.ModelForm):
         widgets = {
             'assay_run_id': forms.Textarea(attrs={'rows': 1}),
             'name': forms.Textarea(attrs={'rows': 1}),
-            'description': forms.Textarea(attrs={'rows': 3}),
+            'description': forms.Textarea(attrs={'rows': 10}),
         }
         exclude = ('',)
 
@@ -1664,9 +1700,20 @@ class StudyConfigurationAdmin(LockableAdmin):
 admin.site.register(StudyConfiguration, StudyConfigurationAdmin)
 
 
+class AssayTargetFormAdmin(forms.ModelForm):
+    """Admin Form for Targets"""
+    class Meta(object):
+        model = AssayTarget
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 10}),
+        }
+        exclude = ('',)
+
+
 # TODO MAKE A VARIABLE TO CONTAIN TRACKING DATA TO AVOID COPY/PASTE
 class AssayTargetAdmin(LockableAdmin):
-    model = AssayTarget
+    # model = AssayTarget
+    form = AssayTargetFormAdmin
 
     save_on_top = True
     list_per_page = 300
@@ -1722,8 +1769,20 @@ class AssayTargetAdmin(LockableAdmin):
 admin.site.register(AssayTarget, AssayTargetAdmin)
 
 
+class AssaySampleLocationFormAdmin(forms.ModelForm):
+    """Admin Form for Sample Locations"""
+    class Meta(object):
+        model = AssaySampleLocation
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 10}),
+        }
+        exclude = ('',)
+
+
 class AssaySampleLocationAdmin(LockableAdmin):
-    model = AssaySampleLocation
+    # model = AssaySampleLocation
+
+    form = AssaySampleLocationFormAdmin
 
     save_on_top = True
     list_per_page = 300
@@ -1774,8 +1833,20 @@ class AssaySampleLocationAdmin(LockableAdmin):
 admin.site.register(AssaySampleLocation, AssaySampleLocationAdmin)
 
 
+class AssayMeasurementTypeFormAdmin(forms.ModelForm):
+    """Admin Form for Measurement Types"""
+    class Meta(object):
+        model = AssayMeasurementType
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 10}),
+        }
+        exclude = ('',)
+
+
 class AssayMeasurementTypeAdmin(LockableAdmin):
-    model = AssayMeasurementType
+    # model = AssayMeasurementType
+
+    form = AssayMeasurementTypeFormAdmin
 
     save_on_top = True
     list_per_page = 300
@@ -1804,8 +1875,20 @@ class AssayMeasurementTypeAdmin(LockableAdmin):
 admin.site.register(AssayMeasurementType, AssayMeasurementTypeAdmin)
 
 
+class AssaySupplierFormAdmin(forms.ModelForm):
+    """Admin Form for Suppliers"""
+    class Meta(object):
+        model = AssaySupplier
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 10}),
+        }
+        exclude = ('',)
+
+
 class AssaySupplierAdmin(LockableAdmin):
-    model = AssaySupplier
+    # model = AssaySupplier
+
+    form = AssaySupplierFormAdmin
 
     save_on_top = True
     list_per_page = 300
@@ -1834,8 +1917,20 @@ class AssaySupplierAdmin(LockableAdmin):
 admin.site.register(AssaySupplier, AssaySupplierAdmin)
 
 
+class AssayMethodFormAdmin(forms.ModelForm):
+    """Admin Form for Methods"""
+    class Meta(object):
+        model = AssayMethod
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 10}),
+        }
+        exclude = ('',)
+
+
 class AssayMethodAdmin(LockableAdmin):
-    model = AssayMethod
+    # model = AssayMethod
+
+    form = AssayMethodFormAdmin
 
     save_on_top = True
     list_per_page = 300
