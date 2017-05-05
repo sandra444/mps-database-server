@@ -201,7 +201,7 @@ $(document).ready(function () {
                 }
             },
             error: function (xhr, errmsg, err) {
-                alert('An unknown error has occurred.');
+                alert('An unknown error has occurred. \nIf you have the file open, you may need to close it.');
                 console.log(xhr.status + ": " + xhr.responseText);
                 // Remove file selection
                 $('#id_file').val('');
