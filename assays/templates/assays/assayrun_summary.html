@@ -25,14 +25,6 @@
          </h1>
     </div>
 
-    <div id="image_display">
-        <div id="current_display">
-            {% if object.image %}
-                <img class="img-responsive center-block padded-bottom" src="/media/{{ object.image }}">
-            {% endif %}
-        </div>
-    </div>
-
     {% if object.description or object.study_configuration or object.protocol %}
         <legend>Description</legend>
 
@@ -60,6 +52,14 @@
         </div>
         </div>
     {% endif %}
+
+    <div id="image_display">
+        <div id="current_display">
+            {% if object.image %}
+                <img class="img-responsive center-block padded-bottom" src="/media/{{ object.image }}">
+            {% endif %}
+        </div>
+    </div>
 
     {% include 'assays/chart_options.html' with chart_prefix="charts" chart_title="Current Data" %}
 
