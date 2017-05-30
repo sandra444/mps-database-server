@@ -425,7 +425,7 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         method = data_point.assay_instance.method.name
         sample_location = data_point.sample_location.name
 
-        compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, '\n')
+        compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, ' | ')
 
         value = data_point.value
         value_unit = data_point.assay_instance.unit.unit
