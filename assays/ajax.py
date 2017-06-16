@@ -428,6 +428,10 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, ' | ')
 
         value = data_point.value
+
+        if value is None:
+            value = ''
+
         value_unit = data_point.assay_instance.unit.unit
         quality = data_point.quality
         replicate = data_point.replicate
@@ -496,7 +500,12 @@ def get_chip_readout_data_as_json(chip_ids, chip_data=None):
         times = get_split_times(time_in_minutes)
         assay_instance = data_point.assay_instance
         sample_location = data_point.sample_location
+
         value = data_point.value
+
+        if value is None:
+            value = ''
+
         quality = data_point.quality
         # TODO ADD OTHER STUFF
         notes = data_point.notes

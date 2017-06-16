@@ -309,7 +309,7 @@ $(document).ready(function () {
                 new_row.addClass('bg-danger');
             }
 
-            else if (value === null) {
+            else if (value === null || value === '') {
                 new_row.css('background', '#606060');
             }
 
