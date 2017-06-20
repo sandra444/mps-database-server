@@ -155,8 +155,8 @@ def run(days=180):
     cursor.execute(
         '''
         UPDATE bioactivities_bioactivity
-        SET standardized_units = NULL,
-            standard_name = NULL,
+        SET standardized_units = '',
+            standard_name = '',
             standardized_value = NULL;
 
         --no mass is needed in data conversion
