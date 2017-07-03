@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block load %}
 {#    <script src="{% static "js/inline_add.js" %}"></script>#}
@@ -212,7 +213,9 @@
 {#        </div>#}
 {#    </div>#}
 
+    <div hidden>
     {% include 'generic_field.html' with field=form.overwrite_option label="Overwrite Option*" %}
+    </div>
 
     {% include 'assays/data_upload_table.html' %}
 
@@ -302,10 +305,10 @@
 {#    <div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;min-width: 1000px;overflow: hidden;">#}
     <div id="extra" align="center">
 {#        <div id="csv_table" style="width: 55%;float: left;">#}
-        <div id="csv_table" class="col-sm-12 col-md-7">
-            <table class="data-table">
+        <div id="csv_table" class="col-sm-12 col-md-7 overflow-auto">
+            <table class="table table-hover data-table bold-font">
                 <thead>
-                    <tr class="bg-info">
+                    <tr class="bg-primary">
 {#                        <th>Chip ID</th>#}
 {#                        <th>Time</th>#}
 {#                        <th>Time Unit</th>#}
@@ -324,8 +327,12 @@
                         <th>Sample Location</th>
                         <th>Value</th>
                         <th>Value Unit</th>
-                        <th>QC Status</th>
-                        <th></th>
+                        <th>Caution Flag</th>
+                        {% if user|is_group_admin:study.group.name %}
+                        <th id="id_exclude_header">Exclude</th>
+                        {% endif %}
+                        <th>Notes</th>
+                        <th>Data File</th>
                     </tr>
                 </thead>
                 <tbody id="table_body">

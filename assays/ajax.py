@@ -21,7 +21,8 @@ from .utils import (
     DEFAULT_CSV_HEADER,
     CSV_HEADER_WITH_COMPOUNDS_AND_STUDY,
     CHIP_DATA_PREFETCH,
-    UnicodeWriter
+    UnicodeWriter,
+    REPLACED_DATA_POINT_CODE
 )
 
 import csv
@@ -375,7 +376,7 @@ def get_split_times(time_in_minutes):
     return times
 
 
-def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=False, include_header=False):
+def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=False, include_header=False, include_all=False):
     """Returns readout data as a csv in the form of a string
 
     Params:
@@ -386,6 +387,7 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
     related_compounds_map = {}
 
     if not chip_data:
+        # TODO ORDER SUBJECT TO CHANGE
         chip_data = AssayChipRawData.objects.prefetch_related(
             *CHIP_DATA_PREFETCH
         ).filter(
@@ -414,6 +416,9 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         study_id = data_point.assay_chip_id.chip_setup.assay_run_id.assay_run_id
 
         chip_id = data_point.assay_chip_id.chip_setup.assay_chip_id
+
+        cross_reference = data_point.cross_reference
+
         assay_plate_id = data_point.assay_plate_id
         assay_well_id = data_point.assay_well_id
 
@@ -434,32 +439,36 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
 
         value_unit = data_point.assay_instance.unit.unit
         quality = data_point.quality
+        caution_flag = data_point.caution_flag
         replicate = data_point.replicate
         # TODO ADD OTHER STUFF
         notes = data_point.notes
 
-        data.append(
-            [unicode(x) for x in
-                [
-                    study_id,
-                    chip_id,
-                    assay_plate_id,
-                    assay_well_id,
-                    times.get('day'),
-                    times.get('hour'),
-                    times.get('minute'),
-                    compound_treatment,
-                    target,
-                    method,
-                    sample_location,
-                    value,
-                    value_unit,
-                    replicate,
-                    quality,
-                    notes
+        if REPLACED_DATA_POINT_CODE not in quality and (include_all or not quality):
+            data.append(
+                [unicode(x) for x in
+                    [
+                        study_id,
+                        chip_id,
+                        cross_reference,
+                        assay_plate_id,
+                        assay_well_id,
+                        times.get('day'),
+                        times.get('hour'),
+                        times.get('minute'),
+                        compound_treatment,
+                        target,
+                        method,
+                        sample_location,
+                        value,
+                        value_unit,
+                        replicate,
+                        caution_flag,
+                        quality,
+                        notes
+                    ]
                 ]
-            ]
-        )
+            )
 
     string_io = StringIO()
     csv_writer = UnicodeWriter(string_io)
@@ -506,12 +515,23 @@ def get_chip_readout_data_as_json(chip_ids, chip_data=None):
         if value is None:
             value = ''
 
+        caution_flag = data_point.caution_flag
         quality = data_point.quality
         # TODO ADD OTHER STUFF
         notes = data_point.notes
 
         update_number = data_point.update_number
         replicate = data_point.replicate
+
+        data_upload = data_point.data_upload
+
+        if data_upload:
+            data_upload_name = unicode(data_upload)
+            data_upload_url = data_upload.file_location
+
+        else:
+            data_upload_name = u''
+            data_upload_url = u''
 
         if sample_location.id not in sample_locations:
             sample_locations.update(
@@ -546,11 +566,14 @@ def get_chip_readout_data_as_json(chip_ids, chip_data=None):
             'assay_instance_id': assay_instance.id,
             'sample_location_id': sample_location.id,
             'value': value,
+            'caution_flag': caution_flag,
             'quality': quality.strip(),
             # TODO ADD OTHER STUFF
             'notes': notes.strip(),
             'update_number': update_number,
-            'replicate': replicate.strip()
+            'replicate': replicate.strip(),
+            'data_upload_url': data_upload_url,
+            'data_upload_name': data_upload_name
         }
         data_points.append(data_point_fields)
 
@@ -777,7 +800,7 @@ def get_readout_data(
 
         chip_id = raw.assay_chip_id.chip_setup.assay_chip_id
 
-        # TODO DO THIS IN JS
+        # BE SURE TO DO THIS IN JS
         quality_index = '~'.join([
             chip_id,
             str(raw.assay_plate_id),
@@ -804,7 +827,7 @@ def get_readout_data(
         quality = raw.quality
 
         # TODO Should probably just use dynamic_quality instead of quality for this
-        if value is not None and (include_all or not dynamic_quality.get(quality_index, quality)):
+        if value is not None and REPLACED_DATA_POINT_CODE not in quality and (include_all or not dynamic_quality.get(quality_index, quality)):
             # Get tag for data point
             # If by compound
             if key == 'compound':

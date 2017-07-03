@@ -73,4 +73,14 @@ $(document).ready(function() {
     $('#' + charts_name + 'chart_options').find('input').change(function() {
         get_readouts();
     });
+
+    $('#exportinclude_all').change(function() {
+        var export_button = $('#export_button');
+        if ($(this).prop('checked')) {
+            export_button.attr('href', export_button.attr('href') + '?include_all=true');
+        }
+        else {
+            export_button.attr('href', export_button.attr('href').split('?')[0]);
+        }
+    }).trigger('change');
 });

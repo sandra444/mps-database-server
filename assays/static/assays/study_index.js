@@ -11,10 +11,10 @@ $(document).ready(function() {
     $.each(ids, function(index, table_id) {
         if ($(table_id)[0]) {
             $(table_id).DataTable({
-                "iDisplayLength": 400,
-                dom: 'rt',
+                "iDisplayLength": 25,
+                dom: 'B<"row">lfrtip',
                 fixedHeader: {headerOffset: 50},
-                responsive: true,
+                responsive: false,
                 // Initially sort on start date (descending), not ID
                 "order": [[1, "asc"], [2, "desc"]],
                 "aoColumnDefs": [

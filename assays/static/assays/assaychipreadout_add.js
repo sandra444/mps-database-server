@@ -10,22 +10,22 @@ $(document).ready(function () {
             getCookie('csrftoken');
 
     // Get the quality indicators
-    var quality_indicators = [];
-    $.ajax({
-        url: "/assays_ajax/",
-        type: "POST",
-        dataType: "json",
-        data: {
-            call: 'fetch_quality_indicators',
-            csrfmiddlewaretoken: middleware_token
-        },
-        success: function (json) {
-            quality_indicators = json;
-        },
-        error: function (xhr, errmsg, err) {
-            console.log(xhr.status + ": " + xhr.responseText);
-        }
-    });
+    // var quality_indicators = [];
+    // $.ajax({
+    //     url: "/assays_ajax/",
+    //     type: "POST",
+    //     dataType: "json",
+    //     data: {
+    //         call: 'fetch_quality_indicators',
+    //         csrfmiddlewaretoken: middleware_token
+    //     },
+    //     success: function (json) {
+    //         quality_indicators = json;
+    //     },
+    //     error: function (xhr, errmsg, err) {
+    //         console.log(xhr.status + ": " + xhr.responseText);
+    //     }
+    // });
 
     // Tracks the quality of data to indicate whether to exclude or include in plots
     var dynamic_quality_current = {};
@@ -36,9 +36,6 @@ $(document).ready(function () {
 
     // Name for the charts for binding events etc
     var charts_name = 'charts';
-
-    // Indicates whether the data exists in the database or not
-    var exist = false;
 
     var changes_to_chart_options = {
         chartArea: {
@@ -118,7 +115,7 @@ $(document).ready(function () {
                 },
                 success: function (json) {
                     exist = true;
-                    process_data(json);
+                    process_data(json, exist);
                 },
                 error: function (xhr, errmsg, err) {
                     console.log(xhr.status + ": " + xhr.responseText);
@@ -194,7 +191,7 @@ $(document).ready(function () {
                     exist = false;
                     alert('Success! Please see "New Chip Data" below for preview.');
                     if (include_table) {
-                       process_data(json.table);
+                       process_data(json.table, exist);
                     }
                     window.CHARTS.prepare_charts_by_table(json.charts, charts_name);
                     window.CHARTS.make_charts(json.charts, charts_name, changes_to_chart_options);
@@ -213,7 +210,7 @@ $(document).ready(function () {
         });
     }
 
-    var process_data = function (json) {
+    var process_data = function (json, exist) {
         var table_body = $('#table_body');
 
         // Do not empty entire table, only delete new values
@@ -260,20 +257,30 @@ $(document).ready(function () {
             var value = data_point.value;
             var value_unit = assay_instances[assay_instance_id].unit;
 
+            var caution_flag = data_point.caution_flag;
             var quality = data_point.quality;
+
             var notes = data_point.notes;
             var replicate = data_point.replicate;
             var update_number = data_point.update_number;
 
-            // Add update_number to notes if this is an update (i.e. update_number > 0)
-            if (update_number && update_number != 0) {
-                notes += '\nUpdate #' + update_number;
+            var data_upload_url = data_point.data_upload_url;
+            var data_upload_name = data_point.data_upload_name;
+
+            // If there is an R, continue
+            if (quality.indexOf('R') > -1) {
+                continue;
             }
 
+            // Add update_number to notes if this is an update (i.e. update_number > 0)
+            // if (update_number && update_number != 0) {
+            //     notes += '\nUpdate #' + update_number;
+            // }
+
             // Add replicate to notes if replicate is specified
-            if (replicate) {
-                notes += '\nReplicate ' + replicate;
-            }
+            // if (replicate) {
+            //     notes += '\nReplicate ' + replicate;
+            // }
 
             var index = {
                 // Chip ID added for future proofing (maybe we will have study-wide changes to quality)
@@ -314,6 +321,10 @@ $(document).ready(function () {
             }
 
             else if (quality) {
+                new_row.addClass('bg-danger');
+            }
+
+            else if (caution_flag) {
                 new_row.addClass('bg-warning');
             }
 
@@ -327,27 +338,48 @@ $(document).ready(function () {
             var col_value = $('<td>').text(value ? data_format(value) : value);
             var col_value_unit = $('<td>').text(value_unit);
 
+            var col_caution_flag = $('<td>').text(caution_flag);
+
             var col_quality = $('<td>');
 
-            var quality_input = $('<input>')
-                .attr('name', index)
+            var quality_box = $('<input>')
+                .attr('type', 'checkbox')
                 // .attr('id', i)
                 .css('width', 50)
-                .addClass('text-danger quality')
-                .val(quality);
+                .addClass('quality');
+
+            var quality_input = $('<input>')
+                .css('visibility', 'hidden')
+                .attr('name', index)
+                .addClass('quality-input');
+
+            if (quality) {
+                quality_box.prop('checked', true);
+                quality_input.val(quality);
+            }
 
             if (exist || every) {
-                col_quality.append(quality_input);
-            }
-
-            var col_notes = $('<td>');
-            if (notes) {
-                col_notes.append(
-                    $('<span>')
-                        .addClass('glyphicon glyphicon-info-sign')
-                        .attr('title', notes)
+                col_quality.append(
+                    quality_box,
+                    quality_input
                 );
             }
+
+            var col_notes = $('<td>').text(notes);
+            // var col_notes = $('<td>');
+            // if (notes) {
+            //     col_notes.append(
+            //         $('<span>')
+            //             .addClass('glyphicon glyphicon-info-sign')
+            //             .attr('title', notes)
+            //     );
+            // }
+
+            var col_data_upload = $('<td>').append(
+                $('<a>')
+                    .text(data_upload_name)
+                    .attr('href', data_upload_url)
+            );
 
             new_row.append(
                 col_chip_id,
@@ -357,11 +389,30 @@ $(document).ready(function () {
                 col_sample_location,
                 col_value,
                 col_value_unit,
-                col_quality,
-                col_notes
+                col_caution_flag
             );
+
+            // Technically a magic value SUBJECT TO CHANGE
+            // Finds if there is a column to put exclude into
+            if ($('#id_exclude_header')[0]) {
+                new_row.append(col_quality)
+            }
+
+            new_row.append(
+                col_notes,
+                col_data_upload
+            );
+
+            // If there is an X, hide and mark
+            if (quality.indexOf('X') > -1) {
+                new_row.addClass('initially-excluded')
+            }
+
             table_body.prepend(new_row);
         }
+
+        // Refresh exclusions
+        toggle_excluded();
 
         var all_qualities = null;
 
@@ -372,102 +423,22 @@ $(document).ready(function () {
             all_qualities = $('.new-value').find('.quality');
         }
 
-        // Bind click event to quality
-        all_qualities.click(function() {
-            // Remove other tables to avoid quirk when jumping from quality to quality
-            $('.quality-indicator-table').remove();
-
-            var current_quality = $(this);
-
-            var table_container = $('<div>')
-                .css('width', '180px')
-                .css('background-color', '#FDFEFD')
-                .addClass('quality-indicator-table');
-
-            var indicator_table = $('<table>')
-                .css('width', '100%')
-                .attr('align', 'center')
-                .addClass('table table-striped table-bordered table-hover table-condensed');
-
-            $.each(quality_indicators, function(index, indicator) {
-                var prechecked = false;
-
-                // ASSUMES SINGLE CHARACTER CODES
-                if (current_quality.val().indexOf(indicator.code) > -1) {
-                    prechecked = true;
-                }
-
-                var new_row = $('<tr>');
-                var name = $('<td>').text(indicator.name + ' ');
-
-                // Add the description
-                name.append(
-                    $('<span>')
-                        .addClass('glyphicon glyphicon-question-sign')
-                        .attr('title', indicator.description)
-                );
-
-                var code = $('<td>')
-                    .text(indicator.code)
-                    .addClass('lead');
-
-                var select = $('<td>')
-                    .append($('<input>')
-                        .attr('type', 'checkbox')
-                        .val(indicator.code)
-                        .prop('checked', prechecked)
-                        .addClass('quality-indicator')
-                        .click(function() {
-                            var current_quality_value = current_quality.val();
-
-                            // If it is being checked
-                            if ($(this).prop('checked') == true) {
-                                if (current_quality_value.indexOf($(this).val()) < 0) {
-                                    current_quality.val(current_quality_value + $(this).val());
-                                }
-                            }
-                            else {
-                                // Otherwise get rid of flag
-                                current_quality.val(current_quality_value.replace($(this).val(), ''));
-                            }
-
-                            current_quality.focus();
-                            current_quality.trigger('change');
-                        }));
-                new_row.append(name, code, select);
-                indicator_table.append(new_row);
-            });
-
-            table_container.append(indicator_table);
-
-            $('body').append(table_container);
-
-            table_container.position({
-              of: current_quality,
-              my: 'left-125 top',
-              at: 'left bottom'
-            });
-        });
-
-        // Bind unfocus event to qualities
-        all_qualities.focusout(function(event) {
-            var related_target = $(event.relatedTarget);
-            // Remove any quality indicator tables if not quality-indicator-table or quality
-            if (!related_target.hasClass('quality-indicator')) {
-                $('.quality-indicator-table').remove();
-            }
-        });
-
         // Bind change event to quality
         all_qualities.change(function() {
-            // Change color of parent if there is input
-            if (this.value) {
-                $(this).parent().parent().addClass('bg-warning');
+            var current_value = $(this).prop('checked');
+            var current_row = $(this).parent().parent();
+            var current_input = $(this).parent().find('.quality-input');
+
+            // Make sure that the value is empty string rather than boolean
+            if (!current_value) {
+                current_value = '';
+                current_input.val('');
             }
             else {
-                $(this).parent().parent().removeClass('bg-warning');
+                current_input.val('X');
             }
-            var index = JSON.parse(this.name);
+
+            var index = JSON.parse(current_input.attr('name'));
             index = [
                 index.chip_id,
                 index.assay_plate_id,
@@ -481,11 +452,25 @@ $(document).ready(function () {
 
             var joined_index = index.join('~');
 
-            if (exist) {
-                dynamic_quality_current[joined_index] = this.value;
+            // Change color of parent if there is input
+            if (current_value) {
+                current_row.addClass('bg-danger');
+                current_row.removeClass('unexcluded');
+            }
+            else if (!current_value && current_row.hasClass('initially-excluded')) {
+                current_row.addClass('bg-info');
+                current_row.addClass('unexcluded');
+                current_row.removeClass('bg-success bg-danger');
             }
             else {
-                dynamic_quality_new[joined_index] = this.value;
+                current_row.removeClass('bg-danger');
+            }
+
+            if (exist) {
+                dynamic_quality_current[joined_index] = current_value;
+            }
+            else {
+                dynamic_quality_new[joined_index] = current_value;
             }
 
             // Validate again if there is a file
@@ -533,6 +518,8 @@ $(document).ready(function () {
         else {
             plot_existing_data();
         }
+
+        toggle_excluded();
     };
 
     var refresh_chart_only = function() {
@@ -544,7 +531,24 @@ $(document).ready(function () {
         else {
             plot_existing_data();
         }
+
+        toggle_excluded();
     };
+
+    function toggle_excluded() {
+        // Stop gap: magic string
+        var include_all = $('#chartsinclude_all').prop('checked');
+
+        if (include_all) {
+            $('.initially-excluded').show();
+        }
+        else {
+            $('.initially-excluded').hide();
+        }
+
+        // Show initially-excluded items that have had their exclusion removed
+        $('.unexcluded').show();
+    }
 
     // Refresh on file change
     $('#id_file').change(function(evt) {

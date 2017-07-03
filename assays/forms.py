@@ -8,7 +8,7 @@ import re
 import string
 import collections
 
-from .utils import validate_file, get_chip_details, get_plate_details, TIME_CONVERSIONS
+from .utils import validate_file, get_chip_details, get_plate_details, TIME_CONVERSIONS, EXCLUDED_DATA_POINT_CODE
 
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
@@ -21,6 +21,7 @@ restricted = ('restricted',)
 group = ('group',)
 
 # Overwrite options
+# DEPRECATED
 OVERWRITE_OPTIONS_BULK = forms.ChoiceField(
     choices=(
         ('mark_conflicting_data', 'Replace Conflicting Data'),
@@ -882,7 +883,7 @@ def process_readout_value(value):
 
         try:
             sliced_value = float(sliced_value)
-            return {'value': sliced_value, 'quality': 'X'}
+            return {'value': sliced_value, 'quality': EXCLUDED_DATA_POINT_CODE}
 
         except ValueError:
             return None
@@ -1156,27 +1157,25 @@ class ReadoutBulkUploadForm(forms.ModelForm):
         # Get the study in question
         study = self.instance
 
-        test_file = None
+        # test_file = None
 
         if self.request and self.request.FILES:
             test_file = data.get('bulk_file', '')
 
-        if not test_file:
-            raise forms.ValidationError('No file was supplied.')
+            file_data = validate_file(
+                self,
+                test_file,
+                'Bulk',
+                # headers=headers,
+                study=study
+            )
 
-        # For the moment, just have headers be equal to one?
-        # headers = 1
+            # Evil attempt to acquire preview data
+            self.cleaned_data['preview_data'] = file_data
 
-        file_data = validate_file(
-            self,
-            test_file,
-            'Bulk',
-            # headers=headers,
-            study=study
-        )
-
-        # Evil attempt to acquire preview data
-        self.cleaned_data['preview_data'] = file_data
+        # Removed, someone might want to use this interface to remove data
+        # if not test_file:
+        #     raise forms.ValidationError('No file was supplied.')
 
         return self.cleaned_data
 

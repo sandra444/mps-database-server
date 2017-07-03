@@ -15,7 +15,9 @@ from assays.utils import (
     modify_qc_status_plate,
     modify_qc_status_chip,
     save_assay_layout,
-    CHIP_DATA_PREFETCH
+    CHIP_DATA_PREFETCH,
+    REPLACED_DATA_POINT_CODE,
+    EXCLUDED_DATA_POINT_CODE
 )
 
 from django.forms.models import inlineformset_factory
@@ -114,11 +116,15 @@ def get_queryset_with_assay_map(queryset):
     """Takes a queryset and returns it with a assay map"""
     data_points = AssayChipRawData.objects.filter(
         assay_chip_id__in=queryset
+    ).exclude(
+        quality__contains=REPLACED_DATA_POINT_CODE
     ).prefetch_related(
         *CHIP_DATA_PREFETCH
     )
 
     assay_map = {}
+    caution_flag_map = {}
+    quality_map = {}
 
     for data_point in data_points:
         assay_map.setdefault(
@@ -129,10 +135,29 @@ def get_queryset_with_assay_map(queryset):
             }
         )
 
+        for flag in data_point.caution_flag:
+            caution_flag_map.setdefault(data_point.assay_chip_id_id, {}
+            ).update(
+                {
+                    flag: True
+                }
+            )
+
+        if EXCLUDED_DATA_POINT_CODE in data_point.quality:
+            quality_map.update(
+                {
+                    data_point.assay_chip_id_id: quality_map.setdefault(data_point.assay_chip_id_id, 0) + 1
+                }
+            )
+
     for readout in queryset:
         readout.assays = ', '.join(
             sorted(assay_map.get(readout.id, {}).keys())
         )
+        readout.caution_flag = ''.join(
+            sorted(caution_flag_map.get(readout.id, {}).keys())
+        )
+        readout.quality = quality_map.get(readout.id, '')
 
     return queryset
 
@@ -2168,11 +2193,31 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
             # Add user to Study's modified by
             # TODO
-            self.object.bulk_file = data.get('bulk_file')
-            self.object.modified_by = self.request.user
-            self.object.save()
+            if self.request and self.request.FILES:
+                self.object.bulk_file = data.get('bulk_file')
+                self.object.modified_by = self.request.user
+                self.object.save()
 
-            parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
+                parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
+
+            # Only check if user is qualified admin
+            if is_group_admin(self.request.user, self.object.group.name):
+                # Contrived method for marking data
+                for key, value in form.data.iteritems():
+                    if key.startswith('data_upload_'):
+                        current_id = key.replace('data_upload_', '', 1)
+                        current_value = value
+
+                        if current_value == 'false':
+                            current_value = False
+
+                        if current_value:
+                            data_upload = AssayDataUpload.objects.filter(study=self.object, id=current_id)
+                            if data_upload:
+                                data_points_to_replace = AssayChipRawData.objects.filter(data_upload=data_upload).exclude(quality__contains=REPLACED_DATA_POINT_CODE)
+                                for data_point in data_points_to_replace:
+                                    data_point.quality = data_point.quality + REPLACED_DATA_POINT_CODE
+                                    data_point.save()
 
             return redirect(self.object.get_absolute_url())
         else:
@@ -2200,7 +2245,9 @@ class ReturnStudyData(ViewershipMixin, DetailView):
                 'chip_setup__assay_run_id'
             )
 
-            chip_data = get_chip_readout_data_as_csv(chip_readouts, include_header=True)
+            include_all = self.request.GET.get('include_all', False)
+
+            chip_data = get_chip_readout_data_as_csv(chip_readouts, include_header=True, include_all=include_all)
 
             # For specifically text
             response = HttpResponse(chip_data, content_type='text/csv')

@@ -56,7 +56,9 @@
         </div>
     </div>
 
+    <div hidden>
     {% include 'generic_field.html' with field=form.overwrite_option label="Overwrite Option*" %}
+    </div>
 
     <p>
         <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">Click Here For Chip Template</a>
@@ -66,7 +68,7 @@
         <a href="/media/excel_templates/plate_block_template-{{ version }}.xlsx">Click Here For Plate (Block) Template</a>
     </p>
 
-    {% include 'assays/data_upload_table.html' %}
+    {% include 'assays/data_upload_table.html' with show_delete="true" group=object.group.name %}
 
     {% if not chip_readouts and not plate_readouts %}
         <div class="alert alert-danger" role="alert">

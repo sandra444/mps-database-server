@@ -52,8 +52,23 @@ import collections
 PLATE_FORMATS = ('Tabular', 'Block')
 CHIP_FORMATS = ('Chip',)
 
+REPLACED_DATA_POINT_CODE = 'R'
+EXCLUDED_DATA_POINT_CODE = 'X'
+
+# This shouldn't be repeated like so
+# Converts: days -> minutes, hours -> minutes, minutes->minutes
+TIME_CONVERSIONS = [
+    ('day', 1440),
+    ('hour', 60),
+    ('minute', 1)
+]
+
+TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
+
+# TODO PLEASE REVIEW TO MAKE SURE CONSISTENT
 COLUMN_HEADERS = (
     'CHIP ID',
+    'CROSS REFERENCE',
     'ASSAY PLATE ID',
     'ASSAY WELL ID',
     'DAY',
@@ -66,6 +81,7 @@ COLUMN_HEADERS = (
     'VALUE UNIT',
     # SUBJECT TO CHANGE
     'REPLICATE',
+    'CAUTION FLAG',
     'QC STATUS',
     'NOTES'
 )
@@ -88,6 +104,7 @@ REQUIRED_COLUMN_HEADERS = (
 # SUBJECT TO CHANGE
 DEFAULT_CSV_HEADER  = (
     'Chip ID',
+    'Cross Reference',
     'Assay Plate ID',
     'Assay Well ID',
     'Day',
@@ -99,12 +116,14 @@ DEFAULT_CSV_HEADER  = (
     'Value',
     'Value Unit',
     'Replicate',
+    'Caution Flag',
     'QC Status',
     'Notes'
 )
 CSV_HEADER_WITH_COMPOUNDS_AND_STUDY = (
     'Study ID',
     'Chip ID',
+    'Cross Reference',
     'Assay Plate ID',
     'Assay Well ID',
     'Day',
@@ -117,6 +136,7 @@ CSV_HEADER_WITH_COMPOUNDS_AND_STUDY = (
     'Value',
     'Value Unit',
     'Replicate',
+    'Caution Flag',
     'QC Status',
     'Notes'
 )
@@ -132,6 +152,7 @@ CHIP_DATA_PREFETCH = (
     'assay_instance__study',
     'sample_location',
     'assay_chip_id__chip_setup',
+    'data_upload'
 )
 
 
@@ -231,7 +252,7 @@ def process_readout_value(value):
 
         try:
             sliced_value = float(sliced_value)
-            return {'value': sliced_value, 'quality': 'X'}
+            return {'value': sliced_value, 'quality': EXCLUDED_DATA_POINT_CODE}
 
         except ValueError:
             return None
@@ -1685,15 +1706,6 @@ def modify_qc_status_chip(current_chip_readout, form):
     ).prefetch_related(
         *CHIP_DATA_PREFETCH
     ).values_list(
-        # 'id',
-        # 'field_id',
-        # 'time',
-        # 'assay_id__assay_id__assay_name',
-        # 'assay_id__assay_id__assay_short_name',
-        # 'update_number',
-        # 'quality',
-        # 'notes',
-        # 'assay_id__readout_unit__unit'
         'id',
         'assay_chip_id__chip_setup__assay_chip_id',
         'assay_plate_id',
@@ -1712,45 +1724,6 @@ def modify_qc_status_chip(current_chip_readout, form):
     readout_ids_and_notes = []
 
     for readout_values in readouts:
-        # index_long = (
-        #     readout_values[1],
-        #     readout_values[2],
-        #     readout_values[3].upper(),
-        #     readout_values[8],
-        #     readout_values[5]
-        # )
-        # index_short = (
-        #     readout_values[1],
-        #     readout_values[2],
-        #     readout_values[4].upper(),
-        #     readout_values[8],
-        #     readout_values[5]
-        # )
-        #
-        # id = readout_values[0]
-        # quality = readout_values[6]
-        # notes = readout_values[7]
-        #
-        # long_name_check = qc_status.get(index_long, None)
-        # short_name_check = qc_status.get(index_short, None)
-        #
-        # # long_name_removed = not long_name_check and not long_name_check is None
-        # long_name_empty = long_name_check == u''
-        # short_name_empty = short_name_check == u''
-        #
-        # if long_name_check:
-        #     new_quality = long_name_check
-        # elif short_name_check:
-        #     new_quality = short_name_check
-        # else:
-        #     new_quality = u''
-        #
-        # # If the quality marker is present
-        # if long_name_check or short_name_check:
-        #     readout_ids_and_notes.append((id, notes, new_quality))
-        # # If the quality marker has been removed
-        # elif (long_name_empty or short_name_empty) and quality:
-        #     readout_ids_and_notes.append((id, notes, new_quality))
         id = readout_values[0]
         chip_id = readout_values[1]
         assay_plate_id = readout_values[2]
@@ -1782,16 +1755,6 @@ def modify_qc_status_chip(current_chip_readout, form):
             readout_ids_and_notes.append((id, notes, new_quality))
 
     mark_chip_readout_values(readout_ids_and_notes)
-
-# This shouldn't be repeated like so
-# Converts: days -> minutes, hours -> minutes, minutes->minutes
-TIME_CONVERSIONS = [
-    ('day', 1440),
-    ('hour', 60),
-    ('minute', 1)
-]
-
-TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
 
 
 # TODO BE SURE TO CHECK CHECK FOR DUPLICATES
@@ -1954,16 +1917,28 @@ def validate_chip_readout_file(
                 unicode(sheet +  'The Sample Location "{0}" was not recognized.').format(sample_location_name)
             )
 
+        # TODO THE TRIMS HERE SHOULD BE BASED ON THE MODELS RATHER THAN MAGIC NUMBERS
         # Get notes, if possible
-        notes = ''
+        notes = u''
         if header_indices.get('NOTES', ''):
             notes = line[header_indices.get('NOTES')].strip()[:255]
+
+        cross_reference = u''
+        if header_indices.get('CROSS REFERENCE', ''):
+            cross_reference = line[header_indices.get('CROSS REFERENCE')].strip()[:255]
 
         # PLEASE NOTE Database inputs, not the csv, have the final say
         # Get quality if possible
         quality = u''
         if header_indices.get('QC STATUS', ''):
-            quality = line[header_indices.get('QC STATUS')].strip()[:20]
+            # PLEASE NOTE: Will only ever add 'X' now
+            # quality = line[header_indices.get('QC STATUS')].strip()[:20]
+            if line[header_indices.get('QC STATUS')].strip()[:20]:
+                quality = EXCLUDED_DATA_POINT_CODE
+
+        caution_flag = u''
+        if header_indices.get('CAUTION FLAG', ''):
+            caution_flag = line[header_indices.get('CAUTION FLAG')].strip()[:20]
 
         # Get replicate if possible
         # DEFAULT IS SUBJECT TO CHANGE PLEASE BE AWARE
@@ -2025,8 +2000,8 @@ def validate_chip_readout_file(
         if value == '':
             value = None
             # Set quality to 'NULL' if quality was not set by user
-            if not quality and 'N' not in quality:
-                quality += 'N'
+            # if not quality and 'N' not in quality:
+            #     quality += 'N'
 
         if not errors:
             # Try to get readout
@@ -2086,12 +2061,14 @@ def validate_chip_readout_file(
             if save:
                 query_list.append((
                     current_chip_readout.id,
+                    cross_reference,
                     assay_plate_id,
                     assay_well_id,
                     assay_instance_id,
                     sample_location_id,
                     value,
                     time,
+                    caution_flag,
                     quality,
                     notes,
                     replicate,
@@ -2101,12 +2078,14 @@ def validate_chip_readout_file(
                 readout_data.append(
                     AssayChipRawData(
                         assay_chip_id=current_chip_readout,
+                        cross_reference=cross_reference,
                         assay_plate_id=assay_plate_id,
                         assay_well_id=assay_well_id,
                         assay_instance_id=assay_instance_id,
                         sample_location_id=sample_location_id,
                         value=value,
                         time=time,
+                        caution_flag=caution_flag,
                         quality=quality,
                         notes=notes,
                         replicate=replicate,
@@ -2139,8 +2118,8 @@ def validate_chip_readout_file(
         cursor = connection.cursor()
         # The generic query
         query = ''' INSERT INTO "assays_assaychiprawdata"
-              ("assay_chip_id_id", "assay_plate_id", "assay_well_id", "assay_instance_id", "sample_location_id", "value", "time", "quality", "notes", "replicate", "update_number")
-              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+              ("assay_chip_id_id", "cross_reference", "assay_plate_id", "assay_well_id", "assay_instance_id", "sample_location_id", "value", "time", "caution_flag", "quality", "notes", "replicate", "update_number")
+              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
 
         cursor.executemany(query, query_list)
         transaction.commit()
@@ -2222,6 +2201,7 @@ def save_chip_files(datalist, current_file, study_id, overwrite_option, readout=
     #     current_file.chip_readout.add(readout_details.get('readout'))
     for chip_id, readout in used_readouts.items():
         current_file.chip_readout.add(readout)
+        AssayChipRawData.objects.filter(assay_chip_id=readout).update(data_upload=current_file)
 
 
 # TODO MAY CAUSE SILENT FAILURE
@@ -2276,8 +2256,8 @@ def mark_chip_readout_values(readout_ids_and_notes, stamp=False):
         quality = readout_id_and_notes[2]
         if stamp:
             # Add OLD to quality (R is code for replaced) [SUBJECT TO CHANGE]
-            if 'R' not in quality:
-                quality = 'R' + quality
+            if REPLACED_DATA_POINT_CODE not in quality:
+                quality = REPLACED_DATA_POINT_CODE + quality
                 quality = quality[:20]
         query_list.append((quality, notes, readout_id))
 
@@ -2307,8 +2287,8 @@ def mark_plate_readout_values(readout_ids_and_notes, stamp=False):
         quality = readout_id_and_notes[2]
         if stamp:
             # Add OLD to quality (R is code for replaced) [SUBJECT TO CHANGE]
-            if 'R' not in quality:
-                quality = 'R' + quality
+            if REPLACED_DATA_POINT_CODE not in quality:
+                quality = REPLACED_DATA_POINT_CODE + quality
                 quality = quality[:19]
         query_list.append((quality, notes, readout_id))
 
