@@ -2201,7 +2201,7 @@ def save_chip_files(datalist, current_file, study_id, overwrite_option, readout=
     #     current_file.chip_readout.add(readout_details.get('readout'))
     for chip_id, readout in used_readouts.items():
         current_file.chip_readout.add(readout)
-        AssayChipRawData.objects.filter(assay_chip_id=readout).update(data_upload=current_file)
+        AssayChipRawData.objects.filter(assay_chip_id=readout, data_upload=None).update(data_upload=current_file)
 
 
 # TODO MAY CAUSE SILENT FAILURE
