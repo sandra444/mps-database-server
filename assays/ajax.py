@@ -637,7 +637,7 @@ def get_list_of_present_compounds(related_compounds_map, data_point, separator='
     return tag
 
 
-def get_control_data(study, related_compounds_map, key, mean_type, include_all, new_data_for_control=None):
+def get_control_data(study, related_compounds_map, key, mean_type, include_all, truncate_negative, new_data_for_control=None):
     """Gets control data for performing percent control calculations
 
     study - the study in question
@@ -661,6 +661,9 @@ def get_control_data(study, related_compounds_map, key, mean_type, include_all, 
     # A little too much copy-pasting here, not very DRY
     for raw in data_points:
         value = raw.value
+
+        if truncate_negative and value < 0:
+            value = 0
 
         # TODO CHANGE TO USE FOLLOWING
         assay_instance = raw.assay_instance
@@ -724,6 +727,7 @@ def get_readout_data(
         interval_type,
         percent_control,
         include_all,
+        truncate_negative,
         dynamic_quality,
         study=None,
         readout=None,
@@ -767,7 +771,15 @@ def get_readout_data(
         if new_data:
             new_data_for_control = raw_data
 
-        controls = get_control_data(study, related_compounds_map, key, mean_type, include_all, new_data_for_control=new_data_for_control)
+        controls = get_control_data(
+            study,
+            related_compounds_map,
+            key,
+            mean_type,
+            include_all,
+            truncate_negative,
+            new_data_for_control=new_data_for_control
+        )
 
         if controls.get('errors' , ''):
             return controls
@@ -788,6 +800,9 @@ def get_readout_data(
         # Deprecated
         # field = raw.field_id
         value = raw.value
+
+        if truncate_negative and value < 0:
+            value = 0
 
         # TODO CHANGE TO USE FOLLOWING
         assay_instance = raw.assay_instance
@@ -1040,6 +1055,7 @@ def fetch_readouts(request):
     interval_type = request.POST.get('interval_type', 'ste')
     percent_control = request.POST.get('percent_control', '')
     include_all = request.POST.get('include_all', '')
+    truncate_negative = request.POST.get('truncate_negative', '')
     dynamic_quality = json.loads(request.POST.get('dynamic_quality', '{}'))
 
     if readout:
@@ -1094,6 +1110,7 @@ def fetch_readouts(request):
         interval_type,
         percent_control,
         include_all,
+        truncate_negative,
         dynamic_quality,
         study=this_study,
         readout=this_readout
@@ -1265,6 +1282,7 @@ def validate_bulk_file(request):
     interval_type = request.POST.get('interval_type', 'ste')
     percent_control = request.POST.get('percent_control', '')
     include_all = request.POST.get('include_all', '')
+    truncate_negative = request.POST.get('truncate_negative', '')
     # overwrite_option = request.POST.get('overwrite_option', '')
     # bulk_file = request.FILES.get('bulk_file', None)
     dynamic_quality = json.loads(request.POST.get('dynamic_quality', '{}'))
@@ -1295,6 +1313,7 @@ def validate_bulk_file(request):
             interval_type,
             percent_control,
             include_all,
+            truncate_negative,
             dynamic_quality,
             study=this_study,
             new_data=True
@@ -1345,6 +1364,7 @@ def validate_individual_chip_file(request):
     interval_type = request.POST.get('interval_type', 'ste')
     percent_control = request.POST.get('percent_control', '')
     include_all = request.POST.get('include_all', '')
+    truncate_negative = request.POST.get('truncate_negative', '')
     readout_id = request.POST.get('readout', '')
     include_table = request.POST.get('include_table', '')
     # overwrite_option = request.POST.get('overwrite_option', '')
@@ -1417,6 +1437,7 @@ def validate_individual_chip_file(request):
             interval_type,
             percent_control,
             include_all,
+            truncate_negative,
             dynamic_quality,
             study=study,
             readout=readout,
