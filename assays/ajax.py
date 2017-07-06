@@ -1279,7 +1279,7 @@ def validate_bulk_file(request):
         preview_data = form_data.get('preview_data')
 
         # Only chip preview right now
-        chip_raw_data = preview_data.get('chip_preview')
+        chip_raw_data = preview_data.get('chip_preview', {}).get('readout_data', [])
 
         related_compounds_map = {}
 
@@ -1287,7 +1287,7 @@ def validate_bulk_file(request):
             related_compounds_map = get_related_compounds_map(study=this_study)
 
         # NOTE THE EMPTY DIC, RIGHT NOW BULK PREVIEW NEVER SHOWS COMPOUND JUST DEVICE
-        data = get_readout_data(
+        readout_data = get_readout_data(
             chip_raw_data,
             related_compounds_map,
             key,
@@ -1299,6 +1299,11 @@ def validate_bulk_file(request):
             study=this_study,
             new_data=True
         )
+
+        data = {
+            'readout_data': readout_data,
+            'number_of_conflicting_entries': preview_data.get('chip_preview', {}).get('number_of_conflicting_entries', 0)
+        }
 
         return HttpResponse(json.dumps(data),
                             content_type="application/json")
@@ -1373,7 +1378,7 @@ def validate_individual_chip_file(request):
         preview_data = form_data.get('preview_data')
 
         # Only chip preview right now
-        chip_raw_data = preview_data.get('chip_preview')
+        chip_raw_data = preview_data.get('chip_preview', {}).get('readout_data', [])
 
         # Now done in get_readout_data
         # Get the other raw data for this readout
@@ -1421,7 +1426,8 @@ def validate_individual_chip_file(request):
 
         data = {
             'table': table,
-            'charts': charts
+            'charts': charts,
+            'number_of_conflicting_entries': preview_data.get('chip_preview', {}).get('number_of_conflicting_entries', 0)
         }
 
         return HttpResponse(json.dumps(data),

@@ -1776,6 +1776,11 @@ def validate_chip_readout_file(
     query_list = []
     # A list of readout data for preview
     readout_data = []
+    # Full preview data
+    preview_data = {
+        'readout_data': readout_data,
+        'number_of_conflicting_entries': 0
+    }
     # A list of errors
     errors = []
     # A dic of readouts found in the file for binding to the DataUpload instance
@@ -1829,6 +1834,8 @@ def validate_chip_readout_file(
     # TODO THIS CALL WILL CHANGE IN FUTURE VERSIONS
     old_readout_data = AssayChipRawData.objects.filter(
         assay_chip_id__in=readouts
+    ).exclude(
+        quality__contains=REPLACED_DATA_POINT_CODE
     ).prefetch_related(
         *CHIP_DATA_PREFETCH
     )
@@ -2145,7 +2152,10 @@ def validate_chip_readout_file(
         return used_readouts
     # If this is a successful preview
     else:
-        return readout_data
+        preview_data.update({
+            'number_of_conflicting_entries': len(conflicting_entries)
+        })
+        return preview_data
 
 
 def get_csv_media_location(file_name):
@@ -2476,7 +2486,10 @@ def validate_excel_file(self, excel_file, interface, overwrite_option, study=Non
     """
     sheet_names = excel_file.sheet_names()
 
-    chip_preview = []
+    chip_preview = {
+        'readout_data': [],
+        'number_of_conflicting_entries': 0
+    }
     plate_preview = []
 
     errors = []
@@ -2523,7 +2536,10 @@ def validate_excel_file(self, excel_file, interface, overwrite_option, study=Non
             )
 
             at_least_one_valid_sheet = True
-            chip_preview.extend(current_chip_preview)
+            chip_preview.get('readout_data').extend(current_chip_preview.get('readout_data'))
+            chip_preview.update({
+                'number_of_conflicting_entries': chip_preview.get('number_of_conflicting_entries') + current_chip_preview.get('number_of_conflicting_entries')
+            })
         # If plate
         elif sheet_type in PLATE_FORMATS:
             if not plate_details:
@@ -2574,7 +2590,7 @@ def validate_csv_file(self, datalist, interface, overwrite_option, study=None, r
     header = datalist[0]
     sheet_type = get_sheet_type(datalist, 'CSV')
 
-    chip_preview = []
+    chip_preview = {}
     plate_preview = []
 
     errors = []

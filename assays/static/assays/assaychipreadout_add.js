@@ -190,9 +190,15 @@ $(document).ready(function () {
                 else {
                     exist = false;
                     alert('Success! Please see "New Chip Data" below for preview.');
+
+                    if (json.number_of_conflicting_entries) {
+                        alert('***Submitting this file will replace ' + json.number_of_conflicting_entries + ' point(s).***')
+                    }
+
                     if (include_table) {
                        process_data(json.table, exist);
                     }
+
                     window.CHARTS.prepare_charts_by_table(json.charts, charts_name);
                     window.CHARTS.make_charts(json.charts, charts_name, changes_to_chart_options);
                 }

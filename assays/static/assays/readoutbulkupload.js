@@ -88,8 +88,13 @@ $(document).ready(function () {
                     }
                     else {
                         alert('Success! Please see "New Chip Data" below for preview.');
-                        window.CHARTS.prepare_side_by_side_charts(json, charts_name);
-                        window.CHARTS.make_charts(json, charts_name);
+
+                        if (json.number_of_conflicting_entries) {
+                            alert('***Submitting this file will replace ' + json.number_of_conflicting_entries + ' point(s).***')
+                        }
+
+                        window.CHARTS.prepare_side_by_side_charts(json.readout_data, charts_name);
+                        window.CHARTS.make_charts(json.readout_data, charts_name);
                     }
                 },
                 error: function (xhr, errmsg, err) {
