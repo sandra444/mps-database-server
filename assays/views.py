@@ -2154,10 +2154,19 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             setup__assay_run_id=self.object
         ).prefetch_related('setup')
 
+        data_points = AssayChipRawData.objects.filter(
+            assay_chip_id__chip_setup__assay_run_id=self.object
+        ).exclude(
+            quality__contains=REPLACED_DATA_POINT_CODE
+        ).prefetch_related(
+            *CHIP_DATA_PREFETCH
+        )
+
         # TODO Could use a refactor
+        # Should use mapping similar to data_upload, methinks
         chip_has_data = {}
         for readout in chip_readouts:
-            if AssayChipRawData.objects.filter(assay_chip_id=readout):
+            if data_points.filter(assay_chip_id=readout):
                 chip_has_data.update({readout: True})
         plate_has_data = {}
         for readout in plate_readouts:
@@ -2169,6 +2178,16 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
         ).prefetch_related(
             'created_by'
         ).distinct().order_by('created_on')
+
+        data_upload_map = {}
+
+        for data_point in data_points:
+            data_upload_map.setdefault(
+                data_point.data_upload_id, True
+            )
+
+        for data_upload in data_uploads:
+            data_upload.has_data = data_upload_map.get(data_upload.id, '')
 
         context['data_uploads'] = data_uploads
 

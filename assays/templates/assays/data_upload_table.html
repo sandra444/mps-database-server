@@ -28,9 +28,11 @@
             {# This is processed in a contrived way in the view #}
             {% if show_delete and user|is_group_admin:group %}
                 <td>
+                {% if data_upload.has_data %}
                 <input type="checkbox"
                        id="id_data_upload_{{ data_upload.id }}"
                        name="data_upload_{{ data_upload.id }}">
+                {% endif %}
                 </td>
             {% endif %}
         </tr>
