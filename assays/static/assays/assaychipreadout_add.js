@@ -356,6 +356,7 @@ $(document).ready(function () {
 
             var quality_input = $('<input>')
                 .css('visibility', 'hidden')
+                .css('width', 0)
                 .attr('name', index)
                 .addClass('quality-input');
 
