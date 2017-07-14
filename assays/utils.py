@@ -117,7 +117,7 @@ DEFAULT_CSV_HEADER  = (
     'Value Unit',
     'Replicate',
     'Caution Flag',
-    'QC Status',
+    'Exclude',
     'Notes'
 )
 CSV_HEADER_WITH_COMPOUNDS_AND_STUDY = (
@@ -137,7 +137,7 @@ CSV_HEADER_WITH_COMPOUNDS_AND_STUDY = (
     'Value Unit',
     'Replicate',
     'Caution Flag',
-    'QC Status',
+    'Exclude',
     'Notes'
 )
 
@@ -1937,10 +1937,10 @@ def validate_chip_readout_file(
         # PLEASE NOTE Database inputs, not the csv, have the final say
         # Get quality if possible
         quality = u''
-        if header_indices.get('QC STATUS', ''):
+        if header_indices.get('EXCLUDE', ''):
             # PLEASE NOTE: Will only ever add 'X' now
             # quality = line[header_indices.get('QC STATUS')].strip()[:20]
-            if line[header_indices.get('QC STATUS')].strip()[:20]:
+            if line[header_indices.get('EXCLUDE')].strip()[:20]:
                 quality = EXCLUDED_DATA_POINT_CODE
 
         caution_flag = u''

@@ -189,10 +189,13 @@ $(document).ready(function () {
                 }
                 else {
                     exist = false;
-                    alert('Success! Please see "New Chip Data" below for preview.');
+                    alert('Success! Please see "New Chip Data" below for preview.' +
+                        '\n\nPlease note that changes will not be made until you press the "Submit" button.');
 
                     if (json.number_of_conflicting_entries) {
-                        alert('***Submitting this file will replace ' + json.number_of_conflicting_entries + ' point(s).***')
+                        alert(
+                            '***Submitting this file will replace ' + json.number_of_conflicting_entries + ' point(s).***' +
+                            '\n\nPlease note that changes will not be made until you press the "Submit" button.');
                     }
 
                     if (include_table) {

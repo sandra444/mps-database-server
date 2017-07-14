@@ -8,13 +8,15 @@
 			<th>Data File</th>
 			<th>Upload Date</th>
 			<th>Uploaded By</th>
-            {% if show_delete and user|is_group_admin:group %}
+            {% if show_delete and user|has_group:group %}
             <th>Remove All Associated Data</th>
             {% endif %}
 		</tr>
 	</thead>
     <tbody>
         {% for data_upload in data_uploads %}
+        {# Right now, only uploads withd data are displayed #}
+        {% if show_delete %}
         <tr>
             <td>
             	<a href="{{ data_upload.file_location }}">{{ data_upload }}</a>
@@ -26,7 +28,7 @@
             	{{ data_upload.full_creator }}
             </td>
             {# This is processed in a contrived way in the view #}
-            {% if show_delete and user|is_group_admin:group %}
+            {% if show_delete and user|has_group:group %}
                 <td>
                 {% if data_upload.has_data %}
                 <input type="checkbox"
@@ -36,6 +38,7 @@
                 </td>
             {% endif %}
         </tr>
+        {% endif %}
         {% endfor %}
     </tbody>
 </table>

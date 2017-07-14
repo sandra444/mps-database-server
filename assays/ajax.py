@@ -61,6 +61,7 @@ logger = logging.getLogger(__name__)
 CONTROL_LABEL = '-Control-'
 
 
+# TODO REFACTOR Rather than passing the same thing over and over, we can make an object with attributes!
 def main(request):
     """Default to server error"""
     return HttpResponseServerError()
@@ -662,9 +663,6 @@ def get_control_data(study, related_compounds_map, key, mean_type, include_all, 
     for raw in data_points:
         value = raw.value
 
-        if truncate_negative and value < 0:
-            value = 0
-
         # TODO CHANGE TO USE FOLLOWING
         assay_instance = raw.assay_instance
         target = assay_instance.target.name
@@ -682,6 +680,9 @@ def get_control_data(study, related_compounds_map, key, mean_type, include_all, 
 
         # No dynamic quality here
         if value is not None and (include_all or not quality):
+            if truncate_negative and value < 0:
+                value = 0
+
             if key == 'compound':
                 tag = get_list_of_present_compounds(related_compounds_map, raw, ' & ')
                 if tag == CONTROL_LABEL:
@@ -801,9 +802,6 @@ def get_readout_data(
         # field = raw.field_id
         value = raw.value
 
-        if truncate_negative and value < 0:
-            value = 0
-
         # TODO CHANGE TO USE FOLLOWING
         assay_instance = raw.assay_instance
         target = assay_instance.target.name
@@ -843,6 +841,8 @@ def get_readout_data(
 
         # TODO Should probably just use dynamic_quality instead of quality for this
         if value is not None and REPLACED_DATA_POINT_CODE not in quality and (include_all or not dynamic_quality.get(quality_index, quality)):
+            if truncate_negative and value < 0:
+                value = 0
             # Get tag for data point
             # If by compound
             if key == 'compound':

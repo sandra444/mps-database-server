@@ -65,7 +65,8 @@ $(document).ready(function () {
                         window.LAYOUT.build_heatmap();
                     }
                     else {
-                        alert('Success! Please see below for preview.');
+                        alert('Success! Please see below for preview.' +
+                            '\n\nPlease note that changes will not be made until you press the "Submit" button.');
                         // Fill heatmap
                         window.LAYOUT.fill_readout_from_existing(json, false);
                     }

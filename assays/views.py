@@ -2220,7 +2220,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
                 parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
 
             # Only check if user is qualified admin
-            if is_group_admin(self.request.user, self.object.group.name):
+            if has_group(self.request.user, self.object.group.name):
                 # Contrived method for marking data
                 for key, value in form.data.iteritems():
                     if key.startswith('data_upload_'):

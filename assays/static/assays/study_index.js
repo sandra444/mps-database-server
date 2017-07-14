@@ -11,7 +11,7 @@ $(document).ready(function() {
     $.each(ids, function(index, table_id) {
         if ($(table_id)[0]) {
             $(table_id).DataTable({
-                "iDisplayLength": 25,
+                "iDisplayLength": 10,
                 dom: 'B<"row">lfrtip',
                 fixedHeader: {headerOffset: 50},
                 responsive: false,

@@ -47,12 +47,16 @@
                         <td></td>
                     {% endif %}
                     <td>{{ readout.assays|default:"-No Data-" }}</td>
-                    <td>{{ readout.caution_flag }}</td>
+                    <td>
+                        <div class="text-warning">
+                            {{ readout.caution_flag }}
+                        </div>
+                    </td>
                     <td>
                         {% if readout.quality %}
-                            <div class="text-danger">
+                            <div class="text-danger" title="This entry contains {{ readout.quality }} excluded point(s)">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                                This entry contains {{ readout.quality }} excluded point(s)
+                                {{ readout.quality }}
                             </div>
                         {% endif %}
                     </td>

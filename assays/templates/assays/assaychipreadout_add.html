@@ -316,7 +316,7 @@
 {#                        <th>Sample Location</th>#}
 {#                        <th>Value</th>#}
 {#                        <th>Value Unit</th>#}
-{#                        <th>QC Status</th>#}
+{#                        <th>Exclude</th>#}
 {#                        <th></th>#}
                         <th>Chip ID</th>
 {#                        <th>Assay Plate ID</th>#}
@@ -328,7 +328,7 @@
                         <th>Value</th>
                         <th>Value Unit</th>
                         <th>Caution Flag</th>
-                        {% if user|is_group_admin:study.group.name %}
+                        {% if user|has_group:study.group.name %}
                         <th id="id_exclude_header">Exclude</th>
                         {% endif %}
                         <th>Notes</th>
