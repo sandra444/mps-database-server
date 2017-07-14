@@ -622,16 +622,19 @@ def get_list_of_present_compounds(related_compounds_map, data_point, separator='
             # Previously included only compounds within duration
             # if compound.addition_time <= time_minutes and compound.duration + compound.addition_time >= time_minutes:
             # Everything past addition time will be listed as effected
-            if compound.addition_time <= data_point.time:
-                compounds_to_add.append(
-                    compound.compound_instance.compound.name +
-                    ' ' + str(compound.concentration) + ' ' + compound.concentration_unit.unit
-                )
+
+            # Revised yet again, now displays all treatments regradless of what was at the time point
+            # if compound.addition_time <= data_point.time:
+
+            compounds_to_add.append(
+                compound.compound_instance.compound.name +
+                ' ' + str(compound.concentration) + ' ' + compound.concentration_unit.unit
+            )
 
         if not compounds_to_add:
             tag = CONTROL_LABEL
         else:
-            tag = separator.join(sorted(compounds_to_add))
+            tag = separator.join(compounds_to_add)
     else:
         tag = CONTROL_LABEL
 
@@ -1027,7 +1030,7 @@ def get_related_compounds_map(readouts=None, study=None):
         'compound_instance__supplier',
         'concentration_unit',
         'chip_setup__assay_run_id'
-    )
+    ).order_by('addition_time')
 
     for compound in related_compounds:
         related_compounds_map.setdefault(compound.chip_setup_id, []).append(compound)

@@ -211,7 +211,7 @@ class StudyIndex(ViewershipMixin, DetailView):
             'compound_instance__supplier',
             'concentration_unit',
             'chip_setup'
-        )
+        ).order_by('addition_time')
         related_compounds_map = {}
 
         # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
@@ -222,9 +222,9 @@ class StudyIndex(ViewershipMixin, DetailView):
             )
 
         for setup in setups:
-            setup.related_compounds_as_string = ',\n'.join(sorted(
+            setup.related_compounds_as_string = ',\n'.join(
                 related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
-            ))
+            )
 
         context['setups'] = setups
 
