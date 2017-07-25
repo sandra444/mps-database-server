@@ -1,9 +1,12 @@
 from django import template
 from microdevices.models import MicrophysiologyCenter
-# from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group
 
 register = template.Library()
 
+# AVOID MAGIC STRINGS
+VIEWER_SUFFIX = ' Viewer'
+ADMIN_SUFFIX = ' Admin'
 
 @register.filter(name='has_group')
 def has_group(user, group_name):
@@ -23,6 +26,25 @@ def has_group(user, group_name):
         return False
 
 
+# PLEASE BE SURE TO USE is_group_editor IN LIEU OF has_group WHEN NECESSARY
+@register.filter(name='is_group_editor')
+def is_group_editor(user, group_name):
+    """Returns whether or not the user has a group editorship privileges
+
+        Params:
+        user - The user in question (as a Django model)
+        group_name - The group name (as a string, as opposed to a Django model)
+        """
+    # In case something has gone wrong, err on the side of caution and deny access
+    if not group_name:
+        return False
+
+    if user.groups.filter(name__in=[group_name, group_name + ADMIN_SUFFIX]):
+        return True
+    else:
+        return False
+
+
 def is_group_viewer(user, group_name):
     """Checks whether the user has permission to view items from the given group
 
@@ -34,7 +56,7 @@ def is_group_viewer(user, group_name):
     if not group_name:
         return False
 
-    if user.groups.filter(name__in=[group_name, group_name + ' Viewer']):
+    if user.groups.filter(name__in=[group_name, group_name + VIEWER_SUFFIX, group_name + ADMIN_SUFFIX]):
         return True
     else:
         return False
@@ -70,7 +92,7 @@ def is_group_admin(user, group_name):
     if not group_name:
         return False
 
-    if user.groups.filter(name=group_name + ' Admin'):
+    if user.groups.filter(name=group_name + ADMIN_SUFFIX):
         return True
     else:
         return False
@@ -83,4 +105,20 @@ def filter_groups(user):
     user - The user in question (as a Django model)
     """
     groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
-    return user.groups.filter(id__in=groups_with_center).order_by('name')
+    groups_with_center_full = Group.object.filter(id__in=groups_with_center)
+
+    groups_with_center_map = {}
+
+    for group in groups_with_center_full:
+        groups_with_center_map.update({
+            group.name: group.id
+        })
+
+    for group in user.groups.filter(name__contains=ADMIN_SUFFIX):
+        trimmed_group_name = group.name.replace(ADMIN_SUFFIX, '')
+        if trimmed_group_name in groups_with_center_map:
+            groups_with_center.append(groups_with_center_map.get(trimmed_group_name))
+
+    group_set = user.groups.filter(id__in=groups_with_center).unique().order_by('name')
+
+    return group_set

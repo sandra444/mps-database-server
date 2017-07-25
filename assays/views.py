@@ -21,15 +21,26 @@ from assays.utils import (
 )
 
 from django.forms.models import inlineformset_factory
-# from django.shortcuts import redirect, get_object_or_404, render_to_response
+from django.shortcuts import get_object_or_404, redirect
 # from django.contrib.auth.models import Group
 # from django.core.exceptions import PermissionDenied
 # from django.contrib.auth.decorators import login_required
 # from django.utils.decorators import method_decorator
 
-# from mps.templatetags.custom_filters import *
+from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX, filter_groups, is_group_editor
 
-from mps.mixins import *
+from mps.mixins import (
+    LoginRequiredMixin,
+    OneGroupRequiredMixin,
+    ObjectGroupRequiredMixin,
+    StudyGroupRequiredMixin,
+    ViewershipMixin,
+    DetailRedirectMixin,
+    AdminRequiredMixin
+    # CreatorOrAdminRequiredMixin,
+    # SpecificGroupRequiredMixin
+)
+
 from mps.base.models import save_forms_with_tracking
 
 # import ujson as json
@@ -167,9 +178,13 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
     template_name = 'assays/assayrun_list.html'
 
     def get_queryset(self):
-        queryset = AssayRun.objects.filter(
-            group__in=self.request.user.groups.all()
-        ).prefetch_related('created_by', 'group', 'signed_off_by')
+        queryset = AssayRun.objects.prefetch_related('created_by', 'group', 'signed_off_by')
+
+        # Display to users with either editor or viewer group or if unrestricted
+        group_names = [group.name.replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+
+        queryset = queryset.filter(group__name__in=group_names)
+
         get_queryset_with_organ_model_map(queryset)
 
         return queryset
@@ -319,7 +334,7 @@ class AssayRunList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
 
         queryset = queryset.filter(
             restricted=False
@@ -692,7 +707,7 @@ class AssayRunSummary(ViewershipMixin, DetailView):
         return self.render_to_response(context)
 
 
-class AssayRunDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayRunDelete(AdminRequiredMixin, DeleteView):
     """Delete a Setup"""
     model = AssayRun
     template_name = 'assays/assayrun_delete.html'
@@ -736,7 +751,7 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
             'signed_off_by'
         )
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
         queryset = queryset.filter(
             restricted=False
         ) | queryset.filter(
@@ -955,7 +970,7 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             ))
 
 
-class AssayChipSetupDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayChipSetupDelete(AdminRequiredMixin, DeleteView):
     """Delete a Chip Setup and Chip Cells"""
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_delete.html'
@@ -990,7 +1005,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
         queryset = queryset.filter(
             restricted=False
         ) | queryset.filter(
@@ -1205,7 +1220,7 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayChipReadoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayChipReadoutDelete(AdminRequiredMixin, DeleteView):
     """Delete Assay Chip Readout"""
     model = AssayChipReadout
     template_name = 'assays/assaychipreadout_delete.html'
@@ -1245,7 +1260,7 @@ class AssayChipTestResultList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
         return queryset.filter(
             assay_result__restricted=False
         ) | queryset.filter(
@@ -1369,7 +1384,7 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayChipTestResultDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayChipTestResultDelete(AdminRequiredMixin, DeleteView):
     """Delete a Chip Test Result"""
     model = AssayChipTestResult
     template_name = 'assays/assaychiptestresult_delete.html'
@@ -1550,7 +1565,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayLayoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayLayoutDelete(AdminRequiredMixin, DeleteView):
     """Delete an Assay Layout"""
     model = AssayLayout
     template_name = 'assays/assaylayout_delete.html'
@@ -1585,7 +1600,7 @@ class AssayPlateSetupList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
         return queryset.filter(
             restricted=False
         ) | queryset.filter(
@@ -1711,7 +1726,7 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayPlateSetupDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayPlateSetupDelete(AdminRequiredMixin, DeleteView):
     """Delete a Plate Setup"""
     model = AssayPlateSetup
     template_name = 'assays/assayplatesetup_delete.html'
@@ -1744,7 +1759,7 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
         queryset = queryset.filter(
             restricted=False
         ) | queryset.filter(
@@ -1971,7 +1986,7 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 
 # TODO ADD CONTEXT
-class AssayPlateReadoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayPlateReadoutDelete(AdminRequiredMixin, DeleteView):
     """Delete an Assay Plate Readout"""
     model = AssayPlateReadout
     template_name = 'assays/assayplatereadout_delete.html'
@@ -2008,7 +2023,7 @@ class AssayPlateTestResultList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
         return queryset.filter(
             assay_result__restricted=False
         ) | queryset.filter(
@@ -2121,7 +2136,7 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayPlateTestResultDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayPlateTestResultDelete(AdminRequiredMixin, DeleteView):
     """Delete a Plate Test Result"""
     model = AssayPlateTestResult
     template_name = 'assays/assayplatetestresult_delete.html'
@@ -2219,8 +2234,8 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
                 parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
 
-            # Only check if user is qualified admin
-            if has_group(self.request.user, self.object.group.name):
+            # Only check if user is qualified editor
+            if is_group_editor(self.request.user, self.object.group.name):
                 # Contrived method for marking data
                 for key, value in form.data.iteritems():
                     if key.startswith('data_upload_'):

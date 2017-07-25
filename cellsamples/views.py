@@ -11,7 +11,7 @@ from mps.base.models import save_forms_with_tracking
 
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
-from mps.templatetags.custom_filters import has_group
+from mps.templatetags.custom_filters import has_group, is_group_editor
 
 
 class CellSampleAdd(SpecificGroupRequiredMixin, CreateView):
@@ -62,7 +62,7 @@ class CellSampleUpdate(UpdateView):
         self.object = self.get_object()
         if not has_group(self.request.user, self.required_group_name):
             return PermissionDenied(self.request, 'Contact an administrator if you would like to gain permission')
-        if not has_group(self.request.user, self.object.group.name):
+        if not is_group_editor(self.request.user, self.object.group.name):
             return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
         return super(CellSampleUpdate, self).dispatch(*args, **kwargs)
 

@@ -8,7 +8,7 @@
 			<th>Data File</th>
 			<th>Upload Date</th>
 			<th>Uploaded By</th>
-            {% if show_delete and user|has_group:group %}
+            {% if show_delete and user|is_group_editor:group %}
             <th>Remove All Associated Data</th>
             {% endif %}
 		</tr>
@@ -28,7 +28,7 @@
             	{{ data_upload.full_creator }}
             </td>
             {# This is processed in a contrived way in the view #}
-            {% if show_delete and user|has_group:group %}
+            {% if show_delete and user|is_group_editor:group %}
                 <td>
                 {% if data_upload.has_data %}
                 <input type="checkbox"

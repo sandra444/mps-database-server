@@ -15,7 +15,17 @@
 {% endblock %}
 
 {% block content %}
-    <legend><h1>Chip Readout ID #{{ object.id }}</h1></legend>
+    <legend>
+        <h1>
+            Chip Readout ID #{{ object.id }}
+            <a href="{% url 'setup_detail' object.chip_setup.id %}" class="btn btn-primary">View Chip Setup</a>
+            {% if object.assaychiptestresult_set.all %}
+                <a href="{% url 'result_detail' object.assaychiptestresult_set.all.0.id %}" class="btn btn-primary">View Chip Test Results</a>
+            {% endif %}
+        </h1>
+    </legend>
+
+    {% include 'tracking.html' with detail='True' %}
 
     <div class="row">
         <div class="col-sm-2 lead text-right-responsive">
@@ -68,6 +78,17 @@
             </div>
             <div class="col-sm-10 lead">
                 {{ object.notes }}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if object.scientist %}
+        <div class="row">
+            <div class="col-sm-2 lead text-right-responsive">
+                <b>Scientist:</b>
+            </div>
+            <div class="col-sm-10 lead">
+                {{ object.scientist }}
             </div>
         </div>
     {% endif %}

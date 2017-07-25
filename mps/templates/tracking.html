@@ -1,5 +1,5 @@
 {# Tracking for certain models #}
-{% if update %}
+{% if update or detail %}
     {% if object.signed_off_by %}
         <div class="alert alert-success" role="alert">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>

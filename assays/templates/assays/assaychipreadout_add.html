@@ -328,7 +328,7 @@
                         <th>Value</th>
                         <th>Value Unit</th>
                         <th>Caution Flag</th>
-                        {% if user|has_group:study.group.name %}
+                        {% if user|is_group_editor:study.group.name %}
                         <th id="id_exclude_header">Exclude</th>
                         {% endif %}
                         <th>Notes</th>

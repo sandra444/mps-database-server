@@ -80,12 +80,12 @@
         {% if group and user|is_group_admin:group or update and creator and user.id == creator %}
             {% if form.signed_off.value %}
             <a role='button' id="mark_reviewed" class="btn btn-sm btn-success" title="Mark entry as reviewed"
-            onclick="$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');">
+            onclick="if (confirm('Signing off will lock this object and its subsidiaries.\nAre you sure you want to change the sign off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">
                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
             </a>
             {% else %}
             <a role='button' id="mark_reviewed" class="btn btn-sm" title="Mark entry as reviewed"
-            onclick="$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');">
+            onclick="if (confirm('Signing off will lock this object and its subsidiaries.\nAre you sure you want to change the sign off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">
                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
             </a>
             {% endif %}
