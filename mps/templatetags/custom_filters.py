@@ -105,7 +105,7 @@ def filter_groups(user):
     user - The user in question (as a Django model)
     """
     groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
-    groups_with_center_full = Group.object.filter(id__in=groups_with_center)
+    groups_with_center_full = Group.objects.filter(id__in=groups_with_center)
 
     groups_with_center_map = {}
 
@@ -114,11 +114,13 @@ def filter_groups(user):
             group.name: group.id
         })
 
-    for group in user.groups.filter(name__contains=ADMIN_SUFFIX):
+    groups_for_user = []
+
+    for group in user.groups.all():
         trimmed_group_name = group.name.replace(ADMIN_SUFFIX, '')
         if trimmed_group_name in groups_with_center_map:
-            groups_with_center.append(groups_with_center_map.get(trimmed_group_name))
+            groups_for_user.append(groups_with_center_map.get(trimmed_group_name))
 
-    group_set = user.groups.filter(id__in=groups_with_center).unique().order_by('name')
+    group_set = groups_with_center_full.filter(id__in=groups_for_user).order_by('name')
 
     return group_set
