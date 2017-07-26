@@ -397,8 +397,8 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
             'assay_chip_id__chip_setup__assay_chip_id',
             'assay_instance__target__name',
             'assay_instance__method__name',
-            'sample_location__name',
             'time',
+            'sample_location__name',
             'quality',
             'update_number'
         )
@@ -489,8 +489,8 @@ def get_chip_readout_data_as_json(chip_ids, chip_data=None):
             'assay_chip_id__chip_setup__assay_chip_id',
             'assay_instance__target__name',
             'assay_instance__method__name',
-            'sample_location__name',
             'time',
+            'sample_location__name',
             'quality',
             'update_number'
         )
