@@ -91,7 +91,7 @@ class StudyGroupRequiredMixin(object):
             return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
 
         # Do we want this behavior??
-        if self.object.signed_off_by:
+        if study.signed_off_by:
             return PermissionDenied(
                 self.request,
                 'You cannot add this because the study has been signed off on by {0} {1}.'
