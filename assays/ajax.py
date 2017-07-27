@@ -855,7 +855,17 @@ def get_readout_data(
                 tag = chip_id
 
             # Set data in nested monstrosity that is initial_data
-            initial_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
+            initial_data.setdefault(
+                target, {}
+            ).setdefault(
+                unit, {}
+            ).setdefault(
+                tag, {}
+            ).setdefault(
+                sample_location, {}
+            ).setdefault(
+                time, []
+            ).append(value)
 
     for target, units in initial_data.items():
         for unit, tags in units.items():
