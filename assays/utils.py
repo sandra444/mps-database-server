@@ -870,6 +870,8 @@ def modify_qc_status_plate(current_plate_readout, form):
     # Get the readouts
     readouts = AssayReadout.objects.filter(
         assay_device_readout=current_plate_readout
+    ).exclude(
+        quality__contains=REPLACED_DATA_POINT_CODE
     ).prefetch_related(
         'assay__assay_id',
         'assay_device_readout__setup__assay_run_id'
@@ -968,6 +970,8 @@ def validate_plate_readout_file(
 
     old_readout_data = AssayReadout.objects.filter(
         assay_device_readout__in=readouts
+    ).exclude(
+        quality__contains=REPLACED_DATA_POINT_CODE
     ).prefetch_related(
         'assay__assay_id',
         'assay_device_readout'
@@ -1703,6 +1707,8 @@ def modify_qc_status_chip(current_chip_readout, form):
     # Get the readouts
     readouts = AssayChipRawData.objects.filter(
         assay_chip_id=current_chip_readout
+    ).exclude(
+        quality__contains=REPLACED_DATA_POINT_CODE
     ).prefetch_related(
         *CHIP_DATA_PREFETCH
     ).values_list(
@@ -2211,7 +2217,10 @@ def save_chip_files(datalist, current_file, study_id, overwrite_option, readout=
     #     current_file.chip_readout.add(readout_details.get('readout'))
     for chip_id, readout in used_readouts.items():
         current_file.chip_readout.add(readout)
-        AssayChipRawData.objects.filter(assay_chip_id=readout, data_upload=None).update(data_upload=current_file)
+        AssayChipRawData.objects.filter(
+            assay_chip_id=readout,
+            data_upload=None
+        ).update(data_upload=current_file)
 
 
 # TODO MAY CAUSE SILENT FAILURE
