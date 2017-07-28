@@ -970,8 +970,6 @@ def validate_plate_readout_file(
 
     old_readout_data = AssayReadout.objects.filter(
         assay_device_readout__in=readouts
-    ).exclude(
-        quality__contains=REPLACED_DATA_POINT_CODE
     ).prefetch_related(
         'assay__assay_id',
         'assay_device_readout'
@@ -1840,8 +1838,6 @@ def validate_chip_readout_file(
     # TODO THIS CALL WILL CHANGE IN FUTURE VERSIONS
     old_readout_data = AssayChipRawData.objects.filter(
         assay_chip_id__in=readouts
-    ).exclude(
-        quality__contains=REPLACED_DATA_POINT_CODE
     ).prefetch_related(
         *CHIP_DATA_PREFETCH
     )
@@ -1850,6 +1846,7 @@ def validate_chip_readout_file(
 
     possible_conflicting_data = {}
     conflicting_entries = []
+
     # Fill check for conflicting
     # TODO THIS WILL NEED TO BE UPDATED
     # TODO IS THIS OPTIMAL WAY TO CHECK CONFLICTING?
@@ -2119,6 +2116,12 @@ def validate_chip_readout_file(
                 ), []
             ).append(1)
 
+    unreplaced_conflicting_entries = []
+
+    for entry in conflicting_entries:
+        if REPLACED_DATA_POINT_CODE not in entry.quality:
+            unreplaced_conflicting_entries.append(entry)
+
     # If errors
     if errors:
         raise forms.ValidationError(errors)
@@ -2140,12 +2143,13 @@ def validate_chip_readout_file(
         if form:
             modify_qc_status_chip(readout, form)
 
-        if overwrite_option == 'delete_conflicting_data':
-            for entry in conflicting_entries:
-                entry.delete()
-        elif overwrite_option == 'mark_conflicting_data':
+        # if overwrite_option == 'delete_conflicting_data':
+        #     for entry in unreplaced_conflicting_entries:
+        #         entry.delete()
+        # elif overwrite_option == 'mark_conflicting_data':
+        if overwrite_option in ['delete_conflicting_data', 'mark_conflicting_data']:
             readout_ids_and_notes = []
-            for entry in conflicting_entries:
+            for entry in unreplaced_conflicting_entries:
                 readout_ids_and_notes.append((entry.id, entry.notes, entry.quality))
             mark_chip_readout_values(readout_ids_and_notes, stamp=True)
         elif overwrite_option == 'mark_all_old_data':
@@ -2158,8 +2162,9 @@ def validate_chip_readout_file(
         return used_readouts
     # If this is a successful preview
     else:
+        # Be sure to subtract the number of replaced points!
         preview_data.update({
-            'number_of_conflicting_entries': len(conflicting_entries)
+            'number_of_conflicting_entries': len(unreplaced_conflicting_entries)
         })
         return preview_data
 
