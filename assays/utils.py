@@ -97,7 +97,7 @@ REQUIRED_COLUMN_HEADERS = (
     'SAMPLE LOCATION',
     'VALUE',
     'VALUE UNIT',
-    # 'QC STATUS',
+    # 'EXCLUDE',
     # 'NOTES',
     # 'REPLICATE'
 )

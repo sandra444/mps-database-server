@@ -114,7 +114,7 @@ $(document).ready(function () {
                     csrfmiddlewaretoken: middleware_token
                 },
                 success: function (json) {
-                    exist = true;
+                    var exist = true;
                     process_data(json, exist);
                 },
                 error: function (xhr, errmsg, err) {
@@ -188,7 +188,7 @@ $(document).ready(function () {
                     plot_existing_data();
                 }
                 else {
-                    exist = false;
+                    var exist = false;
                     alert('Success! Please see "New Chip Data" below for preview.' +
                         '\n\nPlease note that changes will not be made until you press the "Submit" button.');
 
