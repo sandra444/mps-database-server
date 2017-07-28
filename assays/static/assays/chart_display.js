@@ -179,6 +179,18 @@ $(document).ready(function () {
 
             if (assays[index].length > 4) {
                 chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
+
+                // If the scale is not already small
+                if (assays[index][assays[index].length-1][0] - assays[index][1][0] > 1) {
+                    // If line chart and small difference between last two numbers, make the max horizontal value one day higher than necessary
+                    if (assays[index][assays[index].length-1][0] - assays[index][assays[index].length-2][0] < 0.5) {
+                        options.hAxis.maxValue = assays[index][assays[index].length - 1][0] + 1;
+                    }
+                    // Do the same for minimum
+                    if (assays[index][2][0] - assays[index][1][0] < 0.5 ) {
+                        options.hAxis.minValue = assays[index][1][0] - 1;
+                    }
+                }
             }
             else if (assays[index].length > 1) {
                 // Convert to categories

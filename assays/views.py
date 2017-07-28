@@ -15,19 +15,32 @@ from assays.utils import (
     modify_qc_status_plate,
     modify_qc_status_chip,
     save_assay_layout,
-    CHIP_DATA_PREFETCH
+    CHIP_DATA_PREFETCH,
+    REPLACED_DATA_POINT_CODE,
+    EXCLUDED_DATA_POINT_CODE
 )
 
 from django.forms.models import inlineformset_factory
-# from django.shortcuts import redirect, get_object_or_404, render_to_response
+from django.shortcuts import get_object_or_404, redirect
 # from django.contrib.auth.models import Group
 # from django.core.exceptions import PermissionDenied
 # from django.contrib.auth.decorators import login_required
 # from django.utils.decorators import method_decorator
 
-# from mps.templatetags.custom_filters import *
+from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX, filter_groups, is_group_editor
 
-from mps.mixins import *
+from mps.mixins import (
+    LoginRequiredMixin,
+    OneGroupRequiredMixin,
+    ObjectGroupRequiredMixin,
+    StudyGroupRequiredMixin,
+    ViewershipMixin,
+    DetailRedirectMixin,
+    AdminRequiredMixin
+    # CreatorOrAdminRequiredMixin,
+    # SpecificGroupRequiredMixin
+)
+
 from mps.base.models import save_forms_with_tracking
 
 # import ujson as json
@@ -114,11 +127,15 @@ def get_queryset_with_assay_map(queryset):
     """Takes a queryset and returns it with a assay map"""
     data_points = AssayChipRawData.objects.filter(
         assay_chip_id__in=queryset
+    ).exclude(
+        quality__contains=REPLACED_DATA_POINT_CODE
     ).prefetch_related(
         *CHIP_DATA_PREFETCH
     )
 
     assay_map = {}
+    caution_flag_map = {}
+    quality_map = {}
 
     for data_point in data_points:
         assay_map.setdefault(
@@ -129,10 +146,29 @@ def get_queryset_with_assay_map(queryset):
             }
         )
 
+        for flag in data_point.caution_flag:
+            caution_flag_map.setdefault(data_point.assay_chip_id_id, {}
+            ).update(
+                {
+                    flag: True
+                }
+            )
+
+        if EXCLUDED_DATA_POINT_CODE in data_point.quality:
+            quality_map.update(
+                {
+                    data_point.assay_chip_id_id: quality_map.setdefault(data_point.assay_chip_id_id, 0) + 1
+                }
+            )
+
     for readout in queryset:
         readout.assays = ', '.join(
             sorted(assay_map.get(readout.id, {}).keys())
         )
+        readout.caution_flag = ''.join(
+            sorted(caution_flag_map.get(readout.id, {}).keys())
+        )
+        readout.quality = quality_map.get(readout.id, '')
 
     return queryset
 
@@ -142,9 +178,13 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
     template_name = 'assays/assayrun_list.html'
 
     def get_queryset(self):
-        queryset = AssayRun.objects.filter(
-            group__in=self.request.user.groups.all()
-        ).prefetch_related('created_by', 'group', 'signed_off_by')
+        queryset = AssayRun.objects.prefetch_related('created_by', 'group', 'signed_off_by')
+
+        # Display to users with either editor or viewer group or if unrestricted
+        group_names = [group.name.replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+
+        queryset = queryset.filter(group__name__in=group_names)
+
         get_queryset_with_organ_model_map(queryset)
 
         return queryset
@@ -186,7 +226,7 @@ class StudyIndex(ViewershipMixin, DetailView):
             'compound_instance__supplier',
             'concentration_unit',
             'chip_setup'
-        )
+        ).order_by('addition_time')
         related_compounds_map = {}
 
         # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
@@ -197,9 +237,9 @@ class StudyIndex(ViewershipMixin, DetailView):
             )
 
         for setup in setups:
-            setup.related_compounds_as_string = ',\n'.join(sorted(
+            setup.related_compounds_as_string = ',\n'.join(
                 related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
-            ))
+            )
 
         context['setups'] = setups
 
@@ -294,7 +334,7 @@ class AssayRunList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
 
         queryset = queryset.filter(
             restricted=False
@@ -667,7 +707,7 @@ class AssayRunSummary(ViewershipMixin, DetailView):
         return self.render_to_response(context)
 
 
-class AssayRunDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayRunDelete(AdminRequiredMixin, DeleteView):
     """Delete a Setup"""
     model = AssayRun
     template_name = 'assays/assayrun_delete.html'
@@ -711,7 +751,7 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
             'signed_off_by'
         )
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
         queryset = queryset.filter(
             restricted=False
         ) | queryset.filter(
@@ -930,7 +970,7 @@ class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             ))
 
 
-class AssayChipSetupDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayChipSetupDelete(AdminRequiredMixin, DeleteView):
     """Delete a Chip Setup and Chip Cells"""
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_delete.html'
@@ -965,7 +1005,7 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
         queryset = queryset.filter(
             restricted=False
         ) | queryset.filter(
@@ -1180,7 +1220,7 @@ class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayChipReadoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayChipReadoutDelete(AdminRequiredMixin, DeleteView):
     """Delete Assay Chip Readout"""
     model = AssayChipReadout
     template_name = 'assays/assaychipreadout_delete.html'
@@ -1220,7 +1260,7 @@ class AssayChipTestResultList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
         return queryset.filter(
             assay_result__restricted=False
         ) | queryset.filter(
@@ -1344,7 +1384,7 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayChipTestResultDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayChipTestResultDelete(AdminRequiredMixin, DeleteView):
     """Delete a Chip Test Result"""
     model = AssayChipTestResult
     template_name = 'assays/assaychiptestresult_delete.html'
@@ -1525,7 +1565,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayLayoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayLayoutDelete(AdminRequiredMixin, DeleteView):
     """Delete an Assay Layout"""
     model = AssayLayout
     template_name = 'assays/assaylayout_delete.html'
@@ -1560,7 +1600,7 @@ class AssayPlateSetupList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
         return queryset.filter(
             restricted=False
         ) | queryset.filter(
@@ -1686,7 +1726,7 @@ class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayPlateSetupDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayPlateSetupDelete(AdminRequiredMixin, DeleteView):
     """Delete a Plate Setup"""
     model = AssayPlateSetup
     template_name = 'assays/assayplatesetup_delete.html'
@@ -1719,7 +1759,7 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
         queryset = queryset.filter(
             restricted=False
         ) | queryset.filter(
@@ -1946,7 +1986,7 @@ class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 
 # TODO ADD CONTEXT
-class AssayPlateReadoutDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayPlateReadoutDelete(AdminRequiredMixin, DeleteView):
     """Delete an Assay Plate Readout"""
     model = AssayPlateReadout
     template_name = 'assays/assayplatereadout_delete.html'
@@ -1983,7 +2023,7 @@ class AssayPlateTestResultList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(' Viewer', '') for group in self.request.user.groups.all()]
+        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
         return queryset.filter(
             assay_result__restricted=False
         ) | queryset.filter(
@@ -2096,7 +2136,7 @@ class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayPlateTestResultDelete(CreatorOrAdminRequiredMixin, DeleteView):
+class AssayPlateTestResultDelete(AdminRequiredMixin, DeleteView):
     """Delete a Plate Test Result"""
     model = AssayPlateTestResult
     template_name = 'assays/assayplatetestresult_delete.html'
@@ -2129,10 +2169,19 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             setup__assay_run_id=self.object
         ).prefetch_related('setup')
 
+        data_points = AssayChipRawData.objects.filter(
+            assay_chip_id__chip_setup__assay_run_id=self.object
+        ).exclude(
+            quality__contains=REPLACED_DATA_POINT_CODE
+        ).prefetch_related(
+            *CHIP_DATA_PREFETCH
+        )
+
         # TODO Could use a refactor
+        # Should use mapping similar to data_upload, methinks
         chip_has_data = {}
         for readout in chip_readouts:
-            if AssayChipRawData.objects.filter(assay_chip_id=readout):
+            if data_points.filter(assay_chip_id=readout):
                 chip_has_data.update({readout: True})
         plate_has_data = {}
         for readout in plate_readouts:
@@ -2144,6 +2193,16 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
         ).prefetch_related(
             'created_by'
         ).distinct().order_by('created_on')
+
+        data_upload_map = {}
+
+        for data_point in data_points:
+            data_upload_map.setdefault(
+                data_point.data_upload_id, True
+            )
+
+        for data_upload in data_uploads:
+            data_upload.has_data = data_upload_map.get(data_upload.id, '')
 
         context['data_uploads'] = data_uploads
 
@@ -2168,11 +2227,31 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
 
             # Add user to Study's modified by
             # TODO
-            self.object.bulk_file = data.get('bulk_file')
-            self.object.modified_by = self.request.user
-            self.object.save()
+            if self.request and self.request.FILES:
+                self.object.bulk_file = data.get('bulk_file')
+                self.object.modified_by = self.request.user
+                self.object.save()
 
-            parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
+                parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
+
+            # Only check if user is qualified editor
+            if is_group_editor(self.request.user, self.object.group.name):
+                # Contrived method for marking data
+                for key, value in form.data.iteritems():
+                    if key.startswith('data_upload_'):
+                        current_id = key.replace('data_upload_', '', 1)
+                        current_value = value
+
+                        if current_value == 'false':
+                            current_value = False
+
+                        if current_value:
+                            data_upload = AssayDataUpload.objects.filter(study=self.object, id=current_id)
+                            if data_upload:
+                                data_points_to_replace = AssayChipRawData.objects.filter(data_upload=data_upload).exclude(quality__contains=REPLACED_DATA_POINT_CODE)
+                                for data_point in data_points_to_replace:
+                                    data_point.quality = data_point.quality + REPLACED_DATA_POINT_CODE
+                                    data_point.save()
 
             return redirect(self.object.get_absolute_url())
         else:
@@ -2200,7 +2279,9 @@ class ReturnStudyData(ViewershipMixin, DetailView):
                 'chip_setup__assay_run_id'
             )
 
-            chip_data = get_chip_readout_data_as_csv(chip_readouts, include_header=True)
+            include_all = self.request.GET.get('include_all', False)
+
+            chip_data = get_chip_readout_data_as_csv(chip_readouts, include_header=True, include_all=include_all)
 
             # For specifically text
             response = HttpResponse(chip_data, content_type='text/csv')

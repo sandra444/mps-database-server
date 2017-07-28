@@ -25,6 +25,8 @@
                     <th>Chip Setup</th>
                     <th>Readout Date</th>
                     <th>Assays</th>
+                    <th>Caution Flag</th>
+                    <th>Exclusion</th>
                     <th>Scientist</th>
                     <th>Creator</th>
                     <th>Group</th>
@@ -45,6 +47,19 @@
                         <td></td>
                     {% endif %}
                     <td>{{ readout.assays|default:"-No Data-" }}</td>
+                    <td>
+                        <div class="text-warning">
+                            {{ readout.caution_flag }}
+                        </div>
+                    </td>
+                    <td>
+                        {% if readout.quality %}
+                            <div class="text-danger" title="This entry contains {{ readout.quality }} excluded point(s)">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                {{ readout.quality }}
+                            </div>
+                        {% endif %}
+                    </td>
                     <td>{{ readout.scientist }}</td>
                     <td>
                         {{ readout.full_creator }}

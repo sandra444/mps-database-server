@@ -5,6 +5,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 import ujson as json
 from .models import *
+from assays.utils import CHIP_DATA_PREFETCH
 from assays.models import AssayChipRawData
 
 from bioservices import ChEMBL as ChEMBLdb
@@ -223,16 +224,10 @@ def fetch_compound_report(request):
     # Make sure that the quality IS THE EMPTY STRING (anything in the quality field qualifies as invalid)
     readouts = AssayChipRawData.objects.filter(
         assay_chip_id__chip_setup__compound__in=compounds,
-        assay_id__readout_unit__unit='%Control',
         quality=u'',
         assay_chip_id__chip_setup__assay_run_id__use_in_calculations=True
     ).prefetch_related(
-        'assay_chip_id__chip_setup',
-        'assay_chip_id__chip_setup__compound',
-        'assay_chip_id__chip_setup__unit',
-        'assay_chip_id__timeunit',
-        'assay_chip_id__chip_setup__assay_run_id',
-        'assay_id__assay_id'
+        *CHIP_DATA_PREFETCH
     )
 
     for readout in readouts:

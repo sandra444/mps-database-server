@@ -21,7 +21,8 @@ from .utils import (
     DEFAULT_CSV_HEADER,
     CSV_HEADER_WITH_COMPOUNDS_AND_STUDY,
     CHIP_DATA_PREFETCH,
-    UnicodeWriter
+    UnicodeWriter,
+    REPLACED_DATA_POINT_CODE
 )
 
 import csv
@@ -60,6 +61,7 @@ logger = logging.getLogger(__name__)
 CONTROL_LABEL = '-Control-'
 
 
+# TODO REFACTOR Rather than passing the same thing over and over, we can make an object with attributes!
 def main(request):
     """Default to server error"""
     return HttpResponseServerError()
@@ -375,7 +377,7 @@ def get_split_times(time_in_minutes):
     return times
 
 
-def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=False, include_header=False):
+def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=False, include_header=False, include_all=False):
     """Returns readout data as a csv in the form of a string
 
     Params:
@@ -386,6 +388,7 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
     related_compounds_map = {}
 
     if not chip_data:
+        # TODO ORDER SUBJECT TO CHANGE
         chip_data = AssayChipRawData.objects.prefetch_related(
             *CHIP_DATA_PREFETCH
         ).filter(
@@ -394,8 +397,8 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
             'assay_chip_id__chip_setup__assay_chip_id',
             'assay_instance__target__name',
             'assay_instance__method__name',
-            'sample_location__name',
             'time',
+            'sample_location__name',
             'quality',
             'update_number'
         )
@@ -414,6 +417,9 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         study_id = data_point.assay_chip_id.chip_setup.assay_run_id.assay_run_id
 
         chip_id = data_point.assay_chip_id.chip_setup.assay_chip_id
+
+        cross_reference = data_point.cross_reference
+
         assay_plate_id = data_point.assay_plate_id
         assay_well_id = data_point.assay_well_id
 
@@ -434,32 +440,36 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
 
         value_unit = data_point.assay_instance.unit.unit
         quality = data_point.quality
+        caution_flag = data_point.caution_flag
         replicate = data_point.replicate
         # TODO ADD OTHER STUFF
         notes = data_point.notes
 
-        data.append(
-            [unicode(x) for x in
-                [
-                    study_id,
-                    chip_id,
-                    assay_plate_id,
-                    assay_well_id,
-                    times.get('day'),
-                    times.get('hour'),
-                    times.get('minute'),
-                    compound_treatment,
-                    target,
-                    method,
-                    sample_location,
-                    value,
-                    value_unit,
-                    replicate,
-                    quality,
-                    notes
+        if REPLACED_DATA_POINT_CODE not in quality and (include_all or not quality):
+            data.append(
+                [unicode(x) for x in
+                    [
+                        study_id,
+                        chip_id,
+                        cross_reference,
+                        assay_plate_id,
+                        assay_well_id,
+                        times.get('day'),
+                        times.get('hour'),
+                        times.get('minute'),
+                        compound_treatment,
+                        target,
+                        method,
+                        sample_location,
+                        value,
+                        value_unit,
+                        replicate,
+                        caution_flag,
+                        quality,
+                        notes
+                    ]
                 ]
-            ]
-        )
+            )
 
     string_io = StringIO()
     csv_writer = UnicodeWriter(string_io)
@@ -479,8 +489,8 @@ def get_chip_readout_data_as_json(chip_ids, chip_data=None):
             'assay_chip_id__chip_setup__assay_chip_id',
             'assay_instance__target__name',
             'assay_instance__method__name',
-            'sample_location__name',
             'time',
+            'sample_location__name',
             'quality',
             'update_number'
         )
@@ -506,12 +516,23 @@ def get_chip_readout_data_as_json(chip_ids, chip_data=None):
         if value is None:
             value = ''
 
+        caution_flag = data_point.caution_flag
         quality = data_point.quality
         # TODO ADD OTHER STUFF
         notes = data_point.notes
 
         update_number = data_point.update_number
         replicate = data_point.replicate
+
+        data_upload = data_point.data_upload
+
+        if data_upload:
+            data_upload_name = unicode(data_upload)
+            data_upload_url = data_upload.file_location
+
+        else:
+            data_upload_name = u''
+            data_upload_url = u''
 
         if sample_location.id not in sample_locations:
             sample_locations.update(
@@ -546,11 +567,14 @@ def get_chip_readout_data_as_json(chip_ids, chip_data=None):
             'assay_instance_id': assay_instance.id,
             'sample_location_id': sample_location.id,
             'value': value,
+            'caution_flag': caution_flag,
             'quality': quality.strip(),
             # TODO ADD OTHER STUFF
             'notes': notes.strip(),
             'update_number': update_number,
-            'replicate': replicate.strip()
+            'replicate': replicate.strip(),
+            'data_upload_url': data_upload_url,
+            'data_upload_name': data_upload_name
         }
         data_points.append(data_point_fields)
 
@@ -598,23 +622,26 @@ def get_list_of_present_compounds(related_compounds_map, data_point, separator='
             # Previously included only compounds within duration
             # if compound.addition_time <= time_minutes and compound.duration + compound.addition_time >= time_minutes:
             # Everything past addition time will be listed as effected
-            if compound.addition_time <= data_point.time:
-                compounds_to_add.append(
-                    compound.compound_instance.compound.name +
-                    ' ' + str(compound.concentration) + ' ' + compound.concentration_unit.unit
-                )
+
+            # Revised yet again, now displays all treatments regradless of what was at the time point
+            # if compound.addition_time <= data_point.time:
+
+            compounds_to_add.append(
+                compound.compound_instance.compound.name +
+                ' ' + str(compound.concentration) + ' ' + compound.concentration_unit.unit
+            )
 
         if not compounds_to_add:
             tag = CONTROL_LABEL
         else:
-            tag = separator.join(sorted(compounds_to_add))
+            tag = separator.join(compounds_to_add)
     else:
         tag = CONTROL_LABEL
 
     return tag
 
 
-def get_control_data(study, related_compounds_map, key, mean_type, include_all, new_data_for_control=None):
+def get_control_data(study, related_compounds_map, key, mean_type, include_all, truncate_negative, new_data_for_control=None):
     """Gets control data for performing percent control calculations
 
     study - the study in question
@@ -656,6 +683,9 @@ def get_control_data(study, related_compounds_map, key, mean_type, include_all, 
 
         # No dynamic quality here
         if value is not None and (include_all or not quality):
+            if truncate_negative and value < 0:
+                value = 0
+
             if key == 'compound':
                 tag = get_list_of_present_compounds(related_compounds_map, raw, ' & ')
                 if tag == CONTROL_LABEL:
@@ -701,6 +731,7 @@ def get_readout_data(
         interval_type,
         percent_control,
         include_all,
+        truncate_negative,
         dynamic_quality,
         study=None,
         readout=None,
@@ -744,7 +775,15 @@ def get_readout_data(
         if new_data:
             new_data_for_control = raw_data
 
-        controls = get_control_data(study, related_compounds_map, key, mean_type, include_all, new_data_for_control=new_data_for_control)
+        controls = get_control_data(
+            study,
+            related_compounds_map,
+            key,
+            mean_type,
+            include_all,
+            truncate_negative,
+            new_data_for_control=new_data_for_control
+        )
 
         if controls.get('errors' , ''):
             return controls
@@ -777,7 +816,7 @@ def get_readout_data(
 
         chip_id = raw.assay_chip_id.chip_setup.assay_chip_id
 
-        # TODO DO THIS IN JS
+        # BE SURE TO DO THIS IN JS
         quality_index = '~'.join([
             chip_id,
             str(raw.assay_plate_id),
@@ -804,7 +843,9 @@ def get_readout_data(
         quality = raw.quality
 
         # TODO Should probably just use dynamic_quality instead of quality for this
-        if value is not None and (include_all or not dynamic_quality.get(quality_index, quality)):
+        if value is not None and REPLACED_DATA_POINT_CODE not in quality and (include_all or not dynamic_quality.get(quality_index, quality)):
+            if truncate_negative and value < 0:
+                value = 0
             # Get tag for data point
             # If by compound
             if key == 'compound':
@@ -814,7 +855,17 @@ def get_readout_data(
                 tag = chip_id
 
             # Set data in nested monstrosity that is initial_data
-            initial_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
+            initial_data.setdefault(
+                target, {}
+            ).setdefault(
+                unit, {}
+            ).setdefault(
+                tag, {}
+            ).setdefault(
+                sample_location, {}
+            ).setdefault(
+                time, []
+            ).append(value)
 
     for target, units in initial_data.items():
         for unit, tags in units.items():
@@ -989,7 +1040,7 @@ def get_related_compounds_map(readouts=None, study=None):
         'compound_instance__supplier',
         'concentration_unit',
         'chip_setup__assay_run_id'
-    )
+    ).order_by('addition_time')
 
     for compound in related_compounds:
         related_compounds_map.setdefault(compound.chip_setup_id, []).append(compound)
@@ -1017,6 +1068,7 @@ def fetch_readouts(request):
     interval_type = request.POST.get('interval_type', 'ste')
     percent_control = request.POST.get('percent_control', '')
     include_all = request.POST.get('include_all', '')
+    truncate_negative = request.POST.get('truncate_negative', '')
     dynamic_quality = json.loads(request.POST.get('dynamic_quality', '{}'))
 
     if readout:
@@ -1071,6 +1123,7 @@ def fetch_readouts(request):
         interval_type,
         percent_control,
         include_all,
+        truncate_negative,
         dynamic_quality,
         study=this_study,
         readout=this_readout
@@ -1242,6 +1295,7 @@ def validate_bulk_file(request):
     interval_type = request.POST.get('interval_type', 'ste')
     percent_control = request.POST.get('percent_control', '')
     include_all = request.POST.get('include_all', '')
+    truncate_negative = request.POST.get('truncate_negative', '')
     # overwrite_option = request.POST.get('overwrite_option', '')
     # bulk_file = request.FILES.get('bulk_file', None)
     dynamic_quality = json.loads(request.POST.get('dynamic_quality', '{}'))
@@ -1256,7 +1310,7 @@ def validate_bulk_file(request):
         preview_data = form_data.get('preview_data')
 
         # Only chip preview right now
-        chip_raw_data = preview_data.get('chip_preview')
+        chip_raw_data = preview_data.get('chip_preview', {}).get('readout_data', [])
 
         related_compounds_map = {}
 
@@ -1264,7 +1318,7 @@ def validate_bulk_file(request):
             related_compounds_map = get_related_compounds_map(study=this_study)
 
         # NOTE THE EMPTY DIC, RIGHT NOW BULK PREVIEW NEVER SHOWS COMPOUND JUST DEVICE
-        data = get_readout_data(
+        readout_data = get_readout_data(
             chip_raw_data,
             related_compounds_map,
             key,
@@ -1272,10 +1326,16 @@ def validate_bulk_file(request):
             interval_type,
             percent_control,
             include_all,
+            truncate_negative,
             dynamic_quality,
             study=this_study,
             new_data=True
         )
+
+        data = {
+            'readout_data': readout_data,
+            'number_of_conflicting_entries': preview_data.get('chip_preview', {}).get('number_of_conflicting_entries', 0)
+        }
 
         return HttpResponse(json.dumps(data),
                             content_type="application/json")
@@ -1317,6 +1377,7 @@ def validate_individual_chip_file(request):
     interval_type = request.POST.get('interval_type', 'ste')
     percent_control = request.POST.get('percent_control', '')
     include_all = request.POST.get('include_all', '')
+    truncate_negative = request.POST.get('truncate_negative', '')
     readout_id = request.POST.get('readout', '')
     include_table = request.POST.get('include_table', '')
     # overwrite_option = request.POST.get('overwrite_option', '')
@@ -1350,7 +1411,7 @@ def validate_individual_chip_file(request):
         preview_data = form_data.get('preview_data')
 
         # Only chip preview right now
-        chip_raw_data = preview_data.get('chip_preview')
+        chip_raw_data = preview_data.get('chip_preview', {}).get('readout_data', [])
 
         # Now done in get_readout_data
         # Get the other raw data for this readout
@@ -1389,6 +1450,7 @@ def validate_individual_chip_file(request):
             interval_type,
             percent_control,
             include_all,
+            truncate_negative,
             dynamic_quality,
             study=study,
             readout=readout,
@@ -1398,7 +1460,8 @@ def validate_individual_chip_file(request):
 
         data = {
             'table': table,
-            'charts': charts
+            'charts': charts,
+            'number_of_conflicting_entries': preview_data.get('chip_preview', {}).get('number_of_conflicting_entries', 0)
         }
 
         return HttpResponse(json.dumps(data),

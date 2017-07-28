@@ -6,7 +6,16 @@
 {% endblock %}
 
 {% block content %}
-    <legend><h1>Chip Test Results ID #{{ object.id }} for Study:<br><a href="/assays/{{ object.assay_device_readout.id }}">{{ object.assay_device_readout }}</a></h1></legend>
+    <legend>
+        <h1>
+            Chip Test Results ID #{{ object.id }} for Study:<br><a href="/assays/{{ object.assay_device_readout.id }}">{{ object.assay_device_readout }}</a>
+
+            <a href="{% url 'setup_detail' object.chip_readout.chip_setup.id %}" class="btn btn-primary">View Chip Setup</a>
+            <a href="{% url 'readout_detail' object.chip_readout.id %}" class="btn btn-primary">View Chip Readout</a>
+        </h1>
+    </legend>
+
+    {% include 'tracking.html' with detail='True' %}
 
     <div class="row">
         <div class="col-sm-2 lead text-right-responsive">
@@ -24,6 +33,12 @@
             <a href="/assays/assaychipreadout/{{ object.chip_readout.id }}">
                 Readout for {{ object.chip_readout }}
             </a>
+        </div>
+        <div class="col-sm-2 lead text-right-responsive">
+            <b>Summary:</b>
+        </div>
+        <div class="col-sm-10 lead">
+            {{ object.summary }}
         </div>
     </div>
 

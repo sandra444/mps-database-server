@@ -139,7 +139,8 @@ class OrganModel(LockableModel):
 
     model_name = models.CharField(max_length=200)
     organ = models.ForeignKey('cellsamples.Organ')
-    center = models.ForeignKey(MicrophysiologyCenter, null=True, blank=True)
+    # Centers are now required
+    center = models.ForeignKey(MicrophysiologyCenter)
     device = models.ForeignKey(Microdevice)
     description = models.CharField(max_length=400, default='', blank=True)
 

@@ -4,10 +4,11 @@
 
 {% block load %}
     <script src="{% static "assays/study_index.js" %}"></script>
+    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
-    {% if user|has_group:object.group.name %}
+    {% if user|is_group_editor:object.group.name %}
     <li><a href="/assays/editable_studies/">Editable Studies</a></li>
     {% else %}
     <li><a href="/assays/study">Studies</a></li>
@@ -21,7 +22,7 @@
             <h1 class="text-center">
                 {{ object }}
                 <div>
-                    {% if user|has_group:object.group.name %}
+                    {% if user|is_group_editor:object.group.name %}
                         <a href="update" class="btn btn-primary" role="button">Edit This Study</a>
                     {% endif %}
                     <a href="summary" class="btn btn-info" role="button">Study Summary</a>
@@ -33,7 +34,7 @@
             <h2>
                 Setups
                 {# Hide setup add buttons if the study is marked reviewed #}
-                {% if user|has_group:object.group.name and not object.signed_off_date %}
+                {% if user|is_group_editor:object.group.name and not object.signed_off_date %}
                 <div>
                     <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Chip Setup</a>
                     <a href="assayplatesetup/add" class="btn btn-success" role="button">Add Plate Setup</a>
@@ -152,7 +153,7 @@
         <legend>
             <h2>
                 Readouts
-                {% if user|has_group:object.group.name %}
+                {% if user|is_group_editor:object.group.name %}
                 <div>
                 {% if setups.count == 0 or setups.count == readouts.count %}
                     <div hidden id="readout_alert" class="alert alert-warning" role="alert">
@@ -189,6 +190,8 @@
                     <th>Chip Setup</th>
                     <th>Readout Date</th>
                     <th>Assays</th>
+                    <th>Caution Flag</th>
+                    <th>Exclusion</th>
                     <th>Creator</th>
                     <th>Review</th>
                 </tr>
@@ -206,6 +209,19 @@
                     <td><a href="/assays/assaychipsetup/{{ readout.chip_setup.id }}/">{{ readout.chip_setup }}</a></td>
                     <td>{{ readout.readout_start_time }}</td>
                     <td>{{ readout.assays|default:"-No Data-" }}</td>
+                    <td>
+                        <div class="text-warning">
+                            {{ readout.caution_flag }}
+                        </div>
+                    </td>
+                    <td>
+                        {% if readout.quality %}
+                            <div class="text-danger" title="This entry contains {{ readout.quality }} excluded point(s)">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                {{ readout.quality }}
+                            </div>
+                        {% endif %}
+                    </td>
                     <td>
                         {{ readout.full_creator }}
                     </td>
@@ -280,7 +296,7 @@
         </div>
         {% endif %}
 
-        {% if user|has_group:object.group.name %}
+        {% if user|is_group_editor:object.group.name %}
         <a href="bulk" class="btn btn-block btn-info" role="button">
             Upload Excel File of Readout Data
             <br>
@@ -291,7 +307,7 @@
         <legend>
             <h2>
                 Results
-                {% if user|has_group:object.group.name %}
+                {% if user|is_group_editor:object.group.name %}
                 <div>
                 {# Later should add condition for when not enough readouts or setups #}
                 {% if readouts.count == 0 or number_of_results == readouts.count %}

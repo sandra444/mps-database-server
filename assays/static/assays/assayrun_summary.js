@@ -19,8 +19,8 @@ $(document).ready(function() {
     $.each(ids, function(index, table_id) {
         if ($(table_id)[0]) {
             $(table_id).DataTable({
-                "iDisplayLength": 400,
-                dom: 'rt',
+                "iDisplayLength": 10,
+                dom: 'B<"row">lfrtip',
                 fixedHeader: {headerOffset: 50},
                 responsive: true,
                 // Initially sort on start date (descending), not ID
@@ -73,4 +73,14 @@ $(document).ready(function() {
     $('#' + charts_name + 'chart_options').find('input').change(function() {
         get_readouts();
     });
+
+    $('#exportinclude_all').change(function() {
+        var export_button = $('#export_button');
+        if ($(this).prop('checked')) {
+            export_button.attr('href', export_button.attr('href') + '?include_all=true');
+        }
+        else {
+            export_button.attr('href', export_button.attr('href').split('?')[0]);
+        }
+    }).trigger('change');
 });

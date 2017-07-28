@@ -532,6 +532,7 @@
                 <thead>
                     <tr class="active">
                         <th>Chip ID</th>
+                        <th>Cross Reference</th>
                         <th>Assay Plate ID</th>
                         <th>Assay Well ID</th>
                         <th>Day</th>
@@ -543,40 +544,45 @@
                         <th>Value</th>
                         <th>Value Unit</th>
                         <th>Replicate</th>
-                        <th>QC Status</th>
+                        <th>Caution Flag</th>
+                        <th>Exclude</th>
                         <th>Notes</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>[Chip ID]</td>
-                        <th>[Assay Plate ID]</th>
-                        <th>[Assay Well ID]</th>
-                        <th>[Day]</th>
-                        <th>[Hour]</th>
-                        <th>[Minute]</th>
-                        <th>[Target/Analyte]</th>
-                        <th>[Method/Kit]</th>
+                        <td>[Cross Reference]</td>
+                        <td>[Assay Plate ID]</td>
+                        <td>[Assay Well ID]</td>
+                        <td>[Day]</td>
+                        <td>[Hour]</td>
+                        <td>[Minute]</td>
+                        <td>[Target/Analyte]</td>
+                        <td>[Method/Kit]</td>
                         <td>[Sample Location]</td>
                         <td>[Value]</td>
                         <td>[Value Unit]</td>
                         <td>[Replicate]</td>
+                        <th>[Caution Flag]</th>
                         <td>[Leave Blank to Pass]</td>
                         <td>[Notes]</td>
                     </tr>
                     <tr>
                         <td>[Chip ID]</td>
-                        <th>[Assay Plate ID]</th>
-                        <th>[Assay Well ID]</th>
-                        <th>[Day]</th>
-                        <th>[Hour]</th>
-                        <th>[Minute]</th>
-                        <th>[Target/Analyte]</th>
-                        <th>[Method/Kit]</th>
+                        <td>[Cross Reference]</td>
+                        <td>[Assay Plate ID]</td>
+                        <td>[Assay Well ID]</td>
+                        <td>[Day]</td>
+                        <td>[Hour]</td>
+                        <td>[Minute]</td>
+                        <td>[Target/Analyte]</td>
+                        <td>[Method/Kit]</td>
                         <td>[Sample Location]</td>
                         <td>[Value]</td>
                         <td>[Value Unit]</td>
                         <td>[Replicate]</td>
+                        <th>[Caution Flag]</th>
                         <td>[Any Value in this Column Marks the Reading Invalid]</td>
                         <td>[Notes]</td>
                     </tr>
@@ -644,12 +650,7 @@
     <h4>Changing QC</h4>
     <ul class="list-group">
         <li class="list-group-item">
-            QC Status can be changed in the table displayed after data upload
-        <li class="list-group-item">
-            To invalidate a reading, select one or more of the given QC Status options
-        </li>
-        <li class="list-group-item">
-            After changing a QC value, <b>click away</b> or <b>hit tab</b> to see the effect on the plots
+            To invalidate a reading, click the checkbox in the "Exclude" column
         </li>
     </ul>
     <h4>Flagging for Review</h4>

@@ -7,6 +7,7 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{% static "assays/assayrun_summary.js" %}"></script>
     <script src="{% static "assays/chart_display.js" %}"></script>
+    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -17,12 +18,24 @@
 
 {% block content %}
     <div class="well">
-        <h1 class="text-center">
-            {{ object }}
-            <div>
-                <a href="/assays/{{ object.id }}/data/" class="btn btn-info" role="button">Download Data</a>
-            </div>
-         </h1>
+        <div class="row text-center">
+            <h1>
+                {{ object }}
+            </h1>
+        </div>
+        <div class="row text-center">
+            <a id="export_button" href="/assays/{{ object.id }}/data/" class="btn btn-info" role="button">Download Data</a>
+            <label class="radio-inline">
+                <input type="checkbox" name="exportinclude_all" id="exportinclude_all" />
+                <strong>Include Excluded Data</strong>
+            </label>
+        </div>
+{#        <div class="row text-center">#}
+{#            <label class="radio-inline">#}
+{#                <input type="checkbox" name="exportinclude_all" id="exportinclude_all" />#}
+{#                <strong>Include Excluded Data</strong>#}
+{#            </label>#}
+{#        </div>#}
     </div>
 
     {% if object.description or object.study_configuration or object.protocol %}

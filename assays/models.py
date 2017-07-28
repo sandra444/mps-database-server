@@ -716,6 +716,9 @@ class AssayChipRawData(models.Model):
     # DEPRECATED: ACRA WILL BE REPLACED BY ASSAY INSTANCE
     assay_id = models.ForeignKey('assays.AssayChipReadoutAssay', null=True, blank=True)
 
+    # Cross reference for users if study ids diverge
+    cross_reference = models.CharField(max_length=255, default='')
+
     # DEPRECATED: REPLACED BY SAMPLE LOCATION
     field_id = models.CharField(max_length=255, default='0', null=True, blank=True)
 
@@ -727,6 +730,10 @@ class AssayChipRawData(models.Model):
 
     # This value will act as quality control, if it evaluates True then the value is considered invalid
     quality = models.CharField(max_length=20, default='')
+
+    # Caution flags for the user
+    # Errs on the side of larger flags, currently
+    caution_flag = models.CharField(max_length=255, default='')
 
     # IT WAS DECIDED THAT A FK WOULD NOT BE USED
     # Use quality with each flag separated with a '-' (SUBJECT TO CHANGE)
@@ -755,6 +762,9 @@ class AssayChipRawData(models.Model):
 
     # Replaces elapsed_time
     time = models.FloatField(default=0)
+
+    # Affiliated upload
+    data_upload = models.ForeignKey('assays.AssayDataUpload', null=True, blank=True)
 
 
 class AssayChipCells(models.Model):
