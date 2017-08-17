@@ -1,4 +1,4 @@
-// TODO REVISE
+// DEPRECATED
 $(document).ready(function () {
     function getIDs() {
         var i = 0;
