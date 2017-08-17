@@ -1069,7 +1069,7 @@ class AssayTarget(LockableModel):
     short_name = models.CharField(max_length=20, unique=True)
 
     def __unicode__(self):
-        return '{0} ({1})'.format(self.name, self.short_name)
+        return u'{0} ({1})'.format(self.name, self.short_name)
 
 
 class AssayMeasurementType(LockableModel):
@@ -1130,4 +1130,4 @@ class AssayInstance(models.Model):
     unit = models.ForeignKey(PhysicalUnits)
 
     def __unicode__(self):
-        return '{0}|{1}|{2}'.format(self.target, self.method, self.unit)
+        return u'{0}|{1}|{2}'.format(self.target, self.method, self.unit)
