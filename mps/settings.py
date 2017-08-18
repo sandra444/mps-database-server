@@ -386,3 +386,5 @@ LOGIN_REDIRECT_URL = '/accounts/loggedin/'
 
 # The console EmailBackend will post emails in the console
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
