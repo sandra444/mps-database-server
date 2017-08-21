@@ -24,7 +24,7 @@
             <h1 class="text-center">
                 {{ object }}
                 <div>
-                    {% if user|is_group_editor:object.group.name and not object.signed_off_date %}
+                    {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
                         <a href="update" class="btn btn-primary" role="button">Edit This Study</a>
                     {% endif %}
                     <a href="summary" class="btn btn-info" role="button">Study Summary</a>
@@ -36,7 +36,7 @@
             <h2>
                 Setups
                 {# Hide setup add buttons if the study is marked reviewed #}
-                {% if user|is_group_editor:object.group.name and not object.signed_off_date %}
+                {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
                 <div>
                     <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Chip Setup</a>
                     <a href="assayplatesetup/add" class="btn btn-success" role="button">Add Plate Setup</a>
@@ -155,7 +155,7 @@
         <legend>
             <h2>
                 Readouts
-                {% if user|is_group_editor:object.group.name and not object.signed_off_date %}
+                {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
                 <div>
                 {% if setups.count == 0 or setups.count == readouts.count %}
                     <div hidden id="readout_alert" class="alert alert-warning" role="alert">
@@ -298,7 +298,7 @@
         </div>
         {% endif %}
 
-        {% if user|is_group_editor:object.group.name and not object.signed_off_date %}
+        {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
         <a href="bulk" class="btn btn-block btn-info" role="button">
             Upload Excel File of Readout Data
             <br>
@@ -309,7 +309,7 @@
         <legend>
             <h2>
                 Results
-                {% if user|is_group_editor:object.group.name and not object.signed_off_date %}
+                {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
                 <div>
                 {# Later should add condition for when not enough readouts or setups #}
                 {% if readouts.count == 0 or number_of_results == readouts.count %}
