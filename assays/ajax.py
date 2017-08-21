@@ -1027,7 +1027,7 @@ def get_related_compounds_map(readouts=None, study=None):
     related_compounds_map = {}
 
     if readouts:
-        setups = readouts.values_list('chip_setup_id')
+        setups = readouts.values_list('assay_chip_id__chip_setup__id')
     elif study:
         setups = AssayChipSetup.objects.filter(assay_run_id=study)
     else:
