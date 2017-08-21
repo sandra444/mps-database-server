@@ -316,6 +316,8 @@ class StudyIndex(ViewershipMixin, DetailView):
             readout=context['plate_readouts']
         ).count()
 
+        context['detail'] = True
+
         return context
 
 
