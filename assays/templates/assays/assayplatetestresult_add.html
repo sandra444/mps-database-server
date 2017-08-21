@@ -48,6 +48,8 @@
 
         {% include 'tracking.html' %}
 
+        {% include "sign_off_form.html" with group=study.group.name %}
+
         <legend>Plate Test Results</legend>
 
         {% if form.readout.errors %}

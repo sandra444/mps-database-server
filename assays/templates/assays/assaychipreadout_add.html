@@ -64,6 +64,8 @@
     {# Hidden: Used to indicate submit and clone #}
     {{ form.another.as_hidden }}
 
+    {% include "sign_off_form.html" with group=study.group.name %}
+
     <legend>Readout Details</legend>
 
     {% if form.chip_setup.errors %}

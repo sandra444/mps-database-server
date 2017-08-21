@@ -55,6 +55,8 @@
 
         {% include 'tracking.html' %}
 
+        {% include "sign_off_form.html" with flag="y" group=study.group.name %}
+
         <legend>Chip Test Results</legend>
 
         {% if form.chip_readout.errors %}

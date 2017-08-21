@@ -64,6 +64,8 @@
     {# Hidden: Used to indicate submit and clone #}
     {{ form.another.as_hidden }}
 
+    {% include "sign_off_form.html" with group=form.instance.assay_run_id.group.name %}
+
     <legend>Chip Setup Details</legend>
 
     {% if form.setup_date.errors %}

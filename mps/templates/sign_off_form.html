@@ -1,0 +1,45 @@
+{% load custom_filters %}
+
+{% if study_submit and user|is_group_admin:group or update and creator and user.id == creator or not study_submit and group and user|is_group_editor:group %}
+<div hidden>
+    {{ form.signed_off }}
+</div>
+
+<div class="well">
+<div class="fancy-checkbox text-center">
+{% if form.signed_off.value %}
+<input type="checkbox" id="mark_reviewed" checked
+       onchange="if (confirm('Signing off will mark this object.\nAre you sure you want to change the sign off status?'))
+       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));
+       $('#id_signed_off').prop('checked') ?
+       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry');}"/>
+{% elif study_submit %}
+{# PLEASE NOTE THAT STUDIES CANNOT BE UNSIGNED OFF ON AT THE MOMENT SUBJECT TO CHANGE (MAYBE) #}
+<input type="checkbox" id="mark_reviewed"
+       onchange="if (confirm('Signing off will lock this object and its subsidiaries.\nAre you sure you want to change the sign off status?'))
+       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));
+       $('#id_signed_off').prop('checked') ?
+       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry');}"/>
+{% else %}
+<input type="checkbox" id="mark_reviewed"
+       onchange="if (confirm('Signing off will mark this object.\nAre you sure you want to change the sign off status?'))
+       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));
+       $('#id_signed_off').prop('checked') ?
+       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry');}"/>
+{% endif %}
+<div class="btn-group">
+    <label for="mark_reviewed" class="btn btn-success">
+        <span class="glyphicon glyphicon-ok"></span>
+        <span> </span>
+    </label>
+    <label id="mark_reviewed_label" for="mark_reviewed" class="btn btn-default active">
+        {% if form.signed_off.value %}
+        Click Here to Remove Sign Off
+        {% else %}
+        Click Here to Sign Off on this Entry
+        {% endif %}
+    </label>
+</div>
+</div>
+</div>
+{% endif %}

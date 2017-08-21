@@ -48,6 +48,8 @@
 
     {% include 'tracking.html' %}
 
+    {% include "sign_off_form.html" with group=form.instance.group.name study_submit='true' %}
+
     <legend>Study Details</legend>
 
     {% if form.group.errors %}
