@@ -43,7 +43,10 @@ $(document).ready(function () {
 
     // Convert ID to valid selector
     function valid_selector(id) {
-        return "#" + id.replace(/(:|\.|\[|\]|,|'|\(|\))/g, "\\$1");
+        var new_id = "#" + id.replace(/(:|\.|\[|\]|,|'|\(|\))/g, "\\$1");
+        // Compensate for slashes
+        new_id = new_id.replace(/\//g, '\\\/');
+        return new_id;
     }
 
     // Add method to sort by checkbox

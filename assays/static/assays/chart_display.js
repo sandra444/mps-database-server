@@ -109,6 +109,7 @@ $(document).ready(function () {
 
             var options = {
                 title: assay,
+                interpolateNulls: true,
                 titleTextStyle: {
                     fontSize: 18,
                     bold: true,

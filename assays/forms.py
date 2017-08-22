@@ -595,11 +595,16 @@ class ChipTestResultInlineFormset(BaseInlineFormSet):
 
         Filters units so that only those marked 'test' appear in the dropdown
         """
+        self.study = kwargs.pop('study', None)
         super(ChipTestResultInlineFormset, self).__init__(*args, **kwargs)
+        assay_queryset = AssayInstance.objects.filter(
+            study=self.study
+        )
         unit_queryset = PhysicalUnits.objects.filter(
             availability__icontains='test'
         ).order_by('unit_type', 'base_unit', 'scale_factor')
         for form in self.forms:
+            form.fields['assay_name'].queryset = assay_queryset
             form.fields['test_unit'].queryset = unit_queryset
 
     class Meta(object):

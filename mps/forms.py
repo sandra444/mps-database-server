@@ -3,6 +3,7 @@ from captcha.fields import CaptchaField
 from registration.forms import RegistrationFormUniqueEmail
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.models import User
+from mps.settings import DEFAULT_FROM_EMAIL
 
 
 class SignOffMixin(forms.ModelForm):
@@ -48,6 +49,44 @@ class SearchForm(forms.Form):
 class CaptchaRegistrationForm(RegistrationFormUniqueEmail):
     """Extended Registration Form with Captcha"""
     captcha = CaptchaField()
+    first_name = forms.CharField(initial='')
+    last_name = forms.CharField(initial='')
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username', '').strip()[:30].strip()
+
+        return username
+
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name', '').strip()[:30]
+
+        return first_name
+
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name', '').strip()[:30]
+
+        return last_name
+
+    def save(self, commit=True):
+        new_user = super(CaptchaRegistrationForm, self).save()
+        new_user.first_name = self.cleaned_data.get('first_name')
+        new_user.last_name = self.cleaned_data.get('last_name')
+        new_user.save()
+
+        # Magic strings are in poor taste, should use a template instead
+        subject = 'New User: {0} {1}'.format(new_user.first_name, new_user.last_name)
+        message = 'Hello Admins,\n\nA new user has registered.\n\nUsername: {0}\nName: {1} {2}\n\nThanks,\nMPS'.format(
+            new_user.username,
+            new_user.first_name,
+            new_user.last_name
+        )
+
+        users_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+        for user_to_be_alerted in users_to_be_alerted:
+            user_to_be_alerted.email_user(subject, message, DEFAULT_FROM_EMAIL)
+
+        return new_user
 
 
 # Add captcha to reset form

@@ -7,7 +7,7 @@
     <script src="{% static "js/whittle.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
-    <script src="{% static "assays/assaychiptestresult_add.js" %}"></script>
+{#    <script src="{% static "assays/assaychiptestresult_add.js" %}"></script>#}
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -54,6 +54,8 @@
         {% include 'errors.html' %}
 
         {% include 'tracking.html' %}
+
+        {% include "sign_off_form.html" with flag="y" group=study.group.name %}
 
         <legend>Chip Test Results</legend>
 
@@ -131,12 +133,7 @@
                         </td>
                         {% endif %}
                         <td>
-                            <select id="id_assaychipresult_set-{{ forloop.counter0 }}-assay_name" name="assaychipresult_set-{{ forloop.counter0 }}-assay_name">
-                                <option value="">---------</option>
-                                {% if result.assay_name.value %}
-                                    <option selected value="{{ result.assay_name.value }}">Loading</option>
-                                {% endif %}
-                            </select>
+                            {{ result.assay_name }}
                         </td>
                         <td>
                             {{ result.result }}

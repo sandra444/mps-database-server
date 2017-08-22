@@ -4,7 +4,15 @@
         <div class="alert alert-success" role="alert">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
             <span class="sr-only">Success:</span>
-            This entry was reviewed by <b>{{ object.full_reviewer }}</b> on <b>{{ object.signed_off_date }}</b>
+            This entry was Signed Off on by <b>{{ object.full_reviewer }}</b> on <b>{{ object.signed_off_date }}</b>
+        </div>
+    {% endif %}
+
+    {% if object.flagged %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            <span class="sr-only">Success:</span>
+            This entry is Flagged for review: "<b>{{ object.reason_for_flag }}</b>"
         </div>
     {% endif %}
 
@@ -20,7 +28,11 @@
     {% if object.created_on|date:"U" != object.modified_on|date:"U" %}
         <div class="bg-info tracking-box">
             <p class="tracking-text">
-                Last Modified by <b>{{ object.full_modifier }}</b> on <b>{{ object.modified_on }}</b>
+                {% if object.modified_by %}
+                    Last Modified by <b>{{ object.full_modifier }}</b> on <b>{{ object.modified_on }}</b>
+                {% else %}
+                    Last Modified by <b>Administration</b>
+                {% endif %}
             </p>
         </div>
     {% endif %}

@@ -16,6 +16,8 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
+from assays.ajax import get_related_compounds_map, get_list_of_present_compounds
+
 # Calling main is and always will be indicative of an error condition.
 # ajax.py is strictly for AJAX requests
 
@@ -223,40 +225,45 @@ def fetch_compound_report(request):
     # Acquire AssayChipRawData and store based on compound-assay (and convert to minutes?)
     # Make sure that the quality IS THE EMPTY STRING (anything in the quality field qualifies as invalid)
     readouts = AssayChipRawData.objects.filter(
-        assay_chip_id__chip_setup__compound__in=compounds,
         quality=u'',
-        assay_chip_id__chip_setup__assay_run_id__use_in_calculations=True
+        assay_chip_id__chip_setup__assay_run_id__use_in_calculations=True,
+        # Contrived at the moment
+        assay_instance__unit_id=45
     ).prefetch_related(
         *CHIP_DATA_PREFETCH
     )
 
+    related_compounds_map = get_related_compounds_map(readouts=readouts)
+
     for readout in readouts:
-        compound = readout.assay_chip_id.chip_setup.compound.name
-        plot = data.get(compound).get('plot')
-        assay = readout.assay_id.assay_id.assay_short_name
-        if assay not in plot:
-            plot[assay] = {}
+        for compound in related_compounds_map.get(readout.assay_chip_id.chip_setup.id, []):
+            compound_name = compound.compound_instance.compound.name
+            if compound_name in compounds_request:
+                plot = data.get(compound_name).get('plot')
+                assay = readout.assay_instance.target.short_name
+                if assay not in plot:
+                    plot[assay] = {}
 
-        # TODO SCALE CONCETRATIONS
-        concentration = unicode(
-            readout.assay_chip_id.chip_setup.concentration
-        ) + u'_' + readout.assay_chip_id.chip_setup.unit.unit
-        if not concentration in plot[assay]:
-            plot[assay][concentration] = {}
-        entry = plot[assay][concentration]
+                # TODO SCALE CONCETRATIONS
+                concentration = unicode(
+                    compound.concentration
+                ) + u'_' + compound.concentration_unit.unit
+                if not concentration in plot[assay]:
+                    plot[assay][concentration] = {}
+                entry = plot[assay][concentration]
 
-        # Convert all times to days for now
-        # Get the conversion unit
-        # scale = readout.assay_chip_id.timeunit.scale_factor
-        # readout_time = "{0:.2f}".format((scale/1440.0) * readout.time)
-        # readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
-        readout_time = "{0:.2f}".format(readout.time / 1440)
-        readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
+                # Convert all times to days for now
+                # Get the conversion unit
+                # scale = readout.assay_chip_id.timeunit.scale_factor
+                # readout_time = "{0:.2f}".format((scale/1440.0) * readout.time)
+                # readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
+                readout_time = "{0:.2f}".format(readout.time / 1440)
+                readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
 
-        if readout_time not in entry:
-            entry.update({readout_time: [readout.value]})
-        else:
-            entry.get(readout_time).append(readout.value)
+                if readout_time not in entry:
+                    entry.update({readout_time: [readout.value]})
+                else:
+                    entry.get(readout_time).append(readout.value)
 
     # Average out the values
     for compound in data:

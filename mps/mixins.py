@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 from django.template import RequestContext, loader
 from django.http import HttpResponseForbidden
 from assays.models import AssayRun
-from django.contrib.auth.models import Group
+from mps.templatetags.custom_filters import filter_groups
 
 
 def PermissionDenied(request, message):
@@ -49,7 +49,10 @@ class OneGroupRequiredMixin(object):
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
-        if self.request.user.groups.all().count() == 0:
+        # if self.request.user.groups.all().count() == 0:
+        #     return PermissionDenied(self.request, 'You must be a member of at least one group')
+        valid_groups = filter_groups(self.request.user)
+        if not valid_groups:
             return PermissionDenied(self.request, 'You must be a member of at least one group')
         return super(OneGroupRequiredMixin, self).dispatch(*args, **kwargs)
 
@@ -79,35 +82,89 @@ class StudyGroupRequiredMixin(object):
 
     Attributes:
     cloning_permitted - Specifies whether cloning is permitted
+    detail - indicates that a detail page was initially requested
+    update_redirect_url - where to to redirect in the case of detail redirect
     """
     # Default value for whether or not cloning is permitted
     cloning_permitted = False
+    detail = False
+    # Default value for url to redirect to
+    update_redirect_url = 'update/'
 
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
-        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
-        if not is_group_editor(self.request.user, study.group.name):
-            return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
+        if self.kwargs.get('study_id', ''):
+            study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
-        # Do we want this behavior??
-        if study.signed_off_by:
-            return PermissionDenied(
-                self.request,
-                'You cannot add this because the study has been signed off on by {0} {1}.'
-                ' If something needs to be changed, contact the individual who signed off or a database administrator.'.format(
-                    study.signed_off_by.first_name,
-                    study.signed_off_by.last_name
-                )
-            )
+            if not is_group_editor(self.request.user, study.group.name):
+                return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
 
-        if self.cloning_permitted and self.request.GET.get('clone', ''):
-            clone = get_object_or_404(self.model, pk=self.request.GET.get('clone', ''))
-            if not is_group_editor(self.request.user, clone.group.name):
+            # Do we want this behavior??
+            if study.signed_off_by:
                 return PermissionDenied(
                     self.request,
-                    'You must be a member of the group ' + str(clone.group) + ' to clone this'
+                    'You cannot add this because the study has been signed off on by {0} {1}.'
+                    ' If something needs to be changed, contact the individual who signed off or a database administrator.'.format(
+                        study.signed_off_by.first_name,
+                        study.signed_off_by.last_name
+                    )
                 )
+
+            if self.cloning_permitted and self.request.GET.get('clone', ''):
+                clone = get_object_or_404(self.model, pk=self.request.GET.get('clone', ''))
+                if not is_group_editor(self.request.user, clone.group.name):
+                    return PermissionDenied(
+                        self.request,
+                        'You must be a member of the group ' + str(clone.group) + ' to clone this'
+                    )
+        else:
+            try:
+                current_object = self.get_object()
+            except:
+                # Evil except here!
+                return PermissionDenied(self.request, 'An error has occurred.')
+            current_type = str(type(current_object))
+            if current_type == "<class 'assays.models.AssayChipSetup'>":
+                study = current_object.assay_run_id
+            elif current_type == "<class 'assays.models.AssayPlateSetup'>":
+                study = current_object.assay_run_id
+            elif current_type == "<class 'assays.models.AssayChipReadout'>":
+                study = current_object.chip_setup.assay_run_id
+            elif current_type == "<class 'assays.models.AssayPlateReadout'>":
+                study = current_object.setup.assay_run_id
+            elif current_type == "<class 'assays.models.AssayChipTestResult'>":
+                study = current_object.chip_readout.chip_setup.assay_run_id
+            elif current_type == "<class 'assays.models.AssayPlateTestResult'>":
+                study = current_object.readout.setup.assay_run_id
+
+            if is_group_editor(self.request.user, study.group.name) and not study.signed_off_by:
+                # Redirects either to url + update or the specified url + object ID (as an attribute)
+                # This is a little tricky if you don't look for {} in update_redirect_url
+                if self.detail:
+                    return redirect(self.update_redirect_url.format(current_object.id))
+                else:
+                    return super(StudyGroupRequiredMixin, self).dispatch(*args, **kwargs)
+
+            # If the object is not restricted and the user is NOT a listed viewer
+            elif study.restricted and not is_group_viewer(self.request.user, study.group.name):
+                return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
+
+            if study.signed_off_by and not self.detail:
+                return PermissionDenied(
+                    self.request,
+                    'You cannot modify this because the study has been signed off on by {0} {1}.'
+                    ' If something needs to be changed, contact the individual who signed off or a database administrator.'.format(
+                        study.signed_off_by.first_name,
+                        study.signed_off_by.last_name
+                    )
+                )
+
+            # Otherwise return the detail view
+            if self.detail:
+                return super(StudyGroupRequiredMixin, self).dispatch(*args, **kwargs)
+            else:
+                return PermissionDenied(self.request, 'You do not have permission to edit this.')
 
         return super(StudyGroupRequiredMixin, self).dispatch(*args, **kwargs)
 

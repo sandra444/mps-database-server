@@ -36,9 +36,47 @@
   <div class="input-group">
   {% endif %}
     <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-    <input required type="text" name="username" class="form-control" value="" id="id_username" placeholder="Username">
+    <input required type="text" name="username" class="form-control" value="{{ form.username.value|default:'' }}" id="id_username" placeholder="Username">
   </div>
   <span class="help-block">30 characters or fewer. Letters, digits and @/./+/-/_ only.</span>
+
+  <label for="first_name">First Name:</label>
+  {% if form.first_name.errors %}
+      {% for error in form.first_name.errors %}
+          <div class="alert alert-danger" role="alert">
+              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+              <span class="sr-only">Error:</span>
+              {{ error }}
+          </div>
+      {% endfor %}
+  <div class="input-group has-error">
+  {% else %}
+  <div class="input-group">
+  {% endif %}
+    <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+    <input required type="text" name="first_name" class="form-control" value="{{ form.first_name.value }}" id="id_first_name" placeholder="First Name">
+  </div>
+
+  <br>
+
+  <label for="last_name">Last Name:</label>
+  {% if form.last_name.errors %}
+      {% for error in form.last_name.errors %}
+          <div class="alert alert-danger" role="alert">
+              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+              <span class="sr-only">Error:</span>
+              {{ error }}
+          </div>
+      {% endfor %}
+  <div class="input-group has-error">
+  {% else %}
+  <div class="input-group">
+  {% endif %}
+    <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+    <input required type="text" name="last_name" class="form-control" value="{{ form.last_name.value }}" id="id_last_name" placeholder="Last Name">
+  </div>
+
+  <br>
 
   <label for="email">Email:</label>
   {% if form.email.errors %}
@@ -54,7 +92,7 @@
   <div class="input-group">
   {% endif %}
     <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
-    <input required type="email" name="email" class="form-control" value="" id="id_email" placeholder="Email">
+    <input required type="email" name="email" class="form-control" value="{{ form.email.value|default:'' }}" id="id_email" placeholder="Email">
   </div>
   <span class="help-block">Please enter your Email address.</span>
 
@@ -72,7 +110,7 @@
   <div class="input-group">
   {% endif %}
     <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-    <input required type="password" name="password1" class="form-control" value="" id="id_password1" placeholder="Password">
+    <input required type="password" name="password1" class="form-control" value="{{ form.password1.value|default:'' }}" id="id_password1" placeholder="Password">
   </div>
 
   <br>
@@ -91,7 +129,7 @@
   <div class="input-group">
   {% endif %}
     <span class="input-group-addon"><i class="glyphicon glyphicon-ok"></i></span>
-    <input required type="password" name="password2" class="form-control" value="" id="id_password2" placeholder="Confirm Password">
+    <input required type="password" name="password2" class="form-control" value="{{ form.password2.value|default:'' }}" id="id_password2" placeholder="Confirm Password">
   </div>
   <span class="help-block">Enter the same password as above, for verification.</span>
 

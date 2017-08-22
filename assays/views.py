@@ -27,7 +27,7 @@ from django.shortcuts import get_object_or_404, redirect
 # from django.contrib.auth.decorators import login_required
 # from django.utils.decorators import method_decorator
 
-from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX, filter_groups, is_group_editor
+from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX, filter_groups, is_group_editor, is_group_admin
 
 from mps.mixins import (
     LoginRequiredMixin,
@@ -261,7 +261,6 @@ class StudyIndex(ViewershipMixin, DetailView):
             'test_unit',
             'assay_result__chip_readout__chip_setup__unit',
             'assay_result__chip_readout__chip_setup__compound',
-            'assay_name__assay_id',
             'assay_result__created_by'
         ).filter(
             assay_result__chip_readout=context['readouts']
@@ -308,7 +307,6 @@ class StudyIndex(ViewershipMixin, DetailView):
             'result_type',
             'test_unit',
             'assay_result__readout__setup',
-            'assay_name__assay_id',
             'assay_result__created_by'
         ).filter(
             assay_result__readout=context['plate_readouts']
@@ -317,6 +315,8 @@ class StudyIndex(ViewershipMixin, DetailView):
         context['number_of_plate_results'] = AssayPlateTestResult.objects.filter(
             readout=context['plate_readouts']
         ).count()
+
+        context['detail'] = True
 
         return context
 
@@ -406,6 +406,11 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
             instance=form.instance
         )
         if form.is_valid() and assay_instance_formset.is_valid() and supporting_data_formset.is_valid():
+            if not is_group_admin(self.request.user, form.cleaned_data['group'].name):
+                if form.cleaned_data.get('signed_off', ''):
+                    del form.cleaned_data['signed_off']
+                form.cleaned_data['restricted'] = True
+
             save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=False)
             return redirect(
                 self.object.get_absolute_url()
@@ -474,6 +479,11 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
         original_sign_off_date = self.object.signed_off_date
 
         if form.is_valid() and assay_instance_formset.is_valid() and supporting_data_formset.is_valid():
+            if not is_group_admin(self.request.user, self.object.group.name):
+                if form.cleaned_data.get('signed_off', ''):
+                    del form.cleaned_data['signed_off']
+                form.cleaned_data['restricted'] = self.object.restricted
+
             save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=True)
 
             # TODO Update the group and restricted status of children
@@ -924,13 +934,14 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
             ))
 
 
-class AssayChipSetupDetail(DetailRedirectMixin, DetailView):
+class AssayChipSetupDetail(StudyGroupRequiredMixin, DetailView):
     """Details for a Chip Setup"""
     model = AssayChipSetup
+    detail = True
 
 
 # TODO IMPROVE METHOD FOR CLONING
-class AssayChipSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
+class AssayChipSetupUpdate(StudyGroupRequiredMixin, UpdateView):
     """Update a Chip Setup and Chip Cells inline"""
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_add.html'
@@ -1129,9 +1140,10 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
         return super(AssayChipReadoutAdd, self).render_to_response(context)
 
 
-class AssayChipReadoutDetail(DetailRedirectMixin, DetailView):
+class AssayChipReadoutDetail(StudyGroupRequiredMixin, DetailView):
     """Detail for Chip Readout"""
     model = AssayChipReadout
+    detail = True
 
     def get_context_data(self, **kwargs):
         context = super(AssayChipReadoutDetail, self).get_context_data(**kwargs)
@@ -1147,7 +1159,7 @@ class AssayChipReadoutDetail(DetailRedirectMixin, DetailView):
         return context
 
 
-class AssayChipReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
+class AssayChipReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
     """Update Assay Chip Readout and Assay Chip Readout Assays"""
     model = AssayChipReadout
     template_name = 'assays/assaychipreadout_add.html'
@@ -1246,7 +1258,6 @@ class AssayChipTestResultList(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = AssayChipResult.objects.prefetch_related(
-            'assay_name__assay_id',
             'assay_result__chip_readout__chip_setup',
             'assay_result__chip_readout__chip_setup__compound',
             'assay_result__chip_readout__chip_setup__unit',
@@ -1297,19 +1308,21 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
         return form
 
     def get_context_data(self, **kwargs):
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         context = super(AssayChipTestResultAdd, self).get_context_data(**kwargs)
         if 'formset' not in context:
             if self.request.POST:
-                context['formset'] = ChipTestResultFormSet(self.request.POST)
+                context['formset'] = ChipTestResultFormSet(self.request.POST, study=study)
             else:
-                context['formset'] = ChipTestResultFormSet()
+                context['formset'] = ChipTestResultFormSet(study=study)
 
-        context['study'] = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        context['study'] = study
 
         return context
 
     def form_valid(self, form):
-        formset = ChipTestResultFormSet(self.request.POST, instance=form.instance)
+        study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
+        formset = ChipTestResultFormSet(self.request.POST, instance=form.instance, study=study)
         if form.is_valid() and formset.is_valid():
             save_forms_with_tracking(self, form, formset=formset, update=False)
             return redirect(self.object.get_post_submission_url())
@@ -1338,12 +1351,13 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
         return super(AssayChipTestResultAdd, self).render_to_response(context)
 
 
-class AssayChipTestResultDetail(DetailRedirectMixin, DetailView):
+class AssayChipTestResultDetail(StudyGroupRequiredMixin, DetailView):
     """Display details for Chip Test Result"""
     model = AssayChipTestResult
+    detail = True
 
 
-class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
+class AssayChipTestResultUpdate(StudyGroupRequiredMixin, UpdateView):
     """Update a Chip Test Result and inline of individual results"""
     model = AssayChipTestResult
     template_name = 'assays/assaychiptestresult_add.html'
@@ -1361,21 +1375,23 @@ class AssayChipTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
             return form_class(study, current, instance=self.get_object())
 
     def get_context_data(self, **kwargs):
+        study = self.object.chip_readout.chip_setup.assay_run_id
         context = super(AssayChipTestResultUpdate, self).get_context_data(**kwargs)
         if 'formset' not in context:
             if self.request.POST:
-                context['formset'] = ChipTestResultFormSet(self.request.POST, instance=self.object)
+                context['formset'] = ChipTestResultFormSet(self.request.POST, instance=self.object, study=study)
             else:
-                context['formset'] = ChipTestResultFormSet(instance=self.object)
+                context['formset'] = ChipTestResultFormSet(instance=self.object, study=study)
 
-        context['study'] = self.object.chip_readout.chip_setup.assay_run_id
+        context['study'] = study
 
         context['update'] = True
 
         return context
 
     def form_valid(self, form):
-        formset = ChipTestResultFormSet(self.request.POST, instance=self.object)
+        study = self.object.chip_readout.chip_setup.assay_run_id
+        formset = ChipTestResultFormSet(self.request.POST, instance=self.object, study=study)
 
         if form.is_valid() and formset.is_valid():
             save_forms_with_tracking(self, form, formset=formset, update=True)
@@ -1687,12 +1703,13 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
 
 
 # TODO Assay Layout Detail does not currently exist (deemed lower priority)
-class AssayPlateSetupDetail(DetailRedirectMixin, DetailView):
+class AssayPlateSetupDetail(StudyGroupRequiredMixin, DetailView):
     """Details for a Plate Setup"""
     model = AssayPlateSetup
+    detail = True
 
 
-class AssayPlateSetupUpdate(ObjectGroupRequiredMixin, UpdateView):
+class AssayPlateSetupUpdate(StudyGroupRequiredMixin, UpdateView):
     """Update a Plate Setup with inline for Plate Cells"""
     model = AssayPlateSetup
     form_class = AssayPlateSetupForm
@@ -1900,9 +1917,10 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
 
 
 # TODO NEED TO ADD TEMPLATE
-class AssayPlateReadoutDetail(DetailRedirectMixin, DetailView):
+class AssayPlateReadoutDetail(StudyGroupRequiredMixin, DetailView):
     """Details for a Plate Readout"""
     model = AssayPlateReadout
+    detail = True
 
     def get_context_data(self, **kwargs):
         context = super(AssayPlateReadoutDetail, self).get_context_data(**kwargs)
@@ -1917,7 +1935,7 @@ class AssayPlateReadoutDetail(DetailRedirectMixin, DetailView):
 
         return context
 
-class AssayPlateReadoutUpdate(ObjectGroupRequiredMixin, UpdateView):
+class AssayPlateReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
     """Update a Plate Readout with inline for Assay Plate Readout Assays"""
     model = AssayPlateReadout
     template_name = 'assays/assayplatereadout_add.html'
@@ -2016,7 +2034,6 @@ class AssayPlateTestResultList(LoginRequiredMixin, ListView):
             'result_type',
             'test_unit',
             'assay_result__readout__setup__assay_run_id',
-            'assay_name__assay_id',
             'assay_result__created_by',
             'assay_result__group',
             'assay_result__signed_off_by'
@@ -2092,12 +2109,13 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
         return super(AssayPlateTestResultAdd, self).render_to_response(context)
 
 
-class AssayPlateTestResultDetail(DetailRedirectMixin, DetailView):
+class AssayPlateTestResultDetail(StudyGroupRequiredMixin, DetailView):
     """Details for Plate Test Results"""
     model = AssayPlateTestResult
+    detail = True
 
 
-class AssayPlateTestResultUpdate(ObjectGroupRequiredMixin, UpdateView):
+class AssayPlateTestResultUpdate(StudyGroupRequiredMixin, UpdateView):
     """Update a Plate Test Result with inline for individual Plate Results"""
     model = AssayPlateTestResult
     template_name = 'assays/assayplatetestresult_add.html'

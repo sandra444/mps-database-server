@@ -1008,7 +1008,7 @@ class AssayChipTestResult(FlaggableModel):
 class AssayChipResult(models.Model):
     """Individual result parameters for CHIP RESULTS used in inline"""
 
-    assay_name = models.ForeignKey('assays.AssayChipReadoutAssay',
+    assay_name = models.ForeignKey('assays.AssayInstance',
                                    verbose_name='Assay')
 
     assay_result = models.ForeignKey(AssayChipTestResult)
@@ -1069,7 +1069,7 @@ class AssayTarget(LockableModel):
     short_name = models.CharField(max_length=20, unique=True)
 
     def __unicode__(self):
-        return '{0} ({1})'.format(self.name, self.short_name)
+        return u'{0} ({1})'.format(self.name, self.short_name)
 
 
 class AssayMeasurementType(LockableModel):
@@ -1128,3 +1128,6 @@ class AssayInstance(models.Model):
     method = models.ForeignKey(AssayMethod)
     # Name of model "PhysicalUnits" should be renamed, methinks
     unit = models.ForeignKey(PhysicalUnits)
+
+    def __unicode__(self):
+        return u'{0}|{1}|{2}'.format(self.target, self.method, self.unit)

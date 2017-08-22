@@ -1,0 +1,49 @@
+{% load custom_filters %}
+
+{% if study_submit and user|is_group_admin:group or update and creator and user.id == creator or not study_submit and group and user|is_group_editor:group %}
+<div hidden>
+    {{ form.signed_off }}
+</div>
+
+<div class="well">
+<div class="text-center">
+
+{% if form.signed_off.value %}
+<input hidden type="checkbox" id="mark_reviewed" checked />
+{% else %}
+{# PLEASE NOTE THAT STUDIES CANNOT BE UNSIGNED OFF ON AT THE MOMENT SUBJECT TO CHANGE (MAYBE) #}
+<input hidden type="checkbox" id="mark_reviewed" />
+{% endif %}
+
+{% if study_submit %}
+<div class="btn-group"
+    onclick="if (confirm('Signing off will lock this object and its subsidiaries.\nAre you sure you want to change the sign off status?'))
+       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));
+       $('#id_signed_off').prop('checked') ?
+       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry'); $('#mark_reviewed_check').toggle();}">
+{% else %}
+<div class="btn-group"
+    onclick="if (confirm('Signing off will mark this object.\nAre you sure you want to change the sign off status?'))
+       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));
+       $('#id_signed_off').prop('checked') ?
+       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry'); $('#mark_reviewed_check').toggle();}">
+{% endif %}
+    <label for="mark_reviewed" class="btn btn-success">
+        {% if form.signed_off.value %}
+        <span style="display: inline-block" class="glyphicon glyphicon-ok" id="mark_reviewed_check"></span>
+        {% else %}
+        <span style="display: none" class="glyphicon glyphicon-ok" id="mark_reviewed_check"></span>
+        {% endif %}
+        <span> </span>
+    </label>
+    <label id="mark_reviewed_label" for="mark_reviewed" class="btn btn-default active">
+        {% if form.signed_off.value %}
+        Click Here to Remove Sign Off
+        {% else %}
+        Click Here to Sign Off on this Entry
+        {% endif %}
+    </label>
+</div>
+</div>
+</div>
+{% endif %}
