@@ -6,30 +6,34 @@
 </div>
 
 <div class="well">
-<div class="fancy-checkbox text-center">
+<div class="text-center">
+
 {% if form.signed_off.value %}
-<input type="checkbox" id="mark_reviewed" checked
-       onchange="if (confirm('Signing off will mark this object.\nAre you sure you want to change the sign off status?'))
-       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));
-       $('#id_signed_off').prop('checked') ?
-       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry');}"/>
-{% elif study_submit %}
-{# PLEASE NOTE THAT STUDIES CANNOT BE UNSIGNED OFF ON AT THE MOMENT SUBJECT TO CHANGE (MAYBE) #}
-<input type="checkbox" id="mark_reviewed"
-       onchange="if (confirm('Signing off will lock this object and its subsidiaries.\nAre you sure you want to change the sign off status?'))
-       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));
-       $('#id_signed_off').prop('checked') ?
-       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry');}"/>
+<input hidden type="checkbox" id="mark_reviewed" checked />
 {% else %}
-<input type="checkbox" id="mark_reviewed"
-       onchange="if (confirm('Signing off will mark this object.\nAre you sure you want to change the sign off status?'))
+{# PLEASE NOTE THAT STUDIES CANNOT BE UNSIGNED OFF ON AT THE MOMENT SUBJECT TO CHANGE (MAYBE) #}
+<input hidden type="checkbox" id="mark_reviewed" />
+{% endif %}
+
+{% if study_submit %}
+<div class="btn-group"
+    onclick="if (confirm('Signing off will lock this object and its subsidiaries.\nAre you sure you want to change the sign off status?'))
        {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));
        $('#id_signed_off').prop('checked') ?
-       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry');}"/>
+       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry'); $('#mark_reviewed_check').toggle();}">
+{% else %}
+<div class="btn-group"
+    onclick="if (confirm('Signing off will mark this object.\nAre you sure you want to change the sign off status?'))
+       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));
+       $('#id_signed_off').prop('checked') ?
+       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry'); $('#mark_reviewed_check').toggle();}">
 {% endif %}
-<div class="btn-group">
     <label for="mark_reviewed" class="btn btn-success">
-        <span class="glyphicon glyphicon-ok"></span>
+        {% if form.signed_off.value %}
+        <span style="display: inline-block" class="glyphicon glyphicon-ok" id="mark_reviewed_check"></span>
+        {% else %}
+        <span style="display: none" class="glyphicon glyphicon-ok" id="mark_reviewed_check"></span>
+        {% endif %}
         <span> </span>
     </label>
     <label id="mark_reviewed_label" for="mark_reviewed" class="btn btn-default active">
