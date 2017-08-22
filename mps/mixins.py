@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 from django.template import RequestContext, loader
 from django.http import HttpResponseForbidden
 from assays.models import AssayRun
-from django.contrib.auth.models import Group
+from mps.templatetags.custom_filters import filter_groups
 
 
 def PermissionDenied(request, message):
@@ -49,7 +49,10 @@ class OneGroupRequiredMixin(object):
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
-        if self.request.user.groups.all().count() == 0:
+        # if self.request.user.groups.all().count() == 0:
+        #     return PermissionDenied(self.request, 'You must be a member of at least one group')
+        valid_groups = filter_groups(self.request.user)
+        if not valid_groups:
             return PermissionDenied(self.request, 'You must be a member of at least one group')
         return super(OneGroupRequiredMixin, self).dispatch(*args, **kwargs)
 
