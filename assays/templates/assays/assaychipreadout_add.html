@@ -303,46 +303,30 @@
 
     {% include 'assays/chart_options.html' with chart_title="Data" chart_prefix="charts"%}
 
-    {# Inline CSS is very distasteful #}
-{#    <div id="extra" align="center" style="margin-top: 10px;margin-bottom: 10px;min-width: 1000px;overflow: hidden;">#}
-    <div id="extra" align="center">
-{#        <div id="csv_table" style="width: 55%;float: left;">#}
-        <div id="csv_table" class="col-sm-12 col-md-7 overflow-auto">
-            <table class="table table-hover data-table bold-font">
-                <thead>
-                    <tr class="bg-primary">
-{#                        <th>Chip ID</th>#}
-{#                        <th>Time</th>#}
-{#                        <th>Time Unit</th>#}
-{#                        <th>Assay</th>#}
-{#                        <th>Sample Location</th>#}
-{#                        <th>Value</th>#}
-{#                        <th>Value Unit</th>#}
-{#                        <th>Exclude</th>#}
-{#                        <th></th>#}
-                        <th>Chip ID</th>
-{#                        <th>Assay Plate ID</th>#}
-{#                        <th>Assay Well ID</th>#}
-                        <th>Time</th>
-                        <th>Target Analyte</th>
-                        <th>Method Kit</th>
-                        <th>Sample Location</th>
-                        <th>Value</th>
-                        <th>Value Unit</th>
-                        <th>Caution Flag</th>
-                        {% if user|is_group_editor:study.group.name %}
-                        <th id="id_exclude_header">Exclude</th>
-                        {% endif %}
-                        <th>Notes</th>
-                        <th>Data File</th>
-                    </tr>
-                </thead>
-                <tbody id="table_body">
-                </tbody>
-            </table>
-        </div>
-        <div id="charts" class="col-sm-12 col-md-5"></div>
-{#        <div id="charts" style="width: 42.5%;float: right;"></div>#}
+    <div id="charts" class="padded-bottom"></div>
+
+    <div>
+        <table class="table cell-border" id="current_data_table">
+            <thead>
+                <tr class="bg-primary">
+                    <th>Chip ID</th>
+                    <th>Time</th>
+                    <th>Target Analyte</th>
+                    <th>Method Kit</th>
+                    <th>Sample Location</th>
+                    <th>Value</th>
+                    <th>Value Unit</th>
+                    <th>Caution Flag</th>
+                    {% if user|is_group_editor:study.group.name %}
+                    <th id="id_exclude_header">Exclude</th>
+                    {% endif %}
+                    <th>Notes</th>
+                    <th>Data File</th>
+                </tr>
+            </thead>
+            <tbody id="table_body">
+            </tbody>
+        </table>
     </div>
 </form>
 {% endblock %}

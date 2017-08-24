@@ -51,11 +51,11 @@ $(document).ready(function () {
 
     // Add method to sort by checkbox
     // (I reversed it so that ascending will place checked first)
-    $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col){
-        return this.api().column(col, {order:'index'}).nodes().map(function(td, i){
-            return $('input', td).prop('checked') ? 0 : 1;
-        });
-    };
+    // $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col){
+    //     return this.api().column(col, {order:'index'}).nodes().map(function(td, i){
+    //         return $('input', td).prop('checked') ? 0 : 1;
+    //     });
+    // };
 
     function clear_selections(reset) {
         // Remove search terms
@@ -413,7 +413,7 @@ $(document).ready(function () {
             },
             {
                 "sSortDataType": "dom-checkbox",
-                "targets": 0
+                "targets": [0]
             }
         ],
         "iDisplayLength": 25

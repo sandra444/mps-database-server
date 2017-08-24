@@ -147,35 +147,28 @@
         </table>
     {% endif %}
 
-    {% include 'assays/chart_options.html' with chart_prefix="charts" chart_title="Current Data" %}
+    {% include 'assays/chart_options.html' with chart_title="Data" chart_prefix="charts"%}
 
-    <div id="extra" align="center">
-{#        <div id="csv_table" style="width: 55%;float: left;">#}
-        <div id="csv_table" class="col-sm-12 col-md-7 overflow-auto">
-            <table class="table table-hover data-table bold-font">
-                <thead>
-                    <tr class="bg-primary">
-                        <th>Chip ID</th>
-                        <th>Time</th>
-                        <th>Target Analyte</th>
-                        <th>Method Kit</th>
-                        <th>Sample Location</th>
-                        <th>Value</th>
-                        <th>Value Unit</th>
-                        <th>Caution Flag</th>
-                        <th>Notes</th>
-                        <th>Data File</th>
-                    </tr>
-                </thead>
-                <tbody id="table_body">
-                </tbody>
-            </table>
-        </div>
-        <div id="charts" class="col-sm-12 col-md-5"></div>
-{#        <div id="charts" style="width: 42.5%;float: right;"></div>#}
+    <div id="charts" class="padded-bottom"></div>
+
+    <div>
+        <table class="table cell-border" id="current_data_table">
+            <thead>
+                <tr class="bg-primary">
+                    <th>Chip ID</th>
+                    <th>Time</th>
+                    <th>Target Analyte</th>
+                    <th>Method Kit</th>
+                    <th>Sample Location</th>
+                    <th>Value</th>
+                    <th>Value Unit</th>
+                    <th>Caution Flag</th>
+                    <th>Notes</th>
+                    <th>Data File</th>
+                </tr>
+            </thead>
+            <tbody id="table_body">
+            </tbody>
+        </table>
     </div>
-
-{#    <div id="assaychipreadoutassay_set-group"></div>#}
-{##}
-{#    <br><br>#}
 {% endblock %}
