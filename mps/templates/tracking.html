@@ -1,11 +1,19 @@
 {# Tracking for certain models #}
 {% if update or detail %}
     {% if object.signed_off_by %}
+        {% if study_submit %}
         <div class="alert alert-success" role="alert">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
             <span class="sr-only">Success:</span>
-            This entry was Signed Off on by <b>{{ object.full_reviewer }}</b> on <b>{{ object.signed_off_date }}</b>
+            This entry was signed off on by <b>{{ object.full_reviewer }}</b> on <b>{{ object.signed_off_date }}</b>
         </div>
+        {% else %}
+        <div class="alert alert-success" role="alert">
+            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            <span class="sr-only">Success:</span>
+            This entry was verified by <b>{{ object.full_reviewer }}</b> on <b>{{ object.signed_off_date }}</b>
+        </div>
+        {% endif %}
     {% endif %}
 
     {% if object.flagged %}

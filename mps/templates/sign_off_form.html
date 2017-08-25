@@ -17,16 +17,16 @@
 
 {% if study_submit %}
 <div class="btn-group"
-    onclick="if (confirm('Signing off will lock this object and its subsidiaries.\nAre you sure you want to change the sign off status?'))
+    onclick="if (confirm('Signing off will prevent anyone from editing this Study and the data associated with it.\nAre you sure you want to change the sign off status?'))
        {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));
        $('#id_signed_off').prop('checked') ?
        $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry'); $('#mark_reviewed_check').toggle();}">
 {% else %}
 <div class="btn-group"
-    onclick="if (confirm('Signing off will mark this object.\nAre you sure you want to change the sign off status?'))
+    onclick="if (confirm('If this is checked, the entry will be marked as Validated.\nAre you sure you want to change the validated status?'))
        {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));
        $('#id_signed_off').prop('checked') ?
-       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry'); $('#mark_reviewed_check').toggle();}">
+       $('#mark_reviewed_label').text('Click Here to Remove Validated Mark') : $('#mark_reviewed_label').text('Click Here to Mark this Entry as Validated'); $('#mark_reviewed_check').toggle();}">
 {% endif %}
     <label for="mark_reviewed" class="btn btn-success">
         {% if form.signed_off.value %}
@@ -37,10 +37,18 @@
         <span> </span>
     </label>
     <label id="mark_reviewed_label" for="mark_reviewed" class="btn btn-default active">
-        {% if form.signed_off.value %}
-        Click Here to Remove Sign Off
+        {% if study_submit %}
+            {% if form.signed_off.value %}
+            Click Here to Remove Sign Off
+            {% else %}
+            Click Here to Sign Off on this Study
+            {% endif %}
         {% else %}
-        Click Here to Sign Off on this Entry
+            {% if form.signed_off.value %}
+            Click Here to Remove Validated Mark
+            {% else %}
+            Click Here to Mark this Entry as Validated
+            {% endif %}
         {% endif %}
     </label>
 </div>
