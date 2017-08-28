@@ -408,7 +408,7 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
             'update_number'
         )
 
-        related_compounds_map = get_related_compounds_map(chip_ids)
+        related_compounds_map = get_related_compounds_map(readouts=chip_ids)
 
     data = []
 
@@ -1023,7 +1023,7 @@ def get_readout_data(
     return final_data
 
 
-def get_related_compounds_map(readouts=None, study=None):
+def get_related_compounds_map(readouts=None, study=None, data=None):
     """Returns a map of setup id -> compound
 
     Params:
@@ -1032,7 +1032,9 @@ def get_related_compounds_map(readouts=None, study=None):
     related_compounds_map = {}
 
     if readouts:
-        setups = readouts.values_list('assay_chip_id__chip_setup__id')
+        setups = readouts.values_list('chip_setup_id')
+    elif data:
+        setups = data.values_list('assay_chip_id__chip_setup__id')
     elif study:
         setups = AssayChipSetup.objects.filter(assay_run_id=study)
     else:
