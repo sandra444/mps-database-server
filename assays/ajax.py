@@ -27,6 +27,11 @@ from .utils import (
 
 import csv
 from StringIO import StringIO
+from django.shortcuts import get_object_or_404
+from mps.templatetags.custom_filters import ADMIN_SUFFIX, is_group_editor
+
+from django.contrib.auth.models import User
+from mps.settings import DEFAULT_FROM_EMAIL
 
 # from.utils import(
 #     valid_chip_row,
@@ -39,7 +44,7 @@ from StringIO import StringIO
 # import xlrd
 
 # TODO FIX SPAGHETTI CODE
-from .forms import ReadoutBulkUploadForm
+from .forms import ReadoutBulkUploadForm, ReadyForSignOffForm
 from django.forms.models import inlineformset_factory
 
 # from django.utils import timezone
@@ -1570,6 +1575,63 @@ def fetch_quality_indicators(request):
 
     return HttpResponse(json.dumps(data), content_type='application/json')
 
+
+def send_ready_for_sign_off_email(request):
+    data = {}
+
+    if not AssayRun.objects.filter(pk=int(request.POST.get('study_id', ''))):
+        return HttpResponse(json.dumps({'errors': 'This study cannot be signed off on.'}),
+                            content_type='application/json')
+
+    study = get_object_or_404(AssayRun, pk=int(request.POST.get('study_id', '')))
+
+    message = request.POST.get('message', '').strip()[:2000]
+
+    if not is_group_editor(request.user, study.group.name):
+        return HttpResponse(json.dumps({'errors': 'You do not have permission to do this.'}), content_type='application/json')
+
+    email_form = ReadyForSignOffForm(request.POST)
+
+    if email_form.is_valid():
+        required_group_name = study.group.name + ADMIN_SUFFIX
+        users_to_be_alerted = User.objects.filter(groups__name=required_group_name)
+
+        if users_to_be_alerted:
+            # Magic strings are in poor taste, should use a template instead
+            subject = ''.format()
+            for user in users_to_be_alerted:
+                content = 'Hello {0} {1},\n\n' \
+                          '{2} {3} has requested that you review the Study {4}.\n\n' \
+                          '"{5}"\n\n' \
+                          'Please follow this link to see the Study in question:\n' \
+                          'https://mps.csb.pitt.edu{6}\n\n' \
+                          'When you are satisfied with the contents of the Study: click "Edit Study", then "Click Here to Sign Off on this Study", and finally "Submit".\n\n' \
+                          'Thank you very much,\n' \
+                          'The MPS Database Team\n\n' \
+                          '***PLEASE DO NOT REPLY TO THIS EMAIL***'.format(
+                    user.first_name,
+                    user.last_name,
+                    request.user.first_name,
+                    request.user.last_name,
+                    unicode(study),
+                    message,
+                    study.get_absolute_url()
+                )
+                # Actually send the email
+                user.email_user(subject, content, DEFAULT_FROM_EMAIL)
+
+                data.update({'message': message})
+        else:
+            data.update({
+                'errors': 'No valid users were detected. You cannot send this email.'
+            })
+    else:
+        data.update({
+            'errors': 'The form was invalid.'
+        })
+
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
 switch = {
     'fetch_assay_layout_content': fetch_assay_layout_content,
     'fetch_readout': fetch_readout,
@@ -1586,7 +1648,8 @@ switch = {
     'validate_bulk_file': validate_bulk_file,
     'validate_individual_chip_file': validate_individual_chip_file,
     'validate_individual_plate_file': validate_individual_plate_file,
-    'fetch_quality_indicators': fetch_quality_indicators
+    'fetch_quality_indicators': fetch_quality_indicators,
+    'send_ready_for_sign_off_email': send_ready_for_sign_off_email
 }
 
 

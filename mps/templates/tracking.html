@@ -19,7 +19,7 @@
     {% if object.flagged %}
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            <span class="sr-only">Success:</span>
+            <span class="sr-only">Danger:</span>
             This entry is Flagged for review: "<b>{{ object.reason_for_flag }}</b>"
         </div>
     {% endif %}

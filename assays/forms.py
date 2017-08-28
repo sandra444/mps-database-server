@@ -7,6 +7,7 @@ from mps.forms import SignOffMixin
 import re
 import string
 import collections
+from captcha.fields import CaptchaField
 
 from .utils import validate_file, get_chip_details, get_plate_details, TIME_CONVERSIONS, EXCLUDED_DATA_POINT_CODE
 
@@ -1205,3 +1206,8 @@ class AssayInstanceInlineFormset(BaseInlineFormSet):
             form.fields['target'].queryset = target_queryset
             form.fields['method'].queryset = method_queryset
             form.fields['unit'].queryset = unit_queryset
+
+
+class ReadyForSignOffForm(forms.Form):
+    captcha = CaptchaField()
+    message = forms.TextInput()

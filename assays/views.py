@@ -318,6 +318,8 @@ class StudyIndex(ViewershipMixin, DetailView):
 
         context['detail'] = True
 
+        context['ready_for_sign_off_form'] = ReadyForSignOffForm()
+
         return context
 
 
