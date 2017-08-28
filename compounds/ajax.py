@@ -233,7 +233,8 @@ def fetch_compound_report(request):
         *CHIP_DATA_PREFETCH
     )
 
-    related_compounds_map = get_related_compounds_map(readouts=readouts)
+    # MUDDLED USE OF TERMS PLEASE REVISE ASAP
+    related_compounds_map = get_related_compounds_map(data=readouts)
 
     for readout in readouts:
         for compound in related_compounds_map.get(readout.assay_chip_id.chip_setup.id, []):
