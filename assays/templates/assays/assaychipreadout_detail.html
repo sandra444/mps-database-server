@@ -9,9 +9,17 @@
     <script src="{% static "assays/chart_display.js" %}"></script>
 {% endblock %}
 
+{#{% block breadcrumbs %}#}
+{#    <li><a href="/assays/assaychipreadout/">Chip Readouts</a></li>#}
+{#    <li class="active">Readout for <em>Chip-{{ object.chip_setup.assay_chip_id }}</em></li>#}
+{#{% endblock %}#}
+
 {% block breadcrumbs %}
-    <li><a href="/assays/assaychipreadout/">Chip Readouts</a></li>
-    <li class="active">Readout for <em>Chip-{{ object.chip_setup.assay_chip_id }}</em></li>
+    <li><a href="/assays/study/">All Studies</a></li>
+    <li><a href="/assays/{{ object.chip_setup.assay_run_id.id }}">{{ object.chip_setup.assay_run_id }}</a></li>
+    <li class="active">
+        View Readout for <em>Chip-{{ object.chip_setup.assay_chip_id }}</em>
+    </li>
 {% endblock %}
 
 {% block content %}

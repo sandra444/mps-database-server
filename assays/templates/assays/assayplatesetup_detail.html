@@ -2,9 +2,19 @@
 {% load static %}
 {% load humanize %}
 
+{#{% block breadcrumbs %}#}
+{#    <li><a href="/assays/assayplatesetup/">Plate Setups</a></li>#}
+{#    <li class="active">{{ object }}</li>#}
+{#{% endblock %}#}
+
 {% block breadcrumbs %}
-    <li><a href="/assays/assayplatesetup/">Plate Setups</a></li>
-    <li class="active">{{ object }}</li>
+    <li><a href="/assays/study/">All Studies</a></li>
+    <li>
+        <a href="/assays/{{ object.assay_run_id.id }}">{{ object.assay_run_id }}</a>
+    </li>
+    <li class="active">
+        View <em>{{ object }}</em>
+    </li>
 {% endblock %}
 
 {% block load %}
