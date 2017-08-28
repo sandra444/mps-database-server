@@ -45,7 +45,7 @@ $(document).ready(function() {
     // TODO FIX ENTER SUBMIT ISSUE
     var ready_for_sign_off_section = $('#ready_for_sign_off_section');
     ready_for_sign_off_section.dialog({
-       height:800,
+       height:500,
        width:825,
        modal: true,
        closeOnEscape: true,

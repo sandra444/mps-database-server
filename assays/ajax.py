@@ -1598,10 +1598,10 @@ def send_ready_for_sign_off_email(request):
 
         if users_to_be_alerted:
             # Magic strings are in poor taste, should use a template instead
-            subject = ''.format()
+            subject = 'Sign Off Requested for {0}'.format(unicode(study))
             for user in users_to_be_alerted:
                 content = 'Hello {0} {1},\n\n' \
-                          '{2} {3} has requested that you review the Study {4}.\n\n' \
+                          '{2} {3} has requested that you review the Study: {4}.\n\n' \
                           '"{5}"\n\n' \
                           'Please follow this link to see the Study in question:\n' \
                           'https://mps.csb.pitt.edu{6}\n\n' \
