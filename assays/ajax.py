@@ -3,6 +3,7 @@ import ujson as json
 from collections import defaultdict
 # TODO STOP USING WILDCARD IMPORTS
 from django.http import *
+# STOP USING WILDCARD IMPORTS
 from .models import *
 from microdevices.models import MicrophysiologyCenter, Microdevice
 
@@ -16,9 +17,7 @@ from .forms import (
 
 from .utils import (
     number_to_label,
-    get_split_times,
     validate_file,
-    TIME_CONVERSIONS,
     DEFAULT_CSV_HEADER,
     CSV_HEADER_WITH_COMPOUNDS_AND_STUDY,
     CHIP_DATA_PREFETCH,
@@ -1027,7 +1026,7 @@ def get_related_compounds_map(readouts=None, study=None, data=None):
         'compound_instance__supplier',
         'concentration_unit',
         'chip_setup__assay_run_id'
-    ).order_by('addition_time')
+    ).order_by('addition_time', 'compound_instance__compound__name')
 
     for compound in related_compounds:
         related_compounds_map.setdefault(compound.chip_setup_id, []).append(compound)

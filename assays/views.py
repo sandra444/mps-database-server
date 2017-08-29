@@ -15,7 +15,6 @@ from assays.utils import (
     modify_qc_status_plate,
     modify_qc_status_chip,
     save_assay_layout,
-    get_split_times,
     TIME_CONVERSIONS,
     CHIP_DATA_PREFETCH,
     REPLACED_DATA_POINT_CODE,
@@ -228,14 +227,15 @@ class StudyIndex(ViewershipMixin, DetailView):
             'compound_instance__supplier',
             'concentration_unit',
             'chip_setup'
-        ).order_by('addition_time')
+        ).order_by('addition_time', 'compound_instance__compound__name')
         related_compounds_map = {}
 
         # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
         for compound in related_compounds:
             related_compounds_map.setdefault(compound.chip_setup_id, []).append(
                 compound.compound_instance.compound.name +
-                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
+                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')' +
+                '\nAdded on: ' + compound.get_addition_time_string() + ' Duration of: ' + compound.get_duration_string()
             )
 
         for setup in setups:
@@ -649,20 +649,21 @@ class AssayRunSummary(ViewershipMixin, DetailView):
             'compound_instance__supplier',
             'concentration_unit',
             'chip_setup'
-        )
+        ).order_by('addition_time', 'compound_instance__compound__name')
         related_compounds_map = {}
 
         # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
         for compound in related_compounds:
             related_compounds_map.setdefault(compound.chip_setup_id, []).append(
                 compound.compound_instance.compound.name +
-                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
+                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')' +
+                '\nAdded on: ' + compound.get_addition_time_string() + ' Duration of: ' + compound.get_duration_string()
             )
 
         for setup in setups:
-            setup.related_compounds_as_string = ',\n'.join(sorted(
+            setup.related_compounds_as_string = ',\n'.join(
                 related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
-            ))
+            )
 
         context['setups'] = setups
 
@@ -779,20 +780,21 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
             'compound_instance__supplier',
             'concentration_unit',
             'chip_setup'
-        )
+        ).order_by('addition_time', 'compound_instance__compound__name')
         related_compounds_map = {}
 
         # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
         for compound in related_compounds:
             related_compounds_map.setdefault(compound.chip_setup_id, []).append(
                 compound.compound_instance.compound.name +
-                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
+                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')' +
+                '\nAdded on: ' + compound.get_addition_time_string() + ' Duration of: ' + compound.get_duration_string()
             )
 
         for setup in queryset:
-            setup.related_compounds_as_string = ',\n'.join(sorted(
+            setup.related_compounds_as_string = ',\n'.join(
                 related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
-            ))
+            )
 
         return queryset
 
@@ -952,17 +954,17 @@ class AssayChipSetupDetail(StudyGroupRequiredMixin, DetailView):
             'compound_instance__compound',
             'concentration_unit',
             'compound_instance__supplier'
-        )
+        ).order_by('addition_time', 'compound_instance__compound__name')
 
-        for compound in compounds:
-            split_addition_time = get_split_times(compound.addition_time)
-            split_duration = get_split_times(compound.duration)
-
-            for unit in TIME_CONVERSIONS.keys():
-                compound.__dict__.update({
-                    'addition_time_' + unit: split_addition_time.get(unit),
-                    'duration_' + unit: split_duration.get(unit)
-                })
+        # for compound in compounds:
+        #     split_addition_time = get_split_times(compound.addition_time)
+        #     split_duration = get_split_times(compound.duration)
+        #
+        #     for unit in TIME_CONVERSIONS.keys():
+        #         compound.__dict__.update({
+        #             'addition_time_' + unit: split_addition_time.get(unit),
+        #             'duration_' + unit: split_duration.get(unit)
+        #         })
 
         context['compounds'] = compounds
 

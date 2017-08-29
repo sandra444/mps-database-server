@@ -180,8 +180,10 @@
                     <td>{{ compound.compound_instance.lot }}</td>
                     <td>{{ compound.compound_instance.receipt_date|default:'' }}</td>
                     <td>{{ compound.concentration }} {{ compound.concentration_unit }}</td>
-                    <td>D{{ compound.addition_time_day }} H{{ compound.addition_time_hour }} M{{ compound.addition_time_minute }}</td>
-                    <td>D{{ compound.duration_day }} H{{ compound.duration_hour }} M{{ compound.duration_minute }}</td>
+                    <td>{{ compound.get_addition_time_string }}</td>
+                    <td>{{ compound.get_duration_string }}</td>
+{#                    <td>D{{ compound.addition_time_day }} H{{ compound.addition_time_hour }} M{{ compound.addition_time_minute }}</td>#}
+{#                    <td>D{{ compound.duration_day }} H{{ compound.duration_hour }} M{{ compound.duration_minute }}</td>#}
                 </tr>
             {% endfor %}
             </tbody>

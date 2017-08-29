@@ -1,5 +1,6 @@
 from django import forms
 from django.forms.models import BaseInlineFormSet
+# STOP USING WILDCARD IMPORTS
 from assays.models import *
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
 from mps.forms import SignOffMixin
@@ -9,7 +10,7 @@ import string
 import collections
 from captcha.fields import CaptchaField
 
-from .utils import validate_file, get_chip_details, get_plate_details, TIME_CONVERSIONS, EXCLUDED_DATA_POINT_CODE
+from .utils import validate_file, get_chip_details, get_plate_details, EXCLUDED_DATA_POINT_CODE
 
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
