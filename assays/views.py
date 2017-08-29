@@ -15,6 +15,8 @@ from assays.utils import (
     modify_qc_status_plate,
     modify_qc_status_chip,
     save_assay_layout,
+    get_split_times,
+    TIME_CONVERSIONS,
     CHIP_DATA_PREFETCH,
     REPLACED_DATA_POINT_CODE,
     EXCLUDED_DATA_POINT_CODE
@@ -940,6 +942,31 @@ class AssayChipSetupDetail(StudyGroupRequiredMixin, DetailView):
     """Details for a Chip Setup"""
     model = AssayChipSetup
     detail = True
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayChipSetupDetail, self).get_context_data(**kwargs)
+
+        compounds = AssayCompoundInstance.objects.filter(
+            chip_setup=self.object
+        ).prefetch_related(
+            'compound_instance__compound',
+            'concentration_unit',
+            'compound_instance__supplier'
+        )
+
+        for compound in compounds:
+            split_addition_time = get_split_times(compound.addition_time)
+            split_duration = get_split_times(compound.duration)
+
+            for unit in TIME_CONVERSIONS.keys():
+                compound.__dict__.update({
+                    'addition_time_' + unit: split_addition_time.get(unit),
+                    'duration_' + unit: split_duration.get(unit)
+                })
+
+        context['compounds'] = compounds
+
+        return context
 
 
 # TODO IMPROVE METHOD FOR CLONING

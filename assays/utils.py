@@ -212,6 +212,27 @@ class UnicodeWriter:
             self.writerow(row)
 
 
+# TODO EMPLOY THIS FUNCTION ELSEWHERE
+def get_split_times(time_in_minutes):
+    """Takes time_in_minutes and returns a dic with the time split into day, hour, minute"""
+    times = {
+        'day': 0,
+        'hour': 0,
+        'minute': 0
+    }
+    time_in_minutes_remaining = time_in_minutes
+    for time_unit, conversion in TIME_CONVERSIONS.items():
+        initial_time_for_current_field = int(time_in_minutes_remaining / conversion)
+        if initial_time_for_current_field:
+            times[time_unit] = initial_time_for_current_field
+            time_in_minutes_remaining -= initial_time_for_current_field * conversion
+    # Add fractions of minutes if necessary
+    if time_in_minutes_remaining:
+        times['minute'] += time_in_minutes_remaining
+
+    return times
+
+
 def label_to_number(label):
     """Returns a numeric index from an alphabetical index"""
     num = 0
