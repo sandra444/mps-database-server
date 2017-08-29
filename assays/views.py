@@ -174,6 +174,36 @@ def get_queryset_with_assay_map(queryset):
     return queryset
 
 
+def get_compound_instance_strings_for_queryset(setups):
+    """Modifies a queryset to contain strings for all of the compound instances for each setup
+
+    Params:
+    setups - a queryset of AssayChipSetups
+    """
+    related_compounds = AssayCompoundInstance.objects.filter(
+        chip_setup=setups
+    ).prefetch_related(
+        'compound_instance__compound',
+        'compound_instance__supplier',
+        'concentration_unit',
+        'chip_setup'
+    ).order_by('addition_time', 'compound_instance__compound__name')
+    related_compounds_map = {}
+
+    # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
+    for compound in related_compounds:
+        related_compounds_map.setdefault(compound.chip_setup_id, []).append(
+            compound.compound_instance.compound.name +
+            ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')' +
+            '\nAdded on: ' + compound.get_addition_time_string() + '\nDuration of: ' + compound.get_duration_string()
+        )
+
+    for setup in setups:
+        setup.related_compounds_as_string = ',\n\n'.join(
+            related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
+        )
+
+
 class GroupIndex(OneGroupRequiredMixin, ListView):
     """Displays all of the studies linked to groups that the user is part of"""
     template_name = 'assays/assayrun_list.html'
@@ -220,28 +250,7 @@ class StudyIndex(ViewershipMixin, DetailView):
             'created_by',
         )
 
-        related_compounds = AssayCompoundInstance.objects.filter(
-            chip_setup=setups
-        ).prefetch_related(
-            'compound_instance__compound',
-            'compound_instance__supplier',
-            'concentration_unit',
-            'chip_setup'
-        ).order_by('addition_time', 'compound_instance__compound__name')
-        related_compounds_map = {}
-
-        # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
-        for compound in related_compounds:
-            related_compounds_map.setdefault(compound.chip_setup_id, []).append(
-                compound.compound_instance.compound.name +
-                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')' +
-                '\nAdded on: ' + compound.get_addition_time_string() + ' Duration of: ' + compound.get_duration_string()
-            )
-
-        for setup in setups:
-            setup.related_compounds_as_string = ',\n'.join(
-                related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
-            )
+        get_compound_instance_strings_for_queryset(setups)
 
         context['setups'] = setups
 
@@ -642,28 +651,7 @@ class AssayRunSummary(ViewershipMixin, DetailView):
             'created_by',
         )
 
-        related_compounds = AssayCompoundInstance.objects.filter(
-            chip_setup=setups
-        ).prefetch_related(
-            'compound_instance__compound',
-            'compound_instance__supplier',
-            'concentration_unit',
-            'chip_setup'
-        ).order_by('addition_time', 'compound_instance__compound__name')
-        related_compounds_map = {}
-
-        # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
-        for compound in related_compounds:
-            related_compounds_map.setdefault(compound.chip_setup_id, []).append(
-                compound.compound_instance.compound.name +
-                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')' +
-                '\nAdded on: ' + compound.get_addition_time_string() + ' Duration of: ' + compound.get_duration_string()
-            )
-
-        for setup in setups:
-            setup.related_compounds_as_string = ',\n'.join(
-                related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
-            )
+        get_compound_instance_strings_for_queryset(setups)
 
         context['setups'] = setups
 
@@ -773,28 +761,7 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
             group__name__in=group_names
         )
 
-        related_compounds = AssayCompoundInstance.objects.filter(
-            chip_setup=queryset
-        ).prefetch_related(
-            'compound_instance__compound',
-            'compound_instance__supplier',
-            'concentration_unit',
-            'chip_setup'
-        ).order_by('addition_time', 'compound_instance__compound__name')
-        related_compounds_map = {}
-
-        # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
-        for compound in related_compounds:
-            related_compounds_map.setdefault(compound.chip_setup_id, []).append(
-                compound.compound_instance.compound.name +
-                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')' +
-                '\nAdded on: ' + compound.get_addition_time_string() + ' Duration of: ' + compound.get_duration_string()
-            )
-
-        for setup in queryset:
-            setup.related_compounds_as_string = ',\n'.join(
-                related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
-            )
+        get_compound_instance_strings_for_queryset(queryset)
 
         return queryset
 
