@@ -195,11 +195,11 @@ def get_compound_instance_strings_for_queryset(setups):
         related_compounds_map.setdefault(compound.chip_setup_id, []).append(
             compound.compound_instance.compound.name +
             ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')' +
-            '\nAdded on: ' + compound.get_addition_time_string() + '\nDuration of: ' + compound.get_duration_string()
+            '\n-Added on: ' + compound.get_addition_time_string() + '; Duration of: ' + compound.get_duration_string()
         )
 
     for setup in setups:
-        setup.related_compounds_as_string = ',\n\n'.join(
+        setup.related_compounds_as_string = '\n'.join(
             related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
         )
 
