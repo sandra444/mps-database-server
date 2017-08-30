@@ -5,6 +5,7 @@ from microdevices.models import Microdevice, OrganModel, OrganModelProtocol
 from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
 
 import urllib
+import collections
 
 # TODO MAKE MODEL AND FIELD NAMES MORE CONSISTENT/COHERENT
 
@@ -23,6 +24,37 @@ PHYSICAL_UNIT_TYPES = (
 types = (
     ('TOX', 'Toxicity'), ('DM', 'Disease'), ('EFF', 'Efficacy'), ('CC', 'Cell Characterization')
 )
+
+# This shouldn't be repeated like so
+# Converts: days -> minutes, hours -> minutes, minutes->minutes
+TIME_CONVERSIONS = [
+    ('day', 1440),
+    ('hour', 60),
+    ('minute', 1)
+]
+
+TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
+
+
+# TODO EMPLOY THIS FUNCTION ELSEWHERE
+def get_split_times(time_in_minutes):
+    """Takes time_in_minutes and returns a dic with the time split into day, hour, minute"""
+    times = {
+        'day': 0,
+        'hour': 0,
+        'minute': 0
+    }
+    time_in_minutes_remaining = time_in_minutes
+    for time_unit, conversion in TIME_CONVERSIONS.items():
+        initial_time_for_current_field = int(time_in_minutes_remaining / conversion)
+        if initial_time_for_current_field:
+            times[time_unit] = initial_time_for_current_field
+            time_in_minutes_remaining -= initial_time_for_current_field * conversion
+    # Add fractions of minutes if necessary
+    if time_in_minutes_remaining:
+        times['minute'] += time_in_minutes_remaining
+
+    return times
 
 
 class UnitType(LockableModel):
@@ -229,6 +261,23 @@ class AssayCompoundInstance(models.Model):
 
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
     duration = models.FloatField(blank=True)
+
+    def get_addition_time_string(self):
+        split_times = get_split_times(self.addition_time)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
+
+    def get_duration_string(self):
+        split_times = get_split_times(self.duration)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
+
 
 class AssayWellCompound(models.Model):
     """Compound for PLATE wells"""

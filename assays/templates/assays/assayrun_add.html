@@ -46,7 +46,7 @@
 
     {% include 'errors.html' %}
 
-    {% include 'tracking.html' %}
+    {% include 'tracking.html' with study_submit='true' %}
 
     {% include "sign_off_form.html" with group=form.instance.group.name study_submit='true' %}
 

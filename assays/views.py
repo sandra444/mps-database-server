@@ -15,6 +15,7 @@ from assays.utils import (
     modify_qc_status_plate,
     modify_qc_status_chip,
     save_assay_layout,
+    TIME_CONVERSIONS,
     CHIP_DATA_PREFETCH,
     REPLACED_DATA_POINT_CODE,
     EXCLUDED_DATA_POINT_CODE
@@ -173,6 +174,36 @@ def get_queryset_with_assay_map(queryset):
     return queryset
 
 
+def get_compound_instance_strings_for_queryset(setups):
+    """Modifies a queryset to contain strings for all of the compound instances for each setup
+
+    Params:
+    setups - a queryset of AssayChipSetups
+    """
+    related_compounds = AssayCompoundInstance.objects.filter(
+        chip_setup=setups
+    ).prefetch_related(
+        'compound_instance__compound',
+        'compound_instance__supplier',
+        'concentration_unit',
+        'chip_setup'
+    ).order_by('addition_time', 'compound_instance__compound__name')
+    related_compounds_map = {}
+
+    # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
+    for compound in related_compounds:
+        related_compounds_map.setdefault(compound.chip_setup_id, []).append(
+            compound.compound_instance.compound.name +
+            ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')' +
+            '\n-Added on: ' + compound.get_addition_time_string() + '; Duration of: ' + compound.get_duration_string()
+        )
+
+    for setup in setups:
+        setup.related_compounds_as_string = '\n'.join(
+            related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
+        )
+
+
 class GroupIndex(OneGroupRequiredMixin, ListView):
     """Displays all of the studies linked to groups that the user is part of"""
     template_name = 'assays/assayrun_list.html'
@@ -219,27 +250,7 @@ class StudyIndex(ViewershipMixin, DetailView):
             'created_by',
         )
 
-        related_compounds = AssayCompoundInstance.objects.filter(
-            chip_setup=setups
-        ).prefetch_related(
-            'compound_instance__compound',
-            'compound_instance__supplier',
-            'concentration_unit',
-            'chip_setup'
-        ).order_by('addition_time')
-        related_compounds_map = {}
-
-        # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
-        for compound in related_compounds:
-            related_compounds_map.setdefault(compound.chip_setup_id, []).append(
-                compound.compound_instance.compound.name +
-                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
-            )
-
-        for setup in setups:
-            setup.related_compounds_as_string = ',\n'.join(
-                related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
-            )
+        get_compound_instance_strings_for_queryset(setups)
 
         context['setups'] = setups
 
@@ -317,6 +328,8 @@ class StudyIndex(ViewershipMixin, DetailView):
         ).count()
 
         context['detail'] = True
+
+        context['ready_for_sign_off_form'] = ReadyForSignOffForm()
 
         return context
 
@@ -476,7 +489,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
         )
 
         # Get the original sign off data (may be None)
-        original_sign_off_date = self.object.signed_off_date
+        # original_sign_off_date = self.object.signed_off_date
 
         if form.is_valid() and assay_instance_formset.is_valid() and supporting_data_formset.is_valid():
             if not is_group_admin(self.request.user, self.object.group.name):
@@ -499,21 +512,21 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
 
             # Marking a study should mark/unmark only setups that have not been individually reviewed
             # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
-            if original_sign_off_date:
-                unreviewed_chip_setups = all_chip_setups.filter(signed_off_date=original_sign_off_date)
-                # unreviewed_chip_readouts = all_chip_readouts.exclude(signed_off_date=self.object.signed_off_date)
-                # unreviewed_chip_results = all_chip_results.exclude(signed_off_date=self.object.signed_off_date)
-                unreviewed_plate_setups = all_plate_setups.filter(signed_off_date=original_sign_off_date)
-                # unreviewed_plate_readouts = all_plate_readouts.exclude(signed_off_date=self.object.signed_off_date)
-                # unreviewed_plate_results = all_plate_results.exclude(signed_off_date=self.object.signed_off_date)
-            # If the study is being signed off, then treat any setups with no sign off as unreviewed
-            else:
-                unreviewed_chip_setups = all_chip_setups.filter(signed_off_by=None)
-                # unreviewed_chip_readouts = all_chip_readouts.filter(signed_off_by=None)
-                # unreviewed_chip_results = all_chip_results.filter(signed_off_by=None)
-                unreviewed_plate_setups = all_plate_setups.filter(signed_off_by=None)
-                # unreviewed_plate_readouts = all_plate_readouts.filter(signed_off_by=None)
-                # unreviewed_plate_results = all_plate_results.filter(signed_off_by=None)
+            # if original_sign_off_date:
+            #     unreviewed_chip_setups = all_chip_setups.filter(signed_off_date=original_sign_off_date)
+            #     # unreviewed_chip_readouts = all_chip_readouts.exclude(signed_off_date=self.object.signed_off_date)
+            #     # unreviewed_chip_results = all_chip_results.exclude(signed_off_date=self.object.signed_off_date)
+            #     unreviewed_plate_setups = all_plate_setups.filter(signed_off_date=original_sign_off_date)
+            #     # unreviewed_plate_readouts = all_plate_readouts.exclude(signed_off_date=self.object.signed_off_date)
+            #     # unreviewed_plate_results = all_plate_results.exclude(signed_off_date=self.object.signed_off_date)
+            # # If the study is being signed off, then treat any setups with no sign off as unreviewed
+            # else:
+            #     unreviewed_chip_setups = all_chip_setups.filter(signed_off_by=None)
+            #     # unreviewed_chip_readouts = all_chip_readouts.filter(signed_off_by=None)
+            #     # unreviewed_chip_results = all_chip_results.filter(signed_off_by=None)
+            #     unreviewed_plate_setups = all_plate_setups.filter(signed_off_by=None)
+            #     # unreviewed_plate_readouts = all_plate_readouts.filter(signed_off_by=None)
+            #     # unreviewed_plate_results = all_plate_results.filter(signed_off_by=None)
 
             # Add group and restricted to all
             all_chip_setups.update(
@@ -546,10 +559,10 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             )
 
             # Change signed off data only for unreviewed entries
-            unreviewed_chip_setups.update(
-                signed_off_by=self.object.signed_off_by,
-                signed_off_date=self.object.signed_off_date
-            )
+            # unreviewed_chip_setups.update(
+            #     signed_off_by=self.object.signed_off_by,
+            #     signed_off_date=self.object.signed_off_date
+            # )
             # unreviewed_chip_readouts.update(
             #     signed_off_by=self.object.signed_off_by,
             #     signed_off_date=self.object.signed_off_date
@@ -558,10 +571,10 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             #     signed_off_by=self.object.signed_off_by,
             #     signed_off_date=self.object.signed_off_date
             # )
-            unreviewed_plate_setups.update(
-                signed_off_by=self.object.signed_off_by,
-                signed_off_date=self.object.signed_off_date
-            )
+            # unreviewed_plate_setups.update(
+            #     signed_off_by=self.object.signed_off_by,
+            #     signed_off_date=self.object.signed_off_date
+            # )
             # unreviewed_plate_readouts.update(
             #     signed_off_by=self.object.signed_off_by,
             #     signed_off_date=self.object.signed_off_date
@@ -638,66 +651,46 @@ class AssayRunSummary(ViewershipMixin, DetailView):
             'created_by',
         )
 
-        related_compounds = AssayCompoundInstance.objects.filter(
-            chip_setup=setups
-        ).prefetch_related(
-            'compound_instance__compound',
-            'compound_instance__supplier',
-            'concentration_unit',
-            'chip_setup'
-        )
-        related_compounds_map = {}
-
-        # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
-        for compound in related_compounds:
-            related_compounds_map.setdefault(compound.chip_setup_id, []).append(
-                compound.compound_instance.compound.name +
-                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
-            )
-
-        for setup in setups:
-            setup.related_compounds_as_string = ',\n'.join(sorted(
-                related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
-            ))
+        get_compound_instance_strings_for_queryset(setups)
 
         context['setups'] = setups
 
         # TODO THIS SAME BUSINESS NEEDS TO BE REFACTORED
-        # For chips
-        indicative = None
-        sameness = {}
-
-        if len(context['setups']) > 1:
-            results = compare_cells(AssayChipCells, 'assay_chip', context['setups'])
-            indicative = results[0]
-            sameness = results[1]
-        elif len(context['setups']) == 1:
-            indicative = context['setups'][0]
-
-        context['sameness'] = sameness
-        context['indicative'] = indicative
-
-        # For plates
-        context['plate_setups'] = AssayPlateSetup.objects.filter(
-            assay_run_id=self.object
-        ).prefetch_related(
-            'assay_run_id',
-            'assay_layout',
-            'created_by'
-        )
-
-        indicative = None
-        sameness = {}
-
-        if len(context['plate_setups']) > 1:
-            results = compare_cells(AssayPlateCells, 'assay_plate', context['plate_setups'])
-            indicative = results[0]
-            sameness = results[1]
-        elif len(context['plate_setups']) == 1:
-            indicative = context['plate_setups'][0]
-
-        context['plate_sameness'] = sameness
-        context['plate_indicative'] = indicative
+        # # For chips
+        # indicative = None
+        # sameness = {}
+        #
+        # if len(context['setups']) > 1:
+        #     results = compare_cells(AssayChipCells, 'assay_chip', context['setups'])
+        #     indicative = results[0]
+        #     sameness = results[1]
+        # elif len(context['setups']) == 1:
+        #     indicative = context['setups'][0]
+        #
+        # context['sameness'] = sameness
+        # context['indicative'] = indicative
+        #
+        # # For plates
+        # context['plate_setups'] = AssayPlateSetup.objects.filter(
+        #     assay_run_id=self.object
+        # ).prefetch_related(
+        #     'assay_run_id',
+        #     'assay_layout',
+        #     'created_by'
+        # )
+        #
+        # indicative = None
+        # sameness = {}
+        #
+        # if len(context['plate_setups']) > 1:
+        #     results = compare_cells(AssayPlateCells, 'assay_plate', context['plate_setups'])
+        #     indicative = results[0]
+        #     sameness = results[1]
+        # elif len(context['plate_setups']) == 1:
+        #     indicative = context['plate_setups'][0]
+        #
+        # context['plate_sameness'] = sameness
+        # context['plate_indicative'] = indicative
 
         # chip_readouts = AssayChipReadout.objects.filter(
         #     chip_setup__assay_run_id=self.object
@@ -768,27 +761,7 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
             group__name__in=group_names
         )
 
-        related_compounds = AssayCompoundInstance.objects.filter(
-            chip_setup=queryset
-        ).prefetch_related(
-            'compound_instance__compound',
-            'compound_instance__supplier',
-            'concentration_unit',
-            'chip_setup'
-        )
-        related_compounds_map = {}
-
-        # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
-        for compound in related_compounds:
-            related_compounds_map.setdefault(compound.chip_setup_id, []).append(
-                compound.compound_instance.compound.name +
-                ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')'
-            )
-
-        for setup in queryset:
-            setup.related_compounds_as_string = ',\n'.join(sorted(
-                related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
-            ))
+        get_compound_instance_strings_for_queryset(queryset)
 
         return queryset
 
@@ -938,6 +911,31 @@ class AssayChipSetupDetail(StudyGroupRequiredMixin, DetailView):
     """Details for a Chip Setup"""
     model = AssayChipSetup
     detail = True
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayChipSetupDetail, self).get_context_data(**kwargs)
+
+        compounds = AssayCompoundInstance.objects.filter(
+            chip_setup=self.object
+        ).prefetch_related(
+            'compound_instance__compound',
+            'concentration_unit',
+            'compound_instance__supplier'
+        ).order_by('addition_time', 'compound_instance__compound__name')
+
+        # for compound in compounds:
+        #     split_addition_time = get_split_times(compound.addition_time)
+        #     split_duration = get_split_times(compound.duration)
+        #
+        #     for unit in TIME_CONVERSIONS.keys():
+        #         compound.__dict__.update({
+        #             'addition_time_' + unit: split_addition_time.get(unit),
+        #             'duration_' + unit: split_duration.get(unit)
+        #         })
+
+        context['compounds'] = compounds
+
+        return context
 
 
 # TODO IMPROVE METHOD FOR CLONING

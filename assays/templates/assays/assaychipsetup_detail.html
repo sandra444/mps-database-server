@@ -1,9 +1,17 @@
 {% extends "base.html" %}
 {% load humanize %}
 
+{#{% block breadcrumbs %}#}
+{#    <li><a href="/assays/assaychipsetup/">Chip Setups</a></li>#}
+{#    <li class="active">{{ object }}</li>#}
+{#{% endblock %}#}
+
 {% block breadcrumbs %}
-    <li><a href="/assays/assaychipsetup/">Chip Setups</a></li>
-    <li class="active">{{ object }}</li>
+    <li><a href="/assays/study/">All Studies</a></li>
+    <li><a href="/assays/{{ object.assay_run_id.id }}">{{ object.assay_run_id }}</a></li>
+    <li class="active">
+        View <em>{{ object }}</em>
+    </li>
 {% endblock %}
 
 {# TODO REVIEW THIS AND OTHER DETAIL PAGES #}
@@ -146,7 +154,7 @@
         </table>
     {% endif %}
 
-    {% if object.assaycompoundinstance_set.all %}
+    {% if compounds %}
         <legend>Compounds</legend>
         <table class="table table-striped table-bordered">
             <thead>
@@ -156,12 +164,12 @@
                 <th>Lot</th>
                 <th>Receipt Date</th>
                 <th>Concentration</th>
-{#                <th>Addition Time</th>#}
-{#                <th>Duration</th>#}
+                <th>Addition Time</th>
+                <th>Duration</th>
             </tr>
             </thead>
             <tbody>
-            {% for compound in object.assaycompoundinstance_set.all %}
+            {% for compound in compounds %}
                 <tr>
                     <td>
                         <a href="{% url 'compound-detail' compound.compound_instance.compound.id %}">
@@ -172,6 +180,10 @@
                     <td>{{ compound.compound_instance.lot }}</td>
                     <td>{{ compound.compound_instance.receipt_date|default:'' }}</td>
                     <td>{{ compound.concentration }} {{ compound.concentration_unit }}</td>
+                    <td>{{ compound.get_addition_time_string }}</td>
+                    <td>{{ compound.get_duration_string }}</td>
+{#                    <td>D{{ compound.addition_time_day }} H{{ compound.addition_time_hour }} M{{ compound.addition_time_minute }}</td>#}
+{#                    <td>D{{ compound.duration_day }} H{{ compound.duration_hour }} M{{ compound.duration_minute }}</td>#}
                 </tr>
             {% endfor %}
             </tbody>

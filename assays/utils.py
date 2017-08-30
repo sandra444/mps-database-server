@@ -19,7 +19,8 @@ from .models import (
     AssayDataUpload,
     AssayCompoundInstance,
     AssayInstance,
-    AssaySampleLocation
+    AssaySampleLocation,
+    TIME_CONVERSIONS
 )
 from compounds.models import (
     CompoundSupplier,
@@ -54,16 +55,6 @@ CHIP_FORMATS = ('Chip',)
 
 REPLACED_DATA_POINT_CODE = 'R'
 EXCLUDED_DATA_POINT_CODE = 'X'
-
-# This shouldn't be repeated like so
-# Converts: days -> minutes, hours -> minutes, minutes->minutes
-TIME_CONVERSIONS = [
-    ('day', 1440),
-    ('hour', 60),
-    ('minute', 1)
-]
-
-TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
 
 # TODO PLEASE REVIEW TO MAKE SURE CONSISTENT
 COLUMN_HEADERS = (

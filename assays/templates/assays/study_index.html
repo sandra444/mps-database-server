@@ -3,6 +3,7 @@
 {% load custom_filters %}
 
 {% block load %}
+    <script src="{% static "js/cookies.js" %}"></script>
     <script src="{% static "assays/study_index.js" %}"></script>
     <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}
@@ -17,7 +18,7 @@
 {% endblock %}
 
 {% block content %}
-    {% include 'tracking.html' %}
+    {% include 'tracking.html' with study_submit='true' %}
 
     <div class="padded-bottom">
         <div class="well">
@@ -29,6 +30,11 @@
                     {% endif %}
                     <a href="summary" class="btn btn-info" role="button">Study Summary</a>
                 </div>
+                {% if not user|is_group_admin:object.group.name and user|is_group_editor:object.group.name and not object.signed_off_by %}
+                <div>
+                    <a id="indicate_study_is_ready_for_sign_off" class="btn btn-success" role="button">Indicate Study is Ready for Sign Off</a>
+                </div>
+                {% endif %}
             </h1>
         </div>
 
@@ -53,7 +59,7 @@
                     <th>View/Edit</th>
                     <th>Chip ID</th>
                     <th>Date</th>
-                    <th>Device</th>
+{#                    <th>Device</th>#}
                     <th>Organ Model</th>
 {#                    <th>Chip Test Type</th>#}
                     <th>Compound</th>
@@ -73,7 +79,7 @@
                     </td>
                     <td>{{ setup.assay_chip_id }}</td>
                     <td>{{ setup.setup_date }}</td>
-                    <td>{{ setup.device }}</td>
+{#                    <td>{{ setup.device }}</td>#}
                     <td>{{ setup.organ_model|default:"No Model" }}</td>
 {#                    <td>{{ setup.chip_test_type }}</td>#}
 {#                    {% if setup.compound != None %}#}
@@ -87,7 +93,7 @@
                     </td>
                     <td>
                         {% if setup.signed_off_by %}
-                            <span title="This entry was reviewed by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was verified by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if setup.flagged %}
                             <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -135,7 +141,7 @@
                     </td>
                     <td>
                         {% if setup.signed_off_by %}
-                            <span title="This entry was reviewed by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was verified by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if setup.flagged %}
                             <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -229,7 +235,7 @@
                     </td>
                     <td>
                         {% if readout.signed_off_by %}
-                            <span title="This entry was reviewed by {{ readout.full_reviewer }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was verified by {{ readout.full_reviewer }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if readout.flagged %}
                             <span title="This entry is flagged for review: '{{ readout.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -281,7 +287,7 @@
                     </td>
                     <td>
                         {% if readout.signed_off_by %}
-                            <span title="This entry was reviewed by {{ readout.full_reviewer }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was verified by {{ readout.full_reviewer }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if readout.flagged %}
                             <span title="This entry is flagged for review: '{{ readout.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -389,7 +395,7 @@
                     </td>
                     <td>
                         {% if result.assay_result.signed_off_by %}
-                            <span title="This entry was reviewed by {{ result.assay_result.full_reviewer }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was verified by {{ result.assay_result.full_reviewer }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if result.assay_result.flagged %}
                             <span title="This entry is flagged for review: '{{ result.assay_result.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -457,7 +463,7 @@
                     </td>
                     <td>
                         {% if result.assay_result.signed_off_by %}
-                            <span title="This entry was reviewed by {{ result.assay_result.full_reviewer }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was verified by {{ result.assay_result.full_reviewer }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if result.assay_result.flagged %}
                             <span title="This entry is flagged for review: '{{ result.assay_result.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -474,4 +480,57 @@
         </div>
         {% endif %}
     </div>
+
+    {% if not user|is_group_admin:object.group.name and user|is_group_editor:object.group.name and not object.signed_off_by %}
+    <div hidden id="ready_for_sign_off_section" title="Indicate Study is Ready for Sign Off">
+    <form id="ready_for_sign_off_form">
+
+        <div class="alert alert-info" role="alert">
+            <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+            <span class="sr-only">Info:</span>
+            This form, when submitted, will send an email to the group's PI indicating that the study is ready for sign off.
+        </div>
+
+        <label for="email">Message:</label>
+        <div class="input-group padded-bottom">
+            {# Inline style is in poor taste #}
+            <textarea name="message" class="form-control" id="id_message" rows="4" style="width: 775px;"
+                    placeholder="Write a message to accompany your request for a Sign Off."></textarea>
+        </div>
+
+        <div class="well well-lg">
+        <label for="captcha">Please Type What You See</label>
+        <div class="input-group">
+            {{ ready_for_sign_off_form.captcha }}
+        </div>
+        </div>
+    </form>
+    <div hidden id="email_failure" class="alert alert-danger" role="alert">
+        <h3>
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Danger:</span>
+            Your request has failed.
+            <br>
+            <br>
+            <span id="email_failure_message"></span>
+            <br>
+            <br>
+            Please refresh the page and try again.
+        </h3>
+    </div>
+    <div hidden id="email_success" class="alert alert-success" role="alert">
+        <h3>
+            <span class="glyphicon glyphicon-check" aria-hidden="true"></span>
+            <span class="sr-only">Success:</span>
+            Your request has succeeded. Your message:
+            <br>
+            <br>
+            <span id="email_message"></span>
+            <br>
+            <br>
+            Was sent to users that can sign off on the study.
+        </h3>
+    </div>
+    </div>
+    {% endif %}
 {% endblock %}

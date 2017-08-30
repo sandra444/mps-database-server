@@ -3,6 +3,7 @@ import ujson as json
 from collections import defaultdict
 # TODO STOP USING WILDCARD IMPORTS
 from django.http import *
+# STOP USING WILDCARD IMPORTS
 from .models import *
 from microdevices.models import MicrophysiologyCenter, Microdevice
 
@@ -17,7 +18,6 @@ from .forms import (
 from .utils import (
     number_to_label,
     validate_file,
-    TIME_CONVERSIONS,
     DEFAULT_CSV_HEADER,
     CSV_HEADER_WITH_COMPOUNDS_AND_STUDY,
     CHIP_DATA_PREFETCH,
@@ -27,6 +27,11 @@ from .utils import (
 
 import csv
 from StringIO import StringIO
+from django.shortcuts import get_object_or_404
+from mps.templatetags.custom_filters import ADMIN_SUFFIX, is_group_editor
+
+from django.contrib.auth.models import User
+from mps.settings import DEFAULT_FROM_EMAIL
 
 # from.utils import(
 #     valid_chip_row,
@@ -39,7 +44,7 @@ from StringIO import StringIO
 # import xlrd
 
 # TODO FIX SPAGHETTI CODE
-from .forms import ReadoutBulkUploadForm
+from .forms import ReadoutBulkUploadForm, ReadyForSignOffForm
 from django.forms.models import inlineformset_factory
 
 # from django.utils import timezone
@@ -354,27 +359,6 @@ def fetch_center_id(request):
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
-
-
-# TODO EMPLOY THIS FUNCTION ELSEWHERE
-def get_split_times(time_in_minutes):
-    """Takes time_in_minutes and returns a dic with the time split into day, hour, minute"""
-    times = {
-        'day': 0,
-        'hour': 0,
-        'minute': 0
-    }
-    time_in_minutes_remaining = time_in_minutes
-    for time_unit, conversion in TIME_CONVERSIONS.items():
-        initial_time_for_current_field = int(time_in_minutes_remaining / conversion)
-        if initial_time_for_current_field:
-            times[time_unit] = initial_time_for_current_field
-            time_in_minutes_remaining -= initial_time_for_current_field * conversion
-    # Add fractions of minutes if necessary
-    if time_in_minutes_remaining:
-        times['minute'] += time_in_minutes_remaining
-
-    return times
 
 
 def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=False, include_header=False, include_all=False):
@@ -1042,7 +1026,7 @@ def get_related_compounds_map(readouts=None, study=None, data=None):
         'compound_instance__supplier',
         'concentration_unit',
         'chip_setup__assay_run_id'
-    ).order_by('addition_time')
+    ).order_by('addition_time', 'compound_instance__compound__name')
 
     for compound in related_compounds:
         related_compounds_map.setdefault(compound.chip_setup_id, []).append(compound)
@@ -1572,6 +1556,63 @@ def fetch_quality_indicators(request):
 
     return HttpResponse(json.dumps(data), content_type='application/json')
 
+
+def send_ready_for_sign_off_email(request):
+    data = {}
+
+    if not AssayRun.objects.filter(pk=int(request.POST.get('study_id', ''))):
+        return HttpResponse(json.dumps({'errors': 'This study cannot be signed off on.'}),
+                            content_type='application/json')
+
+    study = get_object_or_404(AssayRun, pk=int(request.POST.get('study_id', '')))
+
+    message = request.POST.get('message', '').strip()[:2000]
+
+    if not is_group_editor(request.user, study.group.name):
+        return HttpResponse(json.dumps({'errors': 'You do not have permission to do this.'}), content_type='application/json')
+
+    email_form = ReadyForSignOffForm(request.POST)
+
+    if email_form.is_valid():
+        required_group_name = study.group.name + ADMIN_SUFFIX
+        users_to_be_alerted = User.objects.filter(groups__name=required_group_name)
+
+        if users_to_be_alerted:
+            # Magic strings are in poor taste, should use a template instead
+            subject = 'Sign Off Requested for {0}'.format(unicode(study))
+            for user in users_to_be_alerted:
+                content = 'Hello {0} {1},\n\n' \
+                          '{2} {3} has requested that you review the Study: {4}.\n\n' \
+                          '"{5}"\n\n' \
+                          'Please follow this link to see the Study in question:\n' \
+                          'https://mps.csb.pitt.edu{6}\n\n' \
+                          'When you are satisfied with the contents of the Study: click "Edit Study", then "Click Here to Sign Off on this Study", and finally "Submit".\n\n' \
+                          'Thank you very much,\n' \
+                          'The MPS Database Team\n\n' \
+                          '***PLEASE DO NOT REPLY TO THIS EMAIL***'.format(
+                    user.first_name,
+                    user.last_name,
+                    request.user.first_name,
+                    request.user.last_name,
+                    unicode(study),
+                    message,
+                    study.get_absolute_url()
+                )
+                # Actually send the email
+                user.email_user(subject, content, DEFAULT_FROM_EMAIL)
+
+                data.update({'message': message})
+        else:
+            data.update({
+                'errors': 'No valid users were detected. You cannot send this email.'
+            })
+    else:
+        data.update({
+            'errors': 'The form was invalid.'
+        })
+
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
 switch = {
     'fetch_assay_layout_content': fetch_assay_layout_content,
     'fetch_readout': fetch_readout,
@@ -1588,7 +1629,8 @@ switch = {
     'validate_bulk_file': validate_bulk_file,
     'validate_individual_chip_file': validate_individual_chip_file,
     'validate_individual_plate_file': validate_individual_plate_file,
-    'fetch_quality_indicators': fetch_quality_indicators
+    'fetch_quality_indicators': fetch_quality_indicators,
+    'send_ready_for_sign_off_email': send_ready_for_sign_off_email
 }
 
 

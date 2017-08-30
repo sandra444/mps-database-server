@@ -45,6 +45,8 @@ $(document).ready(function () {
         }
     };
 
+    var current_data_table = null;
+
     function is_true(element, index, array) {
         if (!element && element !== 0) {
             return false;
@@ -202,8 +204,12 @@ $(document).ready(function () {
                        process_data(json.table, exist);
                     }
 
-                    window.CHARTS.prepare_charts_by_table(json.charts, charts_name);
+                    window.CHARTS.prepare_side_by_side_charts(json.charts, charts_name);
                     window.CHARTS.make_charts(json.charts, charts_name, changes_to_chart_options);
+
+                    // Recalculate responsive and fixed headers
+                    $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+                    $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
                 }
             },
             error: function (xhr, errmsg, err) {
@@ -314,7 +320,7 @@ $(document).ready(function () {
             var every = [chip_id, time_in_minutes, assay_instance_id, sample_location_id].every(is_true);
 
             if (exist) {
-                new_row.addClass('bg-success');
+                new_row.addClass('force-bg-success');
             }
 
             else {
@@ -322,7 +328,7 @@ $(document).ready(function () {
             }
 
             if (!exist && !every) {
-                new_row.addClass('bg-danger');
+                new_row.addClass('force-bg-danger');
             }
 
             else if (value === null || value === '') {
@@ -330,16 +336,21 @@ $(document).ready(function () {
             }
 
             else if (quality) {
-                new_row.addClass('bg-danger');
+                new_row.addClass('force-bg-danger');
             }
 
             else if (caution_flag) {
-                new_row.addClass('bg-warning');
+                new_row.addClass('force-bg-warning');
             }
 
             var col_chip_id = $('<td>').text(chip_id);
 
-            var col_time = $('<td>').text('D' + day + ' H' + hour + ' M' + minute);
+            var col_time = $('<td>').text('D' + day + ' H' + hour + ' M' + minute)
+                .append($('<input>')
+                    .addClass('time_in_minutes')
+                    .val(time_in_minutes)
+                    .hide()
+                );
 
             var col_target = $('<td>').text(target_name);
             var col_method = $('<td>').text(method_name);
@@ -464,16 +475,16 @@ $(document).ready(function () {
 
             // Change color of parent if there is input
             if (current_value) {
-                current_row.addClass('bg-danger');
+                current_row.addClass('force-bg-danger');
                 current_row.removeClass('unexcluded');
             }
             else if (!current_value && current_row.hasClass('initially-excluded')) {
-                current_row.addClass('bg-info');
+                current_row.addClass('force-bg-info');
                 current_row.addClass('unexcluded');
-                current_row.removeClass('bg-success bg-danger');
+                current_row.removeClass('force-bg-success force-bg-danger');
             }
             else {
-                current_row.removeClass('bg-danger');
+                current_row.removeClass('force-bg-danger');
             }
 
             if (exist) {
@@ -487,6 +498,45 @@ $(document).ready(function () {
             // Only affects charts
             refresh_chart_only();
         });
+
+        var current_data_table_selector = $('#current_data_table');
+        // Clear old (if present)
+        current_data_table_selector.DataTable().destroy();
+
+        // Make the datatable
+        current_data_table = current_data_table_selector.DataTable({
+            dom: 'B<"row">frti',
+            fixedHeader: {headerOffset: 50},
+            iDisplayLength: -1,
+            columnDefs: [
+                {
+                    "sType": "numeric",
+                    "sSortDataType": "time-in-minutes",
+                    "targets": [1]
+                },
+                {
+                    "sSortDataType": "dom-checkbox",
+                    "targets": [8]
+                }
+            ]
+        });
+
+        // Add listener to search
+        $('input[type=search]').change(function() {
+            toggle_excluded();
+        });
+
+        // TODO DEFINETELY NOT DRY
+        // Swap positions of filter and length selection; clarify filter
+        $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
+        $('.dataTables_length').css('float', 'right');
+        // Reposition download/print/copy
+        $('.DTTT_container').css('float', 'none');
+
+        // Clarify usage of sort
+        $('.sorting').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+        $('.sorting_asc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+        $('.sorting_desc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
     };
 
     function plot_existing_data() {
@@ -510,8 +560,11 @@ $(document).ready(function () {
             dataType: "json",
             data: data,
             success: function (json) {
-                window.CHARTS.prepare_charts_by_table(json, charts_name);
+                window.CHARTS.prepare_side_by_side_charts(json, charts_name);
                 window.CHARTS.make_charts(json, charts_name, changes_to_chart_options);
+                // Recalculate responsive and fixed headers
+                $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+                $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
             },
             error: function (xhr, errmsg, err) {
                 console.log(xhr.status + ": " + xhr.responseText);
@@ -583,5 +636,15 @@ $(document).ready(function () {
     // Setup triggers
     $('#' + charts_name + 'chart_options').find('input').change(function() {
         refresh_chart_only();
+    });
+
+    // Special operations for pre-submission
+    $('form').submit(function() {
+        if (current_data_table) {
+            current_data_table.search('');
+            $('input[type=search]').val('');
+            current_data_table.draw();
+            $('.initially-excluded').show();
+        }
     });
 });
