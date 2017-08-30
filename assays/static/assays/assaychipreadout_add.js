@@ -501,10 +501,10 @@ $(document).ready(function () {
 
         var current_data_table_selector = $('#current_data_table');
         // Clear old (if present)
-        current_data_table_selector.dataTable().fnDestroy();
+        current_data_table_selector.DataTable().destroy();
 
         // Make the datatable
-        current_data_table = current_data_table_selector.dataTable({
+        current_data_table = current_data_table_selector.DataTable({
             dom: 'B<"row">frti',
             fixedHeader: {headerOffset: 50},
             iDisplayLength: -1,
@@ -640,8 +640,11 @@ $(document).ready(function () {
 
     // Special operations for pre-submission
     $('form').submit(function() {
-        current_data_table.search('');
-        $('input[type=search]').val('');
-        current_data_table.page.len(-1).draw();
+        if (current_data_table) {
+            current_data_table.search('');
+            $('input[type=search]').val('');
+            current_data_table.draw();
+            $('.initially-excluded').show();
+        }
     });
 });
