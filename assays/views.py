@@ -656,41 +656,41 @@ class AssayRunSummary(ViewershipMixin, DetailView):
         context['setups'] = setups
 
         # TODO THIS SAME BUSINESS NEEDS TO BE REFACTORED
-        # For chips
-        indicative = None
-        sameness = {}
-
-        if len(context['setups']) > 1:
-            results = compare_cells(AssayChipCells, 'assay_chip', context['setups'])
-            indicative = results[0]
-            sameness = results[1]
-        elif len(context['setups']) == 1:
-            indicative = context['setups'][0]
-
-        context['sameness'] = sameness
-        context['indicative'] = indicative
-
-        # For plates
-        context['plate_setups'] = AssayPlateSetup.objects.filter(
-            assay_run_id=self.object
-        ).prefetch_related(
-            'assay_run_id',
-            'assay_layout',
-            'created_by'
-        )
-
-        indicative = None
-        sameness = {}
-
-        if len(context['plate_setups']) > 1:
-            results = compare_cells(AssayPlateCells, 'assay_plate', context['plate_setups'])
-            indicative = results[0]
-            sameness = results[1]
-        elif len(context['plate_setups']) == 1:
-            indicative = context['plate_setups'][0]
-
-        context['plate_sameness'] = sameness
-        context['plate_indicative'] = indicative
+        # # For chips
+        # indicative = None
+        # sameness = {}
+        #
+        # if len(context['setups']) > 1:
+        #     results = compare_cells(AssayChipCells, 'assay_chip', context['setups'])
+        #     indicative = results[0]
+        #     sameness = results[1]
+        # elif len(context['setups']) == 1:
+        #     indicative = context['setups'][0]
+        #
+        # context['sameness'] = sameness
+        # context['indicative'] = indicative
+        #
+        # # For plates
+        # context['plate_setups'] = AssayPlateSetup.objects.filter(
+        #     assay_run_id=self.object
+        # ).prefetch_related(
+        #     'assay_run_id',
+        #     'assay_layout',
+        #     'created_by'
+        # )
+        #
+        # indicative = None
+        # sameness = {}
+        #
+        # if len(context['plate_setups']) > 1:
+        #     results = compare_cells(AssayPlateCells, 'assay_plate', context['plate_setups'])
+        #     indicative = results[0]
+        #     sameness = results[1]
+        # elif len(context['plate_setups']) == 1:
+        #     indicative = context['plate_setups'][0]
+        #
+        # context['plate_sameness'] = sameness
+        # context['plate_indicative'] = indicative
 
         # chip_readouts = AssayChipReadout.objects.filter(
         #     chip_setup__assay_run_id=self.object
