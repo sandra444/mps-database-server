@@ -9,7 +9,7 @@ $(document).ready(function () {
 
     $.fn.dataTable.ext.order['time-in-minutes'] = function (settings, col) {
         return this.api().column(col, {order: 'index'}).nodes().map(function (td, i) {
-            return $('.time_in_minutes', td).val();
+            return parseFloat($('.time_in_minutes', td).val());
         });
     };
 
