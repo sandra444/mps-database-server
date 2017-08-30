@@ -25,7 +25,7 @@
                     <th>Chip ID</th>
                     <th>Study</th>
                     <th>Date</th>
-                    <th>Device</th>
+{#                    <th>Device</th>#}
                     <th>Organ Model</th>
 {#                    <th>Chip Test Type</th>#}
                     <th>Compound</th>
@@ -43,7 +43,7 @@
                     <td>{{ setup.assay_chip_id }}</td>
                     <td><a href="/assays/{{ setup.assay_run_id.id }}">{{ setup.assay_run_id }}</a></td>
                     <td>{{ setup.setup_date|date:"M d, Y" }}</td>
-                    <td>{{ setup.device }}</td>
+{#                    <td>{{ setup.device }}</td>#}
                     <td>{{ setup.organ_model }}</td>
 {#                    <td>{{ setup.chip_test_type }}</td>#}
 {#                    {% if setup.compound != None %}#}
