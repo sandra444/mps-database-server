@@ -123,3 +123,16 @@
         {% endif %}
     </div>
 </nav>
+
+{# Enter override dialog box #}
+<div hidden id="enter_dialog_confirm" title="Submit this form?">
+    <p>
+        <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" style="float:left; margin:0 7px 20px 0;"></span>
+        Are you sure you want to submit the form?
+    </p>
+</div>
+
+{# This section gives a modal alert for when someone is going to overwrite an entry #}
+{% if update %}
+
+{% endif %}
