@@ -14,9 +14,6 @@
 window.FILTER = {};
 
 $(document).ready(function () {
-    // Get the middleware token
-    var middleware_token = getCookie('csrftoken');
-
     // Get a list for checkboxes from returned AJAX data
     // Min is a boolean value to see if data should be restricted on min_feat_count
     function get_list(data, min) {
@@ -102,7 +99,7 @@ $(document).ready(function () {
                 exclude_questionable: FILTER.exclude_questionable,
                 target_types: JSON.stringify(FILTER.target_types),
                 organisms: JSON.stringify(FILTER.organisms),
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 //console.log(json);

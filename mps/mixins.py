@@ -173,18 +173,33 @@ class StudyGroupRequiredMixin(object):
 
 
 class ViewershipMixin(object):
-    """This mixin checks if the user has the group neccessary to at least view the entry"""
+    """This mixin checks if the user has the group neccessary to at least view the entry
+    
+    Attributes:
+    study - specifies what study to look to for permissions
+    """
+    # Default study as None
+    study = None
+
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
         self.object = self.get_object()
-        # If the object is not restricted and the user is NOT a listed viewer, deny permission
-        if self.object.restricted and not is_group_viewer(self.request.user, self.object.group.name):
-            return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
+        if self.study.access == 'editors' and not has_group(self.request.user, self.study.group.name):
+            return PermissionDenied(
+                self.request,
+                'You do not have editor permissions for the group ' + str(self.study.group)
+            )
+        elif not self.study.access == 'public' and not is_group_viewer(self.request.user, self.study.group.name):
+            return PermissionDenied(
+                self.request,
+                'You do not have viewer permissions for the group ' + str(self.study.group)
+            )
         # Otherwise return the detail view
         return super(ViewershipMixin, self).dispatch(*args, **kwargs)
 
 
+# TODO ADD STUDY HERE (cannot refer straight to .object.restricted)
 # WIP
 class DetailRedirectMixin(object):
     """This mixin checks if the user has the object's group, if so it redirects to the edit page
@@ -193,9 +208,12 @@ class DetailRedirectMixin(object):
 
     Attributes:
     update_redirect_url - where to redirect it update is possible
+    study - specifies what study to look to for permissions
     """
     # Default value for url to redirect to
     update_redirect_url = 'update/'
+    # Default study as None
+    study = None
 
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
@@ -207,9 +225,17 @@ class DetailRedirectMixin(object):
             # Redirects either to url + update or the specified url + object ID (as an attribute)
             # This is a little tricky if you don't look for {} in update_redirect_url
             return redirect(self.update_redirect_url.format(self.object.id))
-        # If the object is not restricted and the user is NOT a listed viewer
-        elif self.object.restricted and not is_group_viewer(self.request.user, self.object.group.name):
-            return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
+        # If the object is restricted and the user is NOT a listed viewer
+        elif self.study.access == 'editors' and not has_group(self.request.user, self.study.group.name):
+            return PermissionDenied(
+                self.request,
+                'You do not have editor permissions for the group ' + str(self.study.group)
+            )
+        elif not self.study.access == 'public' and not is_group_viewer(self.request.user, self.study.group.name):
+            return PermissionDenied(
+                self.request,
+                'You do not have viewer permissions for the group ' + str(self.study.group)
+            )
         # Otherwise return the detail view
         return super(DetailRedirectMixin, self).dispatch(*args, **kwargs)
 

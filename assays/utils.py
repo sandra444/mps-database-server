@@ -155,6 +155,13 @@ CHIP_DATA_PREFETCH = (
     'data_upload'
 )
 
+MATRIX_ITEM_PREFETCH = (
+    'study',
+    'matrix',
+    'setup',
+    # Subject to change
+    'failure_reason'
+)
 
 def charset_detect(in_file, chunk_size=4096):
     """Use chardet library to detect what encoding is being used"""
@@ -2210,7 +2217,7 @@ def save_chip_files(datalist, current_file, study_id, overwrite_option, readout=
     """Process chip file data
 
     datalist - all data from the file datalist
-    current_file - the AssayDataFile object to link to
+    current_file - the AssayDataUpload object to link to
     study_id - the study ID in question
     overwrite_option - what overwrite option was used\
     readout - the readout in question
@@ -2254,7 +2261,7 @@ def save_plate_files(datalist, current_file, study_id, overwrite_option, readout
     """Process plate file data
 
     datalist - all data from the file datalist
-    current_file - the AssayDataFile object to link to
+    current_file - the AssayDataUpload object to link to
     study_id - the study ID in question
     overwrite_option - what overwrite option was used\
     readout - the readout in question

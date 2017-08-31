@@ -1,7 +1,4 @@
 $(document).ready(function () {
-    // Get the middleware token
-    var middleware_token = getCookie('csrftoken');
-
     function cluster(cluster_data_json, bioactivities, compounds) {
         // Show graphic
         $('#graphic').prop('hidden',false);
@@ -247,7 +244,7 @@ $(document).ready(function () {
                     'method': FILTER.method,
                     'chemical_properties': FILTER.chemical_properties
                 }),
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 // Stop spinner

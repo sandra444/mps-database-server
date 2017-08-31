@@ -14,8 +14,6 @@
 //};
 
 $(document).ready(function() {
-    // TODO REVISE ACQUISITION OF TOKEN
-    var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
     // Alias for global variable
 //    var data_map = window.COMPOUND_INSTANCES.data_map;
 //    var instances = window.COMPOUND_INSTANCES.instances;
@@ -30,7 +28,7 @@ $(document).ready(function() {
         dataType: "json",
         data: {
             call: 'fetch_compound_instances',
-            csrfmiddlewaretoken: middleware_token
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         },
         success: function (json) {
             var json_instances = json.instances;

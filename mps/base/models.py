@@ -7,6 +7,7 @@ from django.utils import timezone
 # from django.shortcuts import redirect, get_object_or_404
 
 
+# TODO THIS WILL HAVE TO BE CHANGED IF WE WANT TO HAVE A RECORD FOR EVERY MODIFIER
 class TrackableModel(models.Model):
     """The base model for Trackable models
 
@@ -76,21 +77,26 @@ class LockableModel(TrackableModel):
         abstract = True
 
 
-class RestrictedModel(LockableModel):
-    """The base model for Restricted models"""
+# DEPRECATED
+# AT THE MOMENT, THESE FIELDS ARE NOT VERY MEANINGFULLY USED
+# TODO WE WILL HAVE TO BE SURE TO CHANGE ANY LOGIC THAT RELIES ON GROUP AND RESTRICTED
+# class RestrictedModel(LockableModel):
+#     """The base model for Restricted models"""
+#
+#     # It is mandatory to bind a group to a restricted model
+#     group = models.ForeignKey('auth.Group',
+#                               help_text='Bind to a group')
+#
+#     # DEPRECATED
+#     # We seem to have decided to handle this differently
+#     restricted = models.BooleanField(default=True,
+#                                      help_text='Check box to restrict to selected group')
+#
+#     class Meta(object):
+#         abstract = True
 
-    # It is mandatory to bind a group to a restricted model
-    group = models.ForeignKey('auth.Group',
-                              help_text='Bind to a group')
 
-    restricted = models.BooleanField(default=True,
-                                     help_text='Check box to restrict to selected group')
-
-    class Meta(object):
-        abstract = True
-
-
-class FlaggableModel(RestrictedModel):
+class FlaggableModel(LockableModel):
     """The base model for flaggable models"""
 
     flagged = models.BooleanField(default=False,
@@ -140,3 +146,25 @@ def save_forms_with_tracking(self, form, formset=None, update=False):
         # Otherwise, just save the one
         else:
             formset.save()
+
+
+def add_tracking_to_form_instance(form):
+    """Add tracking data to a form instance
+    
+    params:
+    form - the form in question
+    """
+    data = form.cleaned_data
+
+    # Only update review if the entry has not already been reviewed
+    if not form.instance.signed_off_by and data.get('signed_off', ''):
+        form.instance.signed_off_by = self.request.user
+        form.instance.signed_off_date = timezone.now()
+    # Remove sign off if necessary
+    elif form.instance.signed_off_by and not data.get('signed_off', 'NOT_IN_FORM'):
+        form.instance.signed_off_by = None
+        form.instance.signed_off_date = None
+
+    # If this is an update
+    if form.instance.id:
+        form.instance.modified_by = self.request.user

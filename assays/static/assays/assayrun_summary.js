@@ -5,7 +5,6 @@ $(document).ready(function() {
     google.charts.setOnLoadCallback(get_readouts);
 
     var charts = $('#charts');
-    var middleware_token = getCookie('csrftoken');
     var study_id = Math.floor(window.location.href.split('/')[4]);
 
     // Name for the charts for binding events etc
@@ -43,7 +42,7 @@ $(document).ready(function() {
         var data = {
             call: 'fetch_readouts',
             study: study_id,
-            csrfmiddlewaretoken: middleware_token
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
         var options = window.CHARTS.prepare_chart_options(charts_name);

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load custom_filters %}
+
+{% block load %}
+
+{% endblock %}
+
+{% block breadcrumbs %}
+    {% if user|is_group_editor:object.group.name %}
+    <li><a href="/assays/editable_studies/">Editable Studies</a></li>
+    {% else %}
+    <li><a href="/assays/study">Studies</a></li>
+    {% endif %}
+    <li class="active">{{ object }}</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <div class="well">
+            <h1 class="text-center">
+                {{ object }}
+                <div>
+                    {% if user|is_group_editor:object.group.name %}
+                        <a href="update" class="btn btn-primary" role="button">Edit This Study</a>
+                    {% endif %}
+                    <a href="summary" class="btn btn-info" role="button">Study Summary</a>
+                </div>
+            </h1>
+        </div>
+
+        <legend>
+            <h2>
+                Matrices
+                {# Hide setup add buttons if the study is marked reviewed #}
+                {% if user|is_group_editor:object.group.name and not object.signed_off_date %}
+                <div>
+                    <a href="assaymatrix/add" class="btn btn-success" role="button">Add Matrix</a>
+                </div>
+                {% endif %}
+            </h2>
+        </legend>
+
+        {% if matrices %}
+        <div class="padded-bottom">
+        <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Name</th>
+                    <th>Device</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for matrix in matrices %}
+                <tr id={{ matrix.id }} name={{ matrix.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="/assays/assaymatrix/{{ matrix.id }}/">
+                            View/Edit
+                        </a>
+                    </td>
+                    <td>{{ matrix.name }}</td>
+                    <td>{{ matrix.device }}</td>
+                    <td>
+                        {{ matrix.full_creator }}
+                    </td>
+                    <td>
+                        {# Make sure this works #}
+                        {% include 'sign_off_and_flag_display.html' with object=matrix %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No matrices exist for this study
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

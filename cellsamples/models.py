@@ -4,7 +4,7 @@
 from django.db import models
 
 # Use our own model base classes instead of models.Model
-from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
+from mps.base.models import LockableModel, FlaggableModel
 
 
 class Organ(LockableModel):
@@ -106,6 +106,9 @@ class CellSample(FlaggableModel):
     cell_type = models.ForeignKey('CellType')
     cell_subtype = models.ForeignKey('CellSubtype')
 
+    # Group is now explicitly defined here as opposed to using a mixin
+    group = models.ForeignKey('auth.Group', help_text='Bind to a group')
+
     # DEPRECATED
     # cell_source CONSIDERED UNINTUITIVE
     # CELLSOURCETYPE = (
@@ -128,6 +131,7 @@ class CellSample(FlaggableModel):
     product_id = models.CharField(max_length=255, blank=True)
 
     # PATIENT (move to subtype?)
+    # Technically, these are sexes, not genders
     GENDER_CHOICES = (
         ('N', 'Not-specified'),
         ('F', 'Female'),

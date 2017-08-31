@@ -7,7 +7,6 @@ $(document).ready(function () {
     // Set the callback
     google.charts.setOnLoadCallback(get_readouts);
 
-    var middleware_token = getCookie('csrftoken');
     var study_id = Math.floor(window.location.href.split('/')[4]);
 
     function get_readouts() {
@@ -16,7 +15,7 @@ $(document).ready(function () {
         var data = {
             call: 'fetch_readouts',
             study: study_id,
-            csrfmiddlewaretoken: middleware_token
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
         var options = window.CHARTS.prepare_chart_options(charts_name);
@@ -48,7 +47,7 @@ $(document).ready(function () {
         var data = {
             call: 'validate_bulk_file',
             study: study_id,
-            csrfmiddlewaretoken: middleware_token
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         //    dynamic_quality: JSON.stringify(dynamic_quality),
         //    include_table: include_table
         };

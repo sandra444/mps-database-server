@@ -14,6 +14,7 @@ class MicrophysiologyCenter(LockableModel):
     class Meta(object):
         ordering = ('center_name',)
 
+    # TODO TODO THIS SHOULD BE JUST NAME
     center_name = models.CharField(max_length=100)
     center_id = models.CharField(max_length=20, default='-')
     description = models.CharField(max_length=400, blank=True, default='')
@@ -49,6 +50,7 @@ class Microdevice(LockableModel):
     class Meta(object):
         ordering = ('device_name', 'organ',)
 
+    # TODO TODO THIS SHOULD BE JUST NAME
     device_name = models.CharField(max_length=200)
 
     organ = models.ForeignKey('cellsamples.Organ', blank=True, null=True)
@@ -65,6 +67,8 @@ class Microdevice(LockableModel):
         verbose_name='length (mm)', null=True, blank=True)
     device_thickness = models.FloatField(
         verbose_name='thickness (mm)', null=True, blank=True)
+
+    # What is this for? Residue to be purged
     device_size_unit = models.CharField(max_length=50, default='', blank=True)
 
     device_image = models.ImageField(upload_to='assays', null=True, blank=True)
@@ -137,6 +141,7 @@ class OrganModel(LockableModel):
         verbose_name = 'Organ Model'
         ordering = ('model_name', 'organ',)
 
+    # TODO TODO THIS SHOULD BE JUST NAME
     model_name = models.CharField(max_length=200)
     organ = models.ForeignKey('cellsamples.Organ')
     # Centers are now required

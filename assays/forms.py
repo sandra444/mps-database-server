@@ -1,15 +1,29 @@
 from django import forms
-from django.forms.models import BaseInlineFormSet
+from django.forms.models import BaseInlineFormSet, inlineformset_factory, BaseModelFormSet, modelformset_factory
 from assays.models import *
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
+from cellsamples.models import Biosensor
 from mps.forms import SignOffMixin
 # Use regular expressions for a string split at one point
 import re
 import string
 import collections
 from captcha.fields import CaptchaField
+import ujson as json
 
-from .utils import validate_file, get_chip_details, get_plate_details, TIME_CONVERSIONS, EXCLUDED_DATA_POINT_CODE
+import datetime
+from django.utils import timezone
+from django.utils.encoding import force_str
+
+from .utils import (
+    validate_file,
+    get_chip_details,
+    get_plate_details,
+    TIME_CONVERSIONS,
+    EXCLUDED_DATA_POINT_CODE
+)
+
+from mps.templatetags.custom_filters import filter_groups
 
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
@@ -111,7 +125,7 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
 
-class StudySupportingDataInlineFormset(BaseInlineFormSet):
+class StudySupportingDataInlineFormSet(BaseInlineFormSet):
     """Form for Study Supporting Data (as part of an inline)"""
     class Meta(object):
         model = StudySupportingData
@@ -307,8 +321,8 @@ def update_compound_instance_and_supplier():
 # TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
 
 
-class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
-    """Frontend Inline Formset for Compound Instances"""
+class AssayCompoundInstanceInlineFormSet(CloneableBaseInlineFormSet):
+    """Frontend Inline FormSet for Compound Instances"""
     class Meta(object):
         model = AssayCompoundInstance
         exclude = ('',)
@@ -318,7 +332,7 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
 
         Filters physical units to include only Concentration
         """
-        super(AssayCompoundInstanceInlineFormset, self).__init__(*args, **kwargs)
+        super(AssayCompoundInstanceInlineFormSet, self).__init__(*args, **kwargs)
         # Filter on Time
         # time_unit_queryset = PhysicalUnits.objects.filter(
         #     unit_type__unit_type='Time'
@@ -1186,13 +1200,13 @@ class ReadoutBulkUploadForm(forms.ModelForm):
         return self.cleaned_data
 
 
-class AssayInstanceInlineFormset(BaseInlineFormSet):
+class AssayInstanceInlineFormSet(BaseInlineFormSet):
     def __init__(self, *args, **kwargs):
         """Init APRA inline
 
         Filters units so that only units marked 'readout' appear
         """
-        super(AssayInstanceInlineFormset, self).__init__(*args, **kwargs)
+        super(AssayInstanceInlineFormSet, self).__init__(*args, **kwargs)
 
         target_queryset = AssayTarget.objects.all().order_by('name')
 
@@ -1211,3 +1225,921 @@ class AssayInstanceInlineFormset(BaseInlineFormSet):
 class ReadyForSignOffForm(forms.Form):
     captcha = CaptchaField()
     message = forms.TextInput()
+
+
+class AssayStudyForm(SignOffMixin, forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        """Init the Study Form
+
+        Kwargs:
+        groups -- a queryset of groups (allows us to avoid N+1 problem)
+        """
+        self.groups = kwargs.pop('groups', None)
+        super(AssayStudyForm, self).__init__(*args, **kwargs)
+        self.fields['group'].queryset = self.groups
+
+    class Meta(object):
+        model = AssayStudy
+        widgets = {
+            'name': forms.Textarea(attrs={'rows': 1}),
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
+        exclude = tracking
+
+
+StudySupportingDataFormSet = inlineformset_factory(
+    AssayStudy,
+    AssayStudySupportingData,
+    formset=StudySupportingDataInlineFormSet,
+    extra=1,
+    exclude=[],
+    widgets={
+        'description': forms.Textarea(attrs={'rows': 3}),
+    }
+)
+
+AssayInstanceFormSet = inlineformset_factory(
+    AssayStudy,
+    AssayInstance,
+    formset=AssayInstanceInlineFormSet,
+    extra=1,
+    exclude=[]
+)
+
+
+class AssayMatrixForm(SignOffMixin, forms.ModelForm):
+    class Meta(object):
+        model = AssayMatrix
+        exclude = ('study',) + tracking
+        widgets = {
+            'notes': forms.Textarea(attrs={'rows': 3}),
+            'variance_from_organ_model_protocol': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.study = kwargs.pop('study', None)
+        self.user = kwargs.pop('user', None)
+        super(AssayMatrixForm, self).__init__(*args, **kwargs)
+
+        if self.study:
+            self.instance.study = self.study
+
+        for time_unit in TIME_CONVERSIONS.keys():
+            # Create fields for Days, Hours, Minutes
+            self.fields['addition_time_' + time_unit] = forms.FloatField(initial=0, required=False)
+            self.fields['duration_' + time_unit] = forms.FloatField(initial=0, required=False)
+            # self.fields['addition_time_' + time_unit + '_increment'] = forms.FloatField(initial=0, required=False)
+            # self.fields['duration_' + time_unit + '_increment'] = forms.FloatField(initial=0, required=False)
+            # Change style
+            self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
+            self.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
+            # self.fields['addition_time_' + time_unit + '_increment'].widget.attrs['style'] = 'width:50px;'
+            # self.fields['duration_' + time_unit + '_increment'].widget.attrs['style'] = 'width:50px;'
+
+        # Set CSS class to receipt date to use date picker
+        self.fields['receipt_date'].widget.attrs['class'] = 'datepicker-input'
+        self.fields['item_setup_date'].widget.attrs['class'] = 'datepicker-input'
+
+        # Set the widgets for some additional fields
+        self.fields['item_name'].widget = forms.Textarea(attrs={'rows': 1})
+        self.fields['item_scientist'].widget = forms.Textarea(attrs={'rows': 1})
+        self.fields['item_notes'].widget = forms.Textarea(attrs={'rows': 3})
+        self.fields['setup_variance_from_organ_model_protocol'].widget = forms.Textarea(attrs={'rows': 3})
+        self.fields['item_notebook_page'].widget.attrs['style'] = 'width:50px;'
+        self.fields['cell_sample'].widget.attrs['style'] = 'width:50px;'
+        self.fields['passage'].widget.attrs['style'] = 'width:50px;'
+
+    ### ADDITIONAL MATRIX FIELDS (unsaved)
+    number_of_items = forms.IntegerField(required=False)
+
+    ### ITEM FIELD HELPERS
+    action = forms.ChoiceField(choices=(
+        ('add_name', 'Add Names/IDs*'),
+        ('add_date', 'Add Setup Date*'),
+        ('add_notes', 'Add Notes/Notebook Information'),
+        ('add_device', 'Add Device/Organ Model Information*'),
+        ('add_settings', 'Add Settings'),
+        ('add_compounds', 'Add Compounds'),
+        ('add_cells', 'Add Cells'),
+        ('copy', 'Copy Contents'),
+        ('clear', 'Clear Contents')
+    ))
+
+    ### ADDING ITEM FIELDS
+    item_name = forms.CharField(required=False)
+
+    item_setup_date = forms.DateField(required=False)
+
+    item_scientist = forms.CharField(required=False)
+    item_notebook = forms.CharField(required=False)
+    item_notebook_page = forms.CharField(required=False)
+    item_notes = forms.CharField(required=False)
+
+    ### ADDING SETUP FIELDS
+    setup_device = forms.ModelChoiceField(queryset=Microdevice.objects.all().order_by('device_name'), required=False)
+    setup_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('model_name'), required=False)
+    setup_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.none(), required=False)
+    setup_variance_from_organ_model_protocol = forms.CharField(required=False)
+
+    ### ADDING SETUP CELLS
+    cell_sample = forms.IntegerField(required=False)
+    biosensor = forms.ModelChoiceField(
+        queryset=Biosensor.objects.all().prefetch_related('supplier'),
+        required=False,
+        # Default is naive
+        initial=2
+    )
+    density = forms.FloatField(required=False)
+
+    # TODO THIS IS TO BE HAMMERED OUT
+    density_unit = forms.ModelChoiceField(
+        queryset=PhysicalUnits.objects.filter(availability__contains='cell'),
+        required=False
+    )
+
+    passage = forms.CharField(required=False)
+
+    ### ?ADDING SETUP SETTINGS
+
+    ### ADDING COMPOUNDS
+    compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
+    # Notice the special exception for %
+    concentration_unit = forms.ModelChoiceField(
+        queryset=(PhysicalUnits.objects.filter(
+            unit_type__unit_type='Concentration'
+        ).order_by(
+            'base_unit',
+            'scale_factor'
+        ) | PhysicalUnits.objects.filter(unit='%')),
+        required=False, initial=4
+    )
+    concentration = forms.FloatField(required=False)
+
+    ### INCREMENTER
+    concentration_increment = forms.FloatField(required=False, initial=1)
+    concentration_increment_type = forms.ChoiceField(choices=(
+        ('/', 'Divide'),
+        ('*', 'Multiply'),
+        ('+', 'Add'),
+        ('-', 'Subtract')
+    ))
+    concentration_increment_direction = forms.ChoiceField(choices=(
+        ('lrd', 'Left to Right and Down'),
+        ('rlu', 'Right to Left and Up')
+    ))
+
+    # Text field (un-saved) for supplier
+    supplier_text = forms.CharField(required=False, initial='N/A')
+    # Text field (un-saved) for lot
+    lot_text = forms.CharField(required=False, initial='N/A')
+    # Receipt date
+    receipt_date = forms.DateField(required=False)
+
+    # Contains all item information
+    item_data = forms.CharField(required=False, initial='{}')
+    setup_data = forms.CharField(required=False, initial='{}')
+    setup_set_data = forms.CharField(required=False, initial='{}')
+
+    # Curious way to communicate models to be saved to save (no repeat queries)
+    items_to_consider = forms.BooleanField(required=False)
+    # item_to_setup_map = forms.BooleanField(required=False)
+    setups_to_consider = forms.BooleanField(required=False)
+    # suppliers_to_consider = forms.BooleanField(required=False)
+    # supplier_to_compound_instance = forms.BooleanField(required=False)
+    # compound_instances_to_consider = forms.BooleanField(required=False)
+    # compound_instance_to_assay_compound = forms.BooleanField(required=False)
+    compounds_to_consider = forms.BooleanField(required=False)
+    # compound_to_setup_map = forms.BooleanField(required=False)
+    cells_to_consider = forms.BooleanField(required=False)
+    # cell_to_setup_map = forms.BooleanField(required=False)
+    settings_to_consider = forms.BooleanField(required=False)
+    # setting_to_setup_map = forms.BooleanField(required=False)
+
+    def clean_item_data(self):
+        current_json = self.cleaned_data['item_data']
+        try:
+            json.loads(current_json)
+        except:
+            raise forms.ValidationError('Invalid data in item data.')
+        return current_json
+
+    def clean_setup_data(self):
+        current_json = self.cleaned_data['setup_data']
+        try:
+            json.loads(current_json)
+        except:
+            raise forms.ValidationError('Invalid data in setup data.')
+        return current_json
+
+    def clean_setup_set_data(self):
+        current_json = self.cleaned_data['setup_set_data']
+        try:
+            json.loads(current_json)
+        except:
+            raise forms.ValidationError('Invalid data in setup sets data.')
+        return current_json
+
+    def clean(self):
+        # clean the form data, before validation
+        data = super(AssayMatrixForm, self).clean()
+
+        # Study is excluded, so unique_together constraint is manual
+        if AssayMatrix.objects.filter(
+                name=data.get('name', ''),
+                study=self.instance.study
+        ).exists() and not self.instance.id:
+            raise forms.ValidationError({'name': ['A matrix with this name already exists in this study.']})
+
+        # Goofy, just trying to get things to work
+        try:
+            self.instance = super(forms.ModelForm, self).save(commit=False)
+        except:
+            pass
+
+        # PLEASE NOTE: IF THERE ARE COMPOUNDS, CELLS, SETTINGS TO BE SAVED, THEN THERE ARE NEW SETUPS
+        self.cleaned_data['items_to_consider'] = []
+        #self.cleaned_data['item_to_setup_map'] = {}
+        self.cleaned_data['setups_to_consider'] = {}
+        # self.cleaned_data['suppliers_to_consider'] = {}
+        # self.cleaned_data['supplier_to_compound_instance'] = {}
+        self.cleaned_data['compounds_to_consider'] = {}
+        #self.cleaned_data['assay_compound_to_setup_map'] = {}
+        # self.cleaned_data['compound_instances_to_consider'] = {}
+        # self.cleaned_data['compound_instance_to_assay_compound'] = {}
+        self.cleaned_data['cells_to_consider'] = {}
+        #self.cleaned_data['cell_to_setup_map'] = {}
+        self.cleaned_data['settings_to_consider'] = {}
+        #self.cleaned_data['setting_to_setup_map'] = {}
+
+        # COPY-PASTED: NEED TO CHANGE
+        current_data = self.cleaned_data
+
+        # Get all setup compounds
+        compounds = {
+            (
+                compound.compound_instance.id,
+                compound.concentration,
+                compound.concentration_unit.id,
+                compound.addition_time,
+                compound.duration
+            ): compound for compound in AssaySetupCompound.objects.all().prefetch_related(
+                'compound_instance__compound',
+                'concentration_unit'
+            )
+        }
+
+        setup_compound_id_to_index = {}
+
+        cells = {
+            (
+                cell.cell_sample.id,
+                cell.biosensor.id,
+                cell.density,
+                cell.density_unit.id,
+                cell.passage
+            ): cell for cell in AssaySetupCell.objects.all().prefetch_related(
+                'cell_sample',
+                'biosensor',
+                'density_unit'
+            )
+        }
+
+        setup_cell_id_to_index = {}
+
+        settings = {
+            (
+                setting.setting.name,
+                setting.unit.id,
+                # setting.addition_time,
+                # setting.duration
+            ): setting for setting in AssaySetupSetting.objects.all().prefetch_related(
+                'setting',
+                'unit'
+            )
+        }
+
+        setup_setting_id_to_index = {}
+
+        # Get all Compound Instances
+        compound_instances = {
+            (
+                instance.compound.id,
+                instance.supplier.id,
+                instance.lot,
+                instance.receipt_date
+            ): instance for instance in CompoundInstance.objects.all().prefetch_related(
+                'compound',
+                'supplier'
+            )
+        }
+
+        # Get all suppliers
+        suppliers = {
+            supplier.name: supplier for supplier in CompoundSupplier.objects.all()
+        }
+
+        # TODO PUT THIS IN FORM
+        setup_set_data = json.loads(current_data.get('setup_set_data', '{}'))
+
+        compound_data = setup_set_data.get('compounds', {})
+
+        for compound, index in compound_data.items():
+            compound = json.loads(compound)
+
+            compound_id = compound.get('compound_id', None)
+            supplier_text = compound.get('supplier_text', '').strip()
+            lot_text = compound.get('lot_text', '').strip()
+            receipt_date = compound.get('receipt_date', None)
+
+            concentration = compound.get('concentration', None)
+            concentration_unit_id = compound.get('concentration_unit_id', None)
+
+            addition_time = compound.get('addition_time', None)
+            duration = compound.get('duration', None)
+
+            if receipt_date:
+                try:
+                    receipt_date = datetime.datetime.strptime(receipt_date, '%Y-%m-%d').date()
+                # TODO This catch clause is evil
+                except:
+                    raise forms.ValidationError('Improperly set receipt date: {0}.'.format(receipt_date))
+            else:
+                receipt_date = None
+
+            if duration <= 0:
+                raise forms.ValidationError('Duration cannot be zero or negative.')
+
+            # Check if the supplier already exists
+            supplier = suppliers.get(supplier_text, '')
+            # Otherwise create the supplier
+            if not supplier:
+                supplier = CompoundSupplier(
+                    name=supplier_text,
+                    created_by=self.user,
+                    created_on=timezone.now(),
+                    modified_by=self.user,
+                    modified_on=timezone.now()
+                )
+                # Go ahead and save the supplier
+                try:
+                    supplier.full_clean()
+                    supplier.save()
+                except forms.ValidationError as e:
+                    raise forms.ValidationError('Invalid compound supplier given.')
+                suppliers.update({
+                    supplier_text: supplier
+                })
+
+            # Check if compound instance exists
+            compound_instance = compound_instances.get((compound_id, supplier.id, lot_text, receipt_date), '')
+
+            if not compound_instance:
+                compound_instance = CompoundInstance(
+                    compound_id=compound_id,
+                    supplier=supplier,
+                    lot=lot_text,
+                    receipt_date=receipt_date,
+                    created_by=self.user,
+                    created_on=timezone.now(),
+                    modified_by=self.user,
+                    modified_on=timezone.now()
+                )
+                # Go ahead and save the compound instance (tries will be considered straight submission)
+                try:
+                    compound_instance.full_clean()
+                    compound_instance.save()
+                except forms.ValidationError as e:
+                    # TODO
+                    raise forms.ValidationError(unicode(e))
+                compound_instances.update({
+                    (compound_id, supplier.id, lot_text, receipt_date): compound_instance
+                })
+
+            compound = AssaySetupCompound(
+                compound_instance=compound_instance,
+                concentration=concentration,
+                concentration_unit_id=concentration_unit_id,
+                addition_time=addition_time,
+                duration=duration
+            )
+
+            conflicting_compound = compounds.get(
+                (
+                    compound.compound_instance.id,
+                    compound.concentration,
+                    compound.concentration_unit.id,
+                    compound.addition_time,
+                    compound.duration
+                ), None
+            )
+            if not conflicting_compound:
+                try:
+                    compound.full_clean()
+                except forms.ValidationError as e:
+                    raise forms.ValidationError(unicode(e))
+            else:
+                compound = conflicting_compound
+                setup_compound_id_to_index.update({
+                    compound.id: index
+                })
+
+            compounds.update({
+                (
+                    compound.compound_instance.id,
+                    compound.concentration,
+                    compound.concentration_unit.id,
+                    compound.addition_time,
+                    compound.duration
+                ): compound
+            })
+
+            self.cleaned_data['compounds_to_consider'].update({
+                index: compound
+            })
+
+        cell_data = setup_set_data.get('cells', {})
+
+        for cell, index in cell_data.items():
+            cell = json.loads(cell)
+
+            # This is a little too verbose
+            cell_sample_id = int(cell.get('cell_sample_id', None))
+            biosensor_id = int(cell.get('biosensor_id', None))
+            density = float(cell.get('density', None))
+            density_unit_id = int(cell.get('density_unit_id', None))
+            passage = cell.get('passage', '')
+
+            cell = AssaySetupCell(
+                cell_sample_id=cell_sample_id,
+                biosensor_id=biosensor_id,
+                density=density,
+                density_unit_id=density_unit_id,
+                passage=passage
+            )
+
+            conflicting_cell= cells.get(
+                (
+                    cell_sample_id,
+                    biosensor_id,
+                    density,
+                    density_unit_id,
+                    passage
+                ), None
+            )
+
+            if not conflicting_cell:
+                try:
+                    cell.full_clean()
+                except forms.ValidationError as e:
+                    raise forms.ValidationError(unicode(e))
+            else:
+                cell = conflicting_cell
+                setup_cell_id_to_index.update({
+                    cell.id: index
+                })
+
+            cells.update({
+                (
+                    cell_sample_id,
+                    biosensor_id,
+                    density,
+                    density_unit_id,
+                    passage
+                ): cell
+            })
+
+            self.cleaned_data['cells_to_consider'].update({
+                index: cell
+            })
+
+        setting_data = setup_set_data.get('settings', {})
+
+        for setting, index in setting_data.items():
+            setting = json.loads(setting)
+
+            # This is a little too verbose
+            setting_id = setting.get('setting_id', None)
+            unit_id = setting.get('unit_id', None)
+            value = setting.get('value', None)
+            # addition_time
+            # duration
+
+            setting = AssaySetupSetting(
+                setting_id=setting_id,
+                unit_id=unit_id,
+                value=value
+            )
+
+            conflicting_setting = settings.get(
+                (
+                    setting_id,
+                    unit_id,
+                    value
+                ), None
+            )
+
+            if not conflicting_setting:
+                try:
+                    setting.full_clean()
+                except forms.ValidationError as e:
+                    raise forms.ValidationError(unicode(e))
+            else:
+                setting = conflicting_setting
+                setup_setting_id_to_index.update({
+                    setting.id: index
+                })
+
+            settings.update({
+                (
+                    setting_id,
+                    unit_id,
+                    value
+                ): setting
+            })
+
+            self.cleaned_data['settings_to_consider'].update({
+                index: setting
+            })
+
+        setups = {}
+
+        if self.instance.pk:
+            # Get existing matrix setups
+            # Be sure this applies only to the current matrix
+            setup_queryset = AssaySetup.objects.filter(
+                matrix_id=self.instance.id
+            ).prefetch_related(
+                'matrix',
+                'device',
+                'organ_model_protocol',
+                # 'compounds_set',
+                # 'cells_set',
+                # 'settings_set'
+            )
+
+            for setup in setup_queryset:
+                compound_set_ids = setup.compounds.values_list('id', flat=True)
+                compound_set_indexes = tuple(sorted((
+                    setup_compound_id_to_index.setdefault(
+                        compound_id, len(setup_compound_id_to_index)
+                    ) for compound_id in compound_set_ids
+                )))
+
+                cell_set_ids = setup.cells.values_list('id', flat=True)
+                cell_set_indexes = tuple(sorted((
+                    setup_cell_id_to_index.setdefault(
+                        cell_id, len(setup_cell_id_to_index)
+                    ) for cell_id in cell_set_ids
+                )))
+
+                setting_set_ids = setup.settings.values_list('id', flat=True)
+                setting_set_indexes = tuple(sorted((
+                    setup_setting_id_to_index.setdefault(
+                        setting_id, len(setup_setting_id_to_index)
+                    ) for setting_id in setting_set_ids
+                )))
+
+                setups.update({
+                    (
+                        # setup.matrix_id,
+                        setup.device_id,
+                        setup.organ_model_id,
+                        setup.organ_model_protocol_id,
+                        setup.variance_from_organ_model_protocol,
+                        compound_set_indexes,
+                        cell_set_indexes,
+                        setting_set_indexes
+                    ): setup
+                })
+
+        setup_id_to_index = {}
+        setup_indexes = {}
+
+        # TODO PUT THIS IN FORM
+        setup_data = json.loads(current_data.get('setup_data', '{}'))
+
+        for setup, index in setup_data.items():
+            setup = json.loads(setup)
+
+            try:
+                device_id = int(setup.get('device_id', None))
+            except TypeError:
+                raise forms.ValidationError('All ids must be entered as integers.')
+
+            try:
+                organ_model_id = int(setup.get('organ_model_id', None))
+            except:
+                organ_model_id = None
+
+            try:
+                organ_model_protocol_id = int(setup.get('organ_model_protocol_id', None))
+            except:
+                organ_model_protocol_id = None
+
+            variance_from_organ_model_protocol = setup.get('variance_from_organ_model_protocol', '')
+
+            compound_set = tuple(sorted(setup.get('compounds', [])))
+            cell_set = tuple(sorted(setup.get('cells', [])))
+            setting_set = tuple(sorted(setup.get('settings', [])))
+
+            # More than a little unusual, it is already a dict? I guess I might want to make sure things are in order
+            setup = {
+                'device_id': device_id,
+                'organ_model_id': organ_model_id,
+                'organ_model_protocol_id': organ_model_protocol_id,
+                'variance_from_organ_model_protocol': variance_from_organ_model_protocol,
+                'compounds': compound_set,
+                'cells': cell_set,
+                'setting': setting_set
+            }
+
+            conflicting_setup = setups.get(
+                (
+                    device_id,
+                    organ_model_id,
+                    organ_model_protocol_id,
+                    variance_from_organ_model_protocol,
+                    compound_set,
+                    cell_set,
+                    setting_set
+                ), None
+            )
+
+            if not conflicting_setup:
+                # Contrived due to special circumstances
+                # Adding the M2M here won't quite work because they likely won't exist!
+                try:
+                    AssaySetup(
+                        matrix=self.instance,
+                        device_id=device_id,
+                        organ_model_id=organ_model_id,
+                        organ_model_protocol_id=organ_model_protocol_id,
+                        variance_from_organ_model_protocol=variance_from_organ_model_protocol
+                    ).full_clean()
+                except forms.ValidationError as e:
+                    raise forms.ValidationError(unicode(e))
+            else:
+                setup = conflicting_setup
+                setup_id_to_index.update({
+                    setup.id: index
+                })
+
+            setups.update({
+                (
+                    device_id,
+                    organ_model_id,
+                    organ_model_protocol_id,
+                    variance_from_organ_model_protocol,
+                    compound_set,
+                    cell_set,
+                    setting_set
+                ): setup
+            })
+
+            # TODO NEED TO THINK ABOUT HOW TO REDIRECT UNSAVED DUPLICATES (may or may not occur, good to check)
+            setup_indexes.update({
+                index: setup
+            })
+
+        item_names = {
+            item.name: True for item in AssayMatrixItem.objects.filter(
+                study=self.instance.study
+            ).prefetch_related(
+                'study'
+            )
+        }
+
+        item_indexes = {}
+
+        item_data = json.loads(current_data.get('item_data', '{}'))
+
+        # TODO PREVENT ITEMS WITH DATA FROM BEING DELETED
+        for item in item_data.values():
+            ignore = True
+            for key, value in item.items():
+                if value and key not in ['column_index', 'row_index']:
+                    ignore = False
+                    break
+
+            if ignore:
+                continue
+
+            try:
+                current_row_index = item.get('row_index', None)
+                current_column_index = item.get('column_index', None)
+
+                if current_row_index is '':
+                    current_row_index = None
+
+                if current_column_index is '':
+                    current_column_index = None
+
+                item.update({
+                    'row_index': int(current_row_index),
+                    'column_index': int(current_column_index)
+                })
+            except TypeError:
+                raise forms.ValidationError('Row and column indexes must be numeric.')
+            except ValueError:
+                raise forms.ValidationError('Row and column indexes must be numeric.')
+
+            # TODO NEED TO CHANGE FAILURE TIME TO BE SPLIT INTO DAY HOUR MINUTE
+            try:
+                current_failure_time = item.get('failure_time', None)
+
+                if current_failure_time is '':
+                    current_failure_time = None
+
+                item.update({
+                    'failure_time': current_failure_time
+                })
+            except TypeError:
+                raise forms.ValidationError('Failure time must be numeric.')
+            except ValueError:
+                raise forms.ValidationError('Failure time must be numeric.')
+
+            try:
+                setup_date_as_date = datetime.datetime.strptime(item.get('setup_date', ''), '%Y-%m-%d').date()
+                item.update({
+                    'setup_date': setup_date_as_date
+                })
+            # TODO This catch clause is evil
+            except:
+                raise forms.ValidationError('Improperly set date: {0}.'.format(item.get('setup_date', '')))
+
+            # Check the indices
+            if item_indexes.get(
+                    (item.get('column_index'), item.get('row_index')), None
+            ):
+                raise forms.ValidationError('Duplicate row and column indexes are not allowed.')
+
+            item_indexes.update({
+                (item.get('column_index'), item.get('row_index')): True
+            })
+
+            # Don't bother with unmodified existing items
+            if item.get('id', None) and not item.get('modified', None):
+                continue
+
+            if item.get('name', '') in item_names and not item.get('id', ''):
+                raise forms.ValidationError(
+                    'The name: "{0}" is in use in this study. Make sure names are unique.'.format(
+                        item.get('name', '')
+                    )
+                )
+
+            setup_index = item.get('setup_index', None)
+
+            if setup_index not in setup_indexes:
+                raise forms.ValidationError('All chips/wells need a device.')
+
+            self.cleaned_data['setups_to_consider'].update({
+                setup_index: setup_indexes.get(setup_index)
+            })
+
+            current_id = item.get('id', None)
+
+            fields_dict = {
+                'study': self.instance.study,
+                'matrix': self.instance,
+                'name': item.get('name', ''),
+                'setup_date': item.get('setup_date', None),
+                # 'failure_time': item.get('failure_time', None),
+                'failure_reason_id': item.get('failure_reason_id', None),
+                'scientist': item.get('scientist', ''),
+                'notebook': item.get('notebook', ''),
+                'notebook_page': item.get('notebook_page', ''),
+                'notes': item.get('notes', ''),
+                'row_index': item.get('row_index', None),
+                'column_index': item.get('column_index', None)
+            }
+
+            if current_id and self.instance.id:
+                try:
+                    item = AssayMatrixItem(id=current_id, study_id=self.instance.study.id, matrix_id=self.instance.id)
+                    item.__dict__.update(fields_dict)
+
+                except:
+                    raise forms.ValidationError('A chip/well updated incorrectly.')
+            else:
+                item = AssayMatrixItem(**fields_dict)
+
+                try:
+                    item.full_clean()
+                except forms.ValidationError as e:
+                    raise forms.ValidationError(unicode(e))
+
+            item_names.update({
+                item.name: True
+            })
+
+            self.cleaned_data['items_to_consider'].append([item, setup_index])
+
+        print setups
+        print setup_indexes
+        print self.cleaned_data['setups_to_consider']
+
+        return self.cleaned_data
+
+    def save(self, commit=True):
+        this_matrix = self.instance
+
+        if this_matrix.pk is None:
+            # TODO TODO TODO Modify matrix if necessary
+            this_matrix.save()
+        else:
+            this_matrix = super(AssayMatrixForm, self).save()
+            this_matrix.save()
+
+        for index, compound in self.cleaned_data['compounds_to_consider'].items():
+            compound.save()
+
+        for index, cell in self.cleaned_data['cells_to_consider'].items():
+            cell.save()
+
+        for index, setting in self.cleaned_data['settings_to_consider'].items():
+            setting.save()
+
+        setup_index_to_saved_setup =  {}
+        for index, setup in self.cleaned_data['setups_to_consider'].items():
+            if type(setup) != dict:
+                setup_index_to_saved_setup.update({
+                    index: setup
+                })
+                continue
+
+            # Save setup here
+            new_setup = AssaySetup(
+                matrix=this_matrix,
+                device_id=setup.get('device_id'),
+                organ_model_id=setup.get('organ_model_id', None),
+                organ_model_protocol_id=setup.get('organ_model_protocol_id', None),
+                variance_from_organ_model_protocol=setup.get('variance_from_organ_model_protocol', None)
+            )
+
+            new_setup.save()
+
+            for cell_index in setup.get('cells', []):
+                new_setup.cells.add(self.cleaned_data['cells_to_consider'].get(cell_index))
+
+            for compound_index in setup.get('compounds', []):
+                new_setup.compounds.add(self.cleaned_data['compounds_to_consider'].get(compound_index))
+
+            for setting_index in setup.get('settings', []):
+                new_setup.settings.add(self.cleaned_data['settings_to_consider'].get(setting_index))
+
+            setup_index_to_saved_setup.update({
+                index: new_setup
+            })
+
+        for item_setup_index in self.cleaned_data['items_to_consider']:
+            item = item_setup_index[0]
+            setup = setup_index_to_saved_setup.get(item_setup_index[1])
+            # Unmodified items are currently double saved
+            item.setup = setup
+            item.matrix = this_matrix
+            item.save()
+            # If this item is being deleted (TODO)
+
+        return this_matrix
+
+
+# Should leverage forms rather than cleaning and saving manually
+# class AssaySetupCompoundForm(forms.ModelForm):
+#     def clean(self):
+#         pass
+#
+#     def save(self, commit=True):
+#         pass
+#
+#
+# class AssaySetupCellForm(forms.ModelForm):
+#     def clean(self):
+#         pass
+#
+#     def save(self, commit=True):
+#         pass
+#
+#
+# class AssaySetupSettingForm(forms.ModelForm):
+#     def clean(self):
+#         pass
+#
+#     def save(self, commit=True):
+#         pass
+#
+#
+# class AssaySetupForm(forms.ModelForm):
+#     def clean(self):
+#         pass
+#
+#     def save(self, commit=True):
+#         pass
+#
+#
+# class AssayMatrixItemForm(forms.ModelForm):
+#     def clean(self):
+#         pass
+#
+#     def save(self, commit=True):
+#         pass

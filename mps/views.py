@@ -1,7 +1,7 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
-from forms import SearchForm
+from .forms import SearchForm
 
 from haystack.query import SearchQuerySet
 from haystack.views import search_view_factory
@@ -94,6 +94,7 @@ def custom_search(request):
     # Filter on group: either get all with no group or those with a group the user has
     sqs = SearchQuerySet().exclude(group__in=Group.objects.all())
 
+    # TODO THIS NEEDS TO BE MODIFIED SUCH THAT ALL MODELS WITH VIEWERSHIP PRIVILEGES CAN BE ACCESSED
     if request.user.groups.all():
         sqs = sqs | SearchQuerySet().filter(group__in=request.user.groups.all())
 

@@ -6,12 +6,12 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li><a href="/cellsamples/cellsubtype/">Cell Subtypes</a></li>
+    <li><a href="/cellsamples/cellsubtype/">Cell Origins</a></li>
     <li class="active">
         {% if object %}
             Edit <em>{{ object }}</em>
         {% else %}
-            Add Cell Subtype
+            Add Cell Origin
         {% endif %}
     </li>
 {% endblock %}
@@ -26,7 +26,7 @@
     <form class="form-horizontal" method="post" >
 
     <h1>
-        Add Cell Subtype
+        Add Cell Origin
 {% endif %}
     <br>
     {% csrf_token %}
@@ -40,7 +40,7 @@
 
     {% include 'tracking.html' %}
 
-    <legend>Cell Subtype Details</legend>
+    <legend>Cell Origin Details</legend>
 
     {% if form.cell_subtype.errors %}
         {% for error in form.cell_subtype.errors %}
@@ -54,7 +54,7 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="cell_subtype" class="col-sm-2 control-label">Cell Subtype*</label>
+        <label for="cell_subtype" class="col-sm-2 control-label">Cell Origin*</label>
         <div class="col-sm-10">
           {{ form.cell_subtype }}
         </div>

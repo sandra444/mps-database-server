@@ -7,11 +7,11 @@ Note that the code for templates can be found here
 
 from django.contrib import admin
 from django import forms
-from assays.forms import (
-    StudyConfigurationForm,
-    AssayChipReadoutInlineFormset,
-    AssayPlateReadoutInlineFormset,
-)
+# from assays.forms import (
+#     StudyConfigurationForm,
+#     AssayChipReadoutInlineFormset,
+#     AssayPlateReadoutInlineFormset,
+# )
 from assays.utils import (
     save_assay_layout,
     modify_qc_status_chip,
@@ -391,154 +391,154 @@ class AssayQualityIndicatorAdmin(LockableAdmin):
 admin.site.register(AssayQualityIndicator, AssayQualityIndicatorAdmin)
 
 
-class AssayModelTypeAdmin(LockableAdmin):
-    """Admin for Assay Model Type ('Biochemical')"""
-    save_on_top = True
-    list_display = ('assay_type_name', 'assay_type_description', 'locked')
-    list_per_page = 300
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    'assay_type_name',
-                    'assay_type_description',
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on'),
-                    ('modified_by', 'modified_on'),
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        ),
-    )
-
-admin.site.register(AssayModelType, AssayModelTypeAdmin)
-
-
-class AssayModelAdmin(LockableAdmin):
-    """Admin for Assay Model ('ALT')"""
-    save_on_top = True
-    list_per_page = 300
-    list_display = (
-        'assay_name', 'assay_short_name', 'version_number', 'assay_type', 'assay_description',
-        'locked'
-    )
-
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    ('assay_name', 'assay_short_name',),
-                    ('assay_type', 'test_type',),
-                    ('version_number', 'assay_protocol_file',),
-                    ('assay_description',))
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on',),
-                    ('modified_by', 'modified_on',),
-                    ('signed_off_by', 'signed_off_date',),
-                )
-            }
-        ),
-    )
-
-    def save_model(self, request, obj, form, change):
-        template_change = False
-
-        # Check whether template needs to change
-        # Change if assay name has changed or it is new
-        if obj.pk is not None:
-            original = AssayModel.objects.get(pk=obj.pk)
-            if original.assay_name != obj.assay_name:
-                template_change = True
-        else:
-            template_change = True
-
-        if change:
-            obj.modified_by = request.user
-        else:
-            obj.modified_by = obj.created_by = request.user
-
-        obj.save()
-
-        if template_change:
-            modify_templates()
-
-
-admin.site.register(AssayModel, AssayModelAdmin)
-
-
-class AssayWellTypeAdmin(LockableAdmin):
-    """Admin for Well Types
-
-    Allows us to specify well type and color
-    """
-    save_on_top = True
-    list_per_page = 300
-    list_display = ('colored_display', 'well_description', 'locked')
-
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    'well_type',
-                    'well_description',
-                    'background_color',
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on'),
-                    ('modified_by', 'modified_on'),
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        ),
-    )
-
-
-admin.site.register(AssayWellType, AssayWellTypeAdmin)
-
-
-class AssayReaderAdmin(LockableAdmin):
-    """Admin for Assay Reader (the device the readout came from)"""
-    save_on_top = True
-    list_per_page = 300
-    list_display = ('reader_name', 'reader_type')
-
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    ('reader_name', 'reader_type'),
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on'),
-                    ('modified_by', 'modified_on'),
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        )
-    )
-
-admin.site.register(AssayReader, AssayReaderAdmin)
+# class AssayModelTypeAdmin(LockableAdmin):
+#     """Admin for Assay Model Type ('Biochemical')"""
+#     save_on_top = True
+#     list_display = ('assay_type_name', 'assay_type_description', 'locked')
+#     list_per_page = 300
+#     fieldsets = (
+#         (
+#             None, {
+#                 'fields': (
+#                     'assay_type_name',
+#                     'assay_type_description',
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     ('created_by', 'created_on'),
+#                     ('modified_by', 'modified_on'),
+#                     ('signed_off_by', 'signed_off_date'),
+#                 )
+#             }
+#         ),
+#     )
+#
+# admin.site.register(AssayModelType, AssayModelTypeAdmin)
+#
+#
+# class AssayModelAdmin(LockableAdmin):
+#     """Admin for Assay Model ('ALT')"""
+#     save_on_top = True
+#     list_per_page = 300
+#     list_display = (
+#         'assay_name', 'assay_short_name', 'version_number', 'assay_type', 'assay_description',
+#         'locked'
+#     )
+#
+#     fieldsets = (
+#         (
+#             None, {
+#                 'fields': (
+#                     ('assay_name', 'assay_short_name',),
+#                     ('assay_type', 'test_type',),
+#                     ('version_number', 'assay_protocol_file',),
+#                     ('assay_description',))
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     ('created_by', 'created_on',),
+#                     ('modified_by', 'modified_on',),
+#                     ('signed_off_by', 'signed_off_date',),
+#                 )
+#             }
+#         ),
+#     )
+#
+#     def save_model(self, request, obj, form, change):
+#         template_change = False
+#
+#         # Check whether template needs to change
+#         # Change if assay name has changed or it is new
+#         if obj.pk is not None:
+#             original = AssayModel.objects.get(pk=obj.pk)
+#             if original.assay_name != obj.assay_name:
+#                 template_change = True
+#         else:
+#             template_change = True
+#
+#         if change:
+#             obj.modified_by = request.user
+#         else:
+#             obj.modified_by = obj.created_by = request.user
+#
+#         obj.save()
+#
+#         if template_change:
+#             modify_templates()
+#
+#
+# admin.site.register(AssayModel, AssayModelAdmin)
+#
+#
+# class AssayWellTypeAdmin(LockableAdmin):
+#     """Admin for Well Types
+#
+#     Allows us to specify well type and color
+#     """
+#     save_on_top = True
+#     list_per_page = 300
+#     list_display = ('colored_display', 'well_description', 'locked')
+#
+#     fieldsets = (
+#         (
+#             None, {
+#                 'fields': (
+#                     'well_type',
+#                     'well_description',
+#                     'background_color',
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     ('created_by', 'created_on'),
+#                     ('modified_by', 'modified_on'),
+#                     ('signed_off_by', 'signed_off_date'),
+#                 )
+#             }
+#         ),
+#     )
+#
+#
+# admin.site.register(AssayWellType, AssayWellTypeAdmin)
+#
+#
+# class AssayReaderAdmin(LockableAdmin):
+#     """Admin for Assay Reader (the device the readout came from)"""
+#     save_on_top = True
+#     list_per_page = 300
+#     list_display = ('reader_name', 'reader_type')
+#
+#     fieldsets = (
+#         (
+#             None, {
+#                 'fields': (
+#                     ('reader_name', 'reader_type'),
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     ('created_by', 'created_on'),
+#                     ('modified_by', 'modified_on'),
+#                     ('signed_off_by', 'signed_off_date'),
+#                 )
+#             }
+#         )
+#     )
+#
+# admin.site.register(AssayReader, AssayReaderAdmin)
 
 
 class AssayCompoundInstanceAdmin(admin.ModelAdmin):
@@ -559,158 +559,144 @@ admin.site.register(AssayCompoundInstance, AssayCompoundInstanceAdmin)
 
 # TODO REVISE SAVING
 # TODO ADMIN IS NOT FUNCTIONAL AT THE MOMENT
-class AssayLayoutAdmin(LockableAdmin):
-    """Admin for Assay Layouts (not currently functional)"""
-
-    class Media(object):
-        js = ('assays/plate_display.js', 'assays/assaylayout_add.js',)
-        css = {'all': ('assays/customize_admin.css',)}
-
-    save_as = True
-    save_on_top = True
-    list_per_page = 300
-    fieldsets = (
-        (
-            'Layout Parameters', {
-                'fields': (
-                    (
-                        'layout_name',
-                        'device',
-                        'standard',
-                        'locked',
-                    )
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    (
-                        'created_by', 'created_on',
-                    ),
-                    (
-                        'modified_by', 'modified_on',
-                    ),
-                    (
-                        'signed_off_by', 'signed_off_date'
-                    ),
-                )
-            }
-        ),
-        (
-            'Flag for Review', {
-                'fields': (
-                    ('flagged', 'reason_for_flag',)
-                )
-            }
-        ),
-        (
-            'Group Access', {
-                'fields': (
-                    'group', 'restricted'
-                ),
-            }
-        ),
-    )
-
-    def save_model(self, request, obj, form, change):
-        save_assay_layout(request, obj, form, change)
-
-admin.site.register(AssayLayout, AssayLayoutAdmin)
-
-
-class AssayPlateCellsInline(admin.TabularInline):
-    """Admin for Cells used to construct a plate"""
-    model = AssayPlateCells
-    verbose_name = 'Plate Cells'
-    verbose_name_plural = 'Plate Cells'
-    raw_id_fields = ('cell_sample',)
-    fields = (
-        (
-            'cell_sample', 'cell_biosensor', 'cellsample_density',
-            'cellsample_density_unit', 'cell_passage',
-        ),
-    )
-    extra = 0
-
-    class Media(object):
-        css = {"all": ("css/hide_admin_original.css",)}
-
-
-class AssayPlateSetupAdmin(LockableAdmin):
-    """Admin for the setup of plates"""
-
-    class Media(object):
-        js = ('js/inline_fix.js', 'assays/plate_display.js', 'assays/assayplatesetup_add.js')
-        css = {'all': ('assays/customize_admin.css',)}
-
-    save_on_top = True
-    list_per_page = 300
-    list_display = ('assay_plate_id',
-                    'assay_run_id',
-                    'setup_date')
-
-    inlines = [AssayPlateCellsInline]
-
-    fieldsets = (
-        (
-            'Device Parameters', {
-                'fields': (
-                    (
-                        'assay_run_id',
-                    ),
-                    (
-                        'assay_plate_id', 'setup_date',
-                    ),
-                    (
-                        'assay_layout',
-                    ),
-                )
-            }
-        ),
-        (
-            'Reference Parameters', {
-                'fields': (
-                    (
-                        'scientist', 'notebook', 'notebook_page', 'notes',
-                    ),
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    (
-                        'created_by', 'created_on',
-                    ),
-                    (
-                        'modified_by', 'modified_on',
-                    ),
-                    (
-                        'signed_off_by', 'signed_off_date'
-                    ),
-                )
-            }
-        ),
-        (
-            'Flag for Review', {
-                'fields': (
-                    ('flagged', 'reason_for_flag',)
-                )
-            }
-        ),
-        (
-            'Group Access', {
-                'fields': (
-                    'group', 'restricted'
-                ),
-            }
-        ),
-    )
-
-admin.site.register(AssayPlateSetup, AssayPlateSetupAdmin)
+# class AssayLayoutAdmin(LockableAdmin):
+#     """Admin for Assay Layouts (not currently functional)"""
+#
+#     class Media(object):
+#         js = ('assays/plate_display.js', 'assays/assaylayout_add.js',)
+#         css = {'all': ('assays/customize_admin.css',)}
+#
+#     save_as = True
+#     save_on_top = True
+#     list_per_page = 300
+#     fieldsets = (
+#         (
+#             'Layout Parameters', {
+#                 'fields': (
+#                     (
+#                         'layout_name',
+#                         'device',
+#                         'standard',
+#                         'locked',
+#                     )
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     (
+#                         'created_by', 'created_on',
+#                     ),
+#                     (
+#                         'modified_by', 'modified_on',
+#                     ),
+#                     (
+#                         'signed_off_by', 'signed_off_date'
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Flag for Review', {
+#                 'fields': (
+#                     ('flagged', 'reason_for_flag',)
+#                 )
+#             }
+#         ),
+#     )
+#
+#     def save_model(self, request, obj, form, change):
+#         save_assay_layout(request, obj, form, change)
+#
+# admin.site.register(AssayLayout, AssayLayoutAdmin)
+#
+#
+# class AssayPlateCellsInline(admin.TabularInline):
+#     """Admin for Cells used to construct a plate"""
+#     model = AssayPlateCells
+#     verbose_name = 'Plate Cells'
+#     verbose_name_plural = 'Plate Cells'
+#     raw_id_fields = ('cell_sample',)
+#     fields = (
+#         (
+#             'cell_sample', 'cell_biosensor', 'cellsample_density',
+#             'cellsample_density_unit', 'cell_passage',
+#         ),
+#     )
+#     extra = 0
+#
+#     class Media(object):
+#         css = {"all": ("css/hide_admin_original.css",)}
+#
+#
+# class AssayPlateSetupAdmin(LockableAdmin):
+#     """Admin for the setup of plates"""
+#
+#     class Media(object):
+#         js = ('js/inline_fix.js', 'assays/plate_display.js', 'assays/assayplatesetup_add.js')
+#         css = {'all': ('assays/customize_admin.css',)}
+#
+#     save_on_top = True
+#     list_per_page = 300
+#     list_display = ('assay_plate_id',
+#                     'assay_run_id',
+#                     'setup_date')
+#
+#     inlines = [AssayPlateCellsInline]
+#
+#     fieldsets = (
+#         (
+#             'Device Parameters', {
+#                 'fields': (
+#                     (
+#                         'assay_run_id',
+#                     ),
+#                     (
+#                         'assay_plate_id', 'setup_date',
+#                     ),
+#                     (
+#                         'assay_layout',
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Reference Parameters', {
+#                 'fields': (
+#                     (
+#                         'scientist', 'notebook', 'notebook_page', 'notes',
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     (
+#                         'created_by', 'created_on',
+#                     ),
+#                     (
+#                         'modified_by', 'modified_on',
+#                     ),
+#                     (
+#                         'signed_off_by', 'signed_off_date'
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Flag for Review', {
+#                 'fields': (
+#                     ('flagged', 'reason_for_flag',)
+#                 )
+#             }
+#         ),
+#     )
+#
+# admin.site.register(AssayPlateSetup, AssayPlateSetupAdmin)
 
 
 # As much as I like being certain, this code is somewhat baffling
@@ -726,22 +712,22 @@ admin.site.register(AssayPlateSetup, AssayPlateSetupAdmin)
 #     return
 
 
-class AssayPlateReadoutInline(admin.TabularInline):
-    """Inline for the Assays of a Plate Readout"""
-    formset = AssayPlateReadoutInlineFormset
-    model = AssayPlateReadoutAssay
-    verbose_name = 'Assay Plate Readout Assay'
-    verbose_plural_name = 'Assay Plate Readout Assays'
-
-    fields = (
-        (
-            ('assay_id', 'reader_id', 'readout_unit', 'feature')
-        ),
-    )
-    extra = 0
-
-    class Media(object):
-        css = {"all": ("css/hide_admin_original.css",)}
+# class AssayPlateReadoutInline(admin.TabularInline):
+#     """Inline for the Assays of a Plate Readout"""
+#     formset = AssayPlateReadoutInlineFormset
+#     model = AssayPlateReadoutAssay
+#     verbose_name = 'Assay Plate Readout Assay'
+#     verbose_plural_name = 'Assay Plate Readout Assays'
+#
+#     fields = (
+#         (
+#             ('assay_id', 'reader_id', 'readout_unit', 'feature')
+#         ),
+#     )
+#     extra = 0
+#
+#     class Media(object):
+#         css = {"all": ("css/hide_admin_original.css",)}
 
 
 # Plate Readout validation occurs in the inline formset
@@ -756,134 +742,127 @@ class AssayPlateReadoutInline(admin.TabularInline):
 #         exclude = ('',)
 
 
-class AssayPlateReadoutAdmin(LockableAdmin):
-    """Admin for Assay Plate Readouts"""
-    resource_class = AssayPlateReadoutResource
-    # form = AssayPlateReadoutForm
-
-    class Media(object):
-        js = ('js/inline_fix.js', 'js/csv_functions.js', 'assays/plate_display.js', 'assays/assayplatereadout_add.js',)
-        css = {'all': ('assays/customize_admin.css',)}
-
-    inlines = [AssayPlateReadoutInline]
-
-    date_hierarchy = 'readout_start_time'
-    # raw_id_fields = ("cell_sample",)
-    save_on_top = True
-    list_per_page = 300
-    list_display = ('id',
-                    # 'assay_device_id',
-                    # 'cell_sample',
-                    'readout_start_time',)
-    fieldsets = (
-        (
-            'Device Parameters', {
-                'fields': (
-                    # (
-                    #     'assay_device_id',
-                    # ),
-                    (
-                        'setup',
-                    ),
-                )
-            }
-        ),
-        (
-            'Assay Parameters', {
-                'fields': (
-                    (
-                        'timeunit', 'treatment_time_length', 'readout_start_time',
-                    ),
-                    (
-                        'file'
-                    ),
-                )
-            }
-        ),
-        (
-            'Reference Parameters', {
-                'fields': (
-                    (
-                        'scientist', 'notebook', 'notebook_page', 'notes',
-                    ),
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    (
-                        'created_by', 'created_on',
-                    ),
-                    (
-                        'modified_by', 'modified_on',
-                    ),
-                    (
-                        'signed_off_by', 'signed_off_date'
-                    ),
-                )
-            }
-        ),
-        (
-            'Flag for Review', {
-                'fields': (
-                    ('flagged', 'reason_for_flag',)
-                )
-            }
-        ),
-        (
-            'Group Access', {
-                'fields': (
-                    'group', 'restricted'
-                ),
-            }
-        ),
-    )
-
-    # save_related takes the place of save_model so that the inline can be saved first
-    # this is similar to chip readouts so that we can validate the listed assays THEN the file
-    def save_related(self, request, form, formsets, change):
-        # Prevent saving in Admin for now
-        pass
-        # obj = form.instance
-        #
-        # # Need to get the upload type
-        # # upload_type = form.data.get('upload_type')
-        # overwrite_option = form.data.get('overwrite_option')
-        #
-        # if change:
-        #     obj.modified_by = request.user
-        #
-        # else:
-        #     obj.modified_by = obj.created_by = request.user
-        #
-        # # Save Plate Readout
-        # obj.save()
-        # # Save inline
-        # super(LockableAdmin, self).save_related(request, form, formsets, change)
-        #
-        # if request.FILES:
-        #     # pass the upload file name to the CSV reader if a file exists
-        #     # parse_readout_csv(obj, request.FILES['file'], upload_type, overwrite_option, form)
-        #     pass
-        #     # parse_file_and_save(
-        #     #     request.FILES['file'], obj.study.assay_run_id, overwrite_option, 'Plate', readout=self.object
-        #     # )
-        #
-        # # Need to delete entries when a file is cleared
-        # if request.POST.get('file-clear', '') == 'on':
-        #     # remove_existing_readout(obj)
-        #     AssayReadout.objects.filter(assay_device_readout=obj).delete()
-        #
-        # else:
-        #     modify_qc_status_plate(obj, form)
-
-    # save_model not used; would save twice otherwise
-    def save_model(self, request, obj, form, change):
-        pass
-
-admin.site.register(AssayPlateReadout, AssayPlateReadoutAdmin)
+# class AssayPlateReadoutAdmin(LockableAdmin):
+#     """Admin for Assay Plate Readouts"""
+#     resource_class = AssayPlateReadoutResource
+#     # form = AssayPlateReadoutForm
+#
+#     class Media(object):
+#         js = ('js/inline_fix.js', 'js/csv_functions.js', 'assays/plate_display.js', 'assays/assayplatereadout_add.js',)
+#         css = {'all': ('assays/customize_admin.css',)}
+#
+#     inlines = [AssayPlateReadoutInline]
+#
+#     date_hierarchy = 'readout_start_time'
+#     # raw_id_fields = ("cell_sample",)
+#     save_on_top = True
+#     list_per_page = 300
+#     list_display = ('id',
+#                     # 'assay_device_id',
+#                     # 'cell_sample',
+#                     'readout_start_time',)
+#     fieldsets = (
+#         (
+#             'Device Parameters', {
+#                 'fields': (
+#                     # (
+#                     #     'assay_device_id',
+#                     # ),
+#                     (
+#                         'setup',
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Assay Parameters', {
+#                 'fields': (
+#                     (
+#                         'timeunit', 'treatment_time_length', 'readout_start_time',
+#                     ),
+#                     (
+#                         'file'
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Reference Parameters', {
+#                 'fields': (
+#                     (
+#                         'scientist', 'notebook', 'notebook_page', 'notes',
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     (
+#                         'created_by', 'created_on',
+#                     ),
+#                     (
+#                         'modified_by', 'modified_on',
+#                     ),
+#                     (
+#                         'signed_off_by', 'signed_off_date'
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Flag for Review', {
+#                 'fields': (
+#                     ('flagged', 'reason_for_flag',)
+#                 )
+#             }
+#         ),
+#     )
+#
+#     # save_related takes the place of save_model so that the inline can be saved first
+#     # this is similar to chip readouts so that we can validate the listed assays THEN the file
+#     def save_related(self, request, form, formsets, change):
+#         # Prevent saving in Admin for now
+#         pass
+#         # obj = form.instance
+#         #
+#         # # Need to get the upload type
+#         # # upload_type = form.data.get('upload_type')
+#         # overwrite_option = form.data.get('overwrite_option')
+#         #
+#         # if change:
+#         #     obj.modified_by = request.user
+#         #
+#         # else:
+#         #     obj.modified_by = obj.created_by = request.user
+#         #
+#         # # Save Plate Readout
+#         # obj.save()
+#         # # Save inline
+#         # super(LockableAdmin, self).save_related(request, form, formsets, change)
+#         #
+#         # if request.FILES:
+#         #     # pass the upload file name to the CSV reader if a file exists
+#         #     # parse_readout_csv(obj, request.FILES['file'], upload_type, overwrite_option, form)
+#         #     pass
+#         #     # parse_file_and_save(
+#         #     #     request.FILES['file'], obj.study.assay_run_id, overwrite_option, 'Plate', readout=self.object
+#         #     # )
+#         #
+#         # # Need to delete entries when a file is cleared
+#         # if request.POST.get('file-clear', '') == 'on':
+#         #     # remove_existing_readout(obj)
+#         #     AssayReadout.objects.filter(assay_device_readout=obj).delete()
+#         #
+#         # else:
+#         #     modify_qc_status_plate(obj, form)
+#
+#     # save_model not used; would save twice otherwise
+#     def save_model(self, request, obj, form, change):
+#         pass
+#
+# admin.site.register(AssayPlateReadout, AssayPlateReadoutAdmin)
 
 
 # Case and point for why you should not just copy code without carefully reading it
@@ -899,335 +878,321 @@ admin.site.register(AssayPlateReadout, AssayPlateReadoutAdmin)
 #     return
 
 
-class AssayChipCellsInline(admin.TabularInline):
-    """Inline for Chip Cells (for Chip Setup)"""
-    # Cells used to construct the model
-    model = AssayChipCells
-    verbose_name = 'Model Cells'
-    verbose_name_plural = 'Model Cells'
-    raw_id_fields = ('cell_sample',)
-    fields = (
-        (
-            'cell_sample', 'cell_biosensor', 'cellsample_density',
-            'cellsample_density_unit', 'cell_passage',
-        ),
-    )
-    extra = 0
-
-    class Media(object):
-        css = {"all": ("css/hide_admin_original.css",)}
-
-
-class AssayCompoundInstanceInline(admin.TabularInline):
-    model = AssayCompoundInstance
-    exclude = []
-    extra = 0
+# class AssayChipCellsInline(admin.TabularInline):
+#     """Inline for Chip Cells (for Chip Setup)"""
+#     # Cells used to construct the model
+#     model = AssayChipCells
+#     verbose_name = 'Model Cells'
+#     verbose_name_plural = 'Model Cells'
+#     raw_id_fields = ('cell_sample',)
+#     fields = (
+#         (
+#             'cell_sample', 'cell_biosensor', 'cellsample_density',
+#             'cellsample_density_unit', 'cell_passage',
+#         ),
+#     )
+#     extra = 0
+#
+#     class Media(object):
+#         css = {"all": ("css/hide_admin_original.css",)}
 
 
-class AssayChipSetupAdmin(LockableAdmin):
-    """Admin for Chip Setup"""
-    # TIMEPOINT readouts from ORGAN CHIPS
-    class Media(object):
-        js = ('js/inline_fix.js',)
-        css = {'all': ('assays/customize_admin.css',)}
-
-    save_on_top = True
-    save_as = True
-
-    raw_id_fields = ("compound",)
-    date_hierarchy = 'setup_date'
-
-    list_per_page = 100
-    list_display = ('assay_chip_id', 'assay_run_id', 'setup_date',
-                    'device', 'chip_test_type',
-                    'compound', 'scientist')
-
-    search_fields = ['assay_chip_id']
-    fieldsets = (
-        (
-            'Study', {
-                'fields': (
-                    (
-                        'assay_run_id', 'setup_date',
-                    ),
-                )
-            }
-        ),
-        (
-            'Model Parameters', {
-                'fields': (
-                    (
-                        'assay_chip_id',
-                    ),
-                    (
-                        'device', 'organ_model', 'organ_model_protocol'
-                    ),
-                    (
-                        'variance',
-                    ),
-                )
-            }
-        ),
-        (
-            'Assay Parameters', {
-                'fields': (
-                    (
-                        'chip_test_type', 'compound', 'concentration',
-                        'unit',
-                    ),
-                )
-            }
-        ),
-        (
-            'Reference Parameters', {
-                'fields': (
-                    (
-                        'scientist', 'notebook', 'notebook_page', 'notes',
-                    ),
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    (
-                        'created_by', 'created_on',
-                    ),
-                    (
-                        'modified_by', 'modified_on',
-                    ),
-                    (
-                        'signed_off_by', 'signed_off_date'
-                    ),
-                )
-            }
-        ),
-        (
-            'Flag for Review', {
-                'fields': (
-                    ('flagged', 'reason_for_flag',)
-                )
-            }
-        ),
-        (
-            'Group Access', {
-                'fields': (
-                    'group', 'restricted'
-                ),
-            }
-        ),
-    )
-
-    actions = ['update_fields']
-    inlines = [AssayChipCellsInline, AssayCompoundInstanceInline]
-
-    def response_add(self, request, obj):
-        """If save and add another, have same response as save and continue"""
-        if '_saveasnew' in request.POST or '_addanother' in request.POST:
-            return HttpResponseRedirect("../%s" % obj.id)
-        else:
-            return super(AssayChipSetupAdmin, self).response_add(request, obj)
-
-    def response_change(self, request, obj):
-        """If save as new, redirect to new change model; else go to list"""
-        if '_saveasnew' in request.POST:
-            return HttpResponseRedirect("../%s" % obj.id)
-        else:
-            return super(LockableAdmin, self).response_change(request, obj)
-
-    def save_model(self, request, obj, form, change):
-
-        if change:
-            obj.modified_by = request.user
-
-        else:
-            obj.modified_by = obj.created_by = request.user
-
-        obj.save()
-
-admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
-
-
-class AssayChipReadoutInline(admin.TabularInline):
-    """Assays for ChipReadout"""
-    formset = AssayChipReadoutInlineFormset
-    model = AssayChipReadoutAssay
-    verbose_name = 'Assay Readout Assay'
-    verbose_plural_name = 'Assay Readout Assays'
-
-    fields = (
-        (
-            ('assay_id', 'object_type', 'reader_id', 'readout_unit',)
-        ),
-    )
-    extra = 0
-
-    class Media(object):
-        css = {"all": ("css/hide_admin_original.css",)}
-
-
-# ChipReadout validation occurs in the inline formset
-class AssayChipReadoutForm(forms.ModelForm):
-    """Form for Chip Readouts"""
-    headers = forms.CharField(required=False)
-
-    class Meta(object):
-        model = AssayChipReadout
-        exclude = ('',)
-
-
-class AssayChipReadoutAdmin(LockableAdmin):
-    """Admin for Assay Chip Readout"""
-    class Media(object):
-        # Removed chip readout display, no need to maintain such scripts
-        js = ('js/inline_fix.js', 'js/csv_functions.js', 'js/d3.min.js', 'js/c3.min.js',)
-        css = {'all': ('assays/customize_admin.css', 'css/c3.min.css',)}
-
-    form = AssayChipReadoutForm
-    date_hierarchy = 'readout_start_time'
-
-    raw_id_fields = ("chip_setup",)
-
-    save_on_top = True
-    save_as = True
-
-    list_per_page = 100
-    list_display = (
-        'id',
-        'chip_setup',
-        'assays',
-        'readout_start_time',
-        'scientist'
-    )
-
-    list_display_links = ('id', 'chip_setup',
-                          'readout_start_time',)
-    search_fields = ['assay_chip_id']
-    fieldsets = (
-        (
-            'Setup Parameters', {
-                'fields': (
-                    (
-                        'chip_setup'
-                    ),
-                )
-            }
-        ),
-        (
-            'Assay Parameters', {
-                'fields': (
-                    (
-                        'timeunit', 'treatment_time_length', 'readout_start_time',
-                    ),
-                    (
-                        'file',
-                    ),
-                    (
-                        'headers',
-                    ),
-                )
-            }
-        ),
-        (
-            'Reference Parameters', {
-                'fields': (
-                    (
-                        'scientist', 'notebook', 'notebook_page', 'notes',
-                    ),
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    (
-                        'created_by', 'created_on',
-                    ),
-                    (
-                        'modified_by', 'modified_on',
-                    ),
-                    (
-                        'signed_off_by', 'signed_off_date'
-                    ),
-                )
-            }
-        ),
-        (
-            'Flag for Review', {
-                'fields': (
-                    ('flagged', 'reason_for_flag',)
-                )
-            }
-        ),
-        (
-            'Group Access', {
-                'fields': (
-                    'group', 'restricted'
-                ),
-            }
-        ),
-    )
-
-    # inlines = [AssayChipReadoutInline]
-
-    def response_add(self, request, obj):
-        """If save and add another, have same response as save and continue"""
-        if '_saveasnew' in request.POST or '_addanother' in request.POST:
-            return HttpResponseRedirect("../%s" % obj.id)
-        else:
-            return super(AssayChipReadoutAdmin, self).response_add(request, obj)
-
-    def response_change(self, request, obj):
-        """If save as new, redirect to new change model; else go to list"""
-        if '_saveasnew' in request.POST:
-            return HttpResponseRedirect("../%s" % obj.id)
-        else:
-            return super(LockableAdmin, self).response_change(request, obj)
-
-    # save_related takes the place of save_model so that the inline can be saved first
-    def save_related(self, request, form, formsets, change):
-        # Prevent saving in Admin for now
-        pass
-        # obj = form.instance
-        #
-        # headers = int(form.data.get('headers')) if form.data.get('headers') else 0
-        # overwrite_option = form.data.get('overwrite_option')
-        #
-        # if change:
-        #     obj.modified_by = request.user
-        #
-        # else:
-        #     obj.modified_by = obj.created_by = request.user
-        #
-        # # Save Chip Readout
-        # obj.save()
-        # # Save inline
-        # super(LockableAdmin, self).save_related(request, form, formsets, change)
-        #
-        # if request.FILES:
-        #     # pass the upload file name to the CSV reader if a file exists
-        #     # parse_chip_csv(obj, request.FILES['file'], headers, form)
-        #     pass
-        #     # parse_file_and_save(
-        #     #     request.FILES['file'], obj.chip_setup.assay_run_id, overwrite_option, 'Chip', form=form, readout=self.object
-        #     # )
-        #
-        # # Try to update QC status if no file
-        # else:
-        #     modify_qc_status_chip(obj, form)
-        #
-        # # Need to delete entries when a file is cleared
-        # if request.POST.get('file-clear', '') == 'on':
-        #     # remove_existing_chip(obj)
-        #     AssayChipRawData.objects.filter(assay_chip_id=obj).delete()
-
-    # save_model not used; would save twice otherwise
-    def save_model(self, request, obj, form, change):
-        pass
-
-admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
+# class AssayCompoundInstanceInline(admin.TabularInline):
+#     model = AssayCompoundInstance
+#     exclude = []
+#     extra = 0
+#
+#
+# class AssayChipSetupAdmin(LockableAdmin):
+#     """Admin for Chip Setup"""
+#     # TIMEPOINT readouts from ORGAN CHIPS
+#     class Media(object):
+#         js = ('js/inline_fix.js',)
+#         css = {'all': ('assays/customize_admin.css',)}
+#
+#     save_on_top = True
+#     save_as = True
+#
+#     raw_id_fields = ("compound",)
+#     date_hierarchy = 'setup_date'
+#
+#     list_per_page = 100
+#     list_display = ('assay_chip_id', 'assay_run_id', 'setup_date',
+#                     'device', 'chip_test_type',
+#                     'compound', 'scientist')
+#
+#     search_fields = ['assay_chip_id']
+#     fieldsets = (
+#         (
+#             'Study', {
+#                 'fields': (
+#                     (
+#                         'assay_run_id', 'setup_date',
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Model Parameters', {
+#                 'fields': (
+#                     (
+#                         'assay_chip_id',
+#                     ),
+#                     (
+#                         'device', 'organ_model', 'organ_model_protocol'
+#                     ),
+#                     (
+#                         'variance',
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Assay Parameters', {
+#                 'fields': (
+#                     (
+#                         'chip_test_type', 'compound', 'concentration',
+#                         'unit',
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Reference Parameters', {
+#                 'fields': (
+#                     (
+#                         'scientist', 'notebook', 'notebook_page', 'notes',
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     (
+#                         'created_by', 'created_on',
+#                     ),
+#                     (
+#                         'modified_by', 'modified_on',
+#                     ),
+#                     (
+#                         'signed_off_by', 'signed_off_date'
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Flag for Review', {
+#                 'fields': (
+#                     ('flagged', 'reason_for_flag',)
+#                 )
+#             }
+#         ),
+#     )
+#
+#     actions = ['update_fields']
+#     inlines = [AssayChipCellsInline, AssayCompoundInstanceInline]
+#
+#     def response_add(self, request, obj):
+#         """If save and add another, have same response as save and continue"""
+#         if '_saveasnew' in request.POST or '_addanother' in request.POST:
+#             return HttpResponseRedirect("../%s" % obj.id)
+#         else:
+#             return super(AssayChipSetupAdmin, self).response_add(request, obj)
+#
+#     def response_change(self, request, obj):
+#         """If save as new, redirect to new change model; else go to list"""
+#         if '_saveasnew' in request.POST:
+#             return HttpResponseRedirect("../%s" % obj.id)
+#         else:
+#             return super(LockableAdmin, self).response_change(request, obj)
+#
+#     def save_model(self, request, obj, form, change):
+#
+#         if change:
+#             obj.modified_by = request.user
+#
+#         else:
+#             obj.modified_by = obj.created_by = request.user
+#
+#         obj.save()
+#
+# admin.site.register(AssayChipSetup, AssayChipSetupAdmin)
+#
+#
+# class AssayChipReadoutInline(admin.TabularInline):
+#     """Assays for ChipReadout"""
+#     formset = AssayChipReadoutInlineFormset
+#     model = AssayChipReadoutAssay
+#     verbose_name = 'Assay Readout Assay'
+#     verbose_plural_name = 'Assay Readout Assays'
+#
+#     fields = (
+#         (
+#             ('assay_id', 'object_type', 'reader_id', 'readout_unit',)
+#         ),
+#     )
+#     extra = 0
+#
+#     class Media(object):
+#         css = {"all": ("css/hide_admin_original.css",)}
+#
+#
+# # ChipReadout validation occurs in the inline formset
+# class AssayChipReadoutForm(forms.ModelForm):
+#     """Form for Chip Readouts"""
+#     headers = forms.CharField(required=False)
+#
+#     class Meta(object):
+#         model = AssayChipReadout
+#         exclude = ('',)
+#
+#
+# class AssayChipReadoutAdmin(LockableAdmin):
+#     """Admin for Assay Chip Readout"""
+#     class Media(object):
+#         # Removed chip readout display, no need to maintain such scripts
+#         js = ('js/inline_fix.js', 'js/csv_functions.js', 'js/d3.min.js', 'js/c3.min.js',)
+#         css = {'all': ('assays/customize_admin.css', 'css/c3.min.css',)}
+#
+#     form = AssayChipReadoutForm
+#     date_hierarchy = 'readout_start_time'
+#
+#     raw_id_fields = ("chip_setup",)
+#
+#     save_on_top = True
+#     save_as = True
+#
+#     list_per_page = 100
+#     list_display = (
+#         'id',
+#         'chip_setup',
+#         'assays',
+#         'readout_start_time',
+#         'scientist'
+#     )
+#
+#     list_display_links = ('id', 'chip_setup',
+#                           'readout_start_time',)
+#     search_fields = ['assay_chip_id']
+#     fieldsets = (
+#         (
+#             'Setup Parameters', {
+#                 'fields': (
+#                     (
+#                         'chip_setup'
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Assay Parameters', {
+#                 'fields': (
+#                     (
+#                         'timeunit', 'treatment_time_length', 'readout_start_time',
+#                     ),
+#                     (
+#                         'file',
+#                     ),
+#                     (
+#                         'headers',
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Reference Parameters', {
+#                 'fields': (
+#                     (
+#                         'scientist', 'notebook', 'notebook_page', 'notes',
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     (
+#                         'created_by', 'created_on',
+#                     ),
+#                     (
+#                         'modified_by', 'modified_on',
+#                     ),
+#                     (
+#                         'signed_off_by', 'signed_off_date'
+#                     ),
+#                 )
+#             }
+#         ),
+#         (
+#             'Flag for Review', {
+#                 'fields': (
+#                     ('flagged', 'reason_for_flag',)
+#                 )
+#             }
+#         ),
+#     )
+#
+#     # inlines = [AssayChipReadoutInline]
+#
+#     def response_add(self, request, obj):
+#         """If save and add another, have same response as save and continue"""
+#         if '_saveasnew' in request.POST or '_addanother' in request.POST:
+#             return HttpResponseRedirect("../%s" % obj.id)
+#         else:
+#             return super(AssayChipReadoutAdmin, self).response_add(request, obj)
+#
+#     def response_change(self, request, obj):
+#         """If save as new, redirect to new change model; else go to list"""
+#         if '_saveasnew' in request.POST:
+#             return HttpResponseRedirect("../%s" % obj.id)
+#         else:
+#             return super(LockableAdmin, self).response_change(request, obj)
+#
+#     # save_related takes the place of save_model so that the inline can be saved first
+#     def save_related(self, request, form, formsets, change):
+#         # Prevent saving in Admin for now
+#         pass
+#         # obj = form.instance
+#         #
+#         # headers = int(form.data.get('headers')) if form.data.get('headers') else 0
+#         # overwrite_option = form.data.get('overwrite_option')
+#         #
+#         # if change:
+#         #     obj.modified_by = request.user
+#         #
+#         # else:
+#         #     obj.modified_by = obj.created_by = request.user
+#         #
+#         # # Save Chip Readout
+#         # obj.save()
+#         # # Save inline
+#         # super(LockableAdmin, self).save_related(request, form, formsets, change)
+#         #
+#         # if request.FILES:
+#         #     # pass the upload file name to the CSV reader if a file exists
+#         #     # parse_chip_csv(obj, request.FILES['file'], headers, form)
+#         #     pass
+#         #     # parse_file_and_save(
+#         #     #     request.FILES['file'], obj.chip_setup.assay_run_id, overwrite_option, 'Chip', form=form, readout=self.object
+#         #     # )
+#         #
+#         # # Try to update QC status if no file
+#         # else:
+#         #     modify_qc_status_chip(obj, form)
+#         #
+#         # # Need to delete entries when a file is cleared
+#         # if request.POST.get('file-clear', '') == 'on':
+#         #     # remove_existing_chip(obj)
+#         #     AssayChipRawData.objects.filter(assay_chip_id=obj).delete()
+#
+#     # save_model not used; would save twice otherwise
+#     def save_model(self, request, obj, form, change):
+#         pass
+#
+# admin.site.register(AssayChipReadout, AssayChipReadoutAdmin)
 
 
 class AssayResultFunctionAdmin(LockableAdmin):
@@ -1288,21 +1253,21 @@ class AssayResultTypeAdmin(LockableAdmin):
 admin.site.register(AssayResultType, AssayResultTypeAdmin)
 
 
-class AssayChipResultInline(admin.TabularInline):
-    """Adming for results calculated from CHIP READOUTS"""
-    model = AssayChipResult
-    verbose_name = 'Assay Test'
-    verbose_name_plural = 'Assay Test Results'
-    fields = (
-        (
-            'assay_name', 'result', 'result_function', 'result_type',
-            'value', 'test_unit', 'severity',
-        ),
-    )
-    extra = 0
-
-    class Media(object):
-        css = {"all": ("css/hide_admin_original.css",)}
+# class AssayChipResultInline(admin.TabularInline):
+#     """Adming for results calculated from CHIP READOUTS"""
+#     model = AssayChipResult
+#     verbose_name = 'Assay Test'
+#     verbose_name_plural = 'Assay Test Results'
+#     fields = (
+#         (
+#             'assay_name', 'result', 'result_function', 'result_type',
+#             'value', 'test_unit', 'severity',
+#         ),
+#     )
+#     extra = 0
+#
+#     class Media(object):
+#         css = {"all": ("css/hide_admin_original.css",)}
 
 
 class UnitTypeFormAdmin(forms.ModelForm):
@@ -1404,388 +1369,290 @@ class PhysicalUnitsAdmin(LockableAdmin):
 admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 
 
-class AssayChipTestResultAdmin(LockableAdmin):
-    """Admin for results calculated from RAW CHIP DATA aka 'Chip Result'"""
-    class Media(object):
-        js = ('js/cookies.js', 'js/whittle.js', 'js/inline_fix.js', 'assays/assaychiptestresult_add.js')
-
-    save_as = True
-    save_on_top = True
-    list_per_page = 300
-    list_display = (
-        'chip_readout', 'assay', 'result', 'result_function', 'result_type', 'severity'
-    )
-    search_fields = ['chip_readout']
-    actions = ['update_fields']
-    readonly_fields = ['created_by', 'created_on',
-                       'modified_by', 'modified_on', ]
-
-    fieldsets = (
-        (
-            'Device/Drug Parameters', {
-                'fields': (
-                    ('chip_readout',),
-                    ('summary',),
-                ),
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on'),
-                    ('modified_by', 'modified_on'),
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        ),
-        (
-            'Flag for Review', {
-                'fields': (
-                    ('flagged', 'reason_for_flag',)
-                )
-            }
-        ),
-        (
-            'Group Access', {
-                'fields': (
-                    'group', 'restricted'
-                ),
-            }
-        ),
-    )
-    inlines = [AssayChipResultInline]
-
-admin.site.register(AssayChipTestResult, AssayChipTestResultAdmin)
-
-
-class AssayPlateResultInline(admin.TabularInline):
-    """Admin for results calculated from PLATE READOUTS"""
-    model = AssayPlateResult
-    verbose_name = 'Assay Plate Result'
-    verbose_name_plural = 'Assay Plate Results'
-    fields = (
-        (
-            'assay_name', 'result', 'result_function', 'result_type',
-            'value', 'test_unit', 'severity',
-        ),
-    )
-    extra = 0
-
-    class Media(object):
-        css = {'all': ('css/hide_admin_original.css',)}
-
-
-class AssayPlateTestResultAdmin(LockableAdmin):
-    """Admin for test Results from MICROPLATES"""
-    class Media(object):
-        js = (
-            'js/cookies.js',
-            'js/whittle.js',
-            'js/inline_fix.js',
-            'js/csv_functions.js',
-            'assays/plate_display.js',
-            'assays/assayplatetestresult_add.js'
-        )
-        css = {'all': ('assays/customize_admin.css',)}
-
-    inlines = [AssayPlateResultInline]
-
-    save_as = True
-    save_on_top = True
-    list_per_page = 300
-    list_display = (
-        'readout',
-    )
-    search_fields = ['readout']
-    actions = ['update_fields']
-    readonly_fields = ['created_by', 'created_on',
-                       'modified_by', 'modified_on']
-
-    fieldsets = (
-        (
-            'Device/Drug Parameters', {
-                'fields': (
-                    ('readout',),
-                    ('summary',),
-                ),
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on'),
-                    ('modified_by', 'modified_on'),
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        ),
-        (
-            'Flag for Review', {
-                'fields': (
-                    ('flagged', 'reason_for_flag',)
-                )
-            }
-        ),
-        (
-            'Group Access', {
-                'fields': (
-                    'group', 'restricted'
-                ),
-            }
-        ),
-    )
-
-
-admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
-
-
-class AssayRunFormAdmin(forms.ModelForm):
-    """Admin Form for Assay Runs (now referred to as Studies)"""
-    class Meta(object):
-        model = AssayRun
-        widgets = {
-            'assay_run_id': forms.Textarea(attrs={'rows': 1}),
-            'name': forms.Textarea(attrs={'rows': 1}),
-            'description': forms.Textarea(attrs={'rows': 10}),
-        }
-        exclude = ('',)
-
-    # TODO CLEAN TO USE SETUP IN LIEU OF READOUT ID
-    def clean(self):
-        """Validate unique, existing Chip Readout IDs"""
-
-        # clean the form data, before validation
-        data = super(AssayRunFormAdmin, self).clean()
-
-        if not any([data['toxicity'], data['efficacy'], data['disease'], data['cell_characterization']]):
-            raise forms.ValidationError('Please select at least one study type')
-
-        if data['assay_run_id'].startswith('-'):
-            raise forms.ValidationError('Error with assay_run_id; please try again')
-
-
-class StudySupportingDataInline(admin.TabularInline):
-    """Inline for Studies"""
-    model = StudySupportingData
-    verbose_name = 'Study Supporting Data'
-    fields = (
-        (
-            'description', 'supporting_data'
-        ),
-    )
-    extra = 1
-
-
-class AssayRunAdmin(LockableAdmin):
-    """Admin for what are now called Organ Chip Studies"""
-    # AssayRun is now Organ Chip Study
-    # Organ Chip Study should really be simply Study
-    class Media(object):
-        js = ('assays/assayrun_add.js',)
-
-    form = AssayRunFormAdmin
-    save_on_top = True
-    list_per_page = 300
-    search_fields = ('assay_run_id', 'start_date', 'description')
-    date_hierarchy = 'start_date'
-    list_display = ('assay_run_id', 'study_types', 'start_date', 'description',)
-    fieldsets = (
-        (
-            'Study', {
-                'fields': (
-                    ('toxicity', 'efficacy', 'disease', 'cell_characterization'),
-                    'study_configuration',
-                    'start_date',
-                    'name',
-                    'description',
-                    'image',
-                )
-            }
-        ),
-        (
-            'Study ID (Autocreated from entries above)', {
-                'fields': (
-                    'assay_run_id',
-                )
-            }
-        ),
-        (
-            'Protocol File Upload', {
-                'fields': (
-                    'protocol',
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on'),
-                    ('modified_by', 'modified_on'),
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        ),
-        (
-            'Group Access', {
-                'fields': (
-                    'group', 'restricted'
-                ),
-            }
-        ),
-    )
-
-    inlines = [StudySupportingDataInline]
-
-    def save_model(self, request, obj, form, change):
-
-        if change:
-            obj.modified_by = request.user
-
-            if obj.pk is not None:
-                original = AssayRun.objects.get(pk=obj.pk)
-                original_sign_off_date = original.signed_off_date
-            else:
-                original_sign_off_date = obj.signed_off_date
-
-            obj.save()
-
-            all_chip_setups = AssayChipSetup.objects.filter(assay_run_id=obj)
-            all_chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=obj)
-            all_chip_results = AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=obj)
-            all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=obj)
-            all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=obj)
-            all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=obj)
-
-            all_data_uploads = AssayDataUpload.objects.filter(study=obj)
-
-            # Marking a study should mark/unmark only setups that have not been individually reviewed
-            # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
-            if original_sign_off_date:
-                unreviewed_chip_setups = all_chip_setups.filter(signed_off_date=original_sign_off_date)
-                # unreviewed_chip_readouts = all_chip_readouts.exclude(signed_off_date=obj.signed_off_date)
-                # unreviewed_chip_results = all_chip_results.exclude(signed_off_date=obj.signed_off_date)
-                unreviewed_plate_setups = all_plate_setups.filter(signed_off_date=original_sign_off_date)
-                # unreviewed_plate_readouts = all_plate_readouts.exclude(signed_off_date=obj.signed_off_date)
-                # unreviewed_plate_results = all_plate_results.exclude(signed_off_date=obj.signed_off_date)
-            # If the study is being signed off, then treat any setups with no sign off as unreviewed
-            else:
-                unreviewed_chip_setups = all_chip_setups.filter(signed_off_by=None)
-                # unreviewed_chip_readouts = all_chip_readouts.filter(signed_off_by=None)
-                # unreviewed_chip_results = all_chip_results.filter(signed_off_by=None)
-                unreviewed_plate_setups = all_plate_setups.filter(signed_off_by=None)
-                # unreviewed_plate_readouts = all_plate_readouts.filter(signed_off_by=None)
-                # unreviewed_plate_results = all_plate_results.filter(signed_off_by=None)
-
-            # Add group and restricted to all
-            all_chip_setups.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_chip_readouts.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_chip_results.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_plate_setups.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_plate_readouts.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_plate_results.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_data_uploads.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-
-            # Change signed off data only for unreviewed entries
-            unreviewed_chip_setups.update(
-                signed_off_by=obj.signed_off_by,
-                signed_off_date=obj.signed_off_date
-            )
-            # unreviewed_chip_readouts.update(
-            #     signed_off_by=obj.signed_off_by,
-            #     signed_off_date=obj.signed_off_date
-            # )
-            # unreviewed_chip_results.update(
-            #     signed_off_by=obj.signed_off_by,
-            #     signed_off_date=obj.signed_off_date
-            # )
-            unreviewed_plate_setups.update(
-                signed_off_by=obj.signed_off_by,
-                signed_off_date=obj.signed_off_date
-            )
-
-        else:
-            obj.modified_by = obj.created_by = request.user
-            obj.save()
-        # obj.save()
-
-
-admin.site.register(AssayRun, AssayRunAdmin)
-
-
-class StudyModelInline(admin.TabularInline):
-    """Inline for Study Configurations"""
-    model = StudyModel
-    verbose_name = 'Study Model'
-    fields = (
-        (
-            'label', 'organ', 'sequence_number', 'output', 'integration_mode',
-        ),
-    )
-    extra = 1
-
-    class Media(object):
-        css = {'all': ('css/hide_admin_original.css',)}
-
-
-class StudyConfigurationAdmin(LockableAdmin):
-    """Admin for study configurations"""
-
-    class Media(object):
-        js = ('js/inline_fix.js',)
-
-    form = StudyConfigurationForm
-    save_on_top = True
-    list_per_page = 300
-    list_display = ('name',)
-    fieldsets = (
-        (
-            'Study Configuration', {
-                'fields': (
-                    'name',
-                    'media_composition',
-                    'hardware_description',
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on'),
-                    ('modified_by', 'modified_on'),
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        ),
-    )
-    inlines = [StudyModelInline]
-
-
-admin.site.register(StudyConfiguration, StudyConfigurationAdmin)
+# class AssayChipTestResultAdmin(LockableAdmin):
+#     """Admin for results calculated from RAW CHIP DATA aka 'Chip Result'"""
+#     class Media(object):
+#         js = ('js/cookies.js', 'js/whittle.js', 'js/inline_fix.js', 'assays/assaychiptestresult_add.js')
+#
+#     save_as = True
+#     save_on_top = True
+#     list_per_page = 300
+#     list_display = (
+#         'chip_readout', 'assay', 'result', 'result_function', 'result_type', 'severity'
+#     )
+#     search_fields = ['chip_readout']
+#     actions = ['update_fields']
+#     readonly_fields = ['created_by', 'created_on',
+#                        'modified_by', 'modified_on', ]
+#
+#     fieldsets = (
+#         (
+#             'Device/Drug Parameters', {
+#                 'fields': (
+#                     ('chip_readout',),
+#                     ('summary',),
+#                 ),
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     ('created_by', 'created_on'),
+#                     ('modified_by', 'modified_on'),
+#                     ('signed_off_by', 'signed_off_date'),
+#                 )
+#             }
+#         ),
+#         (
+#             'Flag for Review', {
+#                 'fields': (
+#                     ('flagged', 'reason_for_flag',)
+#                 )
+#             }
+#         ),
+#     )
+#     inlines = [AssayChipResultInline]
+#
+# admin.site.register(AssayChipTestResult, AssayChipTestResultAdmin)
+#
+#
+# class AssayPlateResultInline(admin.TabularInline):
+#     """Admin for results calculated from PLATE READOUTS"""
+#     model = AssayPlateResult
+#     verbose_name = 'Assay Plate Result'
+#     verbose_name_plural = 'Assay Plate Results'
+#     fields = (
+#         (
+#             'assay_name', 'result', 'result_function', 'result_type',
+#             'value', 'test_unit', 'severity',
+#         ),
+#     )
+#     extra = 0
+#
+#     class Media(object):
+#         css = {'all': ('css/hide_admin_original.css',)}
+#
+#
+# class AssayPlateTestResultAdmin(LockableAdmin):
+#     """Admin for test Results from MICROPLATES"""
+#     class Media(object):
+#         js = (
+#             'js/cookies.js',
+#             'js/whittle.js',
+#             'js/inline_fix.js',
+#             'js/csv_functions.js',
+#             'assays/plate_display.js',
+#             'assays/assayplatetestresult_add.js'
+#         )
+#         css = {'all': ('assays/customize_admin.css',)}
+#
+#     inlines = [AssayPlateResultInline]
+#
+#     save_as = True
+#     save_on_top = True
+#     list_per_page = 300
+#     list_display = (
+#         'readout',
+#     )
+#     search_fields = ['readout']
+#     actions = ['update_fields']
+#     readonly_fields = ['created_by', 'created_on',
+#                        'modified_by', 'modified_on']
+#
+#     fieldsets = (
+#         (
+#             'Device/Drug Parameters', {
+#                 'fields': (
+#                     ('readout',),
+#                     ('summary',),
+#                 ),
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     ('created_by', 'created_on'),
+#                     ('modified_by', 'modified_on'),
+#                     ('signed_off_by', 'signed_off_date'),
+#                 )
+#             }
+#         ),
+#         (
+#             'Flag for Review', {
+#                 'fields': (
+#                     ('flagged', 'reason_for_flag',)
+#                 )
+#             }
+#         ),
+#     )
+#
+#
+# admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
+#
+#
+# class AssayRunFormAdmin(forms.ModelForm):
+#     """Admin Form for Assay Runs (now referred to as Studies)"""
+#     class Meta(object):
+#         model = AssayRun
+#         widgets = {
+#             'assay_run_id': forms.Textarea(attrs={'rows': 1}),
+#             'name': forms.Textarea(attrs={'rows': 1}),
+#             'description': forms.Textarea(attrs={'rows': 10}),
+#         }
+#         exclude = ('',)
+#
+#     # TODO CLEAN TO USE SETUP IN LIEU OF READOUT ID
+#     def clean(self):
+#         """Validate unique, existing Chip Readout IDs"""
+#
+#         # clean the form data, before validation
+#         data = super(AssayRunFormAdmin, self).clean()
+#
+#         if not any([data['toxicity'], data['efficacy'], data['disease'], data['cell_characterization']]):
+#             raise forms.ValidationError('Please select at least one study type')
+#
+#         if data['assay_run_id'].startswith('-'):
+#             raise forms.ValidationError('Error with assay_run_id; please try again')
+#
+#
+# class StudySupportingDataInline(admin.TabularInline):
+#     """Inline for Studies"""
+#     model = StudySupportingData
+#     verbose_name = 'Study Supporting Data'
+#     fields = (
+#         (
+#             'description', 'supporting_data'
+#         ),
+#     )
+#     extra = 1
+#
+#
+# class AssayRunAdmin(LockableAdmin):
+#     """Admin for what are now called Organ Chip Studies"""
+#     # AssayRun is now Organ Chip Study
+#     # Organ Chip Study should really be simply Study
+#     class Media(object):
+#         js = ('assays/assayrun_add.js',)
+#
+#     form = AssayRunFormAdmin
+#     save_on_top = True
+#     list_per_page = 300
+#     date_hierarchy = 'start_date'
+#     list_display = ('assay_run_id', 'study_types', 'start_date', 'description',)
+#     fieldsets = (
+#         (
+#             'Study', {
+#                 'fields': (
+#                     ('toxicity', 'efficacy', 'disease', 'cell_characterization'),
+#                     'study_configuration',
+#                     'start_date',
+#                     'name',
+#                     'description',
+#                     'image',
+#                 )
+#             }
+#         ),
+#         (
+#             'Study ID (Autocreated from entries above)', {
+#                 'fields': (
+#                     'assay_run_id',
+#                 )
+#             }
+#         ),
+#         (
+#             'Protocol File Upload', {
+#                 'fields': (
+#                     'protocol',
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     ('created_by', 'created_on'),
+#                     ('modified_by', 'modified_on'),
+#                     ('signed_off_by', 'signed_off_date'),
+#                 )
+#             }
+#         ),
+#         (
+#             'Group Access', {
+#                 'fields': (
+#                     'group',
+#                 ),
+#             }
+#         ),
+#     )
+#
+#     inlines = [StudySupportingDataInline]
+#
+#     def save_model(self, request, obj, form, change):
+#
+#         if change:
+#             obj.modified_by = request.user
+#
+#         else:
+#             obj.modified_by = obj.created_by = request.user
+#
+#         obj.save()
+#
+#
+# admin.site.register(AssayRun, AssayRunAdmin)
+#
+#
+# class StudyModelInline(admin.TabularInline):
+#     """Inline for Study Configurations"""
+#     model = StudyModel
+#     verbose_name = 'Study Model'
+#     fields = (
+#         (
+#             'label', 'organ', 'sequence_number', 'output', 'integration_mode',
+#         ),
+#     )
+#     extra = 1
+#
+#     class Media(object):
+#         css = {'all': ('css/hide_admin_original.css',)}
+#
+#
+# class StudyConfigurationAdmin(LockableAdmin):
+#     """Admin for study configurations"""
+#
+#     class Media(object):
+#         js = ('js/inline_fix.js',)
+#
+#     form = StudyConfigurationForm
+#     save_on_top = True
+#     list_per_page = 300
+#     list_display = ('name',)
+#     fieldsets = (
+#         (
+#             'Study Configuration', {
+#                 'fields': (
+#                     'name',
+#                     'media_composition',
+#                     'hardware_description',
+#                 )
+#             }
+#         ),
+#         (
+#             'Change Tracking', {
+#                 'fields': (
+#                     'locked',
+#                     ('created_by', 'created_on'),
+#                     ('modified_by', 'modified_on'),
+#                     ('signed_off_by', 'signed_off_date'),
+#                 )
+#             }
+#         ),
+#     )
+#     inlines = [StudyModelInline]
+#
+#
+# admin.site.register(StudyConfiguration, StudyConfigurationAdmin)
 
 
 class AssayTargetFormAdmin(forms.ModelForm):
@@ -2076,3 +1943,5 @@ class AssayMethodAdmin(LockableAdmin):
             modify_templates()
 
 admin.site.register(AssayMethod, AssayMethodAdmin)
+
+admin.site.register(AssayStudyType)

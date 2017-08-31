@@ -1,7 +1,4 @@
 $(function() {
-    // Get the CSRF token
-    var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
-
     var cell_image = $('#id_cell_image');
     var image_display = $('#image_display');
     var current_display = $('#current_display');
@@ -32,7 +29,7 @@ $(function() {
             data: {
                 call: 'get_cell_subtypes',
                 cell_type: cell_type,
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 var options = json.dropdown;

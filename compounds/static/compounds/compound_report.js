@@ -6,9 +6,6 @@ $(document).ready(function () {
     // Prevent CSS conflict with Bootstrap
     $.fn.button.noConflict();
 
-    // Middleware token for CSRF validation
-    var middleware_token = getCookie('csrftoken');
-
     // Object of all selected compounds
     var compounds = {};
 
@@ -186,7 +183,7 @@ $(document).ready(function () {
             data: {
                 call: 'fetch_compound_report',
                 compounds: JSON.stringify(compounds),
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 // Stop spinner

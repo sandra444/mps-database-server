@@ -1,7 +1,4 @@
 $(document).ready(function () {
-    // Get the middleware token
-    var middleware_token = getCookie('csrftoken');
-
     function table(data) {
         // Show graphic
         $('#graphic').prop('hidden',false);
@@ -117,7 +114,7 @@ $(document).ready(function () {
                     'target_types_filter': FILTER.target_types,
                     'organisms_filter': FILTER.organisms
                 }),
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 // Stop spinner

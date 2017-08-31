@@ -1,7 +1,4 @@
 $(document).ready(function () {
-    // Get the middleware token
-    var middleware_token = getCookie('csrftoken');
-
     function heatmap(heatmap_data_csv, row_order, col_order) {
 
         //console.log(row_order);
@@ -547,7 +544,7 @@ $(document).ready(function () {
                     'metric': FILTER.metric,
                     'method': FILTER.method
                 }),
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 // Stop spinner
