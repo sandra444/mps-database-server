@@ -1,4 +1,7 @@
 $(document).ready(function() {
+    // Prevent CSS conflict with Bootstrap
+    // $.fn.button.noConflict();
+
     var sign_off_confirm = $("#sign_off_confirm");
     var study_submit = $('#study_submit').val();
 
@@ -47,21 +50,42 @@ $(document).ready(function() {
         modal: true,
         closeOnEscape: true,
         autoOpen: false,
-        buttons: {
-        Yes: function() {
-            signed_off_selector.prop('checked', !signed_off_selector.prop('checked'));
-            set_labels();
-            $(this).dialog("close");
-            },
-        Cancel: function() {
-            $(this).dialog("close");
+        // buttons: {
+        // Yes: function() {
+        //     signed_off_selector.prop('checked', !signed_off_selector.prop('checked'));
+        //     set_labels();
+        //     $(this).dialog("close");
+        //     },
+        // Cancel: function() {
+        //     $(this).dialog("close");
+        //     }
+        // },
+        buttons: [
+        {
+            text: 'Yes',
+            disabled: true,
+            id: 'sign_off_confirm_submit_button',
+            click: function() {
+                signed_off_selector.prop('checked', !signed_off_selector.prop('checked'));
+                set_labels();
+                $(this).dialog('close');
             }
         },
+        {
+            text: 'Cancel',
+            click: function() {
+               $(this).dialog("close");
+            }
+        }],
         close: function() {
             $('body').removeClass('stop-scrolling');
         },
         open: function() {
             $('body').addClass('stop-scrolling');
+
+            setTimeout(function() {
+                $('#sign_off_confirm_submit_button').button('enable');
+            }, 1500);
         }
     });
     sign_off_confirm.removeProp('hidden');

@@ -10,7 +10,7 @@
 
 {% block content %}
 
-<form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post">
+<form enctype="multipart/form-data" class="form-horizontal" method="post">
 
     {% csrf_token %}
     {{ formset_summary.management_form }}
