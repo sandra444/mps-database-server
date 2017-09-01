@@ -242,7 +242,7 @@ class AssayChipSetupForm(SignOffMixin, CloneableForm):
             'scale_factor'
         ) | PhysicalUnits.objects.filter(unit='%')
         # Filter devices to be only microchips (or "chips" like the venous system)
-        self.fields['device'].queryset = Microdevice.objects.filter(device_type='chip')
+        # self.fields['device'].queryset = Microdevice.objects.filter(device_type='chip')
 
     class Meta(object):
         model = AssayChipSetup
