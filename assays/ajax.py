@@ -415,6 +415,9 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         method = data_point.assay_instance.method.name
         sample_location = data_point.sample_location.name
 
+        device = data_point.assay_chip_id.chip_setup.device
+        organ_model = data_point.assay_chip_id.chip_setup.organ_model
+
         compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, ' | ')
 
         value = data_point.value
@@ -441,6 +444,8 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
                         times.get('day'),
                         times.get('hour'),
                         times.get('minute'),
+                        device,
+                        organ_model,
                         compound_treatment,
                         target,
                         method,
