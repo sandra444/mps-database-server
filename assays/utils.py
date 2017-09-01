@@ -120,6 +120,8 @@ CSV_HEADER_WITH_COMPOUNDS_AND_STUDY = (
     'Day',
     'Hour',
     'Minute',
+    'Device',
+    'Organ Model',
     'Compound Treatment(s)',
     'Target/Analyte',
     'Method/Kit',
@@ -143,6 +145,8 @@ CHIP_DATA_PREFETCH = (
     'assay_instance__study',
     'sample_location',
     'assay_chip_id__chip_setup',
+    'assay_chip_id__chip_setup__device',
+    'assay_chip_id__chip_setup__organ_model',
     'data_upload'
 )
 
