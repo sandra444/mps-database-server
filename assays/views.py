@@ -35,7 +35,7 @@ from mps.mixins import (
     OneGroupRequiredMixin,
     ObjectGroupRequiredMixin,
     StudyGroupRequiredMixin,
-    ViewershipMixin,
+    StudyViewershipMixin,
     DetailRedirectMixin,
     AdminRequiredMixin
     # CreatorOrAdminRequiredMixin,
@@ -229,7 +229,7 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
         return context
 
 
-class StudyIndex(ViewershipMixin, DetailView):
+class StudyIndex(StudyViewershipMixin, DetailView):
     """Show all chip and plate models associated with the given study"""
     model = AssayRun
     context_object_name = 'study_index'
@@ -593,6 +593,29 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             ))
 
 
+class AssayRunUpdateAccess(AdminRequiredMixin, UpdateView):
+    """Update the fields of a Study"""
+    model = AssayRun
+    template_name = 'assays/assayrun_access.html'
+    form_class = AssayRunAccessForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayRunUpdateAccess, self).get_context_data(**kwargs)
+
+        context['update'] = True
+
+        return context
+
+    def form_valid(self, form):
+        if form.is_valid():
+            if is_group_admin(self.request.user, self.object.group.name):
+                save_forms_with_tracking(self, form, update=True)
+
+            return redirect(self.object.get_absolute_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+
 def compare_cells(current_model, current_filter, setups):
     """Compare cells to discern setups use the same sort and amount of cells"""
     cells = {}
@@ -629,7 +652,7 @@ def compare_cells(current_model, current_filter, setups):
     return (best_setup, sameness.get(best_setup))
 
 
-class AssayRunSummary(ViewershipMixin, DetailView):
+class AssayRunSummary(StudyViewershipMixin, DetailView):
     """Displays information for a given study
 
     Currently only shows data for chip readouts and chip/plate setups
@@ -2274,7 +2297,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class ReturnStudyData(ViewershipMixin, DetailView):
+class ReturnStudyData(StudyViewershipMixin, DetailView):
     """Returns a combined file for all data in a study"""
     model = AssayRun
 

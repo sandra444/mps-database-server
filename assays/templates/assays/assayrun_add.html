@@ -160,21 +160,21 @@
         </div>
     </div>
 
-    {% if not object or not user|is_group_admin:object.group.name %}
-        <div hidden>
-    {% endif %}
-    <div class="form-group">
-        <label for="restricted" class="col-sm-2 control-label">Restrict Access</label>
-        <div class="col-sm-10">
-          {{ form.restricted }}
-          <div>
-              <em>Check</em> to make this study visible only to users with group access.
-          </div>
-        </div>
-    </div>
-    {% if not object or not user|is_group_admin:object.group.name %}
-        </div>
-    {% endif %}
+{#    {% if not object or not user|is_group_admin:object.group.name %}#}
+{#        <div hidden>#}
+{#    {% endif %}#}
+{#    <div class="form-group">#}
+{#        <label for="restricted" class="col-sm-2 control-label">Restrict Access</label>#}
+{#        <div class="col-sm-10">#}
+{#          {{ form.restricted }}#}
+{#          <div>#}
+{#              <em>Check</em> to make this study visible only to users with group access.#}
+{#          </div>#}
+{#        </div>#}
+{#    </div>#}
+{#    {% if not object or not user|is_group_admin:object.group.name %}#}
+{#        </div>#}
+{#    {% endif %}#}
 
     <div class="form-group">
         <label for="use_in_calculations" class="col-sm-2 control-label">Use in Calculations</label>

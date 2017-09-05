@@ -3,6 +3,7 @@ from django.forms.models import BaseInlineFormSet
 # STOP USING WILDCARD IMPORTS
 from assays.models import *
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
+from microdevices.models import MicrophysiologyCenter
 from mps.forms import SignOffMixin
 # Use regular expressions for a string split at one point
 import re
@@ -110,6 +111,26 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
 
         if data['assay_run_id'].startswith('-'):
             raise forms.ValidationError('Error with assay_run_id; please try again')
+
+
+class AssayRunAccessForm(forms.ModelForm):
+    """Form for changing access to studies"""
+    def __init__(self, *args, **kwargs):
+        super(AssayRunAccessForm, self).__init__(*args, **kwargs)
+        groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
+        groups_with_center_full = Group.objects.filter(
+            id__in=groups_with_center
+        ).exclude(
+            id=self.instance.group.id
+        ).order_by(
+            'name'
+        )
+        self.fields['access_groups'].queryset = groups_with_center_full
+
+
+    class Meta(object):
+        model = AssayRun
+        fields = ['access_groups', 'restricted']
 
 
 class StudySupportingDataInlineFormset(BaseInlineFormSet):

@@ -3,6 +3,7 @@
 from django.db import models
 from microdevices.models import Microdevice, OrganModel, OrganModelProtocol
 from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
+from django.contrib.auth.models import Group
 
 import urllib
 import collections
@@ -709,6 +710,8 @@ class AssayRun(FlaggableModel):
     image = models.ImageField(upload_to='studies', null=True, blank=True)
 
     use_in_calculations = models.BooleanField(default=False)
+
+    access_groups = models.ManyToManyField(Group, blank=True, related_name='access_groups')
 
     def study_types(self):
         current_types = ''

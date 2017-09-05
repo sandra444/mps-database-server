@@ -35,6 +35,11 @@
                     <a id="indicate_study_is_ready_for_sign_off" class="btn btn-success" role="button">Indicate Study is Ready for Sign Off</a>
                 </div>
                 {% endif %}
+                {% if user|is_group_admin:object.group.name %}
+                <div>
+                    <a href="access" class="btn btn-success" role="button">Change Group Access for this Study</a>
+                </div>
+                {% endif %}
             </h1>
         </div>
 
