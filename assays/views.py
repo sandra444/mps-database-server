@@ -43,6 +43,8 @@ from mps.mixins import (
 )
 
 from mps.base.models import save_forms_with_tracking
+from django.contrib.auth.models import User
+from mps.settings import DEFAULT_FROM_EMAIL
 
 # import ujson as json
 import os
@@ -496,6 +498,24 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
                 if form.cleaned_data.get('signed_off', ''):
                     del form.cleaned_data['signed_off']
                 form.cleaned_data['restricted'] = self.object.restricted
+
+            if not form.instance.signed_off_by and form.cleaned_data.get('signed_off', ''):
+                # Magic strings are in poor taste, should use a template instead
+                subject = 'Study Sign Off Detected: {0}'.format(form.instance)
+                message = 'Hello Admins,\n\n' \
+                          'A study has been signed off on.\n\n' \
+                          'Study: {0}\nSign Off By: {1} {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
+                          'Thanks,\nMPS'.format(
+                    form.instance,
+                    self.request.user.first_name,
+                    self.request.user.last_name,
+                    form.instance.get_absolute_url()
+                )
+
+                users_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+                for user_to_be_alerted in users_to_be_alerted:
+                    user_to_be_alerted.email_user(subject, message, DEFAULT_FROM_EMAIL)
 
             save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=True)
 
