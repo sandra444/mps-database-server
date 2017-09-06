@@ -283,16 +283,38 @@ class AdminRequiredMixin(object):
 
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
-    # Deny access if not the CREATOR
-    # Note the call for request.user.is_authenticated
-    # Interestingly, Django wraps request.user until it is accessed
-    # Thus, to perform this comparison it is necessary to access request.user via authentication
     def dispatch(self, *args, **kwargs):
         self.object = self.get_object()
         if not is_group_admin(self.request.user, self.object.group.name):
             return PermissionDenied(self.request, 'Only group admins can perform this action. Please contact your group admin.')
         return super(AdminRequiredMixin, self).dispatch(*args, **kwargs)
 
+
+class DeletionMixin(object):
+    """This mixin requires the user to be an admin and also needs the object to have no relations"""
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+        if not is_group_admin(self.request.user, self.object.group.name):
+            return PermissionDenied(self.request, 'Only group admins can perform this action. Please contact your group admin.')
+
+        can_be_deleted = True
+
+        for current_field in self.object._meta.get_fields():
+            # TODO MODIFY TO CHECK M2M MANAGERS IN THE FUTURE
+            if str(type(current_field)) == "<class 'django.db.models.fields.related.ManyToOneRel'>":
+                manager = getattr(self.object, current_field.name + '_set')
+                count = manager.count()
+                if count > 0:
+                    can_be_deleted = False
+                    break
+
+        if not can_be_deleted:
+            return PermissionDenied(self.request, 'Other entries depend on this, so it cannot be deleted.'
+                                                  ' Please contact a Database Administrator if you would like to delete it.')
+
+        return super(DeletionMixin, self).dispatch(*args, **kwargs)
 
 # Require the specified group or fail
 class SpecificGroupRequiredMixin(object):

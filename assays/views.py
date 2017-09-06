@@ -37,7 +37,8 @@ from mps.mixins import (
     StudyGroupRequiredMixin,
     StudyViewershipMixin,
     DetailRedirectMixin,
-    AdminRequiredMixin
+    AdminRequiredMixin,
+    DeletionMixin
     # CreatorOrAdminRequiredMixin,
     # SpecificGroupRequiredMixin
 )
@@ -753,7 +754,7 @@ class AssayRunSummary(StudyViewershipMixin, DetailView):
         return self.render_to_response(context)
 
 
-class AssayRunDelete(AdminRequiredMixin, DeleteView):
+class AssayRunDelete(DeletionMixin, DeleteView):
     """Delete a Setup"""
     model = AssayRun
     template_name = 'assays/assayrun_delete.html'
@@ -1022,7 +1023,7 @@ class AssayChipSetupUpdate(StudyGroupRequiredMixin, UpdateView):
             ))
 
 
-class AssayChipSetupDelete(AdminRequiredMixin, DeleteView):
+class AssayChipSetupDelete(DeletionMixin, DeleteView):
     """Delete a Chip Setup and Chip Cells"""
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_delete.html'
@@ -1273,7 +1274,7 @@ class AssayChipReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayChipReadoutDelete(AdminRequiredMixin, DeleteView):
+class AssayChipReadoutDelete(DeletionMixin, DeleteView):
     """Delete Assay Chip Readout"""
     model = AssayChipReadout
     template_name = 'assays/assaychipreadout_delete.html'
@@ -1441,7 +1442,7 @@ class AssayChipTestResultUpdate(StudyGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayChipTestResultDelete(AdminRequiredMixin, DeleteView):
+class AssayChipTestResultDelete(DeletionMixin, DeleteView):
     """Delete a Chip Test Result"""
     model = AssayChipTestResult
     template_name = 'assays/assaychiptestresult_delete.html'
@@ -1622,7 +1623,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayLayoutDelete(AdminRequiredMixin, DeleteView):
+class AssayLayoutDelete(DeletionMixin, DeleteView):
     """Delete an Assay Layout"""
     model = AssayLayout
     template_name = 'assays/assaylayout_delete.html'
@@ -1784,7 +1785,7 @@ class AssayPlateSetupUpdate(StudyGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayPlateSetupDelete(AdminRequiredMixin, DeleteView):
+class AssayPlateSetupDelete(DeletionMixin, DeleteView):
     """Delete a Plate Setup"""
     model = AssayPlateSetup
     template_name = 'assays/assayplatesetup_delete.html'
@@ -2045,7 +2046,7 @@ class AssayPlateReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
 
 
 # TODO ADD CONTEXT
-class AssayPlateReadoutDelete(AdminRequiredMixin, DeleteView):
+class AssayPlateReadoutDelete(DeletionMixin, DeleteView):
     """Delete an Assay Plate Readout"""
     model = AssayPlateReadout
     template_name = 'assays/assayplatereadout_delete.html'
@@ -2195,7 +2196,7 @@ class AssayPlateTestResultUpdate(StudyGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayPlateTestResultDelete(AdminRequiredMixin, DeleteView):
+class AssayPlateTestResultDelete(DeletionMixin, DeleteView):
     """Delete a Plate Test Result"""
     model = AssayPlateTestResult
     template_name = 'assays/assayplatetestresult_delete.html'
