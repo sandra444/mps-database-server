@@ -35,6 +35,11 @@
                     <a id="indicate_study_is_ready_for_sign_off" class="btn btn-success" role="button">Indicate Study is Ready for Sign Off</a>
                 </div>
                 {% endif %}
+                {% if user|is_group_admin:object.group.name %}
+                <div>
+                    <a href="access" class="btn btn-success" role="button">Change Group Access for this Study</a>
+                </div>
+                {% endif %}
             </h1>
         </div>
 
@@ -59,7 +64,7 @@
                     <th>View/Edit</th>
                     <th>Chip ID</th>
                     <th>Date</th>
-                    <th>Device</th>
+{#                    <th>Device</th>#}
                     <th>Organ Model</th>
 {#                    <th>Chip Test Type</th>#}
                     <th>Compound</th>
@@ -79,7 +84,7 @@
                     </td>
                     <td>{{ setup.assay_chip_id }}</td>
                     <td>{{ setup.setup_date }}</td>
-                    <td>{{ setup.device }}</td>
+{#                    <td>{{ setup.device }}</td>#}
                     <td>{{ setup.organ_model|default:"No Model" }}</td>
 {#                    <td>{{ setup.chip_test_type }}</td>#}
 {#                    {% if setup.compound != None %}#}

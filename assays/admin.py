@@ -1655,6 +1655,58 @@ admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 # admin.site.register(StudyConfiguration, StudyConfigurationAdmin)
 
 
+class StudyModelInline(admin.TabularInline):
+    """Inline for Study Configurations"""
+    model = StudyModel
+    verbose_name = 'Study Model'
+    fields = (
+        (
+            'label', 'organ', 'sequence_number', 'output', 'integration_mode',
+        ),
+    )
+    extra = 1
+
+    class Media(object):
+        css = {'all': ('css/hide_admin_original.css',)}
+
+
+class StudyConfigurationAdmin(LockableAdmin):
+    """Admin for study configurations"""
+
+    class Media(object):
+        js = ('js/inline_fix.js',)
+
+    form = StudyConfigurationForm
+    save_on_top = True
+    list_per_page = 300
+    list_display = ('name',)
+    fieldsets = (
+        (
+            'Study Configuration', {
+                'fields': (
+                    'name',
+                    'media_composition',
+                    'hardware_description',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+    inlines = [StudyModelInline]
+
+
+admin.site.register(StudyConfiguration, StudyConfigurationAdmin)
+
+
 class AssayTargetFormAdmin(forms.ModelForm):
     """Admin Form for Targets"""
     class Meta(object):

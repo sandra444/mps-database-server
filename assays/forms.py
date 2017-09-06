@@ -1,8 +1,11 @@
 from django import forms
 from django.forms.models import BaseInlineFormSet, inlineformset_factory, BaseModelFormSet, modelformset_factory
+from cellsamples.models import Biosensor
+from django.forms.models import BaseInlineFormSet
+# STOP USING WILDCARD IMPORTS
 from assays.models import *
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
-from cellsamples.models import Biosensor
+from microdevices.models import MicrophysiologyCenter
 from mps.forms import SignOffMixin
 # Use regular expressions for a string split at one point
 import re
@@ -125,11 +128,31 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
 
-class StudySupportingDataInlineFormSet(BaseInlineFormSet):
+class StudySupportingDataInlineFormset(BaseInlineFormSet):
     """Form for Study Supporting Data (as part of an inline)"""
     class Meta(object):
         model = StudySupportingData
         exclude = ('',)
+
+
+class AssayRunAccessForm(forms.ModelForm):
+    """Form for changing access to studies"""
+    def __init__(self, *args, **kwargs):
+        super(AssayRunAccessForm, self).__init__(*args, **kwargs)
+        groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
+        groups_with_center_full = Group.objects.filter(
+            id__in=groups_with_center
+        ).exclude(
+            id=self.instance.group.id
+        ).order_by(
+            'name'
+        )
+        self.fields['access_groups'].queryset = groups_with_center_full
+
+
+    class Meta(object):
+        model = AssayRun
+        fields = ['access_groups', 'restricted']
 
 
 class AssayChipResultForm(SignOffMixin, forms.ModelForm):
@@ -255,7 +278,7 @@ class AssayChipSetupForm(SignOffMixin, CloneableForm):
             'scale_factor'
         ) | PhysicalUnits.objects.filter(unit='%')
         # Filter devices to be only microchips (or "chips" like the venous system)
-        self.fields['device'].queryset = Microdevice.objects.filter(device_type='chip')
+        # self.fields['device'].queryset = Microdevice.objects.filter(device_type='chip')
 
     class Meta(object):
         model = AssayChipSetup

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "assays/assayrun_access.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/editable_studies/">Editable Studies</a></li>
+    {% if object %}
+        <li>
+			<a href="/assays/{{ object.id }}">{{ object }}</a>
+        </li>
+    {% endif %}
+    <li class="active">
+        Edit Access for <em>{{ object }}</em>
+    </li>
+{% endblock %}
+
+{% block content %}
+<form enctype="multipart/form-data" class="form-horizontal" method="post" >
+    {% csrf_token %}
+
+    <h1>
+        Edit Access for <em>{{ object }}</em>
+    </h1>
+
+    {% include "submit.html" with flag="y" group=form.instance.group.name %}
+
+    {% include 'errors.html' %}
+
+    {% include 'tracking.html' with study_submit='true' %}
+
+    <legend>Group Access</legend>
+    <div hidden>
+        {{ form.access_groups }}
+    </div>
+
+    <div class="form-group col-sm-5 lead text-danger">
+      <label for="hidden_from">
+          Hidden from
+      </label>
+      <select multiple="multiple" id='id_hidden_from' class="form-control" size='12'></select>
+    </div>
+
+    <div class="col-sm-2 text-center">
+        <br>
+        <br>
+        <a id='id_all_right' class="btn btn-success btn-block">
+          Add All <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+        </a>
+        <br>
+        <a id='id_right' class="btn btn-success btn-block">
+          Add <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+        </a>
+        <br>
+        <a id='id_left' class="btn btn-danger btn-block">
+          <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span> Remove
+        </a>
+        <br>
+        <a id='id_all_left' class="btn btn-danger btn-block">
+          <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span><span class="glyphicon glyphicon-chevron-left"></span> Remove All
+        </a>
+    </div>
+
+    <div class="form-group col-sm-5 lead text-success">
+        <label for="visible_to">
+            Visible to
+        </label>
+      <select multiple="multiple" id='id_visible_to' class="form-control" size='12'></select>
+    </div>
+
+    <legend>Public Access</legend>
+    <div class="form-group">
+        <label for="restricted" class="col-sm-2 control-label">Restrict Access</label>
+        <div class="col-sm-10">
+          {{ form.restricted }}
+          <div>
+              <em>Check</em> to make this study visible only to users with group access.
+          </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

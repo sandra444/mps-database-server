@@ -29,7 +29,6 @@ from assays.utils import (
     modify_qc_status_plate,
     modify_qc_status_chip,
     save_assay_layout,
-    get_split_times,
     TIME_CONVERSIONS,
     CHIP_DATA_PREFETCH,
     REPLACED_DATA_POINT_CODE,
@@ -53,14 +52,17 @@ from mps.mixins import (
     OneGroupRequiredMixin,
     ObjectGroupRequiredMixin,
     StudyGroupRequiredMixin,
-    ViewershipMixin,
+    StudyViewershipMixin,
     DetailRedirectMixin,
-    AdminRequiredMixin
+    AdminRequiredMixin,
+    DeletionMixin
     # CreatorOrAdminRequiredMixin,
     # SpecificGroupRequiredMixin
 )
 
 from mps.base.models import save_forms_with_tracking
+from django.contrib.auth.models import User
+from mps.settings import DEFAULT_FROM_EMAIL
 
 # import ujson as json
 import os
@@ -251,10 +253,30 @@ class AssayStudyUpdate(ObjectGroupRequiredMixin, UpdateView):
         )
 
         if form.is_valid() and assay_instance_formset.is_valid() and supporting_data_formset.is_valid():
-            save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=False)
-            return redirect(
-                self.object.get_absolute_url()
-            )
+            if not is_group_admin(self.request.user, self.object.group.name):
+                if form.cleaned_data.get('signed_off', ''):
+                    del form.cleaned_data['signed_off']
+                form.cleaned_data['restricted'] = self.object.restricted
+
+            if not form.instance.signed_off_by and form.cleaned_data.get('signed_off', ''):
+                # Magic strings are in poor taste, should use a template instead
+                subject = 'Study Sign Off Detected: {0}'.format(form.instance)
+                message = 'Hello Admins,\n\n' \
+                          'A study has been signed off on.\n\n' \
+                          'Study: {0}\nSign Off By: {1} {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
+                          'Thanks,\nMPS'.format(
+                    form.instance,
+                    self.request.user.first_name,
+                    self.request.user.last_name,
+                    form.instance.get_absolute_url()
+                )
+
+                users_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+                for user_to_be_alerted in users_to_be_alerted:
+                    user_to_be_alerted.email_user(subject, message, DEFAULT_FROM_EMAIL)
+
+            save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=True)
         else:
             return self.render_to_response(
                 self.get_context_data(
@@ -297,7 +319,7 @@ class AssayStudySummary(ViewershipMixin, DetailView):
 
 
 class AssayStudyDelete(AdminRequiredMixin, DeleteView):
-    """Delete a Setup"""
+    """Delete a Study"""
     model = AssayStudy
     template_name = 'assays/assaystudy_delete.html'
     success_url = '/assays/editable_studies/'
@@ -411,3 +433,77 @@ class AssayMatrixUpdate(UpdateView):
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+
+# Class-based views for study configuration
+class StudyConfigurationList(LoginRequiredMixin, ListView):
+    """Display a list of Study Configurations"""
+    model = StudyConfiguration
+    template_name = 'assays/studyconfiguration_list.html'
+
+
+# FormSet for Study Models
+StudyModelFormSet = inlineformset_factory(
+    StudyConfiguration,
+    StudyModel,
+    extra=1,
+    exclude=[],
+    widgets={
+        'label': forms.TextInput(attrs={'size': 2}),
+        'sequence_number': forms.TextInput(attrs={'size': 2})
+    }
+)
+
+
+class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
+    """Add a Study Configuration with inline for Associtated Models"""
+    template_name = 'assays/studyconfiguration_add.html'
+    form_class = StudyConfigurationForm
+
+    def get_context_data(self, **kwargs):
+        context = super(StudyConfigurationAdd, self).get_context_data(**kwargs)
+
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = StudyModelFormSet(self.request.POST)
+            else:
+                context['formset'] = StudyModelFormSet()
+
+        return context
+
+    def form_valid(self, form):
+        formset = StudyModelFormSet(self.request.POST, instance=form.instance)
+
+        if form.is_valid() and formset.is_valid():
+            save_forms_with_tracking(self, form, formset=formset, update=False)
+            return redirect(self.object.get_post_submission_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+
+
+class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
+    """Update a Study Configuration with inline for Associtated Models"""
+    model = StudyConfiguration
+    template_name = 'assays/studyconfiguration_add.html'
+    form_class = StudyConfigurationForm
+
+    def get_context_data(self, **kwargs):
+        context = super(StudyConfigurationUpdate, self).get_context_data(**kwargs)
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = StudyModelFormSet(self.request.POST, instance=self.object)
+            else:
+                context['formset'] = StudyModelFormSet(instance=self.object)
+
+        context['update'] = True
+
+        return context
+
+    def form_valid(self, form):
+        formset = StudyModelFormSet(self.request.POST, instance=self.object)
+
+        if form.is_valid() and formset.is_valid():
+            save_forms_with_tracking(self, form, formset=formset, update=True)
+            return redirect(self.object.get_post_submission_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))

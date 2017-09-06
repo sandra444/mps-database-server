@@ -1,6 +1,6 @@
 {# Consolidated submit row #}
 {# Parameters passed via with: group -- group needed for sign off, creator -- user needed for sign off #}
-{% load custom_filters %}
+{% load custom_filters static %}
 
 <nav id="floating-submit-row" class="footer navbar-fixed-bottom hidden-print floating-submit-row">
     <div class="container large-padding-top">
@@ -123,3 +123,28 @@
         {% endif %}
     </div>
 </nav>
+
+{# It may be worth having a GENERIC dialog box that can be used for different circumstances #}
+{# These dialog boxes, however, I think should remain specific #}
+
+{# Enter override dialog box #}
+<div hidden id="enter_dialog_confirm" title="Submit this form?">
+    <div class="alert alert-warning" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Warning:</span>
+        <span>Are you sure you want to submit the form?</span>
+    </div>
+</div>
+
+{# This section gives a modal alert for when someone is going to overwrite an entry #}
+{% if update %}
+<script src="{% static "js/overwrite.js" %}"></script>
+
+<div hidden id="overwrite_confirm" title="Overwrite this Entry?">
+    <div class="alert alert-warning" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Warning:</span>
+        <span>Are you sure you want to overwrite this entry?</span>
+    </div>
+</div>
+{% endif %}

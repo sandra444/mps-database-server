@@ -21,28 +21,39 @@ $(document).ready(function () {
     $.fn.button.noConflict();
 
     // Add the dialog box
-    $("#content").append('<div hidden id="dialog-confirm" title="Submit this form?"><p><span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" style="float:left; margin:0 7px 20px 0;"></span>Are you sure you want to submit the form?</p></div>');
+    // $("#content").append('<div hidden id="enter_dialog_confirm" title="Submit this form?"><p><span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" style="float:left; margin:0 7px 20px 0;"></span>Are you sure you want to submit the form?</p></div>');
 
-    var dialogConfirm = $("#dialog-confirm");
+    var dialogConfirm = $("#enter_dialog_confirm");
 
     dialogConfirm.dialog({
-        height:200,
+        height:250,
         modal: true,
         closeOnEscape: true,
         autoOpen: false,
-        buttons: {
-        Submit: function() {
-            $("#submit").trigger("click");
-            },
-        Cancel: function() {
-            $(this).dialog("close");
+        buttons: [
+        {
+            text: 'Submit',
+            disabled: true,
+            id: 'enter_dialog_confirm_submit_button',
+            click: function() {
+                $("#submit").trigger("click");
             }
         },
+        {
+            text: 'Cancel',
+            click: function() {
+               $(this).dialog("close");
+            }
+        }],
         close: function() {
             $('body').removeClass('stop-scrolling');
         },
         open: function() {
             $('body').addClass('stop-scrolling');
+
+            setTimeout(function() {
+                $('#enter_dialog_confirm_submit_button').button('enable');
+            }, 1000);
         }
     });
     dialogConfirm.removeProp('hidden');

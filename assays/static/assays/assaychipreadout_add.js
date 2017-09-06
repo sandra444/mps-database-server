@@ -45,6 +45,8 @@ $(document).ready(function () {
         }
     };
 
+    var current_data_table = null;
+
     function is_true(element, index, array) {
         if (!element && element !== 0) {
             return false;
@@ -497,25 +499,31 @@ $(document).ready(function () {
             refresh_chart_only();
         });
 
-        var current_data_table = $('#current_data_table');
+        var current_data_table_selector = $('#current_data_table');
         // Clear old (if present)
-        current_data_table.dataTable().fnDestroy();
+        current_data_table_selector.DataTable().destroy();
 
         // Make the datatable
-        current_data_table.dataTable({
-            dom: 'B<"row">lfrtip',
+        current_data_table = current_data_table_selector.DataTable({
+            dom: 'B<"row">frti',
             fixedHeader: {headerOffset: 50},
-            iDisplayLength: 100,
+            iDisplayLength: -1,
             columnDefs: [
                 {
+                    "sType": "numeric",
                     "sSortDataType": "time-in-minutes",
-                    "aTargets": [1]
+                    "targets": [1]
                 },
                 {
                     "sSortDataType": "dom-checkbox",
                     "targets": [8]
                 }
             ]
+        });
+
+        // Add listener to search
+        $('input[type=search]').change(function() {
+            toggle_excluded();
         });
 
         // TODO DEFINETELY NOT DRY
@@ -628,5 +636,15 @@ $(document).ready(function () {
     // Setup triggers
     $('#' + charts_name + 'chart_options').find('input').change(function() {
         refresh_chart_only();
+    });
+
+    // Special operations for pre-submission
+    $('form').submit(function() {
+        if (current_data_table) {
+            current_data_table.search('');
+            $('input[type=search]').val('');
+            current_data_table.draw();
+            $('.initially-excluded').show();
+        }
     });
 });

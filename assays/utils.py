@@ -19,7 +19,8 @@ from .models import (
     AssayDataUpload,
     AssayCompoundInstance,
     AssayInstance,
-    AssaySampleLocation
+    AssaySampleLocation,
+    TIME_CONVERSIONS
 )
 from compounds.models import (
     CompoundSupplier,
@@ -54,16 +55,6 @@ CHIP_FORMATS = ('Chip',)
 
 REPLACED_DATA_POINT_CODE = 'R'
 EXCLUDED_DATA_POINT_CODE = 'X'
-
-# This shouldn't be repeated like so
-# Converts: days -> minutes, hours -> minutes, minutes->minutes
-TIME_CONVERSIONS = [
-    ('day', 1440),
-    ('hour', 60),
-    ('minute', 1)
-]
-
-TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
 
 # TODO PLEASE REVIEW TO MAKE SURE CONSISTENT
 COLUMN_HEADERS = (
@@ -129,6 +120,8 @@ CSV_HEADER_WITH_COMPOUNDS_AND_STUDY = (
     'Day',
     'Hour',
     'Minute',
+    'Device',
+    'Organ Model',
     'Compound Treatment(s)',
     'Target/Analyte',
     'Method/Kit',
@@ -152,6 +145,8 @@ CHIP_DATA_PREFETCH = (
     'assay_instance__study',
     'sample_location',
     'assay_chip_id__chip_setup',
+    'assay_chip_id__chip_setup__device',
+    'assay_chip_id__chip_setup__organ_model',
     'data_upload'
 )
 
@@ -217,27 +212,6 @@ class UnicodeWriter:
         """This function writes out all rows given"""
         for row in rows:
             self.writerow(row)
-
-
-# TODO EMPLOY THIS FUNCTION ELSEWHERE
-def get_split_times(time_in_minutes):
-    """Takes time_in_minutes and returns a dic with the time split into day, hour, minute"""
-    times = {
-        'day': 0,
-        'hour': 0,
-        'minute': 0
-    }
-    time_in_minutes_remaining = time_in_minutes
-    for time_unit, conversion in TIME_CONVERSIONS.items():
-        initial_time_for_current_field = int(time_in_minutes_remaining / conversion)
-        if initial_time_for_current_field:
-            times[time_unit] = initial_time_for_current_field
-            time_in_minutes_remaining -= initial_time_for_current_field * conversion
-    # Add fractions of minutes if necessary
-    if time_in_minutes_remaining:
-        times['minute'] += time_in_minutes_remaining
-
-    return times
 
 
 def label_to_number(label):

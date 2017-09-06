@@ -2,9 +2,12 @@
 
 from django.db import models
 from microdevices.models import Microdevice, OrganModel, OrganModelProtocol, MicrophysiologyCenter
+# from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
 from mps.base.models import LockableModel, FlaggableModel
+from django.contrib.auth.models import Group
 
 import urllib
+import collections
 
 # TODO MAKE MODEL AND FIELD NAMES MORE CONSISTENT/COHERENT
 
@@ -23,6 +26,37 @@ PHYSICAL_UNIT_TYPES = (
 types = (
     ('TOX', 'Toxicity'), ('DM', 'Disease'), ('EFF', 'Efficacy'), ('CC', 'Cell Characterization')
 )
+
+# This shouldn't be repeated like so
+# Converts: days -> minutes, hours -> minutes, minutes->minutes
+TIME_CONVERSIONS = [
+    ('day', 1440),
+    ('hour', 60),
+    ('minute', 1)
+]
+
+TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
+
+
+# TODO EMPLOY THIS FUNCTION ELSEWHERE
+def get_split_times(time_in_minutes):
+    """Takes time_in_minutes and returns a dic with the time split into day, hour, minute"""
+    times = {
+        'day': 0,
+        'hour': 0,
+        'minute': 0
+    }
+    time_in_minutes_remaining = time_in_minutes
+    for time_unit, conversion in TIME_CONVERSIONS.items():
+        initial_time_for_current_field = int(time_in_minutes_remaining / conversion)
+        if initial_time_for_current_field:
+            times[time_unit] = initial_time_for_current_field
+            time_in_minutes_remaining -= initial_time_for_current_field * conversion
+    # Add fractions of minutes if necessary
+    if time_in_minutes_remaining:
+        times['minute'] += time_in_minutes_remaining
+
+    return times
 
 
 # May be moved
@@ -221,6 +255,55 @@ class AssayWellLabel(models.Model):
     label = models.CharField(max_length=150)
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
+
+
+class AssayCompoundInstance(models.Model):
+    """An instance of a compound used in an assay; used as an inline"""
+
+    class Meta(object):
+        unique_together = [
+            (
+                'chip_setup',
+                'compound_instance',
+                'concentration',
+                'concentration_unit',
+                'addition_time',
+                'duration'
+            )
+        ]
+
+    # Stop-gap, subject to change
+    chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True)
+
+    # COMPOUND INSTANCE IS REQUIRED, however null=True was done to avoid a submission issue
+    compound_instance = models.ForeignKey('compounds.CompoundInstance', null=True, blank=True)
+    concentration = models.FloatField()
+    concentration_unit = models.ForeignKey(
+        'assays.PhysicalUnits',
+        verbose_name='Concentration Unit'
+    )
+
+    # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
+    addition_time = models.FloatField(blank=True)
+
+    # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
+    duration = models.FloatField(blank=True)
+
+    def get_addition_time_string(self):
+        split_times = get_split_times(self.addition_time)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
+
+    def get_duration_string(self):
+        split_times = get_split_times(self.duration)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
 
 
 class AssayWellCompound(models.Model):
@@ -653,6 +736,8 @@ class AssayRun(FlaggableModel):
     image = models.ImageField(upload_to='studies', null=True, blank=True)
 
     use_in_calculations = models.BooleanField(default=False)
+
+    access_groups = models.ManyToManyField(Group, blank=True, related_name='access_groups')
 
     def study_types(self):
         current_types = ''

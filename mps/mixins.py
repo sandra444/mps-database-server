@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 from django.template import RequestContext, loader
 from django.http import HttpResponseForbidden
 from assays.models import AssayRun
-from mps.templatetags.custom_filters import filter_groups
+from mps.templatetags.custom_filters import filter_groups, VIEWER_SUFFIX, ADMIN_SUFFIX
 
 
 def PermissionDenied(request, message):
@@ -34,6 +34,22 @@ def user_is_active(user):
     """Checks whether the user is active"""
     return user.is_active
 
+
+def check_if_user_is_valid_study_viewer(user, study):
+    # Find whether valid viewer by checking group and iterating over all access_groups
+    valid_viewer = is_group_viewer(user, study.group.name)
+
+    if not valid_viewer:
+        user_group_names = user.groups.all().values_list('name', flat=True)
+        access_group_names = {name: True for name in study.access_groups.all().values_list('name', flat=True)}
+
+        for group_name in user_group_names:
+            if group_name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') in access_group_names:
+                valid_viewer = True
+                # Only iterate as many times as is needed
+                return valid_viewer
+
+    return valid_viewer
 
 # Add this mixin via multiple-inheritance and you need not change the dispatch every time
 class LoginRequiredMixin(object):
@@ -148,8 +164,23 @@ class StudyGroupRequiredMixin(object):
                 else:
                     return super(StudyGroupRequiredMixin, self).dispatch(*args, **kwargs)
 
+            # Find whether valid viewer by checking group and iterating over all access_groups
+            # valid_viewer = is_group_viewer(self.request.user, study.group.name)
+            #
+            # if not valid_viewer:
+            #     user_group_names = self.request.user.groups.all().values_list('name', flat=True)
+            #     access_group_names = {name: True for name in study.access_groups.all().values_list('name', flat=True)}
+            #
+            #     for group_name in user_group_names:
+            #         if group_name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') in access_group_names:
+            #             valid_viewer = True
+            #             # Only iterate as many times as is needed
+            #             break
+
+            valid_viewer = check_if_user_is_valid_study_viewer(self.request.user, study)
+
             # If the object is not restricted and the user is NOT a listed viewer
-            elif study.restricted and not is_group_viewer(self.request.user, study.group.name):
+            if study.restricted and not valid_viewer:
                 return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
 
             if study.signed_off_by and not self.detail:
@@ -172,6 +203,7 @@ class StudyGroupRequiredMixin(object):
         return super(StudyGroupRequiredMixin, self).dispatch(*args, **kwargs)
 
 
+# Deprecated
 class ViewershipMixin(object):
     """This mixin checks if the user has the group neccessary to at least view the entry
     
@@ -199,7 +231,21 @@ class ViewershipMixin(object):
         return super(ViewershipMixin, self).dispatch(*args, **kwargs)
 
 
-# TODO ADD STUDY HERE (cannot refer straight to .object.restricted)
+class StudyViewershipMixin(object):
+    """This mixin determines whether a user can view the study and its data"""
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+
+        valid_viewer = check_if_user_is_valid_study_viewer(self.request.user, self.object)
+        # If the object is not restricted and the user is NOT a listed viewer, deny permission
+        if self.object.restricted and not valid_viewer:
+            return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
+        # Otherwise return the detail view
+        return super(StudyViewershipMixin, self).dispatch(*args, **kwargs)
+
+
 # WIP
 class DetailRedirectMixin(object):
     """This mixin checks if the user has the object's group, if so it redirects to the edit page
@@ -263,16 +309,38 @@ class AdminRequiredMixin(object):
 
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
-    # Deny access if not the CREATOR
-    # Note the call for request.user.is_authenticated
-    # Interestingly, Django wraps request.user until it is accessed
-    # Thus, to perform this comparison it is necessary to access request.user via authentication
     def dispatch(self, *args, **kwargs):
         self.object = self.get_object()
         if not is_group_admin(self.request.user, self.object.group.name):
-            return PermissionDenied(self.request, 'Only group admins can delete entries. Please contact your group admin.')
+            return PermissionDenied(self.request, 'Only group admins can perform this action. Please contact your group admin.')
         return super(AdminRequiredMixin, self).dispatch(*args, **kwargs)
 
+
+class DeletionMixin(object):
+    """This mixin requires the user to be an admin and also needs the object to have no relations"""
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+        if not is_group_admin(self.request.user, self.object.group.name):
+            return PermissionDenied(self.request, 'Only group admins can perform this action. Please contact your group admin.')
+
+        can_be_deleted = True
+
+        for current_field in self.object._meta.get_fields():
+            # TODO MODIFY TO CHECK M2M MANAGERS IN THE FUTURE
+            if str(type(current_field)) == "<class 'django.db.models.fields.related.ManyToOneRel'>":
+                manager = getattr(self.object, current_field.name + '_set')
+                count = manager.count()
+                if count > 0:
+                    can_be_deleted = False
+                    break
+
+        if not can_be_deleted:
+            return PermissionDenied(self.request, 'Other entries depend on this, so it cannot be deleted.'
+                                                  ' Please contact a Database Administrator if you would like to delete it.')
+
+        return super(DeletionMixin, self).dispatch(*args, **kwargs)
 
 # Require the specified group or fail
 class SpecificGroupRequiredMixin(object):
