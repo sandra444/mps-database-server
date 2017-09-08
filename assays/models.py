@@ -1272,22 +1272,26 @@ class AssayStudy(FlaggableModel):
     use_in_calculations = models.BooleanField(default=False)
 
     # Group is now explicitly defined here as opposed to using a mixin
-    group = models.ForeignKey('auth.Group', help_text='Bind to a group')
+    group = models.ForeignKey(Group, help_text='Bind to a group')
 
+    # Access groups
+    access_groups = models.ManyToManyField(Group, blank=True, related_name='study_access_groups')
+
+    # DEPRECATED
     # TODO the access choices should probably be file-level scope
     # THIS HAS BEEN DECIDED AGAINST
     # WE WILL USE HAVE A SERIES OF GROUPS TO SELECT FROM INSTEAD OR SOMETHING LIKE THAT
     # access indicates who can see the study and its data
-    access = models.CharField(
-        max_length=255,
-        verbose_name='Access Level',
-        choices=(
-            ('editors', 'Group Editors'),
-            ('viewers', 'Consortium Viewers'),
-            ('public', 'Public')
-        ),
-        default=''
-    )
+    # access = models.CharField(
+    #     max_length=255,
+    #     verbose_name='Access Level',
+    #     choices=(
+    #         ('editors', 'Group Editors'),
+    #         ('viewers', 'Consortium Viewers'),
+    #         ('public', 'Public')
+    #     ),
+    #     default=''
+    # )
 
     # TODO
     def __unicode__(self):

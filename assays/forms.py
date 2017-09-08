@@ -1514,6 +1514,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         }
 
         setup_compound_id_to_index = {}
+        duplicate_compound_indexes = {}
 
         cells = {
             (
@@ -1530,6 +1531,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         }
 
         setup_cell_id_to_index = {}
+        duplicate_cell_indexes = {}
 
         settings = {
             (
@@ -1544,6 +1546,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         }
 
         setup_setting_id_to_index = {}
+        duplicate_setting_indexes = {}
 
         # Get all Compound Instances
         compound_instances = {
@@ -1576,11 +1579,11 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
             lot_text = compound.get('lot_text', '').strip()
             receipt_date = compound.get('receipt_date', None)
 
-            concentration = compound.get('concentration', None)
+            concentration = float(compound.get('concentration', None))
             concentration_unit_id = compound.get('concentration_unit_id', None)
 
-            addition_time = compound.get('addition_time', None)
-            duration = compound.get('duration', None)
+            addition_time = float(compound.get('addition_time', None))
+            duration = float(compound.get('duration', None))
 
             if receipt_date:
                 try:
@@ -1664,9 +1667,14 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
                     raise forms.ValidationError(unicode(e))
             else:
                 compound = conflicting_compound
-                setup_compound_id_to_index.update({
-                    compound.id: index
-                })
+                if compound.id not in setup_compound_id_to_index:
+                    setup_compound_id_to_index.update({
+                        compound.id: index
+                    })
+                else:
+                    duplicate_compound_indexes.update({
+                        index: setup_compound_id_to_index.get(compound.id)
+                    })
 
             compounds.update({
                 (
@@ -1719,9 +1727,14 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
                     raise forms.ValidationError(unicode(e))
             else:
                 cell = conflicting_cell
-                setup_cell_id_to_index.update({
-                    cell.id: index
-                })
+                if cell.id not in setup_cell_id_to_index:
+                    setup_cell_id_to_index.update({
+                        cell.id: index
+                    })
+                else:
+                    duplicate_cell_indexes.update({
+                        index: setup_cell_id_to_index.get(cell.id)
+                    })
 
             cells.update({
                 (
@@ -1770,9 +1783,14 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
                     raise forms.ValidationError(unicode(e))
             else:
                 setting = conflicting_setting
-                setup_setting_id_to_index.update({
-                    setting.id: index
-                })
+                if setting.id not in setup_setting_id_to_index:
+                    setup_setting_id_to_index.update({
+                        setting.id: index
+                    })
+                else:
+                    duplicate_setting_indexes.update({
+                        index: setup_setting_id_to_index.get(setting.id)
+                    })
 
             settings.update({
                 (
@@ -1806,21 +1824,21 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
                 compound_set_ids = setup.compounds.values_list('id', flat=True)
                 compound_set_indexes = tuple(sorted((
                     setup_compound_id_to_index.setdefault(
-                        compound_id, len(setup_compound_id_to_index)
+                        compound_id, len(compound_data)
                     ) for compound_id in compound_set_ids
                 )))
 
                 cell_set_ids = setup.cells.values_list('id', flat=True)
                 cell_set_indexes = tuple(sorted((
                     setup_cell_id_to_index.setdefault(
-                        cell_id, len(setup_cell_id_to_index)
+                        cell_id, len(cell_data)
                     ) for cell_id in cell_set_ids
                 )))
 
                 setting_set_ids = setup.settings.values_list('id', flat=True)
                 setting_set_indexes = tuple(sorted((
                     setup_setting_id_to_index.setdefault(
-                        setting_id, len(setup_setting_id_to_index)
+                        setting_id, len(setting_data)
                     ) for setting_id in setting_set_ids
                 )))
 
@@ -1839,6 +1857,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
 
         setup_id_to_index = {}
         setup_indexes = {}
+        duplicate_setup_indexes = {}
 
         # TODO PUT THIS IN FORM
         setup_data = json.loads(current_data.get('setup_data', '{}'))
@@ -1863,12 +1882,25 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
 
             variance_from_organ_model_protocol = setup.get('variance_from_organ_model_protocol', '')
 
-            compound_set = tuple(sorted(setup.get('compounds', [])))
-            cell_set = tuple(sorted(setup.get('cells', [])))
-            setting_set = tuple(sorted(setup.get('settings', [])))
+            compound_set = tuple(
+                set(
+                    sorted([duplicate_compound_indexes.get(compound_index, compound_index) for compound_index in setup.get('compounds', [])])
+                )
+            )
+            cell_set = tuple(
+                set(
+                    sorted([duplicate_cell_indexes.get(cell_index, cell_index) for cell_index in setup.get('cells', [])])
+                )
+            )
+            setting_set = tuple(
+                set(
+                    sorted([duplicate_setting_indexes.get(setting_index, setting_index) for setting_index in setup.get('settings', [])])
+                )
+            )
 
             # More than a little unusual, it is already a dict? I guess I might want to make sure things are in order
             setup = {
+                'setup_index': index,
                 'device_id': device_id,
                 'organ_model_id': organ_model_id,
                 'organ_model_protocol_id': organ_model_protocol_id,
@@ -1903,24 +1935,35 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
                     ).full_clean()
                 except forms.ValidationError as e:
                     raise forms.ValidationError(unicode(e))
+
+                setups.update({
+                    (
+                        device_id,
+                        organ_model_id,
+                        organ_model_protocol_id,
+                        variance_from_organ_model_protocol,
+                        compound_set,
+                        cell_set,
+                        setting_set
+                    ): setup
+                })
             else:
                 setup = conflicting_setup
-                setup_id_to_index.update({
-                    setup.id: index
-                })
+                if not type(setup) == dict:
+                    if setup.id not in setup_id_to_index:
+                        setup_id_to_index.update({
+                            setup.id: index
+                        })
+                    else:
+                        duplicate_setup_indexes.update({
+                            index: setup_id_to_index.get(setup.id)
+                        })
+                else:
+                    duplicate_setup_indexes.update({
+                        index: setup.get('setup_index')
+                    })
 
-            setups.update({
-                (
-                    device_id,
-                    organ_model_id,
-                    organ_model_protocol_id,
-                    variance_from_organ_model_protocol,
-                    compound_set,
-                    cell_set,
-                    setting_set
-                ): setup
-            })
-
+            # Below should be done now, I think
             # TODO NEED TO THINK ABOUT HOW TO REDIRECT UNSAVED DUPLICATES (may or may not occur, good to check)
             setup_indexes.update({
                 index: setup
@@ -2013,7 +2056,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
                     )
                 )
 
-            setup_index = item.get('setup_index', None)
+            setup_index = duplicate_setup_indexes.get(item.get('setup_index', None), item.get('setup_index', None))
 
             if setup_index not in setup_indexes:
                 raise forms.ValidationError('All chips/wells need a device.')

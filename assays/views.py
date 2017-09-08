@@ -287,7 +287,8 @@ class AssayStudyUpdate(ObjectGroupRequiredMixin, UpdateView):
             )
 
 
-class AssayStudyIndex(ViewershipMixin, DetailView):
+# TODO ADD PERMISSION MIXINS
+class AssayStudyIndex(DetailView):
     """Show all chip and plate models associated with the given study"""
     model = AssayStudy
     context_object_name = 'study_index'
@@ -309,7 +310,7 @@ class AssayStudyIndex(ViewershipMixin, DetailView):
         return context
 
 
-class AssayStudySummary(ViewershipMixin, DetailView):
+class AssayStudySummary(DetailView):
     """Displays information for a given study
 
     Currently only shows data for chip readouts and chip/plate setups
@@ -435,75 +436,76 @@ class AssayMatrixUpdate(UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
+# REMOVED FOR NOW TODO BRING BACK EVENTUALLY
 # Class-based views for study configuration
-class StudyConfigurationList(LoginRequiredMixin, ListView):
-    """Display a list of Study Configurations"""
-    model = StudyConfiguration
-    template_name = 'assays/studyconfiguration_list.html'
-
-
-# FormSet for Study Models
-StudyModelFormSet = inlineformset_factory(
-    StudyConfiguration,
-    StudyModel,
-    extra=1,
-    exclude=[],
-    widgets={
-        'label': forms.TextInput(attrs={'size': 2}),
-        'sequence_number': forms.TextInput(attrs={'size': 2})
-    }
-)
-
-
-class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
-    """Add a Study Configuration with inline for Associtated Models"""
-    template_name = 'assays/studyconfiguration_add.html'
-    form_class = StudyConfigurationForm
-
-    def get_context_data(self, **kwargs):
-        context = super(StudyConfigurationAdd, self).get_context_data(**kwargs)
-
-        if 'formset' not in context:
-            if self.request.POST:
-                context['formset'] = StudyModelFormSet(self.request.POST)
-            else:
-                context['formset'] = StudyModelFormSet()
-
-        return context
-
-    def form_valid(self, form):
-        formset = StudyModelFormSet(self.request.POST, instance=form.instance)
-
-        if form.is_valid() and formset.is_valid():
-            save_forms_with_tracking(self, form, formset=formset, update=False)
-            return redirect(self.object.get_post_submission_url())
-        else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
-
-
-class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
-    """Update a Study Configuration with inline for Associtated Models"""
-    model = StudyConfiguration
-    template_name = 'assays/studyconfiguration_add.html'
-    form_class = StudyConfigurationForm
-
-    def get_context_data(self, **kwargs):
-        context = super(StudyConfigurationUpdate, self).get_context_data(**kwargs)
-        if 'formset' not in context:
-            if self.request.POST:
-                context['formset'] = StudyModelFormSet(self.request.POST, instance=self.object)
-            else:
-                context['formset'] = StudyModelFormSet(instance=self.object)
-
-        context['update'] = True
-
-        return context
-
-    def form_valid(self, form):
-        formset = StudyModelFormSet(self.request.POST, instance=self.object)
-
-        if form.is_valid() and formset.is_valid():
-            save_forms_with_tracking(self, form, formset=formset, update=True)
-            return redirect(self.object.get_post_submission_url())
-        else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+# class StudyConfigurationList(LoginRequiredMixin, ListView):
+#     """Display a list of Study Configurations"""
+#     model = StudyConfiguration
+#     template_name = 'assays/studyconfiguration_list.html'
+#
+#
+# # FormSet for Study Models
+# StudyModelFormSet = inlineformset_factory(
+#     StudyConfiguration,
+#     StudyModel,
+#     extra=1,
+#     exclude=[],
+#     widgets={
+#         'label': forms.TextInput(attrs={'size': 2}),
+#         'sequence_number': forms.TextInput(attrs={'size': 2})
+#     }
+# )
+#
+#
+# class StudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
+#     """Add a Study Configuration with inline for Associtated Models"""
+#     template_name = 'assays/studyconfiguration_add.html'
+#     form_class = StudyConfigurationForm
+#
+#     def get_context_data(self, **kwargs):
+#         context = super(StudyConfigurationAdd, self).get_context_data(**kwargs)
+#
+#         if 'formset' not in context:
+#             if self.request.POST:
+#                 context['formset'] = StudyModelFormSet(self.request.POST)
+#             else:
+#                 context['formset'] = StudyModelFormSet()
+#
+#         return context
+#
+#     def form_valid(self, form):
+#         formset = StudyModelFormSet(self.request.POST, instance=form.instance)
+#
+#         if form.is_valid() and formset.is_valid():
+#             save_forms_with_tracking(self, form, formset=formset, update=False)
+#             return redirect(self.object.get_post_submission_url())
+#         else:
+#             return self.render_to_response(self.get_context_data(form=form, formset=formset))
+#
+#
+# class StudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
+#     """Update a Study Configuration with inline for Associtated Models"""
+#     model = StudyConfiguration
+#     template_name = 'assays/studyconfiguration_add.html'
+#     form_class = StudyConfigurationForm
+#
+#     def get_context_data(self, **kwargs):
+#         context = super(StudyConfigurationUpdate, self).get_context_data(**kwargs)
+#         if 'formset' not in context:
+#             if self.request.POST:
+#                 context['formset'] = StudyModelFormSet(self.request.POST, instance=self.object)
+#             else:
+#                 context['formset'] = StudyModelFormSet(instance=self.object)
+#
+#         context['update'] = True
+#
+#         return context
+#
+#     def form_valid(self, form):
+#         formset = StudyModelFormSet(self.request.POST, instance=self.object)
+#
+#         if form.is_valid() and formset.is_valid():
+#             save_forms_with_tracking(self, form, formset=formset, update=True)
+#             return redirect(self.object.get_post_submission_url())
+#         else:
+#             return self.render_to_response(self.get_context_data(form=form, formset=formset))

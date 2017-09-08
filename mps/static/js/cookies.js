@@ -2,7 +2,7 @@
 // TODO CHANGE FILES TO USE THESE
 window.COOKIES = {};
 
-$(document).ready(function () {
+$(document).ready(function() {
     window.COOKIES.get_cookie = function (name) {
         var cookie_value = null;
         if (document.cookie && document.cookie != '') {
