@@ -38,6 +38,8 @@ restricted = ('restricted',)
 # Group
 group = ('group',)
 
+# TODO REMOVE RESTRICTED
+
 # Overwrite options
 # DEPRECATED
 OVERWRITE_OPTIONS_BULK = forms.ChoiceField(
@@ -128,7 +130,7 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
 
-class StudySupportingDataInlineFormset(BaseInlineFormSet):
+class StudySupportingDataInlineFormSet(BaseInlineFormSet):
     """Form for Study Supporting Data (as part of an inline)"""
     class Meta(object):
         model = StudySupportingData
@@ -152,7 +154,7 @@ class AssayRunAccessForm(forms.ModelForm):
 
     class Meta(object):
         model = AssayRun
-        fields = ['access_groups', 'restricted']
+        fields = ['access_groups']
 
 
 class AssayChipResultForm(SignOffMixin, forms.ModelForm):
