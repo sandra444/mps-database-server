@@ -113,7 +113,7 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
             'name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
-        exclude = tracking
+        exclude = tracking + restricted
 
     def clean(self):
         """Checks for at least one study type and deformed assay_run_ids"""
