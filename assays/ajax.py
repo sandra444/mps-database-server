@@ -1849,7 +1849,6 @@ def fetch_matrix_items_as_json(request):
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
->>>>>>> Stashed changes
 
 switch = {
     'fetch_assay_layout_content': fetch_assay_layout_content,
@@ -1868,7 +1867,7 @@ switch = {
     'validate_individual_chip_file': validate_individual_chip_file,
     'validate_individual_plate_file': validate_individual_plate_file,
     'fetch_quality_indicators': fetch_quality_indicators,
-    'send_ready_for_sign_off_email': send_ready_for_sign_off_email
+    'send_ready_for_sign_off_email': send_ready_for_sign_off_email,
     'fetch_device_dimensions': fetch_device_dimensions,
     'fetch_matrix_items_as_json': fetch_matrix_items_as_json
 }

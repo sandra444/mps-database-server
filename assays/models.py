@@ -1620,44 +1620,44 @@ class AssayDataPoint(models.Model):
 
 # # TODO MODIFY AssayCompoundInstance
 # DEPRECATED: DO NOT USE
-class AssayCompoundInstance(models.Model):
-    """An instance of a compound used in an assay; used as an inline"""
-    class Meta(object):
-        unique_together = [
-            (
-                'chip_setup',
-                # 'setup',
-                'compound_instance',
-                'concentration',
-                'concentration_unit',
-                'addition_time',
-                'duration'
-            )
-        ]
-
-    # Stop-gap, subject to change
-    # DEPRECATED
-    chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True)
-    # Shouldn't be optional
-    # setup = models.ForeignKey('assays.AssaySetup', null=True, blank=True)
-
-    # COMPOUND INSTANCE IS REQUIRED, however null=True was done to avoid a submission issue
-    compound_instance = models.ForeignKey(
-        'compounds.CompoundInstance',
-        null=True,
-        blank=True
-    )
-    concentration = models.FloatField()
-    concentration_unit = models.ForeignKey(
-        'assays.PhysicalUnits',
-        verbose_name='Concentration Unit'
-    )
-
-    # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
-    addition_time = models.FloatField(blank=True)
-
-    # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
-    duration = models.FloatField(blank=True)
+# class AssayCompoundInstance(models.Model):
+#     """An instance of a compound used in an assay; used as an inline"""
+#     class Meta(object):
+#         unique_together = [
+#             (
+#                 'chip_setup',
+#                 # 'setup',
+#                 'compound_instance',
+#                 'concentration',
+#                 'concentration_unit',
+#                 'addition_time',
+#                 'duration'
+#             )
+#         ]
+#
+#     # Stop-gap, subject to change
+#     # DEPRECATED
+#     chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True)
+#     # Shouldn't be optional
+#     # setup = models.ForeignKey('assays.AssaySetup', null=True, blank=True)
+#
+#     # COMPOUND INSTANCE IS REQUIRED, however null=True was done to avoid a submission issue
+#     compound_instance = models.ForeignKey(
+#         'compounds.CompoundInstance',
+#         null=True,
+#         blank=True
+#     )
+#     concentration = models.FloatField()
+#     concentration_unit = models.ForeignKey(
+#         'assays.PhysicalUnits',
+#         verbose_name='Concentration Unit'
+#     )
+#
+#     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
+#     addition_time = models.FloatField(blank=True)
+#
+#     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
+#     duration = models.FloatField(blank=True)
 
 
 class AssaySetupCompound(models.Model):
