@@ -270,7 +270,7 @@ $(document).ready(function () {
     ;
 
     var empty_compound_html = $('<div>')
-        .addClass('bg-info')
+        .addClass('alert alert-info')
         .append(
             $('<div>')
                 .append(
@@ -342,15 +342,24 @@ $(document).ready(function () {
     ;
 
     var empty_cell_html = $('<div>')
-        .addClass('bg-primary')
+        .addClass('alert alert-success')
         .append(
             $('<div>')
-                .addClass('item-cell_sample')
+                .append(
+                    $('<span>')
+                        .addClass('item-cell_sample')
+                )
+                .append(
+                    $('<span>')
+                        .addClass('item-passage')
+                )
+        //         .addClass('item-cell_sample')
+        // )
+        // .append(
+        //     $('<div>')
+        //         .addClass('item-passage')
         )
-        .append(
-            $('<div>')
-                .addClass('item-passage')
-        )
+
         .append(
             $('<div>')
                 .addClass('item-biosensor')
@@ -651,8 +660,6 @@ $(document).ready(function () {
                         $.each(set_data, function(set_field, set_field_value) {
                             set_html.find('.item-' + set_field).text(set_field_value + ' ');
                         });
-
-                        console.log(index, set_name, i, set_index, item_id);
 
                         current_item.find('.item-' + set_name + '_section').append(set_html);
                     });

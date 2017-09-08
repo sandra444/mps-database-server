@@ -1579,11 +1579,20 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
             lot_text = compound.get('lot_text', '').strip()
             receipt_date = compound.get('receipt_date', None)
 
-            concentration = float(compound.get('concentration', None))
+            try:
+                concentration = float(compound.get('concentration', None))
+            except (TypeError, ValueError) as e:
+                concentration = None
             concentration_unit_id = compound.get('concentration_unit_id', None)
 
-            addition_time = float(compound.get('addition_time', None))
-            duration = float(compound.get('duration', None))
+            try:
+                addition_time = float(compound.get('addition_time', None))
+            except (TypeError, ValueError) as e:
+                addition_time = None
+            try:
+                duration = float(compound.get('duration', None))
+            except (TypeError, ValueError) as e:
+                duration = None
 
             if receipt_date:
                 try:
@@ -1696,10 +1705,22 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
             cell = json.loads(cell)
 
             # This is a little too verbose
-            cell_sample_id = int(cell.get('cell_sample_id', None))
-            biosensor_id = int(cell.get('biosensor_id', None))
-            density = float(cell.get('density', None))
-            density_unit_id = int(cell.get('density_unit_id', None))
+            try:
+                cell_sample_id = int(cell.get('cell_sample_id', None))
+            except (TypeError, ValueError) as e:
+                cell_sample_id = None
+            try:
+                biosensor_id = int(cell.get('biosensor_id', None))
+            except (TypeError, ValueError) as e:
+                biosensor_id = None
+            try:
+                density = float(cell.get('density', None))
+            except (TypeError, ValueError) as e:
+                density = None
+            try:
+                density_unit_id = int(cell.get('density_unit_id', None))
+            except (TypeError, ValueError) as e:
+                density_unit_id = None
             passage = cell.get('passage', '')
 
             cell = AssaySetupCell(
@@ -1867,17 +1888,17 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
 
             try:
                 device_id = int(setup.get('device_id', None))
-            except TypeError:
+            except (TypeError, ValueError) as e:
                 raise forms.ValidationError('All ids must be entered as integers.')
 
             try:
                 organ_model_id = int(setup.get('organ_model_id', None))
-            except:
+            except (TypeError, ValueError) as e:
                 organ_model_id = None
 
             try:
                 organ_model_protocol_id = int(setup.get('organ_model_protocol_id', None))
-            except:
+            except (TypeError, ValueError) as e:
                 organ_model_protocol_id = None
 
             variance_from_organ_model_protocol = setup.get('variance_from_organ_model_protocol', '')
@@ -2006,9 +2027,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
                     'row_index': int(current_row_index),
                     'column_index': int(current_column_index)
                 })
-            except TypeError:
-                raise forms.ValidationError('Row and column indexes must be numeric.')
-            except ValueError:
+            except (TypeError, ValueError) as e:
                 raise forms.ValidationError('Row and column indexes must be numeric.')
 
             # TODO NEED TO CHANGE FAILURE TIME TO BE SPLIT INTO DAY HOUR MINUTE
@@ -2021,9 +2040,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
                 item.update({
                     'failure_time': current_failure_time
                 })
-            except TypeError:
-                raise forms.ValidationError('Failure time must be numeric.')
-            except ValueError:
+            except (TypeError, ValueError) as e:
                 raise forms.ValidationError('Failure time must be numeric.')
 
             try:
@@ -2102,10 +2119,6 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
             })
 
             self.cleaned_data['items_to_consider'].append([item, setup_index])
-
-        print setups
-        print setup_indexes
-        print self.cleaned_data['setups_to_consider']
 
         return self.cleaned_data
 
