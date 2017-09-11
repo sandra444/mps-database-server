@@ -1293,12 +1293,16 @@ class AssayStudy(FlaggableModel):
     #     default=''
     # )
 
-    # TODO
-    def __unicode__(self):
-        center_id = get_center_id(self.group.id).get('center_id')
+    def get_study_types_string(self):
         study_types = '-'.join(
             sorted([study_type.code for study_type in self.study_types.all()])
         )
+        return study_types
+
+    # TODO
+    def __unicode__(self):
+        center_id = get_center_id(self.group.id).get('center_id')
+        study_types = self.get_study_types_string()
         return '-'.join([
             center_id,
             study_types,

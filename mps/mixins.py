@@ -342,6 +342,7 @@ class DeletionMixin(object):
 
         return super(DeletionMixin, self).dispatch(*args, **kwargs)
 
+
 # Require the specified group or fail
 class SpecificGroupRequiredMixin(object):
     """This mixin requires the user to have a specific group

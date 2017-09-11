@@ -49,7 +49,7 @@
                     <td><a class="btn btn-primary" href="/assays/{{ study.id }}">View/Edit</a></td>
                     <td>{{ study.name }}</td>
                     <td>{{ study.start_date|date:"M d, Y" }}</td>
-                    <td>{{ study.study_types }}</td>
+                    <td>{{ study.get_study_types_string }}</td>
                     <td>{{ study.organ_models|default:"-No Organ Models-" }}</td>
 {#                    <td>{{ study.study_configuration }}</td>#}
                     <td>{{ study.description }}</td>

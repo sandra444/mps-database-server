@@ -148,23 +148,23 @@ def save_forms_with_tracking(self, form, formset=None, update=False):
             formset.save()
 
 
-def add_tracking_to_form_instance(form):
-    """Add tracking data to a form instance
-    
-    params:
-    form - the form in question
-    """
-    data = form.cleaned_data
-
-    # Only update review if the entry has not already been reviewed
-    if not form.instance.signed_off_by and data.get('signed_off', ''):
-        form.instance.signed_off_by = self.request.user
-        form.instance.signed_off_date = timezone.now()
-    # Remove sign off if necessary
-    elif form.instance.signed_off_by and not data.get('signed_off', 'NOT_IN_FORM'):
-        form.instance.signed_off_by = None
-        form.instance.signed_off_date = None
-
-    # If this is an update
-    if form.instance.id:
-        form.instance.modified_by = self.request.user
+# def add_tracking_to_form_instance(form):
+#     """Add tracking data to a form instance
+#
+#     params:
+#     form - the form in question
+#     """
+#     data = form.cleaned_data
+#
+#     # Only update review if the entry has not already been reviewed
+#     if not form.instance.signed_off_by and data.get('signed_off', ''):
+#         form.instance.signed_off_by = self.request.user
+#         form.instance.signed_off_date = timezone.now()
+#     # Remove sign off if necessary
+#     elif form.instance.signed_off_by and not data.get('signed_off', 'NOT_IN_FORM'):
+#         form.instance.signed_off_by = None
+#         form.instance.signed_off_date = None
+#
+#     # If this is an update
+#     if form.instance.id:
+#         form.instance.modified_by = self.request.user
