@@ -293,33 +293,84 @@
         {% endfor %}
     {% endif %}
 
-    <a id="add_button-assayinstance_set" class="btn btn-success" role="button">Add Assay</a>
-    <table class="table table-striped inlines" id="assayinstance_set-group"  name="assays">
+    <table class="table table-striped table-condensed table-bordered inlines" id="assayinstance_set-group"  name="assays">
         <thead>
             <tr>
-                <th>Target/Analyte*</th>
-                <th>Method/Kit*</th>
-                <th>Readout Unit*</th>
-                <th>Delete</th>
+                <td><a id="add_button-assayinstance_set" class="btn btn-success" role="button">Add Assay</a></td>
             </tr>
         </thead>
+
         <tbody>
             {% for assay in assay_instance_formset %}
-                <tr class="inline" id="assay-{{ forloop.counter0 }}">
-                    {# Hidden input for Update (need id to associate) #}
-                    {% if assay.id.value %}
-                    <td class="original" hidden>
-                        <input id="id_assayinstance_set-{{ forloop.counter0 }}-id" name="assayinstance_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ assay.id.value }}">
-                    </td>
-                    {% endif %}
-                    <td>{{ assay.target }}</td>
-                    <td>{{ assay.method }}</td>
-                    <td>{{ assay.unit }}</td>
-                    <td>{{ assay.DELETE }}</td>
+                <tr class="inline assay-inline" id="assays-{{ forloop.counter0 }}">
+                <td>
+                <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
+                    <tr>
+                        <th>Target/Analyte*</th>
+                        <th>Method/Kit*</th>
+                        <th>Readout Unit*</th>
+                    </tr>
+                    <tr>
+                        {# Hidden input for Update (need id to associate) #}
+                        {% if assay.id.value %}
+                        <td class="original" hidden>
+                            <input id="id_assayinstance_set-{{ forloop.counter0 }}-id" name="assayinstance_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ assay.id.value }}">
+                        </td>
+                        {% endif %}
+                        <td>{{ assay.target }}</td>
+                        <td>{{ assay.method }}</td>
+                        <td>{{ assay.unit }}</td>
+                    </tr>
+                </table>
+                <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
+                    <tr>
+                        <th>Experiment Purpose</th>
+                        <th class="bg-danger">Delete</th>
+                    </tr>
+                    <tr>
+                        <td>{{ assay.purpose }}</td>
+                        <td class="bg-danger">{{ assay.DELETE }}</td>
+                    </tr>
+                </table>
+                </td>
                 </tr>
             {% endfor %}
         </tbody>
+        <tfoot>
+            <tr>
+                {# Contrived extra add button #}
+                <td><a id="add_button-assayinstance_set" class="btn btn-success" role="button">Add Assay</a></td>
+            </tr>
+        </tfoot>
     </table>
+
+{#    <a id="add_button-assayinstance_set" class="btn btn-success" role="button">Add Assay</a>#}
+{#    <table class="table table-striped inlines" id="assayinstance_set-group"  name="assays">#}
+{#        <thead>#}
+{#            <tr>#}
+{#                <th>Target/Analyte*</th>#}
+{#                <th>Method/Kit*</th>#}
+{#                <th>Readout Unit*</th>#}
+{#                <th>Delete</th>#}
+{#            </tr>#}
+{#        </thead>#}
+{#        <tbody>#}
+{#            {% for assay in assay_instance_formset %}#}
+{#                <tr class="inline" id="assay-{{ forloop.counter0 }}">#}
+                    {# Hidden input for Update (need id to associate) #}
+{#                    {% if assay.id.value %}#}
+{#                    <td class="original" hidden>#}
+{#                        <input id="id_assayinstance_set-{{ forloop.counter0 }}-id" name="assayinstance_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ assay.id.value }}">#}
+{#                    </td>#}
+{#                    {% endif %}#}
+{#                    <td>{{ assay.target }}</td>#}
+{#                    <td>{{ assay.method }}</td>#}
+{#                    <td>{{ assay.unit }}</td>#}
+{#                    <td>{{ assay.DELETE }}</td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#        </tbody>#}
+{#    </table>#}
 
     {{ supporting_data_formset.management_form }}
     <legend>Supporting Data</legend>

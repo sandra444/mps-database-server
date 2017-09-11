@@ -58,6 +58,19 @@ def get_split_times(time_in_minutes):
     return times
 
 
+# Proposed
+# class AssayAccessGroup(LockableModel):
+#     """Access Groups for Assays and related data (such as cell samples)"""
+#
+#     viewers = models.ManyToManyField(User, related_name='access_group_viewers')
+#     editors = models.ManyToManyField(User, related_name='access_group_viewers')
+#     admins = models.ManyToManyField(User, related_name='access_group_viewers')
+#
+#     description = models.CharField(max_length=256, blank=True, default='')
+    # centers? or center?
+    # can_add_data?
+
+
 class UnitType(LockableModel):
     """Unit types for physical units"""
 
@@ -1180,6 +1193,9 @@ class AssayInstance(models.Model):
     method = models.ForeignKey(AssayMethod)
     # Name of model "PhysicalUnits" should be renamed, methinks
     unit = models.ForeignKey(PhysicalUnits)
+
+    # Err on the side of long char field
+    purpose = models.CharField(max_length=512, default='')
 
     def __unicode__(self):
         return u'{0}|{1}|{2}'.format(self.target, self.method, self.unit)
