@@ -289,7 +289,7 @@
       <ul class="nav navbar-nav navbar-right">
         {% if user.is_active %}
           <li title="Click to log out or change password" class="dropdown">
-          <a class="dropdown-toggle">Profile<span class="caret"></span></a>
+          <a class="dropdown-toggle">{{ user.username }}<span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
             <li><a href="/accounts/logout/">Log Out</a></li>
             <li><a href="/password_change/">Change Password</a></li>
