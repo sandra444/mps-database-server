@@ -1427,6 +1427,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
 
     # Curious way to communicate models to be saved to save (no repeat queries)
     items_to_consider = forms.BooleanField(required=False)
+    items_to_purge = forms.BooleanField(required=False)
     # item_to_setup_map = forms.BooleanField(required=False)
     setups_to_consider = forms.BooleanField(required=False)
     # suppliers_to_consider = forms.BooleanField(required=False)
@@ -1483,6 +1484,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
 
         # PLEASE NOTE: IF THERE ARE COMPOUNDS, CELLS, SETTINGS TO BE SAVED, THEN THERE ARE NEW SETUPS
         self.cleaned_data['items_to_consider'] = []
+        self.cleaned_data['items_to_purge'] = []
         #self.cleaned_data['item_to_setup_map'] = {}
         self.cleaned_data['setups_to_consider'] = {}
         # self.cleaned_data['suppliers_to_consider'] = {}
@@ -2006,9 +2008,18 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         for item in item_data.values():
             ignore = True
             for key, value in item.items():
-                if value and key not in ['column_index', 'row_index']:
+                if value and key not in ['id', 'column_index', 'row_index']:
                     ignore = False
                     break
+
+            if ignore and item.get('id', '') and self.instance.id:
+                try:
+                    item = AssayMatrixItem.objects.get(id=item.get('id', ''), study_id=self.instance.study.id, matrix_id=self.instance.id)
+                    # TODO MAKE SURE TO CHECK FOR RELATED DATA BEFORE ACTUALLY ADDING TO PURGE
+                    self.cleaned_data['items_to_purge'].append(item)
+
+                except:
+                    raise forms.ValidationError('A chip/well updated incorrectly.')
 
             if ignore:
                 continue
@@ -2101,7 +2112,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
 
             if current_id and self.instance.id:
                 try:
-                    item = AssayMatrixItem(id=current_id, study_id=self.instance.study.id, matrix_id=self.instance.id)
+                    item = AssayMatrixItem.objects.get(id=current_id, study_id=self.instance.study.id, matrix_id=self.instance.id)
                     item.__dict__.update(fields_dict)
 
                 except:
@@ -2181,6 +2192,9 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
             item.matrix = this_matrix
             item.save()
             # If this item is being deleted (TODO)
+
+        for item in self.cleaned_data['items_to_purge']:
+            item.delete()
 
         return this_matrix
 

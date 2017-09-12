@@ -158,9 +158,9 @@ $(document).ready(function () {
         //     'settings': []
         // },
         'setup_index': null,
-        'modified': '',
+        'modified': ''
         // Subject to change
-        'deleted': ''
+        // 'deleted': ''
     };
 
     // These ended up being practically unintelligible
@@ -557,7 +557,9 @@ $(document).ready(function () {
                 },
                 success: function (json) {
                     if (Object.keys(json.item_data).length > 0) {
-                        item_data = json.item_data;
+                        $.each(json.item_data, function(index, contents) {
+                            item_data[index] = contents;
+                        });
                         item_data_selector.val(JSON.stringify(item_data));
 
                         setups = json.setups;
@@ -587,7 +589,9 @@ $(document).ready(function () {
     var build_initial_matrix = function(number_of_rows, number_of_columns) {
         matrix_body_selector.empty();
 
-        get_matrix_contents();
+        if (Object.keys(item_data).length === 0) {
+            get_matrix_contents();
+        }
 
         for (var row_index=0; row_index < number_of_rows; row_index++) {
             var row_id = 'row_' + row_index;
@@ -1063,6 +1067,36 @@ $(document).ready(function () {
         });
     }
 
+    function clear_fields() {
+        $('.ui-selected').each(function(index) {
+            var current_item = $(this);
+            var current_item_id = this.id;
+            var column_index = item_data[current_item_id]['row_index'];
+            var row_index = item_data[current_item_id]['row_index'];
+            var current_id = item_data[current_item_id]['id'];
+            // Reset object values
+            // Remove contents of the item
+            item_data[current_item_id] = Object.assign({}, empty_item);
+            item_data[current_item_id]['row_index'] = row_index;
+            item_data[current_item_id]['column_index'] = column_index;
+            item_data[current_item_id]['id'] = current_id;
+
+            var item_contents = item_data[current_item_id];
+
+            $.each(item_contents, function(item_field, field_value) {
+                current_item.find('.item-' + item_field).text('');
+            });
+
+            $.each(empty_setup, function(setup_field, setup_field_value) {
+                current_item.find('.item-' + setup_field).text(setup_field_value);
+            });
+
+            $.each(_.keys(empty_html), function(index, set_name) {
+                current_item.find('.item-' + set_name + '_section').empty();
+            });
+        });
+    }
+
     function matrix_add_content_to_selected() {
         var action = action_selector.val();
 
@@ -1113,7 +1147,8 @@ $(document).ready(function () {
                 alert('TODO');
                 break;
             case 'clear':
-                alert('TODO');
+                // TODO add more options
+                clear_fields();
                 break;
             default:
                 alert('Action not recognized')
