@@ -378,10 +378,7 @@ AssayInstanceFormset = inlineformset_factory(
     AssayInstance,
     formset=AssayInstanceInlineFormset,
     extra=1,
-    exclude=[],
-    widgets={
-        'purpose': forms.Textarea(attrs={'cols': 100, 'rows': 3})
-    }
+    exclude=[]
 )
 
 
