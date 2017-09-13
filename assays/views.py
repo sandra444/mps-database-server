@@ -9,7 +9,8 @@ from cellsamples.models import CellSample
 from assays.models import (
     AssaySetup,
     AssayStudy,
-    AssayMatrix
+    AssayMatrix,
+    AssayMatrixItem
 )
 from assays.forms import (
     AssayStudyForm,
@@ -25,6 +26,8 @@ from django import forms
 # TODO REVISE SPAGHETTI CODE
 from assays.ajax import get_chip_readout_data_as_csv
 from assays.utils import (
+    MATRIX_PREFETCH,
+    MATRIX_ITEM_PREFETCH,
     parse_file_and_save,
     modify_qc_status_plate,
     modify_qc_status_chip,
@@ -304,8 +307,15 @@ class AssayStudyIndex(DetailView):
 
         matrices = AssayMatrix.objects.filter(study=self.object)
 
+        items = AssayMatrixItem.objects.filter(
+            matrix=matrices
+        ).prefetch_related(
+            *MATRIX_ITEM_PREFETCH
+        )
+
         # Cellsamples will always be the same
         context['matrices'] = matrices
+        context['items'] = items
 
         return context
 
@@ -319,11 +329,11 @@ class AssayStudySummary(DetailView):
     template_name = 'assays/assaystudy_summary.html'
 
 
-class AssayStudyDelete(AdminRequiredMixin, DeleteView):
-    """Delete a Study"""
-    model = AssayStudy
-    template_name = 'assays/assaystudy_delete.html'
-    success_url = '/assays/editable_studies/'
+# class AssayStudyDelete(AdminRequiredMixin, DeleteView):
+#     """Delete a Study"""
+#     model = AssayStudy
+#     template_name = 'assays/assaystudy_delete.html'
+#     success_url = '/assays/editable_studies/'
 
 
 def get_cell_samples(user, setups=None):

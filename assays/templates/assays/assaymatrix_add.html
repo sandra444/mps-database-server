@@ -10,6 +10,15 @@
 {% endblock %}
 
 {% block breadcrumbs %}
+    <li><a href="/assays/editable_studies/">Editable Studies</a></li>
+    <li><a href="/assays/{{ form.instance.study.id }}">{{ form.instance.study }}</a></li>
+    <li class="active">
+        {% if object %}
+            Edit <em>{{ object }}</em>
+        {% else %}
+            Add Matrix
+        {% endif %}
+    </li>
 {% endblock %}
 
 {% block content %}

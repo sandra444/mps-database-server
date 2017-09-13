@@ -150,12 +150,20 @@ CHIP_DATA_PREFETCH = (
     'data_upload'
 )
 
+# SUBJECT TO CHANGE
 MATRIX_ITEM_PREFETCH = (
     'study',
     'matrix',
     'setup',
     # Subject to change
     'failure_reason'
+)
+
+# SUBJECT TO CHANGE
+MATRIX_PREFETCH = (
+    'device',
+    'organ_model',
+    'organ_model_protocol'
 )
 
 def charset_detect(in_file, chunk_size=4096):
@@ -2714,3 +2722,36 @@ def validate_file(
         )
 
         return preview_data
+
+
+class AssayFileProcessor():
+    """Processes files"""
+    def __init__(self):
+        pass
+        # self.files =
+        # self.study =
+        # self.matrix =
+
+    def validate_files(self):
+        pass
+
+    def save_files(self):
+        pass
+
+    def process_file(self, current_file, save=False):
+        try:
+            file_data = current_file.read()
+            excel_file = xlrd.open_workbook(file_contents=file_data)
+        except xlrd.XLRDError:
+            datareader = unicode_csv_reader(current_file, delimiter=',')
+            datalist = list(current_file)
+
+    # TODO REVISE
+    # This isn't super useful, can just do this in get_file contents or whatever
+    # def check_if_excel(self):
+    #     try:
+    #         file_data = self.file_stream.read()
+    #         excel_file = xlrd.open_workbook(file_contents=file_data)
+    #         self.is_excel = True
+    #     except xlrd.XLRDError:
+    #         self.is_excel = False

@@ -42,7 +42,7 @@
         </legend>
 
         {% if matrices %}
-        <div class="padded-bottom">
+        <div>
         <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -59,6 +59,7 @@
                 <tr id={{ matrix.id }} name={{ matrix.id }}>
                     <td>
                         <a class="btn btn-primary"
+                           {# THIS SHOULD USE URL #}
                            href="/assays/assaymatrix/{{ matrix.id }}/">
                             View/Edit
                         </a>
@@ -80,6 +81,55 @@
         {% else %}
         <div class="alert alert-warning" role="alert">
             No matrices exist for this study
+        </div>
+        {% endif %}
+
+        <legend>
+            <h2>
+                Items
+            </h2>
+        </legend>
+
+        {% if items %}
+        <div class="padded-bottom">
+        <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Name</th>
+                    <th>Device</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for item in items %}
+                <tr id={{ item.id }} name={{ item.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           {# THIS SHOULD USE URL #}
+                           href="/assays/assaymatrixitem/{{ item.id }}/">
+                            View/Edit
+                        </a>
+                    </td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.device }}</td>
+                    <td>
+                        {{ item.full_creator }}
+                    </td>
+                    <td>
+                        {# Make sure this works #}
+                        {% include 'sign_off_and_flag_display.html' with object=matrix %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No items exist for this study
         </div>
         {% endif %}
     </div>

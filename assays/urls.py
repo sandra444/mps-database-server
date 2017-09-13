@@ -11,7 +11,7 @@ urlpatterns = patterns('',
     # Update page for studies
     url(r'^assays/(?P<pk>[0-9]+)/update/$', AssayStudyUpdate.as_view(), name='study-update'),
     # Delete view for studies
-    url(r'^assays/(?P<pk>[0-9]+)/delete/$', AssayStudyDelete.as_view(), name='study-delete'),
+    # url(r'^assays/(?P<pk>[0-9]+)/delete/$', AssayStudyDelete.as_view(), name='study-delete'),
     # Summary view for studies
     # url(r'^assays/(?P<pk>[0-9]+)/summary/$', AssayRunSummary.as_view(), name='study-summary'),
     # # All data for a study
