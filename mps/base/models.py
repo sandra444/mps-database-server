@@ -80,23 +80,23 @@ class LockableModel(TrackableModel):
 # DEPRECATED
 # AT THE MOMENT, THESE FIELDS ARE NOT VERY MEANINGFULLY USED
 # TODO WE WILL HAVE TO BE SURE TO CHANGE ANY LOGIC THAT RELIES ON GROUP AND RESTRICTED
-# class RestrictedModel(LockableModel):
-#     """The base model for Restricted models"""
-#
-#     # It is mandatory to bind a group to a restricted model
-#     group = models.ForeignKey('auth.Group',
-#                               help_text='Bind to a group')
-#
-#     # DEPRECATED
-#     # We seem to have decided to handle this differently
-#     restricted = models.BooleanField(default=True,
-#                                      help_text='Check box to restrict to selected group')
-#
-#     class Meta(object):
-#         abstract = True
+class RestrictedModel(LockableModel):
+    """The base model for Restricted models"""
+
+    # It is mandatory to bind a group to a restricted model
+    group = models.ForeignKey('auth.Group',
+                              help_text='Bind to a group')
+
+    # DEPRECATED
+    # We seem to have decided to handle this differently
+    restricted = models.BooleanField(default=True,
+                                     help_text='Check box to restrict to selected group')
+
+    class Meta(object):
+        abstract = True
 
 
-class FlaggableModel(LockableModel):
+class FlaggableModel(RestrictedModel):
     """The base model for flaggable models"""
 
     flagged = models.BooleanField(default=False,

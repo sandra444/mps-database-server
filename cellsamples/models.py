@@ -106,8 +106,8 @@ class CellSample(FlaggableModel):
     cell_type = models.ForeignKey('CellType')
     cell_subtype = models.ForeignKey('CellSubtype')
 
-    # Group is now explicitly defined here as opposed to using a mixin
-    group = models.ForeignKey('auth.Group', help_text='Bind to a group')
+    # Group may need to be explicitly defined here as opposed to using a mixin
+    # group = models.ForeignKey('auth.Group', help_text='Bind to a group')
 
     # DEPRECATED
     # cell_source CONSIDERED UNINTUITIVE
