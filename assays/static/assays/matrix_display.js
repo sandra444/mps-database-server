@@ -171,7 +171,7 @@ $(document).ready(function () {
             $('<div>')
                 .append(
                 $('<span>')
-                    .addClass('item-name')
+                    .addClass('item-name lead')
                 )
                 .append(
                 $('<span>')
@@ -179,78 +179,82 @@ $(document).ready(function () {
                 )
                 .attr('align', 'center')
         )
-        // Setup date
         .append(
             $('<div>')
-                .addClass('item-setup_date')
-        )
-        // Failure
-        .append(
-            $('<div>')
-                .addClass('item-failure')
-                // .append(
-                //     $('<span>')
-                //         .addClass('item-failure_date')
-                // )
-                .append(
-                    $('<span>')
-                        .addClass('item-failure_time')
-                )
-                .append(
-                    $('<span>')
-                        // .addClass('item-failure_reason glyphicon glyphicon-exclamation-sign')
-                        .addClass('item-failure_reason')
-                )
-        )
-        // Notes
-        .append(
-            $('<div>')
-                .addClass('item-notes_section')
-                .append(
-                    $('<span>')
-                        .addClass('item-scientist')
-                )
-                .append(
-                    $('<span>')
-                        .addClass('item-notebook')
-                )
-                .append(
-                    $('<span>')
-                        .addClass('item-notebook_page')
-                )
-                .append(
-                    $('<span>')
-                        // .addClass('item-notes glyphicon glyphicon-question-mark')
-                        .addClass('item-notes')
-                )
-        )
-        // Setup
-        .append(
-            $('<div>')
-                .addClass('item-setup_section')
-                .append(
-                    $('<div>')
-                        .addClass('item-device')
-                )
-                .append(
-                    $('<div>')
-                        .append(
-                            $('<span>')
-                                .addClass('item-organ_model')
-                        )
-                        .append(
-                            $('<span>')
-                                .addClass('item-organ_model_protocol')
-                        )
-                )
-                .append(
-                    $('<div>')
+                .addClass('alert alert-warning')
+            // Setup date
+            .append(
+                $('<div>')
+                    .addClass('item-setup_date')
+            )
+            // Failure
+            .append(
+                $('<div>')
+                    .addClass('item-failure')
+                    // .append(
+                    //     $('<span>')
+                    //         .addClass('item-failure_date')
+                    // )
                     .append(
                         $('<span>')
-                            // .addClass('item-variance_from_organ_model_protocol glyphicon glyphicon-question-mark')
-                            .addClass('item-variance_from_organ_model_protocol')
+                            .addClass('item-failure_time')
                     )
-                )
+                    .append(
+                        $('<span>')
+                            // .addClass('item-failure_reason glyphicon glyphicon-exclamation-sign')
+                            .addClass('item-failure_reason')
+                    )
+            )
+            // Notes
+            .append(
+                $('<div>')
+                    .addClass('item-notes_section')
+                    .append(
+                        $('<span>')
+                            .addClass('item-scientist')
+                    )
+                    .append(
+                        $('<span>')
+                            .addClass('item-notebook')
+                    )
+                    .append(
+                        $('<span>')
+                            .addClass('item-notebook_page')
+                    )
+                    .append(
+                        $('<span>')
+                            // .addClass('item-notes glyphicon glyphicon-question-mark')
+                            .addClass('item-notes')
+                    )
+            )
+            // Setup
+            .append(
+                $('<div>')
+                    .addClass('item-setup_section')
+                    .append(
+                        $('<div>')
+                            .addClass('item-device')
+                    )
+                    .append(
+                        $('<div>')
+                            .append(
+                                $('<span>')
+                                    .addClass('item-organ_model')
+                            )
+                            .append(
+                                $('<span>')
+                                    .addClass('item-organ_model_protocol')
+                            )
+                    )
+                    .append(
+                        $('<div>')
+                        .append(
+                            $('<span>')
+                                // .addClass('item-variance_from_organ_model_protocol glyphicon glyphicon-question-mark')
+                                .addClass('item-variance_from_organ_model_protocol')
+                        )
+                    )
+            )
         )
         // Cells
          .append(

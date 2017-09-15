@@ -1806,7 +1806,7 @@ def fetch_matrix_items_as_json(request):
             })
         if setup.organ_model_protocol_id:
             current_setup.update({
-                'organ_model_protocol': setup.organ_model_protocol.name
+                'organ_model_protocol': setup.organ_model_protocol.version
             })
 
         setup_data.update({

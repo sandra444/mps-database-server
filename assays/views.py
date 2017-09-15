@@ -85,14 +85,17 @@ def get_queryset_with_organ_model_map(queryset):
     setups = AssaySetup.objects.filter(
         organ_model__isnull=False
     ).prefetch_related(
-        'study'
+        'matrix__study',
+        'device',
+        'organ_model',
+        'organ_model_protocol'
     )
 
     organ_model_map = {}
 
     for setup in setups:
         organ_model_map.setdefault(
-            setup.study_id, {}
+            setup.matrix.study.id, {}
         ).update(
             {
                 setup.organ_model.model_name: True
@@ -112,7 +115,7 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
     template_name = 'assays/study_list.html'
 
     def get_queryset(self):
-        queryset = AssayStudy.objects.prefetch_related('created_by', 'group', 'signed_off_by')
+        queryset = AssayStudy.objects.prefetch_related('created_by', 'group', 'signed_off_by', 'study_types')
 
         # Display to users with either editor or viewer group or if unrestricted
         group_names = [group.name.replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]

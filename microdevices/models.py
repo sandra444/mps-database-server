@@ -198,6 +198,7 @@ class OrganModelProtocol(models.Model):
         unique_together = [('version', 'organ_model')]
 
     organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model')
+    # Uhh... this should probably just be "name"...
     version = models.CharField(max_length=20)
     file = models.FileField(upload_to='protocols', verbose_name='Protocol File')
 

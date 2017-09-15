@@ -348,9 +348,9 @@ class AssayPlateCells(models.Model):
     cellsample_density_unit = models.CharField(verbose_name='Unit',
                                                max_length=8,
                                                default='WE',
-                                               choices=(('WE', 'cells / well'),
-                                                        ('ML', 'cells / mL'),
-                                                        ('MM', 'cells / mm^2')))
+                                               choices=(('WE', 'cells/well'),
+                                                        ('ML', 'cells/mL'),
+                                                        ('MM', 'cells/mm^2')))
     cell_passage = models.CharField(max_length=16, verbose_name='Passage#',
                                     blank=True, default='')
 
@@ -1302,10 +1302,10 @@ class AssayStudy(FlaggableModel):
     # TODO
     def __unicode__(self):
         center_id = get_center_id(self.group.id).get('center_id')
-        study_types = self.get_study_types_string()
+        #study_types = self.get_study_types_string()
         return '-'.join([
             center_id,
-            study_types,
+            #study_types,
             unicode(self.start_date),
             self.name
         ])
@@ -1623,7 +1623,8 @@ class AssayDataPoint(models.Model):
     # SUBJECT TO CHANGE
     replicate = models.CharField(max_length=255, default='')
 
-    data_upload = models.ForeignKey('assays.AssayDataUpload')
+    # OPTIONAL FOR NOW
+    data_upload = models.ForeignKey('assays.AssayDataUpload', null=True, blank=True)
 
 
 # # TODO MODIFY AssayCompoundInstance
