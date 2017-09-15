@@ -1271,8 +1271,8 @@ class AssayStudy(FlaggableModel):
 
     use_in_calculations = models.BooleanField(default=False)
 
-    # Group is now explicitly defined here as opposed to using a mixin
-    group = models.ForeignKey(Group, help_text='Bind to a group')
+    # Group may need to be explicitly defined here as opposed to using a mixin
+    # group = models.ForeignKey(Group, help_text='Bind to a group')
 
     # Access groups
     access_groups = models.ManyToManyField(Group, blank=True, related_name='study_access_groups')
