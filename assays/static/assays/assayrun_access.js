@@ -3,6 +3,8 @@ $(document).ready(function() {
     var hidden_from = $('#id_hidden_from');
     var visible_to = $('#id_visible_to');
 
+    var access_group_section = $('#access_group_section');
+
     var restricted_selector = $('#id_restricted');
     var restricted_radio = $('#id_restricted_radio');
     var unrestricted_radio = $('#id_unrestricted_radio');
@@ -58,24 +60,28 @@ $(document).ready(function() {
 
     if (restricted_selector.prop('checked')) {
         restricted_radio.prop('checked', true);
-        $('select').prop('disabled', false);
-        access_group_buttons.css('visibility', 'visible');
+        access_group_section.show('fast');
+        // $('select').prop('disabled', false);
+        // access_group_buttons.css('visibility', 'visible');
     }
     else {
         unrestricted_radio.prop('checked', true);
-        $('select').prop('disabled', true);
-        access_group_buttons.css('visibility', 'hidden');
+        access_group_section.hide('fast');
+        // $('select').prop('disabled', true);
+        // access_group_buttons.css('visibility', 'hidden');
     }
 
     restricted_radio.click(function() {
         restricted_selector.prop('checked', true);
-        $('select').prop('disabled', false);
-        access_group_buttons.css('visibility', 'visible');
+        access_group_section.show('fast');
+        // $('select').prop('disabled', false);
+        // access_group_buttons.css('visibility', 'visible');
     });
 
     unrestricted_radio.click(function() {
         restricted_selector.prop('checked', false);
-        $('select').prop('disabled', true);
-        access_group_buttons.css('visibility', 'hidden');
+        access_group_section.hide('fast');
+        // $('select').prop('disabled', true);
+        // access_group_buttons.css('visibility', 'hidden');
     });
 });

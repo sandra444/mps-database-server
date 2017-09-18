@@ -614,27 +614,27 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             ))
 
 
-class AssayRunUpdateAccess(AdminRequiredMixin, UpdateView):
-    """Update the fields of a Study"""
-    model = AssayRun
-    template_name = 'assays/assayrun_access.html'
-    form_class = AssayRunAccessForm
-
-    def get_context_data(self, **kwargs):
-        context = super(AssayRunUpdateAccess, self).get_context_data(**kwargs)
-
-        context['update'] = True
-
-        return context
-
-    def form_valid(self, form):
-        if form.is_valid():
-            if is_group_admin(self.request.user, self.object.group.name):
-                save_forms_with_tracking(self, form, update=True)
-
-            return redirect(self.object.get_absolute_url())
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
+# class AssayRunUpdateAccess(AdminRequiredMixin, UpdateView):
+#     """Update the fields of a Study"""
+#     model = AssayRun
+#     template_name = 'assays/assayrun_access.html'
+#     form_class = AssayRunAccessForm
+#
+#     def get_context_data(self, **kwargs):
+#         context = super(AssayRunUpdateAccess, self).get_context_data(**kwargs)
+#
+#         context['update'] = True
+#
+#         return context
+#
+#     def form_valid(self, form):
+#         if form.is_valid():
+#             if is_group_admin(self.request.user, self.object.group.name):
+#                 save_forms_with_tracking(self, form, update=True)
+#
+#             return redirect(self.object.get_absolute_url())
+#         else:
+#             return self.render_to_response(self.get_context_data(form=form))
 
 
 def compare_cells(current_model, current_filter, setups):
