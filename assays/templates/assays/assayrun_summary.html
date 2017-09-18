@@ -142,7 +142,7 @@
                     </td>
                     <td>
                         {% if setup.signed_off_by %}
-                            <span title="This entry was verified by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            <span title="This entry was validated by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if setup.flagged %}
                             <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
@@ -230,7 +230,7 @@
 {#                    </td>#}
 {#                    <td>#}
 {#                        {% if setup.signed_off_by %}#}
-{#                            <span title="This entry was verified by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>#}
+{#                            <span title="This entry was validated by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>#}
 {#                        {% endif %}#}
 {#                        {% if setup.flagged %}#}
 {#                            <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>#}

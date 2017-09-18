@@ -207,6 +207,121 @@ def get_compound_instance_strings_for_queryset(setups):
         )
 
 
+def filter_queryset_for_viewership(self, queryset):
+    """Peculiar way of filtering for viewership (Assay data bound to a study only)"""
+
+    user_group_names = [
+        group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()
+    ]
+
+    data_group_filter = {}
+    access_group_filter = {}
+    unrestricted_filter = {}
+    unsigned_off_filter = {}
+
+    current_type = str(self.model)
+
+    if current_type == "<class 'assays.models.AssayRun'>":
+        data_group_filter.update({
+            'group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'access_groups__name__in': user_group_names,
+        })
+        unrestricted_filter.update({
+            'restricted': False
+        })
+        unsigned_off_filter.update({
+            'signed_off_by': None
+        })
+    elif current_type == "<class 'assays.models.AssayChipSetup'>":
+        data_group_filter.update({
+            'assay_run_id__group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'assay_run_id__access_groups__name__in': user_group_names,
+        })
+        unrestricted_filter.update({
+            'assay_run_id__restricted': False
+        })
+        unsigned_off_filter.update({
+            'assay_run_id__signed_off_by': None
+        })
+    elif current_type == "<class 'assays.models.AssayPlateSetup'>":
+        data_group_filter.update({
+            'assay_run_id__group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'assay_run_id__access_groups__name__in': user_group_names
+        })
+        unrestricted_filter.update({
+            'assay_run_id__restricted': False
+        })
+        unsigned_off_filter.update({
+            'assay_run_id__signed_off_by': None
+        })
+    elif current_type == "<class 'assays.models.AssayChipReadout'>":
+        data_group_filter.update({
+            'chip_setup__assay_run_id__group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'chip_setup__assay_run_id__access_groups__name__in': user_group_names
+        })
+        unrestricted_filter.update({
+            'chip_setup__assay_run_id__restricted': False
+        })
+        unsigned_off_filter.update({
+            'chip_setup__aassay_run_id__signed_off_by': None
+        })
+    elif current_type == "<class 'assays.models.AssayPlateReadout'>":
+        data_group_filter.update({
+            'setup__assay_run_id__group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'setup__assay_run_id__access_groups__name__in': user_group_names
+        })
+        unrestricted_filter.update({
+            'setup__assay_run_id__restricted': False
+        })
+        unsigned_off_filter.update({
+            'setup__aassay_run_id__signed_off_by': None
+        })
+    elif current_type == "<class 'assays.models.AssayChipTestResult'>":
+        data_group_filter.update({
+            'chip_readout__chip_setup__assay_run_id__group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'chip_readout__chip_setup__assay_run_id__access_groups__name__in': user_group_names
+        })
+        unrestricted_filter.update({
+            'chip_readout__chip_setup__assay_run_id__restricted': False
+        })
+        unsigned_off_filter.update({
+            'chip_readout__chip_setup__aassay_run_id__signed_off_by': None
+        })
+    elif current_type == "<class 'assays.models.AssayPlateTestResult'>":
+        data_group_filter.update({
+            'readout__setup__assay_run_id__group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'readout__setup__assay_run_id__access_groups__name__in': user_group_names
+        })
+        unrestricted_filter.update({
+            'readout__setup__assay_run_id__restricted': False
+        })
+        unsigned_off_filter.update({
+            'readout__setup__aassay_run_id__signed_off_by': None
+        })
+
+    # Show if:
+        # 1: Study has group matching user_group_names
+        # 2: Study has access group matching user_group_names AND is signed off on
+        # 3: Study is unrestricted AND is signed off on
+    return queryset.filter(**data_group_filter) | \
+           queryset.filter(**access_group_filter).exclude(**unsigned_off_filter) | \
+           queryset.filter(**unrestricted_filter).exclude(**unsigned_off_filter)
+
+
 class GroupIndex(OneGroupRequiredMixin, ListView):
     """Displays all of the studies linked to groups that the user is part of"""
     template_name = 'assays/assayrun_list.html'
@@ -215,7 +330,7 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
         queryset = AssayRun.objects.prefetch_related('created_by', 'group', 'signed_off_by')
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        group_names = list(set([group.name.replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]))
 
         queryset = queryset.filter(group__name__in=group_names)
 
@@ -349,14 +464,16 @@ class AssayRunList(LoginRequiredMixin, ListView):
             'signed_off_by'
         )
 
-        # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        queryset = filter_queryset_for_viewership(self, queryset)
 
-        queryset = queryset.filter(
-            restricted=False
-        ) | queryset.filter(
-            group__name__in=group_names
-        )
+        # # Display to users with either editor or viewer group or if unrestricted
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        #
+        # queryset = queryset.filter(
+        #     restricted=False
+        # ) | queryset.filter(
+        #     group__name__in=group_names
+        # )
 
         get_queryset_with_organ_model_map(queryset)
 
@@ -614,27 +731,27 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             ))
 
 
-class AssayRunUpdateAccess(AdminRequiredMixin, UpdateView):
-    """Update the fields of a Study"""
-    model = AssayRun
-    template_name = 'assays/assayrun_access.html'
-    form_class = AssayRunAccessForm
-
-    def get_context_data(self, **kwargs):
-        context = super(AssayRunUpdateAccess, self).get_context_data(**kwargs)
-
-        context['update'] = True
-
-        return context
-
-    def form_valid(self, form):
-        if form.is_valid():
-            if is_group_admin(self.request.user, self.object.group.name):
-                save_forms_with_tracking(self, form, update=True)
-
-            return redirect(self.object.get_absolute_url())
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
+# class AssayRunUpdateAccess(AdminRequiredMixin, UpdateView):
+#     """Update the fields of a Study"""
+#     model = AssayRun
+#     template_name = 'assays/assayrun_access.html'
+#     form_class = AssayRunAccessForm
+#
+#     def get_context_data(self, **kwargs):
+#         context = super(AssayRunUpdateAccess, self).get_context_data(**kwargs)
+#
+#         context['update'] = True
+#
+#         return context
+#
+#     def form_valid(self, form):
+#         if form.is_valid():
+#             if is_group_admin(self.request.user, self.object.group.name):
+#                 save_forms_with_tracking(self, form, update=True)
+#
+#             return redirect(self.object.get_absolute_url())
+#         else:
+#             return self.render_to_response(self.get_context_data(form=form))
 
 
 def compare_cells(current_model, current_filter, setups):
@@ -797,13 +914,16 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
             'group',
             'signed_off_by'
         )
+
+        queryset = filter_queryset_for_viewership(self, queryset)
+
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        queryset = queryset.filter(
-            restricted=False
-        ) | queryset.filter(
-            group__name__in=group_names
-        )
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        # queryset = queryset.filter(
+        #     restricted=False
+        # ) | queryset.filter(
+        #     group__name__in=group_names
+        # )
 
         get_compound_instance_strings_for_queryset(queryset)
 
@@ -1057,13 +1177,15 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
             'signed_off_by'
         )
 
+        queryset = filter_queryset_for_viewership(self, queryset)
+
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        queryset = queryset.filter(
-            restricted=False
-        ) | queryset.filter(
-            group__name__in=group_names
-        )
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        # queryset = queryset.filter(
+        #     restricted=False
+        # ) | queryset.filter(
+        #     group__name__in=group_names
+        # )
 
         get_queryset_with_assay_map(queryset)
 
@@ -1312,13 +1434,11 @@ class AssayChipTestResultList(LoginRequiredMixin, ListView):
             'test_unit'
         )
 
+        queryset = filter_queryset_for_viewership(self, queryset)
+
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        return queryset.filter(
-            assay_result__restricted=False
-        ) | queryset.filter(
-            assay_result__group__name__in=group_names
-        )
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        return queryset
 
 
 ChipTestResultFormSet = inlineformset_factory(
@@ -1657,13 +1777,11 @@ class AssayPlateSetupList(LoginRequiredMixin, ListView):
             'signed_off_by'
         )
 
+        queryset = filter_queryset_for_viewership(self, queryset)
+
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        return queryset.filter(
-            restricted=False
-        ) | queryset.filter(
-            group__name__in=group_names
-        )
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        return queryset
 
 
 # Formset for plate cells
@@ -1818,12 +1936,8 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        queryset = queryset.filter(
-            restricted=False
-        ) | queryset.filter(
-            group__name__in=group_names
-        )
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        queryset = queryset = filter_queryset_for_viewership(self, queryset)
 
         # Map assays
         related_assays = AssayPlateReadoutAssay.objects.filter(
@@ -2081,13 +2195,11 @@ class AssayPlateTestResultList(LoginRequiredMixin, ListView):
             'assay_result__signed_off_by'
         )
 
+        queryset = filter_queryset_for_viewership(self, queryset)
+
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        return queryset.filter(
-            assay_result__restricted=False
-        ) | queryset.filter(
-            assay_result__group__name__in=group_names
-        )
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        return queryset
 
 
 PlateTestResultFormSet = inlineformset_factory(
