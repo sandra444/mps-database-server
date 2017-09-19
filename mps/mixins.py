@@ -319,6 +319,7 @@ class DeletionMixin(object):
 
         return super(DeletionMixin, self).dispatch(*args, **kwargs)
 
+
 # Require the specified group or fail
 class SpecificGroupRequiredMixin(object):
     """This mixin requires the user to have a specific group
@@ -335,3 +336,13 @@ class SpecificGroupRequiredMixin(object):
                 self.request,
                 'Contact an administrator if you would like to gain permission'
             )
+
+
+class SuperuserRequiredMixin(object):
+    """This mixin checks if the user has the group neccessary to at least view the entry"""
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        if not self.request.user.is_authenticated() or not self.request.user.is_superuser:
+            return PermissionDenied(self.request, 'You do not have permission to view this page.')
+        return super(SuperuserRequiredMixin, self).dispatch(*args, **kwargs)

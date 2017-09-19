@@ -92,16 +92,6 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
 
         self.fields['group'].queryset = groups
 
-        groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
-        groups_with_center_full = Group.objects.filter(
-            id__in=groups_with_center
-        ).exclude(
-            id=self.instance.group.id
-        ).order_by(
-            'name'
-        )
-        self.fields['access_groups'].queryset = groups_with_center_full
-
     class Meta(object):
         model = AssayRun
         widgets = {
@@ -109,7 +99,7 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
             'name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
-        exclude = tracking
+        exclude = tracking + restricted + ('access_groups',)
 
     def clean(self):
         """Checks for at least one study type and deformed assay_run_ids"""
@@ -124,24 +114,24 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
 
-# class AssayRunAccessForm(forms.ModelForm):
-#     """Form for changing access to studies"""
-#     def __init__(self, *args, **kwargs):
-#         super(AssayRunAccessForm, self).__init__(*args, **kwargs)
-#         groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
-#         groups_with_center_full = Group.objects.filter(
-#             id__in=groups_with_center
-#         ).exclude(
-#             id=self.instance.group.id
-#         ).order_by(
-#             'name'
-#         )
-#         self.fields['access_groups'].queryset = groups_with_center_full
-#
-#
-#     class Meta(object):
-#         model = AssayRun
-#         fields = ['access_groups', 'restricted']
+class AssayRunAccessForm(forms.ModelForm):
+    """Form for changing access to studies"""
+    def __init__(self, *args, **kwargs):
+        super(AssayRunAccessForm, self).__init__(*args, **kwargs)
+        groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
+        groups_with_center_full = Group.objects.filter(
+            id__in=groups_with_center
+        ).exclude(
+            id=self.instance.group.id
+        ).order_by(
+            'name'
+        )
+        self.fields['access_groups'].queryset = groups_with_center_full
+
+
+    class Meta(object):
+        model = AssayRun
+        fields = ['access_groups', 'restricted']
 
 
 class StudySupportingDataInlineFormset(BaseInlineFormSet):

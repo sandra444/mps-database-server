@@ -28,7 +28,13 @@ from django.shortcuts import get_object_or_404, redirect
 # from django.contrib.auth.decorators import login_required
 # from django.utils.decorators import method_decorator
 
-from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX, filter_groups, is_group_editor, is_group_admin
+from mps.templatetags.custom_filters import (
+    ADMIN_SUFFIX,
+    VIEWER_SUFFIX,
+    filter_groups,
+    is_group_editor,
+    is_group_admin
+)
 
 from mps.mixins import (
     LoginRequiredMixin,
@@ -38,7 +44,8 @@ from mps.mixins import (
     StudyViewershipMixin,
     DetailRedirectMixin,
     AdminRequiredMixin,
-    DeletionMixin
+    DeletionMixin,
+    SuperuserRequiredMixin
     # CreatorOrAdminRequiredMixin,
     # SpecificGroupRequiredMixin
 )
@@ -639,14 +646,14 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
 
             # TODO Update the group and restricted status of children
             # TODO REVISE KLUDGE; MAY WANT TO TOTALLY ELIMINATE THESE FIELDS?
-            all_chip_setups = AssayChipSetup.objects.filter(assay_run_id=self.object)
-            all_chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=self.object)
-            all_chip_results = AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=self.object)
-            all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=self.object)
-            all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=self.object)
-            all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=self.object)
-
-            all_data_uploads = AssayDataUpload.objects.filter(study=self.object)
+            # all_chip_setups = AssayChipSetup.objects.filter(assay_run_id=self.object)
+            # all_chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=self.object)
+            # all_chip_results = AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=self.object)
+            # all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=self.object)
+            # all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=self.object)
+            # all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=self.object)
+            #
+            # all_data_uploads = AssayDataUpload.objects.filter(study=self.object)
 
             # Marking a study should mark/unmark only setups that have not been individually reviewed
             # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
@@ -667,34 +674,34 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             #     # unreviewed_plate_results = all_plate_results.filter(signed_off_by=None)
 
             # Add group and restricted to all
-            all_chip_setups.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
-            all_chip_readouts.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
-            all_chip_results.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
-            all_plate_setups.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
-            all_plate_readouts.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
-            all_plate_results.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
-            all_data_uploads.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
+            # all_chip_setups.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
+            # all_chip_readouts.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
+            # all_chip_results.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
+            # all_plate_setups.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
+            # all_plate_readouts.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
+            # all_plate_results.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
+            # all_data_uploads.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
 
             # Change signed off data only for unreviewed entries
             # unreviewed_chip_setups.update(
@@ -731,27 +738,27 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             ))
 
 
-# class AssayRunUpdateAccess(AdminRequiredMixin, UpdateView):
-#     """Update the fields of a Study"""
-#     model = AssayRun
-#     template_name = 'assays/assayrun_access.html'
-#     form_class = AssayRunAccessForm
-#
-#     def get_context_data(self, **kwargs):
-#         context = super(AssayRunUpdateAccess, self).get_context_data(**kwargs)
-#
-#         context['update'] = True
-#
-#         return context
-#
-#     def form_valid(self, form):
-#         if form.is_valid():
-#             if is_group_admin(self.request.user, self.object.group.name):
-#                 save_forms_with_tracking(self, form, update=True)
-#
-#             return redirect(self.object.get_absolute_url())
-#         else:
-#             return self.render_to_response(self.get_context_data(form=form))
+class AssayRunUpdateAccess(SuperuserRequiredMixin, UpdateView):
+    """Update the fields of a Study"""
+    model = AssayRun
+    template_name = 'assays/assayrun_access.html'
+    form_class = AssayRunAccessForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayRunUpdateAccess, self).get_context_data(**kwargs)
+
+        context['update'] = True
+
+        return context
+
+    def form_valid(self, form):
+        if form.is_valid():
+            if is_group_admin(self.request.user, self.object.group.name):
+                save_forms_with_tracking(self, form, update=True)
+
+            return redirect(self.object.get_absolute_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 def compare_cells(current_model, current_filter, setups):
