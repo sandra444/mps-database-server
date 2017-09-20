@@ -624,25 +624,51 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
                     del form.cleaned_data['signed_off']
                 form.cleaned_data['restricted'] = self.object.restricted
 
-            if not form.instance.signed_off_by and form.cleaned_data.get('signed_off', ''):
+            send_alert = not form.instance.signed_off_by and form.cleaned_data.get('signed_off', '')
+
+            save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=True)
+
+            if send_alert:
                 # Magic strings are in poor taste, should use a template instead
-                subject = 'Study Sign Off Detected: {0}'.format(form.instance)
-                message = 'Hello Admins,\n\n' \
+                superuser_subject = 'Study Sign Off Detected: {0}'.format(self.object)
+                superuser_message = 'Hello Admins,\n\n' \
                           'A study has been signed off on.\n\n' \
                           'Study: {0}\nSign Off By: {1} {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
                           'Thanks,\nMPS'.format(
-                    form.instance,
+                    self.object,
                     self.request.user.first_name,
                     self.request.user.last_name,
-                    form.instance.get_absolute_url()
+                    self.object.get_absolute_url()
                 )
 
-                users_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+                superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
 
-                for user_to_be_alerted in users_to_be_alerted:
-                    user_to_be_alerted.email_user(subject, message, DEFAULT_FROM_EMAIL)
+                for user_to_be_alerted in superusers_to_be_alerted:
+                    user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
 
-            save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=True)
+                viewer_subject = 'Study {0} Now Available for Viewing'.format(self.object)
+                viewer_message = 'Hello {0} {1},\n\n' \
+                    'A study is now available for viewing.\n\n' \
+                     'Study: {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
+                     'Thanks,\nThe MPS Database Team'
+
+                access_group_names = {group.name: group.id for group in self.object.access_groups.all()}
+                matching_groups = list(set([
+                    access_group_names.get(group.name) for group in Group.objects.all() if group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in access_group_names
+                ]))
+                viewers_to_be_alerted = User.objects.filter(groups__id__in=matching_groups, is_active=True).distinct()
+
+                for user_to_be_alerted in viewers_to_be_alerted:
+                    user_to_be_alerted.email_user(
+                        viewer_subject,
+                        viewer_message.format(
+                            user_to_be_alerted.first_name,
+                            user_to_be_alerted.last_name,
+                            unicode(self.object),
+                            self.object.get_absolute_url()
+                        ),
+                        DEFAULT_FROM_EMAIL
+                    )
 
             # TODO Update the group and restricted status of children
             # TODO REVISE KLUDGE; MAY WANT TO TOTALLY ELIMINATE THESE FIELDS?
