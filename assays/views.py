@@ -779,7 +779,7 @@ class AssayRunUpdateAccess(SuperuserRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         if form.is_valid():
-            if is_group_admin(self.request.user, self.object.group.name):
+            if self.request.user.is_superuser:
                 save_forms_with_tracking(self, form, update=True)
 
             return redirect(self.object.get_absolute_url())
