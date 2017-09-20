@@ -61,6 +61,9 @@
                     <td>
                         {% if study.signed_off_by %}
                             <span title="This entry was signed off on by {{ study.full_reviewer }} on {{ study.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            {% if not study.restricted %}
+                                <span title="This study can be viewed by all registered users" class="glyphicon glyphicon-eye-open text-info" aria-hidden="true"></span>
+                            {% endif %}
                         {% endif %}
                         {% if study.flagged %}
                             <span title="This entry is flagged for review: '{{ study.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
