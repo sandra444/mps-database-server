@@ -214,6 +214,69 @@ def get_compound_instance_strings_for_queryset(setups):
         )
 
 
+def get_data_uploads(study=None, chip_readout=None, plate_readout=None):
+    """Get data uploads for a study"""
+    if study:
+        data_uploads = AssayDataUpload.objects.filter(
+            study=study
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        data_points = AssayChipRawData.objects.filter(
+            assay_chip_id__chip_setup__assay_run_id=study
+        ).exclude(
+            quality__contains=REPLACED_DATA_POINT_CODE
+        ).prefetch_related(
+            *CHIP_DATA_PREFETCH
+        )
+
+    elif chip_readout:
+        data_uploads = AssayDataUpload.objects.filter(
+            chip_readout=chip_readout
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        data_points = AssayChipRawData.objects.filter(
+            assay_chip_id=chip_readout
+        ).exclude(
+            quality__contains=REPLACED_DATA_POINT_CODE
+        ).prefetch_related(
+            *CHIP_DATA_PREFETCH
+        )
+
+    elif plate_readout:
+        data_uploads = AssayDataUpload.objects.filter(
+            plate_readout=plate_readout
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        data_points = AssayChipRawData.objects.none()
+    else:
+        data_uploads = AssayDataUpload.objects.none()
+        data_points = AssayChipRawData.objects.none()
+
+    # Edge case for old data
+    if data_points.exclude(data_upload=None).count() == 0 or plate_readout:
+        for data_upload in data_uploads:
+            data_upload.has_data = True
+
+        return data_uploads
+
+    data_upload_map = {}
+    for data_point in data_points:
+        data_upload_map.setdefault(
+            data_point.data_upload_id, True
+        )
+
+    for data_upload in data_uploads:
+        data_upload.has_data = data_upload_map.get(data_upload.id, '')
+
+    return data_uploads
+
+
 def filter_queryset_for_viewership(self, queryset):
     """Peculiar way of filtering for viewership (Assay data bound to a study only)"""
 
@@ -278,7 +341,7 @@ def filter_queryset_for_viewership(self, queryset):
             'chip_setup__assay_run_id__restricted': False
         })
         unsigned_off_filter.update({
-            'chip_setup__aassay_run_id__signed_off_by': None
+            'chip_setup__assay_run_id__signed_off_by': None
         })
     elif current_type == "<class 'assays.models.AssayPlateReadout'>":
         data_group_filter.update({
@@ -291,7 +354,7 @@ def filter_queryset_for_viewership(self, queryset):
             'setup__assay_run_id__restricted': False
         })
         unsigned_off_filter.update({
-            'setup__aassay_run_id__signed_off_by': None
+            'setup__assay_run_id__signed_off_by': None
         })
     elif current_type == "<class 'assays.models.AssayChipTestResult'>":
         data_group_filter.update({
@@ -304,7 +367,7 @@ def filter_queryset_for_viewership(self, queryset):
             'chip_readout__chip_setup__assay_run_id__restricted': False
         })
         unsigned_off_filter.update({
-            'chip_readout__chip_setup__aassay_run_id__signed_off_by': None
+            'chip_readout__chip_setup__assay_run_id__signed_off_by': None
         })
     elif current_type == "<class 'assays.models.AssayPlateTestResult'>":
         data_group_filter.update({
@@ -317,7 +380,7 @@ def filter_queryset_for_viewership(self, queryset):
             'readout__setup__assay_run_id__restricted': False
         })
         unsigned_off_filter.update({
-            'readout__setup__aassay_run_id__signed_off_by': None
+            'readout__setup__assay_run_id__signed_off_by': None
         })
 
     # Show if:
@@ -930,13 +993,13 @@ class AssayRunSummary(StudyViewershipMixin, DetailView):
         #     setup__assay_run_id=self.object
         # ).prefetch_related('setup')
 
-        data_uploads = AssayDataUpload.objects.filter(
-            study=self.object
-        ).prefetch_related(
-            'created_by'
-        ).distinct().order_by('created_on')
+        # data_uploads = AssayDataUpload.objects.filter(
+        #     study=self.object
+        # ).prefetch_related(
+        #     'created_by'
+        # ).distinct().order_by('created_on')
 
-        context['data_uploads'] = data_uploads
+        context['data_uploads'] = get_data_uploads(study=self.object)
 
         return self.render_to_response(context)
 
@@ -1382,13 +1445,13 @@ class AssayChipReadoutDetail(StudyGroupRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(AssayChipReadoutDetail, self).get_context_data(**kwargs)
 
-        data_uploads = AssayDataUpload.objects.filter(
-            chip_readout=self.object
-        ).prefetch_related(
-            'created_by'
-        ).distinct().order_by('created_on')
+        # data_uploads = AssayDataUpload.objects.filter(
+        #     chip_readout=self.object
+        # ).prefetch_related(
+        #     'created_by'
+        # ).distinct().order_by('created_on')
 
-        context['data_uploads'] = data_uploads
+        context['data_uploads'] = get_data_uploads(chip_readout=self.object)
 
         return context
 
@@ -1418,13 +1481,13 @@ class AssayChipReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
         #     else:
         #         context['formset'] = ACRAFormSet(instance=self.object)
 
-        data_uploads = AssayDataUpload.objects.filter(
-            chip_readout=self.object
-        ).prefetch_related(
-            'created_by'
-        ).distinct().order_by('created_on')
+        # data_uploads = AssayDataUpload.objects.filter(
+        #     chip_readout=self.object
+        # ).prefetch_related(
+        #     'created_by'
+        # ).distinct().order_by('created_on')
 
-        context['data_uploads'] = data_uploads
+        context['data_uploads'] = get_data_uploads(chip_readout=self.object)
 
         context['study'] = self.object.chip_setup.assay_run_id
 
@@ -2007,7 +2070,7 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
 
         # Display to users with either editor or viewer group or if unrestricted
         # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        queryset = queryset = filter_queryset_for_viewership(self, queryset)
+        queryset = filter_queryset_for_viewership(self, queryset)
 
         # Map assays
         related_assays = AssayPlateReadoutAssay.objects.filter(
@@ -2151,13 +2214,13 @@ class AssayPlateReadoutDetail(StudyGroupRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(AssayPlateReadoutDetail, self).get_context_data(**kwargs)
 
-        data_uploads = AssayDataUpload.objects.filter(
-            plate_readout=self.object
-        ).prefetch_related(
-            'created_by'
-        ).distinct().order_by('created_on')
+        # data_uploads = AssayDataUpload.objects.filter(
+        #     plate_readout=self.object
+        # ).prefetch_related(
+        #     'created_by'
+        # ).distinct().order_by('created_on')
 
-        context['data_uploads'] = data_uploads
+        context['data_uploads'] = get_data_uploads(plate_readout=self.object)
 
         return context
 
@@ -2183,13 +2246,13 @@ class AssayPlateReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
             else:
                 context['formset'] = APRAFormSet(instance=self.object)
 
-        data_uploads = AssayDataUpload.objects.filter(
-            plate_readout=self.object
-        ).prefetch_related(
-            'created_by'
-        ).distinct().order_by('created_on')
+        # data_uploads = AssayDataUpload.objects.filter(
+        #     plate_readout=self.object
+        # ).prefetch_related(
+        #     'created_by'
+        # ).distinct().order_by('created_on')
 
-        context['data_uploads'] = data_uploads
+        context['data_uploads'] = get_data_uploads(plate_readout=self.object)
 
         context['study'] = self.object.setup.assay_run_id
 
@@ -2430,23 +2493,23 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             if AssayReadout.objects.filter(assay_device_readout=readout):
                 plate_has_data.update({readout: True})
 
-        data_uploads = AssayDataUpload.objects.filter(
-            study=self.object
-        ).prefetch_related(
-            'created_by'
-        ).distinct().order_by('created_on')
+        # data_uploads = AssayDataUpload.objects.filter(
+        #     study=self.object
+        # ).prefetch_related(
+        #     'created_by'
+        # ).distinct().order_by('created_on')
+        #
+        # data_upload_map = {}
+        #
+        # for data_point in data_points:
+        #     data_upload_map.setdefault(
+        #         data_point.data_upload_id, True
+        #     )
+        #
+        # for data_upload in data_uploads:
+        #     data_upload.has_data = data_upload_map.get(data_upload.id, '')
 
-        data_upload_map = {}
-
-        for data_point in data_points:
-            data_upload_map.setdefault(
-                data_point.data_upload_id, True
-            )
-
-        for data_upload in data_uploads:
-            data_upload.has_data = data_upload_map.get(data_upload.id, '')
-
-        context['data_uploads'] = data_uploads
+        context['data_uploads'] = get_data_uploads(study=self.object)
 
         context['chip_readouts'] = chip_readouts
         context['plate_readouts'] = plate_readouts
