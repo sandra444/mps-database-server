@@ -451,7 +451,7 @@ class AssayCompoundInstanceInlineFormset(CloneableBaseInlineFormSet):
         for form in forms_to_delete:
             instance = super(forms.ModelForm, form).save(commit=False)
 
-            if instance and commit:
+            if instance and instance.id and commit:
                 instance.delete()
 
         chip_setup = self.instance
