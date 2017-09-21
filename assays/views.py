@@ -780,7 +780,44 @@ class AssayRunUpdateAccess(SuperuserRequiredMixin, UpdateView):
     def form_valid(self, form):
         if form.is_valid():
             if self.request.user.is_superuser:
+                previous_access_groups = {group.name:group.id for group in form.instance.access_groups.all()}
+
                 save_forms_with_tracking(self, form, update=True)
+
+                if self.object.signed_off_by:
+                    viewer_subject = 'Study {0} Now Available for Viewing'.format(self.object)
+                    viewer_message = 'Hello {0} {1},\n\n' \
+                                     'A study is now available for viewing.\n\n' \
+                                     'Study: {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
+                                     'Thanks,\nThe MPS Database Team'
+
+                    access_group_names = {group.name: group.id for group in self.object.access_groups.all() if group.name not in previous_access_groups}
+                    matching_groups = list(set([
+                        access_group_names.get(group.name) for group in Group.objects.all() if
+                        group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in access_group_names
+                    ]))
+                    exclude_groups = list(set([
+                        previous_access_groups.get(group.name) for group in Group.objects.all() if
+                        group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in previous_access_groups
+                    ]))
+                    viewers_to_be_alerted = User.objects.filter(
+                        groups__id__in=matching_groups,
+                        is_active=True
+                    ).exclude(
+                        groups__id__in=exclude_groups
+                    ).distinct()
+
+                    for user_to_be_alerted in viewers_to_be_alerted:
+                        user_to_be_alerted.email_user(
+                            viewer_subject,
+                            viewer_message.format(
+                                user_to_be_alerted.first_name,
+                                user_to_be_alerted.last_name,
+                                unicode(self.object),
+                                self.object.get_absolute_url()
+                            ),
+                            DEFAULT_FROM_EMAIL
+                        )
 
             return redirect(self.object.get_absolute_url())
         else:
