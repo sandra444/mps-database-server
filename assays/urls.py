@@ -8,7 +8,8 @@ urlpatterns = patterns('',
     url(r'^assays/editable_studies/$', GroupIndex.as_view(), name='editable_studies'),
     url(r'^assays/assaystudy/editable_assay_studies/$', AssayStudyEditableList.as_view(), name='editable_study_list'),
     # The main page for a study
-    url(r'^assays/(?P<pk>[0-9]+)/$', AssayStudyIndex.as_view(), name='study_index'),
+    url(r'^assays/(?P<pk>[0-9]+)/$', StudyIndex.as_view(), name='study_index'),
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/$', AssayStudyIndex.as_view(), name='assay_study_index'),
     # Update page for studies
     url(r'^assays/(?P<pk>[0-9]+)/update/$', AssayStudyUpdate.as_view(), name='study-update'),
     # Delete view for studies

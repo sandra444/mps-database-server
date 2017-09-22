@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load url from future %}
 
 {% block load %}
     <script src="{% static "assays/assaystudy_list.js" %}"></script>
@@ -46,7 +47,8 @@
             <tbody>
             {% for study in object_list %}
                 <tr class="compound" id={{ study.id }} name={{ study.id }}>
-                    <td><a class="btn btn-primary" href="/assays/{{ study.id }}">View/Edit</a></td>
+                    {# TODO TODO TODO SUBJECT TO CHANGE #}
+                    <td><a class="btn btn-primary" href="{% url 'assay_study_index' study.id %}">View/Edit</a></td>
                     <td>{{ study.name }}</td>
                     <td>{{ study.start_date|date:"M d, Y" }}</td>
                     <td>{{ study.get_study_types_string }}</td>

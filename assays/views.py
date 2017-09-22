@@ -2669,7 +2669,7 @@ def get_queryset_with_organ_model_map(queryset):
 # Class-based views for studies
 class AssayStudyEditableList(OneGroupRequiredMixin, ListView):
     """Displays all of the studies linked to groups that the user is part of"""
-    template_name = 'assays/study_list.html'
+    template_name = 'assays/assaystudy_list.html'
 
     def get_queryset(self):
         queryset = AssayStudy.objects.prefetch_related('created_by', 'group', 'signed_off_by', 'study_types')
@@ -2684,7 +2684,7 @@ class AssayStudyEditableList(OneGroupRequiredMixin, ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
-        context = super(GroupIndex, self).get_context_data(**kwargs)
+        context = super(AssayStudyEditableList, self).get_context_data(**kwargs)
 
         # Adds the word "editable" to the page
         context['editable'] = 'Editable '
