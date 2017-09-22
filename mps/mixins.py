@@ -39,7 +39,8 @@ def check_if_user_is_valid_study_viewer(user, study):
     # Find whether valid viewer by checking group and iterating over all access_groups
     valid_viewer = is_group_viewer(user, study.group.name)
 
-    if not valid_viewer:
+    # Only check access groups if the study IS signed off on
+    if not valid_viewer and study.signed_off_by:
         user_group_names = user.groups.all().values_list('name', flat=True)
         access_group_names = {name: True for name in study.access_groups.all().values_list('name', flat=True)}
 
@@ -111,6 +112,7 @@ class StudyGroupRequiredMixin(object):
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
+        # This is for adding study components
         if self.kwargs.get('study_id', ''):
             study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
 
@@ -156,6 +158,7 @@ class StudyGroupRequiredMixin(object):
             elif current_type == "<class 'assays.models.AssayPlateTestResult'>":
                 study = current_object.readout.setup.assay_run_id
 
+            # Group editors can always see
             if is_group_editor(self.request.user, study.group.name) and not study.signed_off_by:
                 # Redirects either to url + update or the specified url + object ID (as an attribute)
                 # This is a little tricky if you don't look for {} in update_redirect_url
@@ -359,3 +362,13 @@ class SpecificGroupRequiredMixin(object):
                 self.request,
                 'Contact an administrator if you would like to gain permission'
             )
+
+
+class SuperuserRequiredMixin(object):
+    """This mixin checks if the user has the group neccessary to at least view the entry"""
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        if not self.request.user.is_authenticated() or not self.request.user.is_superuser:
+            return PermissionDenied(self.request, 'You do not have permission to view this page.')
+        return super(SuperuserRequiredMixin, self).dispatch(*args, **kwargs)

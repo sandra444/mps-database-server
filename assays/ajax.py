@@ -1593,7 +1593,7 @@ def send_ready_for_sign_off_email(request):
 
     if email_form.is_valid():
         required_group_name = study.group.name + ADMIN_SUFFIX
-        users_to_be_alerted = User.objects.filter(groups__name=required_group_name)
+        users_to_be_alerted = User.objects.filter(groups__name=required_group_name, is_active=True)
 
         if users_to_be_alerted:
             # Magic strings are in poor taste, should use a template instead

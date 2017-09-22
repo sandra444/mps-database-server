@@ -106,6 +106,7 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
         groups -- a queryset of groups (allows us to avoid N+1 problem)
         """
         super(AssayRunForm, self).__init__(*args, **kwargs)
+
         self.fields['group'].queryset = groups
 
     class Meta(object):
@@ -115,7 +116,7 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
             'name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
-        exclude = tracking + restricted
+        exclude = tracking + restricted + ('access_groups',)
 
     def clean(self):
         """Checks for at least one study type and deformed assay_run_ids"""
@@ -467,7 +468,7 @@ class AssayCompoundInstanceInlineFormSet(CloneableBaseInlineFormSet):
         for form in forms_to_delete:
             instance = super(forms.ModelForm, form).save(commit=False)
 
-            if instance and commit:
+            if instance and instance.id and commit:
                 instance.delete()
 
         chip_setup = self.instance

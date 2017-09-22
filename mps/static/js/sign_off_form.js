@@ -45,7 +45,8 @@ $(document).ready(function() {
             if (study_submit) {
                 mark_reviewed_label.text('Click Here to Sign Off on this Study');
                 sign_off_confirm_warning.html(
-                    'Signing Off will prevent anyone from editing this Study and the data associated with it.' +
+                    'Signing Off will prevent anyone, including you, from editing this Study and the data associated with it.' +
+                    '<br><br>Signing Off will also provide view access to your data to consortium groups.' +
                     '<br><br>Are you sure you want to change the sign off status?'
                 );
 
@@ -62,7 +63,8 @@ $(document).ready(function() {
 
     sign_off_confirm.dialog({
         title: dialog_title,
-        height:330,
+        height:450,
+        width:450,
         modal: true,
         closeOnEscape: true,
         autoOpen: false,

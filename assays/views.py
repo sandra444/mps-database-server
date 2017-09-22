@@ -67,7 +67,13 @@ from django.shortcuts import get_object_or_404, redirect
 # from django.contrib.auth.decorators import login_required
 # from django.utils.decorators import method_decorator
 
-from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX, filter_groups, is_group_editor, is_group_admin
+from mps.templatetags.custom_filters import (
+    ADMIN_SUFFIX,
+    VIEWER_SUFFIX,
+    filter_groups,
+    is_group_editor,
+    is_group_admin
+)
 
 from mps.mixins import (
     LoginRequiredMixin,
@@ -77,7 +83,8 @@ from mps.mixins import (
     StudyViewershipMixin,
     DetailRedirectMixin,
     AdminRequiredMixin,
-    DeletionMixin
+    DeletionMixin,
+    SuperuserRequiredMixin
     # CreatorOrAdminRequiredMixin,
     # SpecificGroupRequiredMixin
 )
