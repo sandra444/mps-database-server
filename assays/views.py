@@ -1001,6 +1001,18 @@ class AssayRunSummary(StudyViewershipMixin, DetailView):
 
         context['data_uploads'] = get_data_uploads(study=self.object)
 
+        context['assay_instances'] = AssayInstance.objects.filter(
+            study=self.object
+        ).prefetch_related(
+            'target',
+            'method',
+            'unit'
+        ).order_by(
+            'target__name',
+            'method__name',
+            'unit__unit'
+        )
+
         return self.render_to_response(context)
 
 
