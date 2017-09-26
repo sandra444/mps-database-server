@@ -1282,6 +1282,11 @@ class AssayStudy(FlaggableModel):
     # Access groups
     access_groups = models.ManyToManyField(Group, blank=True, related_name='study_access_groups')
 
+    # THESE ARE NOW EXPLICIT FIELDS IN STUDY
+    group = models.ForeignKey(Group, help_text='Bind to a group')
+
+    restricted = models.BooleanField(default=True, help_text='Check box to restrict to selected group')
+
     # DEPRECATED
     # TODO the access choices should probably be file-level scope
     # THIS HAS BEEN DECIDED AGAINST
