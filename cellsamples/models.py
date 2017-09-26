@@ -5,6 +5,7 @@ from django.db import models
 
 # Use our own model base classes instead of models.Model
 from mps.base.models import LockableModel, FlaggableModel
+from django.contrib.auth.models import Group
 
 
 class Organ(LockableModel):
@@ -169,6 +170,9 @@ class CellSample(FlaggableModel):
     percent_viability = models.FloatField(null=True, blank=True)
     cell_image = models.ImageField(upload_to='cellsamples',
                                    null=True, blank=True)
+
+    # THIS IS NOW EXPLICITLY LISTED
+    group = models.ForeignKey(Group, help_text='Bind to a group')
 
     class Meta(object):
         verbose_name = 'Cell Sample'

@@ -96,7 +96,7 @@ class RestrictedModel(LockableModel):
         abstract = True
 
 
-class FlaggableModel(RestrictedModel):
+class FlaggableModel(LockableModel):
     """The base model for flaggable models"""
 
     flagged = models.BooleanField(default=False,

@@ -739,6 +739,11 @@ class AssayRun(FlaggableModel):
 
     access_groups = models.ManyToManyField(Group, blank=True, related_name='access_groups')
 
+    # THESE ARE NOW EXPLICIT FIELDS IN STUDY
+    group = models.ForeignKey(Group, help_text='Bind to a group')
+
+    restricted = models.BooleanField(default=True, help_text='Check box to restrict to selected group')
+
     def study_types(self):
         current_types = ''
         if self.toxicity:
