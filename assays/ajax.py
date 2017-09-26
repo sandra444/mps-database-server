@@ -1850,6 +1850,232 @@ def fetch_matrix_items_as_json(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+
+# Sloppy Copies for now
+def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_header=False, include_all=False):
+    """Returns readout data as a csv in the form of a string
+
+    Params:
+    chip_ids - Readout IDs to use to acquire chip data (if data not provided)
+    data_points - Readout raw data, optional, acquired with chip_ids if not provided
+    both_assay_names - Indicates that both assay names should be returned (not currently used)
+    """
+    related_compounds_map = {}
+
+    if not data_points:
+        # TODO ORDER SUBJECT TO CHANGE
+        data_points = AssayChipRawData.objects.prefetch_related(
+            *CHIP_DATA_PREFETCH
+        ).filter(
+            # old TODO
+            # assay_chip_id__in=ids
+            matrix_item__in=ids
+        ).order_by(
+            # old TODO
+            # 'assay_chip_id__chip_setup__assay_chip_id',
+            'matrix_item__name',
+            'assay_instance__target__name',
+            'assay_instance__method__name',
+            'time',
+            'sample_location__name',
+            'quality',
+            'update_number'
+        )
+
+        # TODO OLD
+        # related_compounds_map = get_related_compounds_map(readouts=ids)
+
+    data = []
+
+    if include_header:
+        data.append(
+            CSV_HEADER_WITH_COMPOUNDS_AND_STUDY
+        )
+
+    for data_point in data_points:
+        # Definitely need to rename these fields/models...
+        study_id = data_point.matrix_item.study.id
+
+        item_name = data_point.matrix_item.name
+
+        cross_reference = data_point.cross_reference
+
+        assay_plate_id = data_point.assay_plate_id
+        assay_well_id = data_point.assay_well_id
+
+        # Add time here
+        time_in_minutes = data_point.time
+        times = get_split_times(time_in_minutes)
+
+        target = data_point.assay_instance.target.name
+        method = data_point.assay_instance.method.name
+        sample_location = data_point.sample_location.name
+
+        device = data_point.setup.device
+        organ_model = data_point.setup.organ_model
+
+        # TODO
+        # compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, ' | ')
+
+        value = data_point.value
+
+        if value is None:
+            value = ''
+
+        value_unit = data_point.assay_instance.unit.unit
+        quality = data_point.quality
+        caution_flag = data_point.caution_flag
+        replicate = data_point.replicate
+        # TODO ADD OTHER STUFF
+        notes = data_point.notes
+
+        if REPLACED_DATA_POINT_CODE not in quality and (include_all or not quality):
+            data.append(
+                [unicode(x) for x in
+                    [
+                        study_id,
+                        item_name,
+                        cross_reference,
+                        assay_plate_id,
+                        assay_well_id,
+                        times.get('day'),
+                        times.get('hour'),
+                        times.get('minute'),
+                        device,
+                        organ_model,
+                        # compound_treatment,
+                        target,
+                        method,
+                        sample_location,
+                        value,
+                        value_unit,
+                        replicate,
+                        caution_flag,
+                        quality,
+                        notes
+                    ]
+                ]
+            )
+
+    string_io = StringIO()
+    csv_writer = UnicodeWriter(string_io)
+    for one_line_of_data in data:
+        csv_writer.writerow(one_line_of_data)
+
+    return string_io.getvalue()
+
+
+def get_data_as_json(ids, data_points=None):
+    if not data_points:
+        data_points = AssayChipRawData.objects.prefetch_related(
+            *CHIP_DATA_PREFETCH
+        ).filter(
+            matrix_item__in=ids
+            # TODO
+            # assay_chip_id__in=ids
+        ).order_by(
+            # TODO
+            # ALSO MAKE THIS A GLOBAL VARIABLE, NO MAGIC PLEASE
+            # 'assay_chip_id__chip_setup__assay_chip_id',
+            'matrix_item__name',
+            'assay_instance__target__name',
+            'assay_instance__method__name',
+            'time',
+            'sample_location__name',
+            'quality',
+            'update_number'
+        )
+
+    data = {}
+
+    data_points_to_return = []
+    sample_locations = {}
+    assay_instances = {}
+
+    for data_point in data_points:
+        item_name = data_point.matrix_item.name
+        assay_plate_id = data_point.assay_plate_id
+        assay_well_id = data_point.assay_well_id
+        # Add time here
+        time_in_minutes = data_point.time
+        times = get_split_times(time_in_minutes)
+        assay_instance = data_point.assay_instance
+        sample_location = data_point.sample_location
+
+        value = data_point.value
+
+        if value is None:
+            value = ''
+
+        caution_flag = data_point.caution_flag
+        quality = data_point.quality
+        # TODO ADD OTHER STUFF
+        notes = data_point.notes
+
+        update_number = data_point.update_number
+        replicate = data_point.replicate
+
+        data_upload = data_point.data_upload
+
+        if data_upload:
+            data_upload_name = unicode(data_upload)
+            data_upload_url = data_upload.file_location
+
+        else:
+            data_upload_name = u''
+            data_upload_url = u''
+
+        if sample_location.id not in sample_locations:
+            sample_locations.update(
+                {
+                    sample_location.id: {
+                        'name': sample_location.name,
+                        'description': sample_location.description
+                    }
+                }
+            )
+
+        if assay_instance.id not in assay_instances:
+            assay_instances.update(
+                {
+                    assay_instance.id: {
+                        'target_name': assay_instance.target.name,
+                        'target_short_name': assay_instance.target.short_name,
+                        'method_name': assay_instance.method.name,
+                        'unit': assay_instance.unit.unit,
+                    }
+                }
+            )
+
+        data_point_fields = {
+            'item_name': item_name,
+            'assay_plate_id': assay_plate_id,
+            'assay_well_id': assay_well_id,
+            'time_in_minutes': time_in_minutes,
+            'day': times.get('day'),
+            'hour': times.get('hour'),
+            'minute': times.get('minute'),
+            'assay_instance_id': assay_instance.id,
+            'sample_location_id': sample_location.id,
+            'value': value,
+            'caution_flag': caution_flag,
+            'quality': quality.strip(),
+            # TODO ADD OTHER STUFF
+            'notes': notes.strip(),
+            'update_number': update_number,
+            'replicate': replicate.strip(),
+            'data_upload_url': data_upload_url,
+            'data_upload_name': data_upload_name
+        }
+        data_points_to_return.append(data_point_fields)
+
+    data.update({
+        'data_points': data_points_to_return,
+        'sample_locations': sample_locations,
+        'assay_instances': assay_instances
+    })
+    return data
+
 switch = {
     'fetch_assay_layout_content': fetch_assay_layout_content,
     'fetch_readout': fetch_readout,
