@@ -57,9 +57,9 @@ $(document).ready(function () {
     }
 
     function data_format(value, ratio, id) {
-        var format = d3.format(',.2f');
-        if (Math.abs(value) > 100000) {
-            format = d3.format('.2e');
+        var format = d3.format(',.3f');
+        if (value > 10000 || value < 0.01) {
+            format = d3.format('.3e');
         }
         else if (value % 1 === 0) {
             format = d3.format(',d');
