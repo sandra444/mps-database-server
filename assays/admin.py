@@ -1631,9 +1631,9 @@ class AssayRunAdmin(LockableAdmin):
         (
             'Group Access', {
                 'fields': (
-                    'group', 'restricted'
+                    'group', 'restricted', 'access_groups'
                 ),
-            }
+            },
         ),
     )
 

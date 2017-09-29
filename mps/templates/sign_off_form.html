@@ -1,57 +1,82 @@
-{% load custom_filters %}
+{% load custom_filters static %}
+{# Is it in poor taste to include this here? #}
+<script src="{% static "js/sign_off_form.js" %}"></script>
 
 {% if study_submit and user|is_group_admin:group or update and creator and user.id == creator or not study_submit and group and user|is_group_editor:group %}
 <div hidden>
     {{ form.signed_off }}
 </div>
 
+{% if study_submit %}
+    <input hidden id="study_submit" value="True" />
+{% else %}
+    <input hidden id="study_submit" value=""/>
+{% endif %}
+
 <div class="well">
 <div class="text-center">
 
-{% if form.signed_off.value %}
-<input hidden type="checkbox" id="mark_reviewed" checked />
-{% else %}
-{# PLEASE NOTE THAT STUDIES CANNOT BE UNSIGNED OFF ON AT THE MOMENT SUBJECT TO CHANGE (MAYBE) #}
-<input hidden type="checkbox" id="mark_reviewed" />
-{% endif %}
+{#{% if study_submit %}#}
+{#<div class="btn-group"#}
+{#    onclick="if (confirm('Signing off will prevent anyone from editing this Study and the data associated with it.\nAre you sure you want to change the sign off status?'))#}
+{#       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));#}
+{#       $('#id_signed_off').prop('checked') ?#}
+{#       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry'); $('#mark_reviewed_check').toggle();}">#}
+{#{% else %}#}
+{#<div class="btn-group"#}
+{#    onclick="if (confirm('If this is checked, the entry will be marked as Validated.\nAre you sure you want to change the validated status?'))#}
+{#       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));#}
+{#       $('#id_signed_off').prop('checked') ?#}
+{#       $('#mark_reviewed_label').text('Click Here to Remove Validated Mark') : $('#mark_reviewed_label').text('Click Here to Mark this Entry as Validated'); $('#mark_reviewed_check').toggle();}">#}
+{#{% endif %}#}
+{#    <label for="mark_reviewed" class="btn btn-success">#}
+{#        {% if form.signed_off.value %}#}
+{#        <span style="display: inline-block" class="glyphicon glyphicon-ok" id="mark_reviewed_check"></span>#}
+{#        {% else %}#}
+{#        <span style="display: none" class="glyphicon glyphicon-ok" id="mark_reviewed_check"></span>#}
+{#        {% endif %}#}
+{#        <span> </span>#}
+{#    </label>#}
+{#    <label id="mark_reviewed_label" for="mark_reviewed" class="btn btn-default active">#}
+{#        {% if study_submit %}#}
+{#            {% if form.signed_off.value %}#}
+{#            Click Here to Remove Sign Off#}
+{#            {% else %}#}
+{#            Click Here to Sign Off on this Study#}
+{#            {% endif %}#}
+{#        {% else %}#}
+{#            {% if form.signed_off.value %}#}
+{#            Click Here to Remove Validated Mark#}
+{#            {% else %}#}
+{#            Click Here to Mark this Entry as Validated#}
+{#            {% endif %}#}
+{#        {% endif %}#}
+{#    </label>#}
+{#</div>#}
+{#</div>#}
 
-{% if study_submit %}
-<div class="btn-group"
-    onclick="if (confirm('Signing off will prevent anyone from editing this Study and the data associated with it.\nAre you sure you want to change the sign off status?'))
-       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));
-       $('#id_signed_off').prop('checked') ?
-       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry'); $('#mark_reviewed_check').toggle();}">
-{% else %}
-<div class="btn-group"
-    onclick="if (confirm('If this is checked, the entry will be marked as Validated.\nAre you sure you want to change the validated status?'))
-       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));
-       $('#id_signed_off').prop('checked') ?
-       $('#mark_reviewed_label').text('Click Here to Remove Validated Mark') : $('#mark_reviewed_label').text('Click Here to Mark this Entry as Validated'); $('#mark_reviewed_check').toggle();}">
-{% endif %}
-    <label for="mark_reviewed" class="btn btn-success">
-        {% if form.signed_off.value %}
-        <span style="display: inline-block" class="glyphicon glyphicon-ok" id="mark_reviewed_check"></span>
-        {% else %}
-        <span style="display: none" class="glyphicon glyphicon-ok" id="mark_reviewed_check"></span>
-        {% endif %}
+<div class="btn-group" id="mark_reviewed_button_group">
+    <label class="btn btn-success">
+        <span hidden class="glyphicon glyphicon-ok" id="mark_reviewed_check"></span>
         <span> </span>
     </label>
     <label id="mark_reviewed_label" for="mark_reviewed" class="btn btn-default active">
-        {% if study_submit %}
-            {% if form.signed_off.value %}
-            Click Here to Remove Sign Off
-            {% else %}
-            Click Here to Sign Off on this Study
-            {% endif %}
-        {% else %}
-            {% if form.signed_off.value %}
-            Click Here to Remove Validated Mark
-            {% else %}
-            Click Here to Mark this Entry as Validated
-            {% endif %}
-        {% endif %}
     </label>
 </div>
 </div>
+</div>
+
+{# The title will change depending on the circumstances #}
+<div hidden id="sign_off_confirm">
+    <div class="alert alert-danger" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Danger:</span>
+        <span>Changes will not be saved unless you press the "Submit" button.</span>
+    </div>
+    <div class="alert alert-warning" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Warning:</span>
+        <span id="sign_off_confirm_warning"></span>
+    </div>
 </div>
 {% endif %}

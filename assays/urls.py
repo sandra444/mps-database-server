@@ -18,6 +18,8 @@ urlpatterns = patterns('',
     url(r'^assays/(?P<pk>[0-9]+)/data/$', ReturnStudyData.as_view(), name='study-data'),
     # Bulk Readout Upload for Studies
     url(r'^assays/(?P<pk>[0-9]+)/bulk/$', ReadoutBulkUpload.as_view(), name='readout-bulk-upload'),
+    # Change access for a study
+    url(r'^assays/(?P<pk>[0-9]+)/access/$', AssayRunUpdateAccess.as_view(), name='study-access'),
     # # Change pages for respective models
     url(r'^assays/assaychipsetup/(?P<pk>[0-9]+)/update/$', AssayChipSetupUpdate.as_view(), name='setup_update'),
     url(r'^assays/assaychipreadout/(?P<pk>[0-9]+)/update/$', AssayChipReadoutUpdate.as_view(), name='readout_update'),

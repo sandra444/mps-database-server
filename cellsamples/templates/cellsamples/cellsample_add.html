@@ -21,7 +21,7 @@
 
 {% block content %}
 {% if update %}
-    <form onsubmit="return confirm('Are you sure you want to overwrite this entry?');" enctype="multipart/form-data" class="form-horizontal" method="post" >
+    <form enctype="multipart/form-data" class="form-horizontal" method="post" >
 
     <h1>
         Edit <em>Cell Sample ID #{{ object.id }}</em>
@@ -81,16 +81,16 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="cell_subtype" class="col-sm-2 control-label">Cell Subtype*</label>
+        <label for="cell_subtype" class="col-sm-2 control-label">Cell Origin*</label>
         <div class="col-sm-10">
             {{ form.cell_subtype }}
             <br>
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            If the Cell Subtype is a cell line, please select the associated Cell Type first.
+            If the Cell Origin is a cell line, please select the associated Cell Type first.
             <br>
             <a href="/cellsamples/cellsubtype">
                 <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
-                Add/Edit Cell Subtypes (Must Refresh Page to See Change)
+                Add/Edit Cell Origins (Must Refresh Page to See Change)
             </a>
         </div>
     </div>

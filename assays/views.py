@@ -28,21 +28,31 @@ from django.shortcuts import get_object_or_404, redirect
 # from django.contrib.auth.decorators import login_required
 # from django.utils.decorators import method_decorator
 
-from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX, filter_groups, is_group_editor, is_group_admin
+from mps.templatetags.custom_filters import (
+    ADMIN_SUFFIX,
+    VIEWER_SUFFIX,
+    filter_groups,
+    is_group_editor,
+    is_group_admin
+)
 
 from mps.mixins import (
     LoginRequiredMixin,
     OneGroupRequiredMixin,
     ObjectGroupRequiredMixin,
     StudyGroupRequiredMixin,
-    ViewershipMixin,
+    StudyViewershipMixin,
     DetailRedirectMixin,
-    AdminRequiredMixin
+    AdminRequiredMixin,
+    DeletionMixin,
+    SuperuserRequiredMixin
     # CreatorOrAdminRequiredMixin,
     # SpecificGroupRequiredMixin
 )
 
 from mps.base.models import save_forms_with_tracking
+from django.contrib.auth.models import User
+from mps.settings import DEFAULT_FROM_EMAIL
 
 # import ujson as json
 import os
@@ -204,6 +214,184 @@ def get_compound_instance_strings_for_queryset(setups):
         )
 
 
+def get_data_uploads(study=None, chip_readout=None, plate_readout=None):
+    """Get data uploads for a study"""
+    if study:
+        data_uploads = AssayDataUpload.objects.filter(
+            study=study
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        data_points = AssayChipRawData.objects.filter(
+            assay_chip_id__chip_setup__assay_run_id=study
+        ).exclude(
+            quality__contains=REPLACED_DATA_POINT_CODE
+        ).prefetch_related(
+            *CHIP_DATA_PREFETCH
+        )
+
+    elif chip_readout:
+        data_uploads = AssayDataUpload.objects.filter(
+            chip_readout=chip_readout
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        data_points = AssayChipRawData.objects.filter(
+            assay_chip_id=chip_readout
+        ).exclude(
+            quality__contains=REPLACED_DATA_POINT_CODE
+        ).prefetch_related(
+            *CHIP_DATA_PREFETCH
+        )
+
+    elif plate_readout:
+        data_uploads = AssayDataUpload.objects.filter(
+            plate_readout=plate_readout
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        data_points = AssayChipRawData.objects.none()
+    else:
+        data_uploads = AssayDataUpload.objects.none()
+        data_points = AssayChipRawData.objects.none()
+
+    # Edge case for old data
+    if data_points.exclude(data_upload=None).count() == 0 or plate_readout:
+        for data_upload in data_uploads:
+            data_upload.has_data = True
+
+        return data_uploads
+
+    data_upload_map = {}
+    for data_point in data_points:
+        data_upload_map.setdefault(
+            data_point.data_upload_id, True
+        )
+
+    for data_upload in data_uploads:
+        data_upload.has_data = data_upload_map.get(data_upload.id, '')
+
+    return data_uploads
+
+
+def filter_queryset_for_viewership(self, queryset):
+    """Peculiar way of filtering for viewership (Assay data bound to a study only)"""
+
+    user_group_names = [
+        group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()
+    ]
+
+    data_group_filter = {}
+    access_group_filter = {}
+    unrestricted_filter = {}
+    unsigned_off_filter = {}
+
+    current_type = str(self.model)
+
+    if current_type == "<class 'assays.models.AssayRun'>":
+        data_group_filter.update({
+            'group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'access_groups__name__in': user_group_names,
+        })
+        unrestricted_filter.update({
+            'restricted': False
+        })
+        unsigned_off_filter.update({
+            'signed_off_by': None
+        })
+    elif current_type == "<class 'assays.models.AssayChipSetup'>":
+        data_group_filter.update({
+            'assay_run_id__group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'assay_run_id__access_groups__name__in': user_group_names,
+        })
+        unrestricted_filter.update({
+            'assay_run_id__restricted': False
+        })
+        unsigned_off_filter.update({
+            'assay_run_id__signed_off_by': None
+        })
+    elif current_type == "<class 'assays.models.AssayPlateSetup'>":
+        data_group_filter.update({
+            'assay_run_id__group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'assay_run_id__access_groups__name__in': user_group_names
+        })
+        unrestricted_filter.update({
+            'assay_run_id__restricted': False
+        })
+        unsigned_off_filter.update({
+            'assay_run_id__signed_off_by': None
+        })
+    elif current_type == "<class 'assays.models.AssayChipReadout'>":
+        data_group_filter.update({
+            'chip_setup__assay_run_id__group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'chip_setup__assay_run_id__access_groups__name__in': user_group_names
+        })
+        unrestricted_filter.update({
+            'chip_setup__assay_run_id__restricted': False
+        })
+        unsigned_off_filter.update({
+            'chip_setup__assay_run_id__signed_off_by': None
+        })
+    elif current_type == "<class 'assays.models.AssayPlateReadout'>":
+        data_group_filter.update({
+            'setup__assay_run_id__group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'setup__assay_run_id__access_groups__name__in': user_group_names
+        })
+        unrestricted_filter.update({
+            'setup__assay_run_id__restricted': False
+        })
+        unsigned_off_filter.update({
+            'setup__assay_run_id__signed_off_by': None
+        })
+    elif current_type == "<class 'assays.models.AssayChipTestResult'>":
+        data_group_filter.update({
+            'chip_readout__chip_setup__assay_run_id__group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'chip_readout__chip_setup__assay_run_id__access_groups__name__in': user_group_names
+        })
+        unrestricted_filter.update({
+            'chip_readout__chip_setup__assay_run_id__restricted': False
+        })
+        unsigned_off_filter.update({
+            'chip_readout__chip_setup__assay_run_id__signed_off_by': None
+        })
+    elif current_type == "<class 'assays.models.AssayPlateTestResult'>":
+        data_group_filter.update({
+            'readout__setup__assay_run_id__group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'readout__setup__assay_run_id__access_groups__name__in': user_group_names
+        })
+        unrestricted_filter.update({
+            'readout__setup__assay_run_id__restricted': False
+        })
+        unsigned_off_filter.update({
+            'readout__setup__assay_run_id__signed_off_by': None
+        })
+
+    # Show if:
+        # 1: Study has group matching user_group_names
+        # 2: Study has access group matching user_group_names AND is signed off on
+        # 3: Study is unrestricted AND is signed off on
+    return queryset.filter(**data_group_filter) | \
+           queryset.filter(**access_group_filter).exclude(**unsigned_off_filter) | \
+           queryset.filter(**unrestricted_filter).exclude(**unsigned_off_filter)
+
+
 class GroupIndex(OneGroupRequiredMixin, ListView):
     """Displays all of the studies linked to groups that the user is part of"""
     template_name = 'assays/assayrun_list.html'
@@ -212,7 +400,7 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
         queryset = AssayRun.objects.prefetch_related('created_by', 'group', 'signed_off_by')
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        group_names = list(set([group.name.replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]))
 
         queryset = queryset.filter(group__name__in=group_names)
 
@@ -229,7 +417,7 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
         return context
 
 
-class StudyIndex(ViewershipMixin, DetailView):
+class StudyIndex(StudyViewershipMixin, DetailView):
     """Show all chip and plate models associated with the given study"""
     model = AssayRun
     context_object_name = 'study_index'
@@ -346,14 +534,16 @@ class AssayRunList(LoginRequiredMixin, ListView):
             'signed_off_by'
         )
 
-        # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        queryset = filter_queryset_for_viewership(self, queryset)
 
-        queryset = queryset.filter(
-            restricted=False
-        ) | queryset.filter(
-            group__name__in=group_names
-        )
+        # # Display to users with either editor or viewer group or if unrestricted
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        #
+        # queryset = queryset.filter(
+        #     restricted=False
+        # ) | queryset.filter(
+        #     group__name__in=group_names
+        # )
 
         get_queryset_with_organ_model_map(queryset)
 
@@ -497,18 +687,62 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
                     del form.cleaned_data['signed_off']
                 form.cleaned_data['restricted'] = self.object.restricted
 
+            send_alert = not form.instance.signed_off_by and form.cleaned_data.get('signed_off', '')
+
             save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=True)
+
+            if send_alert:
+                # Magic strings are in poor taste, should use a template instead
+                superuser_subject = 'Study Sign Off Detected: {0}'.format(self.object)
+                superuser_message = 'Hello Admins,\n\n' \
+                          'A study has been signed off on.\n\n' \
+                          'Study: {0}\nSign Off By: {1} {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
+                          'Thanks,\nMPS'.format(
+                    self.object,
+                    self.request.user.first_name,
+                    self.request.user.last_name,
+                    self.object.get_absolute_url()
+                )
+
+                superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+                for user_to_be_alerted in superusers_to_be_alerted:
+                    user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+                viewer_subject = 'Study {0} Now Available for Viewing'.format(self.object)
+                viewer_message = 'Hello {0} {1},\n\n' \
+                    'A study is now available for viewing.\n\n' \
+                     'Study: {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
+                     'Thanks,\nThe MPS Database Team'
+
+                access_group_names = {group.name: group.id for group in self.object.access_groups.all()}
+                matching_groups = list(set([
+                    group.id for group in Group.objects.all() if group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in access_group_names
+                ]))
+                viewers_to_be_alerted = User.objects.filter(groups__id__in=matching_groups, is_active=True).distinct()
+
+                for user_to_be_alerted in viewers_to_be_alerted:
+                    user_to_be_alerted.email_user(
+                        viewer_subject,
+                        viewer_message.format(
+                            user_to_be_alerted.first_name,
+                            user_to_be_alerted.last_name,
+                            unicode(self.object),
+                            self.object.get_absolute_url()
+                        ),
+                        DEFAULT_FROM_EMAIL
+                    )
 
             # TODO Update the group and restricted status of children
             # TODO REVISE KLUDGE; MAY WANT TO TOTALLY ELIMINATE THESE FIELDS?
-            all_chip_setups = AssayChipSetup.objects.filter(assay_run_id=self.object)
-            all_chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=self.object)
-            all_chip_results = AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=self.object)
-            all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=self.object)
-            all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=self.object)
-            all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=self.object)
-
-            all_data_uploads = AssayDataUpload.objects.filter(study=self.object)
+            # all_chip_setups = AssayChipSetup.objects.filter(assay_run_id=self.object)
+            # all_chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=self.object)
+            # all_chip_results = AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=self.object)
+            # all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=self.object)
+            # all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=self.object)
+            # all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=self.object)
+            #
+            # all_data_uploads = AssayDataUpload.objects.filter(study=self.object)
 
             # Marking a study should mark/unmark only setups that have not been individually reviewed
             # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
@@ -529,34 +763,34 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             #     # unreviewed_plate_results = all_plate_results.filter(signed_off_by=None)
 
             # Add group and restricted to all
-            all_chip_setups.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
-            all_chip_readouts.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
-            all_chip_results.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
-            all_plate_setups.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
-            all_plate_readouts.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
-            all_plate_results.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
-            all_data_uploads.update(
-                group=self.object.group,
-                restricted=self.object.restricted
-            )
+            # all_chip_setups.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
+            # all_chip_readouts.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
+            # all_chip_results.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
+            # all_plate_setups.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
+            # all_plate_readouts.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
+            # all_plate_results.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
+            # all_data_uploads.update(
+            #     group=self.object.group,
+            #     restricted=self.object.restricted
+            # )
 
             # Change signed off data only for unreviewed entries
             # unreviewed_chip_setups.update(
@@ -591,6 +825,67 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
                 assay_instance_formset=assay_instance_formset,
                 supporting_data_formset=supporting_data_formset
             ))
+
+
+class AssayRunUpdateAccess(SuperuserRequiredMixin, UpdateView):
+    """Update the fields of a Study"""
+    model = AssayRun
+    template_name = 'assays/assayrun_access.html'
+    form_class = AssayRunAccessForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayRunUpdateAccess, self).get_context_data(**kwargs)
+
+        context['update'] = True
+
+        return context
+
+    def form_valid(self, form):
+        if form.is_valid():
+            if self.request.user.is_superuser:
+                previous_access_groups = {group.name:group.id for group in form.instance.access_groups.all()}
+
+                save_forms_with_tracking(self, form, update=True)
+
+                if self.object.signed_off_by:
+                    viewer_subject = 'Study {0} Now Available for Viewing'.format(self.object)
+                    viewer_message = 'Hello {0} {1},\n\n' \
+                                     'A study is now available for viewing.\n\n' \
+                                     'Study: {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
+                                     'Thanks,\nThe MPS Database Team'
+
+                    access_group_names = {group.name: group.id for group in self.object.access_groups.all() if group.name not in previous_access_groups}
+
+                    matching_groups = list(set([
+                        group.id for group in Group.objects.all() if
+                        group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in access_group_names
+                    ]))
+                    exclude_groups = list(set([
+                        group.id for group in Group.objects.all() if
+                        group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in previous_access_groups
+                    ]))
+                    viewers_to_be_alerted = User.objects.filter(
+                        groups__id__in=matching_groups,
+                        is_active=True
+                    ).exclude(
+                        groups__id__in=exclude_groups
+                    ).distinct()
+
+                    for user_to_be_alerted in viewers_to_be_alerted:
+                        user_to_be_alerted.email_user(
+                            viewer_subject,
+                            viewer_message.format(
+                                user_to_be_alerted.first_name,
+                                user_to_be_alerted.last_name,
+                                unicode(self.object),
+                                self.object.get_absolute_url()
+                            ),
+                            DEFAULT_FROM_EMAIL
+                        )
+
+            return redirect(self.object.get_absolute_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 def compare_cells(current_model, current_filter, setups):
@@ -629,7 +924,7 @@ def compare_cells(current_model, current_filter, setups):
     return (best_setup, sameness.get(best_setup))
 
 
-class AssayRunSummary(ViewershipMixin, DetailView):
+class AssayRunSummary(StudyViewershipMixin, DetailView):
     """Displays information for a given study
 
     Currently only shows data for chip readouts and chip/plate setups
@@ -699,18 +994,30 @@ class AssayRunSummary(ViewershipMixin, DetailView):
         #     setup__assay_run_id=self.object
         # ).prefetch_related('setup')
 
-        data_uploads = AssayDataUpload.objects.filter(
+        # data_uploads = AssayDataUpload.objects.filter(
+        #     study=self.object
+        # ).prefetch_related(
+        #     'created_by'
+        # ).distinct().order_by('created_on')
+
+        context['data_uploads'] = get_data_uploads(study=self.object)
+
+        context['assay_instances'] = AssayInstance.objects.filter(
             study=self.object
         ).prefetch_related(
-            'created_by'
-        ).distinct().order_by('created_on')
-
-        context['data_uploads'] = data_uploads
+            'target',
+            'method',
+            'unit'
+        ).order_by(
+            'target__name',
+            'method__name',
+            'unit__unit'
+        )
 
         return self.render_to_response(context)
 
 
-class AssayRunDelete(AdminRequiredMixin, DeleteView):
+class AssayRunDelete(DeletionMixin, DeleteView):
     """Delete a Setup"""
     model = AssayRun
     template_name = 'assays/assayrun_delete.html'
@@ -753,13 +1060,16 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
             'group',
             'signed_off_by'
         )
+
+        queryset = filter_queryset_for_viewership(self, queryset)
+
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        queryset = queryset.filter(
-            restricted=False
-        ) | queryset.filter(
-            group__name__in=group_names
-        )
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        # queryset = queryset.filter(
+        #     restricted=False
+        # ) | queryset.filter(
+        #     group__name__in=group_names
+        # )
 
         get_compound_instance_strings_for_queryset(queryset)
 
@@ -979,7 +1289,7 @@ class AssayChipSetupUpdate(StudyGroupRequiredMixin, UpdateView):
             ))
 
 
-class AssayChipSetupDelete(AdminRequiredMixin, DeleteView):
+class AssayChipSetupDelete(DeletionMixin, DeleteView):
     """Delete a Chip Setup and Chip Cells"""
     model = AssayChipSetup
     template_name = 'assays/assaychipsetup_delete.html'
@@ -1013,13 +1323,15 @@ class AssayChipReadoutList(LoginRequiredMixin, ListView):
             'signed_off_by'
         )
 
+        queryset = filter_queryset_for_viewership(self, queryset)
+
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        queryset = queryset.filter(
-            restricted=False
-        ) | queryset.filter(
-            group__name__in=group_names
-        )
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        # queryset = queryset.filter(
+        #     restricted=False
+        # ) | queryset.filter(
+        #     group__name__in=group_names
+        # )
 
         get_queryset_with_assay_map(queryset)
 
@@ -1146,13 +1458,13 @@ class AssayChipReadoutDetail(StudyGroupRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(AssayChipReadoutDetail, self).get_context_data(**kwargs)
 
-        data_uploads = AssayDataUpload.objects.filter(
-            chip_readout=self.object
-        ).prefetch_related(
-            'created_by'
-        ).distinct().order_by('created_on')
+        # data_uploads = AssayDataUpload.objects.filter(
+        #     chip_readout=self.object
+        # ).prefetch_related(
+        #     'created_by'
+        # ).distinct().order_by('created_on')
 
-        context['data_uploads'] = data_uploads
+        context['data_uploads'] = get_data_uploads(chip_readout=self.object)
 
         return context
 
@@ -1182,13 +1494,13 @@ class AssayChipReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
         #     else:
         #         context['formset'] = ACRAFormSet(instance=self.object)
 
-        data_uploads = AssayDataUpload.objects.filter(
-            chip_readout=self.object
-        ).prefetch_related(
-            'created_by'
-        ).distinct().order_by('created_on')
+        # data_uploads = AssayDataUpload.objects.filter(
+        #     chip_readout=self.object
+        # ).prefetch_related(
+        #     'created_by'
+        # ).distinct().order_by('created_on')
 
-        context['data_uploads'] = data_uploads
+        context['data_uploads'] = get_data_uploads(chip_readout=self.object)
 
         context['study'] = self.object.chip_setup.assay_run_id
 
@@ -1230,7 +1542,7 @@ class AssayChipReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayChipReadoutDelete(AdminRequiredMixin, DeleteView):
+class AssayChipReadoutDelete(DeletionMixin, DeleteView):
     """Delete Assay Chip Readout"""
     model = AssayChipReadout
     template_name = 'assays/assaychipreadout_delete.html'
@@ -1268,13 +1580,11 @@ class AssayChipTestResultList(LoginRequiredMixin, ListView):
             'test_unit'
         )
 
+        queryset = filter_queryset_for_viewership(self, queryset)
+
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        return queryset.filter(
-            assay_result__restricted=False
-        ) | queryset.filter(
-            assay_result__group__name__in=group_names
-        )
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        return queryset
 
 
 ChipTestResultFormSet = inlineformset_factory(
@@ -1398,7 +1708,7 @@ class AssayChipTestResultUpdate(StudyGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayChipTestResultDelete(AdminRequiredMixin, DeleteView):
+class AssayChipTestResultDelete(DeletionMixin, DeleteView):
     """Delete a Chip Test Result"""
     model = AssayChipTestResult
     template_name = 'assays/assaychiptestresult_delete.html'
@@ -1579,7 +1889,7 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayLayoutDelete(AdminRequiredMixin, DeleteView):
+class AssayLayoutDelete(DeletionMixin, DeleteView):
     """Delete an Assay Layout"""
     model = AssayLayout
     template_name = 'assays/assaylayout_delete.html'
@@ -1613,13 +1923,11 @@ class AssayPlateSetupList(LoginRequiredMixin, ListView):
             'signed_off_by'
         )
 
+        queryset = filter_queryset_for_viewership(self, queryset)
+
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        return queryset.filter(
-            restricted=False
-        ) | queryset.filter(
-            group__name__in=group_names
-        )
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        return queryset
 
 
 # Formset for plate cells
@@ -1741,7 +2049,7 @@ class AssayPlateSetupUpdate(StudyGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayPlateSetupDelete(AdminRequiredMixin, DeleteView):
+class AssayPlateSetupDelete(DeletionMixin, DeleteView):
     """Delete a Plate Setup"""
     model = AssayPlateSetup
     template_name = 'assays/assayplatesetup_delete.html'
@@ -1774,12 +2082,8 @@ class AssayPlateReadoutList(LoginRequiredMixin, ListView):
         )
 
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        queryset = queryset.filter(
-            restricted=False
-        ) | queryset.filter(
-            group__name__in=group_names
-        )
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        queryset = filter_queryset_for_viewership(self, queryset)
 
         # Map assays
         related_assays = AssayPlateReadoutAssay.objects.filter(
@@ -1923,13 +2227,13 @@ class AssayPlateReadoutDetail(StudyGroupRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(AssayPlateReadoutDetail, self).get_context_data(**kwargs)
 
-        data_uploads = AssayDataUpload.objects.filter(
-            plate_readout=self.object
-        ).prefetch_related(
-            'created_by'
-        ).distinct().order_by('created_on')
+        # data_uploads = AssayDataUpload.objects.filter(
+        #     plate_readout=self.object
+        # ).prefetch_related(
+        #     'created_by'
+        # ).distinct().order_by('created_on')
 
-        context['data_uploads'] = data_uploads
+        context['data_uploads'] = get_data_uploads(plate_readout=self.object)
 
         return context
 
@@ -1955,13 +2259,13 @@ class AssayPlateReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
             else:
                 context['formset'] = APRAFormSet(instance=self.object)
 
-        data_uploads = AssayDataUpload.objects.filter(
-            plate_readout=self.object
-        ).prefetch_related(
-            'created_by'
-        ).distinct().order_by('created_on')
+        # data_uploads = AssayDataUpload.objects.filter(
+        #     plate_readout=self.object
+        # ).prefetch_related(
+        #     'created_by'
+        # ).distinct().order_by('created_on')
 
-        context['data_uploads'] = data_uploads
+        context['data_uploads'] = get_data_uploads(plate_readout=self.object)
 
         context['study'] = self.object.setup.assay_run_id
 
@@ -2002,7 +2306,7 @@ class AssayPlateReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
 
 
 # TODO ADD CONTEXT
-class AssayPlateReadoutDelete(AdminRequiredMixin, DeleteView):
+class AssayPlateReadoutDelete(DeletionMixin, DeleteView):
     """Delete an Assay Plate Readout"""
     model = AssayPlateReadout
     template_name = 'assays/assayplatereadout_delete.html'
@@ -2037,13 +2341,11 @@ class AssayPlateTestResultList(LoginRequiredMixin, ListView):
             'assay_result__signed_off_by'
         )
 
+        queryset = filter_queryset_for_viewership(self, queryset)
+
         # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        return queryset.filter(
-            assay_result__restricted=False
-        ) | queryset.filter(
-            assay_result__group__name__in=group_names
-        )
+        # group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
+        return queryset
 
 
 PlateTestResultFormSet = inlineformset_factory(
@@ -2152,7 +2454,7 @@ class AssayPlateTestResultUpdate(StudyGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayPlateTestResultDelete(AdminRequiredMixin, DeleteView):
+class AssayPlateTestResultDelete(DeletionMixin, DeleteView):
     """Delete a Plate Test Result"""
     model = AssayPlateTestResult
     template_name = 'assays/assayplatetestresult_delete.html'
@@ -2204,23 +2506,23 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             if AssayReadout.objects.filter(assay_device_readout=readout):
                 plate_has_data.update({readout: True})
 
-        data_uploads = AssayDataUpload.objects.filter(
-            study=self.object
-        ).prefetch_related(
-            'created_by'
-        ).distinct().order_by('created_on')
+        # data_uploads = AssayDataUpload.objects.filter(
+        #     study=self.object
+        # ).prefetch_related(
+        #     'created_by'
+        # ).distinct().order_by('created_on')
+        #
+        # data_upload_map = {}
+        #
+        # for data_point in data_points:
+        #     data_upload_map.setdefault(
+        #         data_point.data_upload_id, True
+        #     )
+        #
+        # for data_upload in data_uploads:
+        #     data_upload.has_data = data_upload_map.get(data_upload.id, '')
 
-        data_upload_map = {}
-
-        for data_point in data_points:
-            data_upload_map.setdefault(
-                data_point.data_upload_id, True
-            )
-
-        for data_upload in data_uploads:
-            data_upload.has_data = data_upload_map.get(data_upload.id, '')
-
-        context['data_uploads'] = data_uploads
+        context['data_uploads'] = get_data_uploads(study=self.object)
 
         context['chip_readouts'] = chip_readouts
         context['plate_readouts'] = plate_readouts
@@ -2274,7 +2576,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class ReturnStudyData(ViewershipMixin, DetailView):
+class ReturnStudyData(StudyViewershipMixin, DetailView):
     """Returns a combined file for all data in a study"""
     model = AssayRun
 
