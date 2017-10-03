@@ -24,7 +24,6 @@ class MicrophysiologyCenter(LockableModel):
 
     groups = models.ManyToManyField(
         Group,
-        null=True,
         blank=True,
         help_text='***PLEASE DO NOT INCLUDE "Admin" OR "Viewer": ONLY SELECT THE BASE GROUP (ie "Taylor_MPS" NOT "Taylor_MPS Admin")***<br>'
     )
