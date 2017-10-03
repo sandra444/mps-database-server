@@ -114,7 +114,7 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
         widgets = {
             'assay_run_id': forms.Textarea(attrs={'rows': 1}),
             'name': forms.Textarea(attrs={'rows': 1}),
-            'description': forms.Textarea(attrs={'rows': 3}),
+            'description': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
         }
         exclude = tracking + restricted + ('access_groups',)
 

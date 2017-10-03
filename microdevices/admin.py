@@ -3,16 +3,19 @@
 from django.contrib import admin
 from mps.base.admin import LockableAdmin
 from .models import MicrophysiologyCenter, Manufacturer, Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
+from.forms import MicrophysiologyCenterForm
 from django.core.urlresolvers import resolve
 from django.db.models.fields.files import FieldFile
 
 
 class MicrophysiologyCenterAdmin(LockableAdmin):
     """Admin for Microphysiology Centers"""
+    form = MicrophysiologyCenterForm
     save_on_top = True
     list_display = (
         'center_name', 'center_id', 'description', 'contact_person', 'center_site')
     list_per_page = 300
+    filter_horizontal = ('groups',)
     fieldsets = (
         (
             None, {

@@ -48,7 +48,7 @@
                 <tr class="compound" id={{ study.id }} name={{ study.id }}>
                     <td><a class="btn btn-primary" href="/assays/{{ study.id }}">View/Edit</a></td>
 {#                    <td>{{ study.assay_run_id }}</td>#}
-                    <td>{{ study.name }}</td>
+                    <td style="word-wrap: break-word">{{ study.name }}</td>
                     <td>{{ study.start_date|date:"M d, Y" }}</td>
                     <td>{{ study.study_types }}</td>
                     <td>{{ study.organ_models|default:"-No Organ Models-" }}</td>

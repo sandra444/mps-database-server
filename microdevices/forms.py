@@ -50,3 +50,13 @@ class OrganModelProtocolInlineFormset(BaseInlineFormSet):
             if protocol_id and delete_checked:
                 if AssayChipSetup.objects.filter(organ_model_protocol=protocol_id):
                     raise forms.ValidationError('You cannot remove protocols that are referenced by a chip setup.')
+
+
+class MicrophysiologyCenterForm(forms.ModelForm):
+    class Meta(object):
+        model = MicrophysiologyCenter
+        exclude = []
+
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 6}),
+        }

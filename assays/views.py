@@ -756,7 +756,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
 
                 access_group_names = {group.name: group.id for group in self.object.access_groups.all()}
                 matching_groups = list(set([
-                    access_group_names.get(group.name) for group in Group.objects.all() if group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in access_group_names
+                    group.id for group in Group.objects.all() if group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in access_group_names
                 ]))
                 viewers_to_be_alerted = User.objects.filter(groups__id__in=matching_groups, is_active=True).distinct()
 
@@ -894,12 +894,13 @@ class AssayRunUpdateAccess(SuperuserRequiredMixin, UpdateView):
                                      'Thanks,\nThe MPS Database Team'
 
                     access_group_names = {group.name: group.id for group in self.object.access_groups.all() if group.name not in previous_access_groups}
+
                     matching_groups = list(set([
-                        access_group_names.get(group.name) for group in Group.objects.all() if
+                        group.id for group in Group.objects.all() if
                         group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in access_group_names
                     ]))
                     exclude_groups = list(set([
-                        previous_access_groups.get(group.name) for group in Group.objects.all() if
+                        group.id for group in Group.objects.all() if
                         group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in previous_access_groups
                     ]))
                     viewers_to_be_alerted = User.objects.filter(

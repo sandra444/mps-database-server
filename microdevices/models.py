@@ -6,6 +6,7 @@ from django.contrib.auth.models import Group
 from mps.base.models import LockableModel
 from django.core.validators import MaxValueValidator
 
+
 class MicrophysiologyCenter(LockableModel):
     """Microphysiology Center gives details for a collaborating center
 
@@ -15,8 +16,8 @@ class MicrophysiologyCenter(LockableModel):
         ordering = ('center_name',)
 
     # TODO TODO THIS SHOULD BE JUST NAME
-    center_name = models.CharField(max_length=100)
-    center_id = models.CharField(max_length=20, default='-')
+    center_name = models.CharField(max_length=100, unique=True)
+    center_id = models.CharField(max_length=20, unique=True)
     description = models.CharField(max_length=400, blank=True, default='')
     contact_person = models.CharField(max_length=250, blank=True, default='')
     contact_email = models.EmailField(blank=True, default='')
@@ -24,6 +25,7 @@ class MicrophysiologyCenter(LockableModel):
 
     groups = models.ManyToManyField(
         Group,
+        blank=True,
         help_text='***PLEASE DO NOT INCLUDE "Admin" OR "Viewer": ONLY SELECT THE BASE GROUP (ie "Taylor_MPS" NOT "Taylor_MPS Admin")***<br>'
     )
 
