@@ -24,7 +24,7 @@ $(document).ready(function () {
             row += "<td>" + bio.organism + "</td>";
             row += "<td>" + bio.activity_name + "</td>";
 
-            if (!pubchem) {
+            if (!FILTER.pubchem) {
                 row += "<td>" + bio.operator + "</td>";
             }
             else {
@@ -33,7 +33,7 @@ $(document).ready(function () {
 
             row += "<td>" + bio.standardized_value + "</td>";
 
-            if (!pubchem) {
+            if (!FILTER.pubchem) {
                 row += "<td>" + bio.standardized_units + "</td>";
             }
             else {
