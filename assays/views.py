@@ -387,9 +387,11 @@ def filter_queryset_for_viewership(self, queryset):
         # 1: Study has group matching user_group_names
         # 2: Study has access group matching user_group_names AND is signed off on
         # 3: Study is unrestricted AND is signed off on
-    return queryset.filter(**data_group_filter) | \
+    combined = queryset.filter(**data_group_filter) | \
            queryset.filter(**access_group_filter).exclude(**unsigned_off_filter) | \
            queryset.filter(**unrestricted_filter).exclude(**unsigned_off_filter)
+
+    return combined.distinct()
 
 
 class GroupIndex(OneGroupRequiredMixin, ListView):
