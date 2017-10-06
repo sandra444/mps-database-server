@@ -337,24 +337,25 @@ def fetch_compound_report(request):
             for assay_compound_instance in setup_id_to_compounds_map.get(
                     data_point.assay_chip_id.chip_setup_id
             ):
-                data.get(
-                    assay_compound_instance.compound_instance.compound.name, {}
-                ).get(
-                    'plot'
-                ).setdefault(
-                    assay, {}
-                ).setdefault(
-                    u'{0:.2f}_{1}'.format(
-                        assay_compound_instance.concentration,
-                        assay_compound_instance.concentration_unit.unit
-                    ), {}
-                ).setdefault(
-                    '{0:.2f}'.format(time / 1440), []
-                ).append(
-                    value / control_data.get(
-                        (study_id, assay, time)
+                if assay_compound_instance.addition_time <= time:
+                    data.get(
+                        assay_compound_instance.compound_instance.compound.name, {}
+                    ).get(
+                        'plot'
+                    ).setdefault(
+                        assay, {}
+                    ).setdefault(
+                        u'{0:.2f}_{1}'.format(
+                            assay_compound_instance.concentration,
+                            assay_compound_instance.concentration_unit.unit
+                        ), {}
+                    ).setdefault(
+                        '{0:.2f}'.format(time / 1440), []
+                    ).append(
+                        value / control_data.get(
+                            (study_id, assay, time)
+                        )
                     )
-                )
 
     # Average out the values
     for compound in data:
