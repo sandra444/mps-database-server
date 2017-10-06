@@ -1591,6 +1591,9 @@ class AssayRunAdmin(LockableAdmin):
     search_fields = ('assay_run_id', 'start_date', 'description')
     date_hierarchy = 'start_date'
     list_display = ('assay_run_id', 'study_types', 'start_date', 'description',)
+
+    filter_horizontal = ('access_groups',)
+
     fieldsets = (
         (
             'Study', {
