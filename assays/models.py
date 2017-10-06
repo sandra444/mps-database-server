@@ -709,7 +709,10 @@ class AssayRun(FlaggableModel):
     # Image for the study (some illustrative image)
     image = models.ImageField(upload_to='studies', null=True, blank=True)
 
-    use_in_calculations = models.BooleanField(default=False)
+    use_in_calculations = models.BooleanField(
+        default=False,
+        help_text='Set this to True if this data should be included in Compound Reports and other data aggregations.'
+    )
 
     access_groups = models.ManyToManyField(Group, blank=True, related_name='access_groups')
 
