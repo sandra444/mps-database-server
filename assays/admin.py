@@ -1703,7 +1703,7 @@ admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 #     )
 #     inlines = [StudyModelInline]
 #
-# 
+#
 # admin.site.register(StudyConfiguration, StudyConfigurationAdmin)
 
 

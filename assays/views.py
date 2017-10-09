@@ -316,6 +316,27 @@ def get_data_uploads(study=None, chip_readout=None, plate_readout=None):
     return data_uploads
 
 
+def get_queryset_with_number_of_data_points(queryset):
+    data_points = AssayChipRawData.objects.exclude(
+        quality__contains=REPLACED_DATA_POINT_CODE
+    ).prefetch_related(
+        *CHIP_DATA_PREFETCH
+    )
+
+    data_points_map = {}
+
+    for data_point in data_points:
+        current_value = data_points_map.setdefault(
+            data_point.assay_chip_id.chip_setup.assay_run_id_id, 0
+        )
+        data_points_map.update({
+            data_point.assay_chip_id.chip_setup.assay_run_id_id: current_value + 1
+        })
+
+    for study in queryset:
+        study.data_points = data_points_map.get(study.id, 0)
+
+
 def filter_queryset_for_viewership(self, queryset):
     """Peculiar way of filtering for viewership (Assay data bound to a study only)"""
 
@@ -426,9 +447,11 @@ def filter_queryset_for_viewership(self, queryset):
         # 1: Study has group matching user_group_names
         # 2: Study has access group matching user_group_names AND is signed off on
         # 3: Study is unrestricted AND is signed off on
-    return queryset.filter(**data_group_filter) | \
+    combined = queryset.filter(**data_group_filter) | \
            queryset.filter(**access_group_filter).exclude(**unsigned_off_filter) | \
            queryset.filter(**unrestricted_filter).exclude(**unsigned_off_filter)
+
+    return combined.distinct()
 
 
 class GroupIndex(OneGroupRequiredMixin, ListView):
@@ -436,7 +459,11 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
     template_name = 'assays/assayrun_list.html'
 
     def get_queryset(self):
-        queryset = AssayRun.objects.prefetch_related('created_by', 'group', 'signed_off_by')
+        queryset = AssayRun.objects.prefetch_related(
+            'created_by',
+            'group',
+            'signed_off_by'
+        )
 
         # Display to users with either editor or viewer group or if unrestricted
         group_names = list(set([group.name.replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]))
@@ -444,6 +471,8 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
         queryset = queryset.filter(group__name__in=group_names)
 
         get_queryset_with_organ_model_map_old(queryset)
+
+        get_queryset_with_number_of_data_points(queryset)
 
         return queryset
 
@@ -585,6 +614,8 @@ class AssayRunList(LoginRequiredMixin, ListView):
         # )
 
         get_queryset_with_organ_model_map_old(queryset)
+
+        get_queryset_with_number_of_data_points(queryset)
 
         return queryset
 

@@ -186,6 +186,7 @@ $(document).ready(function () {
                 csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
+                // console.log(json);
                 // Stop spinner
                 window.spinner.stop();
                 // Build table
@@ -213,9 +214,9 @@ $(document).ready(function () {
         for (var compound in data) {
             var all_plots = data[compound].plot;
             for (var assay in all_plots) {
-                if (!x_max[assay]) {
+                if (x_max[assay] === undefined) {
                     x_max[assay] = 0;
-                    y_max[assay] = 100;
+                    y_max[assay] = 1;
                 }
                 var assay_plots = all_plots[assay];
                 for (var concentration in assay_plots) {
@@ -271,6 +272,7 @@ $(document).ready(function () {
                     .append('<span>'+assay+'<br>'+'(' + assay_max_time + 'd)'+'</span>'));
                 if (plot[assay]) {
                     var sorted_concentrations = _.sortBy(_.keys(plot[assay]), function(a) { return parseFloat(a); });
+                    // console.log(sorted_concentrations);
 
                     for (var j=0; j<sorted_concentrations.length; j++) {
                         concentration = sorted_concentrations[j];

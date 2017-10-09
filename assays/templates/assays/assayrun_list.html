@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load humanize %}
 
 {% block load %}
     <script src="{% static "assays/assayrun_list.js" %}"></script>
@@ -35,6 +36,7 @@
                     <th>Start Date</th>
                     <th>Study Types</th>
                     <th>Organ Models</th>
+                    <th>Data Points</th>
 {#                    <th>Integrated Study Configuration</th>#}
                     <th>Description</th>
                     <th>Creator</th>
@@ -53,6 +55,11 @@
                     <td>{{ study.study_types }}</td>
                     <td>{{ study.organ_models|default:"-No Organ Models-" }}</td>
 {#                    <td>{{ study.study_configuration }}</td>#}
+                    {% if study.data_points %}
+                        <td class="text-success">{{ study.data_points|intcomma }}</td>
+                    {% else %}
+                        <td class="text-danger">0</td>
+                    {% endif %}
                     <td>{{ study.description }}</td>
                     <td>
                         {{ study.full_creator }}

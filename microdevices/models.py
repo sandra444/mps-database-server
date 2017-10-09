@@ -38,7 +38,7 @@ class Manufacturer(LockableModel):
     class Meta(object):
         ordering = ('manufacturer_name',)
 
-    manufacturer_name = models.CharField(max_length=100)
+    manufacturer_name = models.CharField(max_length=100, unique=True)
     contact_person = models.CharField(max_length=250, blank=True, default='')
     # Why is this in the incorrect case?
     Manufacturer_website = models.URLField(blank=True, null=True)
@@ -53,7 +53,7 @@ class Microdevice(LockableModel):
         ordering = ('device_name', 'organ',)
 
     # TODO TODO THIS SHOULD BE JUST NAME
-    device_name = models.CharField(max_length=200)
+    device_name = models.CharField(max_length=200, unique=True)
 
     organ = models.ForeignKey('cellsamples.Organ', blank=True, null=True)
     center = models.ForeignKey(MicrophysiologyCenter, blank=True, null=True)
@@ -144,7 +144,7 @@ class OrganModel(LockableModel):
         ordering = ('model_name', 'organ',)
 
     # TODO TODO THIS SHOULD BE JUST NAME
-    model_name = models.CharField(max_length=200)
+    model_name = models.CharField(max_length=200, unique=True)
     organ = models.ForeignKey('cellsamples.Organ')
     # Centers are now required
     center = models.ForeignKey(MicrophysiologyCenter)

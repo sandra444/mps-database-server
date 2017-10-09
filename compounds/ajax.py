@@ -6,7 +6,7 @@ from django.template import RequestContext
 import ujson as json
 from .models import *
 from assays.utils import CHIP_DATA_PREFETCH
-from assays.models import AssayChipRawData
+from assays.models import AssayChipRawData, AssayCompoundInstance, AssayChipSetup
 
 from bioservices import ChEMBL as ChEMBLdb
 
@@ -15,6 +15,8 @@ from bioservices import ChEMBL as ChEMBLdb
 from bs4 import BeautifulSoup
 import requests
 import re
+
+import numpy as np
 
 from assays.ajax import get_related_compounds_map, get_list_of_present_compounds
 
@@ -204,6 +206,7 @@ def fetch_compound_report(request):
 
     data = {}
 
+    # TODO WHY IS COMPOUND PASSED AS A NAME?
     compounds = Compound.objects.filter(name__in=compounds_request)
 
     for compound in compounds:
@@ -224,47 +227,135 @@ def fetch_compound_report(request):
 
     # Acquire AssayChipRawData and store based on compound-assay (and convert to minutes?)
     # Make sure that the quality IS THE EMPTY STRING (anything in the quality field qualifies as invalid)
-    readouts = AssayChipRawData.objects.filter(
+    # all_data_points = AssayChipRawData.objects.filter(
+    #     quality=u'',
+    #     assay_chip_id__chip_setup__assay_run_id__use_in_calculations=True
+    # ).exclude(
+    #     # Contrived at the moment
+    #     assay_instance__unit_id=45,
+    #     value__isnull=True
+    # ).prefetch_related(
+    #     *CHIP_DATA_PREFETCH
+    # )
+    #
+    # # MUDDLED USE OF TERMS PLEASE REVISE ASAP
+    # related_compounds_map = get_related_compounds_map(data=readouts)
+    #
+    # for readout in readouts:
+    #     for compound in related_compounds_map.get(readout.assay_chip_id.chip_setup.id, []):
+    #         compound_name = compound.compound_instance.compound.name
+    #         if compound_name in compounds_request:
+    #             plot = data.get(compound_name).get('plot')
+    #             assay = readout.assay_instance.target.short_name
+    #             if assay not in plot:
+    #                 plot[assay] = {}
+    #
+    #             # TODO SCALE CONCETRATIONS
+    #             concentration = unicode(
+    #                 compound.concentration
+    #             ) + u'_' + compound.concentration_unit.unit
+    #             if not concentration in plot[assay]:
+    #                 plot[assay][concentration] = {}
+    #             entry = plot[assay][concentration]
+    #
+    #             # Convert all times to days for now
+    #             # Get the conversion unit
+    #             # scale = readout.assay_chip_id.timeunit.scale_factor
+    #             # readout_time = "{0:.2f}".format((scale/1440.0) * readout.time)
+    #             # readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
+    #             readout_time = "{0:.2f}".format(readout.time / 1440)
+    #             readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
+    #
+    #             if readout_time not in entry:
+    #                 entry.update({readout_time: [readout.value]})
+    #             else:
+    #                 entry.get(readout_time).append(readout.value)
+
+    assay_compound_instances = AssayCompoundInstance.objects.filter(
+        compound_instance__compound__name__in=compounds_request
+    ).prefetch_related(
+        'compound_instance__compound',
+        'chip_setup',
+        'concentration_unit'
+    )
+    # setups = assay_compound_instances.values_list('chip_setup_id', flat=True)
+
+    setup_id_to_compounds_map = {}
+
+    for assay_compound_instance in assay_compound_instances:
+        setup_id_to_compounds_map.setdefault(
+            assay_compound_instance.chip_setup_id, []
+        ).append(assay_compound_instance)
+
+    studies = AssayChipSetup.objects.filter(
+        id__in=setup_id_to_compounds_map
+    ).values_list('assay_run_id_id', flat=True)
+
+    control_data_points = AssayChipRawData.objects.filter(
         quality=u'',
         assay_chip_id__chip_setup__assay_run_id__use_in_calculations=True,
-        # Contrived at the moment
-        assay_instance__unit_id=45
+        assay_chip_id__chip_setup__assay_run_id__in=studies,
+        assay_chip_id__chip_setup__assaycompoundinstance__isnull=True
+    ).prefetch_related(
+        *CHIP_DATA_PREFETCH
+    )
+    initial_control_data = {}
+    control_data = {}
+
+    for data_point in control_data_points:
+        if data_point.value:
+            initial_control_data.setdefault(
+                data_point.assay_chip_id.chip_setup.assay_run_id_id, {}
+            ).setdefault(
+                data_point.assay_instance.target.short_name, {}
+            ).setdefault(
+                data_point.time, []
+            ).append(data_point.value)
+
+    for study_id, studies in initial_control_data.items():
+        for assay, assays in studies.items():
+            for time, times in assays.items():
+                control_data.update({
+                    (study_id, assay, time): np.average(times)
+                })
+
+    data_points = AssayChipRawData.objects.filter(
+        quality=u'',
+        assay_chip_id__chip_setup__assay_run_id__use_in_calculations=True,
+        assay_chip_id__chip_setup_id__in=setup_id_to_compounds_map
     ).prefetch_related(
         *CHIP_DATA_PREFETCH
     )
 
-    # MUDDLED USE OF TERMS PLEASE REVISE ASAP
-    related_compounds_map = get_related_compounds_map(data=readouts)
+    for data_point in data_points:
+        study_id = data_point.assay_chip_id.chip_setup.assay_run_id_id
+        assay = data_point.assay_instance.target.short_name
+        time = data_point.time
+        value = data_point.value
 
-    for readout in readouts:
-        for compound in related_compounds_map.get(readout.assay_chip_id.chip_setup.id, []):
-            compound_name = compound.compound_instance.compound.name
-            if compound_name in compounds_request:
-                plot = data.get(compound_name).get('plot')
-                assay = readout.assay_instance.target.short_name
-                if assay not in plot:
-                    plot[assay] = {}
-
-                # TODO SCALE CONCETRATIONS
-                concentration = unicode(
-                    compound.concentration
-                ) + u'_' + compound.concentration_unit.unit
-                if not concentration in plot[assay]:
-                    plot[assay][concentration] = {}
-                entry = plot[assay][concentration]
-
-                # Convert all times to days for now
-                # Get the conversion unit
-                # scale = readout.assay_chip_id.timeunit.scale_factor
-                # readout_time = "{0:.2f}".format((scale/1440.0) * readout.time)
-                # readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
-                readout_time = "{0:.2f}".format(readout.time / 1440)
-                readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
-
-                if readout_time not in entry:
-                    entry.update({readout_time: [readout.value]})
-                else:
-                    entry.get(readout_time).append(readout.value)
+        if control_data.get((study_id, assay, time)) and value:
+            for assay_compound_instance in setup_id_to_compounds_map.get(
+                    data_point.assay_chip_id.chip_setup_id
+            ):
+                if assay_compound_instance.addition_time <= time:
+                    data.get(
+                        assay_compound_instance.compound_instance.compound.name, {}
+                    ).get(
+                        'plot'
+                    ).setdefault(
+                        assay, {}
+                    ).setdefault(
+                        u'{0:.2f}_{1}'.format(
+                            assay_compound_instance.concentration,
+                            assay_compound_instance.concentration_unit.unit
+                        ), {}
+                    ).setdefault(
+                        '{0:.2f}'.format(time / 1440), []
+                    ).append(
+                        value / control_data.get(
+                            (study_id, assay, time)
+                        )
+                    )
 
     # Average out the values
     for compound in data:
@@ -273,13 +364,16 @@ def fetch_compound_report(request):
             for concentration in plot[assay]:
                 entry = plot[assay][concentration]
                 averaged_plot = {}
-                for time in entry:
-                    averaged_plot.update({time: float(sum(entry.get(time)))/len(entry.get(time))})
+                for time, values in entry.items():
+                    averaged_plot.update({time: np.average(values)})
                 # Add maximum
                 times = [float(t) for t in entry.keys()]
                 if assay not in data[compound]['table']['max_time'] or \
                         max(times) > data[compound]['table']['max_time'][assay]:
                     data[compound]['table']['max_time'].update({assay: max(times)})
+                # Add arbitrary 0 as necessary (won't make a line otherwise
+                if len(averaged_plot) == 1:
+                    averaged_plot.update({'0': 0})
                 # Switch to averaged values
                 plot[assay][concentration] = averaged_plot
 
