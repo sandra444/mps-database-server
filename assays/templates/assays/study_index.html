@@ -59,7 +59,7 @@
                 {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
                 <div>
                     <a href="assaychipsetup/add" class="btn btn-success" role="button">Add Chip Setup</a>
-                    <a href="assayplatesetup/add" class="btn btn-success" role="button">Add Plate Setup</a>
+{#                    <a href="assayplatesetup/add" class="btn btn-success" role="button">Add Plate Setup</a>#}
                 </div>
                 {% endif %}
             </h2>
@@ -124,53 +124,53 @@
         </div>
         {% endif %}
 
-        {% if plate_setups %}
-        <div class="padded-bottom">
-        <table id="plate_setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
-            <thead>
-                <tr>
-                    <th>View/Edit</th>
-                    <th>Plate ID</th>
-                    <th>Date</th>
-                    <th>Plate Layout</th>
-                    <th>Creator</th>
-                    <th>Review</th>
-                </tr>
-            </thead>
-
-            <tbody>
-            {% for setup in plate_setups %}
-                <tr id={{ setup.id }} name={{ setup.id }}>
-                    <td>
-                        <a class="btn btn-primary"
-                           href="/assays/assayplatesetup/{{ setup.id }}/">
-                            View/Edit
-                        </a>
-                    </td>
-                    <td>{{ setup.assay_plate_id }}</td>
-                    <td>{{ setup.setup_date }}</td>
-                    <td>{{ setup.assay_layout }}</td>
-                    <td>
-                        {{ setup.full_creator }}
-                    </td>
-                    <td>
-                        {% if setup.signed_off_by %}
-                            <span title="This entry was validated by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-                        {% endif %}
-                        {% if setup.flagged %}
-                            <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        </div>
-        {% else %}
-        <div class="alert alert-warning" role="alert">
-            No plate setups exist for this study
-        </div>
-        {% endif %}
+{#        {% if plate_setups %}#}
+{#        <div class="padded-bottom">#}
+{#        <table id="plate_setups" class="display table table-striped table-hover" cellspacing="0" width="100%">#}
+{#            <thead>#}
+{#                <tr>#}
+{#                    <th>View/Edit</th>#}
+{#                    <th>Plate ID</th>#}
+{#                    <th>Date</th>#}
+{#                    <th>Plate Layout</th>#}
+{#                    <th>Creator</th>#}
+{#                    <th>Review</th>#}
+{#                </tr>#}
+{#            </thead>#}
+{##}
+{#            <tbody>#}
+{#            {% for setup in plate_setups %}#}
+{#                <tr id={{ setup.id }} name={{ setup.id }}>#}
+{#                    <td>#}
+{#                        <a class="btn btn-primary"#}
+{#                           href="/assays/assayplatesetup/{{ setup.id }}/">#}
+{#                            View/Edit#}
+{#                        </a>#}
+{#                    </td>#}
+{#                    <td>{{ setup.assay_plate_id }}</td>#}
+{#                    <td>{{ setup.setup_date }}</td>#}
+{#                    <td>{{ setup.assay_layout }}</td>#}
+{#                    <td>#}
+{#                        {{ setup.full_creator }}#}
+{#                    </td>#}
+{#                    <td>#}
+{#                        {% if setup.signed_off_by %}#}
+{#                            <span title="This entry was validated by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>#}
+{#                        {% endif %}#}
+{#                        {% if setup.flagged %}#}
+{#                            <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>#}
+{#                        {% endif %}#}
+{#                    </td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#            </tbody>#}
+{#        </table>#}
+{#        </div>#}
+{#        {% else %}#}
+{#        <div class="alert alert-warning" role="alert">#}
+{#            No plate setups exist for this study#}
+{#        </div>#}
+{#        {% endif %}#}
 
         <legend>
             <h2>
@@ -188,16 +188,16 @@
                     <a href="assaychipreadout/add" class="btn btn-success" role="button">Add Chip Readout</a>
                 {% endif %}
 
-                {% if plate_setups.count == 0 or plate_setups.count == plate_readouts.count %}
-                    <div hidden id="plate_readout_alert" class="alert alert-warning" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Warning:</span>
-                        You must add at least one plate setup before adding a plate readout.
-                    </div>
-                    <a class="btn btn-warning" role="button" onClick="$('#plate_readout_alert').removeProp('hidden');">Add Plate Readout</a>
-                {% else %}
-                    <a href="assayplatereadout/add" class="btn btn-success" role="button">Add Plate Readout</a>
-                {% endif %}
+{#                {% if plate_setups.count == 0 or plate_setups.count == plate_readouts.count %}#}
+{#                    <div hidden id="plate_readout_alert" class="alert alert-warning" role="alert">#}
+{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                        <span class="sr-only">Warning:</span>#}
+{#                        You must add at least one plate setup before adding a plate readout.#}
+{#                    </div>#}
+{#                    <a class="btn btn-warning" role="button" onClick="$('#plate_readout_alert').removeProp('hidden');">Add Plate Readout</a>#}
+{#                {% else %}#}
+{#                    <a href="assayplatereadout/add" class="btn btn-success" role="button">Add Plate Readout</a>#}
+{#                {% endif %}#}
                 </div>
                 {% endif %}
             </h2>
@@ -266,57 +266,57 @@
         </div>
         {% endif %}
 
-        {% if plate_readouts %}
-        <div class="padded-bottom">
-        <table id="plate_readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">
-            <thead>
-                <tr>
-                    <th>View/Edit</th>
-                    <th>Plate Setup</th>
-                    <th>Readout Date</th>
-                    <th>Assays</th>
-                    <th>Creator</th>
-                    <th>Review</th>
-                </tr>
-            </thead>
-
-            <tbody>
-            {% for readout in plate_readouts %}
-                <tr id={{ readout.id }} name={{ readout.id }}>
-                    <td>
-                        <a class="btn btn-primary"
-                           href="/assays/assayplatereadout/{{ readout.id }}/">
-                            View/Edit
-                        </a>
-                    </td>
-                    <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}/">{{ readout.setup }}</a></td>
-                    <td>{{ readout.readout_start_time }}</td>
-                    <td>
-                        {% for assay in readout.related_assays %}
-                            {{ assay.assay_id.assay_short_name }}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {{ readout.full_creator }}
-                    </td>
-                    <td>
-                        {% if readout.signed_off_by %}
-                            <span title="This entry was validated by {{ readout.full_reviewer }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-                        {% endif %}
-                        {% if readout.flagged %}
-                            <span title="This entry is flagged for review: '{{ readout.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        </div>
-        {% else %}
-        <div class="alert alert-warning" role="alert">
-            No plate readouts exist for this study
-        </div>
-        {% endif %}
+{#        {% if plate_readouts %}#}
+{#        <div class="padded-bottom">#}
+{#        <table id="plate_readouts" class="display table table-striped table-hover" cellspacing="0" width="100%">#}
+{#            <thead>#}
+{#                <tr>#}
+{#                    <th>View/Edit</th>#}
+{#                    <th>Plate Setup</th>#}
+{#                    <th>Readout Date</th>#}
+{#                    <th>Assays</th>#}
+{#                    <th>Creator</th>#}
+{#                    <th>Review</th>#}
+{#                </tr>#}
+{#            </thead>#}
+{##}
+{#            <tbody>#}
+{#            {% for readout in plate_readouts %}#}
+{#                <tr id={{ readout.id }} name={{ readout.id }}>#}
+{#                    <td>#}
+{#                        <a class="btn btn-primary"#}
+{#                           href="/assays/assayplatereadout/{{ readout.id }}/">#}
+{#                            View/Edit#}
+{#                        </a>#}
+{#                    </td>#}
+{#                    <td><a href="/assays/assayplatesetup/{{ readout.setup.id }}/">{{ readout.setup }}</a></td>#}
+{#                    <td>{{ readout.readout_start_time }}</td>#}
+{#                    <td>#}
+{#                        {% for assay in readout.related_assays %}#}
+{#                            {{ assay.assay_id.assay_short_name }}#}
+{#                        {% endfor %}#}
+{#                    </td>#}
+{#                    <td>#}
+{#                        {{ readout.full_creator }}#}
+{#                    </td>#}
+{#                    <td>#}
+{#                        {% if readout.signed_off_by %}#}
+{#                            <span title="This entry was validated by {{ readout.full_reviewer }} on {{ readout.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>#}
+{#                        {% endif %}#}
+{#                        {% if readout.flagged %}#}
+{#                            <span title="This entry is flagged for review: '{{ readout.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>#}
+{#                        {% endif %}#}
+{#                    </td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#            </tbody>#}
+{#        </table>#}
+{#        </div>#}
+{#        {% else %}#}
+{#        <div class="alert alert-warning" role="alert">#}
+{#            No plate readouts exist for this study#}
+{#        </div>#}
+{#        {% endif %}#}
 
         {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
         <a href="bulk" class="btn btn-block btn-info" role="button">
@@ -343,16 +343,16 @@
                     <a href="assaychiptestresult/add" class="btn btn-success" role="button">Add Chip Result</a>
                 {% endif %}
 
-                {% if plate_readouts.count == 0 or number_of_plate_results == plate_readouts.count %}
-                    <div hidden id="plate_result_alert" class="alert alert-warning" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Warning:</span>
-                        You must add at least one plate readout before adding a plate result.
-                    </div>
-                    <a class="btn btn-warning" role="button" onClick="$('#plate_result_alert').removeProp('hidden');">Add Plate Result</a>
-                {% else %}
-                    <a href="assayplatetestresult/add" class="btn btn-success" role="button">Add Plate Result</a>
-                {% endif %}
+{#                {% if plate_readouts.count == 0 or number_of_plate_results == plate_readouts.count %}#}
+{#                    <div hidden id="plate_result_alert" class="alert alert-warning" role="alert">#}
+{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                        <span class="sr-only">Warning:</span>#}
+{#                        You must add at least one plate readout before adding a plate result.#}
+{#                    </div>#}
+{#                    <a class="btn btn-warning" role="button" onClick="$('#plate_result_alert').removeProp('hidden');">Add Plate Result</a>#}
+{#                {% else %}#}
+{#                    <a href="assayplatetestresult/add" class="btn btn-success" role="button">Add Plate Result</a>#}
+{#                {% endif %}#}
                 </div>
                 {% endif %}
             </h2>
@@ -426,74 +426,74 @@
         </div>
         {% endif %}
 
-        {% if plate_results %}
-        <div class="padded-bottom">
-        <table id="plate_results" class="display table table-striped table-hover" cellspacing="0" width="100%">
-            <thead>
-                <tr>
-                    <th>View/Edit</th>
-                    <th>Plate Test Results ID</th>
-                    <th>Plate Setup</th>
-                    <th>Plate Readout ID</th>
-                    <th>Assay &amp; Feature</th>
-                    <th>Result</th>
-                    <th>Result Function</th>
-                    <th>Result Type</th>
-                    <th>Severity</th>
-                    <th>Creator</th>
-                    <th>Review</th>
-                </tr>
-            </thead>
-
-            <tbody>
-            {% for result in plate_results %}
-                <tr class="result" id={{ result.id }} name={{ result.id }}>
-                    <td>
-                        <a class="btn btn-primary"
-                           href="/assays/assayplatetestresult/{{ result.assay_result.id }}/">
-                            View/Edit
-                        </a>
-                    </td>
-                    <td>
-                        {{ result.assay_result.id }}
-                    </td>
-                    <td>
-                        <a href="/assays/assayplatesetup/{{ result.assay_result.readout.setup.id }}/">
-                            {{ result.assay_result.readout.setup }}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="/assays/assayplatereadout/{{ result.assay_result.readout.id }}/">
-                            {{ result.assay_result.readout.id }}
-                        </a>
-                    </td>
-                    <td>{{ result.assay_name }}</td>
-                    <td>{{ result.get_result_display }}</td>
-                    <td>{{ result.result_function }}</td>
-                    <td>{{ result.result_type }}</td>
-                    <td>{{ result.get_severity_display }}</td>
-                    <td>
-                        {{ result.assay_result.full_creator }}
-                    </td>
-                    <td>
-                        {% if result.assay_result.signed_off_by %}
-                            <span title="This entry was validated by {{ result.assay_result.full_reviewer }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-                        {% endif %}
-                        {% if result.assay_result.flagged %}
-                            <span title="This entry is flagged for review: '{{ result.assay_result.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        </div>
-        {% else %}
-        <div class="alert alert-warning" role="alert">
-            No plate results exist for this study
-        </div>
-        {% endif %}
-    </div>
+{#        {% if plate_results %}#}
+{#        <div class="padded-bottom">#}
+{#        <table id="plate_results" class="display table table-striped table-hover" cellspacing="0" width="100%">#}
+{#            <thead>#}
+{#                <tr>#}
+{#                    <th>View/Edit</th>#}
+{#                    <th>Plate Test Results ID</th>#}
+{#                    <th>Plate Setup</th>#}
+{#                    <th>Plate Readout ID</th>#}
+{#                    <th>Assay &amp; Feature</th>#}
+{#                    <th>Result</th>#}
+{#                    <th>Result Function</th>#}
+{#                    <th>Result Type</th>#}
+{#                    <th>Severity</th>#}
+{#                    <th>Creator</th>#}
+{#                    <th>Review</th>#}
+{#                </tr>#}
+{#            </thead>#}
+{##}
+{#            <tbody>#}
+{#            {% for result in plate_results %}#}
+{#                <tr class="result" id={{ result.id }} name={{ result.id }}>#}
+{#                    <td>#}
+{#                        <a class="btn btn-primary"#}
+{#                           href="/assays/assayplatetestresult/{{ result.assay_result.id }}/">#}
+{#                            View/Edit#}
+{#                        </a>#}
+{#                    </td>#}
+{#                    <td>#}
+{#                        {{ result.assay_result.id }}#}
+{#                    </td>#}
+{#                    <td>#}
+{#                        <a href="/assays/assayplatesetup/{{ result.assay_result.readout.setup.id }}/">#}
+{#                            {{ result.assay_result.readout.setup }}#}
+{#                        </a>#}
+{#                    </td>#}
+{#                    <td>#}
+{#                        <a href="/assays/assayplatereadout/{{ result.assay_result.readout.id }}/">#}
+{#                            {{ result.assay_result.readout.id }}#}
+{#                        </a>#}
+{#                    </td>#}
+{#                    <td>{{ result.assay_name }}</td>#}
+{#                    <td>{{ result.get_result_display }}</td>#}
+{#                    <td>{{ result.result_function }}</td>#}
+{#                    <td>{{ result.result_type }}</td>#}
+{#                    <td>{{ result.get_severity_display }}</td>#}
+{#                    <td>#}
+{#                        {{ result.assay_result.full_creator }}#}
+{#                    </td>#}
+{#                    <td>#}
+{#                        {% if result.assay_result.signed_off_by %}#}
+{#                            <span title="This entry was validated by {{ result.assay_result.full_reviewer }} on {{ result.assay_result.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>#}
+{#                        {% endif %}#}
+{#                        {% if result.assay_result.flagged %}#}
+{#                            <span title="This entry is flagged for review: '{{ result.assay_result.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>#}
+{#                        {% endif %}#}
+{#                    </td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#            </tbody>#}
+{#        </table>#}
+{#        </div>#}
+{#        {% else %}#}
+{#        <div class="alert alert-warning" role="alert">#}
+{#            No plate results exist for this study#}
+{#        </div>#}
+{#        {% endif %}#}
+{#    </div>#}
 
     {% if not user|is_group_admin:object.group.name and user|is_group_editor:object.group.name and not object.signed_off_by %}
     <div hidden id="ready_for_sign_off_section" title="Indicate Study is Ready for Sign Off">
