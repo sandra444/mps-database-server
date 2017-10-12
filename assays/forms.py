@@ -1298,6 +1298,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         model = AssayMatrix
         exclude = ('study',) + tracking
         widgets = {
+            'name': forms.Textarea(attrs={'rows': 1}),
             'notes': forms.Textarea(attrs={'rows': 3}),
             'variance_from_organ_model_protocol': forms.Textarea(attrs={'rows': 3}),
         }

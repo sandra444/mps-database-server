@@ -2709,6 +2709,7 @@ def get_queryset_with_organ_model_map(queryset):
         )
 
 
+# TODO GET NUMBER OF DATA POINTS
 # TODO REVIEW PERMISSIONS
 # Class-based views for studies
 class AssayStudyEditableList(OneGroupRequiredMixin, ListView):

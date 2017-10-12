@@ -165,224 +165,233 @@ $(document).ready(function () {
 
     // These ended up being practically unintelligible
     // TODO TODO TODO Have a template or hidden HTML for these instead
-    var empty_item_html = $('<td>')
-        // Name
-        .append(
-            $('<div>')
-                .append(
-                $('<span>')
-                    .addClass('item-name lead')
-                )
-                .append(
-                $('<span>')
-                    .addClass('item-current_setup')
-                )
-                .attr('align', 'center')
-        )
-        .append(
-            $('<div>')
-                .addClass('alert alert-warning')
-            // Setup date
-            .append(
-                $('<div>')
-                    .addClass('item-setup_date')
-            )
-            // Failure
-            .append(
-                $('<div>')
-                    .addClass('item-failure')
-                    // .append(
-                    //     $('<span>')
-                    //         .addClass('item-failure_date')
-                    // )
-                    .append(
-                        $('<span>')
-                            .addClass('item-failure_time')
-                    )
-                    .append(
-                        $('<span>')
-                            // .addClass('item-failure_reason glyphicon glyphicon-exclamation-sign')
-                            .addClass('item-failure_reason')
-                    )
-            )
-            // Notes
-            .append(
-                $('<div>')
-                    .addClass('item-notes_section')
-                    .append(
-                        $('<span>')
-                            .addClass('item-scientist')
-                    )
-                    .append(
-                        $('<span>')
-                            .addClass('item-notebook')
-                    )
-                    .append(
-                        $('<span>')
-                            .addClass('item-notebook_page')
-                    )
-                    .append(
-                        $('<span>')
-                            // .addClass('item-notes glyphicon glyphicon-question-mark')
-                            .addClass('item-notes')
-                    )
-            )
-            // Setup
-            .append(
-                $('<div>')
-                    .addClass('item-setup_section')
-                    .append(
-                        $('<div>')
-                            .addClass('item-device')
-                    )
-                    .append(
-                        $('<div>')
-                            .append(
-                                $('<span>')
-                                    .addClass('item-organ_model')
-                            )
-                            .append(
-                                $('<span>')
-                                    .addClass('item-organ_model_protocol')
-                            )
-                    )
-                    .append(
-                        $('<div>')
-                        .append(
-                            $('<span>')
-                                // .addClass('item-variance_from_organ_model_protocol glyphicon glyphicon-question-mark')
-                                .addClass('item-variance_from_organ_model_protocol')
-                        )
-                    )
-            )
-        )
-        // Cells
-         .append(
-            $('<div>')
-                .addClass('item-cells_section item-setup_set_section')
-         )
-        // Compounds
-        .append(
-            $('<div>')
-                .addClass('item-compounds_section item-setup_set_section')
-        )
-        // Settings?
-        .append(
-            $('<div>')
-                .addClass('item-settings_section item-setup_set_section')
-        )
-    ;
-
-    var empty_compound_html = $('<div>')
-        .addClass('alert alert-info')
-        .append(
-            $('<div>')
-                .append(
-                    $('<span>')
-                        .addClass('item-compound')
-                )
-                .append(
-                    $('<span>')
-                        .addClass('item-concentration')
-                )
-                .append(
-                    $('<span>')
-                        .addClass('item-concentration_unit')
-                )
-        )
-        .append(
-            $('<div>')
-                .append(
-                    $('<span>')
-                        .addClass('item-supplier_text')
-                )
-                .append(
-                    $('<span>')
-                        .addClass('item-lot_text')
-                )
-        )
-        .append(
-            $('<div>')
-                .addClass('item-receipt_date')
-        )
-        .append(
-            $('<div>')
-                .addClass('item-addition_time_section')
-                .append($('<span>').html('Added on D'))
-                .append(
-                    $('<span>')
-                        .addClass('item-addition_time_day')
-                )
-                .append($('<span>').html('H'))
-                .append(
-                    $('<span>')
-                        .addClass('item-addition_time_hour')
-                )
-                .append($('<span>').html('M'))
-                .append(
-                    $('<span>')
-                        .addClass('item-addition_time_minute')
-                )
-        )
-        .append(
-            $('<div>')
-                .addClass('item-duration_section')
-                .append($('<span>').html('Duration of D'))
-                .append(
-                    $('<span>')
-                        .addClass('item-duration_day')
-                )
-                .append($('<span>').html('H'))
-                .append(
-                    $('<span>')
-                        .addClass('item-duration_hour')
-                )
-                .append($('<span>').html('M'))
-                .append(
-                    $('<span>')
-                        .addClass('item-duration_minute')
-                )
-        )
-    ;
-
-    var empty_cell_html = $('<div>')
-        .addClass('alert alert-success')
-        .append(
-            $('<div>')
-                .append(
-                    $('<span>')
-                        .addClass('item-cell_sample')
-                )
-                .append(
-                    $('<span>')
-                        .addClass('item-passage')
-                )
-        //         .addClass('item-cell_sample')
-        // )
-        // .append(
-        //     $('<div>')
-        //         .addClass('item-passage')
-        )
-
-        .append(
-            $('<div>')
-                .addClass('item-biosensor')
-        )
-        .append(
-            $('<div>')
-                .append(
-                    $('<span>')
-                        .addClass('item-density')
-                )
-                .append(
-                    $('<span>')
-                        .addClass('item-density_unit')
-                )
-        )
-    ;
+    // var empty_item_html = $('<td>')
+    //     // Name
+    //     .append(
+    //         $('<div>')
+    //             .append(
+    //             $('<span>')
+    //                 .addClass('item-name lead')
+    //             )
+    //             .append(
+    //             $('<span>')
+    //                 .addClass('item-current_setup')
+    //             )
+    //             .attr('align', 'center')
+    //     )
+    //     .append(
+    //         $('<div>')
+    //             .addClass('alert alert-warning')
+    //         // Setup date
+    //         .append(
+    //             $('<div>')
+    //                 .addClass('item-setup_date')
+    //         )
+    //         // Failure
+    //         .append(
+    //             $('<div>')
+    //                 .addClass('item-failure')
+    //                 // .append(
+    //                 //     $('<span>')
+    //                 //         .addClass('item-failure_date')
+    //                 // )
+    //                 .append(
+    //                     $('<span>')
+    //                         .addClass('item-failure_time')
+    //                 )
+    //                 .append(
+    //                     $('<span>')
+    //                         // .addClass('item-failure_reason glyphicon glyphicon-exclamation-sign')
+    //                         .addClass('item-failure_reason')
+    //                 )
+    //         )
+    //         // Notes
+    //         .append(
+    //             $('<div>')
+    //                 .addClass('item-notes_section')
+    //                 .append(
+    //                     $('<span>')
+    //                         .addClass('item-scientist')
+    //                 )
+    //                 .append(
+    //                     $('<span>')
+    //                         .addClass('item-notebook')
+    //                 )
+    //                 .append(
+    //                     $('<span>')
+    //                         .addClass('item-notebook_page')
+    //                 )
+    //                 .append(
+    //                     $('<span>')
+    //                         // .addClass('item-notes glyphicon glyphicon-question-mark')
+    //                         .addClass('item-notes')
+    //                 )
+    //         )
+    //         // Setup
+    //         .append(
+    //             $('<div>')
+    //                 .addClass('item-setup_section')
+    //                 .append(
+    //                     $('<div>')
+    //                         .addClass('item-device')
+    //                 )
+    //                 .append(
+    //                     $('<div>')
+    //                         .append(
+    //                             $('<span>')
+    //                                 .addClass('item-organ_model')
+    //                         )
+    //                         .append(
+    //                             $('<span>')
+    //                                 .addClass('item-organ_model_protocol')
+    //                         )
+    //                 )
+    //                 .append(
+    //                     $('<div>')
+    //                     .append(
+    //                         $('<span>')
+    //                             // .addClass('item-variance_from_organ_model_protocol glyphicon glyphicon-question-mark')
+    //                             .addClass('item-variance_from_organ_model_protocol')
+    //                     )
+    //                 )
+    //         )
+    //     )
+    //     // Cells
+    //      .append(
+    //         $('<div>')
+    //             .addClass('item-cells_section item-setup_set_section')
+    //      )
+    //     // Compounds
+    //     .append(
+    //         $('<div>')
+    //             .addClass('item-compounds_section item-setup_set_section')
+    //     )
+    //     // Settings?
+    //     .append(
+    //         $('<div>')
+    //             .addClass('item-settings_section item-setup_set_section')
+    //     )
+    // ;
+    //
+    // var empty_compound_html = $('<div>')
+    //     .addClass('alert alert-info')
+    //     .append(
+    //         $('<div>')
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-compound')
+    //             )
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-concentration')
+    //             )
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-concentration_unit')
+    //             )
+    //     )
+    //     .append(
+    //         $('<div>')
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-supplier_text')
+    //             )
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-lot_text')
+    //             )
+    //     )
+    //     .append(
+    //         $('<div>')
+    //             .addClass('item-receipt_date')
+    //     )
+    //     .append(
+    //         $('<div>')
+    //             .addClass('item-addition_time_section')
+    //             .append($('<span>').html('Added on D'))
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-addition_time_day')
+    //             )
+    //             .append($('<span>').html('H'))
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-addition_time_hour')
+    //             )
+    //             .append($('<span>').html('M'))
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-addition_time_minute')
+    //             )
+    //     )
+    //     .append(
+    //         $('<div>')
+    //             .addClass('item-duration_section')
+    //             .append($('<span>').html('Duration of D'))
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-duration_day')
+    //             )
+    //             .append($('<span>').html('H'))
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-duration_hour')
+    //             )
+    //             .append($('<span>').html('M'))
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-duration_minute')
+    //             )
+    //     )
+    // ;
+    //
+    // var empty_cell_html = $('<div>')
+    //     .addClass('alert alert-success')
+    //     .append(
+    //         $('<div>')
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-cell_sample')
+    //             )
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-passage')
+    //             )
+    //     //         .addClass('item-cell_sample')
+    //     // )
+    //     // .append(
+    //     //     $('<div>')
+    //     //         .addClass('item-passage')
+    //     )
+    //
+    //     .append(
+    //         $('<div>')
+    //             .addClass('item-biosensor')
+    //     )
+    //     .append(
+    //         $('<div>')
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-density')
+    //             )
+    //             .append(
+    //                 $('<span>')
+    //                     .addClass('item-density_unit')
+    //             )
+    //     )
+    // ;
+    //
+    // $('body').append(empty_item_html);
+    // $('body').append(empty_cell_html);
+    // $('body').append(empty_compound_html);
 
     // TODO
-    var empty_setting_html = $('<div>');
+    // var empty_setting_html = $('<div>');
+
+    var empty_item_html = $('#empty_item_html').children();
+    var empty_compound_html = $('#empty_compound_html').children();
+    var empty_cell_html = $('#empty_cell_html').children();
+    var empty_setting_html = $('#empty_setting_html').children();
 
     var empty_html = {
         'compounds': empty_compound_html,
