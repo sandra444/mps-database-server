@@ -2911,7 +2911,11 @@ class AssayStudyIndex(DetailView):
     def get_context_data(self, **kwargs):
         context = super(AssayStudyIndex, self).get_context_data(**kwargs)
 
-        matrices = AssayMatrix.objects.filter(study=self.object)
+        matrices = AssayMatrix.objects.filter(
+            study=self.object
+        ).prefetch_related(
+            *MATRIX_PREFETCH
+        )
 
         items = AssayMatrixItem.objects.filter(
             matrix=matrices

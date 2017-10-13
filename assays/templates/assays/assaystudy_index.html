@@ -71,7 +71,8 @@
                     </td>
                     <td>
                         {# Make sure this works #}
-                        {% include 'sign_off_and_flag_display.html' with object=matrix %}
+                        {# This blows up the number of queries, need to rethink! #}
+{#                        {% include 'sign_off_and_flag_display.html' with object=matrix %}#}
                     </td>
                 </tr>
             {% endfor %}
@@ -120,7 +121,8 @@
                     </td>
                     <td>
                         {# Make sure this works #}
-                        {% include 'sign_off_and_flag_display.html' with object=matrix %}
+                        {# This blows up the number of queries, need to rethink! #}
+{#                        {% include 'sign_off_and_flag_display.html' with object=matrix %}#}
                     </td>
                 </tr>
             {% endfor %}

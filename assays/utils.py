@@ -154,7 +154,7 @@ CHIP_DATA_PREFETCH = (
 MATRIX_ITEM_PREFETCH = (
     'study',
     'matrix',
-    'setup',
+    'setup__device',
     # Subject to change
     'failure_reason'
 )
@@ -162,9 +162,8 @@ MATRIX_ITEM_PREFETCH = (
 # SUBJECT TO CHANGE
 MATRIX_PREFETCH = (
     'device',
-    'organ_model',
-    'organ_model_protocol'
 )
+
 
 def charset_detect(in_file, chunk_size=4096):
     """Use chardet library to detect what encoding is being used"""
