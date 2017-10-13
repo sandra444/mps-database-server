@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, url
+# TODO NO WILDCARDS PLEASE
 from assays.views import *
 
 urlpatterns = patterns('',
@@ -24,6 +25,8 @@ urlpatterns = patterns('',
     # NEW_TO_BE_REVISED
     url(r'^assays/assaystudy/$', AssayStudyList.as_view(), name='assay_study_list'),
     url(r'^assays/assaystudy/add/$', AssayStudyAdd.as_view(), name='assay_study_add'),
+
+    url(r'^assays/assaymatrixitem/(?P<pk>[0-9]+)/update/$', AssayMatrixItemUpdate.as_view(), name='assay_study_list'),
 
     url(r'^assays/studyconfiguration/$', StudyConfigurationList.as_view(), name='studyconfiguration_list'),
     url(r'^assays/studyconfiguration/add/$', StudyConfigurationAdd.as_view(), name='studyconfiguration_add'),

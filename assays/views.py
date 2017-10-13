@@ -38,7 +38,8 @@ from assays.forms import (
     AssayMatrixForm,
     # AssayMatrixItemFormSet,
     # AssaySetupFormSet,
-    # AssaySetupCellFormSet
+    # AssaySetupCellFormSet,
+    AssayMatrixItemForm
 )
 from django import forms
 
@@ -3050,3 +3051,27 @@ class AssayMatrixUpdate(UpdateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
+
+class AssayMatrixItemUpdate(UpdateView):
+    model = AssayMatrixItem
+    template_name = 'assays/assaymatrixitem_add.html'
+    form_class = AssayMatrixItemForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayMatrixItemUpdate, self).get_context_data(**kwargs)
+
+        cellsamples = get_cell_samples_for_selection(self.request.user)
+
+        # Cellsamples will always be the same
+        context['cellsamples'] = cellsamples
+
+        context['update'] = True
+
+        return context
+
+    def form_valid(self, form):
+        if form.is_valid():
+            save_forms_with_tracking(self, form)
+            return redirect(self.object.get_post_submission_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form))

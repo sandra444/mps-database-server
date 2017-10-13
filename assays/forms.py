@@ -2234,9 +2234,9 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
 #         pass
 #
 #
-# class AssayMatrixItemForm(forms.ModelForm):
-#     def clean(self):
-#         pass
-#
-#     def save(self, commit=True):
-#         pass
+
+
+class AssayMatrixItemForm(forms.ModelForm):
+    class Meta(object):
+        model = AssayMatrixItem
+        exclude = ('study',) + tracking

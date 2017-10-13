@@ -10,8 +10,8 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li><a href="/assays/editable_studies/">Editable Studies</a></li>
-    <li><a href="/assays/{{ form.instance.study.id }}">{{ form.instance.study }}</a></li>
+    <li><a href="/assays/assaystudy/editable_studies/">Editable Studies</a></li>
+    <li><a href="/assays/assaystudy/{{ form.instance.study.id }}">{{ form.instance.study }}</a></li>
     <li class="active">
         {% if object %}
             Edit <em>{{ object }}</em>
@@ -385,9 +385,9 @@
         <div align="center">
             <u><span class="item-name lead"></span></u>
             <span class="item-current_setup"></span>
-            <a class="pull-right btn btn-xs btn-warning">
-                <span class="glyphicon glyphicon-pencil"></span>
-            </a>
+{#            <a class="pull-right btn btn-xs btn-warning">#}
+{#                <span class="glyphicon glyphicon-pencil"></span>#}
+{#            </a>#}
         </div>
         <div class="alert alert-warning">
             <div class="item-setup_date"></div>
@@ -424,9 +424,9 @@
             <div>
                 <span class="item-cell_sample"></span>
                 <span class="item-passage"></span>
-                <a class="pull-right btn btn-xs btn-danger">
-                    <span class="glyphicon glyphicon-remove"></span>
-                </a>
+{#                <a class="pull-right btn btn-xs btn-danger">#}
+{#                    <span class="glyphicon glyphicon-remove"></span>#}
+{#                </a>#}
             </div>
             <div class="item-biosensor"></div>
             <div>
@@ -442,9 +442,9 @@
                 <span class="item-compound"></span>
                 <span class="item-concentration"></span>
                 <span class="item-concentration_unit"></span>
-                <a class="pull-right btn btn-xs btn-danger">
-                    <span class="glyphicon glyphicon-remove"></span>
-                </a>
+{#                <a class="pull-right btn btn-xs btn-danger">#}
+{#                    <span class="glyphicon glyphicon-remove"></span>#}
+{#                </a>#}
             </div>
             <div>
                 <span class="item-supplier_text"></span>
