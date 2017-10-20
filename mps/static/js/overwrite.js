@@ -5,6 +5,9 @@ $(document).ready(function () {
     var overwrite_confirm = $("#overwrite_confirm");
     var overwrite_was_confirmed = false;
 
+    var all_submits = $(':submit');
+    var submit_button = $('#submit');
+
     overwrite_confirm.dialog({
         height:250,
         modal: true,
@@ -24,11 +27,16 @@ $(document).ready(function () {
         buttons: [
         {
             text: 'Overwrite',
-            disabled: true,
             id: 'overwrite_confirm_submit_button',
             click: function() {
                 overwrite_was_confirmed = true;
-                $('#submit').trigger('click');
+                all_submits.removeAttr("disabled");
+                submit_button.trigger('click');
+                all_submits.attr('disabled', 'disabled');
+                // Disable all buttons during submission
+                $('.ui-button').button('disable');
+                // Change cursor to thinking
+                $('.ui-front').css('cursor', 'wait');
             }
         },
         {
@@ -39,12 +47,16 @@ $(document).ready(function () {
         }],
         close: function() {
             $('body').removeClass('stop-scrolling');
+            all_submits.removeAttr("disabled");
         },
         open: function() {
+            var dialog_submit_button = $('#overwrite_confirm_submit_button');
             $('body').addClass('stop-scrolling');
+            dialog_submit_button.button('disable');
 
             setTimeout(function() {
-                $('#overwrite_confirm_submit_button').button('enable');
+                dialog_submit_button.button('enable');
+                dialog_submit_button.focus();
             }, 1500);
         }
     });

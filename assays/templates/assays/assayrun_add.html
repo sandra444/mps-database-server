@@ -48,7 +48,13 @@
 
     {% include 'tracking.html' with study_submit='true' %}
 
-    {% include "sign_off_form.html" with group=form.instance.group.name study_submit='true' %}
+{#    {% include "sign_off_form.html" with group=form.instance.group.name study_submit='true' %}#}
+
+    {% if user|is_group_admin:object.group.name %}
+        <div class="well text-center">
+            <a href="../sign_off" class="btn btn-success">Click Here to Sign Off on this Study</a>
+        </div>
+    {% endif %}
 
     <legend>Study Details</legend>
 

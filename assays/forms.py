@@ -1,5 +1,5 @@
 from django import forms
-from django.forms.models import BaseInlineFormSet
+from django.forms.models import BaseInlineFormSet, inlineformset_factory
 # STOP USING WILDCARD IMPORTS
 from assays.models import *
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
@@ -10,6 +10,9 @@ import re
 import string
 import collections
 from captcha.fields import CaptchaField
+from django.utils import timezone
+
+from mps.templatetags.custom_filters import is_group_admin
 
 from .utils import validate_file, get_chip_details, get_plate_details, EXCLUDED_DATA_POINT_CODE
 
@@ -114,6 +117,7 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
 
+# DEPRECATED
 class AssayRunAccessForm(forms.ModelForm):
     """Form for changing access to studies"""
     def __init__(self, *args, **kwargs):
@@ -127,7 +131,6 @@ class AssayRunAccessForm(forms.ModelForm):
             'name'
         )
         self.fields['access_groups'].queryset = groups_with_center_full
-
 
     class Meta(object):
         model = AssayRun
@@ -1234,3 +1237,55 @@ class AssayInstanceInlineFormset(BaseInlineFormSet):
 class ReadyForSignOffForm(forms.Form):
     captcha = CaptchaField()
     message = forms.TextInput()
+
+
+class AssayRunSignOffForm(SignOffMixin, forms.ModelForm):
+    class Meta(object):
+        model = AssayRun
+        fields = ['signed_off', 'signed_off_notes']
+        widgets = {
+            'signed_off_notes': forms.Textarea(attrs={'cols': 50, 'rows': 2}),
+        }
+
+
+class AssayRunStakeholderSignOffForm(SignOffMixin, forms.ModelForm):
+    class Meta(object):
+        model = AssayRunStakeholder
+        fields = ['signed_off', 'signed_off_notes']
+        widgets = {
+            'signed_off_notes': forms.Textarea(attrs={'cols': 50, 'rows': 2}),
+        }
+
+
+class AssayRunStakeholderFormSet(BaseInlineFormSet):
+    class Meta(object):
+        model = AssayRunStakeholder
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(AssayRunStakeholderFormSet, self).__init__(*args, **kwargs)
+
+    def get_queryset(self):
+        if not hasattr(self, '_queryset'):
+            # TODO TODO TODO
+            queryset = super(AssayRunStakeholderFormSet, self).get_queryset()
+            self._queryset = queryset
+        return self._queryset
+
+    def save(self, commit=True):
+        for form in self.forms:
+            signed_off = form.cleaned_data.get('signed_off', False)
+            if signed_off and is_group_admin(self.user, form.instance.group.name):
+                form.instance.signed_off_by = self.user
+                form.instance.signed_off_date = timezone.now()
+                form.save(commit=True)
+
+# Really, all factories should be declared like so (will have to do this for upcoming revision)
+assay_run_stakeholder_sign_off_formset_factory = inlineformset_factory(
+    AssayRun,
+    AssayRunStakeholder,
+    form=AssayRunStakeholderSignOffForm,
+    formset=AssayRunStakeholderFormSet,
+    extra=0,
+    can_delete=False
+)

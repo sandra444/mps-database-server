@@ -36,6 +36,9 @@ from mps.templatetags.custom_filters import (
     is_group_admin
 )
 
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required, user_passes_test
+
 from mps.mixins import (
     LoginRequiredMixin,
     OneGroupRequiredMixin,
@@ -45,9 +48,10 @@ from mps.mixins import (
     DetailRedirectMixin,
     AdminRequiredMixin,
     DeletionMixin,
-    SuperuserRequiredMixin
+    SuperuserRequiredMixin,
     # CreatorOrAdminRequiredMixin,
-    # SpecificGroupRequiredMixin
+    # SpecificGroupRequiredMixin,
+    user_is_active
 )
 
 from mps.base.models import save_forms_with_tracking
@@ -709,7 +713,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             instance=form.instance
         )
 
-        # Get the original sign off data (may be None)
+        # Get the original Sign Off data (may be None)
         # original_sign_off_date = self.object.signed_off_date
 
         if form.is_valid() and assay_instance_formset.is_valid() and supporting_data_formset.is_valid():
@@ -776,7 +780,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             # all_data_uploads = AssayDataUpload.objects.filter(study=self.object)
 
             # Marking a study should mark/unmark only setups that have not been individually reviewed
-            # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
+            # If the Sign Off is being removed from the study, then treat all setups with the same date as unreviewed
             # if original_sign_off_date:
             #     unreviewed_chip_setups = all_chip_setups.filter(signed_off_date=original_sign_off_date)
             #     # unreviewed_chip_readouts = all_chip_readouts.exclude(signed_off_date=self.object.signed_off_date)
@@ -784,7 +788,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             #     unreviewed_plate_setups = all_plate_setups.filter(signed_off_date=original_sign_off_date)
             #     # unreviewed_plate_readouts = all_plate_readouts.exclude(signed_off_date=self.object.signed_off_date)
             #     # unreviewed_plate_results = all_plate_results.exclude(signed_off_date=self.object.signed_off_date)
-            # # If the study is being signed off, then treat any setups with no sign off as unreviewed
+            # # If the study is being signed off, then treat any setups with no Sign Off as unreviewed
             # else:
             #     unreviewed_chip_setups = all_chip_setups.filter(signed_off_by=None)
             #     # unreviewed_chip_readouts = all_chip_readouts.filter(signed_off_by=None)
@@ -858,6 +862,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             ))
 
 
+# DEPRECATED
 class AssayRunUpdateAccess(SuperuserRequiredMixin, UpdateView):
     """Update the fields of a Study"""
     model = AssayRun
@@ -917,6 +922,118 @@ class AssayRunUpdateAccess(SuperuserRequiredMixin, UpdateView):
             return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+
+class AssayRunSignOff(UpdateView):
+    """Perform Sign Offs as a group adming or stake holder admin"""
+    model = AssayRun
+    template_name = 'assays/assayrun_sign_off.html'
+    form_class = AssayRunSignOffForm
+
+    # Please note the unique dispatch!
+    # TODO TODO TODO
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        return super(AssayRunSignOff, self).dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayRunSignOff, self).get_context_data(**kwargs)
+
+        if self.request.POST:
+            context.update({
+                'stakeholder_formset': assay_run_stakeholder_sign_off_formset_factory(
+                    self.request.POST,
+                    instance=self.object,
+                    user=self.request.user
+                )
+            })
+        else:
+            context.update({
+                'stakeholder_formset': assay_run_stakeholder_sign_off_formset_factory(
+                    instance=self.object,
+                    user=self.request.user
+                )
+            })
+
+        context.update({
+            'update': True
+        })
+
+        return context
+
+    def form_valid(self, form):
+        stakeholder_formset = assay_run_stakeholder_sign_off_formset_factory(
+            self.request.POST,
+            instance=form.instance,
+            user=self.request.user
+        )
+
+        if form.is_valid() and stakeholder_formset.is_valid():
+            if not is_group_admin(self.request.user, self.object.group.name):
+                if form.cleaned_data.get('signed_off', ''):
+                    del form.cleaned_data['signed_off']
+                form.cleaned_data['restricted'] = self.object.restricted
+
+            # TODO REVISE
+            send_admin_alert = not form.instance.signed_off_by and form.cleaned_data.get('signed_off', '')
+
+            save_forms_with_tracking(self, form, formset=[stakeholder_formset], update=True)
+
+            send_viewer_alert = AssayRunStakeholder.objects.filter(
+                study=self.object,
+                signed_off_by=None
+            ).count == 0 and self.object.signed_off_by
+
+            if send_admin_alert:
+                # Magic strings are in poor taste, should use a template instead
+                superuser_subject = 'Study Sign Off Detected: {0}'.format(self.object)
+                superuser_message = 'Hello Admins,\n\n' \
+                          'A study has been signed off on.\n\n' \
+                          'Study: {0}\nSign Off By: {1} {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
+                          'Thanks,\nMPS'.format(
+                    self.object,
+                    self.request.user.first_name,
+                    self.request.user.last_name,
+                    self.object.get_absolute_url()
+                )
+
+                superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+                for user_to_be_alerted in superusers_to_be_alerted:
+                    user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+            if send_viewer_alert:
+                viewer_subject = 'Study {0} Now Available for Viewing'.format(self.object)
+                viewer_message = 'Hello {0} {1},\n\n' \
+                    'A study is now available for viewing.\n\n' \
+                    'Study: {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
+                    'Thanks,\nThe MPS Database Team'
+
+                access_group_names = {group.name: group.id for group in self.object.access_groups.all()}
+                matching_groups = list(set([
+                    group.id for group in Group.objects.all() if group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in access_group_names
+                ]))
+                viewers_to_be_alerted = User.objects.filter(groups__id__in=matching_groups, is_active=True).distinct()
+
+                for user_to_be_alerted in viewers_to_be_alerted:
+                    user_to_be_alerted.email_user(
+                        viewer_subject,
+                        viewer_message.format(
+                            user_to_be_alerted.first_name,
+                            user_to_be_alerted.last_name,
+                            unicode(self.object),
+                            self.object.get_absolute_url()
+                        ),
+                        DEFAULT_FROM_EMAIL
+                    )
+
+            return redirect(self.object.get_absolute_url())
+        else:
+            return self.render_to_response(self.get_context_data(
+                form=form,
+                stakeholder_formset=stakeholder_formset
+            ))
 
 
 def compare_cells(current_model, current_filter, setups):

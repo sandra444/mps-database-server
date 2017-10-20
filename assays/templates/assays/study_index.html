@@ -46,7 +46,7 @@
                 {% endif %}
                 {% if user.is_superuser %}
                 <div>
-                    <a href="access" class="btn btn-success" role="button">Change Group Access for this Study</a>
+                    <a href="/admin/assays/assayrun/{{ object.id }}" class="btn btn-success" role="button">Change Group Access for this Study</a>
                 </div>
                 {% endif %}
             </h1>
@@ -502,7 +502,7 @@
         <div class="alert alert-info" role="alert">
             <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
             <span class="sr-only">Info:</span>
-            This form, when submitted, will send an email to the group's PI indicating that the study is ready for sign off.
+            This form, when submitted, will send an email to the group's PI indicating that the study is ready for Sign Off.
         </div>
 
         <label for="email">Message:</label>
@@ -542,7 +542,7 @@
             <span id="email_message"></span>
             <br>
             <br>
-            Was sent to users that can sign off on the study.
+            Was sent to users that can Sign Off on the study.
         </h3>
     </div>
     </div>

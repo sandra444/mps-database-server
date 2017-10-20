@@ -1578,6 +1578,13 @@ class StudySupportingDataInline(admin.TabularInline):
     extra = 1
 
 
+class AssayRunStakeholderInline(admin.TabularInline):
+    """Inline for Studies"""
+    model = AssayRunStakeholder
+    verbose_name = 'Study Stakeholders'
+    extra = 1
+
+
 class AssayRunAdmin(LockableAdmin):
     """Admin for what are now called Organ Chip Studies"""
     # AssayRun is now Organ Chip Study
@@ -1641,32 +1648,33 @@ class AssayRunAdmin(LockableAdmin):
         ),
     )
 
-    inlines = [StudySupportingDataInline]
+    inlines = [AssayRunStakeholderInline, StudySupportingDataInline]
 
+    # TODO ADD EMAILS FOR CHANGING SIGN OFF (of study and stake holders) AND ACCESS GROUPS
     def save_model(self, request, obj, form, change):
 
         if change:
             obj.modified_by = request.user
 
-            if obj.pk is not None:
-                original = AssayRun.objects.get(pk=obj.pk)
-                original_sign_off_date = original.signed_off_date
-            else:
-                original_sign_off_date = obj.signed_off_date
+            # if obj.pk is not None:
+            #     original = AssayRun.objects.get(pk=obj.pk)
+            #     original_sign_off_date = original.signed_off_date
+            # else:
+            #     original_sign_off_date = obj.signed_off_date
 
             obj.save()
 
-            all_chip_setups = AssayChipSetup.objects.filter(assay_run_id=obj)
-            all_chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=obj)
-            all_chip_results = AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=obj)
-            all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=obj)
-            all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=obj)
-            all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=obj)
-
-            all_data_uploads = AssayDataUpload.objects.filter(study=obj)
+            # all_chip_setups = AssayChipSetup.objects.filter(assay_run_id=obj)
+            # all_chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=obj)
+            # all_chip_results = AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=obj)
+            # all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=obj)
+            # all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=obj)
+            # all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=obj)
+            #
+            # all_data_uploads = AssayDataUpload.objects.filter(study=obj)
 
             # # Marking a study should mark/unmark only setups that have not been individually reviewed
-            # # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
+            # # If the Sign Off is being removed from the study, then treat all setups with the same date as unreviewed
             # if original_sign_off_date:
             #     unreviewed_chip_setups = all_chip_setups.filter(signed_off_date=original_sign_off_date)
             #     # unreviewed_chip_readouts = all_chip_readouts.exclude(signed_off_date=obj.signed_off_date)
@@ -1684,34 +1692,34 @@ class AssayRunAdmin(LockableAdmin):
             #     # unreviewed_plate_results = all_plate_results.filter(signed_off_by=None)
 
             # Add group and restricted to all
-            all_chip_setups.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_chip_readouts.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_chip_results.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_plate_setups.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_plate_readouts.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_plate_results.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_data_uploads.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
+            # all_chip_setups.update(
+            #     group=obj.group,
+            #     restricted=obj.restricted
+            # )
+            # all_chip_readouts.update(
+            #     group=obj.group,
+            #     restricted=obj.restricted
+            # )
+            # all_chip_results.update(
+            #     group=obj.group,
+            #     restricted=obj.restricted
+            # )
+            # all_plate_setups.update(
+            #     group=obj.group,
+            #     restricted=obj.restricted
+            # )
+            # all_plate_readouts.update(
+            #     group=obj.group,
+            #     restricted=obj.restricted
+            # )
+            # all_plate_results.update(
+            #     group=obj.group,
+            #     restricted=obj.restricted
+            # )
+            # all_data_uploads.update(
+            #     group=obj.group,
+            #     restricted=obj.restricted
+            # )
 
             # Change signed off data only for unreviewed entries
             # unreviewed_chip_setups.update(
@@ -1734,7 +1742,6 @@ class AssayRunAdmin(LockableAdmin):
         else:
             obj.modified_by = obj.created_by = request.user
             obj.save()
-        # obj.save()
 
 
 admin.site.register(AssayRun, AssayRunAdmin)

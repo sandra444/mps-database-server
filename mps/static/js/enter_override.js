@@ -8,14 +8,10 @@ window.OVERRIDE = {
 
 $(document).ready(function () {
     // On submit, disable all submit buttons
-    // This only really matters on add pages and causes a bug on update pages when 'cancel' is selected
-    // if 'Edit ' in h1 is a crude test to determine whether update or not
-    if (!($('h1').first().text().indexOf('Edit ') > -1)) {
-        $('form').submit(function () {
-            $(':submit').attr('disabled', 'disabled');
-            return true;
-        });
-    }
+    $('form').submit(function () {
+        $(':submit').attr('disabled', 'disabled');
+        return true;
+    });
 
     // Prevent CSS conflict with Bootstrap
     $.fn.button.noConflict();
@@ -33,7 +29,6 @@ $(document).ready(function () {
         buttons: [
         {
             text: 'Submit',
-            disabled: true,
             id: 'enter_dialog_confirm_submit_button',
             click: function() {
                 $("#submit").trigger("click");
@@ -49,11 +44,14 @@ $(document).ready(function () {
             $('body').removeClass('stop-scrolling');
         },
         open: function() {
+            var dialog_submit_button = $('#enter_dialog_confirm_submit_button');
             $('body').addClass('stop-scrolling');
+            dialog_submit_button.button('disable');
 
             setTimeout(function() {
-                $('#enter_dialog_confirm_submit_button').button('enable');
-            }, 1000);
+                dialog_submit_button.button('enable');
+                dialog_submit_button.focus();
+            }, 1500);
         }
     });
     dialogConfirm.removeProp('hidden');

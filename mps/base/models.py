@@ -46,6 +46,9 @@ class TrackableModel(models.Model):
     signed_off_date = models.DateTimeField(blank=True,
                                            null=True)
 
+    # May be useful... however might be better to just add as needed
+    # sign_off_notes = models.CharField(max_length=255, blank=True, default='')
+
     def full_creator(self):
         if self.created_by:
             return self.created_by.first_name + ' ' + self.created_by.last_name
