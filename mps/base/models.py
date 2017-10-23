@@ -84,10 +84,10 @@ class RestrictedModel(LockableModel):
 
     # It is mandatory to bind a group to a restricted model
     group = models.ForeignKey('auth.Group',
-                              help_text='Bind to a group')
+                              help_text='Bind to a group (Tier 0)')
 
     restricted = models.BooleanField(default=True,
-                                     help_text='Check box to restrict to selected group')
+                                     help_text='Check box to restrict to selected group. Unchecked sends to Tier 3')
 
     class Meta(object):
         abstract = True

@@ -714,7 +714,12 @@ class AssayRun(FlaggableModel):
         help_text='Set this to True if this data should be included in Compound Reports and other data aggregations.'
     )
 
-    access_groups = models.ManyToManyField(Group, blank=True, related_name='access_groups')
+    access_groups = models.ManyToManyField(
+        Group,
+        blank=True,
+        related_name='access_groups',
+        help_text='Tier 2 Access Groups Assignation'
+    )
 
     # Special addition, would put in base model, but don't want excess...
     signed_off_notes = models.CharField(max_length=255, blank=True, default='')

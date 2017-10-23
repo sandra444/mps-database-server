@@ -22,6 +22,7 @@ from assays.utils import (
 from django.http import HttpResponseRedirect
 
 from assays.models import *
+from microdevices.models import MicrophysiologyCenter
 from .utils import parse_file_and_save
 # from compounds.models import Compound
 from mps.base.admin import LockableAdmin
@@ -1552,6 +1553,25 @@ class AssayRunFormAdmin(forms.ModelForm):
         }
         exclude = ('',)
 
+    def __init__(self, *args, **kwargs):
+        super(AssayRunFormAdmin, self).__init__(*args, **kwargs)
+
+        groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
+        groups_with_center_full = Group.objects.filter(
+            id__in=groups_with_center
+        ).order_by(
+            'name'
+        )
+
+        self.fields['group'].queryset = groups_with_center_full
+
+        groups_without_repeat = groups_with_center_full
+
+        if self.instance:
+            groups_without_repeat.exclude(pk=self.instance.group.id)
+
+        self.fields['access_groups'].queryset = groups_without_repeat
+
     # TODO CLEAN TO USE SETUP IN LIEU OF READOUT ID
     def clean(self):
         """Validate unique, existing Chip Readout IDs"""
@@ -1581,8 +1601,20 @@ class StudySupportingDataInline(admin.TabularInline):
 class AssayRunStakeholderInline(admin.TabularInline):
     """Inline for Studies"""
     model = AssayRunStakeholder
-    verbose_name = 'Study Stakeholders'
+    verbose_name = 'Study Stakeholders (Tier 1)'
     extra = 1
+
+    # TODO TODO TODO
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "group":
+            groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
+            groups_with_center_full = Group.objects.filter(
+                id__in=groups_with_center
+            ).order_by(
+                'name'
+            )
+            kwargs["queryset"] = groups_with_center_full
+        return super(AssayRunStakeholderInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class AssayRunAdmin(LockableAdmin):
@@ -1655,89 +1687,7 @@ class AssayRunAdmin(LockableAdmin):
 
         if change:
             obj.modified_by = request.user
-
-            # if obj.pk is not None:
-            #     original = AssayRun.objects.get(pk=obj.pk)
-            #     original_sign_off_date = original.signed_off_date
-            # else:
-            #     original_sign_off_date = obj.signed_off_date
-
             obj.save()
-
-            # all_chip_setups = AssayChipSetup.objects.filter(assay_run_id=obj)
-            # all_chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=obj)
-            # all_chip_results = AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=obj)
-            # all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=obj)
-            # all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=obj)
-            # all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=obj)
-            #
-            # all_data_uploads = AssayDataUpload.objects.filter(study=obj)
-
-            # # Marking a study should mark/unmark only setups that have not been individually reviewed
-            # # If the Sign Off is being removed from the study, then treat all setups with the same date as unreviewed
-            # if original_sign_off_date:
-            #     unreviewed_chip_setups = all_chip_setups.filter(signed_off_date=original_sign_off_date)
-            #     # unreviewed_chip_readouts = all_chip_readouts.exclude(signed_off_date=obj.signed_off_date)
-            #     # unreviewed_chip_results = all_chip_results.exclude(signed_off_date=obj.signed_off_date)
-            #     unreviewed_plate_setups = all_plate_setups.filter(signed_off_date=original_sign_off_date)
-            #     # unreviewed_plate_readouts = all_plate_readouts.exclude(signed_off_date=obj.signed_off_date)
-            #     # unreviewed_plate_results = all_plate_results.exclude(signed_off_date=obj.signed_off_date)
-            # # If the study is being signed off, then treat any setups with no sign off as unreviewed
-            # else:
-            #     unreviewed_chip_setups = all_chip_setups.filter(signed_off_by=None)
-            #     # unreviewed_chip_readouts = all_chip_readouts.filter(signed_off_by=None)
-            #     # unreviewed_chip_results = all_chip_results.filter(signed_off_by=None)
-            #     unreviewed_plate_setups = all_plate_setups.filter(signed_off_by=None)
-            #     # unreviewed_plate_readouts = all_plate_readouts.filter(signed_off_by=None)
-            #     # unreviewed_plate_results = all_plate_results.filter(signed_off_by=None)
-
-            # Add group and restricted to all
-            # all_chip_setups.update(
-            #     group=obj.group,
-            #     restricted=obj.restricted
-            # )
-            # all_chip_readouts.update(
-            #     group=obj.group,
-            #     restricted=obj.restricted
-            # )
-            # all_chip_results.update(
-            #     group=obj.group,
-            #     restricted=obj.restricted
-            # )
-            # all_plate_setups.update(
-            #     group=obj.group,
-            #     restricted=obj.restricted
-            # )
-            # all_plate_readouts.update(
-            #     group=obj.group,
-            #     restricted=obj.restricted
-            # )
-            # all_plate_results.update(
-            #     group=obj.group,
-            #     restricted=obj.restricted
-            # )
-            # all_data_uploads.update(
-            #     group=obj.group,
-            #     restricted=obj.restricted
-            # )
-
-            # Change signed off data only for unreviewed entries
-            # unreviewed_chip_setups.update(
-            #     signed_off_by=obj.signed_off_by,
-            #     signed_off_date=obj.signed_off_date
-            # )
-            # unreviewed_chip_readouts.update(
-            #     signed_off_by=obj.signed_off_by,
-            #     signed_off_date=obj.signed_off_date
-            # )
-            # unreviewed_chip_results.update(
-            #     signed_off_by=obj.signed_off_by,
-            #     signed_off_date=obj.signed_off_date
-            # )
-            # unreviewed_plate_setups.update(
-            #     signed_off_by=obj.signed_off_by,
-            #     signed_off_date=obj.signed_off_date
-            # )
 
         else:
             obj.modified_by = obj.created_by = request.user
