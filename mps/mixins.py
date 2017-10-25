@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
 from django.template import RequestContext, loader
 from django.http import HttpResponseForbidden
-from assays.models import AssayRun
+from assays.models import AssayRun, AssayRunStakeholder
 from mps.templatetags.custom_filters import filter_groups, VIEWER_SUFFIX, ADMIN_SUFFIX
 
 
@@ -42,13 +42,37 @@ def check_if_user_is_valid_study_viewer(user, study):
     # Only check access groups if the study IS signed off on
     if not valid_viewer and study.signed_off_by:
         user_group_names = user.groups.all().values_list('name', flat=True)
-        access_group_names = {name: True for name in study.access_groups.all().values_list('name', flat=True)}
 
+        # Check if user is a stakeholder
+        stakeholders = AssayRunStakeholder.objects.filter(
+            study=study
+        ).prefetch_related(
+            'study',
+            'group',
+            'signed_off_by'
+        )
+        stakeholder_group_names = {name: True for name in stakeholders.values_list('group__name', flat=True)}
         for group_name in user_group_names:
-            if group_name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') in access_group_names:
+            if group_name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') in stakeholder_group_names:
                 valid_viewer = True
                 # Only iterate as many times as is needed
                 return valid_viewer
+
+        # It not, check if all stake holders have signed off
+        all_required_stakeholders_have_signed_off = stakeholders.filter(
+            sign_off_required=True,
+            signed_off_by_id=None
+        ).count() == 0
+
+        # Check if user needs to be checked for access groups
+        if all_required_stakeholders_have_signed_off:
+            access_group_names = {name: True for name in study.access_groups.all().values_list('name', flat=True)}
+
+            for group_name in user_group_names:
+                if group_name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') in access_group_names:
+                    valid_viewer = True
+                    # Only iterate as many times as is needed
+                    return valid_viewer
 
     return valid_viewer
 
@@ -95,6 +119,7 @@ class ObjectGroupRequiredMixin(object):
         return super(ObjectGroupRequiredMixin, self).dispatch(*args, **kwargs)
 
 
+# It is ostensibly possible to jam the user's status here so that it need not be acquired again
 class StudyGroupRequiredMixin(object):
     """This mixin requires the user to have the group matching the study's group
 
@@ -119,7 +144,6 @@ class StudyGroupRequiredMixin(object):
             if not is_group_editor(self.request.user, study.group.name):
                 return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
 
-            # Do we want this behavior??
             if study.signed_off_by:
                 return PermissionDenied(
                     self.request,
@@ -144,6 +168,7 @@ class StudyGroupRequiredMixin(object):
             except:
                 # Evil except here!
                 return PermissionDenied(self.request, 'An error has occurred.')
+
             current_type = str(type(current_object))
             if current_type == "<class 'assays.models.AssayChipSetup'>":
                 study = current_object.assay_run_id
@@ -166,19 +191,6 @@ class StudyGroupRequiredMixin(object):
                     return redirect(self.update_redirect_url.format(current_object.id))
                 else:
                     return super(StudyGroupRequiredMixin, self).dispatch(*args, **kwargs)
-
-            # Find whether valid viewer by checking group and iterating over all access_groups
-            # valid_viewer = is_group_viewer(self.request.user, study.group.name)
-            #
-            # if not valid_viewer:
-            #     user_group_names = self.request.user.groups.all().values_list('name', flat=True)
-            #     access_group_names = {name: True for name in study.access_groups.all().values_list('name', flat=True)}
-            #
-            #     for group_name in user_group_names:
-            #         if group_name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') in access_group_names:
-            #             valid_viewer = True
-            #             # Only iterate as many times as is needed
-            #             break
 
             valid_viewer = check_if_user_is_valid_study_viewer(self.request.user, study)
 

@@ -1,0 +1,10 @@
+Hello Admins,
+
+A study has been signed off on by a Stakeholder.
+
+Study: {{ study }}
+Sign Off By: {{ signed_off_by.first_name }} {{ signed_off_by.last_name }}
+Link: https://mps.csb.pitt.edu{{ study.get_summary_url }}
+
+Thanks,
+MPS

@@ -46,7 +46,7 @@ $(document).ready(function() {
     var ready_for_sign_off_section = $('#ready_for_sign_off_section');
     ready_for_sign_off_section.dialog({
        height:500,
-       width:825,
+       width:900,
        modal: true,
        closeOnEscape: true,
        autoOpen: false,

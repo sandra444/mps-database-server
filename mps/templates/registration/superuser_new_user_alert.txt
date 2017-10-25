@@ -1,0 +1,9 @@
+Hello Admins,
+
+A new user has registered.
+
+Username: {{ user.user_name }}
+Name: {{ user.first_name }} {{ user.last_name }}
+
+Thanks,
+MPS

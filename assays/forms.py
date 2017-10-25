@@ -83,7 +83,8 @@ class CloneableBaseInlineFormSet(BaseInlineFormSet):
         return form
 
 
-class AssayRunForm(SignOffMixin, forms.ModelForm):
+# NOTE: No longer allows sign offs through this form
+class AssayRunForm(forms.ModelForm):
     """Frontend Form for Studies"""
     def __init__(self, groups, *args, **kwargs):
         """Init the Study Form

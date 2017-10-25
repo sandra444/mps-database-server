@@ -742,6 +742,9 @@ class AssayRun(FlaggableModel):
     def get_absolute_url(self):
         return '/assays/{}/'.format(self.id)
 
+    def get_summary_url(self):
+        return '/assays/{}/summary/'.format(self.id)
+
     def get_delete_url(self):
         return '/assays/{}/delete/'.format(self.id)
 
