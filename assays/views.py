@@ -1011,7 +1011,8 @@ class AssayRunSignOff(UpdateView):
         if form.is_valid() and stakeholder_formset.is_valid():
             send_initial_sign_off_alert = False
 
-            if is_group_admin(self.request.user, self.object.group.name):
+            # Only allow if necessary
+            if is_group_admin(self.request.user, self.object.group.name) and not self.object.signed_off_by:
                 send_initial_sign_off_alert = not form.instance.signed_off_by and form.cleaned_data.get('signed_off', '')
                 save_forms_with_tracking(self, form, update=True)
 

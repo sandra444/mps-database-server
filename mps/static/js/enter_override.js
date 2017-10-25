@@ -52,7 +52,7 @@ $(document).ready(function () {
             //     dialog_submit_button.button('enable');
             //     dialog_submit_button.focus();
             // }, 1500);
-            // Blur to prevent double enter inadvertant accepts
+            // Blur to prevent double enter accidental accepts
             $('.ui-dialog :button').blur();
         }
     });
