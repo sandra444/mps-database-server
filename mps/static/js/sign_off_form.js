@@ -108,14 +108,14 @@ $(document).ready(function() {
             $('body').removeClass('stop-scrolling');
         },
         open: function() {
-            var dialog_submit_button = $('#sign_off_confirm_submit_button');
+            // var dialog_submit_button = $('#sign_off_confirm_submit_button');
             $('body').addClass('stop-scrolling');
-            dialog_submit_button.button('disable');
-
-            setTimeout(function() {
-                dialog_submit_button.button('enable');
-                dialog_submit_button.focus();
-            }, 1500);
+            // dialog_submit_button.button('disable');
+            //
+            // setTimeout(function() {
+            //     dialog_submit_button.button('enable');
+            //     dialog_submit_button.focus();
+            // }, 1500);
         }
     });
     sign_off_confirm.removeProp('hidden');

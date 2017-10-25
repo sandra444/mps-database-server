@@ -50,14 +50,14 @@ $(document).ready(function () {
             all_submits.removeAttr("disabled");
         },
         open: function() {
-            var dialog_submit_button = $('#overwrite_confirm_submit_button');
+            // var dialog_submit_button = $('#overwrite_confirm_submit_button');
             $('body').addClass('stop-scrolling');
-            dialog_submit_button.button('disable');
-
-            setTimeout(function() {
-                dialog_submit_button.button('enable');
-                dialog_submit_button.focus();
-            }, 1500);
+            // dialog_submit_button.button('disable');
+            //
+            // setTimeout(function() {
+            //     dialog_submit_button.button('enable');
+            //     dialog_submit_button.focus();
+            // }, 1500);
         }
     });
     overwrite_confirm.removeProp('hidden');
