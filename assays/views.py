@@ -947,7 +947,7 @@ class AssayRunSignOff(UpdateView):
     form_class = AssayRunSignOffForm
 
     # Please note the unique dispatch!
-    # TODO TODO TODO
+    # TODO TODO TODO REVIEW
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
@@ -964,7 +964,7 @@ class AssayRunSignOff(UpdateView):
             'group',
             'signed_off_by'
         )
-        stakeholder_group_names = {name: True for name in stakeholders.values_list('group__name', flat=True)}
+        stakeholder_group_names = {name + ADMIN_SUFFIX: True for name in stakeholders.values_list('group__name', flat=True)}
         for group_name in user_group_names:
             if group_name in stakeholder_group_names:
                 can_view_sign_off = True
@@ -1009,15 +1009,16 @@ class AssayRunSignOff(UpdateView):
         )
 
         if form.is_valid() and stakeholder_formset.is_valid():
-            if not is_group_admin(self.request.user, self.object.group.name):
-                if form.cleaned_data.get('signed_off', ''):
-                    del form.cleaned_data['signed_off']
-                form.cleaned_data['restricted'] = self.object.restricted
+            send_initial_sign_off_alert = False
 
-            # TODO REVISE
-            send_initial_sign_off_alert = not form.instance.signed_off_by and form.cleaned_data.get('signed_off', '')
+            if is_group_admin(self.request.user, self.object.group.name):
+                send_initial_sign_off_alert = not form.instance.signed_off_by and form.cleaned_data.get('signed_off', '')
+                save_forms_with_tracking(self, form, update=True)
 
-            save_forms_with_tracking(self, form, formset=[stakeholder_formset], update=True)
+            # save_forms_with_tracking(self, form, formset=[stakeholder_formset], update=True)
+
+            if stakeholder_formset.has_changed():
+                save_forms_with_tracking(self, None, formset=[stakeholder_formset], update=True)
 
             send_viewer_alert = AssayRunStakeholder.objects.filter(
                 study=self.object,

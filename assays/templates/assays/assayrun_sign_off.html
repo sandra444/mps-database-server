@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block load %}
     <script src="{% static "js/enter_override.js" %}"></script>
@@ -85,7 +86,11 @@
         </thead>
         <tbody>
             {% if not object.signed_off_by %}
+                {% if user|is_group_admin:object.group.name %}
                 <tr>
+                {% else %}
+                <tr hidden>
+                {% endif %}
                     <td>{{ object.group }}</td>
                     <td hidden>{{ form.signed_off }}</td>
                     <td>
@@ -126,6 +131,12 @@
                         {{ stakeholder.signed_off_notes }}
                     </td>
                 </tr>
+            {% empty %}
+                {% if not user|is_group_admin:object.group.name %}
+                    <tr>
+                        <td colspan="3" class="text-danger">The group you represent has already signed off. See table below.</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
         </tbody>
     </table>

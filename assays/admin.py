@@ -1606,7 +1606,7 @@ class AssayRunStakeholderInline(admin.TabularInline):
     verbose_name = 'Study Stakeholders (Tier 1)'
     extra = 1
 
-    # TODO TODO TODO
+    # TODO REVIEW
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "group":
             groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)

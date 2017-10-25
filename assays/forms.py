@@ -12,7 +12,7 @@ import collections
 from captcha.fields import CaptchaField
 from django.utils import timezone
 
-from mps.templatetags.custom_filters import is_group_admin
+from mps.templatetags.custom_filters import is_group_admin, ADMIN_SUFFIX
 
 from .utils import validate_file, get_chip_details, get_plate_details, EXCLUDED_DATA_POINT_CODE
 
@@ -1268,9 +1268,16 @@ class AssayRunStakeholderFormSet(BaseInlineFormSet):
 
     def get_queryset(self):
         if not hasattr(self, '_queryset'):
-            # TODO TODO TODO
+            # TODO FILTER OUT THOSE USER ISN'T ADMIN OF
+            # TODO REVIEW
+            user_admin_groups = self.user.groups.filter(name__contains=ADMIN_SUFFIX)
+            potential_groups = [group.name.replace(ADMIN_SUFFIX, '') for group in user_admin_groups]
             queryset = super(AssayRunStakeholderFormSet, self).get_queryset()
-            self._queryset = queryset
+            # Only include unsigned off forms that user is admin of!
+            self._queryset = queryset.filter(
+                group__name__in=potential_groups,
+                signed_off_by=None
+            )
         return self._queryset
 
     def save(self, commit=True):

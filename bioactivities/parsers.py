@@ -255,7 +255,7 @@ def generate_list_of_all_drugtrials(desired_organisms):
     Parameters:
     desired_organisms -- list of the organisms to filter drug trials
     """
-    # TODO
+    # TODO This requires refactoring, magic conversion tables are not good practice
     # This requires refactoring, magic conversion tables are not good practice
     organisms = {
         'Homo sapiens': 'Human',
@@ -638,7 +638,7 @@ def fetch_all_standard_drugtrials_data(
     normalized -- boolean to specify whether to normalize bioactivities
     log_scale -- boolean to use log scale on data
     """
-    # TODO
+    # TODO This requires refactoring, magic conversion tables are not good practice
     # This requires refactoring, magic conversion tables are not good practice
     organisms = {
         'Homo sapiens': 'Human',
@@ -648,7 +648,7 @@ def fetch_all_standard_drugtrials_data(
 
     desired_organisms = [organisms.get(organism, '') for organism in desired_organisms]
 
-    # TODO: FIXME
+    # TODO: REVIEW
     # Nonstandard values?
     # Please note that normalization now goes from 0.0001 to 1
 
@@ -716,7 +716,7 @@ def fetch_all_standard_mps_assay_data():
     # using values for now, FUTURE: use standardized_values
     cursor = connection.cursor()
 
-    # TODO: FIXME
+    # TODO: REVIEW
     cursor.execute(
         ''
     )
