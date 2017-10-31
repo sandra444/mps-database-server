@@ -100,10 +100,6 @@ $(document).ready(function() {
         },
         open: function() {
             $('body').addClass('stop-scrolling');
-
-            setTimeout(function() {
-                $('#sign_off_confirm_submit_button').button('enable');
-            }, 1500);
         }
     });
     sign_off_confirm.removeProp('hidden');
