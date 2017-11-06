@@ -5,6 +5,8 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.models import User
 from mps.settings import DEFAULT_FROM_EMAIL
 
+from django.template.loader import render_to_string
+
 
 class SignOffMixin(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -75,10 +77,11 @@ class CaptchaRegistrationForm(RegistrationFormUniqueEmail):
 
         # Magic strings are in poor taste, should use a template instead
         subject = 'New User: {0} {1}'.format(new_user.first_name, new_user.last_name)
-        message = 'Hello Admins,\n\nA new user has registered.\n\nUsername: {0}\nName: {1} {2}\n\nThanks,\nMPS'.format(
-            new_user.username,
-            new_user.first_name,
-            new_user.last_name
+        message = render_to_string(
+            'registration/superuser_new_user_alert.txt',
+            {
+                'user': new_user
+            }
         )
 
         users_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)

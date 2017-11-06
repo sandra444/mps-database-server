@@ -1,11 +1,11 @@
 {# Consolidated submit row #}
-{# Parameters passed via with: group -- group needed for sign off, creator -- user needed for sign off #}
+{# Parameters passed via with: group -- group needed for Sign Off, creator -- user needed for Sign Off #}
 {% load custom_filters static %}
 
 <nav id="floating-submit-row" class="footer navbar-fixed-bottom hidden-print floating-submit-row">
     <div class="container large-padding-top">
         {# TODO REFACTOR #}
-        {# Creator is passed using with to differentiate entries that use user vs. group for sign off qualification #}
+        {# Creator is passed using with to differentiate entries that use user vs. group for Sign Off qualification #}
         {# If entry is reviewed, just show an indication showing that it has been reviewed #}
 {#        {% if update and group and object.signed_off_by and not user|is_group_admin:group or update and creator and object.signed_off_by and not user.id == creator %}#}
         {% if update and creator and object.signed_off_by and not user.id == creator %}
@@ -35,9 +35,9 @@
         {% endif %}
 
         {# Probably want a freeze on deletion #}
-{#        {% if update and object.get_delete_url %}#}
-{#            <a role="button" class="btn btn-danger pull-right" href="{{ object.get_delete_url }}">Delete</a>#}
-{#        {% endif %}#}
+        {% if update and object.get_delete_url and group %}
+            <a role="button" class="btn btn-danger pull-right" href="{{ object.get_delete_url }}">Delete</a>
+        {% endif %}
 
         {# Special exception for Plate Layouts #}
 {#        {% if update and assay_layout %}#}
@@ -82,12 +82,12 @@
 {#        {% if study_submit and user|is_group_admin:group or update and creator and user.id == creator %}#}
 {#            {% if form.signed_off.value %}#}
 {#            <a role='button' id="mark_reviewed" class="btn btn-sm btn-success" title="Mark entry as reviewed"#}
-{#            onclick="if (confirm('Signing off will lock this object and its subsidiaries.\nAre you sure you want to change the sign off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">#}
+{#            onclick="if (confirm('Signing off will lock this object and its subsidiaries.\nAre you sure you want to change the Sign Off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">#}
 {#                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>#}
 {#            </a>#}
 {#            {% else %}#}
 {#            <a role='button' id="mark_reviewed" class="btn btn-sm" title="Mark entry as reviewed"#}
-{#            onclick="if (confirm('Signing off will lock this object and its subsidiaries.\nAre you sure you want to change the sign off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">#}
+{#            onclick="if (confirm('Signing off will lock this object and its subsidiaries.\nAre you sure you want to change the Sign Off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">#}
 {#                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>#}
 {#            </a>#}
 {#            {% endif %}#}
@@ -96,12 +96,12 @@
 {#        {% if not study_submit and group and user|is_group_editor:group %}#}
 {#            {% if form.signed_off.value %}#}
 {#            <a role='button' id="mark_reviewed" class="btn btn-sm btn-success" title="Mark entry as reviewed"#}
-{#            onclick="if (confirm('Signing off will mark this object.\nAre you sure you want to change the sign off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">#}
+{#            onclick="if (confirm('Signing off will mark this object.\nAre you sure you want to change the Sign Off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">#}
 {#                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>#}
 {#            </a>#}
 {#            {% else %}#}
 {#            <a role='button' id="mark_reviewed" class="btn btn-sm" title="Mark entry as reviewed"#}
-{#            onclick="if (confirm('Signing off will mark this object.\nAre you sure you want to change the sign off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">#}
+{#            onclick="if (confirm('Signing off will mark this object.\nAre you sure you want to change the Sign Off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">#}
 {#                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>#}
 {#            </a>#}
 {#            {% endif %}#}

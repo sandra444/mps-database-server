@@ -1,0 +1,11 @@
+Hello {{ user.first_name}} {{ user.last_name}},
+
+A study is now available for viewing.
+
+Study: {{ study }}
+Link: https://mps.csb.pitt.edu{{ study.get_summary_url }}
+
+Thank you very much,
+The MPS Database Team
+
+***PLEASE DO NOT REPLY TO THIS EMAIL***

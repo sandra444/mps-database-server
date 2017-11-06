@@ -1,0 +1,10 @@
+Hello Admins,
+
+A study has been signed off on.
+
+Study: {{ study }}
+Sign Off By: {{ study.signed_off_by.user.first_name }} {{ study.signed_off_by.user.last_name }}
+Link: https://mps.csb.pitt.edu{{ study.get_summary_url }}
+
+Thanks,
+MPS

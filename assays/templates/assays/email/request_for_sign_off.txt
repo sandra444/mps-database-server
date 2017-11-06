@@ -1,0 +1,19 @@
+Hello {{ user.first_name}} {{ user.last_name}},
+
+{{ requester.first_name}} {{ requester.last_name}} has requested that you review the Study: {{ study }}.
+
+"{{ message }}"
+
+Please follow this link to see the Study in question:
+https://mps.csb.pitt.edu{{ study.get_summary_url }}
+
+When you are satisfied with the contents of the Study:
+1.) Click "View/Edit Sign Off Status of this Study"
+2.) Click "Click Here to Sign Off on this Study"
+3.) Read the message and click "Yes"
+4.) Click "Submit" and confirm you want to overwrite the entry
+
+Thank you very much,
+The MPS Database Team
+
+***PLEASE DO NOT REPLY TO THIS EMAIL***
