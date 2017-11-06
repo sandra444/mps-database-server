@@ -164,7 +164,7 @@ def get_queryset_with_organ_model_map_old(queryset):
             setup.assay_run_id_id, {}
         ).update(
             {
-                setup.organ_model.model_name: True
+                setup.organ_model.name: True
             }
         )
 
@@ -2700,7 +2700,7 @@ def get_queryset_with_organ_model_map(queryset):
             setup.matrix.study.id, {}
         ).update(
             {
-                setup.organ_model.model_name: True
+                setup.organ_model.name: True
             }
         )
 

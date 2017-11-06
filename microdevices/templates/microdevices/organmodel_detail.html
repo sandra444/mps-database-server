@@ -2,11 +2,11 @@
 
 {% block breadcrumbs %}
     <li><a href="/microdevices/model">Organ Models</a></li>
-    <li class="active">{{ object.model_name }}</li>
+    <li class="active">{{ object.name }}</li>
 {% endblock %}
 
 {% block content %}
-    <legend><h1>{{ object.model_name }}</h1></legend>
+    <legend><h1>{{ object.name }}</h1></legend>
 
     <div>
         <div class="col-xs-12">

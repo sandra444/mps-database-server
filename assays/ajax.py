@@ -345,7 +345,21 @@ def fetch_center_id(request):
         logger.error('center not present in request to fetch_assay_info')
         return HttpResponseServerError()
 
-    data = get_center_id(group)
+    data = {}
+
+    try:
+        center_data = MicrophysiologyCenter.objects.filter(groups__id=group)[0]
+
+        data.update({
+            'center_id': center_data.center_id,
+            'name': center_data.name,
+        })
+    # Evil exception
+    except:
+        data.update({
+            'center_id': '',
+            'name': '',
+        })
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
@@ -1786,7 +1800,7 @@ def fetch_matrix_items_as_json(request):
 
         current_setup = {
             'device_id': setup.device_id,
-            'device': setup.device.device_name,
+            'device': setup.device.name,
             'organ_model_id': setup.organ_model_id,
             'organ_model': '',
             'organ_model_protocol_id': setup.organ_model_protocol_id,
@@ -1800,7 +1814,7 @@ def fetch_matrix_items_as_json(request):
         # TODO I CAN CHANGE THIS AS SOON AS I FIX THE NAMES
         if setup.organ_model_id:
             current_setup.update({
-                'organ_model': setup.organ_model.model_name
+                'organ_model': setup.organ_model.name
             })
         if setup.organ_model_protocol_id:
             current_setup.update({

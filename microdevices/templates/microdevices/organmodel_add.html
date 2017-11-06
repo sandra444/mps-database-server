@@ -43,7 +43,7 @@
 
     <legend>Organ Model</legend>
 
-    {% include 'generic_field.html' with field=form.model_name label="Model Name*" %}
+    {% include 'generic_field.html' with field=form.name label="Model Name*" %}
 
     {% if form.device.errors %}
         {% for error in form.device.errors %}
