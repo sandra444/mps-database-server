@@ -26,7 +26,7 @@
         <div class="row text-center">
             <a id="export_button" href="/assays/{{ object.id }}/data/" class="btn btn-info" role="button">Download Data</a>
             <label class="radio-inline">
-                <input type="checkbox" name="exportinclude_all" id="exportinclude_all" />
+                <input type="checkbox" name="exportinclude_all" id="exportinclude_all" onclick="$('#chartsinclude_all').prop('checked', $(this).prop('checked'));"/>
                 <strong>Include Excluded Data</strong>
             </label>
         </div>
@@ -36,6 +36,11 @@
 {#                <strong>Include Excluded Data</strong>#}
 {#            </label>#}
 {#        </div>#}
+        {% if user_is_group_admin or user_is_stakeholder_admin %}
+            <div class="row text-center small-padding-top">
+                <a href="../sign_off" class="btn btn-success" role="button">View/Edit Sign Off Status of this Study</a>
+            </div>
+        {% endif %}
     </div>
 
     {% if object.description or object.study_configuration or object.protocol %}

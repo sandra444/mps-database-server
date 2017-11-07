@@ -18,13 +18,16 @@ urlpatterns = patterns('',
     url(r'^assays/(?P<pk>[0-9]+)/data/$', ReturnStudyData.as_view(), name='study-data'),
     # Bulk Readout Upload for Studies
     url(r'^assays/(?P<pk>[0-9]+)/bulk/$', ReadoutBulkUpload.as_view(), name='readout-bulk-upload'),
-    # Change access for a study
-    url(r'^assays/(?P<pk>[0-9]+)/access/$', AssayRunUpdateAccess.as_view(), name='study-access'),
+    # Change access for a study DEPRECATED
+    # url(r'^assays/(?P<pk>[0-9]+)/access/$', AssayRunUpdateAccess.as_view(), name='study-access'),
+    # Sign off
+    url(r'^assays/(?P<pk>[0-9]+)/sign_off/$', AssayRunSignOff.as_view(), name='study-sign_off'),
     # # Change pages for respective models
     url(r'^assays/assaychipsetup/(?P<pk>[0-9]+)/update/$', AssayChipSetupUpdate.as_view(), name='setup_update'),
     url(r'^assays/assaychipreadout/(?P<pk>[0-9]+)/update/$', AssayChipReadoutUpdate.as_view(), name='readout_update'),
     url(r'^assays/assaychiptestresult/(?P<pk>[0-9]+)/update/$', AssayChipTestResultUpdate.as_view(), name='result_update'),
 
+    # Deprecated
     # url(r'^assays/assayplatesetup/(?P<pk>[0-9]+)/update/$', AssayPlateSetupUpdate.as_view(), name='plate_setup_update'),
     # url(r'^assays/assayplatereadout/(?P<pk>[0-9]+)/update/$', AssayPlateReadoutUpdate.as_view(), name='plate_readout_update'),
     # url(r'^assays/assayplatetestresult/(?P<pk>[0-9]+)/update/$', AssayPlateTestResultUpdate.as_view(), name='plate_result_update'),
@@ -34,6 +37,7 @@ urlpatterns = patterns('',
     url(r'^assays/(?P<study_id>[0-9]+)/assaychipreadout/add/$', AssayChipReadoutAdd.as_view(), name='readout_add'),
     url(r'^assays/(?P<study_id>[0-9]+)/assaychiptestresult/add/$', AssayChipTestResultAdd.as_view(), name='result_add'),
 
+    # Deprecated
     # url(r'^assays/(?P<study_id>[0-9]+)/assayplatesetup/add/$', AssayPlateSetupAdd.as_view(), name='plate_setup_add'),
     # url(r'^assays/(?P<study_id>[0-9]+)/assayplatereadout/add/$', AssayPlateReadoutAdd.as_view(), name='plate_readout_add'),
     # url(r'^assays/(?P<study_id>[0-9]+)/assayplatetestresult/add/$', AssayPlateTestResultAdd.as_view(), name='plate_result_add'),
@@ -43,6 +47,7 @@ urlpatterns = patterns('',
     url(r'^assays/assaychipreadout/(?P<pk>[0-9]+)/delete/$', AssayChipReadoutDelete.as_view(), name='readout_delete'),
     url(r'^assays/assaychiptestresult/(?P<pk>[0-9]+)/delete/$', AssayChipTestResultDelete.as_view(), name='result_delete'),
 
+    # Deprecated
     # url(r'^assays/assayplatesetup/(?P<pk>[0-9]+)/delete/$', AssayPlateSetupDelete.as_view(), name='plate_setup_delete'),
     # url(r'^assays/assayplatereadout/(?P<pk>[0-9]+)/delete/$', AssayPlateReadoutDelete.as_view(), name='plate_readout_delete'),
     # url(r'^assays/assayplatetestresult/(?P<pk>[0-9]+)/delete/$', AssayPlateTestResultDelete.as_view(), name='plate_result_delete'),
@@ -51,6 +56,7 @@ urlpatterns = patterns('',
     url(r'^assays/studyconfiguration/add/$', StudyConfigurationAdd.as_view(), name='studyconfiguration_add'),
     url(r'^assays/studyconfiguration/(?P<pk>[0-9]+)/$', StudyConfigurationUpdate.as_view(), name='studyconfiguration_update'),
 
+    # Deprecated
     # url(r'^assays/assaylayout/$', AssayLayoutList.as_view(), name='assaylayout_list'),
     # url(r'^assays/assaylayout/add/$', AssayLayoutAdd.as_view(), name='assaylayout_add'),
     # url(r'^assays/assaylayout/(?P<pk>[0-9]+)/$', AssayLayoutUpdate.as_view(), name='assaylayout_update'),
@@ -72,6 +78,7 @@ urlpatterns = patterns('',
     #url(r'^assays/assaychiptestresult/add$', AssayChipTestResultAdd.as_view()),
     url(r'^assays/assaychiptestresult/(?P<pk>[0-9]+)/$', AssayChipTestResultDetail.as_view(), name='result_detail'),
 
+    # Deprecated
     # url(r'^assays/assayplatesetup/$', AssayPlateSetupList.as_view(), name='plate_setup_list'),
     # url(r'^assays/assayplatesetup/(?P<pk>[0-9]+)/$', AssayPlateSetupDetail.as_view(), name='plate_setup_detail'),
     #
