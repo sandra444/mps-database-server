@@ -1,10 +1,12 @@
 Hello Admins,
 
-A study has been signed off on by a Stakeholder.
+The Acknowledgment Status of a Study has changed:
 
 Study: {{ study }}
-Sign Off By: {{ signed_off_by.first_name }} {{ signed_off_by.last_name }}
 Link: https://mps.csb.pitt.edu{{ study.get_summary_url }}
+
+{% for stakeholder in stakeholders %}{{ stakeholder.group }}: Acknowledged by {{stakeholder.signed_off_by.first_name}} {{stakeholder.signed_off_by.last_name}} on {{ stakeholder.signed_off_date}} {% if stakeholder.sign_off_required %}(Required){% else %}(Not Required){% endif %}
+{% endfor %}
 
 Thanks,
 MPS

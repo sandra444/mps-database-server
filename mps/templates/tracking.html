@@ -26,7 +26,7 @@
 
     <div class="bg-primary tracking-box">
         <p class="tracking-text">
-            {% if object.created_by %}
+            {% if object.created_by_id %}
                 Created by <b>{{ object.full_creator }}</b> on <b>{{ object.created_on }}</b>
             {% else %}
                 Created by <b>Administration</b>
@@ -36,7 +36,7 @@
     {% if object.created_on|date:"U" != object.modified_on|date:"U" %}
         <div class="bg-info tracking-box">
             <p class="tracking-text">
-                {% if object.modified_by %}
+                {% if object.modified_by_id %}
                     Last Modified by <b>{{ object.full_modifier }}</b> on <b>{{ object.modified_on }}</b>
                 {% else %}
                     Last Modified by <b>Administration</b>

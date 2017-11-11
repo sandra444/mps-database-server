@@ -1,6 +1,12 @@
 Hello {{ user.first_name}} {{ user.last_name}},
 
-The Study {{ study }} is now available and needs to be signed off on.
+The Study {{ study }} is now available.
+
+{% if study.access_groups and study.restricted %}We ask that you grant permission for its release to the following groups:
+{% for group in study.access_groups.all %}{{ group.name}}
+{% endfor %}{% endif %}{% if not study.restricted %}We ask that you grant permission for its release to all registered users of the MPS-Db.
+{% endif %}{% if not study.access_groups and study.restricted %}We ask that you give permission for us to release the data to registered users in the future.
+{% endif %}
 
 Please follow this link to see the Study in question:
 https://mps.csb.pitt.edu{{ study.get_summary_url }}
@@ -13,5 +19,9 @@ When you are satisfied with the contents of the Study:
 
 Thank you very much,
 The MPS Database Team
+
+----------------------
+Your username is {{ user.username }}
+If you have forgotten your password, please follow this link: https://mps.csb.pitt.edu/password/reset/
 
 ***PLEASE DO NOT REPLY TO THIS EMAIL***

@@ -67,10 +67,17 @@
                     <td>{{ study.group }}</td>
                     <td>
                         {% if study.signed_off_by %}
-                            <span title="This entry was signed off on by {{ study.full_reviewer }} on {{ study.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-                            {% if not study.restricted %}
+                            {% if study.stakeholder_sign_off and not study.restricted %}
+                                <span hidden>1</span>
                                 <span title="This study can be viewed by all registered users" class="glyphicon glyphicon-eye-open text-info" aria-hidden="true"></span>
+                            {% elif study.stakeholder_sign_off %}
+                                <span hidden>2</span>
+                                <span title="All stakeholders have approved release of this data" class="glyphicon glyphicon-pencil text-info" aria-hidden="true"></span>
+                            {% else %}
+                                <span hidden>3</span>
                             {% endif %}
+                            <span hidden>4</span>
+                            <span title="This entry was signed off on by {{ study.full_reviewer }} on {{ study.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if study.flagged %}
                             <span title="This entry is flagged for review: '{{ study.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>

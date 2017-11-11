@@ -45,9 +45,15 @@
                 </div>
                 {% endif %}
 
-                {% if user_is_group_admin or user_is_stakeholder_admin %}
+                {% if user_is_group_admin %}
                 <div>
                     <a href="sign_off" class="btn btn-success" role="button">View/Edit Sign Off Status of this Study</a>
+                </div>
+                {% endif %}
+
+                {% if user_is_stakeholder_admin %}
+                <div>
+                    <a href="sign_off" class="btn btn-success" role="button">View/Edit Approval Status of this Study</a>
                 </div>
                 {% endif %}
 
