@@ -1082,10 +1082,13 @@ class AssayRunSignOff(UpdateView):
 
             viewer_subject = 'Study {0} Now Available for Viewing'.format(self.object)
             # TODO TODO TODO TODO
-            stakeholder_admin_subject = 'Acknowledgement of Study {0} Requested'.format(self.object)
+            stakeholder_admin_subject = 'Approval of Study {0} Requested'.format(self.object)
 
             stakeholder_viewer_groups = {}
             stakeholder_admin_groups = {}
+
+            stakeholder_admins_to_be_alerted = []
+            stakeholder_viewers_to_be_alerted = []
 
             if send_initial_sign_off_alert:
                 # TODO TODO TODO TODO ALERT STAKEHOLDER ADMINS
@@ -1106,7 +1109,7 @@ class AssayRunSignOff(UpdateView):
                         'assays/email/stakeholder_sign_off_request.txt',
                         {
                             'user': user_to_be_alerted,
-                            'study':self.object
+                            'study': self.object
                         }
                     )
 
@@ -1127,17 +1130,16 @@ class AssayRunSignOff(UpdateView):
 
                 for group in initial_groups:
                     stakeholder_viewer_groups.update({
-                        group + ADMIN_SUFFIX: True,
+                        # group + ADMIN_SUFFIX: True,
                         group + VIEWER_SUFFIX: True
                     })
 
+                # BE SURE THIS IS MATCHED BELOW
                 stakeholder_viewers_to_be_alerted = User.objects.filter(
                     groups__name__in=stakeholder_viewer_groups, is_active=True
+                ).exclude(
+                    id__in=stakeholder_admins_to_be_alerted
                 ).distinct()
-                if stakeholder_admin_groups:
-                    stakeholder_viewers_to_be_alerted.exclude(
-                        groups__name__in=stakeholder_admin_groups
-                    )
 
                 for user_to_be_alerted in stakeholder_viewers_to_be_alerted:
                     # TODO TODO TODO WHAT DO WE CALL THE PROCESS OF SIGN OFF ACKNOWLEDGEMENT?!
@@ -1164,20 +1166,26 @@ class AssayRunSignOff(UpdateView):
                 # Just in case, exclude stakeholders to prevent double messages
                 viewers_to_be_alerted = User.objects.filter(
                     groups__id__in=matching_groups, is_active=True
+                ).exclude(
+                    id__in=stakeholder_admins_to_be_alerted
+                ).exclude(
+                    id__in=stakeholder_viewers_to_be_alerted
                 ).distinct()
                 # Update viewer groups to include admins
                 stakeholder_viewer_groups.update(stakeholder_admin_groups)
-                if stakeholder_viewer_groups or stakeholder_admin_groups:
-                    viewers_to_be_alerted.exclude(
-                        groups__name__in=stakeholder_viewer_groups
-                    )
+                # if stakeholder_viewer_groups or stakeholder_admin_groups:
+                #     viewers_to_be_alerted.exclude(
+                #         groups__name__in=stakeholder_viewer_groups
+                #     ).exclude(
+                #         group__name__in=stakeholder_admin_groups
+                #     )
 
                 for user_to_be_alerted in viewers_to_be_alerted:
                     viewer_message = render_to_string(
                         'assays/email/viewer_alert.txt',
                         {
                             'user': user_to_be_alerted,
-                            'study':self.object
+                            'study': self.object
                         }
                     )
 
@@ -1196,7 +1204,8 @@ class AssayRunSignOff(UpdateView):
                 superuser_message = render_to_string(
                     'assays/email/superuser_initial_sign_off_alert.txt',
                     {
-                        'study':self.object
+                        'study': self.object,
+                        'stakeholders': AssayRunStakeholder.objects.filter(study=self.object).order_by('-signed_off_date')
                     }
                 )
 
@@ -1205,11 +1214,12 @@ class AssayRunSignOff(UpdateView):
 
             if send_stakeholder_sign_off_alert:
                 # Magic strings are in poor taste, should use a template instead
-                superuser_subject = 'Stakeholder Acknowledgement Detected: {0}'.format(self.object)
+                # superuser_subject = 'Stakeholder Acknowledgement Detected: {0}'.format(self.object)
+                superuser_subject = 'Stakeholder Approval Detected: {0}'.format(self.object)
                 superuser_message = render_to_string(
                     'assays/email/superuser_stakeholder_alert.txt',
                     {
-                        'study':self.object,
+                        'study': self.object,
                         'stakeholders': AssayRunStakeholder.objects.filter(study=self.object).order_by('-signed_off_date')
                     }
                 )
@@ -1223,7 +1233,7 @@ class AssayRunSignOff(UpdateView):
                 superuser_message = render_to_string(
                     'assays/email/superuser_viewer_release_alert.txt',
                     {
-                        'study':self.object
+                        'study': self.object
                     }
                 )
 
