@@ -69,14 +69,15 @@
 
     {# Yes, I know this violates SOC #}
     <script>
+      {# Smart menus removed #}
       // always emulate touch mode
 {#      $.SmartMenus.prototype.isTouchMode = function() {#}
 {#        return true;#}
 {#      };#}
 
-      // TODO MOVE THIS TO ITS OWN FILE PLEASE
+{#      // TODO MOVE THIS TO ITS OWN FILE PLEASE#}
       $(document).ready(function () {
-        // Discern what anchor to add to the help URL by looking at current url
+{#        // Discern what anchor to add to the help URL by looking at current url#}
         var url = window.location.href;
         var anchor = '';
 
@@ -89,21 +90,21 @@
         else if (url.indexOf('/assaychiptestresult/') > -1) {
           anchor = '#chipresults'
         }
-        else if (url.indexOf('/assayplatesetup/') > -1) {
-          anchor = '#platesetups'
-        }
-        else if (url.indexOf('/assayplatereadout/') > -1) {
-          anchor = '#platereadouts'
-        }
-        else if (url.indexOf('/assayplatetestresult/') > -1) {
-          anchor = '#plateresults'
-        }
+{#        else if (url.indexOf('/assayplatesetup/') > -1) {#}
+{#          anchor = '#platesetups'#}
+{#        }#}
+{#        else if (url.indexOf('/assayplatereadout/') > -1) {#}
+{#          anchor = '#platereadouts'#}
+{#        }#}
+{#        else if (url.indexOf('/assayplatetestresult/') > -1) {#}
+{#          anchor = '#plateresults'#}
+{#        }#}
         else if (url.indexOf('/bulk/') > -1) {
           anchor = '#bulk'
         }
-        else if (url.indexOf('/assaylayout/') > -1) {
-          anchor = '#assaylayouts'
-        }
+{#        else if (url.indexOf('/assaylayout/') > -1) {#}
+{#          anchor = '#assaylayouts'#}
+{#        }#}
         else if (url.indexOf('/studyconfiguration/') > -1) {
           anchor = '#studyconfigurations'
         }
@@ -145,6 +146,19 @@
         }
 
         $('#view_help').attr('onclick',"window.open('/help/" + anchor + "','win','toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')");
+
+{#        // Bind a listener to the navbar that causes a collapse if it is oversized   #}
+        var navbar = $('#autocollapse');
+
+        function autocollapse() {
+            navbar.removeClass('collapsed');
+            if(navbar.innerHeight() > 50) {
+                navbar.addClass('collapsed');
+            }
+        }
+
+        $(document).on('ready', autocollapse);
+        $(window).on('resize', autocollapse);
       });
     </script>
 
@@ -164,7 +178,7 @@
 
 <body>
   <!-- Fixed navbar -->
-  <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <nav id="autocollapse" class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
