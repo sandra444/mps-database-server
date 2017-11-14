@@ -140,7 +140,7 @@
             {% empty %}
                 {% if not user|is_group_admin:object.group.name or object.signed_off_by %}
                     <tr>
-                        <td colspan="3" class="text-danger">The group you represent has already signed off. See table below.</td>
+                        <td colspan="3" class="text-danger">The group you represent has already approved. See table below.</td>
                     </tr>
                 {% endif %}
             {% endfor %}

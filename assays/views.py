@@ -45,8 +45,8 @@ from mps.mixins import (
     ObjectGroupRequiredMixin,
     StudyGroupRequiredMixin,
     StudyViewershipMixin,
-    DetailRedirectMixin,
-    AdminRequiredMixin,
+    # DetailRedirectMixin,
+    # AdminRequiredMixin,
     DeletionMixin,
     SuperuserRequiredMixin,
     # CreatorOrAdminRequiredMixin,
@@ -1001,20 +1001,21 @@ class AssayRunSignOff(UpdateView):
 
         can_view_sign_off = study.group.name + ADMIN_SUFFIX in user_group_names
 
-        # Check if user is a stakeholder admin
-        stakeholders = AssayRunStakeholder.objects.filter(
-            study=study
-        ).prefetch_related(
-            'study',
-            'group',
-            'signed_off_by'
-        )
-        stakeholder_group_names = {name + ADMIN_SUFFIX: True for name in stakeholders.values_list('group__name', flat=True)}
-        for group_name in user_group_names:
-            if group_name in stakeholder_group_names:
-                can_view_sign_off = True
-                # Only iterate as many times as is needed
-                break
+        # Check if user is a stakeholder admin ONLY IF SIGNED OFF
+        if study.signed_off_by:
+            stakeholders = AssayRunStakeholder.objects.filter(
+                study=study
+            ).prefetch_related(
+                'study',
+                'group',
+                'signed_off_by'
+            )
+            stakeholder_group_names = {name + ADMIN_SUFFIX: True for name in stakeholders.values_list('group__name', flat=True)}
+            for group_name in user_group_names:
+                if group_name in stakeholder_group_names:
+                    can_view_sign_off = True
+                    # Only iterate as many times as is needed
+                    break
 
         if can_view_sign_off:
             return super(AssayRunSignOff, self).dispatch(*args, **kwargs)
