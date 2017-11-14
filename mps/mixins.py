@@ -74,6 +74,10 @@ def check_if_user_is_valid_study_viewer(user, study):
                     # Only iterate as many times as is needed
                     return valid_viewer
 
+            # FINALLY: Check if the study is unrestricted
+            if not study.restricted:
+                return valid_viewer
+
     return valid_viewer
 
 # Add this mixin via multiple-inheritance and you need not change the dispatch every time
@@ -195,7 +199,8 @@ class StudyGroupRequiredMixin(object):
             valid_viewer = check_if_user_is_valid_study_viewer(self.request.user, study)
 
             # If the object is not restricted and the user is NOT a listed viewer
-            if study.restricted and not valid_viewer:
+            # if study.restricted and not valid_viewer:
+            if not valid_viewer:
                 return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
 
             if study.signed_off_by and not self.detail:
@@ -241,12 +246,13 @@ class StudyViewershipMixin(object):
 
         valid_viewer = check_if_user_is_valid_study_viewer(self.request.user, self.object)
         # If the object is not restricted and the user is NOT a listed viewer, deny permission
-        if self.object.restricted and not valid_viewer:
+        # if self.object.restricted and not valid_viewer:
+        if not valid_viewer:
             return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
         # Otherwise return the detail view
         return super(StudyViewershipMixin, self).dispatch(*args, **kwargs)
 
-# WIP
+# WIP (AND DEPRECATED)
 class DetailRedirectMixin(object):
     """This mixin checks if the user has the object's group, if so it redirects to the edit page
 
