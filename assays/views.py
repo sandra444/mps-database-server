@@ -498,7 +498,7 @@ def filter_queryset_for_viewership(self, queryset):
         # 3: Study has access group matching user_group_names AND is signed off on AND all Stakeholders have signed off
         # 4: Study is unrestricted AND is signed off on AND all Stakeholders have signed off
     combined = queryset.filter(**data_group_filter) | \
-    queryset.filter(**stakeholder_group_filter).exclude(**unsigned_off_filter)
+    queryset.filter(**stakeholder_group_filter).exclude(**unsigned_off_filter) | \
     queryset.filter(**access_group_filter).exclude(**unsigned_off_filter).exclude(**missing_stakeholder_filter) | \
     queryset.filter(**unrestricted_filter).exclude(**unsigned_off_filter).exclude(**missing_stakeholder_filter)
 
