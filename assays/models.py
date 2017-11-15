@@ -1219,6 +1219,6 @@ class AssayRunStakeholder(models.Model):
     signed_off_notes = models.CharField(max_length=255, blank=True, default='')
 
     # TODO NEED MEDIA LOCATION
-    approval_for_sign_off = models.FileField(null=True, blank=True)
+    # approval_for_sign_off = models.FileField(null=True, blank=True)
 
     sign_off_required = models.BooleanField(default=True)

@@ -60,3 +60,25 @@ class MicrophysiologyCenterForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 6}),
         }
+
+
+class GroupDeferralForm(forms.ModelForm):
+    class Meta(object):
+        model = GroupDeferral
+        exclude = []
+
+        widgets = {
+            'notes': forms.Textarea(attrs={'rows': 6}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(GroupDeferralForm, self).__init__(*args, **kwargs)
+
+        groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
+        groups_with_center_full = Group.objects.filter(
+            id__in=groups_with_center
+        ).order_by(
+            'name'
+        )
+
+        self.fields['group'].queryset = groups_with_center_full

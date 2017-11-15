@@ -3,7 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import Group
 
-from mps.base.models import LockableModel
+from mps.base.models import LockableModel, TrackableModel
 from django.core.validators import MaxValueValidator
 
 
@@ -200,3 +200,14 @@ class OrganModelProtocol(models.Model):
 
     def __unicode__(self):
         return self.version
+
+
+class GroupDeferral(TrackableModel):
+    """This indicates the status of a group and whether they have deferred their ability to approve studies"""
+    group = models.ForeignKey(Group)
+    notes = models.CharField(max_length=1024)
+    approval_file = models.FileField(
+        null=True,
+        blank=True,
+        upload_to='deferral'
+    )
