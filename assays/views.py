@@ -1083,7 +1083,7 @@ class AssayRunSignOff(UpdateView):
 
             viewer_subject = 'Study {0} Now Available for Viewing'.format(self.object)
             # TODO TODO TODO TODO
-            stakeholder_admin_subject = 'Approval of Study {0} Requested'.format(self.object)
+            stakeholder_admin_subject = 'Approval for Release Requested: {0}'.format(self.object)
 
             stakeholder_viewer_groups = {}
             stakeholder_admin_groups = {}
