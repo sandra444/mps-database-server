@@ -682,6 +682,13 @@ class StudyIndex(StudyViewershipMixin, DetailView):
 
         context['ready_for_sign_off_form'] = ReadyForSignOffForm()
 
+        # Stakeholder status
+        context['stakeholder_sign_off'] = AssayRunStakeholder.objects.filter(
+            study=self.object,
+            signed_off_by_id=None,
+            sign_off_required=True
+        ).count() == 0
+
         return context
 
 
