@@ -19,6 +19,7 @@
 
 {% block content %}
     {# Inform whether this is publicly accessible #}
+    {# Needs to account for all stakeholders too #}
     {% if object.signed_off_by and not object.restricted %}
         <div class="alert alert-info" role="alert">
             <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>

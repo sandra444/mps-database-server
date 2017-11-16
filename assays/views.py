@@ -64,7 +64,7 @@ import os
 
 from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
-from django.template.loader import render_to_string
+from django.template.loader import render_to_string, TemplateDoesNotExist
 
 # TODO Refactor imports
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
@@ -1105,14 +1105,22 @@ class AssayRunSignOff(UpdateView):
                 ).distinct()
 
                 for user_to_be_alerted in stakeholder_admins_to_be_alerted:
-                    # TODO TODO TODO WHAT DO WE CALL THE PROCESS OF SIGN OFF ACKNOWLEDGEMENT?!
-                    stakeholder_admin_message = render_to_string(
-                        'assays/email/stakeholder_sign_off_request.txt',
-                        {
-                            'user': user_to_be_alerted,
-                            'study': self.object
-                        }
-                    )
+                    try:
+                        stakeholder_admin_message = render_to_string(
+                            'assays/email/tctc_stakeholder_email.txt',
+                            {
+                                'user': user_to_be_alerted,
+                                'study': self.object
+                            }
+                        )
+                    except TemplateDoesNotExist:
+                        stakeholder_admin_message = render_to_string(
+                            'assays/email/stakeholder_sign_off_request.txt',
+                            {
+                                'user': user_to_be_alerted,
+                                'study': self.object
+                            }
+                        )
 
                     user_to_be_alerted.email_user(
                         stakeholder_admin_subject,

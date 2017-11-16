@@ -42,7 +42,7 @@ import os
 import xlsxwriter
 # from xlsxwriter.utility import xl_col_to_name
 
-from django.template.loader import render_to_string
+from django.template.loader import render_to_string, TemplateDoesNotExist
 from mps.settings import DEFAULT_FROM_EMAIL
 from mps.templatetags.custom_filters import (
     ADMIN_SUFFIX,
@@ -1797,14 +1797,22 @@ class AssayRunAdmin(LockableAdmin):
             ).distinct()
 
             for user_to_be_alerted in stakeholder_admins_to_be_alerted:
-                # TODO TODO TODO WHAT DO WE CALL THE PROCESS OF SIGN OFF ACKNOWLEDGEMENT?!
-                stakeholder_admin_message = render_to_string(
-                    'assays/email/stakeholder_sign_off_request.txt',
-                    {
-                        'user': user_to_be_alerted,
-                        'study': obj
-                    }
-                )
+                try:
+                    stakeholder_admin_message = render_to_string(
+                        'assays/email/tctc_stakeholder_email.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': obj
+                        }
+                    )
+                except TemplateDoesNotExist:
+                    stakeholder_admin_message = render_to_string(
+                        'assays/email/stakeholder_sign_off_request.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': obj
+                        }
+                    )
 
                 user_to_be_alerted.email_user(
                     stakeholder_admin_subject,
@@ -1955,14 +1963,22 @@ class AssayRunAdmin(LockableAdmin):
             ).distinct()
 
             for user_to_be_alerted in stakeholder_admins_to_be_alerted:
-                # TODO TODO TODO WHAT DO WE CALL THE PROCESS OF SIGN OFF ACKNOWLEDGEMENT?!
-                stakeholder_admin_message = render_to_string(
-                    'assays/email/stakeholder_sign_off_request.txt',
-                    {
-                        'user': user_to_be_alerted,
-                        'study': obj
-                    }
-                )
+                try:
+                    stakeholder_admin_message = render_to_string(
+                        'assays/email/tctc_stakeholder_email.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': obj
+                        }
+                    )
+                except TemplateDoesNotExist:
+                    stakeholder_admin_message = render_to_string(
+                        'assays/email/stakeholder_sign_off_request.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': obj
+                        }
+                    )
 
                 user_to_be_alerted.email_user(
                     stakeholder_admin_subject,
