@@ -41,11 +41,11 @@
         <h3>
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
             {% if user|is_group_admin:object.group.name %}
-            Signing Off indicates that you have reviewed the data associated with this study and
-            that, on behalf of your institution, you are willing to the permit other parties to view
+            Signing Off indicates that you have reviewed this study and
+            that you are willing to the permit other parties to view
             the data in question.
             {% else %}
-            Approval indicates that on behalf of your institution, you are willing to the permit other parties to view
+            Approval indicates that you are willing to the permit other parties to view
             the data in question.
             {% endif %}
         </h3>
@@ -210,7 +210,7 @@
     <div class="alert alert-danger" role="alert">
         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
         <span class="sr-only">Danger:</span>
-        <span>Changes will not be saved unless you press the "Submit" button.</span>
+        <span>Changes will not be saved unless you press the "Submit" button at the bottom of the page.</span>
     </div>
     <div class="alert alert-warning" role="alert">
         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
