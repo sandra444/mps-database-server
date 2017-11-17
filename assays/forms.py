@@ -1363,8 +1363,8 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     item_notes = forms.CharField(required=False)
 
     ### ADDING SETUP FIELDS
-    setup_device = forms.ModelChoiceField(queryset=Microdevice.objects.all().order_by('device_name'), required=False)
-    setup_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('model_name'), required=False)
+    setup_device = forms.ModelChoiceField(queryset=Microdevice.objects.all().order_by('name'), required=False)
+    setup_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
     setup_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.none(), required=False)
     setup_variance_from_organ_model_protocol = forms.CharField(required=False)
 
