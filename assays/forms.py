@@ -103,7 +103,7 @@ class AssayRunForm(forms.ModelForm):
             'name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
         }
-        exclude = tracking + restricted + ('access_groups',)
+        exclude = tracking + restricted + ('access_groups', 'signed_off_notes')
 
     def clean(self):
         """Checks for at least one study type and deformed assay_run_ids"""
