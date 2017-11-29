@@ -1245,7 +1245,7 @@ class AssayRunSignOff(UpdateView):
 
             if send_viewer_alert:
                 # Magic strings are in poor taste, should use a template instead
-                superuser_subject = 'Study Released to Next Tier: {0}'.format(self.object)
+                superuser_subject = 'Study Released to Next Level: {0}'.format(self.object)
                 superuser_message = render_to_string(
                     'assays/email/superuser_viewer_release_alert.txt',
                     {

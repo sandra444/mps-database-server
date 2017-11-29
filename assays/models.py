@@ -718,7 +718,7 @@ class AssayRun(FlaggableModel):
         Group,
         blank=True,
         related_name='access_groups',
-        help_text='Tier 2 Access Groups Assignation'
+        help_text='Level 2 Access Groups Assignation'
     )
 
     # Special addition, would put in base model, but don't want excess...

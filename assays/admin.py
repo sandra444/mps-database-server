@@ -1608,7 +1608,7 @@ class StudySupportingDataInline(admin.TabularInline):
 class AssayRunStakeholderInline(admin.TabularInline):
     """Inline for Studies"""
     model = AssayRunStakeholder
-    verbose_name = 'Study Stakeholders (Tier 1)'
+    verbose_name = 'Study Stakeholders (Level 1)'
     extra = 1
 
     # TODO REVIEW
@@ -1930,7 +1930,7 @@ class AssayRunAdmin(LockableAdmin):
 
         if send_viewer_alert:
             # Magic strings are in poor taste, should use a template instead
-            superuser_subject = 'Study Released to Next Tier: {0}'.format(obj)
+            superuser_subject = 'Study Released to Next Level: {0}'.format(obj)
             superuser_message = render_to_string(
                 'assays/email/superuser_viewer_release_alert.txt',
                 {
@@ -2060,7 +2060,7 @@ class AssayRunAdmin(LockableAdmin):
 
             # TODO CHANGE SUPERUSER VIEWER RELEASE ALERT
             # Magic strings are in poor taste, should use a template instead
-            superuser_subject = 'Study Released to Next Tier: {0}'.format(obj)
+            superuser_subject = 'Study Released to Next Level: {0}'.format(obj)
             superuser_message = render_to_string(
                 'assays/email/superuser_viewer_release_alert.txt',
                 {
@@ -2075,7 +2075,7 @@ class AssayRunAdmin(LockableAdmin):
         # Special case for going public
         if initial_restricted and not obj.restricted:
             # Magic strings are in poor taste, should use a template instead
-            superuser_subject = 'Study Released to Next Tier: {0}'.format(obj)
+            superuser_subject = 'Study Released to Next Level: {0}'.format(obj)
             superuser_message = render_to_string(
                 'assays/email/superuser_viewer_release_alert.txt',
                 {

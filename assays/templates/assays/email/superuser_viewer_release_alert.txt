@@ -1,6 +1,6 @@
 Hello Admins,
 
-{% if not new_access_group_names %}A study has been released to the next tier.{% else %}Access groups have been added.{% endif %}
+{% if not new_access_group_names %}A study has been released to the next level.{% else %}Access groups have been added.{% endif %}
 Study: {{ study }}
 Link: https://mps.csb.pitt.edu{{ study.get_summary_url }}
 
