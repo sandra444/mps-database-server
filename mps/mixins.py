@@ -76,6 +76,7 @@ def check_if_user_is_valid_study_viewer(user, study):
 
             # FINALLY: Check if the study is unrestricted
             if not study.restricted:
+                valid_viewer = True
                 return valid_viewer
 
     return valid_viewer
