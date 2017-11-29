@@ -1557,6 +1557,7 @@ class AssayRunFormAdmin(forms.ModelForm):
             'assay_run_id': forms.Textarea(attrs={'rows': 1}),
             'name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 10}),
+            'signed_off_notes': forms.Textarea(attrs={'rows': 10}),
         }
         exclude = ('',)
 
@@ -1675,6 +1676,7 @@ class AssayRunAdmin(LockableAdmin):
                     ('created_by', 'created_on'),
                     ('modified_by', 'modified_on'),
                     ('signed_off_by', 'signed_off_date'),
+                    ('signed_off_notes',)
                 )
             }
         ),
