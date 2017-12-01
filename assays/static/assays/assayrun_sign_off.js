@@ -48,7 +48,8 @@ $(document).ready(function() {
             if (owner) {
                 mark_reviewed_label_text = 'Click Here to Remove Sign Off';
                 sign_off_confirm_warning_html = 'Signing Off will prevent anyone, including you, from editing this Study and the data associated with it.' +
-                    '<br><br>Signing Off will also allow consortium viewers to view this Study\'s data (granted all Stakeholders Approve as well)' +
+                    '<br><br>Signing Off will also allow consortium viewers to view this Study\'s data (granted all Stakeholders Approve as well).' +
+                    '<br><br>Additionally, after one year\'s time, the Study will become publicly available.' +
                     '<br><br>Are you sure you want to change the Sign Off status?';
                 // mark_reviewed_label.text('Click Here to Sign Off on this Study');
                 // sign_off_confirm_warning.html(
@@ -60,7 +61,8 @@ $(document).ready(function() {
             }
             else {
                 mark_reviewed_label_text = 'Click Here to Revoke your Approval';
-                sign_off_confirm_warning_html = 'Approving will allow consortium viewers to view this Study\'s data (granted all other Stakeholders Approve as well)' +
+                sign_off_confirm_warning_html = 'Approving will allow consortium viewers to view this Study\'s data (granted all other Stakeholders Approve as well).' +
+                    '<br><br>Additionally, after one year\'s time, the Study will become publicly available.' +
                     '<br><br>Are you sure you want to change the Approval status?';
                 // mark_reviewed_label.text('Click Here to Approve this Study for Release');
                 // sign_off_confirm_warning.html(
@@ -88,7 +90,7 @@ $(document).ready(function() {
 
     sign_off_confirm.dialog({
         title: dialog_title,
-        height:450,
+        height:600,
         width:450,
         modal: true,
         closeOnEscape: true,
