@@ -140,6 +140,9 @@ class MicrodeviceAdmin(LockableAdmin):
                         'device_image_display',
                         'device_cross_section_image_display',
                     ),
+                    (
+                        'references'
+                    )
                 )
             }
         ),
@@ -257,6 +260,12 @@ class OrganModelAdmin(LockableAdmin):
                     ),
                     (
                         'mps', 'epa', 'tctc'
+                    ),
+                    (
+                        'model_image'
+                    ),
+                    (
+                        'references'
                     )
                 )
             }

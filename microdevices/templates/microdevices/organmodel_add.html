@@ -101,6 +101,8 @@
         </div>
     </div>
 
+    {% include 'generic_field.html' with field=form.references label="References" %}
+
     {{ formset.management_form }}
     <legend>Protocols</legend>
     {% if formset.non_form_errors %}
