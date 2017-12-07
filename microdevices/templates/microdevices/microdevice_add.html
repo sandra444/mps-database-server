@@ -79,6 +79,8 @@
     </div>
 </div>
 
+{% include 'generic_field.html' with field=form.references label="References" %}
+
 <legend>Dimensions</legend>
 
 {% if form.device_width.errors or form.device_length.errors or form.device_thickness.errors %}
