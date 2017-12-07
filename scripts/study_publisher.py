@@ -7,6 +7,11 @@ from assays.models import AssayRun, AssayRunStakeholder
 from datetime import datetime, timedelta
 import pytz
 
+from django.contrib.auth.models import User
+
+from django.template.loader import render_to_string, TemplateDoesNotExist
+from mps.settings import DEFAULT_FROM_EMAIL
+
 
 def run():
     """Main function that runs the script"""
@@ -67,3 +72,17 @@ def run():
             # print study, 'has been published'
             study.restricted = False
             study.save()
+
+            superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+            # Magic strings are in poor taste, should use a template instead
+            superuser_subject = 'Study Automatically Made Public: {0}'.format(study)
+            superuser_message = render_to_string(
+                'assays/email/superuser_study_made_public_alert.txt',
+                {
+                    'study': study,
+                }
+            )
+
+            for user_to_be_alerted in superusers_to_be_alerted:
+                user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
