@@ -2,9 +2,8 @@
 
 from django.db import models
 from microdevices.models import Microdevice, OrganModel, OrganModelProtocol, MicrophysiologyCenter
-# from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
 from mps.base.models import LockableModel, FlaggableModel
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 
 import urllib
 import collections
@@ -740,7 +739,15 @@ class AssayRun(FlaggableModel):
         help_text='Set this to True if this data should be included in Compound Reports and other data aggregations.'
     )
 
-    access_groups = models.ManyToManyField(Group, blank=True, related_name='access_groups')
+    access_groups = models.ManyToManyField(
+        Group,
+        blank=True,
+        related_name='access_groups',
+        help_text='Level 2 Access Groups Assignation'
+    )
+
+    # Special addition, would put in base model, but don't want excess...
+    signed_off_notes = models.CharField(max_length=255, blank=True, default='')
 
     # THESE ARE NOW EXPLICIT FIELDS IN STUDY
     group = models.ForeignKey(Group, help_text='Bind to a group')
@@ -764,6 +771,9 @@ class AssayRun(FlaggableModel):
 
     def get_absolute_url(self):
         return '/assays/{}/'.format(self.id)
+
+    def get_summary_url(self):
+        return '/assays/{}/summary/'.format(self.id)
 
     def get_delete_url(self):
         return '/assays/{}/delete/'.format(self.id)
@@ -1859,3 +1869,28 @@ class AssaySetupSetting(models.Model):
 
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
     # duration = models.FloatField(blank=True)
+
+
+class AssayRunStakeholder(models.Model):
+    """An institution that has interest in a particular study
+
+    Stakeholders needs to be consulted (sign off) before data can become available
+    """
+
+    study = models.ForeignKey(AssayRun)
+
+    group = models.ForeignKey(Group)
+    # Explicitly declared rather than from inheritance to avoid unecessary fields
+    signed_off_by = models.ForeignKey(
+        User,
+        blank=True,
+        null=True
+    )
+    signed_off_date = models.DateTimeField(blank=True, null=True)
+
+    signed_off_notes = models.CharField(max_length=255, blank=True, default='')
+
+    # TODO NEED MEDIA LOCATION
+    # approval_for_sign_off = models.FileField(null=True, blank=True)
+
+    sign_off_required = models.BooleanField(default=True)

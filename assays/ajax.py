@@ -865,6 +865,7 @@ def get_readout_data(
                 time, []
             ).append(value)
 
+    # Nesting like this is a little sloppy, flat > nested
     for target, units in initial_data.items():
         for unit, tags in units.items():
             for tag, sample_locations in tags.items():
@@ -987,7 +988,8 @@ def get_readout_data(
                             del current_data[current_key + '_i2']
 
             # Note manipulations for sorting
-            x_header.sort(key=lambda s: s.upper().replace(' & ', '~'))
+            # Somewhat contrived
+            x_header.sort(key=lambda s: s.upper().replace(' & ', '~').replace('_I1', '!').replace('_I2', '"'))
             current_table[0].extend(x_header)
 
             x_header = {x_header[index]: index + 1 for index in range(len(x_header))}

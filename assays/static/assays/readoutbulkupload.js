@@ -87,12 +87,12 @@ $(document).ready(function () {
                     }
                     else {
                         alert('Success! Please see "New Chip Data" below for preview.' +
-                            '\n\nPlease note that changes will not be made until you press the "Submit" button.');
+                            '\n\nPlease note that changes will not be made until you press the "Submit" button at the bottom of the page.');
 
                         if (json.number_of_conflicting_entries) {
                             alert(
                                 '***Submitting this file will replace ' + json.number_of_conflicting_entries + ' point(s).***' +
-                                '\n\nPlease note that changes will not be made until you press the "Submit" button.');
+                                '\n\nPlease note that changes will not be made until you press the "Submit" button at the bottom of the page.');
                         }
 
                         window.CHARTS.prepare_side_by_side_charts(json.readout_data, charts_name);

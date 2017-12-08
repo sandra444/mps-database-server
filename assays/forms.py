@@ -1,7 +1,6 @@
 from django import forms
 from django.forms.models import BaseInlineFormSet, inlineformset_factory, BaseModelFormSet, modelformset_factory
 from cellsamples.models import Biosensor
-from django.forms.models import BaseInlineFormSet
 # STOP USING WILDCARD IMPORTS
 from assays.models import *
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
@@ -25,6 +24,9 @@ from .utils import (
     TIME_CONVERSIONS,
     EXCLUDED_DATA_POINT_CODE
 )
+from django.utils import timezone
+
+from mps.templatetags.custom_filters import is_group_admin, ADMIN_SUFFIX
 
 from mps.templatetags.custom_filters import filter_groups
 
@@ -97,7 +99,8 @@ class CloneableBaseInlineFormSet(BaseInlineFormSet):
         return form
 
 
-class AssayRunForm(SignOffMixin, forms.ModelForm):
+# NOTE: No longer allows sign offs through this form
+class AssayRunForm(forms.ModelForm):
     """Frontend Form for Studies"""
     def __init__(self, groups, *args, **kwargs):
         """Init the Study Form
@@ -116,7 +119,7 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
             'name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
         }
-        exclude = tracking + restricted + ('access_groups',)
+        exclude = tracking + restricted + ('access_groups', 'signed_off_notes')
 
     def clean(self):
         """Checks for at least one study type and deformed assay_run_ids"""
@@ -131,6 +134,7 @@ class AssayRunForm(SignOffMixin, forms.ModelForm):
             raise forms.ValidationError('Error with assay_run_id; please try again')
 
 
+
 class StudySupportingDataInlineFormSet(BaseInlineFormSet):
     """Form for Study Supporting Data (as part of an inline)"""
     class Meta(object):
@@ -138,6 +142,8 @@ class StudySupportingDataInlineFormSet(BaseInlineFormSet):
         exclude = ('',)
 
 
+
+# DEPRECATED
 class AssayRunAccessForm(forms.ModelForm):
     """Form for changing access to studies"""
     def __init__(self, *args, **kwargs):
@@ -151,7 +157,6 @@ class AssayRunAccessForm(forms.ModelForm):
             'name'
         )
         self.fields['access_groups'].queryset = groups_with_center_full
-
 
     class Meta(object):
         model = AssayRun
@@ -2240,3 +2245,62 @@ class AssayMatrixItemForm(forms.ModelForm):
     class Meta(object):
         model = AssayMatrixItem
         exclude = ('study',) + tracking
+
+
+class AssayRunSignOffForm(SignOffMixin, forms.ModelForm):
+    class Meta(object):
+        model = AssayRun
+        fields = ['signed_off', 'signed_off_notes']
+        widgets = {
+            'signed_off_notes': forms.Textarea(attrs={'cols': 50, 'rows': 2}),
+        }
+
+
+class AssayRunStakeholderSignOffForm(SignOffMixin, forms.ModelForm):
+    class Meta(object):
+        model = AssayRunStakeholder
+        fields = ['signed_off', 'signed_off_notes']
+        widgets = {
+            'signed_off_notes': forms.Textarea(attrs={'cols': 50, 'rows': 2}),
+        }
+
+
+class AssayRunStakeholderFormSet(BaseInlineFormSet):
+    class Meta(object):
+        model = AssayRunStakeholder
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(AssayRunStakeholderFormSet, self).__init__(*args, **kwargs)
+
+    def get_queryset(self):
+        if not hasattr(self, '_queryset'):
+            # TODO FILTER OUT THOSE USER ISN'T ADMIN OF
+            # TODO REVIEW
+            user_admin_groups = self.user.groups.filter(name__contains=ADMIN_SUFFIX)
+            potential_groups = [group.name.replace(ADMIN_SUFFIX, '') for group in user_admin_groups]
+            queryset = super(AssayRunStakeholderFormSet, self).get_queryset()
+            # Only include unsigned off forms that user is admin of!
+            self._queryset = queryset.filter(
+                group__name__in=potential_groups,
+                signed_off_by=None
+            )
+        return self._queryset
+
+    def save(self, commit=True):
+        for form in self.forms:
+            signed_off = form.cleaned_data.get('signed_off', False)
+            if signed_off and is_group_admin(self.user, form.instance.group.name):
+                form.instance.signed_off_by = self.user
+                form.instance.signed_off_date = timezone.now()
+                form.save(commit=True)
+
+# Really, all factories should be declared like so (will have to do this for upcoming revision)
+assay_run_stakeholder_sign_off_formset_factory = inlineformset_factory(
+    AssayRun,
+    AssayRunStakeholder,
+    form=AssayRunStakeholderSignOffForm,
+    formset=AssayRunStakeholderFormSet,
+    extra=0,
+    can_delete=False
+)

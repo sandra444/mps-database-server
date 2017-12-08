@@ -13,6 +13,8 @@ from assays.forms import (
     AssayRunForm,
     StudySupportingDataInlineFormSet,
     AssayRunAccessForm,
+    AssayRunSignOffForm,
+    assay_run_stakeholder_sign_off_formset_factory,
     AssayChipResultForm,
     AssayChipReadoutForm,
     AssayChipSetupForm,
@@ -76,18 +78,23 @@ from mps.templatetags.custom_filters import (
     is_group_admin
 )
 
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required, user_passes_test
+
 from mps.mixins import (
     LoginRequiredMixin,
     OneGroupRequiredMixin,
     ObjectGroupRequiredMixin,
     StudyGroupRequiredMixin,
     StudyViewershipMixin,
-    DetailRedirectMixin,
-    AdminRequiredMixin,
+    # DetailRedirectMixin,
+    # AdminRequiredMixin,
     DeletionMixin,
-    SuperuserRequiredMixin
+    SuperuserRequiredMixin,
     # CreatorOrAdminRequiredMixin,
-    # SpecificGroupRequiredMixin
+    # SpecificGroupRequiredMixin,
+    user_is_active,
+    PermissionDenied
 )
 
 from mps.base.models import save_forms_with_tracking
@@ -98,6 +105,8 @@ from mps.settings import DEFAULT_FROM_EMAIL
 import os
 
 from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
+
+from django.template.loader import render_to_string, TemplateDoesNotExist
 
 # TODO Refactor imports
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
@@ -317,7 +326,9 @@ def get_data_uploads(study=None, chip_readout=None, plate_readout=None):
     return data_uploads
 
 
+# IN THE FUTURE I SHOULD JUST HAVE DIRECT LINKS TO THE STUDY TO AVOID STUFF LIKE THIS
 def get_queryset_with_number_of_data_points(queryset):
+    """Add number of data points to each object in a nAssay Run querysey"""
     data_points = AssayChipRawData.objects.exclude(
         quality__contains=REPLACED_DATA_POINT_CODE
     ).prefetch_related(
@@ -338,6 +349,28 @@ def get_queryset_with_number_of_data_points(queryset):
         study.data_points = data_points_map.get(study.id, 0)
 
 
+def get_queryset_with_stakeholder_sign_off(queryset):
+    """Add the stakeholder status to each object in an AssayRun Queryset
+
+    The stakeholder_sign_off is True is there are no stakeholders that need to sign off
+    """
+    # A stakeholder is needed if the sign off is required and there is no pk for the individual signing off
+    required_stakeholders_without_sign_off = AssayRunStakeholder.objects.filter(
+        sign_off_required=True,
+        signed_off_by_id=None
+    )
+
+    required_stakeholder_map = {}
+
+    for stakeholder in required_stakeholders_without_sign_off:
+        required_stakeholder_map.update({
+            stakeholder.study_id: False
+        })
+
+    for study in queryset:
+        study.stakeholder_sign_off = required_stakeholder_map.get(study.id, True)
+
+
 def filter_queryset_for_viewership(self, queryset):
     """Peculiar way of filtering for viewership (Assay data bound to a study only)"""
 
@@ -349,6 +382,21 @@ def filter_queryset_for_viewership(self, queryset):
     access_group_filter = {}
     unrestricted_filter = {}
     unsigned_off_filter = {}
+    stakeholder_group_filter = {}
+    missing_stakeholder_filter = {}
+
+    stakeholder_group_whitelist = list(set(
+        AssayRunStakeholder.objects.filter(
+            group__name__in=user_group_names
+        ).values_list('study_id', flat=True)
+    ))
+
+    missing_stakeholder_blacklist = list(set(
+        AssayRunStakeholder.objects.filter(
+            signed_off_by_id=None,
+            sign_off_required=True
+        ).values_list('study_id', flat=True)
+    ))
 
     current_type = str(self.model)
 
@@ -365,6 +413,12 @@ def filter_queryset_for_viewership(self, queryset):
         unsigned_off_filter.update({
             'signed_off_by': None
         })
+        stakeholder_group_filter.update({
+            'id__in': stakeholder_group_whitelist
+        })
+        missing_stakeholder_filter.update({
+            'id__in': missing_stakeholder_blacklist
+        })
     elif current_type == "<class 'assays.models.AssayChipSetup'>":
         data_group_filter.update({
             'assay_run_id__group__name__in': user_group_names
@@ -377,6 +431,12 @@ def filter_queryset_for_viewership(self, queryset):
         })
         unsigned_off_filter.update({
             'assay_run_id__signed_off_by': None
+        })
+        stakeholder_group_filter.update({
+            'assay_run_id_id__in': stakeholder_group_whitelist
+        })
+        missing_stakeholder_filter.update({
+            'assay_run_id_id__in': missing_stakeholder_blacklist
         })
     elif current_type == "<class 'assays.models.AssayPlateSetup'>":
         data_group_filter.update({
@@ -391,6 +451,12 @@ def filter_queryset_for_viewership(self, queryset):
         unsigned_off_filter.update({
             'assay_run_id__signed_off_by': None
         })
+        stakeholder_group_filter.update({
+            'assay_run_id_id__in': stakeholder_group_whitelist
+        })
+        missing_stakeholder_filter.update({
+            'assay_run_id_id__in': missing_stakeholder_blacklist
+        })
     elif current_type == "<class 'assays.models.AssayChipReadout'>":
         data_group_filter.update({
             'chip_setup__assay_run_id__group__name__in': user_group_names
@@ -403,6 +469,12 @@ def filter_queryset_for_viewership(self, queryset):
         })
         unsigned_off_filter.update({
             'chip_setup__assay_run_id__signed_off_by': None
+        })
+        stakeholder_group_filter.update({
+            'chip__setup__assay_run_id_id__in': stakeholder_group_whitelist
+        })
+        missing_stakeholder_filter.update({
+            'chip__setup__assay_run_id_id__in': missing_stakeholder_blacklist
         })
     elif current_type == "<class 'assays.models.AssayPlateReadout'>":
         data_group_filter.update({
@@ -417,6 +489,12 @@ def filter_queryset_for_viewership(self, queryset):
         unsigned_off_filter.update({
             'setup__assay_run_id__signed_off_by': None
         })
+        stakeholder_group_filter.update({
+            'setup__assay_run_id_id__in': stakeholder_group_whitelist
+        })
+        missing_stakeholder_filter.update({
+            'setup__assay_run_id_id__in': missing_stakeholder_blacklist
+        })
     elif current_type == "<class 'assays.models.AssayChipTestResult'>":
         data_group_filter.update({
             'chip_readout__chip_setup__assay_run_id__group__name__in': user_group_names
@@ -429,6 +507,12 @@ def filter_queryset_for_viewership(self, queryset):
         })
         unsigned_off_filter.update({
             'chip_readout__chip_setup__assay_run_id__signed_off_by': None
+        })
+        stakeholder_group_filter.update({
+            'chip_readout__chip__setup__assay_run_id_id__in': stakeholder_group_whitelist
+        })
+        missing_stakeholder_filter.update({
+            'chip_readout__chip__setup__assay_run_id_id__in': missing_stakeholder_blacklist
         })
     elif current_type == "<class 'assays.models.AssayPlateTestResult'>":
         data_group_filter.update({
@@ -443,14 +527,22 @@ def filter_queryset_for_viewership(self, queryset):
         unsigned_off_filter.update({
             'readout__setup__assay_run_id__signed_off_by': None
         })
+        stakeholder_group_filter.update({
+            'readout__setup__assay_run_id_id__in': stakeholder_group_whitelist
+        })
+        missing_stakeholder_filter.update({
+            'readout__setup__assay_run_id_id__in': missing_stakeholder_blacklist
+        })
 
     # Show if:
         # 1: Study has group matching user_group_names
-        # 2: Study has access group matching user_group_names AND is signed off on
-        # 3: Study is unrestricted AND is signed off on
+        # 2: Study has Stakeholder group matching user_group_name AND is signed off on
+        # 3: Study has access group matching user_group_names AND is signed off on AND all Stakeholders have signed off
+        # 4: Study is unrestricted AND is signed off on AND all Stakeholders have signed off
     combined = queryset.filter(**data_group_filter) | \
-           queryset.filter(**access_group_filter).exclude(**unsigned_off_filter) | \
-           queryset.filter(**unrestricted_filter).exclude(**unsigned_off_filter)
+    queryset.filter(**stakeholder_group_filter).exclude(**unsigned_off_filter) | \
+    queryset.filter(**access_group_filter).exclude(**unsigned_off_filter).exclude(**missing_stakeholder_filter) | \
+    queryset.filter(**unrestricted_filter).exclude(**unsigned_off_filter).exclude(**missing_stakeholder_filter)
 
     return combined.distinct()
 
@@ -475,6 +567,8 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
 
         get_queryset_with_number_of_data_points(queryset)
 
+        get_queryset_with_stakeholder_sign_off(queryset)
+
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -484,6 +578,27 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
         context['editable'] = 'Editable '
 
         return context
+
+
+def get_user_status_context(self, context):
+    """Takes the view and context, adds user_is_group_admin, editor, and stakeholder editor to the context"""
+    user_group_names = {group.name for group in self.request.user.groups.all()}
+
+    context['user_is_group_admin'] = self.object.group.name + ADMIN_SUFFIX in user_group_names
+    context['user_is_group_editor'] = self.object.group.name in user_group_names or context['user_is_group_admin']
+
+    stakeholders = AssayRunStakeholder.objects.filter(
+        study_id=self.object.id
+    ).prefetch_related(
+        'group',
+        'study'
+    )
+
+    context['user_is_stakeholder_admin'] = False
+    for stakeholder in stakeholders:
+        if stakeholder.group.name + ADMIN_SUFFIX in user_group_names:
+            context['user_is_stakeholder_admin'] = True
+            break
 
 
 class StudyIndex(StudyViewershipMixin, DetailView):
@@ -537,56 +652,84 @@ class StudyIndex(StudyViewershipMixin, DetailView):
         context['number_of_results'] = AssayChipTestResult.objects.filter(chip_readout=context['readouts']).count()
 
         # PLATES
-        context['plate_setups'] = AssayPlateSetup.objects.filter(
-            assay_run_id=self.object
-        ).prefetch_related(
-            'assay_layout',
-            'created_by'
-        )
-        readouts = AssayPlateReadout.objects.filter(
-            setup=context['plate_setups']
-        ).prefetch_related(
-            'setup',
-            'created_by'
-        )
-
-        related_assays = AssayPlateReadoutAssay.objects.filter(
-            readout_id__in=readouts
-        ).prefetch_related(
-            'readout_id',
-            'assay_id'
-        ).order_by(
-            'assay_id__assay_short_name'
-        )
-        related_assays_map = {}
-
-        for assay in related_assays:
-            # start appending to a list keyed by the readout ID for all related images
-            related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
-
-        for readout in readouts:
-            # set an attribute on the readout that is the list created above
-            readout.related_assays = related_assays_map.get(readout.id)
-
-        context['plate_readouts'] = readouts
-
-        context['plate_results'] = AssayPlateResult.objects.prefetch_related(
-            'result_function',
-            'result_type',
-            'test_unit',
-            'assay_result__readout__setup',
-            'assay_result__created_by'
-        ).filter(
-            assay_result__readout=context['plate_readouts']
-        )
-
-        context['number_of_plate_results'] = AssayPlateTestResult.objects.filter(
-            readout=context['plate_readouts']
-        ).count()
+        # Removed
+        # context['plate_setups'] = AssayPlateSetup.objects.filter(
+        #     assay_run_id=self.object
+        # ).prefetch_related(
+        #     'assay_layout',
+        #     'created_by'
+        # )
+        # readouts = AssayPlateReadout.objects.filter(
+        #     setup=context['plate_setups']
+        # ).prefetch_related(
+        #     'setup',
+        #     'created_by'
+        # )
+        #
+        # related_assays = AssayPlateReadoutAssay.objects.filter(
+        #     readout_id__in=readouts
+        # ).prefetch_related(
+        #     'readout_id',
+        #     'assay_id'
+        # ).order_by(
+        #     'assay_id__assay_short_name'
+        # )
+        # related_assays_map = {}
+        #
+        # for assay in related_assays:
+        #     # start appending to a list keyed by the readout ID for all related images
+        #     related_assays_map.setdefault(assay.readout_id_id, []).append(assay)
+        #
+        # for readout in readouts:
+        #     # set an attribute on the readout that is the list created above
+        #     readout.related_assays = related_assays_map.get(readout.id)
+        #
+        # context['plate_readouts'] = readouts
+        #
+        # context['plate_results'] = AssayPlateResult.objects.prefetch_related(
+        #     'result_function',
+        #     'result_type',
+        #     'test_unit',
+        #     'assay_result__readout__setup',
+        #     'assay_result__created_by'
+        # ).filter(
+        #     assay_result__readout=context['plate_readouts']
+        # )
+        #
+        # context['number_of_plate_results'] = AssayPlateTestResult.objects.filter(
+        #     readout=context['plate_readouts']
+        # ).count()
 
         context['detail'] = True
 
+        # user_group_names = {group.name for group in self.request.user.groups.all()}
+        #
+        # context['user_is_group_admin'] = self.object.group.name + ADMIN_SUFFIX in user_group_names
+        # context['user_is_group_editor'] = self.object.group.name in user_group_names or context['user_is_group_admin']
+        #
+        # stakeholders = AssayRunStakeholder.objects.filter(
+        #     study_id=self.object.id
+        # ).prefetch_related(
+        #     'group',
+        #     'study'
+        # )
+        #
+        # context['user_is_stakeholder_admin'] = False
+        # for stakeholder in stakeholders:
+        #     if stakeholder.group.name + ADMIN_SUFFIX in user_group_names:
+        #         context['user_is_stakeholder_admin'] = True
+        #         break
+
+        get_user_status_context(self, context)
+
         context['ready_for_sign_off_form'] = ReadyForSignOffForm()
+
+        # Stakeholder status
+        context['stakeholder_sign_off'] = AssayRunStakeholder.objects.filter(
+            study=self.object,
+            signed_off_by_id=None,
+            sign_off_required=True
+        ).count() == 0
 
         return context
 
@@ -617,6 +760,8 @@ class AssayRunList(LoginRequiredMixin, ListView):
         get_queryset_with_organ_model_map_old(queryset)
 
         get_queryset_with_number_of_data_points(queryset)
+
+        get_queryset_with_stakeholder_sign_off(queryset)
 
         return queryset
 
@@ -686,6 +831,23 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
                 form.cleaned_data['restricted'] = True
 
             save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=False)
+
+            # Contact superusers
+            # Superusers to contact
+            superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+            # Magic strings are in poor taste, should use a template instead
+            superuser_subject = 'Study Created: {0}'.format(self.object)
+            superuser_message = render_to_string(
+                'assays/email/superuser_study_created_alert.txt',
+                {
+                    'study': self.object
+                }
+            )
+
+            for user_to_be_alerted in superusers_to_be_alerted:
+                user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
             return redirect(
                 self.object.get_absolute_url()
             )
@@ -749,145 +911,58 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             instance=form.instance
         )
 
-        # Get the original sign off data (may be None)
+        # Get the original Sign Off data (may be None)
         # original_sign_off_date = self.object.signed_off_date
 
         if form.is_valid() and assay_instance_formset.is_valid() and supporting_data_formset.is_valid():
-            if not is_group_admin(self.request.user, self.object.group.name):
-                if form.cleaned_data.get('signed_off', ''):
-                    del form.cleaned_data['signed_off']
-                form.cleaned_data['restricted'] = self.object.restricted
+            # These shouldn't be in the form to begin with!
+            # if not is_group_admin(self.request.user, self.object.group.name):
+            #     if form.cleaned_data.get('signed_off', ''):
+            #         del form.cleaned_data['signed_off']
+            #     form.cleaned_data['restricted'] = self.object.restricted
 
-            send_alert = not form.instance.signed_off_by and form.cleaned_data.get('signed_off', '')
+            # send_alert = not form.instance.signed_off_by and form.cleaned_data.get('signed_off', '')
 
             save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=True)
 
-            if send_alert:
-                # Magic strings are in poor taste, should use a template instead
-                superuser_subject = 'Study Sign Off Detected: {0}'.format(self.object)
-                superuser_message = 'Hello Admins,\n\n' \
-                          'A study has been signed off on.\n\n' \
-                          'Study: {0}\nSign Off By: {1} {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
-                          'Thanks,\nMPS'.format(
-                    self.object,
-                    self.request.user.first_name,
-                    self.request.user.last_name,
-                    self.object.get_absolute_url()
-                )
 
-                superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
-
-                for user_to_be_alerted in superusers_to_be_alerted:
-                    user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
-
-                viewer_subject = 'Study {0} Now Available for Viewing'.format(self.object)
-                viewer_message = 'Hello {0} {1},\n\n' \
-                    'A study is now available for viewing.\n\n' \
-                     'Study: {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
-                     'Thanks,\nThe MPS Database Team'
-
-                access_group_names = {group.name: group.id for group in self.object.access_groups.all()}
-                matching_groups = list(set([
-                    group.id for group in Group.objects.all() if group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in access_group_names
-                ]))
-                viewers_to_be_alerted = User.objects.filter(groups__id__in=matching_groups, is_active=True).distinct()
-
-                for user_to_be_alerted in viewers_to_be_alerted:
-                    user_to_be_alerted.email_user(
-                        viewer_subject,
-                        viewer_message.format(
-                            user_to_be_alerted.first_name,
-                            user_to_be_alerted.last_name,
-                            unicode(self.object),
-                            self.object.get_absolute_url()
-                        ),
-                        DEFAULT_FROM_EMAIL
-                    )
-
-            # TODO Update the group and restricted status of children
-            # TODO REVISE KLUDGE; MAY WANT TO TOTALLY ELIMINATE THESE FIELDS?
-            # all_chip_setups = AssayChipSetup.objects.filter(assay_run_id=self.object)
-            # all_chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=self.object)
-            # all_chip_results = AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=self.object)
-            # all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=self.object)
-            # all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=self.object)
-            # all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=self.object)
+            # if send_alert:
+            #     # Magic strings are in poor taste, should use a template instead
+            #     superuser_subject = 'Study Sign Off Detected: {0}'.format(self.object)
+            #     superuser_message = render_to_string(
+            #         'assays/email/superuser_initial_sign_off_alert.txt',
+            #         {
+            #             'study': self.object
+            #         }
+            #     )
             #
-            # all_data_uploads = AssayDataUpload.objects.filter(study=self.object)
-
-            # Marking a study should mark/unmark only setups that have not been individually reviewed
-            # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
-            # if original_sign_off_date:
-            #     unreviewed_chip_setups = all_chip_setups.filter(signed_off_date=original_sign_off_date)
-            #     # unreviewed_chip_readouts = all_chip_readouts.exclude(signed_off_date=self.object.signed_off_date)
-            #     # unreviewed_chip_results = all_chip_results.exclude(signed_off_date=self.object.signed_off_date)
-            #     unreviewed_plate_setups = all_plate_setups.filter(signed_off_date=original_sign_off_date)
-            #     # unreviewed_plate_readouts = all_plate_readouts.exclude(signed_off_date=self.object.signed_off_date)
-            #     # unreviewed_plate_results = all_plate_results.exclude(signed_off_date=self.object.signed_off_date)
-            # # If the study is being signed off, then treat any setups with no sign off as unreviewed
-            # else:
-            #     unreviewed_chip_setups = all_chip_setups.filter(signed_off_by=None)
-            #     # unreviewed_chip_readouts = all_chip_readouts.filter(signed_off_by=None)
-            #     # unreviewed_chip_results = all_chip_results.filter(signed_off_by=None)
-            #     unreviewed_plate_setups = all_plate_setups.filter(signed_off_by=None)
-            #     # unreviewed_plate_readouts = all_plate_readouts.filter(signed_off_by=None)
-            #     # unreviewed_plate_results = all_plate_results.filter(signed_off_by=None)
-
-            # Add group and restricted to all
-            # all_chip_setups.update(
-            #     group=self.object.group,
-            #     restricted=self.object.restricted
-            # )
-            # all_chip_readouts.update(
-            #     group=self.object.group,
-            #     restricted=self.object.restricted
-            # )
-            # all_chip_results.update(
-            #     group=self.object.group,
-            #     restricted=self.object.restricted
-            # )
-            # all_plate_setups.update(
-            #     group=self.object.group,
-            #     restricted=self.object.restricted
-            # )
-            # all_plate_readouts.update(
-            #     group=self.object.group,
-            #     restricted=self.object.restricted
-            # )
-            # all_plate_results.update(
-            #     group=self.object.group,
-            #     restricted=self.object.restricted
-            # )
-            # all_data_uploads.update(
-            #     group=self.object.group,
-            #     restricted=self.object.restricted
-            # )
-
-            # Change signed off data only for unreviewed entries
-            # unreviewed_chip_setups.update(
-            #     signed_off_by=self.object.signed_off_by,
-            #     signed_off_date=self.object.signed_off_date
-            # )
-            # unreviewed_chip_readouts.update(
-            #     signed_off_by=self.object.signed_off_by,
-            #     signed_off_date=self.object.signed_off_date
-            # )
-            # unreviewed_chip_results.update(
-            #     signed_off_by=self.object.signed_off_by,
-            #     signed_off_date=self.object.signed_off_date
-            # )
-            # unreviewed_plate_setups.update(
-            #     signed_off_by=self.object.signed_off_by,
-            #     signed_off_date=self.object.signed_off_date
-            # )
-            # unreviewed_plate_readouts.update(
-            #     signed_off_by=self.object.signed_off_by,
-            #     signed_off_date=self.object.signed_off_date
-            # )
-            # unreviewed_plate_results.update(
-            #     signed_off_by=self.object.signed_off_by,
-            #     signed_off_date=self.object.signed_off_date
-            # )
+            #     superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+            #
+            #     for user_to_be_alerted in superusers_to_be_alerted:
+            #         user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+            #
+            #     viewer_subject = 'Study {0} Now Available for Viewing'.format(self.object)
+            #
+            #     access_group_names = {group.name: group.id for group in self.object.access_groups.all()}
+            #     matching_groups = list(set([
+            #         group.id for group in Group.objects.all() if group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in access_group_names
+            #     ]))
+            #     viewers_to_be_alerted = User.objects.filter(groups__id__in=matching_groups, is_active=True).distinct()
+            #
+            #     for user_to_be_alerted in viewers_to_be_alerted:
+            #         viewer_message = render_to_string(
+            #             'assays/email/viewer_alert_email.txt',
+            #             {
+            #                 'user': user_to_be_alerted,
+            #                 'study': self.object
+            #             }
+            #         )
+            #
+            #         user_to_be_alerted.email_user(
+            #             viewer_subject,
+            #             viewer_message,
+            #             DEFAULT_FROM_EMAIL
+            #         )
 
             return redirect(self.object.get_absolute_url())
         else:
@@ -898,6 +973,7 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             ))
 
 
+# DEPRECATED
 class AssayRunUpdateAccess(SuperuserRequiredMixin, UpdateView):
     """Update the fields of a Study"""
     model = AssayRun
@@ -920,10 +996,6 @@ class AssayRunUpdateAccess(SuperuserRequiredMixin, UpdateView):
 
                 if self.object.signed_off_by:
                     viewer_subject = 'Study {0} Now Available for Viewing'.format(self.object)
-                    viewer_message = 'Hello {0} {1},\n\n' \
-                                     'A study is now available for viewing.\n\n' \
-                                     'Study: {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
-                                     'Thanks,\nThe MPS Database Team'
 
                     access_group_names = {group.name: group.id for group in self.object.access_groups.all() if group.name not in previous_access_groups}
 
@@ -943,20 +1015,295 @@ class AssayRunUpdateAccess(SuperuserRequiredMixin, UpdateView):
                     ).distinct()
 
                     for user_to_be_alerted in viewers_to_be_alerted:
+                        viewer_message = render_to_string(
+                            'assays/viewer_alert.txt',
+                            {
+                                'user': user_to_be_alerted,
+                                'study': self.object
+                            }
+                        )
+
                         user_to_be_alerted.email_user(
                             viewer_subject,
-                            viewer_message.format(
-                                user_to_be_alerted.first_name,
-                                user_to_be_alerted.last_name,
-                                unicode(self.object),
-                                self.object.get_absolute_url()
-                            ),
+                            viewer_message,
                             DEFAULT_FROM_EMAIL
                         )
 
             return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+
+class AssayRunSignOff(UpdateView):
+    """Perform Sign Offs as a group adming or stake holder admin"""
+    model = AssayRun
+    template_name = 'assays/assayrun_sign_off.html'
+    form_class = AssayRunSignOffForm
+
+    # Please note the unique dispatch!
+    # TODO TODO TODO REVIEW
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        study = self.get_object()
+        user_group_names = self.request.user.groups.all().values_list('name', flat=True)
+
+        can_view_sign_off = study.group.name + ADMIN_SUFFIX in user_group_names
+
+        # Check if user is a stakeholder admin ONLY IF SIGNED OFF
+        if study.signed_off_by:
+            stakeholders = AssayRunStakeholder.objects.filter(
+                study=study
+            ).prefetch_related(
+                'study',
+                'group',
+                'signed_off_by'
+            )
+            stakeholder_group_names = {name + ADMIN_SUFFIX: True for name in stakeholders.values_list('group__name', flat=True)}
+            for group_name in user_group_names:
+                if group_name in stakeholder_group_names:
+                    can_view_sign_off = True
+                    # Only iterate as many times as is needed
+                    break
+
+        if can_view_sign_off:
+            return super(AssayRunSignOff, self).dispatch(*args, **kwargs)
+        else:
+            return PermissionDenied(self.request, 'You must be a qualified group administrator to view this page')
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayRunSignOff, self).get_context_data(**kwargs)
+
+        if self.request.POST:
+            context.update({
+                'stakeholder_formset': assay_run_stakeholder_sign_off_formset_factory(
+                    self.request.POST,
+                    instance=self.object,
+                    user=self.request.user
+                )
+            })
+        else:
+            context.update({
+                'stakeholder_formset': assay_run_stakeholder_sign_off_formset_factory(
+                    instance=self.object,
+                    user=self.request.user
+                )
+            })
+
+        context.update({
+            'update': True
+        })
+
+        return context
+
+    def form_valid(self, form):
+        stakeholder_formset = assay_run_stakeholder_sign_off_formset_factory(
+            self.request.POST,
+            instance=form.instance,
+            user=self.request.user
+        )
+
+        if form.is_valid() and stakeholder_formset.is_valid():
+            send_initial_sign_off_alert = False
+            initial_number_of_required_sign_offs = AssayRunStakeholder.objects.filter(
+                study=self.object,
+                signed_off_by_id=None,
+                sign_off_required=True
+            ).count()
+
+            # Only allow if necessary
+            if is_group_admin(self.request.user, self.object.group.name) and not self.object.signed_off_by:
+                send_initial_sign_off_alert = not form.instance.signed_off_by and form.cleaned_data.get('signed_off', '')
+                save_forms_with_tracking(self, form, update=True)
+
+            # save_forms_with_tracking(self, form, formset=[stakeholder_formset], update=True)
+
+            if stakeholder_formset.has_changed():
+                save_forms_with_tracking(self, None, formset=[stakeholder_formset], update=True)
+
+            current_number_of_required_sign_offs = AssayRunStakeholder.objects.filter(
+                study=self.object,
+                signed_off_by_id=None,
+                sign_off_required=True
+            ).count()
+
+            send_stakeholder_sign_off_alert = current_number_of_required_sign_offs < initial_number_of_required_sign_offs
+            send_viewer_alert = current_number_of_required_sign_offs == 0 and self.object.signed_off_by
+
+            viewer_subject = 'Study {0} Now Available for Viewing'.format(self.object)
+            # TODO TODO TODO TODO
+            stakeholder_admin_subject = 'Approval for Release Requested: {0}'.format(self.object)
+
+            stakeholder_viewer_groups = {}
+            stakeholder_admin_groups = {}
+
+            stakeholder_admins_to_be_alerted = []
+            stakeholder_viewers_to_be_alerted = []
+
+            if send_initial_sign_off_alert:
+                # TODO TODO TODO TODO ALERT STAKEHOLDER ADMINS
+                stakeholder_admin_groups = {
+                    group + ADMIN_SUFFIX: True for group in
+                    AssayRunStakeholder.objects.filter(
+                        study=self.object, sign_off_required=True
+                    ).prefetch_related('group').values_list('group__name', flat=True)
+                }
+
+                stakeholder_admins_to_be_alerted = User.objects.filter(
+                    groups__name__in=stakeholder_admin_groups, is_active=True
+                ).distinct()
+
+                for user_to_be_alerted in stakeholder_admins_to_be_alerted:
+                    try:
+                        stakeholder_admin_message = render_to_string(
+                            'assays/email/tctc_stakeholder_email.txt',
+                            {
+                                'user': user_to_be_alerted,
+                                'study': self.object
+                            }
+                        )
+                    except TemplateDoesNotExist:
+                        stakeholder_admin_message = render_to_string(
+                            'assays/email/stakeholder_sign_off_request.txt',
+                            {
+                                'user': user_to_be_alerted,
+                                'study': self.object
+                            }
+                        )
+
+                    user_to_be_alerted.email_user(
+                        stakeholder_admin_subject,
+                        stakeholder_admin_message,
+                        DEFAULT_FROM_EMAIL
+                    )
+
+                # TODO TODO TODO TODO ALERT STAKEHOLDER VIEWERS
+                stakeholder_viewer_groups = {
+                    group: True for group in
+                    AssayRunStakeholder.objects.filter(
+                        study=self.object
+                    ).prefetch_related('group').values_list('group__name', flat=True)
+                }
+                initial_groups = stakeholder_viewer_groups.keys()
+
+                for group in initial_groups:
+                    stakeholder_viewer_groups.update({
+                        # group + ADMIN_SUFFIX: True,
+                        group + VIEWER_SUFFIX: True
+                    })
+
+                # BE SURE THIS IS MATCHED BELOW
+                stakeholder_viewers_to_be_alerted = User.objects.filter(
+                    groups__name__in=stakeholder_viewer_groups, is_active=True
+                ).exclude(
+                    id__in=stakeholder_admins_to_be_alerted
+                ).distinct()
+
+                for user_to_be_alerted in stakeholder_viewers_to_be_alerted:
+                    # TODO TODO TODO WHAT DO WE CALL THE PROCESS OF SIGN OFF ACKNOWLEDGEMENT?!
+                    viewer_message = render_to_string(
+                        'assays/email/viewer_alert.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': self.object
+                        }
+                    )
+
+                    user_to_be_alerted.email_user(
+                        viewer_subject,
+                        viewer_message,
+                        DEFAULT_FROM_EMAIL
+                    )
+
+            if send_viewer_alert:
+                access_group_names = {group.name: group.id for group in self.object.access_groups.all()}
+                matching_groups = list(set([
+                    group.id for group in Group.objects.all() if
+                    group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in access_group_names
+                ]))
+                # Just in case, exclude stakeholders to prevent double messages
+                viewers_to_be_alerted = User.objects.filter(
+                    groups__id__in=matching_groups, is_active=True
+                ).exclude(
+                    id__in=stakeholder_admins_to_be_alerted
+                ).exclude(
+                    id__in=stakeholder_viewers_to_be_alerted
+                ).distinct()
+                # Update viewer groups to include admins
+                stakeholder_viewer_groups.update(stakeholder_admin_groups)
+                # if stakeholder_viewer_groups or stakeholder_admin_groups:
+                #     viewers_to_be_alerted.exclude(
+                #         groups__name__in=stakeholder_viewer_groups
+                #     ).exclude(
+                #         group__name__in=stakeholder_admin_groups
+                #     )
+
+                for user_to_be_alerted in viewers_to_be_alerted:
+                    viewer_message = render_to_string(
+                        'assays/email/viewer_alert.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': self.object
+                        }
+                    )
+
+                    user_to_be_alerted.email_user(
+                        viewer_subject,
+                        viewer_message,
+                        DEFAULT_FROM_EMAIL
+                    )
+
+            # Superusers to contact
+            superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+            if send_initial_sign_off_alert:
+                # Magic strings are in poor taste, should use a template instead
+                superuser_subject = 'Study Sign Off Detected: {0}'.format(self.object)
+                superuser_message = render_to_string(
+                    'assays/email/superuser_initial_sign_off_alert.txt',
+                    {
+                        'study': self.object,
+                        'stakeholders': AssayRunStakeholder.objects.filter(study=self.object).order_by('-signed_off_date')
+                    }
+                )
+
+                for user_to_be_alerted in superusers_to_be_alerted:
+                    user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+            if send_stakeholder_sign_off_alert:
+                # Magic strings are in poor taste, should use a template instead
+                # superuser_subject = 'Stakeholder Acknowledgement Detected: {0}'.format(self.object)
+                superuser_subject = 'Stakeholder Approval Detected: {0}'.format(self.object)
+                superuser_message = render_to_string(
+                    'assays/email/superuser_stakeholder_alert.txt',
+                    {
+                        'study': self.object,
+                        'stakeholders': AssayRunStakeholder.objects.filter(study=self.object).order_by('-signed_off_date')
+                    }
+                )
+
+                for user_to_be_alerted in superusers_to_be_alerted:
+                    user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+            if send_viewer_alert:
+                # Magic strings are in poor taste, should use a template instead
+                superuser_subject = 'Study Released to Next Level: {0}'.format(self.object)
+                superuser_message = render_to_string(
+                    'assays/email/superuser_viewer_release_alert.txt',
+                    {
+                        'study': self.object
+                    }
+                )
+
+                for user_to_be_alerted in superusers_to_be_alerted:
+                    user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+            return redirect(self.object.get_absolute_url())
+        else:
+            return self.render_to_response(self.get_context_data(
+                form=form,
+                stakeholder_formset=stakeholder_formset
+            ))
 
 
 def compare_cells(current_model, current_filter, setups):
@@ -1084,6 +1431,8 @@ class AssayRunSummary(StudyViewershipMixin, DetailView):
             'method__name',
             'unit__unit'
         )
+
+        get_user_status_context(self, context)
 
         return self.render_to_response(context)
 

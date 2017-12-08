@@ -47,6 +47,9 @@ class TrackableModel(models.Model):
     signed_off_date = models.DateTimeField(blank=True,
                                            null=True)
 
+    # May be useful... however might be better to just add as needed
+    # sign_off_notes = models.CharField(max_length=255, blank=True, default='')
+
     def full_creator(self):
         if self.created_by:
             return self.created_by.first_name + ' ' + self.created_by.last_name
@@ -85,12 +88,12 @@ class RestrictedModel(LockableModel):
 
     # It is mandatory to bind a group to a restricted model
     group = models.ForeignKey('auth.Group',
-                              help_text='Bind to a group')
+                              help_text='Bind to a group (Level 0)')
 
     # DEPRECATED
     # We seem to have decided to handle this differently
     restricted = models.BooleanField(default=True,
-                                     help_text='Check box to restrict to selected group')
+                                     help_text='Check box to restrict to selected group. Unchecked sends to Level 3')
 
     class Meta(object):
         abstract = True
@@ -118,26 +121,26 @@ def save_forms_with_tracking(self, form, formset=None, update=False):
     formset -- the formset for the view
     update -- whether this is an update to an existing instance
     """
-    data = form.cleaned_data
+    if form:
+        data = form.cleaned_data
 
-    # TODO SUBJECT TO REVISION
-    # Only update review if the entry has not already been reviewed
-    if not form.instance.signed_off_by and data.get('signed_off', ''):
-        form.instance.signed_off_by = self.request.user
-        form.instance.signed_off_date = timezone.now()
-    # Remove sign off if necessary
-    elif form.instance.signed_off_by and not data.get('signed_off', 'NOT_IN_FORM'):
-        form.instance.signed_off_by = None
-        form.instance.signed_off_date = None
+        # TODO SUBJECT TO REVISION
+        # Only update review if the entry has not already been reviewed
+        if not form.instance.signed_off_by and data.get('signed_off', ''):
+            form.instance.signed_off_by = self.request.user
+            form.instance.signed_off_date = timezone.now()
+        # Remove sign off if necessary
+        elif form.instance.signed_off_by and not data.get('signed_off', 'NOT_IN_FORM'):
+            form.instance.signed_off_by = None
+            form.instance.signed_off_date = None
 
-    self.object = form.save()
-    # If Update
-    if update:
-        self.object.modified_by = self.request.user
-    # Else if Add
-    else:
-        self.object.modified_by = self.object.created_by = self.request.user
-    self.object.save()
+        self.object = form.save()
+
+        # Else if Add
+        if not update:
+            self.object.modified_by = self.object.created_by = self.request.user
+        self.object.save()
+
     if formset:
         # If a list of formsets, save each
         if type(formset) == list:
@@ -168,3 +171,6 @@ def save_forms_with_tracking(self, form, formset=None, update=False):
 #     # If this is an update
 #     if form.instance.id:
 #         form.instance.modified_by = self.request.user
+#     # If Update
+#     if update:
+#         self.object.modified_by = self.request.user
