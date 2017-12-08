@@ -60,30 +60,15 @@ def modify_templates():
     version = str(version)
 
     chip = xlsxwriter.Workbook(template_root + 'chip_template-' + version + '.xlsx')
-    plate_tabular = xlsxwriter.Workbook(template_root + 'plate_tabular_template-' + version + '.xlsx')
-    plate_block = xlsxwriter.Workbook(template_root + 'plate_block_template-' + version + '.xlsx')
 
     chip_sheet = chip.add_worksheet()
-    plate_tabular_sheet = plate_tabular.add_worksheet()
-    plate_block_sheet = plate_block.add_worksheet()
+
 
     # Set up formats
     chip_red = chip.add_format()
     chip_red.set_bg_color('#ff6f69')
     chip_green = chip.add_format()
     chip_green.set_bg_color('#96ceb4')
-
-    plate_tabular_red = plate_tabular.add_format()
-    plate_tabular_red.set_bg_color('#ff6f69')
-    plate_tabular_green = plate_tabular.add_format()
-    plate_tabular_green.set_bg_color('#96ceb4')
-
-    plate_block_red = plate_block.add_format()
-    plate_block_red.set_bg_color('#ff6f69')
-    plate_block_green = plate_block.add_format()
-    plate_block_green.set_bg_color('#96ceb4')
-    plate_block_yellow = plate_block.add_format()
-    plate_block_yellow.set_bg_color('#ffeead')
 
     # Write the base files
     chip_initial = [
@@ -113,89 +98,11 @@ def modify_templates():
         ]
     ]
 
-    plate_tabular_initial = [
-        [
-            'Plate ID',
-            'Well Name (e.g. A01,F12)',
-            'Assay',
-            'Feature',
-            'Unit',
-            'Time',
-            'Time Units',
-            'Value',
-            'Notes',
-            ''
-        ],
-        [''] * 10
-    ]
-
-    plate_tabular_initial_format = [
-        [plate_tabular_red] * 10,
-        [
-            None,
-            None,
-            plate_tabular_green,
-            None,
-            plate_tabular_green,
-            None,
-            plate_tabular_green,
-            None,
-            None,
-            None
-        ]
-    ]
-
-    plate_block_initial = [
-        [
-            'Plate ID',
-            '{enter Plate ID here}',
-            'Assay',
-            '',
-            'Feature',
-            '{enter Feature here}',
-            'Unit',
-            '',
-            '[Time]',
-            '[{enter Time here}]',
-            '[Time Unit]',
-            '',
-            'Note: Totally remove the contents of the Time and Time Units cells if you are not using them',
-        ],
-    ]
-
-    plate_block_initial_format = [
-        [
-            plate_block_red,
-            plate_block_yellow,
-            plate_block_red,
-            plate_block_green,
-            plate_block_red,
-            plate_block_yellow,
-            plate_block_red,
-            plate_block_green,
-            plate_block_red,
-            plate_block_yellow,
-            plate_block_red,
-            plate_block_green,
-            plate_block_red
-        ]
-    ]
-
     # Write out initial
     for row_index, row in enumerate(chip_initial):
         for column_index, column in enumerate(row):
             cell_format = chip_initial_format[row_index][column_index]
             chip_sheet.write(row_index, column_index, column, cell_format)
-
-    for row_index, row in enumerate(plate_tabular_initial):
-        for column_index, column in enumerate(row):
-            cell_format = plate_tabular_initial_format[row_index][column_index]
-            plate_tabular_sheet.write(row_index, column_index, column, cell_format)
-
-    for row_index, row in enumerate(plate_block_initial):
-        for column_index, column in enumerate(row):
-            cell_format = plate_block_initial_format[row_index][column_index]
-            plate_block_sheet.write(row_index, column_index, column, cell_format)
 
     # Set column widths
     # Chip
@@ -218,48 +125,6 @@ def modify_templates():
 
     chip_sheet.set_column('BA:BD', 30)
 
-    # Plate Tabular
-    plate_tabular_sheet.set_column('A:A', 20)
-    plate_tabular_sheet.set_column('B:B', 25)
-    plate_tabular_sheet.set_column('C:C', 30)
-    plate_tabular_sheet.set_column('D:D', 30)
-    plate_tabular_sheet.set_column('E:E', 20)
-    plate_tabular_sheet.set_column('F:F', 15)
-    plate_tabular_sheet.set_column('G:G', 15)
-    plate_tabular_sheet.set_column('H:H', 15)
-    plate_tabular_sheet.set_column('I:I', 100)
-    plate_tabular_sheet.set_column('J:J', 100)
-
-    plate_tabular_sheet.set_column('BA:BC', 30)
-
-    # Plate Block
-    plate_block_sheet.set_column('A:A', 10)
-    plate_block_sheet.set_column('B:B', 20)
-    plate_block_sheet.set_column('C:C', 10)
-    plate_block_sheet.set_column('D:D', 30)
-    plate_block_sheet.set_column('E:E', 10)
-    plate_block_sheet.set_column('F:F', 30)
-    plate_block_sheet.set_column('G:G', 10)
-    plate_block_sheet.set_column('H:H', 20)
-    plate_block_sheet.set_column('I:I', 15)
-    plate_block_sheet.set_column('I:I', 10)
-    plate_block_sheet.set_column('J:J', 20)
-    plate_block_sheet.set_column('K:K', 10)
-    plate_block_sheet.set_column('L:L', 15)
-    plate_block_sheet.set_column('M:M', 100)
-
-    plate_block_sheet.set_column('BA:BC', 30)
-
-    # Get a list of quality indicators
-    quality_indicators = AssayQualityIndicator.objects.all().values_list('name', flat=True)
-
-    # Get list of time units
-    time_units = PhysicalUnits.objects.filter(
-        unit_type__unit_type='Time'
-    ).order_by(
-        'scale_factor'
-    ).values_list('unit', flat=True)
-
     # Get list of value units  (TODO CHANGE ORDER_BY)
     value_units = PhysicalUnits.objects.filter(
         availability__contains='readout'
@@ -267,11 +132,6 @@ def modify_templates():
         'base_unit',
         'scale_factor'
     ).values_list('unit', flat=True)
-
-    # Get list of assays (for plates) TO BE REPLACED
-    assays = AssayModel.objects.all().order_by(
-        'assay_name'
-    ).values_list('assay_name', flat=True)
 
     # List of targets
     targets = AssayTarget.objects.all().order_by(
@@ -288,17 +148,6 @@ def modify_templates():
         'name'
     ).values_list('name', flat=True)
 
-#     for index, value in enumerate(quality_indicators):
-#         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
-#         plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
-#         # Plate templates are slated to be deprecated
-# #         plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
-
-    for index, value in enumerate(time_units):
-        # chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
-        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
-        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
-
     for index, value in enumerate(sample_locations):
         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
 
@@ -307,28 +156,16 @@ def modify_templates():
 
     for index, value in enumerate(value_units):
         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
-        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
-        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
 
     for index, value in enumerate(targets):
         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
 
-    for index, value in enumerate(assays):
-        # chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
-        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
-        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
-
-    # quality_indicators_range = '=$BD$1:$BD$' + str(len(quality_indicators))
-    time_units_range = '=$BC$1:$BC$' + str(len(time_units))
     value_units_range = '=$BB$1:$BB$' + str(len(value_units))
-    assays_range = '=$BA$1:$BA$' + str(len(assays))
 
-    targets_range = '=$BA$1:$BA$' + str(len(assays))
-    methods_range = '=$BC$1:$BC$' + str(len(assays))
-    sample_locations_range = '=$BD$1:$BD$' + str(len(assays))
+    targets_range = '=$BA$1:$BA$' + str(len(targets))
+    methods_range = '=$BC$1:$BC$' + str(len(methods))
+    sample_locations_range = '=$BD$1:$BD$' + str(len(sample_locations))
 
-    # chip_sheet.data_validation('H2', {'validate': 'list',
-    #                            'source': quality_indicators_range})
     chip_sheet.data_validation('H2', {'validate': 'list',
                                       'source': targets_range})
     chip_sheet.data_validation('I2', {'validate': 'list',
@@ -338,24 +175,8 @@ def modify_templates():
     chip_sheet.data_validation('L2', {'validate': 'list',
                                'source': value_units_range})
 
-    plate_tabular_sheet.data_validation('C2', {'validate': 'list',
-                                        'source': assays_range})
-    plate_tabular_sheet.data_validation('E2', {'validate': 'list',
-                                        'source': value_units_range})
-    plate_tabular_sheet.data_validation('G2', {'validate': 'list',
-                                        'source': time_units_range})
-
-    plate_block_sheet.data_validation('D1', {'validate': 'list',
-                                      'source': assays_range})
-    plate_block_sheet.data_validation('H1', {'validate': 'list',
-                                      'source': value_units_range})
-    plate_block_sheet.data_validation('L1', {'validate': 'list',
-                                      'source': time_units_range})
-
     # Save
     chip.close()
-    plate_tabular.close()
-    plate_block.close()
 
 
 class AssayQualityIndicatorFormAdmin(forms.ModelForm):
