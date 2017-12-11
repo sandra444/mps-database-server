@@ -1,7 +1,13 @@
 # coding=utf-8
 
 from django.db import models
-from microdevices.models import Microdevice, OrganModel, OrganModelProtocol, MicrophysiologyCenter
+from microdevices.models import (
+    Microdevice,
+    OrganModel,
+    OrganModelProtocol,
+    MicrophysiologyCenter,
+    MicrodeviceSection
+)
 from mps.base.models import LockableModel, FlaggableModel
 from django.contrib.auth.models import Group, User
 
@@ -1176,6 +1182,15 @@ class AssayTarget(LockableModel):
         return u'{0} ({1})'.format(self.name, self.short_name)
 
 
+class AssaySubtarget(models.Model):
+    """Describes a target for situations where manually curated lists are prohibitively expensive (TempoSeq, etc.)"""
+    name = models.CharField(max_length=512, unique=True)
+    description = models.CharField(max_length=2000)
+
+    def __unicode__(self):
+        return self.name
+
+
 class AssayMeasurementType(LockableModel):
     """Describes what was measures with a given method"""
     name = models.CharField(max_length=512, unique=True)
@@ -1445,14 +1460,6 @@ class AssayMatrixItem(FlaggableModel):
     name = models.CharField(max_length=512)
     setup_date = models.DateField(help_text='YYYY-MM-DD')
 
-    # Tentative
-    # Do we want a time on top of this?
-    # failure_date = models.DateField(help_text='YYYY-MM-DD', null=True, blank=True)
-    # Failure time in minutes
-    failure_time = models.FloatField(null=True, blank=True)
-    # Do we want this is to be table or a static list?
-    failure_reason = models.ForeignKey(AssayFailureReason, blank=True, null=True)
-
     # Do we still want this? Should it be changed?
     scientist = models.CharField(max_length=100, blank=True, default='')
     notebook = models.CharField(max_length=256, blank=True, default='')
@@ -1463,6 +1470,31 @@ class AssayMatrixItem(FlaggableModel):
     # If setups and items are to be merged, these are necessary
     row_index = models.IntegerField()
     column_index = models.IntegerField()
+
+    organ_model = models.ForeignKey(OrganModel, verbose_name='Model', null=True, blank=True)
+
+    organ_model_protocol = models.ForeignKey(
+        OrganModelProtocol,
+        verbose_name='Model Protocol',
+        null=True,
+        blank=True
+    )
+
+    # formerly just 'variance'
+    variance_from_organ_model_protocol = models.CharField(
+        max_length=3000,
+        verbose_name='Variance from Protocol',
+        default='',
+        blank=True
+    )
+
+    # Tentative
+    # Do we want a time on top of this?
+    # failure_date = models.DateField(help_text='YYYY-MM-DD', null=True, blank=True)
+    # Failure time in minutes
+    failure_time = models.FloatField(null=True, blank=True)
+    # Do we want this is to be table or a static list?
+    failure_reason = models.ForeignKey(AssayFailureReason, blank=True, null=True)
 
 
 class AssaySetup(FlaggableModel):
@@ -1554,6 +1586,7 @@ class AssaySetupCell(models.Model):
         unique_together = [
             (
                 # 'setup',
+                'matrix_item',
                 'cell_sample',
                 'biosensor',
                 'density',
@@ -1561,6 +1594,9 @@ class AssaySetupCell(models.Model):
                 'passage'
             )
         ]
+
+    # Now binds directly to items
+    matrix_item = models.ForeignKey(AssayMatrixItem)
 
     # No longer bound one-to-one
     # setup = models.ForeignKey('AssaySetup')
@@ -1587,6 +1623,10 @@ class AssaySetupCell(models.Model):
     )
 
     # DO WE WANT ADDITION TIME AND DURATION?
+    # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
+    addition_time = models.FloatField(blank=True)
+
+    addition_location = models.ForeignKey(MicrodeviceSection)
 
 
 # DO WE WANT TRACKING INFORMATION FOR INDIVIDUAL POINTS?
@@ -1630,7 +1670,11 @@ class AssayDataPoint(models.Model):
     # TODO PROPOSED: CHANGE QUALITY TO TWO BOOLEANS: exclude and replaced
     # Kind of sloppy right now, I do not like it!
     # This value will act as quality control, if it evaluates True then the value is considered invalid
-    quality = models.CharField(max_length=20, default='')
+    # quality = models.CharField(max_length=20, default='')
+
+    excluded = models.BooleanField(default=False)
+
+    replaced = models.BooleanField(default=False)
 
     # This value contains notes for the data point
     notes = models.CharField(max_length=255, default='')
@@ -1648,6 +1692,8 @@ class AssayDataPoint(models.Model):
 
     # OPTIONAL FOR NOW
     data_upload = models.ForeignKey('assays.AssayDataUpload', null=True, blank=True)
+
+    subtarget = models.ForeignKey(AssaySubtarget)
 
 
 # # TODO MODIFY AssayCompoundInstance
@@ -1699,6 +1745,7 @@ class AssaySetupCompound(models.Model):
         unique_together = [
             (
                 # 'setup',
+                'matrix_item',
                 'compound_instance',
                 'concentration',
                 'concentration_unit',
@@ -1706,6 +1753,9 @@ class AssaySetupCompound(models.Model):
                 'duration'
             )
         ]
+
+    # Now binds directly to items
+    matrix_item = models.ForeignKey(AssayMatrixItem)
 
     # COMPOUND INSTANCE IS REQUIRED, however null=True was done to avoid a submission issue
     compound_instance = models.ForeignKey(
@@ -1724,6 +1774,8 @@ class AssaySetupCompound(models.Model):
 
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
     duration = models.FloatField(blank=True)
+
+    addition_location = models.ForeignKey(MicrodeviceSection)
 
 
 # TODO MODIFY StudySupportingData
@@ -1857,6 +1909,9 @@ class AssaySetting(LockableModel):
 
 class AssaySetupSetting(models.Model):
     """Defines a setting as it relates to a setup"""
+    # Now binds directly to items
+    matrix_item = models.ForeignKey(AssayMatrixItem)
+
     # No longer one-to-one
     # setup = models.ForeignKey('assays.AssaySetup')
     setting = models.ForeignKey('assays.AssaySetting')
@@ -1865,10 +1920,12 @@ class AssaySetupSetting(models.Model):
 
     # Will we include these??
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
-    # addition_time = models.FloatField(blank=True)
+    addition_time = models.FloatField(blank=True)
 
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
-    # duration = models.FloatField(blank=True)
+    duration = models.FloatField(blank=True)
+
+    addition_location = models.ForeignKey(MicrodeviceSection)
 
 
 class AssayRunStakeholder(models.Model):

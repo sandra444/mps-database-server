@@ -222,3 +222,25 @@ class GroupDeferral(TrackableModel):
         blank=True,
         upload_to='deferral'
     )
+
+
+class MicrodeviceSublayout(models.Model):
+    """Describes a the layout of sections for a device"""
+    device = models.ForeignKey(Microdevice)
+
+    volume = models.FloatField()
+
+    # VOLUME UNITS TOO?
+
+    number_of_rows = models.IntegerField()
+    number_of_columns = models.IntegerField()
+
+
+class MicrodeviceSection(models.Model):
+    """Describes a section of a device, for instance if a device has to compartments (apical and basal)"""
+    device_sublayout = models.ForeignKey(MicrodeviceSublayout)
+
+    row_index = models.IntegerField()
+    column_index = models.IntegerField()
+
+    name = models.CharField(max_length=255)
