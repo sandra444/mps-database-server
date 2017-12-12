@@ -1591,9 +1591,11 @@ class AssaySetupCell(models.Model):
                 'matrix_item',
                 'cell_sample',
                 'biosensor',
-                'density',
+                # Skip density
+                # 'density',
                 'density_unit',
                 'passage'
+                # Will we need addition time and location here?
             )
         ]
 
@@ -1626,7 +1628,8 @@ class AssaySetupCell(models.Model):
 
     # DO WE WANT ADDITION TIME AND DURATION?
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
-    addition_time = models.FloatField(blank=True)
+    # TODO TODO TODO TEMPORARILY NOT REQUIRED
+    addition_time = models.FloatField(null=True, blank=True)
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
     addition_location = models.ForeignKey(MicrodeviceSection, null=True, blank=True)
