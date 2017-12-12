@@ -1696,7 +1696,8 @@ class AssayDataPoint(models.Model):
     # OPTIONAL FOR NOW
     data_upload = models.ForeignKey('assays.AssayDataUpload', null=True, blank=True)
 
-    subtarget = models.ForeignKey(AssaySubtarget)
+    # OPTIONAL
+    subtarget = models.ForeignKey(AssaySubtarget, null=True, blank=True)
 
 
 # # TODO MODIFY AssayCompoundInstance
