@@ -1626,7 +1626,8 @@ class AssaySetupCell(models.Model):
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
     addition_time = models.FloatField(blank=True)
 
-    addition_location = models.ForeignKey(MicrodeviceSection)
+    # TODO TODO TODO TEMPORARILY NOT REQUIRED
+    addition_location = models.ForeignKey(MicrodeviceSection, null=True, blank=True)
 
 
 # DO WE WANT TRACKING INFORMATION FOR INDIVIDUAL POINTS?
@@ -1775,7 +1776,8 @@ class AssaySetupCompound(models.Model):
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
     duration = models.FloatField(blank=True)
 
-    addition_location = models.ForeignKey(MicrodeviceSection)
+    # TODO TODO TODO TEMPORARILY NOT REQUIRED
+    addition_location = models.ForeignKey(MicrodeviceSection, null=True, blank=True)
 
 
 # TODO MODIFY StudySupportingData
@@ -1925,7 +1927,8 @@ class AssaySetupSetting(models.Model):
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
     duration = models.FloatField(blank=True)
 
-    addition_location = models.ForeignKey(MicrodeviceSection)
+    # TODO TODO TODO TEMPORARILY NOT REQUIRED
+    addition_location = models.ForeignKey(MicrodeviceSection, null=True, blank=True)
 
 
 class AssayRunStakeholder(models.Model):
