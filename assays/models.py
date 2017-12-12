@@ -1455,7 +1455,7 @@ class AssayMatrixItem(FlaggableModel):
     matrix = models.ForeignKey(AssayMatrix, null=True, blank=True)
 
     # This is in fact required, just listed as not being so due to quirk in cleaning
-    setup = models.ForeignKey('assays.AssaySetup', null=True, blank=True)
+    # setup = models.ForeignKey('assays.AssaySetup', null=True, blank=True)
 
     name = models.CharField(max_length=512)
     setup_date = models.DateField(help_text='YYYY-MM-DD')
@@ -1470,6 +1470,8 @@ class AssayMatrixItem(FlaggableModel):
     # If setups and items are to be merged, these are necessary
     row_index = models.IntegerField()
     column_index = models.IntegerField()
+
+    device = models.ForeignKey(Microdevice, verbose_name='Device')
 
     organ_model = models.ForeignKey(OrganModel, verbose_name='Model', null=True, blank=True)
 
@@ -1497,85 +1499,85 @@ class AssayMatrixItem(FlaggableModel):
     failure_reason = models.ForeignKey(AssayFailureReason, blank=True, null=True)
 
 
-class AssaySetup(FlaggableModel):
-    """The configuration of a Chip or Well for implementing an assay"""
-    class Meta(object):
-        verbose_name = 'Setup'
-        # Unfortunately can't use this because uniqueness depends on compounds, cells, etc.
-        # unique_together = [
-        #     (
-        #         'study',
-        #         'device',
-        #         'organ_model',
-        #         'organ_model_protocol',
-        #         'variance_from_organ_model_protocol'
-        #     )
-        # ]
-
-    # Moved
-    # study = models.ForeignKey(AssayStudy, verbose_name='Study')
-    # setup_date = models.DateField(help_text='YYYY-MM-DD')
-
-    # Setups are now bound to a matrix
-    # This is in fact required, just listed as not being so due to quirk in cleaning
-    matrix = models.ForeignKey(AssayMatrix, null=True, blank=True)
-
-    # IF THERE IS A DEVICE IN THE MATRIX, MAKE SURE TO LOCK THIS FIELD
-    device = models.ForeignKey(Microdevice, verbose_name='Device')
-
-    # IF THERE IS A ORGAN MODEL IN THE MATRIX, MAKE SURE TO LOCK THIS FIELD
-    organ_model = models.ForeignKey(OrganModel, verbose_name='Model', null=True, blank=True)
-
-    organ_model_protocol = models.ForeignKey(
-        OrganModelProtocol,
-        verbose_name='Model Protocol',
-        null=True,
-        blank=True
-    )
-
-    # formerly just 'variance'
-    variance_from_organ_model_protocol = models.CharField(
-        max_length=3000,
-        verbose_name='Variance from Protocol',
-        default='',
-        blank=True
-    )
-
-    compounds = models.ManyToManyField('assays.AssaySetupCompound')
-    cells = models.ManyToManyField('assays.AssaySetupCell')
-    settings = models.ManyToManyField('assays.AssaySetupSetting')
-
-    # Moved
-    # name = models.CharField(max_length=512)
-
-    # scientist = models.CharField(max_length=100, blank=True, default='')
-    # notebook = models.CharField(max_length=256, blank=True, default='')
-    # notebook_page = models.IntegerField(blank=True, null=True)
-    # notes = models.CharField(max_length=2048, blank=True, default='')
-    #
-    # # If setups and items are to be merged, these are necessary
-    # row_index = models.IntegerField()
-    # column_index = models.IntegerField()
-
-    def __unicode__(self):
-        return u'{0}-{1}'.format(self.matrix, self.device)
-
-    # TODO
-    def get_absolute_url(self):
-        pass
-        # return '/assays/assaychipsetup/{}/'.format(self.id)
-
-    def get_post_submission_url(self):
-        pass
-        # return '/assays/{}/'.format(self.assay_run_id_id)
-
-    def get_clone_url(self):
-        pass
-        # return '/assays/{0}/assaychipsetup/add?clone={1}'.format(self.assay_run_id_id, self.id)
-
-    def get_delete_url(self):
-        pass
-        # return '/assays/assaychipsetup/{}/delete/'.format(self.id)
+# class AssaySetup(FlaggableModel):
+#     """The configuration of a Chip or Well for implementing an assay"""
+#     class Meta(object):
+#         verbose_name = 'Setup'
+#         # Unfortunately can't use this because uniqueness depends on compounds, cells, etc.
+#         # unique_together = [
+#         #     (
+#         #         'study',
+#         #         'device',
+#         #         'organ_model',
+#         #         'organ_model_protocol',
+#         #         'variance_from_organ_model_protocol'
+#         #     )
+#         # ]
+#
+#     # Moved
+#     # study = models.ForeignKey(AssayStudy, verbose_name='Study')
+#     # setup_date = models.DateField(help_text='YYYY-MM-DD')
+#
+#     # Setups are now bound to a matrix
+#     # This is in fact required, just listed as not being so due to quirk in cleaning
+#     matrix = models.ForeignKey(AssayMatrix, null=True, blank=True)
+#
+#     # IF THERE IS A DEVICE IN THE MATRIX, MAKE SURE TO LOCK THIS FIELD
+#     device = models.ForeignKey(Microdevice, verbose_name='Device')
+#
+#     # IF THERE IS A ORGAN MODEL IN THE MATRIX, MAKE SURE TO LOCK THIS FIELD
+#     organ_model = models.ForeignKey(OrganModel, verbose_name='Model', null=True, blank=True)
+#
+#     organ_model_protocol = models.ForeignKey(
+#         OrganModelProtocol,
+#         verbose_name='Model Protocol',
+#         null=True,
+#         blank=True
+#     )
+#
+#     # formerly just 'variance'
+#     variance_from_organ_model_protocol = models.CharField(
+#         max_length=3000,
+#         verbose_name='Variance from Protocol',
+#         default='',
+#         blank=True
+#     )
+#
+#     compounds = models.ManyToManyField('assays.AssaySetupCompound')
+#     cells = models.ManyToManyField('assays.AssaySetupCell')
+#     settings = models.ManyToManyField('assays.AssaySetupSetting')
+#
+#     # Moved
+#     # name = models.CharField(max_length=512)
+#
+#     # scientist = models.CharField(max_length=100, blank=True, default='')
+#     # notebook = models.CharField(max_length=256, blank=True, default='')
+#     # notebook_page = models.IntegerField(blank=True, null=True)
+#     # notes = models.CharField(max_length=2048, blank=True, default='')
+#     #
+#     # # If setups and items are to be merged, these are necessary
+#     # row_index = models.IntegerField()
+#     # column_index = models.IntegerField()
+#
+#     def __unicode__(self):
+#         return u'{0}-{1}'.format(self.matrix, self.device)
+#
+#     # TODO
+#     def get_absolute_url(self):
+#         pass
+#         # return '/assays/assaychipsetup/{}/'.format(self.id)
+#
+#     def get_post_submission_url(self):
+#         pass
+#         # return '/assays/{}/'.format(self.assay_run_id_id)
+#
+#     def get_clone_url(self):
+#         pass
+#         # return '/assays/{0}/assaychipsetup/add?clone={1}'.format(self.assay_run_id_id, self.id)
+#
+#     def get_delete_url(self):
+#         pass
+#         # return '/assays/assaychipsetup/{}/delete/'.format(self.id)
 
 
 # Controversy has arisen over whether to put this in an organ model or not
