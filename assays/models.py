@@ -1277,9 +1277,9 @@ class AssayStudy(FlaggableModel):
     # We could have a constraint on the combination of name and start_date
     # But to constrain by name, start_date, and study_types, we will need to do that in the forms.py file
     # Otherwise we can change study_types such that it is not longer a ManyToMany
-    name = models.CharField(max_length=2000, verbose_name='Study Name')
+    name = models.CharField(max_length=1000, verbose_name='Study Name')
     start_date = models.DateField(help_text='YYYY-MM-DD')
-    description = models.CharField(max_length=2000, blank=True, default='')
+    description = models.CharField(max_length=8000, blank=True, default='')
 
     protocol = models.FileField(
         upload_to='study_protocol',
