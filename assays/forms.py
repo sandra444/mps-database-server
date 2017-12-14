@@ -1,6 +1,6 @@
 from django import forms
 from django.forms.models import BaseInlineFormSet, inlineformset_factory, BaseModelFormSet, modelformset_factory
-from cellsamples.models import Biosensor
+from cellsamples.models import Biosensor, CellSample
 # STOP USING WILDCARD IMPORTS
 from assays.models import *
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
@@ -1298,7 +1298,7 @@ AssayInstanceFormSet = inlineformset_factory(
 )
 
 
-class AssayMatrixForm(SignOffMixin, forms.ModelForm):
+class AssayMatrixFormOLD(SignOffMixin, forms.ModelForm):
     class Meta(object):
         model = AssayMatrix
         exclude = ('study',) + tracking
@@ -1311,7 +1311,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.study = kwargs.pop('study', None)
         self.user = kwargs.pop('user', None)
-        super(AssayMatrixForm, self).__init__(*args, **kwargs)
+        super(AssayMatrixFormOLD, self).__init__(*args, **kwargs)
 
         if self.study:
             self.instance.study = self.study
@@ -2206,39 +2206,169 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         return this_matrix
 
 
-# Should leverage forms rather than cleaning and saving manually
-# class AssaySetupCompoundForm(forms.ModelForm):
-#     def clean(self):
-#         pass
-#
-#     def save(self, commit=True):
-#         pass
-#
-#
-# class AssaySetupCellForm(forms.ModelForm):
-#     def clean(self):
-#         pass
-#
-#     def save(self, commit=True):
-#         pass
-#
-#
-# class AssaySetupSettingForm(forms.ModelForm):
-#     def clean(self):
-#         pass
-#
-#     def save(self, commit=True):
-#         pass
-#
-#
-# class AssaySetupForm(forms.ModelForm):
-#     def clean(self):
-#         pass
-#
-#     def save(self, commit=True):
-#         pass
-#
-#
+# TODO ADD STUDY
+class AssayMatrixForm(SignOffMixin, forms.ModelForm):
+    class Meta(object):
+        model = AssayMatrix
+        exclude = ('study',) + tracking
+        widgets = {
+            'name': forms.Textarea(attrs={'rows': 1}),
+            'notes': forms.Textarea(attrs={'rows': 3}),
+            'variance_from_organ_model_protocol': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        # Get the study
+        self.study = kwargs.pop('study', None)
+        self.user = kwargs.pop('user', None)
+        super(AssayMatrixForm, self).__init__(*args, **kwargs)
+
+        # Apply the study to the object
+        if self.study:
+            self.instance.study = self.study
+
+
+class AssaySetupCompoundForm(forms.ModelForm):
+    class Meta(object):
+        model = AssaySetupCompound
+        exclude = tracking
+
+    def __init__(self, *args, **kwargs):
+        # self.static_choices = kwargs.pop('static_choices', None)
+        super(AssaySetupCompoundForm, self).__init__(*args, **kwargs)
+
+
+# TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
+class AssaySetupCompoundFormSet(BaseInlineFormSet):
+    cached_fields = []
+
+    def __init__(self, *args, **kwargs):
+        # TODO EVENTUALLY PASS WITH KWARG
+        self.cached_fields = kwargs.pop('cached_fields', None)
+        # print 'FormSet: ', self.static_choices
+        super(AssaySetupCompoundFormSet, self).__init__(*args, **kwargs)
+
+    def _construct_form(self, i, **kwargs):
+        form = super(AssaySetupCompoundFormSet, self)._construct_form(i, **kwargs)
+        for cache_field in self.cached_fields:
+            field = form.fields[cache_field]
+            field.cache_choices = True
+            choices = getattr(self, '_cached_%s_choices' %
+                              cache_field, None)
+            if choices is None:
+                choices = self.cached_fields.get(cache_field, None)
+
+                if choices is None:
+                    choices = list(field.choices)
+
+                setattr(self, '_cached_%s_choices' % cache_field,
+                        choices)
+
+            field.choice_cache = choices
+        return form
+
+
+class AssaySetupCellForm(forms.ModelForm):
+    class Meta(object):
+        model = AssaySetupCell
+        exclude = tracking
+
+    def __init__(self, *args, **kwargs):
+        # self.static_choices = kwargs.pop('static_choices', None)
+        super(AssaySetupCellForm, self).__init__(*args, **kwargs)
+
+
+# TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
+class AssaySetupCellFormSet(BaseInlineFormSet):
+    cached_fields = []
+
+    def __init__(self, *args, **kwargs):
+        # TODO EVENTUALLY PASS WITH KWARG
+        self.cached_fields = kwargs.pop('cached_fields', None)
+        super(AssaySetupCellFormSet, self).__init__(*args, **kwargs)
+
+    def _construct_form(self, i, **kwargs):
+        form = super(AssaySetupCellFormSet, self)._construct_form(i, **kwargs)
+        for cache_field in self.cached_fields:
+            field = form.fields[cache_field]
+            field.cache_choices = True
+            choices = getattr(self, '_cached_%s_choices' %
+                              cache_field, None)
+            if choices is None:
+                choices = self.cached_fields.get(cache_field, None)
+
+                if choices is None:
+                    choices = list(field.choices)
+
+                setattr(self, '_cached_%s_choices' % cache_field,
+                        choices)
+
+            field.choice_cache = choices
+        return form
+
+
+class AssaySetupSettingForm(forms.ModelForm):
+    class Meta(object):
+        model = AssaySetupCell
+        exclude = tracking
+
+    def __init__(self, *args, **kwargs):
+        # self.static_choices = kwargs.pop('static_choices', None)
+        super(AssaySetupSettingForm, self).__init__(*args, **kwargs)
+
+
+# TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
+class AssaySetupSettingFormSet(BaseInlineFormSet):
+    cached_fields = []
+
+    def __init__(self, *args, **kwargs):
+        # TODO EVENTUALLY PASS WITH KWARG
+        self.cached_fields = kwargs.pop('cached_fields', None)
+        super(AssaySetupSettingFormSet, self).__init__(*args, **kwargs)
+
+    def _construct_form(self, i, **kwargs):
+        form = super(AssaySetupSettingFormSet, self)._construct_form(i, **kwargs)
+        for cache_field in self.cached_fields:
+            field = form.fields[cache_field]
+            field.cache_choices = True
+            choices = getattr(self, '_cached_%s_choices' %
+                              cache_field, None)
+            if choices is None:
+                choices = self.cached_fields.get(cache_field, None)
+
+                if choices is None:
+                    choices = list(field.choices)
+
+                setattr(self, '_cached_%s_choices' % cache_field,
+                        choices)
+
+            field.choice_cache = choices
+        return form
+
+AssaySetupCompoundFormSetFactory = inlineformset_factory(
+    AssayMatrixItem,
+    AssaySetupCompound,
+    extra=1,
+    exclude=[tracking],
+    form=AssaySetupCompoundForm,
+    formset=AssaySetupCompoundFormSet
+)
+AssaySetupCellFormSetFactory = inlineformset_factory(
+    AssayMatrixItem,
+    AssaySetupCell,
+    extra=1,
+    exclude=[tracking],
+    form=AssaySetupCellForm,
+    formset=AssaySetupCellFormSet
+)
+AssaySetupSettingFormSetFactory = inlineformset_factory(
+    AssayMatrixItem,
+    AssaySetupSetting,
+    extra=1,
+    exclude=[tracking],
+    form=AssaySetupSettingForm,
+    formset=AssaySetupSettingFormSet
+)
 
 
 class AssayMatrixItemForm(forms.ModelForm):
@@ -2247,6 +2377,154 @@ class AssayMatrixItemForm(forms.ModelForm):
         exclude = ('study',) + tracking
 
 
+# TODO ADD STUDY
+# TODO NEED TO TEST
+# TODO NEED TO IMPROVE PERFORMANCE (UNACCEPTABLY BAD AT THE MOMENT)
+# Early attempt to have a nested formset to keep items, compounds, cells, and settings together
+class AssayMatrixItemFormSet(BaseInlineFormSet):
+    cached_fields = []
+
+    compound_choices = []
+    cell_choices = []
+    setting_choices = []
+
+    def __init__(self, *args, **kwargs):
+        # Get the study
+        self.study = kwargs.pop('study', None)
+        self.user = kwargs.pop('user', None)
+        super(AssayMatrixItemFormSet, self).__init__(*args, **kwargs)
+
+        self.cached_fields = {
+            'device': tuple(Microdevice.objects.all().values_list('id', 'id')),
+            'organ_model': tuple(OrganModel.objects.all().values_list('id', 'id')),
+            'organ_model_protocol': tuple(OrganModelProtocol.objects.all().values_list('id', 'id')),
+            'failure_reason': tuple(AssayFailureReason.objects.all().values_list('id', 'id')),
+        }
+
+        # Here lies the nested formsets
+        addition_location_choices = tuple(MicrodeviceSection.objects.all().values_list('id', 'id'))
+
+        compound_instance_choices = tuple(CompoundInstance.objects.all().values_list('id', 'id'))
+
+        concentration_unit_choices = tuple((PhysicalUnits.objects.filter(
+            unit_type__unit_type='Concentration'
+        ) | PhysicalUnits.objects.filter(unit='%')).values_list('id', 'id'))
+
+        self.compound_choices = {
+            'compound_instance': compound_instance_choices,
+            'concentration_unit': concentration_unit_choices,
+            'addition_location': addition_location_choices
+        }
+
+        self.cell_choices = {
+            'cell_sample': tuple(CellSample.objects.all().values_list('id', 'id')),
+            'biosensor': tuple(Biosensor.objects.all().values_list('id', 'id')),
+            'density_unit': tuple(PhysicalUnits.objects.filter(availability__contains='cell').values_list('id', 'id')),
+            'addition_location': addition_location_choices
+        }
+
+        self.setting_choices = {
+            'setting': tuple(AssaySetting.objects.all().values_list('id', 'id')),
+            'unit': tuple(PhysicalUnits.objects.all().values_list('id', 'id')),
+            'addition_location': addition_location_choices
+        }
+
+        for form in self.forms:
+            if self.study:
+                form.instance.study = self.study
+
+
+    def add_fields(self, form, index):
+        super(AssayMatrixItemFormSet, self).add_fields(form, index)
+
+        form.nested_formset_names = (
+            'compounds',
+            'cells',
+            'settings'
+        )
+
+        form.compounds = AssaySetupCompoundFormSetFactory(
+            instance=form.instance,
+            data=form.data if form.is_bound else None,
+            prefix='compound-%s-%s' % (
+                form.prefix,
+                AssaySetupCompoundFormSetFactory.get_default_prefix()),
+            # extra=1
+            cached_fields=self.compound_choices
+        )
+
+        form.cells = AssaySetupCellFormSetFactory(
+            instance=form.instance,
+            data=form.data if form.is_bound else None,
+            prefix='cell-%s-%s' % (
+                form.prefix,
+                AssaySetupCellFormSetFactory.get_default_prefix()),
+            # extra=1
+            cached_fields=self.cell_choices
+        )
+
+        form.settings = AssaySetupSettingFormSetFactory(
+            instance=form.instance,
+            data=form.data if form.is_bound else None,
+            prefix='setting-%s-%s' % (
+                form.prefix,
+                AssaySetupSettingFormSetFactory.get_default_prefix()),
+            # extra=1
+            cached_fields=self.setting_choices
+        )
+
+    def _construct_form(self, i, **kwargs):
+        form = super(AssayMatrixItemFormSet, self)._construct_form(i, **kwargs)
+        for cache_field in self.cached_fields:
+            field = form.fields[cache_field]
+            field.cache_choices = True
+            choices = getattr(self, '_cached_%s_choices' %
+                              cache_field, None)
+            if choices is None:
+                choices = self.cached_fields.get(cache_field, None)
+
+                if choices is None:
+                    choices = list(field.choices)
+
+                setattr(self, '_cached_%s_choices' % cache_field,
+                        choices)
+
+            field.choice_cache = choices
+        return form
+
+    def is_valid(self):
+        result = super(AssayMatrixItemFormSet, self).is_valid()
+
+        if self.is_bound:
+            for form in self.forms:
+                for formset_name in form.nested_formset_names:
+                    if hasattr(form, formset_name):
+                        result = result and form.__dict__.get(formset_name).is_valid()
+
+        return result
+
+    def save(self, commit=True):
+        result = super(AssayMatrixItemFormSet, self).save(commit=commit)
+
+        for form in self.forms:
+            for formset_name in form.nested_formset_names:
+                if hasattr(form, formset_name):
+                    if not self._should_delete_form(form):
+                        form.__dict__.get(formset_name).save(commit=commit)
+
+        return result
+
+AssayMatrixItemFormSetFactory = inlineformset_factory(
+    AssayMatrix,
+    AssayMatrixItem,
+    formset=AssayMatrixItemFormSet,
+    form=AssayMatrixItemForm,
+    extra=1,
+    exclude=('study',) + tracking
+)
+
+
+# OLD SIGN OFF STUFF, NEED TO MOVE TO ASSAY STUDY TODO TODO TODO
 class AssayRunSignOffForm(SignOffMixin, forms.ModelForm):
     class Meta(object):
         model = AssayRun

@@ -244,3 +244,6 @@ class MicrodeviceSection(models.Model):
     column_index = models.IntegerField()
 
     name = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return self.name
