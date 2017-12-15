@@ -327,7 +327,7 @@ def get_data_uploads(study=None, chip_readout=None, plate_readout=None):
 
 
 # IN THE FUTURE I SHOULD JUST HAVE DIRECT LINKS TO THE STUDY TO AVOID STUFF LIKE THIS
-def get_queryset_with_number_of_data_points(queryset):
+def get_queryset_with_number_of_data_points_old(queryset):
     """Add number of data points to each object in a nAssay Run querysey"""
     data_points = AssayChipRawData.objects.exclude(
         quality__contains=REPLACED_DATA_POINT_CODE
@@ -565,7 +565,7 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
 
         get_queryset_with_organ_model_map_old(queryset)
 
-        get_queryset_with_number_of_data_points(queryset)
+        get_queryset_with_number_of_data_points_old(queryset)
 
         get_queryset_with_stakeholder_sign_off(queryset)
 
@@ -759,7 +759,7 @@ class AssayRunList(LoginRequiredMixin, ListView):
 
         get_queryset_with_organ_model_map_old(queryset)
 
-        get_queryset_with_number_of_data_points(queryset)
+        get_queryset_with_number_of_data_points_old(queryset)
 
         get_queryset_with_stakeholder_sign_off(queryset)
 
@@ -3033,7 +3033,7 @@ class ReturnStudyData(StudyViewershipMixin, DetailView):
 # BEGIN NEW
 def get_queryset_with_organ_model_map(queryset):
     """Takes a queryset and returns it with a organ model map"""
-    setups = AssaySetup.objects.filter(
+    setups = AssayMatrixItem.objects.filter(
         organ_model__isnull=False
     ).prefetch_related(
         'matrix__study',
@@ -3046,7 +3046,7 @@ def get_queryset_with_organ_model_map(queryset):
 
     for setup in setups:
         organ_model_map.setdefault(
-            setup.matrix.study.id, {}
+            setup.study_id, {}
         ).update(
             {
                 setup.organ_model.name: True
@@ -3059,6 +3059,28 @@ def get_queryset_with_organ_model_map(queryset):
         )
 
 
+def get_queryset_with_number_of_data_points(queryset):
+    """Add number of data points to each object in a nAssay Run querysey"""
+    data_points = AssayDataPoint.objects.exclude(
+        replaced=False
+    ).prefetch_related(
+        # *CHIP_DATA_PREFETCH
+    )
+
+    data_points_map = {}
+
+    for data_point in data_points:
+        current_value = data_points_map.setdefault(
+            data_point.study_id, 0
+        )
+        data_points_map.update({
+            data_point.study_id: current_value + 1
+        })
+
+    for study in queryset:
+        study.data_points = data_points_map.get(study.id, 0)
+
+
 # TODO GET NUMBER OF DATA POINTS
 # TODO REVIEW PERMISSIONS
 # Class-based views for studies
@@ -3067,7 +3089,12 @@ class AssayStudyEditableList(OneGroupRequiredMixin, ListView):
     template_name = 'assays/assaystudy_list.html'
 
     def get_queryset(self):
-        queryset = AssayStudy.objects.prefetch_related('created_by', 'group', 'signed_off_by', 'study_types')
+        queryset = AssayStudy.objects.prefetch_related(
+            'created_by',
+            'group',
+            'signed_off_by',
+            'study_types'
+        )
 
         # Display to users with either editor or viewer group or if unrestricted
         group_names = [group.name.replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
@@ -3075,6 +3102,7 @@ class AssayStudyEditableList(OneGroupRequiredMixin, ListView):
         queryset = queryset.filter(group__name__in=group_names)
 
         get_queryset_with_organ_model_map(queryset)
+        get_queryset_with_number_of_data_points(queryset)
 
         return queryset
 
@@ -3096,7 +3124,8 @@ class AssayStudyList(LoginRequiredMixin, ListView):
         queryset = AssayStudy.objects.prefetch_related(
             'created_by',
             'group',
-            'signed_off_by'
+            'signed_off_by',
+            'study_types'
         )
 
         # Display to users with either editor or viewer group or if unrestricted
@@ -3108,6 +3137,7 @@ class AssayStudyList(LoginRequiredMixin, ListView):
         )
 
         get_queryset_with_organ_model_map(queryset)
+        get_queryset_with_number_of_data_points(queryset)
 
         return queryset
 
@@ -3428,3 +3458,43 @@ class AssayMatrixItemUpdate(UpdateView):
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+
+# TEMPORARY JUST TESTING SOMETHING
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from .forms import AssayMatrixItemFormSetFactory
+
+def vile_nested_test(request):
+    """Edit children and their addresses for a single parent."""
+
+    # ARBITRARILY JUST THE PK OF 1
+    parent = get_object_or_404(AssayMatrix, pk=1)
+
+    if request.POST:
+        form = AssayMatrixForm(request.POST, study=parent.study)
+    else:
+        form = AssayMatrixForm(instance=parent, study=parent.study)
+
+    c = RequestContext(request)
+
+    if request.method == 'POST':
+        formset = AssayMatrixItemFormSetFactory(request.POST, instance=parent)
+        if form.is_valid and formset.is_valid():
+            # form.save()
+            formset.save()
+            return redirect(parent.get_post_submission_url())
+        else:
+            print 'Failure!', form.is_valid(), formset.is_valid()
+    else:
+        formset = AssayMatrixItemFormSetFactory(instance=parent)
+
+    c.update({
+        'form': form,
+        'formset': formset
+    })
+
+    # return render(request, 'assays/vile_nested_test.html', {
+    #               'parent':parent,
+    #               'children_formset':formset})
+    return render_to_response('assays/vile_nested_test.html', c)

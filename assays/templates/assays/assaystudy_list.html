@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-{% load url from future %}
+{% load humanize %}
 
 {% block load %}
-    <script src="{% static "assays/assaystudy_list.js" %}"></script>
-    <script src="{% static "js/display_datatable.js" %}"></script>
+    <script src="{% static "assays/assayrun_list.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -32,10 +31,12 @@
             <thead>
                 <tr>
                     <th>View/Edit</th>
+{#                    <th>Study ID</th>#}
                     <th>Study Name</th>
                     <th>Start Date</th>
                     <th>Study Types</th>
                     <th>Organ Models</th>
+                    <th>Data Points</th>
 {#                    <th>Integrated Study Configuration</th>#}
                     <th>Description</th>
                     <th>Creator</th>
@@ -47,13 +48,18 @@
             <tbody>
             {% for study in object_list %}
                 <tr class="compound" id={{ study.id }} name={{ study.id }}>
-                    {# TODO TODO TODO SUBJECT TO CHANGE #}
-                    <td><a class="btn btn-primary" href="{% url 'assay_study_index' study.id %}">View/Edit</a></td>
-                    <td>{{ study.name }}</td>
+                    <td><a class="btn btn-primary" href="/assays/{{ study.id }}">View/Edit</a></td>
+{#                    <td>{{ study.assay_run_id }}</td>#}
+                    <td style="word-wrap: break-word">{{ study.name }}</td>
                     <td>{{ study.start_date|date:"M d, Y" }}</td>
                     <td>{{ study.get_study_types_string }}</td>
                     <td>{{ study.organ_models|default:"-No Organ Models-" }}</td>
 {#                    <td>{{ study.study_configuration }}</td>#}
+                    {% if study.data_points %}
+                        <td class="text-success">{{ study.data_points|intcomma }}</td>
+                    {% else %}
+                        <td class="text-danger">0</td>
+                    {% endif %}
                     <td>{{ study.description }}</td>
                     <td>
                         {{ study.full_creator }}
@@ -61,9 +67,19 @@
                     <td>{{ study.group }}</td>
                     <td>
                         {% if study.signed_off_by %}
-                            <span title="This entry was reviewed by {{ study.full_reviewer }} on {{ study.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            {% if study.stakeholder_sign_off and not study.restricted %}
+                                <span hidden>3</span>
+                                <span title="This study can be viewed by all registered users" class="glyphicon glyphicon-eye-open text-info" aria-hidden="true"></span>
+                            {% elif study.stakeholder_sign_off %}
+                                <span hidden>2</span>
+                                <span title="All stakeholders have approved release of this data" class="glyphicon glyphicon-pencil text-warning" aria-hidden="true"></span>
+                            {% else %}
+                                <span hidden>1</span>
+                            {% endif %}
+                            <span title="This entry was signed off on by {{ study.full_reviewer }} on {{ study.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
                         {% if study.flagged %}
+                            <span hidden>0</span>
                             <span title="This entry is flagged for review: '{{ study.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
                         {% endif %}
                     </td>
@@ -72,4 +88,6 @@
             </tbody>
         </table>
     </div>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

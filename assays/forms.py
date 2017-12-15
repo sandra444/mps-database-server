@@ -2218,14 +2218,123 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        # Get the study
         self.study = kwargs.pop('study', None)
         self.user = kwargs.pop('user', None)
         super(AssayMatrixForm, self).__init__(*args, **kwargs)
 
-        # Apply the study to the object
         if self.study:
             self.instance.study = self.study
+
+        for time_unit in TIME_CONVERSIONS.keys():
+            # Create fields for Days, Hours, Minutes
+            self.fields['addition_time_' + time_unit] = forms.FloatField(initial=0, required=False)
+            self.fields['duration_' + time_unit] = forms.FloatField(initial=0, required=False)
+            # self.fields['addition_time_' + time_unit + '_increment'] = forms.FloatField(initial=0, required=False)
+            # self.fields['duration_' + time_unit + '_increment'] = forms.FloatField(initial=0, required=False)
+            # Change style
+            self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
+            self.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
+            # self.fields['addition_time_' + time_unit + '_increment'].widget.attrs['style'] = 'width:50px;'
+            # self.fields['duration_' + time_unit + '_increment'].widget.attrs['style'] = 'width:50px;'
+
+        # Set CSS class to receipt date to use date picker
+        self.fields['receipt_date'].widget.attrs['class'] = 'datepicker-input'
+        self.fields['item_setup_date'].widget.attrs['class'] = 'datepicker-input'
+
+        # Set the widgets for some additional fields
+        self.fields['item_name'].widget = forms.Textarea(attrs={'rows': 1})
+        self.fields['item_scientist'].widget = forms.Textarea(attrs={'rows': 1})
+        self.fields['item_notes'].widget = forms.Textarea(attrs={'rows': 3})
+        self.fields['setup_variance_from_organ_model_protocol'].widget = forms.Textarea(attrs={'rows': 3})
+        self.fields['item_notebook_page'].widget.attrs['style'] = 'width:50px;'
+        self.fields['cell_sample'].widget.attrs['style'] = 'width:50px;'
+        self.fields['passage'].widget.attrs['style'] = 'width:50px;'
+
+    ### ADDITIONAL MATRIX FIELDS (unsaved)
+    number_of_items = forms.IntegerField(required=False)
+
+    ### ITEM FIELD HELPERS
+    action = forms.ChoiceField(choices=(
+        ('add_name', 'Add Names/IDs*'),
+        ('add_date', 'Add Setup Date*'),
+        ('add_notes', 'Add Notes/Notebook Information'),
+        ('add_device', 'Add Device/Organ Model Information*'),
+        ('add_settings', 'Add Settings'),
+        ('add_compounds', 'Add Compounds'),
+        ('add_cells', 'Add Cells'),
+        ('copy', 'Copy Contents'),
+        ('clear', 'Clear Contents')
+    ))
+
+    ### ADDING ITEM FIELDS
+    item_name = forms.CharField(required=False)
+
+    item_setup_date = forms.DateField(required=False)
+
+    item_scientist = forms.CharField(required=False)
+    item_notebook = forms.CharField(required=False)
+    item_notebook_page = forms.CharField(required=False)
+    item_notes = forms.CharField(required=False)
+
+    ### ADDING SETUP FIELDS
+    setup_device = forms.ModelChoiceField(queryset=Microdevice.objects.all().order_by('name'), required=False)
+    setup_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
+    setup_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.none(), required=False)
+    setup_variance_from_organ_model_protocol = forms.CharField(required=False)
+
+    ### ADDING SETUP CELLS
+    cell_sample = forms.IntegerField(required=False)
+    biosensor = forms.ModelChoiceField(
+        queryset=Biosensor.objects.all().prefetch_related('supplier'),
+        required=False,
+        # Default is naive
+        initial=2
+    )
+    density = forms.FloatField(required=False)
+
+    # TODO THIS IS TO BE HAMMERED OUT
+    density_unit = forms.ModelChoiceField(
+        queryset=PhysicalUnits.objects.filter(availability__contains='cell'),
+        required=False
+    )
+
+    passage = forms.CharField(required=False)
+
+    ### ?ADDING SETUP SETTINGS
+
+    ### ADDING COMPOUNDS
+    compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
+    # Notice the special exception for %
+    concentration_unit = forms.ModelChoiceField(
+        queryset=(PhysicalUnits.objects.filter(
+            unit_type__unit_type='Concentration'
+        ).order_by(
+            'base_unit',
+            'scale_factor'
+        ) | PhysicalUnits.objects.filter(unit='%')),
+        required=False, initial=4
+    )
+    concentration = forms.FloatField(required=False)
+
+    ### INCREMENTER
+    concentration_increment = forms.FloatField(required=False, initial=1)
+    concentration_increment_type = forms.ChoiceField(choices=(
+        ('/', 'Divide'),
+        ('*', 'Multiply'),
+        ('+', 'Add'),
+        ('-', 'Subtract')
+    ))
+    concentration_increment_direction = forms.ChoiceField(choices=(
+        ('lrd', 'Left to Right and Down'),
+        ('rlu', 'Right to Left and Up')
+    ))
+
+    # Text field (un-saved) for supplier
+    supplier_text = forms.CharField(required=False, initial='N/A')
+    # Text field (un-saved) for lot
+    lot_text = forms.CharField(required=False, initial='N/A')
+    # Receipt date
+    receipt_date = forms.DateField(required=False)
 
 
 class AssaySetupCompoundForm(forms.ModelForm):

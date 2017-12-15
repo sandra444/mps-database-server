@@ -1655,6 +1655,9 @@ class AssayDataPoint(models.Model):
 
     # setup = models.ForeignKey('assays.AssaySetup')
 
+    # May seem excessive, but chaining through fields can be inconvenient
+    study = models.ForeignKey('assays.AssayStudy')
+
     # Cross reference for users if study ids diverge
     cross_reference = models.CharField(max_length=255, default='')
 
