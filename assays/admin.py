@@ -181,6 +181,7 @@ def modify_templates():
     chip.close()
 
 
+# DEPRECATED
 class AssayQualityIndicatorFormAdmin(forms.ModelForm):
     """Admin Form for Quality Indicators"""
     class Meta(object):
@@ -191,6 +192,7 @@ class AssayQualityIndicatorFormAdmin(forms.ModelForm):
         exclude = ('',)
 
 
+# DEPRECATED
 class AssayQualityIndicatorAdmin(LockableAdmin):
     save_on_top = True
     list_display = ('code', 'name', 'description')
@@ -1337,6 +1339,8 @@ class AssayPlateTestResultAdmin(LockableAdmin):
 admin.site.register(AssayPlateTestResult, AssayPlateTestResultAdmin)
 
 
+# TODO TODO TODO
+# TODO REMAKE FOR ASSAY STUDY
 class AssayRunFormAdmin(forms.ModelForm):
     """Admin Form for Assay Runs (now referred to as Studies)"""
     class Meta(object):
@@ -1394,6 +1398,7 @@ class StudySupportingDataInline(admin.TabularInline):
     extra = 1
 
 
+# TODO REMAKE FOR ASSAY STUDY
 class AssayRunStakeholderInline(admin.TabularInline):
     """Inline for Studies"""
     model = AssayRunStakeholder
@@ -1413,6 +1418,7 @@ class AssayRunStakeholderInline(admin.TabularInline):
         return super(AssayRunStakeholderInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+# TODO REMAKE FOR ASSAY STUDY
 class AssayRunAdmin(LockableAdmin):
     """Admin for what are now called Organ Chip Studies"""
     # AssayRun is now Organ Chip Study

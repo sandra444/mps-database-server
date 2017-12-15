@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{# TODO MUST CHANGE IN 1.9 #}
+{% load url from future %}
 {% load humanize %}
 
 {% block load %}
@@ -19,11 +21,11 @@
         </legend>
 
         <div class="row text-center padded-bottom">
-            <a href="/assays/study/add" class="btn btn-lg btn-success" role="button">Add Study</a>
+            <a href="{% url 'assay_study_add' %}"  class="btn btn-lg btn-success" role="button">Add Study</a>
             {% if not editable %}
-                <a href="/assays/editable_studies/" class="btn btn-lg btn-info" role="button">Show Editable Studies Only</a>
+                <a href="{% url 'editable_study_list' %}" class="btn btn-lg btn-info" role="button">Show Editable Studies Only</a>
             {% else %}
-                <a href="/assays/study/" class="btn btn-lg btn-info" role="button">Show All Studies</a>
+                <a href="{% url 'assay_study_list' %}" class="btn btn-lg btn-info" role="button">Show All Studies</a>
             {% endif %}
         </div>
 
@@ -48,7 +50,7 @@
             <tbody>
             {% for study in object_list %}
                 <tr class="compound" id={{ study.id }} name={{ study.id }}>
-                    <td><a class="btn btn-primary" href="/assays/{{ study.id }}">View/Edit</a></td>
+                    <td><a class="btn btn-primary" href="{% url 'assay_study_index' study.id %}">View/Edit</a></td>
 {#                    <td>{{ study.assay_run_id }}</td>#}
                     <td style="word-wrap: break-word">{{ study.name }}</td>
                     <td>{{ study.start_date|date:"M d, Y" }}</td>
