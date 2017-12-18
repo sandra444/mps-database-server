@@ -3664,11 +3664,16 @@ class AssayMatrixAdd(CreateView):
         # Cellsamples will always be the same
         context['cellsamples'] = cellsamples
 
+        # Start blank
+        context['formset'] = AssayMatrixItemFormSetFactory()
+
         return context
 
     def form_valid(self, form):
-        if form.is_valid():
-            save_forms_with_tracking(self, form)
+        # Build the formset from POST
+        formset = AssayMatrixItemFormSetFactory(self.request.POST)
+        if form.is_valid() and formset.is_valid():
+            save_forms_with_tracking(self, form, formset=[formset])
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -3699,18 +3704,22 @@ class AssayMatrixUpdate(UpdateView):
         # Cellsamples will always be the same
         context['cellsamples'] = cellsamples
 
+        context['formset'] = AssayMatrixItemFormSetFactory(instance=self.object)
+
         context['update'] = True
 
         return context
 
     def form_valid(self, form):
-        if form.is_valid():
-            save_forms_with_tracking(self, form)
+        formset = AssayMatrixItemFormSetFactory(self.request.POST, instance=self.object)
+        if form.is_valid() and formset.is_valid():
+            save_forms_with_tracking(self, form, formset=[formset])
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
 
+# TODO PROBABLY WILL REMOVE
 class AssayMatrixItemUpdate(UpdateView):
     model = AssayMatrixItem
     template_name = 'assays/assaymatrixitem_add.html'
@@ -3740,6 +3749,7 @@ class AssayMatrixItemUpdate(UpdateView):
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from .forms import AssayMatrixItemFormSetFactory
+
 
 def vile_nested_test(request):
     """Edit children and their addresses for a single parent."""

@@ -34,7 +34,16 @@ from mps.templatetags.custom_filters import filter_groups
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
 
 # These are all of the tracking fields
-tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
+tracking = (
+    'created_by',
+    'created_on',
+    'modified_on',
+    'modified_by',
+    'signed_off_by',
+    'signed_off_date',
+    'locked',
+    'restricted'
+)
 # Excluding restricted is likewise useful
 restricted = ('restricted',)
 # Group
@@ -1258,6 +1267,7 @@ class ReadyForSignOffForm(forms.Form):
     message = forms.TextInput()
 
 
+# TODO PLEASE REVIEW
 class AssayStudyForm(SignOffMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         """Init the Study Form

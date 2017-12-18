@@ -154,7 +154,7 @@ CHIP_DATA_PREFETCH = (
 MATRIX_ITEM_PREFETCH = (
     'study',
     'matrix',
-    'setup__device',
+    'device',
     # Subject to change
     'failure_reason'
 )

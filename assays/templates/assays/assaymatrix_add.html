@@ -221,78 +221,9 @@
             <td class="bg-info">{{ form.duration_minute }}</td>
         </tr>
     </table>
-{#    <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">#}
-{#        <tr>#}
-{#            <th>Compound</th>#}
-{#            <th>Supplier</th>#}
-{#            <th>Lot</th>#}
-{#            <th>Receipt Date</th>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <td>{{ form.compound }}</td>#}
-{#            <td>{{ form.supplier_text }}</td>#}
-{#            <td>{{ form.lot_text }}</td>#}
-{#            <td>{{ form.receipt_date }}</td>#}
-{#        </tr>#}
-{#    </table>#}
-{#    <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">#}
-{#        <tr>#}
-{#            <th>Concentration</th>#}
-{#            <th>Concentration Unit</th>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <td>{{ form.concentration }}</td>#}
-{#            <td>{{ form.concentration_unit }}</td>#}
-{#        </tr>#}
-{#    </table>#}
-{#    <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">#}
-{#        <tr>#}
-{#            <th class="bg-success" colspan="3">Addition Time</th>#}
-{#            <th class="bg-info" colspan="3">Duration</th>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <th class="bg-success">Day</th>#}
-{#            <th class="bg-success">Hour</th>#}
-{#            <th class="bg-success">Minute</th>#}
-{#            <th class="bg-info">Day</th>#}
-{#            <th class="bg-info">Hour</th>#}
-{#            <th class="bg-info">Minute</th>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <td class="bg-success">{{ form.addition_time_day }}</td>#}
-{#            <td class="bg-success">{{ form.addition_time_hour }}</td>#}
-{#            <td class="bg-success">{{ form.addition_time_minute }}</td>#}
-{#            <td class="bg-info">{{ form.duration_day }}</td>#}
-{#            <td class="bg-info">{{ form.duration_hour }}</td>#}
-{#            <td class="bg-info">{{ form.duration_minute }}</td>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <th class="bg-success" colspan="3">Addition Time Increment</th>#}
-{#            <th class="bg-info" colspan="3">Duration Increment</th>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <th class="bg-success">Day</th>#}
-{#            <th class="bg-success">Hour</th>#}
-{#            <th class="bg-success">Minute</th>#}
-{#            <th class="bg-info">Day</th>#}
-{#            <th class="bg-info">Hour</th>#}
-{#            <th class="bg-info">Minute</th>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <td class="bg-success">{{ form.addition_time_day_increment }}</td>#}
-{#            <td class="bg-success">{{ form.addition_time_hour_increment }}</td>#}
-{#            <td class="bg-success">{{ form.addition_time_minute_increment }}</td>#}
-{#            <td class="bg-info">{{ form.duration_day_increment }}</td>#}
-{#            <td class="bg-info">{{ form.duration_hour_increment }}</td>#}
-{#            <td class="bg-info">{{ form.duration_minute_increment }}</td>#}
-{#        </tr>#}
-{#    </table>#}
     </div>
     </div>
 
-{#    {% include 'generic_field.html' with field=form.increment label="Increment Amount" %}#}
-{#    {% include 'generic_field.html' with field=form.increment_type label="Increment Type" %}#}
-{#    {% include 'generic_field.html' with field=form.increment_direction label="Increment Direction" %}#}
     </div>
 
     <div hidden id="add_cells_section" class="item-section">
@@ -313,12 +244,6 @@
     {% include 'generic_field.html' with field=form.passage label="Passage" %}
     </div>
 
-{#    <div hidden id="incrementer_section" class="item-section">#}
-{#    {% include 'generic_field.html' with field=form.increment label="Increment Amount" %}#}
-{#    {% include 'generic_field.html' with field=form.increment_type label="Increment Type" %}#}
-{#    {% include 'generic_field.html' with field=form.increment_direction label="Increment Direction" %}#}
-{#    </div>#}
-
     </div>
 
     </form>
@@ -331,6 +256,47 @@
         </table>
     </div>
     </div>
+
+    {# TESTING #}
+    {% for child_form in formset.forms %}
+        <h2>Matrix Item</h2>
+        {{ child_form }}
+
+        {% if child_form.compounds %}
+            <h2>Compounds</h2>
+            {{ child_form.compounds.management_form }}
+            {{ child_form.compounds.non_form_errors }}
+
+            {% for nested_form in child_form.compounds.forms %}
+                {{ nested_form }}
+            {% endfor %}
+
+        {% endif %}
+
+        {% if child_form.cells %}
+            <h2>Cells</h2>
+            {{ child_form.cells.management_form }}
+            {{ child_form.cells.non_form_errors }}
+
+            {% for nested_form in child_form.cells.forms %}
+                {{ nested_form }}
+            {% endfor %}
+
+        {% endif %}
+
+        {% if child_form.settings %}
+            <h2>Settings</h2>
+            {{ child_form.settings.management_form }}
+            {{ child_form.settings.non_form_errors }}
+
+            {% for nested_form in child_form.settings.forms %}
+                {{ nested_form }}
+            {% endfor %}
+
+        {% endif %}
+
+    {% endfor %}
+    {# CONCLUDE TESTING #}
 
     {# Cellsample Selection Stuff #}
     <div hidden id="dialog" title="Choose a Cell Sample">
