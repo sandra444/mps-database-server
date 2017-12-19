@@ -2587,6 +2587,7 @@ class AssaySetupCellFormSet(BaseInlineFormSet):
         self.cached_fields = kwargs.pop('cached_fields', None)
         super(AssaySetupCellFormSet, self).__init__(*args, **kwargs)
 
+    # NOT DRY
     def _construct_form(self, i, **kwargs):
         form = super(AssaySetupCellFormSet, self)._construct_form(i, **kwargs)
         for cache_field in self.cached_fields:
@@ -2604,7 +2605,41 @@ class AssaySetupCellFormSet(BaseInlineFormSet):
                         choices)
 
             field.choice_cache = choices
+
+        for time_unit in TIME_CONVERSIONS.keys():
+            # Create fields for Days, Hours, Minutes
+            form.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
+            # Change style
+            form.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
+
+        if form.instance.addition_time:
+            # Fill additional time
+            addition_time_in_minutes_remaining = form.instance.addition_time
+            for time_unit, conversion in TIME_CONVERSIONS.items():
+                initial_time_for_current_field = int(addition_time_in_minutes_remaining / conversion)
+                if initial_time_for_current_field:
+                    form.fields['addition_time_' + time_unit].initial = initial_time_for_current_field
+                    addition_time_in_minutes_remaining -= initial_time_for_current_field * conversion
+            # Add fractions of minutes if necessary
+            if addition_time_in_minutes_remaining:
+                form.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
+
         return form
+
+    def clean(self):
+        """Checks to make sure duration is valid"""
+        for index, form in enumerate(self.forms):
+            current_data = form.cleaned_data
+
+            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                addition_time = 0
+                duration = 0
+                for time_unit, conversion in TIME_CONVERSIONS.items():
+                    addition_time += current_data.get('addition_time_' + time_unit, 0) * conversion
+                    duration += current_data.get('duration_' + time_unit, 0) * conversion
+
+                if duration <= 0:
+                    form.add_error('duration', 'Duration cannot be zero or negative.')
 
 
 class AssaySetupSettingForm(forms.ModelForm):
@@ -2643,6 +2678,39 @@ class AssaySetupSettingFormSet(BaseInlineFormSet):
                         choices)
 
             field.choice_cache = choices
+
+        for time_unit in TIME_CONVERSIONS.keys():
+            # Create fields for Days, Hours, Minutes
+            form.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
+            form.fields['duration_' + time_unit] = forms.FloatField(initial=0)
+            # Change style
+            form.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
+            form.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
+
+        if form.instance.addition_time:
+            # Fill additional time
+            addition_time_in_minutes_remaining = form.instance.addition_time
+            for time_unit, conversion in TIME_CONVERSIONS.items():
+                initial_time_for_current_field = int(addition_time_in_minutes_remaining / conversion)
+                if initial_time_for_current_field:
+                    form.fields['addition_time_' + time_unit].initial = initial_time_for_current_field
+                    addition_time_in_minutes_remaining -= initial_time_for_current_field * conversion
+            # Add fractions of minutes if necessary
+            if addition_time_in_minutes_remaining:
+                form.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
+
+        if form.instance.duration:
+            # Fill duration
+            duration_in_minutes_remaining = form.instance.duration
+            for time_unit, conversion in TIME_CONVERSIONS.items():
+                initial_time_for_current_field = int(duration_in_minutes_remaining / conversion)
+                if initial_time_for_current_field:
+                    form.fields['duration_' + time_unit].initial = initial_time_for_current_field
+                    duration_in_minutes_remaining -= initial_time_for_current_field * conversion
+            # Add fractions of minutes if necessary
+            if duration_in_minutes_remaining:
+                form.fields['duration_minute'].initial += duration_in_minutes_remaining
+
         return form
 
 AssaySetupCompoundFormSetFactory = inlineformset_factory(
