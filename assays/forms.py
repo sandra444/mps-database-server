@@ -2695,22 +2695,22 @@ class AssayMatrixItemFormSet(BaseInlineFormSet):
         super(AssayMatrixItemFormSet, self).__init__(*args, **kwargs)
 
         self.cached_fields = {
-            'device': tuple(Microdevice.objects.all().values_list('id', 'id')),
-            'organ_model': tuple(OrganModel.objects.all().values_list('id', 'id')),
-            'organ_model_protocol': tuple(OrganModelProtocol.objects.all().values_list('id', 'id')),
-            'failure_reason': tuple(AssayFailureReason.objects.all().values_list('id', 'id')),
+            'device': tuple(Microdevice.objects.all().values_list('id', 'name')),
+            'organ_model': tuple(OrganModel.objects.all().values_list('id', 'name')),
+            'organ_model_protocol': tuple(OrganModelProtocol.objects.all().values_list('id', 'version')),
+            'failure_reason': tuple(AssayFailureReason.objects.all().values_list('id', 'name')),
         }
 
         # Here lies the nested formsets
-        addition_location_choices = tuple(MicrodeviceSection.objects.all().values_list('id', 'id'))
+        addition_location_choices = tuple(MicrodeviceSection.objects.all().values_list('id', 'name'))
 
         compound_instance_choices = tuple(CompoundInstance.objects.all().values_list('id', 'id'))
 
-        compound_choices = tuple(Compound.objects.all().values_list('id', 'id'))
+        compound_choices = tuple(Compound.objects.all().values_list('id', 'name'))
 
         concentration_unit_choices = tuple((PhysicalUnits.objects.filter(
             unit_type__unit_type='Concentration'
-        ) | PhysicalUnits.objects.filter(unit='%')).values_list('id', 'id'))
+        ) | PhysicalUnits.objects.filter(unit='%')).values_list('id', 'unit'))
 
         # Get all chip setup assay compound instances
         self.setup_compounds = {
@@ -2761,15 +2761,21 @@ class AssayMatrixItemFormSet(BaseInlineFormSet):
         }
 
         self.cell_choices = {
-            'cell_sample': tuple(CellSample.objects.all().values_list('id', 'id')),
-            'biosensor': tuple(Biosensor.objects.all().values_list('id', 'id')),
-            'density_unit': tuple(PhysicalUnits.objects.filter(availability__contains='cell').values_list('id', 'id')),
+            'cell_sample': tuple((
+                    (cell_sample.id, unicode(cell_sample)) for cell_sample in CellSample.objects.all().prefetch_related(
+                        'cell_type__organ',
+                        'cell_subtype',
+                        'supplier'
+                )
+            )),
+            'biosensor': tuple(Biosensor.objects.all().values_list('id', 'name')),
+            'density_unit': tuple(PhysicalUnits.objects.filter(availability__contains='cell').values_list('id', 'unit')),
             'addition_location': addition_location_choices
         }
 
         self.setting_choices = {
-            'setting': tuple(AssaySetting.objects.all().values_list('id', 'id')),
-            'unit': tuple(PhysicalUnits.objects.all().values_list('id', 'id')),
+            'setting': tuple(AssaySetting.objects.all().values_list('id', 'name')),
+            'unit': tuple(PhysicalUnits.objects.all().values_list('id', 'unit')),
             'addition_location': addition_location_choices
         }
 
