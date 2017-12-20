@@ -3704,14 +3704,27 @@ class AssayMatrixUpdate(UpdateView):
         # Cellsamples will always be the same
         context['cellsamples'] = cellsamples
 
-        context['formset'] = AssayMatrixItemFormSetFactory(instance=self.object)
+        # context['formset'] = AssayMatrixItemFormSetFactory(instance=self.object)
+        if self.request.POST:
+            context['formset'] = AssayMatrixItemFormSetFactory(
+                self.request.POST,
+                queryset=AssayMatrixItem.objects.filter(matrix=self.object).order_by('row_index', 'column_index')
+            )
+        else:
+            context['formset'] = AssayMatrixItemFormSetFactory(
+                queryset=AssayMatrixItem.objects.filter(matrix=self.object).order_by('row_index', 'column_index')
+            )
 
         context['update'] = True
 
         return context
 
     def form_valid(self, form):
-        formset = AssayMatrixItemFormSetFactory(self.request.POST, instance=self.object)
+        # formset = AssayMatrixItemFormSetFactory(self.request.POST, instance=self.object)
+        formset = AssayMatrixItemFormSetFactory(
+            self.request.POST,
+            queryset=AssayMatrixItem.objects.filter(matrix=self.object).order_by('row_index', 'column_index')
+        )
         if form.is_valid() and formset.is_valid():
             save_forms_with_tracking(self, form, formset=[formset])
             return redirect(self.object.get_post_submission_url())

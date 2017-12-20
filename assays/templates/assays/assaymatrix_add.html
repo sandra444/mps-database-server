@@ -92,11 +92,6 @@
 
     <legend>Individual</legend>
 
-    <div hidden>
-        {{ form.item_data }}
-        {{ form.setup_data }}
-        {{ form.setup_set_data }}
-    </div>
 
     <div class="well">
     {% include 'generic_field.html' with field=form.action label="Action" %}
@@ -128,10 +123,10 @@
     </div>
 
     <div hidden id="add_device_section" class="item-section">
-    {% include 'generic_field.html' with field=form.setup_device label="Device*" %}
-    {% include 'generic_field.html' with field=form.setup_organ_model label="Organ Model" %}
-    {% include 'generic_field.html' with field=form.setup_organ_model_protocol label="Organ Model Protocol" %}
-    {% include 'generic_field.html' with field=form.setup_variance_from_organ_model_protocol label="Variance from Protocol" %}
+    {% include 'generic_field.html' with field=form.item_device label="Device*" %}
+    {% include 'generic_field.html' with field=form.item_organ_model label="Organ Model" %}
+    {% include 'generic_field.html' with field=form.item_organ_model_protocol label="Organ Model Protocol" %}
+    {% include 'generic_field.html' with field=form.item_variance_from_organ_model_protocol label="Variance from Protocol" %}
     </div>
 
     <div hidden id="add_failure_section" class="item-section">
@@ -172,10 +167,10 @@
         <th>Receipt Date</th>
     </tr>
     <tr>
-        <td>{{ form.compound }}</td>
-        <td>{{ form.supplier_text }}</td>
-        <td>{{ form.lot_text }}</td>
-        <td>{{ form.receipt_date }}</td>
+        <td>{{ form.compound_compound }}</td>
+        <td>{{ form.compound_supplier_text }}</td>
+        <td>{{ form.compound_lot_text }}</td>
+        <td>{{ form.compound_receipt_date }}</td>
     </tr>
     </table>
     <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
@@ -184,19 +179,19 @@
             <th>Concentration Unit*</th>
         </tr>
         <tr>
-            <td>{{ form.concentration }}</td>
-            <td>{{ form.concentration_unit }}</td>
+            <td>{{ form.compound_concentration }}</td>
+            <td>{{ form.compound_concentration_unit }}</td>
         </tr>
         <tr>
             <th>Concentration Increment</th>
             <th>Increment Operation</th>
         </tr>
         <tr>
-            <td>{{ form.concentration_increment }}</td>
-            <td>{{ form.concentration_increment_type }}</td>
+            <td>{{ form.compound_concentration_increment }}</td>
+            <td>{{ form.compound_concentration_increment_type }}</td>
         </tr>
         <tr>
-            <td colspan="2">{{ form.concentration_increment_direction }}</td>
+            <td colspan="2">{{ form.compound_concentration_increment_direction }}</td>
         </tr>
     </table>
     <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
@@ -213,12 +208,12 @@
             <th class="bg-info">Minute</th>
         </tr>
         <tr>
-            <td class="bg-success">{{ form.addition_time_day }}</td>
-            <td class="bg-success">{{ form.addition_time_hour }}</td>
-            <td class="bg-success">{{ form.addition_time_minute }}</td>
-            <td class="bg-info">{{ form.duration_day }}</td>
-            <td class="bg-info">{{ form.duration_hour }}</td>
-            <td class="bg-info">{{ form.duration_minute }}</td>
+            <td class="bg-success">{{ form.compound_addition_time_day }}</td>
+            <td class="bg-success">{{ form.compound_addition_time_hour }}</td>
+            <td class="bg-success">{{ form.compound_addition_time_minute }}</td>
+            <td class="bg-info">{{ form.compound_duration_day }}</td>
+            <td class="bg-info">{{ form.compound_duration_hour }}</td>
+            <td class="bg-info">{{ form.compound_duration_minute }}</td>
         </tr>
     </table>
     </div>
@@ -231,17 +226,85 @@
     <div class="form-group">
     <label for="cell_sample" class="col-sm-2 control-label">Cell Sample*</label>
     <div class="col-sm-10">
-        <input readonly=true id="id_cell_sample" name="cell_sample" size="5" value={{ form.cell_sample.value|default_if_none:'' }}>
+        <input readonly=true id="id_cell_cell_sample" name="cell_cell_sample" size="5" value={{ form.cell_cell_sample.value|default_if_none:'' }}>
         <button id='id_cell_sample_search' type="button" class="btn btn-xs btn-info">
             <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
         </button>
         <label class="small" id="id_cell_sample_label"></label>
     </div>
     </div>
-    {% include 'generic_field.html' with field=form.biosensor label="Biosensor*" %}
-    {% include 'generic_field.html' with field=form.density label="Density*" %}
-    {% include 'generic_field.html' with field=form.density_unit label="Density Unit*" %}
-    {% include 'generic_field.html' with field=form.passage label="Passage" %}
+    {% include 'generic_field.html' with field=form.cell_biosensor label="Biosensor*" %}
+    {% include 'generic_field.html' with field=form.cell_density label="Density*" %}
+    {% include 'generic_field.html' with field=form.cell_density_unit label="Density Unit*" %}
+    {% include 'generic_field.html' with field=form.cell_passage label="Passage" %}
+    {% include 'generic_field.html' with field=form.cell_addition_location label="Addition Location" %}
+    {# TODO ADD TIME #}
+
+    <div class="row">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-10">
+    <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
+        <tr>
+            <th class="bg-success" colspan="3">Addition Time*</th>
+{#            <th class="bg-info" colspan="3">Duration*</th>#}
+        </tr>
+        <tr>
+            <th class="bg-success">Day</th>
+            <th class="bg-success">Hour</th>
+            <th class="bg-success">Minute</th>
+{#            <th class="bg-info">Day</th>#}
+{#            <th class="bg-info">Hour</th>#}
+{#            <th class="bg-info">Minute</th>#}
+        </tr>
+        <tr>
+            <td class="bg-success">{{ form.cell_addition_time_day }}</td>
+            <td class="bg-success">{{ form.cell_addition_time_hour }}</td>
+            <td class="bg-success">{{ form.cell_addition_time_minute }}</td>
+{#            <td class="bg-info">{{ form.cell_duration_day }}</td>#}
+{#            <td class="bg-info">{{ form.cell_duration_hour }}</td>#}
+{#            <td class="bg-info">{{ form.cell_duration_minute }}</td>#}
+        </tr>
+    </table>
+    </div>
+    </div>
+    </div>
+
+    <div hidden id="add_settings_section" class="item-section">
+    {% include 'generic_field.html' with field=form.setting_setting label="Setting*" %}
+    {% include 'generic_field.html' with field=form.setting_value label="Value*" %}
+    {% include 'generic_field.html' with field=form.setting_unit label="Unit*" %}
+    {% include 'generic_field.html' with field=form.setting_addition_location label="Addition Location" %}
+    {# TODO ADD TIME #}
+
+    <div class="row">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-10">
+    <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
+        <tr>
+            <th class="bg-success" colspan="3">Addition Time*</th>
+            <th class="bg-info" colspan="3">Duration*</th>
+        </tr>
+        <tr>
+            <th class="bg-success">Day</th>
+            <th class="bg-success">Hour</th>
+            <th class="bg-success">Minute</th>
+            <th class="bg-info">Day</th>
+            <th class="bg-info">Hour</th>
+            <th class="bg-info">Minute</th>
+        </tr>
+        <tr>
+            <td class="bg-success">{{ form.setting_addition_time_day }}</td>
+            <td class="bg-success">{{ form.setting_addition_time_hour }}</td>
+            <td class="bg-success">{{ form.setting_addition_time_minute }}</td>
+            <td class="bg-info">{{ form.setting_duration_day }}</td>
+            <td class="bg-info">{{ form.setting_duration_hour }}</td>
+            <td class="bg-info">{{ form.setting_duration_minute }}</td>
+        </tr>
+    </table>
+    </div>
+    </div>
+    </div>
+    </div>
     </div>
 
     </div>

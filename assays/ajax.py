@@ -1,6 +1,5 @@
 # coding=utf-8
 import ujson as json
-import json as default_json
 from collections import defaultdict
 # TODO STOP USING WILDCARD IMPORTS
 from django.http import *
@@ -1647,222 +1646,223 @@ def send_ready_for_sign_off_email(request):
 
 
 # TODO IDEALLY THE KEYS WILL SORT THE SAME WAY
-def fetch_matrix_items_as_json(request):
-    """Gets all items for a matrix as json
-
-    Receives the following from POST:
-    matrix -- the id of the matrix in question
-    """
-    matrix_id = request.POST.get('matrix_id', '')
-
-    data = {
-        'item_data': '',
-        'setups': '',
-        'setup_sets': {
-            'compounds': {},
-            'cells': {},
-            'settings': {}
-        }
-    }
-
-    if not matrix_id:
-        return HttpResponse(json.dumps(data),
-                            content_type="application/json")
-
-    # TODO MAKE SURE THAT THE SETS CORRESPOND WITH WHAT IS IN THE JS
-    items = AssayMatrixItem.objects.filter(
-        matrix_id=matrix_id
-    ).prefetch_related(
-        *MATRIX_ITEM_PREFETCH
-    )
-
-    setups = AssaySetup.objects.filter(
-        matrix_id=matrix_id
-    ).prefetch_related(
-        # TODO
-        'matrix'
-    )
-
-    if not items or not setups:
-        return HttpResponse(json.dumps(data),
-                            content_type="application/json")
-
-    setup_id_to_index = {}
-
-    setup_cells = AssaySetupCell.objects.filter(
-        assaysetup__in=setups
-    ).prefetch_related(
-        # TODO
-    )
-
-    cell_id_to_index = {}
-
-    setup_compounds = AssaySetupCompound.objects.filter(
-        assaysetup__in=setups
-    ).prefetch_related(
-        # TODO
-    )
-
-    compound_id_to_index = {}
-
-    setup_settings = AssaySetupSetting.objects.filter(
-        assaysetup__in=setups
-    ).prefetch_related(
-
-    )
-
-    setting_id_to_index = {}
-
-    setup_set_data = {
-        'compounds': {},
-        'cells': {},
-        'settings': {}
-    }
-
-    for index, setup_cell in enumerate(setup_cells):
-        setup_set_data.get('cells').update({
-            default_json.dumps({
-                # 'id': setup_cell.id,
-                'cell_sample_id': setup_cell.cell_sample_id,
-                'cell_sample': unicode(setup_cell.cell_sample),
-                'biosensor_id': setup_cell.biosensor_id,
-                'biosensor': setup_cell.biosensor.name,
-                'density': setup_cell.density,
-                'density_unit_id': setup_cell.density_unit_id,
-                # TODO TODO TODO THIS SHOULD BE .name
-                'density_unit': setup_cell.density_unit.unit,
-                'passage': setup_cell.passage
-            }, sort_keys=True, separators=(',', ':')) : index
-        })
-
-        cell_id_to_index.update({
-            setup_cell.id: index
-        })
-
-    for index, compound in enumerate(setup_compounds):
-        split_addition_time = get_split_times(compound.addition_time)
-        split_duration = get_split_times(compound.duration)
-
-        receipt_date = ''
-        if compound.compound_instance.receipt_date:
-            receipt_date = unicode(compound.compound_instance.receipt_date.isoformat())
-
-        setup_set_data.get('compounds').update({
-            default_json.dumps({
-                # 'id': compound.id,
-                'concentration': compound.concentration,
-                'concentration_unit_id': compound.concentration_unit_id,
-                'concentration_unit': compound.concentration_unit.unit,
-                'addition_time': compound.addition_time,
-                'duration': compound.duration,
-                # Subject to removal
-                'addition_time_day': split_addition_time['day'],
-                'duration_day': split_duration['day'],
-                'addition_time_hour': split_addition_time['hour'],
-                'duration_hour': split_duration['hour'],
-                'addition_time_minute': split_addition_time['minute'],
-                'duration_minute': split_duration['minute'],
-                # continue
-                'compound_id': compound.compound_instance.compound_id,
-                'compound': compound.compound_instance.compound.name,
-                'supplier_text': compound.compound_instance.supplier.name,
-                'lot_text': compound.compound_instance.lot,
-                'receipt_date': receipt_date
-            }, sort_keys=True, separators=(',', ':')) : index
-        })
-
-        compound_id_to_index.update({
-            compound.id: index
-        })
-
-    setup_data = {}
-
-    for index, setup in enumerate(setups):
-        # Should really have a function for this
-        compound_set_ids = setup.compounds.values_list('id', flat=True)
-        compound_set_indexes = sorted([
-            compound_id_to_index.setdefault(
-                compound_id, len(compound_id_to_index)
-            ) for compound_id in compound_set_ids
-        ])
-
-        cell_set_ids = setup.cells.values_list('id', flat=True)
-        cell_set_indexes = sorted([
-            cell_id_to_index.setdefault(
-                cell_id, len(cell_id_to_index)
-            ) for cell_id in cell_set_ids
-        ])
-
-        setting_set_ids = setup.settings.values_list('id', flat=True)
-        setting_set_indexes = sorted([
-            setting_id_to_index.setdefault(
-                setting_id, len(cell_id_to_index)
-            ) for setting_id in setting_set_ids
-        ])
-
-        current_setup = {
-            'device_id': setup.device_id,
-            'device': setup.device.name,
-            'organ_model_id': setup.organ_model_id,
-            'organ_model': '',
-            'organ_model_protocol_id': setup.organ_model_protocol_id,
-            'organ_model_protocol': '',
-            'variance_from_organ_model_protocol': setup.variance_from_organ_model_protocol,
-            'cells': cell_set_indexes,
-            'compounds': compound_set_indexes,
-            'settings': setting_set_indexes
-        }
-
-        # TODO I CAN CHANGE THIS AS SOON AS I FIX THE NAMES
-        if setup.organ_model_id:
-            current_setup.update({
-                'organ_model': setup.organ_model.name
-            })
-        if setup.organ_model_protocol_id:
-            current_setup.update({
-                'organ_model_protocol': setup.organ_model_protocol.version
-            })
-
-        setup_data.update({
-            default_json.dumps(current_setup, sort_keys=True, separators=(',', ':')): index
-        })
-        setup_id_to_index.update({
-            setup.id: index
-        })
-
-    item_data = {}
-
-    for item in items:
-        failure_time = item.failure_time
-        if not failure_time:
-            failure_time = ''
-
-        item_data.update({
-            'item_' + unicode(item.row_index) + '_' + unicode(item.column_index): {
-                'id': item.id,
-                'name': item.name,
-                'setup_date': unicode(item.setup_date.isoformat()),
-                # 'failure_date': item.failure_date,
-                'failure_time': failure_time,
-                'failure_reason_id': item.failure_reason_id,
-                'scientist': item.scientist,
-                'notebook': item.notebook,
-                'notebook_page': item.notebook_page,
-                'notes': item.notes,
-                'row_index': item.row_index,
-                'column_index': item.column_index,
-                'setup_index': setup_id_to_index.get(item.setup.id)
-            }
-        })
-
-    data.update({
-        'item_data': item_data,
-        'setups': setup_data,
-        'setup_sets': setup_set_data
-    })
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
+# VILE: DEPRECATED
+# def fetch_matrix_items_as_json(request):
+#     """Gets all items for a matrix as json
+#
+#     Receives the following from POST:
+#     matrix -- the id of the matrix in question
+#     """
+#     matrix_id = request.POST.get('matrix_id', '')
+#
+#     data = {
+#         'item_data': '',
+#         'setups': '',
+#         'setup_sets': {
+#             'compounds': {},
+#             'cells': {},
+#             'settings': {}
+#         }
+#     }
+#
+#     if not matrix_id:
+#         return HttpResponse(json.dumps(data),
+#                             content_type="application/json")
+#
+#     # TODO MAKE SURE THAT THE SETS CORRESPOND WITH WHAT IS IN THE JS
+#     items = AssayMatrixItem.objects.filter(
+#         matrix_id=matrix_id
+#     ).prefetch_related(
+#         *MATRIX_ITEM_PREFETCH
+#     )
+#
+#     setups = AssaySetup.objects.filter(
+#         matrix_id=matrix_id
+#     ).prefetch_related(
+#         # TODO
+#         'matrix'
+#     )
+#
+#     if not items or not setups:
+#         return HttpResponse(json.dumps(data),
+#                             content_type="application/json")
+#
+#     setup_id_to_index = {}
+#
+#     setup_cells = AssaySetupCell.objects.filter(
+#         assaysetup__in=setups
+#     ).prefetch_related(
+#         # TODO
+#     )
+#
+#     cell_id_to_index = {}
+#
+#     setup_compounds = AssaySetupCompound.objects.filter(
+#         assaysetup__in=setups
+#     ).prefetch_related(
+#         # TODO
+#     )
+#
+#     compound_id_to_index = {}
+#
+#     setup_settings = AssaySetupSetting.objects.filter(
+#         assaysetup__in=setups
+#     ).prefetch_related(
+#
+#     )
+#
+#     setting_id_to_index = {}
+#
+#     setup_set_data = {
+#         'compounds': {},
+#         'cells': {},
+#         'settings': {}
+#     }
+#
+#     for index, setup_cell in enumerate(setup_cells):
+#         setup_set_data.get('cells').update({
+#             default_json.dumps({
+#                 # 'id': setup_cell.id,
+#                 'cell_sample_id': setup_cell.cell_sample_id,
+#                 'cell_sample': unicode(setup_cell.cell_sample),
+#                 'biosensor_id': setup_cell.biosensor_id,
+#                 'biosensor': setup_cell.biosensor.name,
+#                 'density': setup_cell.density,
+#                 'density_unit_id': setup_cell.density_unit_id,
+#                 # TODO TODO TODO THIS SHOULD BE .name
+#                 'density_unit': setup_cell.density_unit.unit,
+#                 'passage': setup_cell.passage
+#             }, sort_keys=True, separators=(',', ':')) : index
+#         })
+#
+#         cell_id_to_index.update({
+#             setup_cell.id: index
+#         })
+#
+#     for index, compound in enumerate(setup_compounds):
+#         split_addition_time = get_split_times(compound.addition_time)
+#         split_duration = get_split_times(compound.duration)
+#
+#         receipt_date = ''
+#         if compound.compound_instance.receipt_date:
+#             receipt_date = unicode(compound.compound_instance.receipt_date.isoformat())
+#
+#         setup_set_data.get('compounds').update({
+#             default_json.dumps({
+#                 # 'id': compound.id,
+#                 'concentration': compound.concentration,
+#                 'concentration_unit_id': compound.concentration_unit_id,
+#                 'concentration_unit': compound.concentration_unit.unit,
+#                 'addition_time': compound.addition_time,
+#                 'duration': compound.duration,
+#                 # Subject to removal
+#                 'addition_time_day': split_addition_time['day'],
+#                 'duration_day': split_duration['day'],
+#                 'addition_time_hour': split_addition_time['hour'],
+#                 'duration_hour': split_duration['hour'],
+#                 'addition_time_minute': split_addition_time['minute'],
+#                 'duration_minute': split_duration['minute'],
+#                 # continue
+#                 'compound_id': compound.compound_instance.compound_id,
+#                 'compound': compound.compound_instance.compound.name,
+#                 'supplier_text': compound.compound_instance.supplier.name,
+#                 'lot_text': compound.compound_instance.lot,
+#                 'receipt_date': receipt_date
+#             }, sort_keys=True, separators=(',', ':')) : index
+#         })
+#
+#         compound_id_to_index.update({
+#             compound.id: index
+#         })
+#
+#     setup_data = {}
+#
+#     for index, setup in enumerate(setups):
+#         # Should really have a function for this
+#         compound_set_ids = setup.compounds.values_list('id', flat=True)
+#         compound_set_indexes = sorted([
+#             compound_id_to_index.setdefault(
+#                 compound_id, len(compound_id_to_index)
+#             ) for compound_id in compound_set_ids
+#         ])
+#
+#         cell_set_ids = setup.cells.values_list('id', flat=True)
+#         cell_set_indexes = sorted([
+#             cell_id_to_index.setdefault(
+#                 cell_id, len(cell_id_to_index)
+#             ) for cell_id in cell_set_ids
+#         ])
+#
+#         setting_set_ids = setup.settings.values_list('id', flat=True)
+#         setting_set_indexes = sorted([
+#             setting_id_to_index.setdefault(
+#                 setting_id, len(cell_id_to_index)
+#             ) for setting_id in setting_set_ids
+#         ])
+#
+#         current_setup = {
+#             'device_id': setup.device_id,
+#             'device': setup.device.name,
+#             'organ_model_id': setup.organ_model_id,
+#             'organ_model': '',
+#             'organ_model_protocol_id': setup.organ_model_protocol_id,
+#             'organ_model_protocol': '',
+#             'variance_from_organ_model_protocol': setup.variance_from_organ_model_protocol,
+#             'cells': cell_set_indexes,
+#             'compounds': compound_set_indexes,
+#             'settings': setting_set_indexes
+#         }
+#
+#         # TODO I CAN CHANGE THIS AS SOON AS I FIX THE NAMES
+#         if setup.organ_model_id:
+#             current_setup.update({
+#                 'organ_model': setup.organ_model.name
+#             })
+#         if setup.organ_model_protocol_id:
+#             current_setup.update({
+#                 'organ_model_protocol': setup.organ_model_protocol.version
+#             })
+#
+#         setup_data.update({
+#             default_json.dumps(current_setup, sort_keys=True, separators=(',', ':')): index
+#         })
+#         setup_id_to_index.update({
+#             setup.id: index
+#         })
+#
+#     item_data = {}
+#
+#     for item in items:
+#         failure_time = item.failure_time
+#         if not failure_time:
+#             failure_time = ''
+#
+#         item_data.update({
+#             'item_' + unicode(item.row_index) + '_' + unicode(item.column_index): {
+#                 'id': item.id,
+#                 'name': item.name,
+#                 'setup_date': unicode(item.setup_date.isoformat()),
+#                 # 'failure_date': item.failure_date,
+#                 'failure_time': failure_time,
+#                 'failure_reason_id': item.failure_reason_id,
+#                 'scientist': item.scientist,
+#                 'notebook': item.notebook,
+#                 'notebook_page': item.notebook_page,
+#                 'notes': item.notes,
+#                 'row_index': item.row_index,
+#                 'column_index': item.column_index,
+#                 'setup_index': setup_id_to_index.get(item.setup.id)
+#             }
+#         })
+#
+#     data.update({
+#         'item_data': item_data,
+#         'setups': setup_data,
+#         'setup_sets': setup_set_data
+#     })
+#
+#     return HttpResponse(json.dumps(data),
+#                         content_type="application/json")
 
 
 # Sloppy Copies for now
@@ -2109,7 +2109,7 @@ switch = {
     'fetch_quality_indicators': fetch_quality_indicators,
     'send_ready_for_sign_off_email': send_ready_for_sign_off_email,
     'fetch_device_dimensions': fetch_device_dimensions,
-    'fetch_matrix_items_as_json': fetch_matrix_items_as_json
+    # 'fetch_matrix_items_as_json': fetch_matrix_items_as_json
 }
 
 

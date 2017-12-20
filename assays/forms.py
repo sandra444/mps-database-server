@@ -2235,30 +2235,37 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         if self.study:
             self.instance.study = self.study
 
+        sections_with_times = (
+            'compound',
+            'cell',
+            'setting'
+        )
+
         for time_unit in TIME_CONVERSIONS.keys():
-            # Create fields for Days, Hours, Minutes
-            self.fields['addition_time_' + time_unit] = forms.FloatField(initial=0, required=False)
-            self.fields['duration_' + time_unit] = forms.FloatField(initial=0, required=False)
-            # self.fields['addition_time_' + time_unit + '_increment'] = forms.FloatField(initial=0, required=False)
-            # self.fields['duration_' + time_unit + '_increment'] = forms.FloatField(initial=0, required=False)
-            # Change style
-            self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
-            self.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
-            # self.fields['addition_time_' + time_unit + '_increment'].widget.attrs['style'] = 'width:50px;'
-            # self.fields['duration_' + time_unit + '_increment'].widget.attrs['style'] = 'width:50px;'
+            for current_section in sections_with_times:
+                # Create fields for Days, Hours, Minutes
+                self.fields[current_section + '_addition_time_' + time_unit] = forms.FloatField(initial=0, required=False)
+                self.fields[current_section + '_duration_' + time_unit] = forms.FloatField(initial=0, required=False)
+                # self.fields['addition_time_' + time_unit + '_increment'] = forms.FloatField(initial=0, required=False)
+                # self.fields['duration_' + time_unit + '_increment'] = forms.FloatField(initial=0, required=False)
+                # Change style
+                self.fields[current_section + '_addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
+                self.fields[current_section + '_duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
+                # self.fields['addition_time_' + time_unit + '_increment'].widget.attrs['style'] = 'width:50px;'
+                # self.fields['duration_' + time_unit + '_increment'].widget.attrs['style'] = 'width:50px;'
 
         # Set CSS class to receipt date to use date picker
-        self.fields['receipt_date'].widget.attrs['class'] = 'datepicker-input'
+        self.fields['compound_receipt_date'].widget.attrs['class'] = 'datepicker-input'
         self.fields['item_setup_date'].widget.attrs['class'] = 'datepicker-input'
 
         # Set the widgets for some additional fields
         self.fields['item_name'].widget = forms.Textarea(attrs={'rows': 1})
         self.fields['item_scientist'].widget = forms.Textarea(attrs={'rows': 1})
         self.fields['item_notes'].widget = forms.Textarea(attrs={'rows': 3})
-        self.fields['setup_variance_from_organ_model_protocol'].widget = forms.Textarea(attrs={'rows': 3})
+        self.fields['item_variance_from_organ_model_protocol'].widget = forms.Textarea(attrs={'rows': 3})
         self.fields['item_notebook_page'].widget.attrs['style'] = 'width:50px;'
-        self.fields['cell_sample'].widget.attrs['style'] = 'width:50px;'
-        self.fields['passage'].widget.attrs['style'] = 'width:50px;'
+        self.fields['cell_cell_sample'].widget.attrs['style'] = 'width:50px;'
+        self.fields['cell_passage'].widget.attrs['style'] = 'width:50px;'
 
     ### ADDITIONAL MATRIX FIELDS (unsaved)
     number_of_items = forms.IntegerField(required=False)
@@ -2276,6 +2283,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         ('clear', 'Clear Contents')
     ))
 
+    # The item_ isn't just to be annoying, I want to avoid conflicts with other fields
     ### ADDING ITEM FIELDS
     item_name = forms.CharField(required=False)
 
@@ -2287,35 +2295,44 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     item_notes = forms.CharField(required=False)
 
     ### ADDING SETUP FIELDS
-    setup_device = forms.ModelChoiceField(queryset=Microdevice.objects.all().order_by('name'), required=False)
-    setup_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
-    setup_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.none(), required=False)
-    setup_variance_from_organ_model_protocol = forms.CharField(required=False)
+    item_device = forms.ModelChoiceField(queryset=Microdevice.objects.all().order_by('name'), required=False)
+    item_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
+    item_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.none(), required=False)
+    item_variance_from_organ_model_protocol = forms.CharField(required=False)
 
     ### ADDING SETUP CELLS
-    cell_sample = forms.IntegerField(required=False)
-    biosensor = forms.ModelChoiceField(
+    cell_cell_sample = forms.IntegerField(required=False)
+    cell_biosensor = forms.ModelChoiceField(
         queryset=Biosensor.objects.all().prefetch_related('supplier'),
         required=False,
         # Default is naive
         initial=2
     )
-    density = forms.FloatField(required=False)
+    cell_density = forms.FloatField(required=False)
 
     # TODO THIS IS TO BE HAMMERED OUT
-    density_unit = forms.ModelChoiceField(
+    cell_density_unit = forms.ModelChoiceField(
         queryset=PhysicalUnits.objects.filter(availability__contains='cell'),
         required=False
     )
 
-    passage = forms.CharField(required=False)
+    cell_passage = forms.CharField(required=False)
+
+    cell_addition_location = forms.ModelChoiceField(queryset=MicrodeviceSection.objects.all().order_by('name'), required=False)
 
     ### ?ADDING SETUP SETTINGS
+    setting_setting = forms.ModelChoiceField(queryset=AssaySetting.objects.all().order_by('name'), required=False)
+    setting_unit = forms.ModelChoiceField(queryset=PhysicalUnits.objects.all().order_by('base_unit','scale_factor'))
+
+    setting_value = forms.FloatField(required=False)
+
+    setting_addition_location = forms.ModelChoiceField(queryset=MicrodeviceSection.objects.all().order_by('name'),
+                                                        required=False)
 
     ### ADDING COMPOUNDS
-    compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
+    compound_compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
     # Notice the special exception for %
-    concentration_unit = forms.ModelChoiceField(
+    compound_concentration_unit = forms.ModelChoiceField(
         queryset=(PhysicalUnits.objects.filter(
             unit_type__unit_type='Concentration'
         ).order_by(
@@ -2324,27 +2341,30 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         ) | PhysicalUnits.objects.filter(unit='%')),
         required=False, initial=4
     )
-    concentration = forms.FloatField(required=False)
+    compound_concentration = forms.FloatField(required=False)
+
+    compound_addition_location = forms.ModelChoiceField(queryset=MicrodeviceSection.objects.all().order_by('name'),
+                                                       required=False)
 
     ### INCREMENTER
-    concentration_increment = forms.FloatField(required=False, initial=1)
-    concentration_increment_type = forms.ChoiceField(choices=(
+    compound_concentration_increment = forms.FloatField(required=False, initial=1)
+    compound_concentration_increment_type = forms.ChoiceField(choices=(
         ('/', 'Divide'),
         ('*', 'Multiply'),
         ('+', 'Add'),
         ('-', 'Subtract')
     ))
-    concentration_increment_direction = forms.ChoiceField(choices=(
+    compound_concentration_increment_direction = forms.ChoiceField(choices=(
         ('lrd', 'Left to Right and Down'),
         ('rlu', 'Right to Left and Up')
     ))
 
     # Text field (un-saved) for supplier
-    supplier_text = forms.CharField(required=False, initial='N/A')
+    compound_supplier_text = forms.CharField(required=False, initial='N/A')
     # Text field (un-saved) for lot
-    lot_text = forms.CharField(required=False, initial='N/A')
+    compound_lot_text = forms.CharField(required=False, initial='N/A')
     # Receipt date
-    receipt_date = forms.DateField(required=False)
+    compound_receipt_date = forms.DateField(required=False)
 
 
 class AssaySetupCompoundForm(forms.ModelForm):
