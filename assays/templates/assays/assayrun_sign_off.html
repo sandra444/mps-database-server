@@ -19,6 +19,7 @@
     </li>
 {% endblock %}
 
+{# TODO TODO REFACTOR TO USE form.prefix RATHER THAN USING A MAGIC STRING #}
 {% block content %}
 <form enctype="multipart/form-data" class="form-horizontal" method="post" >
     {% csrf_token %}

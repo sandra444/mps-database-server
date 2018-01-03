@@ -228,10 +228,6 @@ class MicrodeviceSublayout(models.Model):
     """Describes a the layout of sections for a device"""
     device = models.ForeignKey(Microdevice)
 
-    volume = models.FloatField()
-
-    # VOLUME UNITS TOO?
-
     number_of_rows = models.IntegerField()
     number_of_columns = models.IntegerField()
 
@@ -244,6 +240,10 @@ class MicrodeviceSection(models.Model):
     column_index = models.IntegerField()
 
     name = models.CharField(max_length=255)
+
+    volume = models.FloatField()
+
+    # VOLUME UNITS TOO?
 
     def __unicode__(self):
         return self.name

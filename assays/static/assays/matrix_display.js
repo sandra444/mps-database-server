@@ -16,6 +16,9 @@ $(document).ready(function () {
         stop: matrix_add_content_to_selected
     });
 
+    // Page selector (MAY OR MAY NOT BE USED)
+    var page_selector = $('#page');
+
     // Alias for device selector
     var device_selector = $('#id_device');
 
@@ -34,16 +37,41 @@ $(document).ready(function () {
     // var initial_number_of_rows = 0;
     // var initial_number_of_columns = 0;
 
-
     var empty_item_html = $('#empty_item_html').children();
     var empty_compound_html = $('#empty_compound_html').children();
     var empty_cell_html = $('#empty_cell_html').children();
     var empty_setting_html = $('#empty_setting_html').children();
 
     var empty_html = {
-        'compounds': empty_compound_html,
-        'cells': empty_cell_html,
-        'settings': empty_setting_html
+        'compound': empty_compound_html,
+        'cell': empty_cell_html,
+        'setting': empty_setting_html
+    };
+
+    // CRUDE AND BAD
+    var matrix_item_prefix = 'assaymatrixitem_set';
+    var cell_prefix = 'assaysetupcell_set';
+    var setting_prefix = 'assaysetupsetting_set';
+    var compound_prefix = 'assaysetupcompound_set';
+
+    // All but matrix item should be static here
+    // var matrix_item_final_index = $('#id_' + matrix_item_prefix + '-TOTAL_FORMS').val() - 1;
+    var matrix_item_final_index = $('.matrix_item_form').length - 1;
+    var cell_final_index = 0;
+    var setting_final_index = 0;
+    var compound_final_index = 0;
+
+    // Due to extra=1 (A SETTING WHICH SHOULD NOT CHANGE) there will always be an empty example at the end
+    // I can use these to make new forms as necessary
+    var empty_matrix_item_form = $('#' + matrix_item_prefix + '-' + matrix_item_final_index).html();
+    var empty_setting_form = $('#' + matrix_item_prefix + '-' + matrix_item_final_index + '-' + setting_prefix + '-' + setting_final_index).html();
+    var empty_cell_form = $('#' + matrix_item_prefix + '-' + matrix_item_final_index + '-' + cell_prefix + '-' + cell_final_index).html();
+    var empty_compound_form = $('#' + matrix_item_prefix + '-' + matrix_item_final_index + '-' + compound_prefix + '-' + compound_final_index).html();
+
+    var empty_forms = {
+        'compound': empty_compound_form,
+        'cell': empty_cell_form,
+        'setting': empty_setting_form
     };
 
     // For converting between times
@@ -52,6 +80,37 @@ $(document).ready(function () {
         'hour': 60.0,
         'minute': 1.0
     };
+
+    function add_item_form() {
+        // Can't cache this, need to check every call!
+        var number_of_forms = $('.matrix_item_form').length;
+
+        // TODO TODO TODO THIS IS DANGEROUS
+        // I mean, what if there was a match for -number- in a select or something? It would be destroyed utterly
+        // var new_html = empty_matrix_item_form.replace(/\-\d+\-/g,'-' + number_of_forms + '-');
+
+        var regex_to_replace_old_index = new RegExp("/\-" + matrix_item_final_index +"\-/g");
+        var new_html = empty_matrix_item_form.replace(regex_to_replace_old_index,'-' + number_of_forms + '-');
+        var new_form = $('<div>')
+            .html(new_html)
+            .attr('id', matrix_item_prefix + '-' + number_of_forms);
+
+        // Just arbitrarily append to the page
+        page_selector.append(new_form);
+
+        // Make a form for each subform type
+        $.each(empty_html, function(form_type, content) {
+            add_sub_form(number_of_forms, form_type)
+        });
+    }
+
+
+    // TODO JUST A TEST
+    add_item_form();
+
+    function add_sub_form(current_matrix_item_index, form_type) {
+        var new_html = empty_forms[form_type]
+    }
 
     // DEPRECATED
     // WILL PROBABLY JUST HANDLE THIS IN PYTHON
@@ -322,6 +381,9 @@ $(document).ready(function () {
     }
 
     function add_to_item_fields(fields) {
+        $('.ui-selected').each(function() {
+
+        });
         // $('.ui-selected').each(function() {
         //     var current_item_id = this.id;
         //     var current_item = $(this);

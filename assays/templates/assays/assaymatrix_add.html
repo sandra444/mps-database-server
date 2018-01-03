@@ -304,12 +304,9 @@
     </div>
     </div>
     </div>
-    </div>
-    </div>
 
     </div>
-
-    </form>
+{#    </form>#}
 
     <div class="padded-bottom">
     <div id="matrix_wrapper" class="overflow-auto" style="max-height:800px;">
@@ -321,28 +318,41 @@
     </div>
 
     {# TESTING #}
-    {% for child_form in formset.forms %}
-        <h2>Matrix Item</h2>
-        {{ child_form }}
+    {{ formset.management_form }}
+    {# NOT HERE! #}
+{#    {{ formset.non_form_errors }}#}
 
-        {% if child_form.compounds %}
+    <div>
+    {% for child_form in formset.forms %}
+        <div id="{{ child_form.prefix }}" class="matrix_item_form">
+            <h2>Matrix Item</h2>
+            {{ child_form }}
+        </div>
+
+{#        {% if child_form.compounds %}#}
             <h2>Compounds</h2>
             {{ child_form.compounds.management_form }}
-            {{ child_form.compounds.non_form_errors }}
+            {# Not here! #}
+{#            {{ child_form.compounds.non_form_errors }}#}
 
             {% for nested_form in child_form.compounds.forms %}
-                {{ nested_form }}
+                <div id="{{ nested_form.prefix }}" class="compound_form">
+                    {{ nested_form }}
+                <div>
             {% endfor %}
 
-        {% endif %}
+{#        {% endif %}#}
 
         {% if child_form.cells %}
             <h2>Cells</h2>
             {{ child_form.cells.management_form }}
-            {{ child_form.cells.non_form_errors }}
+            {# Not here! #}
+{#            {{ child_form.cells.non_form_errors }}#}
 
             {% for nested_form in child_form.cells.forms %}
-                {{ nested_form }}
+                <div id="{{ nested_form.prefix }}" class="cell_form">
+                    {{ nested_form }}
+                </div>
             {% endfor %}
 
         {% endif %}
@@ -350,16 +360,21 @@
         {% if child_form.settings %}
             <h2>Settings</h2>
             {{ child_form.settings.management_form }}
-            {{ child_form.settings.non_form_errors }}
+            {# Not here! #}
+{#            {{ child_form.settings.non_form_errors }}#}
 
             {% for nested_form in child_form.settings.forms %}
-                {{ nested_form }}
+                <div id="{{ nested_form.prefix }}" class="setting_form">
+                    {{ nested_form }}
+                </div>
             {% endfor %}
 
         {% endif %}
 
     {% endfor %}
+    </div>
     {# CONCLUDE TESTING #}
+    </form>
 
     {# Cellsample Selection Stuff #}
     <div hidden id="dialog" title="Choose a Cell Sample">

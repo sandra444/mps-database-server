@@ -3708,11 +3708,31 @@ class AssayMatrixUpdate(UpdateView):
         if self.request.POST:
             context['formset'] = AssayMatrixItemFormSetFactory(
                 self.request.POST,
-                queryset=AssayMatrixItem.objects.filter(matrix=self.object).order_by('row_index', 'column_index')
+                instance=self.object,
+                queryset=AssayMatrixItem.objects.filter(
+                    matrix=self.object
+                ).order_by(
+                    'row_index',
+                    'column_index'
+                ).prefetch_related(
+                    'assaysetupcompound_set',
+                    'assaysetupcell_set',
+                    'assaysetupsetting_set',
+                )
             )
         else:
             context['formset'] = AssayMatrixItemFormSetFactory(
-                queryset=AssayMatrixItem.objects.filter(matrix=self.object).order_by('row_index', 'column_index')
+                instance=self.object,
+                queryset=AssayMatrixItem.objects.filter(
+                    matrix=self.object
+                ).order_by(
+                    'row_index',
+                    'column_index'
+                ).prefetch_related(
+                    'assaysetupcompound_set',
+                    'assaysetupcell_set',
+                    'assaysetupsetting_set',
+                )
             )
 
         context['update'] = True
@@ -3723,6 +3743,7 @@ class AssayMatrixUpdate(UpdateView):
         # formset = AssayMatrixItemFormSetFactory(self.request.POST, instance=self.object)
         formset = AssayMatrixItemFormSetFactory(
             self.request.POST,
+            instance=self.object,
             queryset=AssayMatrixItem.objects.filter(matrix=self.object).order_by('row_index', 'column_index')
         )
         if form.is_valid() and formset.is_valid():
