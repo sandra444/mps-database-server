@@ -4,6 +4,8 @@ Hello Admins,
 Study: {{ study }}
 Link: https://mps.csb.pitt.edu{{ study.get_summary_url }}
 
+{% if auto_approval %}This elevation was due to an auto-approval.{% else %}This elevation was done manually.{% endif %}
+
 {% if study.restricted %}This Study remains restricted.
 {% if not new_access_group_names %}It has been released to the following access groups:
 {% for group in study.access_groups.all %}{{ group.name}}
