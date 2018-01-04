@@ -66,6 +66,9 @@ from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
 from django.template.loader import render_to_string, TemplateDoesNotExist
 
+from datetime import datetime, timedelta
+import pytz
+
 # TODO Refactor imports
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
 # TODO Rename get_absolute_url when the function does not actually return the model's URL
@@ -1062,6 +1065,11 @@ class AssayRunSignOff(UpdateView):
         )
 
         if form.is_valid() and stakeholder_formset.is_valid():
+            # Local datetime
+            tz = pytz.timezone('US/Eastern')
+            datetime_now_local = datetime.now(tz)
+            thirty_days_from_date = datetime_now_local + timedelta(days=30)
+
             send_initial_sign_off_alert = False
             initial_number_of_required_sign_offs = AssayRunStakeholder.objects.filter(
                 study=self.object,
@@ -1117,7 +1125,8 @@ class AssayRunSignOff(UpdateView):
                             'assays/email/tctc_stakeholder_email.txt',
                             {
                                 'user': user_to_be_alerted,
-                                'study': self.object
+                                'study': self.object,
+                                'thirty_days_from_date': thirty_days_from_date
                             }
                         )
                     except TemplateDoesNotExist:
