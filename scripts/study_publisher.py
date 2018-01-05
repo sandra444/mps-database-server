@@ -44,6 +44,7 @@ def run():
     for study in signed_off_restricted_studies:
         # NOTE: This uses the study's last update data, NOT the time it was signed off
         # Check if 30 days since last update
+        # Really, this should be in the queryset filter
         thirty_days_since_update = study.modified_on < datetime_now - timedelta(days=30)
 
         # Force approval of all stakeholders

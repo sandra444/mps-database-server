@@ -313,7 +313,8 @@ def get_queryset_with_number_of_data_points(queryset):
     data_points = AssayChipRawData.objects.exclude(
         quality__contains=REPLACED_DATA_POINT_CODE
     ).prefetch_related(
-        *CHIP_DATA_PREFETCH
+        # *CHIP_DATA_PREFETCH
+        'assay_chip_id__chip_setup__assay_run_id'
     )
 
     data_points_map = {}
