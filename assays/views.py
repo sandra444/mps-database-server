@@ -194,8 +194,9 @@ def get_queryset_with_assay_map(queryset):
     return queryset
 
 
-def get_compound_instance_strings_for_queryset(setups):
-    """Modifies a queryset to contain strings for all of the compound instances for each setup
+# "get" is perhaps a little incorrect here, as this acts more like a setter
+def get_compound_instance_and_cell_strings_for_queryset(setups):
+    """Modifies a queryset to contain strings for all of the compound instances and cells for each setup
 
     Params:
     setups - a queryset of AssayChipSetups
@@ -206,21 +207,40 @@ def get_compound_instance_strings_for_queryset(setups):
         'compound_instance__compound',
         'compound_instance__supplier',
         'concentration_unit',
-        'chip_setup'
+        # 'chip_setup'
     ).order_by('addition_time', 'compound_instance__compound__name')
     related_compounds_map = {}
 
     # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
     for compound in related_compounds:
         related_compounds_map.setdefault(compound.chip_setup_id, []).append(
-            compound.compound_instance.compound.name +
-            ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')' +
-            '\n-Added on: ' + compound.get_addition_time_string() + '; Duration of: ' + compound.get_duration_string()
+            unicode(compound)
         )
 
     for setup in setups:
         setup.related_compounds_as_string = '\n'.join(
             related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
+        )
+
+    related_cells = AssayChipCells.objects.filter(
+        # Idiosyncratic field name because schema needs to be revised
+        assay_chip=setups
+    ).prefetch_related(
+        'cell_sample__cell_subtype',
+        'cell_sample__cell_type__organ',
+        'cell_sample__supplier',
+        # 'cellsample_density_unit',
+    ).order_by('cell_sample__cell_type__cell_type')
+    related_cells_map = {}
+
+    for cell in related_cells:
+        related_cells_map.setdefault(cell.assay_chip_id, []).append(
+            unicode(cell)
+        )
+
+    for setup in setups:
+        setup.related_cells_as_string = '\n'.join(
+            related_cells_map.get(setup.id, ['-No Cells-'])
         )
 
 
@@ -583,7 +603,7 @@ class StudyIndex(StudyViewershipMixin, DetailView):
             'created_by',
         )
 
-        get_compound_instance_strings_for_queryset(setups)
+        get_compound_instance_and_cell_strings_for_queryset(setups)
 
         context['setups'] = setups
 
@@ -885,7 +905,6 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
             # send_alert = not form.instance.signed_off_by and form.cleaned_data.get('signed_off', '')
 
             save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=True)
-
 
             # if send_alert:
             #     # Magic strings are in poor taste, should use a template instead
@@ -1331,7 +1350,7 @@ class AssayRunSummary(StudyViewershipMixin, DetailView):
             'created_by',
         )
 
-        get_compound_instance_strings_for_queryset(setups)
+        get_compound_instance_and_cell_strings_for_queryset(setups)
 
         context['setups'] = setups
 
@@ -1458,7 +1477,7 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
         #     group__name__in=group_names
         # )
 
-        get_compound_instance_strings_for_queryset(queryset)
+        get_compound_instance_and_cell_strings_for_queryset(queryset)
 
         return queryset
 
