@@ -129,7 +129,7 @@
                     <tr>
                         <td>{{ supporting_data.description }}</td>
                         <td>
-                            <a href="/media/{{ supporting_data.supporting_data }}">
+                            <a target="_blank" href="/media/{{ supporting_data.supporting_data }}">
                               {{ supporting_data.supporting_data }}
                             </a>
                         </td>
@@ -139,6 +139,7 @@
         </table>
     {% endif %}
 
+    {# Note that this table breaks the Rule of Three and is not DRY #}
     <legend>Chip Setups</legend>
     {% if setups %}
         <div class="padded-bottom">
@@ -151,6 +152,7 @@
 {#                    <th>Device</th>#}
                     <th>Organ Model</th>
                     <th>Compound</th>
+                    <th>Cell</th>
                     <th>Creator</th>
                     <th>Review</th>
                 </tr>
@@ -170,6 +172,7 @@
 {#                        <td>-control-</td>#}
 {#                    {% endif %}#}
                     <td>{{ setup.related_compounds_as_string|linebreaks }}</td>
+                    <td>{{ setup.related_cells_as_string|linebreaks }}</td>
                     <td>
                         {{ setup.full_creator }}
                     </td>

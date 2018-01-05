@@ -51,6 +51,9 @@ from mps.templatetags.custom_filters import (
     VIEWER_SUFFIX,
 )
 
+from datetime import datetime, timedelta
+import pytz
+
 
 def modify_templates():
     """Writes totally new templates for chips and both types of plates"""
@@ -1501,6 +1504,11 @@ class AssayRunAdmin(LockableAdmin):
     # TODO TODO TODO THIS IS NOT VERY DRY
     # This code may pose a problem if multiple people are editing an entry at once...
     def save_related(self, request, form, formsets, change):
+        # Local datetime
+        tz = pytz.timezone('US/Eastern')
+        datetime_now_local = datetime.now(tz)
+        thirty_days_from_date = datetime_now_local + timedelta(days=30)
+
         initial_study = AssayRun.objects.get(pk=form.instance.id)
         initial_sign_off = initial_study.signed_off_by
         initial_restricted = initial_study.restricted
@@ -1598,7 +1606,8 @@ class AssayRunAdmin(LockableAdmin):
                         'assays/email/tctc_stakeholder_email.txt',
                         {
                             'user': user_to_be_alerted,
-                            'study': obj
+                            'study': obj,
+                            'thirty_days_from_date': thirty_days_from_date
                         }
                     )
                 except TemplateDoesNotExist:
@@ -1764,7 +1773,8 @@ class AssayRunAdmin(LockableAdmin):
                         'assays/email/tctc_stakeholder_email.txt',
                         {
                             'user': user_to_be_alerted,
-                            'study': obj
+                            'study': obj,
+                            'thirty_days_from_date': thirty_days_from_date
                         }
                     )
                 except TemplateDoesNotExist:
