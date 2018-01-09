@@ -898,7 +898,7 @@ def get_readout_data(
     for target, units in averaged_data.items():
         for unit, tags in units.items():
             # row_indices = {}
-            accomadate_units = len(units) > 1
+            accommodate_units = len(units) > 1
 
             if not percent_control:
                 # Not converted to percent control
@@ -906,7 +906,7 @@ def get_readout_data(
                 assay_label = target + '\n' + unit
             else:
                 # Convert to percent control
-                if accomadate_units:
+                if accommodate_units:
                     current_unit = '%Control from ' + unit
                 else:
                     current_unit = '%Control'
@@ -921,12 +921,12 @@ def get_readout_data(
             final_data.get('sorted_assays').append(assay_label)
 
             for tag, sample_locations in tags.items():
-                accomadate_sample_location = len(sample_locations) > 1
+                accommodate_sample_location = len(sample_locations) > 1
                 for sample_location, time_values in sample_locations.items():
-                    accomadate_intervals = False
+                    accommodate_intervals = False
                     include_current = False
 
-                    if accomadate_sample_location:
+                    if accommodate_sample_location:
                         current_key = tag + ' ' + sample_location
                     else:
                         current_key = tag
@@ -936,7 +936,7 @@ def get_readout_data(
                         interval = value_and_interval[1]
 
                         if interval != 0:
-                            accomadate_intervals = True
+                            accommodate_intervals = True
 
                         if not percent_control:
                             # assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('time', []).append(time)
@@ -970,7 +970,7 @@ def get_readout_data(
                         x_header.append(current_key)
 
                     # Only include intervals if necessary
-                    if accomadate_intervals and include_current:
+                    if accommodate_intervals and include_current:
                         x_header.extend([
                             current_key + '_i1',
                             current_key + '_i2'
