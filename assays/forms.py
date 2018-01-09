@@ -1596,9 +1596,9 @@ class AssaySetupCompoundFormSet(BaseInlineFormSetInitial):
                 field.choice_cache = choices
 
         # Text field (un-saved) for supplier
-        form.fields['supplier_text'] = forms.CharField()
+        form.fields['supplier_text'] = forms.CharField(initial='N/A')
         # Text field (un-saved) for lot
-        form.fields['lot_text'] = forms.CharField()
+        form.fields['lot_text'] = forms.CharField(initial='N/A')
         # Receipt date
         form.fields['receipt_date'] = forms.DateField(required=False)
 
@@ -1855,10 +1855,11 @@ class AssaySetupCellFormSet(BaseInlineFormSet):
                 duration = 0
                 for time_unit, conversion in TIME_CONVERSIONS.items():
                     addition_time += current_data.get('addition_time_' + time_unit, 0) * conversion
-                    duration += current_data.get('duration_' + time_unit, 0) * conversion
-
-                if duration <= 0:
-                    form.add_error('duration', 'Duration cannot be zero or negative.')
+                # TODO NO DURATION IN CELLS AT THE MOMENT
+                #     duration += current_data.get('duration_' + time_unit, 0) * conversion
+                #
+                # if duration <= 0:
+                #     form.add_error('duration', 'Duration cannot be zero or negative.')
 
 
 class AssaySetupSettingForm(forms.ModelForm):

@@ -3089,11 +3089,9 @@ def get_queryset_with_organ_model_map(queryset):
 
 
 def get_queryset_with_number_of_data_points(queryset):
-    """Add number of data points to each object in a nAssay Run querysey"""
-    data_points = AssayDataPoint.objects.exclude(
+    """Add number of data points to each object in an Assay Run querysey"""
+    data_points = AssayDataPoint.objects.filter(
         replaced=False
-    ).prefetch_related(
-        # *CHIP_DATA_PREFETCH
     )
 
     data_points_map = {}

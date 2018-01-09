@@ -12,7 +12,7 @@ urlpatterns = patterns('',
     # url(r'^assays/user_index/$', UserIndex.as_view(), name='user_index'),
     # User can view all Editable Studies
     url(r'^assays/editable_studies/$', GroupIndex.as_view(), name='editable_studies'),
-    url(r'^assays/assaystudy/editable_assay_studies/$', AssayStudyEditableList.as_view(), name='editable_study_list'),
+    url(r'^assays/assaystudy/editable_studies/$', AssayStudyEditableList.as_view(), name='editable_study_list'),
     # The main page for a study
     url(r'^assays/(?P<pk>[0-9]+)/$', StudyIndex.as_view(), name='study_index'),
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/$', AssayStudyIndex.as_view(), name='assay_study_index'),

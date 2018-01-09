@@ -1654,6 +1654,8 @@ class AssaySetupCell(models.Model):
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
     addition_time = models.FloatField(null=True, blank=True)
 
+    # TODO TODO TODO DO WE WANT DURATION????
+
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
     addition_location = models.ForeignKey(MicrodeviceSection, null=True, blank=True)
 
