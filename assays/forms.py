@@ -84,87 +84,6 @@ OVERWRITE_OPTIONS_INDIVIDUAL = forms.ChoiceField(
 )
 
 
-# Revision to deal with quirk of ModelFormsets when passing initial data without queryset (to avoid database hits)
-class BaseInlineFormSetInitial(BaseInlineFormSet):
-    def __init__(self, data=None, files=None, instance=None,
-                 save_as_new=False, prefix=None, queryset=None, **kwargs):
-        # Get initial_instances
-        self.initial_instances = kwargs.pop('initial_instances', None)
-
-        if instance is None:
-            self.instance = self.fk.rel.to()
-        else:
-            self.instance = instance
-        self.save_as_new = save_as_new
-        if queryset is None:
-            queryset = self.model._default_manager
-        # Revised this line
-        if not instance and self.instance.pk is not None:
-            qs = queryset.filter(**{self.fk.name: self.instance})
-        else:
-            qs = queryset.none()
-
-        super(BaseInlineFormSet, self).__init__(data, files, prefix=prefix,
-                                                queryset=qs, **kwargs)
-
-    def initial_form_count(self):
-        """Returns the number of forms that are required in this FormSet.
-        
-        This has been revised such that it checks for self.initial as well
-        """
-        if self.save_as_new:
-            return 0
-        # This line was revised to include self.initial
-        if self.initial_instances:
-            return len(self.initial_instances)
-        if not (self.data or self.files):
-            return len(self.get_queryset())
-        return super(BaseInlineFormSetInitial, self).initial_form_count()
-
-    def _construct_form(self, i, **kwargs):
-        """This required enough revisions that it may become unstable after django updates
-        
-        Basically the form is populated from form_extra instead of queryset
-        """
-        if self.is_bound and i < self.initial_form_count():
-            pk_key = "%s-%s" % (self.add_prefix(i), self.model._meta.pk.name)
-            pk = self.data[pk_key]
-            pk_field = self.model._meta.pk
-            to_python = self._get_to_python(pk_field)
-            pk = to_python(pk)
-            if i < self.initial_form_count():
-                kwargs['instance'] = self._existing_object(self.initial_instances[i].pk)
-            else:
-                kwargs['instance'] = self._existing_object(pk)
-        if self.initial_instances and i < len(self.initial_instances) and i < self.initial_form_count() and 'instance' not in kwargs:
-            kwargs['instance'] = self.initial_instances[i]
-        elif i < self.initial_form_count() and 'instance' not in kwargs:
-            kwargs['instance'] = self.get_queryset()[i]
-        if i >= self.initial_form_count() and self.initial_extra:
-            # Set initial values for extra forms
-            try:
-                kwargs['initial'] = self.initial_extra[i - self.initial_form_count()]
-            except IndexError:
-                pass
-
-        form = BaseFormSet._construct_form(self, i, **kwargs)
-        if self.save_as_new:
-            # Remove the primary key from the form's data, we are only
-            # creating new instances
-            form.data[form.add_prefix(self._pk_field.name)] = None
-
-            # Remove the foreign key from the form's data
-            form.data[form.add_prefix(self.fk.name)] = None
-
-        # Set the fk value here so that the form can do its validation.
-        fk_value = self.instance.pk
-        if self.fk.rel.field_name != self.fk.rel.to._meta.pk.name:
-            fk_value = getattr(self.instance, self.fk.rel.field_name)
-            fk_value = getattr(fk_value, 'pk', fk_value)
-        setattr(form.instance, self.fk.get_attname(), fk_value)
-
-        return form
-
 # SUBJECT TO CHANGE
 class CloneableForm(forms.ModelForm):
     """Convenience class for adding clone fields"""
@@ -1549,9 +1468,18 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
 
 
 class AssaySetupCompoundForm(forms.ModelForm):
+    compound = forms.CharField()
+
     class Meta(object):
         model = AssaySetupCompound
         exclude = tracking
+
+        widgets = {
+            'matrix_item': forms.TextInput(),
+            'compound_instance': forms.TextInput(),
+            'concentration_unit': forms.TextInput(),
+            'addition_location': forms.TextInput(),
+        }
 
     def __init__(self, *args, **kwargs):
         # self.static_choices = kwargs.pop('static_choices', None)
@@ -1559,41 +1487,59 @@ class AssaySetupCompoundForm(forms.ModelForm):
 
 
 # TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
-class AssaySetupCompoundFormSet(BaseInlineFormSetInitial):
-    cached_fields = []
-
+class AssaySetupCompoundFormSet(BaseModelFormSet):
     def __init__(self, *args, **kwargs):
         # TODO EVENTUALLY PASS WITH KWARG
-        self.cached_fields = kwargs.pop('cached_fields', None)
-        self.suppliers = kwargs.pop('suppliers', None)
-        self.compound_instances = kwargs.pop('compound_instances', None)
-        self.compound_instances_dic = kwargs.pop('compound_instances_dic', None)
-        self.setup_compounds = kwargs.pop('setup_compounds', None)
+        # self.suppliers = kwargs.pop('suppliers', None)
+        # self.compound_instances = kwargs.pop('compound_instances', None)
+        # self.compound_instances_dic = kwargs.pop('compound_instances_dic', None)
+        # self.setup_compounds = kwargs.pop('setup_compounds', None)
+        # Get all chip setup assay compound instances
+        self.matrix = kwargs.pop('matrix', None)
+        self.setup_compounds = {
+            (
+                instance.matrix_item_id,
+                instance.compound_instance_id,
+                instance.concentration,
+                instance.concentration_unit_id,
+                instance.addition_time,
+                instance.duration
+            ): True for instance in AssaySetupCompound.objects.filter(
+                matrix_item__matrix=self.matrix
+            )
+        }
+
+        self.compound_instances = {}
+        self.compound_instances_dic = {}
+
+        for instance in CompoundInstance.objects.all().prefetch_related('supplier'):
+            self.compound_instances.update({
+                (
+                    instance.compound_id,
+                    instance.supplier_id,
+                    instance.lot,
+                    instance.receipt_date
+                ): instance
+            })
+            # NOTE use of name instead of id!
+            self.compound_instances_dic.update({
+                instance.id: (
+                    instance.compound_id,
+                    instance.supplier.name,
+                    instance.lot,
+                    instance.receipt_date
+                )
+            })
+
+        # Get all suppliers
+        self.suppliers = {
+            supplier.name: supplier for supplier in CompoundSupplier.objects.all()
+        }
+
         super(AssaySetupCompoundFormSet, self).__init__(*args, **kwargs)
 
     def _construct_form(self, i, **kwargs):
         form = super(AssaySetupCompoundFormSet, self)._construct_form(i, **kwargs)
-        for cache_field in self.cached_fields:
-            # PLEASE NOTE SPECIAL EXCEPTION FOR COMPOUND HERE
-            if cache_field == 'compound':
-                form.fields[cache_field] = forms.ChoiceField(required=True)
-                form.fields[cache_field].choices = tuple(BLANK_CHOICE_DASH) + self.cached_fields.get(cache_field, None)
-
-            else:
-                field = form.fields[cache_field]
-                field.cache_choices = True
-                choices = getattr(self, '_cached_%s_choices' %
-                                  cache_field, None)
-                if choices is None:
-                    choices = self.cached_fields.get(cache_field, None)
-
-                    if choices is None:
-                        choices = list(field.choices)
-
-                    setattr(self, '_cached_%s_choices' % cache_field,
-                            choices)
-
-                field.choice_cache = choices
 
         # Text field (un-saved) for supplier
         form.fields['supplier_text'] = forms.CharField(initial='N/A')
@@ -1616,6 +1562,8 @@ class AssaySetupCompoundFormSet(BaseInlineFormSetInitial):
             current_duration = form.instance.duration
         else:
             current_compound_instance_id = None
+            current_addition_time = 0
+            current_duration = 0
 
         if current_compound_instance_id:
             current_compound_instance = self.compound_instances_dic.get(current_compound_instance_id)
@@ -1659,8 +1607,6 @@ class AssaySetupCompoundFormSet(BaseInlineFormSetInitial):
         for index, form in enumerate(self.forms):
             current_data = form.cleaned_data
 
-            # print current_data
-
             if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
                 addition_time = 0
                 duration = 0
@@ -1686,15 +1632,15 @@ class AssaySetupCompoundFormSet(BaseInlineFormSetInitial):
             if instance and instance.id and commit:
                 instance.delete()
 
-        matrix_item = self.instance
-
         # Forms to save
         for form in forms_data:
             instance = forms.ModelForm.save(form, commit=False)
 
+            matrix_item = instance.matrix_item
+
             current_data = form.cleaned_data
 
-            compound = current_data.get('compound')
+            compound_id = int(current_data.get('compound'))
             supplier_text = current_data.get('supplier_text').strip()
             lot_text = current_data.get('lot_text').strip()
             receipt_date = current_data.get('receipt_date')
@@ -1727,10 +1673,10 @@ class AssaySetupCompoundFormSet(BaseInlineFormSetInitial):
                 })
 
             # Check if compound instance exists
-            compound_instance = self.compound_instances.get((compound.id, supplier.id, lot_text, receipt_date), '')
+            compound_instance = self.compound_instances.get((compound_id, supplier.id, lot_text, receipt_date), '')
             if not compound_instance:
                 compound_instance = CompoundInstance(
-                    compound=compound,
+                    compound_id=compound_id,
                     supplier=supplier,
                     lot=lot_text,
                     receipt_date=receipt_date,
@@ -1742,11 +1688,11 @@ class AssaySetupCompoundFormSet(BaseInlineFormSetInitial):
                 if commit:
                     compound_instance.save()
                 self.compound_instances.update({
-                    (compound.id, supplier.id, lot_text, receipt_date): compound_instance
+                    (compound_id, supplier.id, lot_text, receipt_date): compound_instance
                 })
 
             # Update the instance with new data
-            instance.matrix_item = matrix_item
+            # instance.matrix_item = matrix_item
             instance.compound_instance = compound_instance
 
             instance.addition_time = addition_time
@@ -1792,39 +1738,29 @@ class AssaySetupCellForm(forms.ModelForm):
         model = AssaySetupCell
         exclude = tracking
 
+        widgets = {
+            'matrix_item': forms.TextInput(),
+            'cell_sample': forms.TextInput(),
+            'biosensor': forms.TextInput(),
+            'density_unit': forms.TextInput(),
+            'addition_location': forms.TextInput(),
+        }
+
     def __init__(self, *args, **kwargs):
         # self.static_choices = kwargs.pop('static_choices', None)
         super(AssaySetupCellForm, self).__init__(*args, **kwargs)
 
 
 # TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
-class AssaySetupCellFormSet(BaseInlineFormSet):
-    cached_fields = []
-
+class AssaySetupCellFormSet(BaseModelFormSet):
     def __init__(self, *args, **kwargs):
         # TODO EVENTUALLY PASS WITH KWARG
-        self.cached_fields = kwargs.pop('cached_fields', None)
+        # self.cached_fields = kwargs.pop('cached_fields', None)
         super(AssaySetupCellFormSet, self).__init__(*args, **kwargs)
 
     # NOT DRY
     def _construct_form(self, i, **kwargs):
         form = super(AssaySetupCellFormSet, self)._construct_form(i, **kwargs)
-        for cache_field in self.cached_fields:
-            field = form.fields[cache_field]
-            field.cache_choices = True
-            choices = getattr(self, '_cached_%s_choices' %
-                              cache_field, None)
-            if choices is None:
-                choices = self.cached_fields.get(cache_field, None)
-
-                if choices is None:
-                    choices = list(field.choices)
-
-                setattr(self, '_cached_%s_choices' % cache_field,
-                        choices)
-
-            field.choice_cache = choices
-
         for time_unit in TIME_CONVERSIONS.keys():
             # Create fields for Days, Hours, Minutes
             form.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
@@ -1852,7 +1788,7 @@ class AssaySetupCellFormSet(BaseInlineFormSet):
 
             if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
                 addition_time = 0
-                duration = 0
+                # duration = 0
                 for time_unit, conversion in TIME_CONVERSIONS.items():
                     addition_time += current_data.get('addition_time_' + time_unit, 0) * conversion
                 # TODO NO DURATION IN CELLS AT THE MOMENT
@@ -1867,38 +1803,24 @@ class AssaySetupSettingForm(forms.ModelForm):
         model = AssaySetupCell
         exclude = tracking
 
+        widgets = {
+            'matrix_item': forms.TextInput(),
+            'setting': forms.TextInput(),
+            'unit': forms.TextInput(),
+            'addition_location': forms.TextInput(),
+        }
+
     def __init__(self, *args, **kwargs):
         # self.static_choices = kwargs.pop('static_choices', None)
         super(AssaySetupSettingForm, self).__init__(*args, **kwargs)
 
 
-# TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
-class AssaySetupSettingFormSet(BaseInlineFormSet):
-    cached_fields = []
-
+class AssaySetupSettingFormSet(BaseModelFormSet):
     def __init__(self, *args, **kwargs):
-        # TODO EVENTUALLY PASS WITH KWARG
-        self.cached_fields = kwargs.pop('cached_fields', None)
         super(AssaySetupSettingFormSet, self).__init__(*args, **kwargs)
 
     def _construct_form(self, i, **kwargs):
         form = super(AssaySetupSettingFormSet, self)._construct_form(i, **kwargs)
-        for cache_field in self.cached_fields:
-            field = form.fields[cache_field]
-            field.cache_choices = True
-            choices = getattr(self, '_cached_%s_choices' %
-                              cache_field, None)
-            if choices is None:
-                choices = self.cached_fields.get(cache_field, None)
-
-                if choices is None:
-                    choices = list(field.choices)
-
-                setattr(self, '_cached_%s_choices' % cache_field,
-                        choices)
-
-            field.choice_cache = choices
-
         for time_unit in TIME_CONVERSIONS.keys():
             # Create fields for Days, Hours, Minutes
             form.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
@@ -1933,29 +1855,29 @@ class AssaySetupSettingFormSet(BaseInlineFormSet):
 
         return form
 
-AssaySetupCompoundFormSetFactory = inlineformset_factory(
-    AssayMatrixItem,
+AssaySetupCompoundFormSetFactory = modelformset_factory(
     AssaySetupCompound,
     extra=1,
     exclude=[tracking],
     form=AssaySetupCompoundForm,
-    formset=AssaySetupCompoundFormSet
+    formset=AssaySetupCompoundFormSet,
+    can_delete=True
 )
-AssaySetupCellFormSetFactory = inlineformset_factory(
-    AssayMatrixItem,
+AssaySetupCellFormSetFactory = modelformset_factory(
     AssaySetupCell,
     extra=1,
     exclude=[tracking],
     form=AssaySetupCellForm,
-    formset=AssaySetupCellFormSet
+    formset=AssaySetupCellFormSet,
+    can_delete=True
 )
-AssaySetupSettingFormSetFactory = inlineformset_factory(
-    AssayMatrixItem,
+AssaySetupSettingFormSetFactory = modelformset_factory(
     AssaySetupSetting,
     extra=1,
     exclude=[tracking],
     form=AssaySetupSettingForm,
-    formset=AssaySetupSettingFormSet
+    formset=AssaySetupSettingFormSet,
+    can_delete=True
 )
 
 
@@ -1964,226 +1886,26 @@ class AssayMatrixItemForm(forms.ModelForm):
         model = AssayMatrixItem
         exclude = ('study',) + tracking
 
+        widgets = {
+            'device': forms.TextInput(),
+            'organ_model': forms.TextInput(),
+            'organ_model_protocol': forms.TextInput(),
+            'failure_reason': forms.TextInput(),
+        }
 
-# TODO ADD STUDY
+
 # TODO NEED TO TEST
-# TODO NEED TO IMPROVE PERFORMANCE (UNACCEPTABLY BAD AT THE MOMENT)
-# Early attempt to have a nested formset to keep items, compounds, cells, and settings together
 class AssayMatrixItemFormSet(BaseInlineFormSet):
-    cached_fields = []
-
-    compound_choices = []
-    cell_choices = []
-    setting_choices = []
-
     def __init__(self, *args, **kwargs):
         # Get the study
         self.study = kwargs.pop('study', None)
         self.user = kwargs.pop('user', None)
         super(AssayMatrixItemFormSet, self).__init__(*args, **kwargs)
 
-        self.cached_fields = {
-            'device': tuple(Microdevice.objects.all().values_list('id', 'name')),
-            'organ_model': tuple(OrganModel.objects.all().values_list('id', 'name')),
-            'organ_model_protocol': tuple(OrganModelProtocol.objects.all().values_list('id', 'version')),
-            'failure_reason': tuple(AssayFailureReason.objects.all().values_list('id', 'name')),
-        }
-
-        # Here lies the nested formsets
-        addition_location_choices = tuple(MicrodeviceSection.objects.all().values_list('id', 'name'))
-
-        compound_instance_choices = tuple(CompoundInstance.objects.all().values_list('id', 'id'))
-
-        compound_choices = tuple(Compound.objects.all().values_list('id', 'name'))
-
-        concentration_unit_choices = tuple((PhysicalUnits.objects.filter(
-            unit_type__unit_type='Concentration'
-        ) | PhysicalUnits.objects.filter(unit='%')).values_list('id', 'unit'))
-
-        # Get all chip setup assay compound instances
-        self.setup_compounds = {
-            (
-                instance.matrix_item_id,
-                instance.compound_instance_id,
-                instance.concentration,
-                instance.concentration_unit_id,
-                instance.addition_time,
-                instance.duration
-            ): True for instance in AssaySetupCompound.objects.filter(
-                matrix_item__matrix=self.instance
-            )
-        }
-
-        self.compound_instances = {}
-        self.compound_instances_dic = {}
-
-        for instance in CompoundInstance.objects.all().prefetch_related('supplier'):
-            self.compound_instances.update({
-                (
-                    instance.compound_id,
-                    instance.supplier_id,
-                    instance.lot,
-                    instance.receipt_date
-                ): instance
-            })
-            # NOTE use of name instead of id!
-            self.compound_instances_dic.update({
-                instance.id: (
-                    instance.compound_id,
-                    instance.supplier.name,
-                    instance.lot,
-                    instance.receipt_date
-                )
-            })
-
-        # Get all suppliers
-        self.suppliers = {
-            supplier.name: supplier for supplier in CompoundSupplier.objects.all()
-        }
-
-        self.compound_choices = {
-            'compound_instance': compound_instance_choices,
-            'compound': compound_choices,
-            'concentration_unit': concentration_unit_choices,
-            'addition_location': addition_location_choices
-        }
-
-        self.cell_choices = {
-            'cell_sample': tuple((
-                    (cell_sample.id, unicode(cell_sample)) for cell_sample in CellSample.objects.all().prefetch_related(
-                        'cell_type__organ',
-                        'cell_subtype',
-                        'supplier'
-                )
-            )),
-            'biosensor': tuple(Biosensor.objects.all().values_list('id', 'name')),
-            'density_unit': tuple(PhysicalUnits.objects.filter(availability__contains='cell').values_list('id', 'unit')),
-            'addition_location': addition_location_choices
-        }
-
-        self.setting_choices = {
-            'setting': tuple(AssaySetting.objects.all().values_list('id', 'name')),
-            'unit': tuple(PhysicalUnits.objects.all().values_list('id', 'unit')),
-            'addition_location': addition_location_choices
-        }
-
-        self.compound_initial_data = {}
-        self.cell_initial_data = {}
-        self.setting_initial_data = {}
-
-        for matrix_item in self.queryset:
-            for compound in matrix_item.assaysetupcompound_set.all():
-                # # Be sure to overwrite add _id fields
-                # current_dict = {}
-                #
-                # for key in compound.__dict__.keys():
-                #     if key[-3:] == '_id':
-                #         current_dict.update({
-                #             key[:-3]: compound.__dict__.get(key)
-                #         })
-                #     current_dict.update({
-                #         key: compound.__dict__.get(key)
-                #     })
-                #
-                # self.compound_initial_data.setdefault(
-                #     matrix_item.id, []
-                # ).append(
-                #     current_dict
-                # )
-                self.compound_initial_data.setdefault(
-                    matrix_item.id, []
-                ).append(
-                    compound
-                )
-
         for form in self.forms:
             if self.study:
                 form.instance.study = self.study
 
-    def add_fields(self, form, index):
-        super(AssayMatrixItemFormSet, self).add_fields(form, index)
-
-        form.nested_formset_names = (
-            'compounds',
-            'cells',
-            'settings'
-        )
-
-        form.compounds = AssaySetupCompoundFormSetFactory(
-            instance=form.instance,
-            # instance_to_pass=form.instance,
-            initial_instances=self.compound_initial_data.get(form.instance.id),
-            data=form.data if form.is_bound else None,
-            prefix='%s-%s' % (
-                form.prefix,
-                AssaySetupCompoundFormSetFactory.get_default_prefix()),
-            cached_fields=self.compound_choices,
-            suppliers=self.suppliers,
-            compound_instances=self.compound_instances,
-            setup_compounds=self.setup_compounds,
-            compound_instances_dic=self.compound_instances_dic
-        )
-
-        form.cells = AssaySetupCellFormSetFactory(
-            instance=form.instance,
-            data=form.data if form.is_bound else None,
-            prefix='%s-%s' % (
-                form.prefix,
-                AssaySetupCellFormSetFactory.get_default_prefix()),
-            # extra=1
-            cached_fields=self.cell_choices
-        )
-
-        form.settings = AssaySetupSettingFormSetFactory(
-            instance=form.instance,
-            data=form.data if form.is_bound else None,
-            prefix='%s-%s' % (
-                form.prefix,
-                AssaySetupSettingFormSetFactory.get_default_prefix()),
-            # extra=1
-            cached_fields=self.setting_choices
-        )
-
-    def _construct_form(self, i, **kwargs):
-        form = super(AssayMatrixItemFormSet, self)._construct_form(i, **kwargs)
-        for cache_field in self.cached_fields:
-            field = form.fields[cache_field]
-            field.cache_choices = True
-            choices = getattr(self, '_cached_%s_choices' %
-                              cache_field, None)
-            if choices is None:
-                choices = self.cached_fields.get(cache_field, None)
-
-                if choices is None:
-                    choices = list(field.choices)
-
-                setattr(self, '_cached_%s_choices' % cache_field,
-                        choices)
-
-            field.choice_cache = choices
-        return form
-
-    def is_valid(self):
-        result = super(AssayMatrixItemFormSet, self).is_valid()
-
-        if self.is_bound:
-            for form in self.forms:
-                for formset_name in form.nested_formset_names:
-                    if hasattr(form, formset_name):
-                        result = result and form.__dict__.get(formset_name).is_valid()
-
-        return result
-
-    def save(self, commit=True):
-        result = super(AssayMatrixItemFormSet, self).save(commit=commit)
-
-        for form in self.forms:
-            for formset_name in form.nested_formset_names:
-                if hasattr(form, formset_name):
-                    if not self._should_delete_form(form):
-                        form.__dict__.get(formset_name).save(commit=commit)
-
-        return result
 
 AssayMatrixItemFormSetFactory = inlineformset_factory(
     AssayMatrix,

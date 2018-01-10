@@ -3,11 +3,6 @@ from django.conf.urls import patterns, url
 from assays.views import *
 
 urlpatterns = patterns('',
-
-    url(
-        r'^assays/vile_nested_test/$',
-        'assays.views.vile_nested_test'
-    ),
     # User can view their studies
     # url(r'^assays/user_index/$', UserIndex.as_view(), name='user_index'),
     # User can view all Editable Studies

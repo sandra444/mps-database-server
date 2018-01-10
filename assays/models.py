@@ -1372,10 +1372,13 @@ class AssayStudy(FlaggableModel):
         ])
 
     def get_absolute_url(self):
-        return '/assays/{}/'.format(self.id)
+        return '/assays/assaystudy/{}/'.format(self.id)
+
+    def get_post_submission_url(self):
+        return self.get_absolute_url()
 
     def get_delete_url(self):
-        return '/assays/{}/delete/'.format(self.id)
+        return '/assays/assaystudy/{}/delete/'.format(self.id)
 
 
 # ON THE FRONT END, MATRICES ARE LIKELY TO BE CALLED STUDY SETUPS
@@ -1442,7 +1445,7 @@ class AssayMatrix(FlaggableModel):
         # return '/assays/assaychipsetup/{}/'.format(self.id)
 
     def get_post_submission_url(self):
-        return '/assays/{}/'.format(self.study.id)
+        return self.study.get_post_submission_url()
         # return '/assays/{}/'.format(self.assay_run_id_id)
 
     def get_clone_url(self):

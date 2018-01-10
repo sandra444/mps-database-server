@@ -41,7 +41,11 @@ from assays.forms import (
     # AssayMatrixItemFormSet,
     # AssaySetupFormSet,
     # AssaySetupCellFormSet,
-    AssayMatrixItemForm
+    AssayMatrixItemForm,
+    AssayMatrixItemFormSetFactory,
+    AssaySetupCompoundFormSetFactory,
+    AssaySetupCellFormSetFactory,
+    AssaySetupSettingFormSetFactory,
 )
 from django import forms
 
@@ -3692,7 +3696,8 @@ class AssayMatrixAdd(CreateView):
         context['cellsamples'] = cellsamples
 
         # Start blank
-        context['formset'] = AssayMatrixItemFormSetFactory()
+        # DON'T EVEN BOTHER WITH THE OTHER FORMSETS YET
+        context['matrix_item_formset'] = AssayMatrixItemFormSetFactory()
 
         return context
 
@@ -3732,34 +3737,65 @@ class AssayMatrixUpdate(UpdateView):
         context['cellsamples'] = cellsamples
 
         # context['formset'] = AssayMatrixItemFormSetFactory(instance=self.object)
+
+        matrix_item_queryset = AssayMatrixItem.objects.filter(
+            matrix=self.object
+        ).order_by(
+            'row_index',
+            'column_index'
+        )
+
         if self.request.POST:
-            context['formset'] = AssayMatrixItemFormSetFactory(
+            context['matrix_item_formset'] = AssayMatrixItemFormSetFactory(
                 self.request.POST,
                 instance=self.object,
-                queryset=AssayMatrixItem.objects.filter(
-                    matrix=self.object
-                ).order_by(
-                    'row_index',
-                    'column_index'
-                ).prefetch_related(
-                    'assaysetupcompound_set',
-                    'assaysetupcell_set',
-                    'assaysetupsetting_set',
-                )
+                queryset=matrix_item_queryset
+            )
+            context['compound_formset'] = AssaySetupCompoundFormSetFactory(
+                self.request.POST,
+                queryset=AssaySetupCompound.objects.filter(
+                    matrix_item__in=matrix_item_queryset
+                ),
+                matrix=self.object,
+                prefix='compound'
+            )
+            context['cell_formset'] = AssaySetupCellFormSetFactory(
+                self.request.POST,
+                queryset=AssaySetupCell.objects.filter(
+                    matrix_item__in=matrix_item_queryset
+                ),
+                prefix='cell'
+            )
+            context['setting_formset'] = AssaySetupSettingFormSetFactory(
+                self.request.POST,
+                queryset=AssaySetupSetting.objects.filter(
+                    matrix_item__in=matrix_item_queryset
+                ),
+                prefix='setting'
             )
         else:
-            context['formset'] = AssayMatrixItemFormSetFactory(
+            context['matrix_item_formset'] = AssayMatrixItemFormSetFactory(
                 instance=self.object,
-                queryset=AssayMatrixItem.objects.filter(
-                    matrix=self.object
-                ).order_by(
-                    'row_index',
-                    'column_index'
-                ).prefetch_related(
-                    'assaysetupcompound_set',
-                    'assaysetupcell_set',
-                    'assaysetupsetting_set',
-                )
+                queryset=matrix_item_queryset
+            )
+            context['compound_formset'] = AssaySetupCompoundFormSetFactory(
+                queryset=AssaySetupCompound.objects.filter(
+                    matrix_item__in=matrix_item_queryset
+                ),
+                matrix=self.object,
+                prefix='compound'
+            )
+            context['cell_formset'] = AssaySetupCellFormSetFactory(
+                queryset=AssaySetupCell.objects.filter(
+                    matrix_item__in=matrix_item_queryset
+                ),
+                prefix='cell'
+            )
+            context['setting_formset'] = AssaySetupSettingFormSetFactory(
+                queryset=AssaySetupSetting.objects.filter(
+                    matrix_item__in=matrix_item_queryset
+                ),
+                prefix='setting'
             )
 
         context['update'] = True
@@ -3768,13 +3804,53 @@ class AssayMatrixUpdate(UpdateView):
 
     def form_valid(self, form):
         # formset = AssayMatrixItemFormSetFactory(self.request.POST, instance=self.object)
-        formset = AssayMatrixItemFormSetFactory(
+        matrix_item_queryset = AssayMatrixItem.objects.filter(matrix=self.object).order_by('row_index', 'column_index')
+
+        matrix_item_formset = AssayMatrixItemFormSetFactory(
             self.request.POST,
             instance=self.object,
-            queryset=AssayMatrixItem.objects.filter(matrix=self.object).order_by('row_index', 'column_index')
+            queryset=matrix_item_queryset
         )
-        if form.is_valid() and formset.is_valid():
-            save_forms_with_tracking(self, form, formset=[formset])
+        compound_formset = AssaySetupCompoundFormSetFactory(
+            self.request.POST,
+            queryset=AssaySetupCompound.objects.filter(
+                matrix_item__in=matrix_item_queryset
+            ),
+            matrix=self.object,
+            prefix='compound'
+        )
+        cell_formset = AssaySetupCellFormSetFactory(
+            self.request.POST,
+            queryset=AssaySetupCell.objects.filter(
+                matrix_item__in=matrix_item_queryset
+            ),
+            prefix='cell'
+        )
+        setting_formset = AssaySetupSettingFormSetFactory(
+            self.request.POST,
+            queryset=AssaySetupSetting.objects.filter(
+                matrix_item__in=matrix_item_queryset
+            ),
+            prefix='setting'
+        )
+
+        formsets = [
+            matrix_item_formset,
+            compound_formset,
+            cell_formset,
+            setting_formset
+        ]
+
+        formsets_are_valid = True
+
+        for formset in formsets:
+            if not formset.is_valid():
+                formsets_are_valid = False
+
+        print len(compound_formset.forms)
+
+        if form.is_valid() and formsets_are_valid:
+            save_forms_with_tracking(self, form, formset=formsets)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -3804,44 +3880,3 @@ class AssayMatrixItemUpdate(UpdateView):
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
-
-
-# TEMPORARY JUST TESTING SOMETHING
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-from .forms import AssayMatrixItemFormSetFactory
-
-
-def vile_nested_test(request):
-    """Edit children and their addresses for a single parent."""
-
-    # ARBITRARILY JUST THE PK OF 1
-    parent = get_object_or_404(AssayMatrix, pk=1)
-
-    if request.POST:
-        form = AssayMatrixForm(request.POST, study=parent.study)
-    else:
-        form = AssayMatrixForm(instance=parent, study=parent.study)
-
-    c = RequestContext(request)
-
-    if request.method == 'POST':
-        formset = AssayMatrixItemFormSetFactory(request.POST, instance=parent)
-        if form.is_valid and formset.is_valid():
-            # form.save()
-            formset.save()
-            return redirect(parent.get_post_submission_url())
-        else:
-            print 'Failure!', form.is_valid(), formset.is_valid()
-    else:
-        formset = AssayMatrixItemFormSetFactory(instance=parent)
-
-    c.update({
-        'form': form,
-        'formset': formset
-    })
-
-    # return render(request, 'assays/vile_nested_test.html', {
-    #               'parent':parent,
-    #               'children_formset':formset})
-    return render_to_response('assays/vile_nested_test.html', c)

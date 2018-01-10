@@ -317,64 +317,35 @@
     </div>
     </div>
 
-    {# TESTING #}
-    {{ formset.management_form }}
-    {# NOT HERE! #}
-{#    {{ formset.non_form_errors }}#}
+    {# START TESTING #}
+    {{ matrix_item_formset.management_form }}
+    {{ compound_formset.management_form }}
+    {{ cell_formset.management_form }}
+    {{ setting_formset.management_form }}
 
-    <div>
-    {% for child_form in formset.forms %}
-        <div id="{{ child_form.prefix }}" class="matrix_item_form">
-            <h2>Matrix Item</h2>
-            {{ child_form }}
-        </div>
-
-{#        {% if child_form.compounds %}#}
-            <h2>Compounds</h2>
-            {{ child_form.compounds.management_form }}
-            {# Not here! #}
-{#            {{ child_form.compounds.non_form_errors }}#}
-
-            {% for nested_form in child_form.compounds.forms %}
-                <div id="{{ nested_form.prefix }}" class="compound_form">
-                    {{ nested_form }}
-                <div>
-            {% endfor %}
-
-{#        {% endif %}#}
-
-        {% if child_form.cells %}
-            <h2>Cells</h2>
-            {{ child_form.cells.management_form }}
-            {# Not here! #}
-{#            {{ child_form.cells.non_form_errors }}#}
-
-            {% for nested_form in child_form.cells.forms %}
-                <div id="{{ nested_form.prefix }}" class="cell_form">
-                    {{ nested_form }}
-                </div>
-            {% endfor %}
-
-        {% endif %}
-
-        {% if child_form.settings %}
-            <h2>Settings</h2>
-            {{ child_form.settings.management_form }}
-            {# Not here! #}
-{#            {{ child_form.settings.non_form_errors }}#}
-
-            {% for nested_form in child_form.settings.forms %}
-                <div id="{{ nested_form.prefix }}" class="setting_form">
-                    {{ nested_form }}
-                </div>
-            {% endfor %}
-
-        {% endif %}
-
+    <h2>Matrix Items</h2>
+    {{ matrix_item_formset.non_form_errors }}
+    {% for form in matrix_item_formset %}
+        {{ form }}
     {% endfor %}
-    </div>
-    {# CONCLUDE TESTING #}
-    </form>
+
+    <h2>Compounds</h2>
+    {{ compound_formset.non_form_errors }}
+    {% for form in compound_formset %}
+        {{ form }}
+    {% endfor %}
+
+    <h2>Cells</h2>
+    {{ cell_formset.non_form_errors }}
+    {% for form in cell_formset %}
+        {{ form }}
+    {% endfor %}
+
+    <h2>Settings</h2>
+    {{ setting_formset.non_form_errors }}
+    {% for form in setting_formset %}
+        {{ form }}
+    {% endfor %}
 
     {# Cellsample Selection Stuff #}
     <div hidden id="dialog" title="Choose a Cell Sample">
