@@ -21,7 +21,6 @@
     </li>
 {% endblock %}
 
-{# TODO needs image preview and layout display #}
 {% block content %}
 {% if update %}
 <form class="form-horizontal" method="post" enctype="multipart/form-data">
@@ -79,6 +78,8 @@
         {% endif %}
     </div>
 </div>
+
+{% include 'generic_field.html' with field=form.references label="References" %}
 
 <legend>Dimensions</legend>
 

@@ -3,7 +3,7 @@
 from django.db import models
 from microdevices.models import Microdevice, OrganModel, OrganModelProtocol
 from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 
 import urllib
 import collections
@@ -277,6 +277,15 @@ class AssayCompoundInstance(models.Model):
             split_times.get('day'),
             split_times.get('hour'),
             split_times.get('minute'),
+        )
+
+    def __unicode__(self):
+        return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
+            self.compound_instance.compound.name,
+            self.concentration,
+            self.concentration_unit.unit,
+            self.get_addition_time_string(),
+            self.get_duration_string()
         )
 
 
@@ -714,7 +723,15 @@ class AssayRun(FlaggableModel):
         help_text='Set this to True if this data should be included in Compound Reports and other data aggregations.'
     )
 
-    access_groups = models.ManyToManyField(Group, blank=True, related_name='access_groups')
+    access_groups = models.ManyToManyField(
+        Group,
+        blank=True,
+        related_name='access_groups',
+        help_text='Level 2 Access Groups Assignation'
+    )
+
+    # Special addition, would put in base model, but don't want excess...
+    signed_off_notes = models.CharField(max_length=255, blank=True, default='')
 
     def study_types(self):
         current_types = ''
@@ -733,6 +750,9 @@ class AssayRun(FlaggableModel):
 
     def get_absolute_url(self):
         return '/assays/{}/'.format(self.id)
+
+    def get_summary_url(self):
+        return '/assays/{}/summary/'.format(self.id)
 
     def get_delete_url(self):
         return '/assays/{}/delete/'.format(self.id)
@@ -821,6 +841,14 @@ class AssayChipRawData(models.Model):
     # Affiliated upload
     data_upload = models.ForeignKey('assays.AssayDataUpload', null=True, blank=True)
 
+# Expedient solution to absurd problem with choice field (which I dislike)
+cell_choice_dict = {
+    'WE': 'cells / well',
+    'CP': 'cells / chip',
+    'ML': 'cells / mL',
+    'MM': 'cells / mm^2'
+}
+
 
 class AssayChipCells(models.Model):
     """Individual cell parameters for CHIP setup used in inline"""
@@ -839,6 +867,12 @@ class AssayChipCells(models.Model):
     cell_passage = models.CharField(max_length=16, verbose_name='Passage#',
                                     blank=True, default='')
 
+    def __unicode__(self):
+        return u'{0} ({1:.0e} {2})'.format(
+            self.cell_sample,
+            self.cellsample_density,
+            cell_choice_dict.get(self.cellsample_density_unit, 'Unknown Unit')
+        )
 
 # TO BE DEPRECATED To be merged into single "AssaySetup" model
 class AssayChipSetup(FlaggableModel):
@@ -1186,3 +1220,28 @@ class AssayInstance(models.Model):
 
     def __unicode__(self):
         return u'{0}|{1}|{2}'.format(self.target, self.method, self.unit)
+
+
+class AssayRunStakeholder(models.Model):
+    """An institution that has interest in a particular study
+
+    Stakeholders needs to be consulted (sign off) before data can become available
+    """
+
+    study = models.ForeignKey(AssayRun)
+
+    group = models.ForeignKey(Group)
+    # Explicitly declared rather than from inheritance to avoid unecessary fields
+    signed_off_by = models.ForeignKey(
+        User,
+        blank=True,
+        null=True
+    )
+    signed_off_date = models.DateTimeField(blank=True, null=True)
+
+    signed_off_notes = models.CharField(max_length=255, blank=True, default='')
+
+    # TODO NEED MEDIA LOCATION
+    # approval_for_sign_off = models.FileField(null=True, blank=True)
+
+    sign_off_required = models.BooleanField(default=True)

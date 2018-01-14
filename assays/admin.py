@@ -22,6 +22,7 @@ from assays.utils import (
 from django.http import HttpResponseRedirect
 
 from assays.models import *
+from microdevices.models import MicrophysiologyCenter
 from .utils import parse_file_and_save
 # from compounds.models import Compound
 from mps.base.admin import LockableAdmin
@@ -41,6 +42,16 @@ import os
 import xlsxwriter
 # from xlsxwriter.utility import xl_col_to_name
 
+from django.template.loader import render_to_string, TemplateDoesNotExist
+from mps.settings import DEFAULT_FROM_EMAIL
+from mps.templatetags.custom_filters import (
+    ADMIN_SUFFIX,
+    VIEWER_SUFFIX,
+)
+
+from datetime import datetime, timedelta
+import pytz
+
 
 def modify_templates():
     """Writes totally new templates for chips and both types of plates"""
@@ -52,30 +63,15 @@ def modify_templates():
     version = str(version)
 
     chip = xlsxwriter.Workbook(template_root + 'chip_template-' + version + '.xlsx')
-    plate_tabular = xlsxwriter.Workbook(template_root + 'plate_tabular_template-' + version + '.xlsx')
-    plate_block = xlsxwriter.Workbook(template_root + 'plate_block_template-' + version + '.xlsx')
 
     chip_sheet = chip.add_worksheet()
-    plate_tabular_sheet = plate_tabular.add_worksheet()
-    plate_block_sheet = plate_block.add_worksheet()
+
 
     # Set up formats
     chip_red = chip.add_format()
     chip_red.set_bg_color('#ff6f69')
     chip_green = chip.add_format()
     chip_green.set_bg_color('#96ceb4')
-
-    plate_tabular_red = plate_tabular.add_format()
-    plate_tabular_red.set_bg_color('#ff6f69')
-    plate_tabular_green = plate_tabular.add_format()
-    plate_tabular_green.set_bg_color('#96ceb4')
-
-    plate_block_red = plate_block.add_format()
-    plate_block_red.set_bg_color('#ff6f69')
-    plate_block_green = plate_block.add_format()
-    plate_block_green.set_bg_color('#96ceb4')
-    plate_block_yellow = plate_block.add_format()
-    plate_block_yellow.set_bg_color('#ffeead')
 
     # Write the base files
     chip_initial = [
@@ -105,89 +101,11 @@ def modify_templates():
         ]
     ]
 
-    plate_tabular_initial = [
-        [
-            'Plate ID',
-            'Well Name (e.g. A01,F12)',
-            'Assay',
-            'Feature',
-            'Unit',
-            'Time',
-            'Time Units',
-            'Value',
-            'Notes',
-            ''
-        ],
-        [''] * 10
-    ]
-
-    plate_tabular_initial_format = [
-        [plate_tabular_red] * 10,
-        [
-            None,
-            None,
-            plate_tabular_green,
-            None,
-            plate_tabular_green,
-            None,
-            plate_tabular_green,
-            None,
-            None,
-            None
-        ]
-    ]
-
-    plate_block_initial = [
-        [
-            'Plate ID',
-            '{enter Plate ID here}',
-            'Assay',
-            '',
-            'Feature',
-            '{enter Feature here}',
-            'Unit',
-            '',
-            '[Time]',
-            '[{enter Time here}]',
-            '[Time Unit]',
-            '',
-            'Note: Totally remove the contents of the Time and Time Units cells if you are not using them',
-        ],
-    ]
-
-    plate_block_initial_format = [
-        [
-            plate_block_red,
-            plate_block_yellow,
-            plate_block_red,
-            plate_block_green,
-            plate_block_red,
-            plate_block_yellow,
-            plate_block_red,
-            plate_block_green,
-            plate_block_red,
-            plate_block_yellow,
-            plate_block_red,
-            plate_block_green,
-            plate_block_red
-        ]
-    ]
-
     # Write out initial
     for row_index, row in enumerate(chip_initial):
         for column_index, column in enumerate(row):
             cell_format = chip_initial_format[row_index][column_index]
             chip_sheet.write(row_index, column_index, column, cell_format)
-
-    for row_index, row in enumerate(plate_tabular_initial):
-        for column_index, column in enumerate(row):
-            cell_format = plate_tabular_initial_format[row_index][column_index]
-            plate_tabular_sheet.write(row_index, column_index, column, cell_format)
-
-    for row_index, row in enumerate(plate_block_initial):
-        for column_index, column in enumerate(row):
-            cell_format = plate_block_initial_format[row_index][column_index]
-            plate_block_sheet.write(row_index, column_index, column, cell_format)
 
     # Set column widths
     # Chip
@@ -210,48 +128,6 @@ def modify_templates():
 
     chip_sheet.set_column('BA:BD', 30)
 
-    # Plate Tabular
-    plate_tabular_sheet.set_column('A:A', 20)
-    plate_tabular_sheet.set_column('B:B', 25)
-    plate_tabular_sheet.set_column('C:C', 30)
-    plate_tabular_sheet.set_column('D:D', 30)
-    plate_tabular_sheet.set_column('E:E', 20)
-    plate_tabular_sheet.set_column('F:F', 15)
-    plate_tabular_sheet.set_column('G:G', 15)
-    plate_tabular_sheet.set_column('H:H', 15)
-    plate_tabular_sheet.set_column('I:I', 100)
-    plate_tabular_sheet.set_column('J:J', 100)
-
-    plate_tabular_sheet.set_column('BA:BC', 30)
-
-    # Plate Block
-    plate_block_sheet.set_column('A:A', 10)
-    plate_block_sheet.set_column('B:B', 20)
-    plate_block_sheet.set_column('C:C', 10)
-    plate_block_sheet.set_column('D:D', 30)
-    plate_block_sheet.set_column('E:E', 10)
-    plate_block_sheet.set_column('F:F', 30)
-    plate_block_sheet.set_column('G:G', 10)
-    plate_block_sheet.set_column('H:H', 20)
-    plate_block_sheet.set_column('I:I', 15)
-    plate_block_sheet.set_column('I:I', 10)
-    plate_block_sheet.set_column('J:J', 20)
-    plate_block_sheet.set_column('K:K', 10)
-    plate_block_sheet.set_column('L:L', 15)
-    plate_block_sheet.set_column('M:M', 100)
-
-    plate_block_sheet.set_column('BA:BC', 30)
-
-    # Get a list of quality indicators
-    quality_indicators = AssayQualityIndicator.objects.all().values_list('name', flat=True)
-
-    # Get list of time units
-    time_units = PhysicalUnits.objects.filter(
-        unit_type__unit_type='Time'
-    ).order_by(
-        'scale_factor'
-    ).values_list('unit', flat=True)
-
     # Get list of value units  (TODO CHANGE ORDER_BY)
     value_units = PhysicalUnits.objects.filter(
         availability__contains='readout'
@@ -259,11 +135,6 @@ def modify_templates():
         'base_unit',
         'scale_factor'
     ).values_list('unit', flat=True)
-
-    # Get list of assays (for plates) TO BE REPLACED
-    assays = AssayModel.objects.all().order_by(
-        'assay_name'
-    ).values_list('assay_name', flat=True)
 
     # List of targets
     targets = AssayTarget.objects.all().order_by(
@@ -280,17 +151,6 @@ def modify_templates():
         'name'
     ).values_list('name', flat=True)
 
-#     for index, value in enumerate(quality_indicators):
-#         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
-#         plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
-#         # Plate templates are slated to be deprecated
-# #         plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
-
-    for index, value in enumerate(time_units):
-        # chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
-        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
-        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
-
     for index, value in enumerate(sample_locations):
         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
 
@@ -299,28 +159,16 @@ def modify_templates():
 
     for index, value in enumerate(value_units):
         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
-        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
-        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
 
     for index, value in enumerate(targets):
         chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
 
-    for index, value in enumerate(assays):
-        # chip_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
-        plate_tabular_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
-        plate_block_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
-
-    # quality_indicators_range = '=$BD$1:$BD$' + str(len(quality_indicators))
-    time_units_range = '=$BC$1:$BC$' + str(len(time_units))
     value_units_range = '=$BB$1:$BB$' + str(len(value_units))
-    assays_range = '=$BA$1:$BA$' + str(len(assays))
 
-    targets_range = '=$BA$1:$BA$' + str(len(assays))
-    methods_range = '=$BC$1:$BC$' + str(len(assays))
-    sample_locations_range = '=$BD$1:$BD$' + str(len(assays))
+    targets_range = '=$BA$1:$BA$' + str(len(targets))
+    methods_range = '=$BC$1:$BC$' + str(len(methods))
+    sample_locations_range = '=$BD$1:$BD$' + str(len(sample_locations))
 
-    # chip_sheet.data_validation('H2', {'validate': 'list',
-    #                            'source': quality_indicators_range})
     chip_sheet.data_validation('H2', {'validate': 'list',
                                       'source': targets_range})
     chip_sheet.data_validation('I2', {'validate': 'list',
@@ -330,24 +178,8 @@ def modify_templates():
     chip_sheet.data_validation('L2', {'validate': 'list',
                                'source': value_units_range})
 
-    plate_tabular_sheet.data_validation('C2', {'validate': 'list',
-                                        'source': assays_range})
-    plate_tabular_sheet.data_validation('E2', {'validate': 'list',
-                                        'source': value_units_range})
-    plate_tabular_sheet.data_validation('G2', {'validate': 'list',
-                                        'source': time_units_range})
-
-    plate_block_sheet.data_validation('D1', {'validate': 'list',
-                                      'source': assays_range})
-    plate_block_sheet.data_validation('H1', {'validate': 'list',
-                                      'source': value_units_range})
-    plate_block_sheet.data_validation('L1', {'validate': 'list',
-                                      'source': time_units_range})
-
     # Save
     chip.close()
-    plate_tabular.close()
-    plate_block.close()
 
 
 class AssayQualityIndicatorFormAdmin(forms.ModelForm):
@@ -1549,8 +1381,28 @@ class AssayRunFormAdmin(forms.ModelForm):
             'assay_run_id': forms.Textarea(attrs={'rows': 1}),
             'name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 10}),
+            'signed_off_notes': forms.Textarea(attrs={'rows': 10}),
         }
         exclude = ('',)
+
+    def __init__(self, *args, **kwargs):
+        super(AssayRunFormAdmin, self).__init__(*args, **kwargs)
+
+        groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
+        groups_with_center_full = Group.objects.filter(
+            id__in=groups_with_center
+        ).order_by(
+            'name'
+        )
+
+        self.fields['group'].queryset = groups_with_center_full
+
+        groups_without_repeat = groups_with_center_full
+
+        if self.instance:
+            groups_without_repeat.exclude(pk=self.instance.group.id)
+
+        self.fields['access_groups'].queryset = groups_without_repeat
 
     # TODO CLEAN TO USE SETUP IN LIEU OF READOUT ID
     def clean(self):
@@ -1576,6 +1428,25 @@ class StudySupportingDataInline(admin.TabularInline):
         ),
     )
     extra = 1
+
+
+class AssayRunStakeholderInline(admin.TabularInline):
+    """Inline for Studies"""
+    model = AssayRunStakeholder
+    verbose_name = 'Study Stakeholders (Level 1)'
+    extra = 1
+
+    # TODO REVIEW
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "group":
+            groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
+            groups_with_center_full = Group.objects.filter(
+                id__in=groups_with_center
+            ).order_by(
+                'name'
+            )
+            kwargs["queryset"] = groups_with_center_full
+        return super(AssayRunStakeholderInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class AssayRunAdmin(LockableAdmin):
@@ -1629,6 +1500,7 @@ class AssayRunAdmin(LockableAdmin):
                     ('created_by', 'created_on'),
                     ('modified_by', 'modified_on'),
                     ('signed_off_by', 'signed_off_date'),
+                    ('signed_off_notes',)
                 )
             }
         ),
@@ -1641,100 +1513,416 @@ class AssayRunAdmin(LockableAdmin):
         ),
     )
 
-    inlines = [StudySupportingDataInline]
+    inlines = [AssayRunStakeholderInline, StudySupportingDataInline]
 
-    def save_model(self, request, obj, form, change):
+    # TODO ADD EMAILS FOR CHANGING SIGN OFF (of study and stake holders) AND ACCESS GROUPS
+    # def save_model(self, request, obj, form, change):
+    #
+    #     # TODO TODO TODO TODO
+    #     if change:
+    #         obj.modified_by = request.user
+    #         obj.save()
+    #
+    #     else:
+    #         obj.modified_by = obj.created_by = request.user
+    #         obj.save()
+
+    # save_related takes the place of save_model so that the inline can be referred to
+    # TODO TODO TODO THIS IS NOT VERY DRY
+    # This code may pose a problem if multiple people are editing an entry at once...
+    def save_related(self, request, form, formsets, change):
+        # Local datetime
+        tz = pytz.timezone('US/Eastern')
+        datetime_now_local = datetime.now(tz)
+        thirty_days_from_date = datetime_now_local + timedelta(days=30)
+
+        initial_study = AssayRun.objects.get(pk=form.instance.id)
+        initial_sign_off = initial_study.signed_off_by
+        initial_restricted = initial_study.restricted
+        initial_required_stakeholders = AssayRunStakeholder.objects.filter(
+            study=initial_study,
+            signed_off_by_id=None,
+            sign_off_required=True
+        )
+        initial_required_stakeholder_group_ids = list(initial_required_stakeholders.values_list('group_id', flat=True))
+        previous_access_groups = {group.name: group.id for group in initial_study.access_groups.all()}
+        new_access_group_names = []
+
+        viewer_subject = 'Study {0} Now Available for Viewing'.format(initial_study)
 
         if change:
+            initial_number_of_required_sign_offs = initial_required_stakeholders.count()
+        else:
+            initial_number_of_required_sign_offs = 0
+
+        send_initial_sign_off_alert = False
+
+        # SAVE FORM HERE
+        # TODO TODO TODO
+
+        if change:
+            obj = form.save()
             obj.modified_by = request.user
-
-            if obj.pk is not None:
-                original = AssayRun.objects.get(pk=obj.pk)
-                original_sign_off_date = original.signed_off_date
-            else:
-                original_sign_off_date = obj.signed_off_date
-
             obj.save()
 
-            all_chip_setups = AssayChipSetup.objects.filter(assay_run_id=obj)
-            all_chip_readouts = AssayChipReadout.objects.filter(chip_setup__assay_run_id=obj)
-            all_chip_results = AssayChipTestResult.objects.filter(chip_readout__chip_setup__assay_run_id=obj)
-            all_plate_setups = AssayPlateSetup.objects.filter(assay_run_id=obj)
-            all_plate_readouts = AssayPlateReadout.objects.filter(setup__assay_run_id=obj)
-            all_plate_results = AssayPlateTestResult.objects.filter(readout__setup__assay_run_id=obj)
+            if not initial_sign_off and obj.signed_off_by:
+                send_initial_sign_off_alert = True
 
-            all_data_uploads = AssayDataUpload.objects.filter(study=obj)
-
-            # # Marking a study should mark/unmark only setups that have not been individually reviewed
-            # # If the sign off is being removed from the study, then treat all setups with the same date as unreviewed
-            # if original_sign_off_date:
-            #     unreviewed_chip_setups = all_chip_setups.filter(signed_off_date=original_sign_off_date)
-            #     # unreviewed_chip_readouts = all_chip_readouts.exclude(signed_off_date=obj.signed_off_date)
-            #     # unreviewed_chip_results = all_chip_results.exclude(signed_off_date=obj.signed_off_date)
-            #     unreviewed_plate_setups = all_plate_setups.filter(signed_off_date=original_sign_off_date)
-            #     # unreviewed_plate_readouts = all_plate_readouts.exclude(signed_off_date=obj.signed_off_date)
-            #     # unreviewed_plate_results = all_plate_results.exclude(signed_off_date=obj.signed_off_date)
-            # # If the study is being signed off, then treat any setups with no sign off as unreviewed
-            # else:
-            #     unreviewed_chip_setups = all_chip_setups.filter(signed_off_by=None)
-            #     # unreviewed_chip_readouts = all_chip_readouts.filter(signed_off_by=None)
-            #     # unreviewed_chip_results = all_chip_results.filter(signed_off_by=None)
-            #     unreviewed_plate_setups = all_plate_setups.filter(signed_off_by=None)
-            #     # unreviewed_plate_readouts = all_plate_readouts.filter(signed_off_by=None)
-            #     # unreviewed_plate_results = all_plate_results.filter(signed_off_by=None)
-
-            # Add group and restricted to all
-            all_chip_setups.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_chip_readouts.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_chip_results.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_plate_setups.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_plate_readouts.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_plate_results.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-            all_data_uploads.update(
-                group=obj.group,
-                restricted=obj.restricted
-            )
-
-            # Change signed off data only for unreviewed entries
-            # unreviewed_chip_setups.update(
-            #     signed_off_by=obj.signed_off_by,
-            #     signed_off_date=obj.signed_off_date
-            # )
-            # unreviewed_chip_readouts.update(
-            #     signed_off_by=obj.signed_off_by,
-            #     signed_off_date=obj.signed_off_date
-            # )
-            # unreviewed_chip_results.update(
-            #     signed_off_by=obj.signed_off_by,
-            #     signed_off_date=obj.signed_off_date
-            # )
-            # unreviewed_plate_setups.update(
-            #     signed_off_by=obj.signed_off_by,
-            #     signed_off_date=obj.signed_off_date
-            # )
+            new_access_group_names = {
+                group.name: group.id for group in obj.access_groups.all() if
+                group.name not in previous_access_groups
+            }
 
         else:
+            obj = form.save()
             obj.modified_by = obj.created_by = request.user
             obj.save()
-        # obj.save()
+
+        # SAVE FORMSETS HERE
+        # TODO TODO TODO
+        # Save inline
+        super(LockableAdmin, self).save_related(request, form, formsets, change)
+
+        current_number_of_required_sign_offs = AssayRunStakeholder.objects.filter(
+            study=obj,
+            signed_off_by_id=None,
+            sign_off_required=True
+        ).count()
+
+        send_stakeholder_sign_off_alert = current_number_of_required_sign_offs < initial_number_of_required_sign_offs
+
+        # TODO TODO TODO
+        # ONLY SEND VIEWER ALERT IF:
+        # Sign off occurred and no stakeholders
+        # Sign off occurred and final stakeholder has acknowledged
+        # send_viewer_alert = current_number_of_required_sign_offs == 0 and obj.signed_off_by
+        send_viewer_alert = (
+            send_initial_sign_off_alert and current_number_of_required_sign_offs == 0
+        ) or (
+            obj.signed_off_by and current_number_of_required_sign_offs == 0 and send_stakeholder_sign_off_alert
+        )
+
+        # TODO TODO TODO TODO
+        # stakeholder_admin_subject = 'Acknowledgement of Study {0} Requested'.format(obj)
+        stakeholder_admin_subject = 'Approval for Release Requested: {0}'.format(obj)
+
+        stakeholder_viewer_groups = {}
+        stakeholder_admin_groups = {}
+
+        stakeholder_admins_to_be_alerted = []
+        stakeholder_viewers_to_be_alerted = []
+
+        # VULGAR! NOT DRY
+        # PASTED HERE
+        if send_initial_sign_off_alert:
+            # TODO TODO TODO TODO ALERT STAKEHOLDER ADMINS
+            stakeholder_admin_groups = {
+                group + ADMIN_SUFFIX: True for group in
+                AssayRunStakeholder.objects.filter(
+                    study=obj, sign_off_required=True
+                ).prefetch_related('group').values_list('group__name', flat=True)
+            }
+
+            stakeholder_admins_to_be_alerted = User.objects.filter(
+                groups__name__in=stakeholder_admin_groups, is_active=True
+            ).distinct()
+
+            for user_to_be_alerted in stakeholder_admins_to_be_alerted:
+                try:
+                    stakeholder_admin_message = render_to_string(
+                        'assays/email/tctc_stakeholder_email.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': obj,
+                            'thirty_days_from_date': thirty_days_from_date
+                        }
+                    )
+                except TemplateDoesNotExist:
+                    stakeholder_admin_message = render_to_string(
+                        'assays/email/stakeholder_sign_off_request.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': obj
+                        }
+                    )
+
+                user_to_be_alerted.email_user(
+                    stakeholder_admin_subject,
+                    stakeholder_admin_message,
+                    DEFAULT_FROM_EMAIL
+                )
+
+            # TODO TODO TODO TODO ALERT STAKEHOLDER VIEWERS
+            stakeholder_viewer_groups = {
+                group: True for group in
+                AssayRunStakeholder.objects.filter(
+                    study=obj
+                ).prefetch_related('group').values_list('group__name', flat=True)
+            }
+            initial_groups = stakeholder_viewer_groups.keys()
+
+            for group in initial_groups:
+                stakeholder_viewer_groups.update({
+                    # group + ADMIN_SUFFIX: True,
+                    group + VIEWER_SUFFIX: True
+                })
+
+            # BE SURE THIS IS MATCHED BELOW
+            stakeholder_viewers_to_be_alerted = User.objects.filter(
+                groups__name__in=stakeholder_viewer_groups, is_active=True
+            ).exclude(
+                id__in=stakeholder_admins_to_be_alerted
+            ).distinct()
+
+            for user_to_be_alerted in stakeholder_viewers_to_be_alerted:
+                # TODO TODO TODO WHAT DO WE CALL THE PROCESS OF SIGN OFF ACKNOWLEDGEMENT?!
+                viewer_message = render_to_string(
+                    'assays/email/viewer_alert.txt',
+                    {
+                        'user': user_to_be_alerted,
+                        'study': obj
+                    }
+                )
+
+                user_to_be_alerted.email_user(
+                    viewer_subject,
+                    viewer_message,
+                    DEFAULT_FROM_EMAIL
+                )
+
+        if send_viewer_alert:
+            access_group_names = {group.name: group.id for group in obj.access_groups.all()}
+            matching_groups = list(set([
+                group.id for group in Group.objects.all() if
+                group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in access_group_names
+            ]))
+            # Just in case, exclude stakeholders to prevent double messages
+            viewers_to_be_alerted = User.objects.filter(
+                groups__id__in=matching_groups, is_active=True
+            ).exclude(
+                id__in=stakeholder_admins_to_be_alerted
+            ).exclude(
+                id__in=stakeholder_viewers_to_be_alerted
+            ).distinct()
+            # Update viewer groups to include admins
+            stakeholder_viewer_groups.update(stakeholder_admin_groups)
+            # if stakeholder_viewer_groups or stakeholder_admin_groups:
+            #     viewers_to_be_alerted.exclude(
+            #         groups__name__in=stakeholder_viewer_groups
+            #     ).exclude(
+            #         group__name__in=stakeholder_admin_groups
+            #     )
+
+            for user_to_be_alerted in viewers_to_be_alerted:
+                viewer_message = render_to_string(
+                    'assays/email/viewer_alert.txt',
+                    {
+                        'user': user_to_be_alerted,
+                        'study': obj
+                    }
+                )
+
+                user_to_be_alerted.email_user(
+                    viewer_subject,
+                    viewer_message,
+                    DEFAULT_FROM_EMAIL
+                )
+
+        # Superusers to contact
+        superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+        if send_initial_sign_off_alert:
+            # Magic strings are in poor taste, should use a template instead
+            superuser_subject = 'Study Sign Off Detected: {0}'.format(obj)
+            superuser_message = render_to_string(
+                'assays/email/superuser_initial_sign_off_alert.txt',
+                {
+                    'study': obj,
+                    'stakeholders': AssayRunStakeholder.objects.filter(study=obj).order_by('-signed_off_date')
+                }
+            )
+
+            for user_to_be_alerted in superusers_to_be_alerted:
+                user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+        if send_stakeholder_sign_off_alert:
+            # Magic strings are in poor taste, should use a template instead
+            # superuser_subject = 'Stakeholder Acknowledgement Detected: {0}'.format(obj)
+            superuser_subject = 'Stakeholder Approval Detected: {0}'.format(obj)
+            superuser_message = render_to_string(
+                'assays/email/superuser_stakeholder_alert.txt',
+                {
+                    'study': obj,
+                    'stakeholders': AssayRunStakeholder.objects.filter(study=obj).order_by('-signed_off_date')
+                }
+            )
+
+            for user_to_be_alerted in superusers_to_be_alerted:
+                user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+        if send_viewer_alert:
+            # Magic strings are in poor taste, should use a template instead
+            superuser_subject = 'Study Released to Next Level: {0}'.format(obj)
+            superuser_message = render_to_string(
+                'assays/email/superuser_viewer_release_alert.txt',
+                {
+                    'study': obj
+                }
+            )
+
+            for user_to_be_alerted in superusers_to_be_alerted:
+                user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+        # END PASTE
+
+        # Special alerts for adding a stakeholder after sign off
+        # Will send a message to all required admins and viewers
+        # BE SURE NOT TO SEND TO STAKEHOLDERS THAT HAVE ALREADY SIGNED OFF
+        if obj.signed_off_by and not send_initial_sign_off_alert and initial_number_of_required_sign_offs < current_number_of_required_sign_offs:
+            # ...
+            # UGLY NOT DRY
+            stakeholder_admin_groups = {
+                group + ADMIN_SUFFIX: True for group in
+                AssayRunStakeholder.objects.filter(
+                    study=obj, sign_off_required=True, signed_off_by_id=None
+                ).exclude(
+                    # id__in=initial_required_stakeholders
+                    group_id__in=initial_required_stakeholder_group_ids
+                ).prefetch_related('group').values_list('group__name', flat=True)
+            }
+
+            stakeholder_admins_to_be_alerted = User.objects.filter(
+                groups__name__in=stakeholder_admin_groups, is_active=True
+            ).distinct()
+
+            for user_to_be_alerted in stakeholder_admins_to_be_alerted:
+                try:
+                    stakeholder_admin_message = render_to_string(
+                        'assays/email/tctc_stakeholder_email.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': obj,
+                            'thirty_days_from_date': thirty_days_from_date
+                        }
+                    )
+                except TemplateDoesNotExist:
+                    stakeholder_admin_message = render_to_string(
+                        'assays/email/stakeholder_sign_off_request.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': obj
+                        }
+                    )
+
+                user_to_be_alerted.email_user(
+                    stakeholder_admin_subject,
+                    stakeholder_admin_message,
+                    DEFAULT_FROM_EMAIL
+                )
+
+            # TODO TODO TODO TODO ALERT STAKEHOLDER VIEWERS
+            stakeholder_viewer_groups = {
+                group: True for group in
+                AssayRunStakeholder.objects.filter(
+                    study=obj, signed_off_by_id=None
+                ).exclude(
+                    # id__in=initial_required_stakeholders
+                    group_id__in=initial_required_stakeholder_group_ids
+                ).prefetch_related('group').values_list('group__name', flat=True)
+            }
+            initial_groups = stakeholder_viewer_groups.keys()
+
+            for group in initial_groups:
+                stakeholder_viewer_groups.update({
+                    # group + ADMIN_SUFFIX: True,
+                    group + VIEWER_SUFFIX: True
+                })
+
+            stakeholder_viewers_to_be_alerted = User.objects.filter(
+                groups__name__in=stakeholder_viewer_groups, is_active=True
+            ).exclude(
+                id__in=stakeholder_admins_to_be_alerted
+            ).distinct()
+
+            for user_to_be_alerted in stakeholder_viewers_to_be_alerted:
+                # TODO TODO TODO WHAT DO WE CALL THE PROCESS OF SIGN OFF ACKNOWLEDGEMENT?!
+                viewer_message = render_to_string(
+                    'assays/email/viewer_alert.txt',
+                    {
+                        'user': user_to_be_alerted,
+                        'study': obj
+                    }
+                )
+
+                user_to_be_alerted.email_user(
+                    viewer_subject,
+                    viewer_message,
+                    DEFAULT_FROM_EMAIL
+                )
+
+        # Special alerts for new access groups
+        if not send_viewer_alert and new_access_group_names and obj.signed_off_by:
+            matching_groups = list(set([
+                group.id for group in Group.objects.all() if
+                group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in new_access_group_names
+            ]))
+            exclude_groups = list(set([
+                group.id for group in Group.objects.all() if
+                group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in previous_access_groups
+            ]))
+            viewers_to_be_alerted = User.objects.filter(
+                groups__id__in=matching_groups,
+                is_active=True
+            ).exclude(
+                groups__id__in=exclude_groups
+            ).distinct()
+
+            for user_to_be_alerted in viewers_to_be_alerted:
+                viewer_message = render_to_string(
+                    'assays/email/viewer_alert.txt',
+                    {
+                        'user': user_to_be_alerted,
+                        'study': obj
+                    }
+                )
+
+                user_to_be_alerted.email_user(
+                    viewer_subject,
+                    viewer_message,
+                    DEFAULT_FROM_EMAIL
+                )
+
+            # TODO CHANGE SUPERUSER VIEWER RELEASE ALERT
+            # Magic strings are in poor taste, should use a template instead
+            superuser_subject = 'Study Released to Next Level: {0}'.format(obj)
+            superuser_message = render_to_string(
+                'assays/email/superuser_viewer_release_alert.txt',
+                {
+                    'study': obj,
+                    'new_access_group_names': new_access_group_names
+                }
+            )
+
+            for user_to_be_alerted in superusers_to_be_alerted:
+                user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+        # Special case for going public
+        if initial_restricted and not obj.restricted:
+            # Magic strings are in poor taste, should use a template instead
+            superuser_subject = 'Study Released to Next Level: {0}'.format(obj)
+            superuser_message = render_to_string(
+                'assays/email/superuser_viewer_release_alert.txt',
+                {
+                    'study': obj,
+                    'new_access_group_names': []
+                }
+            )
+
+            for user_to_be_alerted in superusers_to_be_alerted:
+                user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+    # Odd, I know, but prevents double save
+    def save_model(self, request, obj, form, change):
+        pass
 
 
 admin.site.register(AssayRun, AssayRunAdmin)

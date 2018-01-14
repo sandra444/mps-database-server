@@ -62,13 +62,13 @@
             <ul class="dropdown-menu">
               <li><a href="#studies">Studies</a></li>
               <li><a href="#studyconfigurations">Integrated Study Configurations</a></li>
-              <li><a href="#assaylayouts">Plate Layout</a></li>
+{#              <li><a href="#assaylayouts">Plate Layout</a></li>#}
               <li><a href="#chipsetups">Chip Setup</a></li>
               <li><a href="#chipreadouts">Chip Readout</a></li>
               <li><a href="#chipresults">Chip Results</a></li>
-              <li><a href="#platesetups">Plate Setup</a></li>
-              <li><a href="#platereadouts">Plate Readout</a></li>
-              <li><a href="#plateresults">Plate Results</a></li>
+{#              <li><a href="#platesetups">Plate Setup</a></li>#}
+{#              <li><a href="#platereadouts">Plate Readout</a></li>#}
+{#              <li><a href="#plateresults">Plate Results</a></li>#}
               <li class="divider"></li>
               <li><a href="#bulk">Upload Multiple Sets of Readout Data</a></li>
             </ul>
@@ -270,42 +270,42 @@
     </ul>
   </div>
 
-  <div id="assaylayouts">
-    <h2>Plate Layouts</h2>
-    <h4>Adding or Editing an Plate Layout</h4>
-    <ul class="list-group">
-        <li class="list-group-item active">
-            A <b>Plate Layout</b> dictates the contents of a plate by showing on a well-by-well basis what compounds and time points were used
-        </li>
-        <li class="list-group-item">
-            After selecting a <b>device</b>, a representation of the plate will appear at the bottom of the page
-        </li>
-        <li class="list-group-item">
-            If a device you need is not present, contact an administrator
-        </li>
-        <li class="list-group-item">
-            You can mark a layout as a <b>"Standard Layout"</b> by clicking the checkbox
-            <br>
-            This causes the layout to be at the beginning of lists to make it more noticeable
-        </li>
-        <li class="list-group-item">
-            Making a selection from the <b>Action</b> dropdown allows one to manipulate the plate in the following ways:
-        </li>
-    </ul>
-    <h4>Set Well Type</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Selecting this option will allow you to specify the purpose of each well
-        </li>
-        <li class="list-group-item">
-            First, choose an option from the dropdown entitled <b>Well Type:</b>
-            <br>
-            Then <i>click and drag</i> on the representation so that your selection box contains the wells you want to mark
-        </li>
-        <li class="list-group-item">
-            Marking wells with a type can make the layout (and any data associated with it) much more legible
-        </li>
-    </ul>
+{#  <div id="assaylayouts">#}
+{#    <h2>Plate Layouts</h2>#}
+{#    <h4>Adding or Editing an Plate Layout</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item active">#}
+{#            A <b>Plate Layout</b> dictates the contents of a plate by showing on a well-by-well basis what compounds and time points were used#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            After selecting a <b>device</b>, a representation of the plate will appear at the bottom of the page#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            If a device you need is not present, contact an administrator#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            You can mark a layout as a <b>"Standard Layout"</b> by clicking the checkbox#}
+{#            <br>#}
+{#            This causes the layout to be at the beginning of lists to make it more noticeable#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Making a selection from the <b>Action</b> dropdown allows one to manipulate the plate in the following ways:#}
+{#        </li>#}
+{#    </ul>#}
+{#    <h4>Set Well Type</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item">#}
+{#            Selecting this option will allow you to specify the purpose of each well#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            First, choose an option from the dropdown entitled <b>Well Type:</b>#}
+{#            <br>#}
+{#            Then <i>click and drag</i> on the representation so that your selection box contains the wells you want to mark#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Marking wells with a type can make the layout (and any data associated with it) much more legible#}
+{#        </li>#}
+{#    </ul>#}
 {#    <h4>Set Time Point</h4>#}
 {#    <ul class="list-group">#}
 {#        <li class="list-group-item">#}
@@ -329,74 +329,74 @@
 {#        </li>#}
 {#    </ul>#}
 {#    <h4>Add Compound</h4>#}
-    <ul class="list-group">
-        <li class="list-group-item">
-            Selecting this option will allow you to specify compounds and their concentrations
-        </li>
-        <li class="list-group-item">
-            Wells can contain multiple compounds
-        </li>
-        <li class="list-group-item">
-            Similar to time point, you can specify a series for the compound concentration
-            <br>
-            The default is <b>Divide</b>, but you can also <b>Add</b>, <b>Multiply</b>, or <b>Subtract</b>
-        </li>
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item">#}
+{#            Selecting this option will allow you to specify compounds and their concentrations#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Wells can contain multiple compounds#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Similar to time point, you can specify a series for the compound concentration#}
+{#            <br>#}
+{#            The default is <b>Divide</b>, but you can also <b>Add</b>, <b>Multiply</b>, or <b>Subtract</b>#}
+{#        </li>#}
 {#        <li class="list-group-item">#}
 {#            Wells can contain only one copy of each compound (e.g. a well can only have one instance of Acetaminophen)#}
 {#        </li>#}
-    </ul>
-    <h4>Add Label</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Selecting this option will allow you to add arbitrary text to the layout's wells
-        </li>
-        <li class="list-group-item">
-            This allows users to add data that the other options do not account for
-        </li>
-        <li class="list-group-item">
-            After typing into the input <b>Label</b>, click and drag on the desired wells and the text will be added
-        </li>
-        <li class="list-group-item">
-            Each well can contain only one label, thus old labels will be overwritten if necessary
-        </li>
-    </ul>
-    <h4>Clear Contents</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Selecting this option will allow you to remove everything in the selected wells
-        </li>
-        <li class="list-group-item">
-            Click and drag over the desired wells and all data will be removed
-        </li>
-        <li class="list-group-item">
-            Additionally, clicking a time point, compound, or label will let you delete it
-        </li>
-    </ul>
-    <h4>Flagging for Review</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm" style="color:#337AB7">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            flags the current layout for review
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-warning">
-                Notes
-            </a>
-            brings up an input dialog where you can explain why this layout was flagged
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-danger">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            removes the flag from the current layout
-        </li>
-    </ul>
-  </div>
+{#    </ul>#}
+{#    <h4>Add Label</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item">#}
+{#            Selecting this option will allow you to add arbitrary text to the layout's wells#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            This allows users to add data that the other options do not account for#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            After typing into the input <b>Label</b>, click and drag on the desired wells and the text will be added#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Each well can contain only one label, thus old labels will be overwritten if necessary#}
+{#        </li>#}
+{#    </ul>#}
+{#    <h4>Clear Contents</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item">#}
+{#            Selecting this option will allow you to remove everything in the selected wells#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Click and drag over the desired wells and all data will be removed#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Additionally, clicking a time point, compound, or label will let you delete it#}
+{#        </li>#}
+{#    </ul>#}
+{#    <h4>Flagging for Review</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item">#}
+{#            Clicking#}
+{#            <a role='button' class="btn btn-sm" style="color:#337AB7">#}
+{#                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>#}
+{#            </a>#}
+{#            flags the current layout for review#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Clicking#}
+{#            <a role='button' class="btn btn-sm btn-warning">#}
+{#                Notes#}
+{#            </a>#}
+{#            brings up an input dialog where you can explain why this layout was flagged#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Clicking#}
+{#            <a role='button' class="btn btn-sm btn-danger">#}
+{#                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>#}
+{#            </a>#}
+{#            removes the flag from the current layout#}
+{#        </li>#}
+{#    </ul>#}
+{#  </div>#}
 
   <div id="chipsetups">
     <h2>Chip Setups</h2>
@@ -728,445 +728,446 @@
     </ul>
   </div>
 
-  <div id="platesetups">
-    <h2>Plate Setups</h2>
-    <h4>Adding or Editing a Plate Setup</h4>
-    <ul class="list-group">
-        <li class="list-group-item active">
-            A <b>Plate Setup</b> describes the protocols taken to prepare a plate
-        </li>
-        <li class="list-group-item">
-            Selecting a <b>Plate Layout</b> will show a preview of the plate below
-            <br>
-            Please note that you cannot edit the layout on this page, you will have to edit the layout itself
-        </li>
-        <li class="list-group-item">
-            If the layout you need does not exist, click the provided link to add a new one
-        </li>
-        <li class="list-group-item">
-            The <b>Plate ID/Barcode</b> can not be the same as another plate in the study
-        </li>
-    </ul>
-    <h4>Adding Cells</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Each row under the header <b>Cell Samples</b> describes cells added to the plate
-        </li>
-        <li class="list-group-item">
-            If this plate does not have any cells, do not modify this section
-        </li>
-        <li class="list-group-item">
-            To get another row, click the <b>Add Cells</b> button
-        </li>
-        <li class="list-group-item">
-            Click a magnifying glass to see a list of available cell samples then click the desired row to select that sample
-        </li>
-        <li class="list-group-item">
-            Use 'e' for scientific notation: e.g. 1e+3 = 1000
-        </li>
-        <li class="list-group-item">
-            If you need a cell sample that is not listed, click the provided link to add it
-        </li>
-    </ul>
-    <h4>Flagging for Review</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            flags the current setup for review
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-warning">
-                Notes
-            </a>
-            brings up an input dialog where you can explain why this setup was flagged
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-danger">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            removes the flag from the current setup
-        </li>
-    </ul>
-  </div>
+{#  <div id="platesetups">#}
+{#    <h2>Plate Setups</h2>#}
+{#    <h4>Adding or Editing a Plate Setup</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item active">#}
+{#            A <b>Plate Setup</b> describes the protocols taken to prepare a plate#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Selecting a <b>Plate Layout</b> will show a preview of the plate below#}
+{#            <br>#}
+{#            Please note that you cannot edit the layout on this page, you will have to edit the layout itself#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            If the layout you need does not exist, click the provided link to add a new one#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            The <b>Plate ID/Barcode</b> can not be the same as another plate in the study#}
+{#        </li>#}
+{#    </ul>#}
+{#    <h4>Adding Cells</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item">#}
+{#            Each row under the header <b>Cell Samples</b> describes cells added to the plate#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            If this plate does not have any cells, do not modify this section#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            To get another row, click the <b>Add Cells</b> button#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Click a magnifying glass to see a list of available cell samples then click the desired row to select that sample#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Use 'e' for scientific notation: e.g. 1e+3 = 1000#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            If you need a cell sample that is not listed, click the provided link to add it#}
+{#        </li>#}
+{#    </ul>#}
+{#    <h4>Flagging for Review</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item">#}
+{#            Clicking#}
+{#            <a role='button' class="btn btn-sm">#}
+{#                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>#}
+{#            </a>#}
+{#            flags the current setup for review#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Clicking#}
+{#            <a role='button' class="btn btn-sm btn-warning">#}
+{#                Notes#}
+{#            </a>#}
+{#            brings up an input dialog where you can explain why this setup was flagged#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Clicking#}
+{#            <a role='button' class="btn btn-sm btn-danger">#}
+{#                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>#}
+{#            </a>#}
+{#            removes the flag from the current setup#}
+{#        </li>#}
+{#    </ul>#}
+{#  </div>#}
+{##}
+{#  <div id="platereadouts">#}
+{#    <h2>Plate Readouts</h2>#}
+{#    <h4>Adding or Editing a Chip Readout</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item active">#}
+{#            A <b>Plate Readout</b> describes the assays performed and the data from these assays#}
+{#        </li>#}
+{#    </ul>#}
+{#    <h4>Adding or Editing Assays</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item">#}
+{#            Before uploading data, please be sure to add every assay performed in the section entitled <b>Assays</b>#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            The column for <b>Assay</b> specifies what assay was performed#}
+{#            <br>#}
+{#            If an assay you desire is not on the list, please contact an administrator or post in <b>Feedback</b>#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#          The column <b>Reader</b> shows what reader device was used#}
+{#          <br>#}
+{#          If the reader you used is not on the list, please contact an administrator or post in <b>Feedback</b>#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#          The column for <b>Readout Unit</b> shows what units the data (namely the data you wish to upload) from the assay were recorded in#}
+{#          <br>#}
+{#          If a unit you need is not on the list, please contact an administrator or post in <b>Feedback</b>#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            If you need another row, click the <b>Add Assay</b> button#}
+{#        </li>#}
+{#    </ul>#}
+{#    <h4>Uploading Data</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item">#}
+{#            <h4>If you are uploading data for a single Readout, use the .csv format</h4>#}
+{#              In Excel, you will see an option reading "CSV (Comma delimited)" in the "save as type" drop down in the "save as" menu#}
+{#              <br>#}
+{#              If you want to upload data for multiple Readouts, see <a href="#bulk"> Uploading an Excel File of Readout Data</a>#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            <h4>You may choose between <b>Block</b> and <b>Tabular</b> formats</h4>#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            <h4>A theoretical 3x2 6-well plate in <b>Block</b> format would be as follows:</h4>#}
+{#            <table class="table table-bordered small" style="background-color: #F0FFFF;">#}
+{#                <thead>#}
+{#                    <tr class="active">#}
+{#                        <th>Plate ID</th>#}
+{#                        <th>[Plate ID]</th>#}
+{#                        <th>Assay</th>#}
+{#                        <th>[Assay 1]</th>#}
+{#                        <th>Feature</th>#}
+{#                        <th>[Feature 1]</th>#}
+{#                        <th>Value Unit</th>#}
+{#                        <th>[Value Unit 1]</th>#}
+{#                        <th>Time*</th>#}
+{#                        <th>[Time 1]*</th>#}
+{#                        <th>Time Units*</th>#}
+{#                        <th>[Time Unit 1]*</th>#}
+{#                    </tr>#}
+{#                </thead>#}
+{#                <tbody>#}
+{#                    <tr>#}
+{#                        <td>[Val 1]</td>#}
+{#                        <td>[Val 2]</td>#}
+{#                        <td>[Val 3]</td>#}
+{#                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Val 4]</td>#}
+{#                        <td>[Val 5]</td>#}
+{#                        <td>[Val 6]</td>#}
+{#                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>#}
+{#                    </tr>#}
+{#                    <tr class="active">#}
+{#                        <th>Plate ID</th>#}
+{#                        <th>[Plate ID]</th>#}
+{#                        <th>Assay</th>#}
+{#                        <th>[Assay 2]</th>#}
+{#                        <th>Feature</th>#}
+{#                        <th>[Feature 2]</th>#}
+{#                        <th>Value Unit</th>#}
+{#                        <th>[Value Unit 2]</th>#}
+{#                        <th>Time*</th>#}
+{#                        <th>[Time 2]*</th>#}
+{#                        <th>Time Units*</th>#}
+{#                        <th>[Time Unit 2]*</th>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Val 7]</td>#}
+{#                        <td>[Val 8]</td>#}
+{#                        <td>[Val 9]</td>#}
+{#                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Val 10]</td>#}
+{#                        <td>[Val 11]</td>#}
+{#                        <td>[Val 12]</td>#}
+{#                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>#}
+{#                    </tr>#}
+{#                </tbody>#}
+{#            </table>#}
+{#            *Optional (if not using time, cells may be left blank)#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            <h4>The above example in <b>Tabular</b> format would be as follows:</h4>#}
+{#            <table class="table table-bordered small" style="background-color: #F0FFFF;">#}
+{#                <thead>#}
+{#                    <tr class="active">#}
+{#                        <th>Plate ID</th>#}
+{#                        <th>Well ID</th>#}
+{#                        <th>Assay</th>#}
+{#                        <th>Feature</th>#}
+{#                        <th>Value Unit</th>#}
+{#                        <th>Time*</th>#}
+{#                        <th>Time Units*</th>#}
+{#                        <th>Value</th>#}
+{#                    </tr>#}
+{#                </thead>#}
+{#                <tbody>#}
+{#                    <tr>#}
+{#                        <td>[Plate ID]</td>#}
+{#                        <td>A1</td>#}
+{#                        <td>[Assay 1]</td>#}
+{#                        <td>[Feature 1]</td>#}
+{#                        <td>[Value Unit 1]</td>#}
+{#                        <td>[Time 1]*</td>#}
+{#                        <td>[Time Unit 1]*</td>#}
+{#                        <td>[Val 1]</td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Plate ID]</td>#}
+{#                        <td>A2</td>#}
+{#                        <td>[Assay 1]</td>#}
+{#                        <td>[Feature 1]</td>#}
+{#                        <td>[Value Unit 1]</td>#}
+{#                        <td>[Time 1]*</td>#}
+{#                        <td>[Time Unit 1]*</td>#}
+{#                        <td>[Val 2]</td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Plate ID]</td>#}
+{#                        <td>A3</td>#}
+{#                        <td>[Assay 1]</td>#}
+{#                        <td>[Feature 1]</td>#}
+{#                        <td>[Value Unit 1]</td>#}
+{#                        <td>[Time 1]*</td>#}
+{#                        <td>[Time Unit 1]*</td>#}
+{#                        <td>[Val 3]</td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Plate ID]</td>#}
+{#                        <td>B1</td>#}
+{#                        <td>[Assay 1]</td>#}
+{#                        <td>[Feature 1]</td>#}
+{#                        <td>[Value Unit 1]</td>#}
+{#                        <td>[Time 1]*</td>#}
+{#                        <td>[Time Unit 1]*</td>#}
+{#                        <td>[Val 4]</td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Plate ID]</td>#}
+{#                        <td>B2</td>#}
+{#                        <td>[Assay 1]</td>#}
+{#                        <td>[Feature 1]</td>#}
+{#                        <td>[Value Unit 1]</td>#}
+{#                        <td>[Time 1]*</td>#}
+{#                        <td>[Time Unit 1]*</td>#}
+{#                        <td>[Val 5]</td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Plate ID]</td>#}
+{#                        <td>B3</td>#}
+{#                        <td>[Assay 1]</td>#}
+{#                        <td>[Feature 1]</td>#}
+{#                        <td>[Value Unit 1]</td>#}
+{#                        <td>[Time 1]*</td>#}
+{#                        <td>[Time Unit 1]*</td>#}
+{#                        <td>[Val 6]</td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Plate ID]</td>#}
+{#                        <td>A1</td>#}
+{#                        <td>[Assay 2]</td>#}
+{#                        <td>[Feature 2]</td>#}
+{#                        <td>[Value Unit 2]</td>#}
+{#                        <td>[Time 2]*</td>#}
+{#                        <td>[Time Unit 2]*</td>#}
+{#                        <td>[Val 7]</td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Plate ID]</td>#}
+{#                        <td>A2</td>#}
+{#                        <td>[Assay 2]</td>#}
+{#                        <td>[Feature 2]</td>#}
+{#                        <td>[Value Unit 2]</td>#}
+{#                        <td>[Time 2]*</td>#}
+{#                        <td>[Time Unit 2]*</td>#}
+{#                        <td>[Val 8]</td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Plate ID]</td>#}
+{#                        <td>A3</td>#}
+{#                        <td>[Assay 2]</td>#}
+{#                        <td>[Feature 2]</td>#}
+{#                        <td>[Value Unit 2]</td>#}
+{#                        <td>[Time 2]*</td>#}
+{#                        <td>[Time Unit 2]*</td>#}
+{#                        <td>[Val 9]</td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Plate ID]</td>#}
+{#                        <td>B1</td>#}
+{#                        <td>[Assay 2]</td>#}
+{#                        <td>[Feature 2]</td>#}
+{#                        <td>[Value Unit 2]</td>#}
+{#                        <td>[Time 2]*</td>#}
+{#                        <td>[Time Unit 2]*</td>#}
+{#                        <td>[Val 10]</td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Plate ID]</td>#}
+{#                        <td>B2</td>#}
+{#                        <td>[Assay 2]</td>#}
+{#                        <td>[Feature 2]</td>#}
+{#                        <td>[Value Unit 2]</td>#}
+{#                        <td>[Time 2]*</td>#}
+{#                        <td>[Time Unit 2]*</td>#}
+{#                        <td>[Val 11]</td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>[Plate ID]</td>#}
+{#                        <td>B3</td>#}
+{#                        <td>[Assay 2]</td>#}
+{#                        <td>[Feature 2]</td>#}
+{#                        <td>[Value Unit 2]</td>#}
+{#                        <td>[Time 2]*</td>#}
+{#                        <td>[Time Unit 2]*</td>#}
+{#                        <td>[Val 12]</td>#}
+{#                    </tr>#}
+{#                </tbody>#}
+{#            </table>#}
+{#            *Optional (if not using time, cells may be left blank)#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            <b class="text-danger">#}
+{#                <span class="glyphicon glyphicon-exclamation-sign"></span>#}
+{#                The brackets ([] and {}) in the above examples and templates are not meant to be taken literally#}
+{#                <br>#}
+{#                When you are actually entering data, remove them#}
+{#            </b>#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            <b class="text-danger">#}
+{#                <span class="glyphicon glyphicon-exclamation-sign"></span>#}
+{#                The Plate ID should be nothing more than the Plate ID/Barcode you entered in the setup#}
+{#                <br>#}
+{#                i.e. do not include "Plate-" at the beginning of the Plate ID#}
+{#            </b>#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            <b class="text-danger">#}
+{#                <span class="glyphicon glyphicon-exclamation-sign"></span>#}
+{#                Always start in the top-left corner (the first cell)#}
+{#            </b>#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            <b class="text-danger">#}
+{#                <span class="glyphicon glyphicon-exclamation-sign"></span>#}
+{#                Uploading overwrites previous data#}
+{#            </b>#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            <b class="text-danger">#}
+{#                <span class="glyphicon glyphicon-exclamation-sign"></span>#}
+{#                You will have to reselect the desired file after a failed submission#}
+{#            </b>#}
+{#        </li>#}
+{#    </ul>#}
+{#    <h4>Changing QC</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item">#}
+{#            <b>#}
+{#                In the .csv file you can change a value's QC status by putting a <i>single letter</i> in front of the value#}
+{#                <br>#}
+{#                (e.g. to invalidate the value "12.3" put "x12.3" in the cell instead)#}
+{#            </b>#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            To invalidate a reading, click the corresponding well or QC Status column#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Invalidated wells will be greyed out and their values put in red#}
+{#        </li>#}
+{#    </ul>#}
+{#    <h4>Flagging for Review</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item">#}
+{#            Clicking#}
+{#            <a role='button' class="btn btn-sm">#}
+{#                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>#}
+{#            </a>#}
+{#            flags the current readout for review#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Clicking#}
+{#            <a role='button' class="btn btn-sm btn-warning">#}
+{#                Notes#}
+{#            </a>#}
+{#            brings up an input dialog where you can explain why this readout was flagged#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Clicking#}
+{#            <a role='button' class="btn btn-sm btn-danger">#}
+{#                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>#}
+{#            </a>#}
+{#            removes the flag from the current readout#}
+{#        </li>#}
+{#    </ul>#}
+{#  </div>#}
+{##}
+{#  <div id="plateresults">#}
+{#    <h2>Plate Results</h2>#}
+{#    <h4>Adding or Editing Plate Test Results</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item active">#}
+{#            <b>Plate Results</b> distill raw data into summaries and important values like half-life#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            First, choose a <b>Readout</b>#}
+{#            <br>#}
+{#            Without a readout, you are unable to specify <b>Assay & Feature</b>#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            <b>Summary of Results</b> should be a brief summary of your findings from this plate#}
+{#            <br>#}
+{#            These results can be qualitative#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Each <b>Result</b> represents a finding from a specific assay#}
+{#            <br>#}
+{#            Clicking <b>Add Result</b> will make another row#}
+{#        </li>#}
+{#    </ul>#}
+{#    <h4>Flagging for Review</h4>#}
+{#    <ul class="list-group">#}
+{#        <li class="list-group-item">#}
+{#            Clicking#}
+{#            <a role='button' class="btn btn-sm">#}
+{#                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>#}
+{#            </a>#}
+{#            flags the current results for review#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Clicking#}
+{#            <a role='button' class="btn btn-sm btn-warning">#}
+{#                Notes#}
+{#            </a>#}
+{#            brings up an input dialog where you can explain why these results were flagged#}
+{#        </li>#}
+{#        <li class="list-group-item">#}
+{#            Clicking#}
+{#            <a role='button' class="btn btn-sm btn-danger">#}
+{#                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>#}
+{#            </a>#}
+{#            removes the flag from the current results#}
+{#        </li>#}
+{#    </ul>#}
+{#  </div>#}
 
-  <div id="platereadouts">
-    <h2>Plate Readouts</h2>
-    <h4>Adding or Editing a Chip Readout</h4>
-    <ul class="list-group">
-        <li class="list-group-item active">
-            A <b>Plate Readout</b> describes the assays performed and the data from these assays
-        </li>
-    </ul>
-    <h4>Adding or Editing Assays</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Before uploading data, please be sure to add every assay performed in the section entitled <b>Assays</b>
-        </li>
-        <li class="list-group-item">
-            The column for <b>Assay</b> specifies what assay was performed
-            <br>
-            If an assay you desire is not on the list, please contact an administrator or post in <b>Feedback</b>
-        </li>
-        <li class="list-group-item">
-          The column <b>Reader</b> shows what reader device was used
-          <br>
-          If the reader you used is not on the list, please contact an administrator or post in <b>Feedback</b>
-        </li>
-        <li class="list-group-item">
-          The column for <b>Readout Unit</b> shows what units the data (namely the data you wish to upload) from the assay were recorded in
-          <br>
-          If a unit you need is not on the list, please contact an administrator or post in <b>Feedback</b>
-        </li>
-        <li class="list-group-item">
-            If you need another row, click the <b>Add Assay</b> button
-        </li>
-    </ul>
-    <h4>Uploading Data</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            <h4>If you are uploading data for a single Readout, use the .csv format</h4>
-              In Excel, you will see an option reading "CSV (Comma delimited)" in the "save as type" drop down in the "save as" menu
-              <br>
-              If you want to upload data for multiple Readouts, see <a href="#bulk"> Uploading an Excel File of Readout Data</a>
-        </li>
-        <li class="list-group-item">
-            <h4>You may choose between <b>Block</b> and <b>Tabular</b> formats</h4>
-        </li>
-        <li class="list-group-item">
-            <h4>A theoretical 3x2 6-well plate in <b>Block</b> format would be as follows:</h4>
-            <table class="table table-bordered small" style="background-color: #F0FFFF;">
-                <thead>
-                    <tr class="active">
-                        <th>Plate ID</th>
-                        <th>[Plate ID]</th>
-                        <th>Assay</th>
-                        <th>[Assay 1]</th>
-                        <th>Feature</th>
-                        <th>[Feature 1]</th>
-                        <th>Value Unit</th>
-                        <th>[Value Unit 1]</th>
-                        <th>Time*</th>
-                        <th>[Time 1]*</th>
-                        <th>Time Units*</th>
-                        <th>[Time Unit 1]*</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>[Val 1]</td>
-                        <td>[Val 2]</td>
-                        <td>[Val 3]</td>
-                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    </tr>
-                    <tr>
-                        <td>[Val 4]</td>
-                        <td>[Val 5]</td>
-                        <td>[Val 6]</td>
-                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    </tr>
-                    <tr class="active">
-                        <th>Plate ID</th>
-                        <th>[Plate ID]</th>
-                        <th>Assay</th>
-                        <th>[Assay 2]</th>
-                        <th>Feature</th>
-                        <th>[Feature 2]</th>
-                        <th>Value Unit</th>
-                        <th>[Value Unit 2]</th>
-                        <th>Time*</th>
-                        <th>[Time 2]*</th>
-                        <th>Time Units*</th>
-                        <th>[Time Unit 2]*</th>
-                    </tr>
-                    <tr>
-                        <td>[Val 7]</td>
-                        <td>[Val 8]</td>
-                        <td>[Val 9]</td>
-                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    </tr>
-                    <tr>
-                        <td>[Val 10]</td>
-                        <td>[Val 11]</td>
-                        <td>[Val 12]</td>
-                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    </tr>
-                </tbody>
-            </table>
-            *Optional (if not using time, cells may be left blank)
-        </li>
-        <li class="list-group-item">
-            <h4>The above example in <b>Tabular</b> format would be as follows:</h4>
-            <table class="table table-bordered small" style="background-color: #F0FFFF;">
-                <thead>
-                    <tr class="active">
-                        <th>Plate ID</th>
-                        <th>Well ID</th>
-                        <th>Assay</th>
-                        <th>Feature</th>
-                        <th>Value Unit</th>
-                        <th>Time*</th>
-                        <th>Time Units*</th>
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>[Plate ID]</td>
-                        <td>A1</td>
-                        <td>[Assay 1]</td>
-                        <td>[Feature 1]</td>
-                        <td>[Value Unit 1]</td>
-                        <td>[Time 1]*</td>
-                        <td>[Time Unit 1]*</td>
-                        <td>[Val 1]</td>
-                    </tr>
-                    <tr>
-                        <td>[Plate ID]</td>
-                        <td>A2</td>
-                        <td>[Assay 1]</td>
-                        <td>[Feature 1]</td>
-                        <td>[Value Unit 1]</td>
-                        <td>[Time 1]*</td>
-                        <td>[Time Unit 1]*</td>
-                        <td>[Val 2]</td>
-                    </tr>
-                    <tr>
-                        <td>[Plate ID]</td>
-                        <td>A3</td>
-                        <td>[Assay 1]</td>
-                        <td>[Feature 1]</td>
-                        <td>[Value Unit 1]</td>
-                        <td>[Time 1]*</td>
-                        <td>[Time Unit 1]*</td>
-                        <td>[Val 3]</td>
-                    </tr>
-                    <tr>
-                        <td>[Plate ID]</td>
-                        <td>B1</td>
-                        <td>[Assay 1]</td>
-                        <td>[Feature 1]</td>
-                        <td>[Value Unit 1]</td>
-                        <td>[Time 1]*</td>
-                        <td>[Time Unit 1]*</td>
-                        <td>[Val 4]</td>
-                    </tr>
-                    <tr>
-                        <td>[Plate ID]</td>
-                        <td>B2</td>
-                        <td>[Assay 1]</td>
-                        <td>[Feature 1]</td>
-                        <td>[Value Unit 1]</td>
-                        <td>[Time 1]*</td>
-                        <td>[Time Unit 1]*</td>
-                        <td>[Val 5]</td>
-                    </tr>
-                    <tr>
-                        <td>[Plate ID]</td>
-                        <td>B3</td>
-                        <td>[Assay 1]</td>
-                        <td>[Feature 1]</td>
-                        <td>[Value Unit 1]</td>
-                        <td>[Time 1]*</td>
-                        <td>[Time Unit 1]*</td>
-                        <td>[Val 6]</td>
-                    </tr>
-                    <tr>
-                        <td>[Plate ID]</td>
-                        <td>A1</td>
-                        <td>[Assay 2]</td>
-                        <td>[Feature 2]</td>
-                        <td>[Value Unit 2]</td>
-                        <td>[Time 2]*</td>
-                        <td>[Time Unit 2]*</td>
-                        <td>[Val 7]</td>
-                    </tr>
-                    <tr>
-                        <td>[Plate ID]</td>
-                        <td>A2</td>
-                        <td>[Assay 2]</td>
-                        <td>[Feature 2]</td>
-                        <td>[Value Unit 2]</td>
-                        <td>[Time 2]*</td>
-                        <td>[Time Unit 2]*</td>
-                        <td>[Val 8]</td>
-                    </tr>
-                    <tr>
-                        <td>[Plate ID]</td>
-                        <td>A3</td>
-                        <td>[Assay 2]</td>
-                        <td>[Feature 2]</td>
-                        <td>[Value Unit 2]</td>
-                        <td>[Time 2]*</td>
-                        <td>[Time Unit 2]*</td>
-                        <td>[Val 9]</td>
-                    </tr>
-                    <tr>
-                        <td>[Plate ID]</td>
-                        <td>B1</td>
-                        <td>[Assay 2]</td>
-                        <td>[Feature 2]</td>
-                        <td>[Value Unit 2]</td>
-                        <td>[Time 2]*</td>
-                        <td>[Time Unit 2]*</td>
-                        <td>[Val 10]</td>
-                    </tr>
-                    <tr>
-                        <td>[Plate ID]</td>
-                        <td>B2</td>
-                        <td>[Assay 2]</td>
-                        <td>[Feature 2]</td>
-                        <td>[Value Unit 2]</td>
-                        <td>[Time 2]*</td>
-                        <td>[Time Unit 2]*</td>
-                        <td>[Val 11]</td>
-                    </tr>
-                    <tr>
-                        <td>[Plate ID]</td>
-                        <td>B3</td>
-                        <td>[Assay 2]</td>
-                        <td>[Feature 2]</td>
-                        <td>[Value Unit 2]</td>
-                        <td>[Time 2]*</td>
-                        <td>[Time Unit 2]*</td>
-                        <td>[Val 12]</td>
-                    </tr>
-                </tbody>
-            </table>
-            *Optional (if not using time, cells may be left blank)
-        </li>
-        <li class="list-group-item">
-            File uploads can use either full names ("Albumin") or abbreviations ("ALB") for assays
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                The brackets ([] and {}) in the above examples and templates are not meant to be taken literally
-                <br>
-                When you are actually entering data, remove them
-            </b>
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                The Plate ID should be nothing more than the Plate ID/Barcode you entered in the setup
-                <br>
-                i.e. do not include "Plate-" at the beginning of the Plate ID
-            </b>
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                Always start in the top-left corner (the first cell)
-            </b>
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                Uploading overwrites previous data
-            </b>
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                You will have to reselect the desired file after a failed submission
-            </b>
-        </li>
-    </ul>
-    <h4>Changing QC</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            <b>
-                In the .csv file you can change a value's QC status by putting a <i>single letter</i> in front of the value
-                <br>
-                (e.g. to invalidate the value "12.3" put "x12.3" in the cell instead)
-            </b>
-        </li>
-        <li class="list-group-item">
-            To invalidate a reading, click the corresponding well or QC Status column
-        </li>
-        <li class="list-group-item">
-            Invalidated wells will be greyed out and their values put in red
-        </li>
-    </ul>
-    <h4>Flagging for Review</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            flags the current readout for review
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-warning">
-                Notes
-            </a>
-            brings up an input dialog where you can explain why this readout was flagged
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-danger">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            removes the flag from the current readout
-        </li>
-    </ul>
-  </div>
-
-  <div id="plateresults">
-    <h2>Plate Results</h2>
-    <h4>Adding or Editing Plate Test Results</h4>
-    <ul class="list-group">
-        <li class="list-group-item active">
-            <b>Plate Results</b> distill raw data into summaries and important values like half-life
-        </li>
-        <li class="list-group-item">
-            First, choose a <b>Readout</b>
-            <br>
-            Without a readout, you are unable to specify <b>Assay & Feature</b>
-        </li>
-        <li class="list-group-item">
-            <b>Summary of Results</b> should be a brief summary of your findings from this plate
-            <br>
-            These results can be qualitative
-        </li>
-        <li class="list-group-item">
-            Each <b>Result</b> represents a finding from a specific assay
-            <br>
-            Clicking <b>Add Result</b> will make another row
-        </li>
-    </ul>
-    <h4>Flagging for Review</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            flags the current results for review
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-warning">
-                Notes
-            </a>
-            brings up an input dialog where you can explain why these results were flagged
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-danger">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            removes the flag from the current results
-        </li>
-    </ul>
-  </div>
   <div id="bulk">
     <h2>Uploading an Excel File of Readout Data</h2>
 {#    <h4></h4>#}
@@ -1186,15 +1187,7 @@
         Click the following links to download Excel templates:
         <br>
         <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">
-            Click Here For Chip Template
-        </a>
-        <br>
-        <a href="/media/excel_templates/plate_tabular_template-{{ version }}.xlsx">
-            Click Here For Plate (Tabular) Template
-        </a>
-        <br>
-        <a href="/media/excel_templates/plate_block_template-{{ version }}.xlsx">
-            Click Here For Plate (Block) Template
+            Click Here For Upload Template
         </a>
       </li>
       <li class="list-group-item">

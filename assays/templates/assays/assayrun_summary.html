@@ -26,7 +26,7 @@
         <div class="row text-center">
             <a id="export_button" href="/assays/{{ object.id }}/data/" class="btn btn-info" role="button">Download Data</a>
             <label class="radio-inline">
-                <input type="checkbox" name="exportinclude_all" id="exportinclude_all" />
+                <input type="checkbox" name="exportinclude_all" id="exportinclude_all" onclick="$('#chartsinclude_all').prop('checked', $(this).prop('checked'));"/>
                 <strong>Include Excluded Data</strong>
             </label>
         </div>
@@ -36,6 +36,17 @@
 {#                <strong>Include Excluded Data</strong>#}
 {#            </label>#}
 {#        </div>#}
+        {% if user_is_group_admin %}
+            <div class="row text-center small-padding-top">
+                <a href="../sign_off" class="btn btn-success" role="button">View/Edit Sign Off Status of this Study</a>
+            </div>
+        {% endif %}
+        {#  TODO TODO TODO #}
+        {% if user_is_stakeholder_admin %}
+            <div class="row text-center small-padding-top">
+                <a href="../sign_off" class="btn btn-success" role="button">View/Edit Approval Status of this Study</a>
+            </div>
+        {% endif %}
     </div>
 
     {% if object.description or object.study_configuration or object.protocol %}
@@ -46,7 +57,7 @@
         <div class="panel-body">
         {% if object.description %}
             <p>
-                {{ object.description }}
+                {{ object.description|linebreaksbr }}
             </p>
         {% endif %}
 
@@ -118,7 +129,7 @@
                     <tr>
                         <td>{{ supporting_data.description }}</td>
                         <td>
-                            <a href="/media/{{ supporting_data.supporting_data }}">
+                            <a target="_blank" href="/media/{{ supporting_data.supporting_data }}">
                               {{ supporting_data.supporting_data }}
                             </a>
                         </td>
@@ -128,6 +139,7 @@
         </table>
     {% endif %}
 
+    {# Note that this table breaks the Rule of Three and is not DRY #}
     <legend>Chip Setups</legend>
     {% if setups %}
         <div class="padded-bottom">
@@ -140,6 +152,7 @@
 {#                    <th>Device</th>#}
                     <th>Organ Model</th>
                     <th>Compound</th>
+                    <th>Cell</th>
                     <th>Creator</th>
                     <th>Review</th>
                 </tr>
@@ -159,6 +172,7 @@
 {#                        <td>-control-</td>#}
 {#                    {% endif %}#}
                     <td>{{ setup.related_compounds_as_string|linebreaks }}</td>
+                    <td>{{ setup.related_cells_as_string|linebreaks }}</td>
                     <td>
                         {{ setup.full_creator }}
                     </td>

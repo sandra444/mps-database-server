@@ -46,7 +46,7 @@
                         <b>Description</b>
                     </td>
                     <td>
-                        {{ object.description }}
+                        {{ object.description|linebreaksbr }}
                     </td>
                 </tr>
                 {% endif %}
@@ -91,6 +91,14 @@
                         {% else %}
                             No Image Available
                         {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        References
+                    </td>
+                    <td>
+                        {{ object.references|linebreaksbr }}
                     </td>
                 </tr>
             </tbody>

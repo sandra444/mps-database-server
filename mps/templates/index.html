@@ -120,7 +120,7 @@
             </div>
         </div>
         <div class="row">
-            <h4>Create/Perform Studies</h4>
+            <h4>Assay and Bioactivity Data</h4>
         </div>
         <div class="row">
             <div class="col-sm-6 col-md-4">
@@ -151,56 +151,51 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6 col-md-4">
-                <div title="Add/edit chip setups, readouts, and results" class="well">
-                    <a onclick="event.stopPropagation(); $('#chips_button').click();">
-                        <img src="/static/img/chips.png"
-                             style="height: 70px;">
-                    </a>
-                    <div class="caption">
-                        <div class="btn-group">
-                        <button id="chips_button" type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            Chip Data <span class="caret"></span>
-                        </button>
-                          <ul class="dropdown-menu" role="menu">
-                            <li><a href="/assays/assaychipsetup/">View Setups</a></li>
-                            <li><a href="/assays/assaychipreadout/">View Readouts</a></li>
-                            <li><a href="/assays/assaychiptestresult/">View Results</a></li>
-                            <li class="divider"></li>
-                            <li><a href="/assays/studyconfiguration/">View Integrated Study Configurations</a></li>
-                          </ul>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-12 col-md-4">
-                <div title="Add/edit plate setups, readouts, and results" class="well">
-                    <a onclick="event.stopPropagation(); $('#plates_button').click();">
-                        <img src="/static/img/plates.png"
-                             style="height: 70px;">
-                    </a>
-                    <div class="caption">
-                        <div class="btn-group">
-                          <button id="plates_button" type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            Plate Data <span class="caret"></span>
-                          </button>
-                          <ul class="dropdown-menu" role="menu">
-                            <li><a href="/assays/assayplatesetup/">View Setups</a></li>
-                            <li><a href="/assays/assayplatereadout/">View Readouts</a></li>
-                            <li><a href="/assays/assayplatetestresult/">View Results</a></li>
-                            <li class="divider"></li>
-                            <li><a href="/assays/assaylayout/">View Plate Layouts</a></li>
-                          </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <h4>Data Analysis and Modeling</h4>
-        </div>
-        <div class="row">
+{#            <div class="col-sm-6 col-md-4">#}
+{#                <div title="Add/edit chip setups, readouts, and results" class="well">#}
+{#                    <a onclick="event.stopPropagation(); $('#chips_button').click();">#}
+{#                        <img src="/static/img/chips.png"#}
+{#                             style="height: 70px;">#}
+{#                    </a>#}
+{#                    <div class="caption">#}
+{#                        <div class="btn-group">#}
+{#                        <button id="chips_button" type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">#}
+{#                            Chip Data <span class="caret"></span>#}
+{#                        </button>#}
+{#                          <ul class="dropdown-menu" role="menu">#}
+{#                            <li><a href="/assays/assaychipsetup/">View Setups</a></li>#}
+{#                            <li><a href="/assays/assaychipreadout/">View Readouts</a></li>#}
+{#                            <li><a href="/assays/assaychiptestresult/">View Results</a></li>#}
+{#                            <li class="divider"></li>#}
+{#                            <li><a href="/assays/studyconfiguration/">View Integrated Study Configurations</a></li>#}
+{#                          </ul>#}
+{##}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#            <div class="col-sm-12 col-md-4">#}
+{#                <div title="Add/edit plate setups, readouts, and results" class="well">#}
+{#                    <a onclick="event.stopPropagation(); $('#plates_button').click();">#}
+{#                        <img src="/static/img/plates.png"#}
+{#                             style="height: 70px;">#}
+{#                    </a>#}
+{#                    <div class="caption">#}
+{#                        <div class="btn-group">#}
+{#                          <button id="plates_button" type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">#}
+{#                            Plate Data <span class="caret"></span>#}
+{#                          </button>#}
+{#                          <ul class="dropdown-menu" role="menu">#}
+{#                            <li><a href="/assays/assayplatesetup/">View Setups</a></li>#}
+{#                            <li><a href="/assays/assayplatereadout/">View Readouts</a></li>#}
+{#                            <li><a href="/assays/assayplatetestresult/">View Results</a></li>#}
+{#                            <li class="divider"></li>#}
+{#                            <li><a href="/assays/assaylayout/">View Plate Layouts</a></li>#}
+{#                          </ul>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
             <div class="col-sm-6 col-md-4">
                 <div title="Generate a heatmap for selected bioactivity data" class="well">
                     <a href="/bioactivities/heatmap/#filter">
@@ -215,7 +210,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6 col-md-4">
+            <div class="col-sm-12 col-md-4">
                 <div title="Generate a dendrogram for selected compound/bioactivity data" class="well">
                     <a href="/bioactivities/cluster/#filter">
                         <img src="/static/img/button_cluster.png"
@@ -229,23 +224,56 @@
                     </div>
                 </div>
             </div>
-
-            <div class="col-sm-12 col-md-4">
-                <div title="This feature is still in development" class="well">
-                    <a href="/bioactivities/model/">
-                        <img src="/static/img/button_predictive.png"
-                             style="height: 70px;">
-                    </a>
-                    <div class="caption">
-                        <a href="/bioactivities/model/"
-                           class="btn btn-danger btn-large">
-                        Modeling
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        </a>
-                    </div>
-                </div>
-            </div>
         </div>
+{#        <div class="row">#}
+{#            <h4>Data Analysis and Modeling</h4>#}
+{#        </div>#}
+{#        <div class="row">#}
+{#            <div class="col-sm-6 col-md-4">#}
+{#                <div title="Generate a heatmap for selected bioactivity data" class="well">#}
+{#                    <a href="/bioactivities/heatmap/#filter">#}
+{#                        <img src="/static/img/button_heatmap.png"#}
+{#                             style="height: 70px;">#}
+{#                    </a>#}
+{#                    <div class="caption">#}
+{#                        <a href="/bioactivities/heatmap/#filter"#}
+{#                           class="btn btn-primary btn-large">#}
+{#                        Create Heatmap#}
+{#                        </a>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#            <div class="col-sm-6 col-md-4">#}
+{#                <div title="Generate a dendrogram for selected compound/bioactivity data" class="well">#}
+{#                    <a href="/bioactivities/cluster/#filter">#}
+{#                        <img src="/static/img/button_cluster.png"#}
+{#                             style="height: 70px;">#}
+{#                    </a>#}
+{#                    <div class="caption">#}
+{#                        <a href="/bioactivities/cluster/#filter"#}
+{#                           class="btn btn-primary btn-large">#}
+{#                            Cluster Compounds#}
+{#                        </a>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <div class="col-sm-12 col-md-4">#}
+{#                <div title="This feature is still in development" class="well">#}
+{#                    <a href="/bioactivities/model/">#}
+{#                        <img src="/static/img/button_predictive.png"#}
+{#                             style="height: 70px;">#}
+{#                    </a>#}
+{#                    <div class="caption">#}
+{#                        <a href="/bioactivities/model/"#}
+{#                           class="btn btn-danger btn-large">#}
+{#                        Modeling#}
+{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                        </a>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
     </div>
 
 {% endblock %}

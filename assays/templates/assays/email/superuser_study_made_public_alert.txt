@@ -1,0 +1,11 @@
+Hello Admins,
+
+A study has been made public as a year has passed since moving to Level 2.
+
+Study: {{ study }}
+Created By: {{ study.created_by.first_name }} {{ study.created_by.last_name }}
+Sign Off On: {{ study.signed_off_date }}
+Link: https://mps.csb.pitt.edu{{ study.get_summary_url }}
+
+Thanks,
+MPS

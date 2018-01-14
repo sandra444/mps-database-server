@@ -3,7 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import Group
 
-from mps.base.models import LockableModel
+from mps.base.models import LockableModel, TrackableModel
 from django.core.validators import MaxValueValidator
 
 
@@ -17,7 +17,7 @@ class MicrophysiologyCenter(LockableModel):
 
     center_name = models.CharField(max_length=100, unique=True)
     center_id = models.CharField(max_length=20, unique=True)
-    description = models.CharField(max_length=400, blank=True, default='')
+    description = models.CharField(max_length=4000, blank=True, default='')
     contact_person = models.CharField(max_length=250, blank=True, default='')
     contact_email = models.EmailField(blank=True, default='')
     center_website = models.URLField(blank=True, null=True)
@@ -59,7 +59,7 @@ class Microdevice(LockableModel):
     barcode = models.CharField(
         max_length=200, verbose_name='version/ catalog#', default='', blank=True)
 
-    description = models.CharField(max_length=400, default='', blank=True)
+    description = models.CharField(max_length=4000, default='', blank=True)
 
     device_width = models.FloatField(
         verbose_name='width (mm)', null=True, blank=True)
@@ -123,6 +123,8 @@ class Microdevice(LockableModel):
                                                'Number of items must match '
                                                'number of columns.')
 
+    references = models.CharField(max_length=2000, blank=True, default='')
+
     def __unicode__(self):
         return self.device_name
 
@@ -144,7 +146,7 @@ class OrganModel(LockableModel):
     # Centers are now required
     center = models.ForeignKey(MicrophysiologyCenter)
     device = models.ForeignKey(Microdevice)
-    description = models.CharField(max_length=400, default='', blank=True)
+    description = models.CharField(max_length=4000, default='', blank=True)
 
     model_image = models.ImageField(upload_to='models', null=True, blank=True)
 
@@ -164,6 +166,8 @@ class OrganModel(LockableModel):
     # Removed in favor of protocol inline
     # protocol = models.FileField(upload_to='protocols', verbose_name='Protocol File',
     #                        blank=True, null=True, help_text='File detailing the protocols for this model')
+
+    references = models.CharField(max_length=2000, blank=True, default='')
 
     def __unicode__(self):
         return self.model_name
@@ -200,3 +204,14 @@ class OrganModelProtocol(models.Model):
 
     def __unicode__(self):
         return self.version
+
+
+class GroupDeferral(TrackableModel):
+    """This indicates the status of a group and whether they have deferred their ability to approve studies"""
+    group = models.ForeignKey(Group)
+    notes = models.CharField(max_length=1024)
+    approval_file = models.FileField(
+        null=True,
+        blank=True,
+        upload_to='deferral'
+    )
