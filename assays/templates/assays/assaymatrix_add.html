@@ -4,9 +4,9 @@
 {% block load %}
     <script src="{% static "js/calendar.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
-    <script src="{% static "js/flag.js" %}"></script>
-    <script src="{% static "assays/matrix_display.js" %}"></script>
+    <script src="{% static "assays/assaymatrix_add.js" %}"></script>
     <script src="{% static "assays/compound_instances.js" %}"></script>
+    <script src="{% static "js/flag.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -326,7 +326,9 @@
     <h2>Matrix Items</h2>
     {{ matrix_item_formset.non_form_errors }}
     {% for form in matrix_item_formset %}
-        {{ form }}
+        <div id="{{ form.prefix }}" class="matrix_item_form">
+            {{ form }}
+        </div>
     {% endfor %}
 
     <h2>Compounds</h2>
@@ -346,6 +348,7 @@
     {% for form in setting_formset %}
         {{ form }}
     {% endfor %}
+    {# End Testing #}
 
     {# Cellsample Selection Stuff #}
     <div hidden id="dialog" title="Choose a Cell Sample">

@@ -34,9 +34,7 @@ from django.utils import timezone
 
 from mps.templatetags.custom_filters import is_group_admin, ADMIN_SUFFIX
 
-from mps.templatetags.custom_filters import filter_groups
-
-from django.db.models.fields import BLANK_CHOICE_DASH
+from django.core.exceptions import NON_FIELD_ERRORS
 
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
@@ -82,6 +80,139 @@ OVERWRITE_OPTIONS_INDIVIDUAL = forms.ChoiceField(
     ),
     initial='mark_conflicting_data'
 )
+
+
+def get_dic_for_custom_choice_field(form, filters=None):
+    dic = {}
+
+    fields = form.custom_fields
+    parent = form.model
+
+    for field in fields:
+        model = parent._meta.get_field(field).related_model
+        if filters and filters.get(field, None):
+            dic.update({
+                field: {str(instance.id): instance for instance in model.objects.filter(**filters.get(field))}
+            })
+        else:
+            dic.update({
+                field: {str(instance.id): instance for instance in model.objects.all()}
+            })
+
+    return dic
+
+
+class BaseModelFormSetForcedUniqueness(BaseModelFormSet):
+    def clean(self):
+        self.validate_unique()
+
+    def validate_unique(self):
+        # Collect unique_checks and date_checks to run from all the forms.
+        all_unique_checks = set()
+        all_date_checks = set()
+        forms_to_delete = self.deleted_forms
+        valid_forms = [form for form in self.forms if form.is_valid() and form not in forms_to_delete]
+        for form in valid_forms:
+            exclude = form._get_validation_exclusions()
+            unique_checks, date_checks = form.instance._get_unique_checks(exclude=exclude)
+            all_unique_checks = all_unique_checks.union(set(unique_checks))
+            all_date_checks = all_date_checks.union(set(date_checks))
+
+        errors = []
+        # Do each of the unique checks (unique and unique_together)
+        for uclass, unique_check in all_unique_checks:
+            seen_data = set()
+            for form in valid_forms:
+                # get data for each field of each of unique_check
+                row_data = (form.cleaned_data[field] for field in unique_check if field in form.cleaned_data)
+                # Reduce Model instances to their primary key values
+                row_data = tuple(d._get_pk_val() if hasattr(d, '_get_pk_val') else d for d in row_data)
+                # if row_data and None not in row_data:
+                # if we've already seen it then we have a uniqueness failure
+                if row_data in seen_data:
+                    # poke error messages into the right places and mark
+                    # the form as invalid
+                    errors.append(self.get_unique_error_message(unique_check))
+                    form._errors[NON_FIELD_ERRORS] = self.error_class([self.get_form_error()])
+                    # remove the data from the cleaned_data dict since it was invalid
+                    for field in unique_check:
+                        if field in form.cleaned_data:
+                            del form.cleaned_data[field]
+                # mark the data as seen
+                seen_data.add(row_data)
+        # iterate over each of the date checks now
+        for date_check in all_date_checks:
+            seen_data = set()
+            uclass, lookup, field, unique_for = date_check
+            for form in valid_forms:
+                # see if we have data for both fields
+                if (form.cleaned_data and form.cleaned_data[field] is not None and form.cleaned_data[unique_for] is not None):
+                    # if it's a date lookup we need to get the data for all the fields
+                    if lookup == 'date':
+                        date = form.cleaned_data[unique_for]
+                        date_data = (date.year, date.month, date.day)
+                    # otherwise it's just the attribute on the date/datetime
+                    # object
+                    else:
+                        date_data = (getattr(form.cleaned_data[unique_for], lookup),)
+                    data = (form.cleaned_data[field],) + date_data
+                    # if we've already seen it then we have a uniqueness failure
+                    if data in seen_data:
+                        # poke error messages into the right places and mark
+                        # the form as invalid
+                        errors.append(self.get_date_error_message(date_check))
+                        form._errors[NON_FIELD_ERRORS] = self.error_class([self.get_form_error()])
+                        # remove the data from the cleaned_data dict since it was invalid
+                        del form.cleaned_data[field]
+                    # mark the data as seen
+                    seen_data.add(data)
+
+        if errors:
+            raise forms.ValidationError(errors)
+
+
+# TODO TODO TODO WILL NEED TO CHANGE THIS WITH DJANGO VERSION NO DOUBT
+class BaseInlineFormSetForcedUniqueness(BaseModelFormSetForcedUniqueness, BaseInlineFormSet):
+    def clean(self):
+        self.validate_unique()
+
+
+class DicModelChoiceField(forms.Field):
+    """Special field using dictionary instead of queryset as choices
+    
+    This is to prevent ludicrous numbers of queries
+    """
+    widget = forms.TextInput
+
+    def __init__(self, name, parent, dic, *args, **kwargs):
+        self.name = name
+        self.parent = parent
+        self.dic = dic
+        self.model = self.parent._meta.get_field(self.name).related_model
+
+        super(DicModelChoiceField, self).__init__(*args, **kwargs)
+
+        # Make sure required is set properly
+        self.required = self.widget.required = not (
+            self.parent._meta.get_field_by_name(self.name)[0].null
+            and
+            self.parent._meta.get_field_by_name(self.name)[0].blank
+        )
+
+    def to_python(self, value):
+        if value in self.empty_values:
+            return None
+        try:
+            value = self.dic.get(self.name).get(value)
+        except self.model.DoesNotExist:
+            raise forms.ValidationError(self.error_messages['invalid_choice'], code='invalid_choice')
+        return value
+
+    def valid_value(self, value):
+        "Check to see if the provided value is a valid choice"
+        if unicode(value.id) in self.dic.get(self.name):
+            return True
+        return False
 
 
 # SUBJECT TO CHANGE
@@ -785,7 +916,6 @@ class AssayPlateSetupForm(SignOffMixin, CloneableForm):
         Ensures that the given ID is unique for the current study
         Prevents changes to the setup if there is data uploaded
         """
-
         super(forms.ModelForm, self).clean()
 
         # Make sure the barcode/id is unique in the study
@@ -1474,12 +1604,12 @@ class AssaySetupCompoundForm(forms.ModelForm):
         model = AssaySetupCompound
         exclude = tracking
 
-        widgets = {
-            'matrix_item': forms.TextInput(),
-            'compound_instance': forms.TextInput(),
-            'concentration_unit': forms.TextInput(),
-            'addition_location': forms.TextInput(),
-        }
+        # widgets = {
+        #     'matrix_item': forms.TextInput(),
+        #     'compound_instance': forms.TextInput(),
+        #     'concentration_unit': forms.TextInput(),
+        #     'addition_location': forms.TextInput(),
+        # }
 
     def __init__(self, *args, **kwargs):
         # self.static_choices = kwargs.pop('static_choices', None)
@@ -1487,7 +1617,14 @@ class AssaySetupCompoundForm(forms.ModelForm):
 
 
 # TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
-class AssaySetupCompoundFormSet(BaseModelFormSet):
+class AssaySetupCompoundFormSet(BaseModelFormSetForcedUniqueness):
+    custom_fields = (
+        'matrix_item',
+        'compound_instance',
+        'concentration_unit',
+        'addition_location'
+    )
+
     def __init__(self, *args, **kwargs):
         # TODO EVENTUALLY PASS WITH KWARG
         # self.suppliers = kwargs.pop('suppliers', None)
@@ -1537,6 +1674,13 @@ class AssaySetupCompoundFormSet(BaseModelFormSet):
         }
 
         super(AssaySetupCompoundFormSet, self).__init__(*args, **kwargs)
+
+        filters = {'matrix_item': {'matrix_id': self.matrix.id}}
+        self.dic = get_dic_for_custom_choice_field(self, filters=filters)
+
+        for form in self.forms:
+            for field in self.custom_fields:
+                form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
 
     def _construct_form(self, i, **kwargs):
         form = super(AssaySetupCompoundFormSet, self)._construct_form(i, **kwargs)
@@ -1616,6 +1760,8 @@ class AssaySetupCompoundFormSet(BaseModelFormSet):
 
                 if duration <= 0:
                     form.add_error('duration', 'Duration cannot be zero or negative.')
+
+        super(AssaySetupCompoundFormSet, self).clean()
 
     # TODO TODO TODO
     # Will either have to decouple compound instance and supplier or else have a dic ALL FORMSETS reference
@@ -1738,13 +1884,13 @@ class AssaySetupCellForm(forms.ModelForm):
         model = AssaySetupCell
         exclude = tracking
 
-        widgets = {
-            'matrix_item': forms.TextInput(),
-            'cell_sample': forms.TextInput(),
-            'biosensor': forms.TextInput(),
-            'density_unit': forms.TextInput(),
-            'addition_location': forms.TextInput(),
-        }
+        # widgets = {
+        #     'matrix_item': forms.TextInput(),
+        #     'cell_sample': forms.TextInput(),
+        #     'biosensor': forms.TextInput(),
+        #     'density_unit': forms.TextInput(),
+        #     'addition_location': forms.TextInput(),
+        # }
 
     def __init__(self, *args, **kwargs):
         # self.static_choices = kwargs.pop('static_choices', None)
@@ -1752,11 +1898,25 @@ class AssaySetupCellForm(forms.ModelForm):
 
 
 # TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
-class AssaySetupCellFormSet(BaseModelFormSet):
+class AssaySetupCellFormSet(BaseModelFormSetForcedUniqueness):
+    custom_fields = (
+        'matrix_item',
+        'cell_sample',
+        'biosensor',
+        'density_unit',
+        'addition_location'
+    )
+
     def __init__(self, *args, **kwargs):
-        # TODO EVENTUALLY PASS WITH KWARG
-        # self.cached_fields = kwargs.pop('cached_fields', None)
+        self.matrix = kwargs.pop('matrix', None)
         super(AssaySetupCellFormSet, self).__init__(*args, **kwargs)
+
+        filters = {'matrix_item': {'matrix_id': self.matrix.id}}
+        self.dic = get_dic_for_custom_choice_field(self, filters=filters)
+
+        for form in self.forms:
+            for field in self.custom_fields:
+                form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
 
     # NOT DRY
     def _construct_form(self, i, **kwargs):
@@ -1781,21 +1941,21 @@ class AssaySetupCellFormSet(BaseModelFormSet):
 
         return form
 
-    def clean(self):
-        """Checks to make sure duration is valid"""
-        for index, form in enumerate(self.forms):
-            current_data = form.cleaned_data
-
-            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
-                addition_time = 0
-                # duration = 0
-                for time_unit, conversion in TIME_CONVERSIONS.items():
-                    addition_time += current_data.get('addition_time_' + time_unit, 0) * conversion
-                # TODO NO DURATION IN CELLS AT THE MOMENT
-                #     duration += current_data.get('duration_' + time_unit, 0) * conversion
-                #
-                # if duration <= 0:
-                #     form.add_error('duration', 'Duration cannot be zero or negative.')
+    # def clean(self):
+    #     """Checks to make sure duration is valid"""
+    #     for index, form in enumerate(self.forms):
+    #         current_data = form.cleaned_data
+    #
+    #         if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+    #             addition_time = 0
+    #             duration = 0
+    #             for time_unit, conversion in TIME_CONVERSIONS.items():
+    #                 addition_time += current_data.get('addition_time_' + time_unit, 0) * conversion
+    #             # TODO NO DURATION IN CELLS AT THE MOMENT
+    #                 duration += current_data.get('duration_' + time_unit, 0) * conversion
+    #
+    #             if duration <= 0:
+    #                 form.add_error('duration', 'Duration cannot be zero or negative.')
 
 
 class AssaySetupSettingForm(forms.ModelForm):
@@ -1803,21 +1963,36 @@ class AssaySetupSettingForm(forms.ModelForm):
         model = AssaySetupCell
         exclude = tracking
 
-        widgets = {
-            'matrix_item': forms.TextInput(),
-            'setting': forms.TextInput(),
-            'unit': forms.TextInput(),
-            'addition_location': forms.TextInput(),
-        }
+        # widgets = {
+        #     'matrix_item': forms.TextInput(),
+        #     'setting': forms.TextInput(),
+        #     'unit': forms.TextInput(),
+        #     'addition_location': forms.TextInput(),
+        # }
 
     def __init__(self, *args, **kwargs):
         # self.static_choices = kwargs.pop('static_choices', None)
         super(AssaySetupSettingForm, self).__init__(*args, **kwargs)
 
 
-class AssaySetupSettingFormSet(BaseModelFormSet):
+class AssaySetupSettingFormSet(BaseModelFormSetForcedUniqueness):
+    custom_fields = (
+        'matrix_item',
+        'setting',
+        'unit',
+        'addition_location'
+    )
+
     def __init__(self, *args, **kwargs):
+        self.matrix = kwargs.pop('matrix', None)
         super(AssaySetupSettingFormSet, self).__init__(*args, **kwargs)
+
+        filters = {'matrix_item': {'matrix_id': self.matrix.id }}
+        self.dic = get_dic_for_custom_choice_field(self, filters=filters)
+
+        for form in self.forms:
+            for field in self.custom_fields:
+                form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
 
     def _construct_form(self, i, **kwargs):
         form = super(AssaySetupSettingFormSet, self)._construct_form(i, **kwargs)
@@ -1855,6 +2030,24 @@ class AssaySetupSettingFormSet(BaseModelFormSet):
 
         return form
 
+    # TODO TODO TODO
+    def clean(self):
+        """Checks to make sure duration is valid"""
+        for index, form in enumerate(self.forms):
+            current_data = form.cleaned_data
+
+            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                addition_time = 0
+                duration = 0
+                for time_unit, conversion in TIME_CONVERSIONS.items():
+                    addition_time += current_data.get('addition_time_' + time_unit, 0) * conversion
+                    duration += current_data.get('duration_' + time_unit, 0) * conversion
+
+                if duration <= 0:
+                    form.add_error('duration', 'Duration cannot be zero or negative.')
+
+        super(AssaySetupSettingFormSet, self).clean()
+
 AssaySetupCompoundFormSetFactory = modelformset_factory(
     AssaySetupCompound,
     extra=1,
@@ -1886,25 +2079,47 @@ class AssayMatrixItemForm(forms.ModelForm):
         model = AssayMatrixItem
         exclude = ('study',) + tracking
 
-        widgets = {
-            'device': forms.TextInput(),
-            'organ_model': forms.TextInput(),
-            'organ_model_protocol': forms.TextInput(),
-            'failure_reason': forms.TextInput(),
-        }
+        # widgets = {
+        #     'device': forms.TextInput(),
+        #     'organ_model': forms.TextInput(),
+        #     'organ_model_protocol': forms.TextInput(),
+        #     'failure_reason': forms.TextInput(),
+        # }
+
+    def clean(self):
+        # Add back study
+        # This gets a little, uh... unorthodox...
+        self._meta.exclude = tracking
+        self.fields['study'] = forms.CharField(initial=self.instance.study)
+
+        super(AssayMatrixItemForm, self).clean()
+
+        self.cleaned_data['study'] = self.instance.study
 
 
 # TODO NEED TO TEST
-class AssayMatrixItemFormSet(BaseInlineFormSet):
+class AssayMatrixItemFormSet(BaseInlineFormSetForcedUniqueness):
+    custom_fields = (
+        'device',
+        'organ_model',
+        'organ_model_protocol',
+        'failure_reason'
+    )
+
     def __init__(self, *args, **kwargs):
         # Get the study
         self.study = kwargs.pop('study', None)
         self.user = kwargs.pop('user', None)
         super(AssayMatrixItemFormSet, self).__init__(*args, **kwargs)
 
+        self.dic = get_dic_for_custom_choice_field(self)
+
         for form in self.forms:
             if self.study:
                 form.instance.study = self.study
+
+            for field in self.custom_fields:
+                form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
 
 
 AssayMatrixItemFormSetFactory = inlineformset_factory(

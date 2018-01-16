@@ -1524,6 +1524,9 @@ class AssayMatrixItem(FlaggableModel):
     # Do we want this is to be table or a static list?
     failure_reason = models.ForeignKey(AssayFailureReason, blank=True, null=True)
 
+    def __unicode__(self):
+        return unicode(self.id)
+
 
 # class AssaySetup(FlaggableModel):
 #     """The configuration of a Chip or Well for implementing an assay"""
@@ -1620,7 +1623,9 @@ class AssaySetupCell(models.Model):
                 # Skip density
                 # 'density',
                 'density_unit',
-                'passage'
+                'passage',
+                'addition_time',
+                'addition_location'
                 # Will we need addition time and location here?
             )
         ]
@@ -1785,10 +1790,11 @@ class AssaySetupCompound(models.Model):
                 # 'setup',
                 'matrix_item',
                 'compound_instance',
-                'concentration',
-                'concentration_unit',
+                # 'concentration',
+                # 'concentration_unit',
                 'addition_time',
-                'duration'
+                'duration',
+                'addition_location'
             )
         ]
 
@@ -1948,6 +1954,19 @@ class AssaySetting(LockableModel):
 
 class AssaySetupSetting(models.Model):
     """Defines a setting as it relates to a setup"""
+    class Meta(object):
+        unique_together = [
+            (
+                # 'setup',
+                'matrix_item',
+                'setting',
+                'unit',
+                'addition_time',
+                'duration',
+                'addition_location'
+            )
+        ]
+
     # Now binds directly to items
     matrix_item = models.ForeignKey(AssayMatrixItem)
 

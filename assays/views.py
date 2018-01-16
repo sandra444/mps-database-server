@@ -3743,6 +3743,8 @@ class AssayMatrixUpdate(UpdateView):
         ).order_by(
             'row_index',
             'column_index'
+        ).prefetch_related(
+            'device'
         )
 
         if self.request.POST:
@@ -3764,6 +3766,7 @@ class AssayMatrixUpdate(UpdateView):
                 queryset=AssaySetupCell.objects.filter(
                     matrix_item__in=matrix_item_queryset
                 ),
+                matrix=self.object,
                 prefix='cell'
             )
             context['setting_formset'] = AssaySetupSettingFormSetFactory(
@@ -3771,6 +3774,7 @@ class AssayMatrixUpdate(UpdateView):
                 queryset=AssaySetupSetting.objects.filter(
                     matrix_item__in=matrix_item_queryset
                 ),
+                matrix=self.object,
                 prefix='setting'
             )
         else:
@@ -3789,12 +3793,14 @@ class AssayMatrixUpdate(UpdateView):
                 queryset=AssaySetupCell.objects.filter(
                     matrix_item__in=matrix_item_queryset
                 ),
+                matrix=self.object,
                 prefix='cell'
             )
             context['setting_formset'] = AssaySetupSettingFormSetFactory(
                 queryset=AssaySetupSetting.objects.filter(
                     matrix_item__in=matrix_item_queryset
                 ),
+                matrix=self.object,
                 prefix='setting'
             )
 
@@ -3824,6 +3830,7 @@ class AssayMatrixUpdate(UpdateView):
             queryset=AssaySetupCell.objects.filter(
                 matrix_item__in=matrix_item_queryset
             ),
+            matrix=self.object,
             prefix='cell'
         )
         setting_formset = AssaySetupSettingFormSetFactory(
@@ -3831,6 +3838,7 @@ class AssayMatrixUpdate(UpdateView):
             queryset=AssaySetupSetting.objects.filter(
                 matrix_item__in=matrix_item_queryset
             ),
+            matrix=self.object,
             prefix='setting'
         )
 
@@ -3846,8 +3854,6 @@ class AssayMatrixUpdate(UpdateView):
         for formset in formsets:
             if not formset.is_valid():
                 formsets_are_valid = False
-
-        print len(compound_formset.forms)
 
         if form.is_valid() and formsets_are_valid:
             save_forms_with_tracking(self, form, formset=formsets)
