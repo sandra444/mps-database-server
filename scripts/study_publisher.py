@@ -32,7 +32,9 @@ def run():
     datetime_now_local = datetime.now(tz)
 
     signed_off_restricted_studies = AssayRun.objects.filter(
-        restricted=True
+        restricted=True,
+        # PLEASE NOTE: Locking a study will prevent this script from interacting with it
+        locked=False
     ).exclude(
         signed_off_by_id=None
     )
