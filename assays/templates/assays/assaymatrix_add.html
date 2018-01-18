@@ -318,36 +318,50 @@
     </div>
 
     {# START TESTING #}
-    {{ matrix_item_formset.management_form }}
+    {{ item_formset.management_form }}
     {{ compound_formset.management_form }}
     {{ cell_formset.management_form }}
     {{ setting_formset.management_form }}
 
     <h2>Matrix Items</h2>
-    {{ matrix_item_formset.non_form_errors }}
-    {% for form in matrix_item_formset %}
-        <div id="{{ form.prefix }}" class="matrix_item_form">
+    <div id="{{ item_formset.prefix }}">
+    {{ item_formset.non_form_errors }}
+    {% for form in item_formset %}
+        <div id="{{ form.prefix }}" class="{{ item_formset.prefix }}">
             {{ form }}
         </div>
     {% endfor %}
+    </div>
 
     <h2>Compounds</h2>
+    <div id="{{ compound_formset.prefix }}">
     {{ compound_formset.non_form_errors }}
     {% for form in compound_formset %}
-        {{ form }}
+        <div class="{{ compound_formset.prefix }}">
+            {{ form }}
+        </div>
     {% endfor %}
+    </div>
 
     <h2>Cells</h2>
+    <div id="{{ cell_formset.prefix }}">
     {{ cell_formset.non_form_errors }}
     {% for form in cell_formset %}
-        {{ form }}
+        <div class="{{ cell_formset.prefix }}">
+            {{ form }}
+        </div>
     {% endfor %}
+    </div>
 
     <h2>Settings</h2>
+    <div id="{{ setting_formset.prefix }}">
     {{ setting_formset.non_form_errors }}
     {% for form in setting_formset %}
-        {{ form }}
+        <div class="{{ setting_formset.prefix }}">
+            {{ form }}
+        </div>
     {% endfor %}
+    </div>
     {# End Testing #}
 
     {# Cellsample Selection Stuff #}
@@ -374,6 +388,7 @@
                 {% for cellsample in cellsamples %}
                     <tr class="cellsample">
                         <td>
+                            {# TODO: Uhhh... the ID is the pk... really? Please revise. #}
                             <button type="button" class="cellsample-selector btn btn-xs btn-primary" id={{ cellsample.id }} name="{{ cellsample }}">Select</button>
                         </td>
                         <td>{{ cellsample.id }}</td>
@@ -430,9 +445,9 @@
                 </div>
             </div>
         </div>
-        <div class="item-cells_section item-setup_set_section"></div>
-        <div class="item-compounds_section item-setup_set_section"></div>
-        <div class="item-settings_section item-setup_set_section"></div>
+        <div class="item-cell item-setup_set_section"></div>
+        <div class="item-compound item-setup_set_section"></div>
+        <div class="item-setting item-setup_set_section"></div>
     </td>
     </tr>
     </table>
@@ -440,16 +455,16 @@
     <div id="empty_cell_html">
         <div class="alert alert-success">
             <div>
-                <span class="item-cell_sample"></span>
-                <span class="item-passage"></span>
+                <span class="cell-cell_sample"></span>
+                <span class="cell-passage"></span>
 {#                <a class="pull-right btn btn-xs btn-danger">#}
 {#                    <span class="glyphicon glyphicon-remove"></span>#}
 {#                </a>#}
             </div>
-            <div class="item-biosensor"></div>
+            <div class="cell-biosensor"></div>
             <div>
-                <span class="item-density"></span>
-                <span class="item-density_unit"></span>
+                <span class="cell-density"></span>
+                <span class="cell-density_unit"></span>
             </div>
         </div>
     </div>
@@ -457,37 +472,38 @@
     <div id="empty_compound_html">
         <div class="alert alert-info">
             <div>
-                <span class="item-compound"></span>
-                <span class="item-concentration"></span>
-                <span class="item-concentration_unit"></span>
+                <span class="compound-compound"></span>
+                <span class="compound-concentration"></span>
+                <span class="compound-concentration_unit"></span>
 {#                <a class="pull-right btn btn-xs btn-danger">#}
 {#                    <span class="glyphicon glyphicon-remove"></span>#}
 {#                </a>#}
             </div>
             <div>
-                <span class="item-supplier_text"></span>
-                <span class="item-lot_text"></span>
+                <span class="compound-supplier_text"></span>
+                <span class="compound-lot_text"></span>
             </div>
-            <div class="item-receipt_date"></div>
-            <div class="item-addition_time_section">
+            <div class="compound-receipt_date"></div>
+            <div class="compound-addition_time_section">
                 <span>Added on D</span>
-                <span class="item-addition_time_day"></span>
+                <span class="compound-addition_time_day"></span>
                 <span>H</span>
-                <span class="item-addition_time_hour"></span>
+                <span class="compound-addition_time_hour"></span>
                 <span>M</span>
-                <span class="item-addition_time_minute"></span>
+                <span class="compound-addition_time_minute"></span>
             </div>
-            <div class="item-duration_section">
+            <div class="compound-duration_section">
                 <span>Duration of D</span>
-                <span class="item-duration_day"></span>
+                <span class="compound-duration_day"></span>
                 <span>H</span>
-                <span class="item-duration_hour"></span>
+                <span class="compound-duration_hour"></span>
                 <span>M</span>
-                <span class="item-duration_minute"></span>
+                <span class="compound-duration_minute"></span>
             </div>
         </div>
     </div>
 
+    {# TODO TODO TODO #}
     <div id="empty_setting_html">
         <div></div>
     </div>
