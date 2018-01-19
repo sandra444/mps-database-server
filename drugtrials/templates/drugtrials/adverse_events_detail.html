@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load humanize %}
 
 {% block load %}
     <script src="{% static "drugtrials/get_adverse_events.js" %}"></script>
@@ -155,7 +156,7 @@
             <tr>
                 <td><button class="plot_ae" data-adverse-event="{{ adverse_event.event }}">Toggle Plot</button></td>
                 <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
-                <td>{{ adverse_event.frequency }}</td>
+                <td>{{ adverse_event.frequency|intcomma }}</td>
                 <td>{{ adverse_event.event.organ|default:"" }}</td>
             </tr>
         {% endfor %}

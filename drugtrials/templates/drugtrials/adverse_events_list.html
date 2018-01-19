@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load humanize %}
 
 {% block load %}
     <script src="{% static "js/project_filter.js" %}"></script>
@@ -39,7 +40,7 @@
                     <td><a class="btn btn-primary" href="{{ adverse_event.compound.id }}">View</a></td>
                     <td><a href="/compounds/{{ adverse_event.compound.compound.id }}">{{ adverse_event.compound.compound }}</a></td>
                     <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
-                    <td>{{ adverse_event.frequency }}</td>
+                    <td>{{ adverse_event.frequency|intcomma }}</td>
                     <td>{{ adverse_event.event.organ|default:"" }}</td>
                     <td>
                         {% if adverse_event.compound.black_box %}
