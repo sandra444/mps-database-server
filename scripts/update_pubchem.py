@@ -520,13 +520,13 @@ def run():
         targets = {
             bio.assay.target: True for bio in PubChemBioactivity.objects.filter(
                 activity_name=bio_type
-            ).select_related('assay__target')
+            ).prefetch_related('assay__target')
         }
         for target in targets:
             current_bio = PubChemBioactivity.objects.filter(
                 activity_name=bio_type,
                 assay__target=target
-            ).select_related('assay__target')
+            ).prefetch_related('assay__target')
 
             bio_pk = [bio.id for bio in current_bio]
             bio_value = np.array([bio.value for bio in current_bio])
@@ -551,7 +551,7 @@ def run():
     # Flag questionable entries
     print 'Flagging questionable entries...'
 
-    all_pubchem = PubChemBioactivity.objects.all().prefetch_related('compound').select_related('assay__target')
+    all_pubchem = PubChemBioactivity.objects.all().prefetch_related('compound', 'assay__target')
 
     bio_types = {bio.activity_name: True for bio in all_pubchem}
     bio_compounds = {bio.compound: True for bio in all_pubchem}
