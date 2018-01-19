@@ -9,7 +9,7 @@ def run():
 
     failed = []
 
-    for compound in OpenFDACompound.objects.all().select_related('compound'):
+    for compound in OpenFDACompound.objects.all().prefetch_related('compound'):
         compound_name = compound.compound.name
         if compound_name in normalize:
             compound.estimated_usage = normalize.get(compound_name)

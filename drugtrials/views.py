@@ -15,8 +15,7 @@ class DrugTrialList(ListView):
             'drug_trial',
             'descriptor',
             'finding_name',
-            'value_units'
-        ).select_related(
+            'value_units',
             'drug_trial__compound',
             'drug_trial__species',
             'finding_name__organ',
@@ -42,8 +41,7 @@ class DrugTrialDetail(DetailView):
             'drug_trial',
             'descriptor',
             'finding_name',
-            'value_units'
-        ).select_related(
+            'value_units',
             'drug_trial__compound',
             'drug_trial__species',
             'finding_name__organ',
@@ -118,8 +116,7 @@ class AdverseEventsList(ListView):
     def get_queryset(self):
         queryset = CompoundAdverseEvent.objects.prefetch_related(
             'compound',
-            'event'
-        ).select_related(
+            'event',
             'compound__compound',
             'event__organ'
         ).all()
@@ -140,8 +137,7 @@ class AdverseEventDetail(DetailView):
         events = CompoundAdverseEvent.objects.filter(
             compound=self.object
         ).prefetch_related(
-            'event'
-        ).select_related(
+            'event',
             'event__organ'
         ).order_by('-frequency')
 
