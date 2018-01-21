@@ -3750,6 +3750,29 @@ class AssayMatrixUpdate(UpdateView):
             'device'
         )
 
+        # TODO SORTING CAN MAKE SURE THAT THE FORMS APPEAR IN THE RIGHT ORDER, BUT DECREASE PERFORMANCE
+        compound_queryset = AssaySetupCompound.objects.filter(
+            matrix_item__in=matrix_item_queryset
+        ).order_by(
+            'addition_time',
+            'compound_instance'
+        )
+
+        cell_queryset = AssaySetupCell.objects.filter(
+            matrix_item__in=matrix_item_queryset
+        ).order_by(
+            'addition_time',
+            'cell_sample',
+        )
+
+        setting_queryset = AssaySetupSetting.objects.filter(
+            matrix_item__in=matrix_item_queryset
+        ).order_by(
+            'addition_time',
+            'setting',
+            'unit'
+        )
+
         if self.request.POST:
             context['item_formset'] = AssayMatrixItemFormSetFactory(
                 self.request.POST,
@@ -3759,25 +3782,19 @@ class AssayMatrixUpdate(UpdateView):
             )
             context['compound_formset'] = AssaySetupCompoundFormSetFactory(
                 self.request.POST,
-                queryset=AssaySetupCompound.objects.filter(
-                    matrix_item__in=matrix_item_queryset
-                ),
+                queryset=compound_queryset,
                 matrix=self.object,
                 prefix='compound'
             )
             context['cell_formset'] = AssaySetupCellFormSetFactory(
                 self.request.POST,
-                queryset=AssaySetupCell.objects.filter(
-                    matrix_item__in=matrix_item_queryset
-                ),
+                queryset=cell_queryset,
                 matrix=self.object,
                 prefix='cell'
             )
             context['setting_formset'] = AssaySetupSettingFormSetFactory(
                 self.request.POST,
-                queryset=AssaySetupSetting.objects.filter(
-                    matrix_item__in=matrix_item_queryset
-                ),
+                queryset=setting_queryset,
                 matrix=self.object,
                 prefix='setting'
             )
@@ -3788,23 +3805,17 @@ class AssayMatrixUpdate(UpdateView):
                 prefix='item'
             )
             context['compound_formset'] = AssaySetupCompoundFormSetFactory(
-                queryset=AssaySetupCompound.objects.filter(
-                    matrix_item__in=matrix_item_queryset
-                ),
+                queryset=compound_queryset,
                 matrix=self.object,
                 prefix='compound'
             )
             context['cell_formset'] = AssaySetupCellFormSetFactory(
-                queryset=AssaySetupCell.objects.filter(
-                    matrix_item__in=matrix_item_queryset
-                ),
+                queryset=cell_queryset,
                 matrix=self.object,
                 prefix='cell'
             )
             context['setting_formset'] = AssaySetupSettingFormSetFactory(
-                queryset=AssaySetupSetting.objects.filter(
-                    matrix_item__in=matrix_item_queryset
-                ),
+                queryset=setting_queryset,
                 matrix=self.object,
                 prefix='setting'
             )
@@ -3823,6 +3834,7 @@ class AssayMatrixUpdate(UpdateView):
             queryset=matrix_item_queryset,
             prefix='item'
         )
+        # Order no longer matters really
         compound_formset = AssaySetupCompoundFormSetFactory(
             self.request.POST,
             queryset=AssaySetupCompound.objects.filter(

@@ -21,14 +21,16 @@
     </li>
 {% endblock %}
 
-{% block content %}
+{# TODO MAKE SURE FLUID CONTENT STUFF IS NEAT #}
+{% block fluid-content %}
     {% if update %}
         <form enctype="multipart/form-data" class="form-horizontal" method="post" >
-
+        <div class="container">
         <h1>
             Edit Matrix <em>{{ object }}</em>
     {% else %}
         <form enctype="multipart/form-data" class="form-horizontal" method="post" >
+        <div class="container">
         <h1>
             Add Matrix
     {% endif %}
@@ -308,7 +310,11 @@
     </div>
 {#    </form>#}
 
-    <div class="padded-bottom">
+    {# TERMINATE CONTENT #}
+    </div>
+
+    {# FLUID CONTENT HERE ON #}
+    <div class="well padded-bottom">
     <div id="matrix_wrapper" class="overflow-auto" style="max-height:800px;">
         {# NO INLINE STYLE PLEASE #}
         <table id="matrix_table" class="table ">
@@ -337,7 +343,7 @@
     <div id="{{ compound_formset.prefix }}">
     {{ compound_formset.non_form_errors }}
     {% for form in compound_formset %}
-        <div class="{{ compound_formset.prefix }}">
+        <div id="{{ form.prefix }}" class="{{ compound_formset.prefix }}">
             {{ form }}
         </div>
     {% endfor %}
@@ -347,7 +353,7 @@
     <div id="{{ cell_formset.prefix }}">
     {{ cell_formset.non_form_errors }}
     {% for form in cell_formset %}
-        <div class="{{ cell_formset.prefix }}">
+        <div id="{{ form.prefix }}" class="{{ cell_formset.prefix }}">
             {{ form }}
         </div>
     {% endfor %}
@@ -357,7 +363,7 @@
     <div id="{{ setting_formset.prefix }}">
     {{ setting_formset.non_form_errors }}
     {% for form in setting_formset %}
-        <div class="{{ setting_formset.prefix }}">
+        <div id="{{ form.prefix }}" class="{{ setting_formset.prefix }}">
             {{ form }}
         </div>
     {% endfor %}
@@ -452,6 +458,7 @@
     </tr>
     </table>
 
+    {# TODO ADDITION LOCATION #}
     <div id="empty_cell_html">
         <div class="alert alert-success">
             <div>
@@ -469,6 +476,7 @@
         </div>
     </div>
 
+    {# TODO ADDITION LOCATION #}
     <div id="empty_compound_html">
         <div class="alert alert-info">
             <div>
@@ -505,7 +513,11 @@
 
     {# TODO TODO TODO #}
     <div id="empty_setting_html">
-        <div></div>
+        <div class="alert alert-danger">
+            <span class="setting-setting"></span>
+            <span class="setting-value"></span>
+            <span class="setting-unit"></span>
+        </div>
     </div>
 
     </div>

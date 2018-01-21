@@ -39,14 +39,13 @@ $(document).ready(function () {
     // var initial_number_of_columns = 0;
 
     // CRUDE AND BAD
-    // var item_prefix = 'assaymatrixitem_set';
-    // var cell_prefix = 'assaysetupcell_set';
-    // var setting_prefix = 'assaysetupsetting_set';
-    // var compound_prefix = 'assaysetupcompound_set';
     var item_prefix = 'item';
     var cell_prefix = 'cell';
     var setting_prefix = 'setting';
     var compound_prefix = 'compound';
+
+    var item_data_attribute = 'data-form-index';
+    var item_id_attribute = 'data-item-id';
 
     var prefixes = [
         item_prefix,
@@ -60,13 +59,7 @@ $(document).ready(function () {
     var empty_cell_html = $('#empty_cell_html').children();
     var empty_setting_html = $('#empty_setting_html').children();
 
-    // NO, JS ACCEPTS STRING LITERALS
-    // var empty_html = {
-    //     item_prefix: empty_item_html,
-    //     compound_prefix: empty_compound_html,
-    //     cell_prefix: empty_cell_html,
-    //     setting_prefix: empty_setting_html
-    // };
+    // JS ACCEPTS STRING LITERALS IN OBJECT INITIALIZATION
     var empty_html = {};
     empty_html[item_prefix] = empty_item_html;
     empty_html[compound_prefix] = empty_compound_html;
@@ -87,18 +80,17 @@ $(document).ready(function () {
     var empty_cell_form = $('#' + cell_prefix + '-' + cell_final_index).html();
     var empty_compound_form = $('#' + compound_prefix + '-' + compound_final_index).html();
 
-    // NO!
-    // var empty_forms = {
-    //     item_prefix: empty_item_form,
-    //     compound_prefix: empty_compound_form,
-    //     cell_prefix: empty_cell_form,
-    //     setting_prefix: empty_setting_form
-    // };
     var empty_forms = {};
     empty_forms[item_prefix] = empty_item_form;
     empty_forms[compound_prefix] = empty_compound_form;
     empty_forms[cell_prefix] = empty_cell_form;
     empty_forms[setting_prefix] = empty_setting_form;
+
+    var final_indexes = {};
+    final_indexes[item_prefix] = item_final_index;
+    final_indexes[compound_prefix] = compound_final_index;
+    final_indexes[cell_prefix] = cell_final_index;
+    final_indexes[setting_prefix] = setting_final_index;
 
     // For converting between times
     var time_conversions = {
@@ -107,31 +99,36 @@ $(document).ready(function () {
         'minute': 1.0
     };
 
-    function add_item_form() {
-        // Can't cache this, need to check every call!
-        var number_of_forms = $('.' + item_prefix).length;
+    // For using incrementers
+    // TODO TODO SUBJECT TO CHANGE
+    var incrementers = {
+        'concentration': {
+            'increment': $('#id_compound_concentration_increment'),
+            'type': $('#id_compound_concentration_increment_type'),
+            'direction': $('#id_compound_concentration_increment_direction')
+        }
+    };
 
-        var regex_to_replace_old_index = new RegExp("/\-" + item_final_index +"\-/g");
-        var new_html = empty_item_form.replace(regex_to_replace_old_index,'-' + number_of_forms + '-');
-        var new_form = $('<div>')
-            .html(new_html)
-            .attr('id', item_prefix + '-' + number_of_forms);
-
-        // TODO REVISE THIS, SHOULD BE APPENDED TO ITEM FORMSET
-        // Just arbitrarily append to the page
-        page_selector.append(new_form);
-
-        // Make a form for each subform type
-        $.each(empty_html, function(form_type, content) {
-            add_sub_form(number_of_forms, form_type)
-        });
+    function add_form(prefix, form) {
+        var formset = $('#' + prefix);
+        formset.append(form);
     }
 
-    // TODO JUST A TEST
-    add_item_form();
+    function generate_form(prefix) {
+        // TODO TODO TODO
+        // Can't cache this, need to check every call!
+        var number_of_forms = $('.' + prefix).length;
+        var regex_to_replace_old_index = new RegExp("\-" + final_indexes[prefix] + "\-", 'g');
 
-    function add_sub_form(current_matrix_item_index, prefix) {
-        var new_html = empty_forms[prefix];
+        var new_html = empty_forms[prefix].replace(regex_to_replace_old_index,'-' + number_of_forms + '-');
+        var new_form = $('<div>')
+            .html(new_html)
+            .attr('id', prefix + '-' + number_of_forms)
+            .addClass(prefix);
+
+        // TODO TODO TODO ITEM FORMS NEED TO HAVE ROW AND COLUMN INDICES
+
+        return new_form;
     }
 
     // DEPRECATED
@@ -190,19 +187,24 @@ $(document).ready(function () {
                     column_name = '0' + column_name;
                 }
 
+                var value = current_global_name + row_name + column_name;
+
                 // TODO TODO TODO PERFORM THE ACTUAL APPLICATION TO THE FORMS
+                // TODO TODO TODO PERFORM THE ACTUAL APPLICATION TO THE FORMS
+                // Set display
+                var item_display = $('#'+ current_item_id);
+                item_display.find('.item-name').html(value);
+                // Set form
+                $('#id_' + item_prefix + '-' + item_display.attr(item_data_attribute) + '-name').val(value);
             }
         }
-
-        // TODO CHANGE THE DISPLAYS BY REFERRING TO THE NEWLY CHANGED FORMS
-        // TODO HAVE A FUNCTION TO DO ABOVE
     }
 
     // This function gets the initial dimensions of the matrix
     // Please see the corresponding AJAX call as necessary
     // TODO PLEASE ADD CHECKS TO SEE IF EXISTING DATA FALLS OUTSIDE NEW BOUNDS
     // TODO PLEASE NOTE THAT THIS GETS RUN A MILLION TIMES DO TO HOW TRIGGERS ARE SET UP
-    // TODO MAKE A VARIABLE TO SEE WHETHER DATA WAS ALREADY AQUIRED
+    // TODO MAKE A VARIABLE TO SEE WHETHER DATA WAS ALREADY ACQUIRED
     var get_matrix_dimensions = function() {
         var current_device = device_selector.val();
 
@@ -265,6 +267,8 @@ $(document).ready(function () {
     var build_initial_matrix = function(number_of_rows, number_of_columns) {
         matrix_body_selector.empty();
 
+        // Check to see if new forms will be generated
+
         for (var row_index=0; row_index < number_of_rows; row_index++) {
             var row_id = 'row_' + row_index;
             var current_row = $('<tr>')
@@ -278,8 +282,11 @@ $(document).ready(function () {
                 current_row.append(new_cell);
             }
             matrix_body_selector.append(current_row);
+
+            // Generate forms here
         }
 
+        // Don't run this if the forms are all new anyway
         // TODO TODO TODO NEED A REAL FUNCTION FOR THIS
         refresh_all_contents_from_forms();
     };
@@ -296,6 +303,11 @@ $(document).ready(function () {
     }
 
     function get_display_for_field(field, field_name, prefix) {
+        // If the value of the field is null, don't bother!
+        if (!field.val()) {
+            return null;
+        }
+
         // NOTE: SPECIAL EXCEPTION FOR CELL SAMPLES
         if (field_name === 'cell_sample') {
             // TODO VERY POORLY DONE
@@ -329,8 +341,7 @@ $(document).ready(function () {
 
     function get_display_id_from_subform(subform) {
         var parent_item_id = subform.find('input[name$="matrix_item"]').val();
-        // console.log(parent_item_id);
-        var parent_form = $('.' + item_prefix + '> input[value="' + parent_item_id + '"').parent();
+        var parent_form = $('.' + item_prefix + '> input[name$="-id"][value="' + parent_item_id + '"]').parent();
         return get_display_from_item_form(parent_form);
     }
 
@@ -345,17 +356,22 @@ $(document).ready(function () {
         $.each(prefixes, function(index, prefix) {
             // Iterate over all forms
             $('.' + prefix).each(function() {
+                var display = null;
+                var new_subdisplay = null;
                 // Get the display to add to here TODO TODO TODO
                 if (prefix === item_prefix) {
-                    var display = get_display_from_item_form($(this));
-                    var new_subdisplay = null;
+                    display = get_display_from_item_form($(this));
+                    var current_item_index = $(this).attr('id').split('-');
+                    // TODO TODO TODO I NEED TO THINK ABOUT THE CONSEQUENCES OF THIS
+                    display.attr(item_data_attribute, current_item_index[current_item_index.length - 1]);
+                    display.attr(item_id_attribute, $(this).find('input[name$="-id"]').val());
                 }
                 // Generate a subdisplay if this is not item TODO TODO TODO
                 // Add the subdisplay to the display
                 else {
                     // console.log($(this));
-                    var display = get_display_id_from_subform($(this));
-                    var new_subdisplay = empty_html[prefix].clone();
+                    display = get_display_id_from_subform($(this));
+                    new_subdisplay = empty_html[prefix].clone();
                 }
 
                 // Iterate over all fields
@@ -373,19 +389,9 @@ $(document).ready(function () {
                 });
 
                 if (new_subdisplay) {
-                    display.append(new_subdisplay);
+                    display.find('.item-' + prefix).append(new_subdisplay);
                 }
             });
-        });
-    }
-
-    function apply_matrix_item_contents() {
-
-    }
-
-    function add_to_item_fields(fields) {
-        $('.ui-selected').each(function() {
-
         });
     }
 
@@ -420,12 +426,27 @@ $(document).ready(function () {
 
             value = first_half + incremented_value + second_half;
 
+            // Set display
             $(this).find('.item-name').html(value);
-            // item_data[current_item_id]['name'] = value;
+            // Set form
+            $('#id_' + item_prefix + '-' + $(this).attr(item_data_attribute) + '-name').val(value);
         });
     }
 
-    function default_incrementer(current_value, increment, index, increment_type) {
+    function default_incrementer(
+            current_value,
+            increment_key,
+            index,
+            number_of_items
+    ) {
+        var increment = incrementers[increment_key]['increment'].val();
+        var increment_direction = incrementers[increment_key]['direction'].val();
+        var increment_type = incrementers[increment_key]['type'].val();
+
+        if (increment_direction === 'rlu') {
+            index = number_of_items - 1 - index;
+        }
+
         var new_value = current_value;
         var result = null;
 
@@ -476,56 +497,73 @@ $(document).ready(function () {
         return new_value;
     }
 
+    function get_field_from_control(prefix, control) {
+        return control.attr('name').replace(prefix + '_', '');
+    }
+
+    function add_subform(prefix)  {
+        var current_fields = $('.item-section:visible').find('select, input, textarea');
+
+        var number_of_items = $('.ui-selected').length;
+
+        $('.ui-selected').each(function(index) {
+            var new_form = generate_form(prefix);
+
+            current_fields.each(function(field_index) {
+                var field_name = get_field_from_control(prefix, $(this));
+                var current_value = $(this).val();
+                // I BELIEVE I AM SAFE IN ASSUMING THAT ALL MY FORMS WILL JUST HAVE INPUT, NO SELECT OR WHATEVER
+                if (incrementers[field_name]) {
+                    current_value = default_incrementer(current_value, field_name, index, number_of_items);
+                }
+                new_form.find('input[name$="' + field_name + '"]').val(current_value);
+            });
+
+            new_form.find('input[name$="matrix_item"]').val($(this).attr(item_id_attribute));
+
+            add_form(prefix, new_form.clone());
+        });
+
+        refresh_all_contents_from_forms();
+    }
+
     function clear_fields() {
 
     }
 
     function matrix_add_content_to_selected() {
-        var action = action_selector.val();
+        var current_action = action_selector.val();
+        // TODO MAY NEED REVISION
+        // var current_fields = $('.item-section:visible').find('select, input, textarea');
 
-        // PLEASE NOTE THIS IS SUBJECT TO CHANGE
-        // Switch statements look pretty nice, might use more often
-        switch (action) {
-            case 'add_name':
-                chip_style_name_incrementer();
-                break;
-            case 'add_date':
-                add_to_item_fields(['setup_date']);
-                break;
-            case 'add_notes':
-                add_to_item_fields([
-                    'scientist',
-                    'notebook',
-                    'notebook_page',
-                    'notes'
-                ]);
-                break;
-            case 'add_device':
-                add_to_item_fields([
-                    'device',
-                    'organ_model',
-                    'organ_model_protocol',
-                    'variance_from_organ_model_protocol'
-                ]);
-                break;
-            case 'add_settings':
-                alert('TODO');
-                break;
-            case 'add_compounds':
-                add_compounds_to_setup();
-                break;
-            case 'add_cells':
-                add_cells_to_setup();
-                break;
-            case 'copy':
-                alert('TODO');
-                break;
-            case 'clear':
-                // TODO add more options
-                clear_fields();
-                break;
-            default:
-                alert('Action not recognized')
+        if (current_action === 'add_name') {
+            // Default action for add name is to use chip style
+            chip_style_name_incrementer();
+        }
+        else if (current_action === 'add_cells') {
+            // add_cell_form(current_fields);
+            add_subform(cell_prefix);
+        }
+        else if (current_action === 'add_settings') {
+            add_subform(setting_prefix);
+        }
+        else if (current_action === 'add_compounds') {
+            add_subform(compound_prefix);
+        }
+        // Default for most actions
+        // TODO TODO TODO
+        else if (true) {
+            // Iterate over all selected
+            $('.ui-selected').each(function(index) {
+                // If this is for an item, get the form to modify
+
+                // If this is for something else, make a new form by default
+
+            });
+        }
+        // Total failure, create an alert
+        else {
+            alert('Action not recognized!');
         }
     }
 
