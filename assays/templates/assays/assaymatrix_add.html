@@ -420,13 +420,13 @@
 
     <table>
     <tr id="empty_item_html">
-    <td>
+    <td data-prefix="item" class="item-td">
         <div align="center">
             <u><span class="item-name lead"></span></u>
             <span class="item-current_setup"></span>
-{#            <a class="pull-right btn btn-xs btn-warning">#}
-{#                <span class="glyphicon glyphicon-pencil"></span>#}
-{#            </a>#}
+            <a class="pull-right btn btn-xs btn-warning">
+                <span class="glyphicon glyphicon-pencil"></span>
+            </a>
         </div>
         <div class="alert alert-warning">
             <div class="item-setup_date"></div>
@@ -460,13 +460,13 @@
 
     {# TODO ADDITION LOCATION #}
     <div id="empty_cell_html">
-        <div class="alert alert-success">
+        <div data-prefix="{{ cell_formset.prefix }}" class="alert alert-success">
             <div>
                 <span class="cell-cell_sample"></span>
                 <span class="cell-passage"></span>
-{#                <a class="pull-right btn btn-xs btn-danger">#}
-{#                    <span class="glyphicon glyphicon-remove"></span>#}
-{#                </a>#}
+                <a class="pull-right btn btn-xs btn-danger subform-delete">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </a>
             </div>
             <div class="cell-biosensor"></div>
             <div>
@@ -478,14 +478,14 @@
 
     {# TODO ADDITION LOCATION #}
     <div id="empty_compound_html">
-        <div class="alert alert-info">
+        <div data-prefix="{{ compound_formset.prefix }}" class="alert alert-info">
             <div>
                 <span class="compound-compound"></span>
                 <span class="compound-concentration"></span>
                 <span class="compound-concentration_unit"></span>
-{#                <a class="pull-right btn btn-xs btn-danger">#}
-{#                    <span class="glyphicon glyphicon-remove"></span>#}
-{#                </a>#}
+                <a class="pull-right btn btn-xs btn-danger subform-delete">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </a>
             </div>
             <div>
                 <span class="compound-supplier_text"></span>
@@ -513,7 +513,7 @@
 
     {# TODO TODO TODO #}
     <div id="empty_setting_html">
-        <div class="alert alert-danger">
+        <div data-prefix="{{ setting_formset.prefix }}" class="alert alert-danger">
             <span class="setting-setting"></span>
             <span class="setting-value"></span>
             <span class="setting-unit"></span>

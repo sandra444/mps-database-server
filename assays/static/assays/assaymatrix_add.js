@@ -12,6 +12,7 @@ $(document).ready(function () {
 
     // Allows the matrix_table to have the draggable JQuery UI element
     matrix_table_selector.selectable({
+        // SUBJECT TO CHANGE: WARNING!
         filter: 'td',
         distance: 1,
         stop: matrix_add_content_to_selected
@@ -44,7 +45,8 @@ $(document).ready(function () {
     var setting_prefix = 'setting';
     var compound_prefix = 'compound';
 
-    var item_data_attribute = 'data-form-index';
+    var item_form_index_attribute = 'data-form-index';
+    var item_subform_index_attribute = 'data-subform-index';
     var item_id_attribute = 'data-item-id';
 
     var prefixes = [
@@ -196,7 +198,7 @@ $(document).ready(function () {
                 var item_display = $('#'+ current_item_id);
                 item_display.find('.item-name').html(value);
                 // Set form
-                $('#id_' + item_prefix + '-' + item_display.attr(item_data_attribute) + '-name').val(value);
+                $('#id_' + item_prefix + '-' + item_display.attr(item_form_index_attribute) + '-name').val(value);
             }
         }
     }
@@ -356,15 +358,16 @@ $(document).ready(function () {
         // Iterate over all prefixes
         $.each(prefixes, function(index, prefix) {
             // Iterate over all forms
-            $('.' + prefix).each(function() {
+            $('.' + prefix).each(function(form_index) {
                 var display = null;
                 var new_subdisplay = null;
                 // Get the display to add to here TODO TODO TODO
                 if (prefix === item_prefix) {
                     display = get_display_from_item_form($(this));
-                    var current_item_index = $(this).attr('id').split('-');
+                    // var current_item_index = $(this).attr('id').split('-');
                     // TODO TODO TODO I NEED TO THINK ABOUT THE CONSEQUENCES OF THIS
-                    display.attr(item_data_attribute, current_item_index[current_item_index.length - 1]);
+                    // display.attr(item_form_index_attribute, current_item_index[current_item_index.length - 1]);
+                    display.attr(item_form_index_attribute, form_index);
                     display.attr(item_id_attribute, $(this).find('input[name$="-id"]').val());
                 }
                 // Generate a subdisplay if this is not item TODO TODO TODO
@@ -373,6 +376,9 @@ $(document).ready(function () {
                     // console.log($(this));
                     display = get_display_id_from_subform($(this));
                     new_subdisplay = empty_html[prefix].clone();
+                    new_subdisplay.attr(item_subform_index_attribute, form_index);
+                    // Probably superfluous
+                    new_subdisplay.attr(item_form_index_attribute, display.attr(item_form_index_attribute));
                 }
 
                 // Iterate over all fields
@@ -430,7 +436,7 @@ $(document).ready(function () {
             // Set display
             $(this).find('.item-name').html(value);
             // Set form
-            $('#id_' + item_prefix + '-' + $(this).attr(item_data_attribute) + '-name').val(value);
+            $('#id_' + item_prefix + '-' + $(this).attr(item_form_index_attribute) + '-name').val(value);
         });
     }
 
@@ -526,6 +532,28 @@ $(document).ready(function () {
         });
 
         refresh_all_contents_from_forms();
+    }
+
+    function mark_subform_deleted(delete_button) {
+        var current_parent = delete_button.parent().parent();
+        var prefix = current_parent.attr('data-prefix');
+        var delete_input = $('#id_' + prefix + '-' + current_parent.attr(item_subform_index_attribute) + '-DELETE');
+        var checked_value = !delete_input.prop('checked');
+
+        if (checked_value) {
+            current_parent.addClass('strikethrough');
+        }
+        else {
+            current_parent.removeClass('strikethrough');
+        }
+
+        delete_input.prop('checked', function( i, val ) {return !val;});
+    }
+
+    function mark_form_deleted(delete_button) {
+        var prefix = delete_button.parent().attr('data-prefix');
+        var delete_input = $('#id_' + prefix + '-' + delete_button.attr() + '-DELETE');
+
     }
 
     function clear_fields() {
@@ -641,6 +669,26 @@ $(document).ready(function () {
     // Testing SUBJECT TO CHANGE
     $('#apply_plate_names').click(function() {
        plate_style_name_creation();
+    });
+
+    // Triggers for subform-delete
+    matrix_body_selector.on('click', '.subform-delete', function() {
+        mark_subform_deleted($(this));
+    });
+
+    // Triggers for form-delete
+    matrix_body_selector.on('click', '.form-delete', function() {
+        mark_form_deleted($(this));
+    });
+
+    // Triggers for disabling select during delete hovers
+    matrix_body_selector.on('mouseover', '.form-delete, .subform-delete', function() {
+        matrix_table_selector.selectable('option', 'disabled', true);
+    });
+
+    // Triggers for enabling select after delete hovers
+    matrix_body_selector.on('mouseout', '.form-delete, .subform-delete', function() {
+        matrix_table_selector.selectable('option', 'disabled', false);
     });
 
     // TODO TODO TODO TESTING
