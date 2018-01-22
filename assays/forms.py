@@ -123,6 +123,11 @@ class BaseModelFormSetForcedUniqueness(BaseModelFormSet):
         for uclass, unique_check in all_unique_checks:
             seen_data = set()
             for form in valid_forms:
+                # PLEASE NOTE: SPECIAL EXCEPTION FOR FORMS WITH NO ID TO AVOID TRIGGERING ID DUPLICATE
+                if unique_check == (u'id',) and not form.cleaned_data.get('id', ''):
+                    # IN POOR TASTE, BUT EXPEDIENT
+                    continue
+
                 # get data for each field of each of unique_check
                 row_data = (form.cleaned_data[field] for field in unique_check if field in form.cleaned_data)
                 # Reduce Model instances to their primary key values

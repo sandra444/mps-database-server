@@ -1620,8 +1620,8 @@ class AssaySetupCell(models.Model):
                 'matrix_item',
                 'cell_sample',
                 'biosensor',
-                # Skip density
-                # 'density',
+                # Skip density?
+                'density',
                 'density_unit',
                 'passage',
                 'addition_time',
@@ -1790,8 +1790,8 @@ class AssaySetupCompound(models.Model):
                 # 'setup',
                 'matrix_item',
                 'compound_instance',
-                # 'concentration',
-                # 'concentration_unit',
+                'concentration',
+                'concentration_unit',
                 'addition_time',
                 'duration',
                 'addition_location'

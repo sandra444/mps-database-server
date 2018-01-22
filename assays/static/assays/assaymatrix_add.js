@@ -112,6 +112,7 @@ $(document).ready(function () {
     function add_form(prefix, form) {
         var formset = $('#' + prefix);
         formset.append(form);
+        $('#id_' + prefix + '-TOTAL_FORMS').val($('.' + prefix).length);
     }
 
     function generate_form(prefix) {
