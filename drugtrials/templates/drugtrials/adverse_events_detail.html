@@ -42,7 +42,6 @@
     </legend>
 
     <div class="padded-row">
-
         <div class="col-sm-3 col-md-2 thumbnail text-center">
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.compound.chemblid }}">
             {% if object.compound.mps %}
@@ -90,10 +89,20 @@
                             </td>
                         </tr>
                     {% endif %}
+                    {% if object.estimated_usage %}
+                        <tr>
+                            <td>
+                                <b>Estimated Usage</b>
+                            </td>
+                            <td>
+                                {{ object.estimated_usage|intcomma }}
+                                <input hidden id="id_estimated_usage" value="{{ object.estimated_usage }}">
+                            </td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
-
     </div>
 
     <div class="clearfix"></div>
@@ -147,7 +156,8 @@
             <tr>
                 <th>Plot</th>
                 <th>Event</th>
-                <th>Frequency</th>
+                <th>Number of Reports</th>
+                <th>Normalized # of Reports</th>
                 <th>Organ</th>
             </tr>
         </thead>
@@ -157,6 +167,7 @@
                 <td><button class="plot_ae" data-adverse-event="{{ adverse_event.event }}">Toggle Plot</button></td>
                 <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
                 <td>{{ adverse_event.frequency|intcomma }}</td>
+                <td>{{ adverse_event.normalized_reports|floatformat:2|intcomma }}</td>
                 <td>{{ adverse_event.event.organ|default:"" }}</td>
             </tr>
         {% endfor %}
@@ -232,7 +243,8 @@
         <thead>
             <tr>
                 <th>Event</th>
-                <th>Frequency</th>
+                <th>Number of Reports</th>
+                <th>Normalized # of Reports</th>
             </tr>
         </thead>
         <tbody id="ae_body">
