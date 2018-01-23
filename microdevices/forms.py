@@ -12,7 +12,7 @@ class MicrodeviceForm(SignOffMixin, forms.ModelForm):
     """Form for Microdevices"""
     class Meta(object):
         model = Microdevice
-        exclude = tracking
+        exclude = tracking + ('center', 'organ')
 
         widgets = {
             'name': forms.Textarea(attrs={'rows': 1}),
