@@ -80,10 +80,10 @@
             </tr>
             <tr>
                 <td>
-                    References
+                    <b>References</b>
                 </td>
                 <td>
-                    {{ object.references|linebreaksbr }}
+                    {{ object.references|linebreaksbr|default:'-No References Listed-' }}
                 </td>
             </tr>
         </tbody>
