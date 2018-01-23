@@ -543,7 +543,11 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
         # Display to users with either editor or viewer group or if unrestricted
         group_names = list(set([group.name.replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]))
 
-        queryset = queryset.filter(group__name__in=group_names)
+        # NOTE: Also excludes signed off studies
+        queryset = queryset.filter(
+            group__name__in=group_names,
+            signed_off_by_id=None
+        )
 
         get_queryset_with_organ_model_map(queryset)
 
