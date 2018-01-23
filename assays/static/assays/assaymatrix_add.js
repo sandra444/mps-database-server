@@ -547,13 +547,30 @@ $(document).ready(function () {
             current_parent.removeClass('strikethrough');
         }
 
-        delete_input.prop('checked', function( i, val ) {return !val;});
+        delete_input.prop('checked', function(i, val) {return !val;});
     }
 
     function mark_form_deleted(delete_button) {
-        var prefix = delete_button.parent().attr('data-prefix');
-        var delete_input = $('#id_' + prefix + '-' + delete_button.attr() + '-DELETE');
+        // TODO TODO TODO SUBJECT TO CHANGE
+        var current_parent = delete_button.parent().parent().parent();
+        var current_prefix = current_parent.attr('data-prefix');
+        var delete_input = $('#id_' + current_prefix + '-' + current_parent.attr(item_form_index_attribute) + '-DELETE');
 
+        var checked_value = !delete_input.prop('checked');
+
+        if (checked_value) {
+            current_parent.addClass('strikethrough');
+        }
+        else {
+            current_parent.removeClass('strikethrough');
+        }
+
+        delete_input.prop('checked', function(i, val) {return !val;});
+
+        // TODO MAY BE PROBLEMMATIC IN CERTAIN CIRCUMSTANCES
+        // Requires testing
+        current_parent.find('.subform-delete').trigger('click');
+        current_parent.find('.subform-delete').attr('disabled', checked_value);
     }
 
     function clear_fields() {
@@ -681,13 +698,14 @@ $(document).ready(function () {
         mark_form_deleted($(this));
     });
 
+    // TODO DISABLING FOR ALL ALERTS MAY BE A LITTLE OVERZEALOUS
     // Triggers for disabling select during delete hovers
-    matrix_body_selector.on('mouseover', '.form-delete, .subform-delete', function() {
+    matrix_body_selector.on('mouseover', '.alert', function() {
         matrix_table_selector.selectable('option', 'disabled', true);
     });
 
     // Triggers for enabling select after delete hovers
-    matrix_body_selector.on('mouseout', '.form-delete, .subform-delete', function() {
+    matrix_body_selector.on('mouseout', '.alert', function() {
         matrix_table_selector.selectable('option', 'disabled', false);
     });
 

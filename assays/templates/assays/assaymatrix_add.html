@@ -422,14 +422,19 @@
     <tr id="empty_item_html">
     <td data-prefix="item" class="item-td">
         <div align="center">
-            <u><span class="item-name lead"></span></u>
+            <u><span class="item-name lead">*EMPTY*</span></u>
             <span class="item-current_setup"></span>
-            <a class="pull-right btn btn-xs btn-warning">
-                <span class="glyphicon glyphicon-pencil"></span>
-            </a>
         </div>
         <div class="alert alert-warning">
-            <div class="item-setup_date"></div>
+            <div>
+                <span class="item-setup_date">----</span>
+                <a class="pull-right btn btn-xs btn-danger form-delete">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </a>
+                <a class="pull-right btn btn-xs btn-warning">
+                    <span class="glyphicon glyphicon-pencil"></span>
+                </a>
+            </div>
             <div class="item-failure">
                 <span class="item-failure_time"></span>
                 <span class="item-failure_reason"></span>
@@ -514,9 +519,14 @@
     {# TODO TODO TODO #}
     <div id="empty_setting_html">
         <div data-prefix="{{ setting_formset.prefix }}" class="alert alert-danger">
-            <span class="setting-setting"></span>
-            <span class="setting-value"></span>
-            <span class="setting-unit"></span>
+            <div>
+                <span class="setting-setting"></span>
+                <span class="setting-value"></span>
+                <span class="setting-unit"></span>
+                <a class="pull-right btn btn-xs btn-danger subform-delete">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </a>
+            </div>
         </div>
     </div>
 
