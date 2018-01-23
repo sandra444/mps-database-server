@@ -29,8 +29,8 @@
                     <th>Device Name</th>
                     <th>Version/Catalog#</th>
                     <th>Manufacturer</th>
-                    <th>Center</th>
-                    <th>Organ</th>
+{#                    <th>Center</th>#}
+{#                    <th>Organ</th>#}
                     <th>Description</th>
                 </tr>
             </thead>
@@ -43,8 +43,8 @@
                     <td>{{ device.name }}</td>
                     <td>{{ device.barcode }}</td>
                     <td>{{ device.manufacturer|default_if_none:"" }}</td>
-                    <td>{{ device.center|default_if_none:"" }}</td>
-                    <td>{{ device.organ|default_if_none:"" }}</td>
+{#                    <td>{{ device.center|default_if_none:"" }}</td>#}
+{#                    <td>{{ device.organ|default_if_none:"" }}</td>#}
                     <td>{{ device.description|default_if_none:"" }}</td>
                 </tr>
             {% endfor %}
