@@ -27,7 +27,9 @@
                     <th>View</th>
                     <th>Compound</th>
                     <th>Event</th>
-                    <th>Frequency</th>
+                    <th>Number of Reports</th>
+                    <th>Normalized # of Reports</th>
+                    <th>Estimated Usage</th>
                     <th>Organ</th>
                     <th>Black Box Warning</th>
                     <th>Project</th>
@@ -41,6 +43,8 @@
                     <td><a href="/compounds/{{ adverse_event.compound.compound.id }}">{{ adverse_event.compound.compound }}</a></td>
                     <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
                     <td>{{ adverse_event.frequency|intcomma }}</td>
+                    <td>{{ adverse_event.normalized_reports|floatformat:2|intcomma }}</td>
+                    <td>{{ adverse_event.compound.estimated_usage|default:''|intcomma }}</td>
                     <td>{{ adverse_event.event.organ|default:"" }}</td>
                     <td>
                         {% if adverse_event.compound.black_box %}

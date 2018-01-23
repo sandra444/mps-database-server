@@ -213,11 +213,15 @@ $(document).ready(function () {
             },
             axis: {
                 x: {
-                    type: 'category'
+                    type: 'category',
 //                    label: {
 //                        text: 'Compound',
 //                        position: 'outer-center'
 //                    }
+                    tick: {
+                        rotate: 75,
+                        multiline: false
+                    },
                 },
                 y: {
                     label: {

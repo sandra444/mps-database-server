@@ -120,6 +120,13 @@ class AdverseEventsList(ListView):
             'compound__compound',
             'event__organ'
         ).all()
+
+        for ae in queryset:
+            if ae.compound.estimated_usage:
+                ae.normalized_reports = float(ae.frequency) / ae.compound.estimated_usage * 10000
+            else:
+                ae.normalized_reports = None
+
         return queryset
 
 
@@ -140,6 +147,12 @@ class AdverseEventDetail(DetailView):
             'event',
             'event__organ'
         ).order_by('-frequency')
+
+        for ae in events:
+            if ae.compound.estimated_usage:
+                ae.normalized_reports = float(ae.frequency) / ae.compound.estimated_usage * 10000
+            else:
+                ae.normalized_reports = None
 
         compounds = list(OpenFDACompound.objects.all().order_by('compound').values_list('id', flat=True))
         current = compounds.index(self.object.id)
