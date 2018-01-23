@@ -43,9 +43,8 @@ def bioactivities_list(request):
         if any([compound, target, name]):
             if pubchem:
                 data = PubChemBioactivity.objects.all().prefetch_related(
-                    'compound__name',
-                    'assay__target',
-                    'assay__pubchem_id'
+                    'compound',
+                    'assay__target'
                 )
             else:
                 data = Bioactivity.objects.exclude(
@@ -53,9 +52,9 @@ def bioactivities_list(request):
                     standardized_units='',
                     standardized_value__isnull=True
                 ).prefetch_related(
-                    'compound__name',
-                    'target__name',
-                    'assay__chemblid'
+                    'compound',
+                    'target',
+                    'assay'
                 )
 
             if compound:
