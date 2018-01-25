@@ -117,7 +117,8 @@ $(document).ready(function () {
         $('#id_' + prefix + '-TOTAL_FORMS').val($('.' + prefix).length);
     }
 
-    function generate_form(prefix) {
+    // Takes a prefix and an Object of {field_name: value} to spit out a form
+    function generate_form(prefix, values_to_inject) {
         // TODO TODO TODO
         // Can't cache this, need to check every call!
         var number_of_forms = $('.' + prefix).length;
@@ -130,6 +131,11 @@ $(document).ready(function () {
             .addClass(prefix);
 
         // TODO TODO TODO ITEM FORMS NEED TO HAVE ROW AND COLUMN INDICES
+        if (values_to_inject) {
+            $.each(values_to_inject, function(field, value) {
+                new_form.find('input[name$="' + field + '"]').val(value);
+            });
+        }
 
         return new_form;
     }
@@ -271,22 +277,37 @@ $(document).ready(function () {
         matrix_body_selector.empty();
 
         // Check to see if new forms will be generated
-
         for (var row_index=0; row_index < number_of_rows; row_index++) {
             var row_id = 'row_' + row_index;
             var current_row = $('<tr>')
                 .attr('id', row_id);
-            // var add_row = true;
+
+            var all_matching_for_row_value = $('.' + item_prefix).has('input[name$="-row_index"][value="' + row_index + '"]');
+
             for (var column_index=0; column_index < number_of_columns; column_index++) {
                 var item_id = item_prefix + '_' + row_index + '_' + column_index;
                 var new_cell = empty_item_html
                     .clone()
                     .attr('id', item_id);
+
+                // If the form does not exist, then add it!
+                if (!all_matching_for_row_value.has('input[name$="-column_index"][value="' + column_index + '"]')[0]) {
+                    var new_form = generate_form(
+                        item_prefix, {'row_index': row_index, 'column_index': column_index}
+                    );
+                    // Get number of forms and add as attribute to the display
+                    // A little inefficient, but relatively safe
+                    var number_of_forms = $('.' + item_prefix).length;
+                    new_cell.attr(item_form_index_attribute, number_of_forms);
+
+                    add_form(item_prefix, new_form);
+                }
+
+                // Add
                 current_row.append(new_cell);
             }
-            matrix_body_selector.append(current_row);
 
-            // Generate forms here
+            matrix_body_selector.append(current_row);
         }
 
         // Don't run this if the forms are all new anyway
@@ -508,27 +529,57 @@ $(document).ready(function () {
         return control.attr('name').replace(prefix + '_', '');
     }
 
+    // TODO TODO TODO BE POSITIVE THAT SUBFORMS ARE NOT ADDED TO ITEMS THAT DON'T EXIST YET
     function add_subform(prefix)  {
         var current_fields = $('.item-section:visible').find('select, input, textarea');
 
         var number_of_items = $('.ui-selected').length;
 
         $('.ui-selected').each(function(index) {
-            var new_form = generate_form(prefix);
+            var current_item_id = $(this).attr(item_id_attribute);
+            if (current_item_id) {
+                var new_form = generate_form(prefix);
 
+                // TODO PERHAPS THIS SHOULD BE IN values_to_inject ARG, but doesn't matter too much, would need to accomodate incrementer anyway
+                current_fields.each(function(field_index) {
+                    var field_name = get_field_from_control(prefix, $(this));
+                    var current_value = $(this).val();
+                    // I BELIEVE I AM SAFE IN ASSUMING THAT ALL MY FORMS WILL JUST HAVE INPUT, NO SELECT OR WHATEVER
+                    if (incrementers[field_name]) {
+                        current_value = default_incrementer(current_value, field_name, index, number_of_items);
+                    }
+                    new_form.find('input[name$="' + field_name + '"]').val(current_value);
+                });
+
+                new_form.find('input[name$="matrix_item"]').val(current_item_id);
+
+                add_form(prefix, new_form.clone());
+            }
+        });
+
+        refresh_all_contents_from_forms();
+    }
+
+    // SUBJECT TO CHANGE
+    function add_to_item() {
+        var current_fields = $('.item-section:visible').find('select, input, textarea');
+
+        var number_of_items = $('.ui-selected').length;
+
+        $('.ui-selected').each(function(index) {
+            var current_form = $('#' + item_prefix + '-' + $(this).attr(item_form_index_attribute));
+            console.log(current_form);
+
+            // TODO PERHAPS THIS SHOULD BE IN values_to_inject ARG, but doesn't matter too much, would need to accomodate incrementer anyway
             current_fields.each(function(field_index) {
-                var field_name = get_field_from_control(prefix, $(this));
+                var field_name = get_field_from_control(item_prefix, $(this));
                 var current_value = $(this).val();
                 // I BELIEVE I AM SAFE IN ASSUMING THAT ALL MY FORMS WILL JUST HAVE INPUT, NO SELECT OR WHATEVER
                 if (incrementers[field_name]) {
                     current_value = default_incrementer(current_value, field_name, index, number_of_items);
                 }
-                new_form.find('input[name$="' + field_name + '"]').val(current_value);
+                current_form.find('input[name$="' + field_name + '"]').val(current_value);
             });
-
-            new_form.find('input[name$="matrix_item"]').val($(this).attr(item_id_attribute));
-
-            add_form(prefix, new_form.clone());
         });
 
         refresh_all_contents_from_forms();
@@ -599,13 +650,7 @@ $(document).ready(function () {
         // Default for most actions
         // TODO TODO TODO
         else if (true) {
-            // Iterate over all selected
-            $('.ui-selected').each(function(index) {
-                // If this is for an item, get the form to modify
-
-                // If this is for something else, make a new form by default
-
-            });
+            add_to_item();
         }
         // Total failure, create an alert
         else {
