@@ -12,11 +12,8 @@ class DrugTrialList(ListView):
 
     def get_queryset(self):
         queryset = FindingResult.objects.prefetch_related(
-            'drug_trial',
             'descriptor',
-            'finding_name',
-            'value_units'
-        ).select_related(
+            'value_units',
             'drug_trial__compound',
             'drug_trial__species',
             'finding_name__organ',
@@ -39,11 +36,8 @@ class DrugTrialDetail(DetailView):
         results = FindingResult.objects.filter(
             drug_trial=self.object
         ).prefetch_related(
-            'drug_trial',
             'descriptor',
-            'finding_name',
-            'value_units'
-        ).select_related(
+            'value_units',
             'drug_trial__compound',
             'drug_trial__species',
             'finding_name__organ',
@@ -117,12 +111,16 @@ class AdverseEventsList(ListView):
 
     def get_queryset(self):
         queryset = CompoundAdverseEvent.objects.prefetch_related(
-            'compound',
-            'event'
-        ).select_related(
             'compound__compound',
             'event__organ'
         ).all()
+
+        for ae in queryset:
+            if ae.compound.estimated_usage:
+                ae.normalized_reports = float(ae.frequency) / ae.compound.estimated_usage * 10000
+            else:
+                ae.normalized_reports = None
+
         return queryset
 
 
@@ -140,10 +138,14 @@ class AdverseEventDetail(DetailView):
         events = CompoundAdverseEvent.objects.filter(
             compound=self.object
         ).prefetch_related(
-            'event'
-        ).select_related(
             'event__organ'
         ).order_by('-frequency')
+
+        for ae in events:
+            if ae.compound.estimated_usage:
+                ae.normalized_reports = float(ae.frequency) / ae.compound.estimated_usage * 10000
+            else:
+                ae.normalized_reports = None
 
         compounds = list(OpenFDACompound.objects.all().order_by('compound').values_list('id', flat=True))
         current = compounds.index(self.object.id)

@@ -97,10 +97,7 @@ class CellSampleList(OneGroupRequiredMixin, ListView):
     template_name = 'cellsamples/cellsample_list.html'
 
     def get_queryset(self):
-        groups = self.request.user.groups.values_list('id', flat=True)
-        queryset = CellSample.objects.filter(
-            group__in=groups
-        ).prefetch_related(
+        queryset = CellSample.objects.all().prefetch_related(
             'cell_type__organ',
             'cell_subtype',
             'supplier',

@@ -18,7 +18,7 @@ $(document).ready(function() {
                 "targets": [0]
             },
             {
-                "targets": [6],
+                "targets": [8],
                 "visible": false,
                 "searchable": true
             }
