@@ -1,5 +1,5 @@
 # coding=utf-8
-from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.http import HttpResponse
 # from assays.models import *
 from cellsamples.models import CellSample
@@ -3020,7 +3020,3 @@ class ReturnStudyData(StudyViewershipMixin, DetailView):
         # Return nothing otherwise
         else:
             return HttpResponse('', content_type='text/plain')
-
-
-class AssayReproducibility(TemplateView):
-    template_name = 'assays/reproducibility.html'

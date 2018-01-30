@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block breadcrumbs %}
+    <li class="active">Under Construction</li>
+{% endblock %}
+
+{% block content %}
+    <h1 class="text-warning">Under Construction</h1>
+    <hr>
+    <h3>This page is currently under construction:</h3>
+    <h2 class="text-warning">Please check again in the future.</h2>
+
+    <div class="padded-row large-padding-top padded-bottom text-center">
+        <a class="btn btn-xlarge btn-warning" onclick="if(document.referrer.indexOf(window.location.host) !== -1){window.history.back()}else{window.location.href='/'};setTimeout(function(){window.location.href='/';},500);">
+            <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+            Go Back
+        </a>
+    </div>
+{% endblock %}
