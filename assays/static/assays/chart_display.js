@@ -336,13 +336,27 @@ $(document).ready(function () {
             if (text_section.length === 1) {
                 var content_split = $(this).find('text').text().split(/(\d+)/);
                 var current_pos = $(this).position();
+                // Make it appear slightly below the legend
                 var current_top = current_pos.top + 50;
-                // var current_left = current_pos.left;
-                var current_left = 200;
+                // Get the furthest left it should go
+                var current_left = $('#breadcrumbs').position.left;
+                // var current_left = 200;
                 var row_id_to_use = '#' + content_split[0].replace(' ', '_') + content_split[1];
                 var row_clone = $(row_id_to_use).clone().addClass('bg-warning');
 
                 $('#group_display_body').empty().append(row_clone);
+
+                var second_row = $('<tr>').addClass('bg-warning');
+                var hidden_rows = false;
+
+                $(row_id_to_use).find('td:hidden').each(function(index) {
+                    hidden_rows = true;
+                    second_row.append($(this).clone().show());
+                });
+
+                if (hidden_rows) {
+                    $('#group_display_body').append(second_row);
+                }
 
                 $('#group_display').show()
                     .css({top: current_top, left: current_left, position:'absolute'});
