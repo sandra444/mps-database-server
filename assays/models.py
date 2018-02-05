@@ -996,8 +996,8 @@ class AssayChipSetup(FlaggableModel):
 
     def quick_dic(self):
         dic = {
-            'device': self.device.device_name,
-            'organ_model': self.organ_model.model_name,
+            # 'device': self.device.device_name,
+            'organ_model': self.get_hyperlinked_model_or_device(),
             'compounds': self.stringify_compounds(),
             'cells': self.stringify_cells(),
             'setups_with_same_group': []
@@ -1006,6 +1006,12 @@ class AssayChipSetup(FlaggableModel):
 
     def get_hyperlinked_name(self):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), self.assay_chip_id)
+
+    def get_hyperlinked_model_or_device(self):
+        if not self.organ_model:
+            return '<a href="{0}">{1} (No Organ Model)</a>'.format(self.device.get_absolute_url(), self.device.device_name)
+        else:
+            return '<a href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.model_name)
 
     def get_absolute_url(self):
         return '/assays/assaychipsetup/{}/'.format(self.id)

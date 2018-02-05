@@ -91,18 +91,18 @@ $(document).ready(function () {
     window.CHARTS.display_treament_groups = function(treatment_groups) {
         // TODO KIND OF UGLY
         var header_keys = [
-            'device',
+            // 'device',
             'organ_model',
             'cells',
             'compounds',
             'setups_with_same_group'
         ];
         var headers = {
-            'device': 'Device',
+            // 'device': 'Device',
             'organ_model': 'Organ Model',
             'cells': 'Cells',
             'compounds': 'Compounds',
-            'setups_with_same_group': 'Setups'
+            'setups_with_same_group': 'Chips/Wells'
         };
 
         // Semi-arbitrary at the moment
@@ -159,9 +159,9 @@ $(document).ready(function () {
             columnDefs: [
                 // Treat the group column as if it were just the number
                 { "type": "num", "targets": 0 },
-                { "width": "20%", "targets": 3 },
-                { "width": "30%", "targets": 4 },
-                { "width": "30%", "targets": 5 }
+                { "width": "20%", "targets": 2 },
+                { "width": "30%", "targets": 3 },
+                { "width": "30%", "targets": 4 }
             ]
         });
 
