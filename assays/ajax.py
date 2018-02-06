@@ -684,21 +684,21 @@ def get_control_data(
             if truncate_negative and value < 0:
                 value = 0
 
-        # Check if the setup is marked a control chip
-        if raw.assay_chip_id.chip_setup.chip_test_type == 'control':
-            initial_control_data.setdefault(
-                (target, method), {}
-            ).setdefault(
-                unit, {}
-            ).setdefault(
-                CONTROL_LABEL,{}
-            ).setdefault(
-                sample_location, {}
-            ).setdefault(
-                time, []
-            ).append(
-                value
-            )
+            # Check if the setup is marked a control chip
+            if raw.assay_chip_id.chip_setup.chip_test_type == 'control':
+                initial_control_data.setdefault(
+                    (target, method), {}
+                ).setdefault(
+                    unit, {}
+                ).setdefault(
+                    CONTROL_LABEL, {}
+                ).setdefault(
+                    sample_location, {}
+                ).setdefault(
+                    time, []
+                ).append(
+                    value
+                )
 
     targets = [target_method[0] for target_method in initial_control_data.keys()]
 
@@ -707,7 +707,7 @@ def get_control_data(
         method = target_method[1]
 
         if targets.count(target) > 1:
-            target = target + ' [' + method + ']'
+            target = u'{} [{}]'.format(target, method)
 
         initial_control_data.update({
             target: units
@@ -953,7 +953,7 @@ def get_readout_data(
         method = target_method[1]
 
         if targets.count(target) > 1:
-            target = target + ' [' + method + ']'
+            target = u'{} [{}]'.format(target, method)
 
         initial_data.update({
             target: units
