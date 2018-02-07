@@ -865,6 +865,7 @@ def get_readout_data(
 
     averaged_data = {}
 
+    all_sample_locations = {}
     all_keys = {}
 
     # Append the additional_data as necessary
@@ -890,6 +891,7 @@ def get_readout_data(
         method = assay_instance.method.name
 
         sample_location = raw.sample_location.name
+        all_sample_locations.update({sample_location: True})
 
         setup_id = raw.assay_chip_id.chip_setup_id
         chip_id = raw.assay_chip_id.chip_setup.assay_chip_id
@@ -998,6 +1000,8 @@ def get_readout_data(
 
     initial_data = None
 
+    accommodate_sample_location = len(all_sample_locations) > 1
+
     for target, units in averaged_data.items():
         for unit, tags in units.items():
             # row_indices = {}
@@ -1024,7 +1028,6 @@ def get_readout_data(
             final_data.get('sorted_assays').append(assay_label)
 
             for tag, sample_locations in tags.items():
-                accommodate_sample_location = len(sample_locations) > 1
                 for sample_location, time_values in sample_locations.items():
                     accommodate_intervals = False
                     include_current = False
