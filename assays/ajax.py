@@ -781,6 +781,12 @@ def get_treatment_groups(study):
         )
         setup_to_treatment_group.update({setup.id: current_representative})
 
+    treatment_group_representatives = sorted(
+        treatment_group_representatives, key=lambda x: (
+            x.get('compounds'), x.get('organ_model'), x.get('cells'), x.get('setups_with_same_group')[0]
+        )
+    )
+
     for representative in treatment_group_representatives:
         representative.get('setups_with_same_group').sort()
         representative.update({
