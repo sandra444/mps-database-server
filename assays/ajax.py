@@ -54,6 +54,8 @@ from django.forms.models import inlineformset_factory
 import numpy as np
 from scipy.stats.mstats import gmean
 
+import re
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -1110,7 +1112,13 @@ def get_readout_data(
 
             # Note manipulations for sorting
             # Somewhat contrived
-            x_header.sort(key=lambda s: s.upper().replace(' & ', '~').replace('_I1', '!').replace('_I2', '"'))
+            convert = lambda text: int(text) if text.isdigit() else text.lower()
+            alphanum_key = lambda key: [
+                convert(
+                    c.replace('_I1', '!').replace('_I2', '"')
+                ) for c in re.split('([0-9]+)', key)
+            ]
+            x_header.sort(key=alphanum_key)
             current_table[0].extend(x_header)
 
             x_header = {x_header[index]: index + 1 for index in range(len(x_header))}
