@@ -422,55 +422,38 @@ def get_drugbank_target_information(data, type_of_target):
     values = data.findChildren('dd')
 
     for index, dt in enumerate(headers):
+        dd = values[index]
         if dt.text == 'Organism':
-            organism = values[index].text.strip()
+            organism = dd.text.strip()
 
             if len(organism) > 150:
                 organism = organism[:145] + '...'
 
             target['organism'] = organism
 
-    # Labels are used to show pharmacological action
-    label = data.findChildren('strong', class_='label')
+        elif dt.text == 'Pharmacological action':
+            # Badges are used to show pharmacological action
+            label = dd.findChildren('div', class_='badge')
 
-    if label:
-        target['pharmacological_action'] = label[0].text.strip()
+            if label:
+                target['pharmacological_action'] = label[0].text.strip()
 
-    # Badges contain actions
-    badges = data.findChildren('strong', class_='badge')
-    actions = []
+        elif dt.text == 'Actions':
+            # Badges contain actions
+            badges = dd.findChildren('div', class_='badge')
+            actions = []
 
-    for badge in badges:
-        actions.append(badge.text.strip())
+            for badge in badges:
+                actions.append(badge.text.strip())
 
-    target['action'] = ', '.join(actions)
+            target['action'] = ', '.join(actions)
 
-    uniprot = data.findChildren('div', class_='panel-body')[0].findChildren('a')
+        elif dt.text == 'Uniprot ID':
+            uniprot = dd.findChildren('a')
 
-    if uniprot:
-        if 'www.uniprot.org' in uniprot[0]['href']:
-            target['uniprot_id'] = uniprot[0].text.strip()
-
-    # Loop through the p children to find info
-    # for p in data.findChildren('p'):
-    #     if 'Organism: ' in p.text:
-    #         organism = p.text.replace('Organism: ', '').strip()
-    #
-    #         if len(organism) > 150:
-    #             organism = organism[:145] + '...'
-    #
-    #         target['organism'] = organism
-    #
-    #     elif 'Pharmacological action:' in p.text:
-    #         target['pharmacological_action'] = p.text.replace('Pharmacological action:', '').strip()
-    #
-    #     elif 'Actions:' in p.text:
-    #         target['action'] = p.text.replace('Actions:', '').lstrip().replace('\n        ', ', ').strip()
-    #
-    # # The child table contains the corresponding UniProt ID
-    # if data.findChildren('table') and data.findChildren('table')[0].findChildren('tbody')[0].findChildren('td'):
-    #     target['uniprot_id'] = data.findChildren('table')[0].findChildren(
-    #         'tbody')[0].findChildren('tr')[0].findChildren('td')[1].text.strip()
+            if uniprot:
+                if 'www.uniprot.org' in uniprot[0]['href']:
+                    target['uniprot_id'] = uniprot[0].text.strip()
 
     return target
 
@@ -499,6 +482,8 @@ def get_drugbank_data_from_chembl_id(chembl_id):
     if json_data and u'error' not in json_data:
         # Get drugbank_id
         drugbank_id = json_data[0].get('src_compound_id')
+        # Assign drugbank id right away
+        data['drugbank_id'] = drugbank_id
 
         # Get URL of target for scrape
         url = "http://www.drugbank.ca/drugs/{}".format(drugbank_id)
@@ -510,11 +495,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         soup = BeautifulSoup(stuff, 'html5lib')
 
         # Get all tables
-        tables = soup.findChildren('table')
-        # Get table of interest
-        main_table = tables[0]
-        # Get rows
-        rows = main_table.findChildren('tr')
+        tables = soup.findChildren('dl')
 
         # Regex for extracting percentages
         percent_extractor = re.compile(r'<?\>?\d*\.?\d+%')
@@ -529,25 +510,25 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         # Regex for extracting ints or floats
         integer_and_float_extractor = re.compile(r'\d*\.?\d+')
 
-        # Loop through the rows of the table
-        # Break when all 6 table rows found
-        # MAKE SURE TO IGNORE EXMPTY FIELDS
-        for row in rows:
-            header = row.findChildren('th')
+        # Loop through every dl
+        for dl in tables:
+            dts = dl.findChildren('dt')
+            dds = dl.findChildren('dd')
 
-            if header:
-                header = header[0].text
+            for index, dt in enumerate(dts):
+                header = dt.text
+                dd = dds[index]
 
-                if header == 'Accession Number':
-                    # The ID is in bold, so find with strong
-                    # There will always be an ID
-                    data['drugbank_id'] = row.findChildren('strong')[0].text
+                # Handled earlier, skip
+                # if header == 'Accession Number':
+                #     data['drugbank_id'] = dd.text
 
-                elif header == 'Sub Class':
+                # TODO MAKE A NEW FIELD FOR CLASS AND RENAME SUB CLASS
+                if header == 'Sub Class':
                     # The sub class is in the text of a link
                     # There might not be a sub class
-                    if row.findChildren('a'):
-                        drug_class = row.findChildren('a')[0].text.rstrip()
+                    if dd.findChildren('a'):
+                        drug_class = dd.findChildren('a')[0].text.rstrip()
 
                         if len(drug_class) > 150:
                             drug_class = drug_class[:145] + '...'
@@ -557,85 +538,94 @@ def get_drugbank_data_from_chembl_id(chembl_id):
                 elif header == 'Protein binding':
                     # Trim protein binding to get just the percentage
                     # There might not be protein binding
-                    protein_binding_initial = row.findChildren('td')[0].text
-                    protein_binding_processed = re.findall(percent_extractor, protein_binding_initial)
-                    # If there are multiple, which do I take?
-                    # Taking first percent for now
-                    if protein_binding_processed:
-                        data['protein_binding'] = protein_binding_processed[0]
-
-                    # If regex has failed and 'percent' is in the strings
-                    elif 'percent' in protein_binding_initial:
-                        protein_binding_processed = re.findall(
-                            re.compile(r'<?\>?\d*\.?\d+\spercent'),
-                            protein_binding_initial
-                        )
+                    if dd.findChildren('p'):
+                        protein_binding_initial = dd.findChildren('p')[0].text
+                        protein_binding_processed = re.findall(percent_extractor, protein_binding_initial)
+                        # If there are multiple, which do I take?
+                        # Taking first percent for now
                         if protein_binding_processed:
                             data['protein_binding'] = protein_binding_processed[0]
 
-                    # If +/- is in the string, the percent is likely the deviation
-                    if u'+/-' in protein_binding_initial:
-                        protein_binding_processed = protein_binding_initial.split(u'+/-')
-                        protein_binding_processed = re.findall(
-                            integer_and_float_extractor,
-                            protein_binding_processed[0]
-                        )
-                        if protein_binding_processed:
-                            data['protein_binding'] = protein_binding_processed[0]
+                        # If regex has failed and 'percent' is in the strings
+                        elif 'percent' in protein_binding_initial:
+                            protein_binding_processed = re.findall(
+                                re.compile(r'<?\>?\d*\.?\d+\spercent'),
+                                protein_binding_initial
+                            )
+                            if protein_binding_processed:
+                                data['protein_binding'] = protein_binding_processed[0]
 
-                    if u'±' in protein_binding_initial:
-                        protein_binding_processed = protein_binding_initial.split(u'±')
-                        protein_binding_processed = re.findall(
-                            integer_and_float_extractor,
-                            protein_binding_processed[0]
-                        )
-                        if protein_binding_processed:
-                            data['protein_binding'] = protein_binding_processed[0]
+                        # If +/- is in the string, the percent is likely the deviation
+                        if u'+/-' in protein_binding_initial:
+                            protein_binding_processed = protein_binding_initial.split(u'+/-')
+                            protein_binding_processed = re.findall(
+                                integer_and_float_extractor,
+                                protein_binding_processed[0]
+                            )
+                            if protein_binding_processed:
+                                data['protein_binding'] = protein_binding_processed[0]
+
+                        if u'±' in protein_binding_initial:
+                            protein_binding_processed = protein_binding_initial.split(u'±')
+                            protein_binding_processed = re.findall(
+                                integer_and_float_extractor,
+                                protein_binding_processed[0]
+                            )
+                            if protein_binding_processed:
+                                data['protein_binding'] = protein_binding_processed[0]
 
                 # NOT GUARANTEED TO BE 100% ACCURATE
                 elif header == 'Half life':
                     # Take full string
                     # Might not exist
                     # Be sure to decode for unicode comparisons
-                    life = row.findChildren('td')[0].text
+                    if dd.findChildren('p'):
+                        life = dd.findChildren('p')[0].text
 
-                    # Remove 't1/2' to eliminate confusion for the parser
-                    life = life.replace('t1/2', '')
+                        # Remove 't1/2' to eliminate confusion for the parser
+                        life = life.replace('t1/2', '')
 
-                    unit = ''
-                    for possible_unit in units:
-                        if not unit and possible_unit in life:
-                            unit = possible_unit
-                        # If a unit has already been selected, trim life to remove distracting units
-                        elif unit and possible_unit in life:
-                            life = life[life.index(possible_unit):]
+                        unit = ''
+                        for possible_unit in units:
+                            if not unit and possible_unit in life:
+                                unit = possible_unit
+                            # If a unit has already been selected, trim life to remove distracting units
+                            elif unit and possible_unit in life:
+                                life = life[life.index(possible_unit):]
 
-                    # Special exception for min (abbreviation of minutes)
-                    if not unit and 'min' in life:
-                        unit = 'min'
+                        # Special exception for min (abbreviation of minutes)
+                        if not unit and 'min' in life:
+                            unit = 'min'
 
-                    if unit:
-                        trimmed_life = life[:life.index(unit)]
-                        found_numbers = re.findall(integer_and_float_extractor, trimmed_life)
+                        if unit:
+                            trimmed_life = life[:life.index(unit)]
+                            found_numbers = re.findall(integer_and_float_extractor, trimmed_life)
 
-                        # Make sure the numbers aren't jumbled (float came second and integer came first)
-                        found_numbers.sort(key=float)
+                            # Make sure the numbers aren't jumbled (float came second and integer came first)
+                            found_numbers.sort(key=float)
 
-                        # If it is plus or minus
-                        if u'+/-' in trimmed_life or u'±' in trimmed_life:
-                            found_numbers = [
-                                unicode(float(found_numbers[-1])-float(found_numbers[0])),
-                                unicode(float(found_numbers[-1])+float(found_numbers[0]))
-                            ]
+                            # If it is plus or minus
+                            if u'+/-' in trimmed_life or u'±' in trimmed_life:
+                                found_numbers = [
+                                    unicode(float(found_numbers[-1])-float(found_numbers[0])),
+                                    unicode(float(found_numbers[-1])+float(found_numbers[0]))
+                                ]
 
-                        # Take first two
-                        data['half_life'] = '-'.join(found_numbers[:2]) + ' ' + unit + 's'.lstrip()
+                            # Take first two
+                            data['half_life'] = '-'.join(found_numbers[:2]) + ' ' + unit + 's'.lstrip()
 
+                # THIS IS NOW A UL
                 # Be sure to trim
                 elif header == 'Clearance':
                     # Might not exist
                     # Get rid of bullets with lstrip
-                    clearance = row.findChildren('td')[0].text.lstrip()
+                    clearance = []
+                    clearance_lis = dd.findChildren('li')
+
+                    for li in clearance_lis:
+                        clearance.append(li.text.lstrip())
+
+                    clearance = '\n'.join(clearance)
 
                     if len(clearance) > 500:
                         clearance = clearance[:495] + '...'
@@ -645,20 +635,21 @@ def get_drugbank_data_from_chembl_id(chembl_id):
                 # Be sure to trim
                 elif header == 'Absorption':
                     # Might not exist
-                    absorption_initial = row.findChildren('td')[0].text
+                    if dd.findChildren('p'):
+                        absorption_initial = dd.findChildren('p')[0].text
 
-                    # Absorption is just the full text
-                    absorption = absorption_initial
-                    if len(absorption) > 1000:
-                        absorption = absorption[:995] + '...'
-                    data['absorption'] = absorption
+                        # Absorption is just the full text
+                        absorption = absorption_initial
+                        if len(absorption) > 1000:
+                            absorption = absorption[:995] + '...'
+                        data['absorption'] = absorption
 
-                    # Find percent for bioavailability
-                    bioavailability_initial = re.findall(percent_extractor, absorption_initial)
-                    # If there are multiple, which do I take?
-                    # Taking first percent for now
-                    if bioavailability_initial:
-                        data['bioavailability'] = bioavailability_initial[0]
+                        # Find percent for bioavailability
+                        bioavailability_initial = re.findall(percent_extractor, absorption_initial)
+                        # If there are multiple, which do I take?
+                        # Taking first percent for now
+                        if bioavailability_initial:
+                            data['bioavailability'] = bioavailability_initial[0]
 
         # Convert Not Available to None (for clarity)
         for key, value in data.items():
@@ -668,45 +659,24 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         # Array of targets
         targets = []
 
+        classes = {
+            'targets': 'Target',
+            'enzymes': 'Enzyme',
+            'carriers': 'Carrier',
+            'transporters': 'Transporter',
+        }
+
         # Loop through all target cards
-        listed_targets = soup.findChildren('div', class_='target')
-        if listed_targets:
-            listed_targets = listed_targets[0].findChildren('div', class_='panel')
+        for class_name, full_name in classes.items():
+            listed_targets = soup.findChildren('div', class_=class_name)
 
-            for target in listed_targets:
-                to_add = get_drugbank_target_information(target, 'Target')
-                if to_add.get('name', ''):
-                    targets.append(to_add)
+            if listed_targets:
+                listed_targets = listed_targets[0].findChildren('div', class_='bond')
 
-        # Loop through all enzyme cards
-        listed_enzymes = soup.findChildren('div', class_='enzyme')
-        if listed_enzymes:
-            listed_enzymes = listed_enzymes[0].findChildren('div', class_='panel')
-
-            for enzyme in listed_enzymes:
-                to_add = get_drugbank_target_information(enzyme, 'Enzyme')
-                if to_add.get('name', ''):
-                    targets.append(to_add)
-
-        # Loop through all carrier cards
-        listed_carriers = soup.findChildren('div', class_='carrier')
-        if listed_carriers:
-            listed_carriers = listed_carriers[0].findChildren('div', class_='panel')
-
-            for carrier in listed_carriers:
-                to_add = get_drugbank_target_information(carrier, 'Carrier')
-                if to_add.get('name', ''):
-                    targets.append(to_add)
-
-        # Loop through all transporter cards
-        listed_transporters = soup.findChildren('div', class_='transporter')
-        if listed_transporters:
-            listed_transporters = listed_transporters[0].findChildren('div', class_='panel')
-
-            for transporter in listed_transporters:
-                to_add = get_drugbank_target_information(transporter, 'Transporter')
-                if to_add.get('name', ''):
-                    targets.append(to_add)
+                for target in listed_targets:
+                    to_add = get_drugbank_target_information(target, full_name)
+                    if to_add.get('name', ''):
+                        targets.append(to_add)
 
         # Remember that targets is a list!
         data.update({'targets': targets})
