@@ -66,6 +66,9 @@ from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
 from django.template.loader import render_to_string, TemplateDoesNotExist
 
+from datetime import datetime, timedelta
+import pytz
+
 # TODO Refactor imports
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
 # TODO Rename get_absolute_url when the function does not actually return the model's URL
@@ -191,8 +194,9 @@ def get_queryset_with_assay_map(queryset):
     return queryset
 
 
-def get_compound_instance_strings_for_queryset(setups):
-    """Modifies a queryset to contain strings for all of the compound instances for each setup
+# "get" is perhaps a little incorrect here, as this acts more like a setter
+def get_compound_instance_and_cell_strings_for_queryset(setups):
+    """Modifies a queryset to contain strings for all of the compound instances and cells for each setup
 
     Params:
     setups - a queryset of AssayChipSetups
@@ -203,21 +207,40 @@ def get_compound_instance_strings_for_queryset(setups):
         'compound_instance__compound',
         'compound_instance__supplier',
         'concentration_unit',
-        'chip_setup'
+        # 'chip_setup'
     ).order_by('addition_time', 'compound_instance__compound__name')
     related_compounds_map = {}
 
     # NOTE THAT THIS MAKES A LIST OF STRINGS, NOT THE ACTUAL OBJECTS
     for compound in related_compounds:
         related_compounds_map.setdefault(compound.chip_setup_id, []).append(
-            compound.compound_instance.compound.name +
-            ' (' + str(compound.concentration) + ' ' + compound.concentration_unit.unit + ')' +
-            '\n-Added on: ' + compound.get_addition_time_string() + '; Duration of: ' + compound.get_duration_string()
+            unicode(compound)
         )
 
     for setup in setups:
         setup.related_compounds_as_string = '\n'.join(
             related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
+        )
+
+    related_cells = AssayChipCells.objects.filter(
+        # Idiosyncratic field name because schema needs to be revised
+        assay_chip=setups
+    ).prefetch_related(
+        'cell_sample__cell_subtype',
+        'cell_sample__cell_type__organ',
+        'cell_sample__supplier',
+        # 'cellsample_density_unit',
+    ).order_by('cell_sample__cell_type__cell_type')
+    related_cells_map = {}
+
+    for cell in related_cells:
+        related_cells_map.setdefault(cell.assay_chip_id, []).append(
+            unicode(cell)
+        )
+
+    for setup in setups:
+        setup.related_cells_as_string = '\n'.join(
+            related_cells_map.get(setup.id, ['-No Cells-'])
         )
 
 
@@ -290,7 +313,8 @@ def get_queryset_with_number_of_data_points(queryset):
     data_points = AssayChipRawData.objects.exclude(
         quality__contains=REPLACED_DATA_POINT_CODE
     ).prefetch_related(
-        *CHIP_DATA_PREFETCH
+        # *CHIP_DATA_PREFETCH
+        'assay_chip_id__chip_setup__assay_run_id'
     )
 
     data_points_map = {}
@@ -519,7 +543,11 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
         # Display to users with either editor or viewer group or if unrestricted
         group_names = list(set([group.name.replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]))
 
-        queryset = queryset.filter(group__name__in=group_names)
+        # NOTE: Also excludes signed off studies
+        queryset = queryset.filter(
+            group__name__in=group_names,
+            signed_off_by_id=None
+        )
 
         get_queryset_with_organ_model_map(queryset)
 
@@ -580,7 +608,7 @@ class StudyIndex(StudyViewershipMixin, DetailView):
             'created_by',
         )
 
-        get_compound_instance_strings_for_queryset(setups)
+        get_compound_instance_and_cell_strings_for_queryset(setups)
 
         context['setups'] = setups
 
@@ -883,7 +911,6 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
 
             save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=True)
 
-
             # if send_alert:
             #     # Magic strings are in poor taste, should use a template instead
             #     superuser_subject = 'Study Sign Off Detected: {0}'.format(self.object)
@@ -1062,6 +1089,11 @@ class AssayRunSignOff(UpdateView):
         )
 
         if form.is_valid() and stakeholder_formset.is_valid():
+            # Local datetime
+            tz = pytz.timezone('US/Eastern')
+            datetime_now_local = datetime.now(tz)
+            thirty_days_from_date = datetime_now_local + timedelta(days=30)
+
             send_initial_sign_off_alert = False
             initial_number_of_required_sign_offs = AssayRunStakeholder.objects.filter(
                 study=self.object,
@@ -1117,7 +1149,8 @@ class AssayRunSignOff(UpdateView):
                             'assays/email/tctc_stakeholder_email.txt',
                             {
                                 'user': user_to_be_alerted,
-                                'study': self.object
+                                'study': self.object,
+                                'thirty_days_from_date': thirty_days_from_date
                             }
                         )
                     except TemplateDoesNotExist:
@@ -1322,7 +1355,7 @@ class AssayRunSummary(StudyViewershipMixin, DetailView):
             'created_by',
         )
 
-        get_compound_instance_strings_for_queryset(setups)
+        get_compound_instance_and_cell_strings_for_queryset(setups)
 
         context['setups'] = setups
 
@@ -1449,7 +1482,7 @@ class AssayChipSetupList(LoginRequiredMixin, ListView):
         #     group__name__in=group_names
         # )
 
-        get_compound_instance_strings_for_queryset(queryset)
+        get_compound_instance_and_cell_strings_for_queryset(queryset)
 
         return queryset
 

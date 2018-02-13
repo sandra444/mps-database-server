@@ -162,18 +162,11 @@
       });
     </script>
 
-{#    <!-- SmartMenus jQuery Bootstrap Addon -->#}
-{#    <script type="text/javascript" src="{% static "js/jquery.smartmenus.bootstrap.min.js" %}"></script>#}
-{#    <!-- SmartMenus jQuery Bootstrap Addon CSS -->#}
-{#    <link rel="stylesheet" href="{% static "css/jquery.smartmenus.bootstrap.css" %}">#}
-
     <!-- Custom CSS Rules -->
     <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
   {% endblock %}
 
   {% block load %}{% endblock %}
-{#  {% block js %}{% endblock %}#}
-
 </head>
 
 <body>
@@ -193,58 +186,52 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        {#      <li title="Administrative interface for authorized users only"><a href="/admin">Admin</a></li>#}
         <li title="Add, edit, or view assay data" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">Studies<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
-          {# <li title="Index of all the studies created by you"><a href="/assays/user_index/">Your Studies</a></li>#}
           <li title="Index of all the studies created by groups you are a member of">
               <a href="/assays/editable_studies/">View Editable Studies</a>
           </li>
           <li><a href="/assays/study/">View All Studies</a></li>
-{#          <li><a href="/assays/assaylayout/">View Plate Layouts</a></li>#}
           <li><a href="/assays/studyconfiguration/">View Integrated Study Configurations</a></li>
           <li class="divider"></li>
           <li><a href="/assays/assaychipsetup/">View Setups</a></li>
           <li><a href="/assays/assaychipreadout/">View Readouts</a></li>
           <li><a href="/assays/assaychiptestresult/">View Results</a></li>
-{#          <li class="dropdown-submenu">#}
-{#          <a href="#">View Chips &amp; Plates <span class="caret"></span></a>#}
-{#          <ul class="dropdown-menu">#}
-{#            <li class="dropdown-submenu">#}
-{#            <a href="#">Chips <span class="caret"></span></a>#}
-{#            <ul class="dropdown-menu">#}
-{#              <li><a href="/assays/assaychipsetup/">Setups</a></li>#}
-{#              <li><a href="/assays/assaychipreadout/">Readouts</a></li>#}
-{#              <li><a href="/assays/assaychiptestresult/">Results</a></li>#}
-{#            </ul>#}
-{#            </li>#}
-{#            <li class="dropdown-submenu">#}
-{#            <a href="#">Plates <span class="caret"></span></a>#}
-{#            <ul class="dropdown-menu">#}
-{#              <li><a href="/assays/assayplatesetup/">Setups</a></li>#}
-{#              <li><a href="/assays/assayplatereadout/">Readouts</a></li>#}
-{#              <li><a href="/assays/assayplatetestresult/">Results</a></li>#}
-{#            </ul>#}
-{#            </li>#}
-{#          </ul>#}
-{#          </li>#}
           <li class="divider"></li>
           <li class="dropdown-header">Requires Permission</li>
           <li><a href="/assays/study/add/">Add Study</a></li>
-{#          <li><a href="/assays/assaylayout/add/">Add Plate Layout</a></li>#}
           <li><a href="/assays/studyconfiguration/add/">Add Integrated Study Configuration</a></li>
         </ul>
         </li>
         <li title="Analyze bioactivity and drugtrial data" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">Analysis<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
+          <li class="dropdown-header">Data Analysis</li>
           <li title="Generate a heatmap for selected bioactivity data">
               <a href="/bioactivities/heatmap/#filter">Heatmap</a>
           </li>
           <li title="Generate a dendrogram for selected compound/bioactivity data">
               <a href="/bioactivities/cluster/#filter">Cluster</a>
           </li>
+          <li title="This feature is still in development"><a href="/under_construction/">
+              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+              Reproducibility
+          </a></li>
+          <li class="divider"></li>
+          <li class="dropdown-header">Computational Modeling</li>
+          <li title="This feature is still in development"><a href="/under_construction/">
+              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+              PBPK
+          </a></li>
+          <li title="This feature is still in development"><a href="/bioactivities/model/">
+              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+              Predictive Modeling
+          </a></li>
+{#          <li title="This feature is still in development"><a href="/under_construction/">#}
+{#              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>#}
+{#              Pathway Modeling#}
+{#          </a></li>#}
         </ul>
         </li>
         <li title="View/add organ models and microdevices" class="dropdown">
@@ -364,11 +351,15 @@
       <div class="row">
         <div class="col-xs-9">
           <p>
-            Copyright 2012-2017 The University of Pittsburgh Drug Discovery Institute Microphysiology Database Project
+            Copyright 2012-2018 The University of Pittsburgh Drug Discovery Institute Microphysiology Database Project
           </p>
           <p>
             <a target="_blank" href="http://www.ncats.nih.gov/research/reengineering/tissue-chip/tissue-chip.html">
-                Funded by the National Center for Advancing Translational Sciences <b>Tissue Chips Program</b>
+                Funded by the National Center for Advancing Translational Sciences <b>Tissue Chips Program</b>,
+            </a>
+            <br>
+            <a target="_blank" href="https://ncats.nih.gov/tissuechip/projects/centers">
+                the National Center for Advancing Translational Sciences <b>Tissue Chip Testing Centers Program</b>,
             </a>
             <br>
             <a target="_blank" href="http://www.vanderbilt.edu/vprompt/index.php">

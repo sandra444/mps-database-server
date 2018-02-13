@@ -133,6 +133,8 @@ def save_forms_with_tracking(self, form, formset=None, update=False):
         # Else if Add
         if not update:
             self.object.modified_by = self.object.created_by = self.request.user
+        else:
+            self.object.modified_by = self.request.user
         self.object.save()
 
     if formset:
@@ -144,6 +146,6 @@ def save_forms_with_tracking(self, form, formset=None, update=False):
         else:
             formset.save()
 
-    # If Update
-    if update:
-        self.object.modified_by = self.request.user
+        if update:
+            self.object.modified_by = self.request.user
+            self.object.save()

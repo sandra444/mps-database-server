@@ -246,6 +246,14 @@ class AssayCompoundInstance(models.Model):
             )
         ]
 
+        # ordering = (
+        #     'compound_instance',
+        #     'concentration',
+        #     'concentration_unit',
+        #     'addition_time',
+        #     'duration'
+        # )
+
     # Stop-gap, subject to change
     chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True)
 
@@ -277,6 +285,15 @@ class AssayCompoundInstance(models.Model):
             split_times.get('day'),
             split_times.get('hour'),
             split_times.get('minute'),
+        )
+
+    def __unicode__(self):
+        return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
+            self.compound_instance.compound.name,
+            self.concentration,
+            self.concentration_unit.unit,
+            self.get_addition_time_string(),
+            self.get_duration_string()
         )
 
 
@@ -832,9 +849,27 @@ class AssayChipRawData(models.Model):
     # Affiliated upload
     data_upload = models.ForeignKey('assays.AssayDataUpload', null=True, blank=True)
 
+# Expedient solution to absurd problem with choice field (which I dislike)
+cell_choice_dict = {
+    'WE': 'cells / well',
+    'CP': 'cells / chip',
+    'ML': 'cells / mL',
+    'MM': 'cells / mm^2'
+}
+
 
 class AssayChipCells(models.Model):
     """Individual cell parameters for CHIP setup used in inline"""
+
+    # class Meta(object):
+    #     ordering = (
+    #         'cell_sample',
+    #         'cell_biosensor',
+    #         'cellsample_density',
+    #         'cellsample_density_unit',
+    #         'cell_passage'
+    #     )
+
     assay_chip = models.ForeignKey('AssayChipSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
     cell_biosensor = models.ForeignKey('cellsamples.Biosensor')
@@ -850,6 +885,12 @@ class AssayChipCells(models.Model):
     cell_passage = models.CharField(max_length=16, verbose_name='Passage#',
                                     blank=True, default='')
 
+    def __unicode__(self):
+        return u'{0}\n-{1:.0e} {2}'.format(
+            self.cell_sample,
+            self.cellsample_density,
+            cell_choice_dict.get(self.cellsample_density_unit, 'Unknown Unit')
+        )
 
 # TO BE DEPRECATED To be merged into single "AssaySetup" model
 class AssayChipSetup(FlaggableModel):
@@ -901,6 +942,76 @@ class AssayChipSetup(FlaggableModel):
         #     )
         # else:
         #     return u'Chip-{}:Control'.format(self.assay_chip_id)
+
+    def devolved_cells(self):
+        """Makes a tuple of cells (for comparison)"""
+        cell_tuple = []
+        for cell in self.assaychipcells_set.all():
+            cell_tuple.append((
+                cell.cell_sample_id,
+                cell.cell_biosensor_id,
+                cell.cellsample_density,
+                # cell.cellsample_density_unit_id,
+                cell.cellsample_density_unit,
+                cell.cell_passage
+            ))
+
+        return tuple(sorted(cell_tuple))
+
+    def stringify_cells(self):
+        """Stringified cells for a setup"""
+        cells = []
+        for cell in self.assaychipcells_set.all():
+            cells.append(unicode(cell))
+
+        if not cells:
+            cells = ['-No Cell Samples-']
+
+        return '\n'.join(cells)
+
+    def devolved_compounds(self):
+        """Makes a tuple of compounds (for comparison)"""
+        compound_tuple = []
+        for compound in self.assaycompoundinstance_set.all():
+            compound_tuple.append((
+                compound.compound_instance_id,
+                compound.concentration,
+                compound.concentration_unit_id,
+                compound.addition_time,
+                compound.duration,
+            ))
+
+        return tuple(sorted(compound_tuple))
+
+    def stringify_compounds(self):
+        """Stringified cells for a setup"""
+        compounds = []
+        for compound in self.assaycompoundinstance_set.all():
+            compounds.append(unicode(compound))
+
+        if not compounds:
+            compounds = ['-No Compounds-']
+
+        return '\n'.join(compounds)
+
+    def quick_dic(self):
+        dic = {
+            # 'device': self.device.device_name,
+            'organ_model': self.get_hyperlinked_model_or_device(),
+            'compounds': self.stringify_compounds(),
+            'cells': self.stringify_cells(),
+            'setups_with_same_group': []
+        }
+        return dic
+
+    def get_hyperlinked_name(self):
+        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), self.assay_chip_id)
+
+    def get_hyperlinked_model_or_device(self):
+        if not self.organ_model:
+            return '<a href="{0}">{1} (No Organ Model)</a>'.format(self.device.get_absolute_url(), self.device.device_name)
+        else:
+            return '<a href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.model_name)
 
     def get_absolute_url(self):
         return '/assays/assaychipsetup/{}/'.format(self.id)

@@ -1401,6 +1401,13 @@
         <b>Adverse Events</b> contain automatically acquired data from OpenFDA
       </li>
       <li class="list-group-item">
+        The "Number of Reports" column indicates the number of reports that list both the compound and adverse event in the row
+        <br>
+        Please note that a compound can be listed in a report but not suspected of causing the adverse event
+        <br>
+        Likewise, "Number of Reports" in this interface does not contain any information concerning the dose of the drug
+      </li>
+      <li class="list-group-item">
         Only top adverse events for compounds are shown in this interface
       </li>
       <li class="list-group-item">
@@ -1434,11 +1441,11 @@
         You can save, load, and clear your selections by using the buttons at the top
       </li>
       <li class="list-group-item">
-        "Freq Among Top" is the frequency of the most common adverse events for each compound
+        "Reports Among Top" is the number of reports of the most common adverse events for each compound
         <br>
         <b class="text-danger">
           <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-          Entries with 0 for "Freq Among Top" still have data from OpenFDA, these entries have a zero value because they are not top adverse events
+          Entries with 0 for "Reports Among Top" may still have data from OpenFDA, these entries have a zero value because they are not top adverse events
         </b>
       </li>
       <li class="list-group-item">

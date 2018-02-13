@@ -2,7 +2,7 @@ Hello {{ user.first_name}} {{ user.last_name}},
 
 {{ requester.first_name}} {{ requester.last_name}} has requested that you review the Study: {{ study }}.
 
-"{{ message }}"
+"{{ message|safe }}"
 
 Please follow this link to see the Study in question:
 https://mps.csb.pitt.edu{{ study.get_summary_url }}

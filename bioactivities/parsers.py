@@ -107,7 +107,7 @@ def generate_list_of_all_data_in_bioactivities(exclude_questionable, pubchem, or
         if exclude_questionable:
             all_targets = all_targets.filter(data_validity='')
 
-        all_targets = all_targets.prefetch_related('compound').select_related('assay__target')
+        all_targets = all_targets.prefetch_related('compound', 'assay__target')
 
         all_data = all_targets.values_list(
             'activity_name',
@@ -218,7 +218,7 @@ def generate_list_of_all_targets_in_bioactivities(exclude_questionable, pubchem,
         else:
             all_targets = initial_targets
 
-        all_targets = all_targets.select_related('assay__target').values_list('assay__target__name')
+        all_targets = all_targets.prefetch_related('assay__target').values_list('assay__target__name')
 
     else:
         initial_targets = Bioactivity.objects.filter(
@@ -267,7 +267,7 @@ def generate_list_of_all_drugtrials(desired_organisms):
 
     result = FindingResult.objects.filter(
         value__isnull=False, drug_trial__species__species_name__in=desired_organisms
-    ).select_related('drug_trial__species', 'finding_name').values_list('finding_name__finding_name', flat=True)
+    ).prefetch_related('drug_trial__species', 'finding_name').values_list('finding_name__finding_name', flat=True)
 
     result = generate_record_frequency_data(result)
 
@@ -472,8 +472,7 @@ def get_filtered_bioactivities(
 
         q = q.prefetch_related(
             'compound',
-            'assay'
-        ).select_related(
+            'assay',
             'assay__target'
         )
 
@@ -1304,7 +1303,7 @@ def table(request):
     length = q.count()
 
     # Prefetch all foreign keys
-    q = q.select_related(
+    q = q.prefetch_related(
         'compound',
         'assay__target',
         'assay'

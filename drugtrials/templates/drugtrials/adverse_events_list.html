@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load humanize %}
 
 {% block load %}
     <script src="{% static "js/project_filter.js" %}"></script>
@@ -26,7 +27,18 @@
                     <th>View</th>
                     <th>Compound</th>
                     <th>Event</th>
-                    <th>Frequency</th>
+                    <th>
+                        Number of Reports
+                        <span title="The number of FAERS reports with this compound and adverse event" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                    </th>
+                    <th>
+                        Normalized # of Reports
+                        <span title="Number of Reports / Estimated Usage * 10,000" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                    </th>
+                    <th>
+                        Estimated Usage
+                        <span title="Estimate from the CDC's NAMCS/NHAMCS datasets" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                    </th>
                     <th>Organ</th>
                     <th>Black Box Warning</th>
                     <th>Project</th>
@@ -39,7 +51,9 @@
                     <td><a class="btn btn-primary" href="{{ adverse_event.compound.id }}">View</a></td>
                     <td><a href="/compounds/{{ adverse_event.compound.compound.id }}">{{ adverse_event.compound.compound }}</a></td>
                     <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
-                    <td>{{ adverse_event.frequency }}</td>
+                    <td>{{ adverse_event.frequency|intcomma }}</td>
+                    <td>{{ adverse_event.normalized_reports|floatformat:2|intcomma }}</td>
+                    <td>{{ adverse_event.compound.estimated_usage|default:''|intcomma }}</td>
                     <td>{{ adverse_event.event.organ|default:"" }}</td>
                     <td>
                         {% if adverse_event.compound.black_box %}

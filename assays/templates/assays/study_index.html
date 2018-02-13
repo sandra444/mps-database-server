@@ -12,7 +12,7 @@
     {% if user_is_group_editor %}
     <li><a href="/assays/editable_studies/">Editable Studies</a></li>
     {% else %}
-    <li><a href="/assays/study">Studies</a></li>
+    <li><a href="/assays/study/">All Studies</a></li>
     {% endif %}
     <li class="active">{{ object }}</li>
 {% endblock %}
@@ -91,6 +91,7 @@
                     <th>Organ Model</th>
 {#                    <th>Chip Test Type</th>#}
                     <th>Compound</th>
+                    <th>Cell</th>
                     <th>Creator</th>
                     <th>Review</th>
                 </tr>
@@ -116,6 +117,7 @@
 {#                        <td>-control-</td>#}
 {#                    {% endif %}#}
                     <td>{{ setup.related_compounds_as_string|linebreaks }}</td>
+                    <td>{{ setup.related_cells_as_string|linebreaks }}</td>
                     <td>
                         {{ setup.full_creator }}
                     </td>
