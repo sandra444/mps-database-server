@@ -1,6 +1,4 @@
 $(document).ready(function() {
-    var middleware_token = getCookie('csrftoken');
-
     window.TABLE = $('#adverse_events').DataTable({
         dom: 'B<"row">lfrtip',
         fixedHeader: {headerOffset: 50},
@@ -11,7 +9,7 @@ $(document).ready(function() {
             url: '/drugtrials_ajax/',
             data: {
                 call: 'fetch_adverse_events_data',
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             type: 'POST'
         },

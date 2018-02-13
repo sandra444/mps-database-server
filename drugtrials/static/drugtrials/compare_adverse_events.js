@@ -5,9 +5,6 @@ $(document).ready(function () {
     // Prevent CSS conflict with Bootstrap
     $.fn.button.noConflict();
 
-    // Get the middleware_token
-    var middleware_token = getCookie('csrftoken');
-
     // Stores all currently selected compounds
     var compounds = {};
     // Stores all currently selected adverse events
@@ -466,7 +463,7 @@ $(document).ready(function () {
             url: '/drugtrials_ajax/',
             data: {
                 call: 'fetch_aggregate_ae_by_event',
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             type: 'POST'
         },
@@ -488,7 +485,7 @@ $(document).ready(function () {
             url: '/drugtrials_ajax/',
             data: {
                 call: 'fetch_aggregate_ae_by_compound',
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             type: 'POST'
         },
