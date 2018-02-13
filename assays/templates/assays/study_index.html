@@ -9,11 +9,11 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    {% if user_is_group_editor %}
-    <li><a href="/assays/editable_studies/">Editable Studies</a></li>
-    {% else %}
-    <li><a href="/assays/study">Studies</a></li>
-    {% endif %}
+{#    {% if user_is_group_editor %}#}
+{#    <li><a href="/assays/editable_studies/">Editable Studies</a></li>#}
+{#    {% else %}#}
+    <li><a href="/assays/study/">All Studies</a></li>
+{#    {% endif %}#}
     <li class="active">{{ object }}</li>
 {% endblock %}
 

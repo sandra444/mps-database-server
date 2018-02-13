@@ -122,6 +122,7 @@ CSV_HEADER_WITH_COMPOUNDS_AND_STUDY = (
     'Minute',
     'Device',
     'Organ Model',
+    'Cells',
     'Compound Treatment(s)',
     'Target/Analyte',
     'Method/Kit',

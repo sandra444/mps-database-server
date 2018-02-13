@@ -24,7 +24,7 @@
         <table hidden id="cellsubtypes" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <th>View/Edit</th>
+                    <th>Edit</th>
                     <th>Cell Origin</th>
                     <th>Cell Type</th>
                 </tr>
@@ -33,7 +33,7 @@
             <tbody>
             {% for object in object_list %}
                 <tr class="cellsubtype" id={{ object.id }} name={{ object }}>
-                    <td><a class="btn btn-primary" href="{{ object.id }}">View/Edit</a></td>
+                    <td><a class="btn btn-primary" href="{{ object.id }}">Edit</a></td>
                     <td>{{ object }}</td>
                     <td>{{ object.cell_type|default:'Generic (Applicable to All Cell Types)' }}</td>
                 </tr>

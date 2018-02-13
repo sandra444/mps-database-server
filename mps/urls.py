@@ -10,7 +10,6 @@ from .views import *
 from .forms import *
 
 # For registration
-from django.views.generic.base import TemplateView
 from registration.backends.hmac.views import ActivationView, RegistrationView
 from django.contrib.auth import views as auth_views
 
@@ -139,11 +138,15 @@ urlpatterns = patterns(
 
 
     # BEGIN old-style API
+    # TODO THESE SHOULD BE IN THEIR RESPECTIVE APPS
     url(r'^search_ajax/$', 'mps.ajax.ajax'),
     url(r'^assays_ajax/$', 'assays.ajax.ajax'),
     url(r'^compounds_ajax/$', 'compounds.ajax.ajax'),
     url(r'^cellsamples_ajax/$', 'cellsamples.ajax.ajax'),
     # END old-style API
+
+    # Under construction message
+    url(r'^under_construction/$', UnderConstruction.as_view()),
 
     url(
         r'^admin/doc/',

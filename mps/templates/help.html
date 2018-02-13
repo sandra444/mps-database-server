@@ -106,7 +106,7 @@
               <li><a href="#cluster">Cluster</a></li>
             </ul>
           </li>
-          <li><a href="#glossary">Glossary</a></li>
+{#          <li><a href="#glossary">Glossary</a></li>#}
         </ul>
       </div>
     </div>
@@ -133,7 +133,7 @@
           This is done so that clicking a search suggestion for, say, a drug trial, will also display other results with the compound in question
         </li>
         <li class="list-group-item">
-          Clicking the white button reading <b>Global</b> let's you switch to a <b>Bioactivites Search</b> described
+          Clicking the white button reading <b>Global</b> lets you switch to a <b>Bioactivites Search</b> described
             <a href="#bioactivities">here</a>
         </li>
         <li class="list-group-item">
@@ -1651,29 +1651,30 @@
     </ul>
   </div>
 </div>
-<div id="glossary" class="container padded-bottom">
-  <h1>Glossary</h1>
-  <table hidden id="glossary_table" class="display" cellspacing="0" width="100%">
-    <thead>
-      <tr>
-        <th>Term</th>
-        <th>Definition</th>
-        <th>Ref</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {% for term in glossary %}
-        <tr>
-          <td>{{ term.term }}</td>
-          <td>{{ term.definition }}</td>
-          <td>{{ term.show_url }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <script src="{% static "js/display_datatable.js" %}"></script>
-</div>
+{# Show glossary later when it is more complete #}
+{#<div id="glossary" class="container padded-bottom">#}
+{#  <h1>Glossary</h1>#}
+{#  <table hidden id="glossary_table" class="display" cellspacing="0" width="100%">#}
+{#    <thead>#}
+{#      <tr>#}
+{#        <th>Term</th>#}
+{#        <th>Definition</th>#}
+{#        <th>Ref</th>#}
+{#      </tr>#}
+{#    </thead>#}
+{##}
+{#    <tbody>#}
+{#      {% for term in glossary %}#}
+{#        <tr>#}
+{#          <td>{{ term.term }}</td>#}
+{#          <td>{{ term.definition }}</td>#}
+{#          <td>{{ term.show_url }}</td>#}
+{#        </tr>#}
+{#      {% endfor %}#}
+{#    </tbody>#}
+{#  </table>#}
+{#  <script src="{% static "js/display_datatable.js" %}"></script>#}
+{#</div>#}
 </div>
 </body>
 </html>

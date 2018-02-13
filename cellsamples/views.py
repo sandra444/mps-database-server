@@ -3,7 +3,7 @@
 from django.views.generic import ListView, CreateView, UpdateView
 from .models import CellSample, CellType, CellSubtype
 from .forms import CellSampleForm, CellTypeForm, CellSubtypeForm
-from mps.mixins import OneGroupRequiredMixin, SpecificGroupRequiredMixin, PermissionDenied, user_is_active
+from mps.mixins import LoginRequiredMixin, OneGroupRequiredMixin, SpecificGroupRequiredMixin, PermissionDenied, user_is_active
 from mps.templatetags.custom_filters import filter_groups
 from django.shortcuts import redirect
 
@@ -92,15 +92,12 @@ class CellSampleUpdate(UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class CellSampleList(OneGroupRequiredMixin, ListView):
+class CellSampleList(LoginRequiredMixin, ListView):
     """Displays a list of Cell Samples"""
     template_name = 'cellsamples/cellsample_list.html'
 
     def get_queryset(self):
-        groups = self.request.user.groups.values_list('id', flat=True)
-        queryset = CellSample.objects.filter(
-            group__in=groups
-        ).prefetch_related(
+        queryset = CellSample.objects.all().prefetch_related(
             'cell_type__organ',
             'cell_subtype',
             'supplier',

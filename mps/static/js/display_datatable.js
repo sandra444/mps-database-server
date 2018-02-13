@@ -4,7 +4,7 @@ $(document).ready(function() {
     // Get URL parameters for auto search
     function urlParam(name) {
         var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-        if (results==null){
+        if (results == null){
            return null;
         }
         else{
@@ -25,7 +25,7 @@ $(document).ready(function() {
 
     // TODO Not currently used, but this could be helpful
     // Perform auto search (from GET)
-    $('.dataTables_filter input').val(urlParam('search')).trigger($.Event("keyup", { keyCode: 13 }));
+    // $('.dataTables_filter input').val(urlParam('search')).trigger($.Event("keyup", { keyCode: 13 }));
 
     // Reveal the table, as loading is complete
     $('table').prop('hidden', false);

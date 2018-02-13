@@ -2,8 +2,9 @@ Hello Admins,
 
 A new user has registered.
 
-Username: {{ user.user_name }}
+Username: {{ user.username }}
 Name: {{ user.first_name }} {{ user.last_name }}
+Email: {{ user.email }}
 
 Thanks,
 MPS

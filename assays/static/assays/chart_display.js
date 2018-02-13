@@ -88,6 +88,97 @@ $(document).ready(function () {
         }
     };
 
+    window.CHARTS.display_treament_groups = function(treatment_groups) {
+        // TODO KIND OF UGLY
+        var header_keys = [
+            // 'device',
+            'organ_model',
+            'cells',
+            'compounds',
+            'setups_with_same_group'
+        ];
+        var headers = {
+            // 'device': 'Device',
+            'organ_model': 'Organ Model',
+            'cells': 'Cells',
+            'compounds': 'Compounds',
+            'setups_with_same_group': 'Chips/Wells'
+        };
+
+        // Semi-arbitrary at the moment
+        var treatment_group_table = $('#treatment_group_table');
+        var treatment_group_display = $('#treatment_group_display');
+        var treatment_group_head = $('#treatment_group_head');
+
+        treatment_group_head.empty();
+
+        var new_row =  $('<tr>').append(
+            $('<th>').html('Group')
+        );
+
+        $.each(header_keys, function(index, item) {
+            var new_td = $('<th>').html(headers[item]);
+            new_row.append(new_td);
+        });
+
+        treatment_group_head.append(new_row);
+
+        treatment_group_display.empty();
+        treatment_group_table.DataTable().clear();
+        treatment_group_table.DataTable().destroy();
+
+        $.each(treatment_groups, function(index, treatment) {
+            var group_name = 'Group ' + (index + 1);
+            var group_id = group_name.replace(' ', '_');
+
+            var new_row = $('<tr>')
+                .attr('id', group_id)
+                .append(
+                $('<td>').html(group_name)
+            );
+
+            $.each(header_keys, function(header_index, current_header) {
+                // Replace newlines with breaks
+                var new_td = $('<td>').html(treatment[current_header].split("\n").join("<br />"));
+                new_row.append(new_td);
+            });
+
+            treatment_group_display.append(new_row);
+        });
+
+        treatment_group_table.DataTable({
+            // Cuts out extra unneeded pieces in the table
+            dom: 'B<"row">rt',
+            fixedHeader: {headerOffset: 50},
+            responsive: true,
+            paging: false,
+            order: [[ 0, "asc" ]],
+            // Needed to destroy old table
+            bDestroy: true,
+            // Try to get a more reasonable size for cells
+            columnDefs: [
+                // Treat the group column as if it were just the number
+                { "type": "num", "targets": 0 },
+                { "width": "20%", "targets": 2 },
+                { "width": "30%", "targets": 3 },
+                { "width": "30%", "targets": 4 }
+            ]
+        });
+
+        // TODO NOT DRY
+        // Reposition download/print/copy
+        $('.DTTT_container').css('float', 'none');
+
+        // Clarify usage of sort
+        $('.sorting').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+        $('.sorting_asc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+        $('.sorting_desc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+
+        // Recalculate responsive and fixed headers
+        $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+        $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+    };
+
     window.CHARTS.make_charts = function(json, charts, changes_to_options) {
         // Show the chart options
         // NOTE: the chart options are currently shown by default, subject to change
@@ -110,6 +201,10 @@ $(document).ready(function () {
             var options = {
                 title: assay,
                 interpolateNulls: true,
+                // tooltip: {
+                //     isHtml: true
+                //     trigger: 'selection'
+                // },
                 titleTextStyle: {
                     fontSize: 18,
                     bold: true,
@@ -160,7 +255,8 @@ $(document).ready(function () {
                     'height': '65%'
                 },
                 'height':400,
-                focusTarget: 'category',
+                // Individual point tooltips, not aggregate
+                focusTarget: 'datum',
                 intervals: {
                     style: 'bars'
                 }
@@ -172,7 +268,7 @@ $(document).ready(function () {
             // Find out whether to shrink text
             $.each(assays[index][0], function(index, column_header) {
                 if (column_header.length > 12) {
-                    options.legend.textStyle.fontSize = 8;
+                    options.legend.textStyle.fontSize = 10;
                 }
             });
 
@@ -231,5 +327,42 @@ $(document).ready(function () {
                 chart.draw(dataView, options);
             }
         }
+
+        window.CHARTS.display_treament_groups(json.treatment_groups);
+
+        // Triggers for legends (TERRIBLE SELECTOR)
+        $('g:has("g > text")').mouseover(function() {
+            var text_section = $(this).find('text');
+            if (text_section.length === 1) {
+                var content_split = $(this).find('text').text().split(/(\d+)/);
+                var current_pos = $(this).position();
+                // Make it appear slightly below the legend
+                var current_top = current_pos.top + 50;
+                // Get the furthest left it should go
+                var current_left = $('#breadcrumbs').position.left;
+                // var current_left = 200;
+                var row_id_to_use = '#' + content_split[0].replace(' ', '_') + content_split[1];
+                var row_clone = $(row_id_to_use).clone().addClass('bg-warning');
+
+                $('#group_display_body').empty().append(row_clone);
+
+                var second_row = $('<tr>').addClass('bg-warning');
+                var hidden_rows = false;
+
+                $(row_id_to_use).find('td:hidden').each(function(index) {
+                    hidden_rows = true;
+                    second_row.append($(this).clone().show());
+                });
+
+                if (hidden_rows) {
+                    $('#group_display_body').append(second_row);
+                }
+
+                $('#group_display').show()
+                    .css({top: current_top, left: current_left, position:'absolute'});
+            }
+        }).mouseout(function() {
+            $('#group_display').hide();
+        });
     };
 });
