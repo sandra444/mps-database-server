@@ -33,6 +33,8 @@ from mps.templatetags.custom_filters import ADMIN_SUFFIX, is_group_editor
 from django.contrib.auth.models import User
 from mps.settings import DEFAULT_FROM_EMAIL
 
+from django.template.loader import render_to_string
+
 # from.utils import(
 #     valid_chip_row,
 #     stringify_excel_value,
@@ -856,6 +858,7 @@ def get_readout_data(
                 time, []
             ).append(value)
 
+    # Nesting like this is a little sloppy, flat > nested
     for target, units in initial_data.items():
         for unit, tags in units.items():
             for tag, sample_locations in tags.items():
@@ -978,7 +981,8 @@ def get_readout_data(
                             del current_data[current_key + '_i2']
 
             # Note manipulations for sorting
-            x_header.sort(key=lambda s: s.upper().replace(' & ', '~'))
+            # Somewhat contrived
+            x_header.sort(key=lambda s: s.upper().replace(' & ', '~').replace('_I1', '!').replace('_I2', '"'))
             current_table[0].extend(x_header)
 
             x_header = {x_header[index]: index + 1 for index in range(len(x_header))}
@@ -1584,25 +1588,21 @@ def send_ready_for_sign_off_email(request):
 
         if users_to_be_alerted:
             # Magic strings are in poor taste, should use a template instead
+            # I would use a template, but it gets picky about newlines (which as often added automatically)
+            # I could strip the newlines, but alternatively I might as well just have it here
             subject = 'Sign Off Requested for {0}'.format(unicode(study))
+
             for user in users_to_be_alerted:
-                content = 'Hello {0} {1},\n\n' \
-                          '{2} {3} has requested that you review the Study: {4}.\n\n' \
-                          '"{5}"\n\n' \
-                          'Please follow this link to see the Study in question:\n' \
-                          'https://mps.csb.pitt.edu{6}\n\n' \
-                          'When you are satisfied with the contents of the Study: click "Edit Study", then "Click Here to Sign Off on this Study", and finally "Submit".\n\n' \
-                          'Thank you very much,\n' \
-                          'The MPS Database Team\n\n' \
-                          '***PLEASE DO NOT REPLY TO THIS EMAIL***'.format(
-                    user.first_name,
-                    user.last_name,
-                    request.user.first_name,
-                    request.user.last_name,
-                    unicode(study),
-                    message,
-                    study.get_absolute_url()
+                content = render_to_string(
+                    'assays/email/request_for_sign_off.txt',
+                    {
+                        'study': study,
+                        'requester': request.user,
+                        'user': user,
+                        'message': message
+                    }
                 )
+
                 # Actually send the email
                 user.email_user(subject, content, DEFAULT_FROM_EMAIL)
 

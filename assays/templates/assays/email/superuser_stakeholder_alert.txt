@@ -1,0 +1,12 @@
+Hello Admins,
+
+The Approval Status of a Study has changed:
+
+Study: {{ study }}
+Link: https://mps.csb.pitt.edu{{ study.get_summary_url }}
+
+{% for stakeholder in stakeholders %}{{ stakeholder.group }}: {% if stakeholder.signed_off_by %}Approved by {{ stakeholder.signed_off_by.first_name }} {{stakeholder.signed_off_by.last_name}} on {{ stakeholder.signed_off_date}}{% else %} Not yet approved.{% endif %}{% if stakeholder.sign_off_required %}(Required){% else %}(Not Required){% endif %}
+{% endfor %}
+
+Thanks,
+MPS

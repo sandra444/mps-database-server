@@ -1,0 +1,10 @@
+Hello Admins,
+
+A study has been created.
+
+Study: {{ study }}
+Created By: {{ study.created_by.first_name }} {{ study.created_by.last_name }}
+Link: https://mps.csb.pitt.edu{{ study.get_summary_url }}
+
+Thanks,
+MPS
