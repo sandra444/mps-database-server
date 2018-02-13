@@ -3,6 +3,7 @@
 {% load humanize %}
 
 {% block load %}
+    <script src="{% static "js/cookies.js" %}"></script>
     <script src="{% static "drugtrials/compare_adverse_events.js" %}"></script>
     <link href="{% static "css/c3.min.css" %}" rel="stylesheet" type="text/css">
     <script src="{% static "js/c3.min.js" %}"></script>
@@ -61,24 +62,6 @@
                         <th>Organ</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for event in adverse_events %}
-                        <tr>
-                            <td>
-                                <input class="checkbox adverse-event" type="checkbox" value="{{ event.event|safe }}">
-                            </td>
-                            <td>
-                                {{ event.event }}
-                            </td>
-                            <td>
-                                {{ event.frequency|intcomma }}
-                            </td>
-                            <td>
-                                {{ event.organ|default:'' }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
             </table>
         </div>
         <div class="col-sm-6">
@@ -97,24 +80,6 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for compound in compounds %}
-                        <tr>
-                            <td>
-                                <input class="checkbox compound" type="checkbox" value="{{ compound.compound.name|safe }}">
-                            </td>
-                            <td>
-                                <a href="/compounds/{{ compound.compound.id }}">{{ compound.compound.name }}</a>
-                            </td>
-                            <td>
-                                {{ compound.frequency|intcomma }}
-                            </td>
-                            <td>
-                                {{ compound.estimated_usage|default:''|intcomma }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
             </table>
         </div>
     </div>
