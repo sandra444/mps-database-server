@@ -1509,11 +1509,11 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     action = forms.ChoiceField(choices=(
         ('add_name', 'Add Names/IDs*'),
         ('add_date', 'Add Setup Date*'),
-        ('add_notes', 'Add Notes/Notebook Information'),
         ('add_device', 'Add Device/Organ Model Information*'),
         ('add_settings', 'Add Settings'),
         ('add_compounds', 'Add Compounds'),
         ('add_cells', 'Add Cells'),
+        ('add_notes', 'Add Notes/Notebook Information'),
         ('copy', 'Copy Contents'),
         ('clear', 'Clear Contents')
     ))
