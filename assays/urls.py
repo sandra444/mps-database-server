@@ -34,7 +34,7 @@ urlpatterns = patterns('',
     url(r'^assays/studyconfiguration/(?P<pk>[0-9]+)/$', StudyConfigurationUpdate.as_view(), name='studyconfiguration_update'),
 
     # Add a matrix
-    url(r'^assays/(?P<study_id>[0-9]+)/assaymatrix/add/$', AssayMatrixAdd.as_view(), name='assay_matrix_add'),
+    url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assaymatrix/add/$', AssayMatrixAdd.as_view(), name='assay_matrix_add'),
     url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/$', AssayMatrixUpdate.as_view(), name='assay_matrix_update'),
 
     # Sign off

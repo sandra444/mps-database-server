@@ -136,31 +136,10 @@
     </div>
 
     <div hidden id="add_compounds_section" class="item-section">
+    {% if update %}
     <div class="row">
     <div class="col-sm-1"></div>
     <div class="col-sm-11">
-{#    <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">#}
-{#        <tr>#}
-{#            <th colspan="2">Compound</th>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <td colspan="2">{{ form.compound }}</td>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <th>Supplier</th>#}
-{#            <th>Lot</th>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <td>{{ form.supplier_text }}</td>#}
-{#            <td>{{ form.lot_text }}</td>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <th colspan="2">Receipt Date</th>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <td colspan="2">{{ form.receipt_date }}</td>#}
-{#        </tr>#}
-{#    </table>#}
     <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
     <tr>
         <th>Compound*</th>
@@ -220,10 +199,20 @@
     </table>
     </div>
     </div>
+    {% else %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="alert alert-danger text-center" role="alert">
+                Please define each chip/well first.
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     </div>
 
     <div hidden id="add_cells_section" class="item-section">
+    {% if update %}
 {#    {% include 'generic_field.html' with field=form.cell_sample label="Cell Sample" %}#}
     <div class="form-group">
     <label for="cell_sample" class="col-sm-2 control-label">Cell Sample*</label>
@@ -269,9 +258,20 @@
     </table>
     </div>
     </div>
+    {% else %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="alert alert-danger text-center" role="alert">
+                Please define each chip/well first.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     </div>
 
     <div hidden id="add_settings_section" class="item-section">
+    {% if update %}
     {% include 'generic_field.html' with field=form.setting_setting label="Setting*" %}
     {% include 'generic_field.html' with field=form.setting_value label="Value*" %}
     {% include 'generic_field.html' with field=form.setting_unit label="Unit*" %}
@@ -305,6 +305,15 @@
     </table>
     </div>
     </div>
+    {% else %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="alert alert-danger text-center" role="alert">
+                Please define each chip/well first.
+            </div>
+        </div>
+    </div>
+    {% endif %}
     </div>
 
     </div>
@@ -431,9 +440,10 @@
                 <a class="pull-right btn btn-xs form-delete">
                     <span class="glyphicon glyphicon-remove"></span>
                 </a>
-                <a class="pull-right btn btn-xs">
-                    <span class="glyphicon glyphicon-pencil"></span>
-                </a>
+                {# Add back in when editing functionality available #}
+{#                <a class="pull-right btn btn-xs">#}
+{#                    <span class="glyphicon glyphicon-pencil"></span>#}
+{#                </a>#}
             </div>
             <div class="item-failure">
                 <span class="item-failure_time"></span>

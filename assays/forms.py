@@ -1588,11 +1588,11 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         ('*', 'Multiply'),
         ('+', 'Add'),
         ('-', 'Subtract')
-    ))
+    ), required=False)
     compound_concentration_increment_direction = forms.ChoiceField(choices=(
         ('lrd', 'Left to Right and Down'),
         ('rlu', 'Right to Left and Up')
-    ))
+    ), required=False)
 
     # Text field (un-saved) for supplier
     compound_supplier_text = forms.CharField(required=False, initial='N/A')
@@ -2116,6 +2116,9 @@ class AssayMatrixItemFormSet(BaseInlineFormSetForcedUniqueness):
         self.study = kwargs.pop('study', None)
         self.user = kwargs.pop('user', None)
         super(AssayMatrixItemFormSet, self).__init__(*args, **kwargs)
+
+        if not self.study:
+            self.study = self.instance.study
 
         self.dic = get_dic_for_custom_choice_field(self)
 

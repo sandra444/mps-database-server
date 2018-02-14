@@ -15,6 +15,7 @@ $(document).ready(function () {
         // SUBJECT TO CHANGE: WARNING!
         filter: 'td',
         distance: 1,
+        cancel: '.btn-xs',
         stop: matrix_add_content_to_selected
     });
 
@@ -40,6 +41,7 @@ $(document).ready(function () {
     // var initial_number_of_columns = 0;
 
     // CRUDE AND BAD
+    // If I am going to use these, they should be ALL CAPS to indicate global status
     var item_prefix = 'item';
     var cell_prefix = 'cell';
     var setting_prefix = 'setting';
@@ -110,6 +112,13 @@ $(document).ready(function () {
             'direction': $('#id_compound_concentration_increment_direction')
         }
     };
+
+    var mouse_is_down = false;
+    $(document).mousedown(function() {
+        mouse_is_down = true;
+    }).mouseup(function() {
+        mouse_is_down = false;
+    });
 
     function add_form(prefix, form) {
         var formset = $('#' + prefix);
@@ -293,7 +302,7 @@ $(document).ready(function () {
                 // If the form does not exist, then add it!
                 if (!all_matching_for_row_value.has('input[name$="-column_index"][value="' + column_index + '"]')[0]) {
                     var new_form = generate_form(
-                        item_prefix, {'row_index': row_index, 'column_index': column_index}
+                        item_prefix, {'row_index': row_index, 'column_index': column_index, 'setup_date': '-'}
                     );
                     // Get number of forms and add as attribute to the display
                     // A little inefficient, but relatively safe
@@ -311,7 +320,7 @@ $(document).ready(function () {
         }
 
         // Don't run this if the forms are all new anyway
-        // TODO TODO TODO NEED A REAL FUNCTION FOR THIS
+        // TODO TODO TODO
         refresh_all_contents_from_forms();
     };
 
@@ -624,8 +633,9 @@ $(document).ready(function () {
         current_parent.find('.subform-delete').attr('disabled', checked_value);
     }
 
+    // At the moment, this just triggers the item deletes of all selections
     function clear_fields() {
-
+        $('.ui-selected').find('form-delete').trigger('click');
     }
 
     function matrix_add_content_to_selected() {
@@ -647,14 +657,12 @@ $(document).ready(function () {
         else if (current_action === 'add_compounds') {
             add_subform(compound_prefix);
         }
-        // Default for most actions
-        // TODO TODO TODO
-        else if (true) {
-            add_to_item();
+        else if (current_action === 'clear') {
+            clear_fields();
         }
-        // Total failure, create an alert
+        // Default for most actions
         else {
-            alert('Action not recognized!');
+            add_to_item();
         }
     }
 
@@ -745,14 +753,16 @@ $(document).ready(function () {
 
     // TODO DISABLING FOR ALL ALERTS MAY BE A LITTLE OVERZEALOUS
     // Triggers for disabling select during delete hovers
-    matrix_body_selector.on('mouseover', '.alert', function() {
-        matrix_table_selector.selectable('option', 'disabled', true);
-    });
-
-    // Triggers for enabling select after delete hovers
-    matrix_body_selector.on('mouseout', '.alert', function() {
-        matrix_table_selector.selectable('option', 'disabled', false);
-    });
+    // matrix_body_selector.on('mouseover', '.alert', function() {
+    //     if(!mouse_is_down) {
+    //         matrix_table_selector.selectable('option', 'disabled', true);
+    //     }
+    // });
+    //
+    // // Triggers for enabling select after delete hovers
+    // matrix_body_selector.on('mouseout', '.alert', function() {
+    //     matrix_table_selector.selectable('option', 'disabled', false);
+    // });
 
     // TODO TODO TODO TESTING
     get_matrix_dimensions();

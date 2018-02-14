@@ -3692,6 +3692,9 @@ class AssayMatrixAdd(CreateView):
             return form_class(study=study, user=self.request.user)
 
     def get_context_data(self, **kwargs):
+        # Get the study
+        study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
+
         context = super(AssayMatrixAdd, self).get_context_data(**kwargs)
 
         cellsamples = get_cell_samples_for_selection(self.request.user)
@@ -3702,15 +3705,18 @@ class AssayMatrixAdd(CreateView):
         # Start blank
         # DON'T EVEN BOTHER WITH THE OTHER FORMSETS YET
         if self.request.POST:
-            context['item_formset'] = AssayMatrixItemFormSetFactory(self.request.POST, prefix='item')
+            context['item_formset'] = AssayMatrixItemFormSetFactory(self.request.POST, prefix='item', study=study)
         else:
-            context['item_formset'] = AssayMatrixItemFormSetFactory(prefix='item')
+            context['item_formset'] = AssayMatrixItemFormSetFactory(prefix='item', study=study)
 
         return context
 
     def form_valid(self, form):
+        # Get the study
+        study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
+
         # Build the formset from POST
-        formset = AssayMatrixItemFormSetFactory(self.request.POST, prefix='item')
+        formset = AssayMatrixItemFormSetFactory(self.request.POST, instance=form.instance, prefix='item', study=study)
         if form.is_valid() and formset.is_valid():
             save_forms_with_tracking(self, form, formset=[formset])
             return redirect(self.object.get_post_submission_url())
