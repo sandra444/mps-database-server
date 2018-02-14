@@ -266,7 +266,7 @@ $(document).ready(function () {
             current_number_of_columns = 200;
         }
 
-        if (current_number_of_rows && current_number_of_columns) {
+        if (!current_device && current_number_of_rows && current_number_of_columns) {
             build_initial_matrix(
                 current_number_of_rows,
                 current_number_of_columns
@@ -276,8 +276,10 @@ $(document).ready(function () {
             // initial_number_of_columns = current_number_of_columns;
         }
 
-        // Set number of items
-        number_of_items_selector.val(current_number_of_rows * current_number_of_columns)
+        // Set number of items if not already set
+        if (number_of_items_selector.val() != current_number_of_rows * current_number_of_columns) {
+            number_of_items_selector.val(current_number_of_rows * current_number_of_columns)
+        }
     };
 
     // Makes the initial matrix
@@ -302,7 +304,7 @@ $(document).ready(function () {
                 // If the form does not exist, then add it!
                 if (!all_matching_for_row_value.has('input[name$="-column_index"][value="' + column_index + '"]')[0]) {
                     var new_form = generate_form(
-                        item_prefix, {'row_index': row_index, 'column_index': column_index, 'setup_date': '-'}
+                        item_prefix, {'row_index': row_index, 'column_index': column_index}
                     );
                     // Get number of forms and add as attribute to the display
                     // A little inefficient, but relatively safe
