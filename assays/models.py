@@ -1032,7 +1032,7 @@ class AssayChipSetup(FlaggableModel):
 
     def quick_dic(self):
         dic = {
-            # 'device': self.device.device_name,
+            # 'device': self.device.name,
             'organ_model': self.get_hyperlinked_model_or_device(),
             'compounds': self.stringify_compounds(),
             'cells': self.stringify_cells(),
@@ -1045,9 +1045,9 @@ class AssayChipSetup(FlaggableModel):
 
     def get_hyperlinked_model_or_device(self):
         if not self.organ_model:
-            return '<a href="{0}">{1} (No Organ Model)</a>'.format(self.device.get_absolute_url(), self.device.device_name)
+            return '<a href="{0}">{1} (No Organ Model)</a>'.format(self.device.get_absolute_url(), self.device.name)
         else:
-            return '<a href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.model_name)
+            return '<a href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.name)
 
     def get_absolute_url(self):
         return '/assays/assaychipsetup/{}/'.format(self.id)
@@ -1381,6 +1381,13 @@ class AssayStudy(FlaggableModel):
         verbose_name = 'Study'
         verbose_name_plural = 'Studies'
 
+    toxicity = models.BooleanField(default=False)
+    efficacy = models.BooleanField(default=False)
+    disease = models.BooleanField(default=False)
+    # TODO PLEASE REFACTOR
+    # NOW REFERRED TO AS "Chip Characterization"
+    cell_characterization = models.BooleanField(default=False)
+
     # Subject to change
     # Perhaps we will not continue to use StudyConfiguration (the table name for which should arguably be changed!)
     study_configuration = models.ForeignKey(StudyConfiguration, blank=True, null=True)
@@ -1408,6 +1415,7 @@ class AssayStudy(FlaggableModel):
     #     blank=True, null=True
     # )
 
+    # TODO USE THIS INSTEAD OR GET RID OF IT
     study_types = models.ManyToManyField(AssayStudyType)
 
     # Image for the study (some illustrative image)
@@ -1442,11 +1450,24 @@ class AssayStudy(FlaggableModel):
     #     default=''
     # )
 
+    # TODO
     def get_study_types_string(self):
         study_types = '-'.join(
             sorted([study_type.code for study_type in self.study_types.all()])
         )
         return study_types
+
+    def study_types_string(self):
+        current_types = ''
+        if self.toxicity:
+            current_types += 'TOX '
+        if self.efficacy:
+            current_types += 'EFF '
+        if self.disease:
+            current_types += 'DM '
+        if self.cell_characterization:
+            current_types += 'CC '
+        return u'{0}'.format(current_types)
 
     # TODO
     def __unicode__(self):
@@ -1454,7 +1475,7 @@ class AssayStudy(FlaggableModel):
         #study_types = self.get_study_types_string()
         return '-'.join([
             center_id,
-            #study_types,
+            self.study_types_string(),
             unicode(self.start_date),
             self.name
         ])
@@ -1604,6 +1625,13 @@ class AssayMatrixItem(FlaggableModel):
         blank=True
     )
 
+    # Likely to change in future
+    test_type = models.CharField(
+        max_length=8,
+        choices=(('control', 'Control'), ('compound', 'Compound')),
+        default='control'
+    )
+
     # Tentative
     # Do we want a time on top of this?
     # failure_date = models.DateField(help_text='YYYY-MM-DD', null=True, blank=True)
@@ -1613,88 +1641,84 @@ class AssayMatrixItem(FlaggableModel):
     failure_reason = models.ForeignKey(AssayFailureReason, blank=True, null=True)
 
     def __unicode__(self):
-        return unicode(self.id)
+        return unicode(self.name)
 
+    def devolved_cells(self):
+        """Makes a tuple of cells (for comparison)"""
+        cell_tuple = []
+        for cell in self.assaysetupcell_set.all():
+            cell_tuple.append((
+                cell.cell_sample_id,
+                cell.cell_biosensor_id,
+                cell.cellsample_density,
+                # cell.cellsample_density_unit_id,
+                cell.cellsample_density_unit,
+                cell.cell_passage
+            ))
 
-# class AssaySetup(FlaggableModel):
-#     """The configuration of a Chip or Well for implementing an assay"""
-#     class Meta(object):
-#         verbose_name = 'Setup'
-#         # Unfortunately can't use this because uniqueness depends on compounds, cells, etc.
-#         # unique_together = [
-#         #     (
-#         #         'study',
-#         #         'device',
-#         #         'organ_model',
-#         #         'organ_model_protocol',
-#         #         'variance_from_organ_model_protocol'
-#         #     )
-#         # ]
-#
-#     # Moved
-#     # study = models.ForeignKey(AssayStudy, verbose_name='Study')
-#     # setup_date = models.DateField(help_text='YYYY-MM-DD')
-#
-#     # Setups are now bound to a matrix
-#     # This is in fact required, just listed as not being so due to quirk in cleaning
-#     matrix = models.ForeignKey(AssayMatrix, null=True, blank=True)
-#
-#     # IF THERE IS A DEVICE IN THE MATRIX, MAKE SURE TO LOCK THIS FIELD
-#     device = models.ForeignKey(Microdevice, verbose_name='Device')
-#
-#     # IF THERE IS A ORGAN MODEL IN THE MATRIX, MAKE SURE TO LOCK THIS FIELD
-#     organ_model = models.ForeignKey(OrganModel, verbose_name='Model', null=True, blank=True)
-#
-#     organ_model_protocol = models.ForeignKey(
-#         OrganModelProtocol,
-#         verbose_name='Model Protocol',
-#         null=True,
-#         blank=True
-#     )
-#
-#     # formerly just 'variance'
-#     variance_from_organ_model_protocol = models.CharField(
-#         max_length=3000,
-#         verbose_name='Variance from Protocol',
-#         default='',
-#         blank=True
-#     )
-#
-#     compounds = models.ManyToManyField('assays.AssaySetupCompound')
-#     cells = models.ManyToManyField('assays.AssaySetupCell')
-#     settings = models.ManyToManyField('assays.AssaySetupSetting')
-#
-#     # Moved
-#     # name = models.CharField(max_length=512)
-#
-#     # scientist = models.CharField(max_length=100, blank=True, default='')
-#     # notebook = models.CharField(max_length=256, blank=True, default='')
-#     # notebook_page = models.IntegerField(blank=True, null=True)
-#     # notes = models.CharField(max_length=2048, blank=True, default='')
-#     #
-#     # # If setups and items are to be merged, these are necessary
-#     # row_index = models.IntegerField()
-#     # column_index = models.IntegerField()
-#
-#     def __unicode__(self):
-#         return u'{0}-{1}'.format(self.matrix, self.device)
-#
-#     # TODO
-#     def get_absolute_url(self):
-#         pass
-#         # return '/assays/assaychipsetup/{}/'.format(self.id)
-#
-#     def get_post_submission_url(self):
-#         pass
-#         # return '/assays/{}/'.format(self.assay_run_id_id)
-#
-#     def get_clone_url(self):
-#         pass
-#         # return '/assays/{0}/assaychipsetup/add?clone={1}'.format(self.assay_run_id_id, self.id)
-#
-#     def get_delete_url(self):
-#         pass
-#         # return '/assays/assaychipsetup/{}/delete/'.format(self.id)
+        return tuple(sorted(cell_tuple))
+
+    def stringify_cells(self):
+        """Stringified cells for a setup"""
+        cells = []
+        for cell in self.assaysetupcell_set.all():
+            cells.append(unicode(cell))
+
+        if not cells:
+            cells = ['-No Cell Samples-']
+
+        return '\n'.join(cells)
+
+    def devolved_compounds(self):
+        """Makes a tuple of compounds (for comparison)"""
+        compound_tuple = []
+        for compound in self.assaysetupcompound_set.all():
+            compound_tuple.append((
+                compound.compound_instance_id,
+                compound.concentration,
+                compound.concentration_unit_id,
+                compound.addition_time,
+                compound.duration,
+            ))
+
+        return tuple(sorted(compound_tuple))
+
+    def stringify_compounds(self):
+        """Stringified cells for a setup"""
+        compounds = []
+        for compound in self.assaysetupcompound_set.all():
+            compounds.append(unicode(compound))
+
+        if not compounds:
+            compounds = ['-No Compounds-']
+
+        return '\n'.join(compounds)
+
+    def quick_dic(self):
+        dic = {
+            # 'device': self.device.name,
+            'organ_model': self.get_hyperlinked_model_or_device(),
+            'compounds': self.stringify_compounds(),
+            'cells': self.stringify_cells(),
+            'setups_with_same_group': []
+        }
+        return dic
+
+    def get_hyperlinked_name(self):
+        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), self.name)
+
+    def get_hyperlinked_model_or_device(self):
+        if not self.organ_model:
+            return '<a href="{0}">{1} (No Organ Model)</a>'.format(self.device.get_absolute_url(), self.device.name)
+        else:
+            return '<a href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.name)
+
+    # TODO TODO TODO CHANGE
+    def get_absolute_url(self):
+        return '/assays/assaymatrixitem/{}/'.format(self.id)
+
+    def get_post_submission_url(self):
+        return self.study.get_absolute_url()
 
 
 # Controversy has arisen over whether to put this in an organ model or not
@@ -1754,6 +1778,13 @@ class AssaySetupCell(models.Model):
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
     addition_location = models.ForeignKey(MicrodeviceSection, null=True, blank=True)
+
+    def __unicode__(self):
+        return u'{0}\n-{1:.0e} {2}'.format(
+            self.cell_sample,
+            self.density,
+            self.density_unit.unit
+        )
 
 
 # DO WE WANT TRACKING INFORMATION FOR INDIVIDUAL POINTS?
@@ -1909,6 +1940,31 @@ class AssaySetupCompound(models.Model):
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
     addition_location = models.ForeignKey(MicrodeviceSection, null=True, blank=True)
+
+    def get_addition_time_string(self):
+        split_times = get_split_times(self.addition_time)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
+
+    def get_duration_string(self):
+        split_times = get_split_times(self.duration)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
+
+    def __unicode__(self):
+        return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
+            self.compound_instance.compound.name,
+            self.concentration,
+            self.concentration_unit.unit,
+            self.get_addition_time_string(),
+            self.get_duration_string()
+        )
 
 
 # TODO MODIFY StudySupportingData
