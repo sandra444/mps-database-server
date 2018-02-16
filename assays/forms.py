@@ -2077,6 +2077,33 @@ AssaySetupSettingFormSetFactory = modelformset_factory(
     formset=AssaySetupSettingFormSet,
     can_delete=True
 )
+AssaySetupCompoundInlineFormSetFactory = inlineformset_factory(
+    AssayMatrixItem,
+    AssaySetupCompound,
+    extra=1,
+    exclude=[tracking],
+    form=AssaySetupCompoundForm,
+    # formset=AssaySetupCompoundFormSet,
+    can_delete=True
+)
+AssaySetupCellInlineFormSetFactory = inlineformset_factory(
+    AssayMatrixItem,
+    AssaySetupCell,
+    extra=1,
+    exclude=[tracking],
+    form=AssaySetupCellForm,
+    # formset=AssaySetupCellFormSet,
+    can_delete=True
+)
+AssaySetupSettingInlineFormSetFactory = inlineformset_factory(
+    AssayMatrixItem,
+    AssaySetupSetting,
+    extra=1,
+    exclude=[tracking],
+    form=AssaySetupSettingForm,
+    # formset=AssaySetupSettingFormSet,
+    can_delete=True
+)
 
 
 class AssayMatrixItemForm(forms.ModelForm):

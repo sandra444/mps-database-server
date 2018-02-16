@@ -46,6 +46,9 @@ from assays.forms import (
     AssaySetupCompoundFormSetFactory,
     AssaySetupCellFormSetFactory,
     AssaySetupSettingFormSetFactory,
+    AssaySetupCompoundInlineFormSetFactory,
+    AssaySetupCellInlineFormSetFactory,
+    AssaySetupSettingInlineFormSetFactory
 )
 from django import forms
 
@@ -3890,7 +3893,7 @@ class AssayMatrixUpdate(UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-# TODO PROBABLY WILL REMOVE
+# TODO PROBABLY WILL REMOVE EVENTUALLY
 class AssayMatrixItemUpdate(UpdateView):
     model = AssayMatrixItem
     template_name = 'assays/assaymatrixitem_add.html'
@@ -3898,6 +3901,36 @@ class AssayMatrixItemUpdate(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(AssayMatrixItemUpdate, self).get_context_data(**kwargs)
+
+        if self.request.POST:
+            context['compound_formset'] = AssaySetupCompoundInlineFormSetFactory(
+                self.request.POST,
+                instance=self.object,
+                # matrix=self.object.matrix
+            )
+            context['cell_formset'] = AssaySetupCellInlineFormSetFactory(
+                self.request.POST,
+                instance=self.object,
+                # matrix=self.object
+            )
+            context['setting_formset'] = AssaySetupSettingInlineFormSetFactory(
+                self.request.POST,
+                instance=self.object,
+                # matrix=self.object
+            )
+        else:
+            context['compound_formset'] = AssaySetupCompoundInlineFormSetFactory(
+                instance=self.object,
+                # matrix=self.object.matrix
+            )
+            context['cell_formset'] = AssaySetupCellInlineFormSetFactory(
+                instance=self.object,
+                # matrix=self.object
+            )
+            context['setting_formset'] = AssaySetupSettingInlineFormSetFactory(
+                instance=self.object,
+                # matrix=self.object
+            )
 
         cellsamples = get_cell_samples_for_selection(self.request.user)
 

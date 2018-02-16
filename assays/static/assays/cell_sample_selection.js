@@ -1,24 +1,16 @@
 // This script was made to prevent redundant code in setup pages
 $(document).ready(function () {
-    // The current interface (in all lowercase, set in corresponding scripts)
-    var current_interface = '';
-
-    // SENSITIVE AND POTENTIALLY SUBJECT TO CHANGE
-    // Get interface from url
-    if (window.location.href.indexOf('/assaychipsetup/') > -1) {
-        current_interface = 'chip';
-    }
-    else {
-        current_interface = 'plate';
-    }
-
-    // The id of the current id
-    current_cellsample_id = null;
+    // var cell_sample_search = $('#id_cell_sample_search');
+    var cell_sample_search = $('.open-cell-sample-dialog');
+    // var cell_sample_id_selector = cell_sample_search.parent().find('input[readonly=readonly]');
+    // Defaults for matrix (irrelevant in matrix item)
+    var cell_sample_id_selector = $('#id_cell_sample');
+    var cell_sample_label_selector = $('#id_cell_sample_label');
 
     // Open and then close dialog so it doesn't get placed in window itself
     var dialog = $('#dialog');
     dialog.dialog({
-        width: 825,
+        width: 900,
         height: 500,
         closeOnEscape: true,
         autoOpen: false,
@@ -31,27 +23,10 @@ $(document).ready(function () {
     });
     dialog.removeProp('hidden');
 
-    $(document).on('click', '.open-cellsample-dialog', function (evt) {
-        current_cellsample_id = this.id.replace(/\D/g,'');
-        $("#dialog").dialog('open');
-        // Remove focus
-        $('.ui-dialog :button').blur();
-    });
-
-    $('.cellsample').click(function (evt) {
-        var cellsampleId = this.id;
-        var selectedInput = $('#id_assay' + current_interface + 'cells_set-' + current_cellsample_id + '-cell_sample');
-        selectedInput.prop('value', cellsampleId);
-        var cellsampleName = this.attributes["name"].value;
-        var selectedLabel = $('#id_assay' + current_interface + 'cells_set-' + current_cellsample_id + '-cell_sample_label');
-        selectedLabel.text(cellsampleName);
-        $('#dialog').dialog('close');
-    });
-
     $('#cellsamples').DataTable({
         "iDisplayLength": 50,
         // Initially sort on receipt date
-        "order": [ 0, "desc" ],
+        "order": [ 1, "desc" ],
         // If one wants to display top and bottom
         "sDom": '<"wrapper"fti>'
     });
@@ -59,33 +34,34 @@ $(document).ready(function () {
     // Move filter to left
     $('.dataTables_filter').css('float', 'left');
 
-    // This code should populate cell labels when data is already given
-    var current_id = 0;
-    var current_input = $('#id_assay' + current_interface + 'cells_set-' + current_id + '-cell_sample');
+    cell_sample_search.click(function() {
+        dialog.dialog('open');
+        // Get the proper selectors
+        cell_sample_id_selector = $(this).parent().find('input[readonly=readonly]');
+        cell_sample_label_selector = $(this).parent().find('.small');
+        // Remove focus
+        $('.ui-dialog :button').blur();
+    });
 
-    while (current_input[0]) {
-        if (current_input.val()) {
-            var cell_name = $('#' + current_input.val()).attr('name');
-            $('#id_assay' + current_interface + 'cells_set-' + current_id + '-cell_sample_label').text(cell_name);
-        }
+    $('.cellsample-selector').click(function() {
+        var cell_sample_id = $(this).attr('data-cell-sample-id');
+        cell_sample_id_selector.prop('value', cell_sample_id);
+        var cell_sample_name = this.attributes["name"].value;
+        cell_sample_label_selector.text(cell_sample_name);
+        $('#dialog').dialog('close');
+    });
 
+    // Display all labels(irrelevant in matrix)
+    $('.cell-sample-id-field').each(function() {
+        // Get label
+        $(this).parent().find('label').text($('#cell_sample_' + $(this).val()).attr('name'));
         // Turn density into scientific notation
-        var current_density = $('#id_assay' + current_interface + 'cells_set-' + current_id + '-cellsample_density');
+        // TODO SUBJECT TO CHANGE
+        var current_density = $(this).parent().parent().find('input[name$="-density"]');
         var current_number = Number(current_density.val());
         if (current_number && current_number > 9999) {
+            // TODO TODO TODO THIS DOES NOT WORK IN FIREFIX
             current_density.val(current_number.toExponential());
         }
-
-        current_id += 1;
-        current_input = $('#id_assay' + current_interface + 'cells_set-' + current_id + '-cell_sample');
-    }
-
-    // This will clear a cell sample when the button is pressed
-    $('#clear_cell_sample').click(function() {
-        var selectedInput = $('#id_assay' + current_interface + 'cells_set-' + current_cellsample_id + '-cell_sample');
-        selectedInput.prop('value', '');
-        var selectedLabel = $('#id_assay' + current_interface + 'cells_set-' + current_cellsample_id + '-cell_sample_label');
-        selectedLabel.text('');
-        $('#dialog').dialog('close');
     });
 });

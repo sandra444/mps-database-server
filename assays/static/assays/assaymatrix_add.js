@@ -346,7 +346,7 @@ $(document).ready(function () {
         // NOTE: SPECIAL EXCEPTION FOR CELL SAMPLES
         if (field_name === 'cell_sample') {
             // TODO VERY POORLY DONE
-            return $('#' + field.val()).attr('name');
+            return $('#' + 'cell_sample_' + field.val()).attr('name');
         }
         else {
             // Ideally, this would be cached in an object or something
@@ -579,7 +579,7 @@ $(document).ready(function () {
 
         $('.ui-selected').each(function(index) {
             var current_form = $('#' + item_prefix + '-' + $(this).attr(item_form_index_attribute));
-            console.log(current_form);
+            // console.log(current_form);
 
             // TODO PERHAPS THIS SHOULD BE IN values_to_inject ARG, but doesn't matter too much, would need to accomodate incrementer anyway
             current_fields.each(function(field_index) {
@@ -768,60 +768,4 @@ $(document).ready(function () {
 
     // TODO TODO TODO TESTING
     get_matrix_dimensions();
-
-    // Cell Samples
-    // SOMEWHAT REDUNDANT, BUT THE OTHER INSTANCE OF CELL SAMPLE NEEDS TO WORK WITH INLINES
-    // SHOULD REVISE TO USE CLASSES AND PEEK AT PARENT AND SO ON
-    var cell_sample_search = $('#id_cell_sample_search');
-    var cell_sample_id_selector = $('#id_cell_cell_sample');
-    // var cell_sample_id_selector = $('#id_cell_sample');
-    var cell_sample_label_selector = $('#id_cell_sample_label');
-
-    // Open and then close dialog so it doesn't get placed in window itself
-    var dialog = $('#dialog');
-    dialog.dialog({
-        width: 900,
-        height: 500,
-        closeOnEscape: true,
-        autoOpen: false,
-        close: function() {
-            $('body').removeClass('stop-scrolling');
-        },
-        open: function() {
-            $('body').addClass('stop-scrolling');
-        }
-    });
-    dialog.removeProp('hidden');
-
-    $('#cellsamples').DataTable({
-        "iDisplayLength": 50,
-        // Initially sort on receipt date
-        "order": [ 1, "desc" ],
-        // If one wants to display top and bottom
-        "sDom": '<"wrapper"fti>'
-    });
-
-    // Move filter to left
-    $('.dataTables_filter').css('float', 'left');
-
-    cell_sample_search.click(function() {
-        dialog.dialog('open');
-        // Remove focus
-        $('.ui-dialog :button').blur();
-    });
-
-    $('.cellsample-selector').click(function() {
-        var cell_sample_id = this.id;
-        cell_sample_id_selector.prop('value', cell_sample_id);
-        var cell_sample_name = this.attributes["name"].value;
-        cell_sample_label_selector.text(cell_sample_name);
-        $('#dialog').dialog('close');
-    });
-
-    // This will clear a cell sample when the button is pressed
-    $('#clear_cell_sample').click(function() {
-        cell_sample_id_selector.prop('value', '');
-        cell_sample_label_selector.text('');
-        $('#dialog').dialog('close');
-    });
 });

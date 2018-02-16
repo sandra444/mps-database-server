@@ -74,7 +74,7 @@ def get_center_id(group_id):
 
         data.update({
             'center_id': center_data.center_id,
-            'center_name': center_data.center_name,
+            'center_name': center_data.name,
         })
 
     except:
@@ -1458,21 +1458,21 @@ class AssayStudy(FlaggableModel):
         return study_types
 
     def study_types_string(self):
-        current_types = ''
+        current_types = []
         if self.toxicity:
-            current_types += 'TOX '
+            current_types.append('TOX')
         if self.efficacy:
-            current_types += 'EFF '
+            current_types.append('EFF')
         if self.disease:
-            current_types += 'DM '
+            current_types.append('DM')
         if self.cell_characterization:
-            current_types += 'CC '
-        return u'{0}'.format(current_types)
+            current_types.append('CC')
+        return u'-'.join(current_types)
 
     # TODO
     def __unicode__(self):
         center_id = get_center_id(self.group.id).get('center_id')
-        #study_types = self.get_study_types_string()
+        # study_types = self.get_study_types_string()
         return '-'.join([
             center_id,
             self.study_types_string(),
