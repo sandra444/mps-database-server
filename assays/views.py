@@ -41,7 +41,8 @@ from assays.forms import (
     # AssayMatrixItemFormSet,
     # AssaySetupFormSet,
     # AssaySetupCellFormSet,
-    AssayMatrixItemForm,
+    # AssayMatrixItemForm,
+    AssayMatrixItemFullForm,
     AssayMatrixItemFormSetFactory,
     AssaySetupCompoundFormSetFactory,
     AssaySetupCellFormSetFactory,
@@ -3897,7 +3898,7 @@ class AssayMatrixUpdate(UpdateView):
 class AssayMatrixItemUpdate(UpdateView):
     model = AssayMatrixItem
     template_name = 'assays/assaymatrixitem_add.html'
-    form_class = AssayMatrixItemForm
+    form_class = AssayMatrixItemFullForm
 
     def get_context_data(self, **kwargs):
         context = super(AssayMatrixItemUpdate, self).get_context_data(**kwargs)

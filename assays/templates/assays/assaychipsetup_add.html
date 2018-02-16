@@ -485,7 +485,7 @@
                     {% endif %}
                     <td>
                     	<input readonly=true id="id_assaychipcells_set-{{ forloop.counter0 }}-cell_sample"
-                               name="assaychipcells_set-{{ forloop.counter0 }}-cell_sample" size="5" value={{ cell.cell_sample.value|default_if_none:'' }}>
+                               name="assaychipcells_set-{{ forloop.counter0 }}-cell_sample" size="5" value="{{ cell.cell_sample.value|default_if_none:'' }}">
                         <button id='search-{{ forloop.counter0 }}-' type="button" class="btn btn-xs btn-info open-cellsample-dialog">
                             <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                         </button>
