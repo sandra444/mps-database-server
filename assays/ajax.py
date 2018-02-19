@@ -54,6 +54,8 @@ from django.forms.models import inlineformset_factory
 import numpy as np
 from scipy.stats.mstats import gmean
 
+import re
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -377,6 +379,9 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         # TODO ORDER SUBJECT TO CHANGE
         chip_data = AssayChipRawData.objects.prefetch_related(
             *CHIP_DATA_PREFETCH
+        ).prefetch_related(
+            'assay_chip_id__chip_setup__assaycompoundinstance_set',
+            'assay_chip_id__chip_setup__assaychipcells_set'
         ).filter(
             assay_chip_id__in=chip_ids
         ).order_by(
@@ -420,6 +425,9 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         device = data_point.assay_chip_id.chip_setup.device
         organ_model = data_point.assay_chip_id.chip_setup.organ_model
 
+        # Naive and more expensive than it needs to be
+        cells = data_point.assay_chip_id.chip_setup.stringify_cells()
+
         compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, ' | ')
 
         value = data_point.value
@@ -448,6 +456,7 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
                         times.get('minute'),
                         device,
                         organ_model,
+                        cells,
                         compound_treatment,
                         target,
                         method,
@@ -781,6 +790,12 @@ def get_treatment_groups(study):
         )
         setup_to_treatment_group.update({setup.id: current_representative})
 
+    treatment_group_representatives = sorted(
+        treatment_group_representatives, key=lambda x: (
+            x.get('compounds'), x.get('organ_model'), x.get('cells'), x.get('setups_with_same_group')[0]
+        )
+    )
+
     for representative in treatment_group_representatives:
         representative.get('setups_with_same_group').sort()
         representative.update({
@@ -865,6 +880,7 @@ def get_readout_data(
 
     averaged_data = {}
 
+    all_sample_locations = {}
     all_keys = {}
 
     # Append the additional_data as necessary
@@ -890,6 +906,7 @@ def get_readout_data(
         method = assay_instance.method.name
 
         sample_location = raw.sample_location.name
+        all_sample_locations.update({sample_location: True})
 
         setup_id = raw.assay_chip_id.chip_setup_id
         chip_id = raw.assay_chip_id.chip_setup.assay_chip_id
@@ -998,6 +1015,8 @@ def get_readout_data(
 
     initial_data = None
 
+    accommodate_sample_location = len(all_sample_locations) > 1
+
     for target, units in averaged_data.items():
         for unit, tags in units.items():
             # row_indices = {}
@@ -1024,7 +1043,6 @@ def get_readout_data(
             final_data.get('sorted_assays').append(assay_label)
 
             for tag, sample_locations in tags.items():
-                accommodate_sample_location = len(sample_locations) > 1
                 for sample_location, time_values in sample_locations.items():
                     accommodate_intervals = False
                     include_current = False
@@ -1101,7 +1119,13 @@ def get_readout_data(
 
             # Note manipulations for sorting
             # Somewhat contrived
-            x_header.sort(key=lambda s: s.upper().replace(' & ', '~').replace('_I1', '!').replace('_I2', '"'))
+            convert = lambda text: int(text) if text.isdigit() else text.lower()
+            alphanum_key = lambda key: [
+                convert(
+                    c.replace('_I1', '!').replace('_I2', '"')
+                ) for c in re.split('([0-9]+)', key)
+            ]
+            x_header.sort(key=alphanum_key)
             current_table[0].extend(x_header)
 
             x_header = {x_header[index]: index + 1 for index in range(len(x_header))}
