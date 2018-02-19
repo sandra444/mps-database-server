@@ -77,91 +77,6 @@ def main(request):
     return HttpResponseServerError()
 
 
-# TODO ADD BASE LAYOUT CONTENT TO ASSAY LAYOUT
-def fetch_assay_layout_content(request):
-    """Return compounds in a layout
-
-    Receives the following from POST:
-    id -- the id of the model of interest
-    model -- the model of interest
-    """
-
-    current_id = request.POST.get('id', '')
-    model = request.POST.get('model', '')
-
-    if not model and current_id:
-        logger.error('request_id not present in request to fetch_layout_format_labels')
-        return HttpResponseServerError()
-
-    if model == 'assay_layout':
-        layout = AssayLayout.objects.get(id=current_id)
-
-    elif model == 'assay_device_setup':
-        layout = AssayPlateSetup.objects.get(id=current_id).assay_layout
-
-    elif model == 'assay_device_readout':
-        layout = AssayPlateReadout.objects.get(id=current_id).setup.assay_layout
-
-    data = defaultdict(dict)
-
-    # Fetch compounds
-    compounds = AssayWellCompound.objects.filter(assay_layout=layout).prefetch_related(
-        'assay_layout',
-        'assay_compound_instance__compound_instance__compound',
-        'assay_compound_instance__compound_instance__supplier',
-        'assay_compound_instance__concentration_unit'
-    ).order_by('compound__name')
-
-    for compound in compounds:
-        well = compound.row + '_' + compound.column
-        if not 'compounds' in data[well]:
-            data[well]['compounds'] = []
-        receipt_date = ''
-        if compound.assay_compound_instance.compound_instance.receipt_date:
-            receipt_date = compound.assay_compound_instance.compound_instance.receipt_date.isoformat()
-        data[well]['compounds'].append({
-            'name': compound.assay_compound_instance.compound_instance.compound.name,
-            'id': compound.assay_compound_instance.compound_instance.compound_id,
-            'concentration': compound.assay_compound_instance.concentration,
-            'concentration_unit_id': compound.assay_compound_instance.concentration_unit_id,
-            'concentration_unit': compound.assay_compound_instance.concentration_unit.unit,
-            'supplier': compound.assay_compound_instance.compound_instance.supplier.name,
-            'lot': compound.assay_compound_instance.compound_instance.lot,
-            'receipt_date': receipt_date,
-            'addition_time': compound.assay_compound_instance.addition_time,
-            'duration': compound.assay_compound_instance.duration
-            # 'well': well
-        })
-
-    # Fetch timepoints
-    timepoints = AssayWellTimepoint.objects.filter(assay_layout=layout).prefetch_related('assay_layout')
-
-    for timepoint in timepoints:
-        well = timepoint.row + '_' + timepoint.column
-        data[well].update({'timepoint': timepoint.timepoint})
-
-    # Fetch labels
-    labels = AssayWellLabel.objects.filter(assay_layout=layout).prefetch_related('assay_layout')
-
-    for label in labels:
-        well = label.row + '_' + label.column
-        data[well].update({'label': label.label})
-
-    # Fetch types
-    current_types = AssayWell.objects.filter(assay_layout=layout).prefetch_related('assay_layout', 'well_type')
-
-    for current_type in current_types:
-        well = current_type.row + '_' + current_type.column
-        data[well].update({
-            'type': current_type.well_type.well_type,
-            'type_id': current_type.well_type_id,
-            'color': current_type.well_type.background_color
-        })
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
-
-
 def fetch_readout(request):
     """Get the current plate readout data
 
@@ -230,109 +145,6 @@ def fetch_readout(request):
                         content_type="application/json")
 
 
-def fetch_layout_format_labels(request):
-    """Return layout format labels
-
-    Receives the following from POST:
-    id -- the id of the model of interest
-    model -- the model of interest
-    """
-
-    current_id = request.POST.get('id', '')
-    model = request.POST.get('model', '')
-
-    if not model and current_id:
-        logger.error('request_id not present in request to fetch_layout_format_labels')
-        return HttpResponseServerError()
-
-    if model == 'device':
-        layout = Microdevice.objects.get(id=current_id)
-
-    elif model == 'assay_layout':
-        layout = AssayLayout.objects.get(id=current_id).device
-
-    elif model == 'assay_device_setup':
-        layout = AssayPlateSetup.objects.get(id=current_id).assay_layout.device
-
-    elif model == 'assay_device_readout':
-        layout = AssayPlateReadout.objects.get(id=current_id).setup.assay_layout.device
-
-    data = {}
-
-    # if layout.column_labels and layout.row_labels:
-    #     column_labels = layout.column_labels.split()
-    #     row_labels = layout.row_labels.split()
-    # # Contrived way to deal with models without labels
-    # else:
-    #     column_labels = None
-    #     row_labels = None
-
-    column_labels = []
-    row_labels = []
-
-    if layout.number_of_columns:
-        for x in range(layout.number_of_columns):
-            column_labels.append(x + 1)
-
-    if layout.number_of_rows:
-        for x in range(layout.number_of_rows):
-            row_labels.append(number_to_label(x + 1))
-
-    data.update({
-        'id': layout.id,
-        'column_labels': column_labels,
-        'row_labels': row_labels,
-    })
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
-
-
-def fetch_well_types(request):
-    """Return well type ids and colors"""
-
-    data = {}
-
-    for well_type in AssayWellType.objects.all():
-        data.update(
-            {
-                well_type.id: {
-                    'name': well_type.well_type,
-                    'color': well_type.background_color
-                }
-            }
-        )
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
-
-
-# Fetches and displays assay layout from plate readout
-def fetch_plate_info(request):
-    """Returns dynamic info for plate assays
-
-    Receives the following from POST:
-    id -- the ID of the Assay Plate Readout of interest
-    """
-
-    assay_id = request.POST.get('id', '')
-
-    if not assay_id:
-        logger.error('assay id not present in request to fetch_assay_info')
-        return HttpResponseServerError()
-
-    assay = AssayPlateReadout.objects.get(id=assay_id)
-
-    data = {}
-
-    data.update({
-        'assay_layout_id': assay.assay_layout_id,
-    })
-
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
-
-
 def fetch_center_id(request):
     """Returns center ID for dynamic run form
 
@@ -366,6 +178,7 @@ def fetch_center_id(request):
                         content_type="application/json")
 
 
+# TODO NEED THIS FOR NEW SCHEMA
 def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=False, include_header=False, include_all=False):
     """Returns readout data as a csv in the form of a string
 
@@ -480,6 +293,7 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
     return string_io.getvalue()
 
 
+# TODO NEED FOR NEW SCHEMA
 def get_chip_readout_data_as_json(chip_ids, chip_data=None):
     if not chip_data:
         chip_data = AssayChipRawData.objects.prefetch_related(
@@ -639,6 +453,7 @@ def get_list_of_present_compounds(related_compounds_map, data_point, separator='
     return tag
 
 
+# TODO NEED TO UPDATE
 def get_control_data(
         study,
         related_compounds_map,
@@ -1491,13 +1306,13 @@ def validate_bulk_file(request):
                             content_type='application/json')
 
 # TODO DUPLICATED THUS VIOLATING DRY
-ACRAFormSet = inlineformset_factory(
-    AssayChipReadout,
-    AssayChipReadoutAssay,
-    formset=AssayChipReadoutInlineFormset,
-    extra=1,
-    exclude=[],
-)
+# ACRAFormSet = inlineformset_factory(
+#     AssayChipReadout,
+#     AssayChipReadoutAssay,
+#     formset=AssayChipReadoutInlineFormset,
+#     extra=1,
+#     exclude=[],
+# )
 
 
 # USE THE POST DATA TO BUILD A BULKUPLOAD FORM
@@ -1628,66 +1443,6 @@ APRAFormSet = inlineformset_factory(
 )
 
 
-def validate_individual_plate_file(request):
-    """Validates an individual plate and returns either errors or a preview of the data entered
-
-    Receives the following from POST:
-    study -- the study to acquire readouts from
-    key -- specifies whether to split readouts by compound or device
-    percent_control -- specifies whether to convert to percent control
-    include_all -- specifies whether to include all data (exclude invalid if null string)
-    """
-    study_id = request.POST.get('study', '')
-    readout_id = request.POST.get('readout', '')
-    # overwrite_option = request.POST.get('overwrite_option', '')
-    # bulk_file = request.FILES.get('bulk_file', None)
-
-    readout = None
-    if readout_id:
-        readout = AssayPlateReadout.objects.filter(pk=readout_id)
-        if readout:
-            readout = readout[0]
-            setup_id = readout.setup.id
-            study = readout.setup.assay_run_id
-        else:
-            setup_id = None
-            study = AssayRun.objects.get(pk=int(study_id))
-    else:
-        setup_id = None
-        study = AssayRun.objects.get(pk=int(study_id))
-
-    if readout:
-        form = AssayPlateReadoutForm(study, setup_id, request.POST, instance=readout)
-    else:
-        form = AssayPlateReadoutForm(study, setup_id, request.POST)
-
-    formset = APRAFormSet(request.POST, request.FILES, instance=form.instance)
-
-    if formset.is_valid():
-        # Validate form
-        # form.is_valid()
-        form_data = formset.forms[0].cleaned_data
-
-        preview_data = form_data.get('preview_data')
-
-        data = preview_data.get('plate_preview')
-
-        return HttpResponse(json.dumps(data),
-                            content_type="application/json")
-
-    else:
-        errors = ''
-        if formset.__dict__.get('_non_form_errors', ''):
-            errors += formset.__dict__.get('_non_form_errors', '').as_text()
-        if form.errors:
-            errors += form.errors.as_text()
-        data = {
-            'errors': errors
-        }
-        return HttpResponse(json.dumps(data),
-                            content_type='application/json')
-
-
 def fetch_device_dimensions(request):
     device_id = request.POST.get('device_id', None)
 
@@ -1703,29 +1458,6 @@ def fetch_device_dimensions(request):
         data.update({
             'number_of_rows': device.number_of_rows,
             'number_of_columns': device.number_of_columns
-        })
-
-    return HttpResponse(json.dumps(data), content_type='application/json')
-
-
-def fetch_quality_indicators(request):
-    """Returns quality indicators as JSON for populating dropdowns"""
-
-    # The JSON data to return; initialize with an entry for None
-    # data = [{
-    #     'id': '',
-    #     'code': '',
-    #     'name': '',
-    #     'description': 'No quality indicator selected'
-    # }]
-    data = []
-
-    for quality_indicator in AssayQualityIndicator.objects.all().order_by('code'):
-        data.append({
-            'id': quality_indicator.id,
-            'code': quality_indicator.code,
-            'name': quality_indicator.name,
-            'description': quality_indicator.description
         })
 
     return HttpResponse(json.dumps(data), content_type='application/json')
@@ -1784,241 +1516,19 @@ def send_ready_for_sign_off_email(request):
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
-# TODO IDEALLY THE KEYS WILL SORT THE SAME WAY
-# VILE: DEPRECATED
-# def fetch_matrix_items_as_json(request):
-#     """Gets all items for a matrix as json
-#
-#     Receives the following from POST:
-#     matrix -- the id of the matrix in question
-#     """
-#     matrix_id = request.POST.get('matrix_id', '')
-#
-#     data = {
-#         'item_data': '',
-#         'setups': '',
-#         'setup_sets': {
-#             'compounds': {},
-#             'cells': {},
-#             'settings': {}
-#         }
-#     }
-#
-#     if not matrix_id:
-#         return HttpResponse(json.dumps(data),
-#                             content_type="application/json")
-#
-#     # TODO MAKE SURE THAT THE SETS CORRESPOND WITH WHAT IS IN THE JS
-#     items = AssayMatrixItem.objects.filter(
-#         matrix_id=matrix_id
-#     ).prefetch_related(
-#         *MATRIX_ITEM_PREFETCH
-#     )
-#
-#     setups = AssaySetup.objects.filter(
-#         matrix_id=matrix_id
-#     ).prefetch_related(
-#         # TODO
-#         'matrix'
-#     )
-#
-#     if not items or not setups:
-#         return HttpResponse(json.dumps(data),
-#                             content_type="application/json")
-#
-#     setup_id_to_index = {}
-#
-#     setup_cells = AssaySetupCell.objects.filter(
-#         assaysetup__in=setups
-#     ).prefetch_related(
-#         # TODO
-#     )
-#
-#     cell_id_to_index = {}
-#
-#     setup_compounds = AssaySetupCompound.objects.filter(
-#         assaysetup__in=setups
-#     ).prefetch_related(
-#         # TODO
-#     )
-#
-#     compound_id_to_index = {}
-#
-#     setup_settings = AssaySetupSetting.objects.filter(
-#         assaysetup__in=setups
-#     ).prefetch_related(
-#
-#     )
-#
-#     setting_id_to_index = {}
-#
-#     setup_set_data = {
-#         'compounds': {},
-#         'cells': {},
-#         'settings': {}
-#     }
-#
-#     for index, setup_cell in enumerate(setup_cells):
-#         setup_set_data.get('cells').update({
-#             default_json.dumps({
-#                 # 'id': setup_cell.id,
-#                 'cell_sample_id': setup_cell.cell_sample_id,
-#                 'cell_sample': unicode(setup_cell.cell_sample),
-#                 'biosensor_id': setup_cell.biosensor_id,
-#                 'biosensor': setup_cell.biosensor.name,
-#                 'density': setup_cell.density,
-#                 'density_unit_id': setup_cell.density_unit_id,
-#                 # TODO TODO TODO THIS SHOULD BE .name
-#                 'density_unit': setup_cell.density_unit.unit,
-#                 'passage': setup_cell.passage
-#             }, sort_keys=True, separators=(',', ':')) : index
-#         })
-#
-#         cell_id_to_index.update({
-#             setup_cell.id: index
-#         })
-#
-#     for index, compound in enumerate(setup_compounds):
-#         split_addition_time = get_split_times(compound.addition_time)
-#         split_duration = get_split_times(compound.duration)
-#
-#         receipt_date = ''
-#         if compound.compound_instance.receipt_date:
-#             receipt_date = unicode(compound.compound_instance.receipt_date.isoformat())
-#
-#         setup_set_data.get('compounds').update({
-#             default_json.dumps({
-#                 # 'id': compound.id,
-#                 'concentration': compound.concentration,
-#                 'concentration_unit_id': compound.concentration_unit_id,
-#                 'concentration_unit': compound.concentration_unit.unit,
-#                 'addition_time': compound.addition_time,
-#                 'duration': compound.duration,
-#                 # Subject to removal
-#                 'addition_time_day': split_addition_time['day'],
-#                 'duration_day': split_duration['day'],
-#                 'addition_time_hour': split_addition_time['hour'],
-#                 'duration_hour': split_duration['hour'],
-#                 'addition_time_minute': split_addition_time['minute'],
-#                 'duration_minute': split_duration['minute'],
-#                 # continue
-#                 'compound_id': compound.compound_instance.compound_id,
-#                 'compound': compound.compound_instance.compound.name,
-#                 'supplier_text': compound.compound_instance.supplier.name,
-#                 'lot_text': compound.compound_instance.lot,
-#                 'receipt_date': receipt_date
-#             }, sort_keys=True, separators=(',', ':')) : index
-#         })
-#
-#         compound_id_to_index.update({
-#             compound.id: index
-#         })
-#
-#     setup_data = {}
-#
-#     for index, setup in enumerate(setups):
-#         # Should really have a function for this
-#         compound_set_ids = setup.compounds.values_list('id', flat=True)
-#         compound_set_indexes = sorted([
-#             compound_id_to_index.setdefault(
-#                 compound_id, len(compound_id_to_index)
-#             ) for compound_id in compound_set_ids
-#         ])
-#
-#         cell_set_ids = setup.cells.values_list('id', flat=True)
-#         cell_set_indexes = sorted([
-#             cell_id_to_index.setdefault(
-#                 cell_id, len(cell_id_to_index)
-#             ) for cell_id in cell_set_ids
-#         ])
-#
-#         setting_set_ids = setup.settings.values_list('id', flat=True)
-#         setting_set_indexes = sorted([
-#             setting_id_to_index.setdefault(
-#                 setting_id, len(cell_id_to_index)
-#             ) for setting_id in setting_set_ids
-#         ])
-#
-#         current_setup = {
-#             'device_id': setup.device_id,
-#             'device': setup.device.name,
-#             'organ_model_id': setup.organ_model_id,
-#             'organ_model': '',
-#             'organ_model_protocol_id': setup.organ_model_protocol_id,
-#             'organ_model_protocol': '',
-#             'variance_from_organ_model_protocol': setup.variance_from_organ_model_protocol,
-#             'cells': cell_set_indexes,
-#             'compounds': compound_set_indexes,
-#             'settings': setting_set_indexes
-#         }
-#
-#         # TODO I CAN CHANGE THIS AS SOON AS I FIX THE NAMES
-#         if setup.organ_model_id:
-#             current_setup.update({
-#                 'organ_model': setup.organ_model.name
-#             })
-#         if setup.organ_model_protocol_id:
-#             current_setup.update({
-#                 'organ_model_protocol': setup.organ_model_protocol.version
-#             })
-#
-#         setup_data.update({
-#             default_json.dumps(current_setup, sort_keys=True, separators=(',', ':')): index
-#         })
-#         setup_id_to_index.update({
-#             setup.id: index
-#         })
-#
-#     item_data = {}
-#
-#     for item in items:
-#         failure_time = item.failure_time
-#         if not failure_time:
-#             failure_time = ''
-#
-#         item_data.update({
-#             'item_' + unicode(item.row_index) + '_' + unicode(item.column_index): {
-#                 'id': item.id,
-#                 'name': item.name,
-#                 'setup_date': unicode(item.setup_date.isoformat()),
-#                 # 'failure_date': item.failure_date,
-#                 'failure_time': failure_time,
-#                 'failure_reason_id': item.failure_reason_id,
-#                 'scientist': item.scientist,
-#                 'notebook': item.notebook,
-#                 'notebook_page': item.notebook_page,
-#                 'notes': item.notes,
-#                 'row_index': item.row_index,
-#                 'column_index': item.column_index,
-#                 'setup_index': setup_id_to_index.get(item.setup.id)
-#             }
-#         })
-#
-#     data.update({
-#         'item_data': item_data,
-#         'setups': setup_data,
-#         'setup_sets': setup_set_data
-#     })
-#
-#     return HttpResponse(json.dumps(data),
-#                         content_type="application/json")
-
-
-# Sloppy Copies for now
+# TODO TODO TODO
 def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_header=False, include_all=False):
-    """Returns readout data as a csv in the form of a string
+    """Returns data points as a csv in the form of a string
 
     Params:
-    chip_ids - Readout IDs to use to acquire chip data (if data not provided)
-    data_points - Readout raw data, optional, acquired with chip_ids if not provided
-    both_assay_names - Indicates that both assay names should be returned (not currently used)
+    TODO
     """
     related_compounds_map = {}
 
     if not data_points:
         # TODO ORDER SUBJECT TO CHANGE
-        data_points = AssayChipRawData.objects.prefetch_related(
-            *CHIP_DATA_PREFETCH
+        data_points = AssayDataPoint.objects.prefetch_related(
+            # TODO
         ).filter(
             # old TODO
             # assay_chip_id__in=ids
@@ -2067,22 +1577,22 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
         device = data_point.setup.device
         organ_model = data_point.setup.organ_model
 
-        # TODO
-        # compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, ' | ')
-
         value = data_point.value
 
         if value is None:
             value = ''
 
         value_unit = data_point.assay_instance.unit.unit
-        quality = data_point.quality
+
+        replaced = data_point.replaced
+        excluded = data_point.excluded
+
         caution_flag = data_point.caution_flag
         replicate = data_point.replicate
         # TODO ADD OTHER STUFF
         notes = data_point.notes
 
-        if REPLACED_DATA_POINT_CODE not in quality and (include_all or not quality):
+        if not replaced and (include_all or not excluded):
             data.append(
                 [unicode(x) for x in
                     [
@@ -2104,7 +1614,7 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
                         value_unit,
                         replicate,
                         caution_flag,
-                        quality,
+                        excluded,
                         notes
                     ]
                 ]
@@ -2118,6 +1628,7 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
     return string_io.getvalue()
 
 
+# TODO TODO TODO
 def get_data_as_json(ids, data_points=None):
     if not data_points:
         data_points = AssayChipRawData.objects.prefetch_related(
@@ -2161,7 +1672,8 @@ def get_data_as_json(ids, data_points=None):
             value = ''
 
         caution_flag = data_point.caution_flag
-        quality = data_point.quality
+        # quality = data_point.quality
+        exclude = data_point.exclude
         # TODO ADD OTHER STUFF
         notes = data_point.notes
 
@@ -2212,7 +1724,7 @@ def get_data_as_json(ids, data_points=None):
             'sample_location_id': sample_location.id,
             'value': value,
             'caution_flag': caution_flag,
-            'quality': quality.strip(),
+            'exclude': exclude,
             # TODO ADD OTHER STUFF
             'notes': notes.strip(),
             'update_number': update_number,
@@ -2230,11 +1742,7 @@ def get_data_as_json(ids, data_points=None):
     return data
 
 switch = {
-    'fetch_assay_layout_content': fetch_assay_layout_content,
     'fetch_readout': fetch_readout,
-    'fetch_layout_format_labels': fetch_layout_format_labels,
-    'fetch_well_types': fetch_well_types,
-    'fetch_plate_info': fetch_plate_info,
     'fetch_center_id': fetch_center_id,
     'fetch_chip_readout': fetch_chip_readout,
     'fetch_readouts': fetch_readouts,
@@ -2244,11 +1752,8 @@ switch = {
     'fetch_protocol': fetch_protocol,
     'validate_bulk_file': validate_bulk_file,
     'validate_individual_chip_file': validate_individual_chip_file,
-    'validate_individual_plate_file': validate_individual_plate_file,
-    'fetch_quality_indicators': fetch_quality_indicators,
     'send_ready_for_sign_off_email': send_ready_for_sign_off_email,
     'fetch_device_dimensions': fetch_device_dimensions,
-    # 'fetch_matrix_items_as_json': fetch_matrix_items_as_json
 }
 
 
