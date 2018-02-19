@@ -424,7 +424,7 @@
         </thead>
         <tbody>
             {% for cell in cell_formset %}
-                <tr class="inline compound-inline" id="compounds-{{ forloop.counter0 }}">
+                <tr class="inline cell-inline" id="cells-{{ forloop.counter0 }}">
                 <td>
                 <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
                     <tr>
@@ -547,7 +547,7 @@
         </thead>
         <tbody>
             {% for setting in setting_formset %}
-                <tr class="inline compound-inline" id="compounds-{{ forloop.counter0 }}">
+                <tr class="inline setting-inline" id="settings-{{ forloop.counter0 }}">
                 <td>
                 <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
                     <tr>

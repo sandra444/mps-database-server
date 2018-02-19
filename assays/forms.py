@@ -2147,6 +2147,24 @@ class AssaySetupCellForm(forms.ModelForm):
         self.fields['cell_sample'].widget.attrs['style'] = 'width:50px;'
         self.fields['passage'].widget.attrs['style'] = 'width:50px;'
 
+        for time_unit in TIME_CONVERSIONS.keys():
+            # Create fields for Days, Hours, Minutes
+            self.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
+            # Change style
+            self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
+
+        if self.instance.addition_time:
+            # Fill additional time
+            addition_time_in_minutes_remaining = self.instance.addition_time
+            for time_unit, conversion in TIME_CONVERSIONS.items():
+                initial_time_for_current_field = int(addition_time_in_minutes_remaining / conversion)
+                if initial_time_for_current_field:
+                    self.fields['addition_time_' + time_unit].initial = initial_time_for_current_field
+                    addition_time_in_minutes_remaining -= initial_time_for_current_field * conversion
+            # Add fractions of minutes if necessary
+            if addition_time_in_minutes_remaining:
+                self.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
+
 
 # TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
 class AssaySetupCellFormSet(BaseModelFormSetForcedUniqueness):
@@ -2224,6 +2242,38 @@ class AssaySetupSettingForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         # self.static_choices = kwargs.pop('static_choices', None)
         super(AssaySetupSettingForm, self).__init__(*args, **kwargs)
+
+        for time_unit in TIME_CONVERSIONS.keys():
+            # Create fields for Days, Hours, Minutes
+            self.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
+            self.fields['duration_' + time_unit] = forms.FloatField(initial=0)
+            # Change style
+            self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
+            self.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
+
+        if self.instance.addition_time:
+            # Fill additional time
+            addition_time_in_minutes_remaining = self.instance.addition_time
+            for time_unit, conversion in TIME_CONVERSIONS.items():
+                initial_time_for_current_field = int(addition_time_in_minutes_remaining / conversion)
+                if initial_time_for_current_field:
+                    self.fields['addition_time_' + time_unit].initial = initial_time_for_current_field
+                    addition_time_in_minutes_remaining -= initial_time_for_current_field * conversion
+            # Add fractions of minutes if necessary
+            if addition_time_in_minutes_remaining:
+                self.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
+
+        if self.instance.duration:
+            # Fill duration
+            duration_in_minutes_remaining = self.instance.duration
+            for time_unit, conversion in TIME_CONVERSIONS.items():
+                initial_time_for_current_field = int(duration_in_minutes_remaining / conversion)
+                if initial_time_for_current_field:
+                    self.fields['duration_' + time_unit].initial = initial_time_for_current_field
+                    duration_in_minutes_remaining -= initial_time_for_current_field * conversion
+            # Add fractions of minutes if necessary
+            if duration_in_minutes_remaining:
+                self.fields['duration_minute'].initial += duration_in_minutes_remaining
 
 
 class AssaySetupSettingFormSet(BaseModelFormSetForcedUniqueness):
