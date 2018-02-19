@@ -3348,7 +3348,7 @@ class AssayStudyIndex(DetailView):
         return context
 
 
-class AssayStudySummary(DetailView):
+class AssayStudySummary(TemplateView):
     """Displays information for a given study
 
     Currently only shows data for chip readouts and chip/plate setups
@@ -3356,13 +3356,59 @@ class AssayStudySummary(DetailView):
     model = AssayStudy
     template_name = 'assays/assaystudy_summary.html'
 
+    # TODO TODO TODO
+    def get_context_data(self, **kwargs):
+        context = self.get_context_data()
 
-# class AssayStudyDelete(AdminRequiredMixin, DeleteView):
-#     """Delete a Study"""
-#     model = AssayStudy
-#     template_name = 'assays/assaystudy_delete.html'
-#     success_url = '/assays/editable_studies/'
+        # Get the study
+        study = get_object_or_404(AssayStudy, pk=self.kwargs['pk'])
 
+        context.update({
+            'object': AssayStudy.objects.filter(id=study.id).prefetch_related(
+                'assayinstance_set__target'
+                'assayinstance_set__method',
+                'assayinstance_set__unit',
+                'assay_set__unit',
+            )[0]
+        })
+
+        # TODO TODO TODO PERMISSIONS
+        # get_user_status_context(self, context)
+
+        return context
+
+
+class AssayStudyData(DetailView):
+    """Returns a combined file for all data in a study"""
+    model = AssayRun
+
+    def render_to_response(self, context, **response_kwargs):
+        # Make sure that the study exists, then continue
+        if self.object:
+            # Set response to binary
+            # For xlsx
+            # response = HttpResponse(mimetype="application/ms-excel")
+            # response['Content-Disposition'] = 'attachment; filename=%s' % self.object.assay_run_id
+            #
+            # workbook = xlsxwriter.Workbook(self.object.assay_run_id + '.xlsx')
+
+            # If chip data
+            items = AssayMatrixItem.objects.filter(
+                study_id=self.object.id
+            )
+
+            include_all = self.request.GET.get('include_all', False)
+
+            chip_data = get_chip_readout_data_as_csv(items, include_header=True, include_all=include_all)
+
+            # For specifically text
+            response = HttpResponse(chip_data, content_type='text/csv')
+            response['Content-Disposition'] = 'attachment;filename=' + unicode(self.object) + '.csv'
+
+            return response
+        # Return nothing otherwise
+        else:
+            return HttpResponse('', content_type='text/plain')
 
 # TODO TODO TODO FIX
 # TODO TODO TODO

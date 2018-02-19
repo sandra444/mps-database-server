@@ -1518,8 +1518,6 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
     Params:
     TODO
     """
-    related_compounds_map = {}
-
     if not data_points:
         # TODO ORDER SUBJECT TO CHANGE
         data_points = AssayDataPoint.objects.prefetch_related(
@@ -1534,15 +1532,11 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
             'assay_instance__unit',
             'sample_location',
             'data_upload',
-            # Will use eventually
+            # Will use eventually, maybe
             'subtarget'
         ).filter(
-            # old TODO
-            # assay_chip_id__in=ids
             matrix_item__in=ids
         ).order_by(
-            # old TODO
-            # 'assay_chip_id__chip_setup__assay_chip_id',
             'matrix_item__name',
             'assay_instance__target__name',
             'assay_instance__method__name',
@@ -1939,7 +1933,7 @@ def get_item_groups(study):
     return (treatment_group_representatives, setup_to_treatment_group)
 
 
-def get_assay_datapoints_for_charting(
+def get_assay_data_points_for_charting(
         raw_data,
         related_compounds_map,
         key,

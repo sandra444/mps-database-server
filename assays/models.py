@@ -1281,6 +1281,28 @@ class AssayDataUpload(FlaggableModel):
         return urllib.unquote(self.file_location.split('/')[-1])
 
 
+class AssayDataFileUpload(FlaggableModel):
+    """Shows the history of data uploads for a study; functions as inline"""
+
+    # TO BE DEPRECATED
+    # date_created, created_by, and other fields are used but come from FlaggableModel
+    file_location = models.URLField(null=True, blank=True)
+
+    # Store the file itself, rather than the location
+    # NOTE THAT THIS IS NOT SIMPLY "file" DUE TO COLLISIONS WITH RESERVED WORDS
+    # TODO SET LOCATION
+    # TODO REQUIRE EVENTUALLY
+    data_file = models.FileField(null=True, blank=True)
+
+    # NOT VERY USEFUL
+    # items = models.ManyToManyField(AssayChipReadout)
+
+    study = models.ForeignKey('assays.AssayStudy')
+
+    def __unicode__(self):
+        return urllib.unquote(self.file_location.split('/')[-1])
+
+
 # NEW MODELS, TO BE INTEGRATED FURTHER LATER
 class AssayTarget(LockableModel):
     """Describes what was sought by a given Assay"""
@@ -1874,7 +1896,7 @@ class AssayDataPoint(models.Model):
     replicate = models.CharField(max_length=255, default='')
 
     # OPTIONAL FOR NOW
-    data_upload = models.ForeignKey('assays.AssayDataUpload', null=True, blank=True)
+    data_upload = models.ForeignKey('assays.AssayDataFileUpload', null=True, blank=True)
 
     # OPTIONAL
     subtarget = models.ForeignKey(AssaySubtarget, null=True, blank=True)
