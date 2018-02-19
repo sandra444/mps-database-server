@@ -35,7 +35,7 @@ from assays.forms import (
     ReadyForSignOffForm,
     # NEW
     AssayStudyForm,
-    StudySupportingDataFormSet,
+    AssayStudySupportingDataFormSet,
     AssayInstanceFormSet,
     AssayMatrixForm,
     # AssayMatrixItemFormSet,
@@ -3203,10 +3203,10 @@ class AssayStudyAdd(OneGroupRequiredMixin, CreateView):
             if 'assay_instance_formset' not in context:
                 context['assay_instance_formset'] = AssayInstanceFormSet(self.request.POST)
             if 'supporting_data_formset' not in context:
-                context['supporting_data_formset'] = StudySupportingDataFormSet(self.request.POST, self.request.FILES)
+                context['supporting_data_formset'] = AssayStudySupportingDataFormSet(self.request.POST, self.request.FILES)
         else:
             context['assay_instance_formset'] = AssayInstanceFormSet()
-            context['supporting_data_formset'] = StudySupportingDataFormSet()
+            context['supporting_data_formset'] = AssayStudySupportingDataFormSet()
 
         return context
 
@@ -3215,7 +3215,7 @@ class AssayStudyAdd(OneGroupRequiredMixin, CreateView):
             self.request.POST,
             instance=form.instance
         )
-        supporting_data_formset = StudySupportingDataFormSet(
+        supporting_data_formset = AssayStudySupportingDataFormSet(
             self.request.POST,
             self.request.FILES,
             instance=form.instance
@@ -3259,10 +3259,10 @@ class AssayStudyUpdate(ObjectGroupRequiredMixin, UpdateView):
             if 'assay_instance_formset' not in context:
                 context['assay_instance_formset'] = AssayInstanceFormSet(self.request.POST, instance=self.object)
             if 'supporting_data_formset' not in context:
-                context['supporting_data_formset'] = StudySupportingDataFormSet(self.request.POST, self.request.FILES, instance=self.object)
+                context['supporting_data_formset'] = AssayStudySupportingDataFormSet(self.request.POST, self.request.FILES, instance=self.object)
         else:
             context['assay_instance_formset'] = AssayInstanceFormSet(instance=self.object)
-            context['supporting_data_formset'] = StudySupportingDataFormSet(instance=self.object)
+            context['supporting_data_formset'] = AssayStudySupportingDataFormSet(instance=self.object)
 
         context['update'] = True
 
@@ -3273,7 +3273,7 @@ class AssayStudyUpdate(ObjectGroupRequiredMixin, UpdateView):
             self.request.POST,
             instance=form.instance
         )
-        supporting_data_formset = StudySupportingDataFormSet(
+        supporting_data_formset = AssayStudySupportingDataFormSet(
             self.request.POST,
             self.request.FILES,
             instance=form.instance

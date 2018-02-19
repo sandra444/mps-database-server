@@ -1425,13 +1425,22 @@ class AssayStudyForm(SignOffMixin, forms.ModelForm):
     class Meta(object):
         model = AssayStudy
         widgets = {
+            'assay_run_id': forms.Textarea(attrs={'rows': 1}),
             'name': forms.Textarea(attrs={'rows': 1}),
-            'description': forms.Textarea(attrs={'rows': 3}),
+            'description': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
         }
-        exclude = tracking
+        exclude = tracking + restricted + ('access_groups', 'signed_off_notes')
+
+    def clean(self):
+        """Checks for at least one study type"""
+        # clean the form data, before validation
+        data = super(AssayStudyForm, self).clean()
+
+        if not any([data['toxicity'], data['efficacy'], data['disease'], data['cell_characterization']]):
+            raise forms.ValidationError('Please select at least one study type')
 
 
-StudySupportingDataFormSet = inlineformset_factory(
+AssayStudySupportingDataFormSet = inlineformset_factory(
     AssayStudy,
     AssayStudySupportingData,
     formset=StudySupportingDataInlineFormSet,

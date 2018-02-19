@@ -457,7 +457,7 @@ def get_list_of_present_compounds(related_compounds_map, data_point, separator='
 
 
 # TODO NEED TO UPDATE
-def get_control_data(
+def get_control_data_old(
         study,
         related_compounds_map,
         key,
@@ -681,7 +681,7 @@ def get_readout_data(
         if new_data:
             new_data_for_control = raw_data
 
-        controls = get_control_data(
+        controls = get_control_data_old(
             study,
             related_compounds_map,
             key,
@@ -1767,6 +1767,491 @@ def get_data_as_json(ids, data_points=None):
     })
 
     return data
+
+
+def get_control_data(
+        study,
+        mean_type,
+        include_all,
+        truncate_negative,
+        new_data_for_control=None
+):
+    """Gets control data for performing percent control calculations
+
+    study - the study in question
+    mean_type - what sort of mean to use
+    include_all - whether to include all values
+    truncate_negative - whether to treat negative values as zeroes
+    new_data_for_control - new data that wouldn't be found in the database
+    """
+    initial_control_data = {}
+    controls = {}
+
+    data_points = list(AssayDataPoint.objects.filter(
+        study=study,
+        replaced=False
+    ).prefetch_related(
+        # TODO
+    ))
+
+    if new_data_for_control:
+        data_points.extend(new_data_for_control)
+
+    # A little too much copy-pasting here, not very DRY
+    for raw in data_points:
+        value = raw.value
+
+        # TODO CHANGE TO USE FOLLOWING
+        assay_instance = raw.assay_instance
+        target = assay_instance.target.name
+        unit = assay_instance.unit.unit
+        # Not currently used
+        method = assay_instance.method.name
+
+        sample_location = raw.sample_location.name
+
+        # chip_id = raw.assay_chip_id.chip_setup.assay_chip_id
+
+        time = raw.time / 1440.0
+
+        replaced = raw.replaced
+        excluded = raw.excluded
+
+        # No dynamic quality here
+        if value is not None and (include_all or not excluded):
+            if truncate_negative and value < 0:
+                value = 0
+
+            # TODO CONTROL DEFINITIONS WILL BECOME MORE COMPLICATED LATER
+            # Check if the setup is marked a control chip
+            if raw.assay_chip_id.chip_setup.chip_test_type == 'control':
+                initial_control_data.setdefault(
+                    (target, method), {}
+                ).setdefault(
+                    unit, {}
+                ).setdefault(
+                    CONTROL_LABEL, {}
+                ).setdefault(
+                    sample_location, {}
+                ).setdefault(
+                    time, []
+                ).append(
+                    value
+                )
+
+    targets = [target_method[0] for target_method in initial_control_data.keys()]
+
+    for target_method, units in initial_control_data.items():
+        target = target_method[0]
+        method = target_method[1]
+
+        if targets.count(target) > 1:
+            target = u'{} [{}]'.format(target, method)
+
+        initial_control_data.update({
+            target: units
+        })
+
+        del initial_control_data[target_method]
+
+    for target, units in initial_control_data.items():
+        for unit, tags in units.items():
+            for tag, sample_locations in tags.items():
+                for sample_location, time_values in sample_locations.items():
+                    for time, values in time_values.items():
+                        if len(values) > 1:
+                            # If geometric mean
+                            if mean_type == 'geometric':
+                                # Geometric mean will sometimes fail (due to zero values and so on)
+                                average = gmean(values)
+                                if np.isnan(average):
+                                    return {
+                                        'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'
+                                    }
+                            # If arithmetic mean
+                            else:
+                                average = np.average(values)
+                        else:
+                            average = values[0]
+
+                        controls.update(
+                                {(target, unit, sample_location, time): average}
+                        )
+
+    return controls
+
+
+# TODO WE MAY WANT THE DEFINITION OF A TREATMENT GROUP TO CHANGE, WHO KNOWS
+def get_item_groups(study):
+    treatment_groups = {}
+    # TODO PLEASE REMEMBER TO INCLUDE IDS OF SETUPS IN THIS
+    treatment_group_representatives = []
+    setup_to_treatment_group = {}
+
+    # By pulling the setups for the study, I avoid problems with preview data
+    setups = AssayMatrixItem.objects.filter(
+        assay_run_id=study
+    ).prefetch_related(
+        'assaysetupsetting_set__setting',
+        'assaysetupcell_set__cell_sample',
+        'assaysetupcell_set__cell_sample__cell_type__organ',
+        'assaysetupcompound_set__compound_instance__compound',
+    )
+
+    for setup in setups:
+        treatment_group_tuple = (
+            setup.device_id,
+            setup.organ_model_id,
+            setup.organ_model_protocol_id,
+            setup.variance,
+            setup.devolved_settings(),
+            setup.devolved_compounds(),
+            setup.devolved_cells()
+        )
+
+        if treatment_group_tuple not in treatment_groups:
+            current_representative = len(treatment_group_representatives)
+            treatment_groups.update({
+                treatment_group_tuple: current_representative
+            })
+            treatment_group_representatives.append(setup.quick_dic())
+        else:
+            current_representative = treatment_groups.get(treatment_group_tuple)
+
+        treatment_group_representatives[current_representative].get('setups_with_same_group').append(
+            setup.get_hyperlinked_name()
+        )
+        setup_to_treatment_group.update({setup.id: current_representative})
+
+    # Attempt to sort reasonably
+    treatment_group_representatives = sorted(
+        treatment_group_representatives, key=lambda x: (
+            x.get('compounds'), x.get('organ_model'), x.get('cells'), x.get('settings'), x.get('setups_with_same_group')[0]
+        )
+    )
+
+    for representative in treatment_group_representatives:
+        representative.get('setups_with_same_group').sort()
+        representative.update({
+            'setups_with_same_group': ', '.join(representative.get('setups_with_same_group'))
+        })
+
+    return (treatment_group_representatives, setup_to_treatment_group)
+
+
+def get_assay_datapoints_for_charting(
+        raw_data,
+        related_compounds_map,
+        key,
+        mean_type,
+        interval_type,
+        percent_control,
+        include_all,
+        truncate_negative,
+        dynamic_excluded,
+        study=None,
+        readout=None,
+        new_data=False,
+        additional_data=None
+):
+    """Get all readout data for a study and return it in JSON format
+
+    From POST:
+    raw_data - the AssayChipRawData needed to create the JSON
+    related_compounds_map - dic of setup pointing to compounds
+    key - whether this data should be considered by device or by compound
+    interval_type - the type of interval (std, ste, etc)
+    percent_control - whether to use percent control (WIP)
+    include_all - whether to include all values
+    dynamic_excluded - dic of data points to exclude
+    study - supplied only if needed to get percent control values (validating data sets and so on)
+    readout - supplied only when data is for an individual readout
+    new_data - indicates whether data in raw_data is new
+    additional_data - data to merge with raw_data (used when displaying individual readouts for convenience)
+    """
+    # Organization is assay -> unit -> compound/tag -> field -> time -> value
+    treatment_group_representatives, setup_to_treatment_group = get_treatment_groups(study)
+
+    final_data = {
+        'sorted_assays': [],
+        'assays': []
+    }
+
+    intermediate_data = {}
+
+    initial_data = {}
+
+    controls = {}
+    if percent_control:
+        new_data_for_control = None
+        if new_data:
+            new_data_for_control = raw_data
+
+        controls = get_control_data_old(
+            study,
+            related_compounds_map,
+            key,
+            mean_type,
+            include_all,
+            truncate_negative,
+            new_data_for_control=new_data_for_control
+        )
+
+        if controls.get('errors' , ''):
+            return controls
+
+    averaged_data = {}
+
+    all_sample_locations = {}
+    all_keys = {}
+
+    # Append the additional_data as necessary
+    # Why is this done? It is an expedient way to avoid duplicating data
+    if additional_data:
+        raw_data.extend(additional_data)
+
+    for raw in raw_data:
+        # Now uses full name
+        # assay = raw.assay_id.assay_id.assay_short_name
+        # Deprecated
+        # assay = raw.assay_id.assay_id.assay_name
+        # unit = raw.assay_id.readout_unit.unit
+        # Deprecated
+        # field = raw.field_id
+        value = raw.value
+
+        assay_instance = raw.assay_instance
+        target = assay_instance.target.name
+        unit = assay_instance.unit.unit
+        # Not currently used
+        method = assay_instance.method.name
+
+        sample_location = raw.sample_location.name
+        all_sample_locations.update({sample_location: True})
+
+        setup_id = raw.assay_chip_id.chip_setup_id
+        chip_id = raw.assay_chip_id.chip_setup.assay_chip_id
+
+        # Convert to days for now
+        time = raw.time / 1440.0
+
+        replaced = raw.replaced
+        excluded = raw.excluded
+
+        # TODO Should probably just use dynamic_excluded instead of quality for this
+        if value is not None and not replaced and (include_all or not dynamic_excluded.get(raw.id, excluded)):
+            if truncate_negative and value < 0:
+                value = 0
+            # Get tag for data point
+            # If by compound
+            if key == 'group':
+                # tag = get_list_of_present_compounds(related_compounds_map, raw, ' & ')
+                tag = 'Group {}'.format(setup_to_treatment_group.get(setup_id) + 1)
+            # If by device
+            else:
+                tag = chip_id
+
+            # Set data in nested monstrosity that is initial_data
+            initial_data.setdefault(
+                (target, method), {}
+            ).setdefault(
+                unit, {}
+            ).setdefault(
+                tag, {}
+            ).setdefault(
+                sample_location, {}
+            ).setdefault(
+                time, []
+            ).append(value)
+
+    targets = [target_method[0] for target_method in initial_data.keys()]
+
+    for target_method, units in initial_data.items():
+        target = target_method[0]
+        method = target_method[1]
+
+        if targets.count(target) > 1:
+            target = u'{} [{}]'.format(target, method)
+
+        initial_data.update({
+            target: units
+        })
+
+        del initial_data[target_method]
+
+    # Nesting like this is a little sloppy, flat > nested
+    for target, units in initial_data.items():
+        for unit, tags in units.items():
+            for tag, sample_locations in tags.items():
+                for sample_location, time_values in sample_locations.items():
+                    for time, values in time_values.items():
+                        if len(values) > 1:
+                            # If geometric mean
+                            if mean_type == 'geometric':
+                                # Geometric mean will sometimes fail (due to zero values and so on)
+                                average = gmean(values)
+                                if np.isnan(average):
+                                    return {'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'}
+                            # If arithmetic mean
+                            else:
+                                average = np.average(values)
+                        else:
+                            average = values[0]
+
+                        # If standard deviation
+                        if interval_type == 'std':
+                            interval = np.std(values)
+                        # Standard error if not std
+                        else:
+                            interval = np.std(values) / len(values) ** 0.5
+
+                        average_and_interval = (
+                            average,
+                            interval
+                        )
+
+                        averaged_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).update({
+                            time: average_and_interval
+                        })
+
+    initial_data = None
+
+    accommodate_sample_location = len(all_sample_locations) > 1
+
+    for target, units in averaged_data.items():
+        for unit, tags in units.items():
+            # row_indices = {}
+            accommodate_units = len(units) > 1
+
+            if not percent_control:
+                # Not converted to percent control
+                # Newline is used as a delimiter
+                assay_label = target + '\n' + unit
+            else:
+                # Convert to percent control
+                if accommodate_units:
+                    current_unit = '%Control from ' + unit
+                else:
+                    current_unit = '%Control'
+                # Newline is used as a delimiter
+                assay_label = target + '\n' + current_unit
+
+            current_table = intermediate_data.setdefault(assay_label, [['Time']])
+            # row_indices = {}
+            current_data = {}
+            x_header = []
+            y_header = {}
+            final_data.get('sorted_assays').append(assay_label)
+
+            for tag, sample_locations in tags.items():
+                for sample_location, time_values in sample_locations.items():
+                    accommodate_intervals = False
+                    include_current = False
+
+                    if accommodate_sample_location:
+                        current_key = tag + ' ' + sample_location
+                    else:
+                        current_key = tag
+
+                    all_keys.update({current_key: True})
+
+                    for time, value_and_interval in time_values.items():
+                        value = value_and_interval[0]
+                        interval = value_and_interval[1]
+
+                        if interval != 0:
+                            accommodate_intervals = True
+
+                        if not percent_control:
+                            current_data.setdefault(current_key, {}).update({time: value})
+                            current_data.setdefault(current_key+'_i1', {}).update({time: value - interval})
+                            current_data.setdefault(current_key+'_i2', {}).update({time: value + interval})
+                            y_header.update({time: True})
+                            include_current = True
+
+                        elif controls.get((target, unit, sample_location, time), False):
+                            control_value = controls.get((target, unit, sample_location, time))
+
+                            # We can not divide by zero
+                            if control_value == 0:
+                                return {'errors': 'Could not calculate percent control because some control values are zero (divide by zero error).'}
+
+                            adjusted_value = (value / control_value) * 100
+                            adjusted_interval = (interval / control_value) * 100
+
+                            current_data.setdefault(current_key, {}).update({time: adjusted_value})
+                            current_data.setdefault(current_key+'_i1', {}).update({time: adjusted_value - adjusted_interval})
+                            current_data.setdefault(current_key+'_i2', {}).update({time: adjusted_value + adjusted_interval})
+                            y_header.update({time: True})
+                            include_current = True
+
+                    if include_current:
+                        x_header.append(current_key)
+                    # To include all
+                    # x_header.append(current_key)
+                    # x_header.extend([
+                    #     current_key + '_i1',
+                    #     current_key + '_i2'
+                    # ])
+
+                    # Only include intervals if necessary
+                    if accommodate_intervals and include_current:
+                        x_header.extend([
+                            current_key + '_i1',
+                            current_key + '_i2'
+                        ])
+                    else:
+                        if current_key+'_i1' in current_data:
+                            del current_data[current_key+'_i1']
+                            del current_data[current_key + '_i2']
+
+            # for current_key in all_keys:
+            #     if current_key not in x_header:
+            #         x_header.extend([
+            #             current_key,
+            #             current_key + '_i1',
+            #             current_key + '_i2'
+            #         ])
+
+            # Note manipulations for sorting
+            # Somewhat contrived
+            convert = lambda text: int(text) if text.isdigit() else text.lower()
+            alphanum_key = lambda key: [
+                convert(
+                    c.replace('_I1', '!').replace('_I2', '"')
+                ) for c in re.split('([0-9]+)', key)
+            ]
+            x_header.sort(key=alphanum_key)
+            current_table[0].extend(x_header)
+
+            x_header = {x_header[index]: index + 1 for index in range(len(x_header))}
+
+            y_header = y_header.keys()
+            y_header.sort(key=float)
+
+            for y in y_header:
+                current_table.append([y] + [None] * (len(x_header)))
+
+            y_header = {float(y_header[index]): index + 1 for index in range(len(y_header))}
+
+            for x, data_point in current_data.items():
+                for y, value in data_point.items():
+                    current_table[y_header.get(y)][x_header.get(x)] = value
+
+    controls = None
+    averaged_data = None
+
+    final_data.get('sorted_assays').sort(key=lambda s: s.upper())
+    final_data['assays'] = [[] for x in range(len(final_data.get('sorted_assays')))]
+
+    for assay, assay_data in intermediate_data.items():
+        final_data.get('assays')[final_data.get('sorted_assays').index(assay)] = assay_data
+
+    final_data.update({
+        'treatment_groups': treatment_group_representatives
+    })
+
+    return final_data
 
 switch = {
     'fetch_readout': fetch_readout,
