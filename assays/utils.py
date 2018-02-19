@@ -135,6 +135,32 @@ CSV_HEADER_WITH_COMPOUNDS_AND_STUDY = (
     'Notes'
 )
 
+DEFAULT_EXPORT_HEADER = (
+    'Study ID',
+    'Chip ID',
+    'Cross Reference',
+    'Assay Plate ID',
+    'Assay Well ID',
+    'Day',
+    'Hour',
+    'Minute',
+    'Device',
+    'Organ Model',
+    'Settings'
+    'Cells',
+    'Compound Treatment(s)',
+    'Target/Analyte',
+    'Subtarget',
+    'Method/Kit',
+    'Sample Location',
+    'Value',
+    'Value Unit',
+    'Replicate',
+    'Caution Flag',
+    'Exclude',
+    'Notes'
+)
+
 # I should have more tuples for containing prefetch arguments
 CHIP_DATA_PREFETCH = (
     'assay_id__assay_id',

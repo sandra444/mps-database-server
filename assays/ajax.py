@@ -23,7 +23,8 @@ from .utils import (
     CHIP_DATA_PREFETCH,
     UnicodeWriter,
     REPLACED_DATA_POINT_CODE,
-    MATRIX_ITEM_PREFETCH
+    MATRIX_ITEM_PREFETCH,
+    DEFAULT_EXPORT_HEADER
 )
 
 import csv
@@ -299,7 +300,9 @@ def get_chip_readout_data_as_json(chip_ids, chip_data=None):
         chip_data = AssayChipRawData.objects.prefetch_related(
             *CHIP_DATA_PREFETCH
         ).filter(
-            assay_chip_id__in=chip_ids
+            assay_chip_id__in=chip_ids,
+            # Just remove replaced datapoints initially
+            replaced=False
         ).order_by(
             'assay_chip_id__chip_setup__assay_chip_id',
             'assay_instance__target__name',
@@ -1434,14 +1437,6 @@ def validate_individual_chip_file(request):
         return HttpResponse(json.dumps(data),
                             content_type='application/json')
 
-APRAFormSet = inlineformset_factory(
-    AssayPlateReadout,
-    AssayPlateReadoutAssay,
-    formset=AssayPlateReadoutInlineFormset,
-    extra=1,
-    exclude=[],
-)
-
 
 def fetch_device_dimensions(request):
     device_id = request.POST.get('device_id', None)
@@ -1528,7 +1523,19 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
     if not data_points:
         # TODO ORDER SUBJECT TO CHANGE
         data_points = AssayDataPoint.objects.prefetch_related(
-            # TODO
+            'study',
+            'matrix_item__assaysetupcompound_set',
+            'matrix_item__assaysetupcell_set',
+            'matrix_item__assaysetupsetting_set',
+            'matrix_item__device',
+            'matrix_item__organ_model',
+            'assay_instance__target',
+            'assay_instance__method',
+            'assay_instance__unit',
+            'sample_location',
+            'data_upload',
+            # Will use eventually
+            'subtarget'
         ).filter(
             # old TODO
             # assay_chip_id__in=ids
@@ -1552,12 +1559,12 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
 
     if include_header:
         data.append(
-            CSV_HEADER_WITH_COMPOUNDS_AND_STUDY
+            DEFAULT_EXPORT_HEADER
         )
 
     for data_point in data_points:
         # Definitely need to rename these fields/models...
-        study_id = data_point.matrix_item.study.id
+        study_id = data_point.study
 
         item_name = data_point.matrix_item.name
 
@@ -1587,10 +1594,20 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
         replaced = data_point.replaced
         excluded = data_point.excluded
 
+        if excluded:
+            excluded = 'EXCLUDED'
+        else:
+            excluded = ''
+
         caution_flag = data_point.caution_flag
         replicate = data_point.replicate
         # TODO ADD OTHER STUFF
         notes = data_point.notes
+
+        # Sets of data
+        settings = data_point.matrix_item.stringify_settings()
+        cells = data_point.matrix_item.stringify_cells()
+        compounds = data_point.matrix_item.stringify_compounds()
 
         if not replaced and (include_all or not excluded):
             data.append(
@@ -1606,7 +1623,9 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
                         times.get('minute'),
                         device,
                         organ_model,
-                        # compound_treatment,
+                        settings,
+                        compounds,
+                        cells,
                         target,
                         method,
                         sample_location,
@@ -1632,7 +1651,14 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
 def get_data_as_json(ids, data_points=None):
     if not data_points:
         data_points = AssayChipRawData.objects.prefetch_related(
-            *CHIP_DATA_PREFETCH
+            'matrix_item',
+            'assay_instance__target',
+            'assay_instance__method',
+            'assay_instance__unit',
+            'sample_location',
+            'data_upload',
+            # Will use eventually
+            'subtarget'
         ).filter(
             matrix_item__in=ids
             # TODO
@@ -1739,6 +1765,7 @@ def get_data_as_json(ids, data_points=None):
         'sample_locations': sample_locations,
         'assay_instances': assay_instances
     })
+
     return data
 
 switch = {

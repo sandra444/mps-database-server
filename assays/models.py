@@ -1643,6 +1643,28 @@ class AssayMatrixItem(FlaggableModel):
     def __unicode__(self):
         return unicode(self.name)
 
+    def devolved_settings(self):
+        """Makes a tuple of cells (for comparison)"""
+        setting_tuple = []
+        for setting in self.assaysetupsetting_set.all():
+            setting_tuple.append((
+                setting.setting_id,
+                setting.unit_id,
+            ))
+
+        return tuple(sorted(setting_tuple))
+
+    def stringify_settings(self):
+        """Stringified cells for a setup"""
+        settings = []
+        for setting in self.assaysetupsetting_set.all():
+            settings.append(unicode(setting))
+
+        if not settings:
+            settings = ['-No Extra Settings-']
+
+        return '\n'.join(settings)
+
     def devolved_cells(self):
         """Makes a tuple of cells (for comparison)"""
         cell_tuple = []
@@ -2130,6 +2152,8 @@ class AssaySetupSetting(models.Model):
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
     addition_location = models.ForeignKey(MicrodeviceSection, null=True, blank=True)
 
+    def __unicode__(self):
+        return u'{} {} {}'.format(self.setting.name, self.value, self.unit)
 
 class AssayRunStakeholder(models.Model):
     """An institution that has interest in a particular study
