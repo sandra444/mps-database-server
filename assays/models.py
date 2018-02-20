@@ -1373,7 +1373,7 @@ class AssaySampleLocation(LockableModel):
 class AssayInstance(models.Model):
     """Specific assays used in the 'inlines'"""
     study = models.ForeignKey(AssayRun, null=True, blank=True)
-    study_new = models.ForeignKey('assays.AssayStudy', null=True, blank=True)
+    # study_new = models.ForeignKey('assays.AssayStudy', null=True, blank=True)
     target = models.ForeignKey(AssayTarget)
     method = models.ForeignKey(AssayMethod)
     # Name of model "PhysicalUnits" should be renamed, methinks
@@ -1825,7 +1825,7 @@ class AssayDataPoint(models.Model):
         unique_together = [
             (
                 'matrix_item',
-                'assay_instance',
+                'study_assay',
                 'sample_location',
                 'time',
                 'update_number',
@@ -1845,7 +1845,7 @@ class AssayDataPoint(models.Model):
 
     matrix_item = models.ForeignKey('assays.AssayMatrixItem')
 
-    assay_instance = models.ForeignKey('assays.AssayInstance')
+    study_assay = models.ForeignKey('assays.AssayStudyAssay')
 
     sample_location = models.ForeignKey('assays.AssaySampleLocation')
 
@@ -2209,3 +2209,16 @@ class AssayStudyStakeholder(models.Model):
     signed_off_notes = models.CharField(max_length=255, blank=True, default='')
 
     sign_off_required = models.BooleanField(default=True)
+
+
+class AssayStudyAssay(models.Model):
+    """Specific assays used in the 'inlines'"""
+    study = models.ForeignKey(AssayStudy, null=True, blank=True)
+    # study_new = models.ForeignKey('assays.AssayStudy', null=True, blank=True)
+    target = models.ForeignKey(AssayTarget)
+    method = models.ForeignKey(AssayMethod)
+    # Name of model "PhysicalUnits" should be renamed, methinks
+    unit = models.ForeignKey(PhysicalUnits)
+
+    def __unicode__(self):
+        return u'{0}|{1}|{2}'.format(self.target, self.method, self.unit)

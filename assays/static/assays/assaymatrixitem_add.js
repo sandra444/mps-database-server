@@ -218,7 +218,7 @@ $(document).ready(function() {
 
         // PLEASE NOTE THAT THE DATA POINTS ARE REVERSED
         var data_points = json.data_points.reverse();
-        var assay_instances = json.assay_instances;
+        var study_assays = json.study_assays;
         var sample_locations = json.sample_locations;
 
         // TODO USE THE ACTUAL DATAPOINT PK FOR EXCLUSION
@@ -236,15 +236,15 @@ $(document).ready(function() {
             var time_in_minutes = data_point.time_in_minutes;
             var time_in_days = time_in_minutes / 1440.0;
 
-            var assay_instance_id = data_point.assay_instance_id;
-            var target_name = assay_instances[assay_instance_id].target_name;
-            var method_name = assay_instances[assay_instance_id].method_name;
+            var study_assay_id = data_point.study_assay_id;
+            var target_name = study_assays[study_assay_id].target_name;
+            var method_name = study_assays[study_assay_id].method_name;
 
             var sample_location_id = data_point.sample_location_id;
             var sample_location_name = sample_locations[sample_location_id].name;
 
             var value = data_point.value;
-            var value_unit = assay_instances[assay_instance_id].unit;
+            var value_unit = study_assays[study_assay_id].unit;
 
             var caution_flag = data_point.caution_flag;
             var excluded = data_point.excluded;
@@ -262,7 +262,7 @@ $(document).ready(function() {
 
             // Need to take a slice to avoid treating missing QC as invalid
             // Allow QC changes for NULL value row
-            var every = [chip_id, time_in_minutes, assay_instance_id, sample_location_id].every(is_true);
+            var every = [chip_id, time_in_minutes, study_assay_id, sample_location_id].every(is_true);
 
             if (exist) {
                 new_row.addClass('force-bg-success');
@@ -401,7 +401,7 @@ $(document).ready(function() {
             //     index.chip_id,
             //     index.assay_plate_id,
             //     index.assay_well_id,
-            //     ''+index.assay_instance_id,
+            //     ''+index.study_assay_id,
             //     ''+index.sample_location_id,
             //     ''+index.time,
             //     index.replicate,

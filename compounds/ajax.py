@@ -184,6 +184,7 @@ def fetch_chembl_compound_data(request):
                         content_type='application/json')
 
 
+# TODO TODO TODO TODO TODO
 def fetch_compound_report(request):
     """Return in JSON the data required to make a compound report
 

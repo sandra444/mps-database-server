@@ -1519,9 +1519,9 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
             'matrix_item__assaysetupsetting_set',
             'matrix_item__device',
             'matrix_item__organ_model',
-            'assay_instance__target',
-            'assay_instance__method',
-            'assay_instance__unit',
+            'study_assay__target',
+            'study_assay__method',
+            'study_assay__unit',
             'sample_location',
             'data_upload',
             # Will use eventually, maybe
@@ -1563,8 +1563,8 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
         time_in_minutes = data_point.time
         times = get_split_times(time_in_minutes)
 
-        target = data_point.assay_instance.target.name
-        method = data_point.assay_instance.method.name
+        target = data_point.study_assay.target.name
+        method = data_point.study_assay.method.name
         sample_location = data_point.sample_location.name
 
         device = data_point.setup.device
@@ -1575,7 +1575,7 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
         if value is None:
             value = ''
 
-        value_unit = data_point.assay_instance.unit.unit
+        value_unit = data_point.study_assay.unit.unit
 
         replaced = data_point.replaced
         excluded = data_point.excluded
@@ -1664,7 +1664,7 @@ def get_data_as_json(ids, data_points=None):
 
     data_points_to_return = []
     sample_locations = {}
-    assay_instances = {}
+    study_assays = {}
 
     for data_point in data_points:
         item_name = data_point.matrix_item.name
@@ -1673,7 +1673,7 @@ def get_data_as_json(ids, data_points=None):
         # Add time here
         time_in_minutes = data_point.time
         times = get_split_times(time_in_minutes)
-        assay_instance = data_point.assay_instance
+        study_assay = data_point.study_assay
         sample_location = data_point.sample_location
 
         value = data_point.value
@@ -1710,14 +1710,14 @@ def get_data_as_json(ids, data_points=None):
                 }
             )
 
-        if assay_instance.id not in assay_instances:
-            assay_instances.update(
+        if study_assay.id not in study_assays:
+            study_assays.update(
                 {
-                    assay_instance.id: {
-                        'target_name': assay_instance.target.name,
-                        'target_short_name': assay_instance.target.short_name,
-                        'method_name': assay_instance.method.name,
-                        'unit': assay_instance.unit.unit,
+                    study_assay.id: {
+                        'target_name': study_assay.target.name,
+                        'target_short_name': study_assay.target.short_name,
+                        'method_name': study_assay.method.name,
+                        'unit': study_assay.unit.unit,
                     }
                 }
             )
@@ -1730,7 +1730,7 @@ def get_data_as_json(ids, data_points=None):
             'day': times.get('day'),
             'hour': times.get('hour'),
             'minute': times.get('minute'),
-            'assay_instance_id': assay_instance.id,
+            'study_assay_id': study_assay.id,
             'sample_location_id': sample_location.id,
             'value': value,
             'caution_flag': caution_flag,
@@ -1747,7 +1747,7 @@ def get_data_as_json(ids, data_points=None):
     data.update({
         'data_points': data_points_to_return,
         'sample_locations': sample_locations,
-        'assay_instances': assay_instances
+        'study_assays': study_assays
     })
 
     return data
@@ -1786,11 +1786,11 @@ def get_control_data(
         value = raw.value
 
         # TODO CHANGE TO USE FOLLOWING
-        assay_instance = raw.assay_instance
-        target = assay_instance.target.name
-        unit = assay_instance.unit.unit
+        study_assay = raw.study_assay
+        target = study_assay.target.name
+        unit = study_assay.unit.unit
         # Not currently used
-        method = assay_instance.method.name
+        method = study_assay.method.name
 
         sample_location = raw.sample_location.name
 
@@ -2002,11 +2002,11 @@ def get_data_points_for_charting(
         # field = raw.field_id
         value = raw.value
 
-        assay_instance = raw.assay_instance
-        target = assay_instance.target.name
-        unit = assay_instance.unit.unit
+        study_assay = raw.study_assay
+        target = study_assay.target.name
+        unit = study_assay.unit.unit
         # Not currently used
-        method = assay_instance.method.name
+        method = study_assay.method.name
 
         sample_location = raw.sample_location.name
         all_sample_locations.update({sample_location: True})
@@ -2250,9 +2250,9 @@ def fetch_data_points(request):
         matrix_item__in=matrix_items
     ).prefetch_related(
         #TODO
-        'assay_instance__target',
-        'assay_instance__method',
-        'assay_instance__unit',
+        'study_assay__target',
+        'study_assay__method',
+        'study_assay__unit',
         'sample_location',
         'matrix_item'
     )

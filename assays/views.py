@@ -42,8 +42,8 @@ from assays.forms import (
     ReadyForSignOffForm,
     # NEW
     AssayStudyForm,
-    AssayStudySupportingDataFormSet,
-    AssayInstanceFormSet,
+    AssayStudySupportingDataFormSetFactory,
+    AssayStudyAssayFormSetFactory,
     AssayMatrixForm,
     # AssayMatrixItemFormSet,
     # AssaySetupFormSet,
@@ -3209,28 +3209,28 @@ class AssayStudyAdd(OneGroupRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(AssayStudyAdd, self).get_context_data(**kwargs)
         if self.request.POST:
-            if 'assay_instance_formset' not in context:
-                context['assay_instance_formset'] = AssayInstanceFormSet(self.request.POST)
+            if 'study_assay_formset' not in context:
+                context['study_assay_formset'] = AssayStudyAssayFormSetFactory(self.request.POST)
             if 'supporting_data_formset' not in context:
-                context['supporting_data_formset'] = AssayStudySupportingDataFormSet(self.request.POST, self.request.FILES)
+                context['supporting_data_formset'] = AssayStudySupportingDataFormSetFactory(self.request.POST, self.request.FILES)
         else:
-            context['assay_instance_formset'] = AssayInstanceFormSet()
-            context['supporting_data_formset'] = AssayStudySupportingDataFormSet()
+            context['study_assay_formset'] = AssayStudyAssayFormSetFactory()
+            context['supporting_data_formset'] = AssayStudySupportingDataFormSetFactory()
 
         return context
 
     def form_valid(self, form):
-        assay_instance_formset = AssayInstanceFormSet(
+        study_assay_formset = AssayStudyAssayFormSetFactory(
             self.request.POST,
             instance=form.instance
         )
-        supporting_data_formset = AssayStudySupportingDataFormSet(
+        supporting_data_formset = AssayStudySupportingDataFormSetFactory(
             self.request.POST,
             self.request.FILES,
             instance=form.instance
         )
-        if form.is_valid() and assay_instance_formset.is_valid() and supporting_data_formset.is_valid():
-            save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=False)
+        if form.is_valid() and study_assay_formset.is_valid() and supporting_data_formset.is_valid():
+            save_forms_with_tracking(self, form, formset=[study_assay_formset, supporting_data_formset], update=False)
             return redirect(
                 self.object.get_absolute_url()
             )
@@ -3238,7 +3238,7 @@ class AssayStudyAdd(OneGroupRequiredMixin, CreateView):
             return self.render_to_response(
                 self.get_context_data(
                     form=form,
-                    assay_instance_formset=assay_instance_formset,
+                    study_assay_formset=study_assay_formset,
                     supporting_data_formset=supporting_data_formset
                 )
             )
@@ -3265,35 +3265,31 @@ class AssayStudyUpdate(ObjectGroupRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(AssayStudyUpdate, self).get_context_data(**kwargs)
         if self.request.POST:
-            if 'assay_instance_formset' not in context:
-                context['assay_instance_formset'] = AssayInstanceFormSet(self.request.POST, instance=self.object)
+            if 'study_assay_formset' not in context:
+                context['study_assay_formset'] = AssayStudyAssayFormSetFactory(self.request.POST, instance=self.object)
             if 'supporting_data_formset' not in context:
-                context['supporting_data_formset'] = AssayStudySupportingDataFormSet(self.request.POST, self.request.FILES, instance=self.object)
+                context['supporting_data_formset'] = AssayStudySupportingDataFormSetFactory(self.request.POST, self.request.FILES, instance=self.object)
         else:
-            context['assay_instance_formset'] = AssayInstanceFormSet(instance=self.object)
-            context['supporting_data_formset'] = AssayStudySupportingDataFormSet(instance=self.object)
+            context['study_assay_formset'] = AssayStudyAssayFormSetFactory(instance=self.object)
+            context['supporting_data_formset'] = AssayStudySupportingDataFormSetFactory(instance=self.object)
 
         context['update'] = True
 
         return context
 
     def form_valid(self, form):
-        assay_instance_formset = AssayInstanceFormSet(
+        study_assay_formset = AssayStudyAssayFormSetFactory(
             self.request.POST,
             instance=form.instance
         )
-        supporting_data_formset = AssayStudySupportingDataFormSet(
+        supporting_data_formset = AssayStudySupportingDataFormSetFactory(
             self.request.POST,
             self.request.FILES,
             instance=form.instance
         )
 
-        if form.is_valid() and assay_instance_formset.is_valid() and supporting_data_formset.is_valid():
-            if not is_group_admin(self.request.user, self.object.group.name):
-                if form.cleaned_data.get('signed_off', ''):
-                    del form.cleaned_data['signed_off']
-                form.cleaned_data['restricted'] = self.object.restricted
-
+        # TODO TODO TODO TODO
+        if form.is_valid() and study_assay_formset.is_valid() and supporting_data_formset.is_valid():
             if not form.instance.signed_off_by and form.cleaned_data.get('signed_off', ''):
                 # Magic strings are in poor taste, should use a template instead
                 subject = 'Study Sign Off Detected: {0}'.format(form.instance)
@@ -3312,12 +3308,12 @@ class AssayStudyUpdate(ObjectGroupRequiredMixin, UpdateView):
                 for user_to_be_alerted in users_to_be_alerted:
                     user_to_be_alerted.email_user(subject, message, DEFAULT_FROM_EMAIL)
 
-            save_forms_with_tracking(self, form, formset=[assay_instance_formset, supporting_data_formset], update=True)
+            save_forms_with_tracking(self, form, formset=[study_assay_formset, supporting_data_formset], update=True)
         else:
             return self.render_to_response(
                 self.get_context_data(
                     form=form,
-                    assay_instance_formset=assay_instance_formset,
+                    study_assay_formset=study_assay_formset,
                     supporting_data_formset=supporting_data_formset
                 )
             )
@@ -3374,9 +3370,9 @@ class AssayStudySummary(TemplateView):
 
         context.update({
             'object': AssayStudy.objects.filter(id=study.id).prefetch_related(
-                'assayinstance_set__target',
-                'assayinstance_set__method',
-                'assayinstance_set__unit',
+                'assaystudyassay_set__target',
+                'assaystudyassay_set__method',
+                'assaystudyassay_set__unit',
             )[0]
         })
 

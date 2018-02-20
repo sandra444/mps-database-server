@@ -1405,6 +1405,28 @@ class AssayInstanceInlineFormSet(BaseInlineFormSet):
             form.fields['unit'].queryset = unit_queryset
 
 
+class AssayStudyAssayInlineFormSet(BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        """Init APRA inline
+
+        Filters units so that only units marked 'readout' appear
+        """
+        super(AssayStudyAssayInlineFormSet, self).__init__(*args, **kwargs)
+
+        target_queryset = AssayTarget.objects.all().order_by('name')
+
+        method_queryset = AssayMethod.objects.all().order_by('name')
+
+        unit_queryset = PhysicalUnits.objects.filter(
+            availability__icontains='readout'
+        ).order_by('unit_type', 'base_unit', 'scale_factor')
+
+        for form in self.forms:
+            form.fields['target'].queryset = target_queryset
+            form.fields['method'].queryset = method_queryset
+            form.fields['unit'].queryset = unit_queryset
+
+
 class ReadyForSignOffForm(forms.Form):
     captcha = CaptchaField()
     message = forms.TextInput()
@@ -1440,7 +1462,7 @@ class AssayStudyForm(SignOffMixin, forms.ModelForm):
             raise forms.ValidationError('Please select at least one study type')
 
 
-AssayStudySupportingDataFormSet = inlineformset_factory(
+AssayStudySupportingDataFormSetFactory = inlineformset_factory(
     AssayStudy,
     AssayStudySupportingData,
     formset=StudySupportingDataInlineFormSet,
@@ -1451,10 +1473,18 @@ AssayStudySupportingDataFormSet = inlineformset_factory(
     }
 )
 
-AssayInstanceFormSet = inlineformset_factory(
+# AssayInstanceFormSet = inlineformset_factory(
+#     AssayStudy,
+#     AssayInstance,
+#     formset=AssayInstanceInlineFormSet,
+#     extra=1,
+#     exclude=[]
+# )
+
+AssayStudyAssayFormSetFactory = inlineformset_factory(
     AssayStudy,
-    AssayInstance,
-    formset=AssayInstanceInlineFormSet,
+    AssayStudyAssay,
+    formset=AssayStudyAssayInlineFormSet,
     extra=1,
     exclude=[]
 )
