@@ -2560,3 +2560,62 @@ assay_run_stakeholder_sign_off_formset_factory = inlineformset_factory(
     extra=0,
     can_delete=False
 )
+
+
+class AssayStudySignOffForm(SignOffMixin, forms.ModelForm):
+    class Meta(object):
+        model = AssayStudy
+        fields = ['signed_off', 'signed_off_notes']
+        widgets = {
+            'signed_off_notes': forms.Textarea(attrs={'cols': 50, 'rows': 2}),
+        }
+
+
+class AssayStudyStakeholderSignOffForm(SignOffMixin, forms.ModelForm):
+    class Meta(object):
+        model = AssayStudyStakeholder
+        fields = ['signed_off', 'signed_off_notes']
+        widgets = {
+            'signed_off_notes': forms.Textarea(attrs={'cols': 50, 'rows': 2}),
+        }
+
+
+class AssayStudyStakeholderFormSet(BaseInlineFormSet):
+    class Meta(object):
+        model = AssayStudyStakeholder
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(AssayStudyStakeholderFormSet, self).__init__(*args, **kwargs)
+
+    def get_queryset(self):
+        if not hasattr(self, '_queryset'):
+            # TODO FILTER OUT THOSE USER ISN'T ADMIN OF
+            # TODO REVIEW
+            user_admin_groups = self.user.groups.filter(name__contains=ADMIN_SUFFIX)
+            potential_groups = [group.name.replace(ADMIN_SUFFIX, '') for group in user_admin_groups]
+            queryset = super(AssayStudyStakeholderFormSet, self).get_queryset()
+            # Only include unsigned off forms that user is admin of!
+            self._queryset = queryset.filter(
+                group__name__in=potential_groups,
+                signed_off_by=None
+            )
+        return self._queryset
+
+    def save(self, commit=True):
+        for form in self.forms:
+            signed_off = form.cleaned_data.get('signed_off', False)
+            if signed_off and is_group_admin(self.user, form.instance.group.name):
+                form.instance.signed_off_by = self.user
+                form.instance.signed_off_date = timezone.now()
+                form.save(commit=True)
+
+# Really, all factories should be declared like so (will have to do this for upcoming revision)
+AssayStudyStakeholderFormSetFactory = inlineformset_factory(
+    AssayRun,
+    AssayRunStakeholder,
+    form=AssayRunStakeholderSignOffForm,
+    formset=AssayRunStakeholderFormSet,
+    extra=0,
+    can_delete=False
+)

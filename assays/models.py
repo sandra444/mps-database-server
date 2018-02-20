@@ -1456,21 +1456,8 @@ class AssayStudy(FlaggableModel):
 
     restricted = models.BooleanField(default=True, help_text='Check box to restrict to selected group')
 
-    # DEPRECATED
-    # TODO the access choices should probably be file-level scope
-    # THIS HAS BEEN DECIDED AGAINST
-    # WE WILL USE HAVE A SERIES OF GROUPS TO SELECT FROM INSTEAD OR SOMETHING LIKE THAT
-    # access indicates who can see the study and its data
-    # access = models.CharField(
-    #     max_length=255,
-    #     verbose_name='Access Level',
-    #     choices=(
-    #         ('editors', 'Group Editors'),
-    #         ('viewers', 'Consortium Viewers'),
-    #         ('public', 'Public')
-    #     ),
-    #     default=''
-    # )
+    # Special addition, would put in base model, but don't want excess...
+    signed_off_notes = models.CharField(max_length=255, blank=True, default='')
 
     # TODO
     def get_study_types_string(self):
@@ -2176,6 +2163,7 @@ class AssaySetupSetting(models.Model):
     def __unicode__(self):
         return u'{} {} {}'.format(self.setting.name, self.value, self.unit)
 
+
 class AssayRunStakeholder(models.Model):
     """An institution that has interest in a particular study
 
@@ -2197,5 +2185,27 @@ class AssayRunStakeholder(models.Model):
 
     # TODO NEED MEDIA LOCATION
     # approval_for_sign_off = models.FileField(null=True, blank=True)
+
+    sign_off_required = models.BooleanField(default=True)
+
+
+class AssayStudyStakeholder(models.Model):
+    """An institution that has interest in a particular study
+
+    Stakeholders needs to be consulted (sign off) before data can become available
+    """
+
+    study = models.ForeignKey(AssayStudy)
+
+    group = models.ForeignKey(Group)
+    # Explicitly declared rather than from inheritance to avoid unecessary fields
+    signed_off_by = models.ForeignKey(
+        User,
+        blank=True,
+        null=True
+    )
+    signed_off_date = models.DateTimeField(blank=True, null=True)
+
+    signed_off_notes = models.CharField(max_length=255, blank=True, default='')
 
     sign_off_required = models.BooleanField(default=True)
