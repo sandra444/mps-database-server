@@ -1882,7 +1882,7 @@ class AssayDataPoint(models.Model):
     replicate = models.CharField(max_length=255, default='')
 
     # OPTIONAL FOR NOW
-    data_upload = models.ForeignKey('assays.AssayDataFileUpload', null=True, blank=True)
+    data_file_upload = models.ForeignKey('assays.AssayDataFileUpload', null=True, blank=True)
 
     # OPTIONAL
     subtarget = models.ForeignKey(AssaySubtarget, null=True, blank=True)

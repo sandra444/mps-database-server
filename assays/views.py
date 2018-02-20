@@ -303,6 +303,54 @@ def get_compound_instance_and_cell_strings_for_queryset(setups):
         )
 
 
+def get_data_file_uploads(study=None, matrix_item=None):
+    """Get data uploads for a study"""
+    if study:
+        data_file_uploads = AssayDataFileUpload.objects.filter(
+            study=study
+        ).distinct().order_by('created_on')
+
+        data_points = AssayDataPoint.objects.filter(
+            study=study
+        ).exclude(
+            replaced=True
+        )
+    elif matrix_item:
+        data_file_uploads = AssayDataFileUpload.objects.filter(
+            study=matrix_item.study
+        ).prefetch_related(
+            'created_by'
+        ).distinct().order_by('created_on')
+
+        data_points = AssayDataPoint.objects.filter(
+            study=study
+        ).exclude(
+            replaced=True
+        )
+    else:
+        data_file_uploads = AssayDataUpload.objects.none()
+        data_points = AssayDataPoint.objects.none()
+
+    # Edge case for old data
+    if data_points.exclude(data_file_upload=None).count() == 0:
+        for data_file_upload in data_file_uploads:
+            data_file_upload.has_data = True
+
+        return data_file_uploads
+
+    data_file_upload_map = {}
+    for data_point in data_points:
+        data_file_upload_map.setdefault(
+            data_point.data_file_upload_id, True
+        )
+
+    for data_file_upload in data_file_uploads:
+        data_file_upload.has_data = data_file_upload_map.get(data_file_upload.id, '')
+
+    return data_file_uploads
+
+
+# TODO DEPRECATED
 def get_data_uploads(study=None, chip_readout=None, plate_readout=None):
     """Get data uploads for a study"""
     if study:
@@ -3368,15 +3416,18 @@ class AssayStudySummary(TemplateView):
         # Get the study
         study = get_object_or_404(AssayStudy, pk=self.kwargs['pk'])
 
+        current_study = AssayStudy.objects.filter(id=study.id).prefetch_related(
+            'assaystudyassay_set__target',
+            'assaystudyassay_set__method',
+            'assaystudyassay_set__unit',
+        )[0]
+
         context.update({
-            'object': AssayStudy.objects.filter(id=study.id).prefetch_related(
-                'assaystudyassay_set__target',
-                'assaystudyassay_set__method',
-                'assaystudyassay_set__unit',
-            )[0]
+            'object': current_study,
+            'data_file_uploads': get_data_file_uploads(study=current_study)
         })
 
-        # TODO TODO TODO PERMISSIONS
+        # TODO TODO TODO TODO TODO PERMISSIONS
         # get_user_status_context(self, context)
 
         return context
