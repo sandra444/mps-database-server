@@ -24,7 +24,7 @@ $(document).ready(function () {
                     id: group.val(),
 
                     // Always pass the CSRF middleware token with every AJAX call
-                    csrfmiddlewaretoken: middleware_token
+                    csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 success: function (json) {
                     data[0] = json.center_id;

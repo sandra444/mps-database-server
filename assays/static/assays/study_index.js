@@ -16,7 +16,7 @@ $(document).ready(function() {
         '#plate_results'
     ];
 
-    var middleware_token = getCookie('csrftoken');
+    // var middleware_token = getCookie('csrftoken');
     var study_id = Math.floor(window.location.href.split('/')[4]);
 
     $.each(ids, function(index, table_id) {
@@ -80,7 +80,7 @@ $(document).ready(function() {
         var data = {
             call: 'send_ready_for_sign_off_email',
             study_id: '' + study_id,
-            csrfmiddlewaretoken: middleware_token
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
         var serializedData = $('form').serializeArray();

@@ -6,9 +6,9 @@ window.LAYOUT = {};
 
 $(document).ready(function () {
     // Get the middleware token
-    var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value') ?
-            $('[name=csrfmiddlewaretoken]').attr('value'):
-            getCookie('csrftoken');
+    // var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value') ?
+    //         $('[name=csrfmiddlewaretoken]').attr('value'):
+    //         getCookie('csrftoken');
 
     // Get the quality indicators
     var quality_indicators = [];
@@ -18,7 +18,7 @@ $(document).ready(function () {
         dataType: "json",
         data: {
             call: 'fetch_quality_indicators',
-            csrfmiddlewaretoken: middleware_token
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         },
         success: function (json) {
             quality_indicators = json;
@@ -151,7 +151,7 @@ $(document).ready(function () {
                     call: 'fetch_layout_format_labels',
                     id: current_id,
                     model: current_model,
-                    csrfmiddlewaretoken: middleware_token
+                    csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 success: function (json) {
                     window.LAYOUT.row_labels = json.row_labels;
@@ -300,7 +300,7 @@ $(document).ready(function () {
                 id: current_id,
                 model: current_model,
                 // Always pass the CSRF middleware token with every AJAX call
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 window.LAYOUT.fill_layout(json);
@@ -716,7 +716,7 @@ $(document).ready(function () {
                     model: 'assay_device_readout',
 
                     // Always pass the CSRF middleware token with every AJAX call
-                    csrfmiddlewaretoken: middleware_token
+                    csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 success: function (json) {
                     window.LAYOUT.fill_readout_from_existing(json, true);

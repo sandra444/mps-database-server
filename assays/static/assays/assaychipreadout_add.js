@@ -5,9 +5,9 @@ $(document).ready(function () {
     google.charts.setOnLoadCallback(get_readout);
 
     // Get the middleware token
-    var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value') ?
-            $('[name=csrfmiddlewaretoken]').attr('value'):
-            getCookie('csrftoken');
+    // var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value') ?
+    //         $('[name=csrfmiddlewaretoken]').attr('value'):
+    //         getCookie('csrftoken');
 
     // Get the quality indicators
     // var quality_indicators = [];
@@ -91,7 +91,7 @@ $(document).ready(function () {
         // Frontend
         else {
             // Details does not have access to CSRF on its own
-            middleware_token = getCookie('csrftoken');
+            // middleware_token = getCookie('csrftoken');
             var current_id = Math.floor(window.location.href.split('/')[5]);
 
             if (!current_id) {
@@ -113,7 +113,7 @@ $(document).ready(function () {
                     // Function to call within the view is defined by `call:`
                     call: 'fetch_chip_readout',
                     id: readout_id,
-                    csrfmiddlewaretoken: middleware_token
+                    csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 success: function (json) {
                     var exist = true;
@@ -149,7 +149,7 @@ $(document).ready(function () {
             call: 'validate_individual_chip_file',
             study: study_id,
             readout: readout_id,
-            csrfmiddlewaretoken: middleware_token,
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
             dynamic_quality: JSON.stringify(dynamic_quality),
             include_table: include_table
         };
@@ -546,7 +546,7 @@ $(document).ready(function () {
             call: 'fetch_readouts',
             study: study_id,
             readout: readout_id,
-            csrfmiddlewaretoken: middleware_token,
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
             dynamic_quality: JSON.stringify(dynamic_quality)
         };
 

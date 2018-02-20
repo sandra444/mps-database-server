@@ -301,8 +301,6 @@ def get_chip_readout_data_as_json(chip_ids, chip_data=None):
             *CHIP_DATA_PREFETCH
         ).filter(
             assay_chip_id__in=chip_ids,
-            # Just remove replaced datapoints initially
-            replaced=False
         ).order_by(
             'assay_chip_id__chip_setup__assay_chip_id',
             'assay_instance__target__name',
@@ -1648,13 +1646,11 @@ def get_data_as_json(ids, data_points=None):
             # Will use eventually
             'subtarget'
         ).filter(
-            matrix_item__in=ids
-            # TODO
-            # assay_chip_id__in=ids
+            matrix_item__in=ids,
+            # Just remove replaced datapoints initially
+            replaced = False
         ).order_by(
             # TODO
-            # ALSO MAKE THIS A GLOBAL VARIABLE, NO MAGIC PLEASE
-            # 'assay_chip_id__chip_setup__assay_chip_id',
             'matrix_item__name',
             'assay_instance__target__name',
             'assay_instance__method__name',

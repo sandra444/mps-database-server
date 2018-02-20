@@ -86,7 +86,7 @@ $(document).ready(function() {
                 data: {
                     call: 'fetch_organ_models',
                     device: device,
-                    csrfmiddlewaretoken: middleware_token
+                    csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 success: function (json) {
                     var options = json.dropdown;
@@ -130,7 +130,7 @@ $(document).ready(function() {
                 data: {
                     call: 'fetch_protocols',
                     organ_model: organ_model,
-                    csrfmiddlewaretoken: middleware_token
+                    csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 success: function (json) {
                     var options = json.dropdown;
@@ -174,7 +174,7 @@ $(document).ready(function() {
                 data: {
                     call: 'fetch_protocol',
                     protocol: protocol,
-                    csrfmiddlewaretoken: middleware_token
+                    csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 success: function (json) {
                     if (json) {

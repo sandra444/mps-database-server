@@ -23,7 +23,7 @@ $(document).ready(function () {
                 call: 'fetch_well_types',
 
                 // Always pass the CSRF middleware token with every AJAX call
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 create_well_type_selector(json);
@@ -593,7 +593,7 @@ $(document).ready(function () {
                 model: 'assay_layout',
 
                 // Always pass the CSRF middleware token with every AJAX call
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 var row_labels = json.row_labels;
