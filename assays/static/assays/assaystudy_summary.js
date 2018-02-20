@@ -5,7 +5,7 @@ $(document).ready(function() {
     google.charts.setOnLoadCallback(get_readouts);
 
     var charts = $('#charts');
-    var study_id = Math.floor(window.location.href.split('/')[4]);
+    var study_id = Math.floor(window.location.href.split('/')[5]);
 
     // Name for the charts for binding events etc
     var charts_name = 'charts';
@@ -13,7 +13,7 @@ $(document).ready(function() {
     function get_readouts() {
         var data = {
             // TODO TODO TODO CHANGE CALL
-            call: 'fetch_readouts',
+            call: 'fetch_data_points',
             study: study_id,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };

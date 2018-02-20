@@ -1,6 +1,13 @@
 # coding=utf-8
 # IF YOU WANT TO SEE PAST VIEWS, DO NOT RELY ON THE COMMENTED CODE HEREIN
-from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
+from django.views.generic import (
+    ListView,
+    CreateView,
+    DetailView,
+    UpdateView,
+    TemplateView,
+    DeleteView
+)
 from django.http import HttpResponse
 # from assays.models import *
 from cellsamples.models import CellSample
@@ -3358,17 +3365,16 @@ class AssayStudySummary(TemplateView):
 
     # TODO TODO TODO
     def get_context_data(self, **kwargs):
-        context = self.get_context_data()
+        context = super(AssayStudySummary, self).get_context_data(**kwargs)
 
         # Get the study
         study = get_object_or_404(AssayStudy, pk=self.kwargs['pk'])
 
         context.update({
             'object': AssayStudy.objects.filter(id=study.id).prefetch_related(
-                'assayinstance_set__target'
+                'assayinstance_set__target',
                 'assayinstance_set__method',
                 'assayinstance_set__unit',
-                'assay_set__unit',
             )[0]
         })
 

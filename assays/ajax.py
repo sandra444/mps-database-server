@@ -1884,7 +1884,7 @@ def get_item_groups(study):
 
     # By pulling the setups for the study, I avoid problems with preview data
     setups = AssayMatrixItem.objects.filter(
-        assay_run_id=study
+        study=study
     ).prefetch_related(
         'assaysetupsetting_set__setting',
         'assaysetupcell_set__cell_sample',
@@ -1897,7 +1897,7 @@ def get_item_groups(study):
             setup.device_id,
             setup.organ_model_id,
             setup.organ_model_protocol_id,
-            setup.variance,
+            setup.variance_from_organ_model_protocol,
             setup.devolved_settings(),
             setup.devolved_compounds(),
             setup.devolved_cells()
@@ -1933,9 +1933,8 @@ def get_item_groups(study):
     return (treatment_group_representatives, setup_to_treatment_group)
 
 
-def get_assay_data_points_for_charting(
+def get_data_points_for_charting(
         raw_data,
-        related_compounds_map,
         key,
         mean_type,
         interval_type,
@@ -1944,7 +1943,7 @@ def get_assay_data_points_for_charting(
         truncate_negative,
         dynamic_excluded,
         study=None,
-        readout=None,
+        matrix_item=None,
         new_data=False,
         additional_data=None
 ):
@@ -1959,12 +1958,12 @@ def get_assay_data_points_for_charting(
     include_all - whether to include all values
     dynamic_excluded - dic of data points to exclude
     study - supplied only if needed to get percent control values (validating data sets and so on)
-    readout - supplied only when data is for an individual readout
+    matrix_item - supplied only when data is for an individual matrix_item
     new_data - indicates whether data in raw_data is new
     additional_data - data to merge with raw_data (used when displaying individual readouts for convenience)
     """
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
-    treatment_group_representatives, setup_to_treatment_group = get_treatment_groups(study)
+    treatment_group_representatives, setup_to_treatment_group = get_item_groups(study)
 
     final_data = {
         'sorted_assays': [],
@@ -1981,10 +1980,9 @@ def get_assay_data_points_for_charting(
         if new_data:
             new_data_for_control = raw_data
 
-        controls = get_control_data_old(
+        controls = get_control_data(
             study,
-            related_compounds_map,
-            key,
+            # key,
             mean_type,
             include_all,
             truncate_negative,
@@ -2023,8 +2021,8 @@ def get_assay_data_points_for_charting(
         sample_location = raw.sample_location.name
         all_sample_locations.update({sample_location: True})
 
-        setup_id = raw.assay_chip_id.chip_setup_id
-        chip_id = raw.assay_chip_id.chip_setup.assay_chip_id
+        setup_id = raw.matrix_item_id
+        chip_id = raw.matrix_item.name
 
         # Convert to days for now
         time = raw.time / 1440.0
@@ -2247,6 +2245,46 @@ def get_assay_data_points_for_charting(
 
     return final_data
 
+
+def fetch_data_points(request):
+    if request.POST.get('matrix_item', ''):
+        matrix_items = AssayMatrixItem.objects.filter(pk=int(request.POST.get('matrix_item')))
+        matrix_item = matrix_items[0]
+        study = matrix_item.study
+    else:
+        matrix_item = None
+        study = AssayStudy.objects.get(pk=int(request.POST.get('study', None)))
+        matrix_items = AssayMatrixItem.objects.filter(study=study)
+
+    data_points = AssayDataPoint.objects.filter(
+        matrix_item__in=matrix_items
+    ).prefetch_related(
+        #TODO
+        'assay_instance__target',
+        'assay_instance__method',
+        'assay_instance__unit',
+        'sample_location',
+        'matrix_item'
+    )
+
+
+
+    data = get_data_points_for_charting(
+        data_points,
+        request.POST.get('key', ''),
+        request.POST.get('mean_type', ''),
+        request.POST.get('interval_type', ''),
+        request.POST.get('percent_control', ''),
+        request.POST.get('include_all', ''),
+        request.POST.get('truncate_negative', ''),
+        json.loads(request.POST.get('dynamic_excluded', '{}')),
+        study=study,
+        matrix_item=matrix_item
+    )
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
 switch = {
     'fetch_readout': fetch_readout,
     'fetch_center_id': fetch_center_id,
@@ -2260,6 +2298,7 @@ switch = {
     'validate_individual_chip_file': validate_individual_chip_file,
     'send_ready_for_sign_off_email': send_ready_for_sign_off_email,
     'fetch_device_dimensions': fetch_device_dimensions,
+    'fetch_data_points': fetch_data_points
 }
 
 

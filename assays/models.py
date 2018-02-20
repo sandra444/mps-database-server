@@ -1693,11 +1693,10 @@ class AssayMatrixItem(FlaggableModel):
         for cell in self.assaysetupcell_set.all():
             cell_tuple.append((
                 cell.cell_sample_id,
-                cell.cell_biosensor_id,
-                cell.cellsample_density,
-                # cell.cellsample_density_unit_id,
-                cell.cellsample_density_unit,
-                cell.cell_passage
+                cell.biosensor_id,
+                cell.density,
+                cell.density_unit,
+                cell.passage
             ))
 
         return tuple(sorted(cell_tuple))
