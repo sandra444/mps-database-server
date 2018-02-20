@@ -17,7 +17,7 @@ $(document).ready(function () {
                     csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 success: function (json) {
-                    center_name_selector.html(json.center_name);
+                    center_name_selector.html(json.name);
                 },
                 error: function (xhr, errmsg, err) {
                     console.log(xhr.status + ": " + xhr.responseText);

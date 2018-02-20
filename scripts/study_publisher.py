@@ -3,6 +3,7 @@
     (either because they have no stakeholders or every stakeholder approved)
     and moves them to the public automatically after approximately one year's time
 """
+# TODO TODO TODO TODO MOVE TO NEW SCHEMA
 from assays.models import AssayRun, AssayRunStakeholder
 from datetime import datetime, timedelta
 import pytz

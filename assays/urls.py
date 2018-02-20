@@ -13,7 +13,7 @@ urlpatterns = patterns('',
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/$', AssayStudyIndex.as_view(), name='assay_study_index'),
     # Update page for studies
     url(r'^assays/(?P<pk>[0-9]+)/update/$', AssayRunUpdate.as_view(), name='study-update'),
-    # url(r'^assays/(?P<pk>[0-9]+)/update/$', AssayStudyUpdate.as_view(), name='study-update'),
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/update/$', AssayStudyUpdate.as_view(), name='asssay_study_update'),
     # Delete view for studies
     # url(r'^assays/(?P<pk>[0-9]+)/delete/$', AssayStudyDelete.as_view(), name='study-delete'),
     # Summary view for studies
