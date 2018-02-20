@@ -16,45 +16,6 @@
 <div class="well">
 <div class="text-center">
 
-{#{% if study_submit %}#}
-{#<div class="btn-group"#}
-{#    onclick="if (confirm('Signing off will prevent anyone from editing this Study and the data associated with it.\nAre you sure you want to change the Sign Off status?'))#}
-{#       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));#}
-{#       $('#id_signed_off').prop('checked') ?#}
-{#       $('#mark_reviewed_label').text('Click Here to Remove Sign Off') : $('#mark_reviewed_label').text('Click Here to Sign Off on this Entry'); $('#mark_reviewed_check').toggle();}">#}
-{#{% else %}#}
-{#<div class="btn-group"#}
-{#    onclick="if (confirm('If this is checked, the entry will be marked as Validated.\nAre you sure you want to change the validated status?'))#}
-{#       {$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked'));#}
-{#       $('#id_signed_off').prop('checked') ?#}
-{#       $('#mark_reviewed_label').text('Click Here to Remove Validated Mark') : $('#mark_reviewed_label').text('Click Here to Mark this Entry as Validated'); $('#mark_reviewed_check').toggle();}">#}
-{#{% endif %}#}
-{#    <label for="mark_reviewed" class="btn btn-success">#}
-{#        {% if form.signed_off.value %}#}
-{#        <span style="display: inline-block" class="glyphicon glyphicon-ok" id="mark_reviewed_check"></span>#}
-{#        {% else %}#}
-{#        <span style="display: none" class="glyphicon glyphicon-ok" id="mark_reviewed_check"></span>#}
-{#        {% endif %}#}
-{#        <span> </span>#}
-{#    </label>#}
-{#    <label id="mark_reviewed_label" for="mark_reviewed" class="btn btn-default active">#}
-{#        {% if study_submit %}#}
-{#            {% if form.signed_off.value %}#}
-{#            Click Here to Remove Sign Off#}
-{#            {% else %}#}
-{#            Click Here to Sign Off on this Study#}
-{#            {% endif %}#}
-{#        {% else %}#}
-{#            {% if form.signed_off.value %}#}
-{#            Click Here to Remove Validated Mark#}
-{#            {% else %}#}
-{#            Click Here to Mark this Entry as Validated#}
-{#            {% endif %}#}
-{#        {% endif %}#}
-{#    </label>#}
-{#</div>#}
-{#</div>#}
-
 <div class="btn-group" id="mark_reviewed_button_group">
     <label class="btn btn-success">
         <span hidden class="glyphicon glyphicon-ok" id="mark_reviewed_check"></span>

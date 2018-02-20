@@ -42,6 +42,10 @@
 
     {% include 'errors.html' %}
 
+    {% include 'tracking.html' %}
+
+    {% include "sign_off_form.html" with group=form.instance.study.group.name %}
+
     {{ form.errors }}
 
     <legend>Global</legend>

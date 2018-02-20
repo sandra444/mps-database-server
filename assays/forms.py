@@ -2471,7 +2471,7 @@ class AssayMatrixItemFullForm(SignOffMixin, forms.ModelForm):
             raise forms.ValidationError({'name': ['ID/Barcode must be unique within study.']})
 
 
-class AssayMatrixItemForm(forms.ModelForm):
+class AssayMatrixItemForm(SignOffMixin, forms.ModelForm):
     class Meta(object):
         model = AssayMatrixItem
         exclude = ('study',) + tracking
