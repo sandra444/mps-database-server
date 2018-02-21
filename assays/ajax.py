@@ -1636,27 +1636,27 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
 # TODO TODO TODO
 def get_data_as_json(ids, data_points=None):
     if not data_points:
-        data_points = AssayChipRawData.objects.prefetch_related(
+        data_points = AssayDataPoint.objects.prefetch_related(
             'matrix_item',
-            'assay_instance__target',
-            'assay_instance__method',
-            'assay_instance__unit',
+            'study_assay__target',
+            'study_assay__method',
+            'study_assay__unit',
             'sample_location',
-            'data_upload',
+            'data_file_upload',
             # Will use eventually
             'subtarget'
         ).filter(
             matrix_item__in=ids,
             # Just remove replaced datapoints initially
-            replaced = False
+            replaced=False
         ).order_by(
             # TODO
             'matrix_item__name',
-            'assay_instance__target__name',
-            'assay_instance__method__name',
+            'study_assay__target__name',
+            'study_assay__method__name',
             'time',
             'sample_location__name',
-            'quality',
+            'excluded',
             'update_number'
         )
 
@@ -1667,7 +1667,7 @@ def get_data_as_json(ids, data_points=None):
     study_assays = {}
 
     for data_point in data_points:
-        item_name = data_point.matrix_item.name
+        name = data_point.matrix_item.name
         assay_plate_id = data_point.assay_plate_id
         assay_well_id = data_point.assay_well_id
         # Add time here
@@ -1683,22 +1683,22 @@ def get_data_as_json(ids, data_points=None):
 
         caution_flag = data_point.caution_flag
         # quality = data_point.quality
-        exclude = data_point.exclude
+        excluded = data_point.excluded
         # TODO ADD OTHER STUFF
         notes = data_point.notes
 
         update_number = data_point.update_number
         replicate = data_point.replicate
 
-        data_upload = data_point.data_upload
+        data_file_upload = data_point.data_file_upload
 
-        if data_upload:
-            data_upload_name = unicode(data_upload)
-            data_upload_url = data_upload.file_location
+        if data_file_upload:
+            data_file_upload_name = unicode(data_file_upload)
+            data_file_upload_url = data_file_upload.file_location
 
         else:
-            data_upload_name = u''
-            data_upload_url = u''
+            data_file_upload_name = u''
+            data_file_upload_url = u''
 
         if sample_location.id not in sample_locations:
             sample_locations.update(
@@ -1723,7 +1723,7 @@ def get_data_as_json(ids, data_points=None):
             )
 
         data_point_fields = {
-            'item_name': item_name,
+            'name': name,
             'assay_plate_id': assay_plate_id,
             'assay_well_id': assay_well_id,
             'time_in_minutes': time_in_minutes,
@@ -1734,13 +1734,13 @@ def get_data_as_json(ids, data_points=None):
             'sample_location_id': sample_location.id,
             'value': value,
             'caution_flag': caution_flag,
-            'exclude': exclude,
+            'excluded': excluded,
             # TODO ADD OTHER STUFF
             'notes': notes.strip(),
             'update_number': update_number,
             'replicate': replicate.strip(),
-            'data_upload_url': data_upload_url,
-            'data_upload_name': data_upload_name
+            'data_file_upload_url': data_file_upload_url,
+            'data_file_upload_name': data_file_upload_name
         }
         data_points_to_return.append(data_point_fields)
 
@@ -2275,6 +2275,25 @@ def fetch_data_points(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+# TODO REFACTOR
+def fetch_item_data(request):
+    """Returns the Data Points for an Item
+
+    Receives the following from POST:
+    id -- the ID of the Item of interest
+    """
+
+    item_id = request.POST.get('id', '')
+
+    if not item_id:
+        return HttpResponseServerError()
+
+    data = get_data_as_json([item_id])
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+
+
 switch = {
     'fetch_readout': fetch_readout,
     'fetch_center_id': fetch_center_id,
@@ -2288,7 +2307,8 @@ switch = {
     'validate_individual_chip_file': validate_individual_chip_file,
     'send_ready_for_sign_off_email': send_ready_for_sign_off_email,
     'fetch_device_dimensions': fetch_device_dimensions,
-    'fetch_data_points': fetch_data_points
+    'fetch_data_points': fetch_data_points,
+    'fetch_item_data': fetch_item_data,
 }
 
 

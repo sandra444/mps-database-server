@@ -20,7 +20,7 @@ $(document).ready(function() {
     var dynamic_excluded_current = {};
     var dynamic_excluded_new = {};
 
-    var readout_id = get_readout_value();
+    var matrix_item_idd = get_matrix_item();
     var study_id = get_study_id();
 
     // Name for the charts for binding events etc
@@ -66,7 +66,7 @@ $(document).ready(function() {
         }
     }
 
-    function get_readout_value() {
+    function get_matrix_item() {
         var current_id = Math.floor(window.location.href.split('/')[5]);
 
         if (!current_id) {
@@ -77,7 +77,7 @@ $(document).ready(function() {
     }
 
     function get_readout() {
-        if (readout_id) {
+        if (matrix_item_idd) {
             // Get the table
             $.ajax({
                 url: "/assays_ajax/",
@@ -85,8 +85,8 @@ $(document).ready(function() {
                 dataType: "json",
                 data: {
                     // TODO TODO TODO CALL FOR DATA
-                    call: 'fetch_chip_readout',
-                    id: readout_id,
+                    call: 'fetch_item_data',
+                    id: matrix_item_idd,
                     csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 success: function (json) {
@@ -123,7 +123,7 @@ $(document).ready(function() {
     //     var data = {
     //         call: 'validate_individual_chip_file',
     //         study: study_id,
-    //         readout: readout_id,
+    //         readout: matrix_item_idd,
     //         csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
     //         dynamic_excluded: JSON.stringify(dynamic_excluded),
     //         include_table: include_table
@@ -223,7 +223,7 @@ $(document).ready(function() {
 
         // TODO USE THE ACTUAL DATAPOINT PK FOR EXCLUSION
         $.each(data_points, function(index, data_point) {
-            var chip_id = data_point.chip_id;
+            var name = data_point.name;
 
             var assay_plate_id = data_point.assay_plate_id;
             var assay_well_id = data_point.assay_well_id;
@@ -254,15 +254,15 @@ $(document).ready(function() {
             var replicate = data_point.replicate;
             var update_number = data_point.update_number;
 
-            var data_upload_url = data_point.data_upload_url;
-            var data_upload_name = data_point.data_upload_name;
+            var data_file_upload_url = data_point.data_file_upload_url;
+            var data_file_upload_name = data_point.data_file_upload_name;
 
             var new_row = $('<tr>');
             //     .attr('data-chart-index', index);
 
             // Need to take a slice to avoid treating missing QC as invalid
             // Allow QC changes for NULL value row
-            var every = [chip_id, time_in_minutes, study_assay_id, sample_location_id].every(is_true);
+            var every = [name, time_in_minutes, study_assay_id, sample_location_id].every(is_true);
 
             if (exist) {
                 new_row.addClass('force-bg-success');
@@ -288,7 +288,7 @@ $(document).ready(function() {
                 new_row.addClass('force-bg-warning');
             }
 
-            var col_chip_id = $('<td>').text(chip_id);
+            var col_name = $('<td>').text(name);
 
             var col_time = $('<td>').text('D' + day + ' H' + hour + ' M' + minute)
                 .append($('<input>')
@@ -333,14 +333,14 @@ $(document).ready(function() {
 
             var col_notes = $('<td>').text(notes);
 
-            var col_data_upload = $('<td>').append(
+            var col_data_file_upload = $('<td>').append(
                 $('<a>')
-                    .text(data_upload_name)
-                    .attr('href', data_upload_url)
+                    .text(data_file_upload_name)
+                    .attr('href', data_file_upload_url)
             );
 
             new_row.append(
-                col_chip_id,
+                col_name,
                 col_time,
                 col_target,
                 col_method,
@@ -358,7 +358,7 @@ $(document).ready(function() {
 
             new_row.append(
                 col_notes,
-                col_data_upload
+                col_data_file_upload
             );
 
             if (excluded) {
@@ -482,9 +482,9 @@ $(document).ready(function() {
         var dynamic_excluded = $.extend({}, dynamic_excluded_current, dynamic_excluded_new);
 
         var data = {
-            call: 'fetch_readouts',
+            call: 'fetch_data_points',
             study: study_id,
-            readout: readout_id,
+            matrix_item: matrix_item_idd,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
             dynamic_excluded: JSON.stringify(dynamic_excluded)
         };
