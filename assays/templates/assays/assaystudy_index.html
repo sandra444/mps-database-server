@@ -7,11 +7,7 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    {% if user|is_group_editor:object.group.name %}
-    <li><a href="/assays/editable_studies/">Editable Studies</a></li>
-    {% else %}
-    <li><a href="/assays/study">Studies</a></li>
-    {% endif %}
+    <li><a href="/assays/assaystudy/">Studies</a></li>
     <li class="active">{{ object }}</li>
 {% endblock %}
 
