@@ -379,6 +379,9 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         # TODO ORDER SUBJECT TO CHANGE
         chip_data = AssayChipRawData.objects.prefetch_related(
             *CHIP_DATA_PREFETCH
+        ).prefetch_related(
+            'assay_chip_id__chip_setup__assaycompoundinstance_set',
+            'assay_chip_id__chip_setup__assaychipcells_set'
         ).filter(
             assay_chip_id__in=chip_ids
         ).order_by(
@@ -422,6 +425,9 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         device = data_point.assay_chip_id.chip_setup.device
         organ_model = data_point.assay_chip_id.chip_setup.organ_model
 
+        # Naive and more expensive than it needs to be
+        cells = data_point.assay_chip_id.chip_setup.stringify_cells()
+
         compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, ' | ')
 
         value = data_point.value
@@ -450,6 +456,7 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
                         times.get('minute'),
                         device,
                         organ_model,
+                        cells,
                         compound_treatment,
                         target,
                         method,

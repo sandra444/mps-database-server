@@ -331,7 +331,7 @@ $(document).ready(function () {
         window.CHARTS.display_treament_groups(json.treatment_groups);
 
         // Triggers for legends (TERRIBLE SELECTOR)
-        $('g:has("g > text")').mouseover(function() {
+        $(document).on('mouseover', 'g:has("g > text")', function() {
             var text_section = $(this).find('text');
             if (text_section.length === 1) {
                 var content_split = $(this).find('text').text().split(/(\d+)/);
@@ -361,7 +361,8 @@ $(document).ready(function () {
                 $('#group_display').show()
                     .css({top: current_top, left: current_left, position:'absolute'});
             }
-        }).mouseout(function() {
+        });
+        $(document).on('mouseout', 'g:has("g > text")', function() {
             $('#group_display').hide();
         });
     };
