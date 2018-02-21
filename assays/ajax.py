@@ -73,9 +73,9 @@ CONTROL_LABEL = '-Control-'
 
 
 # TODO REFACTOR Rather than passing the same thing over and over, we can make an object with attributes!
-def main(request):
-    """Default to server error"""
-    return HttpResponseServerError()
+# def main(request):
+#     """Default to server error"""
+#     return HttpResponseServerError()
 
 
 def fetch_readout(request):
@@ -2257,8 +2257,6 @@ def fetch_data_points(request):
         'matrix_item'
     )
 
-
-
     data = get_data_points_for_charting(
         data_points,
         request.POST.get('key', ''),
@@ -2274,6 +2272,7 @@ def fetch_data_points(request):
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
+
 
 # TODO REFACTOR
 def fetch_item_data(request):
@@ -2294,21 +2293,98 @@ def fetch_item_data(request):
                         content_type="application/json")
 
 
+def validate_data_file(request):
+    """Validates a bulk file and returns either errors or a preview of the data entered
+
+    Receives the following from POST:
+    study -- the study to acquire readouts from
+    key -- specifies whether to split readouts by compound or device
+    percent_control -- specifies whether to convert to percent control
+    include_all -- specifies whether to include all data (exclude invalid if null string)
+    """
+    study = request.POST.get('study', '')
+    key = request.POST.get('key', '')
+    mean_type = request.POST.get('mean_type', 'arithmetic')
+    interval_type = request.POST.get('interval_type', 'ste')
+    percent_control = request.POST.get('percent_control', '')
+    include_all = request.POST.get('include_all', '')
+    truncate_negative = request.POST.get('truncate_negative', '')
+    dynamic_quality = json.loads(request.POST.get('dynamic_quality', '{}'))
+
+    this_study = AssayStudy.objects.get(pk=int(study))
+
+    form = AssayStudyDataUploadForm(request.POST, request.FILES, request=request, instance=this_study)
+
+    if form.is_valid():
+        form_data = form.cleaned_data
+
+        preview_data = form_data.get('preview_data')
+
+        # Only chip preview right now
+        chip_raw_data = preview_data.get('chip_preview', {}).get('readout_data', [])
+
+        related_compounds_map = {}
+
+        # NOTE THE EMPTY DIC, RIGHT NOW BULK PREVIEW NEVER SHOWS COMPOUND JUST DEVICE
+        readout_data = get_data_points_for_charting(
+            chip_raw_data,
+            related_compounds_map,
+            key,
+            mean_type,
+            interval_type,
+            percent_control,
+            include_all,
+            truncate_negative,
+            dynamic_quality,
+            study=this_study,
+            new_data=True
+        )
+
+        data = {
+            'readout_data': readout_data,
+            'number_of_conflicting_entries': preview_data.get('chip_preview', {}).get('number_of_conflicting_entries', 0)
+        }
+
+        return HttpResponse(json.dumps(data),
+                            content_type="application/json")
+
+    else:
+        errors = ''
+        if form.errors.get('__all__'):
+            errors += form.errors.get('__all__').as_text()
+        data = {
+            'errors': errors
+        }
+        return HttpResponse(json.dumps(data),
+                            content_type='application/json')
+
+
+# TODO TODO TODO
 switch = {
-    'fetch_readout': fetch_readout,
-    'fetch_center_id': fetch_center_id,
-    'fetch_chip_readout': fetch_chip_readout,
-    'fetch_readouts': fetch_readouts,
-    'fetch_dropdown': fetch_dropdown,
-    'fetch_organ_models': fetch_organ_models,
-    'fetch_protocols': fetch_protocols,
-    'fetch_protocol': fetch_protocol,
-    'validate_bulk_file': validate_bulk_file,
-    'validate_individual_chip_file': validate_individual_chip_file,
-    'send_ready_for_sign_off_email': send_ready_for_sign_off_email,
-    'fetch_device_dimensions': fetch_device_dimensions,
-    'fetch_data_points': fetch_data_points,
-    'fetch_item_data': fetch_item_data,
+    'fetch_readout': {'call': fetch_readout},
+    'fetch_center_id': {'call': fetch_center_id},
+    'fetch_chip_readout': {'call': fetch_chip_readout},
+    'fetch_readouts': {'call': fetch_readouts},
+    'fetch_dropdown': {'call': fetch_dropdown},
+    'fetch_organ_models': {'call': fetch_organ_models},
+    'fetch_protocols': {'call': fetch_protocols},
+    'fetch_protocol': {'call': fetch_protocol},
+    'validate_bulk_file': {'call': validate_bulk_file},
+    'validate_individual_chip_file': {'call': validate_individual_chip_file},
+    'send_ready_for_sign_off_email': {
+        'call': send_ready_for_sign_off_email
+    },
+    'fetch_device_dimensions': {'call': fetch_device_dimensions},
+    'fetch_data_points': {
+        'call': fetch_data_points
+    },
+    'fetch_item_data': {
+        'call': fetch_item_data
+    },
+    # TODO TODO TODO
+    'validate_data_file': {
+
+    }
 }
 
 
@@ -2320,24 +2396,28 @@ def ajax(request):
     """
     post_call = request.POST.get('call', '')
 
-    if not post_call:
-        logger.error('post_call not present in request to ajax')
-        return HttpResponseServerError
-
     # Abort if there is no valid call sent to us from Javascript
     if not post_call:
-        return main(request)
+        logger.error('post_call not present in request to ajax')
+        return HttpResponseServerError()
 
     # Route the request to the correct handler function
     # and pass request to the functions
     try:
         # select the function from the dictionary
-        procedure = switch[post_call]
-
+        selection = switch[post_call]
     # If all else fails, handle the error message
     except KeyError:
-        return main(request)
+        return HttpResponseServerError()
 
     else:
+        procedure = selection.get('call')
+        validation = selection.get('validation', None)
+        if validation:
+            valid = validation(request)
+
+            if not valid:
+                return HttpResponseForbidden()
+
         # execute the function
         return procedure(request)
