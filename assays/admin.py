@@ -37,7 +37,7 @@ from assays.resource import *
 # from django.db import connection, transaction
 # from urllib import unquote
 
-from .forms import StudyConfigurationForm
+from .forms import StudyConfigurationForm, AssayStudyForm
 
 from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 import os
@@ -2243,3 +2243,502 @@ class AssayMethodAdmin(LockableAdmin):
 admin.site.register(AssayMethod, AssayMethodAdmin)
 
 admin.site.register(AssayStudyType)
+
+
+class AssayStudyAssayInline(admin.TabularInline):
+    model = AssayStudyAssay
+    exclude = []
+
+
+class AssayStudySupportingDataInline(admin.TabularInline):
+    """Inline for Studies"""
+    model = AssayStudySupportingData
+    verbose_name = 'Study Supporting Data'
+    fields = (
+        (
+            'description', 'supporting_data'
+        ),
+    )
+    extra = 1
+
+
+# TODO REMAKE FOR ASSAY STUDY
+class AssayStudyStakeholderInline(admin.TabularInline):
+    """Inline for Studies"""
+    model = AssayStudyStakeholder
+    verbose_name = 'Study Stakeholders (Level 1)'
+    extra = 1
+
+    # TODO REVIEW
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "group":
+            groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
+            groups_with_center_full = Group.objects.filter(
+                id__in=groups_with_center
+            ).order_by(
+                'name'
+            )
+            kwargs["queryset"] = groups_with_center_full
+        return super(AssayStudyStakeholderInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+# TODO REMAKE FOR ASSAY STUDY
+class AssayStudyAdmin(LockableAdmin):
+    """Admin for Studies"""
+    # class Media(object):
+    #     js = ('assays/assaystudy_add.js',)
+
+    form = AssayStudyForm
+    save_on_top = True
+    list_per_page = 300
+    search_fields = ('name', 'start_date', 'description')
+    date_hierarchy = 'start_date'
+    list_display = ('name', 'study_types_string', 'start_date', 'description',)
+
+    filter_horizontal = ('access_groups',)
+
+    fieldsets = (
+        (
+            'Study', {
+                'fields': (
+                    ('toxicity', 'efficacy', 'disease', 'cell_characterization'),
+                    'study_configuration',
+                    'start_date',
+                    'name',
+                    'description',
+                    'use_in_calculations',
+                    'image',
+                )
+            }
+        ),
+        (
+            'Protocol File Upload', {
+                'fields': (
+                    'protocol',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                    ('signed_off_notes',)
+                )
+            }
+        ),
+        (
+            'Group Access', {
+                'fields': (
+                    'group', 'restricted', 'access_groups'
+                ),
+            },
+        ),
+    )
+
+    inlines = [AssayStudyStakeholderInline, AssayStudySupportingDataInline, AssayStudyAssayInline]
+
+    # TODO ADD EMAILS FOR CHANGING SIGN OFF (of study and stake holders) AND ACCESS GROUPS
+    # save_related takes the place of save_model so that the inline can be referred to
+    # TODO TODO TODO THIS IS NOT VERY DRY
+    # This code may pose a problem if multiple people are editing an entry at once...
+    def save_related(self, request, form, formsets, change):
+        # Local datetime
+        tz = pytz.timezone('US/Eastern')
+        datetime_now_local = datetime.now(tz)
+        thirty_days_from_date = datetime_now_local + timedelta(days=30)
+
+        initial_study = AssayStudy.objects.get(pk=form.instance.id)
+        initial_sign_off = initial_study.signed_off_by
+        initial_restricted = initial_study.restricted
+        initial_required_stakeholders = AssayStudyStakeholder.objects.filter(
+            study=initial_study,
+            signed_off_by_id=None,
+            sign_off_required=True
+        )
+        initial_required_stakeholder_group_ids = list(initial_required_stakeholders.values_list('group_id', flat=True))
+        previous_access_groups = {group.name: group.id for group in initial_study.access_groups.all()}
+        new_access_group_names = []
+
+        viewer_subject = 'Study {0} Now Available for Viewing'.format(initial_study)
+
+        if change:
+            initial_number_of_required_sign_offs = initial_required_stakeholders.count()
+        else:
+            initial_number_of_required_sign_offs = 0
+
+        send_initial_sign_off_alert = False
+
+        # SAVE FORM HERE
+        # TODO TODO TODO
+
+        if change:
+            obj = form.save()
+            obj.modified_by = request.user
+            obj.save()
+
+            if not initial_sign_off and obj.signed_off_by:
+                send_initial_sign_off_alert = True
+
+            new_access_group_names = {
+                group.name: group.id for group in obj.access_groups.all() if
+                group.name not in previous_access_groups
+            }
+
+        else:
+            obj = form.save()
+            obj.modified_by = obj.created_by = request.user
+            obj.save()
+
+        # SAVE FORMSETS HERE
+        # TODO TODO TODO
+        # Save inline
+        super(LockableAdmin, self).save_related(request, form, formsets, change)
+
+        current_number_of_required_sign_offs = AssayStudyStakeholder.objects.filter(
+            study=obj,
+            signed_off_by_id=None,
+            sign_off_required=True
+        ).count()
+
+        send_stakeholder_sign_off_alert = current_number_of_required_sign_offs < initial_number_of_required_sign_offs
+
+        # TODO TODO TODO
+        # ONLY SEND VIEWER ALERT IF:
+        # Sign off occurred and no stakeholders
+        # Sign off occurred and final stakeholder has acknowledged
+        # send_viewer_alert = current_number_of_required_sign_offs == 0 and obj.signed_off_by
+        send_viewer_alert = (
+            send_initial_sign_off_alert and current_number_of_required_sign_offs == 0
+        ) or (
+            obj.signed_off_by and current_number_of_required_sign_offs == 0 and send_stakeholder_sign_off_alert
+        )
+
+        # TODO TODO TODO TODO
+        # stakeholder_admin_subject = 'Acknowledgement of Study {0} Requested'.format(obj)
+        stakeholder_admin_subject = 'Approval for Release Requested: {0}'.format(obj)
+
+        stakeholder_viewer_groups = {}
+        stakeholder_admin_groups = {}
+
+        stakeholder_admins_to_be_alerted = []
+        stakeholder_viewers_to_be_alerted = []
+
+        # VULGAR! NOT DRY
+        # PASTED HERE
+        if send_initial_sign_off_alert:
+            # TODO TODO TODO TODO ALERT STAKEHOLDER ADMINS
+            stakeholder_admin_groups = {
+                group + ADMIN_SUFFIX: True for group in
+                AssayStudyStakeholder.objects.filter(
+                    study=obj, sign_off_required=True
+                ).prefetch_related('group').values_list('group__name', flat=True)
+            }
+
+            stakeholder_admins_to_be_alerted = User.objects.filter(
+                groups__name__in=stakeholder_admin_groups, is_active=True
+            ).distinct()
+
+            for user_to_be_alerted in stakeholder_admins_to_be_alerted:
+                try:
+                    stakeholder_admin_message = render_to_string(
+                        'assays/email/tctc_stakeholder_email.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': obj,
+                            'thirty_days_from_date': thirty_days_from_date
+                        }
+                    )
+                except TemplateDoesNotExist:
+                    stakeholder_admin_message = render_to_string(
+                        'assays/email/stakeholder_sign_off_request.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': obj
+                        }
+                    )
+
+                user_to_be_alerted.email_user(
+                    stakeholder_admin_subject,
+                    stakeholder_admin_message,
+                    DEFAULT_FROM_EMAIL
+                )
+
+            # TODO TODO TODO TODO ALERT STAKEHOLDER VIEWERS
+            stakeholder_viewer_groups = {
+                group: True for group in
+                AssayStudyStakeholder.objects.filter(
+                    study=obj
+                ).prefetch_related('group').values_list('group__name', flat=True)
+            }
+            initial_groups = stakeholder_viewer_groups.keys()
+
+            for group in initial_groups:
+                stakeholder_viewer_groups.update({
+                    # group + ADMIN_SUFFIX: True,
+                    group + VIEWER_SUFFIX: True
+                })
+
+            # BE SURE THIS IS MATCHED BELOW
+            stakeholder_viewers_to_be_alerted = User.objects.filter(
+                groups__name__in=stakeholder_viewer_groups, is_active=True
+            ).exclude(
+                id__in=stakeholder_admins_to_be_alerted
+            ).distinct()
+
+            for user_to_be_alerted in stakeholder_viewers_to_be_alerted:
+                # TODO TODO TODO WHAT DO WE CALL THE PROCESS OF SIGN OFF ACKNOWLEDGEMENT?!
+                viewer_message = render_to_string(
+                    'assays/email/viewer_alert.txt',
+                    {
+                        'user': user_to_be_alerted,
+                        'study': obj
+                    }
+                )
+
+                user_to_be_alerted.email_user(
+                    viewer_subject,
+                    viewer_message,
+                    DEFAULT_FROM_EMAIL
+                )
+
+        if send_viewer_alert:
+            access_group_names = {group.name: group.id for group in obj.access_groups.all()}
+            matching_groups = list(set([
+                group.id for group in Group.objects.all() if
+                group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in access_group_names
+            ]))
+            # Just in case, exclude stakeholders to prevent double messages
+            viewers_to_be_alerted = User.objects.filter(
+                groups__id__in=matching_groups, is_active=True
+            ).exclude(
+                id__in=stakeholder_admins_to_be_alerted
+            ).exclude(
+                id__in=stakeholder_viewers_to_be_alerted
+            ).distinct()
+            # Update viewer groups to include admins
+            stakeholder_viewer_groups.update(stakeholder_admin_groups)
+            # if stakeholder_viewer_groups or stakeholder_admin_groups:
+            #     viewers_to_be_alerted.exclude(
+            #         groups__name__in=stakeholder_viewer_groups
+            #     ).exclude(
+            #         group__name__in=stakeholder_admin_groups
+            #     )
+
+            for user_to_be_alerted in viewers_to_be_alerted:
+                viewer_message = render_to_string(
+                    'assays/email/viewer_alert.txt',
+                    {
+                        'user': user_to_be_alerted,
+                        'study': obj
+                    }
+                )
+
+                user_to_be_alerted.email_user(
+                    viewer_subject,
+                    viewer_message,
+                    DEFAULT_FROM_EMAIL
+                )
+
+        # Superusers to contact
+        superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+        if send_initial_sign_off_alert:
+            # Magic strings are in poor taste, should use a template instead
+            superuser_subject = 'Study Sign Off Detected: {0}'.format(obj)
+            superuser_message = render_to_string(
+                'assays/email/superuser_initial_sign_off_alert.txt',
+                {
+                    'study': obj,
+                    'stakeholders': AssayStudyStakeholder.objects.filter(study=obj).order_by('-signed_off_date')
+                }
+            )
+
+            for user_to_be_alerted in superusers_to_be_alerted:
+                user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+        if send_stakeholder_sign_off_alert:
+            # Magic strings are in poor taste, should use a template instead
+            # superuser_subject = 'Stakeholder Acknowledgement Detected: {0}'.format(obj)
+            superuser_subject = 'Stakeholder Approval Detected: {0}'.format(obj)
+            superuser_message = render_to_string(
+                'assays/email/superuser_stakeholder_alert.txt',
+                {
+                    'study': obj,
+                    'stakeholders': AssayStudyStakeholder.objects.filter(study=obj).order_by('-signed_off_date')
+                }
+            )
+
+            for user_to_be_alerted in superusers_to_be_alerted:
+                user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+        if send_viewer_alert:
+            # Magic strings are in poor taste, should use a template instead
+            superuser_subject = 'Study Released to Next Level: {0}'.format(obj)
+            superuser_message = render_to_string(
+                'assays/email/superuser_viewer_release_alert.txt',
+                {
+                    'study': obj
+                }
+            )
+
+            for user_to_be_alerted in superusers_to_be_alerted:
+                user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+        # END PASTE
+
+        # Special alerts for adding a stakeholder after sign off
+        # Will send a message to all required admins and viewers
+        # BE SURE NOT TO SEND TO STAKEHOLDERS THAT HAVE ALREADY SIGNED OFF
+        if obj.signed_off_by and not send_initial_sign_off_alert and initial_number_of_required_sign_offs < current_number_of_required_sign_offs:
+            # ...
+            # UGLY NOT DRY
+            stakeholder_admin_groups = {
+                group + ADMIN_SUFFIX: True for group in
+                AssayStudyStakeholder.objects.filter(
+                    study=obj, sign_off_required=True, signed_off_by_id=None
+                ).exclude(
+                    # id__in=initial_required_stakeholders
+                    group_id__in=initial_required_stakeholder_group_ids
+                ).prefetch_related('group').values_list('group__name', flat=True)
+            }
+
+            stakeholder_admins_to_be_alerted = User.objects.filter(
+                groups__name__in=stakeholder_admin_groups, is_active=True
+            ).distinct()
+
+            for user_to_be_alerted in stakeholder_admins_to_be_alerted:
+                try:
+                    stakeholder_admin_message = render_to_string(
+                        'assays/email/tctc_stakeholder_email.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': obj,
+                            'thirty_days_from_date': thirty_days_from_date
+                        }
+                    )
+                except TemplateDoesNotExist:
+                    stakeholder_admin_message = render_to_string(
+                        'assays/email/stakeholder_sign_off_request.txt',
+                        {
+                            'user': user_to_be_alerted,
+                            'study': obj
+                        }
+                    )
+
+                user_to_be_alerted.email_user(
+                    stakeholder_admin_subject,
+                    stakeholder_admin_message,
+                    DEFAULT_FROM_EMAIL
+                )
+
+            # TODO TODO TODO TODO ALERT STAKEHOLDER VIEWERS
+            stakeholder_viewer_groups = {
+                group: True for group in
+                AssayStudyStakeholder.objects.filter(
+                    study=obj, signed_off_by_id=None
+                ).exclude(
+                    # id__in=initial_required_stakeholders
+                    group_id__in=initial_required_stakeholder_group_ids
+                ).prefetch_related('group').values_list('group__name', flat=True)
+            }
+            initial_groups = stakeholder_viewer_groups.keys()
+
+            for group in initial_groups:
+                stakeholder_viewer_groups.update({
+                    # group + ADMIN_SUFFIX: True,
+                    group + VIEWER_SUFFIX: True
+                })
+
+            stakeholder_viewers_to_be_alerted = User.objects.filter(
+                groups__name__in=stakeholder_viewer_groups, is_active=True
+            ).exclude(
+                id__in=stakeholder_admins_to_be_alerted
+            ).distinct()
+
+            for user_to_be_alerted in stakeholder_viewers_to_be_alerted:
+                # TODO TODO TODO WHAT DO WE CALL THE PROCESS OF SIGN OFF ACKNOWLEDGEMENT?!
+                viewer_message = render_to_string(
+                    'assays/email/viewer_alert.txt',
+                    {
+                        'user': user_to_be_alerted,
+                        'study': obj
+                    }
+                )
+
+                user_to_be_alerted.email_user(
+                    viewer_subject,
+                    viewer_message,
+                    DEFAULT_FROM_EMAIL
+                )
+
+        # Special alerts for new access groups
+        if not send_viewer_alert and new_access_group_names and obj.signed_off_by:
+            matching_groups = list(set([
+                group.id for group in Group.objects.all() if
+                group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in new_access_group_names
+            ]))
+            exclude_groups = list(set([
+                group.id for group in Group.objects.all() if
+                group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in previous_access_groups
+            ]))
+            viewers_to_be_alerted = User.objects.filter(
+                groups__id__in=matching_groups,
+                is_active=True
+            ).exclude(
+                groups__id__in=exclude_groups
+            ).distinct()
+
+            for user_to_be_alerted in viewers_to_be_alerted:
+                viewer_message = render_to_string(
+                    'assays/email/viewer_alert.txt',
+                    {
+                        'user': user_to_be_alerted,
+                        'study': obj
+                    }
+                )
+
+                user_to_be_alerted.email_user(
+                    viewer_subject,
+                    viewer_message,
+                    DEFAULT_FROM_EMAIL
+                )
+
+            # TODO CHANGE SUPERUSER VIEWER RELEASE ALERT
+            # Magic strings are in poor taste, should use a template instead
+            superuser_subject = 'Study Released to Next Level: {0}'.format(obj)
+            superuser_message = render_to_string(
+                'assays/email/superuser_viewer_release_alert.txt',
+                {
+                    'study': obj,
+                    'new_access_group_names': new_access_group_names
+                }
+            )
+
+            for user_to_be_alerted in superusers_to_be_alerted:
+                user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+        # Special case for going public
+        if initial_restricted and not obj.restricted:
+            # Magic strings are in poor taste, should use a template instead
+            superuser_subject = 'Study Released to Next Level: {0}'.format(obj)
+            superuser_message = render_to_string(
+                'assays/email/superuser_viewer_release_alert.txt',
+                {
+                    'study': obj,
+                    'new_access_group_names': []
+                }
+            )
+
+            for user_to_be_alerted in superusers_to_be_alerted:
+                user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+    # Odd, I know, but prevents double save
+    def save_model(self, request, obj, form, change):
+        pass
+
+
+admin.site.register(AssayStudy, AssayStudyAdmin)
+
+# TODO TODO TODO TODO NEW MODELS HERE

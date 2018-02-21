@@ -3,8 +3,7 @@
     (either because they have no stakeholders or every stakeholder approved)
     and moves them to the public automatically after approximately one year's time
 """
-# TODO TODO TODO TODO MOVE TO NEW SCHEMA
-from assays.models import AssayRun, AssayRunStakeholder
+from assays.models import AssayStudy, AssayStudyStakeholder
 from datetime import datetime, timedelta
 import pytz
 
@@ -32,7 +31,7 @@ def run():
     tz = pytz.timezone('US/Eastern')
     datetime_now_local = datetime.now(tz)
 
-    signed_off_restricted_studies = AssayRun.objects.filter(
+    signed_off_restricted_studies = AssayStudy.objects.filter(
         restricted=True,
         # PLEASE NOTE: Locking a study will prevent this script from interacting with it
         locked=False
@@ -52,7 +51,7 @@ def run():
 
         # Force approval of all stakeholders
         if thirty_days_since_update:
-            current_stakeholders = AssayRunStakeholder.objects.filter(
+            current_stakeholders = AssayStudyStakeholder.objects.filter(
                 # signed_off_by=None,
                 study_id=study.id
             )
@@ -126,7 +125,7 @@ def run():
     # Indicates whether there are required stakeholders that have not approved
     required_stakeholder_map = {}
 
-    relevant_required_stakeholders_without_approval = AssayRunStakeholder.objects.filter(
+    relevant_required_stakeholders_without_approval = AssayStudyStakeholder.objects.filter(
         sign_off_required=True,
         signed_off_by_id=None,
         study__id__in=signed_off_restricted_studies
@@ -142,7 +141,7 @@ def run():
     # Contains as a datetime the lastest approval for a study
     latest_approval = {}
 
-    approved_stakeholders = AssayRunStakeholder.objects.filter(
+    approved_stakeholders = AssayStudyStakeholder.objects.filter(
         sign_off_required=True,
         study__id__in=signed_off_restricted_studies
     ).exclude(
