@@ -10,9 +10,7 @@ from microdevices.models import MicrophysiologyCenter, Microdevice
 # from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 from .forms import (
     AssayChipReadoutForm,
-    AssayPlateReadoutForm,
-    AssayChipReadoutInlineFormset,
-    AssayPlateReadoutInlineFormset
+    AssayStudyDataUploadForm
 )
 
 from .utils import (

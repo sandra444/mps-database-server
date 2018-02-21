@@ -2649,3 +2649,57 @@ AssayStudyStakeholderFormSetFactory = inlineformset_factory(
     extra=0,
     can_delete=False
 )
+
+
+class AssayStudyDataUploadForm(forms.ModelForm):
+    """Form for Bulk Uploads"""
+    # Now in Study (AssayRun) to make saving easier
+    # bulk_file = forms.FileField()
+
+    overwrite_option = OVERWRITE_OPTIONS_BULK
+
+    # EVIL WAY TO GET PREVIEW DATA
+    preview_data = forms.BooleanField(initial=False, required=False)
+
+    class Meta(object):
+        model = AssayRun
+        fields = ('bulk_file',)
+
+    def __init__(self, *args, **kwargs):
+        """Init the Bulk Form
+
+        kwargs:
+        request -- the current request
+        """
+        self.request = kwargs.pop('request', None)
+
+        super(AssayStudyDataUploadForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        data = super(AssayStudyDataUploadForm, self).clean()
+
+        # Get the study in question
+        study = self.instance
+
+        # test_file = None
+
+        # TODO TODO TODO TODO TODO
+        if self.request and self.request.FILES:
+            test_file = data.get('bulk_file', '')
+
+            file_data = validate_file(
+                self,
+                test_file,
+                'Bulk',
+                # headers=headers,
+                study=study
+            )
+
+            # Evil attempt to acquire preview data
+            self.cleaned_data['preview_data'] = file_data
+
+        # Removed, someone might want to use this interface to remove data
+        # if not test_file:
+        #     raise forms.ValidationError('No file was supplied.')
+
+        return self.cleaned_data
