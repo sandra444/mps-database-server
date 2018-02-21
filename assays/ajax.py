@@ -1773,7 +1773,12 @@ def get_control_data(
         study=study,
         replaced=False
     ).prefetch_related(
-        # TODO
+        'study',
+        'study_assay__target',
+        'study_assay__method',
+        'study_assay__unit',
+        'matrix_item',
+        'sample_location'
     ))
 
     if new_data_for_control:
@@ -1806,7 +1811,7 @@ def get_control_data(
 
             # TODO CONTROL DEFINITIONS WILL BECOME MORE COMPLICATED LATER
             # Check if the setup is marked a control chip
-            if raw.assay_chip_id.chip_setup.chip_test_type == 'control':
+            if raw.matrix_item.test_type == 'control':
                 initial_control_data.setdefault(
                     (target, method), {}
                 ).setdefault(
