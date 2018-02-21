@@ -3195,7 +3195,8 @@ class AssayStudyEditableList(OneGroupRequiredMixin, ListView):
         # Display to users with either editor or viewer group or if unrestricted
         group_names = [group.name.replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
 
-        queryset = queryset.filter(group__name__in=group_names)
+        # Exclude signed off studies
+        queryset = queryset.filter(group__name__in=group_names, signed_off_by_id=None)
 
         get_queryset_with_organ_model_map(queryset)
         get_queryset_with_number_of_data_points(queryset)
