@@ -3,6 +3,7 @@ from django.forms.models import BaseInlineFormSet
 from .models import *
 from assays.models import AssayChipSetup
 from mps.forms import SignOffMixin
+from django.forms.models import inlineformset_factory
 
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
@@ -36,6 +37,25 @@ class OrganModelForm(SignOffMixin, forms.ModelForm):
         }
 
 
+class OrganModelLocationInlineFormset(BaseInlineFormSet):
+    """Form for Organ Model Locations"""
+    class Meta(object):
+        model = OrganModelLocation
+        exclude = ('',)
+
+
+OrganModelLocationFormsetFactory = inlineformset_factory(
+    OrganModel,
+    OrganModelLocation,
+    formset=OrganModelLocationInlineFormset,
+    extra=1,
+    exclude=[],
+    widgets={
+        'notes': forms.Textarea(attrs={'rows': 6})
+    }
+)
+
+
 class OrganModelProtocolInlineFormset(BaseInlineFormSet):
     """Form for Organ Model Protocols (as part of an inline)"""
     class Meta(object):
@@ -54,6 +74,18 @@ class OrganModelProtocolInlineFormset(BaseInlineFormSet):
             if protocol_id and delete_checked:
                 if AssayChipSetup.objects.filter(organ_model_protocol=protocol_id):
                     raise forms.ValidationError('You cannot remove protocols that are referenced by a chip setup.')
+
+
+OrganModelProtocolFormsetFactory = inlineformset_factory(
+    OrganModel,
+    OrganModelProtocol,
+    formset=OrganModelProtocolInlineFormset,
+    extra=1,
+    exclude=[],
+    widgets={
+        'version': forms.TextInput(attrs={'size': 10})
+    }
+)
 
 
 class MicrophysiologyCenterForm(forms.ModelForm):

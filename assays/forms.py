@@ -1592,7 +1592,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
 
     cell_passage = forms.CharField(required=False)
 
-    cell_addition_location = forms.ModelChoiceField(queryset=MicrodeviceSection.objects.all().order_by('name'), required=False)
+    cell_addition_location = forms.ModelChoiceField(queryset=AssaySampleLocation.objects.all().order_by('name'), required=False)
 
     ### ?ADDING SETUP SETTINGS
     setting_setting = forms.ModelChoiceField(queryset=AssaySetting.objects.all().order_by('name'), required=False)
@@ -1600,7 +1600,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
 
     setting_value = forms.FloatField(required=False)
 
-    setting_addition_location = forms.ModelChoiceField(queryset=MicrodeviceSection.objects.all().order_by('name'),
+    setting_addition_location = forms.ModelChoiceField(queryset=AssaySampleLocation.objects.all().order_by('name'),
                                                         required=False)
 
     ### ADDING COMPOUNDS
@@ -1617,7 +1617,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     )
     compound_concentration = forms.FloatField(required=False)
 
-    compound_addition_location = forms.ModelChoiceField(queryset=MicrodeviceSection.objects.all().order_by('name'),
+    compound_addition_location = forms.ModelChoiceField(queryset=AssaySampleLocation.objects.all().order_by('name'),
                                                        required=False)
 
     ### INCREMENTER

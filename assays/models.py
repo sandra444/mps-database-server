@@ -6,7 +6,7 @@ from microdevices.models import (
     OrganModel,
     OrganModelProtocol,
     MicrophysiologyCenter,
-    MicrodeviceSection
+    # MicrodeviceSection
 )
 from mps.base.models import LockableModel, FlaggableModel
 from django.contrib.auth.models import Group, User
@@ -1807,7 +1807,7 @@ class AssaySetupCell(models.Model):
     # TODO TODO TODO DO WE WANT DURATION????
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
-    addition_location = models.ForeignKey(MicrodeviceSection, null=True, blank=True)
+    addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
 
     def __unicode__(self):
         return u'{0}\n-{1:.0e} {2}'.format(
@@ -1969,7 +1969,7 @@ class AssaySetupCompound(models.Model):
     duration = models.FloatField(blank=True)
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
-    addition_location = models.ForeignKey(MicrodeviceSection, null=True, blank=True)
+    addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
 
     def get_addition_time_string(self):
         split_times = get_split_times(self.addition_time)
@@ -2158,7 +2158,7 @@ class AssaySetupSetting(models.Model):
     duration = models.FloatField(blank=True)
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
-    addition_location = models.ForeignKey(MicrodeviceSection, null=True, blank=True)
+    addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
 
     def __unicode__(self):
         return u'{} {} {}'.format(self.setting.name, self.value, self.unit)

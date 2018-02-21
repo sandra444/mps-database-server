@@ -106,6 +106,27 @@
         </div>
     </div>
 
+    {% if object.organmodellocation_set.count %}
+    <legend>Locations</legend>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Location</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for location in object.organmodellocation_set.all %}
+            <tr>
+                <td>{{ location.sample_location }}</td>
+                <td>{{ location.notes }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
     {% if protocols %}
     <legend>Protocols</legend>
 
