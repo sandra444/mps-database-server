@@ -58,7 +58,8 @@ from assays.forms import (
     AssaySetupCellInlineFormSetFactory,
     AssaySetupSettingInlineFormSetFactory,
     AssayStudySignOffForm,
-    AssayStudyStakeholderFormSetFactory
+    AssayStudyStakeholderFormSetFactory,
+    AssayStudyDataUploadForm
 )
 from django import forms
 
@@ -3743,6 +3744,69 @@ class AssayStudySignOff(UpdateView):
                 form=form,
                 stakeholder_formset=stakeholder_formset
             ))
+
+
+class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
+    """Upload an Excel Sheet for storing multiple sets of Readout data at one"""
+    model = AssayStudy
+    template_name = 'assays/assaystudy_upload.html'
+    form_class = AssayStudyDataUploadForm
+
+    def get_form(self, form_class):
+        # If POST
+        if self.request.method == 'POST':
+            return form_class(self.request.POST, self.request.FILES, request=self.request, instance=self.get_object())
+        # If GET
+        else:
+            return form_class(instance=self.get_object())
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyDataUpload, self).get_context_data(**kwargs)
+
+        # TODO TODO TODO
+
+        context['version'] = len(os.listdir(MEDIA_ROOT + '/excel_templates/')) / 3
+
+        return context
+
+    def form_valid(self, form):
+        if form.is_valid():
+            data = form.cleaned_data
+            overwrite_option = data.get('overwrite_option')
+
+            study_id = str(self.object.id)
+
+            # Add user to Study's modified by
+            # TODO
+            if self.request and self.request.FILES:
+                self.object.bulk_file = data.get('bulk_file')
+                self.object.modified_by = self.request.user
+                self.object.save()
+
+                # parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
+
+            # Only check if user is qualified editor
+            if is_group_editor(self.request.user, self.object.group.name):
+                # Contrived method for marking data
+                for key, value in form.data.iteritems():
+                    if key.startswith('data_upload_'):
+                        current_id = key.replace('data_upload_', '', 1)
+                        current_value = value
+
+                        if current_value == 'false':
+                            current_value = False
+
+                        if current_value:
+                            data_upload = AssayDataFileUpload.objects.filter(study=self.object, id=current_id)
+                            if data_upload:
+                                data_points_to_replace = AssayDataPoint.objects.filter(data_file_upload=data_file_upload).exclude(quality__contains=REPLACED_DATA_POINT_CODE)
+                                for data_point in data_points_to_replace:
+                                    data_point.quality = data_point.quality + REPLACED_DATA_POINT_CODE
+                                    data_point.save()
+
+            return redirect(self.object.get_absolute_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 def get_cell_samples_for_selection(user, setups=None):

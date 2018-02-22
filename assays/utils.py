@@ -1743,7 +1743,7 @@ def get_qc_status_chip(form):
     return qc_status
 
 
-# TODO
+# DEPRECATED
 def modify_qc_status_chip(current_chip_readout, form):
     """Update the QC status of a plate"""
     # Get the readouts
@@ -2759,8 +2759,8 @@ def validate_file(
         return preview_data
 
 
-class AssayFileProcessor():
-    """Processes files"""
+class AssayFileProcessor:
+    """Processes Assay MIFC files"""
     def __init__(self, current_file, study, user, current_data_file_upload=None, save=False):
         self.current_file = current_file
         self.user = user

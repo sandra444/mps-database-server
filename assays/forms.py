@@ -28,7 +28,8 @@ from .utils import (
     get_chip_details,
     get_plate_details,
     TIME_CONVERSIONS,
-    EXCLUDED_DATA_POINT_CODE
+    EXCLUDED_DATA_POINT_CODE,
+    AssayFileProcessor
 )
 from django.utils import timezone
 
@@ -2653,16 +2654,16 @@ AssayStudyStakeholderFormSetFactory = inlineformset_factory(
 
 class AssayStudyDataUploadForm(forms.ModelForm):
     """Form for Bulk Uploads"""
-    # Now in Study (AssayRun) to make saving easier
-    # bulk_file = forms.FileField()
+    bulk_file = forms.FileField()
 
-    overwrite_option = OVERWRITE_OPTIONS_BULK
+    # Excluded for now
+    # overwrite_option = OVERWRITE_OPTIONS_BULK
 
     # EVIL WAY TO GET PREVIEW DATA
     preview_data = forms.BooleanField(initial=False, required=False)
 
     class Meta(object):
-        model = AssayRun
+        model = AssayStudy
         fields = ('bulk_file',)
 
     def __init__(self, *args, **kwargs):
@@ -2687,19 +2688,11 @@ class AssayStudyDataUploadForm(forms.ModelForm):
         if self.request and self.request.FILES:
             test_file = data.get('bulk_file', '')
 
-            file_data = validate_file(
-                self,
-                test_file,
-                'Bulk',
-                # headers=headers,
-                study=study
-            )
+            file_processor = AssayFileProcessor(test_file, study, self.request.user)
+            # Process the file
+            file_processor.process_file()
 
             # Evil attempt to acquire preview data
-            self.cleaned_data['preview_data'] = file_data
-
-        # Removed, someone might want to use this interface to remove data
-        # if not test_file:
-        #     raise forms.ValidationError('No file was supplied.')
+            self.cleaned_data['preview_data'] = file_processor.preview_data
 
         return self.cleaned_data

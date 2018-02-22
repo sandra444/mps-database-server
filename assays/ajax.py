@@ -2322,16 +2322,11 @@ def validate_data_file(request):
         form_data = form.cleaned_data
 
         preview_data = form_data.get('preview_data')
-
-        # Only chip preview right now
-        chip_raw_data = preview_data.get('chip_preview', {}).get('readout_data', [])
-
-        related_compounds_map = {}
+        new_data_points = preview_data.get('readout_data')
 
         # NOTE THE EMPTY DIC, RIGHT NOW BULK PREVIEW NEVER SHOWS COMPOUND JUST DEVICE
         readout_data = get_data_points_for_charting(
-            chip_raw_data,
-            related_compounds_map,
+            new_data_points,
             key,
             mean_type,
             interval_type,
@@ -2345,7 +2340,7 @@ def validate_data_file(request):
 
         data = {
             'readout_data': readout_data,
-            'number_of_conflicting_entries': preview_data.get('chip_preview', {}).get('number_of_conflicting_entries', 0)
+            'number_of_conflicting_entries': preview_data.get('number_of_conflicting_entries', 0)
         }
 
         return HttpResponse(json.dumps(data),
@@ -2386,7 +2381,7 @@ switch = {
     },
     # TODO TODO TODO
     'validate_data_file': {
-
+        'call': validate_data_file
     }
 }
 
