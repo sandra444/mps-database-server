@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
 from django.template import RequestContext, loader
 from django.http import HttpResponseForbidden
-from assays.models import AssayRun, AssayRunStakeholder
+from assays.models import AssayRun, AssayRunStakeholder, AssayStudy, AssayStudyStakeholder
 from mps.templatetags.custom_filters import filter_groups, VIEWER_SUFFIX, ADMIN_SUFFIX
 
 
@@ -35,6 +35,54 @@ def user_is_active(user):
     return user.is_active
 
 
+def user_is_valid_study_viewer(user, study):
+    # Find whether valid viewer by checking group and iterating over all access_groups
+    valid_viewer = is_group_viewer(user, study.group.name)
+
+    # Only check access groups if the study IS signed off on
+    if not valid_viewer and study.signed_off_by:
+        user_group_names = user.groups.all().values_list('name', flat=True)
+
+        # Check if user is a stakeholder
+        stakeholders = AssayStudyStakeholder.objects.filter(
+            study=study
+        ).prefetch_related(
+            'study',
+            'group',
+            'signed_off_by'
+        )
+        stakeholder_group_names = {name: True for name in stakeholders.values_list('group__name', flat=True)}
+        for group_name in user_group_names:
+            if group_name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') in stakeholder_group_names:
+                valid_viewer = True
+                # Only iterate as many times as is needed
+                return valid_viewer
+
+        # It not, check if all stake holders have signed off
+        all_required_stakeholders_have_signed_off = stakeholders.filter(
+            sign_off_required=True,
+            signed_off_by_id=None
+        ).count() == 0
+
+        # Check if user needs to be checked for access groups
+        if all_required_stakeholders_have_signed_off:
+            access_group_names = {name: True for name in study.access_groups.all().values_list('name', flat=True)}
+
+            for group_name in user_group_names:
+                if group_name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') in access_group_names:
+                    valid_viewer = True
+                    # Only iterate as many times as is needed
+                    return valid_viewer
+
+            # FINALLY: Check if the study is unrestricted
+            if not study.restricted:
+                valid_viewer = True
+                return valid_viewer
+
+    return valid_viewer
+
+
+# DEPRECATED
 def check_if_user_is_valid_study_viewer(user, study):
     # Find whether valid viewer by checking group and iterating over all access_groups
     valid_viewer = is_group_viewer(user, study.group.name)
@@ -81,6 +129,7 @@ def check_if_user_is_valid_study_viewer(user, study):
 
     return valid_viewer
 
+
 # Add this mixin via multiple-inheritance and you need not change the dispatch every time
 class LoginRequiredMixin(object):
     """This mixin requires the user to log in before continuing"""
@@ -124,6 +173,86 @@ class ObjectGroupRequiredMixin(object):
         return super(ObjectGroupRequiredMixin, self).dispatch(*args, **kwargs)
 
 
+# CLONING IS NOT CURRENTLY AVAILABLE
+# It is ostensibly possible to jam the user's status here so that it need not be acquired again
+class StudyGroupMixin(object):
+    """This mixin requires the user to have the group matching the study's group
+
+    Attributes:
+    detail - indicates that a detail page was initially requested
+    update_redirect_url - where to to redirect in the case of detail redirect
+    """
+    detail = False
+    # Default value for url to redirect to
+    update_redirect_url = 'update/'
+
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        # This is for adding study components
+        if self.kwargs.get('study_id', ''):
+            study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
+
+            if not is_group_editor(self.request.user, study.group.name):
+                return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
+
+            if study.signed_off_by:
+                return PermissionDenied(
+                    self.request,
+                    'You cannot add this because the study has been signed off on by {0} {1}.'
+                    ' If something needs to be changed, contact the individual who signed off.'
+                    ' If you are the individual who signed off, please contact a database administrator.'.format(
+                        study.signed_off_by.first_name,
+                        study.signed_off_by.last_name
+                    )
+                )
+
+        else:
+            try:
+                current_object = self.get_object()
+            except:
+                # Evil except here!
+                return PermissionDenied(self.request, 'An error has occurred.')
+
+            study = current_object.study
+
+            # Group editors can always see
+            if is_group_editor(self.request.user, study.group.name) and not study.signed_off_by:
+                # Redirects either to url + update or the specified url + object ID (as an attribute)
+                # This is a little tricky if you don't look for {} in update_redirect_url
+                if self.detail:
+                    return redirect(self.update_redirect_url.format(current_object.id))
+                else:
+                    return super(StudyGroupMixin, self).dispatch(*args, **kwargs)
+
+            valid_viewer = user_is_valid_study_viewer(self.request.user, study)
+
+            # If the object is not restricted and the user is NOT a listed viewer
+            # if study.restricted and not valid_viewer:
+            if not valid_viewer:
+                return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
+
+            if study.signed_off_by and not self.detail:
+                return PermissionDenied(
+                    self.request,
+                    'You cannot modify this because the study has been signed off on by {0} {1}.'
+                    ' If something needs to be changed, contact the individual who signed off.'
+                    ' If you are the individual who signed off, please contact a database administrator.'.format(
+                        study.signed_off_by.first_name,
+                        study.signed_off_by.last_name
+                    )
+                )
+
+            # Otherwise return the detail view
+            if self.detail:
+                return super(StudyGroupMixin, self).dispatch(*args, **kwargs)
+            else:
+                return PermissionDenied(self.request, 'You do not have permission to edit this.')
+
+        return super(StudyGroupMixin, self).dispatch(*args, **kwargs)
+
+
+# DEPRECATED
 # It is ostensibly possible to jam the user's status here so that it need not be acquired again
 class StudyGroupRequiredMixin(object):
     """This mixin requires the user to have the group matching the study's group
@@ -266,6 +395,24 @@ class StudyViewershipMixin(object):
             return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
         # Otherwise return the detail view
         return super(StudyViewershipMixin, self).dispatch(*args, **kwargs)
+
+
+class StudyViewerMixin(object):
+    """This mixin determines whether a user can view the study and its data"""
+
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        # Get the study
+        study = get_object_or_404(AssayStudy, pk=self.kwargs['pk'])
+
+        valid_viewer = user_is_valid_study_viewer(self.request.user, study)
+        # If the object is not restricted and the user is NOT a listed viewer, deny permission
+        # if self.object.restricted and not valid_viewer:
+        if not valid_viewer:
+            return PermissionDenied(self.request, 'You must be a member of the group ' + str(study.group))
+        # Otherwise return the detail view
+        return super(StudyViewerMixin, self).dispatch(*args, **kwargs)
 
 
 # WIP (AND DEPRECATED)

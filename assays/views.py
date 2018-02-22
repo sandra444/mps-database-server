@@ -63,7 +63,7 @@ from assays.forms import (
 from django import forms
 
 # TODO REVISE SPAGHETTI CODE
-from assays.ajax import get_chip_readout_data_as_csv
+from assays.ajax import get_chip_readout_data_as_csv, get_data_as_csv
 from assays.utils import (
     MATRIX_PREFETCH,
     MATRIX_ITEM_PREFETCH,
@@ -111,7 +111,9 @@ from mps.mixins import (
     # CreatorOrAdminRequiredMixin,
     # SpecificGroupRequiredMixin,
     user_is_active,
-    PermissionDenied
+    PermissionDenied,
+    StudyGroupMixin,
+    StudyViewerMixin
 )
 
 from mps.base.models import save_forms_with_tracking
@@ -3369,7 +3371,7 @@ class AssayStudyUpdate(ObjectGroupRequiredMixin, UpdateView):
 
 
 # TODO ADD PERMISSION MIXINS
-class AssayStudyIndex(DetailView):
+class AssayStudyIndex(StudyViewerMixin, DetailView):
     """Show all chip and plate models associated with the given study"""
     model = AssayStudy
     context_object_name = 'study_index'
@@ -3402,7 +3404,7 @@ class AssayStudyIndex(DetailView):
         return context
 
 
-class AssayStudySummary(TemplateView):
+class AssayStudySummary(StudyViewerMixin, TemplateView):
     """Displays information for a given study
 
     Currently only shows data for chip readouts and chip/plate setups
@@ -3434,7 +3436,7 @@ class AssayStudySummary(TemplateView):
         return context
 
 
-class AssayStudyData(DetailView):
+class AssayStudyData(StudyViewerMixin, DetailView):
     """Returns a combined file for all data in a study"""
     model = AssayRun
 
@@ -3455,16 +3457,17 @@ class AssayStudyData(DetailView):
 
             include_all = self.request.GET.get('include_all', False)
 
-            chip_data = get_chip_readout_data_as_csv(items, include_header=True, include_all=include_all)
+            data = get_data_as_csv(items, include_header=True, include_all=include_all)
 
             # For specifically text
-            response = HttpResponse(chip_data, content_type='text/csv')
+            response = HttpResponse(data, content_type='text/csv')
             response['Content-Disposition'] = 'attachment;filename=' + unicode(self.object) + '.csv'
 
             return response
         # Return nothing otherwise
         else:
             return HttpResponse('', content_type='text/plain')
+
 
 # TODO TODO TODO FIX
 # TODO TODO TODO
@@ -3780,7 +3783,7 @@ def get_cell_samples_for_selection(user, setups=None):
 
 
 # TODO NOT THE RIGHT PERMISSION MIXIN
-class AssayMatrixAdd(CreateView):
+class AssayMatrixAdd(StudyGroupMixin, CreateView):
     """Add a matrix"""
     model = AssayMatrix
     template_name = 'assays/assaymatrix_add.html'
@@ -3831,7 +3834,7 @@ class AssayMatrixAdd(CreateView):
 
 
 # TODO NOT THE RIGHT PERMISSION MIXIN
-class AssayMatrixUpdate(UpdateView):
+class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
     model = AssayMatrix
     template_name = 'assays/assaymatrix_add.html'
     form_class = AssayMatrixForm
@@ -3996,8 +3999,21 @@ class AssayMatrixUpdate(UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
+class AssayMatrixDetail(StudyGroupMixin, DetailView):
+    """Details for a Chip Setup"""
+    model = AssayMatrix
+    detail = True
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayMatrixDetail, self).get_context_data(**kwargs)
+
+        # TODO TODO TODO
+
+        return context
+
+
 # TODO PROBABLY WILL REMOVE EVENTUALLY
-class AssayMatrixItemUpdate(UpdateView):
+class AssayMatrixItemUpdate(StudyGroupMixin, UpdateView):
     model = AssayMatrixItem
     template_name = 'assays/assaymatrixitem_add.html'
     form_class = AssayMatrixItemFullForm
@@ -4050,3 +4066,16 @@ class AssayMatrixItemUpdate(UpdateView):
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+
+class AssayMatrixItemDetail(StudyGroupMixin, DetailView):
+    """Details for a Chip Setup"""
+    model = AssayMatrixItem
+    detail = True
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayMatrixItemDetail, self).get_context_data(**kwargs)
+
+        # TODO TODO TODO
+
+        return context
