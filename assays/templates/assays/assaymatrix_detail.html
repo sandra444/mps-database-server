@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    {# TESTING FOR NOW, EXTRANEOUS STUFF IN HERE #}
+    <script src="{% static "assays/assaymatrix_add.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/assaystudy/">Studies</a></li>
+    <li><a href="{{ object.study.get_absolute_url }}">{{ object.study }}</a></li>
+    <li class="active">
+        <em>{{ object }}</em>
+    </li>
+{% endblock %}
+
+{# TODO MAKE SURE FLUID CONTENT STUFF IS NEAT #}
+{% block fluid-content %}
+    <div class="container">
+    <h1>
+        <em>{{ object }}</em>
+    </h1>
+
+    {{ form.errors }}
+
+    <legend>Global</legend>
+
+    {% include 'generic_field.html' with field=form.name label="Matrix Name*" %}
+
+    {% include 'generic_field.html' with field=form.notes label="Notes" %}
+
+    {% include 'generic_field.html' with field=form.representation label="Representation*" %}
+
+    <div hidden id="matrix_device_and_model_section" class="matrix-section">
+    {% include 'generic_field.html' with field=form.device label="Device" %}
+    </div>
+
+    <div hidden id="matrix_dimensions_section" class="matrix-section">
+    {% include 'generic_field.html' with field=form.number_of_items label="Number of Items" %}
+
+    {# Dimensions should be on one line if possible #}
+    {% if form.number_of_rows.errors or form.number_of_columns.errors  %}
+        {% for error in form.number_of_rows.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{ error }}
+            </div>
+        {% endfor %}
+        {% for error in form.number_of_columns.errors %}
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{ error }}
+            </div>
+        {% endfor %}
+    <div class="form-group has-error">
+    {% else %}
+    <div class="form-group">
+    {% endif %}
+        <label for="number_of_rows" class="col-sm-2 col-md-2 control-label">Number of Rows</label>
+        <div class="col-sm-3 col-md-2">
+            {{ form.number_of_rows }}
+         </div>
+        <label for="number_of_columns" class="col-sm-3 col-md-2 control-label">Number of Columns</label>
+        <div class="col-sm-4 col-md-6">
+            {{ form.number_of_columns }}
+        </div>
+    </div>
+    </div>
+
+    <legend>Individual</legend>
+    {# TERMINATE CONTENT #}
+    </div>
+
+    {# FLUID CONTENT HERE ON #}
+    <div class="well padded-bottom">
+    <div id="matrix_wrapper" class="overflow-auto" style="max-height:800px;">
+        {# NO INLINE STYLE PLEASE #}
+        <table id="matrix_table" class="table ">
+            <tbody id="matrix_body"></tbody>
+        </table>
+    </div>
+    </div>
+
+    <div id="{{ item_formset.prefix }}">
+    {{ item_formset.non_form_errors }}
+    {% for form in item_formset %}
+        <div id="{{ form.prefix }}" class="{{ item_formset.prefix }}">
+            {{ form }}
+        </div>
+    {% endfor %}
+    </div>
+
+    <div id="{{ compound_formset.prefix }}">
+    {{ compound_formset.non_form_errors }}
+    {% for form in compound_formset %}
+        <div id="{{ form.prefix }}" class="{{ compound_formset.prefix }}">
+            {{ form }}
+        </div>
+    {% endfor %}
+    </div>
+
+    <div id="{{ cell_formset.prefix }}">
+    {{ cell_formset.non_form_errors }}
+    {% for form in cell_formset %}
+        <div id="{{ form.prefix }}" class="{{ cell_formset.prefix }}">
+            {{ form }}
+        </div>
+    {% endfor %}
+    </div>
+
+    <div id="{{ setting_formset.prefix }}">
+    {{ setting_formset.non_form_errors }}
+    {% for form in setting_formset %}
+        <div id="{{ form.prefix }}" class="{{ setting_formset.prefix }}">
+            {{ form }}
+        </div>
+    {% endfor %}
+    </div>
+    {# End Testing #}
+
+    {# Hidden templates #}
+    <div hidden>
+
+    <table>
+    <tr id="empty_item_html">
+    <td data-prefix="item" class="item-td">
+        <div align="center">
+            <u><span class="item-name lead"></span></u>
+            <span class="item-current_setup"></span>
+        </div>
+        <div class="alert alert-warning">
+            <div>
+                <span class="item-setup_date"></span>
+                <a class="pull-right btn btn-xs form-delete">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </a>
+                {# Add back in when editing functionality available #}
+{#                <a class="pull-right btn btn-xs">#}
+{#                    <span class="glyphicon glyphicon-pencil"></span>#}
+{#                </a>#}
+            </div>
+            <div class="item-failure">
+                <span class="item-failure_time"></span>
+                <span class="item-failure_reason"></span>
+            </div>
+            <div class="item-setup_section">
+                <div>
+                    <span class="item-organ_model"></span>
+                    <span class="item-organ_model_protocol"></span>
+                </div>
+                <div class="item-device"></div>
+                <div>
+                    <span class="item-variance_from_organ_model_protocol"></span>
+                </div>
+            </div>
+            <div class="item-notes_section">
+                <span class="item-scientist"></span>
+                <span class="item-notebook"></span>
+                <span class="item-notebook_page"></span>
+                <span class="item-notes"></span>
+            </div>
+        </div>
+        <div class="item-cell item-setup_set_section"></div>
+        <div class="item-compound item-setup_set_section"></div>
+        <div class="item-setting item-setup_set_section"></div>
+    </td>
+    </tr>
+    </table>
+
+    {# TODO ADDITION LOCATION #}
+    <div id="empty_cell_html">
+        <div data-prefix="{{ cell_formset.prefix }}" class="alert alert-success">
+            <div>
+                <span class="cell-cell_sample"></span>
+                <span class="cell-passage"></span>
+                <a class="pull-right btn btn-xs subform-delete">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </a>
+            </div>
+            <div class="cell-biosensor"></div>
+            <div>
+                <span class="cell-density"></span>
+                <span class="cell-density_unit"></span>
+            </div>
+        </div>
+    </div>
+
+    {# TODO ADDITION LOCATION #}
+    <div id="empty_compound_html">
+        <div data-prefix="{{ compound_formset.prefix }}" class="alert alert-info">
+            <div>
+                <span class="compound-compound"></span>
+                <span class="compound-concentration"></span>
+                <span class="compound-concentration_unit"></span>
+                <a class="pull-right btn btn-xs subform-delete">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </a>
+            </div>
+            <div>
+                <span class="compound-supplier_text"></span>
+                <span class="compound-lot_text"></span>
+            </div>
+            <div class="compound-receipt_date"></div>
+            <div class="compound-addition_time_section">
+                <span>Added on D</span>
+                <span class="compound-addition_time_day"></span>
+                <span>H</span>
+                <span class="compound-addition_time_hour"></span>
+                <span>M</span>
+                <span class="compound-addition_time_minute"></span>
+            </div>
+            <div class="compound-duration_section">
+                <span>Duration of D</span>
+                <span class="compound-duration_day"></span>
+                <span>H</span>
+                <span class="compound-duration_hour"></span>
+                <span>M</span>
+                <span class="compound-duration_minute"></span>
+            </div>
+        </div>
+    </div>
+
+    {# TODO TODO TODO #}
+    <div id="empty_setting_html">
+        <div data-prefix="{{ setting_formset.prefix }}" class="alert alert-danger">
+            <div>
+                <span class="setting-setting"></span>
+                <span class="setting-value"></span>
+                <span class="setting-unit"></span>
+                <a class="pull-right btn btn-xs subform-delete">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    </div>
+{% endblock %}

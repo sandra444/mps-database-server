@@ -4077,5 +4077,17 @@ class AssayMatrixItemDetail(StudyGroupMixin, DetailView):
         context = super(AssayMatrixItemDetail, self).get_context_data(**kwargs)
 
         # TODO TODO TODO
+        context['compound_formset'] = AssaySetupCompoundInlineFormSetFactory(
+            instance=self.object,
+            # matrix=self.object.matrix
+        )
+        context['cell_formset'] = AssaySetupCellInlineFormSetFactory(
+            instance=self.object,
+            # matrix=self.object
+        )
+        context['setting_formset'] = AssaySetupSettingInlineFormSetFactory(
+            instance=self.object,
+            # matrix=self.object
+        )
 
         return context
