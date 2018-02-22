@@ -1805,6 +1805,7 @@ class AssaySetupCell(models.Model):
     addition_time = models.FloatField(null=True, blank=True)
 
     # TODO TODO TODO DO WE WANT DURATION????
+    # duration = models.FloatField(null=True, blank=True)
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
     addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)

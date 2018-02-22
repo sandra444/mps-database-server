@@ -142,7 +142,7 @@
 
     <div hidden id="add_compounds_section" class="item-section">
     {% if update %}
-    <div class="row">
+    <div class="row thumbnail">
     <div class="col-sm-1"></div>
     <div class="col-sm-11">
     <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
@@ -192,6 +192,7 @@
             <th class="bg-info">Day</th>
             <th class="bg-info">Hour</th>
             <th class="bg-info">Minute</th>
+            <th class="bg-warning">Addition Location</th>
         </tr>
         <tr>
             <td class="bg-success">{{ form.compound_addition_time_day }}</td>
@@ -200,6 +201,7 @@
             <td class="bg-info">{{ form.compound_duration_day }}</td>
             <td class="bg-info">{{ form.compound_duration_hour }}</td>
             <td class="bg-info">{{ form.compound_duration_minute }}</td>
+            <td class="bg-warning">{{ form.compound_addition_location }}</td>
         </tr>
     </table>
     </div>
@@ -219,46 +221,70 @@
     <div hidden id="add_cells_section" class="item-section">
     {% if update %}
 {#    {% include 'generic_field.html' with field=form.cell_sample label="Cell Sample" %}#}
-    <div class="form-group">
-    <label for="cell_sample" class="col-sm-2 control-label">Cell Sample*</label>
-    <div class="col-sm-10">
-        <input readonly="readonly" id="id_cell_cell_sample" name="cell_cell_sample" size="5" value="{{ form.cell_cell_sample.value|default_if_none:'' }}">
-        <button id="id_cell_sample_search" type="button" class="btn btn-xs btn-info open-cell-sample-dialog">
-            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-        </button>
-        <label class="small" id="id_cell_sample_label"></label>
-    </div>
-    </div>
-    {% include 'generic_field.html' with field=form.cell_biosensor label="Biosensor*" %}
-    {% include 'generic_field.html' with field=form.cell_density label="Density*" %}
-    {% include 'generic_field.html' with field=form.cell_density_unit label="Density Unit*" %}
-    {% include 'generic_field.html' with field=form.cell_passage label="Passage" %}
-    {% include 'generic_field.html' with field=form.cell_addition_location label="Addition Location" %}
-    {# TODO ADD TIME #}
-
-    <div class="row">
-    <div class="col-sm-2"></div>
-    <div class="col-sm-10">
+{#    <div class="form-group">#}
+{#    <label for="cell_sample" class="col-sm-2 control-label">Cell Sample*</label>#}
+{#    <div class="col-sm-10">#}
+{#        <input readonly="readonly" id="id_cell_cell_sample" name="cell_cell_sample" size="5" value="{{ form.cell_cell_sample.value|default_if_none:'' }}">#}
+{#        <button id="id_cell_sample_search" type="button" class="btn btn-xs btn-info open-cell-sample-dialog">#}
+{#            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>#}
+{#        </button>#}
+{#        <label class="small" id="id_cell_sample_label"></label>#}
+{#    </div>#}
+{#    </div>#}
+    <div class="row thumbnail">
+    <div class="col-sm-1"></div>
+    <div class="col-sm-11">
+    <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
+        <tr>
+            <th>Cell Sample*</th>
+            <th>Passage</th>
+            <th>Biosensor*</th>
+        </tr>
+        <tr>
+        <td>
+            <input readonly="readonly" id="id_cell_cell_sample" name="cell_cell_sample" size="5" value="{{ form.cell_cell_sample.value|default_if_none:'' }}">
+            <button id='id_cell_sample_search' type="button" class="btn btn-xs btn-info open-cell-sample-dialog">
+                <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+            </button>
+            <label class="small" id="id_cell_sample_label"></label>
+        </td>
+        <td>{{ form.cell_passage }}</td>
+        <td>{{ form.cell_biosensor }}</td>
+        </tr>
+    </table>
+    <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
+        <tr>
+            <th>Density*</th>
+            <th>Density Unit*</th>
+        </tr>
+        <tr>
+            <td title="Use 'e' for scientific notation: 1e+3 = 1000">{{ form.cell_density }}</td>
+            <td>{{ form.cell_density_unit }}</td>
+        </tr>
+    </table>
     <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
         <tr>
             <th class="bg-success" colspan="3">Addition Time*</th>
-{#            <th class="bg-info" colspan="3">Duration*</th>#}
+    {#                        <th class="bg-info" colspan="3">Duration*</th>#}
         </tr>
         <tr>
             <th class="bg-success">Day</th>
             <th class="bg-success">Hour</th>
             <th class="bg-success">Minute</th>
-{#            <th class="bg-info">Day</th>#}
-{#            <th class="bg-info">Hour</th>#}
-{#            <th class="bg-info">Minute</th>#}
+    {#                        <th class="bg-info">Day</th>#}
+    {#                        <th class="bg-info">Hour</th>#}
+    {#                        <th class="bg-info">Minute</th>#}
+            <th class="bg-warning">Addition Location</th>
         </tr>
         <tr>
+
             <td class="bg-success">{{ form.cell_addition_time_day }}</td>
             <td class="bg-success">{{ form.cell_addition_time_hour }}</td>
             <td class="bg-success">{{ form.cell_addition_time_minute }}</td>
-{#            <td class="bg-info">{{ form.cell_duration_day }}</td>#}
-{#            <td class="bg-info">{{ form.cell_duration_hour }}</td>#}
-{#            <td class="bg-info">{{ form.cell_duration_minute }}</td>#}
+    {#                        <td class="bg-info">{{ form.cell_duration_day }}</td>#}
+    {#                        <td class="bg-info">{{ form.cell_duration_hour }}</td>#}
+    {#                        <td class="bg-info">{{ form.cell_duration_minute }}</td>#}
+            <td class="bg-warning">{{ form.cell_addition_location }}</td>
         </tr>
     </table>
     </div>
@@ -277,15 +303,21 @@
 
     <div hidden id="add_settings_section" class="item-section">
     {% if update %}
-    {% include 'generic_field.html' with field=form.setting_setting label="Setting*" %}
-    {% include 'generic_field.html' with field=form.setting_value label="Value*" %}
-    {% include 'generic_field.html' with field=form.setting_unit label="Unit*" %}
-    {% include 'generic_field.html' with field=form.setting_addition_location label="Addition Location" %}
-    {# TODO ADD TIME #}
-
-    <div class="row">
-    <div class="col-sm-2"></div>
-    <div class="col-sm-10">
+    <div class="row thumbnail">
+    <div class="col-sm-1"></div>
+    <div class="col-sm-11">
+    <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
+        <tr>
+            <th>Setting*</th>
+            <th>Value*</th>
+            <th>Unit*</th>
+        </tr>
+        <tr>
+            <td>{{ form.setting_setting }}</td>
+            <td>{{ form.setting_value }}</td>
+            <td>{{ form.setting_unit }}</td>
+        </tr>
+    </table>
     <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
         <tr>
             <th class="bg-success" colspan="3">Addition Time*</th>
@@ -298,6 +330,7 @@
             <th class="bg-info">Day</th>
             <th class="bg-info">Hour</th>
             <th class="bg-info">Minute</th>
+            <th class="bg-warning">Addition Location</th>
         </tr>
         <tr>
             <td class="bg-success">{{ form.setting_addition_time_day }}</td>
@@ -306,6 +339,7 @@
             <td class="bg-info">{{ form.setting_duration_day }}</td>
             <td class="bg-info">{{ form.setting_duration_hour }}</td>
             <td class="bg-info">{{ form.setting_duration_minute }}</td>
+            <td class="bg-warning">{{ form.setting_addition_location }}</td>
         </tr>
     </table>
     </div>
@@ -492,6 +526,17 @@
                 <span class="cell-density"></span>
                 <span class="cell-density_unit"></span>
             </div>
+            <div class="cell-addition_time_section">
+                <span>Added on D</span>
+                <span class="cell-addition_time_day"></span>
+                <span>H</span>
+                <span class="cell-addition_time_hour"></span>
+                <span>M</span>
+                <span class="cell-addition_time_minute"></span>
+            </div>
+            <div>
+                <span class="cell-addition_location"></span>
+            </div>
         </div>
     </div>
 
@@ -527,6 +572,9 @@
                 <span>M</span>
                 <span class="compound-duration_minute"></span>
             </div>
+            <div>
+                <span class="compound-addition_location"></span>
+            </div>
         </div>
     </div>
 
@@ -540,6 +588,25 @@
                 <a class="pull-right btn btn-xs subform-delete">
                     <span class="glyphicon glyphicon-remove"></span>
                 </a>
+            </div>
+            <div class="setting-addition_time_section">
+                <span>Added on D</span>
+                <span class="setting-addition_time_day"></span>
+                <span>H</span>
+                <span class="setting-addition_time_hour"></span>
+                <span>M</span>
+                <span class="setting-addition_time_minute"></span>
+            </div>
+            <div class="setting-duration_section">
+                <span>Duration of D</span>
+                <span class="setting-duration_day"></span>
+                <span>H</span>
+                <span class="setting-duration_hour"></span>
+                <span>M</span>
+                <span class="setting-duration_minute"></span>
+            </div>
+            <div>
+                <span class="setting-addition_location"></span>
             </div>
         </div>
     </div>
