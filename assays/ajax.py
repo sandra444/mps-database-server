@@ -1521,18 +1521,18 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
             'study_assay__method',
             'study_assay__unit',
             'sample_location',
-            'data_upload',
+            # 'data_file_upload',
             # Will use eventually, maybe
             'subtarget'
         ).filter(
             matrix_item__in=ids
         ).order_by(
             'matrix_item__name',
-            'assay_instance__target__name',
-            'assay_instance__method__name',
+            'study_assay__target__name',
+            'study_assay__method__name',
             'time',
             'sample_location__name',
-            'quality',
+            'excluded',
             'update_number'
         )
 
@@ -1565,8 +1565,8 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
         method = data_point.study_assay.method.name
         sample_location = data_point.sample_location.name
 
-        device = data_point.setup.device
-        organ_model = data_point.setup.organ_model
+        device = data_point.matrix_item.device
+        organ_model = data_point.matrix_item.organ_model
 
         value = data_point.value
 

@@ -146,7 +146,7 @@ DEFAULT_EXPORT_HEADER = (
     'Minute',
     'Device',
     'Organ Model',
-    'Settings'
+    'Settings',
     'Cells',
     'Compound Treatment(s)',
     'Target/Analyte',
