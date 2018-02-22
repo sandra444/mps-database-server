@@ -1,4 +1,5 @@
 from django import forms
+# TODO REVISE
 from .models import (
     AssayRun,
     AssayWell,
@@ -20,7 +21,13 @@ from .models import (
     AssayCompoundInstance,
     AssayInstance,
     AssaySampleLocation,
-    TIME_CONVERSIONS
+    TIME_CONVERSIONS,
+    AssayStudy,
+    AssayDataPoint,
+    AssayDataFileUpload,
+    AssaySubtarget,
+    AssayMatrixItem,
+    AssayStudyAssay
 )
 from compounds.models import (
     CompoundSupplier,
@@ -66,6 +73,7 @@ COLUMN_HEADERS = (
     'HOUR',
     'MINUTE',
     'TARGET/ANALYTE',
+    'SUBTARGET',
     'METHOD/KIT',
     'SAMPLE LOCATION',
     'VALUE',
@@ -2202,6 +2210,7 @@ def validate_chip_readout_file(
         preview_data.update({
             'number_of_conflicting_entries': len(unreplaced_conflicting_entries)
         })
+
         return preview_data
 
 
@@ -2752,32 +2761,456 @@ def validate_file(
 
 class AssayFileProcessor():
     """Processes files"""
-    def __init__(self):
-        pass
-        # self.files =
-        # self.study =
-        # self.matrix =
+    def __init__(self, current_file, study, user, current_data_file_upload=None, save=False):
+        self.current_file = current_file
+        self.user = user
+        self.data_file_upload = AssayDataFileUpload(
+            file_location=current_file.url,
+            created_by=user,
+            modified_by=user,
+            study=study
+        )
+        self.study = study
+        self.save = save
+        self.preview_data = {}
+        self.errors = []
 
-    def validate_files(self):
-        pass
+    def get_and_validate_header(self, data_list, number_of_rows_to_check=3):
+        """Takes the first three rows of a file and returns the indices in a dic and the row index of the header"""
+        valid_header = False
+        index = 0
+        header_indices = None
+        while len(data_list) > index and index < number_of_rows_to_check and not valid_header:
+            header = data_list[index]
+            header_indices = {
+                column_header.upper(): index for index, column_header in enumerate(header) if
+                column_header.upper() in COLUMN_HEADERS
+            }
 
-    def save_files(self):
-        pass
+            valid_header = True
 
-    def process_file(self, current_file, save=False):
+            for column_header in REQUIRED_COLUMN_HEADERS:
+                if column_header not in header_indices:
+                    index += 1
+                    valid_header = False
+
+        if valid_header:
+            data_to_return = {
+                'header_starting_index': index,
+                'header_indices': header_indices
+            }
+            return data_to_return
+
+        else:
+            return False
+
+    def process_data(self, data_list, sheet=''):
+        """Validates CSV Uploads for Chip Readouts"""
+        # A query list to execute to save chip data
+        query_list = []
+        # A list of readout data for preview
+        readout_data = []
+        # Full preview data
+        preview_data = {
+            'readout_data': readout_data,
+            'number_of_conflicting_entries': 0
+        }
+
+        # Dictionary of all Study Assays with respective PKs
+        assay_data = {}
+        study_assays = AssayStudyAssay.objects.filter(
+            study_id=self.study.id
+        ).prefetch_related(
+            'target',
+            'method',
+            'unit'
+        )
+        # Note that the names are in uppercase
+        for assay in study_assays:
+            assay_data.update({
+                (assay.target.name.upper(), assay.method.name.upper(), assay.unit.unit): assay.id,
+                (assay.target.short_name.upper(), assay.method.name.upper(), assay.unit.unit): assay.id,
+            })
+
+        # Get matrix item name
+        matrix_items = {
+            matrix_item.name.upper(): matrix_item.id for matrix_item in AssayMatrixItem.objects.filter(study_id=self.study.id)
+        }
+
+        # Get sample locations
+        sample_locations = {
+            sample_location.name.upper(): sample_location.id for sample_location in AssaySampleLocation.objects.all()
+        }
+
+        # Get all subtargets
+        subtargets = {
+            subtarget.name.upper(): subtarget for subtarget in AssaySubtarget.objects.all()
+        }
+
+        # TODO THIS CALL WILL CHANGE IN FUTURE VERSIONS
+        old_data = AssayDataPoint.objects.filter(
+            study_id=self.study.id,
+            replaced=False
+        )
+
+        current_data = {}
+
+        possible_conflicting_data = {}
+        conflicting_entries = []
+
+        # Fill check for conflicting
+        # TODO THIS WILL NEED TO BE UPDATED
+        # TODO IS THIS OPTIMAL WAY TO CHECK CONFLICTING?
+        for entry in old_data:
+            possible_conflicting_data.setdefault(
+                (
+                    entry.matrix_item_id,
+                    entry.assay_plate_id,
+                    entry.assay_well_id,
+                    entry.assay_instance_id,
+                    entry.sample_location_id,
+                    entry.time,
+                    entry.replicate,
+                    # ADD VALUE!
+                    # Uses name to deal with subtargets that don't exist yet
+                    entry.subtarget.name,
+                    entry.value
+                ), []
+            ).append(entry)
+
+        # Get the headers to know where to get data
+        header_data = get_header(data_list, 3)
+        starting_index = header_data.get('header_starting_index') + 1
+        header_indices = header_data.get('header_indices')
+
+        # Read headers going onward
+        for line in data_list[starting_index:]:
+            # Some lines may not be long enough (have sufficient commas), ignore such lines
+            # Some lines may be empty or incomplete, ignore these as well
+            # TODO TODO TODO
+            if not valid_chip_row(line, header_indices):
+                continue
+
+            matrix_item_name = line[header_indices.get('CHIP ID')]
+
+            assay_plate_id = line[header_indices.get('ASSAY PLATE ID')]
+            assay_well_id = line[header_indices.get('ASSAY WELL ID')]
+
+            # Currently required, may be optional later
+            day = line[header_indices.get('DAY')]
+            hour = line[header_indices.get('HOUR')]
+            minute = line[header_indices.get('MINUTE')]
+
+            times = {
+                'day': day,
+                'hour': hour,
+                'minute': minute
+            }
+            # Elapsed time in minutes
+            # Acquired later
+            time = 0
+
+            # Note that the names are in uppercase
+            target_name = line[header_indices.get('TARGET/ANALYTE')].strip()
+            method_name = line[header_indices.get('METHOD/KIT')].strip()
+            sample_location_name = line[header_indices.get('SAMPLE LOCATION')].strip()
+
+            value = line[header_indices.get('VALUE')]
+            value_unit_name = line[header_indices.get('VALUE UNIT')].strip()
+
+            # Check for subtarget name, add one if necessary
+            subtarget_name = line[header_indices.get('SUBTARGET')].strip()
+            subtarget = subtargets.get(subtarget_name.upper(), None)
+
+            if subtarget_name and not subtarget:
+                # TODO TODO TODO TODO MAKE NEW SUBTARGET
+                subtarget = AssaySubtarget(name=subtarget_name)
+
+                if self.save:
+                    subtarget.save()
+
+                subtargets.update({
+                    subtarget_name.upper(): subtarget
+                })
+
+            # Throw error if no Sample Location
+            if not sample_location_name:
+                self.errors.append(
+                    sheet + 'Please make sure all rows have a Sample Location. Additionally, check to see if all related data have the SAME Sample Location.'
+                )
+
+            sample_location_id = sample_locations.get(sample_location_name.upper())
+            if not sample_location_id:
+                self.errors.append(
+                    unicode(sheet + 'The Sample Location "{0}" was not recognized.').format(sample_location_name)
+                )
+
+            # TODO THE TRIMS HERE SHOULD BE BASED ON THE MODELS RATHER THAN MAGIC NUMBERS
+            # Get notes, if possible
+            notes = u''
+            if header_indices.get('NOTES', ''):
+                notes = line[header_indices.get('NOTES')].strip()[:255]
+
+            cross_reference = u''
+            if header_indices.get('CROSS REFERENCE', ''):
+                cross_reference = line[header_indices.get('CROSS REFERENCE')].strip()[:255]
+
+            # Excluded sees if ANYTHING is in EXCLUDE
+            excluded = False
+            if header_indices.get('EXCLUDE', ''):
+                # PLEASE NOTE: Will only ever add 'X' now
+                # quality = line[header_indices.get('QC STATUS')].strip()[:20]
+                if line[header_indices.get('EXCLUDE')].strip():
+                    excluded = True
+
+            caution_flag = u''
+            if header_indices.get('CAUTION FLAG', ''):
+                caution_flag = line[header_indices.get('CAUTION FLAG')].strip()[:20]
+
+            # Get replicate if possible
+            # DEFAULT IS SUBJECT TO CHANGE PLEASE BE AWARE
+            replicate = ''
+            if header_indices.get('REPLICATE', ''):
+                replicate = line[header_indices.get('REPLICATE')].strip()[:255]
+
+            # TODO TODO TODO TODO
+            matrix_item_id = matrix_items.get(matrix_item_name, None)
+            if not matrix_item_id:
+                self.errors.append(
+                    unicode(
+                        sheet + 'No Matrix Item with the ID "{0}" exists; please change your file or add this chip.'
+                    ).format(matrix_item_name)
+                )
+
+            # Raise error when an assay does not exist
+            study_assay_id = assay_data.get((
+                target_name.upper(),
+                method_name.upper(),
+                value_unit_name
+            ), None)
+            if not study_assay_id:
+                self.errors.append(
+                    unicode(
+                        sheet + 'Chip-{0}: No assay with the target "{1}", the method "{2}", and the unit "{3}" exists. '
+                                'Please review your data and add this assay to your study if necessary.').format(
+                        matrix_item_name,
+                        target_name,
+                        method_name,
+                        value_unit_name
+                    )
+                )
+
+            # Check every value to make sure it can resolve to a float
+            try:
+                # Keep empty strings, though they technically can not be converted to floats
+                if value != '':
+                    value = float(value)
+            except:
+                self.errors.append(
+                    sheet + 'The value "{}" is invalid; please make sure all values are numerical'.format(value)
+                )
+
+            # Check to make certain the time is a valid float
+            for time_unit, conversion in TIME_CONVERSIONS.items():
+                current_time_value = times.get(time_unit, 0)
+
+                if current_time_value == '':
+                    current_time_value = 0
+
+                try:
+                    current_time_value = float(current_time_value)
+                    time += current_time_value * conversion
+                except:
+                    self.errors.append(
+                        sheet + 'The {0} "{1}" is invalid; please make sure all times are numerical'.format(
+                            time_unit,
+                            current_time_value
+                        )
+                    )
+
+            # Treat empty strings as None
+            if value == '':
+                value = None
+                # Set quality to 'NULL' if quality was not set by user
+                # if not quality and 'N' not in quality:
+                #     quality += 'N'
+
+            if not self.errors:
+                # Deal with conflicting data
+                current_conflicting_entries = possible_conflicting_data.get(
+                    (
+                        matrix_item_id,
+                        assay_plate_id,
+                        assay_well_id,
+                        study_assay_id,
+                        sample_location_id,
+                        time,
+                        replicate,
+                        # ADD VALUE!
+                        subtarget.name,
+                        value
+                    ), []
+                )
+                conflicting_entries.extend(current_conflicting_entries)
+
+                # Get possible duplicate current entries
+                duplicate_current = current_data.get(
+                    (
+                        matrix_item_id,
+                        assay_plate_id,
+                        assay_well_id,
+                        study_assay_id,
+                        sample_location_id,
+                        time,
+                        replicate,
+                        # ADD VALUE!
+                        subtarget.name,
+                        value
+                    ), []
+                )
+
+                number_duplicate_current = len(duplicate_current)
+                number_conflicting_entries = len(current_conflicting_entries)
+
+                # Discern what update_number this is (default 0)
+                update_number = 0 + number_conflicting_entries + number_duplicate_current
+
+                if self.save:
+                    query_list.append((
+                        matrix_item_id,
+                        cross_reference,
+                        assay_plate_id,
+                        assay_well_id,
+                        study_assay_id,
+                        subtarget.id,
+                        sample_location_id,
+                        value,
+                        time,
+                        caution_flag,
+                        excluded,
+                        notes,
+                        replicate,
+                        update_number
+                    ))
+                else:
+                    readout_data.append(
+                        AssayDataPoint(
+                            matrix_item_id=matrix_item_id,
+                            cross_reference=cross_reference,
+                            assay_plate_id=assay_plate_id,
+                            assay_well_id=assay_well_id,
+                            study_assay_id=study_assay_id,
+                            sample_location_id=sample_location_id,
+                            value=value,
+                            time=time,
+                            caution_flag=caution_flag,
+                            excluded=excluded,
+                            notes=notes,
+                            replicate=replicate,
+                            update_number=update_number,
+                            data_file_upload=self.data_file_upload
+                        )
+                    )
+
+                # Add to current_data
+                current_data.setdefault(
+                    (
+                        matrix_item_id,
+                        assay_plate_id,
+                        assay_well_id,
+                        study_assay_id,
+                        sample_location_id,
+                        time,
+                        replicate,
+                        # ADD VALUE!
+                        subtarget.name,
+                        value
+                    ), []
+                ).append(1)
+
+        # If errors
+        if self.errors:
+            raise forms.ValidationError(self.errors)
+        # If there wasn't anything
+        elif len(query_list) < 1 and len(readout_data) < 1:
+            raise forms.ValidationError(
+                'This file does not contain any valid data. Please make sure every row has values in required columns.'
+            )
+
+        # TODO TODO TODO TODO
+        # If the intention is to save
+        elif self.save:
+            # Connect to the database
+            cursor = connection.cursor()
+            # The generic query
+            # TODO TODO TODO TODO
+            query = ''' INSERT INTO "assays_assaydatapoint"
+                      ("matrix_item_id", "cross_reference", "assay_plate_id", "assay_well_id", "study_assay_id", "subtarget_id", "sample_location_id", "value", "time", "caution_flag", "excluded", "notes", "replicate", "update_number")
+                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+
+            cursor.executemany(query, query_list)
+            transaction.commit()
+
+        # Be sure to subtract the number of replaced points!
+        self.preview_data.update({
+            'number_of_conflicting_entries': len(conflicting_entries)
+        })
+
+    def process_excel_file(self):
+        file_data = self.current_file.read()
+        excel_file = xlrd.open_workbook(file_contents=file_data)
+
+        sheet_names = excel_file.sheet_names()
+
+        at_least_one_valid_sheet = False
+
+        for index, sheet in enumerate(excel_file.sheets()):
+            sheet_name = sheet_names[index]
+
+            # Skip sheets without anything and skip sheets that are hidden
+            if sheet.nrows < 1 or sheet.visibility != 0:
+                continue
+
+            # Get datalist
+            data_list = []
+
+            # Include the first row (the header)
+            for row_index in range(sheet.nrows):
+                data_list.append([stringify_excel_value(value) for value in sheet.row_values(row_index)])
+
+            # Check if header is valid
+            valid_header = self.get_and_validate_header(data_list)
+
+            if valid_header:
+                self.process_data(data_list, sheet_name)
+                at_least_one_valid_sheet = True
+
+        if not at_least_one_valid_sheet:
+            self.errors.append(
+                'No valid sheets were detected in the file. Please check to make sure your headers are correct and start in the top-left corner.'
+            )
+
+    def process_csv_file(self):
+        data_reader = unicode_csv_reader(self.current_file, delimiter=',')
+        data_list = list(data_reader)
+
+        # Check if header is valid
+        valid_header = self.get_and_validate_header(data_list)
+
+        if valid_header:
+            self.process_data(data_list)
+
+        # IF NOT VALID, THROW ERROR
+        else:
+            self.errors.append('The file is not formatted correctly. Please check the header of the file.')
+
+    def process_file(self):
+        # Save the data upload if necessary (ostensibly save should only run after validation)
+        if self.save:
+            self.data_file_upload.save()
+
+        self.current_file.seek(0, 0)
         try:
-            file_data = current_file.read()
-            excel_file = xlrd.open_workbook(file_contents=file_data)
+            self.process_excel_file()
         except xlrd.XLRDError:
-            datareader = unicode_csv_reader(current_file, delimiter=',')
-            datalist = list(current_file)
-
-    # TODO REVISE
-    # This isn't super useful, can just do this in get_file contents or whatever
-    # def check_if_excel(self):
-    #     try:
-    #         file_data = self.file_stream.read()
-    #         excel_file = xlrd.open_workbook(file_contents=file_data)
-    #         self.is_excel = True
-    #     except xlrd.XLRDError:
-    #         self.is_excel = False
+            self.process_csv_file()
