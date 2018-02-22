@@ -19,9 +19,10 @@ $(document).ready(function() {
     $('.DTTT_container').css('float', 'none');
 
     // Clarify usage of sort
-    $('.sorting').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
-    $('.sorting_asc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
-    $('.sorting_desc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+    // REMOVED FOR NOW
+    // $('.sorting').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+    // $('.sorting_asc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+    // $('.sorting_desc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
 
     // TODO Not currently used, but this could be helpful
     // Perform auto search (from GET)
