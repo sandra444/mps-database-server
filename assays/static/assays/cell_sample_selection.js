@@ -24,7 +24,7 @@ $(document).ready(function () {
     dialog.removeProp('hidden');
 
     $('#cellsamples').DataTable({
-        "iDisplayLength": 50,
+        "iDisplayLength": -1,
         // Initially sort on receipt date
         "order": [ 1, "desc" ],
         // If one wants to display top and bottom
