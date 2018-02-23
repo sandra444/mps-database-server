@@ -3439,7 +3439,7 @@ class AssayStudySummary(StudyViewerMixin, TemplateView):
 
 class AssayStudyData(StudyViewerMixin, DetailView):
     """Returns a combined file for all data in a study"""
-    model = AssayRun
+    model = AssayStudy
 
     def render_to_response(self, context, **response_kwargs):
         # Make sure that the study exists, then continue
@@ -3797,11 +3797,11 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
                             current_value = False
 
                         if current_value:
-                            data_upload = AssayDataFileUpload.objects.filter(study=self.object, id=current_id)
-                            if data_upload:
-                                data_points_to_replace = AssayDataPoint.objects.filter(data_file_upload=data_file_upload).exclude(quality__contains=REPLACED_DATA_POINT_CODE)
+                            data_file_upload = AssayDataFileUpload.objects.filter(study=self.object, id=current_id)
+                            if data_file_upload:
+                                data_points_to_replace = AssayDataPoint.objects.filter(data_file_upload=data_file_upload).exclude(replaced=True)
                                 for data_point in data_points_to_replace:
-                                    data_point.quality = data_point.quality + REPLACED_DATA_POINT_CODE
+                                    data_point.replaced = True
                                     data_point.save()
 
             return redirect(self.object.get_absolute_url())
