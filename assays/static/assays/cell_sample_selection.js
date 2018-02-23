@@ -54,10 +54,11 @@ $(document).ready(function () {
     // Display all labels(irrelevant in matrix)
     $('.cell-sample-id-field').each(function() {
         // Get label
-        $(this).parent().find('label').text($('#cell_sample_' + $(this).val()).attr('name'));
+        var current_parent = $(this).parent().parent().parent().parent().parent();
+        current_parent.find('label').text($('#cell_sample_' + $(this).val()).attr('name'));
         // Turn density into scientific notation
         // TODO SUBJECT TO CHANGE
-        var current_density = $(this).parent().parent().find('input[name$="-density"]');
+        var current_density = current_parent.find('input[name$="-density"]');
         var current_number = Number(current_density.val());
         if (current_number && current_number > 9999) {
             // TODO TODO TODO THIS DOES NOT WORK IN FIREFIX
