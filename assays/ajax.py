@@ -1874,8 +1874,6 @@ def get_control_data(
 # TODO WE MAY WANT THE DEFINITION OF A TREATMENT GROUP TO CHANGE, WHO KNOWS
 def get_item_groups(study):
     treatment_groups = {}
-    # TODO PLEASE REMEMBER TO INCLUDE IDS OF SETUPS IN THIS
-    treatment_group_representatives = []
     setup_to_treatment_group = {}
 
     # By pulling the setups for the study, I avoid problems with preview data
@@ -1884,9 +1882,11 @@ def get_item_groups(study):
     ).prefetch_related(
         'organ_model',
         'assaysetupsetting_set__setting',
-        'assaysetupcell_set__cell_sample',
+        'assaysetupcell_set__cell_sample__cell_subtype',
         'assaysetupcell_set__cell_sample__cell_type__organ',
+        'assaysetupcell_set__density_unit',
         'assaysetupcompound_set__compound_instance__compound',
+        'assaysetupcompound_set__concentration_unit',
     )
 
     for setup in setups:
@@ -1900,34 +1900,31 @@ def get_item_groups(study):
             setup.devolved_cells()
         )
 
-        if treatment_group_tuple not in treatment_groups:
-            current_representative = len(treatment_group_representatives)
-            treatment_groups.update({
-                treatment_group_tuple: current_representative
-            })
-            treatment_group_representatives.append(setup.quick_dic())
-        else:
-            current_representative = treatment_groups.get(treatment_group_tuple)
+        current_representative = treatment_groups.setdefault(treatment_group_tuple, setup.quick_dic())
 
-        treatment_group_representatives[current_representative].get('setups_with_same_group').append(
+        current_representative.get('setups_with_same_group').append(
             setup.get_hyperlinked_name()
         )
         setup_to_treatment_group.update({setup.id: current_representative})
 
     # Attempt to sort reasonably
-    treatment_group_representatives = sorted(
-        treatment_group_representatives, key=lambda x: (
-            x.get('compounds'), x.get('organ_model'), x.get('cells'), x.get('settings'), x.get('setups_with_same_group')[0]
+    sorted_treatment_groups = sorted(
+        treatment_groups.values(), key=lambda x: (
+            x.get('compounds'),
+            x.get('organ_model'), x.get('cells'),
+            x.get('settings'),
+            x.get('setups_with_same_group')[0]
         )
     )
 
-    for representative in treatment_group_representatives:
+    for index, representative in enumerate(sorted_treatment_groups):
         representative.get('setups_with_same_group').sort()
         representative.update({
-            'setups_with_same_group': ', '.join(representative.get('setups_with_same_group'))
+            'setups_with_same_group': ', '.join(representative.get('setups_with_same_group')),
+            'index': index
         })
 
-    return (treatment_group_representatives, setup_to_treatment_group)
+    return (sorted_treatment_groups, setup_to_treatment_group)
 
 
 def get_data_points_for_charting(
@@ -2035,7 +2032,7 @@ def get_data_points_for_charting(
             # If by compound
             if key == 'group':
                 # tag = get_list_of_present_compounds(related_compounds_map, raw, ' & ')
-                tag = 'Group {}'.format(setup_to_treatment_group.get(setup_id) + 1)
+                tag = 'Group {}'.format(setup_to_treatment_group.get(setup_id).get('index') + 1)
             # If by device
             else:
                 tag = chip_id
