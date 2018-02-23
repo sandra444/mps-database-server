@@ -1512,9 +1512,12 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
         # TODO ORDER SUBJECT TO CHANGE
         data_points = AssayDataPoint.objects.prefetch_related(
             'study',
-            'matrix_item__assaysetupcompound_set',
-            'matrix_item__assaysetupcell_set',
-            'matrix_item__assaysetupsetting_set',
+            'matrix_item__assaysetupsetting_set__setting__setting',
+            'matrix_item__assaysetupcell_set__cell_sample',
+            'matrix_item__assaysetupcell_set__density_unit',
+            'matrix_item__assaysetupcell_set__cell_sample__cell_type__organ',
+            'matrix_item__assaysetupcompound_set__compound_instance__compound',
+            'matrix_item__assaysetupcompound_set__concentration_unit',
             'matrix_item__device',
             'matrix_item__organ_model',
             'study_assay__target',
@@ -1548,7 +1551,7 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
 
     for data_point in data_points:
         # Definitely need to rename these fields/models...
-        study_id = data_point.study
+        study_id = data_point.study.name
 
         item_name = data_point.matrix_item.name
 
@@ -1879,6 +1882,7 @@ def get_item_groups(study):
     setups = AssayMatrixItem.objects.filter(
         study=study
     ).prefetch_related(
+        'organ_model',
         'assaysetupsetting_set__setting',
         'assaysetupcell_set__cell_sample',
         'assaysetupcell_set__cell_sample__cell_type__organ',
