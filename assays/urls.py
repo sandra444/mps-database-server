@@ -30,7 +30,8 @@ urlpatterns = patterns('',
     url(r'^assays/assaystudy/$', AssayStudyList.as_view(), name='assay_study_list'),
     url(r'^assays/assaystudy/add/$', AssayStudyAdd.as_view(), name='assay_study_add'),
 
-    url(r'^assays/assaymatrixitem/(?P<pk>[0-9]+)/update/$', AssayMatrixItemUpdate.as_view(), name='assay_study_list'),
+    url(r'^assays/assaymatrixitem/(?P<pk>[0-9]+)/$', AssayMatrixItemDetail.as_view(), name='assay_matrix_item_detail'),
+    url(r'^assays/assaymatrixitem/(?P<pk>[0-9]+)/update/$', AssayMatrixItemUpdate.as_view(), name='assay_matrix_item_update'),
 
     url(r'^assays/studyconfiguration/$', StudyConfigurationList.as_view(), name='studyconfiguration_list'),
     url(r'^assays/studyconfiguration/add/$', StudyConfigurationAdd.as_view(), name='studyconfiguration_add'),
@@ -38,7 +39,8 @@ urlpatterns = patterns('',
 
     # Add a matrix
     url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assaymatrix/add/$', AssayMatrixAdd.as_view(), name='assay_matrix_add'),
-    url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/$', AssayMatrixUpdate.as_view(), name='assay_matrix_update'),
+    url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/$', AssayMatrixDetail.as_view(), name='assay_matrix_detail'),
+    url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/update/$', AssayMatrixUpdate.as_view(), name='assay_matrix_update'),
 
     # Sign off
     url(r'^assays/(?P<pk>[0-9]+)/sign_off/$', AssayRunSignOff.as_view(), name='study-sign_off'),

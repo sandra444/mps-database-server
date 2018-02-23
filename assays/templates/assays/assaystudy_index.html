@@ -12,6 +12,18 @@
 {% endblock %}
 
 {% block content %}
+    {# Inform whether this is publicly accessible #}
+    {# Needs to account for all stakeholders too #}
+    {% if object.signed_off_by and stakeholder_sign_off and not object.restricted %}
+        <div class="alert alert-info" role="alert">
+            <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+            <span class="sr-only">Info:</span>
+            This study can be viewed by all registered users
+        </div>
+    {% endif %}
+
+    {% include 'tracking.html' with study_submit='true' %}
+
     <div class="padded-bottom">
         <div class="well">
             <h1 class="text-center">
@@ -21,7 +33,24 @@
                         <a href="update" class="btn btn-primary" role="button">Edit This Study</a>
                     {% endif %}
                     <a href="summary" class="btn btn-info" role="button">Study Summary</a>
+                    <a href="upload" class="btn btn-warning" role="button">Upload Data</a>
                 </div>
+                {% if user_is_group_admin %}
+                    <div class="row text-center small-padding-top">
+                        <a href="sign_off" class="btn btn-success" role="button">View/Edit Sign Off Status of this Study</a>
+                    </div>
+                {% endif %}
+                {#  TODO TODO TODO #}
+                {% if user_is_stakeholder_admin %}
+                    <div class="row text-center small-padding-top">
+                        <a href="sign_off" class="btn btn-success" role="button">View/Edit Approval Status of this Study</a>
+                    </div>
+                {% endif %}
+                {% if user.is_superuser %}
+                <div>
+                    <a href="/admin/assays/assaystudy/{{ object.id }}" class="btn btn-success" role="button">Change Group Access for this Study</a>
+                </div>
+                {% endif %}
             </h1>
         </div>
 

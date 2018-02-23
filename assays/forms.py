@@ -1463,6 +1463,45 @@ class AssayStudyForm(SignOffMixin, forms.ModelForm):
             raise forms.ValidationError('Please select at least one study type')
 
 
+class AssayStudyFormAdmin(forms.ModelForm):
+    """Admin Form for Assay Runs (now referred to as Studies)"""
+    class Meta(object):
+        model = AssayStudy
+        widgets = {
+            'assay_run_id': forms.Textarea(attrs={'rows': 1}),
+            'name': forms.Textarea(attrs={'rows': 1}),
+            'description': forms.Textarea(attrs={'rows': 10}),
+            'signed_off_notes': forms.Textarea(attrs={'rows': 10}),
+        }
+        exclude = ('',)
+
+    def __init__(self, *args, **kwargs):
+        super(AssayStudyFormAdmin, self).__init__(*args, **kwargs)
+
+        groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
+        groups_with_center_full = Group.objects.filter(
+            id__in=groups_with_center
+        ).order_by(
+            'name'
+        )
+
+        self.fields['group'].queryset = groups_with_center_full
+
+        groups_without_repeat = groups_with_center_full
+
+        if self.instance:
+            groups_without_repeat.exclude(pk=self.instance.group.id)
+
+        self.fields['access_groups'].queryset = groups_without_repeat
+
+    def clean(self):
+        # clean the form data, before validation
+        data = super(AssayStudyFormAdmin, self).clean()
+
+        if not any([data['toxicity'], data['efficacy'], data['disease'], data['cell_characterization']]):
+            raise forms.ValidationError('Please select at least one study type')
+
+
 AssayStudySupportingDataFormSetFactory = inlineformset_factory(
     AssayStudy,
     AssayStudySupportingData,

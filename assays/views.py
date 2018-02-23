@@ -3046,12 +3046,12 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
         context['data_uploads'] = get_data_uploads(study=self.object)
 
         context['chip_readouts'] = chip_readouts
-        context['plate_readouts'] = plate_readouts
+        # context['plate_readouts'] = plate_readouts
 
         context['chip_has_data'] = chip_has_data
-        context['plate_has_data'] = plate_has_data
+        # context['plate_has_data'] = plate_has_data
 
-        context['version'] = len(os.listdir(MEDIA_ROOT + '/excel_templates/')) / 3
+        context['version'] = len(os.listdir(MEDIA_ROOT + '/excel_templates/'))
 
         return context
 
@@ -3764,8 +3764,7 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
         context = super(AssayStudyDataUpload, self).get_context_data(**kwargs)
 
         # TODO TODO TODO
-
-        context['version'] = len(os.listdir(MEDIA_ROOT + '/excel_templates/')) / 3
+        context['version'] = len(os.listdir(MEDIA_ROOT + '/excel_templates/'))
 
         return context
 

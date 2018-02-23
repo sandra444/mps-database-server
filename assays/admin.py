@@ -37,7 +37,7 @@ from assays.resource import *
 # from django.db import connection, transaction
 # from urllib import unquote
 
-from .forms import StudyConfigurationForm, AssayStudyForm
+from .forms import StudyConfigurationForm, AssayStudyFormAdmin
 
 from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 import os
@@ -61,7 +61,7 @@ def modify_templates():
     template_root = MEDIA_ROOT + '/excel_templates/'
 
     version = 1
-    version += len(os.listdir(template_root)) / 3
+    version += len(os.listdir(template_root))
     version = str(version)
 
     chip = xlsxwriter.Workbook(template_root + 'chip_template-' + version + '.xlsx')
@@ -2288,7 +2288,7 @@ class AssayStudyAdmin(LockableAdmin):
     # class Media(object):
     #     js = ('assays/assaystudy_add.js',)
 
-    form = AssayStudyForm
+    form = AssayStudyFormAdmin
     save_on_top = True
     list_per_page = 300
     search_fields = ('name', 'start_date', 'description')
