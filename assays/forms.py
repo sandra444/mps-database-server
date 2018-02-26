@@ -2523,15 +2523,15 @@ class AssayMatrixItemForm(SignOffMixin, forms.ModelForm):
         #     'failure_reason': forms.TextInput(),
         # }
 
-    def clean(self):
-        # Add back study
-        # This gets a little, uh... unorthodox...
-        self._meta.exclude = tracking
-        self.fields['study'] = forms.CharField(initial=self.instance.study)
-
-        super(AssayMatrixItemForm, self).clean()
-
-        self.cleaned_data['study'] = self.instance.study
+    # def clean(self):
+    #     # Add back study
+    #     # This gets a little, uh... unorthodox...
+    #     self._meta.exclude = tracking
+    #     self.fields['study'] = forms.CharField(initial=self.instance.study)
+    #
+    #     super(AssayMatrixItemForm, self).clean()
+    #
+    #     self.cleaned_data['study'] = self.instance.study
 
 
 # TODO NEED TO TEST

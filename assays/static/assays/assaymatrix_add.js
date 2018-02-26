@@ -143,6 +143,8 @@ $(document).ready(function () {
         if (values_to_inject) {
             $.each(values_to_inject, function(field, value) {
                 new_form.find('input[name$="' + field + '"]').val(value);
+                // TODO NAIVE: Also set the attribute (val sets a property)
+                new_form.find('input[name$="' + field + '"]').attr('value', value);
             });
         }
 
@@ -753,19 +755,27 @@ $(document).ready(function () {
         mark_form_deleted($(this));
     });
 
-    // TODO DISABLING FOR ALL ALERTS MAY BE A LITTLE OVERZEALOUS
-    // Triggers for disabling select during delete hovers
-    // matrix_body_selector.on('mouseover', '.alert', function() {
-    //     if(!mouse_is_down) {
-    //         matrix_table_selector.selectable('option', 'disabled', true);
-    //     }
-    // });
-    //
-    // // Triggers for enabling select after delete hovers
-    // matrix_body_selector.on('mouseout', '.alert', function() {
-    //     matrix_table_selector.selectable('option', 'disabled', false);
-    // });
-
     // TODO TODO TODO TESTING
     get_matrix_dimensions();
+
+    // Special operations for pre-submission
+    $('form').submit(function() {
+        // Iterate over every Matrix Item form
+        $('.' + item_prefix).each(function(form_index) {
+            var empty = true;
+            $(this).find('input:not(:checkbox)').each(function(input_index) {
+                // console.log($(this));
+                if($(this).val()) {
+                    if($(this).attr('name').indexOf('_index') === -1 && $(this).attr('name').indexOf('-name') === -1) {
+                        empty = false;
+                        return false;
+                    }
+                }
+            });
+            // Mark for deletion if empty
+            if (empty) {
+                $(this).find('input[name$="DELETE"]').prop('checked', true);
+            }
+        });
+    });
 });
