@@ -1568,6 +1568,8 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
         method = data_point.study_assay.method.name
         sample_location = data_point.sample_location.name
 
+        subtarget = data_point.subtarget.name
+
         device = data_point.matrix_item.device
         organ_model = data_point.matrix_item.organ_model
 
@@ -1611,9 +1613,10 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
                         device,
                         organ_model,
                         settings,
-                        compounds,
                         cells,
+                        compounds,
                         target,
+                        subtarget,
                         method,
                         sample_location,
                         value,

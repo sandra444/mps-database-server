@@ -1452,7 +1452,7 @@ class AssayStudyForm(SignOffMixin, forms.ModelForm):
             'name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
         }
-        exclude = tracking + restricted + ('access_groups', 'signed_off_notes')
+        exclude = tracking + restricted + ('access_groups', 'signed_off_notes', 'bulk_file')
 
     def clean(self):
         """Checks for at least one study type"""
@@ -2693,8 +2693,6 @@ AssayStudyStakeholderFormSetFactory = inlineformset_factory(
 
 class AssayStudyDataUploadForm(forms.ModelForm):
     """Form for Bulk Uploads"""
-    bulk_file = forms.FileField()
-
     # Excluded for now
     # overwrite_option = OVERWRITE_OPTIONS_BULK
 

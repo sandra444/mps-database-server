@@ -2764,16 +2764,33 @@ class AssayFileProcessor:
     def __init__(self, current_file, study, user, current_data_file_upload=None, save=False):
         self.current_file = current_file
         self.user = user
-        self.data_file_upload = AssayDataFileUpload(
-            file_location=current_file.url,
-            created_by=user,
-            modified_by=user,
-            study=study
-        )
+        if save:
+            self.data_file_upload = AssayDataFileUpload(
+                file_location=current_file.url,
+                created_by=user,
+                modified_by=user,
+                study=study
+            )
+        else:
+            self.data_file_upload = AssayDataFileUpload()
         self.study = study
         self.save = save
         self.preview_data = {}
         self.errors = []
+
+    def valid_data_row(self, row, header_indices):
+        """Confirm that a row is valid"""
+        valid_row = False
+
+        for required_column in REQUIRED_COLUMN_HEADERS:
+            # if len(row) < header_indices.get(required_column) or not row[header_indices.get(required_column)]:
+            if len(row) < header_indices.get(required_column):
+                valid_row = False
+                break
+            elif row[header_indices.get(required_column)]:
+                valid_row = True
+
+        return valid_row
 
     def get_and_validate_header(self, data_list, number_of_rows_to_check=3):
         """Takes the first three rows of a file and returns the indices in a dic and the row index of the header"""
@@ -2811,10 +2828,12 @@ class AssayFileProcessor:
         # A list of readout data for preview
         readout_data = []
         # Full preview data
-        preview_data = {
+        self.preview_data = {
             'readout_data': readout_data,
-            'number_of_conflicting_entries': 0
+            'number_of_conflicting_entries': 0,
+            'number_of_total_duplicates': 0
         }
+        number_of_total_duplicates = 0
 
         # Dictionary of all Study Assays with respective PKs
         assay_data = {}
@@ -2823,23 +2842,24 @@ class AssayFileProcessor:
         ).prefetch_related(
             'target',
             'method',
-            'unit'
+            'unit',
+            'study'
         )
         # Note that the names are in uppercase
         for assay in study_assays:
             assay_data.update({
-                (assay.target.name.upper(), assay.method.name.upper(), assay.unit.unit): assay.id,
-                (assay.target.short_name.upper(), assay.method.name.upper(), assay.unit.unit): assay.id,
+                (assay.target.name.upper(), assay.method.name.upper(), assay.unit.unit): assay,
+                (assay.target.short_name.upper(), assay.method.name.upper(), assay.unit.unit): assay,
             })
 
         # Get matrix item name
         matrix_items = {
-            matrix_item.name.upper(): matrix_item.id for matrix_item in AssayMatrixItem.objects.filter(study_id=self.study.id)
+            matrix_item.name.upper(): matrix_item for matrix_item in AssayMatrixItem.objects.filter(study_id=self.study.id)
         }
 
         # Get sample locations
         sample_locations = {
-            sample_location.name.upper(): sample_location.id for sample_location in AssaySampleLocation.objects.all()
+            sample_location.name.upper(): sample_location for sample_location in AssaySampleLocation.objects.all()
         }
 
         # Get all subtargets
@@ -2847,10 +2867,14 @@ class AssayFileProcessor:
             subtarget.name.upper(): subtarget for subtarget in AssaySubtarget.objects.all()
         }
 
+        default_subtarget = subtargets.get('NONE')
+
         # TODO THIS CALL WILL CHANGE IN FUTURE VERSIONS
         old_data = AssayDataPoint.objects.filter(
             study_id=self.study.id,
             replaced=False
+        ).prefetch_related(
+            'subtarget'
         )
 
         current_data = {}
@@ -2867,19 +2891,19 @@ class AssayFileProcessor:
                     entry.matrix_item_id,
                     entry.assay_plate_id,
                     entry.assay_well_id,
-                    entry.assay_instance_id,
+                    entry.study_assay_id,
                     entry.sample_location_id,
                     entry.time,
                     entry.replicate,
                     # ADD VALUE!
                     # Uses name to deal with subtargets that don't exist yet
                     entry.subtarget.name,
-                    entry.value
+                    # entry.value
                 ), []
             ).append(entry)
 
         # Get the headers to know where to get data
-        header_data = get_header(data_list, 3)
+        header_data = self.get_and_validate_header(data_list, 3)
         starting_index = header_data.get('header_starting_index') + 1
         header_indices = header_data.get('header_indices')
 
@@ -2888,7 +2912,7 @@ class AssayFileProcessor:
             # Some lines may not be long enough (have sufficient commas), ignore such lines
             # Some lines may be empty or incomplete, ignore these as well
             # TODO TODO TODO
-            if not valid_chip_row(line, header_indices):
+            if not self.valid_data_row(line, header_indices):
                 continue
 
             matrix_item_name = line[header_indices.get('CHIP ID')]
@@ -2922,6 +2946,9 @@ class AssayFileProcessor:
             subtarget_name = line[header_indices.get('SUBTARGET')].strip()
             subtarget = subtargets.get(subtarget_name.upper(), None)
 
+            if not subtarget_name:
+                subtarget = default_subtarget
+
             if subtarget_name and not subtarget:
                 # TODO TODO TODO TODO MAKE NEW SUBTARGET
                 subtarget = AssaySubtarget(name=subtarget_name)
@@ -2939,56 +2966,63 @@ class AssayFileProcessor:
                     sheet + 'Please make sure all rows have a Sample Location. Additionally, check to see if all related data have the SAME Sample Location.'
                 )
 
-            sample_location_id = sample_locations.get(sample_location_name.upper())
-            if not sample_location_id:
+            sample_location = sample_locations.get(sample_location_name.upper())
+            sample_location_id = None
+            if not sample_location:
                 self.errors.append(
                     unicode(sheet + 'The Sample Location "{0}" was not recognized.').format(sample_location_name)
                 )
+            else:
+                sample_location_id = sample_location.id
 
             # TODO THE TRIMS HERE SHOULD BE BASED ON THE MODELS RATHER THAN MAGIC NUMBERS
             # Get notes, if possible
             notes = u''
-            if header_indices.get('NOTES', ''):
+            if header_indices.get('NOTES', '') and header_indices.get('NOTES') < len(line):
                 notes = line[header_indices.get('NOTES')].strip()[:255]
 
             cross_reference = u''
-            if header_indices.get('CROSS REFERENCE', ''):
+            if header_indices.get('CROSS REFERENCE', '') and header_indices.get('CROSS REFERENCE') < len(line):
                 cross_reference = line[header_indices.get('CROSS REFERENCE')].strip()[:255]
 
             # Excluded sees if ANYTHING is in EXCLUDE
             excluded = False
-            if header_indices.get('EXCLUDE', ''):
+            if header_indices.get('EXCLUDE', '') and header_indices.get('EXCLUDE') < len(line):
                 # PLEASE NOTE: Will only ever add 'X' now
                 # quality = line[header_indices.get('QC STATUS')].strip()[:20]
                 if line[header_indices.get('EXCLUDE')].strip():
                     excluded = True
 
             caution_flag = u''
-            if header_indices.get('CAUTION FLAG', ''):
+            if header_indices.get('CAUTION FLAG', '') and header_indices.get('CAUTION FLAG') < len(line):
                 caution_flag = line[header_indices.get('CAUTION FLAG')].strip()[:20]
 
             # Get replicate if possible
             # DEFAULT IS SUBJECT TO CHANGE PLEASE BE AWARE
             replicate = ''
-            if header_indices.get('REPLICATE', ''):
+            if header_indices.get('REPLICATE', '') and header_indices.get('REPLICATE') < len(line):
                 replicate = line[header_indices.get('REPLICATE')].strip()[:255]
 
             # TODO TODO TODO TODO
-            matrix_item_id = matrix_items.get(matrix_item_name, None)
-            if not matrix_item_id:
+            matrix_item = matrix_items.get(matrix_item_name, None)
+            matrix_item_id = None
+            if not matrix_item:
                 self.errors.append(
                     unicode(
                         sheet + 'No Matrix Item with the ID "{0}" exists; please change your file or add this chip.'
                     ).format(matrix_item_name)
                 )
+            else:
+                matrix_item_id = matrix_item.id
 
             # Raise error when an assay does not exist
-            study_assay_id = assay_data.get((
+            study_assay = assay_data.get((
                 target_name.upper(),
                 method_name.upper(),
                 value_unit_name
             ), None)
-            if not study_assay_id:
+            study_assay_id = None
+            if not study_assay:
                 self.errors.append(
                     unicode(
                         sheet + 'Chip-{0}: No assay with the target "{1}", the method "{2}", and the unit "{3}" exists. '
@@ -2999,6 +3033,8 @@ class AssayFileProcessor:
                         value_unit_name
                     )
                 )
+            else:
+                study_assay_id = study_assay.id
 
             # Check every value to make sure it can resolve to a float
             try:
@@ -3031,9 +3067,6 @@ class AssayFileProcessor:
             # Treat empty strings as None
             if value == '':
                 value = None
-                # Set quality to 'NULL' if quality was not set by user
-                # if not quality and 'N' not in quality:
-                #     quality += 'N'
 
             if not self.errors:
                 # Deal with conflicting data
@@ -3048,10 +3081,20 @@ class AssayFileProcessor:
                         replicate,
                         # ADD VALUE!
                         subtarget.name,
-                        value
+                        # value
                     ), []
                 )
-                conflicting_entries.extend(current_conflicting_entries)
+
+                # If value is the same, don't bother considering at all
+                total_duplicate = False
+                for conflict in current_conflicting_entries:
+                    if conflict.value == value:
+                        total_duplicate = True
+                        number_of_total_duplicates += 1
+                        break
+
+                if not total_duplicate:
+                    conflicting_entries.extend(current_conflicting_entries)
 
                 # Get possible duplicate current entries
                 duplicate_current = current_data.get(
@@ -3065,7 +3108,7 @@ class AssayFileProcessor:
                         replicate,
                         # ADD VALUE!
                         subtarget.name,
-                        value
+                        # value
                     ), []
                 )
 
@@ -3075,7 +3118,7 @@ class AssayFileProcessor:
                 # Discern what update_number this is (default 0)
                 update_number = 0 + number_conflicting_entries + number_duplicate_current
 
-                if self.save:
+                if self.save and not total_duplicate:
                     query_list.append((
                         matrix_item_id,
                         cross_reference,
@@ -3092,15 +3135,15 @@ class AssayFileProcessor:
                         replicate,
                         update_number
                     ))
-                else:
+                elif not total_duplicate:
                     readout_data.append(
                         AssayDataPoint(
-                            matrix_item_id=matrix_item_id,
+                            matrix_item=matrix_item,
                             cross_reference=cross_reference,
                             assay_plate_id=assay_plate_id,
                             assay_well_id=assay_well_id,
-                            study_assay_id=study_assay_id,
-                            sample_location_id=sample_location_id,
+                            study_assay=study_assay,
+                            sample_location=sample_location,
                             value=value,
                             time=time,
                             caution_flag=caution_flag,
@@ -3124,7 +3167,7 @@ class AssayFileProcessor:
                         replicate,
                         # ADD VALUE!
                         subtarget.name,
-                        value
+                        # value
                     ), []
                 ).append(1)
 
@@ -3132,9 +3175,13 @@ class AssayFileProcessor:
         if self.errors:
             raise forms.ValidationError(self.errors)
         # If there wasn't anything
-        elif len(query_list) < 1 and len(readout_data) < 1:
+        elif len(query_list) < 1 and len(readout_data) < 1 and not number_of_total_duplicates:
             raise forms.ValidationError(
                 'This file does not contain any valid data. Please make sure every row has values in required columns.'
+            )
+        elif len(query_list) < 1 and len(readout_data) < 1 and number_of_total_duplicates:
+            raise forms.ValidationError(
+                'This file contains only duplicate data. Please make sure this is the correct file.'
             )
 
         # TODO TODO TODO TODO
@@ -3153,7 +3200,8 @@ class AssayFileProcessor:
 
         # Be sure to subtract the number of replaced points!
         self.preview_data.update({
-            'number_of_conflicting_entries': len(conflicting_entries)
+            'number_of_conflicting_entries': len(conflicting_entries),
+            'number_of_total_duplicates': number_of_total_duplicates
         })
 
     def process_excel_file(self):

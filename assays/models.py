@@ -1397,6 +1397,12 @@ class AssayStudyType(LockableModel):
         return self.name
 
 
+# TODO SUBJECT TO CHANGE
+# Get upload file location
+def upload_file_location(instance, filename):
+    return '/'.join(['data_points', str(instance.id), filename])
+
+
 class AssayStudy(FlaggableModel):
     """The encapsulation of all data concerning a project"""
     class Meta(object):
@@ -1458,6 +1464,13 @@ class AssayStudy(FlaggableModel):
 
     # Special addition, would put in base model, but don't want excess...
     signed_off_notes = models.CharField(max_length=255, blank=True, default='')
+
+    # TODO SOMEWHAT CONTRIVED
+    bulk_file = models.FileField(
+        upload_to=upload_file_location,
+        verbose_name='Data File',
+        blank=True, null=True
+    )
 
     # TODO
     def get_study_types_string(self):
