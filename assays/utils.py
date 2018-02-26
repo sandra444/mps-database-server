@@ -110,6 +110,7 @@ DEFAULT_CSV_HEADER  = (
     'Hour',
     'Minute',
     'Target/Analyte',
+    'Subtarget',
     'Method/Kit',
     'Sample Location',
     'Value',

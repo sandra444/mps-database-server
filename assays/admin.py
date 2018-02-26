@@ -68,7 +68,6 @@ def modify_templates():
 
     chip_sheet = chip.add_worksheet()
 
-
     # Set up formats
     chip_red = chip.add_format()
     chip_red.set_bg_color('#ff6f69')
@@ -78,11 +77,11 @@ def modify_templates():
     # Write the base files
     chip_initial = [
         DEFAULT_CSV_HEADER,
-        [''] * 16
+        [''] * 17
     ]
 
     chip_initial_format = [
-        [chip_red] * 16,
+        [chip_red] * 17,
         [
             None,
             None,
@@ -92,6 +91,7 @@ def modify_templates():
             None,
             None,
             chip_green,
+            None,
             chip_green,
             chip_green,
             None,
@@ -119,14 +119,23 @@ def modify_templates():
     chip_sheet.set_column('F:F', 10)
     chip_sheet.set_column('G:G', 10)
     chip_sheet.set_column('H:H', 20)
-    chip_sheet.set_column('I:I', 20)
-    chip_sheet.set_column('J:J', 15)
-    chip_sheet.set_column('K:K', 10)
+    chip_sheet.set_column('I:I', 10)
+    chip_sheet.set_column('J:J', 20)
+    chip_sheet.set_column('K:K', 15)
     chip_sheet.set_column('L:L', 10)
     chip_sheet.set_column('M:M', 10)
     chip_sheet.set_column('N:N', 10)
     chip_sheet.set_column('O:O', 10)
-    chip_sheet.set_column('P:P', 100)
+    chip_sheet.set_column('P:P', 10)
+    chip_sheet.set_column('Q:Q', 100)
+    # chip_sheet.set_column('I:I', 20)
+    # chip_sheet.set_column('J:J', 15)
+    # chip_sheet.set_column('K:K', 10)
+    # chip_sheet.set_column('L:L', 10)
+    # chip_sheet.set_column('M:M', 10)
+    # chip_sheet.set_column('N:N', 10)
+    # chip_sheet.set_column('O:O', 10)
+    # chip_sheet.set_column('P:P', 100)
 
     chip_sheet.set_column('BA:BD', 30)
 
@@ -173,11 +182,11 @@ def modify_templates():
 
     chip_sheet.data_validation('H2', {'validate': 'list',
                                       'source': targets_range})
-    chip_sheet.data_validation('I2', {'validate': 'list',
-                               'source': methods_range})
     chip_sheet.data_validation('J2', {'validate': 'list',
+                               'source': methods_range})
+    chip_sheet.data_validation('K2', {'validate': 'list',
                                'source': sample_locations_range})
-    chip_sheet.data_validation('L2', {'validate': 'list',
+    chip_sheet.data_validation('M2', {'validate': 'list',
                                'source': value_units_range})
 
     # Save
