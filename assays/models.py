@@ -1565,20 +1565,10 @@ class AssayMatrix(FlaggableModel):
 
     # TODO
     def get_absolute_url(self):
-        pass
-        # return '/assays/assaychipsetup/{}/'.format(self.id)
+        return '/assays/assaymatrix/{}/'.format(self.id)
 
     def get_post_submission_url(self):
         return self.study.get_post_submission_url()
-        # return '/assays/{}/'.format(self.assay_run_id_id)
-
-    def get_clone_url(self):
-        pass
-        # return '/assays/{0}/assaychipsetup/add?clone={1}'.format(self.assay_run_id_id, self.id)
-
-    def get_delete_url(self):
-        pass
-        # return '/assays/assaychipsetup/{}/delete/'.format(self.id)
 
 
 class AssayFailureReason(FlaggableModel):
