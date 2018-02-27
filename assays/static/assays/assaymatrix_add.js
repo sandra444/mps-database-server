@@ -402,7 +402,16 @@ $(document).ready(function () {
                     // TODO TODO TODO I NEED TO THINK ABOUT THE CONSEQUENCES OF THIS
                     // display.attr(item_form_index_attribute, current_item_index[current_item_index.length - 1]);
                     display.attr(item_form_index_attribute, form_index);
-                    display.attr(item_id_attribute, $(this).find('input[name$="-id"]').val());
+                    var current_id = $(this).find('input[name$="-id"]').val();
+                    display.attr(item_id_attribute, current_id);
+                    if(current_id) {
+                        // BE CAREFUL WITH THIS SORT OF STUFF
+                        display.find('.form-view')
+                            .attr('href', '/assays/assaymatrixitem/' + current_id);
+                    }
+                    else {
+                        display.find('.form-view').hide();
+                    }
                 }
                 // Generate a subdisplay if this is not item TODO TODO TODO
                 // Add the subdisplay to the display

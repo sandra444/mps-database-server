@@ -11,11 +11,17 @@
 {% endblock %}
 
 {% block breadcrumbs %}
+    {% if not detail %}
     <li><a href="/assays/assaystudy/editable_studies/">Editable Studies</a></li>
+    {% else %}
+    <li><a href="/assays/assaystudy/editable_studies/">Studies</a></li>
+    {% endif %}
     <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
     <li class="active">
-        {% if object %}
+        {% if update %}
             Edit <em>{{ object }}</em>
+        {% elif detail %}
+            Matrix <em>{{ object }}</em>
         {% else %}
             Add Matrix
         {% endif %}
@@ -29,6 +35,11 @@
         <div class="container">
         <h1>
             Edit Matrix <em>{{ object }}</em>
+    {% elif detail %}
+        <form enctype="multipart/form-data" class="form-horizontal" method="post" >
+        <div class="container">
+        <h1>
+            Matrix <em>{{ object }}</em>
     {% else %}
         <form enctype="multipart/form-data" class="form-horizontal" method="post" >
         <div class="container">
@@ -38,6 +49,9 @@
     {% csrf_token %}
     </h1>
 
+    {% if detail %}
+    <div hidden>
+    {% endif %}
     {% include "submit.html" with flag="y" group=study.group.name %}
 
     {% include 'errors.html' %}
@@ -141,7 +155,7 @@
     </div>
 
     <div hidden id="add_compounds_section" class="item-section">
-    {% if update %}
+    {% if update or detail %}
     <div class="row thumbnail">
     <div class="col-sm-1"></div>
     <div class="col-sm-11">
@@ -219,7 +233,7 @@
     </div>
 
     <div hidden id="add_cells_section" class="item-section">
-    {% if update %}
+    {% if update or detail %}
 {#    {% include 'generic_field.html' with field=form.cell_sample label="Cell Sample" %}#}
 {#    <div class="form-group">#}
 {#    <label for="cell_sample" class="col-sm-2 control-label">Cell Sample*</label>#}
@@ -302,7 +316,7 @@
     </div>
 
     <div hidden id="add_settings_section" class="item-section">
-    {% if update %}
+    {% if update or detail %}
     <div class="row thumbnail">
     <div class="col-sm-1"></div>
     <div class="col-sm-11">
@@ -357,6 +371,50 @@
 
     </div>
 {#    </form>#}
+
+    {% if detail %}
+    </div>
+
+        {# ADD STYLES FOR THESE SORTS OF THINGS #}
+    <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
+        <tbody>
+            <tr>
+                <th>
+                    Name
+                </th>
+                <td>
+                    {{ object.name }}
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Representation
+                </th>
+                <td>
+                    {{ object.get_representation_display }}
+                </td>
+            </tr>
+            {% if object.device %}
+            <tr>
+                <th>
+                    Device
+                </th>
+                <td>
+                    {{ object.device }}
+                </td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th>
+                    Dimensions
+                </th>
+                <td>
+                    {{ object.number_of_rows }}x{{ object.number_of_columns }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    {% endif %}
 
     {# TERMINATE CONTENT #}
     </div>
@@ -475,8 +533,13 @@
         <div class="alert alert-warning">
             <div>
                 <span class="item-setup_date"></span>
+                {% if not detail %}
                 <a class="pull-right btn btn-xs form-delete">
                     <span class="glyphicon glyphicon-remove"></span>
+                </a>
+                {% endif %}
+                <a class="pull-right btn btn-xs form-view">
+                    <span class="glyphicon glyphicon-eye-open"></span>
                 </a>
                 {# Add back in when editing functionality available #}
 {#                <a class="pull-right btn btn-xs">#}
@@ -517,9 +580,11 @@
             <div>
                 <span class="cell-cell_sample"></span>
                 <span class="cell-passage"></span>
+                {% if not detail %}
                 <a class="pull-right btn btn-xs subform-delete">
                     <span class="glyphicon glyphicon-remove"></span>
                 </a>
+                {% endif %}
             </div>
             <div class="cell-biosensor"></div>
             <div>
@@ -547,9 +612,11 @@
                 <span class="compound-compound"></span>
                 <span class="compound-concentration"></span>
                 <span class="compound-concentration_unit"></span>
+                {% if not detail %}
                 <a class="pull-right btn btn-xs subform-delete">
                     <span class="glyphicon glyphicon-remove"></span>
                 </a>
+                {% endif %}
             </div>
             <div>
                 <span class="compound-supplier_text"></span>
@@ -585,9 +652,11 @@
                 <span class="setting-setting"></span>
                 <span class="setting-value"></span>
                 <span class="setting-unit"></span>
+                {% if not detail %}
                 <a class="pull-right btn btn-xs subform-delete">
                     <span class="glyphicon glyphicon-remove"></span>
                 </a>
+                {% endif %}
             </div>
             <div class="setting-addition_time_section">
                 <span>Added on D</span>

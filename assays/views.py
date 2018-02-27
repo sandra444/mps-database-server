@@ -3471,6 +3471,8 @@ class AssayStudySummary(StudyViewerMixin, TemplateView):
             'detail': True
         })
 
+        self.object = current_study
+
         # TODO TODO TODO TODO TODO PERMISSIONS
         get_user_status_context(self, context)
 
@@ -3909,10 +3911,12 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
 
         context = super(AssayMatrixAdd, self).get_context_data(**kwargs)
 
-        cellsamples = get_cell_samples_for_selection(self.request.user)
-
         # Cellsamples will always be the same
-        context['cellsamples'] = cellsamples
+        context['cellsamples'] = CellSample.objects.all().prefetch_related(
+            'cell_type__organ',
+            'supplier',
+            'cell_subtype__cell_type'
+        )
 
         # Start blank
         # DON'T EVEN BOTHER WITH THE OTHER FORMSETS YET
@@ -3956,10 +3960,12 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(AssayMatrixUpdate, self).get_context_data(**kwargs)
 
-        cellsamples = get_cell_samples_for_selection(self.request.user)
-
         # Cellsamples will always be the same
-        context['cellsamples'] = cellsamples
+        context['cellsamples'] = CellSample.objects.all().prefetch_related(
+            'cell_type__organ',
+            'supplier',
+            'cell_subtype__cell_type'
+        )
 
         # context['formset'] = AssayMatrixItemFormSetFactory(instance=self.object)
 
@@ -4103,14 +4109,79 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
 
 
 class AssayMatrixDetail(StudyGroupMixin, DetailView):
-    """Details for a Chip Setup"""
+    """Details for a Matrix"""
+    template_name = 'assays/assaymatrix_add.html'
     model = AssayMatrix
     detail = True
 
     def get_context_data(self, **kwargs):
         context = super(AssayMatrixDetail, self).get_context_data(**kwargs)
 
+        # Cellsamples will always be the same
+        context['cellsamples'] = CellSample.objects.all().prefetch_related(
+            'cell_type__organ',
+            'supplier',
+            'cell_subtype__cell_type'
+        )
+
         # TODO TODO TODO
+        # Contrived
+        matrix_item_queryset = AssayMatrixItem.objects.filter(
+            matrix=self.object
+        ).order_by(
+            'row_index',
+            'column_index'
+        ).prefetch_related(
+            'device'
+        )
+
+        # TODO SORTING CAN MAKE SURE THAT THE FORMS APPEAR IN THE RIGHT ORDER, BUT DECREASE PERFORMANCE
+        compound_queryset = AssaySetupCompound.objects.filter(
+            matrix_item__in=matrix_item_queryset
+        ).order_by(
+            'addition_time',
+            'compound_instance'
+        )
+
+        cell_queryset = AssaySetupCell.objects.filter(
+            matrix_item__in=matrix_item_queryset
+        ).order_by(
+            'addition_time',
+            'cell_sample',
+        )
+
+        setting_queryset = AssaySetupSetting.objects.filter(
+            matrix_item__in=matrix_item_queryset
+        ).order_by(
+            'addition_time',
+            'setting',
+            'unit'
+        )
+
+        context['item_formset'] = AssayMatrixItemFormSetFactory(
+            instance=self.object,
+            queryset=matrix_item_queryset,
+            prefix='item'
+        )
+        context['compound_formset'] = AssaySetupCompoundFormSetFactory(
+            queryset=compound_queryset,
+            matrix=self.object,
+            prefix='compound'
+        )
+        context['cell_formset'] = AssaySetupCellFormSetFactory(
+            queryset=cell_queryset,
+            matrix=self.object,
+            prefix='cell'
+        )
+        context['setting_formset'] = AssaySetupSettingFormSetFactory(
+            queryset=setting_queryset,
+            matrix=self.object,
+            prefix='setting'
+        )
+
+        context['form'] = AssayMatrixForm(instance=self.object)
+
+        context['detail'] = True
 
         return context
 
@@ -4173,6 +4244,7 @@ class AssayMatrixItemUpdate(StudyGroupMixin, UpdateView):
 
 class AssayMatrixItemDetail(StudyGroupMixin, DetailView):
     """Details for a Chip Setup"""
+    template_name = 'assays/assaymatrixitem_detail.html'
     model = AssayMatrixItem
     detail = True
 
