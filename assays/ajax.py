@@ -49,6 +49,8 @@ from django.template.loader import render_to_string
 from .forms import ReadoutBulkUploadForm, ReadyForSignOffForm
 from django.forms.models import inlineformset_factory
 
+from mps.mixins import user_is_valid_study_viewer
+
 # from django.utils import timezone
 
 import numpy as np
@@ -1448,14 +1450,67 @@ def fetch_device_dimensions(request):
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
-def send_ready_for_sign_off_email(request):
+def send_ready_for_sign_off_email_old(request):
     data = {}
 
-    if not AssayRun.objects.filter(pk=int(request.POST.get('study_id', ''))):
+    if not AssayRun.objects.filter(pk=int(request.POST.get('study', ''))):
         return HttpResponse(json.dumps({'errors': 'This study cannot be signed off on.'}),
                             content_type='application/json')
 
-    study = get_object_or_404(AssayRun, pk=int(request.POST.get('study_id', '')))
+    study = get_object_or_404(AssayRun, pk=int(request.POST.get('study', '')))
+
+    message = request.POST.get('message', '').strip()[:2000]
+
+    if not is_group_editor(request.user, study.group.name):
+        return HttpResponse(json.dumps({'errors': 'You do not have permission to do this.'}), content_type='application/json')
+
+    email_form = ReadyForSignOffForm(request.POST)
+
+    if email_form.is_valid():
+        required_group_name = study.group.name + ADMIN_SUFFIX
+        users_to_be_alerted = User.objects.filter(groups__name=required_group_name, is_active=True)
+
+        if users_to_be_alerted:
+            # Magic strings are in poor taste, should use a template instead
+            # I would use a template, but it gets picky about newlines (which as often added automatically)
+            # I could strip the newlines, but alternatively I might as well just have it here
+            subject = 'Sign Off Requested for {0}'.format(unicode(study))
+
+            for user in users_to_be_alerted:
+                content = render_to_string(
+                    'assays/email/request_for_sign_off.txt',
+                    {
+                        'study': study,
+                        'requester': request.user,
+                        'user': user,
+                        'message': message
+                    }
+                )
+
+                # Actually send the email
+                user.email_user(subject, content, DEFAULT_FROM_EMAIL)
+
+                data.update({'message': message})
+        else:
+            data.update({
+                'errors': 'No valid users were detected. You cannot send this email.'
+            })
+    else:
+        data.update({
+            'errors': 'The form was invalid.'
+        })
+
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
+
+def send_ready_for_sign_off_email(request):
+    data = {}
+
+    if not AssayStudy.objects.filter(pk=int(request.POST.get('study', '')), signed_off_by=None):
+        return HttpResponse(json.dumps({'errors': 'This study cannot be signed off on.'}),
+                            content_type='application/json')
+
+    study = get_object_or_404(AssayStudy, pk=int(request.POST.get('study', '')))
 
     message = request.POST.get('message', '').strip()[:2000]
 
@@ -2289,12 +2344,12 @@ def fetch_item_data(request):
     id -- the ID of the Item of interest
     """
 
-    item_id = request.POST.get('id', '')
+    matrix_item_id = request.POST.get('matrix_item_id', '')
 
-    if not item_id:
+    if not matrix_item_id:
         return HttpResponseServerError()
 
-    data = get_data_as_json([item_id])
+    data = get_data_as_json([matrix_item_id])
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
@@ -2361,6 +2416,36 @@ def validate_data_file(request):
                             content_type='application/json')
 
 
+def study_viewer_validation(request):
+    study = None
+    if request.POST.get('study', ''):
+        study = get_object_or_404(AssayStudy, pk=request.POST.get('study'))
+    elif request.POST.get('matrix_item', ''):
+        # GET STUDY FROM THE MATRIX ITEM
+        matrix_item = get_object_or_404(AssayMatrixItem, pk=request.POST.get('matrix_item'))
+        study = matrix_item.study
+
+    if study:
+        return user_is_valid_study_viewer(request.user, study)
+    else:
+        return HttpResponseForbidden()
+
+
+def study_editor_validation(request):
+    study = None
+    if request.POST.get('study', ''):
+        study = get_object_or_404(AssayStudy, pk=request.POST.get('study'))
+    elif request.POST.get('matrix_item', ''):
+        # GET STUDY FROM THE MATRIX ITEM
+        matrix_item = get_object_or_404(AssayMatrixItem, pk=request.POST.get('matrix_item'))
+        study = matrix_item.study
+
+    if study:
+        return is_group_editor(request.user, study.group.name)
+    else:
+        return HttpResponseForbidden()
+
+
 # TODO TODO TODO
 switch = {
     'fetch_readout': {'call': fetch_readout},
@@ -2373,19 +2458,24 @@ switch = {
     'fetch_protocol': {'call': fetch_protocol},
     'validate_bulk_file': {'call': validate_bulk_file},
     'validate_individual_chip_file': {'call': validate_individual_chip_file},
-    'send_ready_for_sign_off_email': {
-        'call': send_ready_for_sign_off_email
+    'send_ready_for_sign_off_email_old': {
+        'call': send_ready_for_sign_off_email_old,
+        # 'validation': study_editor_validation
     },
+    'send_ready_for_sign_off_email': {'call': fetch_device_dimensions},
     'fetch_device_dimensions': {'call': fetch_device_dimensions},
     'fetch_data_points': {
-        'call': fetch_data_points
+        'call': fetch_data_points,
+        'validation': study_viewer_validation
     },
     'fetch_item_data': {
-        'call': fetch_item_data
+        'call': fetch_item_data,
+        'validation': study_viewer_validation
     },
     # TODO TODO TODO
     'validate_data_file': {
-        'call': validate_data_file
+        'call': validate_data_file,
+        'validation': study_editor_validation
     }
 }
 
