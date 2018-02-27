@@ -378,10 +378,17 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
     if not chip_data:
         # TODO ORDER SUBJECT TO CHANGE
         chip_data = AssayChipRawData.objects.prefetch_related(
-            *CHIP_DATA_PREFETCH
-        ).prefetch_related(
-            'assay_chip_id__chip_setup__assaycompoundinstance_set',
-            'assay_chip_id__chip_setup__assaychipcells_set'
+            'assay_chip_id__chip_setup__assay_run_id',
+            'assay_instance__target',
+            'assay_instance__method',
+            'assay_instance__unit',
+            'assay_chip_id__chip_setup__device',
+            'assay_chip_id__chip_setup__organ_model',
+            'assay_chip_id__chip_setup__assaycompoundinstance_set__compound_instance__compound',
+            'assay_chip_id__chip_setup__assaycompoundinstance_set__concentration_unit',
+            'assay_chip_id__chip_setup__assaychipcells_set__cell_sample__cell_type__organ',
+            'assay_chip_id__chip_setup__assaychipcells_set__cell_sample__cell_subtype',
+            'sample_location'
         ).filter(
             assay_chip_id__in=chip_ids
         ).order_by(
@@ -478,6 +485,118 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
 
     return string_io.getvalue()
 
+def get_chip_readout_data_as_list_of_lists(chip_ids, chip_data=None, both_assay_names=False, include_header=False, include_all=False):
+    """Returns readout data as a csv in the form of a string
+
+    Params:
+    chip_ids - Readout IDs to use to acquire chip data (if data not provided)
+    chip_data - Readout raw data, optional, acquired with chip_ids if not provided
+    both_assay_names - Indicates that both assay names should be returned (not currently used)
+    """
+    related_compounds_map = {}
+
+    if not chip_data:
+        # TODO ORDER SUBJECT TO CHANGE
+        chip_data = AssayChipRawData.objects.prefetch_related(
+            'assay_chip_id__chip_setup__assay_run_id',
+            'assay_instance__target',
+            'assay_instance__method',
+            'assay_instance__unit',
+            'assay_chip_id__chip_setup__device',
+            'assay_chip_id__chip_setup__organ_model',
+            'assay_chip_id__chip_setup__assaycompoundinstance_set__compound_instance__compound',
+            'assay_chip_id__chip_setup__assaycompoundinstance_set__concentration_unit',
+            'assay_chip_id__chip_setup__assaychipcells_set__cell_sample__cell_type__organ',
+            'assay_chip_id__chip_setup__assaychipcells_set__cell_sample__cell_subtype',
+            'sample_location'
+        ).filter(
+            assay_chip_id__in=chip_ids
+        ).order_by(
+            'assay_chip_id__chip_setup__assay_chip_id',
+            'assay_instance__target__name',
+            'assay_instance__method__name',
+            'time',
+            'sample_location__name',
+            'quality',
+            'update_number'
+        )
+
+        related_compounds_map = get_related_compounds_map(readouts=chip_ids)
+
+    data = []
+
+    if include_header:
+        data.append(
+            CSV_HEADER_WITH_COMPOUNDS_AND_STUDY
+        )
+
+    for data_point in chip_data:
+        # Definitely need to rename these fields/models...
+        study_id = data_point.assay_chip_id.chip_setup.assay_run_id.assay_run_id
+
+        chip_id = data_point.assay_chip_id.chip_setup.assay_chip_id
+
+        cross_reference = data_point.cross_reference
+
+        assay_plate_id = data_point.assay_plate_id
+        assay_well_id = data_point.assay_well_id
+
+        # Add time here
+        time_in_minutes = data_point.time
+        times = get_split_times(time_in_minutes)
+
+        target = data_point.assay_instance.target.name
+        method = data_point.assay_instance.method.name
+        sample_location = data_point.sample_location.name
+
+        device = data_point.assay_chip_id.chip_setup.device.device_name
+        organ_model = data_point.assay_chip_id.chip_setup.organ_model
+
+        cells = data_point.assay_chip_id.chip_setup.stringify_cells()
+
+        compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, ' | ')
+
+        value = data_point.value
+
+        if value is None:
+            value = ''
+
+        value_unit = data_point.assay_instance.unit.unit
+        quality = data_point.quality
+        caution_flag = data_point.caution_flag
+        replicate = data_point.replicate
+        # TODO ADD OTHER STUFF
+        notes = data_point.notes
+
+        if organ_model:
+            organ_model = organ_model.model_name
+
+        if REPLACED_DATA_POINT_CODE not in quality and (include_all or not quality):
+            data.append([
+                study_id,
+                chip_id,
+                cross_reference,
+                assay_plate_id,
+                assay_well_id,
+                times.get('day'),
+                times.get('hour'),
+                times.get('minute'),
+                device,
+                organ_model,
+                cells,
+                compound_treatment,
+                target,
+                method,
+                sample_location,
+                value,
+                value_unit,
+                replicate,
+                caution_flag,
+                quality,
+                notes
+            ])
+
+    return data
 
 def get_chip_readout_data_as_json(chip_ids, chip_data=None):
     if not chip_data:
@@ -1778,7 +1897,6 @@ switch = {
     'fetch_quality_indicators': fetch_quality_indicators,
     'send_ready_for_sign_off_email': send_ready_for_sign_off_email
 }
-
 
 def ajax(request):
     """Switch to correct function given POST call

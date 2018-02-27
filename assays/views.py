@@ -1,6 +1,7 @@
 # coding=utf-8
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.http import HttpResponse
+import json
 # from assays.models import *
 from cellsamples.models import CellSample
 # TODO TRIM THIS IMPORT
@@ -9,8 +10,9 @@ from assays.forms import *
 from django import forms
 
 # TODO REVISE SPAGHETTI CODE
-from assays.ajax import get_chip_readout_data_as_csv
+from assays.ajax import get_chip_readout_data_as_csv, get_chip_readout_data_as_list_of_lists
 from assays.utils import (
+    get_repro_data,
     parse_file_and_save,
     modify_qc_status_plate,
     modify_qc_status_chip,
@@ -75,7 +77,6 @@ import pytz
 # TODO It is probably more semantic to overwrite get_context_data and form_valid in lieu of post and get for updates
 # TODO ^ Update Views should be refactored soon
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
-
 
 def add_study_fields_to_form(self, form, add_study=False):
     """Adds study, group, and restricted to a form
@@ -3020,3 +3021,119 @@ class ReturnStudyData(StudyViewershipMixin, DetailView):
         # Return nothing otherwise
         else:
             return HttpResponse('', content_type='text/plain')
+
+class AssayRunReproducibility(StudyViewershipMixin, DetailView):
+    """Returns a form and processed statistical information. """
+
+    model = AssayRun
+    template_name = 'assays/reproducibility.html'
+
+    def get(self, request, *args, **kwargs):
+        if self.object:
+            self.object = self.get_object()
+            context = self.get_context_data(object=self.object)
+
+            context['study'] = AssayRun.objects.get(pk=self.kwargs['pk']).name
+
+            # If chip data
+            chip_readouts = AssayChipReadout.objects.filter(
+                chip_setup__assay_run_id_id=self.object
+            ).prefetch_related(
+                'chip_setup__assay_run_id'
+            )
+
+            # Boolean
+            #include_all = self.request.GET.get('include_all', False)
+            chip_data = get_chip_readout_data_as_list_of_lists(chip_readouts, include_header=True, include_all=False)
+
+            repro_data = get_repro_data(chip_data)
+
+            gas_list = repro_data['reproducibility_results_table']['data']
+            gas_list = json.dumps(gas_list)
+            context['gas_list'] = gas_list
+
+            mad_list = {}
+            cv_list = {}
+            chip_list = {}
+            comp_list = {}
+            for x in range(len(repro_data)-1):
+                # mad_list
+                mad_list[x+1] = {'columns':repro_data[x]['mad_score_matrix']['columns']}
+                for y in range(len(repro_data[x]['mad_score_matrix']['index'])):
+                    repro_data[x]['mad_score_matrix']['data'][y].insert(0, repro_data[x]['mad_score_matrix']['index'][y])
+                mad_list[x+1]['data'] = repro_data[x]['mad_score_matrix']['data']
+                # cv_list
+                if repro_data[x].get('comp_ICC_Value'):
+                    cv_list[x+1] = [['Time', 'CV (%)']]
+                    for y in range(len(repro_data[x]['CV_array']['index'])):
+                        repro_data[x]['CV_array']['data'][y].insert(0, repro_data[x]['CV_array']['index'][y])
+                    for entry in repro_data[x]['CV_array']['data']:
+                        cv_list[x+1].append(entry)
+                # chip_list
+                repro_data[x]['cv_chart']['columns'].insert(0,"Time (days)")
+                chip_list[x+1] = [repro_data[x]['cv_chart']['columns']]
+                for y in range(len(repro_data[x]['cv_chart']['index'])):
+                    repro_data[x]['cv_chart']['data'][y].insert(0, repro_data[x]['cv_chart']['index'][y])
+                for z in range(len(repro_data[x]['cv_chart']['data'])):
+                    chip_list[x+1].append(repro_data[x]['cv_chart']['data'][z])
+                # comp_list
+                if repro_data[x].get('comp_ICC_Value'):
+                    comp_list[x+1] = []
+                    for y in range(len(repro_data[x]['comp_ICC_Value']['Chip ID'])):
+                        comp_list[x+1].insert(y, [])
+                        comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Chip ID'][y])
+                        comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['ICC Absolute Agreement'][y])
+                        comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Missing Data Points'][y])
+
+            mad_list = json.dumps(mad_list)
+            context['mad_list'] = mad_list
+
+            cv_list = json.dumps(cv_list)
+            context['cv_list'] = cv_list
+
+            chip_list = json.dumps(chip_list)
+            context['chip_list'] = chip_list
+
+            comp_list = json.dumps(comp_list)
+            context['comp_list'] = comp_list
+
+        get_user_status_context(self, context)
+
+        return self.render_to_response(context)
+
+# TODO Class-based view for direct reproducibility access.
+class AssayRunReproducibilityList(OneGroupRequiredMixin, ListView):
+    """Displays all of the studies linked to groups that the user is part of"""
+    template_name = 'assays/assayrun_reproducibility_list.html'
+
+    def get_queryset(self):
+        queryset = AssayRun.objects.prefetch_related(
+            'created_by',
+            'group',
+            'signed_off_by'
+        )
+
+        # Display to users with either editor or viewer group or if unrestricted
+        group_names = list(set([group.name.replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]))
+
+        # NOTE: Also excludes signed off studies
+        queryset = queryset.filter(
+            group__name__in=group_names,
+            signed_off_by_id=None
+        )
+
+        get_queryset_with_organ_model_map(queryset)
+
+        get_queryset_with_number_of_data_points(queryset)
+
+        get_queryset_with_stakeholder_sign_off(queryset)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(GroupIndex, self).get_context_data(**kwargs)
+
+        # Adds the word "editable" to the page
+        context['editable'] = 'Editable '
+
+        return context
