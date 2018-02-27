@@ -8,12 +8,8 @@ $(document).ready(function() {
     });
 
     var ids = [
-        '#setups',
-        '#plate_setups',
-        '#readouts',
-        '#plate_readouts',
-        '#results',
-        '#plate_results'
+        '#matrices',
+        '#matrix_items'
     ];
 
     // var middleware_token = getCookie('csrftoken');
@@ -78,7 +74,7 @@ $(document).ready(function() {
 
     function process_email_request() {
         var data = {
-            call: 'send_ready_for_sign_off_email_old',
+            call: 'send_ready_for_sign_off_email',
             study: study_id,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };

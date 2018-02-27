@@ -1424,6 +1424,10 @@ class AssayStudy(FlaggableModel):
     # But to constrain by name, start_date, and study_types, we will need to do that in the forms.py file
     # Otherwise we can change study_types such that it is not longer a ManyToMany
     name = models.CharField(max_length=1000, verbose_name='Study Name')
+
+    # This will be used to avoid having to call related fields to get the full name all the time
+    # full_name = models.CharField(max_length=1200, verbose_name='Full Study Name')
+
     start_date = models.DateField(help_text='YYYY-MM-DD')
     description = models.CharField(max_length=8000, blank=True, default='')
 
@@ -1435,14 +1439,6 @@ class AssayStudy(FlaggableModel):
         help_text='Protocol File for Study'
     )
 
-    # We prefer adding multiple files at once, it seems
-    # Will we still upload files for an entire study?
-    # bulk_file = models.FileField(
-    #     upload_to=bulk_readout_file_location,
-    #     verbose_name='Data File',
-    #     blank=True, null=True
-    # )
-
     # TODO USE THIS INSTEAD OR GET RID OF IT
     study_types = models.ManyToManyField(AssayStudyType)
 
@@ -1450,9 +1446,6 @@ class AssayStudy(FlaggableModel):
     image = models.ImageField(upload_to='studies', null=True, blank=True)
 
     use_in_calculations = models.BooleanField(default=False)
-
-    # Group may need to be explicitly defined here as opposed to using a mixin
-    # group = models.ForeignKey(Group, help_text='Bind to a group')
 
     # Access groups
     access_groups = models.ManyToManyField(Group, blank=True, related_name='study_access_groups')

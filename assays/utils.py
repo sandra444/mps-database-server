@@ -3198,6 +3198,7 @@ class AssayFileProcessor:
 
             cursor.executemany(query, query_list)
             transaction.commit()
+            cursor.close()
 
         # Be sure to subtract the number of replaced points!
         self.preview_data.update({

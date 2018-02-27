@@ -86,7 +86,7 @@ $(document).ready(function() {
                 data: {
                     // TODO TODO TODO CALL FOR DATA
                     call: 'fetch_item_data',
-                    id: matrix_item_idd,
+                    matrix_item: matrix_item_idd,
                     csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 success: function (json) {
@@ -484,7 +484,7 @@ $(document).ready(function() {
         var data = {
             call: 'fetch_data_points',
             study: study_id,
-            matrix_item: matrix_item_idd,
+            matrix_item: matrix_item_id,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
             dynamic_excluded: JSON.stringify(dynamic_excluded)
         };

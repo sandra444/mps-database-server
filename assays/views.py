@@ -676,7 +676,8 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
         return context
 
 
-def get_user_status_context(self, context):
+# DEPRECATED
+def get_user_status_context_old(self, context):
     """Takes the view and context, adds user_is_group_admin, editor, and stakeholder editor to the context"""
     user_group_names = {group.name for group in self.request.user.groups.all()}
 
@@ -684,6 +685,27 @@ def get_user_status_context(self, context):
     context['user_is_group_editor'] = self.object.group.name in user_group_names or context['user_is_group_admin']
 
     stakeholders = AssayRunStakeholder.objects.filter(
+        study_id=self.object.id
+    ).prefetch_related(
+        'group',
+        'study'
+    )
+
+    context['user_is_stakeholder_admin'] = False
+    for stakeholder in stakeholders:
+        if stakeholder.group.name + ADMIN_SUFFIX in user_group_names:
+            context['user_is_stakeholder_admin'] = True
+            break
+
+
+def get_user_status_context(self, context):
+    """Takes the view and context, adds user_is_group_admin, editor, and stakeholder editor to the context"""
+    user_group_names = {group.name for group in self.request.user.groups.all()}
+
+    context['user_is_group_admin'] = self.object.group.name + ADMIN_SUFFIX in user_group_names
+    context['user_is_group_editor'] = self.object.group.name in user_group_names or context['user_is_group_admin']
+
+    stakeholders = AssayStudyStakeholder.objects.filter(
         study_id=self.object.id
     ).prefetch_related(
         'group',
@@ -816,7 +838,7 @@ class StudyIndex(StudyViewershipMixin, DetailView):
         #         context['user_is_stakeholder_admin'] = True
         #         break
 
-        get_user_status_context(self, context)
+        get_user_status_context_old(self, context)
 
         context['ready_for_sign_off_form'] = ReadyForSignOffForm()
 
@@ -1533,7 +1555,7 @@ class AssayRunSummary(StudyViewershipMixin, DetailView):
             'unit__unit'
         )
 
-        get_user_status_context(self, context)
+        get_user_status_context_old(self, context)
 
         return self.render_to_response(context)
 
@@ -3389,18 +3411,34 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
         matrices = AssayMatrix.objects.filter(
             study=self.object
         ).prefetch_related(
-            *MATRIX_PREFETCH
+            'device',
+            'created_by',
         )
 
         items = AssayMatrixItem.objects.filter(
             matrix=matrices
         ).prefetch_related(
-            *MATRIX_ITEM_PREFETCH
+            'device',
+            'created_by',
+            'matrix'
         )
 
         # Cellsamples will always be the same
         context['matrices'] = matrices
         context['items'] = items
+
+        get_user_status_context(self, context)
+
+        context['ready_for_sign_off_form'] = ReadyForSignOffForm()
+
+        # Stakeholder status
+        context['stakeholder_sign_off'] = AssayStudyStakeholder.objects.filter(
+            study=self.object,
+            signed_off_by_id=None,
+            sign_off_required=True
+        ).count() == 0
+
+        context['detail'] = True
 
         return context
 
@@ -3420,6 +3458,7 @@ class AssayStudySummary(StudyViewerMixin, TemplateView):
         # Get the study
         study = get_object_or_404(AssayStudy, pk=self.kwargs['pk'])
 
+        # This gets a little odd, I make what would be the get_object call here so I can prefetch some things
         current_study = AssayStudy.objects.filter(id=study.id).prefetch_related(
             'assaystudyassay_set__target',
             'assaystudyassay_set__method',
@@ -3428,11 +3467,12 @@ class AssayStudySummary(StudyViewerMixin, TemplateView):
 
         context.update({
             'object': current_study,
-            'data_file_uploads': get_data_file_uploads(study=current_study)
+            'data_file_uploads': get_data_file_uploads(study=current_study),
+            'detail': True
         })
 
         # TODO TODO TODO TODO TODO PERMISSIONS
-        # get_user_status_context(self, context)
+        get_user_status_context(self, context)
 
         return context
 
