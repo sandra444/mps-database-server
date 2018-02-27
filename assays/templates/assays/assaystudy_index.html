@@ -93,7 +93,7 @@
                     <td>
                         <a class="btn btn-primary"
                            {# THIS SHOULD USE URL #}
-                           href="/assays/assaymatrix/{{ matrix.id }}/">
+                           href="{{ matrix.get_absolute_url }}">
                             View/Edit
                         </a>
                     </td>
@@ -103,7 +103,14 @@
                         {{ matrix.full_creator }}
                     </td>
                     <td>
-                        {# TODO #}
+                        {% if matrix.signed_off_by %}
+                            <span hidden>1</span>
+                            <span title="This entry was validated by {{ matrix.full_reviewer }} on {{ matrix.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if item.flagged %}
+                            <span hidden>0</span>
+                            <span title="This entry is flagged for review: '{{ matrix.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}
@@ -140,18 +147,24 @@
                 <tr id={{ item.id }} name={{ item.id }}>
                     <td>
                         <a class="btn btn-primary"
-                           {# THIS SHOULD USE URL #}
-                           href="/assays/assaymatrixitem/{{ item.id }}/update">
+                           href="{{ item.get_absolute_url }}">
                             View/Edit
                         </a>
                     </td>
                     <td>{{ item.name }}</td>
-                    <td>{{ item.setup.device }}</td>
+                    <td>{{ item.device }}</td>
                     <td>
                         {{ item.full_creator }}
                     </td>
                     <td>
-                        {# TODO #}
+                        {% if item.signed_off_by %}
+                            <span hidden>1</span>
+                            <span title="This entry was validated by {{ item.full_reviewer }} on {{ item.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if item.flagged %}
+                            <span hidden>0</span>
+                            <span title="This entry is flagged for review: '{{ item.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}
