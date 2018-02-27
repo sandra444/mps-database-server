@@ -1593,7 +1593,8 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         ('add_compounds', 'Add Compounds'),
         ('add_cells', 'Add Cells'),
         ('add_notes', 'Add Notes/Notebook Information'),
-        ('copy', 'Copy Contents'),
+        # ADD BACK LATER
+        # ('copy', 'Copy Contents'),
         ('clear', 'Clear Contents')
     ))
 
