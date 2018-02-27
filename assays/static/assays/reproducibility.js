@@ -28,7 +28,7 @@ $(document).ready(function () {
                 }
             }
             },
-            { title: "Replica Group", data: '9', type: "num" },
+            { title: "Replica Group", data: '9', type: "numeric" },
             { title: "Organ Model", data: '0' },
             { title: "Cells", data: '1' },
             { title: "Compound<br>Treatment(s)", data: '2' },
