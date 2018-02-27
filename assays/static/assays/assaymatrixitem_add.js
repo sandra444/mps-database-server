@@ -20,7 +20,7 @@ $(document).ready(function() {
     var dynamic_excluded_current = {};
     var dynamic_excluded_new = {};
 
-    var matrix_item_idd = get_matrix_item();
+    var matrix_item_id = get_matrix_item();
     var study_id = get_study_id();
 
     // Name for the charts for binding events etc
@@ -77,7 +77,7 @@ $(document).ready(function() {
     }
 
     function get_readout() {
-        if (matrix_item_idd) {
+        if (matrix_item_id) {
             // Get the table
             $.ajax({
                 url: "/assays_ajax/",
@@ -86,7 +86,7 @@ $(document).ready(function() {
                 data: {
                     // TODO TODO TODO CALL FOR DATA
                     call: 'fetch_item_data',
-                    matrix_item: matrix_item_idd,
+                    matrix_item: matrix_item_id,
                     csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 success: function (json) {
@@ -123,7 +123,7 @@ $(document).ready(function() {
     //     var data = {
     //         call: 'validate_individual_chip_file',
     //         study: study_id,
-    //         readout: matrix_item_idd,
+    //         readout: matrix_item_id,
     //         csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
     //         dynamic_excluded: JSON.stringify(dynamic_excluded),
     //         include_table: include_table
