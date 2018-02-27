@@ -1,9 +1,108 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block breadcrumbs %}
-    <li class="active">Reproducibility</li>
+{% block load %}
+    <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/cookies.js" %}"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="{% static "assays/reproducibility.js" %}"></script>
+    <script src="{% static "assays/chart_display.js" %}"></script>
+    <script src="{% static "js/display_datatable.js" %}"></script>
+    <script type='text/javascript'>
+    var gas_list = JSON.parse("{{ gas_list|escapejs|safe }}");
+    var mad_list = JSON.parse("{{ mad_list|escapejs|safe }}");
+    var comp_list = JSON.parse("{{ comp_list|escapejs|safe }}");
+    var cv_list = JSON.parse("{{ cv_list|escapejs|safe }}");
+    var chip_list = JSON.parse("{{ chip_list|escapejs|safe }}");
+    </script>
+    <style>
+    /*Dirty, vile styling*/
+    input[type=checkbox] {
+      transform: scale(2.5);
+    }
+    </style>
 {% endblock %}
 
-{% block content %}
-<h1>This page will contain a Reproducibility example</h1>
+{% block breadcrumbs %}
+    <li class="active">Reproducibility Analysis for {{ study }}</li>
+{% endblock %}
+
+{% block fluid-content %}
+    {# <form enctype="multipart/form-data" class="form-horizontal" method="post" >#}
+
+    <h2 class='text-center'>
+        Reproducibility for {{ study }}
+    </h2>
+    <hr>
+    <br>
+
+    <div style='padding: 10px;'>
+        <label>Reproducibility Grouping Table</label>
+        <table id='gas-table' class='table table-hover table-striped table-bordered'>
+
+        </table>
+    </div>
+
+    <br><hr><br>
+    <div id='clone-container'>
+        <div id='repro-data' class='container hidden'>
+            <div class='row'>
+                <div class='col-xs-12'><h2 id='repro-title' class='text-center'></h2></div>
+            </div>
+            <br>
+            <div class='row'>
+                <div class='col-md-6'>
+                    <label>Selection Parameters</label>
+                    <table id='selection-parameters' class='table-bordered'>
+                        <tr><th>Study ID</th><td class='studyId'>{{study}}</td></tr>
+                    </table>
+                    <br>
+                    <label>Chip Replicates Reproducibility Indices</label>
+                    <table id='chip-rep-rep-ind' class='table-hover table-striped table-bordered'>
+
+                    </table>
+                </div>
+                <div class='col-md-6'>
+                    <div id='chart1'>
+
+                    </div>
+                    <div id='chart2'>
+
+                    </div>
+                </div>
+            </div>
+            <div class='row' style='text-align: right;'>
+                <div class='col-md-12'>
+                    <h3>Reproducibility Status: <span id='repro-status'></span></h3>
+                </div>
+            </div>
+            <br><br>
+            <div class='row'>
+                <div class='col-md-6'>
+                    <label>Chip MAD Scores of Assay Target/Analyte Measurements</label>
+                    <table id='mad-score-matrix' class='table-hover table-striped table-bordered pull-left'>
+
+                    </table>
+                </div>
+                <div class='col-md-6'>
+                    <label>Compare with the Median of the Chip Observations</label>
+                    <table id='chip-comp-med' class='table-hover table-striped table-bordered pull-left'>
+
+                    </table>
+                </div>
+            </div>
+            <br>
+            <div id='overflow' class='row'>
+
+            </div>
+            <br><hr><br>
+        </div>
+    </div>
+
+    <br>
+
+    {% csrf_token %}
+
+    {% include 'errors.html' %}
+
 {% endblock %}
