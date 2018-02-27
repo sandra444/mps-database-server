@@ -2344,7 +2344,7 @@ def fetch_item_data(request):
     id -- the ID of the Item of interest
     """
 
-    matrix_item_id = request.POST.get('matrix_item_id', '')
+    matrix_item_id = request.POST.get('matrix_item', '')
 
     if not matrix_item_id:
         return HttpResponseServerError()
