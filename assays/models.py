@@ -1408,6 +1408,16 @@ class AssayStudy(FlaggableModel):
     class Meta(object):
         verbose_name = 'Study'
         verbose_name_plural = 'Studies'
+        # TEMPORARY, SUBJECT TO REVISION
+        # This would be useless if I decided to use a M2M instead
+        unique_together = ((
+            'name',
+            'efficacy',
+            'disease',
+            'cell_characterization',
+            'start_date',
+            'group'
+        ))
 
     toxicity = models.BooleanField(default=False)
     efficacy = models.BooleanField(default=False)
@@ -1425,6 +1435,7 @@ class AssayStudy(FlaggableModel):
     # Otherwise we can change study_types such that it is not longer a ManyToMany
     name = models.CharField(max_length=1000, verbose_name='Study Name')
 
+    # Uncertain whether or not I will do this
     # This will be used to avoid having to call related fields to get the full name all the time
     # full_name = models.CharField(max_length=1200, verbose_name='Full Study Name')
 
