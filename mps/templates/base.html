@@ -92,34 +92,22 @@
                 'onclick',
                 "window.open('/help/"
                 + anchor +
-                "','win','toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')"
+                "','win','toolbars=0,width=1200,height=760,left=200,top=200,scrollbars=1,resizable=1')"
             );
 
-        if (url.indexOf('/assaychipsetup/') > -1) {
-          anchor = '#chipsetups'
+        if (url.indexOf('/assaymatrix/') > -1) {
+          anchor = '#matrices'
         }
-        else if (url.indexOf('/assaychipreadout/') > -1) {
-          anchor = '#chipreadouts'
+        else if (url.indexOf('/assaymatrixitem/') > -1) {
+          anchor = '#matrixitems'
         }
-        else if (url.indexOf('/assaychiptestresult/') > -1) {
-          anchor = '#chipresults'
-        }
-{#        else if (url.indexOf('/assayplatesetup/') > -1) {#}
-{#          anchor = '#platesetups'#}
-{#        }#}
-{#        else if (url.indexOf('/assayplatereadout/') > -1) {#}
-{#          anchor = '#platereadouts'#}
-{#        }#}
-{#        else if (url.indexOf('/assayplatetestresult/') > -1) {#}
-{#          anchor = '#plateresults'#}
-{#        }#}
-        else if (url.indexOf('/bulk/') > -1) {
-          anchor = '#bulk'
+        else if (url.indexOf('/upload/') > -1) {
+          anchor = '#uploadingdata'
         }
 {#        else if (url.indexOf('/assaylayout/') > -1) {#}
 {#          anchor = '#assaylayouts'#}
 {#        }#}
-        else if (url.indexOf('/studyconfiguration/') > -1) {
+        else if (url.indexOf('/assaystudyconfiguration/') > -1) {
           anchor = '#studyconfigurations'
         }
         else if (url.indexOf('/model/') > -1) {
