@@ -830,10 +830,10 @@ class ChipTestResultInlineFormset(BaseInlineFormSet):
             raise forms.ValidationError('You must have at least one result.')
 
 
-class StudyConfigurationForm(SignOffMixin, forms.ModelForm):
+class AssayStudyConfigurationForm(SignOffMixin, forms.ModelForm):
     """Frontend Form for Study Configurations"""
     class Meta(object):
-        model = StudyConfiguration
+        model = AssayStudyConfiguration
         widgets = {
             'name': forms.Textarea(attrs={'cols': 50, 'rows': 1}),
             'media_composition': forms.Textarea(attrs={'cols': 50, 'rows': 3}),

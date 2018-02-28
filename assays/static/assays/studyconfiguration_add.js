@@ -33,29 +33,31 @@ $(document).ready(function () {
 
     function getValues() {
         // Selector for all inline rows
-        var inlines = $("tr[id*='studymodel_set']");
+        var inlines = $("tr[id*='assaystudymodel_set']");
         // Returned array of nodes
         var data = [];
 
         // For every inline (i is the index)
-        for (var i in inlines) {
+        $.each(inlines, function(i) {
             // Get the label
-            var label = $('#id_studymodel_set-'+ i +'-label').val();
+            var label = $('#id_assaystudymodel_set-'+ i +'-label').val();
             // Get the organ
-            var organ = $('#id_studymodel_set-'+ i +'-organ').val();
-            var organ_name = $( '#id_studymodel_set-'+ i +'-organ option:selected').text();
+            var organ = $('#id_assaystudymodel_set-'+ i +'-organ').val();
+            var organ_name = $( '#id_assaystudymodel_set-'+ i +'-organ option:selected').text();
             // Get the sequence #
-            var sequence = $('#id_studymodel_set-'+ i +'-sequence_number').val();
+            var sequence = $('#id_assaystudymodel_set-'+ i +'-sequence_number').val();
             // Get the outputs
-            var output = $('#id_studymodel_set-'+ i +'-output').val();
+            var output = $('#id_assaystudymodel_set-'+ i +'-output').val();
             // Get the integration mode (coupling) (1 for connected and 0 for not connected)
-            var connection = Math.floor($('#id_studymodel_set-'+ i + '-integration_mode').val());
+            var connection = Math.floor($('#id_assaystudymodel_set-'+ i + '-integration_mode').val());
+
+            // console.log(connection);
 
             // Only add complete nodes
             if (label && organ && sequence) {
                 data.push({'label': label, 'organ': organ, 'sequence': sequence, 'connection': connection, 'organ_name': organ_name, 'output': output});
             }
-        }
+        });
 
         // Sort the data by sequence
         _.sortBy(data, function(o) { return o.sequence; });
@@ -84,13 +86,13 @@ $(document).ready(function () {
 
                 var target = data[j];
                 var label = target.label;
-                var connection = target.connection;
+                var connection = source.connection;
 
                 var intermediate = {};
 
                 if (outputs.indexOf(label) > -1) {
                     links.push({'source':source, 'target':intermediate }, {'source':intermediate, 'target':target });
-                    bilinks.push([source,intermediate,target,connection]);
+                    bilinks.push([source, intermediate, target, connection]);
                     nodes.push(intermediate);
                 }
             }
@@ -177,7 +179,7 @@ $(document).ready(function () {
             // Use preposterous workaround on Internet Explorer
             // Micro$oft doesn't care, at all
             if (ms_ie) {
-                link.attr('marker-end', function(d) { return ie_tick % 2 == 0 ? 'url(#arrow_ie)' : 'url(#arrow)'})
+                link.attr('marker-end', function(d) { return ie_tick % 2 == 0 ? 'url(#arrow_ie)' : 'url(#arrow)'});
                 ie_tick += 1;
             }
         });
@@ -239,7 +241,7 @@ $(document).ready(function () {
     makeGraph();
 
     // Whenever one of the inputs change
-    $("body").on("change", "tr [id*='studymodel_set']", function(event) {
+    $("body").on("change", "tr [id*='assaystudymodel_set']", function(event) {
         refresh();
     });
 

@@ -8,7 +8,7 @@ Note that the code for templates can be found here
 from django.contrib import admin
 from django import forms
 # from assays.forms import (
-#     StudyConfigurationForm,
+#     AssayStudyConfigurationForm,
 #     AssayChipReadoutInlineFormset,
 #     AssayPlateReadoutInlineFormset,
 # )
@@ -37,7 +37,7 @@ from assays.resource import *
 # from django.db import connection, transaction
 # from urllib import unquote
 
-from .forms import StudyConfigurationForm, AssayStudyFormAdmin
+from .forms import AssayStudyConfigurationForm, AssayStudyFormAdmin
 
 from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 import os
@@ -1910,9 +1910,9 @@ class AssayRunAdmin(LockableAdmin):
 admin.site.register(AssayRun, AssayRunAdmin)
 
 
-class StudyModelInline(admin.TabularInline):
+class AssayStudyModelInline(admin.TabularInline):
     """Inline for Study Configurations"""
-    model = StudyModel
+    model = AssayStudyModel
     verbose_name = 'Study Model'
     fields = (
         (
@@ -1925,13 +1925,13 @@ class StudyModelInline(admin.TabularInline):
         css = {'all': ('css/hide_admin_original.css',)}
 
 
-class StudyConfigurationAdmin(LockableAdmin):
+class AssayStudyConfigurationAdmin(LockableAdmin):
     """Admin for study configurations"""
 
     class Media(object):
         js = ('js/inline_fix.js',)
 
-    form = StudyConfigurationForm
+    form = AssayStudyConfigurationForm
     save_on_top = True
     list_per_page = 300
     list_display = ('name',)
@@ -1956,10 +1956,10 @@ class StudyConfigurationAdmin(LockableAdmin):
             }
         ),
     )
-    inlines = [StudyModelInline]
+    inlines = [AssayStudyModelInline]
 
 
-admin.site.register(StudyConfiguration, StudyConfigurationAdmin)
+admin.site.register(AssayStudyConfiguration, AssayStudyConfigurationAdmin)
 
 
 class AssayTargetFormAdmin(forms.ModelForm):

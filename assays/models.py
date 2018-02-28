@@ -652,7 +652,7 @@ class AssayPlateTestResult(FlaggableModel):
         return '/assays/assayplatetestresult/{}/delete/'.format(self.id)
 
 
-class StudyConfiguration(LockableModel):
+class AssayStudyConfiguration(LockableModel):
     """Defines how chips are connected together (for integrated studies)"""
 
     class Meta(object):
@@ -683,10 +683,10 @@ class StudyConfiguration(LockableModel):
         return '/assays/studyconfiguration/'
 
 
-class StudyModel(models.Model):
+class AssayStudyModel(models.Model):
     """Individual connections for integrated models"""
 
-    study_configuration = models.ForeignKey(StudyConfiguration)
+    study_configuration = models.ForeignKey(AssayStudyConfiguration)
     label = models.CharField(max_length=2)
     organ = models.ForeignKey(OrganModel)
     sequence_number = models.IntegerField()
@@ -722,7 +722,7 @@ class AssayRun(FlaggableModel):
     # NOW REFERRED TO AS "Chip Characterization"
     cell_characterization = models.BooleanField(default=False)
     # Subject to change
-    study_configuration = models.ForeignKey(StudyConfiguration, blank=True, null=True)
+    study_configuration = models.ForeignKey(AssayStudyConfiguration, blank=True, null=True)
     name = models.TextField(default='Study-01', verbose_name='Study Name',
                             help_text='Name-###')
     start_date = models.DateField(help_text='YYYY-MM-DD')
@@ -1427,8 +1427,8 @@ class AssayStudy(FlaggableModel):
     cell_characterization = models.BooleanField(default=False)
 
     # Subject to change
-    # Perhaps we will not continue to use StudyConfiguration (the table name for which should arguably be changed!)
-    study_configuration = models.ForeignKey(StudyConfiguration, blank=True, null=True)
+    # NOTE THAT THE TABLE IS NOW NAMED AssayStudyConfiguration to adhere to standards
+    study_configuration = models.ForeignKey(AssayStudyConfiguration, blank=True, null=True)
     # Whether or not the name should be unique is an interesting question
     # We could have a constraint on the combination of name and start_date
     # But to constrain by name, start_date, and study_types, we will need to do that in the forms.py file
@@ -2043,41 +2043,6 @@ class AssayStudySupportingData(models.Model):
 #
 #     def __unicode__(self):
 #         return urllib.unquote(self.file_location.split('/')[-1])
-
-
-# TODO ADD ASSAY TO MODEL NAMES
-# TODO REMEMBER TO REPLACE ALL OCCURENCES AFTER DOING THIS
-class AssayStudyConfiguration(LockableModel):
-    """Defines how chips are connected together (for integrated studies)"""
-
-    class Meta(object):
-        verbose_name = 'Study Configuration'
-
-    # Length subject to change
-    name = models.CharField(max_length=255, unique=True)
-
-    media_composition = models.CharField(max_length=1000, blank=True, default='')
-    hardware_description = models.CharField(max_length=1000, blank=True, default='')
-
-    def __unicode__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        return '/assays/studyconfiguration/{}/'.format(self.id)
-
-    def get_post_submission_url(self):
-        return '/assays/studyconfiguration/'
-
-
-class AssayStudyModel(models.Model):
-    """Individual connections for integrated models"""
-    study_configuration = models.ForeignKey(AssayStudyConfiguration)
-    label = models.CharField(max_length=2)
-    organ = models.ForeignKey(OrganModel)
-    sequence_number = models.IntegerField()
-    output = models.CharField(max_length=20, blank=True, default='')
-    # Subject to change
-    integration_mode = models.CharField(max_length=13, default='1', choices=(('0', 'Functional'), ('1', 'Physical')))
 
 
 # TODO Rename PhysicalUnits to PhysicalUnit
