@@ -1782,6 +1782,7 @@ def get_data_as_json(ids, data_points=None):
             )
 
         data_point_fields = {
+            'id': data_point.id,
             'name': name,
             'assay_plate_id': assay_plate_id,
             'assay_well_id': assay_well_id,
@@ -2083,7 +2084,7 @@ def get_data_points_for_charting(
         excluded = raw.excluded
 
         # TODO Should probably just use dynamic_excluded instead of quality for this
-        if value is not None and not replaced and (include_all or not dynamic_excluded.get(raw.id, excluded)):
+        if value is not None and not replaced and (include_all or not dynamic_excluded.get(unicode(raw.id), excluded)):
             if truncate_negative and value < 0:
                 value = 0
             # Get tag for data point

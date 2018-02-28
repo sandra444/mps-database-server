@@ -307,26 +307,21 @@ $(document).ready(function() {
 
             var col_excluded = $('<td>');
 
-            var excluded_box = $('<input>')
+            var excluded_input = $('<input>')
                 .attr('type', 'checkbox')
                 // .attr('id', i)
                 .css('width', 50)
-                .addClass('excluded');
-
-            var excluded_input = $('<input>')
-                .css('visibility', 'hidden')
-                .css('width', 0)
-                .attr('name', index)
-                .addClass('excluded-input');
+                .attr('data-matrix-item-pk', data_point.id)
+                // .attr('name', 'assaydatapoint-' + data_point.id + '-exclude')
+                // .attr('id', 'id_assaydatapoint-' + data_point.id + '-exclude')
+                .addClass('excluded excluded-input');
 
             if (excluded) {
-                excluded_box.prop('checked', true);
-                excluded_input.val(excluded);
+                excluded_input.prop('checked', true);
             }
 
             if (exist || every) {
                 col_excluded.append(
-                    excluded_box,
                     excluded_input
                 );
             }
@@ -384,31 +379,7 @@ $(document).ready(function() {
         all_excluded.change(function() {
             var current_value = $(this).prop('checked');
             var current_row = $(this).parent().parent();
-            var current_input = $(this).parent().find('.excluded-input');
-
-            // Make sure that the value is empty string rather than boolean
-            if (!current_value) {
-                current_value = '';
-                current_input.val('');
-            }
-            else {
-                current_input.val('X');
-            }
-
-            // TODO REPLACE INDEX WITH THE ACTUAL DATAPOINT PK
-            // var index = JSON.parse(current_input.attr('name'));
-            // index = [
-            //     index.chip_id,
-            //     index.assay_plate_id,
-            //     index.assay_well_id,
-            //     ''+index.study_assay_id,
-            //     ''+index.sample_location_id,
-            //     ''+index.time,
-            //     index.replicate,
-            //     ''+index.update_number
-            // ];
-            //
-            // var joined_index = index.join('~');
+            var current_pk = Math.floor($(this).attr('data-matrix-item-pk'));
 
             // Change color of parent if there is input
             if (current_value) {
@@ -426,11 +397,11 @@ $(document).ready(function() {
 
             if (exist) {
                 // TODO
-                dynamic_excluded_current[joined_index] = current_value;
+                dynamic_excluded_current[current_pk] = current_value;
             }
             else {
                 // TODO
-                dynamic_excluded_new[joined_index] = current_value;
+                dynamic_excluded_new[current_pk] = current_value;
             }
 
             // Validate again if there is a file
@@ -567,16 +538,6 @@ $(document).ready(function() {
         refresh_chart_only();
     });
 
-    // Special operations for pre-submission
-    $('form').submit(function() {
-        if (current_data_table) {
-            current_data_table.search('');
-            $('input[type=search]').val('');
-            current_data_table.draw();
-            $('.initially-excluded').show();
-        }
-    });
-    // TODO END
 
     function get_organ_models(device) {
         if (device) {
@@ -706,18 +667,31 @@ $(document).ready(function() {
     device.change(function() {
         // Get organ models
         get_organ_models(device.val());
-    });
+    }).trigger('change');
 
     organ_model.change(function() {
         // Get and display correct protocol options
         get_protocols(organ_model.val());
-    });
+    }).trigger('change');
 
     protocol.change(function() {
         display_protocol(protocol.val());
-    });
+    }).trigger('change');
 
-    device.trigger('change');
-    organ_model.trigger('change');
-    protocol.trigger('change');
+    // device.trigger('change');
+    // organ_model.trigger('change');
+    // protocol.trigger('change');
+
+    // Post submission operation
+    // Special operations for pre-submission
+    $('form').submit(function() {
+        if (current_data_table) {
+            current_data_table.search('');
+            $('input[type=search]').val('');
+            current_data_table.draw();
+            $('.initially-excluded').show();
+        }
+        // Add the exclusions
+        $('#id_dynamic_exclusion').val(JSON.stringify(dynamic_excluded_current));
+    });
 });

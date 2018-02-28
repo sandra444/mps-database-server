@@ -2251,7 +2251,7 @@ class AssayMethodAdmin(LockableAdmin):
 
 admin.site.register(AssayMethod, AssayMethodAdmin)
 
-admin.site.register(AssayStudyType)
+# admin.site.register(AssayStudyType)
 
 
 class AssayStudyAssayInline(admin.TabularInline):

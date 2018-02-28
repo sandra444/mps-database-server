@@ -220,19 +220,19 @@
         </div>
     </div>
 
-    {{ assay_instance_formset.management_form }}
+    {{ study_assay_formset.management_form }}
     <legend>Assays</legend>
 
-    {% if assay_instance_formset.non_form_errors %}
+    {% if study_assay_formset.non_form_errors %}
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
             <span class="sr-only">Error:</span>
-            {{ assay_instance_formset.non_form_errors }}
+            {{ study_assay_formset.non_form_errors }}
         </div>
     {% endif %}
 
-    {% if assay_instance_formset.errors %}
-        {% for dict in assay_instance_formset.errors %}
+    {% if study_assay_formset.errors %}
+        {% for dict in study_assay_formset.errors %}
             {% for key,value in dict.items %}
                 {% if key %}
                     <div class="alert alert-danger" role="alert">

@@ -1385,16 +1385,16 @@ class AssayInstance(models.Model):
 
 # Preliminary schema
 # Please note that I opted to use CharFields in lieu of TextFields (we can limit characters that way)
-class AssayStudyType(LockableModel):
-    """Used as in a many-to-many field in Assay Study to indicate the purpose(s) of the Study"""
-    name = models.CharField(max_length=255, unique=True)
-    # Abbreviation for the study type
-    code = models.CharField(max_length=20, unique=True)
-    # Description as per usual
-    description = models.CharField(max_length=2000, default='')
-
-    def __unicode__(self):
-        return self.name
+# class AssayStudyType(LockableModel):
+#     """Used as in a many-to-many field in Assay Study to indicate the purpose(s) of the Study"""
+#     name = models.CharField(max_length=255, unique=True)
+#     # Abbreviation for the study type
+#     code = models.CharField(max_length=20, unique=True)
+#     # Description as per usual
+#     description = models.CharField(max_length=2000, default='')
+#
+#     def __unicode__(self):
+#         return self.name
 
 
 # TODO SUBJECT TO CHANGE
@@ -1440,7 +1440,7 @@ class AssayStudy(FlaggableModel):
     )
 
     # TODO USE THIS INSTEAD OR GET RID OF IT
-    study_types = models.ManyToManyField(AssayStudyType)
+    # study_types = models.ManyToManyField(AssayStudyType)
 
     # Image for the study (some illustrative image)
     image = models.ImageField(upload_to='studies', null=True, blank=True)
@@ -1466,11 +1466,11 @@ class AssayStudy(FlaggableModel):
     )
 
     # TODO
-    def get_study_types_string(self):
-        study_types = '-'.join(
-            sorted([study_type.code for study_type in self.study_types.all()])
-        )
-        return study_types
+    # def get_study_types_string(self):
+    #     study_types = '-'.join(
+    #         sorted([study_type.code for study_type in self.study_types.all()])
+    #     )
+    #     return study_types
 
     def study_types_string(self):
         current_types = []

@@ -2493,7 +2493,7 @@ class AssayMatrixItemFullForm(SignOffMixin, forms.ModelForm):
             'variance': forms.Textarea(attrs={'cols': 50, 'rows': 2}),
         }
         # Assay Run ID is always bound to the parent Study
-        exclude = ('study',) + tracking + restricted
+        exclude = ('study', 'matrix', 'column_index', 'row_index') + tracking + restricted
 
     def clean(self):
         """Cleans the Chip Setup Form
@@ -2505,8 +2505,8 @@ class AssayMatrixItemFullForm(SignOffMixin, forms.ModelForm):
         super(AssayMatrixItemFullForm, self).clean()
 
         # Make sure the barcode/ID is unique in the study
-        if AssayMatrixItemFullForm.objects.filter(
-                study=self.instance.assay_run_id,
+        if AssayMatrixItem.objects.filter(
+                study=self.instance.study,
                 name=self.cleaned_data.get('name')
         ).exclude(id=self.instance.id):
             raise forms.ValidationError({'name': ['ID/Barcode must be unique within study.']})

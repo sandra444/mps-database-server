@@ -121,7 +121,7 @@ from mps.base.models import save_forms_with_tracking
 from django.contrib.auth.models import User
 from mps.settings import DEFAULT_FROM_EMAIL
 
-# import ujson as json
+import ujson as json
 import os
 
 from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
@@ -3364,25 +3364,11 @@ class AssayStudyUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         # TODO TODO TODO TODO
         if form.is_valid() and study_assay_formset.is_valid() and supporting_data_formset.is_valid():
-            if not form.instance.signed_off_by and form.cleaned_data.get('signed_off', ''):
-                # Magic strings are in poor taste, should use a template instead
-                subject = 'Study Sign Off Detected: {0}'.format(form.instance)
-                message = 'Hello Admins,\n\n' \
-                          'A study has been signed off on.\n\n' \
-                          'Study: {0}\nSign Off By: {1} {2}\nLink: https://mps.csb.pitt.edu{3}\n\n' \
-                          'Thanks,\nMPS'.format(
-                    form.instance,
-                    self.request.user.first_name,
-                    self.request.user.last_name,
-                    form.instance.get_absolute_url()
-                )
-
-                users_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
-
-                for user_to_be_alerted in users_to_be_alerted:
-                    user_to_be_alerted.email_user(subject, message, DEFAULT_FROM_EMAIL)
-
             save_forms_with_tracking(self, form, formset=[study_assay_formset, supporting_data_formset], update=True)
+
+            return redirect(
+                self.object.get_absolute_url()
+            )
         else:
             return self.render_to_response(
                 self.get_context_data(
@@ -4102,7 +4088,7 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
                 formsets_are_valid = False
 
         if form.is_valid() and formsets_are_valid:
-            save_forms_with_tracking(self, form, formset=formsets)
+            save_forms_with_tracking(self, form, formset=formsets, update=True)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -4235,11 +4221,55 @@ class AssayMatrixItemUpdate(StudyGroupMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        if form.is_valid():
-            save_forms_with_tracking(self, form)
+        compound_formset = AssaySetupCompoundInlineFormSetFactory(
+            self.request.POST,
+            instance=self.object,
+            # matrix=self.object.matrix
+        )
+        cell_formset = AssaySetupCellInlineFormSetFactory(
+            self.request.POST,
+            instance=self.object,
+            # matrix=self.object
+        )
+        setting_formset = AssaySetupSettingInlineFormSetFactory(
+            self.request.POST,
+            instance=self.object,
+            # matrix=self.object
+        )
+        if form.is_valid() and compound_formset.is_valid() and cell_formset.is_valid() and setting_formset.is_valid():
+            save_forms_with_tracking(self, form, update=True, formset=[
+                compound_formset,
+                cell_formset,
+                setting_formset
+            ])
+
+            try:
+                data_point_ids_to_update_raw = json.loads(form.data.get('dynamic_exclusion', '{}'))
+                data_point_ids_to_mark_excluded = [
+                    int(id) for id, value in data_point_ids_to_update_raw.items() if value
+                ]
+                data_point_ids_to_mark_included = [
+                    int(id) for id, value in data_point_ids_to_update_raw.items() if not value
+                ]
+                if data_point_ids_to_mark_excluded:
+                    AssayDataPoint.objects.filter(
+                        matrix_item=form.instance,
+                        id__in=data_point_ids_to_mark_excluded
+                    ).update(excluded=True)
+                if data_point_ids_to_mark_included:
+                    AssayDataPoint.objects.filter(
+                        matrix_item=form.instance,
+                        id__in=data_point_ids_to_mark_included
+                    ).update(excluded=False)
+            # EVIL EXCEPTION PLEASE REVISE
+            except:
+                pass
+
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(
+                form=form
+            ))
 
 
 class AssayMatrixItemDetail(StudyGroupMixin, DetailView):
