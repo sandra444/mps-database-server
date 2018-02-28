@@ -83,7 +83,7 @@
         {% endfor %}
     {% endif %}
 
-    <table class="table table-striped table-bordered table-hover table-nonfluid inlines" id="assayrunstakeholder_set-group" name="stakeholder">
+    <table class="table table-striped table-bordered table-hover table-nonfluid inlines" id="{{ stakeholder_formset.prefix }}-group" name="stakeholder">
         <thead>
             <tr>
                 <th>On Behalf of</th>
@@ -119,7 +119,7 @@
             {% for stakeholder in stakeholder_formset %}
                 <tr class="inline">
                     <td class="original" hidden>
-                        <input id="id_assayrunstakeholder_set-{{ forloop.counter0 }}-id" name="assayrunstakeholder_set-{{ forloop.counter0 }}-id" type="hidden" value="{{ stakeholder.id.value }}">
+                        <input id="id_{{ stakeholder_formset.prefix }}-{{ forloop.counter0 }}-id" name="{{ stakeholder_formset.prefix }}-{{ forloop.counter0 }}-id" type="hidden" value="{{ stakeholder.id.value }}">
                     </td>
                     <td>{{ stakeholder.instance.group }}</td>
                     <td hidden>{{ stakeholder.signed_off }}</td>
@@ -181,7 +181,7 @@
                     <td></td>
                 {% endif %}
             </tr>
-            {% for stakeholder in object.assayrunstakeholder_set.all %}
+            {% for stakeholder in object.assaystudystakeholder_set.all %}
                 <tr>
                     {% if stakeholder.signed_off_by %}
                         <td>

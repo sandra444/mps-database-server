@@ -2683,10 +2683,10 @@ class AssayStudyStakeholderFormSet(BaseInlineFormSet):
 
 # Really, all factories should be declared like so (will have to do this for upcoming revision)
 AssayStudyStakeholderFormSetFactory = inlineformset_factory(
-    AssayRun,
-    AssayRunStakeholder,
-    form=AssayRunStakeholderSignOffForm,
-    formset=AssayRunStakeholderFormSet,
+    AssayStudy,
+    AssayStudyStakeholder,
+    form=AssayStudyStakeholderSignOffForm,
+    formset=AssayStudyStakeholderFormSet,
     extra=0,
     can_delete=False
 )
