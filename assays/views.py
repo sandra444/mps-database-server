@@ -75,7 +75,8 @@ from assays.utils import (
     TIME_CONVERSIONS,
     CHIP_DATA_PREFETCH,
     REPLACED_DATA_POINT_CODE,
-    EXCLUDED_DATA_POINT_CODE
+    EXCLUDED_DATA_POINT_CODE,
+    AssayFileProcessor
 )
 
 from django.forms.models import inlineformset_factory
@@ -3214,7 +3215,7 @@ class AssayStudyEditableList(OneGroupRequiredMixin, ListView):
             'created_by',
             'group',
             'signed_off_by',
-            'study_types'
+            # 'study_types'
         )
 
         # Display to users with either editor or viewer group or if unrestricted
@@ -3247,7 +3248,7 @@ class AssayStudyList(LoginRequiredMixin, ListView):
             'created_by',
             'group',
             'signed_off_by',
-            'study_types'
+            # 'study_types'
         )
 
         # Display to users with either editor or viewer group or if unrestricted
@@ -3810,6 +3811,9 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
                 self.object.modified_by = self.request.user
                 self.object.save()
 
+                file_processor = AssayFileProcessor(self.object.bulk_file, self.object, self.request.user, save=True)
+                # Process the file
+                file_processor.process_file()
                 # parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
 
             # Only check if user is qualified editor
@@ -3827,9 +3831,7 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
                             data_file_upload = AssayDataFileUpload.objects.filter(study=self.object, id=current_id)
                             if data_file_upload:
                                 data_points_to_replace = AssayDataPoint.objects.filter(data_file_upload=data_file_upload).exclude(replaced=True)
-                                for data_point in data_points_to_replace:
-                                    data_point.replaced = True
-                                    data_point.save()
+                                data_points_to_replace.update(replaced=True)
 
             return redirect(self.object.get_absolute_url())
         else:

@@ -3121,6 +3121,7 @@ class AssayFileProcessor:
 
                 if self.save and not total_duplicate:
                     query_list.append((
+                        self.study.id,
                         matrix_item_id,
                         cross_reference,
                         assay_plate_id,
@@ -3134,7 +3135,8 @@ class AssayFileProcessor:
                         excluded,
                         notes,
                         replicate,
-                        update_number
+                        update_number,
+                        False
                     ))
                 elif not total_duplicate:
                     readout_data.append(
@@ -3193,8 +3195,8 @@ class AssayFileProcessor:
             # The generic query
             # TODO TODO TODO TODO
             query = ''' INSERT INTO "assays_assaydatapoint"
-                      ("matrix_item_id", "cross_reference", "assay_plate_id", "assay_well_id", "study_assay_id", "subtarget_id", "sample_location_id", "value", "time", "caution_flag", "excluded", "notes", "replicate", "update_number")
-                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+                      ("study_id", "matrix_item_id", "cross_reference", "assay_plate_id", "assay_well_id", "study_assay_id", "subtarget_id", "sample_location_id", "value", "time", "caution_flag", "excluded", "notes", "replicate", "update_number", "replaced")
+                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
 
             cursor.executemany(query, query_list)
             transaction.commit()
