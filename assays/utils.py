@@ -3136,6 +3136,7 @@ class AssayFileProcessor:
                         notes,
                         replicate,
                         update_number,
+                        self.data_file_upload.id,
                         False
                     ))
                 elif not total_duplicate:
@@ -3154,7 +3155,7 @@ class AssayFileProcessor:
                             notes=notes,
                             replicate=replicate,
                             update_number=update_number,
-                            data_file_upload=self.data_file_upload
+                            # data_file_upload=self.data_file_upload
                         )
                     )
 
@@ -3195,8 +3196,8 @@ class AssayFileProcessor:
             # The generic query
             # TODO TODO TODO TODO
             query = ''' INSERT INTO "assays_assaydatapoint"
-                      ("study_id", "matrix_item_id", "cross_reference", "assay_plate_id", "assay_well_id", "study_assay_id", "subtarget_id", "sample_location_id", "value", "time", "caution_flag", "excluded", "notes", "replicate", "update_number", "replaced")
-                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+                      ("study_id", "matrix_item_id", "cross_reference", "assay_plate_id", "assay_well_id", "study_assay_id", "subtarget_id", "sample_location_id", "value", "time", "caution_flag", "excluded", "notes", "replicate", "update_number", "data_file_upload_id", "replaced")
+                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
 
             cursor.executemany(query, query_list)
             transaction.commit()

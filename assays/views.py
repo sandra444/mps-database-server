@@ -3795,6 +3795,8 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
         # TODO TODO TODO
         context['version'] = len(os.listdir(MEDIA_ROOT + '/excel_templates/'))
 
+        context['data_file_uploads'] = get_data_file_uploads(study=self.object)
+
         return context
 
     def form_valid(self, form):
