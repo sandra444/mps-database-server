@@ -2812,7 +2812,7 @@ def chip_med_comp_ICC(X):
         df=pd.DataFrame(Y,columns=[col_index[col]])
         icc_comp_mat=pd.concat([icc_median, df], join='outer', axis=1)
         icc_comp_value.iloc[col][0]=col_index[col]
-        icc_comp_value.iloc[col][1]=ICC_A(icc_comp_mat)
+        icc_comp_value.iloc[col][1]=ICC_A(icc_comp_mat).round(2)
         icc_comp_value.iloc[col][2]=df_missing[col]
     return icc_comp_value
 
@@ -2960,16 +2960,16 @@ def get_repro_data(datafile):
         rep_matrix=rep_matrix[rep_matrix['Value Unit']==study_unique_group['Value Unit'][row]]
         #create replicate matrix for intra reproducibility analysis
         icc_pivot = pd.pivot_table(rep_matrix, values='Value', index='Time (day)',columns=['Chip ID'], aggfunc=np.mean)
-        group_id = 'Group ' + str(row+1) #Define group ID
+        group_id = str(row+1) #Define group ID
         reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Replicate Group')] = group_id
         reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('# of Chips/Wells')] = icc_pivot.shape[1]
         reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('# of Time Points')] = icc_pivot.shape[0]
 
         #Call MAD score function
-        mad_score_matrix=MAD_score(icc_pivot).round(5)
+        mad_score_matrix=MAD_score(icc_pivot).round(2)
         datadict[row]['mad_score_matrix'] = mad_score_matrix.to_dict('split')
 
-        cv_chart=scatter_plot_matrix(study_data,row).round(2).fillna('')
+        cv_chart=scatter_plot_matrix(study_data,row).fillna('')
         datadict[row]['cv_chart'] = cv_chart.to_dict('split')
 
         if icc_pivot.shape[0]>1 and icc_pivot.shape[1]>1:
