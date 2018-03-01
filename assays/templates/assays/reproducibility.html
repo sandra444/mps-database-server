@@ -24,20 +24,27 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li class="active">Reproducibility Analysis for {{ study }}</li>
+    <li><a href="#">Reproducibility</a></li>
+    <li><a href="/assays/{{ object.id }}/summary">{{ study }}</a></li>
+    <li class="active">Reproducibility Analysis</li>
 {% endblock %}
 
+{% block content %}
+    <div class="well">
+        <div class="row text-center">
+            <h1>
+                {{ object }}
+            </h1>
+        </div>
+        <div class="row text-center">
+            <a href="/assays/{{ object.id }}/summary" class="btn btn-info" role="button">Study Summary</a>
+        </div>
+    </div>
+{% endblock %}
+<br>
 {% block fluid-content %}
-    {# <form enctype="multipart/form-data" class="form-horizontal" method="post" >#}
-
-    <h2 class='text-center'>
-        Reproducibility for {{ study }}
-    </h2>
-    <hr>
-    <br>
-
     <div style='padding: 10px;'>
-        <label>Reproducibility Grouping Table</label>
+        <label>Replica Set Table</label>
         <table id='gas-table' class='table table-hover table-striped table-bordered'>
 
         </table>
@@ -71,7 +78,7 @@
                     </div>
                 </div>
             </div>
-            <div class='row' style='text-align: right;'>
+            <div class='row' style='text-align: left;'>
                 <div class='col-md-12'>
                     <h3>Reproducibility Status: <span id='repro-status'></span></h3>
                 </div>
@@ -79,13 +86,13 @@
             <br><br>
             <div class='row'>
                 <div class='col-md-6'>
-                    <label>Chip MAD Scores of Assay Target/Analyte Measurements</label>
+                    <label>Chip MAD Scores of Assay Target/Analyte Measurements <span title="MAD SCORE TOOLTIP" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></label>
                     <table id='mad-score-matrix' class='table-hover table-striped table-bordered pull-left'>
 
                     </table>
                 </div>
                 <div class='col-md-6'>
-                    <label>Compare with the Median of the Chip Observations</label>
+                    <label>Compare with the Median of the Chip Observations <span title="COMPARE MEDIAN TOOLTIP" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></label>
                     <table id='chip-comp-med' class='table-hover table-striped table-bordered pull-left'>
 
                     </table>

@@ -3033,6 +3033,7 @@ class AssayRunReproducibility(StudyViewershipMixin, DetailView):
             self.object = self.get_object()
             context = self.get_context_data(object=self.object)
 
+            context['pk'] = self.kwargs['pk']
             context['study'] = AssayRun.objects.get(pk=self.kwargs['pk']).name
 
             # If chip data
@@ -3131,7 +3132,7 @@ class AssayRunReproducibilityList(OneGroupRequiredMixin, ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
-        context = super(GroupIndex, self).get_context_data(**kwargs)
+        context = {super(GroupIndex, self).get_context_data(**kwargs)}
 
         # Adds the word "editable" to the page
         context['editable'] = 'Editable '
