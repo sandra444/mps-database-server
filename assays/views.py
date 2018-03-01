@@ -3911,9 +3911,18 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
         # Start blank
         # DON'T EVEN BOTHER WITH THE OTHER FORMSETS YET
         if self.request.POST:
-            context['item_formset'] = AssayMatrixItemFormSetFactory(self.request.POST, prefix='item', study=study)
+            context['item_formset'] = AssayMatrixItemFormSetFactory(
+                self.request.POST,
+                prefix='item',
+                study=study,
+                user=self.request.user
+            )
         else:
-            context['item_formset'] = AssayMatrixItemFormSetFactory(prefix='item', study=study)
+            context['item_formset'] = AssayMatrixItemFormSetFactory(
+                prefix='item',
+                study=study,
+                user=self.request.user
+            )
 
         return context
 
@@ -3922,7 +3931,13 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
         study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
 
         # Build the formset from POST
-        formset = AssayMatrixItemFormSetFactory(self.request.POST, instance=form.instance, prefix='item', study=study)
+        formset = AssayMatrixItemFormSetFactory(
+            self.request.POST,
+            instance=form.instance,
+            prefix='item',
+            study=study,
+            user=self.request.user
+        )
 
         if form.is_valid() and formset.is_valid():
             save_forms_with_tracking(self, form, formset=[formset])
@@ -3997,7 +4012,8 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
                 self.request.POST,
                 instance=self.object,
                 queryset=matrix_item_queryset,
-                prefix='item'
+                prefix='item',
+                user=self.request.user
             )
             context['compound_formset'] = AssaySetupCompoundFormSetFactory(
                 self.request.POST,
@@ -4021,7 +4037,8 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
             context['item_formset'] = AssayMatrixItemFormSetFactory(
                 instance=self.object,
                 queryset=matrix_item_queryset,
-                prefix='item'
+                prefix='item',
+                user=self.request.user
             )
             context['compound_formset'] = AssaySetupCompoundFormSetFactory(
                 queryset=compound_queryset,
@@ -4051,7 +4068,8 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
             self.request.POST,
             instance=self.object,
             queryset=matrix_item_queryset,
-            prefix='item'
+            prefix='item',
+            user=self.request.user
         )
         # Order no longer matters really
         compound_formset = AssaySetupCompoundFormSetFactory(

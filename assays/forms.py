@@ -2588,6 +2588,11 @@ class AssayMatrixItemFormSet(BaseInlineFormSetForcedUniqueness):
             if self.study:
                 form.instance.study = self.study
 
+            if form.instance.pk:
+                form.instance.modified_by = self.user
+            else:
+                form.instance.created_by = self.user
+
             for field in self.custom_fields:
                 form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
                 # form.fields[field].widget = forms.TextInput()
