@@ -468,7 +468,14 @@ $(document).ready(function () {
             type: 'POST'
         },
         columns: [
-            {data: 'checkbox', sSortDataType: 'dom-checkbox-defer', width: '10%'},
+            {
+                data: 'checkbox',
+                sSortDataType: 'dom-checkbox-defer',
+                width: '10%',
+                render:function ( data, type, row, meta ) {
+                    return '<input class="checkbox adverse-event" type="checkbox" value="' + data + '">';
+                }
+            },
             // {data: 'checkbox', type: 'dom-checkbox-defer', width: '10%'},
             {data: 'event'},
             {data: 'frequency'},
@@ -490,7 +497,14 @@ $(document).ready(function () {
             type: 'POST'
         },
         columns: [
-            {data: 'checkbox', sSortDataType: 'dom-checkbox-defer', width: '10%'},
+            {
+                data: 'checkbox',
+                sSortDataType: 'dom-checkbox-defer',
+                width: '10%',
+                render:function ( data, type, row, meta ) {
+                    return '<input class="checkbox compound" type="checkbox" value="' + data + '">';
+                }
+            },
             // {data: 'checkbox', type: 'dom-checkbox-defer', width: '10%'},
             {data: 'compound'},
             {data: 'frequency'},
