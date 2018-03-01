@@ -472,7 +472,7 @@ $(document).ready(function () {
                 data: 'checkbox',
                 sSortDataType: 'dom-checkbox-defer',
                 width: '10%',
-                render:function ( data, type, row, meta ) {
+                render:function (data, type, row, meta) {
                     return '<input class="checkbox adverse-event" type="checkbox" value="' + data + '">';
                 }
             },
@@ -501,7 +501,7 @@ $(document).ready(function () {
                 data: 'checkbox',
                 sSortDataType: 'dom-checkbox-defer',
                 width: '10%',
-                render:function ( data, type, row, meta ) {
+                render:function (data, type, row, meta) {
                     return '<input class="checkbox compound" type="checkbox" value="' + data + '">';
                 }
             },

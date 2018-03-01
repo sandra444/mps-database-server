@@ -188,15 +188,49 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
     chip_data - Readout raw data, optional, acquired with chip_ids if not provided
     both_assay_names - Indicates that both assay names should be returned (not currently used)
     """
+    data = get_chip_readout_data_as_list_of_lists(
+        chip_ids,
+        chip_data,
+        both_assay_names,
+        include_header,
+        include_all
+    )
+
+    for index in range(len(data)):
+        current_list = list(data[index])
+        data[index] = [unicode(item) for item in current_list]
+
+    string_io = StringIO()
+    csv_writer = UnicodeWriter(string_io)
+    for one_line_of_data in data:
+        csv_writer.writerow(one_line_of_data)
+
+    return string_io.getvalue()
+
+def get_chip_readout_data_as_list_of_lists(chip_ids, chip_data=None, both_assay_names=False, include_header=False, include_all=False):
+    """Returns readout data as a csv in the form of a string
+
+    Params:
+    chip_ids - Readout IDs to use to acquire chip data (if data not provided)
+    chip_data - Readout raw data, optional, acquired with chip_ids if not provided
+    both_assay_names - Indicates that both assay names should be returned (not currently used)
+    """
     related_compounds_map = {}
 
     if not chip_data:
         # TODO ORDER SUBJECT TO CHANGE
         chip_data = AssayChipRawData.objects.prefetch_related(
-            *CHIP_DATA_PREFETCH
-        ).prefetch_related(
-            'assay_chip_id__chip_setup__assaycompoundinstance_set',
-            'assay_chip_id__chip_setup__assaychipcells_set'
+            'assay_chip_id__chip_setup__assay_run_id',
+            'assay_instance__target',
+            'assay_instance__method',
+            'assay_instance__unit',
+            'assay_chip_id__chip_setup__device',
+            'assay_chip_id__chip_setup__organ_model',
+            'assay_chip_id__chip_setup__assaycompoundinstance_set__compound_instance__compound',
+            'assay_chip_id__chip_setup__assaycompoundinstance_set__concentration_unit',
+            'assay_chip_id__chip_setup__assaychipcells_set__cell_sample__cell_type__organ',
+            'assay_chip_id__chip_setup__assaychipcells_set__cell_sample__cell_subtype',
+            'sample_location'
         ).filter(
             assay_chip_id__in=chip_ids
         ).order_by(
@@ -237,10 +271,9 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         method = data_point.assay_instance.method.name
         sample_location = data_point.sample_location.name
 
-        device = data_point.assay_chip_id.chip_setup.device
+        device = data_point.assay_chip_id.chip_setup.device.name
         organ_model = data_point.assay_chip_id.chip_setup.organ_model
 
-        # Naive and more expensive than it needs to be
         cells = data_point.assay_chip_id.chip_setup.stringify_cells()
 
         compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, ' | ')
@@ -257,41 +290,35 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         # TODO ADD OTHER STUFF
         notes = data_point.notes
 
+        if organ_model:
+            organ_model = organ_model.name
+
         if REPLACED_DATA_POINT_CODE not in quality and (include_all or not quality):
-            data.append(
-                [unicode(x) for x in
-                    [
-                        study_id,
-                        chip_id,
-                        cross_reference,
-                        assay_plate_id,
-                        assay_well_id,
-                        times.get('day'),
-                        times.get('hour'),
-                        times.get('minute'),
-                        device,
-                        organ_model,
-                        cells,
-                        compound_treatment,
-                        target,
-                        method,
-                        sample_location,
-                        value,
-                        value_unit,
-                        replicate,
-                        caution_flag,
-                        quality,
-                        notes
-                    ]
-                ]
-            )
+            data.append([
+                study_id,
+                chip_id,
+                cross_reference,
+                assay_plate_id,
+                assay_well_id,
+                times.get('day'),
+                times.get('hour'),
+                times.get('minute'),
+                device,
+                organ_model,
+                cells,
+                compound_treatment,
+                target,
+                method,
+                sample_location,
+                value,
+                value_unit,
+                replicate,
+                caution_flag,
+                quality,
+                notes
+            ])
 
-    string_io = StringIO()
-    csv_writer = UnicodeWriter(string_io)
-    for one_line_of_data in data:
-        csv_writer.writerow(one_line_of_data)
-
-    return string_io.getvalue()
+    return data
 
 
 # TODO NEED FOR NEW SCHEMA
@@ -1555,14 +1582,9 @@ def send_ready_for_sign_off_email(request):
 
     return HttpResponse(json.dumps(data), content_type='application/json')
 
-
 # TODO TODO TODO
 def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_header=False, include_all=False):
-    """Returns data points as a csv in the form of a string
-
-    Params:
-    TODO
-    """
+    """Returns data points as a csv in the form of a string"""
     if not data_points:
         # TODO ORDER SUBJECT TO CHANGE
         data_points = AssayDataPoint.objects.prefetch_related(

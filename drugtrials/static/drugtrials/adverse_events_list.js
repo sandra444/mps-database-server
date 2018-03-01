@@ -18,19 +18,19 @@ $(document).ready(function() {
                 data: 'view',
                 sortable:false,
                 width: "10%",
-                render:function ( data, type, row, meta ) {
+                render:function (data, type, row, meta) {
                     return '<a class="btn btn-primary" href="' + data + '">View</a>';
                 }
             },
             {
                 data: 'compound',
-                render:function ( data, type, row, meta ) {
+                render:function (data, type, row, meta) {
                     return '<a href="/compounds/' + data.id + '">' + data.name + '</a>';
                 }
             },
             {
                 data: 'event',
-                render:function ( data, type, row, meta ) {
+                render:function (data, type, row, meta) {
                     return '<a href="https://en.wikipedia.org/wiki/' + data.lower+ '">' + data.name + '</a>';
                 }
             },
@@ -40,7 +40,7 @@ $(document).ready(function() {
             {data: 'organ'},
             {
                 data: 'black_box_warning',
-                render:function ( data, type, row, meta ) {
+                render:function (data, type, row, meta) {
                     if (data) {
                         return '<span title="This compound has a Black Box Warning" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>'
                     }
