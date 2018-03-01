@@ -3923,6 +3923,7 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
 
         # Build the formset from POST
         formset = AssayMatrixItemFormSetFactory(self.request.POST, instance=form.instance, prefix='item', study=study)
+
         if form.is_valid() and formset.is_valid():
             save_forms_with_tracking(self, form, formset=[formset])
             return redirect(self.object.get_post_submission_url())

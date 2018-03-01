@@ -60,8 +60,6 @@
 
     {% include "sign_off_form.html" with group=form.instance.study.group.name %}
 
-    {{ form.errors }}
-
     <legend>Global</legend>
 
     {% include 'generic_field.html' with field=form.name label="Matrix Name*" %}
@@ -419,6 +417,94 @@
     {# TERMINATE CONTENT #}
     </div>
 
+    {% if item_formset.errors %}
+        {% for dict in item_formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    {% if item_formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ item_formset.non_form_errors }}
+        </div>
+    {% endif %}
+
+    {% if compound_formset.errors %}
+        {% for dict in compound_formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    {% if compound_formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ compound_formset.non_form_errors }}
+        </div>
+    {% endif %}
+
+    {% if cell_formset.errors %}
+        {% for dict in cell_formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    {% if cell_formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ cell_formset.non_form_errors }}
+        </div>
+    {% endif %}
+
+    {% if setting_formset.errors %}
+        {% for dict in setting_formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    {% if setting_formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ setting_formset.non_form_errors }}
+        </div>
+    {% endif %}
+
     {# FLUID CONTENT HERE ON #}
     <div class="well padded-bottom">
     <div id="matrix_wrapper" class="overflow-auto" style="max-height:800px;">
@@ -429,7 +515,8 @@
     </div>
     </div>
 
-    {# START TESTING #}
+    <div hidden>
+    {# START FORMS #}
     {{ item_formset.management_form }}
     {{ compound_formset.management_form }}
     {{ cell_formset.management_form }}
@@ -437,7 +524,7 @@
 
     <h2>Matrix Items</h2>
     <div id="{{ item_formset.prefix }}">
-    {{ item_formset.non_form_errors }}
+{#    {{ item_formset.non_form_errors }}#}
     {% for form in item_formset %}
         <div id="{{ form.prefix }}" class="{{ item_formset.prefix }}">
             {{ form }}
@@ -447,7 +534,7 @@
 
     <h2>Compounds</h2>
     <div id="{{ compound_formset.prefix }}">
-    {{ compound_formset.non_form_errors }}
+{#    {{ compound_formset.non_form_errors }}#}
     {% for form in compound_formset %}
         <div id="{{ form.prefix }}" class="{{ compound_formset.prefix }}">
             {{ form }}
@@ -457,7 +544,7 @@
 
     <h2>Cells</h2>
     <div id="{{ cell_formset.prefix }}">
-    {{ cell_formset.non_form_errors }}
+{#    {{ cell_formset.non_form_errors }}#}
     {% for form in cell_formset %}
         <div id="{{ form.prefix }}" class="{{ cell_formset.prefix }}">
             {{ form }}
@@ -467,14 +554,15 @@
 
     <h2>Settings</h2>
     <div id="{{ setting_formset.prefix }}">
-    {{ setting_formset.non_form_errors }}
+{#    {{ setting_formset.non_form_errors }}#}
     {% for form in setting_formset %}
         <div id="{{ form.prefix }}" class="{{ setting_formset.prefix }}">
             {{ form }}
         </div>
     {% endfor %}
     </div>
-    {# End Testing #}
+    </div>
+    {# End FORMS #}
 
     {# Cellsample Selection Stuff #}
     <div hidden id="dialog" title="Choose a Cell Sample">

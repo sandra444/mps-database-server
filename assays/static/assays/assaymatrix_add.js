@@ -770,12 +770,18 @@ $(document).ready(function () {
     // Special operations for pre-submission
     $('form').submit(function() {
         // Iterate over every Matrix Item form
+        // EXCEEDINGLY NAIVE, PLEASE REVISE
         $('.' + item_prefix).each(function(form_index) {
             var empty = true;
             $(this).find('input:not(:checkbox)').each(function(input_index) {
                 // console.log($(this));
                 if($(this).val()) {
-                    if($(this).attr('name').indexOf('_index') === -1 && $(this).attr('name').indexOf('-name') === -1) {
+                    if(
+                        $(this).attr('name').indexOf('_index') === -1 &&
+                        $(this).attr('name').indexOf('-name') === -1 &&
+                        $(this).attr('name').indexOf('-matrix') === -1 &&
+                        $(this).attr('name').indexOf('-test_type') === -1
+                    ) {
                         empty = false;
                         return false;
                     }

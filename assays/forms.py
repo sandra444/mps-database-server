@@ -112,7 +112,7 @@ class BaseModelFormSetForcedUniqueness(BaseModelFormSet):
         all_unique_checks = set()
         all_date_checks = set()
         forms_to_delete = self.deleted_forms
-        valid_forms = [form for form in self.forms if form.is_valid() and form not in forms_to_delete]
+        valid_forms = [form for form in self.forms if form not in forms_to_delete and form.is_valid()]
         for form in valid_forms:
             exclude = form._get_validation_exclusions()
             unique_checks, date_checks = form.instance._get_unique_checks(exclude=exclude)
@@ -130,7 +130,11 @@ class BaseModelFormSetForcedUniqueness(BaseModelFormSet):
                     continue
 
                 # get data for each field of each of unique_check
-                row_data = (form.cleaned_data[field] for field in unique_check if field in form.cleaned_data)
+                # PLEASE NOTE THAT THIS GETS ALL FIELDS, EVEN IF NOT IN THE FORM
+                row_data = (
+                    form.cleaned_data[field] if field in form.cleaned_data else getattr(form.instance, field, None) for field in unique_check
+                )
+
                 # Reduce Model instances to their primary key values
                 row_data = tuple(d._get_pk_val() if hasattr(d, '_get_pk_val') else d for d in row_data)
                 # if row_data and None not in row_data:
@@ -1681,6 +1685,16 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     # Receipt date
     compound_receipt_date = forms.DateField(required=False)
 
+    # FORCE UNIQUENESS CHECK
+    def clean(self):
+        super(AssayMatrixForm, self).clean()
+
+        if AssayMatrix.objects.filter(
+                study=self.instance.study,
+                name=self.cleaned_data.get('name', '')
+        ).exclude(pk=self.instance.pk).count():
+            raise forms.ValidationError({'name': ['Matrix name must be unique within study.']})
+
 
 class AssaySetupCompoundForm(forms.ModelForm):
     compound = forms.CharField()
@@ -2512,10 +2526,25 @@ class AssayMatrixItemFullForm(SignOffMixin, forms.ModelForm):
             raise forms.ValidationError({'name': ['ID/Barcode must be unique within study.']})
 
 
-class AssayMatrixItemForm(SignOffMixin, forms.ModelForm):
+class AssayMatrixItemForm(forms.ModelForm):
     class Meta(object):
         model = AssayMatrixItem
-        exclude = ('study',) + tracking
+        exclude = ('study', 'matrix') + tracking
+
+    def clean(self):
+        """
+        Ensures the the name is unique in the current study
+        Ensures that the data for a compound is complete
+        Prevents changes to the chip if data has been uploaded (avoiding conflicts between data and entries)
+        """
+        super(AssayMatrixItemForm, self).clean()
+
+        # Make sure the barcode/ID is unique in the study
+        if AssayMatrixItem.objects.filter(
+                study=self.instance.study,
+                name=self.cleaned_data.get('name')
+        ).exclude(id=self.instance.id):
+            raise forms.ValidationError({'name': ['ID/Barcode must be unique within study.']})
 
         # widgets = {
         #     'device': forms.TextInput(),
@@ -2561,6 +2590,7 @@ class AssayMatrixItemFormSet(BaseInlineFormSetForcedUniqueness):
 
             for field in self.custom_fields:
                 form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
+                # form.fields[field].widget = forms.TextInput()
 
 
 AssayMatrixItemFormSetFactory = inlineformset_factory(
