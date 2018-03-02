@@ -648,7 +648,7 @@ $(document).ready(function () {
 
     // At the moment, this just triggers the item deletes of all selections
     function clear_fields() {
-        $('.ui-selected').find('form-delete').trigger('click');
+        $('.ui-selected').find('.form-delete').trigger('click');
     }
 
     function matrix_add_content_to_selected() {
