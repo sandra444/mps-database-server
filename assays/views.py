@@ -3943,7 +3943,7 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
 
         if form.is_valid() and formset.is_valid():
             save_forms_with_tracking(self, form, formset=[formset])
-            return redirect(self.object.get_post_submission_url())
+            return redirect(self.object.get_absolute_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
