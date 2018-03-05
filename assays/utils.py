@@ -2847,7 +2847,7 @@ class AssayFileProcessor:
             'target',
             'method',
             'unit',
-            'study'
+            # 'study'
         )
         # Note that the names are in uppercase
         for assay in study_assays:
@@ -2910,6 +2910,9 @@ class AssayFileProcessor:
         header_data = self.get_and_validate_header(data_list, 3)
         starting_index = header_data.get('header_starting_index') + 1
         header_indices = header_data.get('header_indices')
+
+        if sheet:
+            sheet = sheet + ': '
 
         # Read headers going onward
         for line in data_list[starting_index:]:
@@ -3029,11 +3032,12 @@ class AssayFileProcessor:
                 method_name.upper(),
                 value_unit_name
             ), None)
+
             study_assay_id = None
             if not study_assay:
                 self.errors.append(
                     unicode(
-                        sheet + 'Chip-{0}: No assay with the target "{1}", the method "{2}", and the unit "{3}" exists. '
+                        sheet + '{0}: No assay with the target "{1}", the method "{2}", and the unit "{3}" exists. '
                                 'Please review your data and add this assay to your study if necessary.').format(
                         matrix_item_name,
                         target_name,
@@ -3184,6 +3188,7 @@ class AssayFileProcessor:
 
         # If errors
         if self.errors:
+            self.errors = list(set(self.errors))
             raise forms.ValidationError(self.errors)
         # If there wasn't anything
         elif len(query_list) < 1 and len(readout_data) < 1 and not number_of_total_duplicates:
