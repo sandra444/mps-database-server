@@ -24,8 +24,8 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li><a href="#">Reproducibility</a></li>
-    <li><a href="/assays/{{ object.id }}/summary">{{ study }}</a></li>
+    <li><a href="/assays/reproducibility/">Reproducibility</a></li>
+    <li><a href="/assays/{{ object.id }}/summary">{{ object }}</a></li>
     <li class="active">Reproducibility Analysis</li>
 {% endblock %}
 
@@ -36,7 +36,9 @@
                 {{ object }}
             </h1>
         </div>
-        <div class="row text-center">
+        <div class="row text-center small-padding-top">
+            <a href="/assays/reproducibility" class="btn btn-primary" role="prima">Reproducibility List</a>
+            <a href="/assays/{{ object.id }}" class="btn btn-primary" role="button">Study Landing</a>
             <a href="/assays/{{ object.id }}/summary" class="btn btn-info" role="button">Study Summary</a>
         </div>
     </div>
@@ -86,7 +88,7 @@
             <br><br>
             <div class='row'>
                 <div class='col-md-6'>
-                    <label>Chip MAD Scores of Assay Target/Analyte Measurements <span title="Median absolute deviation of all chips at all time points." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></label>
+                    <label>Chip MAD Scores of Assay Target/Analyte Measurements <span title="Median Absolute Deviation (MAD) scores of all chip measurement population at every time point.  A score > 3.5 or < -3.5 indicates that the chip is an outlier relative to the median of chip measurement population at a that time point" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></label>
                     <table id='mad-score-matrix' class='table-hover table-striped table-bordered pull-left'>
 
                     </table>
