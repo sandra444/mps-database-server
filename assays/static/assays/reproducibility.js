@@ -3,12 +3,10 @@ $(document).ready(function () {
     google.charts.load('current', {'packages':['corechart']});
     google.charts.setOnLoadCallback(drawTables);
 
-    var cv_tooltip = '<span title="The CV is calculated for each time point and the value reported is the max CV across time points, or the CV if a single point is present." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
-    var icc_tooltip = '<span title="The ICC is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated. The reproducibility status is excellent if > 0.8, acceptable if >0.2, and poor if < 0.2." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var cv_tooltip = '<span title="The CV is calculated for each time point and the value reported is the max CV across time points, or the CV if a single time point is present.  The reproducibility status is excellent if Max CV/CV < 5% (Excellent (CV)), acceptable if Max CV/CV < 15% (Acceptable (CV)), and poor if CV > 15% for a single time point (Poor (CV))" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var icc_tooltip = '<span title="The ICC Absolute Agreement of the measurements across multiple time points is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated.  When the Max CV > 15%, the reproducibility status is reported to be excellent if > 0.8 (Excellent (ICC), acceptable if > 0.2 (Acceptable (ICC)), and poor if < 0.2 (Poor (ICC))" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
     var repro_tooltip = '<span title="Our classification of this grouping\'s reproducibility (Excellent > Acceptable > Poor/NA). If Max CV < 15% then the status is based on the  Max CV criteria, otherwise the status is based on the ICC criteria" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
-    var missing_tooltip = '<span title="Quantity of data points whose values were inferred by taking the average of values in the same series." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
-    //var comp_tooltip = '<span title="The ICC is calculated for each chip relative to the median of all of the chips." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
-    //var mad_tooltip = '<span title="Median absolute deviation of all chips\' values at all time points." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var missing_tooltip = '<span title="Quantity of data values whose values were missing from the data provided and were interpolated by the average of the data values at the same time point" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
 
     var studyID = $( "#selection-parameters" ).find(".studyId").text();
 
@@ -34,13 +32,13 @@ $(document).ready(function () {
             },
             { title: "Replica Set", data: '10', type: "num" },
             { title: "Organ Model", data: '0' },
-            { title: "Compound<br>Treatment(s)", data: '2' },
+            { title: "<span style='white-space: nowrap;'>Compound<br>Treatment(s)</span>", data: '2' },
             { title: "Target/Analyte", data: '3' },
             { title: "Method/Kit", data: '4' },
             { title: "Sample Location", data: '5' },
             { title: "Value Unit", data: '6' },
-            { title: "Max CV/CV "+cv_tooltip, data: '7' },
-            { title: "ICC Absolute Agreement "+icc_tooltip, data: '8' },
+            { title: "<span style='white-space: nowrap;'>Max CV<br>or CV "+cv_tooltip+"</span>", data: '7' },
+            { title: "<span style='white-space: nowrap;'>ICC Absolute<br>Agreement "+icc_tooltip+"</span>", data: '8' },
             { title: "Reproducibility<br>Status "+repro_tooltip, data: '9', render: function(data, type, row, meta){
                 if (data == "Excellent (ICC)" || data == "Excellent (CV)"){
                     return '<td><span class="hidden">3</span>'+data+'</td>';
@@ -133,7 +131,7 @@ $(document).ready(function () {
     var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
 });
 
-function drawChart(list, number, title, chartNum, valueUnit){
+function drawChart(list, number, title, chartNum, valueUnit, percentage){
     var values = list[number];
     if (values == null){
         return false;
@@ -207,6 +205,18 @@ function drawChart(list, number, title, chartNum, valueUnit){
     if (title == 'Chip Values/Time'){
         options['series'] = {0: { lineDashStyle: [4, 4], pointShape: { type: 'diamond', sides: 4 } }};
     }
+    if (percentage){
+        options['vAxis'] = {title: valueUnit, format: 'short', textStyle: { bold: true },
+        titleTextStyle: {
+                fontSize: 14,
+                bold: true,
+                italic: false
+            },
+            minValue: 0,
+            maxValue: 100,
+            viewWindowMode: 'explicit'
+        }
+    }
     chart = new google.visualization.LineChart(document.getElementById(chartNum+number));
     chart.draw(data, options);
 }
@@ -248,8 +258,8 @@ $(document).on("click",":checkbox", function(){
             reproTable.find('#mad-score-matrix').parent().parent().addClass('col-xs-12');
             reproTable.find('#chip-comp-med').parent().parent().detach().appendTo(reproTable.find('#overflow'));
         }
-        drawChart(chip_list, number, 'Chip Values/Time', 'chart1-', axisLabel);
-        drawChart(cv_list, number, 'CV(%)/Time', 'chart2-', 'CV(%)');
+        drawChart(chip_list, number, 'Chip Values/Time', 'chart1-', axisLabel, false);
+        drawChart(cv_list, number, 'CV(%)/Time', 'chart2-', 'CV(%)', true);
     } else {
         //console.log("Hiding Table " + number);
         reproTable.addClass('hidden')
