@@ -480,6 +480,14 @@ $(document).ready(function () {
                 }
             });
         });
+
+        // NOTE: Special operation! Hide device if one is selected
+        if (device_selector.val()) {
+            $('.item-device').hide();
+        }
+        else {
+            $('.item-device').show();
+        }
     }
 
     function chip_style_name_incrementer() {
@@ -726,12 +734,14 @@ $(document).ready(function () {
 
         if (current_representation === 'chips') {
             $('#matrix_dimensions_section').show();
-            // TODO CHANGE DEVICE TO NONE
-            $('#id_setup_device option').show();
+            // SPECIAL OPERATION
+            $('#id_item_device').parent().parent().show();
         }
         else if (current_representation === 'plate') {
             $('#matrix_device_and_model_section').show();
             // TODO FORCE SETUP DEVICE TO MATCH
+            // SPECIAL OPERATION
+            $('#id_item_device').parent().parent().hide();
         }
     }).trigger('change');
 
