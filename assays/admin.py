@@ -1199,6 +1199,10 @@ class PhysicalUnitsAdmin(LockableAdmin):
     )
 
     def save_model(self, request, obj, form, change):
+        # Strip the name
+        form.instance.unit = form.instance.unit.strip()
+        obj.unit = obj.unit.strip()
+
         if change:
             obj.modified_by = request.user
         else:
@@ -2009,6 +2013,12 @@ class AssayTargetAdmin(LockableAdmin):
     def save_model(self, request, obj, form, change):
         template_change = False
 
+        # Strip the name and short name
+        form.instance.name = form.instance.name.strip()
+        form.instance.short_name = form.instance.short_name.strip()
+        obj.name = obj.name.strip()
+        obj.short_name = obj.short_name.strip()
+
         # Check whether template needs to change
         # Change if assay name has changed or it is new
         if obj.pk is not None:
@@ -2072,6 +2082,10 @@ class AssaySampleLocationAdmin(LockableAdmin):
 
     def save_model(self, request, obj, form, change):
         template_change = False
+
+        # Strip the name
+        form.instance.name = form.instance.name.strip()
+        obj.name = obj.name.strip()
 
         # Check whether template needs to change
         # Change if assay name has changed or it is new
@@ -2229,6 +2243,10 @@ class AssayMethodAdmin(LockableAdmin):
 
     def save_model(self, request, obj, form, change):
         template_change = False
+
+        # Strip the name
+        form.instance.name = form.instance.name.strip()
+        obj.name = obj.name.strip()
 
         # Check whether template needs to change
         # Change if assay name has changed or it is new
