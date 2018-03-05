@@ -3,20 +3,22 @@ $(document).ready(function () {
     google.charts.load('current', {'packages':['corechart']});
     google.charts.setOnLoadCallback(drawTables);
 
-    var cv_tooltip = '<span title="The higest coefficient of variation" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
-    var icc_tooltip = '<span title="The intraclass correlation (from 0 to 1)" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
-    var repro_tooltip = '<span title="Our classification of this grouping\'s reproducibility (Excellent > Acceptable > Poor/NA)" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
-    var missing_tooltip = '<span title="The higest coefficient of variation" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var cv_tooltip = '<span title="The CV is calculated for each time point and the value reported is the max CV across time points, or the CV if a single point is present." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var icc_tooltip = '<span title="The ICC is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated. The reproducibility status is excellent if > 0.8, acceptable if >0.2, and poor if < 0.2." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var repro_tooltip = '<span title="Our classification of this grouping\'s reproducibility (Excellent > Acceptable > Poor/NA). If Max CV < 15% then the status is based on the  Max CV criteria, otherwise the status is based on the ICC criteria" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var missing_tooltip = '<span title="Quantity of data points whose values were inferred by taking the average of values in the same series." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    //var comp_tooltip = '<span title="The ICC is calculated for each chip relative to the median of all of the chips." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    //var mad_tooltip = '<span title="Median absolute deviation of all chips\' values at all time points." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
 
     var studyID = $( "#selection-parameters" ).find(".studyId").text();
 
     var gasTable = $('#gas-table').DataTable( {
         data: gas_list,
         columns: [
-            { title: "Checkbox",
+            { title: "Show Details",
              "render": function(data, type, row) {
                 if (type === 'display') {
-                    groupNum = row[9];
+                    groupNum = row[10];
                     return '<input type="checkbox" class="gas-checkbox-'+groupNum+'">';
                     //<a class="hidden repro-goto-'+groupNum+'" onclick=$(.repro-'+groupNum+').scrollIntoView();>Go to</a>
                 }
@@ -30,34 +32,45 @@ $(document).ready(function () {
             },
             "sortable": false
             },
-            { title: "Replica Set", data: '9', type: "num" },
+            { title: "Replica Set", data: '10', type: "num" },
             { title: "Organ Model", data: '0' },
             { title: "Compound<br>Treatment(s)", data: '2' },
             { title: "Target/Analyte", data: '3' },
-            { title: "Sample Location", data: '4' },
-            { title: "Value Unit", data: '5' },
-            { title: "Max CV/CV "+cv_tooltip, data: '6' },
-            { title: "ICC Absolute Agreement "+icc_tooltip, data: '7' },
-            { title: "Reproducibility<br>Status "+repro_tooltip, data: '8' },
-            { title: "# of Chips/Wells", data: '10' },
-            { title: "# of Time Points", data: '11' },
-            { title: "Cells", data: '1', class: 'none' }
+            { title: "Method/Kit", data: '4' },
+            { title: "Sample Location", data: '5' },
+            { title: "Value Unit", data: '6' },
+            { title: "Max CV/CV "+cv_tooltip, data: '7' },
+            { title: "ICC Absolute Agreement "+icc_tooltip, data: '8' },
+            { title: "Reproducibility<br>Status "+repro_tooltip, data: '9', render: function(data, type, row, meta){
+                if (data == "Excellent (ICC)" || data == "Excellent (CV)"){
+                    return '<td><span class="hidden">3</span>'+data+'</td>';
+                } else if (data == "Acceptable (ICC)" || data == "Acceptable (CV)") {
+                    return '<td><span class="hidden">2</span>'+data+'</td>';
+                } else if (data == "Poor (ICC)" || data == "Poor (CV)") {
+                    return '<td><span class="hidden">1</span>'+data+'</td>';
+                } else {
+                    return '<td><span class="hidden">0</span>'+data+'<span title="'+row[13]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
+                }
+            } },
+            { title: "# of Chips/Wells", data: '11' },
+            { title: "# of Time Points", data: '12' },
+            { title: "Cells", data: '1', class: 'none' },
+            { title: "NA Explanation", data: '13', visible: false, 'name': 'naText' }
         ],
         "order": [[ 1, "asc" ]],
         "createdRow": function( row, data, dataIndex ) {
-            if ( data[8] == "Excellent" ) {
-                $( row ).find('td:eq(9)').css( "background-color", "#74ff5b" ).css( "font-weight", "bold"  );
+            if ( data[9][0] == "E" ) {
+                $( row ).find('td:eq(10)').css( "background-color", "#74ff5b" ).css( "font-weight", "bold"  );
             }
-            else if ( data[8] == "Acceptable" ) {
-                $( row ).find('td:eq(9)').css( "background-color", "#fcfa8d" ).css( "font-weight", "bold"  );
+            else if ( data[9][0] == "A" ) {
+                $( row ).find('td:eq(10)').css( "background-color", "#fcfa8d" ).css( "font-weight", "bold"  );
             }
-            else if ( data[8] == "Poor" ) {
-                $( row ).find('td:eq(9)').css( "background-color", "#ff7863" ).css( "font-weight", "bold" );
+            else if ( data[9][0] == "P" ) {
+                $( row ).find('td:eq(10)').css( "background-color", "#ff7863" ).css( "font-weight", "bold" );
             }
             else {
-                $( row ).find('td:eq(9)').css( "background-color", "Grey" ).css( "font-weight", "bold" );
+                $( row ).find('td:eq(10)').css( "background-color", "Grey" ).css( "font-weight", "bold" );
             }
-
         },
         "responsive": true,
         dom: 'B<"row">frtip'
@@ -70,42 +83,47 @@ $(document).ready(function () {
             var data = this.data();
             var organModel = data[0];
             var targetAnalyte = data[3];
-            var sampleLocation = data[4];
+            var methodKit = data[4];
+            var sampleLocation = data[5];
             var compoundTreatments = data[2];
-            var valueUnit = data[5];
-            var group = data[9];
-            var icc_status = data[8];
+            var valueUnit = data[6];
+            var group = data[10];
+            var icc_status = data[9];
             var $elem = $( "#repro-data" );
             var $clone = $elem.first().clone( true ).addClass('repro-'+counter).appendTo("#clone-container").val("");
             mad_list[counter]['columns'].unshift("Time");
-            $clone.find('#repro-title').text('Replicant Set ' + group)
-            $clone.find('#selection-parameters').html(buildSelectionParameters(studyID, organModel, targetAnalyte, sampleLocation, compoundTreatments, valueUnit));
+            $clone.find('#repro-title').text('Replica Set ' + group)
+            $clone.find('#selection-parameters').html(buildSelectionParameters(studyID, organModel, targetAnalyte, methodKit, sampleLocation, compoundTreatments, valueUnit));
             $clone.find('#selection-parameters').find('td, th').css('padding','8px 10px');
-            $clone.find('#chip-rep-rep-ind').html(buildCV_ICC(data[6],data[7]));
+            $clone.find('#chip-rep-rep-ind').html(buildCV_ICC(data[7],data[8]));
             $clone.find('#chip-rep-rep-ind').find('td, th').css('padding','8px 10px');
             $clone.find('#chart1').attr('id', 'chart1-'+counter);
             $clone.find('#chart2').attr('id', 'chart2-'+counter);
-            $clone.find('#repro-status').html('<em>'+icc_status+'</em>');
+            if (icc_status == 'NA') {
+                $clone.find('#repro-status').html('<em>'+icc_status+'</em><small style="color: black;"><span title="'+data[13]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>');
+            } else {
+                $clone.find('#repro-status').html('<em>'+icc_status+'</em>');
+            }
             $clone.find('#mad-score-matrix').DataTable( {
                 aoColumns: mad_columns(counter),
                 data: mad_list[counter]['data'],
                 searching: false,
                 paging: false,
-                info: false,
-                "responsive": true
+                info: false
+                // fixedColumns: {leftColumns: 1},
+                // scrollX: true
             });
 
             $clone.find('#chip-comp-med').DataTable( {
                 columns: [
                             { title: "Chip ID", data: '0' },
-                            { title: "ICC Absolute Agreement "+missing_tooltip, data: '1' },
-                            { title: "Missing Data Points", data: '2' }
+                            { title: "ICC Absolute Agreement", data: '1' },
+                            { title: "Missing Data Points "+missing_tooltip, data: '2' }
                         ],
                 data: comp_list[counter],
                 searching: false,
                 paging: false,
-                info: false,
-                "responsive": true
+                info: false
             });
             counter++;
         } );
@@ -120,23 +138,19 @@ function drawChart(list, number, title, chartNum, valueUnit){
     if (values == null){
         return false;
     }
-    console.log(values);
     var allNull = true;
     for (var i = 1; i < values.length; i++) {
         for (var j = 1; j < values[i].length; j++) {
-            if (values[i][j] == ""){
+            if (values[i][j] === ""){
                 values[i][j] = null;
             } else {
-                console.log("Not all null");
                 allNull = false;
             }
         }
     }
     if (allNull){
-        console.log("All null");
         return false;
     }
-    console.log(values);
     var data = google.visualization.arrayToDataTable(values);
     var options = {
         // title: title,
@@ -206,8 +220,8 @@ function mad_columns(counter){
     return columns
 }
 
-function buildSelectionParameters(studyId, organModel, targetAnalyte, sampleLocation, compoundTreatments, valueUnit){
-    content = '<tr><th>Study ID</th><td>'+studyId+'</td></tr><tr><th>Organ Model</th><td>'+organModel+'</td></tr><tr><th>Target/Analyte</th><td id="target-analyte-value">'+targetAnalyte+'</td></tr><tr><th>Sample Location</th><td>'+sampleLocation+'</td></tr><tr><th>Compound Treatment(s)</th><td>'+compoundTreatments+'</td></tr><tr><th>Value Unit</th><td>'+valueUnit+'</td></tr>'
+function buildSelectionParameters(studyId, organModel, targetAnalyte, methodKit, sampleLocation, compoundTreatments, valueUnit){
+    content = '<tr><th>Study ID</th><td>'+studyId+'</td></tr><tr><th>Organ Model</th><td>'+organModel+'</td></tr><tr><th>Target/Analyte</th><td id="target-analyte-value">'+targetAnalyte+'</td></tr><tr><th>Method/Kit</th><td>'+methodKit+'</td></tr><tr><th>Sample Location</th><td>'+sampleLocation+'</td></tr><tr><th>Compound Treatment(s)</th><td>'+compoundTreatments+'</td></tr><tr><th>Value Unit</th><td>'+valueUnit+'</td></tr>'
     return content;
 }
 
@@ -220,17 +234,15 @@ function buildCV_ICC(cv, icc){
 $(document).on("click",":checkbox", function(){
     var checkbox = $(this)
     var checkbox_id = $(this).attr('class');
-    console.log("ID " + checkbox_id);
     var cls = checkbox_id.split(' ').pop();
     var number = cls.substr(cls.lastIndexOf("-") + 1);
     //var number = checkbox_id;
-    console.log("Checked " + number);
     var reproTable = $('.repro-'+number);
     if (checkbox.is(':checked')){
         //console.log("Showing Table " + number);
         reproTable.removeClass('hidden');
         var axisLabel = reproTable.find('#target-analyte-value').text();
-        //$(document).find(".repro-goto-"+number).removeClass('hidden')
+        $(document).find(".repro-goto-"+number).removeClass('hidden')
         if (reproTable.find('#mad-score-matrix').width() > 500) {
             reproTable.find('#mad-score-matrix').parent().parent().removeClass('col-md-6');
             reproTable.find('#mad-score-matrix').parent().parent().addClass('col-xs-12');
