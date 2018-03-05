@@ -2526,6 +2526,12 @@ class AssayMatrixItemFullForm(SignOffMixin, forms.ModelForm):
         ).exclude(id=self.instance.id):
             raise forms.ValidationError({'name': ['ID/Barcode must be unique within study.']})
 
+        # Make sure the device matches if necessary
+        if self.instance.matrix.device and (self.instance.matrix.device != self.cleaned_data.get('device')):
+            raise forms.ValidationError(
+                {'device': ['The item\'s device must match the one specified in the Matrix: "{}"'.format(self.instance.matrix.device)]}
+            )
+
 
 class AssayMatrixItemForm(forms.ModelForm):
     class Meta(object):
@@ -2554,6 +2560,9 @@ class AssayMatrixItemFormSet(BaseInlineFormSetForcedUniqueness):
         self.dic = get_dic_for_custom_choice_field(self)
 
         for form in self.forms:
+            for field in self.custom_fields:
+                form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
+
             if self.study:
                 form.instance.study = self.study
 
@@ -2561,10 +2570,6 @@ class AssayMatrixItemFormSet(BaseInlineFormSetForcedUniqueness):
                 form.instance.modified_by = self.user
             else:
                 form.instance.created_by = self.user
-
-            for field in self.custom_fields:
-                form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
-
 
 AssayMatrixItemFormSetFactory = inlineformset_factory(
     AssayMatrix,

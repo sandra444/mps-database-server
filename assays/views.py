@@ -3886,6 +3886,19 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
     template_name = 'assays/assaymatrix_add.html'
     form_class = AssayMatrixForm
 
+    # A little extreme, but should work
+    def post(self, request, **kwargs):
+        request.POST = request.POST.copy()
+
+        if request.POST.get('device', None):
+            # NOTE BE CAREFUL WITH PREFIX HERE
+            for item_index in range(int(request.POST.get('item-TOTAL_FORMS', '0'))):
+                request.POST.update({
+                    'item-{}-device'.format(item_index): request.POST.get('device')
+                })
+
+        return super(AssayMatrixAdd, self).post(request, **kwargs)
+
     def get_form(self, form_class):
         # Get the study
         study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
@@ -3953,6 +3966,19 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
     model = AssayMatrix
     template_name = 'assays/assaymatrix_add.html'
     form_class = AssayMatrixForm
+
+    # A little extreme, but should work
+    def post(self, request, **kwargs):
+        request.POST = request.POST.copy()
+
+        if request.POST.get('device', None):
+            # NOTE BE CAREFUL WITH PREFIX HERE
+            for item_index in range(int(request.POST.get('item-TOTAL_FORMS', '0'))):
+                request.POST.update({
+                    'item-{}-device'.format(item_index): request.POST.get('device')
+                })
+
+        return super(AssayMatrixUpdate, self).post(request, **kwargs)
 
     def get_form(self, form_class):
         # Get the study
