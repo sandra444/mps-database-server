@@ -388,6 +388,7 @@ $(document).ready(function () {
         // I probably can get away with purging the subdisplays, but can keep the item data
 
         $('.item-setup_set_section').empty();
+        $('.error-message-section').empty();
 
         // Iterate over all prefixes
         $.each(prefixes, function(index, prefix) {
@@ -424,9 +425,12 @@ $(document).ready(function () {
                     new_subdisplay.attr(item_form_index_attribute, display.attr(item_form_index_attribute));
                 }
 
+                // List of errors to add in a ul at the top of a display
+                var errors = [];
+
                 // Iterate over all fields
                 // Out of convenience, I can iterate over every child
-                $(this).children().each(function() {
+                $(this).find(':input').each(function(input_index) {
                     // I will need to think about invalid fields
                     var field_name = get_field_name($(this));
                     var field_display = get_display_for_field($(this), field_name, prefix);
@@ -436,10 +440,43 @@ $(document).ready(function () {
                     else {
                         new_subdisplay.find('.' + prefix + '-' + field_name).html(field_display);
                     }
+
+
+                    var possible_errors = [];
+                    if (!input_index) {
+                        possible_errors = $(this).prev().prev().find('li');
+                        $.each(possible_errors, function() {
+                            errors.push($(this).text());
+                        });
+                    }
+                    else {
+                        possible_errors = $(this).prev().find('li');
+                        $.each(possible_errors, function() {
+                            errors.push(field_name + ': ' + $(this).text());
+                        });
+                    }
                 });
+
+                var errors_display = null;
+                var errors_list = null;
+
+                if (errors.length > 0) {
+                    errors_display = $('#empty_error_html').children().clone();
+                    errors_list = $('<ul>');
+                    $.each(errors, function(index, error_message) {
+                        errors_list.append($('<li>').text(error_message));
+                    });
+                    errors_display.html(errors_list);
+                }
 
                 if (new_subdisplay) {
                     display.find('.item-' + prefix).append(new_subdisplay);
+                    if (errors_display) {
+                        new_subdisplay.find('.error-message-section').html(errors_display);
+                    }
+                }
+                else if (errors_display) {
+                    display.find('.error-message-section').html(errors_display);
                 }
             });
         });

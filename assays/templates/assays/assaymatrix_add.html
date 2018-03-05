@@ -417,20 +417,20 @@
     {# TERMINATE CONTENT #}
     </div>
 
-    {% if item_formset.errors %}
-        {% for dict in item_formset.errors %}
-            {% for key,value in dict.items %}
-                {% if key %}
-                    <div class="alert alert-danger" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
-                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        {% endfor %}
-    {% endif %}
-
+{#    {% if item_formset.errors %}#}
+{#        {% for dict in item_formset.errors %}#}
+{#            {% for key,value in dict.items %}#}
+{#                {% if key %}#}
+{#                    <div class="alert alert-danger" role="alert">#}
+{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                        <span class="sr-only">Error:</span>#}
+{#                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}#}
+{#                    </div>#}
+{#                {% endif %}#}
+{#            {% endfor %}#}
+{#        {% endfor %}#}
+{#    {% endif %}#}
+{##}
     {% if item_formset.non_form_errors %}
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -438,21 +438,21 @@
             {{ item_formset.non_form_errors }}
         </div>
     {% endif %}
-
-    {% if compound_formset.errors %}
-        {% for dict in compound_formset.errors %}
-            {% for key,value in dict.items %}
-                {% if key %}
-                    <div class="alert alert-danger" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
-                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        {% endfor %}
-    {% endif %}
-
+{##}
+{#    {% if compound_formset.errors %}#}
+{#        {% for dict in compound_formset.errors %}#}
+{#            {% for key,value in dict.items %}#}
+{#                {% if key %}#}
+{#                    <div class="alert alert-danger" role="alert">#}
+{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                        <span class="sr-only">Error:</span>#}
+{#                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}#}
+{#                    </div>#}
+{#                {% endif %}#}
+{#            {% endfor %}#}
+{#        {% endfor %}#}
+{#    {% endif %}#}
+{##}
     {% if compound_formset.non_form_errors %}
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -460,21 +460,21 @@
             {{ compound_formset.non_form_errors }}
         </div>
     {% endif %}
-
-    {% if cell_formset.errors %}
-        {% for dict in cell_formset.errors %}
-            {% for key,value in dict.items %}
-                {% if key %}
-                    <div class="alert alert-danger" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
-                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        {% endfor %}
-    {% endif %}
-
+{##}
+{#    {% if cell_formset.errors %}#}
+{#        {% for dict in cell_formset.errors %}#}
+{#            {% for key,value in dict.items %}#}
+{#                {% if key %}#}
+{#                    <div class="alert alert-danger" role="alert">#}
+{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                        <span class="sr-only">Error:</span>#}
+{#                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}#}
+{#                    </div>#}
+{#                {% endif %}#}
+{#            {% endfor %}#}
+{#        {% endfor %}#}
+{#    {% endif %}#}
+{##}
     {% if cell_formset.non_form_errors %}
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -482,21 +482,21 @@
             {{ cell_formset.non_form_errors }}
         </div>
     {% endif %}
-
-    {% if setting_formset.errors %}
-        {% for dict in setting_formset.errors %}
-            {% for key,value in dict.items %}
-                {% if key %}
-                    <div class="alert alert-danger" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
-                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        {% endfor %}
-    {% endif %}
-
+{##}
+{#    {% if setting_formset.errors %}#}
+{#        {% for dict in setting_formset.errors %}#}
+{#            {% for key,value in dict.items %}#}
+{#                {% if key %}#}
+{#                    <div class="alert alert-danger" role="alert">#}
+{#                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                        <span class="sr-only">Error:</span>#}
+{#                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}#}
+{#                    </div>#}
+{#                {% endif %}#}
+{#            {% endfor %}#}
+{#        {% endfor %}#}
+{#    {% endif %}#}
+{##}
     {% if setting_formset.non_form_errors %}
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -614,16 +614,18 @@
     <table>
     <tr id="empty_item_html">
     <td data-prefix="item" class="item-td">
+        <div class="error-message-section">
+        </div>
         <div align="center">
             <u><span class="item-name lead"></span></u>
             <span class="item-current_setup"></span>
         </div>
-        <div class="alert alert-warning">
+        <div class="well">
             <div>
                 <span class="item-setup_date"></span>
                 {% if not detail %}
                 <a class="pull-right btn btn-xs form-delete">
-                    <span class="glyphicon glyphicon-remove"></span>
+                    <span class="glyphicon glyphicon-remove text-danger"></span>
                 </a>
                 {% endif %}
                 <a class="pull-right btn btn-xs form-view">
@@ -664,13 +666,15 @@
 
     {# TODO ADDITION LOCATION #}
     <div id="empty_cell_html">
-        <div data-prefix="{{ cell_formset.prefix }}" class="alert alert-success">
+        <div data-prefix="{{ cell_formset.prefix }}" class="alert alert-success force-off-black-text">
+            <div class="error-message-section">
+            </div>
             <div>
                 <span class="cell-cell_sample"></span>
                 <span class="cell-passage"></span>
                 {% if not detail %}
                 <a class="pull-right btn btn-xs subform-delete">
-                    <span class="glyphicon glyphicon-remove"></span>
+                    <span class="glyphicon glyphicon-remove text-danger"></span>
                 </a>
                 {% endif %}
             </div>
@@ -695,14 +699,16 @@
 
     {# TODO ADDITION LOCATION #}
     <div id="empty_compound_html">
-        <div data-prefix="{{ compound_formset.prefix }}" class="alert alert-info">
+        <div data-prefix="{{ compound_formset.prefix }}" class="alert alert-info force-off-black-text">
+            <div class="error-message-section">
+            </div>
             <div>
                 <span class="compound-compound"></span>
                 <span class="compound-concentration"></span>
                 <span class="compound-concentration_unit"></span>
                 {% if not detail %}
                 <a class="pull-right btn btn-xs subform-delete">
-                    <span class="glyphicon glyphicon-remove"></span>
+                    <span class="glyphicon glyphicon-remove text-danger"></span>
                 </a>
                 {% endif %}
             </div>
@@ -735,14 +741,16 @@
 
     {# TODO TODO TODO #}
     <div id="empty_setting_html">
-        <div data-prefix="{{ setting_formset.prefix }}" class="alert alert-danger">
+        <div data-prefix="{{ setting_formset.prefix }}" class="alert alert-warning force-off-black-text">
+            <div class="error-message-section">
+            </div>
             <div>
                 <span class="setting-setting"></span>
                 <span class="setting-value"></span>
                 <span class="setting-unit"></span>
                 {% if not detail %}
                 <a class="pull-right btn btn-xs subform-delete">
-                    <span class="glyphicon glyphicon-remove"></span>
+                    <span class="glyphicon glyphicon-remove text-danger"></span>
                 </a>
                 {% endif %}
             </div>
@@ -765,6 +773,12 @@
             <div>
                 <span class="setting-addition_location"></span>
             </div>
+        </div>
+    </div>
+
+    <div id="empty_error_html">
+        <div class="alert alert-danger force-off-black-text item-error-message-box">
+
         </div>
     </div>
 
