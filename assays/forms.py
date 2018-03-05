@@ -115,7 +115,8 @@ class BaseModelFormSetForcedUniqueness(BaseModelFormSet):
         valid_forms = [form for form in self.forms if form not in forms_to_delete and form.is_valid()]
         for form in valid_forms:
             exclude = form._get_validation_exclusions()
-            unique_checks, date_checks = form.instance._get_unique_checks(exclude=exclude)
+            # unique_checks, date_checks = form.instance._get_unique_checks(exclude=exclude)
+            unique_checks, date_checks = form.instance._get_unique_checks()
             all_unique_checks = all_unique_checks.union(set(unique_checks))
             all_date_checks = all_date_checks.union(set(date_checks))
 
@@ -2531,38 +2532,6 @@ class AssayMatrixItemForm(forms.ModelForm):
         model = AssayMatrixItem
         exclude = ('study', 'matrix') + tracking
 
-    def clean(self):
-        """
-        Ensures the the name is unique in the current study
-        Ensures that the data for a compound is complete
-        Prevents changes to the chip if data has been uploaded (avoiding conflicts between data and entries)
-        """
-        super(AssayMatrixItemForm, self).clean()
-
-        # Make sure the barcode/ID is unique in the study
-        if AssayMatrixItem.objects.filter(
-                study=self.instance.study,
-                name=self.cleaned_data.get('name')
-        ).exclude(id=self.instance.id):
-            raise forms.ValidationError({'name': ['ID/Barcode must be unique within study.']})
-
-        # widgets = {
-        #     'device': forms.TextInput(),
-        #     'organ_model': forms.TextInput(),
-        #     'organ_model_protocol': forms.TextInput(),
-        #     'failure_reason': forms.TextInput(),
-        # }
-
-    # def clean(self):
-    #     # Add back study
-    #     # This gets a little, uh... unorthodox...
-    #     self._meta.exclude = tracking
-    #     self.fields['study'] = forms.CharField(initial=self.instance.study)
-    #
-    #     super(AssayMatrixItemForm, self).clean()
-    #
-    #     self.cleaned_data['study'] = self.instance.study
-
 
 # TODO NEED TO TEST
 class AssayMatrixItemFormSet(BaseInlineFormSetForcedUniqueness):
@@ -2595,7 +2564,6 @@ class AssayMatrixItemFormSet(BaseInlineFormSetForcedUniqueness):
 
             for field in self.custom_fields:
                 form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
-                # form.fields[field].widget = forms.TextInput()
 
 
 AssayMatrixItemFormSetFactory = inlineformset_factory(
