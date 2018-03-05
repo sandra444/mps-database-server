@@ -2947,7 +2947,11 @@ class AssayFileProcessor:
             value_unit_name = line[header_indices.get('VALUE UNIT')].strip()
 
             # Check for subtarget name, add one if necessary
-            subtarget_name = line[header_indices.get('SUBTARGET')].strip()
+            if header_indices.get('SUBTARGET'):
+                subtarget_name = line[header_indices.get('SUBTARGET')].strip()
+            else:
+                subtarget_name = ''
+
             subtarget = subtargets.get(subtarget_name.upper(), None)
 
             if not subtarget_name:
