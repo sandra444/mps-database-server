@@ -107,7 +107,7 @@
                             <span hidden>1</span>
                             <span title="This entry was validated by {{ matrix.full_reviewer }} on {{ matrix.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
                         {% endif %}
-                        {% if item.flagged %}
+                        {% if matrix.flagged %}
                             <span hidden>0</span>
                             <span title="This entry is flagged for review: '{{ matrix.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
                         {% endif %}
