@@ -134,6 +134,10 @@
     {% include 'generic_field.html' with field=form.item_setup_date label="Setup Date*" %}
     </div>
 
+    <div hidden id="add_test_type_section" class="item-section">
+    {% include 'generic_field.html' with field=form.item_test_type label="Test Type*" %}
+    </div>
+
     <div hidden id="add_notes_section" class="item-section">
     {% include 'generic_field.html' with field=form.item_scientist label="Scientist" %}
     {% include 'generic_field.html' with field=form.item_notebook label="Notebook" %}
@@ -614,15 +618,15 @@
     <table>
     <tr id="empty_item_html">
     <td data-prefix="item" class="item-td">
-        <div class="error-message-section">
+        <div class="error-message-section item-setup_set_section">
         </div>
         <div align="center">
-            <u><span class="item-name lead"></span></u>
-            <span class="item-current_setup"></span>
+            <u><span class="item-name lead item-setup_set_section"></span></u>
+{#            <span class="item-current_setup"></span>#}
         </div>
         <div class="well">
             <div>
-                <span class="item-setup_date"></span>
+                <span class="item-setup_date item-setup_set_section"></span>
                 {% if not detail %}
                 <a class="pull-right btn btn-xs form-delete">
                     <span class="glyphicon glyphicon-remove text-danger"></span>
@@ -636,25 +640,28 @@
 {#                    <span class="glyphicon glyphicon-pencil"></span>#}
 {#                </a>#}
             </div>
+            <div>
+                <span class="item-test_type item-setup_set_section"></span>
+            </div>
             <div class="item-failure">
-                <span class="item-failure_time"></span>
-                <span class="item-failure_reason"></span>
+                <span class="item-failure_time item-setup_set_section"></span>
+                <span class="item-failure_reason item-setup_set_section"></span>
             </div>
             <div class="item-setup_section">
                 <div>
-                    <span class="item-organ_model"></span>
-                    <span class="item-organ_model_protocol"></span>
+                    <span class="item-organ_model item-setup_set_section"></span>
+                    <span class="item-organ_model_protocol item-setup_set_section"></span>
                 </div>
-                <div class="item-device"></div>
+                <div class="item-device item-setup_set_section"></div>
                 <div>
-                    <span class="item-variance_from_organ_model_protocol"></span>
+                    <span class="item-variance_from_organ_model_protocol item-setup_set_section"></span>
                 </div>
             </div>
             <div class="item-notes_section">
-                <span class="item-scientist"></span>
-                <span class="item-notebook"></span>
-                <span class="item-notebook_page"></span>
-                <span class="item-notes"></span>
+                <span class="item-scientist item-setup_set_section"></span>
+                <span class="item-notebook item-setup_set_section"></span>
+                <span class="item-notebook_page item-setup_set_section"></span>
+                <span class="item-notes item-setup_set_section"></span>
             </div>
         </div>
         <div class="item-cell item-setup_set_section"></div>

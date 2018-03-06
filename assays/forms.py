@@ -1591,7 +1591,9 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
 
     ### ITEM FIELD HELPERS
     action = forms.ChoiceField(choices=(
+        ('', 'Please Select an Action'),
         ('add_name', 'Add Names/IDs*'),
+        ('add_test_type', 'Add Test Type*'),
         ('add_date', 'Add Setup Date*'),
         ('add_device', 'Add Device/Organ Model Information*'),
         ('add_settings', 'Add Settings'),
@@ -1600,7 +1602,9 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         ('add_notes', 'Add Notes/Notebook Information'),
         # ADD BACK LATER
         # ('copy', 'Copy Contents'),
-        ('clear', 'Clear Contents')
+        # TODO TODO TODO TENTATIVE
+        # ('clear', 'Clear Contents'),
+        ('delete', 'Delete Selected')
     ))
 
     # The item_ isn't just to be annoying, I want to avoid conflicts with other fields
@@ -1608,6 +1612,8 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     item_name = forms.CharField(required=False)
 
     item_setup_date = forms.DateField(required=False)
+
+    item_test_type = forms.ChoiceField(required=False, choices=TEST_TYPE_CHOICES)
 
     item_scientist = forms.CharField(required=False)
     item_notebook = forms.CharField(required=False)

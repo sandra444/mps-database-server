@@ -113,12 +113,12 @@ $(document).ready(function () {
         }
     };
 
-    var mouse_is_down = false;
-    $(document).mousedown(function() {
-        mouse_is_down = true;
-    }).mouseup(function() {
-        mouse_is_down = false;
-    });
+    // var mouse_is_down = false;
+    // $(document).mousedown(function() {
+    //     mouse_is_down = true;
+    // }).mouseup(function() {
+    //     mouse_is_down = false;
+    // });
 
     function add_form(prefix, form) {
         var formset = $('#' + prefix);
@@ -388,7 +388,6 @@ $(document).ready(function () {
         // I probably can get away with purging the subdisplays, but can keep the item data
 
         $('.item-setup_set_section').empty();
-        $('.error-message-section').empty();
 
         // Iterate over all prefixes
         $.each(prefixes, function(index, prefix) {
@@ -412,6 +411,7 @@ $(document).ready(function () {
                     }
                     else {
                         display.find('.form-view').hide();
+                        display.find('.form-delete').hide();
                     }
                 }
                 // Generate a subdisplay if this is not item TODO TODO TODO
@@ -645,7 +645,14 @@ $(document).ready(function () {
                 if (incrementers[field_name]) {
                     current_value = default_incrementer(current_value, field_name, index, number_of_items);
                 }
-                current_form.find('input[name$="' + field_name + '"]').val(current_value);
+
+                var form_field_to_add_to = current_form.find('input[name$="' + field_name + '"]');
+
+                if (!form_field_to_add_to[0]) {
+                    form_field_to_add_to = current_form.find('select[name$="' + field_name + '"]');
+                }
+
+                form_field_to_add_to.val(current_value);
             });
         });
 
@@ -692,8 +699,24 @@ $(document).ready(function () {
     }
 
     // At the moment, this just triggers the item deletes of all selections
+    function delete_items() {
+        $('.ui-selected').not('.strikethrough').find('.form-delete').trigger('click');
+    }
+
+    // TODO TODO TODO TENTATIVE
     function clear_fields() {
-        $('.ui-selected').find('.form-delete').trigger('click');
+        $('.ui-selected').each(function(index) {
+            var current_id = $(this).find('input[name$="-id"]').val();
+            if (!current_id) {
+                var current_form = $('#' + item_prefix + '-' + $(this).attr(item_form_index_attribute));
+                // console.log(current_form);
+
+                current_form.find('input').val('');
+                current_form.find('select').val('');
+            }
+        });
+
+        refresh_all_contents_from_forms();
     }
 
     function matrix_add_content_to_selected() {
@@ -715,9 +738,13 @@ $(document).ready(function () {
         else if (current_action === 'add_compounds') {
             add_subform(compound_prefix);
         }
-        else if (current_action === 'clear') {
-            clear_fields();
+        else if (current_action === 'delete') {
+            delete_items();
         }
+        // TODO TODO TODO TENTATIVE
+        // else if (current_action === 'clear') {
+        //     clear_fields();
+        // }
         // Default for most actions
         else {
             add_to_item();
@@ -827,7 +854,8 @@ $(document).ready(function () {
                         $(this).attr('name').indexOf('_index') === -1 &&
                         $(this).attr('name').indexOf('-name') === -1 &&
                         $(this).attr('name').indexOf('-matrix') === -1 &&
-                        $(this).attr('name').indexOf('-test_type') === -1
+                        $(this).attr('name').indexOf('-test_type') === -1 &&
+                        (!device_selector.val() || $(this).attr('name').indexOf('-device') === -1)
                     ) {
                         empty = false;
                         return false;

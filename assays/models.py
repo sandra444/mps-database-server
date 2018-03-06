@@ -1587,6 +1587,9 @@ class AssayFailureReason(FlaggableModel):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
+TEST_TYPE_CHOICES = (
+    ('', '--------'), ('control', 'Control'), ('compound', 'Compound')
+)
 
 # SUBJECT TO REMOVAL (MAY JUST USE ASSAY SETUP)
 class AssayMatrixItem(FlaggableModel):
@@ -1644,8 +1647,8 @@ class AssayMatrixItem(FlaggableModel):
     # Likely to change in future
     test_type = models.CharField(
         max_length=8,
-        choices=(('control', 'Control'), ('compound', 'Compound')),
-        default='control'
+        choices=TEST_TYPE_CHOICES,
+        # default='control'
     )
 
     # Tentative
