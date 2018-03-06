@@ -103,6 +103,19 @@ def get_dic_for_custom_choice_field(form, filters=None):
     return dic
 
 
+class ModelFormStripWhiteSpace(forms.ModelForm):
+    """Strips the whitespace from char and text fields"""
+    def clean(self):
+        cd = self.cleaned_data
+        for field_name, field in self.fields.items():
+            if isinstance(field, forms.CharField):
+                cd[field_name] = cd[field_name].strip()
+                if self.fields[field_name].required and not cd[field_name]:
+                    self.add_error(field_name, "This is a required field.")
+
+        return super(ModelFormStripWhiteSpace, self).clean()
+
+
 class BaseModelFormSetForcedUniqueness(BaseModelFormSet):
     def clean(self):
         self.validate_unique()
@@ -835,7 +848,7 @@ class ChipTestResultInlineFormset(BaseInlineFormSet):
             raise forms.ValidationError('You must have at least one result.')
 
 
-class AssayStudyConfigurationForm(SignOffMixin, forms.ModelForm):
+class AssayStudyConfigurationForm(SignOffMixin, ModelFormStripWhiteSpace):
     """Frontend Form for Study Configurations"""
     class Meta(object):
         model = AssayStudyConfiguration
@@ -1439,7 +1452,7 @@ class ReadyForSignOffForm(forms.Form):
 
 
 # TODO PLEASE REVIEW
-class AssayStudyForm(SignOffMixin, forms.ModelForm):
+class AssayStudyForm(SignOffMixin, ModelFormStripWhiteSpace):
     def __init__(self, *args, **kwargs):
         """Init the Study Form
 
@@ -1536,7 +1549,7 @@ AssayStudyAssayFormSetFactory = inlineformset_factory(
 
 
 # TODO ADD STUDY
-class AssayMatrixForm(SignOffMixin, forms.ModelForm):
+class AssayMatrixForm(SignOffMixin, ModelFormStripWhiteSpace):
     class Meta(object):
         model = AssayMatrix
         exclude = ('study',) + tracking
@@ -1703,7 +1716,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
             raise forms.ValidationError({'name': ['Matrix name must be unique within study.']})
 
 
-class AssaySetupCompoundForm(forms.ModelForm):
+class AssaySetupCompoundForm(ModelFormStripWhiteSpace):
     compound = forms.CharField()
 
     class Meta(object):
@@ -1717,9 +1730,9 @@ class AssaySetupCompoundForm(forms.ModelForm):
         #     'addition_location': forms.TextInput(),
         # }
 
-    def __init__(self, *args, **kwargs):
-        # self.static_choices = kwargs.pop('static_choices', None)
-        super(AssaySetupCompoundForm, self).__init__(*args, **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     # self.static_choices = kwargs.pop('static_choices', None)
+    #     super(AssaySetupCompoundForm, self).__init__(*args, **kwargs)
 
 
 # TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
@@ -2503,7 +2516,7 @@ AssaySetupSettingInlineFormSetFactory = inlineformset_factory(
 )
 
 
-class AssayMatrixItemFullForm(SignOffMixin, forms.ModelForm):
+class AssayMatrixItemFullForm(SignOffMixin, ModelFormStripWhiteSpace):
     """Frontend form for Items"""
     class Meta(object):
         model = AssayMatrixItem
@@ -2539,7 +2552,7 @@ class AssayMatrixItemFullForm(SignOffMixin, forms.ModelForm):
             )
 
 
-class AssayMatrixItemForm(forms.ModelForm):
+class AssayMatrixItemForm(ModelFormStripWhiteSpace):
     class Meta(object):
         model = AssayMatrixItem
         exclude = ('study', 'matrix') + tracking
@@ -2576,6 +2589,17 @@ class AssayMatrixItemFormSet(BaseInlineFormSetForcedUniqueness):
                 form.instance.modified_by = self.user
             else:
                 form.instance.created_by = self.user
+
+    def clean(self):
+        """Checks to make sure duration is valid"""
+        for index, form in enumerate(self.forms):
+            current_data = form.cleaned_data
+
+            if current_data and not current_data.get('DELETE', False):
+                if current_data.get('column-index') > self.instance.number_of_columns:
+                    raise forms.ValidationError('An Item extends beyond the columns of the Matrix. Increase the size of the Matrix and/or delete the offending Item if necessary.')
+                if current_data.get('column-index') > self.instance.number_of_columns:
+                    raise forms.ValidationError('An Item extends beyond the rows of the Matrix. Increase the size of the Matrix and/or delete the offending Item if necessary.')
 
 AssayMatrixItemFormSetFactory = inlineformset_factory(
     AssayMatrix,
@@ -2647,7 +2671,7 @@ assay_run_stakeholder_sign_off_formset_factory = inlineformset_factory(
 )
 
 
-class AssayStudySignOffForm(SignOffMixin, forms.ModelForm):
+class AssayStudySignOffForm(SignOffMixin, ModelFormStripWhiteSpace):
     class Meta(object):
         model = AssayStudy
         fields = ['signed_off', 'signed_off_notes']
@@ -2656,7 +2680,7 @@ class AssayStudySignOffForm(SignOffMixin, forms.ModelForm):
         }
 
 
-class AssayStudyStakeholderSignOffForm(SignOffMixin, forms.ModelForm):
+class AssayStudyStakeholderSignOffForm(SignOffMixin, ModelFormStripWhiteSpace):
     class Meta(object):
         model = AssayStudyStakeholder
         fields = ['signed_off', 'signed_off_notes']
