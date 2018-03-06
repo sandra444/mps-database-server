@@ -3583,8 +3583,6 @@ def pivot_data_matrix(study_data,group_index):
 
 
 def scatter_plot_matrix(study_data,group_index):
-    print(study_data)
-    print(group_index)
     #Drop null value rows
     study_data= study_data.dropna(subset=['Value'])
     #Define the Chip ID column to string type
@@ -3602,14 +3600,12 @@ def scatter_plot_matrix(study_data,group_index):
     rep_matrix=rep_matrix[rep_matrix['Value Unit']==study_unique_group['Value Unit'][row]]
     #create replicate matrix for intra reproducibility analysis
     icc_pivot = pd.pivot_table(rep_matrix, values='Value', index='Time (day)',columns=['Chip ID'], aggfunc=np.mean)
-    print(icc_pivot)
     if icc_pivot.isnull().sum().sum()>0:
         Y=Matrix_Fill(icc_pivot)
     else:
         Y=icc_pivot
     d_median = Y.median(axis=1)
     plot_matrix=icc_pivot
-    print(icc_pivot)
     plot_header_list=plot_matrix.columns.values.tolist()
     plot_header_list.insert(0, 'Median')
     plot_matrix = plot_matrix.reindex(columns = plot_header_list)
