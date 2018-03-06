@@ -3,10 +3,12 @@ $(document).ready(function () {
     google.charts.load('current', {'packages':['corechart']});
     google.charts.setOnLoadCallback(drawTables);
 
-    var cv_tooltip = '<span title="The CV is calculated for each time point and the value reported is the max CV across time points, or the CV if a single time point is present.  The reproducibility status is excellent if Max CV/CV < 5% (Excellent (CV)), acceptable if Max CV/CV < 15% (Acceptable (CV)), and poor if CV > 15% for a single time point (Poor (CV))" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
-    var icc_tooltip = '<span title="The ICC Absolute Agreement of the measurements across multiple time points is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated.  When the Max CV > 15%, the reproducibility status is reported to be excellent if > 0.8 (Excellent (ICC), acceptable if > 0.2 (Acceptable (ICC)), and poor if < 0.2 (Poor (ICC))" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
-    var repro_tooltip = '<span title="Our classification of this grouping\'s reproducibility (Excellent > Acceptable > Poor/NA). If Max CV < 15% then the status is based on the  Max CV criteria, otherwise the status is based on the ICC criteria" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
-    var missing_tooltip = '<span title="Quantity of data values whose values were missing from the data provided and were interpolated by the average of the data values at the same time point" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var cv_tooltip = '<span data-toggle="tooltip" title="The CV is calculated for each time point and the value reported is the max CV across time points, or the CV if a single time point is present.  The reproducibility status is excellent if Max CV/CV < 5% (Excellent (CV)), acceptable if Max CV/CV < 15% (Acceptable (CV)), and poor if CV > 15% for a single time point (Poor (CV))" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var icc_tooltip = '<span data-toggle="tooltip" title="The ICC Absolute Agreement of the measurements across multiple time points is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated.  When the Max CV > 15%, the reproducibility status is reported to be excellent if > 0.8 (Excellent (ICC), acceptable if > 0.2 (Acceptable (ICC)), and poor if < 0.2 (Poor (ICC))" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var repro_tooltip = '<span data-toggle="tooltip" title="Our classification of this grouping\'s reproducibility (Excellent > Acceptable > Poor/NA). If Max CV < 15% then the status is based on the  Max CV criteria, otherwise the status is based on the ICC criteria" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var missing_tooltip = '<span data-toggle="tooltip" title="Quantity of data values whose values were missing from the data provided and were interpolated by the average of the data values at the same time point" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var mad_tooltip = '<span data-toggle="tooltip" title="Median Absolute Deviation (MAD) scores of all chip measurement population at every time point.  A score > 3.5 or < -3.5 indicates that the chip is an outlier relative to the median of chip measurement population at a that time point" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var comp_tooltip = '<span data-toggle="tooltip" title="The ICC is calculated for each chip relative to the median of all of the chips." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
 
     var studyID = $( "#selection-parameters" ).find(".studyId").text();
 
@@ -97,6 +99,8 @@ $(document).ready(function () {
             $clone.find('#chip-rep-rep-ind').find('td, th').css('padding','8px 10px');
             $clone.find('#chart1').attr('id', 'chart1-'+counter);
             $clone.find('#chart2').attr('id', 'chart2-'+counter);
+            $clone.find('#mad-score-label').append(mad_tooltip);
+            $clone.find('#med-comp-label').append(comp_tooltip);
             if (icc_status == 'NA') {
                 $clone.find('#repro-status').html('<em>'+icc_status+'</em><small style="color: black;"><span title="'+data[13]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>');
             } else {
@@ -127,8 +131,8 @@ $(document).ready(function () {
         } );
     };
 
-    // Middleware token for AJAX call
-    var middleware_token = $('[name=csrfmiddlewaretoken]').attr('value');
+    // Activates Bootstrap tooltips
+    $('[data-toggle="tooltip"]').tooltip({container:"body"});
 });
 
 function drawChart(list, number, title, chartNum, valueUnit, percentage){
@@ -206,7 +210,10 @@ function drawChart(list, number, title, chartNum, valueUnit, percentage){
         options['series'] = {0: { lineDashStyle: [4, 4], pointShape: { type: 'diamond', sides: 4 } }};
     }
     if (percentage){
-        options['vAxis'] = {title: valueUnit, format: 'short', textStyle: { bold: true },
+        options['vAxis'] = {
+        title: valueUnit,
+        format: 'short',
+        textStyle: { bold: true },
         titleTextStyle: {
                 fontSize: 14,
                 bold: true,
@@ -217,7 +224,19 @@ function drawChart(list, number, title, chartNum, valueUnit, percentage){
             viewWindowMode: 'explicit'
         }
     }
-    chart = new google.visualization.LineChart(document.getElementById(chartNum+number));
+    if (values.length == 2) {
+        chart = new google.visualization.ColumnChart(document.getElementById(chartNum+number));
+        // for (var i = 0; i < values[1].length; i++) {
+        //     if (values[1][i] != null) {
+        //         values[1][i] = values[1][i].toString();
+        //     }
+        //     console.log(values[1][i]);
+        // }
+        options['bar'] = {groupWidth: '25%'}
+        options['hAxis']['ticks'] = [{v:values[1][0], f:values[1][0].toString()}]
+    } else {
+        chart = new google.visualization.LineChart(document.getElementById(chartNum+number));
+    }
     chart.draw(data, options);
 }
 
@@ -267,4 +286,6 @@ $(document).on("click",":checkbox", function(){
     }
     // Recalculate responsive and fixed headers
     $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+    // Activates Bootstrap tooltips
+    $('[data-toggle="tooltip"]').tooltip({container:"body"});
 });
