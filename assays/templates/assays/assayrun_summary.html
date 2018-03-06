@@ -39,15 +39,15 @@
 {#                <strong>Include Excluded Data</strong>#}
 {#            </label>#}
 {#        </div>#}
+        <div class="row text-center small-padding-top">
         {% if user_is_group_admin %}
-            <div class="row text-center small-padding-top">
-                <a href="../sign_off" class="btn btn-success" role="button">View/Edit Sign Off Status of this Study</a>
+            <a href="../sign_off" class="btn btn-success" role="button">View/Edit Sign Off Status of this Study</a>
         {% endif %}
         {#  TODO TODO TODO #}
         {% if user_is_stakeholder_admin %}
-                <a href="../sign_off" class="btn btn-success" role="button">View/Edit Approval Status of this Study</a>
-            </div>
+            <a href="../sign_off" class="btn btn-success" role="button">View/Edit Approval Status of this Study</a>
         {% endif %}
+        </div>
     </div>
 
     {% if object.description or object.study_configuration or object.protocol %}

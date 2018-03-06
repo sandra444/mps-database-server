@@ -4434,7 +4434,4 @@ class AssayRunReproducibilityList(OneGroupRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(AssayRunReproducibilityList, self).get_context_data(**kwargs)
 
-        # Adds the word "editable" to the page
-        context['editable'] = 'Editable '
-
         return context
