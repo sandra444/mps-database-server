@@ -279,7 +279,7 @@ $(document).ready(function () {
         }
 
         // Set number of items if not already set
-        if (number_of_items_selector.val() != current_number_of_rows * current_number_of_columns) {
+        if (number_of_items_selector.val() !== current_number_of_rows * current_number_of_columns) {
             number_of_items_selector.val(current_number_of_rows * current_number_of_columns)
         }
     };
@@ -384,9 +384,7 @@ $(document).ready(function () {
 
     // TODO REVISE
     function refresh_all_contents_from_forms() {
-        // TODO PURGE ALL OLD DISPLAY STUFF
-        // I probably can get away with purging the subdisplays, but can keep the item data
-
+        // I probably can get away with purging the marked entries
         $('.item-setup_set_section').empty();
 
         // Iterate over all prefixes
@@ -721,8 +719,6 @@ $(document).ready(function () {
 
     function matrix_add_content_to_selected() {
         var current_action = action_selector.val();
-        // TODO MAY NEED REVISION
-        // var current_fields = $('.item-section:visible').find('select, input, textarea');
 
         if (current_action === 'add_name') {
             // Default action for add name is to use chip style

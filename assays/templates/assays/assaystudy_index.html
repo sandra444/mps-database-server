@@ -33,9 +33,9 @@
                     {% if user|is_group_editor:object.group.name %}
                         <a href="update" class="btn btn-primary" role="button">Edit This Study</a>
                     {% endif %}
-                    <a href="summary" class="btn btn-info" role="button">Study Summary</a>
+                    <a href="summary" class="btn btn-primary" role="button">Study Summary</a>
                     {% if user_is_group_editor and not object.signed_off_by %}
-                    <a href="upload" class="btn btn-warning" role="button">Upload Data</a>
+                    <a href="upload" class="btn btn-primary" role="button">Upload Data</a>
                     {% endif %}
                 </div>
                 {% if not user_is_group_admin and user_is_group_editor and not object.signed_off_by %}
