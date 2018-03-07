@@ -16,7 +16,8 @@
     <tbody>
         {% for data_file_upload in data_file_uploads %}
         {# Right now, only uploads with data are displayed #}
-        {% if data_file_upload.has_data %}
+        {# At the moment, this conditional is superfluos #}
+{#        {% if data_file_upload.has_data %}#}
         <tr>
             <td>
             	<a href="{{ data_file_upload.file_location }}">{{ data_file_upload }}</a>
@@ -36,7 +37,7 @@
                 </td>
             {% endif %}
         </tr>
-        {% endif %}
+{#        {% endif %}#}
         {% endfor %}
     </tbody>
 </table>

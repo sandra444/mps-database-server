@@ -310,6 +310,8 @@ def get_compound_instance_and_cell_strings_for_queryset(setups):
 
 def get_data_file_uploads(study=None, matrix_item=None):
     """Get data uploads for a study"""
+    valid_files = []
+
     if study:
         data_file_uploads = AssayDataFileUpload.objects.filter(
             study=study
@@ -337,10 +339,7 @@ def get_data_file_uploads(study=None, matrix_item=None):
         data_points = AssayDataPoint.objects.none()
 
     # Edge case for old data
-    if data_points.exclude(data_file_upload=None).count() == 0:
-        for data_file_upload in data_file_uploads:
-            data_file_upload.has_data = True
-
+    if data_points and data_points.exclude(data_file_upload=None).count() == 0:
         return data_file_uploads
 
     data_file_upload_map = {}
@@ -350,9 +349,10 @@ def get_data_file_uploads(study=None, matrix_item=None):
         )
 
     for data_file_upload in data_file_uploads:
-        data_file_upload.has_data = data_file_upload_map.get(data_file_upload.id, '')
+        if data_file_upload_map.get(data_file_upload.id, ''):
+            valid_files.append(data_file_upload)
 
-    return data_file_uploads
+    return valid_files
 
 
 # TODO DEPRECATED
@@ -396,6 +396,7 @@ def get_data_uploads(study=None, chip_readout=None, plate_readout=None):
         ).distinct().order_by('created_on')
 
         data_points = AssayChipRawData.objects.none()
+
     else:
         data_uploads = AssayDataUpload.objects.none()
         data_points = AssayChipRawData.objects.none()

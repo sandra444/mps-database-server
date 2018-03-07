@@ -2880,6 +2880,13 @@ class AssayFileProcessor:
             'subtarget'
         )
 
+        old_replaced_data = AssayDataPoint.objects.filter(
+            study_id=self.study.id,
+            replaced=True
+        ).prefetch_related(
+            'subtarget'
+        )
+
         current_data = {}
 
         possible_conflicting_data = {}
@@ -2904,6 +2911,24 @@ class AssayFileProcessor:
                     # entry.value
                 ), []
             ).append(entry)
+
+        # KIND OF CONFUSING, BUT IT IS EXPEDIENT TO PRETEND REPLACED DATA IS CURRENT DATA FOR UPDATE NUMBER
+        for entry in old_replaced_data:
+            current_data.setdefault(
+                (
+                    entry.matrix_item_id,
+                    entry.assay_plate_id,
+                    entry.assay_well_id,
+                    entry.study_assay_id,
+                    entry.sample_location_id,
+                    entry.time,
+                    entry.replicate,
+                    # ADD VALUE!
+                    # Uses name to deal with subtargets that don't exist yet
+                    entry.subtarget.name,
+                    # entry.value
+                ), []
+            ).append(1)
 
         # Get the headers to know where to get data
         header_data = self.get_and_validate_header(data_list, 3)
@@ -3218,7 +3243,6 @@ class AssayFileProcessor:
         self.preview_data['readout_data'].extend(readout_data)
         self.preview_data['number_of_conflicting_entries'] += len(conflicting_entries)
         self.preview_data['number_of_total_duplicates'] += number_of_total_duplicates
-
 
     def process_excel_file(self):
         file_data = self.current_file.read()

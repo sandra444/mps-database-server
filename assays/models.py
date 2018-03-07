@@ -1265,7 +1265,7 @@ class AssayDataUpload(FlaggableModel):
     # NOTE THAT THIS IS NOT SIMPLY "file" DUE TO COLLISIONS WITH RESERVED WORDS
     # TODO SET LOCATION
     # TODO REQUIRE EVENTUALLY
-    data_file = models.FileField(null=True, blank=True)
+    # data_file = models.FileField(null=True, blank=True)
 
     # Note that there are both chip and plate readouts listed as one file may supply both
     # TO BE DEPRECATED
@@ -1292,7 +1292,7 @@ class AssayDataFileUpload(FlaggableModel):
     # NOTE THAT THIS IS NOT SIMPLY "file" DUE TO COLLISIONS WITH RESERVED WORDS
     # TODO SET LOCATION
     # TODO REQUIRE EVENTUALLY
-    data_file = models.FileField(null=True, blank=True)
+    # data_file = models.FileField(null=True, blank=True)
 
     # NOT VERY USEFUL
     # items = models.ManyToManyField(AssayChipReadout)
