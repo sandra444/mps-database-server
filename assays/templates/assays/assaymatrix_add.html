@@ -115,7 +115,7 @@
     <div class="well">
     {% include 'generic_field.html' with field=form.action label="Action" %}
 
-    <div hidden id="add_name_section" class="item-section">
+    <div hidden class="item-section add_name_section">
     {% include 'generic_field.html' with field=form.item_name label="Name*" %}
 
 {#    <div class="form-group">#}
@@ -124,39 +124,35 @@
 {#            <input id="increment_name_by_one" type="checkbox" value="">#}
 {#        </div>#}
 {#    </div>#}
-
-    <div align="center">
-        <a role="button" id="apply_plate_names" class="btn btn-primary">Apply Default Plate Names</a>
-    </div>
     </div>
 
-    <div hidden id="add_date_section" class="item-section">
+    <div hidden class="item-section add_date_section">
     {% include 'generic_field.html' with field=form.item_setup_date label="Setup Date*" %}
     </div>
 
-    <div hidden id="add_test_type_section" class="item-section">
+    <div hidden class="item-section add_test_type_section">
     {% include 'generic_field.html' with field=form.item_test_type label="Test Type*" %}
     </div>
 
-    <div hidden id="add_notes_section" class="item-section">
+    <div hidden class="item-section add_notes_section">
     {% include 'generic_field.html' with field=form.item_scientist label="Scientist" %}
     {% include 'generic_field.html' with field=form.item_notebook label="Notebook" %}
     {% include 'generic_field.html' with field=form.item_notebook_page label="Notebook Page" %}
     {% include 'generic_field.html' with field=form.item_notes label="Notes" %}
     </div>
 
-    <div hidden id="add_device_section" class="item-section">
+    <div hidden class="item-section add_device_section">
     {% include 'generic_field.html' with field=form.item_device label="Device*" %}
     {% include 'generic_field.html' with field=form.item_organ_model label="Organ Model" %}
     {% include 'generic_field.html' with field=form.item_organ_model_protocol label="Organ Model Protocol" %}
     {% include 'generic_field.html' with field=form.item_variance_from_organ_model_protocol label="Variance from Protocol" %}
     </div>
 
-    <div hidden id="add_failure_section" class="item-section">
+    <div hidden class="item-section add_failure_section">
     {# TODO TODO TODO #}
     </div>
 
-    <div hidden id="add_compounds_section" class="item-section">
+    <div hidden class="item-section add_compounds_section">
     {% if update or detail %}
     <div class="row thumbnail">
     <div class="col-sm-1"></div>
@@ -234,7 +230,7 @@
 
     </div>
 
-    <div hidden id="add_cells_section" class="item-section">
+    <div hidden class="item-section add_cells_section">
     {% if update or detail %}
 {#    {% include 'generic_field.html' with field=form.cell_sample label="Cell Sample" %}#}
 {#    <div class="form-group">#}
@@ -317,7 +313,7 @@
 
     </div>
 
-    <div hidden id="add_settings_section" class="item-section">
+    <div hidden class="item-section add_settings_section">
     {% if update or detail %}
     <div class="row thumbnail">
     <div class="col-sm-1"></div>
@@ -369,6 +365,11 @@
         </div>
     </div>
     {% endif %}
+    </div>
+
+    <div align="center">
+        <a hidden role="button" id="apply_action_to_all" class="btn btn-primary">Apply Action to All</a>
+        <a hidden role="button" id="apply_plate_names" class="btn btn-primary item-section add_name_section">Apply Default Plate Names</a>
     </div>
 
     </div>
@@ -519,7 +520,7 @@
     </div>
     </div>
 
-    <div hidden>
+    <div style="display: none;">
     {# START FORMS #}
     {{ item_formset.management_form }}
     {{ compound_formset.management_form }}
@@ -613,7 +614,7 @@
     </div>
 
     {# Hidden templates #}
-    <div hidden>
+    <div style="display: none;">
 
     <table>
     <tr id="empty_item_html">

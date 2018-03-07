@@ -10,10 +10,12 @@ $(document).ready(function () {
     var matrix_table_selector = $('#matrix_table');
     var matrix_body_selector = $('#matrix_body');
 
+    var item_display_class = '.item-td';
+
     // Allows the matrix_table to have the draggable JQuery UI element
     matrix_table_selector.selectable({
         // SUBJECT TO CHANGE: WARNING!
-        filter: 'td',
+        filter: item_display_class,
         distance: 1,
         cancel: '.btn-xs',
         stop: matrix_add_content_to_selected
@@ -717,6 +719,11 @@ $(document).ready(function () {
         refresh_all_contents_from_forms();
     }
 
+    function apply_action_to_all() {
+        $(item_display_class).addClass('ui-selected');
+        matrix_add_content_to_selected();
+    }
+
     function matrix_add_content_to_selected() {
         var current_action = action_selector.val();
 
@@ -816,7 +823,13 @@ $(document).ready(function () {
     action_selector.change(function() {
         $('.item-section').hide('fast');
         var current_section = $(this).val();
-        $('#' + current_section + '_section').show('fast');
+        $('.' + current_section + '_section').show('fast');
+        if (current_section) {
+            $('#apply_action_to_all').show();
+        }
+        else {
+            $('#apply_action_to_all').hide();
+        }
     }).trigger('change');
 
     // Testing SUBJECT TO CHANGE
@@ -832,6 +845,11 @@ $(document).ready(function () {
     // Triggers for form-delete
     matrix_body_selector.on('click', '.form-delete', function() {
         mark_form_deleted($(this));
+    });
+
+    // Trigger for apply all
+    $('#apply_action_to_all').click(function() {
+        apply_action_to_all();
     });
 
     // TODO TODO TODO TESTING
