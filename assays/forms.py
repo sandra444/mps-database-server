@@ -109,9 +109,10 @@ class ModelFormStripWhiteSpace(forms.ModelForm):
         cd = self.cleaned_data
         for field_name, field in self.fields.items():
             if isinstance(field, forms.CharField):
-                cd[field_name] = cd[field_name].strip()
-                if self.fields[field_name].required and not cd[field_name]:
+                if self.fields[field_name].required and not cd.get(field_name, None):
                     self.add_error(field_name, "This is a required field.")
+                else:
+                    cd[field_name] = cd[field_name].strip()
 
         return super(ModelFormStripWhiteSpace, self).clean()
 
