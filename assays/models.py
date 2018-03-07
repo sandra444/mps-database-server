@@ -1497,7 +1497,7 @@ class AssayStudy(FlaggableModel):
 
     # TODO
     def __unicode__(self):
-        center_id = get_center_id(self.group.id).get('center_id')
+        center_id = self.group.microphysiologycenter_set.first().center_id
         # study_types = self.get_study_types_string()
         return '-'.join([
             center_id,

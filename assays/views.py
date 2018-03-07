@@ -3453,6 +3453,7 @@ class AssayStudySummary(StudyViewerMixin, TemplateView):
             'assaystudyassay_set__target',
             'assaystudyassay_set__method',
             'assaystudyassay_set__unit',
+            'group__microphysiologycenter_set'
         )[0]
 
         context.update({

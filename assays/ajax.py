@@ -1585,12 +1585,11 @@ def send_ready_for_sign_off_email(request):
 
 
 # TODO TODO TODO
-def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_header=False, include_all=False):
-    """Returns data points as a csv in the form of a string"""
+def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, include_header=False, include_all=False):
     if not data_points:
         # TODO ORDER SUBJECT TO CHANGE
         data_points = AssayDataPoint.objects.prefetch_related(
-            'study',
+            'study__group__microphysiologycenter_set',
             'matrix_item__assaysetupsetting_set__setting__setting',
             'matrix_item__assaysetupcell_set__cell_sample',
             'matrix_item__assaysetupcell_set__density_unit',
@@ -1630,7 +1629,7 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
 
     for data_point in data_points:
         # Definitely need to rename these fields/models...
-        study_id = data_point.study.name
+        study_id = unicode(data_point.study)
 
         item_name = data_point.matrix_item.name
 
@@ -1679,34 +1678,49 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
 
         if not replaced and (include_all or not excluded):
             data.append(
-                [unicode(x) for x in
-                    [
-                        study_id,
-                        item_name,
-                        cross_reference,
-                        assay_plate_id,
-                        assay_well_id,
-                        times.get('day'),
-                        times.get('hour'),
-                        times.get('minute'),
-                        device,
-                        organ_model,
-                        settings,
-                        cells,
-                        compounds,
-                        target,
-                        subtarget,
-                        method,
-                        sample_location,
-                        value,
-                        value_unit,
-                        replicate,
-                        caution_flag,
-                        excluded,
-                        notes
-                    ]
+                [
+                    study_id,
+                    item_name,
+                    cross_reference,
+                    assay_plate_id,
+                    assay_well_id,
+                    times.get('day'),
+                    times.get('hour'),
+                    times.get('minute'),
+                    device,
+                    organ_model,
+                    settings,
+                    cells,
+                    compounds,
+                    target,
+                    subtarget,
+                    method,
+                    sample_location,
+                    value,
+                    value_unit,
+                    replicate,
+                    caution_flag,
+                    excluded,
+                    notes
                 ]
             )
+
+    return data
+
+
+def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_header=False, include_all=False):
+    """Returns data points as a csv in the form of a string"""
+    data = get_data_as_list_of_lists(
+        ids,
+        data_points,
+        both_assay_names,
+        include_header,
+        include_all
+    )
+
+    for index in range(len(data)):
+        current_list = list(data[index])
+        data[index] = [unicode(item) for item in current_list]
 
     string_io = StringIO()
     csv_writer = UnicodeWriter(string_io)
