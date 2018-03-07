@@ -81,6 +81,10 @@
       // TODO MOVE THIS TO ITS OWN FILE PLEASE
 {#      // TODO MOVE THIS TO ITS OWN FILE PLEASE#}
       $(document).ready(function () {
+        // Prevent CSS conflict with Bootstrap
+        // CRUDE
+        $.fn.button.noConflict();
+
 {#        // Discern what anchor to add to the help URL by looking at current url#}
         var url = window.location.href;
         var anchor = '';

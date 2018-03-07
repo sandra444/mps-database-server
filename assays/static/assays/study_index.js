@@ -1,6 +1,6 @@
 $(document).ready(function() {
     // Prevent CSS conflict with Bootstrap
-    $.fn.button.noConflict();
+    // $.fn.button.noConflict();
 
     // Prevent accidental form submission
     $(document).on("keypress", ":input:not(textarea)", function(event) {

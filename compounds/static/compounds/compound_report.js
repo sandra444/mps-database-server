@@ -3,9 +3,6 @@
 // 2.) Display all of the requested compound data in the desired table
 // 3.) Display D3 "Sparklines" for every assay for the given compound (TODO LOOK AT D3 TECHNIQUE)
 $(document).ready(function () {
-    // Prevent CSS conflict with Bootstrap
-    $.fn.button.noConflict();
-
     // Object of all selected compounds
     var compounds = {};
 

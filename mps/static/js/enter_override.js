@@ -14,7 +14,7 @@ $(document).ready(function () {
     });
 
     // Prevent CSS conflict with Bootstrap
-    $.fn.button.noConflict();
+    // $.fn.button.noConflict();
 
     // Add the dialog box
     // $("#content").append('<div hidden id="enter_dialog_confirm" title="Submit this form?"><p><span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true" style="float:left; margin:0 7px 20px 0;"></span>Are you sure you want to submit the form?</p></div>');

@@ -3,7 +3,7 @@
 // TODO THIS SCRIPT NEEDS TO BE REVISED TO LIMIT HITS
 $(document).ready(function () {
     // Prevent CSS conflict with Bootstrap
-    $.fn.button.noConflict();
+    // $.fn.button.noConflict();
 
     // Stores all currently selected compounds
     var compounds = {};
