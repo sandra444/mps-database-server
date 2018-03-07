@@ -207,6 +207,7 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
 
     return string_io.getvalue()
 
+
 def get_chip_readout_data_as_list_of_lists(chip_ids, chip_data=None, both_assay_names=False, include_header=False, include_all=False):
     """Returns readout data as a csv in the form of a string
 
@@ -1582,6 +1583,7 @@ def send_ready_for_sign_off_email(request):
 
     return HttpResponse(json.dumps(data), content_type='application/json')
 
+
 # TODO TODO TODO
 def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_header=False, include_all=False):
     """Returns data points as a csv in the form of a string"""
@@ -2090,6 +2092,7 @@ def get_data_points_for_charting(
         study_assay = raw.study_assay
         target = study_assay.target.name
         unit = study_assay.unit.unit
+
         # Not currently used
         method = study_assay.method.name
 

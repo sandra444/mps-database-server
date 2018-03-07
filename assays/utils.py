@@ -2779,7 +2779,12 @@ class AssayFileProcessor:
             self.data_file_upload = AssayDataFileUpload()
         self.study = study
         self.save = save
-        self.preview_data = {}
+        # NO REAL REASON FOR THIS TO BE A DIC RATHER THAN ATTRIBUTES
+        self.preview_data = {
+            'readout_data': [],
+            'number_of_conflicting_entries': 0,
+            'number_of_total_duplicates': 0
+        }
         self.errors = []
 
     def valid_data_row(self, row, header_indices):
@@ -2831,12 +2836,6 @@ class AssayFileProcessor:
         query_list = []
         # A list of readout data for preview
         readout_data = []
-        # Full preview data
-        self.preview_data = {
-            'readout_data': readout_data,
-            'number_of_conflicting_entries': 0,
-            'number_of_total_duplicates': 0
-        }
         number_of_total_duplicates = 0
 
         # Dictionary of all Study Assays with respective PKs
@@ -3216,10 +3215,10 @@ class AssayFileProcessor:
             cursor.close()
 
         # Be sure to subtract the number of replaced points!
-        self.preview_data.update({
-            'number_of_conflicting_entries': len(conflicting_entries),
-            'number_of_total_duplicates': number_of_total_duplicates
-        })
+        self.preview_data['readout_data'].extend(readout_data)
+        self.preview_data['number_of_conflicting_entries'] += len(conflicting_entries)
+        self.preview_data['number_of_total_duplicates'] += number_of_total_duplicates
+
 
     def process_excel_file(self):
         file_data = self.current_file.read()
