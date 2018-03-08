@@ -2,12 +2,11 @@
 {% load static %}
 
 {% block load %}
-    <script src="{% static "js/enter_override.js" %}"></script>
-    <script src="{% static "js/cookies.js" %}"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{% static "assays/reproducibility.js" %}"></script>
     <script src="{% static "assays/chart_display.js" %}"></script>
     <script src="{% static "js/display_datatable.js" %}"></script>
+    {# TODO REFACTOR IF POSSIBLE #}
     <script type='text/javascript'>
     var gas_list = JSON.parse("{{ gas_list|escapejs|safe }}");
     var mad_list = JSON.parse("{{ mad_list|escapejs|safe }}");
@@ -15,17 +14,11 @@
     var cv_list = JSON.parse("{{ cv_list|escapejs|safe }}");
     var chip_list = JSON.parse("{{ chip_list|escapejs|safe }}");
     </script>
-    <style>
-    /*Dirty, vile styling*/
-    input[type=checkbox] {
-      transform: scale(2.5);
-    }
-    </style>
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li><a href="/assays/reproducibility/">Reproducibility</a></li>
-    <li><a href="/assays/{{ object.id }}/summary">{{ object }}</a></li>
+    <li><a href="/assays/assaystudy/reproducibility/">Reproducibility</a></li>
+    <li><a href="{{ object.get_absolute_url }}">{{ object }}</a></li>
     <li class="active">Reproducibility Analysis</li>
 {% endblock %}
 
@@ -37,9 +30,9 @@
             </h1>
         </div>
         <div class="row text-center small-padding-top">
-            <a href="/assays/reproducibility" class="btn btn-primary" role="prima">Reproducibility List</a>
-            <a href="/assays/{{ object.id }}" class="btn btn-primary" role="button">Study Landing</a>
-            <a href="/assays/{{ object.id }}/summary" class="btn btn-info" role="button">Study Summary</a>
+            <a href="/assays/assaystudy/reproducibility/" class="btn btn-primary" role="primary">Reproducibility List</a>
+            <a href="{{ object.get_absolute_url }}" class="btn btn-primary" role="button">Study Landing</a>
+            <a href="{{ object.get_summary_url }}" class="btn btn-primary" role="button">Study Summary</a>
         </div>
     </div>
 {% endblock %}

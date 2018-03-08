@@ -2320,7 +2320,7 @@ class AssayStudyAdmin(LockableAdmin):
     list_per_page = 300
     search_fields = ('name', 'start_date', 'description')
     date_hierarchy = 'start_date'
-    list_display = ('name', 'study_types_string', 'start_date', 'description',)
+    list_display = ('name', 'get_study_types_string', 'start_date', 'description',)
 
     filter_horizontal = ('access_groups',)
 

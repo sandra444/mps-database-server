@@ -65,7 +65,7 @@ from assays.forms import (
 from django import forms
 
 # TODO REVISE SPAGHETTI CODE
-from assays.ajax import get_chip_readout_data_as_csv, get_data_as_csv, get_chip_readout_data_as_list_of_lists
+from assays.ajax import get_chip_readout_data_as_csv, get_data_as_csv, get_data_as_list_of_lists, get_chip_readout_data_as_list_of_lists
 from assays.utils import (
     MATRIX_PREFETCH,
     MATRIX_ITEM_PREFETCH,
@@ -444,13 +444,35 @@ def get_queryset_with_number_of_data_points_old(queryset):
         study.data_points = data_points_map.get(study.id, 0)
 
 
-def get_queryset_with_stakeholder_sign_off(queryset):
+def get_queryset_with_stakeholder_sign_off_old(queryset):
     """Add the stakeholder status to each object in an AssayRun Queryset
 
     The stakeholder_sign_off is True is there are no stakeholders that need to sign off
     """
     # A stakeholder is needed if the sign off is required and there is no pk for the individual signing off
     required_stakeholders_without_sign_off = AssayRunStakeholder.objects.filter(
+        sign_off_required=True,
+        signed_off_by_id=None
+    )
+
+    required_stakeholder_map = {}
+
+    for stakeholder in required_stakeholders_without_sign_off:
+        required_stakeholder_map.update({
+            stakeholder.study_id: False
+        })
+
+    for study in queryset:
+        study.stakeholder_sign_off = required_stakeholder_map.get(study.id, True)
+
+
+def get_queryset_with_stakeholder_sign_off(queryset):
+    """Add the stakeholder status to each object in an AssayStudy Queryset
+
+    The stakeholder_sign_off is True is there are no stakeholders that need to sign off
+    """
+    # A stakeholder is needed if the sign off is required and there is no pk for the individual signing off
+    required_stakeholders_without_sign_off = AssayStudyStakeholder.objects.filter(
         sign_off_required=True,
         signed_off_by_id=None
     )
@@ -666,7 +688,7 @@ class GroupIndex(OneGroupRequiredMixin, ListView):
 
         get_queryset_with_number_of_data_points_old(queryset)
 
-        get_queryset_with_stakeholder_sign_off(queryset)
+        get_queryset_with_stakeholder_sign_off_old(queryset)
 
         return queryset
 
@@ -882,7 +904,7 @@ class AssayRunList(LoginRequiredMixin, ListView):
 
         get_queryset_with_number_of_data_points_old(queryset)
 
-        get_queryset_with_stakeholder_sign_off(queryset)
+        get_queryset_with_stakeholder_sign_off_old(queryset)
 
         return queryset
 
@@ -3187,7 +3209,7 @@ def get_queryset_with_organ_model_map(queryset):
 
 
 def get_queryset_with_number_of_data_points(queryset):
-    """Add number of data points to each object in an Assay Run querysey"""
+    """Add number of data points to each object in an Assay Study querysey"""
     data_points = AssayDataPoint.objects.filter(
         replaced=False
     )
@@ -3229,6 +3251,8 @@ class AssayStudyEditableList(OneGroupRequiredMixin, ListView):
 
         get_queryset_with_organ_model_map(queryset)
         get_queryset_with_number_of_data_points(queryset)
+        # DOESN'T MATTER, ANYTHING THAT IS SIGNED OFF CAN'T BE EDITED
+        # get_queryset_with_stakeholder_sign_off(queryset)
 
         return queryset
 
@@ -3247,25 +3271,74 @@ class AssayStudyList(LoginRequiredMixin, ListView):
     model = AssayStudy
 
     def get_queryset(self):
-        queryset = AssayStudy.objects.prefetch_related(
+        queryset = AssayStudy.objects.all().prefetch_related(
             'created_by',
             'group',
-            'signed_off_by',
-            # 'study_types'
+            'signed_off_by'
         )
 
-        # Display to users with either editor or viewer group or if unrestricted
-        group_names = [group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()]
-        queryset = queryset.filter(
-            restricted=False
-        ) | queryset.filter(
-            group__name__in=group_names
-        )
+        user_group_names = [
+            group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()
+        ]
 
-        get_queryset_with_organ_model_map(queryset)
-        get_queryset_with_number_of_data_points(queryset)
+        data_group_filter = {}
+        access_group_filter = {}
+        unrestricted_filter = {}
+        unsigned_off_filter = {}
+        stakeholder_group_filter = {}
+        missing_stakeholder_filter = {}
 
-        return queryset
+        stakeholder_group_whitelist = list(set(
+            AssayStudyStakeholder.objects.filter(
+                group__name__in=user_group_names
+            ).values_list('study_id', flat=True)
+        ))
+
+        missing_stakeholder_blacklist = list(set(
+            AssayStudyStakeholder.objects.filter(
+                signed_off_by_id=None,
+                sign_off_required=True
+            ).values_list('study_id', flat=True)
+        ))
+
+        data_group_filter.update({
+            'group__name__in': user_group_names
+        })
+        access_group_filter.update({
+            'access_groups__name__in': user_group_names,
+        })
+        unrestricted_filter.update({
+            'restricted': False
+        })
+        unsigned_off_filter.update({
+            'signed_off_by': None
+        })
+        stakeholder_group_filter.update({
+            'id__in': stakeholder_group_whitelist
+        })
+        missing_stakeholder_filter.update({
+            'id__in': missing_stakeholder_blacklist
+        })
+
+        # Show if:
+        # 1: Study has group matching user_group_names
+        # 2: Study has Stakeholder group matching user_group_name AND is signed off on
+        # 3: Study has access group matching user_group_names AND is signed off on AND all Stakeholders have signed off
+        # 4: Study is unrestricted AND is signed off on AND all Stakeholders have signed off
+        combined = queryset.filter(**data_group_filter) | \
+                   queryset.filter(**stakeholder_group_filter).exclude(**unsigned_off_filter) | \
+                   queryset.filter(**access_group_filter).exclude(**unsigned_off_filter).exclude(
+                       **missing_stakeholder_filter) | \
+                   queryset.filter(**unrestricted_filter).exclude(**unsigned_off_filter).exclude(
+                       **missing_stakeholder_filter)
+
+        combined = combined.distinct()
+
+        get_queryset_with_organ_model_map(combined)
+        get_queryset_with_number_of_data_points(combined)
+        get_queryset_with_stakeholder_sign_off(combined)
+
+        return combined
 
 
 class AssayStudyAdd(OneGroupRequiredMixin, CreateView):
@@ -3844,6 +3917,13 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
+class AssayStudyDelete(DeletionMixin, DeleteView):
+    """Delete a Setup"""
+    model = AssayStudy
+    template_name = 'assays/assaystudy_delete.html'
+    success_url = '/assays/assaystudy/'
+
+
 def get_cell_samples_for_selection(user, setups=None):
     """Returns the cell samples to be listed in setup views
 
@@ -4225,6 +4305,15 @@ class AssayMatrixDetail(StudyGroupMixin, DetailView):
         return context
 
 
+class AssayMatrixDelete(DeletionMixin, DeleteView):
+    """Delete a Setup"""
+    model = AssayMatrix
+    template_name = 'assays/assaymatrix_delete.html'
+
+    def get_success_url(self):
+        return self.object.study.get_absolute_url()
+
+
 # TODO PROBABLY WILL REMOVE EVENTUALLY
 class AssayMatrixItemUpdate(StudyGroupMixin, UpdateView):
     model = AssayMatrixItem
@@ -4349,6 +4438,15 @@ class AssayMatrixItemDetail(StudyGroupMixin, DetailView):
         )
 
 
+class AssayMatrixItemDelete(DeletionMixin, DeleteView):
+    """Delete a Setup"""
+    model = AssayMatrixItem
+    template_name = 'assays/assaymatrixitem_delete.html'
+
+    def get_success_url(self):
+        return self.object.study.get_absolute_url()
+
+
 class AssayRunReproducibility(StudyViewershipMixin, DetailView):
     """Returns a form and processed statistical information. """
 
@@ -4451,15 +4549,100 @@ class AssayRunReproducibilityList(OneGroupRequiredMixin, ListView):
             signed_off_by_id=None
         )
 
-        get_queryset_with_organ_model_map(queryset)
+        get_queryset_with_organ_model_map_old(queryset)
 
-        get_queryset_with_number_of_data_points(queryset)
+        get_queryset_with_number_of_data_points_old(queryset)
 
-        get_queryset_with_stakeholder_sign_off(queryset)
+        get_queryset_with_stakeholder_sign_off_old(queryset)
 
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super(AssayRunReproducibilityList, self).get_context_data(**kwargs)
+
+        return context
+
+
+class AssayStudyReproducibility(StudyViewerMixin, DetailView):
+    """Returns a form and processed statistical information. """
+    model = AssayStudy
+    template_name = 'assays/assaystudy_reproducibility.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+
+        # If chip data
+        matrix_items = AssayMatrixItem.objects.filter(
+            study_id=self.object.id
+        )
+
+        # Boolean
+        #include_all = self.request.GET.get('include_all', False)
+        chip_data = get_data_as_list_of_lists(matrix_items, include_header=True, include_all=False)
+
+        repro_data = get_repro_data(chip_data)
+
+        gas_list = repro_data['reproducibility_results_table']['data']
+        gas_list = json.dumps(gas_list)
+        context['gas_list'] = gas_list
+
+        mad_list = {}
+        cv_list = {}
+        chip_list = {}
+        comp_list = {}
+        for x in range(len(repro_data)-1):
+            # mad_list
+            mad_list[x+1] = {'columns':repro_data[x]['mad_score_matrix']['columns']}
+            for y in range(len(repro_data[x]['mad_score_matrix']['index'])):
+                repro_data[x]['mad_score_matrix']['data'][y].insert(0, repro_data[x]['mad_score_matrix']['index'][y])
+            mad_list[x+1]['data'] = repro_data[x]['mad_score_matrix']['data']
+            # cv_list
+            if repro_data[x].get('comp_ICC_Value'):
+                cv_list[x+1] = [['Time', 'CV (%)']]
+                for y in range(len(repro_data[x]['CV_array']['index'])):
+                    repro_data[x]['CV_array']['data'][y].insert(0, repro_data[x]['CV_array']['index'][y])
+                for entry in repro_data[x]['CV_array']['data']:
+                    cv_list[x+1].append(entry)
+            # chip_list
+            repro_data[x]['cv_chart']['columns'].insert(0,"Time (days)")
+            chip_list[x+1] = [repro_data[x]['cv_chart']['columns']]
+            for y in range(len(repro_data[x]['cv_chart']['index'])):
+                repro_data[x]['cv_chart']['data'][y].insert(0, repro_data[x]['cv_chart']['index'][y])
+            for z in range(len(repro_data[x]['cv_chart']['data'])):
+                chip_list[x+1].append(repro_data[x]['cv_chart']['data'][z])
+            # comp_list
+            if repro_data[x].get('comp_ICC_Value'):
+                comp_list[x+1] = []
+                for y in range(len(repro_data[x]['comp_ICC_Value']['Chip ID'])):
+                    comp_list[x+1].insert(y, [])
+                    comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Chip ID'][y])
+                    comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['ICC Absolute Agreement'][y])
+                    comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Missing Data Points'][y])
+
+        mad_list = json.dumps(mad_list)
+        context['mad_list'] = mad_list
+
+        cv_list = json.dumps(cv_list)
+        context['cv_list'] = cv_list
+
+        chip_list = json.dumps(chip_list)
+        context['chip_list'] = chip_list
+
+        comp_list = json.dumps(comp_list)
+        context['comp_list'] = comp_list
+
+        # get_user_status_context(self, context)
+
+        return self.render_to_response(context)
+
+
+# TODO Class-based view for direct reproducibility access.
+class AssayStudyReproducibilityList(AssayStudyList):
+    """Displays all of the studies linked to groups that the user is part of"""
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyReproducibilityList, self).get_context_data()
+
+        context['reproducibility'] = True
 
         return context

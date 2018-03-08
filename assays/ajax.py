@@ -216,7 +216,7 @@ def get_chip_readout_data_as_list_of_lists(chip_ids, chip_data=None, both_assay_
     chip_data - Readout raw data, optional, acquired with chip_ids if not provided
     both_assay_names - Indicates that both assay names should be returned (not currently used)
     """
-    related_compounds_map = {}
+    # related_compounds_map = {}
 
     if not chip_data:
         # TODO ORDER SUBJECT TO CHANGE
@@ -244,7 +244,7 @@ def get_chip_readout_data_as_list_of_lists(chip_ids, chip_data=None, both_assay_
             'update_number'
         )
 
-        related_compounds_map = get_related_compounds_map(readouts=chip_ids)
+        # related_compounds_map = get_related_compounds_map(readouts=chip_ids)
 
     data = []
 
@@ -277,7 +277,8 @@ def get_chip_readout_data_as_list_of_lists(chip_ids, chip_data=None, both_assay_
 
         cells = data_point.assay_chip_id.chip_setup.stringify_cells()
 
-        compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, ' | ')
+        # compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, ' | ')
+        compound_treatment = data_point.assay_chip_id.chip_setup.stringify_compounds()
 
         value = data_point.value
 
@@ -1648,8 +1649,8 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
 
         subtarget = data_point.subtarget.name
 
-        device = data_point.matrix_item.device
-        organ_model = data_point.matrix_item.organ_model
+        device = data_point.matrix_item.device.name
+        organ_model = data_point.matrix_item.organ_model.name
 
         value = data_point.value
 

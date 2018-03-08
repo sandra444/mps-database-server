@@ -8,7 +8,7 @@ from microdevices.models import (
     MicrophysiologyCenter,
     # MicrodeviceSection
 )
-from mps.base.models import LockableModel, FlaggableModel
+from mps.base.models import LockableModel, FlaggableModel, FlaggableRestrictedModel
 from django.contrib.auth.models import Group, User
 
 import urllib
@@ -175,7 +175,7 @@ class AssayModel(LockableModel):
 
 
 # Assay layout is now a flaggable model
-class AssayLayout(FlaggableModel):
+class AssayLayout(FlaggableRestrictedModel):
     """Defines the layout of a PLATE (parent of all associated wells)"""
 
     class Meta(object):
@@ -378,7 +378,7 @@ class AssayPlateCells(models.Model):
 
 
 # TO BE DEPRECATED To be merged into single "AssaySetup" model
-class AssayPlateSetup(FlaggableModel):
+class AssayPlateSetup(FlaggableRestrictedModel):
     """Setup for MICROPLATES"""
 
     class Meta(object):
@@ -505,7 +505,7 @@ def plate_readout_file_location(instance, filename):
 
 
 # TO BE DEPRECATED To be merged into single "AssayDataset" model
-class AssayPlateReadout(FlaggableModel):
+class AssayPlateReadout(FlaggableRestrictedModel):
     """Readout data collected from MICROPLATES"""
 
     class Meta(object):
@@ -629,7 +629,7 @@ class AssayPlateResult(models.Model):
 
 
 # TO BE DEPRECATED To be merged into single "AssayResultset" model
-class AssayPlateTestResult(FlaggableModel):
+class AssayPlateTestResult(FlaggableRestrictedModel):
     """Test Results from MICROPLATES"""
 
     class Meta(object):
@@ -703,7 +703,7 @@ def bulk_readout_file_location(instance, filename):
 # To be renamed "AssayStudy" for clarity
 # Handling of study type will be changed
 # Nature of assay_run_id subject to revision
-class AssayRun(FlaggableModel):
+class AssayRun(FlaggableRestrictedModel):
     """The encapsulation of all data concerning some plate/chip project"""
 
     class Meta(object):
@@ -773,9 +773,9 @@ class AssayRun(FlaggableModel):
     signed_off_notes = models.CharField(max_length=255, blank=True, default='')
 
     # THESE ARE NOW EXPLICIT FIELDS IN STUDY
-    group = models.ForeignKey(Group, help_text='Bind to a group')
+    # group = models.ForeignKey(Group, help_text='Bind to a group')
 
-    restricted = models.BooleanField(default=True, help_text='Check box to restrict to selected group')
+    # restricted = models.BooleanField(default=True, help_text='Check box to restrict to selected group')
 
     def study_types(self):
         current_types = ''
@@ -929,7 +929,7 @@ class AssayChipCells(models.Model):
         )
 
 # TO BE DEPRECATED To be merged into single "AssaySetup" model
-class AssayChipSetup(FlaggableModel):
+class AssayChipSetup(FlaggableRestrictedModel):
     """The configuration of a Chip for implementing an assay"""
     class Meta(object):
         verbose_name = 'Chip Setup'
@@ -1106,7 +1106,7 @@ def chip_readout_file_location(instance, filename):
 
 
 # TO BE DEPRECATED To be merged into single "AssayDataset" model
-class AssayChipReadout(FlaggableModel):
+class AssayChipReadout(FlaggableRestrictedModel):
     """Readout data for CHIPS"""
 
     class Meta(object):
@@ -1163,7 +1163,7 @@ class AssayChipReadout(FlaggableModel):
 
 
 # TO BE DEPRECATED To be merged into single "AssayResultSet" model
-class AssayChipTestResult(FlaggableModel):
+class AssayChipTestResult(FlaggableRestrictedModel):
     """Results calculated from Raw Chip Data"""
 
     class Meta(object):
@@ -1254,11 +1254,11 @@ class AssayChipResult(models.Model):
                                   null=True)
 
 
-class AssayDataUpload(FlaggableModel):
+class AssayDataUpload(FlaggableRestrictedModel):
     """Shows the history of data uploads for a readout; functions as inline"""
 
     # TO BE DEPRECATED
-    # date_created, created_by, and other fields are used but come from FlaggableModel
+    # date_created, created_by, and other fields are used but come from FlaggableRestrictedModel
     file_location = models.URLField(null=True, blank=True)
 
     # Store the file itself, rather than the location
@@ -1483,7 +1483,7 @@ class AssayStudy(FlaggableModel):
     #     )
     #     return study_types
 
-    def study_types_string(self):
+    def get_study_types_string(self):
         current_types = []
         if self.toxicity:
             current_types.append('TOX')
@@ -1501,7 +1501,7 @@ class AssayStudy(FlaggableModel):
         # study_types = self.get_study_types_string()
         return '-'.join([
             center_id,
-            self.study_types_string(),
+            self.get_study_types_string(),
             unicode(self.start_date),
             self.name
         ])
@@ -1513,7 +1513,13 @@ class AssayStudy(FlaggableModel):
         return self.get_absolute_url()
 
     def get_delete_url(self):
-        return '/assays/assaystudy/{}/delete/'.format(self.id)
+        return '{}delete/'.format(self.get_absolute_url())
+
+    def get_summary_url(self):
+        return '{}summary/'.format(self.get_absolute_url())
+
+    def get_reproducibility_url(self):
+        return '{}reproducibility/'.format(self.get_absolute_url())
 
 
 # ON THE FRONT END, MATRICES ARE LIKELY TO BE CALLED STUDY SETUPS
@@ -1580,6 +1586,9 @@ class AssayMatrix(FlaggableModel):
 
     def get_post_submission_url(self):
         return self.study.get_post_submission_url()
+
+    def get_delete_url(self):
+        return '{}delete/'.format(self.get_absolute_url())
 
 
 class AssayFailureReason(FlaggableModel):
@@ -1759,6 +1768,9 @@ class AssayMatrixItem(FlaggableModel):
 
     def get_post_submission_url(self):
         return self.study.get_absolute_url()
+
+    def get_delete_url(self):
+        return '{}delete/'.format(self.get_absolute_url())
 
 
 # Controversy has arisen over whether to put this in an organ model or not

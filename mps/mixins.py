@@ -491,13 +491,37 @@ class DeletionMixin(object):
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
         self.object = self.get_object()
-        if not is_group_admin(self.request.user, self.object.group.name):
+
+        group = getattr(self.object, 'group', None)
+        study = None
+        study_sign_off = False
+
+        if not group:
+            study = getattr(self.object, 'study', None)
+            group = study.group
+            study_sign_off = study.signed_off_by
+
+        group = group.name
+
+        if not is_group_admin(self.request.user, group):
             return PermissionDenied(self.request, 'Only group admins can perform this action. Please contact your group admin.')
+
+        if study_sign_off:
+            return PermissionDenied(
+                self.request,
+                'You cannot modify this because the study has been signed off on by {0} {1}.'
+                ' If something needs to be changed, contact the individual who signed off.'
+                ' If you are the individual who signed off, please contact a database administrator.'.format(
+                    study.signed_off_by.first_name,
+                    study.signed_off_by.last_name
+                )
+            )
 
         can_be_deleted = True
 
         for current_field in self.object._meta.get_fields():
             # TODO MODIFY TO CHECK M2M MANAGERS IN THE FUTURE
+            # TODO REVISE
             if str(type(current_field)) == "<class 'django.db.models.fields.related.ManyToOneRel'>":
                 manager = getattr(self.object, current_field.name + '_set')
                 count = manager.count()
@@ -506,8 +530,11 @@ class DeletionMixin(object):
                     break
 
         if not can_be_deleted:
-            return PermissionDenied(self.request, 'Other entries depend on this, so it cannot be deleted.'
-                                                  ' Please contact a Database Administrator if you would like to delete it.')
+            return PermissionDenied(
+                self.request,
+                'Other entries depend on this, so it cannot be deleted.'
+                ' Either delete the linked entries or contact a Database Administrator if you would like to delete it.'
+            )
 
         return super(DeletionMixin, self).dispatch(*args, **kwargs)
 

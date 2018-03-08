@@ -19,7 +19,7 @@ $(document).ready(function () {
              "render": function(data, type, row) {
                 if (type === 'display') {
                     groupNum = row[10];
-                    return '<input type="checkbox" class="gas-checkbox-'+groupNum+'">';
+                    return '<input type="checkbox" class="big-checkbox gas-checkbox-'+groupNum+'">';
                     //<a class="hidden repro-goto-'+groupNum+'" onclick=$(.repro-'+groupNum+').scrollIntoView();>Go to</a>
                 }
             return data;
@@ -92,7 +92,7 @@ $(document).ready(function () {
             var $elem = $( "#repro-data" );
             var $clone = $elem.first().clone( true ).addClass('repro-'+counter).appendTo("#clone-container").val("");
             mad_list[counter]['columns'].unshift("Time");
-            $clone.find('#repro-title').text('Replica Set ' + group)
+            $clone.find('#repro-title').text('Replica Set ' + group);
             $clone.find('#selection-parameters').html(buildSelectionParameters(studyID, organModel, targetAnalyte, methodKit, sampleLocation, compoundTreatments, valueUnit));
             $clone.find('#selection-parameters').find('td, th').css('padding','8px 10px');
             $clone.find('#chip-rep-rep-ind').html(buildCV_ICC(data[7],data[8]));

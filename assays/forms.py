@@ -1618,8 +1618,8 @@ class AssayMatrixForm(SignOffMixin, ModelFormStripWhiteSpace):
         # ('copy', 'Copy Contents'),
         # TODO TODO TODO TENTATIVE
         # ('clear', 'Clear Contents'),
-        ('delete', 'Delete Selected')
-    ))
+        ('delete', 'Delete Selected'),
+    ), required=False)
 
     # The item_ isn't just to be annoying, I want to avoid conflicts with other fields
     ### ADDING ITEM FIELDS

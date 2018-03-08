@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     url(r'^assays/(?P<pk>[0-9]+)/update/$', AssayRunUpdate.as_view(), name='study-update'),
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/update/$', AssayStudyUpdate.as_view(), name='asssay_study_update'),
     # Delete view for studies
-    # url(r'^assays/(?P<pk>[0-9]+)/delete/$', AssayStudyDelete.as_view(), name='study-delete'),
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/delete/$', AssayStudyDelete.as_view(), name='study-delete'),
     # Summary view for studies
     url(r'^assays/(?P<pk>[0-9]+)/summary/$', AssayRunSummary.as_view(), name='study-summary'),
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/summary/$', AssayStudySummary.as_view(), name='assay_study_summary'),
@@ -32,6 +32,7 @@ urlpatterns = patterns('',
 
     url(r'^assays/assaymatrixitem/(?P<pk>[0-9]+)/$', AssayMatrixItemDetail.as_view(), name='assay_matrix_item_detail'),
     url(r'^assays/assaymatrixitem/(?P<pk>[0-9]+)/update/$', AssayMatrixItemUpdate.as_view(), name='assay_matrix_item_update'),
+    url(r'^assays/assaymatrixitem/(?P<pk>[0-9]+)/delete/$', AssayMatrixItemDelete.as_view(), name='assay_matrix_item_delete'),
 
     url(r'^assays/studyconfiguration/$', AssayStudyConfigurationList.as_view(), name='studyconfiguration_list'),
     url(r'^assays/studyconfiguration/add/$', AssayStudyConfigurationAdd.as_view(), name='studyconfiguration_add'),
@@ -41,6 +42,7 @@ urlpatterns = patterns('',
     url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assaymatrix/add/$', AssayMatrixAdd.as_view(), name='assay_matrix_add'),
     url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/$', AssayMatrixDetail.as_view(), name='assay_matrix_detail'),
     url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/update/$', AssayMatrixUpdate.as_view(), name='assay_matrix_update'),
+    url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/delete/$', AssayMatrixDelete.as_view(), name='assay_matrix_delete'),
 
     # Sign off
     url(r'^assays/(?P<pk>[0-9]+)/sign_off/$', AssayRunSignOff.as_view(), name='study-sign_off'),
@@ -78,6 +80,9 @@ urlpatterns = patterns('',
     url(r'^assays/assaychiptestresult/(?P<pk>[0-9]+)/$', AssayChipTestResultDetail.as_view(), name='result_detail'),
 
     # Reproducibility
-    url(r'^assays/reproducibility/$', AssayRunReproducibilityList.as_view(), name='study_reproducibility_list'),
-    url(r'^assays/(?P<pk>[0-9]+)/reproducibility/$', AssayRunReproducibility.as_view(), name='study-reproducibility'),
+    url(r'^assays/reproducibility/$', AssayRunReproducibilityList.as_view(), name='run_reproducibility_list'),
+    url(r'^assays/(?P<pk>[0-9]+)/reproducibility/$', AssayRunReproducibility.as_view(), name='run-reproducibility'),
+
+    url(r'^assays/assaystudy/reproducibility/$', AssayStudyReproducibilityList.as_view(), name='assay_study_reproducibility_list'),
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/reproducibility/$', AssayStudyReproducibility.as_view(), name='assay_study_reproducibility'),
 )

@@ -112,6 +112,20 @@ class FlaggableModel(LockableModel):
         abstract = True
 
 
+# FOR COMPATIBILITY
+class FlaggableRestrictedModel(RestrictedModel):
+    """The base model for flaggable models"""
+
+    flagged = models.BooleanField(default=False,
+                                  help_text='Check box to flag for review')
+
+    reason_for_flag = models.CharField(max_length=300,
+                                       help_text='Reason for why this entry was flagged', blank=True, default='')
+
+    class Meta(object):
+        abstract = True
+
+
 def save_forms_with_tracking(self, form, formset=None, update=False):
     """Save tracking data
     Params:
