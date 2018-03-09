@@ -10,6 +10,10 @@ $(document).ready(function () {
     var matrix_table_selector = $('#matrix_table');
     var matrix_body_selector = $('#matrix_body');
 
+    window.device = $('#id_item_device');
+    window.organ_model = $('#id_item_organ_model');
+    window.organ_model_protocol = $('#id_item_organ_model_protocol');
+
     var item_display_class = '.item-td';
 
     // Allows the matrix_table to have the draggable JQuery UI element
@@ -780,6 +784,7 @@ $(document).ready(function () {
 
         if (representation_selector.val() === 'plate') {
            $('#id_setup_device option[value!=' + device_selector.val() + ']').hide();
+           window.device.val(device_selector.val()).trigger('change');
         }
     });
 
@@ -854,6 +859,21 @@ $(document).ready(function () {
 
     // TODO TODO TODO TESTING
     get_matrix_dimensions();
+
+    // Handling Device flow
+    window.device.change(function() {
+        // Get organ models
+        window.get_organ_models(device.val());
+    }).trigger('change');
+
+    window.organ_model.change(function() {
+        // Get and display correct protocol options
+        window.get_protocols(window.organ_model.val());
+    }).trigger('change');
+
+    window.organ_model_protocol.change(function() {
+        window.display_protocol(window.organ_model_protocol.val());
+    }).trigger('change');
 
     // Special operations for pre-submission
     $('form').submit(function() {

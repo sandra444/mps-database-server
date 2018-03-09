@@ -1637,7 +1637,7 @@ class AssayMatrixForm(SignOffMixin, ModelFormStripWhiteSpace):
     ### ADDING SETUP FIELDS
     item_device = forms.ModelChoiceField(queryset=Microdevice.objects.all().order_by('name'), required=False)
     item_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
-    item_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.none(), required=False)
+    item_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.all().order_by('version'), required=False)
     item_variance_from_organ_model_protocol = forms.CharField(required=False)
 
     ### ADDING SETUP CELLS
@@ -2525,7 +2525,7 @@ class AssayMatrixItemFullForm(SignOffMixin, ModelFormStripWhiteSpace):
             'concentration': forms.NumberInput(attrs={'style': 'width:50px;'}),
             'notebook_page': forms.NumberInput(attrs={'style': 'width:50px;'}),
             'notes': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
-            'variance': forms.Textarea(attrs={'cols': 50, 'rows': 2}),
+            'variance_from_organ_model_protocol': forms.Textarea(attrs={'cols': 50, 'rows': 2}),
         }
         # Assay Run ID is always bound to the parent Study
         exclude = ('study', 'matrix', 'column_index', 'row_index') + tracking + restricted
