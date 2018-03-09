@@ -10,14 +10,15 @@
 
     <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
         <tbody>
-            <tr>
-                <td>
-                    <b>Center</b>
-                </td>
-                <td>
-                    {{ object.center|default:'Unspecified' }}
-                </td>
-            </tr>
+        {# Hidden for now #}
+{#            <tr>#}
+{#                <td>#}
+{#                    <b>Center</b>#}
+{#                </td>#}
+{#                <td>#}
+{#                    {{ object.center|default:'Unspecified' }}#}
+{#                </td>#}
+{#            </tr>#}
             <tr>
                 <td>
                     <b>Manufacturer</b>
@@ -26,14 +27,15 @@
                     {{ object.manufacturer|default:'Unspecified' }}
                 </td>
             </tr>
-            <tr>
-                <td>
-                    <b>Organ</b>
-                </td>
-                <td>
-                    {{ object.organ|default:'Unspecified' }}
-                </td>
-            </tr>
+        {# Hidden for now #}
+{#            <tr>#}
+{#                <td>#}
+{#                    <b>Organ</b>#}
+{#                </td>#}
+{#                <td>#}
+{#                    {{ object.organ|default:'Unspecified' }}#}
+{#                </td>#}
+{#            </tr>#}
             <tr>
                 <td>
                     <b>Catalog#-Version</b>
@@ -48,7 +50,7 @@
                     <b>Description</b>
                 </td>
                 <td>
-                    {{ object.description }}
+                    {{ object.description|linebreaksbr }}
                 </td>
             </tr>
             {% endif %}
@@ -74,6 +76,14 @@
                     {% else %}
                         No Image Available
                     {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>References</b>
+                </td>
+                <td>
+                    {{ object.references|linebreaksbr|default:'-No References Listed-' }}
                 </td>
             </tr>
         </tbody>

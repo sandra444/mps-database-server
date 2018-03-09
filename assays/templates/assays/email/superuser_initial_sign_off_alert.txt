@@ -1,0 +1,15 @@
+Hello Admins,
+
+A study has been signed off on.
+
+Study: {{ study }}
+Sign Off By: {{ study.signed_off_by.first_name }} {{ study.signed_off_by.last_name }}
+Link: https://mps.csb.pitt.edu{{ study.get_summary_url }}
+
+The following stakeholders have been contacted:
+{% for stakeholder in stakeholders %}{{ stakeholder.group.name }}
+{% empty %}**No groups were contacted: This study has been fast-tracked!**
+{% endfor %}
+
+Thanks,
+MPS

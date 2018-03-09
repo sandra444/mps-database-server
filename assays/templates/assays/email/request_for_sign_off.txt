@@ -1,0 +1,25 @@
+Hello {{ user.first_name}} {{ user.last_name}},
+
+{{ requester.first_name}} {{ requester.last_name}} has requested that you review the Study: {{ study }}.
+
+"{{ message|safe }}"
+
+Please follow this link to see the Study in question:
+https://mps.csb.pitt.edu{{ study.get_summary_url }}
+
+When you are satisfied with the contents of the Study:
+1.) Click "View/Edit Sign Off Status of this Study"
+2.) Click "Click Here to Sign Off on this Study"
+3.) Read the message and click "Yes"
+4.) Click "Submit" and confirm you want to overwrite the entry
+
+Please note that after you sign off and all stakeholders have approved, this study will be publicly available in a year's time.
+
+Thank you very much,
+The MPS Database Team
+
+----------------------
+Your username is {{ user.username }}
+If you have forgotten your password, please follow this link: https://mps.csb.pitt.edu/password/reset/
+
+***PLEASE DO NOT REPLY TO THIS EMAIL***

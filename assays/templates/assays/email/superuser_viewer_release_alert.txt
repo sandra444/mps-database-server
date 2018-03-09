@@ -1,0 +1,20 @@
+Hello Admins,
+
+{% if not new_access_group_names %}A study has been released to the next level.{% else %}Access groups have been added.{% endif %}
+Study: {{ study }}
+Link: https://mps.csb.pitt.edu{{ study.get_summary_url }}
+
+{% if auto_approval %}This elevation was due to an auto-approval.{% else %}This elevation was done manually.{% endif %}
+
+{% if study.restricted %}This Study remains restricted.
+{% if not new_access_group_names %}It has been released to the following access groups:
+{% for group in study.access_groups.all %}{{ group.name}}
+{% empty %}No access groups were granted access.
+{% endfor %}{% else %}The following access groups have been added:
+{% for group in new_access_group_names %}{{ group }}
+{% endfor %}{% endif %}
+{% else %}This study is now unrestricted.
+It has been released to all registered users.
+{% endif %}
+Thanks,
+MPS

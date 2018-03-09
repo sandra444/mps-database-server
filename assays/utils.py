@@ -122,6 +122,7 @@ CSV_HEADER_WITH_COMPOUNDS_AND_STUDY = (
     'Minute',
     'Device',
     'Organ Model',
+    'Cells',
     'Compound Treatment(s)',
     'Target/Analyte',
     'Method/Kit',
@@ -1694,7 +1695,7 @@ def get_qc_status_chip(form):
     return qc_status
 
 
-# TODO TODO TODO
+# TODO
 def modify_qc_status_chip(current_chip_readout, form):
     """Update the QC status of a plate"""
     # Get the readouts

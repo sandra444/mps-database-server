@@ -21,7 +21,6 @@
     </li>
 {% endblock %}
 
-{# TODO needs image preview and layout display #}
 {% block content %}
 {% if update %}
 <form class="form-horizontal" method="post" enctype="multipart/form-data">
@@ -52,11 +51,11 @@
 
 {% include 'generic_field.html' with field=form.barcode label="Catalog#-Version" %}
 
-{% include 'generic_field.html' with field=form.center label="Center" %}
+{#{% include 'generic_field.html' with field=form.center label="Center" %}#}
 
 {% include 'generic_field.html' with field=form.manufacturer label="Manufacturer" %}
 
-{% include 'generic_field.html' with field=form.organ label="Organ" %}
+{#{% include 'generic_field.html' with field=form.organ label="Organ" %}#}
 
 {% include 'generic_field.html' with field=form.description label="Description" %}
 
@@ -79,6 +78,8 @@
         {% endif %}
     </div>
 </div>
+
+{% include 'generic_field.html' with field=form.references label="References" %}
 
 <legend>Dimensions</legend>
 

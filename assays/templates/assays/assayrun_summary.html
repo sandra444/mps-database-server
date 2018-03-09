@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li><a href="/assays/editable_studies/">Editable Studies</a></li>
+    <li><a href="/assays/study/">All Studies</a></li>
     <li><a href="/assays/{{ object.id }}">{{ object }}</a></li>
     <li class="active">Study Summary</li>
 {% endblock %}
@@ -26,7 +26,7 @@
         <div class="row text-center">
             <a id="export_button" href="/assays/{{ object.id }}/data/" class="btn btn-info" role="button">Download Data</a>
             <label class="radio-inline">
-                <input type="checkbox" name="exportinclude_all" id="exportinclude_all" />
+                <input type="checkbox" name="exportinclude_all" id="exportinclude_all" onclick="$('#chartsinclude_all').prop('checked', $(this).prop('checked'));"/>
                 <strong>Include Excluded Data</strong>
             </label>
         </div>
@@ -36,6 +36,17 @@
 {#                <strong>Include Excluded Data</strong>#}
 {#            </label>#}
 {#        </div>#}
+        {% if user_is_group_admin %}
+            <div class="row text-center small-padding-top">
+                <a href="../sign_off" class="btn btn-success" role="button">View/Edit Sign Off Status of this Study</a>
+            </div>
+        {% endif %}
+        {#  TODO TODO TODO #}
+        {% if user_is_stakeholder_admin %}
+            <div class="row text-center small-padding-top">
+                <a href="../sign_off" class="btn btn-success" role="button">View/Edit Approval Status of this Study</a>
+            </div>
+        {% endif %}
     </div>
 
     {% if object.description or object.study_configuration or object.protocol %}
@@ -46,7 +57,7 @@
         <div class="panel-body">
         {% if object.description %}
             <p>
-                {{ object.description }}
+                {{ object.description|linebreaksbr }}
             </p>
         {% endif %}
 
@@ -79,9 +90,9 @@
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
-                <th>Target/Analyte*</th>
-                <th>Method/Kit*</th>
-                <th>Readout Unit*</th>
+                <th>Target/Analyte</th>
+                <th>Method/Kit</th>
+                <th>Readout Unit</th>
             </tr>
         </thead>
         <tbody>
@@ -103,6 +114,21 @@
         No data to display
     </div>
 
+    <table id="treatment_group_table" class="table table-striped table-bordered">
+        <thead id="treatment_group_head">
+        </thead>
+        <tbody id="treatment_group_display">
+        </tbody>
+    </table>
+
+    <div id="group_display" class="container">
+        <table class="table table-bordered">
+            <tbody id="group_display_body">
+
+            </tbody>
+        </table>
+    </div>
+
     {% if object.studysupportingdata_set.all %}
         <legend>Supporting Data</legend>
 
@@ -118,7 +144,7 @@
                     <tr>
                         <td>{{ supporting_data.description }}</td>
                         <td>
-                            <a href="/media/{{ supporting_data.supporting_data }}">
+                            <a target="_blank" href="/media/{{ supporting_data.supporting_data }}">
                               {{ supporting_data.supporting_data }}
                             </a>
                         </td>
@@ -128,199 +154,5 @@
         </table>
     {% endif %}
 
-    <legend>Chip Setups</legend>
-    {% if setups %}
-        <div class="padded-bottom">
-        <table id="setups" class="display table table-striped table-hover" cellspacing="0" width="100%">
-            <thead>
-                <tr>
-                    <th class="hidden-print">View/Edit</th>
-                    <th>Chip Setup</th>
-                    <th>Date</th>
-{#                    <th>Device</th>#}
-                    <th>Organ Model</th>
-                    <th>Compound</th>
-                    <th>Creator</th>
-                    <th>Review</th>
-                </tr>
-            </thead>
-
-            <tbody>
-            {% for setup in setups %}
-                <tr id={{ setup.id }} name={{ setup.id }}>
-                    <td class="hidden-print"><a class="btn btn-primary" href="/assays/assaychipsetup/{{ setup.id }}">View/Edit</a></td>
-                    <td>{{ setup.assay_chip_id }}</td>
-                    <td>{{ setup.setup_date }}</td>
-{#                    <td>{{ setup.device }}</td>#}
-                    <td>{{ setup.organ_model }}</td>
-{#                    {% if setup.compound != None %}#}
-{#                        <td>{{ setup.compound }} ({{ setup.concentration }} {{ setup.unit }})</td>#}
-{#                    {% else %}#}
-{#                        <td>-control-</td>#}
-{#                    {% endif %}#}
-                    <td>{{ setup.related_compounds_as_string|linebreaks }}</td>
-                    <td>
-                        {{ setup.full_creator }}
-                    </td>
-                    <td>
-                        {% if setup.signed_off_by %}
-                            <span title="This entry was validated by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-                        {% endif %}
-                        {% if setup.flagged %}
-                            <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        </div>
-        {% else %}
-        <div class="alert alert-warning" role="alert">
-            No chip setups exist for this study
-        </div>
-    {% endif %}
-
     {% include 'assays/data_upload_table.html' %}
-
-{#    {% if indicative.assaychipcells_set.all %}#}
-{#        <legend>Cells for {{ indicative }}</legend>#}
-{#        <table class="table table-striped table-bordered">#}
-{#            <thead>#}
-{#            <tr>#}
-{#                <th>Cell Sample</th>#}
-{#                <th>Cell Biosensor</th>#}
-{#                <th>Density</th>#}
-{#                <th>Unit</th>#}
-{#                <th>Passage#</th>#}
-{#            </tr>#}
-{#            </thead>#}
-{#            <tbody>#}
-{#            {% for cell in indicative.assaychipcells_set.all %}#}
-{#                <tr>#}
-{#                    <td>{{ cell.cell_sample }}</td>#}
-{#                    <td>{{ cell.cell_biosensor }}</td>#}
-{#                    <td>{{ cell.cellsample_density|intcomma }}</td>#}
-{#                    <td>{{ cell.get_cellsample_density_unit_display }}</td>#}
-{#                    <td>{{ cell.cell_passage }}</td>#}
-{#                </tr>#}
-{#            {% endfor %}#}
-{#            </tbody>#}
-{#        </table>#}
-{#    {% endif %}#}
-{##}
-{#    {% if sameness %}#}
-{#        <table class="table table-striped table-bordered">#}
-{#            <tbody>#}
-{#        {% for setup, same in sameness.items %}#}
-{#            <tr>#}
-{#                <td>{{ setup }}</td>#}
-{#                {% if same %}#}
-{#                    <td class="text-success">Same Cells as {{indicative}}</td>#}
-{#                {% else %}#}
-{#                    <td class="text-danger">Different Cells from {{indicative}}</td>#}
-{#                {% endif %}#}
-{#            </tr>#}
-{#        {% endfor %}#}
-{#            </tbody>#}
-{#        </table>#}
-{#    {% endif %}#}
-{##}
-{#    {% if plate_setups %}#}
-{#        <legend>Plate Setups</legend>#}
-{#        <table id="plate_setups" class="display table table-striped table-hover" cellspacing="0" width="100%">#}
-{#            <thead>#}
-{#                <tr>#}
-{#                    <th class="hidden-print">View/Edit</th>#}
-{#                    <th>Plate Setup</th>#}
-{#                    <th>Date</th>#}
-{#                    <th>Plate Layout</th>#}
-{#                    <th>Creator</th>#}
-{#                    <th>Review</th>#}
-{#                </tr>#}
-{#            </thead>#}
-{##}
-{#            <tbody>#}
-{#            {% for setup in plate_setups %}#}
-{#                <tr id={{ setup.id }} name={{ setup.id }}>#}
-{#                    <td class="hidden-print"><a class="btn btn-primary" href="/assays/assayplatesetup/{{ setup.id }}">View/Edit</a></td>#}
-{#                    <td>{{ setup.assay_plate_id }}</td>#}
-{#                    <td>{{ setup.setup_date }}</td>#}
-{#                    <td>{{ setup.assay_layout }}</td>#}
-{#                    <td>#}
-{#                        {{ setup.full_creator }}#}
-{#                    </td>#}
-{#                    <td>#}
-{#                        {% if setup.signed_off_by %}#}
-{#                            <span title="This entry was validated by {{ setup.full_reviewer }} on {{ setup.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>#}
-{#                        {% endif %}#}
-{#                        {% if setup.flagged %}#}
-{#                            <span title="This entry is flagged for review: '{{ setup.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>#}
-{#                        {% endif %}#}
-{#                    </td>#}
-{#                </tr>#}
-{#            {% endfor %}#}
-{#            </tbody>#}
-{#        </table>#}
-{#    {% endif %}#}
-{##}
-{#    {% if plate_indicative.assayplatecells_set.all %}#}
-{#        <legend>Cells for {{ plate_indicative }}</legend>#}
-{#        <table class="table table-striped">#}
-{#            <thead>#}
-{#            <tr>#}
-{#                <th>Cell Sample</th>#}
-{#                <th>Cell Biosensor</th>#}
-{#                <th>Density</th>#}
-{#                <th>Unit</th>#}
-{#                <th>Passage#</th>#}
-{#            </tr>#}
-{#            </thead>#}
-{#            <tbody>#}
-{#            {% for cell in plate_indicative.assayplatecells_set.all %}#}
-{#                <tr>#}
-{#                    <td>{{ cell.cell_sample }}</td>#}
-{#                    <td>{{ cell.cell_biosensor }}</td>#}
-{#                    <td>{{ cell.cellsample_density }}</td>#}
-{#                    <td>{{ cell.get_cellsample_density_unit_display }}</td>#}
-{#                    <td>{{ cell.cell_passage }}</td>#}
-{#                </tr>#}
-{#            {% endfor %}#}
-{#            </tbody>#}
-{#        </table>#}
-{#    {% endif %}#}
-{##}
-{#    {% if plate_sameness %}#}
-{#        <table class="table table-striped table-bordered">#}
-{#            <tbody>#}
-{#        {% for setup, same in plate_sameness.items %}#}
-{#            <tr>#}
-{#                <td>{{ setup }}</td>#}
-{#                {% if same %}#}
-{#                    <td class="text-success">Same Cells as {{ plate_indicative }}</td>#}
-{#                {% else %}#}
-{#                    <td class="text-danger">Different Cells from {{ plate_indicative }}</td>#}
-{#                {% endif %}#}
-{#            </tr>#}
-{#        {% endfor %}#}
-{#            </tbody>#}
-{#        </table>#}
-{#    {% endif %}#}
-
-{#    {% include 'assays/data_upload_table.html' %}#}
-{##}
-{#    <div id="radio_buttons" hidden class="well hidden-print">#}
-{#        <h3 class="text-center">Chip Readout Data</h3>#}
-{#        <label class="radio-inline">#}
-{#            <input type="radio" name="chart_type_radio" id="chip_select" value="chip" checked> View By Device#}
-{#        </label>#}
-{#        <label class="radio-inline">#}
-{#            <input type="radio" name="chart_type_radio" id="compound_select" value="compound"> View By Compound#}
-{#        </label>#}
-{#        <label for="convert_to_percent_control" class="pull-right">#}
-{#            <input type="checkbox" name="convert_to_percent_control" id="convert_to_percent_control" /> Convert to Percent of Control#}
-{#        </label>#}
-{#    </div>#}
-{##}
-{#    <div id="charts" class="padded-bottom"></div>#}
 {% endblock %}

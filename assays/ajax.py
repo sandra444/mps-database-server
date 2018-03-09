@@ -33,6 +33,8 @@ from mps.templatetags.custom_filters import ADMIN_SUFFIX, is_group_editor
 from django.contrib.auth.models import User
 from mps.settings import DEFAULT_FROM_EMAIL
 
+from django.template.loader import render_to_string
+
 # from.utils import(
 #     valid_chip_row,
 #     stringify_excel_value,
@@ -51,6 +53,8 @@ from django.forms.models import inlineformset_factory
 
 import numpy as np
 from scipy.stats.mstats import gmean
+
+import re
 
 import logging
 logger = logging.getLogger(__name__)
@@ -375,6 +379,9 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         # TODO ORDER SUBJECT TO CHANGE
         chip_data = AssayChipRawData.objects.prefetch_related(
             *CHIP_DATA_PREFETCH
+        ).prefetch_related(
+            'assay_chip_id__chip_setup__assaycompoundinstance_set',
+            'assay_chip_id__chip_setup__assaychipcells_set'
         ).filter(
             assay_chip_id__in=chip_ids
         ).order_by(
@@ -418,6 +425,9 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
         device = data_point.assay_chip_id.chip_setup.device
         organ_model = data_point.assay_chip_id.chip_setup.organ_model
 
+        # Naive and more expensive than it needs to be
+        cells = data_point.assay_chip_id.chip_setup.stringify_cells()
+
         compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, ' | ')
 
         value = data_point.value
@@ -446,6 +456,7 @@ def get_chip_readout_data_as_csv(chip_ids, chip_data=None, both_assay_names=Fals
                         times.get('minute'),
                         device,
                         organ_model,
+                        cells,
                         compound_treatment,
                         target,
                         method,
@@ -630,7 +641,15 @@ def get_list_of_present_compounds(related_compounds_map, data_point, separator='
     return tag
 
 
-def get_control_data(study, related_compounds_map, key, mean_type, include_all, truncate_negative, new_data_for_control=None):
+def get_control_data(
+        study,
+        related_compounds_map,
+        key,
+        mean_type,
+        include_all,
+        truncate_negative,
+        new_data_for_control=None
+):
     """Gets control data for performing percent control calculations
 
     study - the study in question
@@ -638,7 +657,6 @@ def get_control_data(study, related_compounds_map, key, mean_type, include_all, 
     key - the key for the legend being used
     include_all - whether to include all values
     """
-
     initial_control_data = {}
     controls = {}
 
@@ -675,41 +693,110 @@ def get_control_data(study, related_compounds_map, key, mean_type, include_all, 
             if truncate_negative and value < 0:
                 value = 0
 
-            if key == 'compound':
-                tag = get_list_of_present_compounds(related_compounds_map, raw, ' & ')
-                if tag == CONTROL_LABEL:
-                    initial_control_data.setdefault(target, {}).setdefault(unit, {}).setdefault(CONTROL_LABEL, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
-            # If by device
-            else:
-                # Specifically add to consolidated control if this is a device-by-device control
-                if raw.assay_chip_id.chip_setup.chip_test_type == 'control':
-                    initial_control_data.setdefault(target, {}).setdefault(unit, {}).setdefault(CONTROL_LABEL, {}).setdefault(sample_location, {}).setdefault(time, []).append(value)
+            # Check if the setup is marked a control chip
+            if raw.assay_chip_id.chip_setup.chip_test_type == 'control':
+                initial_control_data.setdefault(
+                    (target, method), {}
+                ).setdefault(
+                    unit, {}
+                ).setdefault(
+                    CONTROL_LABEL, {}
+                ).setdefault(
+                    sample_location, {}
+                ).setdefault(
+                    time, []
+                ).append(
+                    value
+                )
 
-        for target, units in initial_control_data.items():
-            for unit, tags in units.items():
-                for tag, sample_locations in tags.items():
-                    for sample_location, time_values in sample_locations.items():
-                        for time, values in time_values.items():
-                            if len(values) > 1:
-                                # If geometric mean
-                                if mean_type == 'geometric':
-                                    # Geometric mean will sometimes fail (due to zero values and so on)
-                                    average = gmean(values)
-                                    if np.isnan(average):
-                                        return {
-                                            'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'
-                                        }
-                                # If arithmetic mean
-                                else:
-                                    average = np.average(values)
+    targets = [target_method[0] for target_method in initial_control_data.keys()]
+
+    for target_method, units in initial_control_data.items():
+        target = target_method[0]
+        method = target_method[1]
+
+        if targets.count(target) > 1:
+            target = u'{} [{}]'.format(target, method)
+
+        initial_control_data.update({
+            target: units
+        })
+
+        del initial_control_data[target_method]
+
+    for target, units in initial_control_data.items():
+        for unit, tags in units.items():
+            for tag, sample_locations in tags.items():
+                for sample_location, time_values in sample_locations.items():
+                    for time, values in time_values.items():
+                        if len(values) > 1:
+                            # If geometric mean
+                            if mean_type == 'geometric':
+                                # Geometric mean will sometimes fail (due to zero values and so on)
+                                average = gmean(values)
+                                if np.isnan(average):
+                                    return {
+                                        'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'
+                                    }
+                            # If arithmetic mean
                             else:
-                                average = values[0]
+                                average = np.average(values)
+                        else:
+                            average = values[0]
 
-                            controls.update(
-                                    {(target, unit, sample_location, time): average}
-                            )
+                        controls.update(
+                                {(target, unit, sample_location, time): average}
+                        )
 
     return controls
+
+
+# TODO WE MAY WANT THE DEFINITION OF A TREATMENT GROUP TO CHANGE, WHO KNOWS
+def get_treatment_groups(study):
+    treatment_groups = {}
+    # TODO PLEASE REMEMBER TO INCLUDE IDS OF SETUPS IN THIS
+    treatment_group_representatives = []
+    setup_to_treatment_group = {}
+
+    # By pulling the setups for the study, I avoid problems with preview data
+    setups = AssayChipSetup.objects.filter(
+        assay_run_id=study
+    ).prefetch_related(
+        'assaychipcells_set',
+        'assaycompoundinstance_set'
+    )
+
+    for setup in setups:
+        treatment_group_tuple = (
+            setup.device_id,
+            setup.organ_model_id,
+            setup.organ_model_protocol_id,
+            setup.variance,
+            setup.devolved_compounds(),
+            setup.devolved_cells()
+        )
+
+        if treatment_group_tuple not in treatment_groups:
+            current_representative = len(treatment_group_representatives)
+            treatment_groups.update({
+                treatment_group_tuple: current_representative
+            })
+            treatment_group_representatives.append(setup.quick_dic())
+        else:
+            current_representative = treatment_groups.get(treatment_group_tuple)
+
+        treatment_group_representatives[current_representative].get('setups_with_same_group').append(
+            setup.get_hyperlinked_name()
+        )
+        setup_to_treatment_group.update({setup.id: current_representative})
+
+    for representative in treatment_group_representatives:
+        representative.get('setups_with_same_group').sort()
+        representative.update({
+            'setups_with_same_group': ', '.join(representative.get('setups_with_same_group'))
+        })
+
+    return (treatment_group_representatives, setup_to_treatment_group)
 
 
 def get_readout_data(
@@ -731,7 +818,7 @@ def get_readout_data(
 
     From POST:
     raw_data - the AssayChipRawData needed to create the JSON
-    related_compounds_map - dic of setup pointing to compounhds
+    related_compounds_map - dic of setup pointing to compounds
     key - whether this data should be considered by device or by compound
     interval_type - the type of interval (std, ste, etc)
     percent_control - whether to use percent control (WIP)
@@ -748,6 +835,14 @@ def get_readout_data(
     # TODO ACCOUNT FOR CASE WHERE STUDY HAS MORE THAN ONE COMPOUND
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
     # assays = {}
+
+    treatment_group_representatives, setup_to_treatment_group = get_treatment_groups(study)
+    # TODO CHANGE THIS POST TO SOMETHING MORE SEMANITC FROM JS
+    # if key == 'compound':
+    #     treatment_group_representatives, setup_to_treatment_group = get_treatment_groups(study)
+    # else:
+    #     treatment_group_representatives = []
+    #     setup_to_treatment_group = {}
 
     final_data = {
         'sorted_assays': [],
@@ -779,6 +874,9 @@ def get_readout_data(
 
     averaged_data = {}
 
+    all_sample_locations = {}
+    all_keys = {}
+
     # Append the additional_data as necessary
     # Why is this done? It is an expedient way to avoid duplicating data
     if additional_data:
@@ -802,7 +900,9 @@ def get_readout_data(
         method = assay_instance.method.name
 
         sample_location = raw.sample_location.name
+        all_sample_locations.update({sample_location: True})
 
+        setup_id = raw.assay_chip_id.chip_setup_id
         chip_id = raw.assay_chip_id.chip_setup.assay_chip_id
 
         # BE SURE TO DO THIS IN JS
@@ -837,15 +937,16 @@ def get_readout_data(
                 value = 0
             # Get tag for data point
             # If by compound
-            if key == 'compound':
-                tag = get_list_of_present_compounds(related_compounds_map, raw, ' & ')
+            if key == 'group':
+                # tag = get_list_of_present_compounds(related_compounds_map, raw, ' & ')
+                tag = 'Group {}'.format(setup_to_treatment_group.get(setup_id) + 1)
             # If by device
             else:
                 tag = chip_id
 
             # Set data in nested monstrosity that is initial_data
             initial_data.setdefault(
-                target, {}
+                (target, method), {}
             ).setdefault(
                 unit, {}
             ).setdefault(
@@ -856,6 +957,22 @@ def get_readout_data(
                 time, []
             ).append(value)
 
+    targets = [target_method[0] for target_method in initial_data.keys()]
+
+    for target_method, units in initial_data.items():
+        target = target_method[0]
+        method = target_method[1]
+
+        if targets.count(target) > 1:
+            target = u'{} [{}]'.format(target, method)
+
+        initial_data.update({
+            target: units
+        })
+
+        del initial_data[target_method]
+
+    # Nesting like this is a little sloppy, flat > nested
     for target, units in initial_data.items():
         for unit, tags in units.items():
             for tag, sample_locations in tags.items():
@@ -892,10 +1009,12 @@ def get_readout_data(
 
     initial_data = None
 
+    accommodate_sample_location = len(all_sample_locations) > 1
+
     for target, units in averaged_data.items():
         for unit, tags in units.items():
             # row_indices = {}
-            accomadate_units = len(units) > 1
+            accommodate_units = len(units) > 1
 
             if not percent_control:
                 # Not converted to percent control
@@ -903,7 +1022,7 @@ def get_readout_data(
                 assay_label = target + '\n' + unit
             else:
                 # Convert to percent control
-                if accomadate_units:
+                if accommodate_units:
                     current_unit = '%Control from ' + unit
                 else:
                     current_unit = '%Control'
@@ -918,22 +1037,23 @@ def get_readout_data(
             final_data.get('sorted_assays').append(assay_label)
 
             for tag, sample_locations in tags.items():
-                accomadate_sample_location = len(sample_locations) > 1
                 for sample_location, time_values in sample_locations.items():
-                    accomadate_intervals = False
+                    accommodate_intervals = False
                     include_current = False
 
-                    if accomadate_sample_location:
+                    if accommodate_sample_location:
                         current_key = tag + ' ' + sample_location
                     else:
                         current_key = tag
+
+                    all_keys.update({current_key: True})
 
                     for time, value_and_interval in time_values.items():
                         value = value_and_interval[0]
                         interval = value_and_interval[1]
 
                         if interval != 0:
-                            accomadate_intervals = True
+                            accommodate_intervals = True
 
                         if not percent_control:
                             # assays.setdefault(assay_label, {}).setdefault(current_key, {}).setdefault('time', []).append(time)
@@ -965,9 +1085,15 @@ def get_readout_data(
 
                     if include_current:
                         x_header.append(current_key)
+                    # To include all
+                    # x_header.append(current_key)
+                    # x_header.extend([
+                    #     current_key + '_i1',
+                    #     current_key + '_i2'
+                    # ])
 
                     # Only include intervals if necessary
-                    if accomadate_intervals and include_current:
+                    if accommodate_intervals and include_current:
                         x_header.extend([
                             current_key + '_i1',
                             current_key + '_i2'
@@ -977,8 +1103,23 @@ def get_readout_data(
                             del current_data[current_key+'_i1']
                             del current_data[current_key + '_i2']
 
+            # for current_key in all_keys:
+            #     if current_key not in x_header:
+            #         x_header.extend([
+            #             current_key,
+            #             current_key + '_i1',
+            #             current_key + '_i2'
+            #         ])
+
             # Note manipulations for sorting
-            x_header.sort(key=lambda s: s.upper().replace(' & ', '~'))
+            # Somewhat contrived
+            convert = lambda text: int(text) if text.isdigit() else text.lower()
+            alphanum_key = lambda key: [
+                convert(
+                    c.replace('_I1', '!').replace('_I2', '"')
+                ) for c in re.split('([0-9]+)', key)
+            ]
+            x_header.sort(key=alphanum_key)
             current_table[0].extend(x_header)
 
             x_header = {x_header[index]: index + 1 for index in range(len(x_header))}
@@ -1003,6 +1144,10 @@ def get_readout_data(
 
     for assay, assay_data in intermediate_data.items():
         final_data.get('assays')[final_data.get('sorted_assays').index(assay)] = assay_data
+
+    final_data.update({
+        'treatment_groups': treatment_group_representatives
+    })
 
     return final_data
 
@@ -1103,7 +1248,7 @@ def fetch_readouts(request):
 
     related_compounds_map = {}
 
-    if key == 'compound':
+    if key == 'group':
         related_compounds_map = get_related_compounds_map(study=study)
 
     data = get_readout_data(
@@ -1305,7 +1450,7 @@ def validate_bulk_file(request):
 
         related_compounds_map = {}
 
-        if key == 'compound':
+        if key == 'group':
             related_compounds_map = get_related_compounds_map(study=this_study)
 
         # NOTE THE EMPTY DIC, RIGHT NOW BULK PREVIEW NEVER SHOWS COMPOUND JUST DEVICE
@@ -1430,7 +1575,7 @@ def validate_individual_chip_file(request):
 
         related_compounds_map = {}
 
-        if key == 'compound':
+        if key == 'group':
             related_compounds_map = get_related_compounds_map(study=study)
 
         charts = get_readout_data(
@@ -1584,25 +1729,21 @@ def send_ready_for_sign_off_email(request):
 
         if users_to_be_alerted:
             # Magic strings are in poor taste, should use a template instead
+            # I would use a template, but it gets picky about newlines (which as often added automatically)
+            # I could strip the newlines, but alternatively I might as well just have it here
             subject = 'Sign Off Requested for {0}'.format(unicode(study))
+
             for user in users_to_be_alerted:
-                content = 'Hello {0} {1},\n\n' \
-                          '{2} {3} has requested that you review the Study: {4}.\n\n' \
-                          '"{5}"\n\n' \
-                          'Please follow this link to see the Study in question:\n' \
-                          'https://mps.csb.pitt.edu{6}\n\n' \
-                          'When you are satisfied with the contents of the Study: click "Edit Study", then "Click Here to Sign Off on this Study", and finally "Submit".\n\n' \
-                          'Thank you very much,\n' \
-                          'The MPS Database Team\n\n' \
-                          '***PLEASE DO NOT REPLY TO THIS EMAIL***'.format(
-                    user.first_name,
-                    user.last_name,
-                    request.user.first_name,
-                    request.user.last_name,
-                    unicode(study),
-                    message,
-                    study.get_absolute_url()
+                content = render_to_string(
+                    'assays/email/request_for_sign_off.txt',
+                    {
+                        'study': study,
+                        'requester': request.user,
+                        'user': user,
+                        'message': message
+                    }
                 )
+
                 # Actually send the email
                 user.email_user(subject, content, DEFAULT_FROM_EMAIL)
 

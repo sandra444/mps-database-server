@@ -42,20 +42,19 @@ def bioactivities_list(request):
         # I might want to sort by multiple fields later
         if any([compound, target, name]):
             if pubchem:
-                data = PubChemBioactivity.objects.all().select_related(
-                    'compound__name',
-                    'assay__target',
-                    'assay__pubchem_id'
+                data = PubChemBioactivity.objects.all().prefetch_related(
+                    'compound',
+                    'assay__target'
                 )
             else:
                 data = Bioactivity.objects.exclude(
                     standard_name='',
                     standardized_units='',
                     standardized_value__isnull=True
-                ).select_related(
-                    'compound__name',
-                    'target__name',
-                    'assay__chemblid'
+                ).prefetch_related(
+                    'compound',
+                    'target',
+                    'assay'
                 )
 
             if compound:

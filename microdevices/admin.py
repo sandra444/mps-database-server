@@ -1,9 +1,17 @@
 # coding=utf-8
 
 from django.contrib import admin
-from mps.base.admin import LockableAdmin
-from .models import MicrophysiologyCenter, Manufacturer, Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
-from.forms import MicrophysiologyCenterForm
+from mps.base.admin import LockableAdmin, TrackableAdmin
+from .models import (
+    MicrophysiologyCenter,
+    Manufacturer,
+    Microdevice,
+    OrganModel,
+    ValidatedAssay,
+    OrganModelProtocol,
+    GroupDeferral
+)
+from.forms import MicrophysiologyCenterForm, GroupDeferralForm
 from django.core.urlresolvers import resolve
 from django.db.models.fields.files import FieldFile
 
@@ -132,6 +140,9 @@ class MicrodeviceAdmin(LockableAdmin):
                         'device_image_display',
                         'device_cross_section_image_display',
                     ),
+                    (
+                        'references'
+                    )
                 )
             }
         ),
@@ -249,6 +260,12 @@ class OrganModelAdmin(LockableAdmin):
                     ),
                     (
                         'mps', 'epa', 'tctc'
+                    ),
+                    (
+                        'model_image'
+                    ),
+                    (
+                        'references'
                     )
                 )
             }
@@ -270,3 +287,33 @@ class OrganModelAdmin(LockableAdmin):
     inlines = [ValidatedAssayInline, OrganModelProtocolInline]
 
 admin.site.register(OrganModel, OrganModelAdmin)
+
+
+class GroupDeferralAdmin(TrackableAdmin):
+    """Admin for Manufacturers"""
+    form = GroupDeferralForm
+    save_on_top = True
+    list_per_page = 300
+    list_display = ['group', 'approval_file', 'notes']
+    fieldsets = (
+        (
+            None, {
+                'fields': (
+                'group',
+                'approval_file',
+                'notes',
+                )
+            }
+        ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        ),
+    )
+
+admin.site.register(GroupDeferral, GroupDeferralAdmin)

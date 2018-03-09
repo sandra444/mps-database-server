@@ -1,9 +1,12 @@
 // Name subject to change
 // This file allows the user to compare data of different adverse events for differing compounds
-// TODO THIS SCRIPT NEEDS TO BE REVISED TO LIMIT API HITS
+// TODO THIS SCRIPT NEEDS TO BE REVISED TO LIMIT HITS
 $(document).ready(function () {
     // Prevent CSS conflict with Bootstrap
     $.fn.button.noConflict();
+
+    // Get the middleware_token
+    var middleware_token = getCookie('csrftoken');
 
     // Stores all currently selected compounds
     var compounds = {};
@@ -11,6 +14,10 @@ $(document).ready(function () {
     var adverse_events = {};
     // Format = adverse_event -> compound -> value
     var full_data = {};
+    var estimated_usage = {};
+
+    var adverse_events_checkboxes = {};
+    var compounds_checkboxes = {};
 
     // The bar graphs
     var bar_graphs = null;
@@ -43,24 +50,6 @@ $(document).ready(function () {
         }
     });
 
-    var table_options =
-    {
-        dom: 'lfrtip',
-        "iDisplayLength": 10,
-        "order": [[ 2, "desc" ]],
-        "deferRender": true,
-        "aoColumnDefs": [
-            {
-                "width": "10%",
-                "targets": [0]
-            },
-            {
-                "sSortDataType": "dom-checkbox",
-                "targets": 0
-            }
-        ]
-    };
-
     // Open and then close dialog so it doesn't get placed in window itself
     var dialog = $('#selection_dialog');
     dialog.dialog({
@@ -79,9 +68,9 @@ $(document).ready(function () {
 
     // Add method to sort by checkbox
     // (I reversed it so that ascending will place checked first)
-    $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col) {
-        return this.api().column(col, {order:'index'}).nodes().map(function(td, i) {
-            return $('input', td).prop('checked') ? 0 : 1;
+    $.fn.dataTable.ext.order['dom-checkbox-defer'] = function(settings, col) {
+        return settings.aoData.map(function(data, index) {
+            return data._aData.checkbox.indexOf(' checked>') > -1 ? 0 : 1;
         });
     };
 
@@ -99,8 +88,18 @@ $(document).ready(function () {
         adverse_events_table.search('');
         $('input[type=search]').val('');
 
-        adverse_events_checkboxes.prop('checked', false);
-        compounds_checkboxes.prop('checked', false);
+        // adverse_events_checkboxes.prop('checked', false);
+        // compounds_checkboxes.prop('checked', false);
+
+        $.each(adverse_events, function(name, index) {
+            var checkbox_index = adverse_events_checkboxes[name];
+            adverse_events_table.data()[checkbox_index].checkbox = adverse_events_table.data()[checkbox_index].checkbox.replace(' checked>', '>');
+        });
+
+        $.each(compounds, function(name, index) {
+            var checkbox_index = compounds_checkboxes[name];
+            compounds_table.data()[checkbox_index].checkbox = compounds_table.data()[checkbox_index].checkbox.replace(' checked>', '>');
+        });
 
         adverse_events = {};
         compounds = {};
@@ -109,7 +108,15 @@ $(document).ready(function () {
         create_initial_plot();
 
         if (reset) {
+            var data = adverse_events_table.data();
+            adverse_events_table.clear();
+            adverse_events_table.rows.add(data);
+
             adverse_events_table.page.len(10).draw();
+
+            data = compounds_table.data();
+            compounds_table.clear();
+            compounds_table.rows.add(data);
             compounds_table.page.len(10).draw();
         }
     }
@@ -162,13 +169,13 @@ $(document).ready(function () {
         $('.ui-dialog :button').blur();
     }
 
-    function check_selection(value, checkboxes) {
-        $.each(checkboxes, function(index, checkbox) {
-            if (checkbox.value == value) {
-                $(checkbox).prop('checked', true);
-            }
-        });
-    }
+    // function check_selection(value, checkboxes) {
+        // $.each(checkboxes, function(index, checkbox) {
+        //     if (checkbox.value == value) {
+        //         $(checkbox).prop('checked', true);
+        //     }
+        // });
+    // }
 
     function load_selections(selection_index) {
         clear_selections(false);
@@ -181,16 +188,30 @@ $(document).ready(function () {
 
         $.each(ae_selections, function(index, adverse_event) {
             adverse_events[adverse_event] = adverse_event;
-            check_selection(adverse_event, adverse_events_checkboxes);
+            var checkbox_index = adverse_events_checkboxes[adverse_event];
+            if (checkbox_index) {
+                adverse_events_table.data()[checkbox_index].checkbox = adverse_events_table.data()[checkbox_index].checkbox.replace('>', ' checked>');
+            }
         });
+
+        var data = adverse_events_table.data();
+        adverse_events_table.clear();
+        adverse_events_table.rows.add(data);
 
         adverse_events_table.order([[0, 'asc']]);
         adverse_events_table.page.len(10).draw();
 
         $.each(compound_selections, function(index, compound) {
             compounds[compound] = compound;
-            check_selection(compound, compounds_checkboxes);
+            var checkbox_index = compounds_checkboxes[compound];
+            if (checkbox_index) {
+                compounds_table.data()[checkbox_index].checkbox = compounds_table.data()[checkbox_index].checkbox.replace('>', ' checked>');
+            }
         });
+
+        data = compounds_table.data();
+        compounds_table.clear();
+        compounds_table.rows.add(data);
 
         compounds_table.order([[0, 'asc']]);
         compounds_table.page.len(10).draw();
@@ -213,11 +234,15 @@ $(document).ready(function () {
             },
             axis: {
                 x: {
-                    type: 'category'
+                    type: 'category',
 //                    label: {
 //                        text: 'Compound',
 //                        position: 'outer-center'
 //                    }
+                    tick: {
+                        rotate: 75,
+                        multiline: false
+                    }
                 },
                 y: {
                     label: {
@@ -399,31 +424,6 @@ $(document).ready(function () {
         }
     }
 
-    // Tracks the clicking of checkboxes to fill compounds
-    $('.compound').change(function() {
-        var compound = this.value;
-
-        if (this.checked) {
-            compounds[compound] = compound;
-            collect_all_adverse_events();
-        }
-        else {
-            remove_compound(compound);
-        }
-    });
-    // Tracks the clicking of checkboxes to fill adverse events
-    $('.adverse-event').change(function() {
-        var adverse_event = this.value;
-
-        if (this.checked) {
-            adverse_events[adverse_event] = adverse_event;
-            collect_all_adverse_events();
-        }
-        else {
-            remove_adverse_event(adverse_event);
-        }
-    });
-
     $('#show_raw').click(function() {
         if (raw_hidden) {
             bar_graphs.show(_.map(adverse_events, function(num, key){ return key + ' (COUNT)'; }), {withLegend: true});
@@ -457,32 +457,120 @@ $(document).ready(function () {
         load_selections(+$(this).attr('data-selection-index'));
     });
 
-    var adverse_events_table = $('#adverse_events').DataTable(table_options);
+    adverse_events_table = $('#adverse_events').DataTable({
+        dom: 'lfrtip',
+        iDisplayLength: 10,
+        order: [[ 2, "desc" ]],
+        deferRender: true,
+        ajax: {
+            url: '/drugtrials_ajax/',
+            data: {
+                call: 'fetch_aggregate_ae_by_event',
+                csrfmiddlewaretoken: middleware_token
+            },
+            type: 'POST'
+        },
+        columns: [
+            {data: 'checkbox', sSortDataType: 'dom-checkbox-defer', width: '10%'},
+            // {data: 'checkbox', type: 'dom-checkbox-defer', width: '10%'},
+            {data: 'event'},
+            {data: 'frequency'},
+            {data: 'organ'}
+        ]
+    });
 
-    var compounds_table = $('#compounds').DataTable(table_options);
+    compounds_table = $('#compounds').DataTable({
+        dom: 'lfrtip',
+        iDisplayLength: 10,
+        order: [[ 2, "desc" ]],
+        deferRender: true,
+        ajax: {
+            url: '/drugtrials_ajax/',
+            data: {
+                call: 'fetch_aggregate_ae_by_compound',
+                csrfmiddlewaretoken: middleware_token
+            },
+            type: 'POST'
+        },
+        columns: [
+            {data: 'checkbox', sSortDataType: 'dom-checkbox-defer', width: '10%'},
+            // {data: 'checkbox', type: 'dom-checkbox-defer', width: '10%'},
+            {data: 'compound'},
+            {data: 'frequency'},
+            {data: 'estimated_usage'}
+        ]
+    });
 
-    var adverse_events_cells = adverse_events_table.cells().nodes();
-    var adverse_events_checkboxes = $(adverse_events_cells).find(':checkbox');
+    $(document).ajaxComplete(function(event, xhr, settings) {
+        if (settings.data) {
+            if (settings.data.indexOf('fetch_aggregate_ae_by_compound') > -1) {
+                compounds_checkboxes = {};
 
-    var compounds_cells = compounds_table.cells().nodes();
-    var compounds_checkboxes = $(compounds_cells).find(':checkbox');
+                $.each(compounds_table.data(), function(index, row) {
+                    compounds_checkboxes[row['compound']] = index;
+                });
+
+                var full_compounds = compounds_table.columns(1).data().eq(0);
+
+                var all_compounds = [];
+                for (var index=0; index < full_compounds.length; index++) {
+                    all_compounds.push(full_compounds[index].replace(/<\/?[^>]+(>|$)/g, ''));
+                }
+
+                var full_estimates = compounds_table.columns(3).data().eq(0);
+
+                var all_estimates = [];
+                for (index=0; index < full_estimates.length; index++) {
+                    all_estimates.push(full_estimates[index].replace(/,/g, ''));
+                }
+
+                estimated_usage = {};
+                _.each(all_compounds,function(key, index){estimated_usage[key] = parseInt(all_estimates[index]);});
+            }
+            else if (settings.data.indexOf('fetch_aggregate_ae_by_event') > -1) {
+                adverse_events_checkboxes = {};
+
+                $.each(adverse_events_table.data(), function(index, row) {
+                adverse_events_checkboxes[row['event']] = index;
+                });
+            }
+        }
+    });
+
+    // var adverse_events_cells = adverse_events_table.cells().nodes();
+    // var adverse_events_checkboxes = $(adverse_events_cells).find(':checkbox');
+
+    // var compounds_cells = compounds_table.cells().nodes();
+    // var compounds_checkboxes = $(compounds_cells).find(':checkbox');
 
     create_initial_plot();
 
-    var full_compounds = compounds_table.columns(1).data().eq(0);
+    // Tracks the clicking of checkboxes to fill compounds
+    $(document).on('change', '.compound', function() {
+        var compound = this.value;
+        var checkbox_index = compounds_checkboxes[compound];
 
-    var all_compounds = [];
-    for (var index=0; index < full_compounds.length; index++) {
-        all_compounds.push(full_compounds[index].replace(/<\/?[^>]+(>|$)/g, ''));
-    }
+        if (this.checked) {
+            compounds[compound] = compound;
+            compounds_table.data()[checkbox_index].checkbox = compounds_table.data()[checkbox_index].checkbox.replace('>', ' checked>');
+            collect_all_adverse_events();
+        }
+        else {
+            remove_compound(compound);
+        }
+    });
+    // Tracks the clicking of checkboxes to fill adverse events
+    $(document).on('change', '.adverse-event', function() {
+        var adverse_event = this.value;
+        var checkbox_index = adverse_events_checkboxes[adverse_event];
 
-    var full_estimates = compounds_table.columns(3).data().eq(0);
-
-    var all_estimates = [];
-    for (index=0; index < full_estimates.length; index++) {
-        all_estimates.push(full_estimates[index].replace(/,/g, ''));
-    }
-
-    var estimated_usage = {};
-    _.each(all_compounds,function(key, index){estimated_usage[key] = parseInt(all_estimates[index]);});
+        if (this.checked) {
+            adverse_events[adverse_event] = adverse_event;
+            adverse_events_table.data()[checkbox_index].checkbox = adverse_events_table.data()[checkbox_index].checkbox.replace('>', ' checked>');
+            collect_all_adverse_events();
+        }
+        else {
+            remove_adverse_event(adverse_event);
+        }
+    });
 });

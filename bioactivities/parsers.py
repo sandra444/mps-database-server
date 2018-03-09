@@ -107,7 +107,7 @@ def generate_list_of_all_data_in_bioactivities(exclude_questionable, pubchem, or
         if exclude_questionable:
             all_targets = all_targets.filter(data_validity='')
 
-        all_targets = all_targets.prefetch_related('compound').select_related('assay__target')
+        all_targets = all_targets.prefetch_related('compound', 'assay__target')
 
         all_data = all_targets.values_list(
             'activity_name',
@@ -218,7 +218,7 @@ def generate_list_of_all_targets_in_bioactivities(exclude_questionable, pubchem,
         else:
             all_targets = initial_targets
 
-        all_targets = all_targets.select_related('assay__target').values_list('assay__target__name')
+        all_targets = all_targets.prefetch_related('assay__target').values_list('assay__target__name')
 
     else:
         initial_targets = Bioactivity.objects.filter(
@@ -255,7 +255,7 @@ def generate_list_of_all_drugtrials(desired_organisms):
     Parameters:
     desired_organisms -- list of the organisms to filter drug trials
     """
-    # TODO
+    # TODO This requires refactoring, magic conversion tables are not good practice
     # This requires refactoring, magic conversion tables are not good practice
     organisms = {
         'Homo sapiens': 'Human',
@@ -267,7 +267,7 @@ def generate_list_of_all_drugtrials(desired_organisms):
 
     result = FindingResult.objects.filter(
         value__isnull=False, drug_trial__species__species_name__in=desired_organisms
-    ).select_related('drug_trial__species', 'finding_name').values_list('finding_name__finding_name', flat=True)
+    ).prefetch_related('drug_trial__species', 'finding_name').values_list('finding_name__finding_name', flat=True)
 
     result = generate_record_frequency_data(result)
 
@@ -472,8 +472,7 @@ def get_filtered_bioactivities(
 
         q = q.prefetch_related(
             'compound',
-            'assay'
-        ).select_related(
+            'assay',
             'assay__target'
         )
 
@@ -638,7 +637,7 @@ def fetch_all_standard_drugtrials_data(
     normalized -- boolean to specify whether to normalize bioactivities
     log_scale -- boolean to use log scale on data
     """
-    # TODO
+    # TODO This requires refactoring, magic conversion tables are not good practice
     # This requires refactoring, magic conversion tables are not good practice
     organisms = {
         'Homo sapiens': 'Human',
@@ -648,7 +647,7 @@ def fetch_all_standard_drugtrials_data(
 
     desired_organisms = [organisms.get(organism, '') for organism in desired_organisms]
 
-    # TODO: FIXME
+    # TODO: REVIEW
     # Nonstandard values?
     # Please note that normalization now goes from 0.0001 to 1
 
@@ -716,7 +715,7 @@ def fetch_all_standard_mps_assay_data():
     # using values for now, FUTURE: use standardized_values
     cursor = connection.cursor()
 
-    # TODO: FIXME
+    # TODO: REVIEW
     cursor.execute(
         ''
     )
@@ -1304,7 +1303,7 @@ def table(request):
     length = q.count()
 
     # Prefetch all foreign keys
-    q = q.select_related(
+    q = q.prefetch_related(
         'compound',
         'assay__target',
         'assay'

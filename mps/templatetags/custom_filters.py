@@ -8,6 +8,7 @@ register = template.Library()
 VIEWER_SUFFIX = ' Viewer'
 ADMIN_SUFFIX = ' Admin'
 
+# One of the tricky things about filters is that they spawn a SQL query each time they are invoked!
 @register.filter(name='has_group')
 def has_group(user, group_name):
     """Returns whether or not the user has a specified group

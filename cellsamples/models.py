@@ -26,6 +26,7 @@ class CellType(LockableModel):
         ('Rat', 'Rat'),
         ('Mouse', 'Mouse'),
     )
+    # Unsemantic name (should just be name)
     cell_type = models.CharField(max_length=255,
                                  help_text='Example: hepatocyte, muscle, kidney, etc')
     species = models.CharField(max_length=10,
@@ -60,6 +61,7 @@ class CellSubtype(LockableModel):
     class Meta(object):
         ordering = ('cell_subtype', )
 
+    # Unsemantic name (should just be name)
     cell_subtype = models.CharField(max_length=255, unique=True,
                                     help_text="Example: motor (type of neuron), "
                                               "skeletal (type of muscle), etc.")
@@ -172,14 +174,14 @@ class CellSample(FlaggableModel):
 
     def __unicode__(self):
         if self.barcode:
-            return u'{} {} ({}-{})'.format(
+            return u'{0} {1} ({2}-{3})'.format(
                 self.cell_subtype,
                 self.cell_type,
                 self.supplier,
                 self.barcode
             )
         else:
-            return u'{} {} ({})'.format(
+            return u'{0} {1} ({2})'.format(
                 self.cell_subtype,
                 self.cell_type,
                 self.supplier

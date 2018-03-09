@@ -14,6 +14,7 @@ import os
 from mps.settings import MEDIA_ROOT
 
 from resources.models import Definition
+from django.views.generic.base import TemplateView
 
 
 def main(request):
@@ -114,3 +115,8 @@ def mps_help(request):
     c['glossary'] = Definition.objects.exclude(definition='')
 
     return render_to_response('help.html', c)
+
+
+# TODO Consider defining this in URLS or either bringing the rest here
+class UnderConstruction(TemplateView):
+    template_name = 'under_construction.html'

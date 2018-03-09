@@ -7,6 +7,7 @@ import ujson as json
 
 from mps.settings import PROJECT_ROOT
 
+import urllib
 import urllib3
 import certifi
 
@@ -41,6 +42,9 @@ blacklist = {
 
 
 def get_label_field(generic_name, field):
+    # WILL NEED TO CHANGE WITH PYTHON 3
+    generic_name = urllib.quote_plus(generic_name)
+
     try:
         # Arbitrary limit of 100 might not be sufficient to ensure grabbing the correct entry
         if api_key:
@@ -62,6 +66,9 @@ def get_label_field(generic_name, field):
 
 
 def get_event_frequency(generic_name, organs):
+    # WILL NEED TO CHANGE WITH PYTHON 3
+    generic_name = urllib.quote_plus(generic_name)
+
     # Reset organ highest and count
     for key, organ in organs.items():
         organ.update({'highest': 0})
@@ -199,8 +206,10 @@ def run():
     CompoundAdverseEvent.objects.all().delete()
 
     for compound in Compound.objects.all():
+        print compound
         # TODO CHANGE TO ACCOMODATE ALL ORGANS
         events = get_event_frequency(compound.name, organs)
+        print len(events)
         time.sleep(0.2)
 
         if events:
@@ -250,7 +259,7 @@ def run():
                         frequency=frequency
                     )
                     adverse_event_model.save()
-                    print "Success!"
+                    # print "Success!"
                 except:
                     print "Fail..."
 
