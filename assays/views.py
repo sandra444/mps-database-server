@@ -4429,25 +4429,6 @@ class AssayMatrixItemDetail(StudyGroupMixin, DetailView):
     model = AssayMatrixItem
     detail = True
 
-    def get_context_data(self, **kwargs):
-        context = super(AssayMatrixItemDetail, self).get_context_data(**kwargs)
-
-        # TODO TODO TODO
-        context['compound_formset'] = AssaySetupCompoundInlineFormSetFactory(
-            instance=self.object,
-            # matrix=self.object.matrix
-        )
-        context['cell_formset'] = AssaySetupCellInlineFormSetFactory(
-            instance=self.object,
-            # matrix=self.object
-        )
-        context['setting_formset'] = AssaySetupSettingInlineFormSetFactory(
-            instance=self.object,
-            # matrix=self.object
-        )
-
-        return context
-
 
 class AssayMatrixItemDelete(DeletionMixin, DeleteView):
     """Delete a Setup"""
