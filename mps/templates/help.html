@@ -101,7 +101,38 @@
               <li><a href="#cluster">Cluster</a></li>
             </ul>
           </li>
-{#          <li><a href="#glossary">Glossary</a></li>#}
+{#           <li><a href="#glossary">Glossary</a></li>#}
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Glossary<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#glossary_a">A</a></li>
+              <li><a href="#glossary_b">B</a></li>
+              <li><a href="#glossary_c">C</a></li>
+              <li><a href="#glossary_d">D</a></li>
+              <li><a href="#glossary_e">E</a></li>
+              <li><a href="#glossary_f">F</a></li>
+              <li><a href="#glossary_g">G</a></li>
+              <li><a href="#glossary_h">H</a></li>
+              <li><a href="#glossary_i">I</a></li>
+              <li><a href="#glossary_j">J</a></li>
+              <li><a href="#glossary_k">K</a></li>
+              <li><a href="#glossary_l">L</a></li>
+              <li><a href="#glossary_m">M</a></li>
+              <li><a href="#glossary_n">N</a></li>
+              <li><a href="#glossary_o">O</a></li>
+              <li><a href="#glossary_p">P</a></li>
+              <li><a href="#glossary_q">Q</a></li>
+              <li><a href="#glossary_r">R</a></li>
+              <li><a href="#glossary_s">S</a></li>
+              <li><a href="#glossary_t">T</a></li>
+              <li><a href="#glossary_u">U</a></li>
+              <li><a href="#glossary_v">V</a></li>
+              <li><a href="#glossary_w">W</a></li>
+              <li><a href="#glossary_x">X</a></li>
+              <li><a href="#glossary_y">Y</a></li>
+              <li><a href="#glossary_z">Z</a></li>
+            </ul>
+          </li>
         </ul>
       </div>
     </div>
@@ -1011,18 +1042,20 @@
     </ul>
   </div>
 </div>
+
 {# Show glossary later when it is more complete #}
-{#<div id="glossary" class="container padded-bottom">#}
-{#  <h1>Glossary</h1>#}
+<div id="glossary" class="container padded-bottom">
+  <h1>Glossary</h1>
 {#  <table hidden id="glossary_table" class="display" cellspacing="0" width="100%">#}
-{#    <thead>#}
-{#      <tr>#}
-{#        <th>Term</th>#}
-{#        <th>Definition</th>#}
+  <table id="glossary_table" class="display" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Term</th>
+        <th>Definition</th>
 {#        <th>Ref</th>#}
-{#      </tr>#}
-{#    </thead>#}
-{##}
+      </tr>
+    </thead>
+
 {#    <tbody>#}
 {#      {% for term in glossary %}#}
 {#        <tr>#}
@@ -1032,9 +1065,135 @@
 {#        </tr>#}
 {#      {% endfor %}#}
 {#    </tbody>#}
-{#  </table>#}
-{#  <script src="{% static "js/display_datatable.js" %}"></script>#}
-{#</div>#}
+
+    <tbody>
+    <tr id="glossary_a"></tr>
+        <tr>
+          <td> Access Group </td>
+          <td> A group of users that can be granted viewer access to studies in a Data Group.
+          </td>
+        </tr>
+        <tr>
+          <td> Access Level </td>
+          <td> The degree of visibility of data associated with a study. Data providers and associated data stakeholders are level 1, funding agencies and associated designees are level 2, and all registered MPS Data users are level 3.
+          </td>
+        </tr>
+        <tr>
+          <td> Assay </td>
+          <td> A qualitative or quantitative analysis performed to determine the amount of a particular constituent in a sample or the biological or pharmacological activity of a drug.
+               Examples: biochemical or ELISA for secretion of albumin, urea, glucose, or TNFα; mass spectrometry for compounds or metabolites; imaging of a biosensor, a fluorescent probe, or morphology
+          </td>
+        </tr>
+          <td> Assay Plate ID </td>
+          <td> A unique ID assigned to a well Plate. Recommended naming convention is as follows: “P” & “yyyy” & “-“ & “dddd” & ”a string of the user’s choice” (e.g., P2017-0223A).
+          </td>
+        </tr>
+        <tr>
+          <td> Assay Purpose </td>
+          <td> A controlled text string that is unique to a combination of the Study Name, the Method/Kit and the Target/Analyte. The functionality to enable entry of an assay purpose into the MPS-Db is under consideration for future implementation.
+               Examples: metabolism study-parent compound, metabolism study-metabolite
+          </td>
+        </tr>
+    <tr id="glossary_b"></tr>
+        <tr>
+          <td> Biomarker </td>
+          <td> A characteristic that can be objectively measured and serves as an indicator for normal biologic processes, pathogenic processes, state of health or disease, the risk for disease development and/or prognosis, or responsiveness to a particular therapeutic intervention.
+          </td>
+        </tr>
+        <tr>
+          <td> Biosensor </td>
+          <td> A component that converts a biological response into a measurable signal. The term 'biosensor' is often used for ‘fluorescent protein biosensors’ which are fluorescent proteins engineered into cells to indicate a functional activity.  Biosensor can also be used for other components or devices that indicate a parameter of biological interest, such as a membrane potential sensitive fluorescent probe or an electrical potential integrated circuit for measuring heart beat rate.
+          </td>
+        </tr>
+    <tr id="glossary_c"></tr>
+        <tr>
+          <td> Calibration </td>
+          <td> The act of checking or adjusting (by comparison with a standard) the accuracy of a measuring instrument.
+          </td>
+        </tr>
+        <tr>
+          <td> Caution Flag </td>
+          <td> A flag indicating the status of a reported result. Flags are as follows: E - Reported value outside of calibration range. F - Value could not be calculated. J - Reported value is less than the quantification limit but greater than 0. O - Value is associated with some kind of experimental error resulting in an unreliable result. W - Value is associated with an empty well on a plate in a plate reader assay.
+          </td>
+        </tr>
+        <tr>
+          <td> Cell Origin </td>
+          <td> Describes how cells were isolated or acquired. Examples: freshly isolated primary; cryopreserved primary; cell-lines; or iPS derived.
+          </td>
+        </tr>
+        <tr>
+          <td> Cell Sample </td>
+          <td> Describes a specific lot of cells used by a facility. Examples: HMCPMS-Human Plateable Hepatocytes, Metabolism Qualified Lot#12345; THLE-3 Human Liver Epithelial Cells (ATCC® CRL-11233™).
+          </td>
+        </tr>
+        <tr>
+          <td> Cell Type </td>
+          <td> Refers to a distinct functional class of cell, such as hepatocyte, monocyte, immune, or stellate cell. Cell types must specify the organism and organ they are associated with. Examples: rat hepatocyte, human vascular endothelial (HUVEC), human monocyte.
+          </td>
+        </tr>
+        <tr>
+          <td> Chip </td>
+          <td> See Organ Model.
+          </td>
+        </tr>
+        <tr>
+          <td> Chip ID </td>
+          <td> Primarily identifier used to refer to a specific instance of an organ model. In cases where wells are being used as a static comparison to a chip, for purposes of entry into the MPS-Db, each of those wells will need to be assigned a Chip ID, which could be “PlateID-WellID” (e.g. P1234-B05).
+          </td>
+        </tr>
+        <tr>
+          <td> Compound </td>
+          <td> A substance formed by chemical union of two or more elements or ingredients in definite proportion by weight (or a single element) that is added to a Chip to quantify the MPS response to the substance. Examples: Terfenadine, Fexofenadine, Vitamin D3, Polymyxin B, cadmium, etc.
+          </td>
+        </tr>
+        <tr>
+          <td> Condition </td>
+          <td> A set of experimental criteria used to place experimental results (i.e. processed data) into a chip group. Conditions are used for Grouping/Batching Chips based on treatment of the chip prior to sample collection (i.e., biological conditions); thus, the Condition of an MPS is associated with a point in the experimental time course. MPS replicates will have the same conditions throughout a Study, although they may be sampled at different time points. A chip group consists of a set of chips and/or wells with associated experimental data where the distinct treatment of the chips/wells is consistent with the selected experimental factors.
+          </td>
+        </tr>
+        <tr>
+          <td> Control </td>
+          <td>A component of a study (or assay) that is used to confirm the expected behavior of the study (or assay). Examples: Solvent or vehicle alone, without Compound or a Compound without any measurable activity in the assay are usually called negative controls. Compounds with significant activity in an assay are usually called positive controls.
+          </td>
+        </tr>
+        <tr>
+          <td> Controlled Vocabulary </td>
+          <td> A set of terms that are valid entries in specific fields of the MPS-Db. In many cases, the controlled vocabulary incorporates combinations of terms (e.g., if the Method/Kit is Ammoniagenesis (Abcam: ab83360), the Target/Analyte should be Ammonium).
+               Controlled Vocabulary is being managed in multiple places to accommodate the needs of various data providers. These include the UDIT, the LERU, and the MPS-Db. Terms associated with information that is uploaded into the MPS-Db via the import feature must be entered into the MPS-Db prior to attempting to upload data contained in a MIF-C file.
+          </td>
+        </tr>
+        <tr>
+          <td> Cross Reference </td>
+          <td> In the context of the processed data (the MIF-C file), the cross reference is a string of text that is used to cross reference data points in the MPS-Db to other database systems (i.e. LabKey).
+          </td>
+        </tr>
+    <tr id="glossary_d"></tr>
+        <tr>
+          <td> Data Group </td>
+          <td> In the context of the MPS-Db, the research team that generated the data. Synonym: Team
+          </td>
+        </tr>
+        <tr>
+          <td> Deviation </td>
+          <td> See Variance
+          </td>
+        </tr>
+        <tr>
+          <td> Device </td>
+          <td> 	A biology-free physical vessel used to construct an Organ Model. A Device can also be a Microplate used for implementation of an Organ Model or for holding samples collected for the purpose of conducting assays.
+                Examples: microfluidic devices include the Nortis Har-V, the CN Bio LiverChip, Vanderbilt’s Neurovascular Unit
+          </td>
+        </tr>
+
+    </tbody>
+
+
+
+  </table>
+  <script src="{% static "js/display_datatable.js" %}"></script>
 </div>
+
+
+
 </body>
 </html>
