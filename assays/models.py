@@ -1580,6 +1580,16 @@ class AssayMatrix(FlaggableModel):
     def __unicode__(self):
         return u'{0}'.format(self.name)
 
+    # def get_organ_models(self):
+    #     organ_models = []
+    #     for matrix_item in self.assaymatrixitem_set.all():
+    #         organ_models.append(matrix_item.organ_model)
+    #
+    #     if not organ_models:
+    #         return '-No Organ Models-'
+    #     else:
+    #         return ','.join(list(set(organ_models)))
+
     # TODO
     def get_absolute_url(self):
         return '/assays/assaymatrix/{}/'.format(self.id)

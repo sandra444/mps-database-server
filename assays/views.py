@@ -3474,7 +3474,7 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
         matrices = AssayMatrix.objects.filter(
             study=self.object
         ).prefetch_related(
-            'device',
+            'assaymatrixitem_set',
             'created_by',
         )
 
@@ -3483,7 +3483,16 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
         ).prefetch_related(
             'device',
             'created_by',
-            'matrix'
+            'matrix',
+            'organ_model',
+            'assaysetupcompound_set__compound_instance__compound',
+            'assaysetupcompound_set__concentration_unit',
+            'assaysetupcell_set__cell_sample__cell_type__organ',
+            'assaysetupcell_set__cell_sample__cell_subtype',
+            'assaysetupcell_set__cell_sample__supplier',
+            'assaysetupcell_set__density_unit',
+            'assaysetupsetting_set__setting',
+            'assaysetupsetting_set__unit',
         )
 
         # Cellsamples will always be the same
@@ -4436,6 +4445,8 @@ class AssayMatrixItemDetail(StudyGroupMixin, DetailView):
             instance=self.object,
             # matrix=self.object
         )
+
+        return context
 
 
 class AssayMatrixItemDelete(DeletionMixin, DeleteView):
