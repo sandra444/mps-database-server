@@ -393,6 +393,7 @@ $(document).ready(function () {
         // I probably can get away with purging the marked entries
         $('.item-setup_set_section').empty();
 
+        var errors_exist = false;
         // Iterate over all prefixes
         $.each(prefixes, function(index, prefix) {
             // Iterate over all forms
@@ -471,6 +472,7 @@ $(document).ready(function () {
                         errors_list.append($('<li>').text(error_message));
                     });
                     errors_display.html(errors_list);
+                    errors_exist = true;
                 }
 
                 if (new_subdisplay) {
@@ -491,6 +493,11 @@ $(document).ready(function () {
         }
         else {
             $('.item-device').show();
+        }
+
+        // NOTE: Show all displays if there are errors
+        if (errors_exist) {
+            $('.visibility-checkbox').prop('checked', true).trigger('change');
         }
     }
 
@@ -835,6 +842,20 @@ $(document).ready(function () {
         else {
             $('#apply_action_to_all').hide();
         }
+
+        // Check visibility boxes as necessary
+        if (current_section === 'add_settings') {
+            $('#show_settings').prop('checked', true).trigger('change');
+        }
+        else if (current_section === 'add_compounds') {
+            $('#show_compounds').prop('checked', true).trigger('change');
+        }
+        else if (current_section === 'add_cells') {
+            $('#show_cells').prop('checked', true).trigger('change');
+        }
+        else if (current_section.indexOf('add_') > -1) {
+            $('#show_items').prop('checked', true).trigger('change');
+        }
     }).trigger('change');
 
     // Testing SUBJECT TO CHANGE
@@ -873,6 +894,17 @@ $(document).ready(function () {
 
     window.organ_model_protocol.change(function() {
         window.display_protocol(window.organ_model_protocol.val());
+    }).trigger('change');
+
+    // Triggers for hiding elements
+    $('.visibility-checkbox').change(function() {
+        var class_to_hide = $(this).attr('value');
+        if ($(this).prop('checked')) {
+            $(class_to_hide).show();
+        }
+        else {
+            $(class_to_hide).hide();
+        }
     }).trigger('change');
 
     // Special operations for pre-submission

@@ -2123,6 +2123,9 @@ class AssaySetting(LockableModel):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
+    def __unicode__(self):
+        return self.name
+
 
 class AssaySetupSetting(models.Model):
     """Defines a setting as it relates to a setup"""

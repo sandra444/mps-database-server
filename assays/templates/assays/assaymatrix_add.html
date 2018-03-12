@@ -531,6 +531,88 @@
     {% endif %}
 
     {# FLUID CONTENT HERE ON #}
+    {# Section for visibility checkboxes #}
+    <div class="row large-padding-top">
+        <div class="col-sm-4 col-md-3 col-lg-2">
+            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                <input class="visibility-checkbox" type="checkbox" name="show_items" id="show_items" value=".item-display" checked/>
+                <div class="btn-group">
+                    <label for="show_items" class="btn btn-default">
+                        <span class="glyphicon glyphicon-ok"></span>
+                        <span> </span>
+                    </label>
+                    <label for="show_items" class="btn btn-default active">
+                        Show Item Contents
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-4 col-md-3 col-lg-2">
+            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                <input class="visibility-checkbox" type="checkbox" name="show_settings" id="show_settings" value=".setting-display" />
+                <div class="btn-group">
+                    <label for="show_settings" class="btn btn-warning">
+                        <span class="glyphicon glyphicon-ok"></span>
+                        <span> </span>
+                    </label>
+                    <label for="show_settings" class="btn btn-default active">
+                        Show Settings
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-4 col-md-3 col-lg-2">
+            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                <input class="visibility-checkbox" type="checkbox" name="show_compounds" id="show_compounds" value=".compound-display"/>
+                <div class="btn-group">
+                    <label for="show_compounds" class="btn btn-info">
+                        <span class="glyphicon glyphicon-ok"></span>
+                        <span> </span>
+                    </label>
+                    <label for="show_compounds" class="btn btn-default active">
+                        Show Compounds
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-4 col-md-3 col-lg-4">
+            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                <input class="visibility-checkbox" type="checkbox" name="show_cells" id="show_cells" value=".cell-display"/>
+                <div class="btn-group">
+                    <label for="show_cells" class="btn btn-success">
+                        <span class="glyphicon glyphicon-ok"></span>
+                        <span> </span>
+                    </label>
+                    <label for="show_cells" class="btn btn-default active">
+                        Show Cells
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-lg-4"></div>
+    </div>
+
+    {#        <label>#}
+{#        <input type="checkbox" id="id_visibility_item_display" name="visibility_item_display" value=".item-display">#}
+{#        Show Item Information#}
+{#        </label>#}
+{#        <label>#}
+{#        <input type="checkbox" id="id_visibility_setting_display" name="visibility_setting_display" value=".setting-display">#}
+{#        Show Setting Information#}
+{#        </label>#}
+{#        <label>#}
+{#        <input type="checkbox" id="id_visibility_compound_display" name="visibility_compound_display" value=".compound-display">#}
+{#        Show Compound Information#}
+{#        </label>#}
+{#        <label>#}
+{#        <input type="checkbox" id="id_visibility_cell_display" name="visibility_cell_display" value=".cell-display">#}
+{#        Show Cell Information#}
+{#        </label>#}
+
     <div class="well padded-bottom">
     <div id="matrix_wrapper" class="overflow-auto" style="max-height:800px;">
         {# NO INLINE STYLE PLEASE #}
@@ -638,14 +720,14 @@
 
     <table>
     <tr id="empty_item_html">
-    <td data-prefix="item" class="item-td">
+    <td data-prefix="{{ item_formset.prefix }}" class="item-td">
         <div class="error-message-section item-setup_set_section">
         </div>
         <div align="center">
             <u><span class="item-name lead item-setup_set_section"></span></u>
 {#            <span class="item-current_setup"></span>#}
         </div>
-        <div class="well">
+        <div class="well item-display">
             <div>
                 <span class="item-setup_date item-setup_set_section"></span>
                 {% if not detail %}
@@ -694,7 +776,7 @@
 
     {# TODO ADDITION LOCATION #}
     <div id="empty_cell_html">
-        <div data-prefix="{{ cell_formset.prefix }}" class="alert alert-success force-off-black-text">
+        <div data-prefix="{{ cell_formset.prefix }}" class="alert alert-success force-off-black-text cell-display">
             <div class="error-message-section">
             </div>
             <div>
@@ -727,7 +809,7 @@
 
     {# TODO ADDITION LOCATION #}
     <div id="empty_compound_html">
-        <div data-prefix="{{ compound_formset.prefix }}" class="alert alert-info force-off-black-text">
+        <div data-prefix="{{ compound_formset.prefix }}" class="alert alert-info force-off-black-text compound-display">
             <div class="error-message-section">
             </div>
             <div>
@@ -769,7 +851,7 @@
 
     {# TODO TODO TODO #}
     <div id="empty_setting_html">
-        <div data-prefix="{{ setting_formset.prefix }}" class="alert alert-warning force-off-black-text">
+        <div data-prefix="{{ setting_formset.prefix }}" class="alert alert-warning force-off-black-text setting-display">
             <div class="error-message-section">
             </div>
             <div>
