@@ -51,10 +51,10 @@ class Resource(LockableModel):
         return self.type.resource_subtype.name
 
 
-class Definition(models.Model):
+class Definition(LockableModel):
     """A Definition is a definition for the glossary found in Help"""
     term = models.CharField(max_length=60, unique=True)
-    definition = models.CharField(max_length=1000, default='')
+    definition = models.CharField(max_length=2500, default='')
     reference = models.URLField(default='', blank=True)
 
     def __unicode__(self):

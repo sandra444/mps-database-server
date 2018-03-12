@@ -101,7 +101,7 @@
               <li><a href="#cluster">Cluster</a></li>
             </ul>
           </li>
-{#          <li><a href="#glossary">Glossary</a></li>#}
+          <li><a href="#glossary">Glossary</a></li>
         </ul>
       </div>
     </div>
@@ -1011,30 +1011,29 @@
     </ul>
   </div>
 </div>
-{# Show glossary later when it is more complete #}
-{#<div id="glossary" class="container padded-bottom">#}
-{#  <h1>Glossary</h1>#}
-{#  <table hidden id="glossary_table" class="display" cellspacing="0" width="100%">#}
-{#    <thead>#}
-{#      <tr>#}
-{#        <th>Term</th>#}
-{#        <th>Definition</th>#}
-{#        <th>Ref</th>#}
-{#      </tr>#}
-{#    </thead>#}
-{##}
-{#    <tbody>#}
-{#      {% for term in glossary %}#}
-{#        <tr>#}
-{#          <td>{{ term.term }}</td>#}
-{#          <td>{{ term.definition }}</td>#}
-{#          <td>{{ term.show_url }}</td>#}
-{#        </tr>#}
-{#      {% endfor %}#}
-{#    </tbody>#}
-{#  </table>#}
-{#  <script src="{% static "js/display_datatable.js" %}"></script>#}
-{#</div>#}
+<div id="glossary" class="container padded-bottom">
+  <h1>Glossary</h1>
+  <table hidden id="glossary_table" class="display" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Term</th>
+        <th>Definition</th>
+        <th>Ref</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for term in glossary %}
+        <tr>
+          <td>{{ term.term }}</td>
+          <td>{{ term.definition }}</td>
+          <td>{{ term.show_url }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <script src="{% static "js/display_datatable.js" %}"></script>
+</div>
 </div>
 </body>
 </html>
