@@ -244,7 +244,7 @@ def get_chip_readout_data_as_list_of_lists(chip_ids, chip_data=None, both_assay_
             'update_number'
         ).exclude(
             quality__contains=REPLACED_DATA_POINT_CODE
-	)
+        )
 
         # related_compounds_map = get_related_compounds_map(readouts=chip_ids)
 
