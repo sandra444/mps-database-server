@@ -242,7 +242,9 @@ def get_chip_readout_data_as_list_of_lists(chip_ids, chip_data=None, both_assay_
             'sample_location__name',
             'quality',
             'update_number'
-        )
+        ).exclude(
+            quality__contains=REPLACED_DATA_POINT_CODE
+	)
 
         # related_compounds_map = get_related_compounds_map(readouts=chip_ids)
 
@@ -1607,7 +1609,8 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
             # Will use eventually, maybe
             'subtarget'
         ).filter(
-            matrix_item__in=ids
+            matrix_item__in=ids,
+            replaced=False
         ).order_by(
             'matrix_item__name',
             'study_assay__target__name',
