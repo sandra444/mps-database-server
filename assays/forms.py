@@ -117,6 +117,67 @@ class ModelFormStripWhiteSpace(forms.ModelForm):
         return super(ModelFormStripWhiteSpace, self).clean()
 
 
+class ModelFormSplitTime(ModelFormStripWhiteSpace):
+    def __init__(self, *args, **kwargs):
+        super(ModelFormSplitTime, self).__init__(*args, **kwargs)
+
+        for time_unit in TIME_CONVERSIONS.keys():
+            # Create fields for Days, Hours, Minutes
+            self.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
+            self.fields['duration_' + time_unit] = forms.FloatField(initial=0)
+            # Change style
+            self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
+            self.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
+
+        # Fill additional time
+        if self.fields.get('addition_time', None):
+            addition_time_in_minutes_remaining = getattr(self.instance, 'addition_time', 0)
+            if not addition_time_in_minutes_remaining:
+                addition_time_in_minutes_remaining = 0
+            for time_unit, conversion in TIME_CONVERSIONS.items():
+                initial_time_for_current_field = int(addition_time_in_minutes_remaining / conversion)
+                if initial_time_for_current_field:
+                    self.fields['addition_time_' + time_unit].initial = initial_time_for_current_field
+                    addition_time_in_minutes_remaining -= initial_time_for_current_field * conversion
+            # Add fractions of minutes if necessary
+            if addition_time_in_minutes_remaining:
+                self.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
+
+        # Fill duration
+        if self.fields.get('duration', None):
+            duration_in_minutes_remaining = getattr(self.instance, 'duration', 0)
+            if not duration_in_minutes_remaining:
+                duration_in_minutes_remaining = 0
+            for time_unit, conversion in TIME_CONVERSIONS.items():
+                initial_time_for_current_field = int(duration_in_minutes_remaining / conversion)
+                if initial_time_for_current_field:
+                    self.fields['duration_' + time_unit].initial = initial_time_for_current_field
+                    duration_in_minutes_remaining -= initial_time_for_current_field * conversion
+            # Add fractions of minutes if necessary
+            if duration_in_minutes_remaining:
+                self.fields['duration_minute'].initial += duration_in_minutes_remaining
+
+    def clean(self):
+        cleaned_data = super(ModelFormSplitTime, self).clean()
+
+        if cleaned_data and not cleaned_data.get('DELETE', False):
+            cleaned_data.update({
+                'addition_time': 0,
+                'duration': 0
+            })
+            for time_unit, conversion in TIME_CONVERSIONS.items():
+                cleaned_data.update({
+                    'addition_time': cleaned_data.get('addition_time') + cleaned_data.get('addition_time_' + time_unit,
+                                                                                          0) * conversion,
+                    'duration': cleaned_data.get('duration') + cleaned_data.get('duration_' + time_unit, 0) * conversion
+                })
+
+            if self.fields.get('duration', None) is not None and cleaned_data.get('duration') <= 0:
+                raise forms.ValidationError({'duration': ['Duration cannot be zero or negative.']})
+
+        return cleaned_data
+
+
 class BaseModelFormSetForcedUniqueness(BaseModelFormSet):
     def clean(self):
         self.validate_unique()
@@ -128,7 +189,7 @@ class BaseModelFormSetForcedUniqueness(BaseModelFormSet):
         forms_to_delete = self.deleted_forms
         valid_forms = [form for form in self.forms if form not in forms_to_delete and form.is_valid()]
         for form in valid_forms:
-            exclude = form._get_validation_exclusions()
+            # exclude = form._get_validation_exclusions()
             # unique_checks, date_checks = form.instance._get_unique_checks(exclude=exclude)
             unique_checks, date_checks = form.instance._get_unique_checks()
             all_unique_checks = all_unique_checks.union(set(unique_checks))
@@ -229,7 +290,7 @@ class DicModelChoiceField(forms.Field):
             return None
         try:
             value = self.dic.get(self.name).get(value)
-        except self.model.DoesNotExist:
+        except:
             raise forms.ValidationError(self.error_messages['invalid_choice'], code='invalid_choice')
         return value
 
@@ -1717,23 +1778,12 @@ class AssayMatrixForm(SignOffMixin, ModelFormStripWhiteSpace):
             raise forms.ValidationError({'name': ['Matrix name must be unique within study.']})
 
 
-class AssaySetupCompoundForm(ModelFormStripWhiteSpace):
+class AssaySetupCompoundForm(ModelFormSplitTime):
     compound = forms.CharField()
 
     class Meta(object):
         model = AssaySetupCompound
         exclude = tracking
-
-        # widgets = {
-        #     'matrix_item': forms.TextInput(),
-        #     'compound_instance': forms.TextInput(),
-        #     'concentration_unit': forms.TextInput(),
-        #     'addition_location': forms.TextInput(),
-        # }
-
-    # def __init__(self, *args, **kwargs):
-    #     # self.static_choices = kwargs.pop('static_choices', None)
-    #     super(AssaySetupCompoundForm, self).__init__(*args, **kwargs)
 
 
 # TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
@@ -1812,22 +1862,10 @@ class AssaySetupCompoundFormSet(BaseModelFormSetForcedUniqueness):
         # Receipt date
         form.fields['receipt_date'] = forms.DateField(required=False)
 
-        for time_unit in TIME_CONVERSIONS.keys():
-            # Create fields for Days, Hours, Minutes
-            form.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
-            form.fields['duration_' + time_unit] = forms.FloatField(initial=0)
-            # Change style
-            form.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
-            form.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
-
         if form.instance:
             current_compound_instance_id = form.instance.compound_instance_id
-            current_addition_time = form.instance.addition_time
-            current_duration = form.instance.duration
         else:
             current_compound_instance_id = None
-            current_addition_time = 0
-            current_duration = 0
 
         if current_compound_instance_id:
             current_compound_instance = self.compound_instances_dic.get(current_compound_instance_id)
@@ -1841,47 +1879,7 @@ class AssaySetupCompoundFormSet(BaseModelFormSetForcedUniqueness):
             form.fields['lot_text'].initial = current_compound_instance[2]
             form.fields['receipt_date'].initial = current_compound_instance[3]
 
-            # Fill additional time
-            addition_time_in_minutes_remaining = current_addition_time
-            for time_unit, conversion in TIME_CONVERSIONS.items():
-                initial_time_for_current_field = int(addition_time_in_minutes_remaining / conversion)
-                if initial_time_for_current_field:
-                    form.fields['addition_time_' + time_unit].initial = initial_time_for_current_field
-                    addition_time_in_minutes_remaining -= initial_time_for_current_field * conversion
-            # Add fractions of minutes if necessary
-            if addition_time_in_minutes_remaining:
-                form.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
-
-            # Fill duration
-            duration_in_minutes_remaining = current_duration
-            for time_unit, conversion in TIME_CONVERSIONS.items():
-                initial_time_for_current_field = int(duration_in_minutes_remaining / conversion)
-                if initial_time_for_current_field:
-                    form.fields['duration_' + time_unit].initial = initial_time_for_current_field
-                    duration_in_minutes_remaining -= initial_time_for_current_field * conversion
-            # Add fractions of minutes if necessary
-            if duration_in_minutes_remaining:
-                form.fields['duration_minute'].initial += duration_in_minutes_remaining
-
         return form
-
-    # TODO TODO TODO
-    def clean(self):
-        """Checks to make sure duration is valid"""
-        for index, form in enumerate(self.forms):
-            current_data = form.cleaned_data
-
-            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
-                addition_time = 0
-                duration = 0
-                for time_unit, conversion in TIME_CONVERSIONS.items():
-                    addition_time += current_data.get('addition_time_' + time_unit, 0) * conversion
-                    duration += current_data.get('duration_' + time_unit, 0) * conversion
-
-                if duration <= 0:
-                    form.add_error('duration', 'Duration cannot be zero or negative.')
-
-        super(AssaySetupCompoundFormSet, self).clean()
 
     # TODO TODO TODO
     # Will either have to decouple compound instance and supplier or else have a dic ALL FORMSETS reference
@@ -2044,16 +2042,6 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
             # Receipt date
             form.fields['receipt_date'] = forms.DateField(required=False)
 
-            # Add fields for splitting time into days, hours, and minutes
-            # Times are trickier to fill in, uses formula that prioritizes larger denominations
-            for time_unit in TIME_CONVERSIONS.keys():
-                # Create fields for Days, Hours, Minutes
-                form.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
-                form.fields['duration_' + time_unit] = forms.FloatField(initial=0)
-                # Change style
-                form.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
-                form.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
-
             # If instance, apply initial values
             if form.instance.compound_instance_id:
                 current_compound_instance = compound_instances_dic.get(form.instance.compound_instance_id)
@@ -2063,45 +2051,8 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
                 form.fields['lot_text'].initial = current_compound_instance.lot
                 form.fields['receipt_date'].initial = current_compound_instance.receipt_date
 
-                # Fill additional time
-                addition_time_in_minutes_remaining = form.instance.addition_time
-                for time_unit, conversion in TIME_CONVERSIONS.items():
-                    initial_time_for_current_field = int(addition_time_in_minutes_remaining / conversion)
-                    if initial_time_for_current_field:
-                        form.fields['addition_time_' + time_unit].initial = initial_time_for_current_field
-                        addition_time_in_minutes_remaining -= initial_time_for_current_field * conversion
-                # Add fractions of minutes if necessary
-                if addition_time_in_minutes_remaining:
-                    form.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
-
-                # Fill duration
-                duration_in_minutes_remaining = form.instance.duration
-                for time_unit, conversion in TIME_CONVERSIONS.items():
-                    initial_time_for_current_field = int(duration_in_minutes_remaining / conversion)
-                    if initial_time_for_current_field:
-                        form.fields['duration_' + time_unit].initial = initial_time_for_current_field
-                        duration_in_minutes_remaining -= initial_time_for_current_field * conversion
-                # Add fractions of minutes if necessary
-                if duration_in_minutes_remaining:
-                    form.fields['duration_minute'].initial += duration_in_minutes_remaining
-
             # Set CSS class to receipt date to use date picker
             form.fields['receipt_date'].widget.attrs['class'] = 'datepicker-input'
-
-    def clean(self):
-        """Checks to make sure duration is valid"""
-        for index, form in enumerate(self.forms):
-            current_data = form.cleaned_data
-
-            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
-                addition_time = 0
-                duration = 0
-                for time_unit, conversion in TIME_CONVERSIONS.items():
-                    addition_time += current_data.get('addition_time_' + time_unit, 0) * conversion
-                    duration += current_data.get('duration_' + time_unit, 0) * conversion
-
-                if duration <= 0:
-                    form.add_error('duration', 'Duration cannot be zero or negative.')
 
     # TODO THIS IS NOT DRY
     def save(self, commit=True):
@@ -2241,7 +2192,7 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
             })
 
 
-class AssaySetupCellForm(forms.ModelForm):
+class AssaySetupCellForm(ModelFormSplitTime):
     class Meta(object):
         model = AssaySetupCell
         exclude = tracking
@@ -2261,43 +2212,6 @@ class AssaySetupCellForm(forms.ModelForm):
         # Change widget size
         self.fields['cell_sample'].widget.attrs['style'] = 'width:50px;'
         self.fields['passage'].widget.attrs['style'] = 'width:50px;'
-
-        for time_unit in TIME_CONVERSIONS.keys():
-            # Create fields for Days, Hours, Minutes
-            self.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
-            # Change style
-            self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
-
-        if self.instance.addition_time:
-            # Fill additional time
-            addition_time_in_minutes_remaining = self.instance.addition_time
-            for time_unit, conversion in TIME_CONVERSIONS.items():
-                initial_time_for_current_field = int(addition_time_in_minutes_remaining / conversion)
-                if initial_time_for_current_field:
-                    self.fields['addition_time_' + time_unit].initial = initial_time_for_current_field
-                    addition_time_in_minutes_remaining -= initial_time_for_current_field * conversion
-            # Add fractions of minutes if necessary
-            if addition_time_in_minutes_remaining:
-                self.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
-
-    def clean(self):
-        cleaned_data = super(AssaySetupCellForm, self).clean()
-
-        if cleaned_data and not cleaned_data.get('DELETE', False):
-            cleaned_data.update({
-                'addition_time': 0,
-                # 'duration': 0
-            })
-            for time_unit, conversion in TIME_CONVERSIONS.items():
-                cleaned_data.update({
-                    'addition_time': cleaned_data.get('addition_time') + cleaned_data.get('addition_time_' + time_unit, 0) * conversion,
-                    # 'duration': cleaned_data.get('duration') + cleaned_data.get('duration_' + time_unit, 0) * conversion
-                })
-
-            # if cleaned_data.get('duration') <= 0:
-            #     raise forms.ValidationError({'duration': ['Duration cannot be zero or negative.']})
-
-        return cleaned_data
 
 
 # TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
@@ -2321,31 +2235,8 @@ class AssaySetupCellFormSet(BaseModelFormSetForcedUniqueness):
             for field in self.custom_fields:
                 form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
 
-    # NOT DRY
-    def _construct_form(self, i, **kwargs):
-        form = super(AssaySetupCellFormSet, self)._construct_form(i, **kwargs)
-        for time_unit in TIME_CONVERSIONS.keys():
-            # Create fields for Days, Hours, Minutes
-            form.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
-            # Change style
-            form.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
 
-        if form.instance.addition_time:
-            # Fill additional time
-            addition_time_in_minutes_remaining = form.instance.addition_time
-            for time_unit, conversion in TIME_CONVERSIONS.items():
-                initial_time_for_current_field = int(addition_time_in_minutes_remaining / conversion)
-                if initial_time_for_current_field:
-                    form.fields['addition_time_' + time_unit].initial = initial_time_for_current_field
-                    addition_time_in_minutes_remaining -= initial_time_for_current_field * conversion
-            # Add fractions of minutes if necessary
-            if addition_time_in_minutes_remaining:
-                form.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
-
-        return form
-
-
-class AssaySetupSettingForm(forms.ModelForm):
+class AssaySetupSettingForm(ModelFormSplitTime):
     class Meta(object):
         model = AssaySetupCell
         exclude = tracking
@@ -2356,62 +2247,6 @@ class AssaySetupSettingForm(forms.ModelForm):
         #     'unit': forms.TextInput(),
         #     'addition_location': forms.TextInput(),
         # }
-
-    def __init__(self, *args, **kwargs):
-        # self.static_choices = kwargs.pop('static_choices', None)
-        super(AssaySetupSettingForm, self).__init__(*args, **kwargs)
-
-        for time_unit in TIME_CONVERSIONS.keys():
-            # Create fields for Days, Hours, Minutes
-            self.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
-            self.fields['duration_' + time_unit] = forms.FloatField(initial=0)
-            # Change style
-            self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
-            self.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
-
-        if self.instance.addition_time:
-            # Fill additional time
-            addition_time_in_minutes_remaining = self.instance.addition_time
-            for time_unit, conversion in TIME_CONVERSIONS.items():
-                initial_time_for_current_field = int(addition_time_in_minutes_remaining / conversion)
-                if initial_time_for_current_field:
-                    self.fields['addition_time_' + time_unit].initial = initial_time_for_current_field
-                    addition_time_in_minutes_remaining -= initial_time_for_current_field * conversion
-            # Add fractions of minutes if necessary
-            if addition_time_in_minutes_remaining:
-                self.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
-
-        if self.instance.duration:
-            # Fill duration
-            duration_in_minutes_remaining = self.instance.duration
-            for time_unit, conversion in TIME_CONVERSIONS.items():
-                initial_time_for_current_field = int(duration_in_minutes_remaining / conversion)
-                if initial_time_for_current_field:
-                    self.fields['duration_' + time_unit].initial = initial_time_for_current_field
-                    duration_in_minutes_remaining -= initial_time_for_current_field * conversion
-            # Add fractions of minutes if necessary
-            if duration_in_minutes_remaining:
-                self.fields['duration_minute'].initial += duration_in_minutes_remaining
-
-    def clean(self):
-        cleaned_data = super(AssaySetupSettingForm, self).clean()
-
-        if cleaned_data and not cleaned_data.get('DELETE', False):
-            cleaned_data.update({
-                'addition_time': 0,
-                'duration': 0
-            })
-            for time_unit, conversion in TIME_CONVERSIONS.items():
-                cleaned_data.update({
-                    'addition_time': cleaned_data.get('addition_time') + cleaned_data.get('addition_time_' + time_unit,
-                                                                                          0) * conversion,
-                    'duration': cleaned_data.get('duration') + cleaned_data.get('duration_' + time_unit, 0) * conversion
-                })
-
-            if cleaned_data.get('duration') <= 0:
-                raise forms.ValidationError({'duration': ['Duration cannot be zero or negative.']})
-
-        return cleaned_data
 
 
 class AssaySetupSettingFormSet(BaseModelFormSetForcedUniqueness):
@@ -2603,9 +2438,9 @@ class AssayMatrixItemFormSet(BaseInlineFormSetForcedUniqueness):
             current_data = form.cleaned_data
 
             if current_data and not current_data.get('DELETE', False):
-                if current_data.get('column-index') > self.instance.number_of_columns:
+                if current_data.get('column_index') > self.instance.number_of_columns:
                     raise forms.ValidationError('An Item extends beyond the columns of the Matrix. Increase the size of the Matrix and/or delete the offending Item if necessary.')
-                if current_data.get('column-index') > self.instance.number_of_columns:
+                if current_data.get('row_index') > self.instance.number_of_rows:
                     raise forms.ValidationError('An Item extends beyond the rows of the Matrix. Increase the size of the Matrix and/or delete the offending Item if necessary.')
 
 AssayMatrixItemFormSetFactory = inlineformset_factory(
