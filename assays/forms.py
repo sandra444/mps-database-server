@@ -2280,6 +2280,25 @@ class AssaySetupCellForm(forms.ModelForm):
             if addition_time_in_minutes_remaining:
                 self.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
 
+    def clean(self):
+        cleaned_data = super(AssaySetupCellForm, self).clean()
+
+        if cleaned_data and not cleaned_data.get('DELETE', False):
+            cleaned_data.update({
+                'addition_time': 0,
+                # 'duration': 0
+            })
+            for time_unit, conversion in TIME_CONVERSIONS.items():
+                cleaned_data.update({
+                    'addition_time': cleaned_data.get('addition_time') + cleaned_data.get('addition_time_' + time_unit, 0) * conversion,
+                    # 'duration': cleaned_data.get('duration') + cleaned_data.get('duration_' + time_unit, 0) * conversion
+                })
+
+            # if cleaned_data.get('duration') <= 0:
+            #     raise forms.ValidationError({'duration': ['Duration cannot be zero or negative.']})
+
+        return cleaned_data
+
 
 # TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
 class AssaySetupCellFormSet(BaseModelFormSetForcedUniqueness):
@@ -2324,22 +2343,6 @@ class AssaySetupCellFormSet(BaseModelFormSetForcedUniqueness):
                 form.fields['addition_time_minute'].initial += addition_time_in_minutes_remaining
 
         return form
-
-    # def clean(self):
-    #     """Checks to make sure duration is valid"""
-    #     for index, form in enumerate(self.forms):
-    #         current_data = form.cleaned_data
-    #
-    #         if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
-    #             addition_time = 0
-    #             duration = 0
-    #             for time_unit, conversion in TIME_CONVERSIONS.items():
-    #                 addition_time += current_data.get('addition_time_' + time_unit, 0) * conversion
-    #             # TODO NO DURATION IN CELLS AT THE MOMENT
-    #                 duration += current_data.get('duration_' + time_unit, 0) * conversion
-    #
-    #             if duration <= 0:
-    #                 form.add_error('duration', 'Duration cannot be zero or negative.')
 
 
 class AssaySetupSettingForm(forms.ModelForm):
@@ -2389,6 +2392,26 @@ class AssaySetupSettingForm(forms.ModelForm):
             # Add fractions of minutes if necessary
             if duration_in_minutes_remaining:
                 self.fields['duration_minute'].initial += duration_in_minutes_remaining
+
+    def clean(self):
+        cleaned_data = super(AssaySetupSettingForm, self).clean()
+
+        if cleaned_data and not cleaned_data.get('DELETE', False):
+            cleaned_data.update({
+                'addition_time': 0,
+                'duration': 0
+            })
+            for time_unit, conversion in TIME_CONVERSIONS.items():
+                cleaned_data.update({
+                    'addition_time': cleaned_data.get('addition_time') + cleaned_data.get('addition_time_' + time_unit,
+                                                                                          0) * conversion,
+                    'duration': cleaned_data.get('duration') + cleaned_data.get('duration_' + time_unit, 0) * conversion
+                })
+
+            if cleaned_data.get('duration') <= 0:
+                raise forms.ValidationError({'duration': ['Duration cannot be zero or negative.']})
+
+        return cleaned_data
 
 
 class AssaySetupSettingFormSet(BaseModelFormSetForcedUniqueness):
@@ -2446,23 +2469,6 @@ class AssaySetupSettingFormSet(BaseModelFormSetForcedUniqueness):
 
         return form
 
-    # TODO TODO TODO
-    def clean(self):
-        """Checks to make sure duration is valid"""
-        for index, form in enumerate(self.forms):
-            current_data = form.cleaned_data
-
-            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
-                addition_time = 0
-                duration = 0
-                for time_unit, conversion in TIME_CONVERSIONS.items():
-                    addition_time += current_data.get('addition_time_' + time_unit, 0) * conversion
-                    duration += current_data.get('duration_' + time_unit, 0) * conversion
-
-                if duration <= 0:
-                    form.add_error('duration', 'Duration cannot be zero or negative.')
-
-        super(AssaySetupSettingFormSet, self).clean()
 
 AssaySetupCompoundFormSetFactory = modelformset_factory(
     AssaySetupCompound,
