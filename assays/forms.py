@@ -122,12 +122,14 @@ class ModelFormSplitTime(ModelFormStripWhiteSpace):
         super(ModelFormSplitTime, self).__init__(*args, **kwargs)
 
         for time_unit in TIME_CONVERSIONS.keys():
-            # Create fields for Days, Hours, Minutes
-            self.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
-            self.fields['duration_' + time_unit] = forms.FloatField(initial=0)
-            # Change style
-            self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
-            self.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
+            if self.fields.get('addition_time', None):
+                # Create fields for Days, Hours, Minutes
+                self.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
+                # Change style
+                self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
+            if self.fields.get('duration', None):
+                self.fields['duration_' + time_unit] = forms.FloatField(initial=0)
+                self.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
 
         # Fill additional time
         if self.fields.get('addition_time', None):
@@ -2432,16 +2434,38 @@ class AssayMatrixItemFormSet(BaseInlineFormSetForcedUniqueness):
             else:
                 form.instance.created_by = self.user
 
+        self.invalid_matrix_item_names = {
+            item.name: item.id for item in AssayMatrixItem.objects.filter(study_id=self.study.id)
+        }
+
     def clean(self):
         """Checks to make sure duration is valid"""
+        super(AssayMatrixItemFormSet, self).clean()
+
         for index, form in enumerate(self.forms):
             current_data = form.cleaned_data
 
             if current_data and not current_data.get('DELETE', False):
-                if current_data.get('column_index') > self.instance.number_of_columns:
-                    raise forms.ValidationError('An Item extends beyond the columns of the Matrix. Increase the size of the Matrix and/or delete the offending Item if necessary.')
-                if current_data.get('row_index') > self.instance.number_of_rows:
-                    raise forms.ValidationError('An Item extends beyond the rows of the Matrix. Increase the size of the Matrix and/or delete the offending Item if necessary.')
+                if self.instance.number_of_columns:
+                    if current_data.get('column_index') > self.instance.number_of_columns:
+                        raise forms.ValidationError(
+                            'An Item extends beyond the columns of the Matrix.'
+                            ' Increase the size of the Matrix and/or delete the offending Item if necessary.'
+                        )
+                    if current_data.get('row_index') > self.instance.number_of_rows:
+                        raise forms.ValidationError(
+                            'An Item extends beyond the rows of the Matrix.'
+                            ' Increase the size of the Matrix and/or delete the offending Item if necessary.'
+                        )
+
+                # Make sure the barcode/ID is unique in the study
+                conflicting_name_item_id = self.invalid_matrix_item_names.get(current_data.get('name'), None)
+                if conflicting_name_item_id and conflicting_name_item_id != form.instance.pk:
+                    form.add_error('name', 'This name conflicts with existing Item names in this Study.')
+
+                # Make sure the device matches if necessary
+                if self.instance.device and (self.instance.device != current_data.get('device')):
+                    form.add_error('device', 'This device conflicts with the one listed in the Matrix.')
 
 AssayMatrixItemFormSetFactory = inlineformset_factory(
     AssayMatrix,
