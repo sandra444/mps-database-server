@@ -22,7 +22,8 @@ from .utils import (
     UnicodeWriter,
     REPLACED_DATA_POINT_CODE,
     MATRIX_ITEM_PREFETCH,
-    DEFAULT_EXPORT_HEADER
+    DEFAULT_EXPORT_HEADER,
+    get_repro_data
 )
 
 import csv
@@ -2460,6 +2461,132 @@ def validate_data_file(request):
                             content_type='application/json')
 
 
+def fetch_assay_run_reproducibility(request):
+    study = get_object_or_404(AssayRun, pk=int(request.POST.get('study', '')))
+    data = {}
+
+    # If chip data
+    chip_readouts = AssayChipReadout.objects.filter(
+        chip_setup__assay_run_id_id=study
+    )
+
+    # Boolean
+    # include_all = self.request.GET.get('include_all', False)
+    chip_data = get_chip_readout_data_as_list_of_lists(chip_readouts, include_header=True, include_all=False)
+
+    repro_data = get_repro_data(chip_data)
+
+    gas_list = repro_data['reproducibility_results_table']['data']
+    data['gas_list'] = gas_list
+
+    mad_list = {}
+    cv_list = {}
+    chip_list = {}
+    comp_list = {}
+    for x in range(len(repro_data) - 1):
+        # mad_list
+        mad_list[x + 1] = {'columns': repro_data[x]['mad_score_matrix']['columns']}
+        for y in range(len(repro_data[x]['mad_score_matrix']['index'])):
+            repro_data[x]['mad_score_matrix']['data'][y].insert(0, repro_data[x]['mad_score_matrix']['index'][y])
+        mad_list[x + 1]['data'] = repro_data[x]['mad_score_matrix']['data']
+        # cv_list
+        if repro_data[x].get('comp_ICC_Value'):
+            cv_list[x + 1] = [['Time', 'CV (%)']]
+            for y in range(len(repro_data[x]['CV_array']['index'])):
+                repro_data[x]['CV_array']['data'][y].insert(0, repro_data[x]['CV_array']['index'][y])
+            for entry in repro_data[x]['CV_array']['data']:
+                cv_list[x + 1].append(entry)
+        # chip_list
+        repro_data[x]['cv_chart']['columns'].insert(0, "Time (days)")
+        chip_list[x + 1] = [repro_data[x]['cv_chart']['columns']]
+        for y in range(len(repro_data[x]['cv_chart']['index'])):
+            repro_data[x]['cv_chart']['data'][y].insert(0, repro_data[x]['cv_chart']['index'][y])
+        for z in range(len(repro_data[x]['cv_chart']['data'])):
+            chip_list[x + 1].append(repro_data[x]['cv_chart']['data'][z])
+        # comp_list
+        if repro_data[x].get('comp_ICC_Value'):
+            comp_list[x + 1] = []
+            for y in range(len(repro_data[x]['comp_ICC_Value']['Chip ID'])):
+                comp_list[x + 1].insert(y, [])
+                comp_list[x + 1][y].append(repro_data[x]['comp_ICC_Value']['Chip ID'][y])
+                comp_list[x + 1][y].append(repro_data[x]['comp_ICC_Value']['ICC Absolute Agreement'][y])
+                comp_list[x + 1][y].append(repro_data[x]['comp_ICC_Value']['Missing Data Points'][y])
+
+    data['mad_list'] = mad_list
+
+    data['cv_list'] = cv_list
+
+    data['chip_list'] = chip_list
+
+    data['comp_list'] = comp_list
+
+    return HttpResponse(json.dumps(data),
+                        content_type='application/json')
+
+
+def fetch_assay_study_reproducibility(request):
+    study = get_object_or_404(AssayStudy, pk=int(request.POST.get('study', '')))
+    data = {}
+
+    # If chip data
+    matrix_items = AssayMatrixItem.objects.filter(
+        study_id=study.id
+    )
+
+    # Boolean
+    # include_all = self.request.GET.get('include_all', False)
+    chip_data = get_data_as_list_of_lists(matrix_items, include_header=True, include_all=False)
+
+    repro_data = get_repro_data(chip_data)
+
+    gas_list = repro_data['reproducibility_results_table']['data']
+    data['gas_list'] = gas_list
+
+    mad_list = {}
+    cv_list = {}
+    chip_list = {}
+    comp_list = {}
+    for x in range(len(repro_data) - 1):
+        # mad_list
+        mad_list[x + 1] = {'columns': repro_data[x]['mad_score_matrix']['columns']}
+        for y in range(len(repro_data[x]['mad_score_matrix']['index'])):
+            repro_data[x]['mad_score_matrix']['data'][y].insert(0, repro_data[x]['mad_score_matrix']['index'][y])
+        mad_list[x + 1]['data'] = repro_data[x]['mad_score_matrix']['data']
+        # cv_list
+        if repro_data[x].get('comp_ICC_Value'):
+            cv_list[x + 1] = [['Time', 'CV (%)']]
+            for y in range(len(repro_data[x]['CV_array']['index'])):
+                repro_data[x]['CV_array']['data'][y].insert(0, repro_data[x]['CV_array']['index'][y])
+            for entry in repro_data[x]['CV_array']['data']:
+                cv_list[x + 1].append(entry)
+        # chip_list
+        repro_data[x]['cv_chart']['columns'].insert(0, "Time (days)")
+        chip_list[x + 1] = [repro_data[x]['cv_chart']['columns']]
+        for y in range(len(repro_data[x]['cv_chart']['index'])):
+            repro_data[x]['cv_chart']['data'][y].insert(0, repro_data[x]['cv_chart']['index'][y])
+        for z in range(len(repro_data[x]['cv_chart']['data'])):
+            chip_list[x + 1].append(repro_data[x]['cv_chart']['data'][z])
+        # comp_list
+        if repro_data[x].get('comp_ICC_Value'):
+            comp_list[x + 1] = []
+            for y in range(len(repro_data[x]['comp_ICC_Value']['Chip ID'])):
+                comp_list[x + 1].insert(y, [])
+                comp_list[x + 1][y].append(repro_data[x]['comp_ICC_Value']['Chip ID'][y])
+                comp_list[x + 1][y].append(repro_data[x]['comp_ICC_Value']['ICC Absolute Agreement'][y])
+                comp_list[x + 1][y].append(repro_data[x]['comp_ICC_Value']['Missing Data Points'][y])
+
+    data['mad_list'] = mad_list
+
+    data['cv_list'] = cv_list
+
+    data['chip_list'] = chip_list
+
+    data['comp_list'] = comp_list
+
+    return HttpResponse(json.dumps(data),
+                        content_type='application/json')
+
+
 def study_viewer_validation(request):
     study = None
     if request.POST.get('study', ''):
@@ -2500,6 +2627,7 @@ switch = {
     'fetch_organ_models': {'call': fetch_organ_models},
     'fetch_protocols': {'call': fetch_protocols},
     'fetch_protocol': {'call': fetch_protocol},
+    'fetch_assay_run_reproducibility': {'call': fetch_assay_run_reproducibility},
     'validate_bulk_file': {'call': validate_bulk_file},
     'validate_individual_chip_file': {'call': validate_individual_chip_file},
     'send_ready_for_sign_off_email_old': {
@@ -2514,6 +2642,10 @@ switch = {
     },
     'fetch_item_data': {
         'call': fetch_item_data,
+        'validation': study_viewer_validation
+    },
+    'fetch_assay_study_reproducibility': {
+        'call': fetch_assay_study_reproducibility,
         'validation': study_viewer_validation
     },
     # TODO TODO TODO
