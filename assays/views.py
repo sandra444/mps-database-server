@@ -139,7 +139,7 @@ def get_queryset_with_organ_model_map(queryset):
         )
 
     for study in queryset:
-        study.organ_models = ',\n'.join(
+        study.organ_models = u',\n'.join(
             sorted(organ_model_map.get(study.id, {}).keys())
         )
 
@@ -183,10 +183,10 @@ def get_queryset_with_assay_map(queryset):
             )
 
     for readout in queryset:
-        readout.assays = ', '.join(
+        readout.assays = u', '.join(
             sorted(assay_map.get(readout.id, {}).keys())
         )
-        readout.caution_flag = ''.join(
+        readout.caution_flag = u''.join(
             sorted(caution_flag_map.get(readout.id, {}).keys())
         )
         readout.quality = quality_map.get(readout.id, '')
@@ -218,7 +218,7 @@ def get_compound_instance_and_cell_strings_for_queryset(setups):
         )
 
     for setup in setups:
-        setup.related_compounds_as_string = '\n'.join(
+        setup.related_compounds_as_string = u'\n'.join(
             related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
         )
 
@@ -239,7 +239,7 @@ def get_compound_instance_and_cell_strings_for_queryset(setups):
         )
 
     for setup in setups:
-        setup.related_cells_as_string = '\n'.join(
+        setup.related_cells_as_string = u'\n'.join(
             related_cells_map.get(setup.id, ['-No Cells-'])
         )
 

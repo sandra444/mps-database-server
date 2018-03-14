@@ -754,7 +754,7 @@ class AssayRun(FlaggableModel):
         return u'{0}'.format(current_types)
 
     def __unicode__(self):
-        return self.assay_run_id
+        return unicode(self.assay_run_id)
 
     def get_absolute_url(self):
         return '/assays/{}/'.format(self.id)
