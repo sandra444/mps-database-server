@@ -60,7 +60,9 @@ from assays.forms import (
     AssaySetupSettingInlineFormSetFactory,
     AssayStudySignOffForm,
     AssayStudyStakeholderFormSetFactory,
-    AssayStudyDataUploadForm
+    AssayStudyDataUploadForm,
+    AssayImage,
+    AssayImageSetting
 )
 from django import forms
 
@@ -4554,7 +4556,6 @@ class AssayRunReproducibilityList(OneGroupRequiredMixin, ListView):
 
         return context
 
-
 class AssayStudyReproducibility(StudyViewerMixin, DetailView):
     """Returns a form and processed statistical information. """
     model = AssayStudy
@@ -4638,3 +4639,46 @@ class AssayStudyReproducibilityList(AssayStudyList):
         context['reproducibility'] = True
 
         return context
+
+class AssayStudyImages(StudyViewershipMixin, DetailView):
+    """Displays all of the images linked to the current study"""
+    model = AssayStudy
+    template_name = 'assays/assaystudy_images.html'
+
+    def get(self, request, *args, **kwargs):
+        if self.object:
+            self.object = self.get_object()
+            context = self.get_context_data(object=self.object)
+
+            pk = self.kwargs['pk']
+            context['study'] = AssayStudy.objects.get(pk=pk).name
+
+        # Currently I have the wrong study connected to the AssayImageSetting objects. I will resolve this.
+        study_image_settings = AssayImageSetting.objects.filter(study_id=pk)
+        study_images = AssayImage.objects.filter(setting_id__in=study_image_settings)
+
+        metadata = {}
+        tableCols = []
+        tableRows = []
+        # filterTable = {}
+        #
+        # counter = 0
+        for image in study_images:
+            metadata[image.id] = image.get_metadata()
+            if image.matrix_item.name not in tableRows:
+                tableRows.append(image.matrix_item.name)
+            if image.setting.label_name not in tableCols:
+                tableCols.append(image.setting.label_name)
+            # counter += 1
+
+
+
+        context['metadata'] = json.dumps(metadata)
+        context['tableRows'] = json.dumps(tableRows)
+        context['tableCols'] = json.dumps(tableCols)
+        # context['filterTable'] = json.dumps(filterTable)
+        # context['tableData'] = json.dumps(tableData)
+
+        get_user_status_context(self, context)
+
+        return self.render_to_response(context)

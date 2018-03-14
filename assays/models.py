@@ -2223,3 +2223,63 @@ class AssayStudyAssay(models.Model):
 
     def __unicode__(self):
         return u'{0}|{1}|{2}'.format(self.target, self.method, self.unit)
+
+class AssayImageSetting(models.Model):
+    # Requested, not sure how useful
+    study = models.ForeignKey(AssayStudy)
+    # This is necessary in TongYing's scheme, but it is kind of confusing in a way
+    label_id = models.CharField(max_length=40)
+    label_name = models.CharField(max_length=255)
+    label_description = models.CharField(max_length=500)
+    wave_length = models.CharField(max_length=255)
+    magnification = models.CharField(max_length=40)
+    resolution = models.CharField(max_length=40)
+    resolution_unit = models.CharField(max_length=40)
+    # May be useful later
+    notes = models.CharField(max_length=500, default='')
+
+class AssayImage(models.Model):
+    # The associated item
+    matrix_item = models.ForeignKey(AssayMatrixItem)
+    # The file name
+    file_name = models.CharField(max_length=255)
+    field = models.CharField(max_length=255)
+    field_description = models.CharField(max_length=500, default='')
+    # Stored in minutes
+    time = models.FloatField()
+    # Possibly used later, who knows
+    assay_plate_id = models.CharField(max_length=40, default='N/A')
+    assay_well_id = models.CharField(max_length=40, default='N/A')
+    # PLEASE NOTE THAT I USE TARGET AND METHOD SEPARATE FROM ASSAY INSTANCE
+    method = models.ForeignKey(AssayMethod)
+    target = models.ForeignKey(AssayTarget)
+    # May become useful
+    subtarget = models.ForeignKey(AssaySubtarget)
+    sample_location = models.ForeignKey(AssaySampleLocation)
+    notes = models.CharField(max_length=500, default='')
+    replicate = models.CharField(max_length=40, default='')
+    setting = models.ForeignKey(AssayImageSetting)
+
+    def get_metadata(self):
+        return {
+            'chip_id': self.matrix_item.name,
+            'plate_id' : self.assay_plate_id,
+            'well_id' : self.assay_well_id,
+            'time' : "D"+str(int(self.time/24/60))+" H"+str(int(self.time/60%24))+" M" + str(int(self.time%60)),
+            'method_kit' : self.method.name,
+            'target_analyte' : self.target.name,
+            'subtarget' : self.subtarget.name,
+            'sample_location' : self.sample_location.name,
+            'replicate' : self.replicate,
+            'notes' : self.notes,
+            'file_name' : self.file_name,
+            'field' : self.field,
+            'field_description' : self.field_description,
+            'magnification' : self.setting.magnification,
+            'resolution' : self.setting.resolution,
+            'resolution_unit' : self.setting.resolution_unit,
+            'sample_label' : self.setting.label_name,
+            'sample_label_description' : self.setting.label_description,
+            'wavelength' : self.setting.wave_length,
+            'setting_notes' : self.setting.notes,
+        }

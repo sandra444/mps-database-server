@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "js/cookies.js" %}"></script>
+    <script src="{% static "assays/image_interface.js" %}"></script>
+    <script>
+        var metadata_list = JSON.parse("{{ metadata|escapejs|safe }}");
+        var tableRows = JSON.parse("{{ tableRows|escapejs|safe }}");
+        var tableCols = JSON.parse("{{ tableCols|escapejs|safe }}");
+    </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/study/">All Studies</a></li>
+    <li><a href="/assays/{{ object.id }}">{{ object }}</a></li>
+    <li class="active">Study Images</li>
+{% endblock %}
+
+{% block content %}
+    <div class="well">
+        <div class="row text-center">
+            <h1>
+                {{ object }}
+            </h1>
+        </div>
+        <div class="row text-center small-padding-top">
+            <a href="/assays/{{ object.id }}" class="btn btn-primary" role="button">Study Landing</a>
+            <a href="/assays/{{ object.id }}/summary" class="btn btn-info" role="button">Study Summary</a>
+        </div>
+    </div>
+
+    <div id="image_mosaic">
+        <button id="image_thumbnail" class="btn-lg btn-warning">Testing Metadata Popup</button>
+        <div class="row">
+            <div class="col-6 text-center">
+                <table id="filter_table" style="width: 40%;" class="table table-hover table-border"></table>
+            </div>
+        </div>
+        <div id="image_popup"><div id="myDialogText"></div></div>
+        <table id="image_table" class="table table-hover table-bordered"></table>
+    </div>
+
+    {{ table }}
+{% endblock %}

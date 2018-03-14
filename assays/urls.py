@@ -85,4 +85,7 @@ urlpatterns = patterns('',
 
     url(r'^assays/assaystudy/reproducibility/$', AssayStudyReproducibilityList.as_view(), name='assay_study_reproducibility_list'),
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/reproducibility/$', AssayStudyReproducibility.as_view(), name='assay_study_reproducibility'),
+
+    # Images
+    url(r'^assays/(?P<pk>[0-9]+)/images/$', AssayStudyImages.as_view(), name='study-images')
 )

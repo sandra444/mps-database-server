@@ -28,7 +28,9 @@ from .models import (
     AssayDataFileUpload,
     AssaySubtarget,
     AssayMatrixItem,
-    AssayStudyAssay
+    AssayStudyAssay,
+    AssayImage,
+    AssayImageSetting
 )
 from compounds.models import (
     CompoundSupplier,
@@ -3499,7 +3501,7 @@ def Reproducibility_Report(study_data):
     header_list.append('Max CV')
     header_list.append('ICC Absolute Agreement')
     header_list.append('Reproducibility Status')
-    header_list.append('Replicate Set')
+    header_list.append('Replica Set')
     header_list.append('# of Chips/Wells')
     header_list.append('# of Time Points')
     header_list.append('Reproducibility Note')
@@ -3520,7 +3522,7 @@ def Reproducibility_Report(study_data):
         icc_pivot = pd.pivot_table(rep_matrix, values='Value', index='Time (day)',columns=['Chip ID'], aggfunc=np.mean)
         group_id = str(row+1) #Define group ID
 
-        reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Replicate Set')] = group_id
+        reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Replica Set')] = group_id
         reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('# of Chips/Wells')] = icc_pivot.shape[1]
         reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('# of Time Points')] = icc_pivot.shape[0]
 
@@ -3543,7 +3545,7 @@ def Reproducibility_Report(study_data):
                         if rep_index.iloc[0][0] <= 5:
                             reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Excellent (CV)'
                         elif rep_index.iloc[0][1] >= 0.8:
-                            reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
+                            reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Excellent (ICC)'
                         else:
                             reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Acceptable (CV)'
                     else:
