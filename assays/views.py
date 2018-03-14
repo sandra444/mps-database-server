@@ -453,10 +453,10 @@ def filter_queryset_for_viewership(self, queryset):
             'chip_setup__assay_run_id__signed_off_by': None
         })
         stakeholder_group_filter.update({
-            'chip__setup__assay_run_id_id__in': stakeholder_group_whitelist
+            'chip_setup__assay_run_id_id__in': stakeholder_group_whitelist
         })
         missing_stakeholder_filter.update({
-            'chip__setup__assay_run_id_id__in': missing_stakeholder_blacklist
+            'chip_setup__assay_run_id_id__in': missing_stakeholder_blacklist
         })
     elif current_type == "<class 'assays.models.AssayPlateReadout'>":
         data_group_filter.update({
@@ -491,10 +491,10 @@ def filter_queryset_for_viewership(self, queryset):
             'chip_readout__chip_setup__assay_run_id__signed_off_by': None
         })
         stakeholder_group_filter.update({
-            'chip_readout__chip__setup__assay_run_id_id__in': stakeholder_group_whitelist
+            'chip_readout__chip_setup__assay_run_id_id__in': stakeholder_group_whitelist
         })
         missing_stakeholder_filter.update({
-            'chip_readout__chip__setup__assay_run_id_id__in': missing_stakeholder_blacklist
+            'chip_readout__chip_setup__assay_run_id_id__in': missing_stakeholder_blacklist
         })
     elif current_type == "<class 'assays.models.AssayPlateTestResult'>":
         data_group_filter.update({
