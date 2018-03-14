@@ -377,6 +377,6 @@ class CompoundInstance(LockableModel):
 
     def __unicode__(self):
         items = [
-            str(self.compound), str(self.supplier), str(self.lot), str(self.receipt_date)
+            unicode(self.compound), unicode(self.supplier), unicode(self.lot), unicode(self.receipt_date)
         ]
         return u' '.join(items)
