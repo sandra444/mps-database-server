@@ -82,7 +82,7 @@
                 <tr>
                     <th>View/Edit</th>
                     <th>Name</th>
-                    <th>Device</th>
+                    <th>Items</th>
                     <th>Creator</th>
                     <th>Review</th>
                 </tr>
@@ -99,7 +99,11 @@
                         </a>
                     </td>
                     <td>{{ matrix.name }}</td>
-                    <td>{{ matrix.device }}</td>
+                    <td>
+                        {% for item in matrix.assaymatrixitem_set.all|dictsort:"name" %}
+                            <a href="{{ item.get_absolute_url }}">{{ item.name }}</a>&nbsp;
+                        {% endfor %}
+                    </td>
                     <td>
                         {{ matrix.full_creator }}
                     </td>
@@ -137,7 +141,11 @@
                 <tr>
                     <th>View/Edit</th>
                     <th>Name</th>
-                    <th>Device</th>
+                    <th>Date</th>
+                    <th>Organ Model</th>
+                    <th>Compound</th>
+                    <th>Cell</th>
+                    <th>Setting</th>
                     <th>Creator</th>
                     <th>Review</th>
                 </tr>
@@ -153,7 +161,11 @@
                         </a>
                     </td>
                     <td>{{ item.name }}</td>
-                    <td>{{ item.device }}</td>
+                    <td>{{ item.setup_date }}</td>
+                    <td>{{ item.organ_model }}</td>
+                    <td>{{ item.stringify_compounds }}</td>
+                    <td>{{ item.stringify_cells }}</td>
+                    <td>{{ item.stringify_settings }}</td>
                     <td>
                         {{ item.full_creator }}
                     </td>

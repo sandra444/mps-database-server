@@ -790,7 +790,7 @@ class AssayRun(FlaggableRestrictedModel):
         return u'{0}'.format(current_types)
 
     def __unicode__(self):
-        return self.assay_run_id
+        return unicode(self.assay_run_id)
 
     def get_absolute_url(self):
         return '/assays/{}/'.format(self.id)
@@ -1580,6 +1580,16 @@ class AssayMatrix(FlaggableModel):
     def __unicode__(self):
         return u'{0}'.format(self.name)
 
+    # def get_organ_models(self):
+    #     organ_models = []
+    #     for matrix_item in self.assaymatrixitem_set.all():
+    #         organ_models.append(matrix_item.organ_model)
+    #
+    #     if not organ_models:
+    #         return '-No Organ Models-'
+    #     else:
+    #         return ','.join(list(set(organ_models)))
+
     # TODO
     def get_absolute_url(self):
         return '/assays/assaymatrix/{}/'.format(self.id)
@@ -2112,6 +2122,9 @@ class AssaySetting(LockableModel):
     """Defines a type of setting (flowrate etc.)"""
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
+
+    def __unicode__(self):
+        return self.name
 
 
 class AssaySetupSetting(models.Model):

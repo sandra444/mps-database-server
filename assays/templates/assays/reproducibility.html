@@ -8,19 +8,6 @@
     <script src="{% static "assays/reproducibility.js" %}"></script>
     <script src="{% static "assays/chart_display.js" %}"></script>
     <script src="{% static "js/display_datatable.js" %}"></script>
-    <script type='text/javascript'>
-    var gas_list = JSON.parse("{{ gas_list|escapejs|safe }}");
-    var mad_list = JSON.parse("{{ mad_list|escapejs|safe }}");
-    var comp_list = JSON.parse("{{ comp_list|escapejs|safe }}");
-    var cv_list = JSON.parse("{{ cv_list|escapejs|safe }}");
-    var chip_list = JSON.parse("{{ chip_list|escapejs|safe }}");
-    </script>
-    <style>
-    /*Dirty, vile styling*/
-    input[type=checkbox] {
-      transform: scale(2.5);
-    }
-    </style>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -37,7 +24,7 @@
             </h1>
         </div>
         <div class="row text-center small-padding-top">
-            <a href="/assays/reproducibility" class="btn btn-primary" role="prima">Reproducibility List</a>
+            <a href="/assays/reproducibility" class="btn btn-primary" role="primary">Reproducibility List</a>
             <a href="/assays/{{ object.id }}" class="btn btn-primary" role="button">Study Landing</a>
             <a href="/assays/{{ object.id }}/summary" class="btn btn-info" role="button">Study Summary</a>
         </div>
@@ -89,13 +76,13 @@
             <div class='row'>
                 <div class='col-md-6'>
                     <label id='mad-score-label'>Chip MAD Scores of Assay Target/Analyte Measurements </label>
-                    <table id='mad-score-matrix' class='table-hover table-striped table-bordered pull-left'>
+                    <table id='mad-score-matrix' class='table-hover table-striped table-bordered pull-left spawned-datatable'>
 
                     </table>
                 </div>
                 <div class='col-md-6'>
                     <label id='med-comp-label'>Compare with the Median of the Chip Observations </label>
-                    <table id='chip-comp-med' class='table-hover table-striped table-bordered pull-left'>
+                    <table id='chip-comp-med' class='table-hover table-striped table-bordered pull-left spawned-datatable'>
 
                     </table>
                 </div>
@@ -107,11 +94,4 @@
             <br><hr><br>
         </div>
     </div>
-
-    <br>
-
-    {% csrf_token %}
-
-    {% include 'errors.html' %}
-
 {% endblock %}

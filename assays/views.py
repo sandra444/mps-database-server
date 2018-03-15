@@ -203,7 +203,7 @@ def get_queryset_with_organ_model_map_old(queryset):
         )
 
     for study in queryset:
-        study.organ_models = ',\n'.join(
+        study.organ_models = u',\n'.join(
             sorted(organ_model_map.get(study.id, {}).keys())
         )
 
@@ -247,10 +247,10 @@ def get_queryset_with_assay_map(queryset):
             )
 
     for readout in queryset:
-        readout.assays = ', '.join(
+        readout.assays = u', '.join(
             sorted(assay_map.get(readout.id, {}).keys())
         )
-        readout.caution_flag = ''.join(
+        readout.caution_flag = u''.join(
             sorted(caution_flag_map.get(readout.id, {}).keys())
         )
         readout.quality = quality_map.get(readout.id, '')
@@ -282,7 +282,7 @@ def get_compound_instance_and_cell_strings_for_queryset(setups):
         )
 
     for setup in setups:
-        setup.related_compounds_as_string = '\n'.join(
+        setup.related_compounds_as_string = u'\n'.join(
             related_compounds_map.get(setup.id, ['-No Compound Treatments-'])
         )
 
@@ -303,7 +303,7 @@ def get_compound_instance_and_cell_strings_for_queryset(setups):
         )
 
     for setup in setups:
-        setup.related_cells_as_string = '\n'.join(
+        setup.related_cells_as_string = u'\n'.join(
             related_cells_map.get(setup.id, ['-No Cells-'])
         )
 
@@ -588,10 +588,10 @@ def filter_queryset_for_viewership(self, queryset):
             'chip_setup__assay_run_id__signed_off_by': None
         })
         stakeholder_group_filter.update({
-            'chip__setup__assay_run_id_id__in': stakeholder_group_whitelist
+            'chip_setup__assay_run_id_id__in': stakeholder_group_whitelist
         })
         missing_stakeholder_filter.update({
-            'chip__setup__assay_run_id_id__in': missing_stakeholder_blacklist
+            'chip_setup__assay_run_id_id__in': missing_stakeholder_blacklist
         })
     elif current_type == "<class 'assays.models.AssayPlateReadout'>":
         data_group_filter.update({
@@ -626,10 +626,10 @@ def filter_queryset_for_viewership(self, queryset):
             'chip_readout__chip_setup__assay_run_id__signed_off_by': None
         })
         stakeholder_group_filter.update({
-            'chip_readout__chip__setup__assay_run_id_id__in': stakeholder_group_whitelist
+            'chip_readout__chip_setup__assay_run_id_id__in': stakeholder_group_whitelist
         })
         missing_stakeholder_filter.update({
-            'chip_readout__chip__setup__assay_run_id_id__in': missing_stakeholder_blacklist
+            'chip_readout__chip_setup__assay_run_id_id__in': missing_stakeholder_blacklist
         })
     elif current_type == "<class 'assays.models.AssayPlateTestResult'>":
         data_group_filter.update({
@@ -3474,7 +3474,7 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
         matrices = AssayMatrix.objects.filter(
             study=self.object
         ).prefetch_related(
-            'device',
+            'assaymatrixitem_set',
             'created_by',
         )
 
@@ -3483,7 +3483,16 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
         ).prefetch_related(
             'device',
             'created_by',
-            'matrix'
+            'matrix',
+            'organ_model',
+            'assaysetupcompound_set__compound_instance__compound',
+            'assaysetupcompound_set__concentration_unit',
+            'assaysetupcell_set__cell_sample__cell_type__organ',
+            'assaysetupcell_set__cell_sample__cell_subtype',
+            'assaysetupcell_set__cell_sample__supplier',
+            'assaysetupcell_set__density_unit',
+            'assaysetupsetting_set__setting',
+            'assaysetupsetting_set__unit',
         )
 
         # Cellsamples will always be the same
@@ -4420,23 +4429,6 @@ class AssayMatrixItemDetail(StudyGroupMixin, DetailView):
     model = AssayMatrixItem
     detail = True
 
-    def get_context_data(self, **kwargs):
-        context = super(AssayMatrixItemDetail, self).get_context_data(**kwargs)
-
-        # TODO TODO TODO
-        context['compound_formset'] = AssaySetupCompoundInlineFormSetFactory(
-            instance=self.object,
-            # matrix=self.object.matrix
-        )
-        context['cell_formset'] = AssaySetupCellInlineFormSetFactory(
-            instance=self.object,
-            # matrix=self.object
-        )
-        context['setting_formset'] = AssaySetupSettingInlineFormSetFactory(
-            instance=self.object,
-            # matrix=self.object
-        )
-
 
 class AssayMatrixItemDelete(DeletionMixin, DeleteView):
     """Delete a Setup"""
@@ -4453,79 +4445,79 @@ class AssayRunReproducibility(StudyViewershipMixin, DetailView):
     model = AssayRun
     template_name = 'assays/reproducibility.html'
 
-    def get(self, request, *args, **kwargs):
-        if self.object:
-            self.object = self.get_object()
-            context = self.get_context_data(object=self.object)
-
-            context['pk'] = self.kwargs['pk']
-            context['study'] = AssayRun.objects.get(pk=self.kwargs['pk']).name
-
-            # If chip data
-            chip_readouts = AssayChipReadout.objects.filter(
-                chip_setup__assay_run_id_id=self.object
-            ).prefetch_related(
-                'chip_setup__assay_run_id'
-            )
-
-            # Boolean
-            #include_all = self.request.GET.get('include_all', False)
-            chip_data = get_chip_readout_data_as_list_of_lists(chip_readouts, include_header=True, include_all=False)
-
-            repro_data = get_repro_data(chip_data)
-
-            gas_list = repro_data['reproducibility_results_table']['data']
-            gas_list = json.dumps(gas_list)
-            context['gas_list'] = gas_list
-
-            mad_list = {}
-            cv_list = {}
-            chip_list = {}
-            comp_list = {}
-            for x in range(len(repro_data)-1):
-                # mad_list
-                mad_list[x+1] = {'columns':repro_data[x]['mad_score_matrix']['columns']}
-                for y in range(len(repro_data[x]['mad_score_matrix']['index'])):
-                    repro_data[x]['mad_score_matrix']['data'][y].insert(0, repro_data[x]['mad_score_matrix']['index'][y])
-                mad_list[x+1]['data'] = repro_data[x]['mad_score_matrix']['data']
-                # cv_list
-                if repro_data[x].get('comp_ICC_Value'):
-                    cv_list[x+1] = [['Time', 'CV (%)']]
-                    for y in range(len(repro_data[x]['CV_array']['index'])):
-                        repro_data[x]['CV_array']['data'][y].insert(0, repro_data[x]['CV_array']['index'][y])
-                    for entry in repro_data[x]['CV_array']['data']:
-                        cv_list[x+1].append(entry)
-                # chip_list
-                repro_data[x]['cv_chart']['columns'].insert(0,"Time (days)")
-                chip_list[x+1] = [repro_data[x]['cv_chart']['columns']]
-                for y in range(len(repro_data[x]['cv_chart']['index'])):
-                    repro_data[x]['cv_chart']['data'][y].insert(0, repro_data[x]['cv_chart']['index'][y])
-                for z in range(len(repro_data[x]['cv_chart']['data'])):
-                    chip_list[x+1].append(repro_data[x]['cv_chart']['data'][z])
-                # comp_list
-                if repro_data[x].get('comp_ICC_Value'):
-                    comp_list[x+1] = []
-                    for y in range(len(repro_data[x]['comp_ICC_Value']['Chip ID'])):
-                        comp_list[x+1].insert(y, [])
-                        comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Chip ID'][y])
-                        comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['ICC Absolute Agreement'][y])
-                        comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Missing Data Points'][y])
-
-            mad_list = json.dumps(mad_list)
-            context['mad_list'] = mad_list
-
-            cv_list = json.dumps(cv_list)
-            context['cv_list'] = cv_list
-
-            chip_list = json.dumps(chip_list)
-            context['chip_list'] = chip_list
-
-            comp_list = json.dumps(comp_list)
-            context['comp_list'] = comp_list
-
-        get_user_status_context(self, context)
-
-        return self.render_to_response(context)
+    # def get(self, request, *args, **kwargs):
+    #     if self.object:
+    #         self.object = self.get_object()
+    #         context = self.get_context_data(object=self.object)
+    #
+    #         context['pk'] = self.kwargs['pk']
+    #         context['study'] = AssayRun.objects.get(pk=self.kwargs['pk']).name
+    #
+    #         # If chip data
+    #         chip_readouts = AssayChipReadout.objects.filter(
+    #             chip_setup__assay_run_id_id=self.object
+    #         ).prefetch_related(
+    #             'chip_setup__assay_run_id'
+    #         )
+    #
+    #         # Boolean
+    #         #include_all = self.request.GET.get('include_all', False)
+    #         chip_data = get_chip_readout_data_as_list_of_lists(chip_readouts, include_header=True, include_all=False)
+    #
+    #         repro_data = get_repro_data(chip_data)
+    #
+    #         gas_list = repro_data['reproducibility_results_table']['data']
+    #         gas_list = json.dumps(gas_list)
+    #         context['gas_list'] = gas_list
+    #
+    #         mad_list = {}
+    #         cv_list = {}
+    #         chip_list = {}
+    #         comp_list = {}
+    #         for x in range(len(repro_data)-1):
+    #             # mad_list
+    #             mad_list[x+1] = {'columns':repro_data[x]['mad_score_matrix']['columns']}
+    #             for y in range(len(repro_data[x]['mad_score_matrix']['index'])):
+    #                 repro_data[x]['mad_score_matrix']['data'][y].insert(0, repro_data[x]['mad_score_matrix']['index'][y])
+    #             mad_list[x+1]['data'] = repro_data[x]['mad_score_matrix']['data']
+    #             # cv_list
+    #             if repro_data[x].get('comp_ICC_Value'):
+    #                 cv_list[x+1] = [['Time', 'CV (%)']]
+    #                 for y in range(len(repro_data[x]['CV_array']['index'])):
+    #                     repro_data[x]['CV_array']['data'][y].insert(0, repro_data[x]['CV_array']['index'][y])
+    #                 for entry in repro_data[x]['CV_array']['data']:
+    #                     cv_list[x+1].append(entry)
+    #             # chip_list
+    #             repro_data[x]['cv_chart']['columns'].insert(0,"Time (days)")
+    #             chip_list[x+1] = [repro_data[x]['cv_chart']['columns']]
+    #             for y in range(len(repro_data[x]['cv_chart']['index'])):
+    #                 repro_data[x]['cv_chart']['data'][y].insert(0, repro_data[x]['cv_chart']['index'][y])
+    #             for z in range(len(repro_data[x]['cv_chart']['data'])):
+    #                 chip_list[x+1].append(repro_data[x]['cv_chart']['data'][z])
+    #             # comp_list
+    #             if repro_data[x].get('comp_ICC_Value'):
+    #                 comp_list[x+1] = []
+    #                 for y in range(len(repro_data[x]['comp_ICC_Value']['Chip ID'])):
+    #                     comp_list[x+1].insert(y, [])
+    #                     comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Chip ID'][y])
+    #                     comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['ICC Absolute Agreement'][y])
+    #                     comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Missing Data Points'][y])
+    #
+    #         mad_list = json.dumps(mad_list)
+    #         context['mad_list'] = mad_list
+    #
+    #         cv_list = json.dumps(cv_list)
+    #         context['cv_list'] = cv_list
+    #
+    #         chip_list = json.dumps(chip_list)
+    #         context['chip_list'] = chip_list
+    #
+    #         comp_list = json.dumps(comp_list)
+    #         context['comp_list'] = comp_list
+    #
+    #     get_user_status_context(self, context)
+    #
+    #     return self.render_to_response(context)
 
 
 # TODO Class-based view for direct reproducibility access.
@@ -4568,73 +4560,73 @@ class AssayStudyReproducibility(StudyViewerMixin, DetailView):
     model = AssayStudy
     template_name = 'assays/assaystudy_reproducibility.html'
 
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        context = self.get_context_data(object=self.object)
-
-        # If chip data
-        matrix_items = AssayMatrixItem.objects.filter(
-            study_id=self.object.id
-        )
-
-        # Boolean
-        #include_all = self.request.GET.get('include_all', False)
-        chip_data = get_data_as_list_of_lists(matrix_items, include_header=True, include_all=False)
-
-        repro_data = get_repro_data(chip_data)
-
-        gas_list = repro_data['reproducibility_results_table']['data']
-        gas_list = json.dumps(gas_list)
-        context['gas_list'] = gas_list
-
-        mad_list = {}
-        cv_list = {}
-        chip_list = {}
-        comp_list = {}
-        for x in range(len(repro_data)-1):
-            # mad_list
-            mad_list[x+1] = {'columns':repro_data[x]['mad_score_matrix']['columns']}
-            for y in range(len(repro_data[x]['mad_score_matrix']['index'])):
-                repro_data[x]['mad_score_matrix']['data'][y].insert(0, repro_data[x]['mad_score_matrix']['index'][y])
-            mad_list[x+1]['data'] = repro_data[x]['mad_score_matrix']['data']
-            # cv_list
-            if repro_data[x].get('comp_ICC_Value'):
-                cv_list[x+1] = [['Time', 'CV (%)']]
-                for y in range(len(repro_data[x]['CV_array']['index'])):
-                    repro_data[x]['CV_array']['data'][y].insert(0, repro_data[x]['CV_array']['index'][y])
-                for entry in repro_data[x]['CV_array']['data']:
-                    cv_list[x+1].append(entry)
-            # chip_list
-            repro_data[x]['cv_chart']['columns'].insert(0,"Time (days)")
-            chip_list[x+1] = [repro_data[x]['cv_chart']['columns']]
-            for y in range(len(repro_data[x]['cv_chart']['index'])):
-                repro_data[x]['cv_chart']['data'][y].insert(0, repro_data[x]['cv_chart']['index'][y])
-            for z in range(len(repro_data[x]['cv_chart']['data'])):
-                chip_list[x+1].append(repro_data[x]['cv_chart']['data'][z])
-            # comp_list
-            if repro_data[x].get('comp_ICC_Value'):
-                comp_list[x+1] = []
-                for y in range(len(repro_data[x]['comp_ICC_Value']['Chip ID'])):
-                    comp_list[x+1].insert(y, [])
-                    comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Chip ID'][y])
-                    comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['ICC Absolute Agreement'][y])
-                    comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Missing Data Points'][y])
-
-        mad_list = json.dumps(mad_list)
-        context['mad_list'] = mad_list
-
-        cv_list = json.dumps(cv_list)
-        context['cv_list'] = cv_list
-
-        chip_list = json.dumps(chip_list)
-        context['chip_list'] = chip_list
-
-        comp_list = json.dumps(comp_list)
-        context['comp_list'] = comp_list
-
-        # get_user_status_context(self, context)
-
-        return self.render_to_response(context)
+    # def get(self, request, *args, **kwargs):
+    #     self.object = self.get_object()
+    #     context = self.get_context_data(object=self.object)
+    #
+    #     # If chip data
+    #     matrix_items = AssayMatrixItem.objects.filter(
+    #         study_id=self.object.id
+    #     )
+    #
+    #     # Boolean
+    #     #include_all = self.request.GET.get('include_all', False)
+    #     chip_data = get_data_as_list_of_lists(matrix_items, include_header=True, include_all=False)
+    #
+    #     repro_data = get_repro_data(chip_data)
+    #
+    #     gas_list = repro_data['reproducibility_results_table']['data']
+    #     gas_list = json.dumps(gas_list)
+    #     context['gas_list'] = gas_list
+    #
+    #     mad_list = {}
+    #     cv_list = {}
+    #     chip_list = {}
+    #     comp_list = {}
+    #     for x in range(len(repro_data)-1):
+    #         # mad_list
+    #         mad_list[x+1] = {'columns':repro_data[x]['mad_score_matrix']['columns']}
+    #         for y in range(len(repro_data[x]['mad_score_matrix']['index'])):
+    #             repro_data[x]['mad_score_matrix']['data'][y].insert(0, repro_data[x]['mad_score_matrix']['index'][y])
+    #         mad_list[x+1]['data'] = repro_data[x]['mad_score_matrix']['data']
+    #         # cv_list
+    #         if repro_data[x].get('comp_ICC_Value'):
+    #             cv_list[x+1] = [['Time', 'CV (%)']]
+    #             for y in range(len(repro_data[x]['CV_array']['index'])):
+    #                 repro_data[x]['CV_array']['data'][y].insert(0, repro_data[x]['CV_array']['index'][y])
+    #             for entry in repro_data[x]['CV_array']['data']:
+    #                 cv_list[x+1].append(entry)
+    #         # chip_list
+    #         repro_data[x]['cv_chart']['columns'].insert(0,"Time (days)")
+    #         chip_list[x+1] = [repro_data[x]['cv_chart']['columns']]
+    #         for y in range(len(repro_data[x]['cv_chart']['index'])):
+    #             repro_data[x]['cv_chart']['data'][y].insert(0, repro_data[x]['cv_chart']['index'][y])
+    #         for z in range(len(repro_data[x]['cv_chart']['data'])):
+    #             chip_list[x+1].append(repro_data[x]['cv_chart']['data'][z])
+    #         # comp_list
+    #         if repro_data[x].get('comp_ICC_Value'):
+    #             comp_list[x+1] = []
+    #             for y in range(len(repro_data[x]['comp_ICC_Value']['Chip ID'])):
+    #                 comp_list[x+1].insert(y, [])
+    #                 comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Chip ID'][y])
+    #                 comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['ICC Absolute Agreement'][y])
+    #                 comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Missing Data Points'][y])
+    #
+    #     mad_list = json.dumps(mad_list)
+    #     context['mad_list'] = mad_list
+    #
+    #     cv_list = json.dumps(cv_list)
+    #     context['cv_list'] = cv_list
+    #
+    #     chip_list = json.dumps(chip_list)
+    #     context['chip_list'] = chip_list
+    #
+    #     comp_list = json.dumps(comp_list)
+    #     context['comp_list'] = comp_list
+    #
+    #     # get_user_status_context(self, context)
+    #
+    #     return self.render_to_response(context)
 
 
 # TODO Class-based view for direct reproducibility access.

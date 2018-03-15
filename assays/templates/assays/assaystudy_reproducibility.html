@@ -3,17 +3,9 @@
 
 {% block load %}
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="{% static "assays/reproducibility.js" %}"></script>
+    <script src="{% static "assays/assaystudy_reproducibility.js" %}"></script>
     <script src="{% static "assays/chart_display.js" %}"></script>
     <script src="{% static "js/display_datatable.js" %}"></script>
-    {# TODO REFACTOR IF POSSIBLE #}
-    <script type='text/javascript'>
-    var gas_list = JSON.parse("{{ gas_list|escapejs|safe }}");
-    var mad_list = JSON.parse("{{ mad_list|escapejs|safe }}");
-    var comp_list = JSON.parse("{{ comp_list|escapejs|safe }}");
-    var cv_list = JSON.parse("{{ cv_list|escapejs|safe }}");
-    var chip_list = JSON.parse("{{ chip_list|escapejs|safe }}");
-    </script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -30,7 +22,7 @@
             </h1>
         </div>
         <div class="row text-center small-padding-top">
-            <a href="/assays/assaystudy/reproducibility/" class="btn btn-primary" role="primary">Reproducibility List</a>
+            <a href="/assays/assaystudy/reproducibility/" class="btn btn-primary">Reproducibility List</a>
             <a href="{{ object.get_absolute_url }}" class="btn btn-primary" role="button">Study Landing</a>
             <a href="{{ object.get_summary_url }}" class="btn btn-primary" role="button">Study Summary</a>
         </div>
@@ -38,15 +30,17 @@
 {% endblock %}
 <br>
 {% block fluid-content %}
-    <div style='padding: 10px;'>
+    <div class="padded-row padded-bottom">
+        <div class="col-xs-12">
         <label>Replica Set Table</label>
         <table id='gas-table' class='table table-hover table-striped table-bordered'>
 
         </table>
+        </div>
     </div>
 
     <br><hr><br>
-    <div id='clone-container'>
+    <div id='clone-container' class="padded-bottom">
         <div id='repro-data' class='container hidden'>
             <div class='row'>
                 <div class='col-xs-12'><h2 id='repro-title' class='text-center'></h2></div>
@@ -82,13 +76,13 @@
             <div class='row'>
                 <div class='col-md-6'>
                     <label id='mad-score-label'>Chip MAD Scores of Assay Target/Analyte Measurements </label>
-                    <table id='mad-score-matrix' class='table-hover table-striped table-bordered pull-left'>
+                    <table id='mad-score-matrix' class='table-hover table-striped table-bordered pull-left spawned-datatable'>
 
                     </table>
                 </div>
                 <div class='col-md-6'>
                     <label id='med-comp-label'>Compare with the Median of the Chip Observations </label>
-                    <table id='chip-comp-med' class='table-hover table-striped table-bordered pull-left'>
+                    <table id='chip-comp-med' class='table-hover table-striped table-bordered pull-left spawned-datatable'>
 
                     </table>
                 </div>
@@ -100,11 +94,4 @@
             <br><hr><br>
         </div>
     </div>
-
-    <br>
-
-    {% csrf_token %}
-
-    {% include 'errors.html' %}
-
 {% endblock %}

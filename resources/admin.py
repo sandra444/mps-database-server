@@ -117,7 +117,7 @@ class ResourceSubtypeAdmin(LockableAdmin):
 admin.site.register(ResourceSubtype, ResourceSubtypeAdmin)
 
 
-class DefinitionAdmin(admin.ModelAdmin):
+class DefinitionAdmin(LockableAdmin):
     """Admin for Definitions"""
     form = DefinitionForm
     save_on_top = True
@@ -134,6 +134,16 @@ class DefinitionAdmin(admin.ModelAdmin):
                 )
             }
         ),
+        (
+            'Change Tracking', {
+                'fields': (
+                    'locked',
+                    ('created_by', 'created_on'),
+                    ('modified_by', 'modified_on'),
+                    ('signed_off_by', 'signed_off_date'),
+                )
+            }
+        )
     )
     actions = ['update_fields']
 

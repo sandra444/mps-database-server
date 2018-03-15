@@ -2,7 +2,7 @@ $(document).ready(function () {
     google.charts.load('current', {'packages':['corechart']});
 
     // FILE-SCOPE VARIABLES
-    var study_id = Math.floor(window.location.href.split('/')[4]);
+    var study_id = Math.floor(window.location.href.split('/')[5]);
 
     var gas_list = null;
     var mad_list = null;
@@ -26,7 +26,7 @@ $(document).ready(function () {
             url: '/assays_ajax/',
             data: {
                 // TODO TODO TODO THIS DEPENDS ON THE INTERFACE
-                call: 'fetch_assay_run_reproducibility',
+                call: 'fetch_assay_study_reproducibility',
                 csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
                 study: study_id
             },

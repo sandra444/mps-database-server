@@ -3542,6 +3542,8 @@ def Reproducibility_Report(study_data):
                     if rep_index.iloc[0][0] <= 15 and rep_index.iloc[0][0] >0:
                         if rep_index.iloc[0][0] <= 5:
                             reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Excellent (CV)'
+                        elif rep_index.iloc[0][1] >= 0.8:
+                            reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
                         else:
                             reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Acceptable (CV)'
                     else:
