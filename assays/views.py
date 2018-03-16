@@ -4653,31 +4653,27 @@ class AssayStudyImages(StudyViewershipMixin, DetailView):
             pk = self.kwargs['pk']
             context['study'] = AssayStudy.objects.get(pk=pk).name
 
-        # Currently I have the wrong study connected to the AssayImageSetting objects. I will resolve this.
         study_image_settings = AssayImageSetting.objects.filter(study_id=pk)
         study_images = AssayImage.objects.filter(setting_id__in=study_image_settings)
 
         metadata = {}
         tableCols = []
         tableRows = []
-        # filterTable = {}
-        #
-        # counter = 0
+        tableData = {}
+
         for image in study_images:
             metadata[image.id] = image.get_metadata()
+            tableData[image.id] = ["".join("".join(image.matrix_item.name.split(" ")).split(",")), "".join("".join(image.setting.label_name.split(" ")).split(","))]
             if image.matrix_item.name not in tableRows:
                 tableRows.append(image.matrix_item.name)
             if image.setting.label_name not in tableCols:
                 tableCols.append(image.setting.label_name)
-            # counter += 1
-
-
+            tableData[image.id]
 
         context['metadata'] = json.dumps(metadata)
         context['tableRows'] = json.dumps(tableRows)
         context['tableCols'] = json.dumps(tableCols)
-        # context['filterTable'] = json.dumps(filterTable)
-        # context['tableData'] = json.dumps(tableData)
+        context['tableData'] = json.dumps(tableData)
 
         get_user_status_context(self, context)
 

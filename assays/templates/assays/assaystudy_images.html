@@ -8,6 +8,7 @@
         var metadata_list = JSON.parse("{{ metadata|escapejs|safe }}");
         var tableRows = JSON.parse("{{ tableRows|escapejs|safe }}");
         var tableCols = JSON.parse("{{ tableCols|escapejs|safe }}");
+        var tableData = JSON.parse("{{ tableData|escapejs|safe }}");
     </script>
 {% endblock %}
 
@@ -31,10 +32,9 @@
     </div>
 
     <div id="image_mosaic">
-        <button id="image_thumbnail" class="btn-lg btn-warning">Testing Metadata Popup</button>
         <div class="row">
             <div class="col-6 text-center">
-                <table id="filter_table" style="width: 40%;" class="table table-hover table-border"></table>
+                <table id="filter_table" class="table table-hover table-border"></table>
             </div>
         </div>
         <div id="image_popup"><div id="myDialogText"></div></div>
