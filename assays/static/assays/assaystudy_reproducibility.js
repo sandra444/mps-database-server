@@ -89,13 +89,13 @@ $(document).ready(function () {
         ],
         "order": [[ 1, "asc" ]],
         "createdRow": function( row, data, dataIndex ) {
-            if ( data[9][0] == "E" ) {
+            if ( data[9][0] === "E" ) {
                 $( row ).find('td:eq(10)').css( "background-color", "#74ff5b" ).css( "font-weight", "bold"  );
             }
-            else if ( data[9][0] == "A" ) {
+            else if ( data[9][0] === "A" ) {
                 $( row ).find('td:eq(10)').css( "background-color", "#fcfa8d" ).css( "font-weight", "bold"  );
             }
-            else if ( data[9][0] == "P" ) {
+            else if ( data[9][0] === "P" ) {
                 $( row ).find('td:eq(10)').css( "background-color", "#ff7863" ).css( "font-weight", "bold" );
             }
             else {
@@ -137,10 +137,14 @@ $(document).ready(function () {
             $clone.find('#chart2').attr('id', 'chart2-'+counter);
             $clone.find('#mad-score-label').append(mad_tooltip);
             $clone.find('#med-comp-label').append(comp_tooltip);
-            if (icc_status === 'NA') {
-                $clone.find('#repro-status').html('<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+data[13]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>');
+            if (icc_status[0] === 'E'){
+                $clone.find('#repro-status').html('<em>'+icc_status+'</em>').css("background-color", "#74ff5b");
+            } else if (icc_status[0] === 'A'){
+                $clone.find('#repro-status').html('<em>'+icc_status+'</em>').css("background-color", "#fcfa8d");
+            } else if (icc_status[0] === 'P'){
+                $clone.find('#repro-status').html('<em>'+icc_status+'</em>').css("background-color", "#ff7863");
             } else {
-                $clone.find('#repro-status').html('<em>'+icc_status+'</em>');
+                $clone.find('#repro-status').html('<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+data[13]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>').css("background-color", "Grey");
             }
             $clone.find('#mad-score-matrix').DataTable( {
                 columns: mad_columns(counter),
