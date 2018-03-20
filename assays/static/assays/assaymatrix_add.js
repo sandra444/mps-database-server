@@ -787,13 +787,15 @@ $(document).ready(function () {
     }).trigger('change');
 
     device_selector.change(function() {
-        get_matrix_dimensions();
+        if (device_selector.val()) {
+            get_matrix_dimensions();
 
-        if (representation_selector.val() === 'plate') {
-           $('#id_setup_device option[value!=' + device_selector.val() + ']').hide();
-           window.device.val(device_selector.val()).trigger('change');
+            if (representation_selector.val() === 'plate') {
+               $('#id_setup_device option[value!=' + device_selector.val() + ']').hide();
+               window.device.val(device_selector.val()).trigger('change');
+            }
         }
-    });
+    }).trigger('change');
 
     // TODO TODO TODO RESTORE LATER
     // if (device_selector.val()) {
@@ -879,7 +881,9 @@ $(document).ready(function () {
     });
 
     // TODO TODO TODO TESTING
-    get_matrix_dimensions();
+    if (!device_selector.val()) {
+        get_matrix_dimensions();
+    }
 
     // Handling Device flow
     window.device.change(function() {
