@@ -280,7 +280,6 @@ class AssayCompoundInstance(models.Model):
         ordering = (
             'addition_time',
             'compound_instance',
-            'addition_location',
             'concentration_unit',
             'concentration',
             'duration',
@@ -2170,10 +2169,10 @@ class AssaySetupSetting(models.Model):
                 # 'setup',
                 'matrix_item',
                 'setting',
+                'addition_location',
                 'unit',
                 'addition_time',
                 'duration',
-                'addition_location'
             )
         ]
 
