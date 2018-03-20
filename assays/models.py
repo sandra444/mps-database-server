@@ -277,13 +277,14 @@ class AssayCompoundInstance(models.Model):
             )
         ]
 
-        # ordering = (
-        #     'compound_instance',
-        #     'concentration',
-        #     'concentration_unit',
-        #     'addition_time',
-        #     'duration'
-        # )
+        ordering = (
+            'addition_time',
+            'compound_instance',
+            'addition_location',
+            'concentration_unit',
+            'concentration',
+            'duration',
+        )
 
     # Stop-gap, subject to change
     chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True)
@@ -904,14 +905,14 @@ cell_choice_dict = {
 class AssayChipCells(models.Model):
     """Individual cell parameters for CHIP setup used in inline"""
 
-    # class Meta(object):
-    #     ordering = (
-    #         'cell_sample',
-    #         'cell_biosensor',
-    #         'cellsample_density',
-    #         'cellsample_density_unit',
-    #         'cell_passage'
-    #     )
+    class Meta(object):
+        ordering = (
+            'cell_sample',
+            'cell_biosensor',
+            'cellsample_density',
+            'cellsample_density_unit',
+            'cell_passage'
+        )
 
     assay_chip = models.ForeignKey('AssayChipSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
@@ -1818,6 +1819,17 @@ class AssaySetupCell(models.Model):
             )
         ]
 
+        ordering = (
+            'addition_time',
+            'cell_sample',
+            'addition_location',
+            'biosensor',
+            'density',
+            'density_unit',
+            'passage'
+        )
+
+
     # Now binds directly to items
     matrix_item = models.ForeignKey(AssayMatrixItem)
 
@@ -1993,6 +2005,15 @@ class AssaySetupCompound(models.Model):
                 'addition_location'
             )
         ]
+
+        ordering = (
+            'addition_time',
+            'compound_instance',
+            'addition_location',
+            'concentration_unit',
+            'concentration',
+            'duration',
+        )
 
     # Now binds directly to items
     matrix_item = models.ForeignKey(AssayMatrixItem)
