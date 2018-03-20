@@ -4556,78 +4556,11 @@ class AssayRunReproducibilityList(OneGroupRequiredMixin, ListView):
 
         return context
 
+
 class AssayStudyReproducibility(StudyViewerMixin, DetailView):
     """Returns a form and processed statistical information. """
     model = AssayStudy
     template_name = 'assays/assaystudy_reproducibility.html'
-
-    # def get(self, request, *args, **kwargs):
-    #     self.object = self.get_object()
-    #     context = self.get_context_data(object=self.object)
-    #
-    #     # If chip data
-    #     matrix_items = AssayMatrixItem.objects.filter(
-    #         study_id=self.object.id
-    #     )
-    #
-    #     # Boolean
-    #     #include_all = self.request.GET.get('include_all', False)
-    #     chip_data = get_data_as_list_of_lists(matrix_items, include_header=True, include_all=False)
-    #
-    #     repro_data = get_repro_data(chip_data)
-    #
-    #     gas_list = repro_data['reproducibility_results_table']['data']
-    #     gas_list = json.dumps(gas_list)
-    #     context['gas_list'] = gas_list
-    #
-    #     mad_list = {}
-    #     cv_list = {}
-    #     chip_list = {}
-    #     comp_list = {}
-    #     for x in range(len(repro_data)-1):
-    #         # mad_list
-    #         mad_list[x+1] = {'columns':repro_data[x]['mad_score_matrix']['columns']}
-    #         for y in range(len(repro_data[x]['mad_score_matrix']['index'])):
-    #             repro_data[x]['mad_score_matrix']['data'][y].insert(0, repro_data[x]['mad_score_matrix']['index'][y])
-    #         mad_list[x+1]['data'] = repro_data[x]['mad_score_matrix']['data']
-    #         # cv_list
-    #         if repro_data[x].get('comp_ICC_Value'):
-    #             cv_list[x+1] = [['Time', 'CV (%)']]
-    #             for y in range(len(repro_data[x]['CV_array']['index'])):
-    #                 repro_data[x]['CV_array']['data'][y].insert(0, repro_data[x]['CV_array']['index'][y])
-    #             for entry in repro_data[x]['CV_array']['data']:
-    #                 cv_list[x+1].append(entry)
-    #         # chip_list
-    #         repro_data[x]['cv_chart']['columns'].insert(0,"Time (days)")
-    #         chip_list[x+1] = [repro_data[x]['cv_chart']['columns']]
-    #         for y in range(len(repro_data[x]['cv_chart']['index'])):
-    #             repro_data[x]['cv_chart']['data'][y].insert(0, repro_data[x]['cv_chart']['index'][y])
-    #         for z in range(len(repro_data[x]['cv_chart']['data'])):
-    #             chip_list[x+1].append(repro_data[x]['cv_chart']['data'][z])
-    #         # comp_list
-    #         if repro_data[x].get('comp_ICC_Value'):
-    #             comp_list[x+1] = []
-    #             for y in range(len(repro_data[x]['comp_ICC_Value']['Chip ID'])):
-    #                 comp_list[x+1].insert(y, [])
-    #                 comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Chip ID'][y])
-    #                 comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['ICC Absolute Agreement'][y])
-    #                 comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Missing Data Points'][y])
-    #
-    #     mad_list = json.dumps(mad_list)
-    #     context['mad_list'] = mad_list
-    #
-    #     cv_list = json.dumps(cv_list)
-    #     context['cv_list'] = cv_list
-    #
-    #     chip_list = json.dumps(chip_list)
-    #     context['chip_list'] = chip_list
-    #
-    #     comp_list = json.dumps(comp_list)
-    #     context['comp_list'] = comp_list
-    #
-    #     # get_user_status_context(self, context)
-    #
-    #     return self.render_to_response(context)
 
 
 # TODO Class-based view for direct reproducibility access.
@@ -4640,21 +4573,29 @@ class AssayStudyReproducibilityList(AssayStudyList):
 
         return context
 
-class AssayStudyImages(StudyViewershipMixin, DetailView):
+
+class AssayStudyImages(StudyViewerMixin, DetailView):
     """Displays all of the images linked to the current study"""
     model = AssayStudy
     template_name = 'assays/assaystudy_images.html'
 
-    def get(self, request, *args, **kwargs):
-        if self.object:
-            self.object = self.get_object()
-            context = self.get_context_data(object=self.object)
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyImages, self).get_context_data(**kwargs)
 
-            pk = self.kwargs['pk']
-            context['study'] = AssayStudy.objects.get(pk=pk).name
+        study_image_settings = AssayImageSetting.objects.filter(
+            study_id=self.object.id
+        )
+        study_images = AssayImage.objects.filter(
+            setting_id__in=study_image_settings
+        ).prefetch_related(
+            'matrix_item',
+            'method',
+            'target',
+            'sample_location',
+            'subtarget',
+            'setting__study'
+        )
 
-        study_image_settings = AssayImageSetting.objects.filter(study_id=pk)
-        study_images = AssayImage.objects.filter(setting_id__in=study_image_settings)
 
         metadata = {}
         tableCols = []
@@ -4668,13 +4609,60 @@ class AssayStudyImages(StudyViewershipMixin, DetailView):
                 tableRows.append(image.matrix_item.name)
             if image.setting.label_name not in tableCols:
                 tableCols.append(image.setting.label_name)
-            tableData[image.id]
 
         context['metadata'] = json.dumps(metadata)
         context['tableRows'] = json.dumps(tableRows)
         context['tableCols'] = json.dumps(tableCols)
         context['tableData'] = json.dumps(tableData)
 
-        get_user_status_context(self, context)
+        # Maybe useful later
+        # get_user_status_context(self, context)
 
-        return self.render_to_response(context)
+        return context
+
+
+# Equivalent for
+class AssayRunImages(StudyViewershipMixin, DetailView):
+    """Displays all of the images linked to the current study"""
+    model = AssayRun
+    template_name = 'assays/assaystudy_images.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayRunImages, self).get_context_data(**kwargs)
+
+        study_image_settings = AssayRunImageSetting.objects.filter(
+            study_id=self.object.id
+        )
+        study_images = AssayRunImage.objects.filter(
+            setting_id__in=study_image_settings
+        ).prefetch_related(
+            'matrix_item',
+            'method',
+            'target',
+            'sample_location',
+            # 'subtarget',
+            'setting__study'
+        )
+
+        metadata = {}
+        tableCols = []
+        tableRows = []
+        tableData = {}
+
+        for image in study_images:
+            metadata[image.id] = image.get_metadata()
+            tableData[image.id] = ["".join("".join(image.matrix_item.assay_chip_id.split(" ")).split(",")), "".join("".join(image.setting.label_name.split(" ")).split(","))]
+            if image.matrix_item.assay_chip_id not in tableRows:
+                tableRows.append(image.matrix_item.assay_chip_id)
+            if image.setting.label_name not in tableCols:
+                tableCols.append(image.setting.label_name)
+
+        context['metadata'] = json.dumps(metadata)
+        context['tableRows'] = json.dumps(tableRows)
+        context['tableCols'] = json.dumps(tableCols)
+        context['tableData'] = json.dumps(tableData)
+
+        # Maybe useful later
+        # get_user_status_context(self, context)
+
+        return context

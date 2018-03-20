@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block load %}
-    <script src="{% static "js/cookies.js" %}"></script>
+{#    <script src="{% static "js/cookies.js" %}"></script>#}
     <script src="{% static "assays/image_interface.js" %}"></script>
     <script>
         var metadata_list = JSON.parse("{{ metadata|escapejs|safe }}");
@@ -13,8 +13,8 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li><a href="/assays/study/">All Studies</a></li>
-    <li><a href="/assays/{{ object.id }}">{{ object }}</a></li>
+    <li><a href="{{ object.get_list_url }}">All Studies</a></li>
+    <li><a href="{{ object.get_absolute_url }}">{{ object }}</a></li>
     <li class="active">Study Images</li>
 {% endblock %}
 
@@ -26,8 +26,8 @@
             </h1>
         </div>
         <div class="row text-center small-padding-top">
-            <a href="/assays/{{ object.id }}" class="btn btn-primary" role="button">Study Landing</a>
-            <a href="/assays/{{ object.id }}/summary" class="btn btn-info" role="button">Study Summary</a>
+{#            <a href="/assays/{{ object.id }}" class="btn btn-primary" role="button">Study Landing</a>#}
+            <a href="{{ object.get_summary_url }}" class="btn btn-info" role="button">Study Summary</a>
         </div>
     </div>
 
@@ -41,5 +41,5 @@
         <table id="image_table" class="table table-hover table-bordered"></table>
     </div>
 
-    {{ table }}
+{#    {{ table }}#}
 {% endblock %}
