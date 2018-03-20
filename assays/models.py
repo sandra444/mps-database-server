@@ -1702,6 +1702,7 @@ class AssayMatrixItem(FlaggableModel):
             setting_tuple.append((
                 setting.setting_id,
                 setting.unit_id,
+                setting.addition_location
             ))
 
         return tuple(sorted(setting_tuple))
