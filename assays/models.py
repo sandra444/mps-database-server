@@ -1726,7 +1726,8 @@ class AssayMatrixItem(FlaggableModel):
                 cell.biosensor_id,
                 cell.density,
                 cell.density_unit,
-                cell.passage
+                cell.passage,
+                cell.addition_location
             ))
 
         return tuple(sorted(cell_tuple))
@@ -1752,6 +1753,7 @@ class AssayMatrixItem(FlaggableModel):
                 compound.concentration_unit_id,
                 compound.addition_time,
                 compound.duration,
+                compound.addition_location
             ))
 
         return tuple(sorted(compound_tuple))
@@ -1868,11 +1870,19 @@ class AssaySetupCell(models.Model):
     addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
 
     def __unicode__(self):
-        return u'{0}\n-{1:.0e} {2}'.format(
-            self.cell_sample,
-            self.density,
-            self.density_unit.unit
-        )
+        if self.addition_location:
+            return u'{0}\n-{1:.0e} {2}\nAdded to: {3}'.format(
+                self.cell_sample,
+                self.density,
+                self.density_unit.unit,
+                self.addition_location
+            )
+        else:
+            return u'{0}\n-{1:.0e} {2}'.format(
+                self.cell_sample,
+                self.density,
+                self.density_unit.unit,
+            )
 
 
 # DO WE WANT TRACKING INFORMATION FOR INDIVIDUAL POINTS?
@@ -2055,13 +2065,23 @@ class AssaySetupCompound(models.Model):
         )
 
     def __unicode__(self):
-        return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
-            self.compound_instance.compound.name,
-            self.concentration,
-            self.concentration_unit.unit,
-            self.get_addition_time_string(),
-            self.get_duration_string()
-        )
+        if self.addition_location:
+            return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}; Added to: {5}'.format(
+                self.compound_instance.compound.name,
+                self.concentration,
+                self.concentration_unit.unit,
+                self.get_addition_time_string(),
+                self.get_duration_string(),
+                self.addition_location
+            )
+        else:
+            return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
+                self.compound_instance.compound.name,
+                self.concentration,
+                self.concentration_unit.unit,
+                self.get_addition_time_string(),
+                self.get_duration_string(),
+            )
 
 
 # TODO MODIFY StudySupportingData
