@@ -18,7 +18,7 @@ $(document).ready(function () {
     var popupDialogData = {};
     var dialogConfirm = $("#image_popup");
     var dialogOptions = {
-        height:850,
+        height:500,
         width:1300,
         modal: true,
         closeOnEscape: true,
