@@ -18,7 +18,7 @@ $(document).ready(function () {
     var popupDialogData = {};
     var dialogConfirm = $("#image_popup");
     var dialogOptions = {
-        height:500,
+        height:850,
         width:1300,
         modal: true,
         closeOnEscape: true,
@@ -37,10 +37,28 @@ $(document).ready(function () {
             }
         }],
         close: function() {
+            // Permit scrolling again
             $('body').removeClass('stop-scrolling');
         },
         open: function() {
+            // Prevent scrolling
             $('body').addClass('stop-scrolling');
+
+            // Change height if necessary
+            if ($(window).height() < 950) {
+                $(this).dialog('option', 'height', $(window).height() - 100);
+            }
+            else {
+                $(this).dialog('option', 'height', 850);
+            }
+
+            if ($(window).width() < 1300) {
+                $(this).dialog('option', 'width', $(window).width() - 200);
+            }
+            else {
+                $(this).dialog('option', 'width', 1300);
+            }
+
             $('.ui-dialog :button').blur();
             var iChip = popupDialogData["chip_id"];
             var iPlate = popupDialogData["plate_id"];
@@ -62,15 +80,19 @@ $(document).ready(function () {
             var iSampleLabelDescription = popupDialogData["sample_label_description"];
             var iWavelength = popupDialogData["wavelength"];
             var iSettingNote = popupDialogData["setting_notes"];
-            $("#myDialogText").html('<div style="vertical-align: top; display: inline-block;"><img src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/><div style="vertical-align: middle; margin-left: 25px; display:inline-block;"><table style="width: 600px;" class="table table-hover table-striped table-bordered table-condensed"><tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+iWell+'</td></tr><tr><th>Time</th><td>'+iTime+'</td></tr><tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr><tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr><tr><th>Subtarget</th><td>'+iSubtarget+'</td></tr><tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr><tr><th>Replicate</th><td>'+iReplicate+'</td></tr><tr><th>Notes</th><td>'+iNotes+'</td></tr><tr><th>Image File Name</th><td>'+iFileName+'</td></tr><tr><th>Image Field</th><td>'+iField+'</td></tr><tr><th>Image Field Description</th><td>'+iFieldDescription+'</td></tr><tr><th>Image Magnification</th><td>'+iMagnification+'</td></tr><tr><th>Image Resolution</th><td>'+iResolution+'</td></tr><tr><th>Image Resolution Unit</th><td>'+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+iSampleLabel+'</td></tr><tr><th>Image Sample Label Description</th><td>'+iSampleLabelDescription+'</td></tr><tr><th>Image Wavelength (nm)</th><td>'+iWavelength+'</td></tr><tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
+            $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-6"><img src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-6"><table class="table table-hover table-striped table-bordered table-condensed"><tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+iWell+'</td></tr><tr><th>Time</th><td>'+iTime+'</td></tr><tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr><tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr><tr><th>Subtarget</th><td>'+iSubtarget+'</td></tr><tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr><tr><th>Replicate</th><td>'+iReplicate+'</td></tr><tr><th>Notes</th><td>'+iNotes+'</td></tr><tr><th>Image File Name</th><td>'+iFileName+'</td></tr><tr><th>Image Field</th><td>'+iField+'</td></tr><tr><th>Image Field Description</th><td>'+iFieldDescription+'</td></tr><tr><th>Image Magnification</th><td>'+iMagnification+'</td></tr><tr><th>Image Resolution</th><td>'+iResolution+'</td></tr><tr><th>Image Resolution Unit</th><td>'+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+iSampleLabel+'</td></tr><tr><th>Image Sample Label Description</th><td>'+iSampleLabelDescription+'</td></tr><tr><th>Image Wavelength (nm)</th><td>'+iWavelength+'</td></tr><tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
         }
     };
     var theDialog = dialogConfirm.dialog(dialogOptions);
 
     var filter_elements = "";
     for (var i=0; i<tableCols.length; i++) {
-        var col = tableCols[i].split(" ").join("").split(",").join("");
-        filter_elements += "<tr><th>"+tableCols[i]+"</th><td><input data-filled='0' id='"+col+"' type=checkbox></td></tr>";
+        // Remove spaces and commas
+        // var col = tableCols[i].split(" ").join("").split(",").join("");
+        var col = tableCols[i].replace(/\s/g, '').replace(/[,]/g, '');
+        // filter_elements += "<tr><th>"+tableCols[i]+"</th><td><input data-filled='0' id='"+col+"' type=checkbox></td></tr>";
+        // Unsemantic (but somewhat amusing) use of thumbnail class
+        filter_elements += "<div style='min-height:60px;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 thumbnail'><label>"+tableCols[i]+"  <input data-filled='0' id='"+col+"' type=checkbox></label></div>";
     }
     // for (i=0; i<tableRows.length; i++){
     //     filter_elements += "<tr><th>"+tableRows[i]+"</th><td><input id='"+tableRows[i].split(" ").join("").split(",").join("")+"' type=checkbox></td></tr>";
@@ -100,6 +122,7 @@ $(document).ready(function () {
     });
 
     //Checkbox click event
+    // *All* checkboxes is maybe a little broad
     $(document).on("click",":checkbox", function() {
         var checkbox = $(this);
         var checkbox_id = $(this).attr('id');
