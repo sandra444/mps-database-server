@@ -31,7 +31,7 @@ $(document).ready(function () {
             }
         },
         {
-            text: 'Cancel',
+            text: 'Back',
             click: function() {
                $(this).dialog("close");
             }
