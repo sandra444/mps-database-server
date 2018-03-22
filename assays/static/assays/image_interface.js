@@ -11,6 +11,9 @@ $(document).ready(function () {
     var filter_table = $('#filter_table');
     var image_table = $('#image_table');
 
+    var contrast = 100;
+    var brightness = 100;
+
     // tableCols[3] = "Test";
     // tableRows[3] = "Tester";
 
@@ -80,7 +83,7 @@ $(document).ready(function () {
             var iSampleLabelDescription = popupDialogData["sample_label_description"];
             var iWavelength = popupDialogData["wavelength"];
             var iSettingNote = popupDialogData["setting_notes"];
-            $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-6"><img src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-6"><table class="table table-hover table-striped table-bordered table-condensed"><tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+iWell+'</td></tr><tr><th>Time</th><td>'+iTime+'</td></tr><tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr><tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr><tr><th>Subtarget</th><td>'+iSubtarget+'</td></tr><tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr><tr><th>Replicate</th><td>'+iReplicate+'</td></tr><tr><th>Notes</th><td>'+iNotes+'</td></tr><tr><th>Image File Name</th><td>'+iFileName+'</td></tr><tr><th>Image Field</th><td>'+iField+'</td></tr><tr><th>Image Field Description</th><td>'+iFieldDescription+'</td></tr><tr><th>Image Magnification</th><td>'+iMagnification+'</td></tr><tr><th>Image Resolution</th><td>'+iResolution+'</td></tr><tr><th>Image Resolution Unit</th><td>'+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+iSampleLabel+'</td></tr><tr><th>Image Sample Label Description</th><td>'+iSampleLabelDescription+'</td></tr><tr><th>Image Wavelength (nm)</th><td>'+iWavelength+'</td></tr><tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
+            $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-6"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-6"><table class="table table-hover table-striped table-bordered table-condensed"><tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+iWell+'</td></tr><tr><th>Time</th><td>'+iTime+'</td></tr><tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr><tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr><tr><th>Subtarget</th><td>'+iSubtarget+'</td></tr><tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr><tr><th>Replicate</th><td>'+iReplicate+'</td></tr><tr><th>Notes</th><td>'+iNotes+'</td></tr><tr><th>Image File Name</th><td>'+iFileName+'</td></tr><tr><th>Image Field</th><td>'+iField+'</td></tr><tr><th>Image Field Description</th><td>'+iFieldDescription+'</td></tr><tr><th>Image Magnification</th><td>'+iMagnification+'</td></tr><tr><th>Image Resolution</th><td>'+iResolution+'</td></tr><tr><th>Image Resolution Unit</th><td>'+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+iSampleLabel+'</td></tr><tr><th>Image Sample Label Description</th><td>'+iSampleLabelDescription+'</td></tr><tr><th>Image Wavelength (nm)</th><td>'+iWavelength+'</td></tr><tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
         }
     };
     var theDialog = dialogConfirm.dialog(dialogOptions);
@@ -92,25 +95,25 @@ $(document).ready(function () {
         var col = tableCols[i].replace(/\s/g, '').replace(/[,]/g, '');
         // filter_elements += "<tr><th>"+tableCols[i]+"</th><td><input data-filled='0' id='"+col+"' type=checkbox></td></tr>";
         // Unsemantic (but somewhat amusing) use of thumbnail class
-        filter_elements += "<div style='min-height:60px;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 thumbnail'><label>"+tableCols[i]+"  <input data-filled='0' id='"+col+"' type=checkbox></label></div>";
+        filter_elements += "<div style='min-height:60px;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 thumbnail'><label>"+tableCols[i]+"  <input checked data-filled='0' id='"+col+"' type=checkbox></label></div>";
     }
     // for (i=0; i<tableRows.length; i++){
     //     filter_elements += "<tr><th>"+tableRows[i]+"</th><td><input id='"+tableRows[i].split(" ").join("").split(",").join("")+"' type=checkbox></td></tr>";
     // }
     filter_table.html(filter_elements);
 
-    var table_elements = "<tr><td style='width: .1%; white-space: no-wrap;'></td>";
+    var table_elements = "<tr><td style='width: .1%; white-space: nowrap;'></td>";
     for (i=0; i<tableCols.length; i++) {
         var col = tableCols[i].split(" ").join("").split(",").join("");
-        table_elements += "<th style='width: .1%; white-space: no-wrap;' class='"+col+" hidden text-center'>"+tableCols[i]+"</th>";
+        table_elements += "<th style='width: .1%; white-space: nowrap;' class='"+col+" text-center'>"+tableCols[i]+"</th>";
     }
     table_elements += "</tr>";
     for (i=0; i<tableRows.length; i++) {
         var row = tableRows[i].split(" ").join("").split(",").join("");
-        table_elements += "<tr style='width: .1%; white-space: no-wrap;' class='"+row+"'><th>"+tableRows[i]+"</th>";
+        table_elements += "<tr class='"+row+"'><th style='width: .1%; white-space: nowrap;'>"+tableRows[i]+"</th>";
         for (var j=0; j<tableCols.length; j++) {
             var col = tableCols[j].split(" ").join("").split(",").join("");
-            table_elements += "<td style='width: .1%; white-space: no-wrap;' class='"+col+row+" "+col+" hidden'></td>";
+            table_elements += "<td class='"+col+row+" "+col+"'></td>";
         }
         table_elements += "</tr>";
     }
@@ -127,15 +130,16 @@ $(document).ready(function () {
         var checkbox = $(this);
         var checkbox_id = $(this).attr('id');
         var cls = checkbox_id.split(' ').pop();
-        //console.log(cls);
+        console.log(cls);
         //console.log(Object.keys(metadata_list)[0])
         //console.log(metadata_list[Object.keys(metadata_list)[0]]);
-        for (var i=0; i<Object.keys(tableData).length; i++) {
-            if (tableData[Object.keys(tableData)[i]][1] == cls && $(this).data("filled") == '0') {
-                $('.'+cls+tableData[Object.keys(tableData)[i]][0]).append('<span data-pic="'+Object.keys(tableData)[i]+'" style="display: inline-block; margin:5px;" id="image_thumbnail"><figure><img src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".")[0]+'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center">'+metadata_list[Object.keys(tableData)[i]]["file_name"]+'</figcaption></figure></span>');
-            }
-        }
-        $(this).data("filled", '1');
+        // for (var i=0; i<Object.keys(tableData).length; i++) {
+        //     if (tableData[Object.keys(tableData)[i]][1] == cls && $(this).data("filled") == '0') {
+        //         var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + ") at " + metadata_list[Object.keys(tableData)[i]]["time"]
+        //         $('.'+cls+tableData[Object.keys(tableData)[i]][0]).append('<span data-pic="'+Object.keys(tableData)[i]+'" style="display: inline-block; margin:5px;" id="image_thumbnail"><figure><img style="filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".")[0]+'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center">'+ caption +'</figcaption></figure></span>');
+        //     }
+        // }
+        // $(this).data("filled", '1');
         if (checkbox.is(':checked')){
             image_table.find('.'+cls).removeClass('hidden');
         } else {
@@ -144,6 +148,71 @@ $(document).ready(function () {
 
         // Activates Bootstrap tooltips
         $('[data-toggle="tooltip"]').tooltip({container:"body"});
+    });
+
+    for (j=0; j<tableCols.length; j++){
+        cls = tableCols[j].split(" ").join("").split(",").join("");
+        for (var i=0; i<Object.keys(tableData).length; i++) {
+            if (tableData[Object.keys(tableData)[i]][1] == cls) {
+                var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + ") at " + metadata_list[Object.keys(tableData)[i]]["time"]
+                $('.'+cls+tableData[Object.keys(tableData)[i]][0]).append('<span data-pic="'+Object.keys(tableData)[i]+'" style="display: inline-block; margin:5px;" id="image_thumbnail"><figure><img style="filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".")[0]+'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center">'+ caption +'</figcaption></figure></span>');
+            }
+        }
+    }
+
+    $( function() {
+        var handle = $( "#handle-contrast" );
+        $( "#slider-contrast" ).slider({
+            create: function() {
+                handle.text( $( this ).slider( "value" ) );
+            },
+            slide: function( event, ui ) {
+                handle.text( ui.value );
+                adjustContrast(ui.value);
+            },
+            value: 100,
+            min: 0,
+            max: 200
+        });
+    } );
+
+    $( function() {
+        var handle = $( "#handle-brightness" );
+        $( "#slider-brightness" ).slider({
+            create: function() {
+                handle.text( $( this ).slider( "value" ) );
+            },
+            slide: function( event, ui ) {
+                handle.text( ui.value );
+                adjustBrightness(ui.value);
+            },
+            value: 100,
+            min: 0,
+            max: 200
+        });
+    } );
+
+    function adjustContrast(newContrast){
+        contrast = newContrast;
+        $( "img" ).not('img[src$="/static/img/brand.png"]').each(function() {
+            $( this ).css( "filter", "contrast("+contrast+"%) brightness("+brightness+"%)");
+        });
+    }
+
+    function adjustBrightness(newBrightness){
+        brightness = newBrightness;
+        $( "img" ).not('img[src$="/static/img/brand.png"]').each(function() {
+            $( this ).css( "filter", "contrast("+contrast+"%) brightness("+brightness+"%)");
+        });
+    }
+
+    $('#reset-to-default').click(function () {
+        adjustBrightness(100);
+        adjustContrast(100);
+        $('#handle-brightness').text(100);
+        $('#handle-contrast').text(100);
+        $("#slider-brightness").slider( "value", 100 );
+        $("#slider-contrast").slider( "value", 100 );
     });
 
 });
