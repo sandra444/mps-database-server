@@ -95,7 +95,7 @@ $(document).ready(function () {
         var col = tableCols[i].replace(/\s/g, '').replace(/[,]/g, '');
         // filter_elements += "<tr><th>"+tableCols[i]+"</th><td><input data-filled='0' id='"+col+"' type=checkbox></td></tr>";
         // Unsemantic (but somewhat amusing) use of thumbnail class
-        filter_elements += "<div style='min-height:60px;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 thumbnail'><label>"+tableCols[i]+"  <input checked data-filled='0' id='"+col+"' type=checkbox></label></div>";
+        filter_elements += "<div style='min-height:90px;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 well'><label>"+tableCols[i]+"  <input checked id='"+col+"' type=checkbox></label></div>";
     }
     // for (i=0; i<tableRows.length; i++){
     //     filter_elements += "<tr><th>"+tableRows[i]+"</th><td><input id='"+tableRows[i].split(" ").join("").split(",").join("")+"' type=checkbox></td></tr>";
@@ -130,7 +130,7 @@ $(document).ready(function () {
         var checkbox = $(this);
         var checkbox_id = $(this).attr('id');
         var cls = checkbox_id.split(' ').pop();
-        console.log(cls);
+        // console.log(cls);
         //console.log(Object.keys(metadata_list)[0])
         //console.log(metadata_list[Object.keys(metadata_list)[0]]);
         // for (var i=0; i<Object.keys(tableData).length; i++) {
@@ -140,7 +140,7 @@ $(document).ready(function () {
         //     }
         // }
         // $(this).data("filled", '1');
-        if (checkbox.is(':checked')){
+        if (checkbox.is(':checked')) {
             image_table.find('.'+cls).removeClass('hidden');
         } else {
             image_table.find('.'+cls).addClass('hidden');
