@@ -10,6 +10,16 @@
         var tableCols = JSON.parse("{{ tableCols|escapejs|safe }}");
         var tableData = JSON.parse("{{ tableData|escapejs|safe }}");
     </script>
+    <style>
+        #handle-contrast, #handle-brightness {
+            width: 3em;
+            height: 1.6em;
+            top: 50%;
+            margin-top: -.8em;
+            text-align: center;
+            line-height: 1.6em;
+        }
+  </style>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -32,8 +42,28 @@
     </div>
 
     <div id="filter_table" class="row no-padding">
-
     </div>
+
+    <br>
+
+    <div class="row">
+        <div class="col-6 center-block" style="width: 50%;">
+            <label>Contrast</label>
+            <div id="slider-contrast">
+                <div id="handle-contrast" class="ui-slider-handle"></div>
+            </div>
+            <br>
+            <label>Brightness</label>
+            <div id="slider-brightness">
+                <div id="handle-brightness" class="ui-slider-handle"></div>
+            </div>
+            <br>
+            <button id="reset-to-default" class="btn btn-primary">Reset to Default</button>
+        </div>
+    </div>
+
+
+    <br>
 
     <div id="image_mosaic">
 {#        <div class="row">#}
