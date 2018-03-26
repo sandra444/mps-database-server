@@ -62,7 +62,7 @@ $(document).ready(function () {
                 $(this).dialog('option', 'width', 1300);
             }
 
-            $('.ui-dialog :button').blur();
+            $(this).closest('.ui-dialog').find('.ui-dialog-buttonpane button:eq(2)').focus();
             var iChip = popupDialogData["chip_id"];
             var iPlate = popupDialogData["plate_id"];
             var iWell = popupDialogData["well_id"];

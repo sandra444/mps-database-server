@@ -44,16 +44,12 @@ $(document).ready(function () {
             $('body').removeClass('stop-scrolling');
         },
         open: function() {
-            // var dialog_submit_button = $('#enter_dialog_confirm_submit_button');
             $('body').addClass('stop-scrolling');
-            // dialog_submit_button.button('disable');
-            //
-            // setTimeout(function() {
-            //     dialog_submit_button.button('enable');
-            //     dialog_submit_button.focus();
-            // }, 1500);
             // Blur to prevent double enter accidental accepts
-            $('.ui-dialog :button').blur();
+            // $('.ui-dialog :button').blur();
+
+            // Default to cancel
+            $(this).closest('.ui-dialog').find('.ui-dialog-buttonpane button:eq(1)').focus();
         }
     });
     dialogConfirm.removeProp('hidden');
