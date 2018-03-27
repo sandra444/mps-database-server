@@ -14,6 +14,22 @@ $(document).ready(function () {
     window.organ_model = $('#id_item_organ_model');
     window.organ_model_protocol = $('#id_item_organ_model_protocol');
 
+    // Contrived, but useful:
+    // Will make a clone of the organ_model and organ_model_protocol dropdowns for display
+    // Somewhat crude to add straight to body, I suppose
+    var full_organ_model = window.organ_model
+        .clone()
+        .attr('id', 'id_item-full_organ_model')
+        .attr('name', 'item-full_organ_model')
+        .css('display', 'none')
+        .appendTo('body');
+    var full_organ_model_protocol = window.organ_model_protocol
+        .clone()
+        .attr('id', 'id_item-full_organ_model_protocol')
+        .attr('name', 'item-full_organ_model_protocol')
+        .css('display', 'none')
+        .appendTo('body');
+
     var item_display_class = '.item-td';
 
     // Allows the matrix_table to have the draggable JQuery UI element
@@ -118,13 +134,6 @@ $(document).ready(function () {
             'direction': $('#id_compound_concentration_increment_direction')
         }
     };
-
-    // var mouse_is_down = false;
-    // $(document).mousedown(function() {
-    //     mouse_is_down = true;
-    // }).mouseup(function() {
-    //     mouse_is_down = false;
-    // });
 
     function add_form(prefix, form) {
         var formset = $('#' + prefix);
@@ -355,6 +364,14 @@ $(document).ready(function () {
         if (field_name === 'cell_sample') {
             // TODO VERY POORLY DONE
             return $('#' + 'cell_sample_' + field.val()).attr('name');
+        }
+        // SPECIAL EXCEPTION FOR ORGAN MODELS
+        else if (field_name === 'organ_model') {
+            return full_organ_model.find('option[value="' + field.val() + '"]').text();
+        }
+        // SPECIAL EXCEPTION FOR ORGAN MODEL PROTOCOLS
+        else if (field_name === 'organ_model_protocol') {
+            return full_organ_model_protocol.find('option[value="' + field.val() + '"]').text();
         }
         else {
             // Ideally, this would be cached in an object or something
