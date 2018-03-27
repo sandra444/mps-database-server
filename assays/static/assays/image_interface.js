@@ -149,7 +149,7 @@ $(document).ready(function () {
         cls = tableCols[j].split(" ").join("").split(",").join("");
         for (var i=0; i<Object.keys(tableData).length; i++) {
             if (tableData[Object.keys(tableData)[i]][1] == cls) {
-                var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + ") at " + metadata_list[Object.keys(tableData)[i]]["time"]
+                var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + ") "+metadata_list[Object.keys(tableData)[i]]["magnification"]+"x at " + metadata_list[Object.keys(tableData)[i]]["time"]
                 $('.'+cls+tableData[Object.keys(tableData)[i]][0]).append('<span data-pic="'+Object.keys(tableData)[i]+'" style="display: inline-block; margin:5px;" id="image_thumbnail"><figure><img style="filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".")[0]+'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center">'+ caption +'</figcaption></figure></span>');
             }
         }
