@@ -792,6 +792,10 @@ $(document).ready(function () {
 
         if (current_representation === 'chips') {
             $('#matrix_dimensions_section').show();
+            number_of_rows_selector.val(0);
+            number_of_columns_selector.val(0);
+            number_of_items_selector.val(0);
+            device_selector.val('').change();
             // SPECIAL OPERATION
             $('#id_item_device').parent().parent().show();
         }
@@ -804,13 +808,18 @@ $(document).ready(function () {
     }).trigger('change');
 
     device_selector.change(function() {
-        if (device_selector.val()) {
-            get_matrix_dimensions();
+        get_matrix_dimensions();
 
+        if (device_selector.val()) {
             if (representation_selector.val() === 'plate') {
-               $('#id_setup_device option[value!=' + device_selector.val() + ']').hide();
-               window.device.val(device_selector.val()).trigger('change');
+                // Apparently cruft
+                // $('#id_setup_device option[value!=' + device_selector.val() + ']').hide();
+                window.device.val(device_selector.val()).trigger('change');
             }
+        }
+        else {
+            // $('#id_setup_device option[value!=' + device_selector.val() + ']').show();
+            window.device.val('').trigger('change');
         }
     }).trigger('change');
 
