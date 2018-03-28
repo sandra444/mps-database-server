@@ -426,13 +426,14 @@ $(document).ready(function () {
                     display.attr(item_form_index_attribute, form_index);
                     var current_id = $(this).find('input[name$="-id"]').val();
                     display.attr(item_id_attribute, current_id);
-                    if(current_id) {
+                    if (current_id) {
                         // BE CAREFUL WITH THIS SORT OF STUFF
-                        display.find('.form-view')
+                        display.find('.item-name')
+                            .removeAttr('disabled')
                             .attr('href', '/assays/assaymatrixitem/' + current_id);
                     }
                     else {
-                        display.find('.form-view').hide();
+                        display.find('.item-name').attr('disabled', '');
                         display.find('.form-delete').hide();
                     }
                 }
