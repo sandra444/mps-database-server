@@ -219,8 +219,8 @@ $(document).ready(function () {
         } else {
             $(this).removeClass("active");
         }
-        $(this).blur()
-        hideEmpty();
+        $(this).blur();
+        doSearch(true);
     });
 
 
@@ -232,52 +232,75 @@ $(document).ready(function () {
         // columns: generateColumns(),
         "ordering": false,
         "filter": false,
-        "searching": true,
+        "searching": false,
         dom: 'frt',
         fixedHeader: {headerOffset: 50},
         deferRender: true
     });
 
-    $('#image_table_filter input').addClass('search-box');
-
-    var timer;
-    $('.search-box').keyup(function () {
-        var query = $('.search-box').val().toLowerCase();
-        if (timer){
-            clearTimeout(timer);
+    $('#search-box').keyup(function (e) {
+        if(e.keyCode == 8){
+            doSearch(true);
+        } else {
+            doSearch(false);
         }
-        timer = setTimeout(function(){
-            var isChip = false;
-            $('#image_table figcaption').each(function(index, value){
-                $(value).parent().parent().removeClass('hidden');
-                for (var i=0; i<tableRows.length; i++){
-                    if (tableRows[i].toLowerCase().includes(query)) {
-                        isChip = true;
-                    }
-                }
-                if (!isChip) {
-                    if ($(value).text().toLowerCase().includes(query)) {
+    });
+
+    function doSearch(backspace) {
+        var query = $('#search-box').val().toLowerCase();
+        var isChip = false;
+        if (backspace){
+            makeAllVisible();
+        }
+        for (var i=0; i<tableRows.length; i++){
+            if (tableRows[i].toLowerCase().includes(query)) {
+                isChip = true;
+                break;
+            }
+        }
+        if (!isChip) {
+            $('#image_table figcaption').each(function(index, value) {
+                buttonActive = $('#'+$(value).parent().parent().parent().attr("class").split(" ")[2]).prop('checked');
+                if ($(value).text().toLowerCase().includes(query)) {
+                    if (buttonActive) {
+                        $(value).parent().parent().removeClass('hidden');
                     } else {
                         $(value).parent().parent().addClass('hidden');
                     }
+                } else {
+                    $(value).parent().parent().addClass('hidden');
                 }
-            })
-        }, 10);
-    });
+            });
+        } else {
+            $('#image_table th').each(function(index, value) {
+                if (index > tableCols.length-1){
+                    if ($(value).text().toLowerCase().includes(query)) {
+                        $(value).parent().removeClass('hidden');
+                    } else {
+                        $(value).parent().addClass('hidden');
+                    }
+                }
+            });
+        }
+    hideEmpty()
+    }
+
+    function makeAllVisible(){
+        $('#image_table figcaption').each(function(index, value) {
+            $(value).parent().parent().removeClass('hidden');
+        });
+        $('#image_table th').each(function(index, value) {
+            if (index > tableCols.length-1){
+                $(value).parent().removeClass('hidden');
+            }
+        });
+    }
 
     // Reveal all rows, and then hide rows that contain no images.
     function hideEmpty(){
         for (i=0; i<tableRows.length; i++) {
-            $('.'+tableRows[i]).removeClass('hidden');
             if ($('.'+tableRows[i]).height() < 100) {
                 $('.'+tableRows[i]).addClass('hidden');
-            }
-        }
-        // DO ALL OF THIS STUFF FRIDAY, GET SEARCHING DONE
-        for (i=0; i<tableCols.length; i++) {
-            $('.'+tableCols[i]).removeClass('hidden');
-            if ($('.'+tableCols[i]).height() < 100) {
-                $('.'+tableCols[i]).addClass('hidden');
             }
         }
     }
