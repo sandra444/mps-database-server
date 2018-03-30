@@ -3,6 +3,7 @@
 
 {% block load %}
     <script src="{% static "assays/image_interface.js" %}"></script>
+    <script src="{% static "js/display_datatable.js" %}"></script>
     <script>
         var metadata_list = JSON.parse("{{ metadata|escapejs|safe }}");
         var tableRows = JSON.parse("{{ tableRows|escapejs|safe }}");
@@ -10,7 +11,7 @@
         var tableData = JSON.parse("{{ tableData|escapejs|safe }}");
     </script>
     <style>
-        #handle-contrast, #handle-brightness, #clone-handle-contrast, #clone-handle-brightness {
+        #handle-contrast, #handle-brightness {
             width: 3em;
             height: 1.6em;
             top: 50%;
@@ -27,8 +28,28 @@
             cursor: pointer;
         }
 
-        .btn-checkbox {
+        .btn-3d {
+            transition:all .08s linear;
+            position:relative;
+            outline:medium none;
+            -moz-outline-style:none;
+            border:0px;
+            margin-right:10px;
+            margin-top:15px;
+        }
 
+        .btn-3d:focus {
+            outline:medium none;
+            -moz-outline-style:none;
+        }
+
+        .btn-3d.active {
+            top:9px;
+        }
+
+        .btn-default {
+            box-shadow:0 0 0 1px #ebebeb inset, 0 0 0 2px rgba(255,255,255,0.15) inset, 0 8px 0 0 #adadad, 0 8px 0 1px rgba(0,0,0,0.4), 0 8px 8px 1px rgba(0,0,0,0.5);
+            background-color:#fff;
         }
   </style>
 {% endblock %}
