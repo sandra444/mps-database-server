@@ -104,7 +104,7 @@ $(document).ready(function () {
             { title: "Cells", data: '1', 'className': 'none'},
             { title: "NA Explanation", data: '13', visible: false, 'name': 'naText' }
         ],
-        "order": [[ 1, "asc" ]],
+        "order": [[11, 'desc'], [ 1, "asc" ]],
         "createdRow": function( row, data, dataIndex ) {
             if ( data[9][0] === "E" ) {
                 $( row ).find('td:eq(11)').css( "background-color", "#74ff5b" ).css( "font-weight", "bold"  );
@@ -147,15 +147,15 @@ $(document).ready(function () {
             var group = data[10];
             var icc_status = data[9];
             var $elem = $( "#repro-data" );
-            var $clone = $elem.first().clone( true ).addClass('repro-'+counter).appendTo("#clone-container");
-            mad_list[counter]['columns'].unshift("Time");
+            var $clone = $elem.first().clone( true ).addClass('repro-'+group).appendTo("#clone-container");
+            mad_list[group]['columns'].unshift("Time");
             $clone.find('#repro-title').text('Replica Set ' + group);
             $clone.find('#selection-parameters').html(buildSelectionParameters(studyID, organModel, targetAnalyte, methodKit, sampleLocation, compoundTreatments, valueUnit));
             $clone.find('#selection-parameters').find('td, th').css('padding','8px 10px');
             $clone.find('#chip-rep-rep-ind').html(buildCV_ICC(data[7],data[8]));
             $clone.find('#chip-rep-rep-ind').find('td, th').css('padding','8px 10px');
-            $clone.find('#chart1').attr('id', 'chart1-'+counter);
-            $clone.find('#chart2').attr('id', 'chart2-'+counter);
+            $clone.find('#chart1').attr('id', 'chart1-'+group);
+            $clone.find('#chart2').attr('id', 'chart2-'+group);
             $clone.find('#mad-score-label').append(mad_tooltip);
             $clone.find('#med-comp-label').append(comp_tooltip);
             if (icc_status[0] === 'E'){
@@ -168,8 +168,8 @@ $(document).ready(function () {
                 $clone.find('#repro-status').html('<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+data[13]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>').css("background-color", "Grey");
             }
             $clone.find('#mad-score-matrix').DataTable( {
-                columns: mad_columns(counter),
-                data: mad_list[counter]['data'],
+                columns: mad_columns(group),
+                data: mad_list[group]['data'],
                 searching: false,
                 paging: false,
                 info: false
@@ -183,7 +183,7 @@ $(document).ready(function () {
                     { title: "ICC Absolute Agreement", data: '1' },
                     { title: "Missing Data Points "+missing_tooltip, data: '2' }
                 ],
-                data: comp_list[counter],
+                data: comp_list[group],
                 searching: false,
                 paging: false,
                 info: false
@@ -323,7 +323,7 @@ $(document).ready(function () {
         var number = cls.substr(cls.lastIndexOf("-") + 1);
         //var number = checkbox_id;
         var reproTable = $('.repro-'+number);
-        if (checkbox.is(':checked')){
+        if (checkbox.is(':checked')) {
             //console.log("Showing Table " + number);
             reproTable.removeClass('hidden');
             var axisLabel = reproTable.find('#target-analyte-value').text();

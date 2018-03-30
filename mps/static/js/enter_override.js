@@ -90,12 +90,12 @@ $(document).ready(function () {
     // MAKES THE ASSUMPTION THAT THERE IS ONLY ONE FORM
     form_selector.find('input, select, textarea').change(function() {
         form_selector.data('changed', true);
-        console.log($(this));
+        // console.log($(this));
     });
 
     // When the user navigates away
     $(window).on('beforeunload', function() {
-        if (form_selector.data('changed')) {
+        if (form_selector.data('changed') && !$(':submit').first().attr('disabled')) {
             return 'Changes may not be saved.';
         }
     });

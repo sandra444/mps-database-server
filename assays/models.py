@@ -279,8 +279,8 @@ class AssayCompoundInstance(models.Model):
 
         ordering = (
             'addition_time',
-            'compound_instance',
-            'concentration_unit',
+            'compound_instance_id',
+            'concentration_unit_id',
             'concentration',
             'duration',
         )
@@ -906,8 +906,8 @@ class AssayChipCells(models.Model):
 
     class Meta(object):
         ordering = (
-            'cell_sample',
-            'cell_biosensor',
+            'cell_sample_id',
+            'cell_biosensor_id',
             'cellsample_density',
             'cellsample_density_unit',
             'cell_passage'
@@ -2319,6 +2319,7 @@ class AssayImage(models.Model):
 
     def get_metadata(self):
         return {
+            'matrix_item_id': self.matrix_item_id,
             'chip_id': self.matrix_item.name,
             'plate_id' : self.assay_plate_id,
             'well_id' : self.assay_well_id,
@@ -2381,6 +2382,7 @@ class AssayRunImage(models.Model):
 
     def get_metadata(self):
         return {
+            'matrix_item_id': self.matrix_item_id,
             'chip_id': self.matrix_item.assay_chip_id,
             'plate_id' : self.assay_plate_id,
             'well_id' : self.assay_well_id,

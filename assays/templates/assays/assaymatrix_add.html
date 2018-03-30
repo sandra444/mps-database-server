@@ -2,13 +2,15 @@
 {% load static %}
 
 {% block load %}
+    {% if not detail %}
     <script src="{% static "js/calendar.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
-    <script src="{% static "assays/cell_sample_selection.js" %}"></script>
-    <script src="{% static "assays/organ_model_filter.js" %}"></script>
-    <script src="{% static "assays/assaymatrix_add.js" %}"></script>
     <script src="{% static "assays/compound_instances.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
+    {% endif %}
+    <script src="{% static "assays/organ_model_filter.js" %}"></script>
+    <script src="{% static "assays/cell_sample_selection.js" %}"></script>
+    <script src="{% static "assays/assaymatrix_add.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -532,7 +534,7 @@
 
     {# FLUID CONTENT HERE ON #}
     {# Section for visibility checkboxes #}
-    <div class="row large-padding-top">
+    <div class="row no-padding large-padding-top">
         <div class="col-sm-4 col-md-3 col-lg-2">
             <div class="fancy-checkbox table-filter padded-bottom" align="left">
                 <input class="visibility-checkbox" type="checkbox" name="show_items" id="show_items" value=".item-display" checked/>
@@ -724,10 +726,14 @@
         <div class="error-message-section item-setup_set_section">
         </div>
         <div align="center">
-            <u><span class="item-name lead item-setup_set_section"></span></u>
+            <span><a disabled href="#" class="item-name lead item-setup_set_section"></a></span>
 {#            <span class="item-current_setup"></span>#}
         </div>
+        {% if detail %}
+        <div class="well item-display no-margins">
+        {% else %}
         <div class="well item-display">
+        {% endif %}
             <div>
                 <span class="item-setup_date item-setup_set_section"></span>
                 {% if not detail %}
@@ -735,9 +741,9 @@
                     <span class="glyphicon glyphicon-remove text-danger"></span>
                 </a>
                 {% endif %}
-                <a class="pull-right btn btn-xs form-view">
-                    <span class="glyphicon glyphicon-eye-open"></span>
-                </a>
+{#                <a class="pull-right btn btn-xs form-view">#}
+{#                    <span class="glyphicon glyphicon-eye-open"></span>#}
+{#                </a>#}
                 {# Add back in when editing functionality available #}
 {#                <a class="pull-right btn btn-xs">#}
 {#                    <span class="glyphicon glyphicon-pencil"></span>#}
@@ -776,7 +782,11 @@
 
     {# TODO ADDITION LOCATION #}
     <div id="empty_cell_html">
+        {% if detail %}
+        <div data-prefix="{{ cell_formset.prefix }}" class="alert alert-success force-off-black-text cell-display no-margins">
+        {% else %}
         <div data-prefix="{{ cell_formset.prefix }}" class="alert alert-success force-off-black-text cell-display">
+        {% endif %}
             <div class="error-message-section">
             </div>
             <div>
@@ -809,7 +819,11 @@
 
     {# TODO ADDITION LOCATION #}
     <div id="empty_compound_html">
+        {% if detail %}
+        <div data-prefix="{{ compound_formset.prefix }}" class="alert alert-info force-off-black-text compound-display no-margins">
+        {% else %}
         <div data-prefix="{{ compound_formset.prefix }}" class="alert alert-info force-off-black-text compound-display">
+        {% endif %}
             <div class="error-message-section">
             </div>
             <div>
@@ -851,7 +865,11 @@
 
     {# TODO TODO TODO #}
     <div id="empty_setting_html">
+        {% if detail %}
+        <div data-prefix="{{ setting_formset.prefix }}" class="alert alert-warning force-off-black-text setting-display no-margins">
+        {% else %}
         <div data-prefix="{{ setting_formset.prefix }}" class="alert alert-warning force-off-black-text setting-display">
+        {% endif %}
             <div class="error-message-section">
             </div>
             <div>
@@ -887,7 +905,11 @@
     </div>
 
     <div id="empty_error_html">
+        {% if detail %}
+        <div class="alert alert-danger force-off-black-text item-error-message-box no-margins">
+        {% else %}
         <div class="alert alert-danger force-off-black-text item-error-message-box">
+        {% endif %}
 
         </div>
     </div>
