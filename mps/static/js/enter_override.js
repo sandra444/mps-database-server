@@ -95,7 +95,7 @@ $(document).ready(function () {
 
     // When the user navigates away
     $(window).on('beforeunload', function() {
-        if (form_selector.data('changed')) {
+        if (form_selector.data('changed') && !$(':submit').first().attr('disabled')) {
             return 'Changes may not be saved.';
         }
     });
