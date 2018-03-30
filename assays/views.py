@@ -4607,7 +4607,7 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
             tableData[image.id] = ["".join("".join(image.matrix_item.name.split(" ")).split(",")), "".join("".join(image.setting.label_name.split(" ")).split(","))]
             if image.matrix_item.name not in tableRows:
                 tableRows.append(image.matrix_item.name)
-                metadata[image.matrix_item.name] = AssayMatrixItem.objects.filter(name=image.matrix_item.name).values('id')[0]['id']
+                metadata[image.matrix_item.name] = matrix_item_id
             if image.setting.label_name not in tableCols:
                 tableCols.append(image.setting.label_name)
 
@@ -4655,7 +4655,7 @@ class AssayRunImages(StudyViewershipMixin, DetailView):
             tableData[image.id] = ["".join("".join(image.matrix_item.assay_chip_id.split(" ")).split(",")), "".join("".join(image.setting.label_name.split(" ")).split(","))]
             if image.matrix_item.assay_chip_id not in tableRows:
                 tableRows.append(image.matrix_item.assay_chip_id)
-                metadata[image.matrix_item.name] = AssayMatrixItem.objects.filter(name=image.matrix_item.name).values('id')[0]['id']
+                metadata[image.matrix_item.name] = matrix_item_id
             if image.setting.label_name not in tableCols:
                 tableCols.append(image.setting.label_name)
 
