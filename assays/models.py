@@ -2319,6 +2319,7 @@ class AssayImage(models.Model):
 
     def get_metadata(self):
         return {
+            'matrix_item_id': self.matrix_item_id,
             'chip_id': self.matrix_item.name,
             'plate_id' : self.assay_plate_id,
             'well_id' : self.assay_well_id,
@@ -2381,6 +2382,7 @@ class AssayRunImage(models.Model):
 
     def get_metadata(self):
         return {
+            'matrix_item_id': self.matrix_item_id,
             'chip_id': self.matrix_item.assay_chip_id,
             'plate_id' : self.assay_plate_id,
             'well_id' : self.assay_well_id,

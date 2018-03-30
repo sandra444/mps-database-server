@@ -98,28 +98,30 @@ $(document).ready(function () {
         // var col = tableCols[i].split(" ").join("").split(",").join("");
         var col = tableCols[i].replace(/\s/g, '').replace(/[,]/g, '');
         // filter_elements += "<tr><th>"+tableCols[i]+"</th><td><input data-filled='0' id='"+col+"' type=checkbox></td></tr>";
-        filter_elements += "<button aria-pressed='true' style='min-height:90px; white-space: normal; margin-bottom: 1em;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 btn btn-default btn-checkbox active'><label class='hand-cursor'>"+tableCols[i]+"</label><input checked id='"+col+"' type=checkbox></button>";
+        filter_elements += "<button aria-pressed='true' style='min-height:90px; white-space: normal; margin-bottom: 1em;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 btn btn-3d btn-default btn-checkbox active'><label class='hand-cursor'>"+tableCols[i]+"</label><input checked id='"+col+"' type=checkbox></button>";
     }
     // for (i=0; i<tableRows.length; i++){
     //     filter_elements += "<tr><th>"+tableRows[i]+"</th><td><input id='"+tableRows[i].split(" ").join("").split(",").join("")+"' type=checkbox></td></tr>";
     // }
     filter_table.html(filter_elements);
 
-    var table_elements = "<tr><td style='width: .1%; white-space: nowrap;'></td>";
+    var table_elements = "<thead><tr><td style='width: .1%; white-space: nowrap;'></td>";
     for (i=0; i<tableCols.length; i++) {
         var col = tableCols[i].split(" ").join("").split(",").join("");
-        table_elements += "<th style='max-width: 100%; white-space: nowrap;' class='"+col+" text-center'>"+tableCols[i]+"</th>";
+        // table_elements += "<th style='max-width: 100%; white-space: nowrap;' class='"+col+" text-center'>"+tableCols[i]+"</th>";
+        table_elements += "<th style='white-space: nowrap;' class='"+col+" text-center'>"+tableCols[i]+"</th>";
     }
-    table_elements += "</tr>";
+    table_elements += "</tr></thead><tbody>";
     for (i=0; i<tableRows.length; i++) {
         var row = tableRows[i].split(" ").join("").split(",").join("");
-        table_elements += "<tr class='"+row+"'><th class='row-header' style='width: .1%; white-space: nowrap;'>"+tableRows[i]+"</th>";
+        table_elements += "<tr class='"+row+"'><th class='row-header' style='width: .1%; white-space: nowrap;'><a href='/assays/assaymatrixitem/"+metadata_list[tableRows[i]]+"/'>"+tableRows[i]+"</a></th>";
         for (var j=0; j<tableCols.length; j++) {
             var col = tableCols[j].split(" ").join("").split(",").join("");
             table_elements += "<td class='text-center "+col+row+" "+col+"'></td>";
         }
         table_elements += "</tr>";
     }
+    table_elements += "</tbody>";
     image_table.html(table_elements);
 
     image_table.on('click', '#image_thumbnail', function () {
@@ -148,7 +150,7 @@ $(document).ready(function () {
         cls = tableCols[j].split(" ").join("").split(",").join("");
         for (var i=0; i<Object.keys(tableData).length; i++) {
             if (tableData[Object.keys(tableData)[i]][1] == cls) {
-                var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + ") "+metadata_list[Object.keys(tableData)[i]]["magnification"]+"x at " + metadata_list[Object.keys(tableData)[i]]["time"]
+                var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + ") "+metadata_list[Object.keys(tableData)[i]]["magnification"].split(".")[0]+"x at " + metadata_list[Object.keys(tableData)[i]]["time"]
                 $('.'+cls+tableData[Object.keys(tableData)[i]][0]).append('<span data-pic="'+Object.keys(tableData)[i]+'" style="vertical-align: top; display: inline-block; margin:5px;" id="image_thumbnail"><figure><img style="filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".")[0]+'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center">'+ caption +'</figcaption></figure></span>');
             }
         }
@@ -166,7 +168,7 @@ $(document).ready(function () {
             },
             value: 100,
             min: 0,
-            max: 500
+            max: 200
         });
     } );
 
@@ -209,7 +211,7 @@ $(document).ready(function () {
         $("#slider-contrast").slider( "value", 100 );
     });
 
-    $(".btn-checkbox").off().on("click", function () {
+    $(".btn-checkbox").off().on("mouseup", function () {
         var $checkbox = $(this).find(':checkbox');
         $checkbox.trigger("click");
         if ($checkbox.prop('checked')){
@@ -217,9 +219,89 @@ $(document).ready(function () {
         } else {
             $(this).removeClass("active");
         }
+        $(this).blur();
+        doSearch(true);
     });
 
 
     // Increase the height of the footer to ensure it is not obscured
     $('#footer').height("+=150");
+
+
+    $('#image_table').dataTable({
+        // columns: generateColumns(),
+        "ordering": false,
+        "filter": false,
+        "searching": false,
+        dom: 'frt',
+        fixedHeader: {headerOffset: 50},
+        deferRender: true
+    });
+
+    $('#search-box').keyup(function (e) {
+        if(e.keyCode == 8){
+            doSearch(true);
+        } else {
+            doSearch(false);
+        }
+    });
+
+    function doSearch(backspace) {
+        var query = $('#search-box').val().toLowerCase();
+        var isChip = false;
+        if (backspace){
+            makeAllVisible();
+        }
+        for (var i=0; i<tableRows.length; i++){
+            if (tableRows[i].toLowerCase().includes(query)) {
+                isChip = true;
+                break;
+            }
+        }
+        if (!isChip) {
+            $('#image_table figcaption').each(function(index, value) {
+                buttonActive = $('#'+$(value).parent().parent().parent().attr("class").split(" ")[2]).prop('checked');
+                if ($(value).text().toLowerCase().includes(query)) {
+                    if (buttonActive) {
+                        $(value).parent().parent().removeClass('hidden');
+                    } else {
+                        $(value).parent().parent().addClass('hidden');
+                    }
+                } else {
+                    $(value).parent().parent().addClass('hidden');
+                }
+            });
+        } else {
+            $('#image_table th').each(function(index, value) {
+                if (index > tableCols.length-1){
+                    if ($(value).text().toLowerCase().includes(query)) {
+                        $(value).parent().removeClass('hidden');
+                    } else {
+                        $(value).parent().addClass('hidden');
+                    }
+                }
+            });
+        }
+    hideEmpty()
+    }
+
+    function makeAllVisible(){
+        $('#image_table figcaption').each(function(index, value) {
+            $(value).parent().parent().removeClass('hidden');
+        });
+        $('#image_table th').each(function(index, value) {
+            if (index > tableCols.length-1){
+                $(value).parent().removeClass('hidden');
+            }
+        });
+    }
+
+    // Reveal all rows, and then hide rows that contain no images.
+    function hideEmpty(){
+        for (i=0; i<tableRows.length; i++) {
+            if ($('.'+tableRows[i]).height() < 100) {
+                $('.'+tableRows[i]).addClass('hidden');
+            }
+        }
+    }
 });
