@@ -295,7 +295,7 @@ $(document).ready(function () {
 
         // Set number of items if not already set
         if (number_of_items_selector.val() !== current_number_of_rows * current_number_of_columns) {
-            number_of_items_selector.val(current_number_of_rows * current_number_of_columns)
+            number_of_items_selector.val(current_number_of_rows * current_number_of_columns);
         }
     };
 
@@ -793,10 +793,13 @@ $(document).ready(function () {
 
         if (current_representation === 'chips') {
             $('#matrix_dimensions_section').show();
-            number_of_rows_selector.val(0);
-            number_of_columns_selector.val(0);
-            number_of_items_selector.val(0);
-            device_selector.val('').change();
+            if (device_selector.val()) {
+                // number_of_rows_selector.val(0);
+                // number_of_columns_selector.val(0);
+                // number_of_items_selector.val(0);
+                device_selector.val('').change();
+            }
+
             // SPECIAL OPERATION
             $('#id_item_device').parent().parent().show();
         }
