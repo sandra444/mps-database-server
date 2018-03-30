@@ -98,14 +98,15 @@ $(document).ready(function () {
         // var col = tableCols[i].split(" ").join("").split(",").join("");
         var col = tableCols[i].replace(/\s/g, '').replace(/[,]/g, '');
         // filter_elements += "<tr><th>"+tableCols[i]+"</th><td><input data-filled='0' id='"+col+"' type=checkbox></td></tr>";
-        filter_elements += "<button aria-pressed='true' style='min-height:90px; white-space: normal; margin-bottom: 1em;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 btn btn-3d btn-default btn-checkbox active'><label class='hand-cursor'>"+tableCols[i]+"</label><input checked id='"+col+"' type=checkbox></button>";
+        filter_elements += "<button aria-pressed='true' style='max-width: 160px; min-height:70px; white-space: normal; margin-bottom: 1em;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 btn btn-3d btn-default btn-checkbox active'><label class='hand-cursor'>"+tableCols[i]+"</label><input checked id='"+col+"' type=checkbox></button>";
     }
     // for (i=0; i<tableRows.length; i++){
     //     filter_elements += "<tr><th>"+tableRows[i]+"</th><td><input id='"+tableRows[i].split(" ").join("").split(",").join("")+"' type=checkbox></td></tr>";
     // }
     filter_table.html(filter_elements);
 
-    var table_elements = "<thead><tr><td style='width: .1%; white-space: nowrap;'></td>";
+    // Sloppy solution keeping this a td
+    var table_elements = "<thead><tr><td style='font-weight: bold; width: .1%; white-space: nowrap;'>Chip/Well</td>";
     for (i=0; i<tableCols.length; i++) {
         var col = tableCols[i].split(" ").join("").split(",").join("");
         // table_elements += "<th style='max-width: 100%; white-space: nowrap;' class='"+col+" text-center'>"+tableCols[i]+"</th>";
@@ -126,7 +127,7 @@ $(document).ready(function () {
 
     image_table.on('click', '#image_thumbnail', function () {
         popupDialogData = metadata_list[this.getAttribute("data-pic")];
-        dialogConfirm.dialog( "open" );
+        dialogConfirm.dialog("open");
     });
 
     //Checkbox click event
@@ -150,8 +151,8 @@ $(document).ready(function () {
         cls = tableCols[j].split(" ").join("").split(",").join("");
         for (var i=0; i<Object.keys(tableData).length; i++) {
             if (tableData[Object.keys(tableData)[i]][1] == cls) {
-                var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + ") "+metadata_list[Object.keys(tableData)[i]]["magnification"].split(".")[0]+"x at " + metadata_list[Object.keys(tableData)[i]]["time"]
-                $('.'+cls+tableData[Object.keys(tableData)[i]][0]).append('<span data-pic="'+Object.keys(tableData)[i]+'" style="vertical-align: top; display: inline-block; margin:5px;" id="image_thumbnail"><figure><img style="filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".")[0]+'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center">'+ caption +'</figcaption></figure></span>');
+                var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + ") "+metadata_list[Object.keys(tableData)[i]]["magnification"].split(".")[0]+"x at " + metadata_list[Object.keys(tableData)[i]]["time"];
+                $('.'+cls+tableData[Object.keys(tableData)[i]][0]).append('<span data-pic="'+Object.keys(tableData)[i]+'" style="vertical-align: top; display: inline-block; margin:5px;" id="image_thumbnail"><figure><img style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".")[0]+'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center">'+ caption +'</figcaption></figure></span>');
             }
         }
     }
@@ -223,12 +224,7 @@ $(document).ready(function () {
         doSearch(true);
     });
 
-
-    // Increase the height of the footer to ensure it is not obscured
-    $('#footer').height("+=150");
-
-
-    $('#image_table').dataTable({
+    image_table.dataTable({
         // columns: generateColumns(),
         "ordering": false,
         "filter": false,
@@ -239,7 +235,7 @@ $(document).ready(function () {
     });
 
     $('#search-box').keyup(function (e) {
-        if(e.keyCode == 8){
+        if(e.keyCode === 8) {
             doSearch(true);
         } else {
             doSearch(false);
@@ -249,17 +245,17 @@ $(document).ready(function () {
     function doSearch(backspace) {
         var query = $('#search-box').val().toLowerCase();
         var isChip = false;
-        if (backspace){
+        if (backspace) {
             makeAllVisible();
         }
-        for (var i=0; i<tableRows.length; i++){
+        for (var i=0; i<tableRows.length; i++) {
             if (tableRows[i].toLowerCase().includes(query)) {
                 isChip = true;
                 break;
             }
         }
         if (!isChip) {
-            $('#image_table figcaption').each(function(index, value) {
+            image_table.find('figcaption').each(function(index, value) {
                 buttonActive = $('#'+$(value).parent().parent().parent().attr("class").split(" ")[2]).prop('checked');
                 if ($(value).text().toLowerCase().includes(query)) {
                     if (buttonActive) {
@@ -272,7 +268,7 @@ $(document).ready(function () {
                 }
             });
         } else {
-            $('#image_table th').each(function(index, value) {
+            image_table.find('th').each(function(index, value) {
                 if (index > tableCols.length-1){
                     if ($(value).text().toLowerCase().includes(query)) {
                         $(value).parent().removeClass('hidden');
@@ -282,14 +278,14 @@ $(document).ready(function () {
                 }
             });
         }
-    hideEmpty()
+        hideEmpty();
     }
 
     function makeAllVisible(){
-        $('#image_table figcaption').each(function(index, value) {
+        image_table.find('figcaption').each(function(index, value) {
             $(value).parent().parent().removeClass('hidden');
         });
-        $('#image_table th').each(function(index, value) {
+        image_table.find('th').each(function(index, value) {
             if (index > tableCols.length-1){
                 $(value).parent().removeClass('hidden');
             }
@@ -297,11 +293,17 @@ $(document).ready(function () {
     }
 
     // Reveal all rows, and then hide rows that contain no images.
-    function hideEmpty(){
+    function hideEmpty() {
         for (i=0; i<tableRows.length; i++) {
             if ($('.'+tableRows[i]).height() < 100) {
                 $('.'+tableRows[i]).addClass('hidden');
             }
         }
+
+        // Adjust fixedHeader
+        $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
     }
+
+    // Increase the height of the footer to ensure it is not obscured
+    $('#footer').height("+=150");
 });
