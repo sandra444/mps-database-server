@@ -64,7 +64,7 @@ $(document).ready(function () {
             // }
 
             $(this).dialog('option', 'width', $(window).width());
-            $(this).dialog('option', 'height', $(window).height()*0.85);
+            $(this).dialog('option', 'height', ($(window).height()-$('#floating-sliders').height()-1));
 
             $(this).closest('.ui-dialog').find('.ui-dialog-buttonpane button:eq(2)').focus();
             var iChip = popupDialogData["chip_id"];
@@ -248,36 +248,36 @@ $(document).ready(function () {
         if (backspace) {
             makeAllVisible();
         }
-        for (var i=0; i<tableRows.length; i++) {
-            if (tableRows[i].toLowerCase().includes(query)) {
-                isChip = true;
-                break;
-            }
-        }
-        if (!isChip) {
-            image_table.find('figcaption').each(function(index, value) {
-                buttonActive = $('#'+$(value).parent().parent().parent().attr("class").split(" ")[2]).prop('checked');
-                if ($(value).text().toLowerCase().includes(query)) {
-                    if (buttonActive) {
-                        $(value).parent().parent().removeClass('hidden');
-                    } else {
-                        $(value).parent().parent().addClass('hidden');
-                    }
+        image_table.find('figcaption').each(function(index, value) {
+            buttonActive = $('#'+$(value).parent().parent().parent().attr("class").split(" ")[2]).prop('checked');
+            if ($(value).text().toLowerCase().includes(query)) {
+                if (buttonActive) {
+                    $(value).parent().parent().removeClass('hidden');
                 } else {
                     $(value).parent().parent().addClass('hidden');
                 }
-            });
-        } else {
-            image_table.find('th').each(function(index, value) {
-                if (index > tableCols.length-1){
-                    if ($(value).text().toLowerCase().includes(query)) {
-                        $(value).parent().removeClass('hidden');
-                    } else {
-                        $(value).parent().addClass('hidden');
+            } else {
+                for (var i=0; i<tableRows.length; i++) {
+                    if (tableRows[i].toLowerCase().includes(query)) {
+                        isChip = true;
+                        break;
                     }
                 }
-            });
-        }
+                if (isChip) {
+                    image_table.find('th').each(function(index, value) {
+                        if (index > tableCols.length-1){
+                            if ($(value).text().toLowerCase().includes(query)) {
+                                $(value).parent().removeClass('hidden');
+                            } else {
+                                $(value).parent().addClass('hidden');
+                            }
+                        }
+                    });
+                } else {
+                    $(value).parent().parent().addClass('hidden');
+                }
+            }
+        });
         hideEmpty();
     }
 
