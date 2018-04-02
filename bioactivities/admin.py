@@ -1,4 +1,3 @@
-from django.conf.urls import patterns
 from django.contrib import admin
 from django.contrib import messages
 from django import forms
@@ -71,75 +70,76 @@ class TargetAdmin(LockableAdmin):
         ),
     )
 
-    def get_urls(self):
-
-        return patterns(
-            '',
-            (r'^add_multi/$', self.admin_site.admin_view(self.add_targets))
-        ) + super(TargetAdmin, self).get_urls()
-
-    def add_targets(self, request):
-
-        if '_add' in request.POST:
-            form = self.AddMultiForm(request.POST)
-            if form.is_valid():
-                chemblids = form.cleaned_data['chemblids']
-                counter = skipped = invalid = notfound = 0
-                chemblids = chemblids.split()
-                for chemblid in chemblids:
-                    if not chemblid.startswith('CHEMBL'):
-                        invalid += 1
-                        continue
-                    if Target.objects.filter(chemblid=chemblid):
-                        skipped += 1
-                        continue
-                    try:
-                        data = chembl_target(chemblid)
-                    except Exception:
-                        notfound += 1
-                    else:
-                        if data:
-                            data['locked'] = True
-                            counter += 1
-                            Target.objects.create(**data)
-
-                if counter:
-                    self.message_user(request,
-                                      'Successfully added {} target{}.'
-                                      .format(counter,
-                                              '' if counter == 1 else 's'))
-                if skipped:
-                    self.message_user(request, 'Skipped {} target{} that '
-                                               '{} already in the database.'
-                                      .format(skipped,
-                                              '' if skipped == 1 else 's',
-                                              'is' if skipped == 1 else 'are'),
-                                      level=messages.WARNING)
-                if invalid:
-                    self.message_user(request, 'Skipped {} invalid '
-                                               'identifier{}.'
-                                      .format(invalid,
-                                              '' if invalid == 1 else 's'),
-                                      level=messages.WARNING)
-                if notfound:
-                    self.message_user(request,
-                                      'Could not find {} identifier{} in '
-                                      'ChEMBL database.'
-                                      .format(notfound,
-                                              '' if notfound == 1 else 's'),
-                                      level=messages.WARNING)
-
-                return HttpResponseRedirect(request.get_full_path())
-        else:
-            form = self.AddMultiForm()
-
-        return render_to_response('bioactivities/add_multi.html', {
-            'title': 'Add multiple targets',
-            'opts': self.model._meta,
-            'form': form,
-            'what': 'target',
-            # 'root_path': self.admin_site.root_path,
-        }, context_instance=RequestContext(request))
+    # REMOVED FOR NOW
+    # def get_urls(self):
+    #
+    #     return patterns(
+    #         '',
+    #         (r'^add_multi/$', self.admin_site.admin_view(self.add_targets))
+    #     ) + super(TargetAdmin, self).get_urls()
+    #
+    # def add_targets(self, request):
+    #
+    #     if '_add' in request.POST:
+    #         form = self.AddMultiForm(request.POST)
+    #         if form.is_valid():
+    #             chemblids = form.cleaned_data['chemblids']
+    #             counter = skipped = invalid = notfound = 0
+    #             chemblids = chemblids.split()
+    #             for chemblid in chemblids:
+    #                 if not chemblid.startswith('CHEMBL'):
+    #                     invalid += 1
+    #                     continue
+    #                 if Target.objects.filter(chemblid=chemblid):
+    #                     skipped += 1
+    #                     continue
+    #                 try:
+    #                     data = chembl_target(chemblid)
+    #                 except Exception:
+    #                     notfound += 1
+    #                 else:
+    #                     if data:
+    #                         data['locked'] = True
+    #                         counter += 1
+    #                         Target.objects.create(**data)
+    #
+    #             if counter:
+    #                 self.message_user(request,
+    #                                   'Successfully added {} target{}.'
+    #                                   .format(counter,
+    #                                           '' if counter == 1 else 's'))
+    #             if skipped:
+    #                 self.message_user(request, 'Skipped {} target{} that '
+    #                                            '{} already in the database.'
+    #                                   .format(skipped,
+    #                                           '' if skipped == 1 else 's',
+    #                                           'is' if skipped == 1 else 'are'),
+    #                                   level=messages.WARNING)
+    #             if invalid:
+    #                 self.message_user(request, 'Skipped {} invalid '
+    #                                            'identifier{}.'
+    #                                   .format(invalid,
+    #                                           '' if invalid == 1 else 's'),
+    #                                   level=messages.WARNING)
+    #             if notfound:
+    #                 self.message_user(request,
+    #                                   'Could not find {} identifier{} in '
+    #                                   'ChEMBL database.'
+    #                                   .format(notfound,
+    #                                           '' if notfound == 1 else 's'),
+    #                                   level=messages.WARNING)
+    #
+    #             return HttpResponseRedirect(request.get_full_path())
+    #     else:
+    #         form = self.AddMultiForm()
+    #
+    #     return render_to_response('bioactivities/add_multi.html', {
+    #         'title': 'Add multiple targets',
+    #         'opts': self.model._meta,
+    #         'form': form,
+    #         'what': 'target',
+    #         # 'root_path': self.admin_site.root_path,
+    #     }, context_instance=RequestContext(request))
 
 
 admin.site.register(Target, TargetAdmin)
@@ -202,75 +202,76 @@ class AssayAdmin(LockableAdmin):
         ),
     )
 
-    def get_urls(self):
-
-        return patterns(
-            '',
-            (r'^add_multi/$', self.admin_site.admin_view(self.add_assays))
-        ) + super(AssayAdmin, self).get_urls()
-
-    def add_assays(self, request):
-
-        if '_add' in request.POST:
-            form = self.AddMultiForm(request.POST)
-            if form.is_valid():
-                chemblids = form.cleaned_data['chemblids']
-                counter = skipped = invalid = notfound = 0
-                chemblids = chemblids.split()
-                for chemblid in chemblids:
-                    if not chemblid.startswith('CHEMBL'):
-                        invalid += 1
-                        continue
-                    if Assay.objects.filter(chemblid=chemblid):
-                        skipped += 1
-                        continue
-                    try:
-                        data = chembl_assay(chemblid)
-                    except Exception:
-                        notfound += 1
-                    else:
-                        if data:
-                            data['locked'] = True
-                            counter += 1
-                            Assay.objects.create(**data)
-
-                if counter:
-                    self.message_user(request,
-                                      'Successfully added {} assay{}.'
-                                      .format(counter,
-                                              '' if counter == 1 else 's'))
-                if skipped:
-                    self.message_user(request, 'Skipped {} assay{} that '
-                                               '{} already in the database.'
-                                      .format(skipped,
-                                              '' if skipped == 1 else 's',
-                                              'is' if skipped == 1 else 'are'),
-                                      level=messages.WARNING)
-                if invalid:
-                    self.message_user(request, 'Skipped {} invalid '
-                                               'identifier{}.'
-                                      .format(invalid,
-                                              '' if invalid == 1 else 's'),
-                                      level=messages.WARNING)
-                if notfound:
-                    self.message_user(request,
-                                      'Could not find {} identifier{} in '
-                                      'ChEMBL database.'
-                                      .format(notfound,
-                                              '' if notfound == 1 else 's'),
-                                      level=messages.WARNING)
-
-                return HttpResponseRedirect(request.get_full_path())
-        else:
-            form = self.AddMultiForm()
-
-        return render_to_response('bioactivities/add_multi.html', {
-            'title': 'Add multiple assays',
-            'opts': self.model._meta,
-            'form': form,
-            'what': 'assay',
-            # 'root_path': self.admin_site.root_path,
-        }, context_instance=RequestContext(request))
+    # Removed for now
+    # def get_urls(self):
+    #
+    #     return patterns(
+    #         '',
+    #         (r'^add_multi/$', self.admin_site.admin_view(self.add_assays))
+    #     ) + super(AssayAdmin, self).get_urls()
+    #
+    # def add_assays(self, request):
+    #
+    #     if '_add' in request.POST:
+    #         form = self.AddMultiForm(request.POST)
+    #         if form.is_valid():
+    #             chemblids = form.cleaned_data['chemblids']
+    #             counter = skipped = invalid = notfound = 0
+    #             chemblids = chemblids.split()
+    #             for chemblid in chemblids:
+    #                 if not chemblid.startswith('CHEMBL'):
+    #                     invalid += 1
+    #                     continue
+    #                 if Assay.objects.filter(chemblid=chemblid):
+    #                     skipped += 1
+    #                     continue
+    #                 try:
+    #                     data = chembl_assay(chemblid)
+    #                 except Exception:
+    #                     notfound += 1
+    #                 else:
+    #                     if data:
+    #                         data['locked'] = True
+    #                         counter += 1
+    #                         Assay.objects.create(**data)
+    #
+    #             if counter:
+    #                 self.message_user(request,
+    #                                   'Successfully added {} assay{}.'
+    #                                   .format(counter,
+    #                                           '' if counter == 1 else 's'))
+    #             if skipped:
+    #                 self.message_user(request, 'Skipped {} assay{} that '
+    #                                            '{} already in the database.'
+    #                                   .format(skipped,
+    #                                           '' if skipped == 1 else 's',
+    #                                           'is' if skipped == 1 else 'are'),
+    #                                   level=messages.WARNING)
+    #             if invalid:
+    #                 self.message_user(request, 'Skipped {} invalid '
+    #                                            'identifier{}.'
+    #                                   .format(invalid,
+    #                                           '' if invalid == 1 else 's'),
+    #                                   level=messages.WARNING)
+    #             if notfound:
+    #                 self.message_user(request,
+    #                                   'Could not find {} identifier{} in '
+    #                                   'ChEMBL database.'
+    #                                   .format(notfound,
+    #                                           '' if notfound == 1 else 's'),
+    #                                   level=messages.WARNING)
+    #
+    #             return HttpResponseRedirect(request.get_full_path())
+    #     else:
+    #         form = self.AddMultiForm()
+    #
+    #     return render_to_response('bioactivities/add_multi.html', {
+    #         'title': 'Add multiple assays',
+    #         'opts': self.model._meta,
+    #         'form': form,
+    #         'what': 'assay',
+    #         # 'root_path': self.admin_site.root_path,
+    #     }, context_instance=RequestContext(request))
 
 
 admin.site.register(Assay, AssayAdmin)

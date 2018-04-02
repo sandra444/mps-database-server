@@ -1,4 +1,4 @@
-from django.conf.urls import include, patterns, url
+from django.conf.urls import include, url
 from django.contrib.auth.views import login
 from djangovoice.models import Feedback
 from djangovoice.views import (
@@ -13,9 +13,7 @@ feedback_dict = {
     'template_object_name': 'feedback'
 }
 
-urlpatterns = patterns(
-    '',
-
+urlpatterns = [
     url(r'^$',
         view=FeedbackListView.as_view(),
         name='djangovoice_home'),
@@ -71,4 +69,4 @@ urlpatterns = patterns(
         name='feeds_latest'),
 
     url(r'^votes/', include('qhonuskan_votes.urls'))
-)
+]

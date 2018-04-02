@@ -1,8 +1,9 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 # TODO NO WILDCARDS PLEASE
 from assays.views import *
+import assays.ajax
 
-urlpatterns = patterns('',
+urlpatterns = [
     # User can view their studies
     # url(r'^assays/user_index/$', UserIndex.as_view(), name='user_index'),
     # User can view all Editable Studies
@@ -88,5 +89,8 @@ urlpatterns = patterns('',
 
     # Images
     url(r'^assays/(?P<pk>[0-9]+)/images/$', AssayRunImages.as_view(), name='assay-run-images'),
-    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/images/$', AssayStudyImages.as_view(), name='study-images')
-)
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/images/$', AssayStudyImages.as_view(), name='study-images'),
+
+    # Ajax
+    url(r'^assays_ajax/$', assays.ajax.ajax),
+]

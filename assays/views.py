@@ -947,7 +947,8 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
 
         return context
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 
@@ -1034,7 +1035,8 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         return context
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 
@@ -1725,7 +1727,8 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
     # Specify that cloning is permitted
     cloning_permitted = True
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         if self.request.method == 'POST':
             form = form_class(self.request.POST)
         elif self.request.GET.get('clone', ''):
@@ -1926,7 +1929,8 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
     # Specify that cloning is permitted
     cloning_permitted = True
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
         if self.request.method == 'POST':
@@ -2045,7 +2049,8 @@ class AssayChipReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = self.object.chip_setup.assay_run_id
         current = self.object.chip_setup_id
 
@@ -2172,7 +2177,8 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
     template_name = 'assays/assaychiptestresult_add.html'
     form_class = AssayChipResultForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
 
@@ -2241,7 +2247,8 @@ class AssayChipTestResultUpdate(StudyGroupRequiredMixin, UpdateView):
     template_name = 'assays/assaychiptestresult_add.html'
     form_class = AssayChipResultForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = self.object.chip_readout.chip_setup.assay_run_id
         current = self.object.chip_readout_id
 
@@ -2398,7 +2405,8 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
     form_class = AssayLayoutForm
     template_name = 'assays/assaylayout_add.html'
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 
@@ -2432,7 +2440,8 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     form_class = AssayLayoutForm
     template_name = 'assays/assaylayout_add.html'
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 
@@ -2524,7 +2533,8 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
     # Specify that cloning is permitted
     cloning_permitted = True
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         if self.request.method == 'POST':
             form = form_class(self.request.POST)
         elif self.request.GET.get('clone', ''):
@@ -2695,7 +2705,8 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
     # Specify that cloning is permitted
     cloning_permitted = True
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
         if self.request.method == 'POST':
@@ -2813,7 +2824,8 @@ class AssayPlateReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
     template_name = 'assays/assayplatereadout_add.html'
     form_class = AssayPlateReadoutForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = self.object.setup.assay_run_id
         current = self.object.setup_id
         if self.request.method == 'POST':
@@ -2933,7 +2945,8 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
     template_name = 'assays/assayplatetestresult_add.html'
     form_class = AssayPlateResultForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
 
@@ -2991,7 +3004,8 @@ class AssayPlateTestResultUpdate(StudyGroupRequiredMixin, UpdateView):
     template_name = 'assays/assayplatetestresult_add.html'
     form_class = AssayPlateResultForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = self.object.readout.setup.assay_run_id
         current = self.object.readout_id
 
@@ -3039,7 +3053,8 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
     template_name = 'assays/readoutbulkupload.html'
     form_class = ReadoutBulkUploadForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # If POST
         if self.request.method == 'POST':
             return form_class(self.request.POST, self.request.FILES, request=self.request, instance=self.get_object())
@@ -3348,7 +3363,8 @@ class AssayStudyAdd(OneGroupRequiredMixin, CreateView):
     template_name = 'assays/assaystudy_add.html'
     form_class = AssayStudyForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 
@@ -3404,7 +3420,8 @@ class AssayStudyUpdate(ObjectGroupRequiredMixin, UpdateView):
     template_name = 'assays/assaystudy_add.html'
     form_class = AssayStudyForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 
@@ -3481,7 +3498,7 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
         )
 
         items = AssayMatrixItem.objects.filter(
-            matrix=matrices
+            matrix_id__in=matrices
         ).prefetch_related(
             'device',
             'created_by',
@@ -3869,7 +3886,8 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
     template_name = 'assays/assaystudy_upload.html'
     form_class = AssayStudyDataUploadForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # If POST
         if self.request.method == 'POST':
             return form_class(self.request.POST, self.request.FILES, request=self.request, instance=self.get_object())
@@ -3992,7 +4010,8 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
 
         return super(AssayMatrixAdd, self).post(request, **kwargs)
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get the study
         study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
 
@@ -4073,7 +4092,8 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
 
         return super(AssayMatrixUpdate, self).post(request, **kwargs)
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get the study
         study = self.object.study
 

@@ -1,4 +1,5 @@
 from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from .forms import SearchForm
@@ -26,13 +27,11 @@ def main(request):
     else:
         form = SearchForm(initial={'app': 'Global'})
 
-    c = RequestContext(request)
-
-    c.update({
+    context = {
         'form': form,
-    })
+    }
 
-    return render_to_response('index.html', c)
+    return render(request, 'index.html', context)
 
 
 def loggedin(request):
