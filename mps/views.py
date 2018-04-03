@@ -1,4 +1,3 @@
-from django.shortcuts import render_to_response
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
@@ -35,9 +34,8 @@ def main(request):
 
 
 def loggedin(request):
-    c = RequestContext(request)
-    c.update({'full_name': request.user.username})
-    return render_to_response('loggedin.html', c)
+    c = {'full_name': request.user.username}
+    return render(request, 'loggedin.html', c)
 
 
 def search(request):
@@ -70,24 +68,6 @@ def search(request):
     else:
         return HttpResponseRedirect('/')
 
-# class CustomSearch(SearchView):
-#
-#     results_per_page = 1000
-#
-#     def get_results(self):
-#         """
-#         NORMALLY Fetches the results via the form.
-#         Returns an empty list if there's no query to search with.
-#         """
-#         if self.query:
-#             return SearchQuerySet().autocomplete(text=self.query)
-#         else:
-#             return []
-#
-#     def extra_context(self):
-#         spelling = self.results.spelling_suggestion(self.query)
-#         return {'suggestion': spelling,}
-
 
 # A generic use of the search_view_factory
 def custom_search(request):
@@ -108,13 +88,12 @@ def custom_search(request):
 
 
 def mps_help(request):
-    c = RequestContext(request)
-    # Add version for templates
-    c['version'] = len(os.listdir(MEDIA_ROOT + '/excel_templates/'))
-    # Get glossary
-    c['glossary'] = Definition.objects.exclude(definition='')
+    c = {
+        'version': len(os.listdir(MEDIA_ROOT + '/excel_templates/')),
+        'glossary': Definition.objects.exclude(definition='')
+    }
 
-    return render_to_response('help.html', c)
+    return render(request, 'help.html', c)
 
 
 # TODO Consider defining this in URLS or either bringing the rest here
