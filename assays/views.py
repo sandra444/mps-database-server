@@ -143,6 +143,7 @@ import pytz
 # TODO ^ Update Views should be refactored soon
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
+
 def add_study_fields_to_form(self, form, add_study=False):
     """Adds study, group, and restricted to a form
 
@@ -213,7 +214,7 @@ def get_queryset_with_organ_model_map_old(queryset):
 def get_queryset_with_assay_map(queryset):
     """Takes a queryset and returns it with a assay map"""
     data_points = AssayChipRawData.objects.filter(
-        assay_chip_id__in=queryset
+        assay_chip_id_id__in=queryset
     ).exclude(
         quality__contains=REPLACED_DATA_POINT_CODE
     ).prefetch_related(
@@ -268,7 +269,7 @@ def get_compound_instance_and_cell_strings_for_queryset(setups):
     setups - a queryset of AssayChipSetups
     """
     related_compounds = AssayCompoundInstance.objects.filter(
-        chip_setup=setups
+        chip_setup_id__in=setups
     ).prefetch_related(
         'compound_instance__compound',
         'compound_instance__supplier',
@@ -290,7 +291,7 @@ def get_compound_instance_and_cell_strings_for_queryset(setups):
 
     related_cells = AssayChipCells.objects.filter(
         # Idiosyncratic field name because schema needs to be revised
-        assay_chip=setups
+        assay_chip_id__in=setups
     ).prefetch_related(
         'cell_sample__cell_subtype',
         'cell_sample__cell_type__organ',
@@ -316,23 +317,23 @@ def get_data_file_uploads(study=None, matrix_item=None):
 
     if study:
         data_file_uploads = AssayDataFileUpload.objects.filter(
-            study=study
+            study_id=study
         ).distinct().order_by('created_on')
 
         data_points = AssayDataPoint.objects.filter(
-            study=study
+            study_id=study
         ).exclude(
             replaced=True
         )
     elif matrix_item:
         data_file_uploads = AssayDataFileUpload.objects.filter(
-            study=matrix_item.study
+            study_id=matrix_item.study
         ).prefetch_related(
             'created_by'
         ).distinct().order_by('created_on')
 
         data_points = AssayDataPoint.objects.filter(
-            study=study
+            study_id=study
         ).exclude(
             replaced=True
         )
@@ -368,7 +369,7 @@ def get_data_uploads(study=None, chip_readout=None, plate_readout=None):
         ).distinct().order_by('created_on')
 
         data_points = AssayChipRawData.objects.filter(
-            assay_chip_id__chip_setup__assay_run_id=study
+            assay_chip_id__chip_setup__assay_run_id_id=study
         ).exclude(
             quality__contains=REPLACED_DATA_POINT_CODE
         ).prefetch_related(
@@ -383,7 +384,7 @@ def get_data_uploads(study=None, chip_readout=None, plate_readout=None):
         ).distinct().order_by('created_on')
 
         data_points = AssayChipRawData.objects.filter(
-            assay_chip_id=chip_readout
+            assay_chip_id_id=chip_readout
         ).exclude(
             quality__contains=REPLACED_DATA_POINT_CODE
         ).prefetch_related(
@@ -758,7 +759,7 @@ class StudyIndex(StudyViewershipMixin, DetailView):
 
         # THIS CODE SHOULD NOT GET REPEATED AS OFTEN AS IT IS
         setups = AssayChipSetup.objects.filter(
-            assay_run_id=self.object
+            assay_run_id_id=self.object
         ).prefetch_related(
             'organ_model',
             'device',
@@ -772,7 +773,7 @@ class StudyIndex(StudyViewershipMixin, DetailView):
         context['setups'] = setups
 
         readouts = AssayChipReadout.objects.filter(
-            chip_setup=context['setups']
+            chip_setup_id__in=context['setups']
         ).prefetch_related(
             'created_by',
             'chip_setup__compound',
@@ -791,10 +792,10 @@ class StudyIndex(StudyViewershipMixin, DetailView):
             'assay_result__chip_readout__chip_setup__compound',
             'assay_result__created_by'
         ).filter(
-            assay_result__chip_readout=context['readouts']
+            assay_result__chip_readout__in=context['readouts']
         )
 
-        context['number_of_results'] = AssayChipTestResult.objects.filter(chip_readout=context['readouts']).count()
+        context['number_of_results'] = AssayChipTestResult.objects.filter(chip_readout__in=context['readouts']).count()
 
         # PLATES
         # Removed
@@ -1606,12 +1607,12 @@ class AssayRunDelete(DeletionMixin, DeleteView):
             'compound',
             'unit'
         )
-        context['chip_readouts'] = AssayChipReadout.objects.filter(chip_setup=context['chip_setups'])
-        context['chip_results'] = AssayChipTestResult.objects.filter(chip_readout=context['chip_readouts'])
+        context['chip_readouts'] = AssayChipReadout.objects.filter(chip_setup__in=context['chip_setups'])
+        context['chip_results'] = AssayChipTestResult.objects.filter(chip_readout__in=context['chip_readouts'])
 
         context['plate_setups'] = AssayPlateSetup.objects.filter(assay_run_id=self.object)
-        context['plate_readouts'] = AssayPlateReadout.objects.filter(setup=context['plate_setups'])
-        context['plate_results'] = AssayPlateTestResult.objects.filter(readout=context['plate_readouts'])
+        context['plate_readouts'] = AssayPlateReadout.objects.filter(setup__in=context['plate_setups'])
+        context['plate_results'] = AssayPlateTestResult.objects.filter(readout__in=context['plate_readouts'])
 
         return self.render_to_response(context)
 
@@ -1876,7 +1877,7 @@ class AssayChipSetupDelete(DeletionMixin, DeleteView):
         context = self.get_context_data()
 
         context['readouts'] = AssayChipReadout.objects.filter(chip_setup=self.object)
-        context['results'] = AssayChipTestResult.objects.filter(chip_readout=context['readouts'])
+        context['results'] = AssayChipTestResult.objects.filter(chip_readout__in=context['readouts'])
 
         return self.render_to_response(context)
 
@@ -2482,8 +2483,8 @@ class AssayLayoutDelete(DeletionMixin, DeleteView):
         context = self.get_context_data()
 
         context['setups'] = AssayPlateSetup.objects.filter(assay_layout=self.object)
-        context['readouts'] = AssayPlateReadout.objects.filter(setup=context['setups'])
-        context['results'] = AssayPlateTestResult.objects.filter(readout=context['readouts'])
+        context['readouts'] = AssayPlateReadout.objects.filter(setup__in=context['setups'])
+        context['results'] = AssayPlateTestResult.objects.filter(readout__in=context['readouts'])
 
         return self.render_to_response(context)
 
@@ -3073,7 +3074,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
         ).prefetch_related('setup')
 
         data_points = AssayChipRawData.objects.filter(
-            assay_chip_id__chip_setup__assay_run_id=self.object
+            assay_chip_id__chip_setup__assay_run_id_id=self.object
         ).exclude(
             quality__contains=REPLACED_DATA_POINT_CODE
         ).prefetch_related(
