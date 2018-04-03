@@ -29,14 +29,22 @@ urlpatterns = [
     # user auth urls
     url(
         r'^accounts/login/$',
-        auth_views.login,
-        {'template_name': 'login.html'},
+        # Deprecated
+        # auth_views.login,
+        # {'template_name': 'login.html'},
+        auth_views.LoginView.as_view(
+            template_name='login.html'
+        ),
         name='auth_login'
     ),
     url(
         r'^accounts/logout/$',
-        auth_views.logout,
-        {'template_name': 'logout.html'},
+        # Deprecated
+        # auth_views.logout,
+        # {'template_name': 'logout.html'},
+        auth_views.LogoutView.as_view(
+            template_name='logout.html'
+        ),
         name='auth_logout'
     ),
     url(r'^accounts/loggedin/$', mps.views.loggedin, name='auth_loggedin'),

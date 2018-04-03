@@ -34,8 +34,7 @@ def main(request):
 
 
 def loggedin(request):
-    c = {'full_name': request.user.username}
-    return render(request, 'loggedin.html', c)
+    return render(request, 'loggedin.html')
 
 
 def search(request):
