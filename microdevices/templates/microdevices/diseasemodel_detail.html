@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{# TODO REQUIRES AESTHETIC REVISION #}
+
+{% block breadcrumbs %}
+    <li><a href="/compounds/">Disease Models</a></li>
+    <li class="active">{{ object.name}}</li>
+{% endblock %}
+
+{% block content %}
+
+    {% include "microdevices/diseasemodellinks.html" %}
+
+    <div class="row padded-row padded-bottom">
+
+        <div class="col-md-4 padded-bottom">
+            <table class="table table-striped table-bordered table-nonfluid center" style="background-color: #AAB3AB;">
+                <tbody>
+                    <tr>
+                        <td>
+                            <b>Current Clinical Trials</b>
+                        </td>
+                        <td>
+                            <a href="#">574</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Current Disease Models</b>
+                        </td>
+                        <td>
+                            <a href="#">1</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Current Drugs</b>
+                        </td>
+                        <td>
+                            <a href="#">296</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Current Drug Targets</b>
+                        </td>
+                        <td>
+                            {{ object.molecular_formula }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Important NAFLD Modeling Publications</b>
+                        </td>
+                        <td>
+                            5
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-8 thumbnail text-center row-center">
+            <img src="{% static "microdevices/gastro-nafld_orig.png" %}" class="img-responsive"></img>
+        </div>
+    </div>
+
+
+
+    <legend>NAFLD Disease State</legend>
+    <div class="row">
+        <div class="col-sm-2 col-md-1 text-right-responsive">
+            <b>Overview</b>
+        </div>
+        <div class="col-sm-10 col-md-11 text-wrapped">
+            Non-alcoholic fatty liver disease (NAFLD) is one of the types of fatty liver which occurs when fat is deposited (steatosis) in the liver due to causes other than excessive alcohol use. Non-alcoholic steatohepatitis (NASH) is the most extreme form of NAFLD.[1] NAFLD is the most common liver disorder in developed countries.[2][3] NAFLD is related to insulin resistance and the metabolic syndrome and may respond to treatments originally developed for other insulin-resistant states (e.g. diabetes mellitus type 2) such as weight loss, metformin, and thiazolidinediones.[4] Up to 80% of obese people have the disease.[5] NASH is regarded as a major cause of cirrhosis of the liver of unknown cause.[1] Most people have a good outcome if the condition is caught in its early stages.[6] About 12 to 25% of people in the United States have NAFLD,[7] while NASH affects between 2 and 5% of people in the United States.[7] Most people with NAFLD have few or no symptoms. Patients may complain of fatigue, malaise, and dull right-upper-quadrant abdominal discomfort. Mild jaundice may be noticed, although this is rare. More commonly NAFLD is diagnosed following abnormal liver function tests during routine blood tests. By definition, alcohol consumption of over 20 g/day (about 25 ml/day of net ethanol) excludes the condition.[4] NAFLD is associated with insulin resistance and metabolic syndrome (obesity, combined hyperlipidemia, diabetes mellitus (type II), and high blood pressure).[4][1] Recent research has shown that NAFLD increases the risk of cardiovascular diseases,[8] such as cardiac arrhythmias.[9][10] NAFLD is considered to cover a spectrum of disease activity. This spectrum begins as fatty accumulation in the liver (hepatic steatosis). A liver can remain fatty without disturbing liver function, but by varying mechanisms and possible insults to the liver, it may also progress to become non-alcoholic steatohepatitis (NASH), a state in which steatosis is combined with inflammation and fibrosis (steatohepatitis). NASH is a progressive disease: over a 10-year period, up to 20% of patients with NASH will develop cirrhosis of the liver, and 10% will suffer death related to liver disease.[14] Cigarette smoking is not associated with an increased risk of developing NASH. The exact cause of NAFLD is still unknown. However, both obesity and insulin resistance probably play a strong role in the disease process. The exact reasons and mechanisms by which the disease progresses from one stage to the next are not known. One debated mechanism proposes a "second hit", or further injury, enough to cause change that leads from hepatic steatosis to hepatic inflammation. Oxidative stress, hormonal imbalances, and mitochondrial abnormalities are potential causes for this "second hit" phenomenon.[4]
+        </div>
+    </div>
+
+    <br>
+    <legend><a href="/microdevices/diseasebiology"> NAFLD Disease Biology</a></legend>
+        <div class="row">
+            <div class="col-sm-2 col-md-1 text-right-responsive">
+                <b>Overview</b>
+            </div>
+            <div class="col-sm-10 col-md-6 text-wrapped">
+                “Non-alcoholic fatty liver disease (NAFLD) represents a spectrum ranging from simple steatosis to more severe steatohepatitis with hepatic inflammation and fibrosis, known as nonalcoholic steatohepatitis (NASH). NASH may further lead to cirrhosis and hepatocellular carcinoma (HCC). This map shows a stage-dependent progression of NAFLD. In the first stage of NAFLD, excess lipid accumulation has been demonstrated. The main cause is the induction of insulin resistance, which leads to a defect in insulin suppression of free fatty acids (FAAs) disposal. In addition, two transcription factors, SREBP-1c and PPAR-alpha, activate key enzymes of lipogenesis and increase the synthesis of FAAs in liver. In the second stage, as a consequence of the progression to NASH, the production of reactive oxygen species (ROS) is enhanced due to oxidation stress through mitochondrial beta-oxidation of fatty acids and endoplasmic reticulum (ER) stress, leading to lipid peroxidation. The lipid peroxidation can further cause the production of cytokines (Fas ligand, TNF-alpha, IL-8 and TGF), promoting cell death, inflammation and fibrosis. The activation of JNK, which is induced by ER stress, TNF-alpha and FAAs, is also associated with NAFLD progression. Increased JNK promotes cytokine production and initiation of HCC.” –KEGG Disease Description
+            </div>
+            <div class="col-md-5 thumbnail text-center row-center">
+                <img src="{% static "microdevices/map04932.png" %}" class="img-responsive"></img>
+            </div>
+        </div>
+    <br>
+
+<legend><a href="/microdevices/clinicaldata">NAFLD Clinical Data</a></legend>
+    <div class="row">
+        <div class="col-sm-2 col-md-1 text-right-responsive">
+            <b>Overview</b>
+        </div>
+        <div class="col-sm-10 col-md-11 text-wrapped padded-bottom">
+            The NAFLD Clinical Drugs and Trials page consists of pre-curated preclinical and clinical databases that contain information about the NAFLD disease phenotype. You can find information about different studies that have been completed looking at NAFLD. This page also looks to make it easier to address the important studies that convey the ADMET and MOA processes with drugs that have been determined relevant to NAFLD. NAFLD currently has 574 clinical trials in all phases across world, the United States makes up 234 of those studies. Of all the 574 clinical trials, 296 drug intervention studies have been explored for the abetment of the disease state. There are also thousands to clinical samples for testing from NIDDK. Preclinical models number in the thousands and range from mice models to organ on a chip models.
+        </div>
+    </div>
+<br>
+
+<br>
+<legend><a href="/microdevices/diseasemodel_diseasemodel">NAFLD Disease Models</a></legend>
+<div class="row">
+    <div class="col-sm-2 col-md-1 text-right-responsive">
+        <b>Overview</b>
+    </div>
+
+    <div class="col-sm-10 col-md-6 text-wrapped">
+        The NAFLD Model Portal page is where you can go to find all information relevant to microphysiology systems models related to NAFLD. Here you can also find the studies associated with these models. Currently, the MPS Database is the warehouse for these models. There have been various organ models aiming to describe the NAFLD disease state.
+    </div>
+    <div class="col-md-5 thumbnail text-center row-center">
+        <img src="{% static "microdevices/NortisDevice.PNG" %}" class="img-responsive"></img>
+    </div>
+</div>
+<br>
+
+<br>
+<legend>NAFLD Data Analysis</legend>
+<div class="row">
+    <div class="col-sm-2 col-md-1 text-right-responsive">
+        <b>Overview</b>
+    </div>
+    <div class="col-sm-10 col-md-11 text-wrapped">
+        “Non-alcoholic fatty liver disease (NAFLD) represents a spectrum ranging from simple steatosis to more severe steatohepatitis with hepatic inflammation and fibrosis, known as nonalcoholic steatohepatitis (NASH). NASH may further lead to cirrhosis and hepatocellular carcinoma (HCC). This map shows a stage-dependent progression of NAFLD. In the first stage of NAFLD, excess lipid accumulation has been demonstrated. The main cause is the induction of insulin resistance, which leads to a defect in insulin suppression of free fatty acids (FAAs) disposal. In addition, two transcription factors, SREBP-1c and PPAR-alpha, activate key enzymes of lipogenesis and increase the synthesis of FAAs in liver. In the second stage, as a consequence of the progression to NASH, the production of reactive oxygen species (ROS) is enhanced due to oxidation stress through mitochondrial beta-oxidation of fatty acids and endoplasmic reticulum (ER) stress, leading to lipid peroxidation. The lipid peroxidation can further cause the production of cytokines (Fas ligand, TNF-alpha, IL-8 and TGF), promoting cell death, inflammation and fibrosis. The activation of JNK, which is induced by ER stress, TNF-alpha and FAAs, is also associated with NAFLD progression. Increased JNK promotes cytokine production and initiation of HCC.” –KEGG Disease Description
+    </div>
+</div>
+<br>
+{% endblock %}
