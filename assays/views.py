@@ -4666,5 +4666,4 @@ class AssayRunImages(StudyViewershipMixin, DetailView):
 
         # Maybe useful later
         # get_user_status_context(self, context)
-
         return context
