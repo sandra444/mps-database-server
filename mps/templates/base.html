@@ -117,6 +117,9 @@
         else if (url.indexOf('/model/') > -1) {
           anchor = '#organmodels'
         }
+        else if (url.indexOf('/diseasemodel_list/') > -1) {
+          anchor = '#diseasemodels'
+        }
         else if (url.indexOf('/microdevices/') > -1) {
           anchor = '#microdevices'
         }
@@ -248,9 +251,11 @@
         <ul class="dropdown-menu" role="menu">
           <li title="View organ models"><a href="/microdevices/model">View Organ Models</a></li>
           <li title="View microdevices"><a href="/microdevices/device">View Microdevices</a></li>
+          <li title="View disease models"><a href="/microdevices/diseasemodel">View Disease Model</a></li>
           <li class="divider"></li>
           <li class="dropdown-header">Requires Permission</li>
           <li><a href="/microdevices/model/add/">Add Organ Model</a></li>
+          <li><a href="/microdevices/model/add/">Add Disease Model</a></li>
           <li><a href="/microdevices/device/add/">Add Microdevice</a></li>
         </ul>
         </li>

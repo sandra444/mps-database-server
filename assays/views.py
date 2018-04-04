@@ -4682,3 +4682,7 @@ class AssayStudyImages(StudyViewershipMixin, DetailView):
         get_user_status_context(self, context)
 
         return self.render_to_response(context)
+
+
+class DillonTest(TemplateView):
+    template_name='assays/dillon_test.html'
