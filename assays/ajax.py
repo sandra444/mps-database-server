@@ -523,7 +523,7 @@ def get_control_data_old(
     controls = {}
 
     data_points = list(AssayChipRawData.objects.filter(
-        assay_chip_id__chip_setup__assay_run_id=study
+        assay_chip_id__chip_setup__assay_run_id_id=study
     ).prefetch_related(
         *CHIP_DATA_PREFETCH
     ))
@@ -1032,7 +1032,7 @@ def get_related_compounds_map(readouts=None, study=None, data=None):
         setups = None
 
     related_compounds = AssayCompoundInstance.objects.filter(
-        chip_setup=setups
+        chip_setup_id__in=setups
     ).prefetch_related(
         'compound_instance__compound',
         'compound_instance__supplier',
@@ -1103,7 +1103,7 @@ def fetch_readouts(request):
     #     )
 
     raw_data = AssayChipRawData.objects.filter(
-        assay_chip_id=readouts
+        assay_chip_id__in=readouts
     ).prefetch_related(
         *CHIP_DATA_PREFETCH
     )
@@ -1626,7 +1626,7 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
             # Will use eventually, maybe
             'subtarget'
         ).filter(
-            matrix_item__in=ids,
+            matrix_item_id__in=ids,
             replaced=False
         ).order_by(
             'matrix_item__name',
@@ -1764,7 +1764,7 @@ def get_data_as_json(ids, data_points=None):
             # Will use eventually
             'subtarget'
         ).filter(
-            matrix_item__in=ids,
+            matrix_item_id__in=ids,
             # Just remove replaced datapoints initially
             replaced=False
         ).order_by(
@@ -1891,7 +1891,7 @@ def get_control_data(
     controls = {}
 
     data_points = list(AssayDataPoint.objects.filter(
-        study=study,
+        study_id=study,
         replaced=False
     ).prefetch_related(
         'study',
@@ -2370,7 +2370,7 @@ def fetch_data_points(request):
         matrix_items = AssayMatrixItem.objects.filter(study=study)
 
     data_points = AssayDataPoint.objects.filter(
-        matrix_item__in=matrix_items
+        matrix_item_id__in=matrix_items
     ).prefetch_related(
         #TODO
         'study_assay__target',

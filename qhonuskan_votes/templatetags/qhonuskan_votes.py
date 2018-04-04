@@ -56,12 +56,14 @@ class VoteButtonsNode(template.Node):
         self.template_loc = template_loc
 
     def render(self, context):
-        t = template.loader.get_template(self.template_loc)
+        # t = template.loader.get_template(self.template_loc)
+        t = context.template.engine.get_template(self.template_loc)
         obj = context[self.obj]
         c = {
             "user": context['user'],
             "object": obj,
             "vote_model": "%s.%sVote" % (
-                obj._meta.app_label, obj._meta.object_name)
+                obj._meta.app_label, obj._meta.object_name
+            )
         }
         return t.render(template.Context(c, autoescape=context.autoescape))

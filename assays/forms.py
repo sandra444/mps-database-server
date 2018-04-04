@@ -103,6 +103,7 @@ def get_dic_for_custom_choice_field(form, filters=None):
     return dic
 
 
+# DEPRECATED NO LONGER NEEDED AS CHARFIELDS NOW STRIP AUTOMATICALLY
 class ModelFormStripWhiteSpace(forms.ModelForm):
     """Strips the whitespace from char and text fields"""
     def clean(self):
@@ -117,7 +118,7 @@ class ModelFormStripWhiteSpace(forms.ModelForm):
         return super(ModelFormStripWhiteSpace, self).clean()
 
 
-class ModelFormSplitTime(ModelFormStripWhiteSpace):
+class ModelFormSplitTime(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ModelFormSplitTime, self).__init__(*args, **kwargs)
 
@@ -282,9 +283,9 @@ class DicModelChoiceField(forms.Field):
 
         # Make sure required is set properly
         self.required = self.widget.required = not (
-            self.parent._meta.get_field_by_name(self.name)[0].null
+            self.parent._meta.get_field(self.name).null
             and
-            self.parent._meta.get_field_by_name(self.name)[0].blank
+            self.parent._meta.get_field(self.name).blank
         )
 
     def to_python(self, value):
@@ -912,7 +913,7 @@ class ChipTestResultInlineFormset(BaseInlineFormSet):
             raise forms.ValidationError('You must have at least one result.')
 
 
-class AssayStudyConfigurationForm(SignOffMixin, ModelFormStripWhiteSpace):
+class AssayStudyConfigurationForm(SignOffMixin, forms.ModelForm):
     """Frontend Form for Study Configurations"""
     class Meta(object):
         model = AssayStudyConfiguration
@@ -1516,7 +1517,7 @@ class ReadyForSignOffForm(forms.Form):
 
 
 # TODO PLEASE REVIEW
-class AssayStudyForm(SignOffMixin, ModelFormStripWhiteSpace):
+class AssayStudyForm(SignOffMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         """Init the Study Form
 
@@ -1613,7 +1614,7 @@ AssayStudyAssayFormSetFactory = inlineformset_factory(
 
 
 # TODO ADD STUDY
-class AssayMatrixForm(SignOffMixin, ModelFormStripWhiteSpace):
+class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     class Meta(object):
         model = AssayMatrix
         exclude = ('study',) + tracking
@@ -2360,7 +2361,7 @@ AssaySetupSettingInlineFormSetFactory = inlineformset_factory(
 )
 
 
-class AssayMatrixItemFullForm(SignOffMixin, ModelFormStripWhiteSpace):
+class AssayMatrixItemFullForm(SignOffMixin, forms.ModelForm):
     """Frontend form for Items"""
     class Meta(object):
         model = AssayMatrixItem
@@ -2396,7 +2397,7 @@ class AssayMatrixItemFullForm(SignOffMixin, ModelFormStripWhiteSpace):
             )
 
 
-class AssayMatrixItemForm(ModelFormStripWhiteSpace):
+class AssayMatrixItemForm(forms.ModelForm):
     class Meta(object):
         model = AssayMatrixItem
         exclude = ('study', 'matrix') + tracking
@@ -2537,7 +2538,7 @@ assay_run_stakeholder_sign_off_formset_factory = inlineformset_factory(
 )
 
 
-class AssayStudySignOffForm(SignOffMixin, ModelFormStripWhiteSpace):
+class AssayStudySignOffForm(SignOffMixin, forms.ModelForm):
     class Meta(object):
         model = AssayStudy
         fields = ['signed_off', 'signed_off_notes']
@@ -2546,7 +2547,7 @@ class AssayStudySignOffForm(SignOffMixin, ModelFormStripWhiteSpace):
         }
 
 
-class AssayStudyStakeholderSignOffForm(SignOffMixin, ModelFormStripWhiteSpace):
+class AssayStudyStakeholderSignOffForm(SignOffMixin, forms.ModelForm):
     class Meta(object):
         model = AssayStudyStakeholder
         fields = ['signed_off', 'signed_off_notes']

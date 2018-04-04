@@ -1,8 +1,8 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 # Wildcard imports are EVIL
 from microdevices.views import *
 
-urlpatterns = patterns('',
+urlpatterns = [
     # User can view their studies
     url(r'^microdevices/device/$', MicrodeviceList.as_view(), name='microdevice-list'),
     url(r'^microdevices/device/(?P<pk>[0-9]+)/$', MicrodeviceDetail.as_view(), name='microdevice-detail'),
@@ -17,4 +17,4 @@ urlpatterns = patterns('',
     url(r'^microdevices/clinicaldata/$', DiseaseModelClinicalData.as_view()),
     url(r'^microdevices/diseasebiology/$', DiseaseModelDiseaseBiology.as_view()),
     url(r'^microdevices/diseasemodel_diseasemodel/$', DiseaseModelDiseaseModel.as_view()),
-)
+]

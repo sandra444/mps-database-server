@@ -1019,7 +1019,7 @@ def validate_plate_readout_file(
         readout = readouts[0]
 
     old_readout_data = AssayReadout.objects.filter(
-        assay_device_readout__in=readouts
+        assay_device_readout_id__in=readouts
     ).prefetch_related(
         'assay__assay_id',
         'assay_device_readout'
