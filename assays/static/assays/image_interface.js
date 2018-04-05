@@ -94,10 +94,7 @@ $(document).ready(function () {
 
     var filter_elements = "";
     for (var i=0; i<tableCols.length; i++) {
-        // Remove spaces and commas
-        // var col = tableCols[i].split(" ").join("").split(",").join("");
         var col = tableCols[i].replace(/\s/g, '').replace(/[,]/g, '');
-        // filter_elements += "<tr><th>"+tableCols[i]+"</th><td><input data-filled='0' id='"+col+"' type=checkbox></td></tr>";
         filter_elements += "<button aria-pressed='true' style='max-width: 160px; min-height:70px; white-space: normal; margin-bottom: 1em;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 btn btn-3d btn-default btn-checkbox active'><label class='hand-cursor'>"+tableCols[i]+"</label><input checked id='"+col+"' type=checkbox></button>";
     }
     // for (i=0; i<tableRows.length; i++){
@@ -108,16 +105,15 @@ $(document).ready(function () {
     // Sloppy solution keeping this a td
     var table_elements = "<thead><tr><td style='font-weight: bold; width: .1%; white-space: nowrap;'>Chip/Well</td>";
     for (i=0; i<tableCols.length; i++) {
-        var col = tableCols[i].split(" ").join("").split(",").join("");
-        // table_elements += "<th style='max-width: 100%; white-space: nowrap;' class='"+col+" text-center'>"+tableCols[i]+"</th>";
+        var col = tableCols[i].replace(/\s/g, '').replace(/[,]/g, '');
         table_elements += "<th style='white-space: nowrap;' class='"+col+" text-center'>"+tableCols[i]+"</th>";
     }
     table_elements += "</tr></thead><tbody>";
     for (i=0; i<tableRows.length; i++) {
-        var row = tableRows[i].split(" ").join("").split(",").join("");
+        var row = tableRows[i].replace(/\s/g, '').replace(/[,]/g, '');
         table_elements += "<tr class='"+row+"'><th class='row-header' style='width: .1%; white-space: nowrap;'><a href='/assays/assaymatrixitem/"+metadata_list[tableRows[i]]+"/'>"+tableRows[i]+"</a></th>";
         for (var j=0; j<tableCols.length; j++) {
-            var col = tableCols[j].split(" ").join("").split(",").join("");
+            var col = tableCols[j].replace(/\s/g, '').replace(/[,]/g, '');
             table_elements += "<td class='text-center "+col+row+" "+col+"'></td>";
         }
         table_elements += "</tr>";
@@ -132,7 +128,7 @@ $(document).ready(function () {
 
     //Checkbox click event
     // *All* checkboxes is maybe a little broad
-    $(document).on("click",":checkbox", function() {
+    $("#filter_table").on("click",":checkbox", function() {
         var checkbox = $(this);
         var checkbox_id = $(this).attr('id');
         var cls = checkbox_id.split(' ').pop();
@@ -161,10 +157,10 @@ $(document).ready(function () {
         var handle = $( "#handle-contrast" );
         $( "#slider-contrast" ).slider({
             create: function() {
-                handle.text( $( this ).slider( "value" ) );
+                handle.text( $( this ).slider( "value" ) + "%" );
             },
             slide: function( event, ui ) {
-                handle.text( ui.value );
+                handle.text( ui.value + "%");
                 adjustContrast(ui.value);
             },
             value: 100,
@@ -177,10 +173,10 @@ $(document).ready(function () {
         var handle = $( "#handle-brightness" );
         $( "#slider-brightness" ).slider({
             create: function() {
-                handle.text( $( this ).slider( "value" ) );
+                handle.text( $( this ).slider( "value" ) + "%" );
             },
             slide: function( event, ui ) {
-                handle.text( ui.value );
+                handle.text( ui.value + "%");
                 adjustBrightness(ui.value);
             },
             value: 100,
@@ -203,16 +199,18 @@ $(document).ready(function () {
         });
     }
 
+    // Return brightness and contrast to 100%.
     $('#reset-to-default').click(function () {
         adjustBrightness(100);
         adjustContrast(100);
-        $('#handle-brightness').text(100);
-        $('#handle-contrast').text(100);
+        $('#handle-brightness').text("100%");
+        $('#handle-contrast').text("100%");
         $("#slider-brightness").slider( "value", 100 );
         $("#slider-contrast").slider( "value", 100 );
     });
 
-    $(".btn-checkbox").off().on("mouseup", function () {
+    // Toggle buttons.
+    $(".btn-checkbox").on("mouseup", function () {
         var $checkbox = $(this).find(':checkbox');
         $checkbox.trigger("click");
         if ($checkbox.prop('checked')){
@@ -234,6 +232,7 @@ $(document).ready(function () {
         deferRender: true
     });
 
+    // On keystroke, run search function.
     $('#search-box').keyup(function (e) {
         if(e.keyCode === 8) {
             doSearch(true);
@@ -242,6 +241,8 @@ $(document).ready(function () {
         }
     });
 
+    // Filter table based on contents of search textbox.
+    // TODO A caption may contain a query, but if a future caption does not, the row will be hidden.
     function doSearch(backspace) {
         var query = $('#search-box').val().toLowerCase();
         var isChip = false;
@@ -281,6 +282,7 @@ $(document).ready(function () {
         hideEmpty();
     }
 
+    // Reveal every row and image.
     function makeAllVisible(){
         image_table.find('figcaption').each(function(index, value) {
             $(value).parent().parent().removeClass('hidden');
@@ -292,7 +294,7 @@ $(document).ready(function () {
         });
     }
 
-    // Reveal all rows, and then hide rows that contain no images.
+    // Hide rows that contain no images.
     function hideEmpty() {
         for (i=0; i<tableRows.length; i++) {
             if ($('.'+tableRows[i]).height() < 100) {
