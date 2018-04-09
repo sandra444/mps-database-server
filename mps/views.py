@@ -16,6 +16,9 @@ from mps.settings import MEDIA_ROOT
 from resources.models import Definition
 from django.views.generic.base import TemplateView
 
+from microdevices.models import MicrophysiologyCenter
+from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX
+
 
 def main(request):
     if request.method == 'POST':
@@ -90,14 +93,28 @@ def search(request):
 #         return {'suggestion': spelling,}
 
 
+def get_search_queryset_with_permissions(request):
+    sqs = SearchQuerySet().exclude(permissions='==PERMISSION START==')
+
+    groups_with_center = MicrophysiologyCenter.objects.all().values_list('groups', flat=True)
+    groups_with_center_full = {group.name: True for group in Group.objects.filter(id__in=groups_with_center)}
+
+    if request.user.groups.all().count():
+        user_groups = {
+            group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, ''): True for group in request.user.groups.all()
+            if group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in groups_with_center_full
+        }
+
+        for group in user_groups.keys():
+            sqs = sqs | SearchQuerySet().filter(permissions=group)
+
+    return sqs
+
+
 # A generic use of the search_view_factory
 def custom_search(request):
     # Filter on group: either get all with no group or those with a group the user has
-    sqs = SearchQuerySet().exclude(group__in=Group.objects.all())
-
-    # TODO THIS NEEDS TO BE MODIFIED SUCH THAT ALL MODELS WITH VIEWERSHIP PRIVILEGES CAN BE ACCESSED
-    if request.user.groups.all():
-        sqs = sqs | SearchQuerySet().filter(group__in=request.user.groups.all())
+    sqs = get_search_queryset_with_permissions(request)
 
     view = search_view_factory(
         template='search/search.html',
@@ -105,6 +122,7 @@ def custom_search(request):
         form_class=haystack.forms.ModelSearchForm,
         results_per_page=1000,
     )
+
     return view(request)
 
 
