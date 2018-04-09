@@ -2344,64 +2344,64 @@ class AssayImage(models.Model):
 
 
 # Old Schema equivalents
-class AssayRunImageSetting(models.Model):
-    # Requested, not sure how useful
-    study = models.ForeignKey(AssayRun)
-    label_id = models.CharField(max_length=40)
-    label_name = models.CharField(max_length=255)
-    label_description = models.CharField(max_length=500)
-    wave_length = models.CharField(max_length=255)
-    magnification = models.CharField(max_length=40)
-    resolution = models.CharField(max_length=40)
-    resolution_unit = models.CharField(max_length=40)
-    # May be useful later
-    notes = models.CharField(max_length=500, default='')
-
-
-class AssayRunImage(models.Model):
-    # The associated item (ILL NAMED, JUST FOR EASY TRANSITION)
-    matrix_item = models.ForeignKey(AssayChipSetup)
-    # The file name
-    file_name = models.CharField(max_length=255)
-    field = models.CharField(max_length=255)
-    field_description = models.CharField(max_length=500, default='')
-    # Stored in minutes
-    time = models.FloatField()
-    # Possibly used later, who knows
-    assay_plate_id = models.CharField(max_length=40, default='N/A')
-    assay_well_id = models.CharField(max_length=40, default='N/A')
-    # PLEASE NOTE THAT I USE TARGET AND METHOD SEPARATE FROM ASSAY INSTANCE
-    method = models.ForeignKey(AssayMethod)
-    target = models.ForeignKey(AssayTarget)
-    # May become useful
-    # subtarget = models.ForeignKey(AssaySubtarget)
-    sample_location = models.ForeignKey(AssaySampleLocation)
-    notes = models.CharField(max_length=500, default='')
-    replicate = models.CharField(max_length=40, default='')
-    setting = models.ForeignKey(AssayRunImageSetting)
-
-    def get_metadata(self):
-        return {
-            'matrix_item_id': self.matrix_item_id,
-            'chip_id': self.matrix_item.assay_chip_id,
-            'plate_id' : self.assay_plate_id,
-            'well_id' : self.assay_well_id,
-            'time' : "D"+str(int(self.time/24/60))+" H"+str(int(self.time/60%24))+" M" + str(int(self.time%60)),
-            'method_kit' : self.method.name,
-            'target_analyte' : self.target.name,
-            # Contrived for now
-            'subtarget' : '',
-            'sample_location' : self.sample_location.name,
-            'replicate' : self.replicate,
-            'notes' : self.notes,
-            'file_name' : self.file_name,
-            'field' : self.field,
-            'field_description' : self.field_description,
-            'magnification' : self.setting.magnification,
-            'resolution' : self.setting.resolution,
-            'resolution_unit' : self.setting.resolution_unit,
-            'sample_label' : self.setting.label_name,
-            'sample_label_description' : self.setting.label_description,
-            'wavelength' : self.setting.wave_length,
-            'setting_notes' : self.setting.notes,
-        }
+# class AssayRunImageSetting(models.Model):
+#     # Requested, not sure how useful
+#     study = models.ForeignKey(AssayRun)
+#     label_id = models.CharField(max_length=40)
+#     label_name = models.CharField(max_length=255)
+#     label_description = models.CharField(max_length=500)
+#     wave_length = models.CharField(max_length=255)
+#     magnification = models.CharField(max_length=40)
+#     resolution = models.CharField(max_length=40)
+#     resolution_unit = models.CharField(max_length=40)
+#     # May be useful later
+#     notes = models.CharField(max_length=500, default='')
+#
+#
+# class AssayRunImage(models.Model):
+#     # The associated item (ILL NAMED, JUST FOR EASY TRANSITION)
+#     matrix_item = models.ForeignKey(AssayChipSetup)
+#     # The file name
+#     file_name = models.CharField(max_length=255)
+#     field = models.CharField(max_length=255)
+#     field_description = models.CharField(max_length=500, default='')
+#     # Stored in minutes
+#     time = models.FloatField()
+#     # Possibly used later, who knows
+#     assay_plate_id = models.CharField(max_length=40, default='N/A')
+#     assay_well_id = models.CharField(max_length=40, default='N/A')
+#     # PLEASE NOTE THAT I USE TARGET AND METHOD SEPARATE FROM ASSAY INSTANCE
+#     method = models.ForeignKey(AssayMethod)
+#     target = models.ForeignKey(AssayTarget)
+#     # May become useful
+#     # subtarget = models.ForeignKey(AssaySubtarget)
+#     sample_location = models.ForeignKey(AssaySampleLocation)
+#     notes = models.CharField(max_length=500, default='')
+#     replicate = models.CharField(max_length=40, default='')
+#     setting = models.ForeignKey(AssayRunImageSetting)
+#
+#     def get_metadata(self):
+#         return {
+#             'matrix_item_id': self.matrix_item_id,
+#             'chip_id': self.matrix_item.assay_chip_id,
+#             'plate_id' : self.assay_plate_id,
+#             'well_id' : self.assay_well_id,
+#             'time' : "D"+str(int(self.time/24/60))+" H"+str(int(self.time/60%24))+" M" + str(int(self.time%60)),
+#             'method_kit' : self.method.name,
+#             'target_analyte' : self.target.name,
+#             # Contrived for now
+#             'subtarget' : '',
+#             'sample_location' : self.sample_location.name,
+#             'replicate' : self.replicate,
+#             'notes' : self.notes,
+#             'file_name' : self.file_name,
+#             'field' : self.field,
+#             'field_description' : self.field_description,
+#             'magnification' : self.setting.magnification,
+#             'resolution' : self.setting.resolution,
+#             'resolution_unit' : self.setting.resolution_unit,
+#             'sample_label' : self.setting.label_name,
+#             'sample_label_description' : self.setting.label_description,
+#             'wavelength' : self.setting.wave_length,
+#             'setting_notes' : self.setting.notes,
+#         }
