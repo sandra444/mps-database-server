@@ -3659,6 +3659,10 @@ class AssayStudySignOff(UpdateView):
         )
 
         if form.is_valid() and stakeholder_formset.is_valid():
+            tz = pytz.timezone('US/Eastern')
+            datetime_now_local = datetime.now(tz)
+            fourteen_days_from_date = datetime_now_local + timedelta(days=14)
+
             send_initial_sign_off_alert = False
             initial_number_of_required_sign_offs = AssayStudyStakeholder.objects.filter(
                 study=self.object,
@@ -3716,7 +3720,8 @@ class AssayStudySignOff(UpdateView):
                             'assays/email/tctc_stakeholder_email.txt',
                             {
                                 'user': user_to_be_alerted,
-                                'study': self.object
+                                'study': self.object,
+                                'fourteen_days_from_date': fourteen_days_from_date
                             }
                         )
                     except TemplateDoesNotExist:
