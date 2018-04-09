@@ -2859,7 +2859,7 @@ class AssayFileProcessor:
 
         # Get matrix item name
         matrix_items = {
-            matrix_item.name.upper(): matrix_item for matrix_item in AssayMatrixItem.objects.filter(study_id=self.study.id)
+            matrix_item.name: matrix_item for matrix_item in AssayMatrixItem.objects.filter(study_id=self.study.id)
         }
 
         # Get sample locations
