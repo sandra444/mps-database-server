@@ -1610,7 +1610,7 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
         # TODO ORDER SUBJECT TO CHANGE
         data_points = AssayDataPoint.objects.prefetch_related(
             'study__group__microphysiologycenter_set',
-            'matrix_item__assaysetupsetting_set__setting__setting',
+            'matrix_item__assaysetupsetting_set__setting',
             'matrix_item__assaysetupcell_set__cell_sample',
             'matrix_item__assaysetupcell_set__density_unit',
             'matrix_item__assaysetupcell_set__cell_sample__cell_type__organ',
