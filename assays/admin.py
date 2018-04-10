@@ -2372,7 +2372,7 @@ class AssayStudyAdmin(LockableAdmin):
         ),
     )
 
-    inlines = [AssayStudyAssayInline, AssayStudyStakeholderInline, AssayStudySupportingDataInline]
+    inlines = [AssayStudyStakeholderInline, AssayStudyAssayInline, AssayStudySupportingDataInline]
 
     def get_queryset(self, request):
         qs = super(AssayStudyAdmin, self).get_queryset(request)
@@ -2448,7 +2448,6 @@ class AssayStudyAdmin(LockableAdmin):
         )
         initial_required_stakeholder_group_ids = list(initial_required_stakeholders.values_list('group_id', flat=True))
         previous_access_groups = {group.name: group.id for group in initial_study.access_groups.all()}
-        new_access_group_names = []
 
         viewer_subject = 'Study {0} Now Available for Viewing'.format(initial_study)
 
@@ -2470,11 +2469,6 @@ class AssayStudyAdmin(LockableAdmin):
             if not initial_sign_off and obj.signed_off_by:
                 send_initial_sign_off_alert = True
 
-            new_access_group_names = {
-                group.name: group.id for group in obj.access_groups.all() if
-                group.name not in previous_access_groups
-            }
-
         else:
             obj = form.save()
             obj.modified_by = obj.created_by = request.user
@@ -2482,8 +2476,16 @@ class AssayStudyAdmin(LockableAdmin):
 
         # SAVE FORMSETS HERE
         # TODO TODO TODO
-        # Save inline
-        super(LockableAdmin, self).save_related(request, form, formsets, change)
+        # Save inline and many to many
+        super(AssayStudyAdmin, self).save_related(request, form, formsets, change)
+
+        # Crude way to make sure M2M is up-to-date
+        study_after_save = AssayStudy.objects.get(pk=form.instance.id)
+
+        new_access_group_names = {
+            group.name: group.id for group in study_after_save.access_groups.all() if
+            group.name not in previous_access_groups
+        }
 
         current_number_of_required_sign_offs = AssayStudyStakeholder.objects.filter(
             study=obj,
