@@ -50,6 +50,7 @@ import re
 import os
 import codecs
 import cStringIO
+
 import pandas as pd
 import numpy as np
 
@@ -59,8 +60,6 @@ from django.utils.dateparse import parse_date
 from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
 from chardet.universaldetector import UniversalDetector
-
-import collections
 
 PLATE_FORMATS = ('Tabular', 'Block')
 CHIP_FORMATS = ('Chip',)
