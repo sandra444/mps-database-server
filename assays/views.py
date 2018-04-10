@@ -4608,13 +4608,14 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
         tableData = {}
 
         for image in study_images:
+            print(image.id)
             metadata[image.id] = image.get_metadata()
-            tableData[image.id] = ["".join("".join(image.matrix_item.name.split(" ")).split(",")), "".join("".join(image.setting.label_name.split(" ")).split(","))]
+            tableData[image.id] = ["".join("".join(image.matrix_item.name.split(" ")).split(",")), "".join("".join(image.setting.color_mapping.split(" ")).split(","))]
             if image.matrix_item.name not in tableRows:
                 tableRows.append(image.matrix_item.name)
                 metadata[image.matrix_item.name] = image.matrix_item_id
-            if image.setting.label_name not in tableCols:
-                tableCols.append(image.setting.label_name)
+            if image.setting.color_mapping not in tableCols:
+                tableCols.append(image.setting.color_mapping)
 
         context['metadata'] = json.dumps(metadata)
         context['tableRows'] = json.dumps(tableRows)
