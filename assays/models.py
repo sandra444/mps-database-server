@@ -2293,6 +2293,7 @@ class AssayImageSetting(models.Model):
     resolution_unit = models.CharField(max_length=40)
     # May be useful later
     notes = models.CharField(max_length=500, default='')
+    color_mapping = models.CharField(max_length=255, default='')
 
 
 class AssayImage(models.Model):
@@ -2339,6 +2340,7 @@ class AssayImage(models.Model):
             'sample_label' : self.setting.label_name,
             'sample_label_description' : self.setting.label_description,
             'wavelength' : self.setting.wave_length,
+            'color_mapping' : self.setting.color_mapping,
             'setting_notes' : self.setting.notes,
         }
 
@@ -2356,6 +2358,7 @@ class AssayRunImageSetting(models.Model):
     resolution_unit = models.CharField(max_length=40)
     # May be useful later
     notes = models.CharField(max_length=500, default='')
+    color_mapping = models.CharField(max_length=255, default='')
 
 
 class AssayRunImage(models.Model):
