@@ -659,7 +659,7 @@ class AssayStudyConfiguration(LockableModel):
         verbose_name = 'Study Configuration'
 
     # Length subject to change
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=255, unique=True)
 
     # DEPRECATED when would we ever want an individual configuration?
     # study_format = models.CharField(
@@ -668,8 +668,8 @@ class AssayStudyConfiguration(LockableModel):
     #     default='integrated'
     # )
 
-    media_composition = models.CharField(max_length=1000, blank=True, default='')
-    hardware_description = models.CharField(max_length=1000, blank=True, default='')
+    media_composition = models.CharField(max_length=4000, blank=True, default='')
+    hardware_description = models.CharField(max_length=4000, blank=True, default='')
     # Subject to removal
     # image = models.ImageField(upload_to="configuration",null=True, blank=True)
 
