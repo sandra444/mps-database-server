@@ -14,11 +14,6 @@ $(document).ready(function () {
     var contrast = 100;
     var brightness = 100;
 
-    console.log(metadata_list);
-    console.log(tableCols);
-    console.log(tableRows);
-    console.log(tableData);
-
     // tableCols[3] = "Test";
     // tableRows[3] = "Tester";
 
