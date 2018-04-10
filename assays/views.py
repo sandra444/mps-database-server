@@ -4608,7 +4608,6 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
         tableData = {}
 
         for image in study_images:
-            print(image.id)
             metadata[image.id] = image.get_metadata()
             tableData[image.id] = ["".join("".join(image.matrix_item.name.split(" ")).split(",")), "".join("".join(image.setting.color_mapping.split(" ")).split(","))]
             if image.matrix_item.name not in tableRows:
