@@ -2320,7 +2320,14 @@ class AssayStudyAdmin(LockableAdmin):
     list_per_page = 300
     search_fields = ('name', 'start_date', 'description')
     date_hierarchy = 'start_date'
-    list_display = ('name', 'get_study_types_string', 'start_date', 'description',)
+    list_display = (
+        'name',
+        'get_study_types_string',
+        'start_date',
+        'stakeholder_display',
+        'access_group_display',
+        'description',
+    )
 
     filter_horizontal = ('access_groups',)
 
@@ -2365,9 +2372,63 @@ class AssayStudyAdmin(LockableAdmin):
         ),
     )
 
-    inlines = [AssayStudyStakeholderInline, AssayStudySupportingDataInline, AssayStudyAssayInline]
+    inlines = [AssayStudyAssayInline, AssayStudyStakeholderInline, AssayStudySupportingDataInline]
 
-    # TODO ADD EMAILS FOR CHANGING SIGN OFF (of study and stake holders) AND ACCESS GROUPS
+    def get_queryset(self, request):
+        qs = super(AssayStudyAdmin, self).get_queryset(request)
+        qs = qs.prefetch_related(
+            'access_groups',
+            'assaystudystakeholder_set__group'
+        )
+        return qs
+
+    def stakeholder_display(self, obj):
+        contents = u''
+        trigger = u''
+        queryset = obj.assaystudystakeholder_set.all()
+        count = queryset.count()
+        released = True
+
+        if count:
+            stakes = []
+            for stakeholder in queryset.order_by('group__name'):
+                if not stakeholder.signed_off_by:
+                    released = False
+                stakes.append(u'{0} Approved?: {1}'.format(stakeholder.group.name, stakeholder.signed_off_by))
+
+            contents = u'<br>'.join(stakes)
+
+            if released:
+                released = 'Approved!'
+            else:
+                released = ''
+
+            trigger = u'<a href="javascript:void(0)" onclick=$("#stakes_{0}").toggle()>Show/Hide Stakeholders ({1}) {2}</a>'.format(
+                obj.pk, count, released
+            )
+        return u'{0}<div hidden id="stakes_{1}">{2}</div>'.format(trigger, obj.pk, contents)
+
+    stakeholder_display.allow_tags = True
+
+    def access_group_display(self, obj):
+        contents = u''
+        trigger = u''
+        queryset = obj.access_groups.all()
+        count = queryset.count()
+
+        if count:
+            contents = u'<br>'.join(
+                [
+                    group.name for group in queryset.order_by('name')
+                ]
+            )
+            trigger = u'<a href="javascript:void(0)" onclick=$("#access_{0}").toggle()>Show/Hide Access Groups ({1})</a>'.format(
+                obj.pk, count
+            )
+        return u'{0}<div hidden id="access_{1}">{2}</div>'.format(trigger, obj.pk, contents)
+
+    access_group_display.allow_tags = True
+
     # save_related takes the place of save_model so that the inline can be referred to
     # TODO TODO TODO THIS IS NOT VERY DRY
     # This code may pose a problem if multiple people are editing an entry at once...
