@@ -921,7 +921,7 @@ class AssayStudyConfigurationForm(SignOffMixin, ModelFormStripWhiteSpace):
             'media_composition': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
             'hardware_description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
         }
-        exclude = ('',)
+        exclude = tracking
 
 
 # Forms for plates may become more useful later
