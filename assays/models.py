@@ -1900,7 +1900,9 @@ class AssayDataPoint(models.Model):
                 'update_number',
                 'assay_plate_id',
                 'assay_well_id',
-                'replicate'
+                'replicate',
+                # Be sure to include subtarget!
+                'subtarget'
             )
         ]
 
