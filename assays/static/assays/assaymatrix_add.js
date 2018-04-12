@@ -464,7 +464,6 @@ $(document).ready(function () {
                         new_subdisplay.find('.' + prefix + '-' + field_name).html(field_display);
                     }
 
-
                     var possible_errors = [];
                     if (!input_index) {
                         possible_errors = $(this).prev().prev().find('li');
@@ -494,6 +493,18 @@ $(document).ready(function () {
                 }
 
                 if (new_subdisplay) {
+                    // If this subform is to be deleted
+                    // TODO NOT DRY
+                    var delete_input = $('#id_' + prefix + '-' + new_subdisplay.attr(item_subform_index_attribute) + '-DELETE');
+                    var checked_value = delete_input.prop('checked');
+
+                    if (checked_value) {
+                        new_subdisplay.addClass('strikethrough');
+                    }
+                    else {
+                        new_subdisplay.removeClass('strikethrough');
+                    }
+
                     display.find('.item-' + prefix).append(new_subdisplay);
                     if (errors_display) {
                         new_subdisplay.find('.error-message-section').html(errors_display);
