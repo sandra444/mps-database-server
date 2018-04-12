@@ -1,0 +1,16 @@
+==PERMISSION START==
+{# Add the data group #}
+{{ study.group.name }}
+{# Add the stakeholders if sign off #}
+{% if study.signed_off_by %}
+    {% for stakeholder in study.assaystudystakeholder_set.objects.all %}
+        {{ stakeholder.group.name }}
+    {% endfor %}
+
+    {# Add the access groups if approval as well #}
+    {% if object.stakeholder_approval %}
+        {% for access_group in study.access_groups.all %}
+            {{ access_group.name }}
+        {% endfor %}
+    {% endif %}
+{% endif %}

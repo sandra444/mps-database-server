@@ -70,15 +70,12 @@ $(document).ready(function () {
                 render:function (data, type, row, meta) {
                     var split_data = data.split('\n');
                     var new_data = [];
-
                     $.each(split_data, function(index, value) {
                         if (index % 2 === 0) {
                             new_data.push(value);
                         }
                     });
-
                     new_data = new_data.join('<br>');
-
                     return new_data;
                 }
             },
@@ -149,7 +146,7 @@ $(document).ready(function () {
             var $elem = $( "#repro-data" );
             var $clone = $elem.first().clone( true ).addClass('repro-'+group).appendTo("#clone-container");
             mad_list[group]['columns'].unshift("Time");
-            $clone.find('#repro-title').text('Replica Set ' + group);
+            $clone.find('#repro-title').text('Set ' + group);
             $clone.find('#selection-parameters').html(buildSelectionParameters(studyID, organModel, targetAnalyte, methodKit, sampleLocation, compoundTreatments, valueUnit));
             $clone.find('#selection-parameters').find('td, th').css('padding','8px 10px');
             $clone.find('#chip-rep-rep-ind').html(buildCV_ICC(data[7],data[8]));
@@ -324,7 +321,6 @@ $(document).ready(function () {
         //var number = checkbox_id;
         var reproTable = $('.repro-'+number);
         if (checkbox.is(':checked')) {
-            //console.log("Showing Table " + number);
             reproTable.removeClass('hidden');
             var axisLabel = reproTable.find('#target-analyte-value').text();
             var valueUnit = reproTable.find('#value-unit').text();
@@ -344,4 +340,19 @@ $(document).ready(function () {
         // Activates Bootstrap tooltips
         $('[data-toggle="tooltip"]').tooltip({container:"body"});
     });
+
+    // On reorder
+    gasTable.on( 'order.dt', function () {
+        var setOrder = [];
+        gasTable.column(1, { search:'applied' } ).data().each(function(value, index) {
+            setOrder.push(value);
+        });
+        orderInfo(setOrder);
+    } );
+
+    function orderInfo(orderList){
+        for (var i=0; i < orderList.length; i++){
+            $('#clone-container .repro-'+orderList[i]).appendTo('#clone-container');
+        }
+    }
 });

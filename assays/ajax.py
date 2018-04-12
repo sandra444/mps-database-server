@@ -1610,7 +1610,7 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
         # TODO ORDER SUBJECT TO CHANGE
         data_points = AssayDataPoint.objects.prefetch_related(
             'study__group__microphysiologycenter_set',
-            'matrix_item__assaysetupsetting_set__setting__setting',
+            'matrix_item__assaysetupsetting_set__setting',
             'matrix_item__assaysetupcell_set__cell_sample',
             'matrix_item__assaysetupcell_set__density_unit',
             'matrix_item__assaysetupcell_set__cell_sample__cell_type__organ',
@@ -2635,22 +2635,22 @@ def study_editor_validation(request):
 
 # TODO TODO TODO
 switch = {
-    'fetch_readout': {'call': fetch_readout},
+    # 'fetch_readout': {'call': fetch_readout},
     'fetch_center_id': {'call': fetch_center_id},
-    'fetch_chip_readout': {'call': fetch_chip_readout},
-    'fetch_readouts': {'call': fetch_readouts},
-    'fetch_dropdown': {'call': fetch_dropdown},
+    # 'fetch_chip_readout': {'call': fetch_chip_readout},
+    # 'fetch_readouts': {'call': fetch_readouts},
+    # 'fetch_dropdown': {'call': fetch_dropdown},
     'fetch_organ_models': {'call': fetch_organ_models},
     'fetch_protocols': {'call': fetch_protocols},
     'fetch_protocol': {'call': fetch_protocol},
-    'fetch_assay_run_reproducibility': {'call': fetch_assay_run_reproducibility},
-    'validate_bulk_file': {'call': validate_bulk_file},
-    'validate_individual_chip_file': {'call': validate_individual_chip_file},
-    'send_ready_for_sign_off_email_old': {
-        'call': send_ready_for_sign_off_email_old,
-        # 'validation': study_editor_validation
-    },
-    'send_ready_for_sign_off_email': {'call': fetch_device_dimensions},
+    # 'fetch_assay_run_reproducibility': {'call': fetch_assay_run_reproducibility},
+    # 'validate_bulk_file': {'call': validate_bulk_file},
+    # 'validate_individual_chip_file': {'call': validate_individual_chip_file},
+    # 'send_ready_for_sign_off_email_old': {
+    #     'call': send_ready_for_sign_off_email_old,
+    #     # 'validation': study_editor_validation
+    # },
+    'send_ready_for_sign_off_email': {'call': send_ready_for_sign_off_email},
     'fetch_device_dimensions': {'call': fetch_device_dimensions},
     'fetch_data_points': {
         'call': fetch_data_points,
@@ -2664,7 +2664,6 @@ switch = {
         'call': fetch_assay_study_reproducibility,
         'validation': study_viewer_validation
     },
-    # TODO TODO TODO
     'validate_data_file': {
         'call': validate_data_file,
         'validation': study_editor_validation

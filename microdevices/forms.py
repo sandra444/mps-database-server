@@ -17,7 +17,6 @@ class MicrodeviceForm(SignOffMixin, forms.ModelForm):
 
         widgets = {
             'name': forms.Textarea(attrs={'rows': 1}),
-            'name': forms.Textarea(attrs={'rows': 1}),
             'references': forms.Textarea(attrs={'rows': 3}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
