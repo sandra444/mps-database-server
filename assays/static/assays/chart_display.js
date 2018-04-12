@@ -95,6 +95,7 @@ $(document).ready(function () {
             'organ_model',
             'cells',
             'compounds',
+            'settings',
             'setups_with_same_group'
         ];
         var headers = {
@@ -102,6 +103,7 @@ $(document).ready(function () {
             'organ_model': 'Organ Model',
             'cells': 'Cells',
             'compounds': 'Compounds',
+            'settings': 'Settings',
             'setups_with_same_group': 'Chips/Wells'
         };
 
@@ -158,10 +160,11 @@ $(document).ready(function () {
             // Try to get a more reasonable size for cells
             columnDefs: [
                 // Treat the group column as if it were just the number
-                { "type": "num", "targets": 0 },
-                { "width": "20%", "targets": 2 },
-                { "width": "30%", "targets": 3 },
-                { "width": "30%", "targets": 4 }
+                { "type": "num", "targets": 0, "width": "10%" },
+                { "width": "10%", "targets": 1 },
+                { "width": "15%", "targets": 2 },
+                { "width": "20%", "targets": 3 },
+                { "width": "15%", "targets": 4 }
             ]
         });
 

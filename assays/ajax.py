@@ -2029,7 +2029,8 @@ def get_item_groups(study):
     sorted_treatment_groups = sorted(
         treatment_groups.values(), key=lambda x: (
             x.get('compounds'),
-            x.get('organ_model'), x.get('cells'),
+            x.get('organ_model'),
+            x.get('cells'),
             x.get('settings'),
             x.get('setups_with_same_group')[0]
         )
