@@ -2133,7 +2133,6 @@ def get_data_points_for_charting(
         method = study_assay.method.name
 
         sample_location = raw.sample_location.name
-        all_sample_locations.update({sample_location: True})
 
         setup_id = raw.matrix_item_id
         chip_id = raw.matrix_item.name
@@ -2169,6 +2168,9 @@ def get_data_points_for_charting(
             ).setdefault(
                 time, []
             ).append(value)
+
+            # Update all_sample_locations
+            all_sample_locations.update({sample_location: True})
 
     targets = [target_method[0] for target_method in initial_data.keys()]
 
