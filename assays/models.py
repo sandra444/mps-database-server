@@ -1776,6 +1776,7 @@ class AssayMatrixItem(FlaggableModel):
             'organ_model': self.get_hyperlinked_model_or_device(),
             'compounds': self.stringify_compounds(),
             'cells': self.stringify_cells(),
+            'settings': self.stringify_settings(),
             'setups_with_same_group': []
         }
         return dic
@@ -1872,15 +1873,17 @@ class AssaySetupCell(models.Model):
 
     def __unicode__(self):
         if self.addition_location:
-            return u'{0}\n-{1:.0e} {2}\nAdded to: {3}'.format(
+            return u'{0} [{1}]\n-{2:.0e} {3}\nAdded to: {4}'.format(
                 self.cell_sample,
+                self.passage,
                 self.density,
                 self.density_unit.unit,
                 self.addition_location
             )
         else:
-            return u'{0}\n-{1:.0e} {2}'.format(
+            return u'{0} [{1}]\n-{2:.0e} {3}'.format(
                 self.cell_sample,
+                self.passage,
                 self.density,
                 self.density_unit.unit,
             )
