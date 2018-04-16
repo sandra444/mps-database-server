@@ -1813,7 +1813,8 @@ class AssaySetupCompoundFormSet(BaseModelFormSetForcedUniqueness):
                 instance.concentration,
                 instance.concentration_unit_id,
                 instance.addition_time,
-                instance.duration
+                instance.duration,
+                instance.addition_location_id
             ): True for instance in AssaySetupCompound.objects.filter(
                 matrix_item__matrix=self.matrix
             )
@@ -1974,7 +1975,8 @@ class AssaySetupCompoundFormSet(BaseModelFormSetForcedUniqueness):
                         instance.concentration,
                         instance.concentration_unit_id,
                         instance.addition_time,
-                        instance.duration
+                        instance.duration,
+                        instance.addition_location_id
                     ), None
                 )
                 # If there is not conflict or if this is an update
@@ -1995,7 +1997,8 @@ class AssaySetupCompoundFormSet(BaseModelFormSetForcedUniqueness):
                     instance.concentration,
                     instance.concentration_unit_id,
                     instance.addition_time,
-                    instance.duration
+                    instance.duration,
+                    instance.addition_location_id
                 ): True
             })
 
@@ -2079,7 +2082,8 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
                 instance.concentration,
                 instance.concentration_unit.id,
                 instance.addition_time,
-                instance.duration
+                instance.duration,
+                instance.addition_location_id
             ): True for instance in AssaySetupCompound.objects.filter(
             matrix_item=matrix_item
             ).prefetch_related(
@@ -2178,7 +2182,8 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
                         instance.concentration,
                         instance.concentration_unit.id,
                         instance.addition_time,
-                        instance.duration
+                        instance.duration,
+                        instance.addition_location_id
                     ), None
                 )
                 if not conflicting_assay_compound_instance:
@@ -2190,7 +2195,8 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
                     instance.concentration,
                     instance.concentration_unit.id,
                     instance.addition_time,
-                    instance.duration
+                    instance.duration,
+                    instance.addition_location_id
                 ): True
             })
 
