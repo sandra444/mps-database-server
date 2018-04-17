@@ -3242,8 +3242,23 @@ def get_queryset_with_number_of_data_points(queryset):
             data_point.study_id: current_value + 1
         })
 
+    images = AssayImage.objects.all().prefetch_related(
+        'matrix_item'
+    )
+
+    images_map = {}
+
+    for image in images:
+        current_value = images_map.setdefault(
+            image.matrix_item.study_id, 0
+        )
+        images_map.update({
+            image.matrix_item.study_id: current_value + 1
+        })
+
     for study in queryset:
         study.data_points = data_points_map.get(study.id, 0)
+        study.images = images_map.get(study.id, 0)
 
 
 # TODO GET NUMBER OF DATA POINTS
@@ -4590,14 +4605,14 @@ class AssayStudyReproducibility(StudyViewerMixin, DetailView):
 
 
 # TODO Class-based view for direct reproducibility access.
-class AssayStudyReproducibilityList(AssayStudyList):
-    """Displays all of the studies linked to groups that the user is part of"""
-    def get_context_data(self, **kwargs):
-        context = super(AssayStudyReproducibilityList, self).get_context_data()
-
-        context['reproducibility'] = True
-
-        return context
+# class AssayStudyReproducibilityList(AssayStudyList):
+#     """Displays all of the studies linked to groups that the user is part of"""
+#     def get_context_data(self, **kwargs):
+#         context = super(AssayStudyReproducibilityList, self).get_context_data()
+#
+#         context['reproducibility'] = True
+#
+#         return context
 
 
 class AssayStudyImages(StudyViewerMixin, DetailView):

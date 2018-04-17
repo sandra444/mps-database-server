@@ -17,7 +17,7 @@ $(document).ready(function() {
             },
             {
                 'className': 'none',
-                'targets': [6]
+                'targets': [7]
             }
         ]
     });
