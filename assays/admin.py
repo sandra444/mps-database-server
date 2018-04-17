@@ -2326,6 +2326,8 @@ class AssayStudyAdmin(LockableAdmin):
         'start_date',
         'stakeholder_display',
         'access_group_display',
+        'restricted',
+        'locked',
         'description',
     )
 
