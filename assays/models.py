@@ -2287,6 +2287,7 @@ class AssayStudyAssay(models.Model):
 
 class AssayImageSetting(models.Model):
     # Requested, not sure how useful
+    # May want to remove soon, why have this be specific to a study? Deletion cascade?
     study = models.ForeignKey(AssayStudy)
     # This is necessary in TongYing's scheme, but it is kind of confusing in a way
     label_id = models.CharField(max_length=40)
@@ -2302,6 +2303,8 @@ class AssayImageSetting(models.Model):
 
 
 class AssayImage(models.Model):
+    # May want to have an FK to study for convenience?
+    # study = models.ForeignKey(AssayStudy)
     # The associated item
     matrix_item = models.ForeignKey(AssayMatrixItem)
     # The file name
