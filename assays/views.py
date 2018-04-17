@@ -3504,12 +3504,15 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
             'organ_model',
             'assaysetupcompound_set__compound_instance__compound',
             'assaysetupcompound_set__concentration_unit',
+            'assaysetupcompound_set__addition_location',
             'assaysetupcell_set__cell_sample__cell_type__organ',
             'assaysetupcell_set__cell_sample__cell_subtype',
             'assaysetupcell_set__cell_sample__supplier',
+            'assaysetupcell_set__addition_location',
             'assaysetupcell_set__density_unit',
             'assaysetupsetting_set__setting',
             'assaysetupsetting_set__unit',
+            'assaysetupsetting_set__addition_location',
         )
 
         # Cellsamples will always be the same
