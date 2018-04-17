@@ -12,13 +12,20 @@
 
     {% include "microdevices/diseasemodellinks.html" %}
 
+
     <legend>NAFLD Disease State</legend>
     <div class="row">
         <div class="col-sm-2 col-md-1 text-right-responsive">
             <b>Overview</b>
         </div>
         <div class="col-sm-10 col-md-5 text-wrapped">
-            Non-alcoholic fatty liver disease (NAFLD) is one of the types of fatty liver which occurs when fat is deposited (steatosis) in the liver due to causes other than excessive alcohol use. Non-alcoholic steatohepatitis (NASH) is the most extreme form of NAFLD. NAFLD is the most common liver disorder in developed countries. NAFLD is related to insulin resistance and the metabolic syndrome and may respond to treatments originally developed for other insulin-resistant states (e.g. diabetes mellitus type 2) such as weight loss, metformin, and thiazolidinediones.
+            <ul>
+                <li>Nonalcoholic fatty liver disease (NAFLD) refers to the entire spectrum of disease, from simple steatosis to NASH to fibrosis/cirrhosis</li>
+                <li>30% (90 million) people have NAFLD, an abnormally high accumulation of fat within hepatocytes (steatosis)</li>
+                <li>10% (9 million) NAFLD patients develop inflammation in a condition called non-alcoholic steatohepatitis (NASH), with or without fibrosis </li>
+                <li>25% (2.5 million) NASH patients develop cirrhosis </li>
+                <li>200,000 – 500,000 patients at risk to develop hepatocellular carcinoma</li>
+            </ul>
         </div>
         <div class="col-md-6 thumbnail text-center row-center">
             <img src="{% static "microdevices/NAFLD-Disease-Spectrum.jpg" %}" class="img-responsive"></img>
@@ -32,13 +39,19 @@
                 <b>Overview</b>
             </div>
             <div class="col-sm-10 col-md-5 text-wrapped">
-                “Non-alcoholic fatty liver disease (NAFLD) represents a spectrum ranging from simple steatosis to more severe steatohepatitis with hepatic inflammation and fibrosis, known as nonalcoholic steatohepatitis (NASH). NASH may further lead to cirrhosis and hepatocellular carcinoma (HCC). This map shows a stage-dependent progression of NAFLD. In the first stage of NAFLD, excess lipid accumulation has been demonstrated. The main cause is the induction of insulin resistance, which leads to a defect in insulin suppression of free fatty acids (FAAs) disposal. In addition, two transcription factors, SREBP-1c and PPAR-alpha, activate key enzymes of lipogenesis and increase the synthesis of FAAs in liver. In the second stage, as a consequence of the progression to NASH, the production of reactive oxygen species (ROS) is enhanced due to oxidation stress through mitochondrial beta-oxidation of fatty acids and endoplasmic reticulum (ER) stress, leading to lipid peroxidation. The lipid peroxidation can further cause the production of cytokines (Fas ligand, TNF-alpha, IL-8 and TGF), promoting cell death, inflammation and fibrosis. The activation of JNK, which is induced by ER stress, TNF-alpha and FAAs, is also associated with NAFLD progression. Increased JNK promotes cytokine production and initiation of HCC.” –KEGG Disease Description
+                <ul>
+                    <li>NAFLD is a co-morbidity of insulin resistance and metabolic syndrome</li>
+                    <li>Abnormal mitochondrial beta-oxidation of fatty acids  produces oxidative stress and lipid peroxidation</li>
+                    <li>Release of proinflammatory cytokines</li>
+                    <li>Liver inflammation and fibrosis</li>
+                </ul>
             </div>
             <div class="col-md-6 thumbnail text-center row-center">
-                <img src="{% static "microdevices/NAFLD-NASH2.jpg" %}" class="img-responsive"></img>
+                <img src="{% static "microdevices/NAFLD-NASH1.jpg" %}" class="img-responsive"></img>
             </div>
         </div>
-    <br>
+
+<br>
 
 <legend><a href="/microdevices/clinicaldata">NAFLD Clinical Data</a></legend>
     <div class="row">
@@ -46,17 +59,82 @@
             <b>Overview</b>
         </div>
         <div class="col-sm-10 col-md-5 text-wrapped padded-bottom">
-            The NAFLD Clinical Drugs and Trials page consists of pre-curated preclinical and clinical databases that contain information about the NAFLD disease phenotype. You can find information about different studies that have been completed looking at NAFLD. This page also looks to make it easier to address the important studies that convey the ADMET and MOA processes with drugs that have been determined relevant to NAFLD. NAFLD currently has 574 clinical trials in all phases across world, the United States makes up 234 of those studies. Of all the 574 clinical trials, 296 drug intervention studies have been explored for the abetment of the disease state. There are also thousands to clinical samples for testing from NIDDK. Preclinical models number in the thousands and range from mice models to organ on a chip models.
+            <ul>
+                <li>Targeting hepatic fat accumulation and the resultant metabolic PPAR agonists
+                    <ul>
+                        <li> FXR-bile acid axis</li>
+                        <li>de novo lipogenesis inhibition</li>
+                        <li>Incretins</li>
+                        <li>DPP-4 inhibitors</li>
+                        <li>Lipid-lowering agents</li>
+                        <li>Hormonal signaling</li>
+                        <li>MicroRNA-based treatment</li>
+                    </ul>
+                <li>Targeting oxidative stress and inflammation
+                    <ul>
+                        <li>Antioxidants</li>
+                        <li>Apoptosis inhibitors</li>
+                        <li>TNFα pathway</li>
+                        <li>immune modulators</li>
+                    </ul>
+                </li>
+                <li>Targeting Intestine
+                    <ul>
+                        <li>Antiobesity medications</li>
+                        </li>microbiome</li>
+                    </ul>
+                <li>Targeting fibrosis
+                    <ul>
+                        <li>lysyl oxidase-like 2 protein</li>
+                        <li>Galectin-3</li>
+                    </ul>
+            </ul>
         </div>
-        <div class="col-md-6 thumbnail text-center row-center">
-            <img src="{% static "microdevices/DrugTableRotman.JPG" %}" class="img-responsive"></img>
+        <div class="col-md-6 thumbnail text-center">
+            <img src="{% static "microdevices/ClinicalTrialsProcess.png" %}" class="img-responsive"></img>
         </div>
-        <div class="col-md-12 thumbnail text-center row-center">
-            <img src="{% static "microdevices/ClinicalTrialsNAFLD.jpg" %}" class="img-responsive"></img>
         </div>
-    </div>
-<br>
-
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Number of Trials with Results</th>
+                                <th>Number of Trials in Phase I</th>
+                                <th>Number of Trials in Phase II</th>
+                                <th>Number of Trials in Phase III</th>
+                                <th>Number of Trials in Phase IV</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="#">ClinicalTrials.gov</a></td>
+                                <td>ClinicalTrials.gov</td>
+                                <td>34</td>
+                                <td>34</td>
+                                <td>34</td>
+                                <td>34</td>
+                                <td>34</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#">NIDDK Central Repository</a></td>
+                                <td>NIDDK</td>
+                                <td>34</td>
+                                <td>34</td>
+                                <td>34</td>
+                                <td>34</td>
+                                <td>34</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+        </div>
 <br>
 <legend><a href="/microdevices/diseasemodel_diseasemodel">NAFLD Disease Models</a></legend>
 <div class="row">
