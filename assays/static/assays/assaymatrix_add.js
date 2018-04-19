@@ -883,7 +883,7 @@ $(document).ready(function () {
 
     function check_action() {
         $('.item-section').hide('fast');
-        var current_section = $(this).val();
+        var current_section = action_selector.val();
         $('.' + current_section + '_section').show('fast');
         if (current_section) {
             $('#apply_action_to_all').show();
@@ -907,6 +907,9 @@ $(document).ready(function () {
         }
     }
     action_selector.change(check_action);
+
+    // Initially check action
+    check_action();
 
     // Testing SUBJECT TO CHANGE
     $('#apply_plate_names').click(function() {
