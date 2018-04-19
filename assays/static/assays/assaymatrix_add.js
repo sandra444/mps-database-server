@@ -526,7 +526,8 @@ $(document).ready(function () {
 
         // NOTE: Show all displays if there are errors
         if (errors_exist) {
-            $('.visibility-checkbox').prop('checked', true).trigger('change');
+            $('.visibility-checkbox').prop('checked', true);
+            change_matrix_visibility();
         }
     }
 
@@ -796,7 +797,7 @@ $(document).ready(function () {
 
     // Matrix Listeners
     // BE CAREFUL! THIS IS SUBJECT TO CHANGE!
-    representation_selector.change(function() {
+    function check_representation() {
         var current_representation = representation_selector.val();
 
         // Hide all matrix sections
@@ -820,23 +821,28 @@ $(document).ready(function () {
             // SPECIAL OPERATION
             $('#id_item_device').parent().parent().hide();
         }
-    }).trigger('change');
+    }
 
-    device_selector.change(function() {
-        get_matrix_dimensions();
+    representation_selector.change(check_representation);
+    check_representation();
 
+    function check_matrix_device() {
         if (device_selector.val()) {
+            get_matrix_dimensions();
+
             if (representation_selector.val() === 'plate') {
-                // Apparently cruft
-                // $('#id_setup_device option[value!=' + device_selector.val() + ']').hide();
-                window.device.val(device_selector.val()).trigger('change');
+                // window.device.val(device_selector.val()).trigger('change');
+                window.get_organ_models(device.val());
             }
         }
         else {
-            // $('#id_setup_device option[value!=' + device_selector.val() + ']').show();
-            window.device.val('').trigger('change');
+            window.device.val('');
+            window.get_organ_models('');
         }
-    }).trigger('change');
+    }
+
+    device_selector.change(check_matrix_device);
+    check_matrix_device();
 
     // TODO TODO TODO RESTORE LATER
     // if (device_selector.val()) {
@@ -875,9 +881,9 @@ $(document).ready(function () {
     //     number_of_items_selector.trigger('change');
     // }
 
-    action_selector.change(function() {
+    function check_action() {
         $('.item-section').hide('fast');
-        var current_section = $(this).val();
+        var current_section = action_selector.val();
         $('.' + current_section + '_section').show('fast');
         if (current_section) {
             $('#apply_action_to_all').show();
@@ -899,7 +905,11 @@ $(document).ready(function () {
         else if (current_section.indexOf('add_') > -1) {
             $('#show_items').prop('checked', true).trigger('change');
         }
-    }).trigger('change');
+    }
+    action_selector.change(check_action);
+
+    // Initially check action
+    check_action();
 
     // Testing SUBJECT TO CHANGE
     $('#apply_plate_names').click(function() {
@@ -930,27 +940,38 @@ $(document).ready(function () {
     window.device.change(function() {
         // Get organ models
         window.get_organ_models(device.val());
-    }).trigger('change');
+    });
+
+    window.get_organ_models(device.val());
 
     window.organ_model.change(function() {
         // Get and display correct protocol options
         window.get_protocols(window.organ_model.val());
-    }).trigger('change');
+    });
+
+    window.get_protocols(window.organ_model.val());
 
     window.organ_model_protocol.change(function() {
         window.display_protocol(window.organ_model_protocol.val());
-    }).trigger('change');
+    });
+
+    window.display_protocol(window.organ_model_protocol.val());
 
     // Triggers for hiding elements
-    $('.visibility-checkbox').change(function() {
-        var class_to_hide = $(this).attr('value');
-        if ($(this).prop('checked')) {
-            $(class_to_hide).show();
-        }
-        else {
-            $(class_to_hide).hide();
-        }
-    }).trigger('change');
+    function change_matrix_visibility() {
+        $('.visibility-checkbox').each(function() {
+            var class_to_hide = $(this).attr('value');
+            if ($(this).prop('checked')) {
+                $(class_to_hide).show();
+            }
+            else {
+                $(class_to_hide).hide();
+            }
+        });
+    }
+
+    $('.visibility-checkbox').change(change_matrix_visibility);
+    change_matrix_visibility();
 
     // Special operations for pre-submission
     $('form').submit(function() {

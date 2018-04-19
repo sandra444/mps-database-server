@@ -2326,6 +2326,8 @@ class AssayStudyAdmin(LockableAdmin):
         'start_date',
         'stakeholder_display',
         'access_group_display',
+        'restricted',
+        'locked',
         'description',
     )
 
@@ -2841,3 +2843,5 @@ admin.site.register(AssaySetting)
 admin.site.register(AssayMatrixItem)
 
 admin.site.register(AssayMatrix)
+
+admin.site.register(AssaySubtarget)

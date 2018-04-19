@@ -62,7 +62,7 @@ $(document).ready(function() {
     //     }
     // }
 
-        function set_labels() {
+    function set_labels() {
         if (signed_off_selector.prop('checked')) {
             mark_reviewed_check.show();
             mark_reviewed_label.text('Click Here to Remove Validated Mark');
@@ -93,7 +93,8 @@ $(document).ready(function() {
             text: 'Yes',
             id: 'sign_off_confirm_submit_button',
             click: function() {
-                signed_off_selector.prop('checked', !signed_off_selector.prop('checked'));
+                // Need to indicate that a change has ocurred as well
+                signed_off_selector.prop('checked', !signed_off_selector.prop('checked')).trigger('change');
                 set_labels();
                 $(this).dialog('close');
             }
@@ -108,14 +109,7 @@ $(document).ready(function() {
             $('body').removeClass('stop-scrolling');
         },
         open: function() {
-            // var dialog_submit_button = $('#sign_off_confirm_submit_button');
             $('body').addClass('stop-scrolling');
-            // dialog_submit_button.button('disable');
-            //
-            // setTimeout(function() {
-            //     dialog_submit_button.button('enable');
-            //     dialog_submit_button.focus();
-            // }, 1500);
         }
     });
     sign_off_confirm.removeProp('hidden');
