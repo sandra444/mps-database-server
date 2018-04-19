@@ -83,8 +83,10 @@ $(document).ready(function() {
             // Notice that all of this is in the AJAX success call
             // When a compound is selected
             // ALL SUPPLIERS ARE SHOWN INSTEAD NOW
-            $(document).on('change', 'select[id$="compound"]', function() {
-                var current_supplier_text = $(this)
+            function check_compound(obj) {
+                // Somewhat sloppy solution
+                if (!obj) obj = this;
+                var current_supplier_text = $(obj)
                     .parent()
                     .parent()
                     .find('input[id$="supplier_text"]')
@@ -95,27 +97,29 @@ $(document).ready(function() {
                 }
 
                 current_supplier_text.autocomplete({
-                    // source: _.keys(data_map[$(this).val()]),
+                    // source: _.keys(data_map[$(obj).val()]),
                     source: _.sortBy(_.keys(suppliers)),
                     select: function (a, b) {
-                        $(this).val(b.item.value);
-                        $(this).trigger('change');
+                        $(obj).val(b.item.value);
+                        $(obj).trigger('change');
                     },
                     minLength: 0
                 });
 
                 current_supplier_text.focus(function() {
-                    $(this).autocomplete('search', $(this).val());
+                    $(obj).autocomplete('search', $(obj).val());
                 });
 
                 // Turn on autocomplete
                 current_supplier_text.attr('autocomplete', 'on');
-            });
+            }
+            $(document).on('change', 'select[id$="compound"]', check_compound);
 
             // When a supplier is given
             // Sets lot based on given data
-            $(document).on('change', 'input[id$="supplier_text"]', function() {
-                var current_row = $(this)
+            function check_supplier(obj) {
+                if (!obj) obj = this;
+                var current_row = $(obj)
                     .parent()
                     .parent();
 
@@ -132,29 +136,31 @@ $(document).ready(function() {
                     current_lot_text.autocomplete('destroy');
                 }
 
-                if(data_map[current_compound_value]) {
+                if (data_map[current_compound_value]) {
                     current_lot_text.autocomplete({
-                        source: _.keys(data_map[current_compound_value][$(this).val()]),
+                        source: _.keys(data_map[current_compound_value][$(obj).val()]),
                         select: function (a, b) {
-                            $(this).val(b.item.value);
-                            $(this).trigger('change');
+                            $(obj).val(b.item.value);
+                            $(obj).trigger('change');
                         },
                         minLength: 0
                     });
 
-                    current_lot_text.focus(function() {
-                        $(this).autocomplete('search', $(this).val());
+                    current_lot_text.focus(function () {
+                        $(obj).autocomplete('search', $(obj).val());
                     });
 
                     // Turn on autocomplete
                     current_lot_text.attr('autocomplete', 'on');
                 }
-            });
+            }
+            $(document).on('change', 'input[id$="supplier_text"]', check_supplier);
 
             // When a lot is given
             // Sets receipt date based on given data
-            $(document).on('change', 'input[id$="lot_text"]', function() {
-                var current_row = $(this)
+            function check_lot(obj) {
+                if (!obj) obj = this;
+                var current_row = $(obj)
                     .parent()
                     .parent();
 
@@ -178,11 +184,11 @@ $(document).ready(function() {
 
                 if(data_map[current_compound_value] && data_map[current_compound_value][current_supplier_value]) {
                     current_receipt_date.autocomplete({
-                        source: data_map[current_compound_value][current_supplier_value][$(this).val()],
+                        source: data_map[current_compound_value][current_supplier_value][$(obj).val()],
                         minLength: 0,
                         select: function (a, b) {
-                            $(this).val(b.item.value);
-                            $(this).trigger('change');
+                            $(obj).val(b.item.value);
+                            $(obj).trigger('change');
                         },
                         position: {
                             my: "left bottom",
@@ -193,122 +199,25 @@ $(document).ready(function() {
 
                     // Uses click instead of focus
                     current_receipt_date.click(function () {
-                        $(this).autocomplete('search', $(this).val());
+                        $(obj).autocomplete('search', $(obj).val());
                     });
 
                     // Turn on autocomplete
                     current_receipt_date.attr('autocomplete', 'on');
                 }
-            });
-
-//            // When a receipt date is given
-//            // Sets compound_instance ID (for ease of detecting duplicates)
-//            $(document).on('change', 'input[id$="receipt_date"]', function() {
-//                var current_row = $(this)
-//                    .parent()
-//                    .parent();
-//
-//                var current_compound_instance = current_row
-//                    .find('select[id$="compound_instance"]')
-//                    .first();
-//
-//                if (current_compound_instance) {
-//                    var current_compound_value = current_row
-//                        .find('select[id$="compound"]')
-//                        .first()
-//                        .val();
-//
-//                    var current_supplier_value = current_row
-//                        .find('input[id$="supplier_text"]')
-//                        .first()
-//                        .val();
-//
-//                    var current_lot_value = current_row
-//                        .find('input[id$="lot_text"]')
-//                        .first()
-//                        .val();
-//
-//                    var current_receipt_date_value = $(this).val();
-//
-//                    var instance_key = [
-//                        current_compound_value,
-//                        current_supplier_value,
-//                        current_lot_value,
-//                        current_receipt_date_value
-//                    ].join('_');
-//
-//                    // If there is an available instance, use it
-//                    if (instances[instance_key]) {
-//                        current_compound_instance.val(instances[instance_key]);
-//                    }
-//                    else {
-//                        current_compound_instance.val('');
-//                    }
-//                    console.log(instances);
-//                    console.log(instance_key);
-//                    console.log(instances[instance_key]);
-//                    console.log(current_compound_instance.val());
-//                }
-//            });
-//
-//            // TODO SECTION NOT VERY DRY
-//            // Times in question
-//            var time_conversions = {
-//                'day': 1440,
-//                'hour': 60,
-//                'minute': 1
-//            };
-//
-//            // Fill addition time and duration with converted values
-//            // (THIS TOO IS FOR CONVENIENCE WHEN PROCESSING FORM)
-//            $(document).on('change', 'input[id*="addition_time_"]', function() {
-//                var current_row = $(this)
-//                    .parent()
-//                    .parent();
-//
-//                var current_addition_time = current_row
-//                    .find('select[id$="addition_time"]')
-//                    .first();
-//
-//                var new_addition_time = 0;
-//
-//                // Add times to info
-//                $.each(time_conversions, function(unit, conversion) {
-//                    var current_addition_time_x = current_addition_time.val();
-//                    // Perform the conversion to minutes
-//                    new_addition_time += current_addition_time_x * conversion;
-//                });
-//
-//                current_addition_time.val(new_addition_time);
-//                console.log(new_addition_time);
-//            });
-//
-//            $(document).on('change', 'input[id="duration_"]', function() {
-//                var current_row = $(this)
-//                    .parent()
-//                    .parent();
-//
-//                var current_duration = current_row
-//                    .find('select[id$="duration"]')
-//                    .first();
-//
-//                var new_duration = 0;
-//
-//                // Add times to info
-//                $.each(time_conversions, function(unit, conversion) {
-//                    var current_duration_x = current_duration.val();
-//                    // Perform the conversion to minutes
-//                    new_duration += current_duration_x * conversion;
-//                });
-//
-//                current_duration.val(new_duration);
-//                console.log(new_duration);
-//            });
+            }
+            $(document).on('change', 'input[id$="lot_text"]', check_lot);
 
             // Initially trigger whittling events above
-            $('select[id$="compound"]').trigger('change');
-            $('input[id$="supplier_text"]').trigger('change');
-            $('input[id$="lot_text"]').trigger('change');
+            $('select[id$="compound"]').each(function(){
+                check_compound(this);
+            });
+            $('input[id$="supplier_text"]').each(function(){
+                check_supplier(this);
+            });
+            $('input[id$="lot_text"]').each(function(){
+                check_lot(this);
+            });
 //            $('input[id$="receipt_date"]').trigger('change');
         },
         error: function (xhr, errmsg, err) {

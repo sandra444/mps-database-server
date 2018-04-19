@@ -2843,3 +2843,5 @@ admin.site.register(AssaySetting)
 admin.site.register(AssayMatrixItem)
 
 admin.site.register(AssayMatrix)
+
+admin.site.register(AssaySubtarget)
