@@ -908,9 +908,6 @@ $(document).ready(function () {
     }
     action_selector.change(check_action);
 
-    // Initially check the action
-    check_action();
-
     // Testing SUBJECT TO CHANGE
     $('#apply_plate_names').click(function() {
        plate_style_name_creation();
