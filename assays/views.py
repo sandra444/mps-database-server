@@ -4611,9 +4611,7 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
             if image.setting.color_mapping.upper() not in tableCols:
                 tableCols.append(image.setting.color_mapping.upper())
 
-        if "BRIGHTFIELD COLOR" in tableCols:
-            tableCols.insert(0, tableCols.pop(tableCols.index("PHASE CONTRAST")))
-        if "BRIGHTFIELD COLOR" in tableCols:
+        if "PHASE CONTRAST" in tableCols:
             tableCols.insert(0, tableCols.pop(tableCols.index("PHASE CONTRAST")))
         if "BRIGHTFIELD COLOR" in tableCols:
             tableCols.insert(0, tableCols.pop(tableCols.index("BRIGHTFIELD COLOR")))
