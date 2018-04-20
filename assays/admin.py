@@ -54,6 +54,8 @@ from mps.templatetags.custom_filters import (
 from datetime import datetime, timedelta
 import pytz
 
+from import_export.admin import ImportExportModelAdmin
+
 
 def modify_templates():
     """Writes totally new templates for chips and both types of plates"""
@@ -1132,6 +1134,7 @@ class UnitTypeAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('unit_type', 'description')
+    search_fields = ('unit_type', 'description')
     fieldsets = (
         (
             None, {
@@ -1175,6 +1178,7 @@ class PhysicalUnitsAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('unit_type', 'unit', 'base_unit', 'scale_factor', 'availability', 'description')
+    search_fields = ('unit_type__unit_type', 'unit', 'availability', 'description')
     fieldsets = (
         (
             None, {
@@ -1935,7 +1939,7 @@ class AssayStudyConfigurationAdmin(LockableAdmin):
     class Media(object):
         js = ('js/inline_fix.js',)
 
-    form = AssayStudyConfigurationForm
+    # form = AssayStudyConfigurationForm
     save_on_top = True
     list_per_page = 300
     list_display = ('name',)
@@ -1984,6 +1988,11 @@ class AssayTargetAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = (
+        'name',
+        'short_name',
+        'description'
+    )
+    search_fields = (
         'name',
         'short_name',
         'description'
@@ -2059,6 +2068,7 @@ class AssaySampleLocationAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('name', 'description')
+    search_fields = ('name', 'description')
     fieldsets = (
         (
             'Sample Location', {
@@ -2127,6 +2137,10 @@ class AssayMeasurementTypeAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('name', 'description')
+    search_fields = (
+        'name',
+        'description'
+    )
     fieldsets = (
         (
             'Measurement Type', {
@@ -2169,6 +2183,10 @@ class AssaySupplierAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('name', 'description')
+    search_fields = (
+        'name',
+        'description'
+    )
     fieldsets = (
         (
             'Measurement Type', {
@@ -2215,6 +2233,10 @@ class AssayMethodAdmin(LockableAdmin):
         'measurement_type',
         'supplier',
         'protocol_file',
+        'description'
+    )
+    search_fields = (
+        'name',
         'description'
     )
     fieldsets = (
@@ -2834,14 +2856,42 @@ class AssayStudyAdmin(LockableAdmin):
 admin.site.register(AssayStudy, AssayStudyAdmin)
 
 # TODO TODO TODO TODO NEW MODELS HERE
-admin.site.register(AssayImage)
+class AssayMatrixItemAdmin(ImportExportModelAdmin):
+    model = AssayMatrixItem
+    search_fields = ('name', 'notes')
 
-admin.site.register(AssayImageSetting)
+admin.site.register(AssayMatrixItem, AssayMatrixItemAdmin)
 
-admin.site.register(AssaySetting)
 
-admin.site.register(AssayMatrixItem)
+class AssayMatrixAdmin(ImportExportModelAdmin):
+    model = AssayMatrix
+    search_fields = ('name', 'notes')
 
-admin.site.register(AssayMatrix)
+admin.site.register(AssayMatrix, AssayMatrixAdmin)
 
-admin.site.register(AssaySubtarget)
+class AssayImageAdmin(ImportExportModelAdmin):
+    model = AssayImage
+    search_fields = ('matrix_item__name', 'file_name')
+
+admin.site.register(AssayImage, AssayImageAdmin)
+
+
+class AssayImageSettingAdmin(ImportExportModelAdmin):
+    model = AssayImageSetting
+    search_fields = ('study__name', 'label_name')
+
+admin.site.register(AssayImageSetting, AssayImageSettingAdmin)
+
+
+class AssaySettingAdmin(ImportExportModelAdmin):
+    model = AssaySetting
+    search_fields = ('name', 'description')
+
+admin.site.register(AssaySetting, AssaySettingAdmin)
+
+
+class AssaySubtargetAdmin(ImportExportModelAdmin):
+    model = AssaySubtarget
+    search_fields = ('name', 'description')
+
+admin.site.register(AssaySubtarget, AssaySubtargetAdmin)
