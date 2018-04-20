@@ -4617,12 +4617,12 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
             tableCols.insert(0, tableCols.pop(tableCols.index("BRIGHTFIELD COLOR")))
         if "FAR RED" in tableCols:
             tableCols.insert(0, tableCols.pop(tableCols.index("FAR RED")))
-        if "BLUE" in tableCols:
-            tableCols.insert(0, tableCols.pop(tableCols.index("BLUE")))
-        if "GREEN" in tableCols:
-            tableCols.insert(0, tableCols.pop(tableCols.index("GREEN")))
         if "RED" in tableCols:
             tableCols.insert(0, tableCols.pop(tableCols.index("RED")))
+        if "GREEN" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("GREEN")))
+        if "BLUE" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("BLUE")))
 
         context['metadata'] = json.dumps(metadata)
         context['tableRows'] = json.dumps(tableRows)

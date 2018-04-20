@@ -72,6 +72,7 @@ $(document).ready(function () {
             var iWell = popupDialogData["well_id"];
             var iTime = popupDialogData["time"];
             var iMethodKit = popupDialogData["method_kit"];
+            var iTargetAnalyte = popupDialogData["target_analyte"];
             var iSubtarget = popupDialogData["subtarget"];
             var iSampleLocation = popupDialogData["sample_location"];
             var iReplicate = popupDialogData["replicate"];
@@ -88,17 +89,20 @@ $(document).ready(function () {
             var iColorMapping = popupDialogData['color_mapping'];
             var iSettingNote = popupDialogData["setting_notes"];
 
-            // Additional processing for Target/Analyte
-            var workingTargetAnalyte = popupDialogData["target_analyte"].split(',');
-            var iTargetAnalyte = ""
-            for (i = 0; i < workingTargetAnalyte.length; i++) {
-                iTargetAnalyte += workingTargetAnalyte[i] + " ("+iSampleLabel.split(',')[i].replace(/\s/g, '')+", "+iColorMapping.split(',')[i].replace(/\s/g, '')+")";
-                if (i < workingTargetAnalyte.length-1) {
-                    iTargetAnalyte += ", ";
+            // Construct Dialog Box Title
+            var tempTarget = iTargetAnalyte.split(',');
+            var tempLabel = iSampleLabel.split(',');
+            var tempColor = iColorMapping.split(',');
+            var titleText = ""
+            for (i = 0; i < tempTarget.length; i++) {
+                titleText += tempTarget[i] + " ("+tempLabel[i].replace(/\s/g, '')+", "+tempColor[i].replace(/\s/g, '')+")";
+                if (i < tempTarget.length-1) {
+                    titleText += ", ";
                 }
             }
 
             $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small"><tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+iWell+'</td></tr><tr><th>Time</th><td>'+iTime+'</td></tr><tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr><tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr><tr><th>Subtarget</th><td>'+iSubtarget+'</td></tr><tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr><tr><th>Replicate</th><td>'+iReplicate+'</td></tr><tr><th>Notes</th><td>'+iNotes+'</td></tr><tr><th>Image File Name</th><td>'+iFileName+'</td></tr><tr><th>Image Field</th><td>'+iField+'</td></tr><tr><th>Image Field Description</th><td>'+iFieldDescription+'</td></tr><tr><th>Image Magnification</th><td>'+iMagnification+'</td></tr><tr><th>Image Resolution</th><td>'+iResolution+'</td></tr><tr><th>Image Resolution Unit</th><td>'+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+iSampleLabel+'</td></tr><tr><th>Image Sample Label Description</th><td>'+iSampleLabelDescription+'</td></tr><tr><th>Image Wavelength (ex/em nm)</th><td>'+iWavelength+'</td></tr><tr><th>Image Color Mapping</th><td>'+iColorMapping+'</td></tr><tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
+            $("#ui-id-1")[0].innerHTML = titleText;
         }
     };
     var theDialog = dialogConfirm.dialog(dialogOptions);
@@ -159,7 +163,7 @@ $(document).ready(function () {
         for (var i=0; i<Object.keys(tableData).length; i++) {
             if (tableData[Object.keys(tableData)[i]][1] == cls) {
                 var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + "), "+metadata_list[Object.keys(tableData)[i]]["sample_label"]+", "+metadata_list[Object.keys(tableData)[i]]["magnification"].split(".")[0]+"x at " + metadata_list[Object.keys(tableData)[i]]["time"];
-                $('.'+cls+tableData[Object.keys(tableData)[i]][0]).append('<span data-pic="'+Object.keys(tableData)[i]+'" style="vertical-align: top; display: inline-block; margin:5px;" id="image_thumbnail"><figure><img style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".")[0]+'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center">'+ caption +'</figcaption></figure></span>');
+                $('.'+cls+tableData[Object.keys(tableData)[i]][0]).append('<span data-pic="'+Object.keys(tableData)[i]+'" style="vertical-align: top; display: inline-block; margin:2px;" id="image_thumbnail"><figure><img style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".")[0]+'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center">'+ caption +'</figcaption></figure></span>');
             }
         }
     }
@@ -319,4 +323,7 @@ $(document).ready(function () {
 
     // Increase the height of the footer to ensure it is not obscured
     $('#footer').height("+=150");
+
+    // Center JQuery Dialog Window Title
+    $("#ui-id-1").css('text-align', 'center').css('width','100%').css('font-size', '20px');
 });
