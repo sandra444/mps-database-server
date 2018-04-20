@@ -2304,6 +2304,7 @@ class AssayImageSetting(models.Model):
     def __unicode__(self):
         return u'{} {}'.format(self.study.name, self.label_name)
 
+
 class AssayImage(models.Model):
     # May want to have an FK to study for convenience?
     # study = models.ForeignKey(AssayStudy)

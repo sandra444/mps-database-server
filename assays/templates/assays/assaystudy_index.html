@@ -102,7 +102,7 @@
                     <td>{{ matrix.name }}</td>
                     <td>
                         {% for item in matrix.assaymatrixitem_set.all|dictsort:"name" %}
-                            <a href="{{ item.get_absolute_url }}">{{ item.name }}</a>&nbsp;
+                            <a href="{{ item.get_absolute_url }}">{{ item.name }}</a>;&nbsp;
                         {% endfor %}
                     </td>
                     <td>
