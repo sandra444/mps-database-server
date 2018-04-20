@@ -4627,12 +4627,25 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
 
         for image in study_images:
             metadata[image.id] = image.get_metadata()
-            tableData[image.id] = ["".join("".join(image.matrix_item.name.split(" ")).split(",")), "".join("".join(image.setting.color_mapping.split(" ")).split(","))]
+            tableData[image.id] = ["".join("".join(image.matrix_item.name.split(" ")).split(",")), "".join("".join(image.setting.color_mapping.upper().split(" ")).split(","))]
             if image.matrix_item.name not in tableRows:
                 tableRows.append(image.matrix_item.name)
                 metadata[image.matrix_item.name] = image.matrix_item_id
-            if image.setting.color_mapping not in tableCols:
-                tableCols.append(image.setting.color_mapping)
+            if image.setting.color_mapping.upper() not in tableCols:
+                tableCols.append(image.setting.color_mapping.upper())
+
+        if "PHASE CONTRAST" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("PHASE CONTRAST")))
+        if "BRIGHTFIELD COLOR" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("BRIGHTFIELD COLOR")))
+        if "FAR RED" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("FAR RED")))
+        if "BLUE" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("BLUE")))
+        if "GREEN" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("GREEN")))
+        if "RED" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("RED")))
 
         context['metadata'] = json.dumps(metadata)
         context['tableRows'] = json.dumps(tableRows)
