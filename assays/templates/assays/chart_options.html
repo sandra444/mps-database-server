@@ -44,4 +44,24 @@
             Treat Negative Values as Zero&nbsp;
         </label>
     </div>
+    <div class="row">
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}datum_select" value="datum" checked>
+            Tooltips for each Data Point
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}category_select" value="category">
+            Tooltips for Entire Time Point
+        </label>
+        <label for="{{ chart_prefix }}log_x" class="pull-right">
+            <input type="checkbox" name="{{ chart_prefix }}log_x" id="{{ chart_prefix }}log_x" />
+            Log Scale X-Axis&nbsp;
+        </label>
+    </div>
+    <div class="row">
+        <label for="{{ chart_prefix }}log_y" class="pull-right">
+            <input type="checkbox" name="{{ chart_prefix }}log_y" id="{{ chart_prefix }}log_y" />
+            Log Scale Y-Axis&nbsp;
+        </label>
+    </div>
 </div>
