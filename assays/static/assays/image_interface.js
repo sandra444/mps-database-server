@@ -14,11 +14,6 @@ $(document).ready(function () {
     var contrast = 100;
     var brightness = 100;
 
-    console.log(metadata_list);
-    console.log(tableCols);
-    console.log(tableRows);
-    console.log(tableData);
-
     // tableCols[3] = "Test";
     // tableRows[3] = "Tester";
 
@@ -77,7 +72,6 @@ $(document).ready(function () {
             var iWell = popupDialogData["well_id"];
             var iTime = popupDialogData["time"];
             var iMethodKit = popupDialogData["method_kit"];
-            var iTargetAnalyte = popupDialogData["target_analyte"];
             var iSubtarget = popupDialogData["subtarget"];
             var iSampleLocation = popupDialogData["sample_location"];
             var iReplicate = popupDialogData["replicate"];
@@ -93,6 +87,17 @@ $(document).ready(function () {
             var iWavelength = popupDialogData["wavelength"];
             var iColorMapping = popupDialogData['color_mapping'];
             var iSettingNote = popupDialogData["setting_notes"];
+
+            // Additional processing for Target/Analyte
+            var workingTargetAnalyte = popupDialogData["target_analyte"].split(',');
+            var iTargetAnalyte = ""
+            for (i = 0; i < workingTargetAnalyte.length; i++) {
+                iTargetAnalyte += workingTargetAnalyte[i] + " ("+iSampleLabel.split(',')[i].replace(/\s/g, '')+", "+iColorMapping.split(',')[i].replace(/\s/g, '')+")";
+                if (i < workingTargetAnalyte.length-1) {
+                    iTargetAnalyte += ", ";
+                }
+            }
+
             $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small"><tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+iWell+'</td></tr><tr><th>Time</th><td>'+iTime+'</td></tr><tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr><tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr><tr><th>Subtarget</th><td>'+iSubtarget+'</td></tr><tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr><tr><th>Replicate</th><td>'+iReplicate+'</td></tr><tr><th>Notes</th><td>'+iNotes+'</td></tr><tr><th>Image File Name</th><td>'+iFileName+'</td></tr><tr><th>Image Field</th><td>'+iField+'</td></tr><tr><th>Image Field Description</th><td>'+iFieldDescription+'</td></tr><tr><th>Image Magnification</th><td>'+iMagnification+'</td></tr><tr><th>Image Resolution</th><td>'+iResolution+'</td></tr><tr><th>Image Resolution Unit</th><td>'+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+iSampleLabel+'</td></tr><tr><th>Image Sample Label Description</th><td>'+iSampleLabelDescription+'</td></tr><tr><th>Image Wavelength (ex/em nm)</th><td>'+iWavelength+'</td></tr><tr><th>Image Color Mapping</th><td>'+iColorMapping+'</td></tr><tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
         }
     };
@@ -101,7 +106,7 @@ $(document).ready(function () {
     var filter_elements = "";
     for (var i=0; i<tableCols.length; i++) {
         var col = tableCols[i].replace(/\s/g, '').replace(/[,]/g, '');
-        filter_elements += "<button aria-pressed='true' style='max-width: 160px; min-height:70px; white-space: normal; margin-bottom: 1em;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 btn btn-3d btn-default btn-checkbox active'><label class='hand-cursor'>"+tableCols[i].toUpperCase()+"</label><input checked id='"+col+"' type=checkbox></button>";
+        filter_elements += "<button aria-pressed='true' style='max-width: 160px; min-height: 80px; white-space: normal; margin-bottom: 1em;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 btn btn-3d btn-default btn-checkbox active'><label class='hand-cursor'>"+tableCols[i].toUpperCase()+"</label><input checked id='"+col+"' type=checkbox></button>";
     }
     // for (i=0; i<tableRows.length; i++){
     //     filter_elements += "<tr><th>"+tableRows[i]+"</th><td><input id='"+tableRows[i].split(" ").join("").split(",").join("")+"' type=checkbox></td></tr>";
@@ -153,7 +158,7 @@ $(document).ready(function () {
         cls = tableCols[j].split(" ").join("").split(",").join("");
         for (var i=0; i<Object.keys(tableData).length; i++) {
             if (tableData[Object.keys(tableData)[i]][1] == cls) {
-                var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + ") "+metadata_list[Object.keys(tableData)[i]]["magnification"].split(".")[0]+"x at " + metadata_list[Object.keys(tableData)[i]]["time"];
+                var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + "), "+metadata_list[Object.keys(tableData)[i]]["sample_label"]+", "+metadata_list[Object.keys(tableData)[i]]["magnification"].split(".")[0]+"x at " + metadata_list[Object.keys(tableData)[i]]["time"];
                 $('.'+cls+tableData[Object.keys(tableData)[i]][0]).append('<span data-pic="'+Object.keys(tableData)[i]+'" style="vertical-align: top; display: inline-block; margin:5px;" id="image_thumbnail"><figure><img style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".")[0]+'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center">'+ caption +'</figcaption></figure></span>');
             }
         }
@@ -250,14 +255,14 @@ $(document).ready(function () {
     // Filter table based on contents of search textbox.
     // TODO A caption may contain a query, but if a future caption does not, the row will be hidden.
     function doSearch(backspace) {
-        var query = $('#search-box').val().toLowerCase();
+        var query = $('#search-box').val().toUpperCase();
         var isChip = false;
         if (backspace) {
             makeAllVisible();
         }
         image_table.find('figcaption').each(function(index, value) {
             buttonActive = $('#'+$(value).parent().parent().parent().attr("class").split(" ")[2]).prop('checked');
-            if ($(value).text().toLowerCase().includes(query)) {
+            if ($(value).text().toUpperCase().includes(query)) {
                 if (buttonActive) {
                     $(value).parent().parent().removeClass('hidden');
                 } else {
@@ -265,7 +270,7 @@ $(document).ready(function () {
                 }
             } else {
                 for (var i=0; i<tableRows.length; i++) {
-                    if (tableRows[i].toLowerCase().includes(query)) {
+                    if (tableRows[i].toUpperCase().includes(query)) {
                         isChip = true;
                         break;
                     }
@@ -273,7 +278,7 @@ $(document).ready(function () {
                 if (isChip) {
                     image_table.find('th').each(function(index, value) {
                         if (index > tableCols.length-1){
-                            if ($(value).text().toLowerCase().includes(query)) {
+                            if ($(value).text().toUpperCase().includes(query)) {
                                 $(value).parent().removeClass('hidden');
                             } else {
                                 $(value).parent().addClass('hidden');
