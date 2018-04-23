@@ -2346,11 +2346,13 @@ class AssayStudyAdmin(LockableAdmin):
         'name',
         'get_study_types_string',
         'start_date',
+        'signed_off_by',
+        'signed_off_date',
         'stakeholder_display',
         'access_group_display',
         'restricted',
         'locked',
-        'description',
+        # 'description',
     )
 
     filter_horizontal = ('access_groups',)
