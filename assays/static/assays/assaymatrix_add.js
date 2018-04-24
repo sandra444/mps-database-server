@@ -832,7 +832,7 @@ $(document).ready(function () {
 
             if (representation_selector.val() === 'plate') {
                 // window.device.val(device_selector.val()).trigger('change');
-                window.get_organ_models(device.val());
+                window.get_organ_models(device_selector.val());
             }
         }
         else {
