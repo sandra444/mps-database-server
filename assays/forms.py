@@ -1981,14 +1981,9 @@ class AssaySetupCompoundFormSet(BaseModelFormSetForcedUniqueness):
                 )
                 # If there is not conflict or if this is an update
                 if not conflicting_assay_compound_instance:
-                    # instance.save()
-                    forms.save_instance(form, instance, form._meta.fields,
-                                  'created', commit, form._meta.exclude,
-                                  construct=False)
-                else:
-                    forms.save_instance(form, instance, form._meta.fields,
-                                        'updated', commit, form._meta.exclude,
-                                        construct=False)
+                    instance.save()
+
+                # Do nothing otherwise (it already exists)
 
             self.setup_compounds.update({
                 (
