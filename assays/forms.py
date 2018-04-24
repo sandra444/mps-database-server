@@ -1764,9 +1764,9 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     ), required=False)
 
     # Text field (un-saved) for supplier
-    compound_supplier_text = forms.CharField(required=False, initial='N/A')
+    compound_supplier_text = forms.CharField(required=False, initial='')
     # Text field (un-saved) for lot
-    compound_lot_text = forms.CharField(required=False, initial='N/A')
+    compound_lot_text = forms.CharField(required=False, initial='')
     # Receipt date
     compound_receipt_date = forms.DateField(required=False)
 
