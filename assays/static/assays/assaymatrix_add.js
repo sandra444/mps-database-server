@@ -203,7 +203,7 @@ $(document).ready(function () {
         return pow ? to_letters(pow) + out : out;
     }
 
-    function plate_style_name_creation() {
+    function plate_style_name_creation(append_zero) {
         var current_global_name = $('#id_item_name').val();
         var current_number_of_rows = number_of_rows_selector.val();
         var current_number_of_columns = number_of_columns_selector.val();
@@ -218,8 +218,10 @@ $(document).ready(function () {
                 var current_item_id = item_prefix + '_' + row_id + '_' + column_id;
 
                 var column_name = column_id + 1 + '';
-                while (column_name.length < largest_row_name_length) {
-                    column_name = '0' + column_name;
+                if (append_zero) {
+                    while (column_name.length < largest_row_name_length) {
+                        column_name = '0' + column_name;
+                    }
                 }
 
                 var value = current_global_name + row_name + column_name;
@@ -832,7 +834,7 @@ $(document).ready(function () {
 
             if (representation_selector.val() === 'plate') {
                 // window.device.val(device_selector.val()).trigger('change');
-                window.get_organ_models(device.val());
+                window.get_organ_models(device_selector.val());
             }
         }
         else {
@@ -912,8 +914,12 @@ $(document).ready(function () {
     check_action();
 
     // Testing SUBJECT TO CHANGE
-    $('#apply_plate_names').click(function() {
-       plate_style_name_creation();
+    $('#apply_plate_names_zero').click(function() {
+       plate_style_name_creation(true);
+    });
+
+    $('#apply_plate_names_no_zero').click(function() {
+       plate_style_name_creation(false);
     });
 
     // Triggers for subform-delete

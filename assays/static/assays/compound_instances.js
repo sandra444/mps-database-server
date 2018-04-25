@@ -85,7 +85,7 @@ $(document).ready(function() {
             // ALL SUPPLIERS ARE SHOWN INSTEAD NOW
             function check_compound(obj) {
                 // Somewhat sloppy solution
-                if (!obj) obj = this;
+                if (obj.isTrigger) obj = this;
                 var current_supplier_text = $(obj)
                     .parent()
                     .parent()
@@ -100,14 +100,14 @@ $(document).ready(function() {
                     // source: _.keys(data_map[$(obj).val()]),
                     source: _.sortBy(_.keys(suppliers)),
                     select: function (a, b) {
-                        $(obj).val(b.item.value);
-                        $(obj).trigger('change');
+                        $(this).val(b.item.value);
+                        $(this).trigger('change');
                     },
                     minLength: 0
                 });
 
                 current_supplier_text.focus(function() {
-                    $(obj).autocomplete('search', $(obj).val());
+                    $(this).autocomplete('search', $(this).val());
                 });
 
                 // Turn on autocomplete
@@ -118,7 +118,7 @@ $(document).ready(function() {
             // When a supplier is given
             // Sets lot based on given data
             function check_supplier(obj) {
-                if (!obj) obj = this;
+                if (obj.isTrigger) obj = this;
                 var current_row = $(obj)
                     .parent()
                     .parent();
@@ -136,18 +136,18 @@ $(document).ready(function() {
                     current_lot_text.autocomplete('destroy');
                 }
 
-                if (data_map[current_compound_value]) {
+                if (data_map[current_compound_value] && $(obj).val()) {
                     current_lot_text.autocomplete({
                         source: _.keys(data_map[current_compound_value][$(obj).val()]),
                         select: function (a, b) {
-                            $(obj).val(b.item.value);
-                            $(obj).trigger('change');
+                            $(this).val(b.item.value);
+                            $(this).trigger('change');
                         },
                         minLength: 0
                     });
 
                     current_lot_text.focus(function () {
-                        $(obj).autocomplete('search', $(obj).val());
+                        $(this).autocomplete('search', $(this).val());
                     });
 
                     // Turn on autocomplete
@@ -159,7 +159,7 @@ $(document).ready(function() {
             // When a lot is given
             // Sets receipt date based on given data
             function check_lot(obj) {
-                if (!obj) obj = this;
+                if (obj.isTrigger) obj = this;
                 var current_row = $(obj)
                     .parent()
                     .parent();
@@ -182,13 +182,13 @@ $(document).ready(function() {
                     current_receipt_date.autocomplete('destroy');
                 }
 
-                if(data_map[current_compound_value] && data_map[current_compound_value][current_supplier_value]) {
+                if(data_map[current_compound_value] && data_map[current_compound_value][current_supplier_value] && $(obj).val()) {
                     current_receipt_date.autocomplete({
                         source: data_map[current_compound_value][current_supplier_value][$(obj).val()],
                         minLength: 0,
                         select: function (a, b) {
-                            $(obj).val(b.item.value);
-                            $(obj).trigger('change');
+                            $(this).val(b.item.value);
+                            $(this).trigger('change');
                         },
                         position: {
                             my: "left bottom",
@@ -199,7 +199,7 @@ $(document).ready(function() {
 
                     // Uses click instead of focus
                     current_receipt_date.click(function () {
-                        $(obj).autocomplete('search', $(obj).val());
+                        $(this).autocomplete('search', $(this).val());
                     });
 
                     // Turn on autocomplete

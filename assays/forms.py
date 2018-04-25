@@ -1764,9 +1764,9 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     ), required=False)
 
     # Text field (un-saved) for supplier
-    compound_supplier_text = forms.CharField(required=False, initial='N/A')
+    compound_supplier_text = forms.CharField(required=False, initial='')
     # Text field (un-saved) for lot
-    compound_lot_text = forms.CharField(required=False, initial='N/A')
+    compound_lot_text = forms.CharField(required=False, initial='')
     # Receipt date
     compound_receipt_date = forms.DateField(required=False)
 
@@ -1981,14 +1981,9 @@ class AssaySetupCompoundFormSet(BaseModelFormSetForcedUniqueness):
                 )
                 # If there is not conflict or if this is an update
                 if not conflicting_assay_compound_instance:
-                    # instance.save()
-                    forms.save_instance(form, instance, form._meta.fields,
-                                  'created', commit, form._meta.exclude,
-                                  construct=False)
-                else:
-                    forms.save_instance(form, instance, form._meta.fields,
-                                        'updated', commit, form._meta.exclude,
-                                        construct=False)
+                    instance.save()
+
+                # Do nothing otherwise (it already exists)
 
             self.setup_compounds.update({
                 (
