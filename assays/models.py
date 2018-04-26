@@ -1318,6 +1318,9 @@ class AssayTarget(LockableModel):
 
     short_name = models.CharField(max_length=20, unique=True)
 
+    # Tentative
+    alt_name = models.CharField(max_length=1000, blank=True, default='')
+
     def __unicode__(self):
         return u'{0} ({1})'.format(self.name, self.short_name)
 
@@ -1362,6 +1365,9 @@ class AssayMethod(LockableModel):
     # TODO STORAGE LOCATION
     # TODO TEMPORARILY NOT REQUIRED
     protocol_file = models.FileField(upload_to='assays', null=True, blank=True)
+
+    # Tentative
+    alt_name = models.CharField(max_length=1000, blank=True, default='')
 
     def __unicode__(self):
         return self.name
