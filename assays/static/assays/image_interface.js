@@ -72,6 +72,7 @@ $(document).ready(function () {
             var iWell = popupDialogData["well_id"];
             var iTime = popupDialogData["time"];
             var iMethodKit = popupDialogData["method_kit"];
+            var iStainPairings = popupDialogData["stain_pairings"];
             var iTargetAnalyte = popupDialogData["target_analyte"];
             var iSubtarget = popupDialogData["subtarget"];
             var iSampleLocation = popupDialogData["sample_location"];
@@ -89,16 +90,16 @@ $(document).ready(function () {
             var iColorMapping = popupDialogData['color_mapping'];
             var iSettingNote = popupDialogData["setting_notes"];
             // Construct Dialog Box Title
-            var tempTarget = iTargetAnalyte.split(', ');
-            var tempLabel = iSampleLabel.split(', ');
-            var tempColor = iColorMapping.split(', ');
-            var titleText = ""
+            var tempTarget = iTargetAnalyte.split(' | ');
+            var tempLabel = iSampleLabel.split(' | ');
+            var tempColor = iColorMapping.split(' | ');
+            var titleText = "";
             if (tempTarget.length == 1 || tempLabel.length == 1 || tempColor.length == 1){
-                titleText = iTargetAnalyte + " ("+iSampleLabel+", "+iColorMapping.toUpperCase()+")";
+                titleText = iTargetAnalyte + " ("+iSampleLabel+" | "+iColorMapping.toUpperCase()+")";
             } else {
                 try {
                     for (i = 0; i < tempTarget.length; i++) {
-                        titleText += tempTarget[i] + " ("+tempLabel[i]+", "+tempColor[i].toUpperCase()+")";
+                        titleText += tempTarget[i] + " ("+tempLabel[i]+" | "+tempColor[i].toUpperCase()+")";
                         if (i < tempTarget.length-1) {
                             titleText += ", ";
                         }
@@ -109,7 +110,27 @@ $(document).ready(function () {
             }
 
 
-            $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small"><tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+iWell+'</td></tr><tr><th>Time</th><td>'+iTime+'</td></tr><tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr><tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr><tr><th>Subtarget</th><td>'+iSubtarget+'</td></tr><tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr><tr><th>Replicate</th><td>'+iReplicate+'</td></tr><tr><th>Notes</th><td>'+iNotes+'</td></tr><tr><th>Image File Name</th><td>'+iFileName+'</td></tr><tr><th>Image Field</th><td>'+iField+'</td></tr><tr><th>Image Field Description</th><td>'+iFieldDescription+'</td></tr><tr><th>Image Magnification</th><td>'+iMagnification+'</td></tr><tr><th>Image Resolution</th><td>'+iResolution+'</td></tr><tr><th>Image Resolution Unit</th><td>'+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+iSampleLabel+'</td></tr><tr><th>Image Sample Label Description</th><td>'+iSampleLabelDescription+'</td></tr><tr><th>Image Wavelength (ex/em nm)</th><td>'+iWavelength+'</td></tr><tr><th>Image Color Mapping</th><td>'+iColorMapping+'</td></tr><tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
+            // $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small"><tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+iWell+'</td></tr><tr><th>Time</th><td>'+iTime+'</td></tr><tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr><tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr><tr><th>Subtarget</th><td>'+iSubtarget+'</td></tr><tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr><tr><th>Replicate</th><td>'+iReplicate+'</td></tr><tr><th>Notes</th><td>'+iNotes+'</td></tr><tr><th>Image File Name</th><td>'+iFileName+'</td></tr><tr><th>Image Field</th><td>'+iField+'</td></tr><tr><th>Image Field Description</th><td>'+iFieldDescription+'</td></tr><tr><th>Image Magnification</th><td>'+iMagnification+'</td></tr><tr><th>Image Resolution</th><td>'+iResolution+'</td></tr><tr><th>Image Resolution Unit</th><td>'+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+iSampleLabel+'</td></tr><tr><th>Image Sample Label Description</th><td>'+iSampleLabelDescription+'</td></tr><tr><th>Image Wavelength (ex/em nm)</th><td>'+iWavelength+'</td></tr><tr><th>Image Color Mapping</th><td>'+iColorMapping+'</td></tr><tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
+            $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small"><tr><th style="width: 250px;">Chip ID</th><td>'+
+                iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+
+                iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+
+                iWell+'</td></tr><tr><th>Time</th><td>'+
+                iTime+'</td></tr><tr><th>Method/Kit</th><td>'+
+                iMethodKit+'</td></tr><tr><th>Stains Key</th><td><b>'+
+                iStainPairings+'</td></tr></b><tr><th>Target/Analyte</th><td>'+
+                iTargetAnalyte+'</td></tr><tr><th>Sample Location</th><td>'+
+                iSampleLocation+'</td></tr><tr><th>Notes</th><td>'+
+                iNotes+'</td></tr><tr><th>Image File Name</th><td>'+
+                iFileName+'</td></tr><tr><th>Image Field</th><td>'+
+                iField.split(".")[0]+' <span data-toggle="tooltip" title="'+
+                iFieldDescription+'" class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></td></tr><tr><th>Image Magnification</th><td>'+
+                iMagnification.split(".")[0]+'x</td></tr><tr><th>Image Resolution</th><td>'+
+                iResolution+" "+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+
+                iSampleLabel+' <span data-toggle="tooltip" title="'+
+                iSampleLabelDescription+'" class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></td></tr><tr><th>Image Wavelength (ex/em nm)</th><td>'+
+                iWavelength+'</td></tr><tr><th>Image Color Mapping</th><td>'+
+                iColorMapping+'</td></tr><tr><th>Image Setting Note</th><td>'+
+                iSettingNote+'</td></tr></table></div></div>');
             $("#ui-id-1")[0].innerHTML = titleText;
         }
     };
@@ -150,7 +171,6 @@ $(document).ready(function () {
     });
 
     //Checkbox click event
-    // *All* checkboxes is maybe a little broad
     $("#filter_table").on("click",":checkbox", function() {
         var checkbox = $(this);
         var checkbox_id = $(this).attr('id');

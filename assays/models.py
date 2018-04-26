@@ -2391,6 +2391,7 @@ class AssayRunImage(models.Model):
             'well_id' : self.assay_well_id,
             'time' : "D"+str(int(self.time/24/60))+" H"+str(int(self.time/60%24))+" M" + str(int(self.time%60)),
             'method_kit' : self.method.name,
+            'stain_pairings' : self.method.alt_name,
             'target_analyte' : self.target.name,
             # Contrived for now
             'subtarget' : '',
