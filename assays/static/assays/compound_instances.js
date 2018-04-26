@@ -85,7 +85,7 @@ $(document).ready(function() {
             // ALL SUPPLIERS ARE SHOWN INSTEAD NOW
             function check_compound(obj) {
                 // Somewhat sloppy solution
-                if (obj.isTrigger) obj = this;
+                if (!obj || obj.isTrigger || obj.eventPhase) obj = this;
                 var current_supplier_text = $(obj)
                     .parent()
                     .parent()
@@ -112,13 +112,15 @@ $(document).ready(function() {
 
                 // Turn on autocomplete
                 current_supplier_text.attr('autocomplete', 'on');
+
+                check_supplier(current_supplier_text);
             }
             $(document).on('change', 'select[id$="compound"]', check_compound);
 
             // When a supplier is given
             // Sets lot based on given data
             function check_supplier(obj) {
-                if (obj.isTrigger) obj = this;
+                if (!obj || obj.isTrigger || obj.eventPhase) obj = this;
                 var current_row = $(obj)
                     .parent()
                     .parent();
@@ -153,13 +155,15 @@ $(document).ready(function() {
                     // Turn on autocomplete
                     current_lot_text.attr('autocomplete', 'on');
                 }
+
+                check_lot(current_lot_text);
             }
             $(document).on('change', 'input[id$="supplier_text"]', check_supplier);
 
             // When a lot is given
             // Sets receipt date based on given data
             function check_lot(obj) {
-                if (obj.isTrigger) obj = this;
+                if (!obj || obj.isTrigger || obj.eventPhase) obj = this;
                 var current_row = $(obj)
                     .parent()
                     .parent();

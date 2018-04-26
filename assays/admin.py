@@ -1976,6 +1976,8 @@ class AssayTargetFormAdmin(forms.ModelForm):
         model = AssayTarget
         widgets = {
             'description': forms.Textarea(attrs={'rows': 10}),
+            'name': forms.Textarea(attrs={'rows': 2}),
+            'alt_name': forms.Textarea(attrs={'rows': 2}),
         }
         exclude = ('',)
 
@@ -2002,6 +2004,7 @@ class AssayTargetAdmin(LockableAdmin):
             'Target', {
                 'fields': (
                     'name',
+                    'alt_name',
                     'short_name',
                     'description',
                 )
@@ -2217,6 +2220,8 @@ class AssayMethodFormAdmin(forms.ModelForm):
         model = AssayMethod
         widgets = {
             'description': forms.Textarea(attrs={'rows': 10}),
+            'name': forms.Textarea(attrs={'rows': 2}),
+            'alt_name': forms.Textarea(attrs={'rows': 2}),
         }
         exclude = ('',)
 
@@ -2244,6 +2249,7 @@ class AssayMethodAdmin(LockableAdmin):
             'Measurement Type', {
                 'fields': (
                     'name',
+                    'alt_name',
                     'description',
                     'measurement_type',
                     'supplier',
