@@ -116,7 +116,7 @@ $(document).ready(function () {
                 iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+
                 iWell+'</td></tr><tr><th>Time</th><td>'+
                 iTime+'</td></tr><tr><th>Method/Kit</th><td>'+
-                iMethodKit+'</td></tr><tr><th>Stains Key</th><td><b>'+
+                iMethodKit+'</td></tr><tr><th>Target-Stain Pairings</th><td><b>'+
                 iStainPairings+'</td></tr></b><tr><th>Target/Analyte</th><td>'+
                 iTargetAnalyte+'</td></tr><tr><th>Sample Location</th><td>'+
                 iSampleLocation+'</td></tr><tr><th>Notes</th><td>'+
