@@ -5,6 +5,20 @@
 {% endblock %}
 
 {% block content %}
-  <h2>{{full_name}}, you are now logged in.</h2>
+  <legend>
+      <div class="alert alert-success" role="alert">
+      <span class="sr-only">Success:</span>
+          <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>
+          {{ user.first_name }} {{ user.last_name }}, you are now logged in.
+      </div>
+  </legend>
+
+  <div class="padded-row large-padding-top padded-bottom text-center">
+        <a class="btn btn-xlarge btn-primary" href="/">
+            <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+            Back to Home Page
+        </a>
+  </div>
+
   <p>Click <a href="/accounts/logout/">here</a> to logout.</p>
 {% endblock %}

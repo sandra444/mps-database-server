@@ -228,10 +228,10 @@ def get_chip_readout_data_as_list_of_lists(chip_ids, chip_data=None, both_assay_
             'assay_instance__unit',
             'assay_chip_id__chip_setup__device',
             'assay_chip_id__chip_setup__organ_model',
-            'assay_chip_id__chip_setup__assaycompoundinstance_set__compound_instance__compound',
-            'assay_chip_id__chip_setup__assaycompoundinstance_set__concentration_unit',
-            'assay_chip_id__chip_setup__assaychipcells_set__cell_sample__cell_type__organ',
-            'assay_chip_id__chip_setup__assaychipcells_set__cell_sample__cell_subtype',
+            # 'assay_chip_id__chip_setup__assaycompoundinstance_set__compound_instance__compound',
+            # 'assay_chip_id__chip_setup__assaycompoundinstance_set__concentration_unit',
+            # 'assay_chip_id__chip_setup__assaychipcells_set__cell_sample__cell_type__organ',
+            # 'assay_chip_id__chip_setup__assaychipcells_set__cell_sample__cell_subtype',
             'sample_location'
         ).filter(
             assay_chip_id__in=chip_ids
@@ -247,7 +247,21 @@ def get_chip_readout_data_as_list_of_lists(chip_ids, chip_data=None, both_assay_
             quality__contains=REPLACED_DATA_POINT_CODE
         )
 
-        # related_compounds_map = get_related_compounds_map(readouts=chip_ids)
+    related_maps = {}
+    chip_ids = chip_ids.prefetch_related(
+        'chip_setup__assaycompoundinstance_set__compound_instance__compound',
+        'chip_setup__assaycompoundinstance_set__concentration_unit',
+        'chip_setup__assaychipcells_set__cell_sample__cell_type__organ',
+        'chip_setup__assaychipcells_set__cell_sample__cell_subtype',
+    )
+
+    for chip in chip_ids:
+        related_maps.update({
+            chip.chip_setup_id: {
+                'compounds': chip.chip_setup.stringify_compounds(),
+                'cells': chip.chip_setup.stringify_cells()
+            }
+        })
 
     data = []
 
@@ -278,10 +292,12 @@ def get_chip_readout_data_as_list_of_lists(chip_ids, chip_data=None, both_assay_
         device = data_point.assay_chip_id.chip_setup.device.name
         organ_model = data_point.assay_chip_id.chip_setup.organ_model
 
-        cells = data_point.assay_chip_id.chip_setup.stringify_cells()
+        # cells = data_point.assay_chip_id.chip_setup.stringify_cells()
+        cells = related_maps.get(data_point.assay_chip_id.chip_setup_id).get('cells')
 
         # compound_treatment = get_list_of_present_compounds(related_compounds_map, data_point, ' | ')
-        compound_treatment = data_point.assay_chip_id.chip_setup.stringify_compounds()
+        # compound_treatment = data_point.assay_chip_id.chip_setup.stringify_compounds()
+        compound_treatment = related_maps.get(data_point.assay_chip_id.chip_setup_id).get('compounds')
 
         value = data_point.value
 
@@ -507,7 +523,7 @@ def get_control_data_old(
     controls = {}
 
     data_points = list(AssayChipRawData.objects.filter(
-        assay_chip_id__chip_setup__assay_run_id=study
+        assay_chip_id__chip_setup__assay_run_id_id=study
     ).prefetch_related(
         *CHIP_DATA_PREFETCH
     ))
@@ -1016,7 +1032,7 @@ def get_related_compounds_map(readouts=None, study=None, data=None):
         setups = None
 
     related_compounds = AssayCompoundInstance.objects.filter(
-        chip_setup=setups
+        chip_setup_id__in=setups
     ).prefetch_related(
         'compound_instance__compound',
         'compound_instance__supplier',
@@ -1087,7 +1103,7 @@ def fetch_readouts(request):
     #     )
 
     raw_data = AssayChipRawData.objects.filter(
-        assay_chip_id=readouts
+        assay_chip_id__in=readouts
     ).prefetch_related(
         *CHIP_DATA_PREFETCH
     )
@@ -1594,7 +1610,7 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
         # TODO ORDER SUBJECT TO CHANGE
         data_points = AssayDataPoint.objects.prefetch_related(
             'study__group__microphysiologycenter_set',
-            'matrix_item__assaysetupsetting_set__setting__setting',
+            'matrix_item__assaysetupsetting_set__setting',
             'matrix_item__assaysetupcell_set__cell_sample',
             'matrix_item__assaysetupcell_set__density_unit',
             'matrix_item__assaysetupcell_set__cell_sample__cell_type__organ',
@@ -1610,7 +1626,7 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
             # Will use eventually, maybe
             'subtarget'
         ).filter(
-            matrix_item__in=ids,
+            matrix_item_id__in=ids,
             replaced=False
         ).order_by(
             'matrix_item__name',
@@ -1748,7 +1764,7 @@ def get_data_as_json(ids, data_points=None):
             # Will use eventually
             'subtarget'
         ).filter(
-            matrix_item__in=ids,
+            matrix_item_id__in=ids,
             # Just remove replaced datapoints initially
             replaced=False
         ).order_by(
@@ -1875,7 +1891,7 @@ def get_control_data(
     controls = {}
 
     data_points = list(AssayDataPoint.objects.filter(
-        study=study,
+        study_id=study,
         replaced=False
     ).prefetch_related(
         'study',
@@ -2013,7 +2029,8 @@ def get_item_groups(study):
     sorted_treatment_groups = sorted(
         treatment_groups.values(), key=lambda x: (
             x.get('compounds'),
-            x.get('organ_model'), x.get('cells'),
+            x.get('organ_model'),
+            x.get('cells'),
             x.get('settings'),
             x.get('setups_with_same_group')[0]
         )
@@ -2116,7 +2133,6 @@ def get_data_points_for_charting(
         method = study_assay.method.name
 
         sample_location = raw.sample_location.name
-        all_sample_locations.update({sample_location: True})
 
         setup_id = raw.matrix_item_id
         chip_id = raw.matrix_item.name
@@ -2152,6 +2168,9 @@ def get_data_points_for_charting(
             ).setdefault(
                 time, []
             ).append(value)
+
+            # Update all_sample_locations
+            all_sample_locations.update({sample_location: True})
 
     targets = [target_method[0] for target_method in initial_data.keys()]
 
@@ -2354,7 +2373,7 @@ def fetch_data_points(request):
         matrix_items = AssayMatrixItem.objects.filter(study=study)
 
     data_points = AssayDataPoint.objects.filter(
-        matrix_item__in=matrix_items
+        matrix_item_id__in=matrix_items
     ).prefetch_related(
         #TODO
         'study_assay__target',
@@ -2619,22 +2638,22 @@ def study_editor_validation(request):
 
 # TODO TODO TODO
 switch = {
-    'fetch_readout': {'call': fetch_readout},
+    # 'fetch_readout': {'call': fetch_readout},
     'fetch_center_id': {'call': fetch_center_id},
-    'fetch_chip_readout': {'call': fetch_chip_readout},
-    'fetch_readouts': {'call': fetch_readouts},
-    'fetch_dropdown': {'call': fetch_dropdown},
+    # 'fetch_chip_readout': {'call': fetch_chip_readout},
+    # 'fetch_readouts': {'call': fetch_readouts},
+    # 'fetch_dropdown': {'call': fetch_dropdown},
     'fetch_organ_models': {'call': fetch_organ_models},
     'fetch_protocols': {'call': fetch_protocols},
     'fetch_protocol': {'call': fetch_protocol},
-    'fetch_assay_run_reproducibility': {'call': fetch_assay_run_reproducibility},
-    'validate_bulk_file': {'call': validate_bulk_file},
-    'validate_individual_chip_file': {'call': validate_individual_chip_file},
-    'send_ready_for_sign_off_email_old': {
-        'call': send_ready_for_sign_off_email_old,
-        # 'validation': study_editor_validation
-    },
-    'send_ready_for_sign_off_email': {'call': fetch_device_dimensions},
+    # 'fetch_assay_run_reproducibility': {'call': fetch_assay_run_reproducibility},
+    # 'validate_bulk_file': {'call': validate_bulk_file},
+    # 'validate_individual_chip_file': {'call': validate_individual_chip_file},
+    # 'send_ready_for_sign_off_email_old': {
+    #     'call': send_ready_for_sign_off_email_old,
+    #     # 'validation': study_editor_validation
+    # },
+    'send_ready_for_sign_off_email': {'call': send_ready_for_sign_off_email},
     'fetch_device_dimensions': {'call': fetch_device_dimensions},
     'fetch_data_points': {
         'call': fetch_data_points,
@@ -2648,7 +2667,6 @@ switch = {
         'call': fetch_assay_study_reproducibility,
         'validation': study_viewer_validation
     },
-    # TODO TODO TODO
     'validate_data_file': {
         'call': validate_data_file,
         'validation': study_editor_validation

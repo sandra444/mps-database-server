@@ -51,6 +51,7 @@ $(document).ready(function() {
     });
 
     // Crude way to deal with resizing from images
+    // TODO TODO TODO REFACTOR
     setTimeout(function() {
          $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
     }, 500);

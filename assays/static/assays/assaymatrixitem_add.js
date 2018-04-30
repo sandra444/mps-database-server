@@ -546,20 +546,22 @@ $(document).ready(function() {
     device.change(function() {
         // Get organ models
         window.get_organ_models(device.val());
-    }).trigger('change');
+    });
+
+    window.get_organ_models(device.val());
 
     organ_model.change(function() {
         // Get and display correct protocol options
         window.get_protocols(organ_model.val());
-    }).trigger('change');
+    });
+
+    window.get_protocols(organ_model.val());
 
     protocol.change(function() {
         window.display_protocol(protocol.val());
-    }).trigger('change');
+    });
 
-    // device.trigger('change');
-    // organ_model.trigger('change');
-    // protocol.trigger('change');
+    window.display_protocol(protocol.val());
 
     // Post submission operation
     // Special operations for pre-submission

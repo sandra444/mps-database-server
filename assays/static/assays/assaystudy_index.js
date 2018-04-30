@@ -13,7 +13,7 @@ $(document).ready(function() {
     ];
 
     // var middleware_token = getCookie('csrftoken');
-    var study_id = Math.floor(window.location.href.split('/')[4]);
+    var study_id = Math.floor(window.location.href.split('/')[5]);
 
     $.each(ids, function(index, table_id) {
         if ($(table_id)[0]) {

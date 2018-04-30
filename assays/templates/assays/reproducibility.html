@@ -11,7 +11,8 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li><a href="/assays/reproducibility/">Reproducibility</a></li>
+{#    <li><a href="/assays/reproducibility/">Reproducibility</a></li>#}
+    <li><a href="/assays/study/">Studies</a></li>
     <li><a href="/assays/{{ object.id }}/summary">{{ object }}</a></li>
     <li class="active">Reproducibility Analysis</li>
 {% endblock %}
@@ -24,19 +25,21 @@
             </h1>
         </div>
         <div class="row text-center small-padding-top">
-            <a href="/assays/reproducibility" class="btn btn-primary" role="primary">Reproducibility List</a>
-            <a href="/assays/{{ object.id }}" class="btn btn-primary" role="button">Study Landing</a>
+{#            <a href="/assays/reproducibility" class="btn btn-primary" role="primary">Reproducibility List</a>#}
+{#            <a href="/assays/{{ object.id }}" class="btn btn-primary" role="button">Study Landing</a>#}
             <a href="/assays/{{ object.id }}/summary" class="btn btn-info" role="button">Study Summary</a>
         </div>
     </div>
 {% endblock %}
 <br>
 {% block fluid-content %}
-    <div style='padding: 10px;'>
+    <div class="row padded-row">
+        <div class="col-xs-12">
         <label>Replica Set Table</label>
-        <table id='gas-table' class='table table-hover table-striped table-bordered'>
+        <table id='gas-table' class="display table-bordered" cellspacing="0" width="100%">
 
         </table>
+        </div>
     </div>
 
     <br><hr><br>

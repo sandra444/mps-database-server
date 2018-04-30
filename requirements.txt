@@ -1,7 +1,7 @@
 matplotlib
 django-uwsgi-cache
 networkx
-Django==1.8.18
+Django==1.11.12
 Jinja2
 Markdown
 MarkupSafe
@@ -60,7 +60,8 @@ wsgiref
 wstools
 django-import-export
 # Frozen partially to indicate new version not compatible with django 1.8
-django-alphafilter==0.8
+# django-alphafilter==0.8
+django-alphafilter==1.0
 django-simple-captcha
 django-contrib-comments
 #Using whoosh for now, may switch to a more sophisticated search engine later

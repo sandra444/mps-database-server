@@ -117,7 +117,8 @@ class MicrodeviceAdmin(LockableAdmin):
     list_per_page = 300
     list_display = ('name', 'organ', 'center', 'manufacturer',
                     'description')
-    search_fields = ['name', 'organ', 'center',  'description']
+    # TODO REVISE ORGAN_NAME
+    search_fields = ['name', 'organ__organ_name', 'center__name',  'description']
     list_filter = ['organ', 'center', ]
 
     fieldsets = (
@@ -244,7 +245,7 @@ class OrganModelAdmin(LockableAdmin):
     list_display = (
         'name', 'organ', 'device', 'center', 'description', 'mps', 'epa', 'tctc')
     search_fields = [
-        'name', 'organ', 'device', 'center', 'description']
+        'name', 'organ__organ_name', 'device__name', 'center__name', 'description']
     readonly_fields = ['created_by', 'created_on',
                        'modified_by', 'modified_on']
 

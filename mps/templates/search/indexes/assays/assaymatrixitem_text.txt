@@ -1,0 +1,17 @@
+{{ object }}
+{{ object.name }}
+{{ object.device }}
+{{ object.organ_model }}
+{{ object.organ_model_protocol }}
+{{ object.scientist }}
+{{ object.notes }}
+{{ object.notebook }}
+{{ object.created_by.first_name }}
+{{ object.created_by.last_name }}
+{{ object.group }}
+{% for cell in object.assaysetupcell_set.all %}
+  {{ cell }}
+{% endfor %}
+{% for compound in object.assaysetupcompound_set.all %}
+  {{ compound }}
+{% endfor %}

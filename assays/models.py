@@ -277,13 +277,13 @@ class AssayCompoundInstance(models.Model):
             )
         ]
 
-        # ordering = (
-        #     'compound_instance',
-        #     'concentration',
-        #     'concentration_unit',
-        #     'addition_time',
-        #     'duration'
-        # )
+        ordering = (
+            'addition_time',
+            'compound_instance_id',
+            'concentration_unit_id',
+            'concentration',
+            'duration',
+        )
 
     # Stop-gap, subject to change
     chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True)
@@ -659,7 +659,7 @@ class AssayStudyConfiguration(LockableModel):
         verbose_name = 'Study Configuration'
 
     # Length subject to change
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=255, unique=True)
 
     # DEPRECATED when would we ever want an individual configuration?
     # study_format = models.CharField(
@@ -668,8 +668,8 @@ class AssayStudyConfiguration(LockableModel):
     #     default='integrated'
     # )
 
-    media_composition = models.CharField(max_length=1000, blank=True, default='')
-    hardware_description = models.CharField(max_length=1000, blank=True, default='')
+    media_composition = models.CharField(max_length=4000, blank=True, default='')
+    hardware_description = models.CharField(max_length=4000, blank=True, default='')
     # Subject to removal
     # image = models.ImageField(upload_to="configuration",null=True, blank=True)
 
@@ -801,6 +801,13 @@ class AssayRun(FlaggableRestrictedModel):
     def get_delete_url(self):
         return '/assays/{}/delete/'.format(self.id)
 
+    def get_images_url(self):
+        return '{}images/'.format(self.get_absolute_url())
+
+    # Dubiously useful, but maybe
+    def get_list_url(self):
+        return '/assays/'
+
 
 # Get readout file location
 def study_supporting_data_location(instance, filename):
@@ -897,14 +904,14 @@ cell_choice_dict = {
 class AssayChipCells(models.Model):
     """Individual cell parameters for CHIP setup used in inline"""
 
-    # class Meta(object):
-    #     ordering = (
-    #         'cell_sample',
-    #         'cell_biosensor',
-    #         'cellsample_density',
-    #         'cellsample_density_unit',
-    #         'cell_passage'
-    #     )
+    class Meta(object):
+        ordering = (
+            'cell_sample_id',
+            'cell_biosensor_id',
+            'cellsample_density',
+            'cellsample_density_unit',
+            'cell_passage'
+        )
 
     assay_chip = models.ForeignKey('AssayChipSetup')
     cell_sample = models.ForeignKey('cellsamples.CellSample')
@@ -1311,6 +1318,9 @@ class AssayTarget(LockableModel):
 
     short_name = models.CharField(max_length=20, unique=True)
 
+    # Tentative
+    alt_name = models.CharField(max_length=1000, blank=True, default='')
+
     def __unicode__(self):
         return u'{0} ({1})'.format(self.name, self.short_name)
 
@@ -1355,6 +1365,9 @@ class AssayMethod(LockableModel):
     # TODO STORAGE LOCATION
     # TODO TEMPORARILY NOT REQUIRED
     protocol_file = models.FileField(upload_to='assays', null=True, blank=True)
+
+    # Tentative
+    alt_name = models.CharField(max_length=1000, blank=True, default='')
 
     def __unicode__(self):
         return self.name
@@ -1520,6 +1533,13 @@ class AssayStudy(FlaggableModel):
 
     def get_reproducibility_url(self):
         return '{}reproducibility/'.format(self.get_absolute_url())
+
+    def get_images_url(self):
+        return '{}images/'.format(self.get_absolute_url())
+
+    # Dubiously useful, but maybe
+    def get_list_url(self):
+        return '/assays/assaystudy/'
 
 
 # ON THE FRONT END, MATRICES ARE LIKELY TO BE CALLED STUDY SETUPS
@@ -1688,6 +1708,7 @@ class AssayMatrixItem(FlaggableModel):
             setting_tuple.append((
                 setting.setting_id,
                 setting.unit_id,
+                setting.addition_location
             ))
 
         return tuple(sorted(setting_tuple))
@@ -1712,7 +1733,8 @@ class AssayMatrixItem(FlaggableModel):
                 cell.biosensor_id,
                 cell.density,
                 cell.density_unit,
-                cell.passage
+                cell.passage,
+                cell.addition_location
             ))
 
         return tuple(sorted(cell_tuple))
@@ -1738,6 +1760,7 @@ class AssayMatrixItem(FlaggableModel):
                 compound.concentration_unit_id,
                 compound.addition_time,
                 compound.duration,
+                compound.addition_location
             ))
 
         return tuple(sorted(compound_tuple))
@@ -1759,6 +1782,7 @@ class AssayMatrixItem(FlaggableModel):
             'organ_model': self.get_hyperlinked_model_or_device(),
             'compounds': self.stringify_compounds(),
             'cells': self.stringify_cells(),
+            'settings': self.stringify_settings(),
             'setups_with_same_group': []
         }
         return dic
@@ -1804,6 +1828,17 @@ class AssaySetupCell(models.Model):
             )
         ]
 
+        ordering = (
+            'addition_time',
+            'cell_sample',
+            'addition_location',
+            'biosensor',
+            'density',
+            'density_unit',
+            'passage'
+        )
+
+
     # Now binds directly to items
     matrix_item = models.ForeignKey(AssayMatrixItem)
 
@@ -1843,11 +1878,21 @@ class AssaySetupCell(models.Model):
     addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
 
     def __unicode__(self):
-        return u'{0}\n-{1:.0e} {2}'.format(
-            self.cell_sample,
-            self.density,
-            self.density_unit.unit
-        )
+        if self.addition_location:
+            return u'{0} [{1}]\n-{2:.0e} {3}\nAdded to: {4}'.format(
+                self.cell_sample,
+                self.passage,
+                self.density,
+                self.density_unit.unit,
+                self.addition_location
+            )
+        else:
+            return u'{0} [{1}]\n-{2:.0e} {3}'.format(
+                self.cell_sample,
+                self.passage,
+                self.density,
+                self.density_unit.unit,
+            )
 
 
 # DO WE WANT TRACKING INFORMATION FOR INDIVIDUAL POINTS?
@@ -1864,7 +1909,9 @@ class AssayDataPoint(models.Model):
                 'update_number',
                 'assay_plate_id',
                 'assay_well_id',
-                'replicate'
+                'replicate',
+                # Be sure to include subtarget!
+                'subtarget'
             )
         ]
 
@@ -1980,6 +2027,15 @@ class AssaySetupCompound(models.Model):
             )
         ]
 
+        ordering = (
+            'addition_time',
+            'compound_instance',
+            'addition_location',
+            'concentration_unit',
+            'concentration',
+            'duration',
+        )
+
     # Now binds directly to items
     matrix_item = models.ForeignKey(AssayMatrixItem)
 
@@ -2021,13 +2077,23 @@ class AssaySetupCompound(models.Model):
         )
 
     def __unicode__(self):
-        return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
-            self.compound_instance.compound.name,
-            self.concentration,
-            self.concentration_unit.unit,
-            self.get_addition_time_string(),
-            self.get_duration_string()
-        )
+        if self.addition_location:
+            return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}; Added to: {5}'.format(
+                self.compound_instance.compound.name,
+                self.concentration,
+                self.concentration_unit.unit,
+                self.get_addition_time_string(),
+                self.get_duration_string(),
+                self.addition_location
+            )
+        else:
+            return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
+                self.compound_instance.compound.name,
+                self.concentration,
+                self.concentration_unit.unit,
+                self.get_addition_time_string(),
+                self.get_duration_string(),
+            )
 
 
 # TODO MODIFY StudySupportingData
@@ -2135,10 +2201,10 @@ class AssaySetupSetting(models.Model):
                 # 'setup',
                 'matrix_item',
                 'setting',
+                'addition_location',
                 'unit',
                 'addition_time',
                 'duration',
-                'addition_location'
             )
         ]
 
@@ -2223,3 +2289,79 @@ class AssayStudyAssay(models.Model):
 
     def __unicode__(self):
         return u'{0}|{1}|{2}'.format(self.target, self.method, self.unit)
+
+
+class AssayImageSetting(models.Model):
+    # Requested, not sure how useful
+    # May want to remove soon, why have this be specific to a study? Deletion cascade?
+    study = models.ForeignKey(AssayStudy)
+    # This is necessary in TongYing's scheme, but it is kind of confusing in a way
+    label_id = models.CharField(max_length=40)
+    label_name = models.CharField(max_length=255)
+    label_description = models.CharField(max_length=500)
+    wave_length = models.CharField(max_length=255)
+    magnification = models.CharField(max_length=40)
+    resolution = models.CharField(max_length=40)
+    resolution_unit = models.CharField(max_length=40)
+    # May be useful later
+    notes = models.CharField(max_length=500, default='')
+    color_mapping = models.CharField(max_length=255, default='')
+
+    def __unicode__(self):
+        return u'{} {}'.format(self.study.name, self.label_name)
+
+
+class AssayImage(models.Model):
+    # May want to have an FK to study for convenience?
+    # study = models.ForeignKey(AssayStudy)
+    # The associated item
+    matrix_item = models.ForeignKey(AssayMatrixItem)
+    # The file name
+    file_name = models.CharField(max_length=255)
+    field = models.CharField(max_length=255)
+    field_description = models.CharField(max_length=500, default='')
+    # Stored in minutes
+    time = models.FloatField()
+    # Possibly used later, who knows
+    assay_plate_id = models.CharField(max_length=40, default='N/A')
+    assay_well_id = models.CharField(max_length=40, default='N/A')
+    # PLEASE NOTE THAT I USE TARGET AND METHOD SEPARATE FROM ASSAY INSTANCE
+    method = models.ForeignKey(AssayMethod)
+    target = models.ForeignKey(AssayTarget)
+    # May become useful
+    subtarget = models.ForeignKey(AssaySubtarget)
+    sample_location = models.ForeignKey(AssaySampleLocation)
+    notes = models.CharField(max_length=500, default='')
+    replicate = models.CharField(max_length=40, default='')
+    setting = models.ForeignKey(AssayImageSetting)
+
+    def get_metadata(self):
+        return {
+            'matrix_item_id': self.matrix_item_id,
+            'chip_id': self.matrix_item.name,
+            'plate_id' : self.assay_plate_id,
+            'well_id' : self.assay_well_id,
+            'time' : "D"+str(int(self.time/24/60))+" H"+str(int(self.time/60%24))+" M" + str(int(self.time%60)),
+            'method_kit' : self.method.name,
+            'stain_pairings': self.method.alt_name,
+            'target_analyte' : self.target.name,
+            'subtarget' : self.subtarget.name,
+            'sample_location' : self.sample_location.name,
+            'replicate' : self.replicate,
+            'notes' : self.notes,
+            'file_name' : self.file_name,
+            'field' : self.field,
+            'field_description' : self.field_description,
+            'magnification' : self.setting.magnification,
+            'resolution' : self.setting.resolution,
+            'resolution_unit' : self.setting.resolution_unit,
+            'sample_label' : self.setting.label_name,
+            'sample_label_description' : self.setting.label_description,
+            'wavelength' : self.setting.wave_length,
+            'color_mapping' : self.setting.color_mapping,
+            'setting_notes' : self.setting.notes,
+        }
+
+    def __unicode__(self):
+        return u'{}'.format(self.file_name)
+

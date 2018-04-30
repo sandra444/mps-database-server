@@ -60,7 +60,9 @@ from assays.forms import (
     AssaySetupSettingInlineFormSetFactory,
     AssayStudySignOffForm,
     AssayStudyStakeholderFormSetFactory,
-    AssayStudyDataUploadForm
+    AssayStudyDataUploadForm,
+    AssayImage,
+    AssayImageSetting
 )
 from django import forms
 
@@ -141,6 +143,7 @@ import pytz
 # TODO ^ Update Views should be refactored soon
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
+
 def add_study_fields_to_form(self, form, add_study=False):
     """Adds study, group, and restricted to a form
 
@@ -211,7 +214,7 @@ def get_queryset_with_organ_model_map_old(queryset):
 def get_queryset_with_assay_map(queryset):
     """Takes a queryset and returns it with a assay map"""
     data_points = AssayChipRawData.objects.filter(
-        assay_chip_id__in=queryset
+        assay_chip_id_id__in=queryset
     ).exclude(
         quality__contains=REPLACED_DATA_POINT_CODE
     ).prefetch_related(
@@ -266,7 +269,7 @@ def get_compound_instance_and_cell_strings_for_queryset(setups):
     setups - a queryset of AssayChipSetups
     """
     related_compounds = AssayCompoundInstance.objects.filter(
-        chip_setup=setups
+        chip_setup_id__in=setups
     ).prefetch_related(
         'compound_instance__compound',
         'compound_instance__supplier',
@@ -288,7 +291,7 @@ def get_compound_instance_and_cell_strings_for_queryset(setups):
 
     related_cells = AssayChipCells.objects.filter(
         # Idiosyncratic field name because schema needs to be revised
-        assay_chip=setups
+        assay_chip_id__in=setups
     ).prefetch_related(
         'cell_sample__cell_subtype',
         'cell_sample__cell_type__organ',
@@ -314,23 +317,23 @@ def get_data_file_uploads(study=None, matrix_item=None):
 
     if study:
         data_file_uploads = AssayDataFileUpload.objects.filter(
-            study=study
+            study_id=study
         ).distinct().order_by('created_on')
 
         data_points = AssayDataPoint.objects.filter(
-            study=study
+            study_id=study
         ).exclude(
             replaced=True
         )
     elif matrix_item:
         data_file_uploads = AssayDataFileUpload.objects.filter(
-            study=matrix_item.study
+            study_id=matrix_item.study
         ).prefetch_related(
             'created_by'
         ).distinct().order_by('created_on')
 
         data_points = AssayDataPoint.objects.filter(
-            study=study
+            study_id=study
         ).exclude(
             replaced=True
         )
@@ -366,7 +369,7 @@ def get_data_uploads(study=None, chip_readout=None, plate_readout=None):
         ).distinct().order_by('created_on')
 
         data_points = AssayChipRawData.objects.filter(
-            assay_chip_id__chip_setup__assay_run_id=study
+            assay_chip_id__chip_setup__assay_run_id_id=study
         ).exclude(
             quality__contains=REPLACED_DATA_POINT_CODE
         ).prefetch_related(
@@ -381,7 +384,7 @@ def get_data_uploads(study=None, chip_readout=None, plate_readout=None):
         ).distinct().order_by('created_on')
 
         data_points = AssayChipRawData.objects.filter(
-            assay_chip_id=chip_readout
+            assay_chip_id_id=chip_readout
         ).exclude(
             quality__contains=REPLACED_DATA_POINT_CODE
         ).prefetch_related(
@@ -756,7 +759,7 @@ class StudyIndex(StudyViewershipMixin, DetailView):
 
         # THIS CODE SHOULD NOT GET REPEATED AS OFTEN AS IT IS
         setups = AssayChipSetup.objects.filter(
-            assay_run_id=self.object
+            assay_run_id_id=self.object
         ).prefetch_related(
             'organ_model',
             'device',
@@ -770,7 +773,7 @@ class StudyIndex(StudyViewershipMixin, DetailView):
         context['setups'] = setups
 
         readouts = AssayChipReadout.objects.filter(
-            chip_setup=context['setups']
+            chip_setup_id__in=context['setups']
         ).prefetch_related(
             'created_by',
             'chip_setup__compound',
@@ -789,10 +792,10 @@ class StudyIndex(StudyViewershipMixin, DetailView):
             'assay_result__chip_readout__chip_setup__compound',
             'assay_result__created_by'
         ).filter(
-            assay_result__chip_readout=context['readouts']
+            assay_result__chip_readout__in=context['readouts']
         )
 
-        context['number_of_results'] = AssayChipTestResult.objects.filter(chip_readout=context['readouts']).count()
+        context['number_of_results'] = AssayChipTestResult.objects.filter(chip_readout__in=context['readouts']).count()
 
         # PLATES
         # Removed
@@ -945,7 +948,8 @@ class AssayRunAdd(OneGroupRequiredMixin, CreateView):
 
         return context
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 
@@ -1032,7 +1036,8 @@ class AssayRunUpdate(ObjectGroupRequiredMixin, UpdateView):
 
         return context
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 
@@ -1249,7 +1254,7 @@ class AssayRunSignOff(UpdateView):
             # Local datetime
             tz = pytz.timezone('US/Eastern')
             datetime_now_local = datetime.now(tz)
-            thirty_days_from_date = datetime_now_local + timedelta(days=30)
+            fourteen_days_from_date = datetime_now_local + timedelta(days=14)
 
             send_initial_sign_off_alert = False
             initial_number_of_required_sign_offs = AssayRunStakeholder.objects.filter(
@@ -1307,7 +1312,7 @@ class AssayRunSignOff(UpdateView):
                             {
                                 'user': user_to_be_alerted,
                                 'study': self.object,
-                                'thirty_days_from_date': thirty_days_from_date
+                                'fourteen_days_from_date': fourteen_days_from_date
                             }
                         )
                     except TemplateDoesNotExist:
@@ -1602,12 +1607,12 @@ class AssayRunDelete(DeletionMixin, DeleteView):
             'compound',
             'unit'
         )
-        context['chip_readouts'] = AssayChipReadout.objects.filter(chip_setup=context['chip_setups'])
-        context['chip_results'] = AssayChipTestResult.objects.filter(chip_readout=context['chip_readouts'])
+        context['chip_readouts'] = AssayChipReadout.objects.filter(chip_setup__in=context['chip_setups'])
+        context['chip_results'] = AssayChipTestResult.objects.filter(chip_readout__in=context['chip_readouts'])
 
         context['plate_setups'] = AssayPlateSetup.objects.filter(assay_run_id=self.object)
-        context['plate_readouts'] = AssayPlateReadout.objects.filter(setup=context['plate_setups'])
-        context['plate_results'] = AssayPlateTestResult.objects.filter(readout=context['plate_readouts'])
+        context['plate_readouts'] = AssayPlateReadout.objects.filter(setup__in=context['plate_setups'])
+        context['plate_results'] = AssayPlateTestResult.objects.filter(readout__in=context['plate_readouts'])
 
         return self.render_to_response(context)
 
@@ -1723,7 +1728,8 @@ class AssayChipSetupAdd(StudyGroupRequiredMixin, CreateView):
     # Specify that cloning is permitted
     cloning_permitted = True
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         if self.request.method == 'POST':
             form = form_class(self.request.POST)
         elif self.request.GET.get('clone', ''):
@@ -1871,7 +1877,7 @@ class AssayChipSetupDelete(DeletionMixin, DeleteView):
         context = self.get_context_data()
 
         context['readouts'] = AssayChipReadout.objects.filter(chip_setup=self.object)
-        context['results'] = AssayChipTestResult.objects.filter(chip_readout=context['readouts'])
+        context['results'] = AssayChipTestResult.objects.filter(chip_readout__in=context['readouts'])
 
         return self.render_to_response(context)
 
@@ -1924,7 +1930,8 @@ class AssayChipReadoutAdd(StudyGroupRequiredMixin, CreateView):
     # Specify that cloning is permitted
     cloning_permitted = True
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
         if self.request.method == 'POST':
@@ -2043,7 +2050,8 @@ class AssayChipReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
     template_name = 'assays/assaychipreadout_add.html'
     form_class = AssayChipReadoutForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = self.object.chip_setup.assay_run_id
         current = self.object.chip_setup_id
 
@@ -2170,7 +2178,8 @@ class AssayChipTestResultAdd(StudyGroupRequiredMixin, CreateView):
     template_name = 'assays/assaychiptestresult_add.html'
     form_class = AssayChipResultForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
 
@@ -2239,7 +2248,8 @@ class AssayChipTestResultUpdate(StudyGroupRequiredMixin, UpdateView):
     template_name = 'assays/assaychiptestresult_add.html'
     form_class = AssayChipResultForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = self.object.chip_readout.chip_setup.assay_run_id
         current = self.object.chip_readout_id
 
@@ -2396,7 +2406,8 @@ class AssayLayoutAdd(OneGroupRequiredMixin, CreateView):
     form_class = AssayLayoutForm
     template_name = 'assays/assaylayout_add.html'
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 
@@ -2430,7 +2441,8 @@ class AssayLayoutUpdate(ObjectGroupRequiredMixin, UpdateView):
     form_class = AssayLayoutForm
     template_name = 'assays/assaylayout_add.html'
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 
@@ -2471,8 +2483,8 @@ class AssayLayoutDelete(DeletionMixin, DeleteView):
         context = self.get_context_data()
 
         context['setups'] = AssayPlateSetup.objects.filter(assay_layout=self.object)
-        context['readouts'] = AssayPlateReadout.objects.filter(setup=context['setups'])
-        context['results'] = AssayPlateTestResult.objects.filter(readout=context['readouts'])
+        context['readouts'] = AssayPlateReadout.objects.filter(setup__in=context['setups'])
+        context['results'] = AssayPlateTestResult.objects.filter(readout__in=context['readouts'])
 
         return self.render_to_response(context)
 
@@ -2522,7 +2534,8 @@ class AssayPlateSetupAdd(StudyGroupRequiredMixin, CreateView):
     # Specify that cloning is permitted
     cloning_permitted = True
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         if self.request.method == 'POST':
             form = form_class(self.request.POST)
         elif self.request.GET.get('clone', ''):
@@ -2693,7 +2706,8 @@ class AssayPlateReadoutAdd(StudyGroupRequiredMixin, CreateView):
     # Specify that cloning is permitted
     cloning_permitted = True
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
         if self.request.method == 'POST':
@@ -2811,7 +2825,8 @@ class AssayPlateReadoutUpdate(StudyGroupRequiredMixin, UpdateView):
     template_name = 'assays/assayplatereadout_add.html'
     form_class = AssayPlateReadoutForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = self.object.setup.assay_run_id
         current = self.object.setup_id
         if self.request.method == 'POST':
@@ -2931,7 +2946,8 @@ class AssayPlateTestResultAdd(StudyGroupRequiredMixin, CreateView):
     template_name = 'assays/assayplatetestresult_add.html'
     form_class = AssayPlateResultForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = get_object_or_404(AssayRun, pk=self.kwargs['study_id'])
         current = None
 
@@ -2989,7 +3005,8 @@ class AssayPlateTestResultUpdate(StudyGroupRequiredMixin, UpdateView):
     template_name = 'assays/assayplatetestresult_add.html'
     form_class = AssayPlateResultForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         study = self.object.readout.setup.assay_run_id
         current = self.object.readout_id
 
@@ -3037,7 +3054,8 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
     template_name = 'assays/readoutbulkupload.html'
     form_class = ReadoutBulkUploadForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # If POST
         if self.request.method == 'POST':
             return form_class(self.request.POST, self.request.FILES, request=self.request, instance=self.get_object())
@@ -3056,7 +3074,7 @@ class ReadoutBulkUpload(ObjectGroupRequiredMixin, UpdateView):
         ).prefetch_related('setup')
 
         data_points = AssayChipRawData.objects.filter(
-            assay_chip_id__chip_setup__assay_run_id=self.object
+            assay_chip_id__chip_setup__assay_run_id_id=self.object
         ).exclude(
             quality__contains=REPLACED_DATA_POINT_CODE
         ).prefetch_related(
@@ -3224,8 +3242,23 @@ def get_queryset_with_number_of_data_points(queryset):
             data_point.study_id: current_value + 1
         })
 
+    images = AssayImage.objects.all().prefetch_related(
+        'matrix_item'
+    )
+
+    images_map = {}
+
+    for image in images:
+        current_value = images_map.setdefault(
+            image.matrix_item.study_id, 0
+        )
+        images_map.update({
+            image.matrix_item.study_id: current_value + 1
+        })
+
     for study in queryset:
         study.data_points = data_points_map.get(study.id, 0)
+        study.images = images_map.get(study.id, 0)
 
 
 # TODO GET NUMBER OF DATA POINTS
@@ -3346,7 +3379,8 @@ class AssayStudyAdd(OneGroupRequiredMixin, CreateView):
     template_name = 'assays/assaystudy_add.html'
     form_class = AssayStudyForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 
@@ -3402,7 +3436,8 @@ class AssayStudyUpdate(ObjectGroupRequiredMixin, UpdateView):
     template_name = 'assays/assaystudy_add.html'
     form_class = AssayStudyForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 
@@ -3479,7 +3514,7 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
         )
 
         items = AssayMatrixItem.objects.filter(
-            matrix=matrices
+            matrix_id__in=matrices
         ).prefetch_related(
             'device',
             'created_by',
@@ -3487,12 +3522,15 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
             'organ_model',
             'assaysetupcompound_set__compound_instance__compound',
             'assaysetupcompound_set__concentration_unit',
+            'assaysetupcompound_set__addition_location',
             'assaysetupcell_set__cell_sample__cell_type__organ',
             'assaysetupcell_set__cell_sample__cell_subtype',
             'assaysetupcell_set__cell_sample__supplier',
+            'assaysetupcell_set__addition_location',
             'assaysetupcell_set__density_unit',
             'assaysetupsetting_set__setting',
             'assaysetupsetting_set__unit',
+            'assaysetupsetting_set__addition_location',
         )
 
         # Cellsamples will always be the same
@@ -3657,6 +3695,10 @@ class AssayStudySignOff(UpdateView):
         )
 
         if form.is_valid() and stakeholder_formset.is_valid():
+            tz = pytz.timezone('US/Eastern')
+            datetime_now_local = datetime.now(tz)
+            fourteen_days_from_date = datetime_now_local + timedelta(days=14)
+
             send_initial_sign_off_alert = False
             initial_number_of_required_sign_offs = AssayStudyStakeholder.objects.filter(
                 study=self.object,
@@ -3714,7 +3756,8 @@ class AssayStudySignOff(UpdateView):
                             'assays/email/tctc_stakeholder_email.txt',
                             {
                                 'user': user_to_be_alerted,
-                                'study': self.object
+                                'study': self.object,
+                                'fourteen_days_from_date': fourteen_days_from_date
                             }
                         )
                     except TemplateDoesNotExist:
@@ -3867,7 +3910,8 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
     template_name = 'assays/assaystudy_upload.html'
     form_class = AssayStudyDataUploadForm
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # If POST
         if self.request.method == 'POST':
             return form_class(self.request.POST, self.request.FILES, request=self.request, instance=self.get_object())
@@ -3990,7 +4034,8 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
 
         return super(AssayMatrixAdd, self).post(request, **kwargs)
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get the study
         study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
 
@@ -4071,7 +4116,8 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
 
         return super(AssayMatrixUpdate, self).post(request, **kwargs)
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get the study
         study = self.object.study
 
@@ -4560,81 +4606,122 @@ class AssayStudyReproducibility(StudyViewerMixin, DetailView):
     model = AssayStudy
     template_name = 'assays/assaystudy_reproducibility.html'
 
-    # def get(self, request, *args, **kwargs):
-    #     self.object = self.get_object()
-    #     context = self.get_context_data(object=self.object)
-    #
-    #     # If chip data
-    #     matrix_items = AssayMatrixItem.objects.filter(
-    #         study_id=self.object.id
-    #     )
-    #
-    #     # Boolean
-    #     #include_all = self.request.GET.get('include_all', False)
-    #     chip_data = get_data_as_list_of_lists(matrix_items, include_header=True, include_all=False)
-    #
-    #     repro_data = get_repro_data(chip_data)
-    #
-    #     gas_list = repro_data['reproducibility_results_table']['data']
-    #     gas_list = json.dumps(gas_list)
-    #     context['gas_list'] = gas_list
-    #
-    #     mad_list = {}
-    #     cv_list = {}
-    #     chip_list = {}
-    #     comp_list = {}
-    #     for x in range(len(repro_data)-1):
-    #         # mad_list
-    #         mad_list[x+1] = {'columns':repro_data[x]['mad_score_matrix']['columns']}
-    #         for y in range(len(repro_data[x]['mad_score_matrix']['index'])):
-    #             repro_data[x]['mad_score_matrix']['data'][y].insert(0, repro_data[x]['mad_score_matrix']['index'][y])
-    #         mad_list[x+1]['data'] = repro_data[x]['mad_score_matrix']['data']
-    #         # cv_list
-    #         if repro_data[x].get('comp_ICC_Value'):
-    #             cv_list[x+1] = [['Time', 'CV (%)']]
-    #             for y in range(len(repro_data[x]['CV_array']['index'])):
-    #                 repro_data[x]['CV_array']['data'][y].insert(0, repro_data[x]['CV_array']['index'][y])
-    #             for entry in repro_data[x]['CV_array']['data']:
-    #                 cv_list[x+1].append(entry)
-    #         # chip_list
-    #         repro_data[x]['cv_chart']['columns'].insert(0,"Time (days)")
-    #         chip_list[x+1] = [repro_data[x]['cv_chart']['columns']]
-    #         for y in range(len(repro_data[x]['cv_chart']['index'])):
-    #             repro_data[x]['cv_chart']['data'][y].insert(0, repro_data[x]['cv_chart']['index'][y])
-    #         for z in range(len(repro_data[x]['cv_chart']['data'])):
-    #             chip_list[x+1].append(repro_data[x]['cv_chart']['data'][z])
-    #         # comp_list
-    #         if repro_data[x].get('comp_ICC_Value'):
-    #             comp_list[x+1] = []
-    #             for y in range(len(repro_data[x]['comp_ICC_Value']['Chip ID'])):
-    #                 comp_list[x+1].insert(y, [])
-    #                 comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Chip ID'][y])
-    #                 comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['ICC Absolute Agreement'][y])
-    #                 comp_list[x+1][y].append(repro_data[x]['comp_ICC_Value']['Missing Data Points'][y])
-    #
-    #     mad_list = json.dumps(mad_list)
-    #     context['mad_list'] = mad_list
-    #
-    #     cv_list = json.dumps(cv_list)
-    #     context['cv_list'] = cv_list
-    #
-    #     chip_list = json.dumps(chip_list)
-    #     context['chip_list'] = chip_list
-    #
-    #     comp_list = json.dumps(comp_list)
-    #     context['comp_list'] = comp_list
-    #
-    #     # get_user_status_context(self, context)
-    #
-    #     return self.render_to_response(context)
-
 
 # TODO Class-based view for direct reproducibility access.
-class AssayStudyReproducibilityList(AssayStudyList):
-    """Displays all of the studies linked to groups that the user is part of"""
-    def get_context_data(self, **kwargs):
-        context = super(AssayStudyReproducibilityList, self).get_context_data()
+# class AssayStudyReproducibilityList(AssayStudyList):
+#     """Displays all of the studies linked to groups that the user is part of"""
+#     def get_context_data(self, **kwargs):
+#         context = super(AssayStudyReproducibilityList, self).get_context_data()
+#
+#         context['reproducibility'] = True
+#
+#         return context
 
-        context['reproducibility'] = True
+
+class AssayStudyImages(StudyViewerMixin, DetailView):
+    """Displays all of the images linked to the current study"""
+    model = AssayStudy
+    template_name = 'assays/assaystudy_images.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyImages, self).get_context_data(**kwargs)
+
+        study_image_settings = AssayImageSetting.objects.filter(
+            study_id=self.object.id
+        )
+        study_images = AssayImage.objects.filter(
+            setting_id__in=study_image_settings
+        ).prefetch_related(
+            'matrix_item',
+            'method',
+            'target',
+            'sample_location',
+            'subtarget',
+            'setting__study'
+        )
+
+
+        metadata = {}
+        tableCols = []
+        tableRows = []
+        tableData = {}
+
+        for image in study_images:
+            metadata[image.id] = image.get_metadata()
+            tableData[image.id] = ["".join("".join(image.matrix_item.name.split(" ")).split(",")), "".join("".join(image.setting.color_mapping.upper().split(" ")).split(","))]
+            if image.matrix_item.name not in tableRows:
+                tableRows.append(image.matrix_item.name)
+                metadata[image.matrix_item.name] = image.matrix_item_id
+            if image.setting.color_mapping.upper() not in tableCols:
+                tableCols.append(image.setting.color_mapping.upper())
+
+        if "PHASE CONTRAST" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("PHASE CONTRAST")))
+        if "BRIGHTFIELD COLOR" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("BRIGHTFIELD COLOR")))
+        if "FAR RED" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("FAR RED")))
+        if "RED" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("RED")))
+        if "GREEN" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("GREEN")))
+        if "BLUE" in tableCols:
+            tableCols.insert(0, tableCols.pop(tableCols.index("BLUE")))
+
+        context['metadata'] = json.dumps(metadata)
+        context['tableRows'] = json.dumps(tableRows)
+        context['tableCols'] = json.dumps(tableCols)
+        context['tableData'] = json.dumps(tableData)
+
+        # Maybe useful later
+        # get_user_status_context(self, context)
+
+        return context
+
+
+# Equivalent for
+class AssayRunImages(StudyViewershipMixin, DetailView):
+    """Displays all of the images linked to the current study"""
+    model = AssayRun
+    template_name = 'assays/assaystudy_images.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayRunImages, self).get_context_data(**kwargs)
+
+        study_image_settings = AssayRunImageSetting.objects.filter(
+            study_id=self.object.id
+        )
+        study_images = AssayRunImage.objects.filter(
+            setting_id__in=study_image_settings
+        ).prefetch_related(
+            'matrix_item',
+            'method',
+            'target',
+            'sample_location',
+            # 'subtarget',
+            'setting__study'
+        )
+
+        metadata = {}
+        tableCols = []
+        tableRows = []
+        tableData = {}
+
+        for image in study_images:
+            metadata[image.id] = image.get_metadata()
+            tableData[image.id] = ["".join("".join(image.matrix_item.assay_chip_id.split(" ")).split(",")), "".join("".join(image.setting.label_name.split(" ")).split(","))]
+            if image.matrix_item.assay_chip_id not in tableRows:
+                tableRows.append(image.matrix_item.assay_chip_id)
+                metadata[image.matrix_item.name] = image.matrix_item_id
+            if image.setting.label_name not in tableCols:
+                tableCols.append(image.setting.label_name)
+
+        context['metadata'] = json.dumps(metadata)
+        context['tableRows'] = json.dumps(tableRows)
+        context['tableCols'] = json.dumps(tableCols)
+        context['tableData'] = json.dumps(tableData)
+
+        # Maybe useful later
+        # get_user_status_context(self, context)
 
         return context

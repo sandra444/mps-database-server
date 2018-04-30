@@ -40,7 +40,7 @@ $(document).ready(function () {
         cell_sample_id_selector = $(this).parent().find('input[readonly=readonly]');
         cell_sample_label_selector = $(this).parent().find('.small');
         // Remove focus
-        $('.ui-dialog :button').blur();
+        // $('.ui-dialog :button').blur();
     });
 
     $('.cellsample-selector').click(function() {
