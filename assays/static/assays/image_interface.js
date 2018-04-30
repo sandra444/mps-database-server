@@ -116,7 +116,7 @@ $(document).ready(function () {
                 iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+
                 iWell+'</td></tr><tr><th>Time</th><td>'+
                 iTime+'</td></tr><tr><th>Method/Kit</th><td>'+
-                iMethodKit+'</td></tr><tr><th>Stains Key</th><td><b>'+
+                iMethodKit+'</td></tr><tr><th>Target-Stain Pairings</th><td><b>'+
                 iStainPairings+'</td></tr></b><tr><th>Target/Analyte</th><td>'+
                 iTargetAnalyte+'</td></tr><tr><th>Sample Location</th><td>'+
                 iSampleLocation+'</td></tr><tr><th>Notes</th><td>'+
@@ -168,6 +168,7 @@ $(document).ready(function () {
     image_table.on('click', '#image_thumbnail', function () {
         popupDialogData = metadata_list[this.getAttribute("data-pic")];
         dialogConfirm.dialog("open");
+        $(".ui-dialog").find("button").blur();
     });
 
     //Checkbox click event
@@ -353,5 +354,20 @@ $(document).ready(function () {
     $('#footer').height("+=150");
 
     // Center JQuery Dialog Window Title
-    $("#ui-id-1").css('text-align', 'center').css('width','100%').css('font-size', '20px');
+    $("#ui-id-1").css('text-align', 'center').css('width','100%').css('font-size', '16px');
+
+    // Make JQuery Dialog title bar not blend in with browser UI so strongly
+    $(".ui-dialog").find(".ui-widget-header").css('background', 'linear-gradient(#111111, #333333)').css('color', 'white');
+
+    // "Close" and "Download" buttons as Bootstrap buttons.
+    // TODO Figure out what classes contribute to strange hovering when you are less tired.
+    $(".ui-dialog").find(".ui-button-text-only").addClass('btn btn-primary').removeClass('ui-state-default');
+
+    // Escape Key closes dialog windows
+    $(document).keydown(function(e) {
+        // ESCAPE key pressed
+        if (e.which == 27) {
+            $(theDialog).dialog('close');
+        }
+    });
 });
