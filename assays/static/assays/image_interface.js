@@ -109,28 +109,35 @@ $(document).ready(function () {
                 }
             }
 
+            // Tooltips logic
+            var fieldTooltip = '';
+            if (iFieldDescription) {
+                fieldTooltip = ' <span data-toggle="tooltip" title="'+iFieldDescription+'" class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>';
+            }
+            var sampleLabelTooltip = '';
+            if (iSampleLabelDescription) {
+                sampleLabelTooltip = ' <span data-toggle="tooltip" title="'+iSampleLabelDescription+'" class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>';
+            }
 
             // $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small"><tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+iWell+'</td></tr><tr><th>Time</th><td>'+iTime+'</td></tr><tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr><tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr><tr><th>Subtarget</th><td>'+iSubtarget+'</td></tr><tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr><tr><th>Replicate</th><td>'+iReplicate+'</td></tr><tr><th>Notes</th><td>'+iNotes+'</td></tr><tr><th>Image File Name</th><td>'+iFileName+'</td></tr><tr><th>Image Field</th><td>'+iField+'</td></tr><tr><th>Image Field Description</th><td>'+iFieldDescription+'</td></tr><tr><th>Image Magnification</th><td>'+iMagnification+'</td></tr><tr><th>Image Resolution</th><td>'+iResolution+'</td></tr><tr><th>Image Resolution Unit</th><td>'+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+iSampleLabel+'</td></tr><tr><th>Image Sample Label Description</th><td>'+iSampleLabelDescription+'</td></tr><tr><th>Image Wavelength (ex/em nm)</th><td>'+iWavelength+'</td></tr><tr><th>Image Color Mapping</th><td>'+iColorMapping+'</td></tr><tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
-            $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small"><tr><th style="width: 250px;">Chip ID</th><td>'+
-                iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+
-                iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+
-                iWell+'</td></tr><tr><th>Time</th><td>'+
-                iTime+'</td></tr><tr><th>Method/Kit</th><td>'+
-                iMethodKit+'</td></tr><tr><th>Target-Stain Pairings</th><td><b>'+
-                iStainPairings+'</td></tr></b><tr><th>Target/Analyte</th><td>'+
-                iTargetAnalyte+'</td></tr><tr><th>Sample Location</th><td>'+
-                iSampleLocation+'</td></tr><tr><th>Notes</th><td>'+
-                iNotes+'</td></tr><tr><th>Image File Name</th><td>'+
-                iFileName+'</td></tr><tr><th>Image Field</th><td>'+
-                iField.split(".")[0]+' <span data-toggle="tooltip" title="'+
-                iFieldDescription+'" class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></td></tr><tr><th>Image Magnification</th><td>'+
-                iMagnification.split(".")[0]+'x</td></tr><tr><th>Image Resolution</th><td>'+
-                iResolution+" "+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+
-                iSampleLabel+' <span data-toggle="tooltip" title="'+
-                iSampleLabelDescription+'" class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></td></tr><tr><th>Image Wavelength (ex/em nm)</th><td>'+
-                iWavelength+'</td></tr><tr><th>Image Color Mapping</th><td>'+
-                iColorMapping+'</td></tr><tr><th>Image Setting Note</th><td>'+
-                iSettingNote+'</td></tr></table></div></div>');
+            $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small">'+
+                '<tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr>'+
+                '<tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr>'+
+                '<tr><th>Assay Well ID</th><td>'+iWell+'</td></tr>'+
+                '<tr><th>Time</th><td>'+iTime+'</td></tr>'+
+                '<tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr>'+
+                '<tr><th>Target-Stain Pairings</th><td><b>'+iStainPairings+'</td></tr></b>'+
+                '<tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr>'+
+                '<tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr>'+
+                '<tr><th>Notes</th><td>'+iNotes+'</td></tr>'+
+                '<tr><th>Image File Name</th><td>'+iFileName+'</td></tr>'+
+                '<tr><th>Image Field</th><td>'+iField.split(".")[0]+fieldTooltip+'</td></tr>'+
+                '<tr><th>Image Magnification</th><td>'+iMagnification.split(".")[0]+'x</td></tr>'+
+                '<tr><th>Image Resolution</th><td>'+iResolution+" "+iResolutionUnit+'</td></tr>'+
+                '<tr><th>Image Sample Label</th><td>'+iSampleLabel+sampleLabelTooltip+'</td></tr>'+
+                '<tr><th>Image Wavelength (ex/em nm)</th><td>'+iWavelength+'</td></tr>'+
+                '<tr><th>Image Color Mapping</th><td>'+iColorMapping+'</td></tr>'+
+                '<tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
             $("#ui-id-1")[0].innerHTML = titleText;
         }
     };
