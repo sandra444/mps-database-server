@@ -1895,10 +1895,14 @@ class AssaySetupCompoundFormSet(BaseModelFormSetForcedUniqueness):
 
         # Forms to be deleted
         for form in forms_to_delete:
-            instance = forms.ModelForm.save(form, commit=False)
+            try:
+                instance = forms.ModelForm.save(form, commit=False)
 
-            if instance and instance.id and commit:
-                instance.delete()
+                if instance and instance.id and commit:
+                    instance.delete()
+            # ValueError here indicates that the instance couldn't even validate and so should be ignored
+            except ValueError:
+                pass
 
         # Forms to save
         for form in forms_data:
