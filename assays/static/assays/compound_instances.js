@@ -22,6 +22,10 @@ $(document).ready(function() {
     var instances = {};
     var suppliers = {};
 
+    function autocomplete_search_this() {
+        $(this).autocomplete('search', $(this).val());
+    }
+
     $.ajax({
         url: "/compounds_ajax/",
         type: "POST",
@@ -92,7 +96,7 @@ $(document).ready(function() {
                     .find('input[id$="supplier_text"]')
                     .first();
 
-                if (current_supplier_text.data('autocomplete')) {
+                if (current_supplier_text.attr('autocomplete')) {
                     current_supplier_text.autocomplete('destroy');
                 }
 
@@ -106,9 +110,10 @@ $(document).ready(function() {
                     minLength: 0
                 });
 
-                current_supplier_text.focus(function() {
-                    $(this).autocomplete('search', $(this).val());
-                });
+                // current_supplier_text.focus(function() {
+                //     $(this).autocomplete('search', $(this).val());
+                // });
+                current_supplier_text.bind('focus', autocomplete_search_this);
 
                 // Turn on autocomplete
                 current_supplier_text.attr('autocomplete', 'on');
@@ -134,7 +139,7 @@ $(document).ready(function() {
                     .find('input[id$="lot_text"]')
                     .first();
 
-                if (current_lot_text.data('autocomplete')) {
+                if (current_lot_text.attr('autocomplete')) {
                     current_lot_text.autocomplete('destroy');
                 }
 
@@ -148,9 +153,10 @@ $(document).ready(function() {
                         minLength: 0
                     });
 
-                    current_lot_text.focus(function () {
-                        $(this).autocomplete('search', $(this).val());
-                    });
+                    // current_lot_text.focus(function () {
+                    //     $(this).autocomplete('search', $(this).val());
+                    // });
+                    current_lot_text.bind('focus', autocomplete_search_this);
 
                     // Turn on autocomplete
                     current_lot_text.attr('autocomplete', 'on');
@@ -182,7 +188,7 @@ $(document).ready(function() {
                     .find('input[id$="receipt_date"]')
                     .first();
 
-                if (current_receipt_date.data('autocomplete')) {
+                if (current_receipt_date.attr('autocomplete')) {
                     current_receipt_date.autocomplete('destroy');
                 }
 
@@ -202,12 +208,16 @@ $(document).ready(function() {
                     });
 
                     // Uses click instead of focus
-                    current_receipt_date.click(function () {
-                        $(this).autocomplete('search', $(this).val());
-                    });
+                    // current_receipt_date.click(function () {
+                    //     $(this).autocomplete('search', $(this).val());
+                    // });
+                    current_receipt_date.bind('click', autocomplete_search_this);
 
                     // Turn on autocomplete
                     current_receipt_date.attr('autocomplete', 'on');
+                }
+                else {
+                    current_receipt_date.unbind('click', autocomplete_search_this);
                 }
             }
             $(document).on('change', 'input[id$="lot_text"]', check_lot);
