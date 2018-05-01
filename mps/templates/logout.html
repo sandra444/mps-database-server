@@ -5,6 +5,20 @@
 {% endblock %}
 
 {% block content %}
-  <h2>You have logged out.</h2>
+  <legend>
+      <div class="alert alert-info" role="alert">
+      <span class="sr-only">Info:</span>
+          <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+          You are now logged out.
+      </div>
+  </legend>
+
+  <div class="padded-row large-padding-top padded-bottom text-center">
+        <a class="btn btn-xlarge btn-primary" href="/">
+            <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+            Back to Home Page
+        </a>
+  </div>
+
   <p>Click <a href="/accounts/login/">here</a> to login again.</p>
 {% endblock %}

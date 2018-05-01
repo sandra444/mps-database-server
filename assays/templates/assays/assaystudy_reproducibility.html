@@ -9,7 +9,8 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li><a href="/assays/assaystudy/reproducibility/">Reproducibility</a></li>
+{#    <li><a href="/assays/assaystudy/reproducibility/">Reproducibility</a></li>#}
+    <li><a href="/assays/assaystudy/">Studies</a></li>
     <li><a href="{{ object.get_absolute_url }}">{{ object }}</a></li>
     <li class="active">Reproducibility Analysis</li>
 {% endblock %}
@@ -22,30 +23,35 @@
             </h1>
         </div>
         <div class="row text-center small-padding-top">
-            <a href="/assays/assaystudy/reproducibility/" class="btn btn-primary">Reproducibility List</a>
-            <a href="{{ object.get_absolute_url }}" class="btn btn-primary" role="button">Study Landing</a>
+{#            <a href="/assays/assaystudy/reproducibility/" class="btn btn-primary">Reproducibility List</a>#}
+{#            <a href="{{ object.get_absolute_url }}" class="btn btn-primary" role="button">Study Landing</a>#}
             <a href="{{ object.get_summary_url }}" class="btn btn-primary" role="button">Study Summary</a>
         </div>
     </div>
 {% endblock %}
 <br>
 {% block fluid-content %}
-    <div class="padded-row padded-bottom">
+    <div class="row padded-row">
         <div class="col-xs-12">
         <label>Replica Set Table</label>
-        <table id='gas-table' class='table table-hover table-striped table-bordered'>
+        <table id='gas-table' class="display table-bordered" cellspacing="0" width="100%">
 
         </table>
         </div>
     </div>
 
     <br><hr><br>
-    <div id='clone-container' class="padded-bottom">
+    <div id='clone-container'>
         <div id='repro-data' class='container hidden'>
             <div class='row'>
                 <div class='col-xs-12'><h2 id='repro-title' class='text-center'></h2></div>
             </div>
             <br>
+            <div class='row' style='text-align: left;'>
+                <div class='col-md-12'>
+                    <h3>Reproducibility Status: <span id='repro-status'></span></h3>
+                </div>
+            </div>
             <div class='row'>
                 <div class='col-md-6'>
                     <label>Selection Parameters</label>
@@ -65,11 +71,6 @@
                     <div id='chart2'>
 
                     </div>
-                </div>
-            </div>
-            <div class='row' style='text-align: left;'>
-                <div class='col-md-12'>
-                    <h3>Reproducibility Status: <span id='repro-status'></span></h3>
                 </div>
             </div>
             <br><br>

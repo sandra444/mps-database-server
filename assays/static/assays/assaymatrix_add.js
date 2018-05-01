@@ -14,6 +14,22 @@ $(document).ready(function () {
     window.organ_model = $('#id_item_organ_model');
     window.organ_model_protocol = $('#id_item_organ_model_protocol');
 
+    // Contrived, but useful:
+    // Will make a clone of the organ_model and organ_model_protocol dropdowns for display
+    // Somewhat crude to add straight to body, I suppose
+    var full_organ_model = window.organ_model
+        .clone()
+        .attr('id', 'id_item-full_organ_model')
+        .attr('name', 'item-full_organ_model')
+        .css('display', 'none')
+        .appendTo('body');
+    var full_organ_model_protocol = window.organ_model_protocol
+        .clone()
+        .attr('id', 'id_item-full_organ_model_protocol')
+        .attr('name', 'item-full_organ_model_protocol')
+        .css('display', 'none')
+        .appendTo('body');
+
     var item_display_class = '.item-td';
 
     // Allows the matrix_table to have the draggable JQuery UI element
@@ -119,13 +135,6 @@ $(document).ready(function () {
         }
     };
 
-    // var mouse_is_down = false;
-    // $(document).mousedown(function() {
-    //     mouse_is_down = true;
-    // }).mouseup(function() {
-    //     mouse_is_down = false;
-    // });
-
     function add_form(prefix, form) {
         var formset = $('#' + prefix);
         formset.append(form);
@@ -194,7 +203,7 @@ $(document).ready(function () {
         return pow ? to_letters(pow) + out : out;
     }
 
-    function plate_style_name_creation() {
+    function plate_style_name_creation(append_zero) {
         var current_global_name = $('#id_item_name').val();
         var current_number_of_rows = number_of_rows_selector.val();
         var current_number_of_columns = number_of_columns_selector.val();
@@ -209,8 +218,10 @@ $(document).ready(function () {
                 var current_item_id = item_prefix + '_' + row_id + '_' + column_id;
 
                 var column_name = column_id + 1 + '';
-                while (column_name.length < largest_row_name_length) {
-                    column_name = '0' + column_name;
+                if (append_zero) {
+                    while (column_name.length < largest_row_name_length) {
+                        column_name = '0' + column_name;
+                    }
                 }
 
                 var value = current_global_name + row_name + column_name;
@@ -286,7 +297,7 @@ $(document).ready(function () {
 
         // Set number of items if not already set
         if (number_of_items_selector.val() !== current_number_of_rows * current_number_of_columns) {
-            number_of_items_selector.val(current_number_of_rows * current_number_of_columns)
+            number_of_items_selector.val(current_number_of_rows * current_number_of_columns);
         }
     };
 
@@ -356,6 +367,14 @@ $(document).ready(function () {
             // TODO VERY POORLY DONE
             return $('#' + 'cell_sample_' + field.val()).attr('name');
         }
+        // SPECIAL EXCEPTION FOR ORGAN MODELS
+        else if (field_name === 'organ_model') {
+            return full_organ_model.find('option[value="' + field.val() + '"]').text();
+        }
+        // SPECIAL EXCEPTION FOR ORGAN MODEL PROTOCOLS
+        else if (field_name === 'organ_model_protocol') {
+            return full_organ_model_protocol.find('option[value="' + field.val() + '"]').text();
+        }
         else {
             // Ideally, this would be cached in an object or something
             var origin = $('#id_' + prefix + '_' + field_name);
@@ -409,13 +428,14 @@ $(document).ready(function () {
                     display.attr(item_form_index_attribute, form_index);
                     var current_id = $(this).find('input[name$="-id"]').val();
                     display.attr(item_id_attribute, current_id);
-                    if(current_id) {
+                    if (current_id) {
                         // BE CAREFUL WITH THIS SORT OF STUFF
-                        display.find('.form-view')
+                        display.find('.item-name')
+                            .removeAttr('disabled')
                             .attr('href', '/assays/assaymatrixitem/' + current_id);
                     }
                     else {
-                        display.find('.form-view').hide();
+                        display.find('.item-name').attr('disabled', '');
                         display.find('.form-delete').hide();
                     }
                 }
@@ -446,7 +466,6 @@ $(document).ready(function () {
                         new_subdisplay.find('.' + prefix + '-' + field_name).html(field_display);
                     }
 
-
                     var possible_errors = [];
                     if (!input_index) {
                         possible_errors = $(this).prev().prev().find('li');
@@ -476,6 +495,18 @@ $(document).ready(function () {
                 }
 
                 if (new_subdisplay) {
+                    // If this subform is to be deleted
+                    // TODO NOT DRY
+                    var delete_input = $('#id_' + prefix + '-' + new_subdisplay.attr(item_subform_index_attribute) + '-DELETE');
+                    var checked_value = delete_input.prop('checked');
+
+                    if (checked_value) {
+                        new_subdisplay.addClass('strikethrough');
+                    }
+                    else {
+                        new_subdisplay.removeClass('strikethrough');
+                    }
+
                     display.find('.item-' + prefix).append(new_subdisplay);
                     if (errors_display) {
                         new_subdisplay.find('.error-message-section').html(errors_display);
@@ -497,7 +528,8 @@ $(document).ready(function () {
 
         // NOTE: Show all displays if there are errors
         if (errors_exist) {
-            $('.visibility-checkbox').prop('checked', true).trigger('change');
+            $('.visibility-checkbox').prop('checked', true);
+            change_matrix_visibility();
         }
     }
 
@@ -767,7 +799,7 @@ $(document).ready(function () {
 
     // Matrix Listeners
     // BE CAREFUL! THIS IS SUBJECT TO CHANGE!
-    representation_selector.change(function() {
+    function check_representation() {
         var current_representation = representation_selector.val();
 
         // Hide all matrix sections
@@ -775,6 +807,13 @@ $(document).ready(function () {
 
         if (current_representation === 'chips') {
             $('#matrix_dimensions_section').show();
+            if (device_selector.val()) {
+                // number_of_rows_selector.val(0);
+                // number_of_columns_selector.val(0);
+                // number_of_items_selector.val(0);
+                device_selector.val('').change();
+            }
+
             // SPECIAL OPERATION
             $('#id_item_device').parent().parent().show();
         }
@@ -784,16 +823,28 @@ $(document).ready(function () {
             // SPECIAL OPERATION
             $('#id_item_device').parent().parent().hide();
         }
-    }).trigger('change');
+    }
 
-    device_selector.change(function() {
-        get_matrix_dimensions();
+    representation_selector.change(check_representation);
+    check_representation();
 
-        if (representation_selector.val() === 'plate') {
-           $('#id_setup_device option[value!=' + device_selector.val() + ']').hide();
-           window.device.val(device_selector.val()).trigger('change');
+    function check_matrix_device() {
+        if (device_selector.val()) {
+            get_matrix_dimensions();
+
+            if (representation_selector.val() === 'plate') {
+                // window.device.val(device_selector.val()).trigger('change');
+                window.get_organ_models(device_selector.val());
+            }
         }
-    });
+        else {
+            window.device.val('');
+            window.get_organ_models('');
+        }
+    }
+
+    device_selector.change(check_matrix_device);
+    check_matrix_device();
 
     // TODO TODO TODO RESTORE LATER
     // if (device_selector.val()) {
@@ -832,9 +883,9 @@ $(document).ready(function () {
     //     number_of_items_selector.trigger('change');
     // }
 
-    action_selector.change(function() {
+    function check_action() {
         $('.item-section').hide('fast');
-        var current_section = $(this).val();
+        var current_section = action_selector.val();
         $('.' + current_section + '_section').show('fast');
         if (current_section) {
             $('#apply_action_to_all').show();
@@ -856,11 +907,19 @@ $(document).ready(function () {
         else if (current_section.indexOf('add_') > -1) {
             $('#show_items').prop('checked', true).trigger('change');
         }
-    }).trigger('change');
+    }
+    action_selector.change(check_action);
+
+    // Initially check action
+    check_action();
 
     // Testing SUBJECT TO CHANGE
-    $('#apply_plate_names').click(function() {
-       plate_style_name_creation();
+    $('#apply_plate_names_zero').click(function() {
+       plate_style_name_creation(true);
+    });
+
+    $('#apply_plate_names_no_zero').click(function() {
+       plate_style_name_creation(false);
     });
 
     // Triggers for subform-delete
@@ -879,33 +938,46 @@ $(document).ready(function () {
     });
 
     // TODO TODO TODO TESTING
-    get_matrix_dimensions();
+    if (!device_selector.val()) {
+        get_matrix_dimensions();
+    }
 
     // Handling Device flow
     window.device.change(function() {
         // Get organ models
         window.get_organ_models(device.val());
-    }).trigger('change');
+    });
+
+    window.get_organ_models(device.val());
 
     window.organ_model.change(function() {
         // Get and display correct protocol options
         window.get_protocols(window.organ_model.val());
-    }).trigger('change');
+    });
+
+    window.get_protocols(window.organ_model.val());
 
     window.organ_model_protocol.change(function() {
         window.display_protocol(window.organ_model_protocol.val());
-    }).trigger('change');
+    });
+
+    window.display_protocol(window.organ_model_protocol.val());
 
     // Triggers for hiding elements
-    $('.visibility-checkbox').change(function() {
-        var class_to_hide = $(this).attr('value');
-        if ($(this).prop('checked')) {
-            $(class_to_hide).show();
-        }
-        else {
-            $(class_to_hide).hide();
-        }
-    }).trigger('change');
+    function change_matrix_visibility() {
+        $('.visibility-checkbox').each(function() {
+            var class_to_hide = $(this).attr('value');
+            if ($(this).prop('checked')) {
+                $(class_to_hide).show();
+            }
+            else {
+                $(class_to_hide).hide();
+            }
+        });
+    }
+
+    $('.visibility-checkbox').change(change_matrix_visibility);
+    change_matrix_visibility();
 
     // Special operations for pre-submission
     $('form').submit(function() {

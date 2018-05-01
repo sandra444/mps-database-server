@@ -21,7 +21,8 @@ class CellSampleAdd(SpecificGroupRequiredMixin, CreateView):
 
     required_group_name = 'Add Cell Samples Front'
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 
@@ -66,7 +67,8 @@ class CellSampleUpdate(UpdateView):
             return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
         return super(CellSampleUpdate, self).dispatch(*args, **kwargs)
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
         # Get group selection possibilities
         groups = filter_groups(self.request.user)
 

@@ -28,7 +28,9 @@ from .models import (
     AssayDataFileUpload,
     AssaySubtarget,
     AssayMatrixItem,
-    AssayStudyAssay
+    AssayStudyAssay,
+    AssayImage,
+    AssayImageSetting
 )
 from compounds.models import (
     CompoundSupplier,
@@ -48,6 +50,7 @@ import re
 import os
 import codecs
 import cStringIO
+
 import pandas as pd
 import numpy as np
 
@@ -57,8 +60,6 @@ from django.utils.dateparse import parse_date
 from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
 from chardet.universaldetector import UniversalDetector
-
-import collections
 
 PLATE_FORMATS = ('Tabular', 'Block')
 CHIP_FORMATS = ('Chip',)
@@ -1017,7 +1018,7 @@ def validate_plate_readout_file(
         readout = readouts[0]
 
     old_readout_data = AssayReadout.objects.filter(
-        assay_device_readout__in=readouts
+        assay_device_readout_id__in=readouts
     ).prefetch_related(
         'assay__assay_id',
         'assay_device_readout'
@@ -2857,7 +2858,7 @@ class AssayFileProcessor:
 
         # Get matrix item name
         matrix_items = {
-            matrix_item.name.upper(): matrix_item for matrix_item in AssayMatrixItem.objects.filter(study_id=self.study.id)
+            matrix_item.name: matrix_item for matrix_item in AssayMatrixItem.objects.filter(study_id=self.study.id)
         }
 
         # Get sample locations
@@ -3499,7 +3500,7 @@ def Reproducibility_Report(study_data):
     header_list.append('Max CV')
     header_list.append('ICC Absolute Agreement')
     header_list.append('Reproducibility Status')
-    header_list.append('Replicate Set')
+    header_list.append('Replica Set')
     header_list.append('# of Chips/Wells')
     header_list.append('# of Time Points')
     header_list.append('Reproducibility Note')
@@ -3520,19 +3521,19 @@ def Reproducibility_Report(study_data):
         icc_pivot = pd.pivot_table(rep_matrix, values='Value', index='Time (day)',columns=['Chip ID'], aggfunc=np.mean)
         group_id = str(row+1) #Define group ID
 
-        reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Replicate Set')] = group_id
+        reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Replica Set')] = group_id
         reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('# of Chips/Wells')] = icc_pivot.shape[1]
         reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('# of Time Points')] = icc_pivot.shape[0]
 
         # Check all coulmns are redundent
-        if icc_pivot.shape[1]>2 and all(icc_pivot.eq(icc_pivot.iloc[:, 0], axis=0).all(1)):
+        if icc_pivot.shape[1]>1 and all(icc_pivot.eq(icc_pivot.iloc[:, 0], axis=0).all(1)):
             reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
             reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Note')] ='Duplicate data on chips/wells'
         elif icc_pivot.shape[0]>1 and all(icc_pivot.eq(icc_pivot.iloc[0, :], axis=1).all(1)):
             reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
             reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Note')] ='Duplicate data on all time points'
         else:
-            if icc_pivot.shape[0]>1 and icc_pivot.shape[1]>2:
+            if icc_pivot.shape[0]>1 and icc_pivot.shape[1]>1:
                 #Call a chip time series reproducibility index dataframe
                 rep_index=Reproducibility_Index(icc_pivot)
                 if pd.isnull(rep_index.iloc[0][0]) != True:
@@ -3543,7 +3544,7 @@ def Reproducibility_Report(study_data):
                         if rep_index.iloc[0][0] <= 5:
                             reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Excellent (CV)'
                         elif rep_index.iloc[0][1] >= 0.8:
-                            reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
+                            reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Excellent (ICC)'
                         else:
                             reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Acceptable (CV)'
                     else:
@@ -3555,7 +3556,7 @@ def Reproducibility_Report(study_data):
                             reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Poor (ICC)'
                 else:
                     reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
-            elif icc_pivot.shape[0]<2 and icc_pivot.shape[1]>2:
+            elif icc_pivot.shape[0]<2 and icc_pivot.shape[1]>1:
                  #Call a single time reproducibility index dataframe
                 rep_index=Single_Time_Reproducibility_Index(icc_pivot)
                 reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Max CV')] =rep_index.iloc[0][0]
@@ -3572,7 +3573,7 @@ def Reproducibility_Report(study_data):
                     reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
             else:
                 reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
-                reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Note')] ='Insufficient replicate chips/wells to calculate reproducibility. At least 3 replicates are needed.'
+                reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Reproducibility Note')] ='Insufficient replicate chips/wells to calculate reproducibility. At least 2 replicates are needed.'
             reproducibility_results_table=reproducibility_results_table.round(2)
     return reproducibility_results_table
 

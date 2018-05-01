@@ -1,0 +1,3 @@
+{% with study=object %}
+{% include 'search/indexes/assays/study_permission_include.txt' %}
+{% endwith %}

@@ -7,8 +7,10 @@ window.OVERRIDE = {
 };
 
 $(document).ready(function () {
+    var form_selector = $('form');
+
     // On submit, disable all submit buttons
-    $('form').submit(function () {
+    form_selector.submit(function () {
         $(':submit').attr('disabled', 'disabled');
         return true;
     });
@@ -44,22 +46,18 @@ $(document).ready(function () {
             $('body').removeClass('stop-scrolling');
         },
         open: function() {
-            // var dialog_submit_button = $('#enter_dialog_confirm_submit_button');
             $('body').addClass('stop-scrolling');
-            // dialog_submit_button.button('disable');
-            //
-            // setTimeout(function() {
-            //     dialog_submit_button.button('enable');
-            //     dialog_submit_button.focus();
-            // }, 1500);
             // Blur to prevent double enter accidental accepts
-            $('.ui-dialog :button').blur();
+            // $('.ui-dialog :button').blur();
+
+            // Default to cancel
+            $(this).closest('.ui-dialog').find('.ui-dialog-buttonpane button:eq(1)').focus();
         }
     });
     dialogConfirm.removeProp('hidden');
 
     $(window).keydown(function(event) {
-        if(event.keyCode == 13) {
+        if(event.keyCode === 13) {
             // Make sure this isn't the exception
             var exception_focused = false;
             if(window.OVERRIDE.exceptions) {
@@ -86,5 +84,18 @@ $(document).ready(function () {
     });
 
     // Increase the height of the footer to ensure it is not obscured
-    $('#footer').height("+=150")
+    $('#footer').height("+=150");
+
+    // To track if the form has been changed
+    // MAKES THE ASSUMPTION THAT THERE IS ONLY ONE FORM
+    form_selector.find('input, select, textarea').change(function() {
+        form_selector.data('changed', true);
+    });
+
+    // When the user navigates away
+    $(window).on('beforeunload', function() {
+        if (form_selector.data('changed') && !$(':submit').first().attr('disabled')) {
+            return 'Changes may not be saved.';
+        }
+    });
 });

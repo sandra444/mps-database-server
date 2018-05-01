@@ -163,7 +163,7 @@ $(document).ready(function () {
 
         dialog.dialog('open');
         // Remove focus
-        $('.ui-dialog :button').blur();
+        // $('.ui-dialog :button').blur();
     }
 
     // function check_selection(value, checkboxes) {

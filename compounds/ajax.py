@@ -102,7 +102,7 @@ def get_chembl_compound_data(chemblid):
     """Returns a dictionary of ChEMBL data given a chemblid"""
     data = {}
 
-    url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chemblid)
+    url = u'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chemblid)
     response = requests.get(url)
     initial_data = json.loads(response.text)
 
@@ -152,7 +152,7 @@ def get_chembl_compound_data(chemblid):
         # Get medchem alerts
         medchem_alerts = False
         # Get URL of target for scrape
-        url = "https://www.ebi.ac.uk/chembl/compound/structural_alerts/{}".format(chemblid)
+        url = u"https://www.ebi.ac.uk/chembl/compound/structural_alerts/{}".format(chemblid)
         # Make the http request
         response = requests.get(url)
         # Get the webpage as text
@@ -432,7 +432,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
     }
 
     # Get drugbank_id or fail
-    url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/2'.format(chembl_id)
+    url = u'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/2'.format(chembl_id)
     # Make the http request
     response = requests.get(url)
     # Get the webpage in JSON
@@ -445,7 +445,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         data['drugbank_id'] = drugbank_id
 
         # Get URL of target for scrape
-        url = "http://www.drugbank.ca/drugs/{}".format(drugbank_id)
+        url = u"http://www.drugbank.ca/drugs/{}".format(drugbank_id)
         # Make the http request
         response = requests.get(url)
         # Get the webpage as text
@@ -642,7 +642,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
 
     # YES, I know that the function title is deceiving in that this is actually a PubChem ID
     # Get pubchemid from unichem too
-    url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/22'.format(chembl_id)
+    url = u'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/22'.format(chembl_id)
     # Make the http request
     response = requests.get(url)
     # Get the webpage in JSON
@@ -678,7 +678,7 @@ def fetch_chembl_search_results(request):
     """
     query = request.POST.get('query', '')
 
-    url = 'https://www.ebi.ac.uk/chembl/api/data/chembl_id_lookup/search.json?q={}'.format(query)
+    url = u'https://www.ebi.ac.uk/chembl/api/data/chembl_id_lookup/search.json?q={}'.format(query)
     # Make the http request
     response = requests.get(url)
     # Get the webpage in JSON
@@ -692,7 +692,7 @@ def fetch_chembl_search_results(request):
             additional_data = {}
             chembl_id = lookup.get('chembl_id', '')
 
-            url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chembl_id)
+            url = u'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chembl_id)
             # Make the http request
             response = requests.get(url)
             # Get the webpage in JSON
