@@ -543,25 +543,28 @@ $(document).ready(function() {
     });
 
     // Handling Device flow
-    device.change(function() {
-        // Get organ models
+    // Make sure global var exists before continuing
+    if (window.get_organ_models) {
+        device.change(function() {
+            // Get organ models
+            window.get_organ_models(device.val());
+        });
+
         window.get_organ_models(device.val());
-    });
 
-    window.get_organ_models(device.val());
+        organ_model.change(function() {
+            // Get and display correct protocol options
+            window.get_protocols(organ_model.val());
+        });
 
-    organ_model.change(function() {
-        // Get and display correct protocol options
         window.get_protocols(organ_model.val());
-    });
 
-    window.get_protocols(organ_model.val());
+        protocol.change(function() {
+            window.display_protocol(protocol.val());
+        });
 
-    protocol.change(function() {
         window.display_protocol(protocol.val());
-    });
-
-    window.display_protocol(protocol.val());
+    }
 
     // Post submission operation
     // Special operations for pre-submission
