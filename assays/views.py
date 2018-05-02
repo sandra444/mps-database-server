@@ -4724,3 +4724,7 @@ class AssayRunImages(StudyViewershipMixin, DetailView):
         # Maybe useful later
         # get_user_status_context(self, context)
         return context
+
+
+class TestFilterView(TemplateView):
+    template_name = 'assays/test_filter.html'
