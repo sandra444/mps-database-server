@@ -1967,6 +1967,13 @@ class AssayDataPoint(models.Model):
     # OPTIONAL
     subtarget = models.ForeignKey(AssaySubtarget, null=True, blank=True)
 
+    def get_time_string(self):
+        split_times = get_split_times(self.time)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
 
 # # TODO MODIFY AssayCompoundInstance
 # DEPRECATED: DO NOT USE
@@ -2060,6 +2067,7 @@ class AssaySetupCompound(models.Model):
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
     addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
 
+    # NOT DRY
     def get_addition_time_string(self):
         split_times = get_split_times(self.addition_time)
         return 'D{0} H{1} M{2}'.format(

@@ -2049,6 +2049,44 @@ def get_item_groups(study):
     return (sorted_treatment_groups, setup_to_treatment_group)
 
 
+def get_paired_id_and_name(field):
+    return '\n'.join((field.name, unicode(field.id)))
+
+
+def get_data_for_heatmap(raw_data):
+    data = {
+        'matrices': {},
+        'values': {}
+    }
+
+    # Nesting like this is a serious violation of style
+    for raw in raw_data:
+        data.get('values').setdefault(
+            get_paired_id_and_name(raw.matrix_item.matrix), {}
+        ).setdefault(
+            get_paired_id_and_name(raw.study_assay.target), {}
+        ).setdefault(
+            get_paired_id_and_name(raw.study_assay.method), {}
+        ).setdefault(
+            # Dumb exception
+            '\n'.join((raw.study_assay.unit.unit, unicode(raw.study_assay.unit.id))), {}
+        ).setdefault(
+            get_paired_id_and_name(raw.sample_location), {}
+        ).setdefault(
+            get_paired_id_and_name(raw.subtarget), {}
+        ).setdefault(
+            '\n'.join((raw.get_time_string(), unicode(raw.time))), {}
+        ).setdefault(
+            '_'.join([unicode(raw.matrix_item.row_index), unicode(raw.matrix_item.column_index)]), []
+        ).append(raw.value)
+
+        data.get('matrices').setdefault(
+            get_paired_id_and_name(raw.matrix_item.matrix), [[''] * raw.matrix_item.matrix.number_of_columns for _ in range(raw.matrix_item.matrix.number_of_rows)]
+        )[raw.matrix_item.row_index][raw.matrix_item.column_index] = raw.matrix_item.name
+
+    return data
+
+
 def get_data_points_for_charting(
         raw_data,
         key,
@@ -2058,7 +2096,7 @@ def get_data_points_for_charting(
         include_all,
         truncate_negative,
         dynamic_excluded,
-        study=None,
+        study,
         matrix_item=None,
         new_data=False,
         additional_data=None
@@ -2083,7 +2121,8 @@ def get_data_points_for_charting(
 
     final_data = {
         'sorted_assays': [],
-        'assays': []
+        'assays': [],
+        'heatmap': {}
     }
 
     intermediate_data = {}
@@ -2117,6 +2156,20 @@ def get_data_points_for_charting(
     # Why is this done? It is an expedient way to avoid duplicating data
     if additional_data:
         raw_data.extend(additional_data)
+
+    heatmap_matrices = AssayMatrix.objects.filter(
+        study_id=study,
+        representation='plate'
+    )
+
+    heatmap_data = raw_data.filter(matrix_item__matrix_id__in=heatmap_matrices)
+
+    final_data.update({
+        'heatmap': get_data_for_heatmap(heatmap_data)
+    })
+
+    if key != 'group':
+        raw_data = raw_data.exclude(matrix_item__matrix_id__in=heatmap_matrices)
 
     for raw in raw_data:
         # Now uses full name
@@ -2383,7 +2436,8 @@ def fetch_data_points(request):
         'study_assay__method',
         'study_assay__unit',
         'sample_location',
-        'matrix_item'
+        'matrix_item__matrix',
+        'subtarget'
     )
 
     data = get_data_points_for_charting(

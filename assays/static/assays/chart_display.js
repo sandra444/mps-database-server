@@ -12,8 +12,24 @@ window.CHARTS = {};
 // google.charts.setOnLoadCallback(window.CHARTS.callback);
 
 $(document).ready(function () {
+    var colors = [
+        "rgba(0,128,0,0.4)", "rgba(26,140,0,0.4)", "rgba(51,152,0,0.4)",
+        "rgba(77,164,0,0.4)", "rgba(102,176,0,0.4)", "rgba(128,188,0,0.4)",
+        "rgba(153,200,0,0.4)", "rgba(179,212,0,0.4)", "rgba(204,224,0,0.4)",
+        "rgba(230,236,0,0.4)", "rgba(255,255,0,0.4)", "rgba(243,230,0,0.4)",
+        "rgba(231,204,0,0.4)", "rgba(219,179,0,0.4)", "rgba(207,153,0,0.4)",
+        "rgba(195,128,0,0.4)", "rgba(183,102,0,0.4)", "rgba(171,77,0,0.4)",
+        "rgba(159,51,0,0.4)", "rgba(147,26,0,0.4)", "rgba(135,0,0,0.4)"
+    ];
 
+    // Probably should just have full data!
     var device_to_group = {};
+
+    // Avoid magic strings for heatmap elements
+    var heatmap_filters_selector = $('#heatmap_filters').find('select');
+    var matrix_body_selector = $('#matrix_body');
+    // TODO TODO TODO TEMPORARILY EXPOSE
+    heatmap_data = {};
 
     window.CHARTS.prepare_chart_options = function(charts) {
         var options = {};
@@ -92,7 +108,7 @@ $(document).ready(function () {
         }
     };
 
-    window.CHARTS.display_treament_groups = function(treatment_groups) {
+    window.CHARTS.display_treatment_groups = function(treatment_groups) {
         // TODO KIND OF UGLY
         var header_keys = [
             // 'device',
@@ -193,9 +209,95 @@ $(document).ready(function () {
         $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
     };
 
+    window.CHARTS.get_heatmap_dropdowns = function(starting_index) {
+        var current_index = 0;
+        var data_level = heatmap_data.values;
+        var current;
+
+        while (current_index < starting_index) {
+            current = heatmap_filters_selector.eq(current_index);
+            data_level = data_level[current.val()];
+            current_index++;
+        }
+
+        while (current_index < heatmap_filters_selector.length) {
+            current = heatmap_filters_selector.eq(current_index);
+            var former_value = current.val();
+
+            if (former_value === null || starting_index < current_index) {
+                current.empty();
+                $.each(_.sortBy(_.keys(data_level)), function(index, key) {
+                    var dropdown_text = key.split('\n')[0];
+                    current.append($('<option>').val(key).text(dropdown_text));
+                });
+
+                if (former_value && current.find('option[value="' + former_value + '"]').length > 0) {
+                    current.val(former_value);
+                }
+            }
+
+            data_level = data_level[current.val()];
+            current_index++;
+        }
+
+        // Make the heatmap
+        // Get the values for the heatmap
+        var means = _.map(_.values(data_level), function(values) { return d3.mean(values); });
+        var median = d3.median(means);
+        // Get the min
+        var min_value = _.min(means);
+        min_value -= min_value * 0.000001;
+        // Get the max
+        var max_value = _.max(means);
+        max_value += max_value * 0.000001;
+        // Get the colorscale
+        var color_scale = d3.scale.quantile()
+            .domain([min_value , median, max_value])
+            .range(colors);
+
+        // Actually display the heatmap
+        var current_matrix = heatmap_data.matrices[$('#id_heatmap_matrix').val()];
+
+        matrix_body_selector.empty();
+
+        // Check to see if new forms will be generated
+        for (var row_index=0; row_index < current_matrix.length; row_index++) {
+            var row_id = 'row_' + row_index;
+            var current_row = $('<tr>')
+                .attr('id', row_id);
+
+            for (var column_index=0; column_index < current_matrix[row_index].length; column_index++) {
+                var new_cell = $('<td>');
+
+                var value = data_level[row_index + '_' + column_index];
+
+                if (value) {
+                    new_cell.html(value);
+                    new_cell.css('background-color', color_scale(value));
+                }
+                else {
+                    new_cell.css('background-color', '#606060');
+                }
+
+                // Add
+                current_row.append(new_cell);
+            }
+
+            matrix_body_selector.append(current_row);
+        }
+    };
+
+    // window.CHARTS.make_heatmap = function() {
+    //
+    // };
+
     window.CHARTS.make_charts = function(json, charts, changes_to_options) {
         // Show the chart options
         // NOTE: the chart options are currently shown by default, subject to change
+
+        heatmap_data = json.heatmap;
+
+        window.CHARTS.get_heatmap_dropdowns(0);
 
         // If nothing to show
         if (!json.assays) {
@@ -355,7 +457,7 @@ $(document).ready(function () {
             }
         }
 
-        window.CHARTS.display_treament_groups(json.treatment_groups);
+        window.CHARTS.display_treatment_groups(json.treatment_groups);
 
         // Triggers for legends (TERRIBLE SELECTOR)
         $(document).on('mouseover', 'g:has("g > text")', function() {
@@ -406,4 +508,9 @@ $(document).ready(function () {
             $('#group_display').hide();
         });
     };
+
+    // Triggers for heatmap filters
+    heatmap_filters_selector.change(function() {
+       window.CHARTS.get_heatmap_dropdowns(Math.floor($(this).data('heatmap-index')));
+    });
 });
