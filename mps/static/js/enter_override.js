@@ -90,7 +90,6 @@ $(document).ready(function () {
     // MAKES THE ASSUMPTION THAT THERE IS ONLY ONE FORM
     form_selector.find('input, select, textarea').change(function() {
         form_selector.data('changed', true);
-        // console.log($(this));
     });
 
     // When the user navigates away

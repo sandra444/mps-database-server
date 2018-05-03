@@ -50,6 +50,7 @@ import re
 import os
 import codecs
 import cStringIO
+
 import pandas as pd
 import numpy as np
 
@@ -59,8 +60,6 @@ from django.utils.dateparse import parse_date
 from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
 from chardet.universaldetector import UniversalDetector
-
-import collections
 
 PLATE_FORMATS = ('Tabular', 'Block')
 CHIP_FORMATS = ('Chip',)
@@ -1019,7 +1018,7 @@ def validate_plate_readout_file(
         readout = readouts[0]
 
     old_readout_data = AssayReadout.objects.filter(
-        assay_device_readout__in=readouts
+        assay_device_readout_id__in=readouts
     ).prefetch_related(
         'assay__assay_id',
         'assay_device_readout'
@@ -2859,7 +2858,7 @@ class AssayFileProcessor:
 
         # Get matrix item name
         matrix_items = {
-            matrix_item.name.upper(): matrix_item for matrix_item in AssayMatrixItem.objects.filter(study_id=self.study.id)
+            matrix_item.name: matrix_item for matrix_item in AssayMatrixItem.objects.filter(study_id=self.study.id)
         }
 
         # Get sample locations

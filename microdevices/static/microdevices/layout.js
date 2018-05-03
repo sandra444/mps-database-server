@@ -61,7 +61,7 @@ $(document).ready(function () {
         return pow ? toLetters(pow) + out : out;
     }
 
-    number_of_rows.change(function() {
+    function check_rows() {
         var rows = number_of_rows.val();
 
         // Check if rows exceed 100, throw alert and reset if so
@@ -80,10 +80,13 @@ $(document).ready(function () {
         // Insert into row labels
         // $('#id_row_labels').val(labels);
 
-        build_table()
-    });
+        build_table();
+    }
 
-    number_of_columns.change(function() {
+    number_of_rows.change(check_rows);
+    check_rows();
+
+    function check_columns() {
         var columns = number_of_columns.val();
 
         if (columns > max_number) {
@@ -101,8 +104,11 @@ $(document).ready(function () {
         // Insert into row labels
         // $('#id_column_labels').val(labels);
 
-        build_table()
-    });
+        build_table();
+    }
+
+    number_of_columns.change(check_columns);
+    check_columns();
 
     // Deprecated
     // $('#id_row_labels').change(function() {
@@ -113,7 +119,7 @@ $(document).ready(function () {
     // });
 
     // Attempt to build initial table
-    number_of_rows.trigger('change');
-    number_of_columns.trigger('change');
+    // number_of_rows.trigger('change');
+    // number_of_columns.trigger('change');
     build_table()
 });

@@ -1,8 +1,9 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
+# Wildcards are evil
 from .views import *
+import cellsamples.ajax
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     # Proposed URLS:
     # specify cellsample if we decide to also let users add cell type etc.
     url(r'^cellsamples/cellsample/add/$', CellSampleAdd.as_view(), name='cellsample_add'),
@@ -14,4 +15,5 @@ urlpatterns = patterns(
     url(r'^cellsamples/cellsubtype/add/$', CellSubtypeAdd.as_view(), name='cellsubtype_add'),
     url(r'^cellsamples/cellsubtype/$', CellSubtypeList.as_view(), name='cellsubtype_list'),
     url(r'^cellsamples/cellsubtype/(?P<pk>[0-9]+)/$', CellSubtypeUpdate.as_view(), name='cellsubtype_update'),
-)
+url(r'^cellsamples_ajax/$', cellsamples.ajax.ajax),
+]
