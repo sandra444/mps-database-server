@@ -66,7 +66,6 @@ $(document).ready(function () {
             $(this).dialog('option', 'width', $(window).width());
             $(this).dialog('option', 'height', ($(window).height()-$('#floating-sliders').height()-1));
 
-            $(this).closest('.ui-dialog').find('.ui-dialog-buttonpane button:eq(2)').focus();
             var iChip = popupDialogData["chip_id"];
             var iPlate = popupDialogData["plate_id"];
             var iWell = popupDialogData["well_id"];
