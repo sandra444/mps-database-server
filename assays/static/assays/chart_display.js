@@ -242,7 +242,12 @@ $(document).ready(function () {
 
         // Make the heatmap
         // Get the values for the heatmap
-        var means = _.map(_.values(data_level), function(values) { return d3.mean(values); });
+        var means = {};
+
+        $.each(data_level, function(key, values) {
+            means[key] = d3.mean(values);
+        });
+
         var median = d3.median(means);
         // Get the min
         var min_value = _.min(means);
@@ -269,11 +274,13 @@ $(document).ready(function () {
             for (var column_index=0; column_index < current_matrix[row_index].length; column_index++) {
                 var new_cell = $('<td>');
 
-                var value = data_level[row_index + '_' + column_index];
+                var current_key = row_index + '_' + column_index;
+                var value = data_level[current_key];
+                var mean_value = means[current_key];
 
                 if (value) {
-                    new_cell.html(value);
-                    new_cell.css('background-color', color_scale(value));
+                    new_cell.html(value.join(', '));
+                    new_cell.css('background-color', color_scale(mean_value));
                 }
                 else {
                     new_cell.css('background-color', '#606060');
