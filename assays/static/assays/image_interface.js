@@ -145,7 +145,7 @@ $(document).ready(function () {
 
     var filter_elements = "";
     for (var i=0; i<tableCols.length; i++) {
-        var col = tableCols[i].replace(/\s/g, '').replace(/[,]/g, '');
+        var col = tableCols[i].replace(/\s/g, '').replace(/[,]/g, '').replace(/\|/g, '');
         filter_elements += "<button aria-pressed='true' style='max-width: 160px; min-height: 80px; white-space: normal; margin-bottom: 1em;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 btn btn-3d btn-default btn-checkbox active'><label class='hand-cursor'>"+tableCols[i].toUpperCase()+"</label><input checked id='"+col+"' type=checkbox></button>";
     }
     // for (i=0; i<tableRows.length; i++){
