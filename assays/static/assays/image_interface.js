@@ -174,7 +174,6 @@ $(document).ready(function () {
     image_table.on('click', '#image_thumbnail', function () {
         popupDialogData = metadata_list[this.getAttribute("data-pic")];
         dialogConfirm.dialog("open");
-        $(".ui-dialog").find("button").blur();
     });
 
     //Checkbox click event
