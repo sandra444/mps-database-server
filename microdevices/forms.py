@@ -1,7 +1,7 @@
 from django import forms
 from django.forms.models import BaseInlineFormSet
 from .models import *
-from assays.models import AssayChipSetup
+from assays.models import AssayMatrixItem
 from mps.forms import SignOffMixin
 from django.forms.models import inlineformset_factory
 
@@ -16,7 +16,6 @@ class MicrodeviceForm(SignOffMixin, forms.ModelForm):
         exclude = tracking + ('center', 'organ')
 
         widgets = {
-            'name': forms.Textarea(attrs={'rows': 1}),
             'name': forms.Textarea(attrs={'rows': 1}),
             'references': forms.Textarea(attrs={'rows': 3}),
             'description': forms.Textarea(attrs={'rows': 3}),
@@ -71,8 +70,8 @@ class OrganModelProtocolInlineFormset(BaseInlineFormSet):
 
             # Make sure that no protocol in use is checked for deletion
             if protocol_id and delete_checked:
-                if AssayChipSetup.objects.filter(organ_model_protocol=protocol_id):
-                    raise forms.ValidationError('You cannot remove protocols that are referenced by a chip setup.')
+                if AssayMatrixItem.objects.filter(organ_model_protocol=protocol_id):
+                    raise forms.ValidationError('You cannot remove protocols that are referenced by a chip/well.')
 
 
 OrganModelProtocolFormsetFactory = inlineformset_factory(

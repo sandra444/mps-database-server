@@ -1,0 +1,12 @@
+<tr>
+    <td>
+        <a href="{{ object.get_absolute_url }}">
+            {{ object }}
+        </a>
+    </td>
+    <td>
+        <a class="btn btn-info" href="{{ object.get_post_submission_url }}">
+            View Study
+        </a>
+    </td>
+</tr>

@@ -3,20 +3,20 @@ from mps.templatetags.custom_filters import has_group, is_group_viewer, is_group
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
-from django.template import RequestContext, loader
+from django.template import loader
 from django.http import HttpResponseForbidden
 from assays.models import AssayRun, AssayRunStakeholder, AssayStudy, AssayStudyStakeholder
 from mps.templatetags.custom_filters import filter_groups, VIEWER_SUFFIX, ADMIN_SUFFIX
 
 
+# Unsemantic! Breaks PEP!
 def PermissionDenied(request, message):
     """This function will take a string a render 403.html with that string as context"""
     template = loader.get_template('403.html')
-    context = RequestContext(request, {
+    context = {
         'message': message
-    })
-    return HttpResponseForbidden(template.render(context))
-
+    }
+    return HttpResponseForbidden(template.render(context, request))
 
 # def check_if_user_is_active(user):
 #     if not user or not user.is_active:
@@ -522,7 +522,7 @@ class DeletionMixin(object):
         for current_field in self.object._meta.get_fields():
             # TODO MODIFY TO CHECK M2M MANAGERS IN THE FUTURE
             # TODO REVISE
-            if str(type(current_field)) == "<class 'django.db.models.fields.related.ManyToOneRel'>":
+            if str(type(current_field)) == "<class 'django.db.models.fields.reverse_related.ManyToOneRel'>":
                 manager = getattr(self.object, current_field.name + '_set')
                 count = manager.count()
                 if count > 0:

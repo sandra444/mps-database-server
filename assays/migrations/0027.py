@@ -1,0 +1,533 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import migrations, models
+from django.conf import settings
+import assays.models
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('microdevices', '0011'),
+        ('compounds', '0009'),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('cellsamples', '0007'),
+        ('auth', '0006_require_contenttypes_0002'),
+        ('assays', '0026'),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='AssayDataFileUpload',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('flagged', models.BooleanField(default=False, help_text=b'Check box to flag for review')),
+                ('reason_for_flag', models.CharField(default=b'', help_text=b'Reason for why this entry was flagged', max_length=300, blank=True)),
+                ('file_location', models.URLField(null=True, blank=True)),
+                ('created_by', models.ForeignKey(related_name='assaydatafileupload_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='assaydatafileupload_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('signed_off_by', models.ForeignKey(related_name='assaydatafileupload_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
+        migrations.CreateModel(
+            name='AssayDataPoint',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('cross_reference', models.CharField(default=b'', max_length=255)),
+                ('value', models.FloatField(null=True)),
+                ('time', models.FloatField(default=0)),
+                ('caution_flag', models.CharField(default=b'', max_length=255)),
+                ('excluded', models.BooleanField(default=False)),
+                ('replaced', models.BooleanField(default=False)),
+                ('notes', models.CharField(default=b'', max_length=255)),
+                ('update_number', models.IntegerField(default=0)),
+                ('assay_plate_id', models.CharField(default=b'N/A', max_length=255)),
+                ('assay_well_id', models.CharField(default=b'N/A', max_length=255)),
+                ('replicate', models.CharField(default=b'', max_length=255)),
+                ('data_file_upload', models.ForeignKey(blank=True, to='assays.AssayDataFileUpload', null=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='AssayFailureReason',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('flagged', models.BooleanField(default=False, help_text=b'Check box to flag for review')),
+                ('reason_for_flag', models.CharField(default=b'', help_text=b'Reason for why this entry was flagged', max_length=300, blank=True)),
+                ('name', models.CharField(unique=True, max_length=512)),
+                ('description', models.CharField(max_length=2000)),
+                ('created_by', models.ForeignKey(related_name='assayfailurereason_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='assayfailurereason_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('signed_off_by', models.ForeignKey(related_name='assayfailurereason_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
+        migrations.CreateModel(
+            name='AssayImage',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('file_name', models.CharField(max_length=255)),
+                ('field', models.CharField(max_length=255)),
+                ('field_description', models.CharField(default=b'', max_length=500)),
+                ('time', models.FloatField()),
+                ('assay_plate_id', models.CharField(default=b'N/A', max_length=40)),
+                ('assay_well_id', models.CharField(default=b'N/A', max_length=40)),
+                ('notes', models.CharField(default=b'', max_length=500)),
+                ('replicate', models.CharField(default=b'', max_length=40)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='AssayImageSetting',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('label_id', models.CharField(max_length=40)),
+                ('label_name', models.CharField(max_length=255)),
+                ('label_description', models.CharField(max_length=500)),
+                ('wave_length', models.CharField(max_length=255)),
+                ('magnification', models.CharField(max_length=40)),
+                ('resolution', models.CharField(max_length=40)),
+                ('resolution_unit', models.CharField(max_length=40)),
+                ('notes', models.CharField(default=b'', max_length=500)),
+                ('color_mapping', models.CharField(default=b'', max_length=255)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='AssayMatrix',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('flagged', models.BooleanField(default=False, help_text=b'Check box to flag for review')),
+                ('reason_for_flag', models.CharField(default=b'', help_text=b'Reason for why this entry was flagged', max_length=300, blank=True)),
+                ('name', models.CharField(max_length=255)),
+                ('representation', models.CharField(max_length=255, choices=[(b'chips', b'Multiple Chips'), (b'plate', b'Plate'), (b'', b'')])),
+                ('number_of_rows', models.IntegerField(null=True, blank=True)),
+                ('number_of_columns', models.IntegerField(null=True, blank=True)),
+                ('notes', models.CharField(default=b'', max_length=2048, blank=True)),
+                ('created_by', models.ForeignKey(related_name='assaymatrix_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('device', models.ForeignKey(blank=True, to='microdevices.Microdevice', null=True)),
+                ('modified_by', models.ForeignKey(related_name='assaymatrix_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('signed_off_by', models.ForeignKey(related_name='assaymatrix_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'verbose_name_plural': 'Assay Matrices',
+            },
+        ),
+        migrations.CreateModel(
+            name='AssayMatrixItem',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('flagged', models.BooleanField(default=False, help_text=b'Check box to flag for review')),
+                ('reason_for_flag', models.CharField(default=b'', help_text=b'Reason for why this entry was flagged', max_length=300, blank=True)),
+                ('name', models.CharField(max_length=512)),
+                ('setup_date', models.DateField(help_text=b'YYYY-MM-DD')),
+                ('scientist', models.CharField(default=b'', max_length=100, blank=True)),
+                ('notebook', models.CharField(default=b'', max_length=256, blank=True)),
+                ('notebook_page', models.CharField(default=b'', max_length=256, blank=True)),
+                ('notes', models.CharField(default=b'', max_length=2048, blank=True)),
+                ('row_index', models.IntegerField()),
+                ('column_index', models.IntegerField()),
+                ('variance_from_organ_model_protocol', models.CharField(default=b'', max_length=3000, verbose_name=b'Variance from Protocol', blank=True)),
+                ('test_type', models.CharField(max_length=8, choices=[(b'', b'--------'), (b'control', b'Control'), (b'compound', b'Compound')])),
+                ('failure_time', models.FloatField(null=True, blank=True)),
+                ('created_by', models.ForeignKey(related_name='assaymatrixitem_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('device', models.ForeignKey(verbose_name=b'Device', to='microdevices.Microdevice')),
+                ('failure_reason', models.ForeignKey(blank=True, to='assays.AssayFailureReason', null=True)),
+                ('matrix', models.ForeignKey(blank=True, to='assays.AssayMatrix', null=True)),
+                ('modified_by', models.ForeignKey(related_name='assaymatrixitem_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('organ_model', models.ForeignKey(verbose_name=b'Model', blank=True, to='microdevices.OrganModel', null=True)),
+                ('organ_model_protocol', models.ForeignKey(verbose_name=b'Model Protocol', blank=True, to='microdevices.OrganModelProtocol', null=True)),
+                ('signed_off_by', models.ForeignKey(related_name='assaymatrixitem_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'verbose_name': 'Matrix Item',
+            },
+        ),
+        migrations.CreateModel(
+            name='AssaySetting',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('name', models.CharField(unique=True, max_length=512)),
+                ('description', models.CharField(max_length=2000)),
+                ('created_by', models.ForeignKey(related_name='assaysetting_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='assaysetting_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('signed_off_by', models.ForeignKey(related_name='assaysetting_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
+        migrations.CreateModel(
+            name='AssaySetupCell',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('density', models.FloatField(default=0, verbose_name=b'density')),
+                ('passage', models.CharField(default=b'', max_length=16, verbose_name=b'Passage#', blank=True)),
+                ('addition_time', models.FloatField(null=True, blank=True)),
+                ('addition_location', models.ForeignKey(blank=True, to='assays.AssaySampleLocation', null=True)),
+                ('biosensor', models.ForeignKey(to='cellsamples.Biosensor')),
+                ('cell_sample', models.ForeignKey(to='cellsamples.CellSample')),
+            ],
+            options={
+                'ordering': ('addition_time', 'cell_sample', 'addition_location', 'biosensor', 'density', 'density_unit', 'passage'),
+            },
+        ),
+        migrations.CreateModel(
+            name='AssaySetupCompound',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('concentration', models.FloatField()),
+                ('addition_time', models.FloatField(blank=True)),
+                ('duration', models.FloatField(blank=True)),
+                ('addition_location', models.ForeignKey(blank=True, to='assays.AssaySampleLocation', null=True)),
+                ('compound_instance', models.ForeignKey(blank=True, to='compounds.CompoundInstance', null=True)),
+            ],
+            options={
+                'ordering': ('addition_time', 'compound_instance', 'addition_location', 'concentration_unit', 'concentration', 'duration'),
+            },
+        ),
+        migrations.CreateModel(
+            name='AssaySetupSetting',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('value', models.FloatField()),
+                ('addition_time', models.FloatField(blank=True)),
+                ('duration', models.FloatField(blank=True)),
+                ('addition_location', models.ForeignKey(blank=True, to='assays.AssaySampleLocation', null=True)),
+                ('matrix_item', models.ForeignKey(to='assays.AssayMatrixItem')),
+                ('setting', models.ForeignKey(to='assays.AssaySetting')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='AssayStudy',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('flagged', models.BooleanField(default=False, help_text=b'Check box to flag for review')),
+                ('reason_for_flag', models.CharField(default=b'', help_text=b'Reason for why this entry was flagged', max_length=300, blank=True)),
+                ('toxicity', models.BooleanField(default=False)),
+                ('efficacy', models.BooleanField(default=False)),
+                ('disease', models.BooleanField(default=False)),
+                ('cell_characterization', models.BooleanField(default=False)),
+                ('name', models.CharField(max_length=1000, verbose_name=b'Study Name')),
+                ('start_date', models.DateField(help_text=b'YYYY-MM-DD')),
+                ('description', models.CharField(default=b'', max_length=8000, blank=True)),
+                ('protocol', models.FileField(help_text=b'Protocol File for Study', upload_to=b'study_protocol', null=True, verbose_name=b'Protocol File', blank=True)),
+                ('image', models.ImageField(null=True, upload_to=b'studies', blank=True)),
+                ('use_in_calculations', models.BooleanField(default=False)),
+                ('restricted', models.BooleanField(default=True, help_text=b'Check box to restrict to selected group')),
+                ('signed_off_notes', models.CharField(default=b'', max_length=255, blank=True)),
+                ('bulk_file', models.FileField(upload_to=assays.models.upload_file_location, null=True, verbose_name=b'Data File', blank=True)),
+                ('access_groups', models.ManyToManyField(related_name='study_access_groups', to='auth.Group', blank=True)),
+                ('created_by', models.ForeignKey(related_name='assaystudy_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('group', models.ForeignKey(help_text=b'Bind to a group', to='auth.Group')),
+                ('modified_by', models.ForeignKey(related_name='assaystudy_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('signed_off_by', models.ForeignKey(related_name='assaystudy_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'verbose_name': 'Study',
+                'verbose_name_plural': 'Studies',
+            },
+        ),
+        migrations.CreateModel(
+            name='AssayStudyAssay',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('method', models.ForeignKey(to='assays.AssayMethod')),
+                ('study', models.ForeignKey(blank=True, to='assays.AssayStudy', null=True)),
+                ('target', models.ForeignKey(to='assays.AssayTarget')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='AssayStudyConfiguration',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_on', models.DateTimeField(auto_now_add=True, null=True)),
+                ('modified_on', models.DateTimeField(auto_now=True, null=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('locked', models.BooleanField(default=False, help_text=b'Check the box and save to lock the entry. Uncheck and save to enable editing.')),
+                ('name', models.CharField(unique=True, max_length=255)),
+                ('media_composition', models.CharField(default=b'', max_length=4000, blank=True)),
+                ('hardware_description', models.CharField(default=b'', max_length=4000, blank=True)),
+                ('created_by', models.ForeignKey(related_name='assaystudyconfiguration_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='assaystudyconfiguration_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('signed_off_by', models.ForeignKey(related_name='assaystudyconfiguration_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'verbose_name': 'Study Configuration',
+            },
+        ),
+        migrations.CreateModel(
+            name='AssayStudyModel',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('label', models.CharField(max_length=2)),
+                ('sequence_number', models.IntegerField()),
+                ('output', models.CharField(default=b'', max_length=20, blank=True)),
+                ('integration_mode', models.CharField(default=b'1', max_length=13, choices=[(b'0', b'Functional'), (b'1', b'Physical')])),
+                ('organ', models.ForeignKey(to='microdevices.OrganModel')),
+                ('study_configuration', models.ForeignKey(to='assays.AssayStudyConfiguration')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='AssayStudyStakeholder',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('signed_off_date', models.DateTimeField(null=True, blank=True)),
+                ('signed_off_notes', models.CharField(default=b'', max_length=255, blank=True)),
+                ('sign_off_required', models.BooleanField(default=True)),
+                ('group', models.ForeignKey(to='auth.Group')),
+                ('signed_off_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('study', models.ForeignKey(to='assays.AssayStudy')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='AssayStudySupportingData',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('description', models.CharField(help_text=b'Describes the contents of the supporting data file', max_length=1000)),
+                ('supporting_data', models.FileField(help_text=b'Supporting Data for Study', upload_to=assays.models.study_supporting_data_location)),
+                ('study', models.ForeignKey(to='assays.AssayStudy')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='AssaySubtarget',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(unique=True, max_length=512)),
+                ('description', models.CharField(max_length=2000)),
+            ],
+        ),
+        migrations.RemoveField(
+            model_name='studyconfiguration',
+            name='created_by',
+        ),
+        migrations.RemoveField(
+            model_name='studyconfiguration',
+            name='modified_by',
+        ),
+        migrations.RemoveField(
+            model_name='studyconfiguration',
+            name='signed_off_by',
+        ),
+        migrations.RemoveField(
+            model_name='studymodel',
+            name='organ',
+        ),
+        migrations.RemoveField(
+            model_name='studymodel',
+            name='study_configuration',
+        ),
+        migrations.AlterModelOptions(
+            name='assaychipcells',
+            options={'ordering': ('cell_sample_id', 'cell_biosensor_id', 'cellsample_density', 'cellsample_density_unit', 'cell_passage')},
+        ),
+        migrations.AlterModelOptions(
+            name='assaycompoundinstance',
+            options={'ordering': ('addition_time', 'compound_instance_id', 'concentration_unit_id', 'concentration', 'duration')},
+        ),
+        migrations.AlterModelOptions(
+            name='assayrun',
+            options={'ordering': ('assay_run_id',), 'verbose_name': 'Old Study', 'verbose_name_plural': 'Old Studies'},
+        ),
+        migrations.AlterField(
+            model_name='assayinstance',
+            name='study',
+            field=models.ForeignKey(blank=True, to='assays.AssayRun', null=True),
+        ),
+        migrations.AlterField(
+            model_name='assayplatecells',
+            name='cellsample_density_unit',
+            field=models.CharField(default=b'WE', max_length=8, verbose_name=b'Unit', choices=[(b'WE', b'cells/well'), (b'ML', b'cells/mL'), (b'MM', b'cells/mm^2')]),
+        ),
+        migrations.AlterField(
+            model_name='assayrun',
+            name='study_configuration',
+            field=models.ForeignKey(blank=True, to='assays.AssayStudyConfiguration', null=True),
+        ),
+        migrations.AlterField(
+            model_name='physicalunits',
+            name='availability',
+            field=models.CharField(default=b'', help_text='Type a series of strings for indicating where this unit should be listed:\ntest = test results\nreadouts = readouts\ncells = cell samples', max_length=255, blank=True),
+        ),
+        migrations.AlterField(
+            model_name='physicalunits',
+            name='description',
+            field=models.CharField(default=b'', max_length=255, blank=True),
+        ),
+        migrations.AlterField(
+            model_name='physicalunits',
+            name='unit',
+            field=models.CharField(max_length=255),
+        ),
+        migrations.DeleteModel(
+            name='StudyConfiguration',
+        ),
+        migrations.DeleteModel(
+            name='StudyModel',
+        ),
+        migrations.AddField(
+            model_name='assaystudyassay',
+            name='unit',
+            field=models.ForeignKey(to='assays.PhysicalUnits'),
+        ),
+        migrations.AddField(
+            model_name='assaystudy',
+            name='study_configuration',
+            field=models.ForeignKey(blank=True, to='assays.AssayStudyConfiguration', null=True),
+        ),
+        migrations.AddField(
+            model_name='assaysetupsetting',
+            name='unit',
+            field=models.ForeignKey(to='assays.PhysicalUnits'),
+        ),
+        migrations.AddField(
+            model_name='assaysetupcompound',
+            name='concentration_unit',
+            field=models.ForeignKey(verbose_name=b'Concentration Unit', to='assays.PhysicalUnits'),
+        ),
+        migrations.AddField(
+            model_name='assaysetupcompound',
+            name='matrix_item',
+            field=models.ForeignKey(to='assays.AssayMatrixItem'),
+        ),
+        migrations.AddField(
+            model_name='assaysetupcell',
+            name='density_unit',
+            field=models.ForeignKey(to='assays.PhysicalUnits'),
+        ),
+        migrations.AddField(
+            model_name='assaysetupcell',
+            name='matrix_item',
+            field=models.ForeignKey(to='assays.AssayMatrixItem'),
+        ),
+        migrations.AddField(
+            model_name='assaymatrixitem',
+            name='study',
+            field=models.ForeignKey(to='assays.AssayStudy'),
+        ),
+        migrations.AddField(
+            model_name='assaymatrix',
+            name='study',
+            field=models.ForeignKey(to='assays.AssayStudy'),
+        ),
+        migrations.AddField(
+            model_name='assayimagesetting',
+            name='study',
+            field=models.ForeignKey(to='assays.AssayStudy'),
+        ),
+        migrations.AddField(
+            model_name='assayimage',
+            name='matrix_item',
+            field=models.ForeignKey(to='assays.AssayMatrixItem'),
+        ),
+        migrations.AddField(
+            model_name='assayimage',
+            name='method',
+            field=models.ForeignKey(to='assays.AssayMethod'),
+        ),
+        migrations.AddField(
+            model_name='assayimage',
+            name='sample_location',
+            field=models.ForeignKey(to='assays.AssaySampleLocation'),
+        ),
+        migrations.AddField(
+            model_name='assayimage',
+            name='setting',
+            field=models.ForeignKey(to='assays.AssayImageSetting'),
+        ),
+        migrations.AddField(
+            model_name='assayimage',
+            name='subtarget',
+            field=models.ForeignKey(to='assays.AssaySubtarget'),
+        ),
+        migrations.AddField(
+            model_name='assayimage',
+            name='target',
+            field=models.ForeignKey(to='assays.AssayTarget'),
+        ),
+        migrations.AddField(
+            model_name='assaydatapoint',
+            name='matrix_item',
+            field=models.ForeignKey(to='assays.AssayMatrixItem'),
+        ),
+        migrations.AddField(
+            model_name='assaydatapoint',
+            name='sample_location',
+            field=models.ForeignKey(to='assays.AssaySampleLocation'),
+        ),
+        migrations.AddField(
+            model_name='assaydatapoint',
+            name='study',
+            field=models.ForeignKey(to='assays.AssayStudy'),
+        ),
+        migrations.AddField(
+            model_name='assaydatapoint',
+            name='study_assay',
+            field=models.ForeignKey(to='assays.AssayStudyAssay'),
+        ),
+        migrations.AddField(
+            model_name='assaydatapoint',
+            name='subtarget',
+            field=models.ForeignKey(blank=True, to='assays.AssaySubtarget', null=True),
+        ),
+        migrations.AddField(
+            model_name='assaydatafileupload',
+            name='study',
+            field=models.ForeignKey(to='assays.AssayStudy'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='assaystudy',
+            unique_together=set([('name', 'efficacy', 'disease', 'cell_characterization', 'start_date', 'group')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='assaysetupsetting',
+            unique_together=set([('matrix_item', 'setting', 'addition_location', 'unit', 'addition_time', 'duration')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='assaysetupcompound',
+            unique_together=set([('matrix_item', 'compound_instance', 'concentration', 'concentration_unit', 'addition_time', 'duration', 'addition_location')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='assaysetupcell',
+            unique_together=set([('matrix_item', 'cell_sample', 'biosensor', 'density', 'density_unit', 'passage', 'addition_time', 'addition_location')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='assaymatrixitem',
+            unique_together=set([('matrix', 'row_index', 'column_index'), ('study', 'name')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='assaymatrix',
+            unique_together=set([('study', 'name')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='assaydatapoint',
+            unique_together=set([('matrix_item', 'study_assay', 'sample_location', 'time', 'update_number', 'assay_plate_id', 'assay_well_id', 'replicate')]),
+        ),
+    ]

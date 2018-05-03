@@ -2,8 +2,7 @@
 
 from django.http import HttpResponse, Http404
 # from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 
 from rest_framework.renderers import JSONRenderer
 #from rest_framework.parsers import JSONParser
@@ -98,17 +97,16 @@ def bioactivities_list(request):
             # Limit at 5000
             bioactivities = data[:5000]
 
-            c = RequestContext(request)
-            c.update({
+            c = {
                 'bioactivities': bioactivities,
                 'compound': compound,
                 'target': target,
                 'name': name,
                 'length': length,
                 'pubchem': pubchem
-            })
+            }
 
-            return render_to_response('bioactivities/bioactivities_list.html', c)
+            return render(request, 'bioactivities/bioactivities_list.html', c)
 
         else:
             raise Http404
@@ -294,14 +292,12 @@ def gen_table(request):
 
 def view_cluster(request):
     """View the page for a cluster of compounds (can cluster on Bioactivities)"""
-    c = RequestContext(request)
-    return render_to_response('bioactivities/cluster.html', c)
+    return render(request, 'bioactivities/cluster.html')
 
 
 def view_heatmap(request):
     """View the page for a heatmap of Bioactivities"""
-    c = RequestContext(request)
-    return render_to_response('bioactivities/heatmap.html', c)
+    return render(request, 'bioactivities/heatmap.html')
 
 
 def view_table(request):
@@ -314,16 +310,13 @@ def view_table(request):
     else:
         form = SearchForm(initial={'app': 'Bioactivities'})
 
-    c = RequestContext(request)
-
-    c.update({
+    c = {
         'form': form,
-    })
+    }
 
-    return render_to_response('bioactivities/table.html', c)
+    return render(request, 'bioactivities/table.html', c)
 
 
 def view_model(request):
     """WIP: View preview page for predictive modelling"""
-    c = RequestContext(request)
-    return render_to_response('bioactivities/model.html', c)
+    return render(request, 'bioactivities/model.html')

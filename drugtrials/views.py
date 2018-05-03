@@ -84,7 +84,8 @@ class AdverseEventDetail(DetailView):
         events = CompoundAdverseEvent.objects.filter(
             compound=self.object
         ).prefetch_related(
-            'event__organ'
+            'event__organ',
+            'compound'
         ).order_by('-frequency')
 
         for ae in events:
