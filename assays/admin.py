@@ -1992,6 +1992,7 @@ class AssayTargetAdmin(LockableAdmin):
     list_display = (
         'name',
         'short_name',
+        'alt_name',
         'description'
     )
     search_fields = (
@@ -2235,6 +2236,7 @@ class AssayMethodAdmin(LockableAdmin):
     list_per_page = 300
     list_display = (
         'name',
+        'alt_name',
         'measurement_type',
         'supplier',
         'protocol_file',
