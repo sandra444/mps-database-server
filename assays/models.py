@@ -2298,7 +2298,7 @@ class AssayImageSetting(models.Model):
     # This is necessary in TongYing's scheme, but it is kind of confusing in a way
     label_id = models.CharField(max_length=40, default='', blank=True)
     label_name = models.CharField(max_length=255)
-    label_description = models.CharField(max_length=500)
+    label_description = models.CharField(max_length=500, default='', blank=True)
     wave_length = models.CharField(max_length=255)
     magnification = models.CharField(max_length=40)
     resolution = models.CharField(max_length=40)
