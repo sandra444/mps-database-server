@@ -13,6 +13,22 @@ $(document).ready(function () {
         });
     };
 
+    // Define numeric comma sorting
+    $.extend($.fn.dataTableExt.oSort, {
+        "numeric-comma-pre": function (a) {
+            var x = a.replace(/,/g, '');
+            return parseFloat(x);
+        },
+
+        "numeric-comma-asc": function (a, b) {
+            return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+        },
+
+        "numeric-comma-desc": function (a, b) {
+            return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+        }
+    });
+
 // Defines the options for the print, copy, and save as buttons
     $.extend(true, $.fn.dataTable.defaults, {
         buttons: [
