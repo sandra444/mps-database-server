@@ -4640,7 +4640,6 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
             'setting__study'
         )
 
-
         metadata = {}
         tableCols = []
         tableRows = []

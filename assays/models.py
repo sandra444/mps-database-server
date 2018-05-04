@@ -2304,16 +2304,16 @@ class AssayImageSetting(models.Model):
     # May want to remove soon, why have this be specific to a study? Deletion cascade?
     study = models.ForeignKey(AssayStudy)
     # This is necessary in TongYing's scheme, but it is kind of confusing in a way
-    label_id = models.CharField(max_length=40)
+    label_id = models.CharField(max_length=40, default='', blank=True)
     label_name = models.CharField(max_length=255)
-    label_description = models.CharField(max_length=500)
+    label_description = models.CharField(max_length=500, default='', blank=True)
     wave_length = models.CharField(max_length=255)
     magnification = models.CharField(max_length=40)
     resolution = models.CharField(max_length=40)
     resolution_unit = models.CharField(max_length=40)
     # May be useful later
-    notes = models.CharField(max_length=500, default='')
-    color_mapping = models.CharField(max_length=255, default='')
+    notes = models.CharField(max_length=500, default='', blank=True)
+    color_mapping = models.CharField(max_length=255, default='', blank=True)
 
     def __unicode__(self):
         return u'{} {}'.format(self.study.name, self.label_name)
