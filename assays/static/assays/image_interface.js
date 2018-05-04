@@ -278,7 +278,8 @@ $(document).ready(function () {
         "searching": false,
         dom: 'frt',
         fixedHeader: {headerOffset: 50},
-        deferRender: true
+        deferRender: true,
+        iDisplayLength: -1
     });
 
     // On keystroke, run search function.
