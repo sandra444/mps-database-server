@@ -16,6 +16,10 @@ $(document).ready(function() {
                 "targets": [0]
             },
             {
+                "type": "numeric-comma",
+                "targets": [5, 6]
+            },
+            {
                 'className': 'none',
                 'targets': [7]
             }
