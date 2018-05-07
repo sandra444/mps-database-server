@@ -314,6 +314,7 @@ def generate_list_of_all_compounds_in_bioactivities(exclude_questionable, pubche
     return result
 
 
+# PLEASE REFACTOR
 def get_form_data(request):
     """Return dictionay containing data from the submitted filter form for bioactivities
 
@@ -323,54 +324,28 @@ def get_form_data(request):
     # convert data sent in request to a dict data type from a string data type
     request_filter = json.loads(request.POST.get('form', '{}'))
 
-    desired_targets = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'targets_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
+    desired_targets = request_filter.get(
+        'targets_filter', []
+    )
 
-    desired_compounds = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'compounds_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
+    desired_compounds = request_filter.get(
+        'compounds_filter', []
+    )
 
-    desired_bioactivities = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'bioactivities_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
+    desired_bioactivities = request_filter.get(
+        'bioactivities_filter', []
+    )
 
-    if 'drugtrials_filter' in request_filter:
-        desired_drugtrials = [
-            x.get(
-                'name'
-            ) for x in request_filter.get(
-                'drugtrials_filter'
-            ) if x.get(
-                'is_selected'
-            ) is True
-        ]
-    else:
-        desired_drugtrials = []
+    desired_drugtrials = request_filter.get(
+        'drugtrials_filter', []
+    )
 
+    # TODO TODO TODO REVISE REVISE REVISE
     desired_organisms = [
         x.get(
             'name'
         ) for x in request_filter.get(
-            'organisms_filter'
+            'organisms_filter', []
         ) if x.get(
             'is_selected'
         ) is True
@@ -654,7 +629,6 @@ def fetch_all_standard_drugtrials_data(
     results = []
 
     for finding in desired_drugtrials:
-
         drugtrial_data = FindingResult.objects.filter(
             finding_name__finding_name=finding,
             value__isnull=False,
