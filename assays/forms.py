@@ -24,11 +24,11 @@ from django.utils import timezone
 from django.utils.encoding import force_str
 
 from .utils import (
-    validate_file,
-    get_chip_details,
-    get_plate_details,
+    # validate_file,
+    # get_chip_details,
+    # get_plate_details,
     TIME_CONVERSIONS,
-    EXCLUDED_DATA_POINT_CODE,
+    # EXCLUDED_DATA_POINT_CODE,
     AssayFileProcessor
 )
 from django.utils import timezone
