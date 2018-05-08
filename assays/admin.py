@@ -13,20 +13,19 @@ from django import forms
 #     AssayPlateReadoutInlineFormset,
 # )
 from assays.utils import (
-    save_assay_layout,
-    modify_qc_status_chip,
-    modify_qc_status_plate,
+    # save_assay_layout,
+    # modify_qc_status_chip,
+    # modify_qc_status_plate,
     DEFAULT_CSV_HEADER
 )
 # TODO SPAGHETTI CODE
-from django.http import HttpResponseRedirect
+# from django.http import HttpResponseRedirect
 
 from assays.models import *
 from microdevices.models import MicrophysiologyCenter
-from .utils import parse_file_and_save
 # from compounds.models import Compound
 from mps.base.admin import LockableAdmin
-from assays.resource import *
+# from assays.resource import *
 # from import_export.admin import ImportExportModelAdmin
 # from compounds.models import *
 # import unicodedata
