@@ -828,7 +828,10 @@ def get_data_points_for_charting(
     final_data = {
         'sorted_assays': [],
         'assays': [],
-        'heatmap': {}
+        'heatmap': {
+            'matrices': {},
+            'values': {}
+        }
     }
 
     intermediate_data = {}
@@ -863,19 +866,20 @@ def get_data_points_for_charting(
     if additional_data:
         raw_data.extend(additional_data)
 
-    heatmap_matrices = AssayMatrix.objects.filter(
-        study_id=study,
-        representation='plate'
-    )
+    if not matrix_item:
+        heatmap_matrices = AssayMatrix.objects.filter(
+            study_id=study,
+            representation='plate'
+        )
 
-    heatmap_data = raw_data.filter(matrix_item__matrix_id__in=heatmap_matrices)
+        heatmap_data = raw_data.filter(matrix_item__matrix_id__in=heatmap_matrices)
 
-    final_data.update({
-        'heatmap': get_data_for_heatmap(heatmap_data)
-    })
+        final_data.update({
+            'heatmap': get_data_for_heatmap(heatmap_data)
+        })
 
-    if key != 'group':
-        raw_data = raw_data.exclude(matrix_item__matrix_id__in=heatmap_matrices)
+        if key != 'group':
+            raw_data = raw_data.exclude(matrix_item__matrix_id__in=heatmap_matrices)
 
     for raw in raw_data:
         # Now uses full name
