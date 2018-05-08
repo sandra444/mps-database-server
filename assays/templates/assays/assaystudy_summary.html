@@ -107,7 +107,7 @@
         No data to display
     </div>
 
-    <div class="padded-bottom">
+    <div id="heatmap_wrapper" class="padded-bottom" hidden>
         <div class="row">
             <div id="heatmap_filters" class="col-xs-12">
                 <label for="id_heatmap_matrix">Matrix
@@ -133,7 +133,6 @@
                 </label>
             </div>
         </div>
-    </div>
 
     <div class="well padded-bottom">
         <div id="matrix_wrapper" class="overflow-auto" style="max-height:800px;">
@@ -142,6 +141,7 @@
                 <tbody id="matrix_body"></tbody>
             </table>
         </div>
+    </div>
     </div>
 
     <table id="treatment_group_table" class="table table-striped table-bordered">

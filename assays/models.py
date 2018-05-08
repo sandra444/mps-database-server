@@ -6,13 +6,14 @@ from microdevices.models import (
     OrganModel,
     OrganModelProtocol,
     MicrophysiologyCenter,
-    # MicrodeviceSection
 )
 from mps.base.models import LockableModel, FlaggableModel, FlaggableRestrictedModel
 from django.contrib.auth.models import Group, User
 
 import urllib
 import collections
+
+from operator import attrgetter
 
 # TODO MAKE MODEL AND FIELD NAMES MORE CONSISTENT/COHERENT
 
@@ -42,6 +43,29 @@ TIME_CONVERSIONS = [
 
 TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
 
+DEFAULT_SETTING_CRITERIA = (
+    'setting.setting_id',
+    'setting.unit_id',
+    'setting.addition_location'
+)
+
+DEFAULT_COMPOUND_CRITERIA = (
+    'compound.compound_instance_id',
+    'compound.concentration',
+    'compound.concentration_unit_id',
+    'compound.addition_time',
+    'compound.duration',
+    'compound.addition_location'
+)
+
+DEFAULT_CELL_CRITERIA = (
+    'cell.cell_sample_id',
+    'cell.biosensor_id',
+    'cell.density',
+    'cell.density_unit',
+    'cell.passage',
+    'cell.addition_location'
+)
 
 # TODO EMPLOY THIS FUNCTION ELSEWHERE
 def get_split_times(time_in_minutes):
@@ -1705,15 +1729,13 @@ class AssayMatrixItem(FlaggableModel):
     def __unicode__(self):
         return unicode(self.name)
 
-    def devolved_settings(self):
+    def devolved_settings(self, criteria=DEFAULT_SETTING_CRITERIA):
         """Makes a tuple of cells (for comparison)"""
         setting_tuple = []
         for setting in self.assaysetupsetting_set.all():
-            setting_tuple.append((
-                setting.setting_id,
-                setting.unit_id,
-                setting.addition_location
-            ))
+            current_tuple = attrgetter(setting, criteria)
+
+            setting_tuple.append(current_tuple)
 
         return tuple(sorted(setting_tuple))
 
@@ -1728,18 +1750,13 @@ class AssayMatrixItem(FlaggableModel):
 
         return '\n'.join(settings)
 
-    def devolved_cells(self):
+    def devolved_cells(self, criteria=DEFAULT_CELL_CRITERIA):
         """Makes a tuple of cells (for comparison)"""
         cell_tuple = []
         for cell in self.assaysetupcell_set.all():
-            cell_tuple.append((
-                cell.cell_sample_id,
-                cell.biosensor_id,
-                cell.density,
-                cell.density_unit,
-                cell.passage,
-                cell.addition_location
-            ))
+            current_tuple = attrgetter(cell, criteria)
+
+            cell_tuple.append(current_tuple)
 
         return tuple(sorted(cell_tuple))
 
@@ -1754,18 +1771,13 @@ class AssayMatrixItem(FlaggableModel):
 
         return '\n'.join(cells)
 
-    def devolved_compounds(self):
+    def devolved_compounds(self, criteria=DEFAULT_COMPOUND_CRITERIA):
         """Makes a tuple of compounds (for comparison)"""
         compound_tuple = []
         for compound in self.assaysetupcompound_set.all():
-            compound_tuple.append((
-                compound.compound_instance_id,
-                compound.concentration,
-                compound.concentration_unit_id,
-                compound.addition_time,
-                compound.duration,
-                compound.addition_location
-            ))
+            current_tuple = attrgetter(compound, criteria)
+
+            compound_tuple.append(current_tuple)
 
         return tuple(sorted(compound_tuple))
 
