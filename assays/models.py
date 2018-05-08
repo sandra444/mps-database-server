@@ -77,7 +77,7 @@ def get_center_id(group_id):
             'center_name': center_data.name,
         })
 
-    except:
+    except IndexError:
         data.update({
             'center_id': '',
             'center_name': '',
@@ -357,6 +357,7 @@ class AssayQualityIndicator(LockableModel):
 
     # Is this necessary? Do we assume that all need to be excluded?
     # exclude = models.BooleanField(default=True)
+
 
 # TO BE DEPRECATED To be merged into single "AssayCells" model
 class AssayPlateCells(models.Model):
@@ -935,6 +936,7 @@ class AssayChipCells(models.Model):
             cell_choice_dict.get(self.cellsample_density_unit, 'Unknown Unit')
         )
 
+
 # TO BE DEPRECATED To be merged into single "AssaySetup" model
 class AssayChipSetup(FlaggableRestrictedModel):
     """The configuration of a Chip for implementing an assay"""
@@ -960,7 +962,9 @@ class AssayChipSetup(FlaggableRestrictedModel):
     assay_chip_id = models.CharField(max_length=512, verbose_name='Chip ID/ Barcode')
 
     # Control => control, Compound => compound; Abbreviate? Capitalize?
-    chip_test_type = models.CharField(max_length=8, choices=(("control", "Control"), ("compound", "Compound")), default="control")
+    chip_test_type = models.CharField(max_length=8, choices=(
+        ("control", "Control"), ("compound", "Compound")), default="control"
+    )
 
     compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
     concentration = models.FloatField(default=0, verbose_name='Conc.',
@@ -1838,7 +1842,6 @@ class AssaySetupCell(models.Model):
             'passage'
         )
 
-
     # Now binds directly to items
     matrix_item = models.ForeignKey(AssayMatrixItem)
 
@@ -2347,29 +2350,28 @@ class AssayImage(models.Model):
         return {
             'matrix_item_id': self.matrix_item_id,
             'chip_id': self.matrix_item.name,
-            'plate_id' : self.assay_plate_id,
-            'well_id' : self.assay_well_id,
-            'time' : "D"+str(int(self.time/24/60))+" H"+str(int(self.time/60%24))+" M" + str(int(self.time%60)),
-            'method_kit' : self.method.name,
+            'plate_id': self.assay_plate_id,
+            'well_id': self.assay_well_id,
+            'time': "D"+str(int(self.time/24/60))+" H"+str(int(self.time/60%24))+" M" + str(int(self.time%60)),
+            'method_kit': self.method.name,
             'stain_pairings': self.method.alt_name,
-            'target_analyte' : self.target.name,
-            'subtarget' : self.subtarget.name,
-            'sample_location' : self.sample_location.name,
-            'replicate' : self.replicate,
-            'notes' : self.notes,
-            'file_name' : self.file_name,
-            'field' : self.field,
-            'field_description' : self.field_description,
-            'magnification' : self.setting.magnification,
-            'resolution' : self.setting.resolution,
-            'resolution_unit' : self.setting.resolution_unit,
-            'sample_label' : self.setting.label_name,
-            'sample_label_description' : self.setting.label_description,
-            'wavelength' : self.setting.wave_length,
-            'color_mapping' : self.setting.color_mapping,
-            'setting_notes' : self.setting.notes,
+            'target_analyte': self.target.name,
+            'subtarget': self.subtarget.name,
+            'sample_location': self.sample_location.name,
+            'replicate': self.replicate,
+            'notes': self.notes,
+            'file_name': self.file_name,
+            'field': self.field,
+            'field_description': self.field_description,
+            'magnification': self.setting.magnification,
+            'resolution': self.setting.resolution,
+            'resolution_unit': self.setting.resolution_unit,
+            'sample_label': self.setting.label_name,
+            'sample_label_description': self.setting.label_description,
+            'wavelength': self.setting.wave_length,
+            'color_mapping': self.setting.color_mapping,
+            'setting_notes': self.setting.notes,
         }
 
     def __unicode__(self):
         return u'{}'.format(self.file_name)
-
