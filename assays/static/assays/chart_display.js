@@ -211,7 +211,7 @@ $(document).ready(function () {
     };
 
     window.CHARTS.get_heatmap_dropdowns = function(starting_index) {
-        if (heatmap_data.matrices.length > 1) {
+        if (heatmap_data.matrices && _.keys(heatmap_data.matrices).length > 0) {
             heatmap_wrapper_selector.show();
 
             var current_index = 0;
