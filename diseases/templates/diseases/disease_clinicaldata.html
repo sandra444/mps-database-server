@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{# TODO REQUIRES AESTHETIC REVISION #}
+
+{% block breadcrumbs %}
+    <li><a href="/diseases/">Disease List</a></li>
+    <li><a href="/diseases/{{disease.pk}}/">{{ disease.name }}</a></li>
+    <li class="active">Clinical Data</li>
+{% endblock %}
+
+{% block content %}
+    <div class="well">
+        <div class="row text-center">
+            <h1>
+                {{ disease.name }} Disease Clinical Data
+            </h1>
+        </div>
+        <div class="row text-center small-padding-top">
+            {% include "diseases/disease_links.html" %}
+        </div>
+    </div>
+
+    <legend>{{ disease.name }} Clinical Data</legend>
+    <div class="row">
+        {% if disease.clinicaldata_image %}
+        <div class="col-sm-10 col-md-6 text-wrapped">
+            {{ disease.clinicaldata_blurb|safe }}
+        </div>
+        <div class="col-md-6 thumbnail text-center row-center">
+            <img src="{{disease.clinicaldata_image.url}}" class="img-responsive"></img>
+        </div>
+        {% else %}
+        <div class="col-sm-10 col-md-12 text-wrapped">
+            {{ disease.clinicaldata_blurb|safe }}
+        </div>
+        {% endif %}
+    </div>
+    <br><br>
+
+    <div class="col-md-12">
+        <div class="panel-group" id="accordion">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">ClinicalTrials.gov</a>
+                    </h4>
+                </div>
+                <div id="collapse1" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Trial Name</th>
+                                            <th>Phase</th>
+                                            <th>Status</th>
+                                            <th>Results</th>
+                                            <th>Institution</th>
+                                            <th>Drugs</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><a href="https://clinicaltrials.gov/ct2/show/NCT01913470"> Study of Losartan in the Treatment of NAFLD in Children</a></td>
+                                            <td>2</td>
+                                            <td>Completed</td>
+                                            <td>Yes</td>
+                                            <td>Emory University</td>
+                                            <td>Losartan</td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="https://clinicaltrials.gov/ct2/show/NCT01529268?recrs=e&rslt=With&cond=NAFLD&rank=2"> Cysteamine Bitartrate Delayed-Release for the Treatment of NAFLD in Children</a></td>
+                                            <td>2,3</td>
+                                            <td>Completed</td>
+                                            <td>Yes</td>
+                                            <td>University of California San Diego</td>
+                                            <td>Cysteamine Bitartrate</td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="https://clinicaltrials.gov/ct2/show/NCT01811472?recrs=e&rslt=With&cond=NAFLD&rank=3"> Study to Assess the Efficacy, Safety and Tolerability of LCQ908 in NAFLD Patients</a></td>
+                                            <td>2</td>
+                                            <td>Completed</td>
+                                            <td>Yes</td>
+                                            <td>Novartis</td>
+                                            <td>LCQ908</td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="https://clinicaltrials.gov/ct2/show/NCT01963845?recrs=e&rslt=With&cond=NAFLD&rank=7"> Sitagliptin Versus Placebo in the Treatment of Non-alcoholic Fatty Liver Disease</a></td>
+                                            <td>2</td>
+                                            <td>Completed</td>
+                                            <td>Yes</td>
+                                            <td>University of California San Diego</td>
+                                            <td>Sitagliptin</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="panel-group" id="accordion">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">National Institute of Diabetes and Digestive and Kidney Disease (NIDDK) Central Repository</a>
+                    </h4>
+                </div>
+                <div id="collapse2" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Acronym</th>
+                                            <th>Has Specimens</th>
+                                            <th>Has Study Dataset</th>
+                                            <th>Network</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><a href="https://repository.niddk.nih.gov/studies/nafld-database/?query=NAFLD">Nonalcoholic Fatty Liver Disease Database (NAFLD Database)</a></td>
+                                            <td>NAFLD Database</td>
+                                            <td>Interal Use Only</td>
+                                            <td>No</td>
+                                            <td>NASH</td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="https://repository.niddk.nih.gov/studies/nafld_pediatric/?query=NAFLD">Nonalcoholic Fatty Liver Disease (NAFLD) Pediatric Database (NAFLD Pediatric)</a></td>
+                                            <td>NAFLD Pediatric</td>
+                                            <td>Available upon request</td>
+                                            <td>Yes</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="https://repository.niddk.nih.gov/studies/nafld-goals/?query=NAFLD">NAFLD GOALS (NAFLD GOALS)</a></td>
+                                            <td>NAFLD GOALS</td>
+                                            <td>No Specimens</td>
+                                            <td>No</td>
+                                            <td>NASH</td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="https://repository.niddk.nih.gov/studies/nafld_adult/?query=NAFLD">Nonalcoholic Fatty Liver Disease (NAFLD) Adult Database (NAFLD Adult)</a></td>
+                                            <td>NAFLD Adult</td>
+                                            <td>Available upon request</td>
+                                            <td>Yes</td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="panel-group" id="accordion">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">FDA Adverse Events Reporting System (FAERS)</a>
+                    </h4>
+                </div>
+                <div id="collapse3" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Drug Name</th>
+                                            <th>Status</th>
+                                            <th>Adverse Events</th>
+                                            <th>Deaths</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><a href="https://fis.fda.gov/sense/app/777e9f4d-0cf8-448e-8068-f564c31baa25/sheet/45beeb74-30ab-46be-8267-5756582633b4/state/analysis"> Losartan</a></td>
+                                            <td>Clinically Available</td>
+                                            <td>3777</td>
+                                            <td>366</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <strong><a href="https://www.drugs.com/condition/nonalcoholic-fatty-liver.html">Drugs.com</a></strong>
+                </h4>
+            </div>
+            <div class="col-xs-12 panel body padding-left">There are 11 results for drugs that treat NAFLD on Drugs.com</div>
+        </div>
+    </div>
+{% endblock %}

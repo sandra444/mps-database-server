@@ -235,7 +235,8 @@ INSTALLED_APPS = (
     'bioactivities',
     'drugtrials',
     'assays',
-    'resources'
+    'resources',
+    'diseases'
 )
 
 # This should set all indices to use real time processing
