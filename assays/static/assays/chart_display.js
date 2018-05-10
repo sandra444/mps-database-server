@@ -408,12 +408,13 @@ $(document).ready(function () {
             // Merge options with the specified changes
             $.extend(options, changes_to_options);
 
+            // REMOVED FOR NOW
             // Find out whether to shrink text
-            $.each(assays[index][0], function(index, column_header) {
-                if (column_header.length > 12) {
-                    options.legend.textStyle.fontSize = 10;
-                }
-            });
+            // $.each(assays[index][0], function(index, column_header) {
+            //     if (column_header.length > 12) {
+            //         options.legend.textStyle.fontSize = 10;
+            //     }
+            // });
 
             var chart = null;
 
@@ -475,49 +476,52 @@ $(document).ready(function () {
         window.CHARTS.display_treatment_groups(json.treatment_groups);
 
         // Triggers for legends (TERRIBLE SELECTOR)
-        $(document).on('mouseover', 'g:has("g > text")', function() {
-            var text_section = $(this).find('text');
-            if (text_section.length === 1) {
-                var current_pos = $(this).position();
-                // Make it appear slightly below the legend
-                var current_top = current_pos.top + 50;
-                // Get the furthest left it should go
-                var current_left = $('#breadcrumbs').position.left;
+        // $(document).on('mouseover', 'g:has("g > text")', function() {
+        $(document).on('mouseover', 'g > text[font-size="12"]', function() {
+            // var text_section = $(this).find('text');
+            // if (text_section.length === 1) {
+            var current_pos = $(this).position();
+            // Make it appear slightly below the legend
+            var current_top = current_pos.top + 50;
+            // Get the furthest left it should go
+            var current_left = $('#breadcrumbs').position.left;
 
-                var content_split = null;
-                var row_id_to_use = null;
-                var row_clone = null;
+            var content_split = null;
+            var row_id_to_use = null;
+            var row_clone = null;
 
-                // Naive, assumes Group would never be in a device name
-                if ($(this).find('text').text().indexOf('Group') > -1) {
-                    content_split = $(this).find('text').text().split(/(\d+)/);
-                    row_id_to_use = '#' + content_split[0].replace(' ', '_') + content_split[1];
-                    row_clone = $(row_id_to_use).clone().addClass('bg-warning');
-                }
-                else {
-                    // Naive, assumes spaces will not be in device name
-                    content_split = $(this).find('text').text().split(/(\s+)/);
-                    row_id_to_use = '#' + device_to_group[content_split[0]];
-                    row_clone = $(row_id_to_use).clone().addClass('bg-warning');
-                }
-
-                $('#group_display_body').empty().append(row_clone);
-
-                var second_row = $('<tr>').addClass('bg-warning');
-                var hidden_rows = false;
-
-                $(row_id_to_use).find('td:hidden').each(function(index) {
-                    hidden_rows = true;
-                    second_row.append($(this).clone().show());
-                });
-
-                if (hidden_rows) {
-                    $('#group_display_body').append(second_row);
-                }
-
-                $('#group_display').show()
-                    .css({top: current_top, left: current_left, position:'absolute'});
+            // Naive, assumes Group would never be in a device name
+            if ($(this).find('text').text().indexOf('Group') > -1) {
+                // content_split = $(this).find('text').text().split(/(\d+)/);
+                content_split = $(this).text().split(/(\d+)/);
+                row_id_to_use = '#' + content_split[0].replace(' ', '_') + content_split[1];
+                row_clone = $(row_id_to_use).clone().addClass('bg-warning');
             }
+            else {
+                // Naive, assumes spaces will not be in device name
+                // content_split = $(this).find('text').text().split(/(\s+)/);
+                content_split = $(this).text().split(/(\s+)/);
+                row_id_to_use = '#' + device_to_group[content_split[0]];
+                row_clone = $(row_id_to_use).clone().addClass('bg-warning');
+            }
+
+            $('#group_display_body').empty().append(row_clone);
+
+            var second_row = $('<tr>').addClass('bg-warning');
+            var hidden_rows = false;
+
+            $(row_id_to_use).find('td:hidden').each(function(index) {
+                hidden_rows = true;
+                second_row.append($(this).clone().show());
+            });
+
+            if (hidden_rows) {
+                $('#group_display_body').append(second_row);
+            }
+
+            $('#group_display').show()
+                .css({top: current_top, left: current_left, position:'absolute'});
+            // }
         });
         $(document).on('mouseout', 'g:has("g > text")', function() {
             $('#group_display').hide();
