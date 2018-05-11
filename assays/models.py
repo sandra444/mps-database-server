@@ -44,27 +44,27 @@ TIME_CONVERSIONS = [
 TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
 
 DEFAULT_SETTING_CRITERIA = (
-    'setting.setting_id',
-    'setting.unit_id',
-    'setting.addition_location'
+    'setting_id',
+    'unit_id',
+    'addition_location'
 )
 
 DEFAULT_COMPOUND_CRITERIA = (
-    'compound.compound_instance_id',
-    'compound.concentration',
-    'compound.concentration_unit_id',
-    'compound.addition_time',
-    'compound.duration',
-    'compound.addition_location'
+    'compound_instance_id',
+    'concentration',
+    'concentration_unit_id',
+    'addition_time',
+    'duration',
+    'addition_location'
 )
 
 DEFAULT_CELL_CRITERIA = (
-    'cell.cell_sample_id',
-    'cell.biosensor_id',
-    'cell.density',
-    'cell.density_unit',
-    'cell.passage',
-    'cell.addition_location'
+    'cell_sample_id',
+    'biosensor_id',
+    'density',
+    'density_unit_id',
+    'passage',
+    'addition_location'
 )
 
 # TODO EMPLOY THIS FUNCTION ELSEWHERE
@@ -1732,8 +1732,9 @@ class AssayMatrixItem(FlaggableModel):
     def devolved_settings(self, criteria=DEFAULT_SETTING_CRITERIA):
         """Makes a tuple of cells (for comparison)"""
         setting_tuple = []
+        attribute_getter = attrgetter(*criteria)
         for setting in self.assaysetupsetting_set.all():
-            current_tuple = attrgetter(setting, criteria)
+            current_tuple = attrgetter(setting)
 
             setting_tuple.append(current_tuple)
 
@@ -1753,8 +1754,9 @@ class AssayMatrixItem(FlaggableModel):
     def devolved_cells(self, criteria=DEFAULT_CELL_CRITERIA):
         """Makes a tuple of cells (for comparison)"""
         cell_tuple = []
+        attribute_getter = attrgetter(*criteria)
         for cell in self.assaysetupcell_set.all():
-            current_tuple = attrgetter(cell, criteria)
+            current_tuple = attribute_getter(cell)
 
             cell_tuple.append(current_tuple)
 
@@ -1774,8 +1776,9 @@ class AssayMatrixItem(FlaggableModel):
     def devolved_compounds(self, criteria=DEFAULT_COMPOUND_CRITERIA):
         """Makes a tuple of compounds (for comparison)"""
         compound_tuple = []
+        attribute_getter =  attrgetter(*criteria)
         for compound in self.assaysetupcompound_set.all():
-            current_tuple = attrgetter(compound, criteria)
+            current_tuple = attribute_getter(compound)
 
             compound_tuple.append(current_tuple)
 
