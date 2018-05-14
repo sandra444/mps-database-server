@@ -878,7 +878,7 @@ def get_data_points_for_charting(
             'heatmap': get_data_for_heatmap(heatmap_data)
         })
 
-        if key != 'group':
+        if key == 'device':
             raw_data = raw_data.exclude(matrix_item__matrix_id__in=heatmap_matrices)
 
     for raw in raw_data:
@@ -905,6 +905,7 @@ def get_data_points_for_charting(
 
         # Convert to days for now
         time = raw.time / 1440.0
+        raw_time = raw.time
 
         replaced = raw.replaced
         excluded = raw.excluded
@@ -918,6 +919,21 @@ def get_data_points_for_charting(
             if key == 'group':
                 # tag = get_list_of_present_compounds(related_compounds_map, raw, ' & ')
                 tag = 'Group {}'.format(setup_to_treatment_group.get(setup_id).get('index') + 1)
+            elif key == 'dose':
+                tag = []
+                concentration = 0
+
+                for compound in raw.matrix_item.assaysetupcompound_set.all():
+                    if compound.addition_time <= raw_time and compound.addition_time + compound.duration >= raw_time:
+                        concentration += compound.concentration * compound.concentration_unit.scale_factor
+                        tag.append(compound.compound_instance.compound.name)
+
+                # CONTRIVED: Set time to concentration
+                time = concentration
+                if tag:
+                    tag = ' & '.join(tag)
+                else:
+                    tag = '-No Compound-'
             # If by device
             else:
                 tag = chip_id

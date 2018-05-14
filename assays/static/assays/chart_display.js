@@ -314,6 +314,14 @@ $(document).ready(function () {
 
         window.CHARTS.get_heatmap_dropdowns(0);
 
+        // Naive way to learn whether dose vs. time
+        var is_dose = $('#' + charts + 'dose_select').prop('checked');
+
+        var x_axis_label = 'Time (Days)';
+        if (is_dose) {
+            x_axis_label = 'Dose (μM)';
+        }
+
         // If nothing to show
         if (!json.assays) {
             $('#' + charts).html('No data to display');
@@ -351,7 +359,7 @@ $(document).ready(function () {
                     }
                 },
                 hAxis: {
-                    title: 'Time (Days)',
+                    title: x_axis_label,
                     textStyle: {
                         bold: true
                     },

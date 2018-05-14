@@ -3,12 +3,16 @@
     <h3 class="text-center">{{ chart_title }}</h3>
     <div class="row">
         <label class="radio-inline">
-            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}chip_select" value="chip" checked>
+            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}device_select" value="device" checked>
             View by Device
         </label>
         <label class="radio-inline">
-            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}compound_select" value="group">
+            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}group_select" value="group">
             View by Group
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}dose_select" value="dose">
+            View by Dose-Response
         </label>
         <label for="{{ chart_prefix }}percent_control" class="pull-right">
             <input type="checkbox" name="{{ chart_prefix }}percent_control" id="{{ chart_prefix }}percent_control" />
