@@ -485,9 +485,9 @@ $(document).ready(function () {
 
         // Triggers for legends (TERRIBLE SELECTOR)
         // $(document).on('mouseover', 'g:has("g > text")', function() {
-        $(document).on('mouseover', 'g > text[font-size="12"]', function() {
-            // var text_section = $(this).find('text');
-            // if (text_section.length === 1) {
+        $(document).on('mouseover', 'g:has(text[font-size="12"])', function() {
+            var text_section = $(this).find('text');
+            if (text_section.length === 1) {
             var current_pos = $(this).position();
             // Make it appear slightly below the legend
             var current_top = current_pos.top + 50;
@@ -499,16 +499,16 @@ $(document).ready(function () {
             var row_clone = null;
 
             // Naive, assumes Group would never be in a device name
-            if ($(this).text().indexOf('Group') > -1) {
+            if (text_section.text().indexOf('Group') > -1) {
                 // content_split = $(this).find('text').text().split(/(\d+)/);
-                content_split = $(this).text().split(/(\d+)/);
+                content_split = text_section.text().split(/(\d+)/);
                 row_id_to_use = '#' + content_split[0].replace(' ', '_') + content_split[1];
                 row_clone = $(row_id_to_use).clone().addClass('bg-warning');
             }
             else {
                 // Naive, assumes spaces will not be in device name
                 // content_split = $(this).find('text').text().split(/(\s+)/);
-                content_split = $(this).text().split(/(\s+)/);
+                content_split = text_section.text().split(/(\s+)/);
                 row_id_to_use = '#' + device_to_group[content_split[0]];
                 row_clone = $(row_id_to_use).clone().addClass('bg-warning');
             }
@@ -529,9 +529,9 @@ $(document).ready(function () {
 
             $('#group_display').show()
                 .css({top: current_top, left: current_left, position:'absolute'});
-            // }
+            }
         });
-        $(document).on('mouseout', 'g:has("g > text")', function() {
+        $(document).on('mouseout', 'g:has(text[font-size="12"])', function() {
             $('#group_display').hide();
         });
     };
