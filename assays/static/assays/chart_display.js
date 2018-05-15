@@ -499,7 +499,7 @@ $(document).ready(function () {
             var row_clone = null;
 
             // Naive, assumes Group would never be in a device name
-            if ($(this).find('text').text().indexOf('Group') > -1) {
+            if ($(this).text().indexOf('Group') > -1) {
                 // content_split = $(this).find('text').text().split(/(\d+)/);
                 content_split = $(this).text().split(/(\d+)/);
                 row_id_to_use = '#' + content_split[0].replace(' ', '_') + content_split[1];
