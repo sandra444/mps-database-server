@@ -51,6 +51,7 @@
                         <div class="row">
                             <div class="col-xs-12">
                                 <table class="table table-striped">
+                                    {% if clinicaltrials %}
                                     <thead>
                                         <tr>
                                             <th>Trial Name</th>
@@ -61,40 +62,21 @@
                                             <th>Drugs</th>
                                         </tr>
                                     </thead>
+                                    {% for key in clinicaltrials %}
                                     <tbody>
                                         <tr>
-                                            <td><a href="https://clinicaltrials.gov/ct2/show/NCT01913470"> Study of Losartan in the Treatment of NAFLD in Children</a></td>
-                                            <td>2</td>
-                                            <td>Completed</td>
-                                            <td>Yes</td>
-                                            <td>Emory University</td>
-                                            <td>Losartan</td>
-                                        </tr>
-                                        <tr>
-                                            <td><a href="https://clinicaltrials.gov/ct2/show/NCT01529268?recrs=e&rslt=With&cond=NAFLD&rank=2"> Cysteamine Bitartrate Delayed-Release for the Treatment of NAFLD in Children</a></td>
-                                            <td>2,3</td>
-                                            <td>Completed</td>
-                                            <td>Yes</td>
-                                            <td>University of California San Diego</td>
-                                            <td>Cysteamine Bitartrate</td>
-                                        </tr>
-                                        <tr>
-                                            <td><a href="https://clinicaltrials.gov/ct2/show/NCT01811472?recrs=e&rslt=With&cond=NAFLD&rank=3"> Study to Assess the Efficacy, Safety and Tolerability of LCQ908 in NAFLD Patients</a></td>
-                                            <td>2</td>
-                                            <td>Completed</td>
-                                            <td>Yes</td>
-                                            <td>Novartis</td>
-                                            <td>LCQ908</td>
-                                        </tr>
-                                        <tr>
-                                            <td><a href="https://clinicaltrials.gov/ct2/show/NCT01963845?recrs=e&rslt=With&cond=NAFLD&rank=7"> Sitagliptin Versus Placebo in the Treatment of Non-alcoholic Fatty Liver Disease</a></td>
-                                            <td>2</td>
-                                            <td>Completed</td>
-                                            <td>Yes</td>
-                                            <td>University of California San Diego</td>
-                                            <td>Sitagliptin</td>
+                                            <td><a href="https://clinicaltrials.gov/ct2/show/{{ key.trial_id }}"> {{ key.trial_name }}</a></td>
+                                            <td>{{key.phase}}</td>
+                                            <td>{{key.status}}</td>
+                                            <td>{{key.results}}</td>
+                                            <td>{{key.institution}}</td>
+                                            <td>{{key.drugs}}</td>
                                         </tr>
                                     </tbody>
+                                    {% endfor %}
+                                    {% else %}
+                                    No clinical trials currently linked to this disease in the database.
+                                    {% endif %}
                                 </table>
                             </div>
                         </div>
@@ -103,7 +85,7 @@
             </div>
         </div>
     </div>
-
+<!--
     <div class="col-md-12">
         <div class="panel-group" id="accordion">
             <div class="panel panel-default">
@@ -212,5 +194,5 @@
             </div>
             <div class="col-xs-12 panel body padding-left">There are 11 results for drugs that treat NAFLD on Drugs.com</div>
         </div>
-    </div>
+    </div>-->
 {% endblock %}

@@ -43,7 +43,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">Current Disease Models in Database</a>
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">Current {{ disease.name }} Models</a>
                     </h4>
                 </div>
                 <div id="collapse2" class="panel-collapse collapse in">
@@ -81,7 +81,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">Current Disease Model Cell Types</a>
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">Current {{ disease.name }} Model Cell Types</a>
                     </h4>
                 </div>
                 <div id="collapse3" class="panel-collapse collapse in">
@@ -91,7 +91,7 @@
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
-                                            <th>Current NAFLD Model Cells</th>
+                                            <th>Current Model Cells</th>
                                             <th>Type</th>
                                             <th>Status</th>
                                             <th>Transfection Ability</th>
@@ -162,7 +162,6 @@
                                             <td>SQL-SAL 2.0</td>
                                             <td>University of Pittsburgh</td>
                                             <td>This would display the table of devices that we already have under the "devices" page, but only the devices that have been used for disease models</td>
-                                            <td><a href="#"> SQL-SAL 2.0</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -199,7 +198,6 @@
                                             <td>SQL-SAL 2.0</td>
                                             <td>University of Pittsburgh</td>
                                             <td>This would display the table of biomaterials for a currently selected disease model</td>
-                                            <td><a href="#"> SQL-SAL 2.0</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -236,7 +234,6 @@
                                             <td>SQL-SAL 2.0</td>
                                             <td>University of Pittsburgh</td>
                                             <td>This would display the table of publications that are associated with that disease model</td>
-                                            <td><a href="#"> SQL-SAL 2.0</td>
                                         </tr>
                                     </tbody>
                                 </table>

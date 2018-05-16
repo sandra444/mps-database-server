@@ -39,8 +39,8 @@
     <br><br>
 
     <legend>{{disease.name}} Genomic Resources</legend>
-        <div class="row">
-            <div class="col-md-8">
+    <div class="row">
+        <div class="col-md-8">
             <div class="panel-group">
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -52,32 +52,44 @@
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-xs-12">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Description</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><a href="https://www.ncbi.nlm.nih.gov/gds/?term=NAFLD">Gene Expression Omnibus</a></td>
-                                            <td>GEO is a public functional genomics data repository supporting MIAME-compliant data submissions. Array- and sequence-based data are accepted. Tools are provided to help users query and download experiments and curated gene expression profiles</td>
-                                        </tr>
-                                        <tr>
-                                            <td><a href="https://www.omim.org/search/?index=entry&start=1&limit=10&sort=score+desc,+prefix_sort+desc&search=NAFLD">OMIM Gene-Phenotype Relationship</a></td>
-                                            <td>OMIM is a comprehensive, authoritative compendium of human genes and genetic phenotypes. Our precurated search sends you directly to NAFLD related Gene-Phenotype relationships on OMIM.</td>
-                                        </tr>
-                                        <tr>
-                                            <td><a href="http://www.exsnp.org/Cell">ExSNP</a></td>
-                                            <td>ExSNP is a data looking to establish a gold-standard list of consensus eQTLs by integrating publicly available data for specific human populations and cell types, so as to efficiently prioritize functional SNPs. Our precurated search sends you directly to liver specific eQTLs.</td>
-                                        </tr>
-                                        <tr>
-                                            <td><a href="https://diseases.jensenlab.org/Search?query=Fatty%20Liver%20Disease">DISEASES.org</a></td>
-                                            <td>Diseases is a tool that mines disease-gene relationships from text</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                    {% if disease.biology_genomic_geo_url or disease.biology_genomic_omim_url or disease.biology_genomic_exsnp_url or disease.biology_genomic_diseasesorg_url %}
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% if disease.biology_genomic_geo_url %}
+                                            <tr>
+                                                <td><a href="{{disease.biology_genomic_geo_url}}">Gene Expression Omnibus</a></td>
+                                                <td>GEO is a public functional genomics data repository supporting MIAME-compliant data submissions. Array- and sequence-based data are accepted. Tools are provided to help users query and download experiments and curated gene expression profiles</td>
+                                            </tr>
+                                            {% endif %}
+                                            {% if disease.biology_genomic_omim_url %}
+                                            <tr>
+                                                <td><a href="{{disease.biology_genomic_omim_url}}">OMIM Gene-Phenotype Relationship</a></td>
+                                                <td>OMIM is a comprehensive, authoritative compendium of human genes and genetic phenotypes.</td>
+                                            </tr>
+                                            {% endif %}
+                                            {% if disease.biology_genomic_exsnp_url %}
+                                            <tr>
+                                                <td><a href="{{disease.biology_genomic_exsnp_url}}">ExSNP</a></td>
+                                                <td>ExSNP is a data looking to establish a gold-standard list of consensus eQTLs by integrating publicly available data for specific human populations and cell types, so as to efficiently prioritize functional SNPs.</td>
+                                            </tr>
+                                            {% endif %}
+                                            {% if disease.biology_genomic_diseasesorg_url %}
+                                            <tr>
+                                                <td><a href="{{disease.biology_genomic_diseasesorg_url}}">DISEASES.org</a></td>
+                                                <td>Diseases is a tool that mines disease-gene relationships from text</td>
+                                            </tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                    {% else %}
+                                        There are currently no Genomic Resources linked to this disease.
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -85,24 +97,24 @@
                 </div>
             </div>
         </div>
-        {% if disease.kegg_pathway_map %}
+        {% if disease.biology_kegg_pathway_map %}
             <div class="col-md-4 thumbnail text-center row-center"> <h4><strong><a href="http://www.genome.jp/kegg/">KEGG: {{disease.name}} Pathway Map</a></strong></h4>
-                <img src="{{disease.kegg_pathway_map.url}}" class="img-responsive"> KEGG is a database resource for understanding high-level functions and utilities of the biological system.
+                <img src="{{disease.biology_kegg_pathway_map.url}}" class="img-responsive"> KEGG is a database resource for understanding high-level functions and utilities of the biological system.
             </div>
         {% endif %}
-        </div>
-        <br><br>
+    </div>
+    <br><br>
 
-        <legend>Proteomics, Metabolomics, and Pharmacogenomic Resources</legend>
-        <div class="row padding-bottom">
-            <div class="col-md-6 padded">
+    <legend>Proteomics, Metabolomics, and Pharmacogenomic Resources</legend>
+    <div class="row padding-bottom">
+        <div class="col-md-6 padded">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4 class="panel-title">
                         <strong><a href="https://www.proteomicsdb.org/">ProteomicsDB by SAP</a></strong>
                     </h4>
                 </div>
-                <div class="col-xs-12 panel body padding-left">ProteomicsDB by SAP is a proteomic database that allows you to browse  proteins and chromosomes of interest.</div>
+                <div class="col-xs-12 panel body padding-left">ProteomicsDB by SAP is a proteomic database that allows you to browse proteins and chromosomes of interest.</div>
             </div>
         </div>
 
@@ -110,32 +122,31 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4 class="panel-title">
-                        <strong><a href="http://www.metabolomicsworkbench.org/data/DRCCStudySummary.php?Mode=ProcessExpDataTextSearch&Title=NAFLD">Metabolomicsworkbench</a></strong>
+                        <strong><a href="http://www.metabolomicsworkbench.org/data/DRCCStudySummary.php?Mode=ProcessExpDataTextSearch&Title={{disease.name}}">Metabolomicsworkbench</a></strong>
                     </h4>
                 </div>
-                <div class="col-xs-12 panel body padding-left">4 NAFLD related studies have been found on metabolomicsworkbench. Metabolomicsworkbench serves as a national and international repository for metabolomics data.</div>
-            </div>
-            </div>
-        </div>
-
-        <div class="row padding-bottom">
-            <div class="col-md-12 padding-bottom">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
-                            <strong><a href="https://www.pharmgkb.org/">PharmaGKB</a></strong>
-                        </h4>
-                    </div>
-                <div class="col-xs-12 panel body padding-left">3 results related to NAFLD in PharmaGKB. PharmaGKB is a website that investigates genetic variations and how the body responds to medication.</div>
+                <div class="col-xs-12 panel body padding-left">Metabolomicsworkbench serves as a national and international repository for metabolomics data.</div>
             </div>
         </div>
     </div>
+
     <div class="row padding-bottom">
-        <div class="col-md-12 padding-bottom">
+        <div class="col-md-6 padding-bottom">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4 class="panel-title">
-                        <strong><a href="https://www.drugbank.ca/">DrugBank</a></strong>
+                        <strong><a href="https://www.pharmgkb.org/search?connections&query={{disease.name}}">PharmaGKB</a></strong>
+                    </h4>
+                </div>
+            <div class="col-xs-12 panel body padding-left">PharmaGKB is a website that investigates genetic variations and how the body responds to medication.</div>
+            </div>
+        </div>
+
+        <div class="col-md-6 padding-bottom">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <strong><a href="https://www.drugbank.ca">DrugBank</a></strong>
                     </h4>
                 </div>
                 <div class="col-xs-12 panel body padding-left">DrugBank is a unique bioinformatics and chemoinformatics database that combines drug data with comprehensive drug target information.</div>
