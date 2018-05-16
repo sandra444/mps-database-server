@@ -30,7 +30,12 @@ class Disease(models.Model):
     # Everything necessary for the Biology Page
     biology_blurb = models.TextField(default='', blank=True)
     biology_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
-    kegg_pathway_map = models.ImageField(upload_to='disease_images', null=True, blank=True)
+    biology_kegg_pathway_map = models.ImageField(upload_to='disease_images', null=True, blank=True)
+
+    biology_genomic_geo_url = models.CharField(max_length=200, null=True, blank=True)
+    biology_genomic_omim_url = models.CharField(max_length=200, null=True, blank=True)
+    biology_genomic_exsnp_url = models.CharField(max_length=200, null=True, blank=True)
+    biology_genomic_diseasesorg_url = models.CharField(max_length=200, null=True)
 
     # Everything necessary for the Clinical Data Page
     clinicaldata_blurb = models.TextField(default='', blank=True)
@@ -41,29 +46,28 @@ class Disease(models.Model):
     models_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
 
     # Everything necessary for the Data Analysis Page
+    # Not yet detailed anywhere.
 
     def __unicode__(self):
-       return self.name
+        return self.name
 
 
-# class DiseaseOverviewClinicalTrialTableRow(models.Model):
-#     disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
-#     name = models.CharField(max_length=200, default='', blank=True)
-#     description = models.TextField(default='', blank=True)
-#     num_results = models.IntegerField(default=0)
-#     num_phaseI = models.IntegerField(default=0)
-#     num_phaseII = models.IntegerField(default=0)
-#     num_phaseIII = models.IntegerField(default=0)
-#     num_phaseIV = models.IntegerField(default=0)
-#
-# class DiseaseBiologyGenomicDatabasesTableRow(models.Model):
-#     disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
-#     name = models.CharField(max_length=200, default='', blank=True)
-#     description = models.TextField(default='', blank=True)
-#     url = models.CharField(max_length=200, default='', blank=True)
-#
-# class DiseaseOtherResources(models.Model):
-#     disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
-#     name = models.CharField(max_length=200, default='', blank=True)
-#     description = models.TextField(default='', blank=True)
-#     url = models.CharField(max_length=200, default='', blank=True)
+class DiseaseBiologyOtherResources(models.Model):
+    disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200, null=True, blank=True)
+    description = models.TextField(default='', blank=True)
+    url = models.CharField(max_length=200, null=True, blank=True)
+
+
+class DiseaseClinicalTrial(models.Model):
+    disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
+    trial_id = models.CharField(max_length=200, null=True, blank=True)
+    trial_name = models.CharField(max_length=200, null=True, blank=True)
+    phase = models.CharField(max_length=20, null=True, blank=True)
+    status = models.CharField(max_length=200, null=True, blank=True)
+    results = models.CharField(max_length=200, null=True, blank=True)
+    institution = models.CharField(max_length=200, null=True, blank=True)
+    drugs = models.CharField(max_length=200, null=True, blank=True)
+
+    def __unicode__(self):
+        return "{} - {}".format(self.disease, self.trial_id)
