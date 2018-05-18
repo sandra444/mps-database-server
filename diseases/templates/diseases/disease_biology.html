@@ -4,7 +4,7 @@
 {# TODO REQUIRES AESTHETIC REVISION #}
 
 {% block breadcrumbs %}
-    <li><a href="/diseases/">Disease List</a></li>
+    <li><a href="/diseases/">Diseases</a></li>
     <li><a href="/diseases/{{disease.pk}}/">{{ disease.name }}</a></li>
     <li class="active">Biology</li>
 {% endblock %}
@@ -63,25 +63,25 @@
                                         <tbody>
                                             {% if disease.biology_genomic_geo_url %}
                                             <tr>
-                                                <td><a href="{{disease.biology_genomic_geo_url}}">Gene Expression Omnibus</a></td>
+                                                <td><a target="_blank" href="{{disease.biology_genomic_geo_url}}">Gene Expression Omnibus</a></td>
                                                 <td>GEO is a public functional genomics data repository supporting MIAME-compliant data submissions. Array- and sequence-based data are accepted. Tools are provided to help users query and download experiments and curated gene expression profiles</td>
                                             </tr>
                                             {% endif %}
                                             {% if disease.biology_genomic_omim_url %}
                                             <tr>
-                                                <td><a href="{{disease.biology_genomic_omim_url}}">OMIM Gene-Phenotype Relationship</a></td>
+                                                <td><a target="_blank" href="{{disease.biology_genomic_omim_url}}">OMIM Gene-Phenotype Relationship</a></td>
                                                 <td>OMIM is a comprehensive, authoritative compendium of human genes and genetic phenotypes.</td>
                                             </tr>
                                             {% endif %}
                                             {% if disease.biology_genomic_exsnp_url %}
                                             <tr>
-                                                <td><a href="{{disease.biology_genomic_exsnp_url}}">ExSNP</a></td>
+                                                <td><a target="_blank" href="{{disease.biology_genomic_exsnp_url}}">ExSNP</a></td>
                                                 <td>ExSNP is a data looking to establish a gold-standard list of consensus eQTLs by integrating publicly available data for specific human populations and cell types, so as to efficiently prioritize functional SNPs.</td>
                                             </tr>
                                             {% endif %}
                                             {% if disease.biology_genomic_diseasesorg_url %}
                                             <tr>
-                                                <td><a href="{{disease.biology_genomic_diseasesorg_url}}">DISEASES.org</a></td>
+                                                <td><a target="_blank" href="{{disease.biology_genomic_diseasesorg_url}}">DISEASES.org</a></td>
                                                 <td>Diseases is a tool that mines disease-gene relationships from text</td>
                                             </tr>
                                             {% endif %}
@@ -98,7 +98,7 @@
             </div>
         </div>
         {% if disease.biology_kegg_pathway_map %}
-            <div class="col-md-4 thumbnail text-center row-center"> <h4><strong><a href="http://www.genome.jp/kegg/">KEGG: {{disease.name}} Pathway Map</a></strong></h4>
+            <div class="col-md-4 thumbnail text-center row-center"> <h4><strong><a target="_blank" href="http://www.genome.jp/dbget-bin/www_bget?ds:H01333">KEGG: {{disease.name}} Pathway Map</a></strong></h4>
                 <img src="{{disease.biology_kegg_pathway_map.url}}" class="img-responsive"> KEGG is a database resource for understanding high-level functions and utilities of the biological system.
             </div>
         {% endif %}
@@ -111,7 +111,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4 class="panel-title">
-                        <strong><a href="https://www.proteomicsdb.org/">ProteomicsDB by SAP</a></strong>
+                        <strong><a target="_blank" href="https://www.proteomicsdb.org/">ProteomicsDB by SAP</a></strong>
                     </h4>
                 </div>
                 <div class="col-xs-12 panel body padding-left">ProteomicsDB by SAP is a proteomic database that allows you to browse proteins and chromosomes of interest.</div>
@@ -122,7 +122,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4 class="panel-title">
-                        <strong><a href="http://www.metabolomicsworkbench.org/data/DRCCStudySummary.php?Mode=ProcessExpDataTextSearch&Title={{disease.name}}">Metabolomicsworkbench</a></strong>
+                        <strong><a target="_blank" href="http://www.metabolomicsworkbench.org/data/DRCCStudySummary.php?Mode=ProcessExpDataTextSearch&Title={{disease.name}}">Metabolomicsworkbench</a></strong>
                     </h4>
                 </div>
                 <div class="col-xs-12 panel body padding-left">Metabolomicsworkbench serves as a national and international repository for metabolomics data.</div>
@@ -135,7 +135,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4 class="panel-title">
-                        <strong><a href="https://www.pharmgkb.org/search?connections&query={{disease.name}}">PharmaGKB</a></strong>
+                        <strong><a target="_blank" href="https://www.pharmgkb.org/search?connections&query={{disease.name}}">PharmaGKB</a></strong>
                     </h4>
                 </div>
             <div class="col-xs-12 panel body padding-left">PharmaGKB is a website that investigates genetic variations and how the body responds to medication.</div>
@@ -146,7 +146,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4 class="panel-title">
-                        <strong><a href="https://www.drugbank.ca">DrugBank</a></strong>
+                        <strong><a target="_blank" href="https://www.drugbank.ca">DrugBank</a></strong>
                     </h4>
                 </div>
                 <div class="col-xs-12 panel body padding-left">DrugBank is a unique bioinformatics and chemoinformatics database that combines drug data with comprehensive drug target information.</div>
