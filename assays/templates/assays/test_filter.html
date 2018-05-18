@@ -1,0 +1,876 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "assays/test_filter.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="active">Query Data</li>
+{% endblock %}
+
+{% block content %}
+    {% block error %}
+        <div class="row">
+            <div hidden class="alert alert-danger" role="alert" id="error_message">
+                <p id="error">
+                    The server could not find the result to your request.
+                </p>
+
+                <p>
+                    Please try a different query.
+                </p>
+            </div>
+        </div>
+    {% endblock %}
+
+    <div id="selection">
+
+        <div class="row">
+
+            <!--
+            <div class="row text-center">
+                <h1 class="text-center">Filter, Group, Click
+                </h1>
+            </div>
+            -->
+
+            <!--
+            <h1>Luke</h1>
+            <span title="Clicking these buttons needs to take the user to the appropriate next page and carry the selected data and groupings their." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+            -->
+
+            <div class="text-center">
+                {% block submit %}
+                <a href="#show" class="btn btn-primary text-center" id="submit">
+                    Graph Response as f(time)
+                </a>
+                <a href="#show" class="btn btn-primary text-center" id="submit">
+                    Graph Response as f(dose)
+                </a>
+                <a href="#show" class="btn btn-primary text-center" id="submit">
+                    Reproducibilty Analysis
+                </a>
+                <a href="#show" class="btn btn-primary text-center" id="submit">
+                    Modeling
+                </a>
+                <a href="#show" class="btn btn-primary text-center" id="submit">
+                    Data Export
+                </a>
+                {% endblock %}
+            </div>
+        </div>
+
+        <form id='selection_form' autocomplete="off">
+
+
+        <hr>
+
+        <div class="row">
+            <div class="row text-center">
+                <h2 title="Filtering selects a subset of data, all in one group. Click 'on' to filter and/or show filters, 'off' to hide section." class="text-center">
+                    <input type="radio" id="radioButton">
+                    Filtering Section
+                </h2>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row">
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Organ Model Filter:
+                        <input class="table-filter" id="bioactivity_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Organ Model List
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Device Filter:
+                        <input class="table-filter" id="bioactivity_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Device List
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Sample Location Filter:
+                        <input class="table-filter" id="bioactivity_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Sample Location List
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+        </div>
+
+
+        <div class="row">
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Data Group Filter:
+                        <input class="table-filter" id="bioactivity_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Data Group List
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Study Name Filter:
+                        <input class="table-filter" id="bioactivity_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Study Name List
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Chip/Well Matrix Filter:
+                        <input class="table-filter" id="bioactivity_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Matrix of Chips List
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Chip/Well (Item) Filter:
+                        <input class="table-filter" id="bioactivity_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Chip/Well (Items) List
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+
+
+        <div class="row">
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Cells Filter:
+                        <input class="table-filter" id="compound_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_compounds" type="checkbox">
+                                </th>
+                                <th title="Click 'on' to include seeding density in list.">
+                                    Cell List
+                                    <input type="radio" id="radioButton">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="compounds">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Compounds Filter:
+                        <input class="table-filter" id="compound_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_compounds" type="checkbox">
+                                </th>
+                                <th title="Click 'on' to include treatment times in list.">
+                                    Compound List
+                                    <input type="radio" id="radioButton">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="compounds">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Settings Filter:
+                        <input class="table-filter" id="compound_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_compounds" type="checkbox">
+                                </th>
+                                <th title="Click 'on' to include treatment times in list.">
+                                    Setting List
+                                    <input type="radio" id="radioButton">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="compounds">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="row">
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Target/Analyte Filter:
+                        <input class="table-filter" id="bioactivity_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Target/Analyte List
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Method/Kit Filter:
+                        <input class="table-filter" id="bioactivity_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Method/Kit List
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Reporting Unit Filter:
+                        <input class="table-filter" id="bioactivity_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Reporting Unit List
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label title="Click 'on' to expand selections." >
+                        <input type="radio" id="radioButton">
+                        Sampling Time Filter:
+                        <input class="table-filter" id="bioactivity_filter">
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th title="Check to select all.">
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Sampling Time List
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+
+
+
+
+        <hr>
+
+        <div class="row">
+            <div class="row text-center">
+                <h2 title=" Click 'on' to define and/or show groupings, 'off' to hide section." class="text-center">
+                    <input type="radio" id="radioButton">
+                    Grouping Section
+                </h2>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row">
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label>
+                        Organ Models Metadata
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Organ Model
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Device
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Sample Location
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Data Group
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label>
+                        Study Metadata
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Study Name
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Study Type
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Study Start Date
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label>
+                        Chip Metadata
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Chip Matrix
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Chip ID (Item)
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Chip Type
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label>
+                        Cell Metadata
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Cell Type
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Cell Origin
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Cell Sample
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Cell Lot
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Cell Density
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label>
+                        Compound Metadata
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Compound
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Compound Concentration
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Compound Addition Time
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Compound Addition Duration
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Compound Addition Location
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label>
+                        Setting Metadata
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Setting
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Setting Value
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Setting Time
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Setting Duration
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Setting Location
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="col-xs-3">
+                <p class="text-center">
+                    <label>
+                        Assay Metadata
+                    </label>
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Assay Target/Analyte
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Method/Kit
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Reporting Unit
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input id="all_target_types" type="checkbox">
+                                </th>
+                                <th>
+                                    Sampling Time
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bioactivities">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+        </div>
+
+        <hr>
+
+        <div class="row">
+            <div class="row text-center">
+                <h2 title=" Click 'on' to select and/or show groupings, 'off' to hide section." class="text-center">
+                    <input type="radio" id="radioButton">
+                    Group Table
+                </h2>
+            </div>
+
+                <h4>
+                    Put the table here. There should be a column for each field in the filtering section and for each additional metadata field included in the grouping section.
+                </h4>
+
+                <h4>
+                    There will need to be default selections. Filtering default should be all data user has access to. Default grouping will be more complicated (i.e. more likely to have many opinions). For now, I would says group the same way you do for reproducibility (including study name)
+                </h4>
+
+                <h4>
+                    Make the first column a check box that allows the user a second filter step, check to include. Make a select all check box in the column header just like in the filtering section.
+                </h4>
+
+        </div>
+
+        <hr>
+
+
+
+
+
+
+        </form>
+    </div>
+{% endblock %}
+
+

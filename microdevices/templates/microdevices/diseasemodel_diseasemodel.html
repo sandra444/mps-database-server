@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{# TODO REQUIRES AESTHETIC REVISION #}
+
+{% block breadcrumbs %}
+    <li><a href="/compounds/">Disease Models</a></li>
+    <li class="active">{{ object.name}}</li>
+{% endblock %}
+
+{% block content %}
+
+    {% include "microdevices/diseasemodellinks.html" %}
+
+
+<br>
+<legend>NAFLD Disease Models</legend>
+<div class="row">
+    <div class="col-sm-2 col-md-1 text-right-responsive">
+        <b>Overview</b>
+    </div>
+
+    <div class="col-sm-10 col-md-6 text-wrapped">
+        The NAFLD Model Portal page is where you can go to find all information relevant to microphysiology systems models related to NAFLD. Here you can also find the studies associated with these models. Currently, the MPS Database is the warehouse for these models. Currently, the University of Pittsburgh is the only institution to submit a disease model for the NAFLD disease state.
+    </div>
+    <div class="col-md-5 thumbnail text-center row-center">
+        <img src="{% static "microdevices/NortisDevice.PNG" %}" class="img-responsive"> it would be nice if this static image was replaced with an interactive graphic summary of the components of the disease model</img>
+    </div>
+</div>
+<div class="col-md-12">
+<div class="panel-group" id="accordion">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">Current Disease Models in Database</a>
+            </h4>
+        </div>
+        <div id="collapse2" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Institution</th>
+                                <th>Description</th>
+                                <th>Protocol</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SQL-SAL 2.0</td>
+                                <td>University of Pittsburgh</td>
+                                <td>A Nortis Device composed of the four cell types of the liver that is induced with molecular drivers to function in the NAFLD disease state.</td>
+                                <td><a href="#"> SQL-SAL 2.0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<br>
+<div class="col-md-12">
+<div class="panel-group" id="accordion">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">Current Disease Model Cell Types</a>
+            </h4>
+        </div>
+        <div id="collapse3" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="row">
+                    <div class='col-xs-12'>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Current NAFLD Model Cells</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Transfection Ability</th>
+                                <th>Vendor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Hepatocytes</td>
+                                <td>Primary</td>
+                                <td>Diseased</td>
+                                <td>Low</td>
+                                <td>Thermo-Fisher</td>
+                            </tr>
+                            <tr>
+                                <td>Kupffer (THP-1)</td>
+                                <td>Cell Line</td>
+                                <td>Normal</td>
+                                <td>NA</td>
+                                <td>ATCC</td>
+                            </tr>
+                            <tr>
+                                <td>Stellate (LX-2)</td>
+                                <td>Cell Line</td>
+                                <td>Normal</td>
+                                <td>NA</td>
+                                <td>ATCC</td>
+                            </tr>
+                            <tr>
+                                <td>Endothelial (EA.HY926)</td>
+                                <td>Cell Line</td>
+                                <td>Normal</td>
+                                <td>NA</td>
+                                <td>ATCC</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="col-md-12">
+<div class="panel-group" id="accordion">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapse4">Devices</a>
+            </h4>
+        </div>
+        <div id="collapse4" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Institution</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SQL-SAL 2.0</td>
+                                <td>University of Pittsburgh</td>
+                                <td>This would display the table of devices that we already have under the "devices" page, but only the devices that have been used for disease models</td>
+                                <td><a href="#"> SQL-SAL 2.0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="col-md-12">
+<div class="panel-group" id="accordion">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapse5">Biomaterials</a>
+            </h4>
+        </div>
+        <div id="collapse5" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Vendor</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SQL-SAL 2.0</td>
+                                <td>University of Pittsburgh</td>
+                                <td>This would display the table of biomaterials for a currently selected disease model</td>
+                                <td><a href="#"> SQL-SAL 2.0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="col-md-12">
+<div class="panel-group" id="accordion">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapse6">Publications</a>
+            </h4>
+        </div>
+        <div id="collapse6" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>University</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SQL-SAL 2.0</td>
+                                <td>University of Pittsburgh</td>
+                                <td>This would display the table of publications that are associated with that disease model</td>
+                                <td><a href="#"> SQL-SAL 2.0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

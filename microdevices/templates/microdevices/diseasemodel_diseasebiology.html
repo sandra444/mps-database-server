@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{# TODO REQUIRES AESTHETIC REVISION #}
+
+{% block breadcrumbs %}
+    <li><a href="/compounds/">Disease Models</a></li>
+    <li class="active">{{ object.name}}</li>
+{% endblock %}
+
+{% block content %}
+
+    {% include "microdevices/diseasemodellinks.html" %}
+
+
+    <legend>NAFLD Disease Biology</legend>
+        <div class="row">
+            <div class="col-sm-2 col-md-1 text-right-responsive">
+                <b>Overview</b>
+            </div>
+            <div class="col-sm-10 col-md-11 text-wrapped">
+                It has been reported that those patients with nonalcoholic fatty liver disease (NAFLD) are probably more common in those individuals with metabolic
+                syndrome, which includes obesity and type 2 diabetes mellitus. The spectrum of NAFLD ranges from simple steatosis to steatohepatitis with hepatic
+                inflammation and fibrosis, known as nonalcoholic steatohepatitis (NASH). Of those with NASH, approximately 20% will go on to develop cirrhosis and
+                hepatocellular carcinoma.
+            </div>
+        </div>
+        <br>
+    <legend>NAFLD Genomic Resources</legend>
+        <div class="row">
+            <div class="col-md-8">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <strong>Genomic Databases</strong>
+                        </h4>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><a href="https://www.ncbi.nlm.nih.gov/gds/?term=NAFLD">Gene Expression Omnibus</a></td>
+                                            <td>GEO is a public functional genomics data repository supporting MIAME-compliant data submissions. Array- and sequence-based data are accepted. Tools are provided to help users query and download experiments and curated gene expression profiles</td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="https://www.omim.org/search/?index=entry&start=1&limit=10&sort=score+desc,+prefix_sort+desc&search=NAFLD">OMIM Gene-Phenotype Relationship</a></td>
+                                            <td>OMIM is a comprehensive, authoritative compendium of human genes and genetic phenotypes. Our precurated search sends you directly to NAFLD related Gene-Phenotype relationships on OMIM.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="http://www.exsnp.org/Cell">ExSNP</a></td>
+                                            <td>ExSNP is a data looking to establish a gold-standard list of consensus eQTLs by integrating publicly available data for specific human populations and cell types, so as to efficiently prioritize functional SNPs. Our precurated search sends you directly to liver specific eQTLs.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="https://diseases.jensenlab.org/Search?query=Fatty%20Liver%20Disease">DISEASES.org</a></td>
+                                            <td>Diseases is a tool that mines disease-gene relationships from text</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div class="col-md-4 thumbnail text-center row-center"> <h4><strong><a href="http://www.genome.jp/kegg/">KEGG: NAFLD Pathway Map</a></strong></h4>
+                <img src="{% static "microdevices/map04932.png" %}" class="img-responsive"></img> KEGG is a database resource for understanding high-level functions and utilities of the biological system.
+            </div>
+        </div>
+        <legend>Proteomics, Metabolomics, and Pharmacogenomic Resources</legend>
+
+        <div class="row padding-bottom">
+            <div class="col-md-6 padded">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <strong><a href="https://www.proteomicsdb.org/">ProteomicsDB by SAP</a></strong>
+                    </h4>
+                </div>
+                <div class="col-xs-12 panel body padding-left">ProteomicsDB by SAP is a proteomic database that allows you to browse  proteins and chromosomes of interest.</div>
+            </div>
+            </div>
+
+            <div class="col-md-6 padding-bottom">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <strong><a href="http://www.metabolomicsworkbench.org/data/DRCCStudySummary.php?Mode=ProcessExpDataTextSearch&Title=NAFLD">Metabolomicsworkbench</a></strong>
+                    </h4>
+                </div>
+                <div class="col-xs-12 panel body padding-left">4 NAFLD related studies have been found on metabolomicsworkbench. Metabolomicsworkbench serves as a national and international repository for metabolomics data.</div>
+            </div>
+            </div>
+        </div>
+        <div class="row padding-bottom">
+            <div class="col-md-12 padding-bottom">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <strong><a href="https://www.pharmgkb.org/">PharmaGKB</a></strong>
+                    </h4>
+                </div>
+                <div class="col-xs-12 panel body padding-left">3 results related to NAFLD in PharmaGKB. PharmaGKB is a website that investigates genetic variations and how the body responds to medication.</div>
+            </div>
+            </div>
+        </div>
+            <div class="row padding-bottom">
+            <div class="col-md-12 padding-bottom">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <strong><a href="https://www.drugbank.ca/">DrugBank</a></strong>
+                    </h4>
+                </div>
+                <div class="col-xs-12 panel body padding-left">DrugBank is a unique bioinformatics and chemoinformatics database that combines drug data with comprehensive drug target information.</div>
+            </div>
+            </div>
+            </div>
+{% endblock %}

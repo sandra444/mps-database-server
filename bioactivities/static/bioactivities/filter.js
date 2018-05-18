@@ -11,13 +11,18 @@
 // window.FILTER.
 
 // This is how to expose variables for use in the respective scripts
-window.FILTER = {};
+window.FILTER = {
+    bioactivities_filter: {},
+    targets_filter: {},
+    compounds_filter: {},
+    drugtrials_filter: {}
+};
 
 $(document).ready(function () {
     // Get a list for checkboxes from returned AJAX data
     // Min is a boolean value to see if data should be restricted on min_feat_count
     function get_list(data, min) {
-        if (!data || data.length == 0) {
+        if (!data || data.length === 0) {
             return [];
         }
 
@@ -46,9 +51,22 @@ $(document).ready(function () {
     function reset_rows(name, list, add) {
         // Clear current
         $('#' + name).html('');
+
+        // Check if all checked
+        var all_checked = true;
+        var lookup_current = {};
+
         // Add from list
         for (var i in list) {
             var row = '';
+
+            var checked = false;
+            if (!window.FILTER[name + '_filter'][list[i].name.replace(/'/g, "&#39;")]) {
+                all_checked = false;
+            }
+            else {
+                checked = ' checked';
+            }
             // Note added 'c' to avoid confusion with graphic
             if (add) {
                 var data = list[i].name.split('|');
@@ -68,22 +86,32 @@ $(document).ready(function () {
                     + " data-tctc=" + tctc
                     + " data-contains= true"
                     + ">";
-                row += "<td>" + "<input type='checkbox' value='" + compound_name.replace(/'/g, "&#39;") + "'></td>";
+                row += "<td>" + "<input type='checkbox' value='" + compound_name.replace(/'/g, "&#39;") + "'" + checked + "></td>";
                 row += "<td>" + compound_name + "</td>";
                 row += "</tr>";
                 $('#' + name).append(row);
             }
             else {
                 row = "<tr id='" + list[i].name.replace(/ /g, "_").replace(/'/g, "&#39;") + "'>";
-                row += "<td>" + "<input type='checkbox' value='" + list[i].name.replace(/'/g, "&#39;") + "'></td>";
+                row += "<td>" + "<input type='checkbox' value='" + list[i].name.replace(/'/g, "&#39;") + "'" + checked + "></td>";
                 row += "<td>" + list[i].name + "</td>";
                 row += "</tr>";
                 $('#' + name).append(row);
             }
+
+            lookup_current[list[i].name.replace(/'/g, "&#39;")] = true;
         }
 
-        // Reset select all box
-        $("#all_" + name).prop('checked', false);
+        var keys_of_interest = _.keys(window.FILTER[name + '_filter']);
+
+        $.each(keys_of_interest, function(index, key) {
+            if (!lookup_current[key]) {
+                delete window.FILTER[name + '_filter'][key];
+            }
+        });
+
+        // Reset select all box if necessary
+        $("#all_" + name).prop('checked', all_checked);
     }
 
     function refresh(changed) {
@@ -116,7 +144,7 @@ $(document).ready(function () {
                 reset_rows('targets', targets, '');
                 $('#target_filter').val('');
 
-                if (changed == 'all') {
+                if (changed === 'all') {
                     // Clear bioactivities
                     reset_rows('bioactivities', bioactivities, '');
 
@@ -223,21 +251,32 @@ $(document).ready(function () {
         $('#all_' + name).change(function (evt) {
             // If the "all" box is checked, select all visible checkboxes
             if (this.checked) {
-                $("#" + name + " input[type='checkbox']:visible").prop('checked', true);
+                $("#" + name + " input[type='checkbox']:visible").prop('checked', true).each(function() {
+                    window.FILTER[name + '_filter'][this.value] = true;
+                });
             }
             // Otherwise deselect all checkboxes
             else {
-                $("#" + name + " input[type='checkbox']:visible").prop('checked', false);
+                $("#" + name + " input[type='checkbox']:visible").prop('checked', false).each(function() {
+                    delete window.FILTER[name + '_filter'][this.value];
+                });
             }
         });
 
         // Track when any row checkbox is clicked and discern whether all visible check boxes are checked, if so then check the "all" box
         $("body").on("change", "#" + name + " input[type='checkbox']", function (event) {
-            if ($("#" + name + " input[type='checkbox']:checked:visible").length == $("#" + name + " input[type='checkbox']:visible").length) {
+            if ($("#" + name + " input[type='checkbox']:checked:visible").length === $("#" + name + " input[type='checkbox']:visible").length) {
                 $('#all_' + name).prop('checked', true);
             }
             else {
                 $('#all_' + name).prop('checked', false);
+            }
+
+            if (this.checked) {
+                window.FILTER[name + '_filter'][this.value] = true;
+            }
+            else {
+                delete window.FILTER[name + '_filter'][this.value];
             }
         });
     }
@@ -414,20 +453,20 @@ $(document).ready(function () {
             }
 
             if(
-                ((drugs_checked && row_values['data-is_drug'] == 'True') || (non_drugs_checked && row_values['data-is_drug'] != 'True'))
+                ((drugs_checked && row_values['data-is_drug'] === 'True') || (non_drugs_checked && row_values['data-is_drug'] !== 'True'))
                 &&
                 (
-                    (mps_checked && row_values['data-mps'] == 'True')
+                    (mps_checked && row_values['data-mps'] === 'True')
                     ||
-                    (epa_checked && row_values['data-epa'] == 'True')
+                    (epa_checked && row_values['data-epa'] === 'True')
                     ||
-                    (tctc_checked && row_values['data-tctc'] == 'True')
+                    (tctc_checked && row_values['data-tctc'] === 'True')
                     ||
-                    (unlabelled_checked && row_values['data-mps'] != 'True' && row_values['data-epa'] != 'True' && row_values['data-tctc'] != 'True')
+                    (unlabelled_checked && row_values['data-mps'] !== 'True' && row_values['data-epa'] !== 'True' && row_values['data-tctc'] !== 'True')
                 )
                 && gtlt_check(logp_gtlt_operator, row_values['data-logp'], logp_compare_against)
                 && gtlt_check(molecular_weight_gtlt_operator, row_values['data-molecular_weight'], molecular_weight_compare_against)
-                && row_values['data-contains'] == 'true'
+                && row_values['data-contains'] === 'true'
             ) {
                 this.hidden = false;
             }
@@ -439,7 +478,7 @@ $(document).ready(function () {
 
     function reset_all_checkbox(selector) {
         // Check or uncheck all as necessary
-        if ($("#" + selector + " input[type='checkbox']:checked:visible").length == $("#" + selector + " input[type='checkbox']:visible").length) {
+        if ($("#" + selector + " input[type='checkbox']:checked:visible").length === $("#" + selector + " input[type='checkbox']:visible").length) {
             $('#all_' + selector).prop('checked', true);
         }
         else {
@@ -504,7 +543,7 @@ $(document).ready(function () {
     }
 
     window.onhashchange = function() {
-        if (location.hash != '#show') {
+        if (location.hash !== '#show') {
             $('#graphic').prop('hidden', true);
             $('#selection').prop('hidden', false);
             // Ensure table header (if present) is hidden

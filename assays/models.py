@@ -6,13 +6,14 @@ from microdevices.models import (
     OrganModel,
     OrganModelProtocol,
     MicrophysiologyCenter,
-    # MicrodeviceSection
 )
 from mps.base.models import LockableModel, FlaggableModel, FlaggableRestrictedModel
 from django.contrib.auth.models import Group, User
 
 import urllib
 import collections
+
+from operator import attrgetter
 
 # TODO MAKE MODEL AND FIELD NAMES MORE CONSISTENT/COHERENT
 
@@ -42,6 +43,29 @@ TIME_CONVERSIONS = [
 
 TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
 
+DEFAULT_SETTING_CRITERIA = (
+    'setting_id',
+    'unit_id',
+    'addition_location'
+)
+
+DEFAULT_COMPOUND_CRITERIA = (
+    'compound_instance_id',
+    'concentration',
+    'concentration_unit_id',
+    'addition_time',
+    'duration',
+    'addition_location'
+)
+
+DEFAULT_CELL_CRITERIA = (
+    'cell_sample_id',
+    'biosensor_id',
+    'density',
+    'density_unit_id',
+    'passage',
+    'addition_location'
+)
 
 # TODO EMPLOY THIS FUNCTION ELSEWHERE
 def get_split_times(time_in_minutes):
@@ -77,7 +101,7 @@ def get_center_id(group_id):
             'center_name': center_data.name,
         })
 
-    except:
+    except IndexError:
         data.update({
             'center_id': '',
             'center_name': '',
@@ -357,6 +381,7 @@ class AssayQualityIndicator(LockableModel):
 
     # Is this necessary? Do we assume that all need to be excluded?
     # exclude = models.BooleanField(default=True)
+
 
 # TO BE DEPRECATED To be merged into single "AssayCells" model
 class AssayPlateCells(models.Model):
@@ -935,6 +960,7 @@ class AssayChipCells(models.Model):
             cell_choice_dict.get(self.cellsample_density_unit, 'Unknown Unit')
         )
 
+
 # TO BE DEPRECATED To be merged into single "AssaySetup" model
 class AssayChipSetup(FlaggableRestrictedModel):
     """The configuration of a Chip for implementing an assay"""
@@ -960,7 +986,9 @@ class AssayChipSetup(FlaggableRestrictedModel):
     assay_chip_id = models.CharField(max_length=512, verbose_name='Chip ID/ Barcode')
 
     # Control => control, Compound => compound; Abbreviate? Capitalize?
-    chip_test_type = models.CharField(max_length=8, choices=(("control", "Control"), ("compound", "Compound")), default="control")
+    chip_test_type = models.CharField(max_length=8, choices=(
+        ("control", "Control"), ("compound", "Compound")), default="control"
+    )
 
     compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
     concentration = models.FloatField(default=0, verbose_name='Conc.',
@@ -1701,15 +1729,14 @@ class AssayMatrixItem(FlaggableModel):
     def __unicode__(self):
         return unicode(self.name)
 
-    def devolved_settings(self):
+    def devolved_settings(self, criteria=DEFAULT_SETTING_CRITERIA):
         """Makes a tuple of cells (for comparison)"""
         setting_tuple = []
+        attribute_getter = attrgetter(*criteria)
         for setting in self.assaysetupsetting_set.all():
-            setting_tuple.append((
-                setting.setting_id,
-                setting.unit_id,
-                setting.addition_location
-            ))
+            current_tuple = attrgetter(setting)
+
+            setting_tuple.append(current_tuple)
 
         return tuple(sorted(setting_tuple))
 
@@ -1724,18 +1751,14 @@ class AssayMatrixItem(FlaggableModel):
 
         return '\n'.join(settings)
 
-    def devolved_cells(self):
+    def devolved_cells(self, criteria=DEFAULT_CELL_CRITERIA):
         """Makes a tuple of cells (for comparison)"""
         cell_tuple = []
+        attribute_getter = attrgetter(*criteria)
         for cell in self.assaysetupcell_set.all():
-            cell_tuple.append((
-                cell.cell_sample_id,
-                cell.biosensor_id,
-                cell.density,
-                cell.density_unit,
-                cell.passage,
-                cell.addition_location
-            ))
+            current_tuple = attribute_getter(cell)
+
+            cell_tuple.append(current_tuple)
 
         return tuple(sorted(cell_tuple))
 
@@ -1750,18 +1773,14 @@ class AssayMatrixItem(FlaggableModel):
 
         return '\n'.join(cells)
 
-    def devolved_compounds(self):
+    def devolved_compounds(self, criteria=DEFAULT_COMPOUND_CRITERIA):
         """Makes a tuple of compounds (for comparison)"""
         compound_tuple = []
+        attribute_getter =  attrgetter(*criteria)
         for compound in self.assaysetupcompound_set.all():
-            compound_tuple.append((
-                compound.compound_instance_id,
-                compound.concentration,
-                compound.concentration_unit_id,
-                compound.addition_time,
-                compound.duration,
-                compound.addition_location
-            ))
+            current_tuple = attribute_getter(compound)
+
+            compound_tuple.append(current_tuple)
 
         return tuple(sorted(compound_tuple))
 
@@ -1837,7 +1856,6 @@ class AssaySetupCell(models.Model):
             'density_unit',
             'passage'
         )
-
 
     # Now binds directly to items
     matrix_item = models.ForeignKey(AssayMatrixItem)
@@ -1967,6 +1985,13 @@ class AssayDataPoint(models.Model):
     # OPTIONAL
     subtarget = models.ForeignKey(AssaySubtarget, null=True, blank=True)
 
+    def get_time_string(self):
+        split_times = get_split_times(self.time)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
 
 # # TODO MODIFY AssayCompoundInstance
 # DEPRECATED: DO NOT USE
@@ -2060,6 +2085,7 @@ class AssaySetupCompound(models.Model):
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
     addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
 
+    # NOT DRY
     def get_addition_time_string(self):
         split_times = get_split_times(self.addition_time)
         return 'D{0} H{1} M{2}'.format(
@@ -2339,29 +2365,28 @@ class AssayImage(models.Model):
         return {
             'matrix_item_id': self.matrix_item_id,
             'chip_id': self.matrix_item.name,
-            'plate_id' : self.assay_plate_id,
-            'well_id' : self.assay_well_id,
-            'time' : "D"+str(int(self.time/24/60))+" H"+str(int(self.time/60%24))+" M" + str(int(self.time%60)),
-            'method_kit' : self.method.name,
+            'plate_id': self.assay_plate_id,
+            'well_id': self.assay_well_id,
+            'time': "D"+str(int(self.time/24/60))+" H"+str(int(self.time/60%24))+" M" + str(int(self.time%60)),
+            'method_kit': self.method.name,
             'stain_pairings': self.method.alt_name,
-            'target_analyte' : self.target.name,
-            'subtarget' : self.subtarget.name,
-            'sample_location' : self.sample_location.name,
-            'replicate' : self.replicate,
-            'notes' : self.notes,
-            'file_name' : self.file_name,
-            'field' : self.field,
-            'field_description' : self.field_description,
-            'magnification' : self.setting.magnification,
-            'resolution' : self.setting.resolution,
-            'resolution_unit' : self.setting.resolution_unit,
-            'sample_label' : self.setting.label_name,
-            'sample_label_description' : self.setting.label_description,
-            'wavelength' : self.setting.wave_length,
-            'color_mapping' : self.setting.color_mapping,
-            'setting_notes' : self.setting.notes,
+            'target_analyte': self.target.name,
+            'subtarget': self.subtarget.name,
+            'sample_location': self.sample_location.name,
+            'replicate': self.replicate,
+            'notes': self.notes,
+            'file_name': self.file_name,
+            'field': self.field,
+            'field_description': self.field_description,
+            'magnification': self.setting.magnification,
+            'resolution': self.setting.resolution,
+            'resolution_unit': self.setting.resolution_unit,
+            'sample_label': self.setting.label_name,
+            'sample_label_description': self.setting.label_description,
+            'wavelength': self.setting.wave_length,
+            'color_mapping': self.setting.color_mapping,
+            'setting_notes': self.setting.notes,
         }
 
     def __unicode__(self):
         return u'{}'.format(self.file_name)
-

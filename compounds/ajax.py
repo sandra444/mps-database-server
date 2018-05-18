@@ -1,11 +1,9 @@
 # coding=utf-8
 
 from django.http import *
-from django.shortcuts import render_to_response
-from django.template import RequestContext
 import ujson as json
 from .models import *
-from assays.utils import CHIP_DATA_PREFETCH
+# from assays.utils import CHIP_DATA_PREFETCH
 # from assays.models import AssayChipRawData, AssayCompoundInstance, AssayChipSetup
 from assays.models import AssayDataPoint, AssaySetupCompound, AssayMatrixItem
 
@@ -18,8 +16,6 @@ import requests
 import re
 
 import numpy as np
-
-from assays.ajax import get_related_compounds_map, get_list_of_present_compounds
 
 # Calling main is and always will be indicative of an error condition.
 # ajax.py is strictly for AJAX requests
@@ -192,16 +188,6 @@ def fetch_compound_report(request):
     Receives the following from POST:
     compounds -- the names of the desired ChEMBL ids
     """
-    # summary_types = (
-    #     'Pre-clinical Findings',
-    #     'Clinical Findings',
-    #     # Recently added
-    #     'PK/Metabolism',
-    # )
-    # property_types = (
-    #     'Dose (xCmax)',
-    #     'cLogP',
-    # )
 
     # Should "compounds" be pk's instead of names?
     compounds_request = json.loads(request.POST.get('compounds', []))

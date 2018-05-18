@@ -117,6 +117,9 @@
         else if (url.indexOf('/model/') > -1) {
           anchor = '#organmodels'
         }
+        else if (url.indexOf('/diseasemodel_list/') > -1) {
+          anchor = '#diseasemodels'
+        }
         else if (url.indexOf('/microdevices/') > -1) {
           anchor = '#microdevices'
         }
@@ -234,6 +237,10 @@
               <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
               Predictive Modeling
           </a></li>
+          <li title="This feature is still in development"><a href="/assays/test_filter/">
+              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+              Test Filter
+          </a></li>
 {#          <li title="This feature is still in development"><a href="/under_construction/">#}
 {#              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>#}
 {#              Pathway Modeling#}
@@ -245,6 +252,7 @@
         <ul class="dropdown-menu" role="menu">
           <li title="View MPS models"><a href="/microdevices/model">View MPS Models</a></li>
           <li title="View microdevices"><a href="/microdevices/device">View Microdevices</a></li>
+          <li title="View disease models"><a href="/microdevices/diseasemodel">View Disease Model</a></li>
           <li class="divider"></li>
           <li class="dropdown-header">Requires Permission</li>
           <li><a href="/microdevices/model/add/">Add MPS Model</a></li>

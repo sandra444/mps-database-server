@@ -12,8 +12,25 @@ window.CHARTS = {};
 // google.charts.setOnLoadCallback(window.CHARTS.callback);
 
 $(document).ready(function () {
+    var colors = [
+        "rgba(0,128,0,0.4)", "rgba(26,140,0,0.4)", "rgba(51,152,0,0.4)",
+        "rgba(77,164,0,0.4)", "rgba(102,176,0,0.4)", "rgba(128,188,0,0.4)",
+        "rgba(153,200,0,0.4)", "rgba(179,212,0,0.4)", "rgba(204,224,0,0.4)",
+        "rgba(230,236,0,0.4)", "rgba(255,255,0,0.4)", "rgba(243,230,0,0.4)",
+        "rgba(231,204,0,0.4)", "rgba(219,179,0,0.4)", "rgba(207,153,0,0.4)",
+        "rgba(195,128,0,0.4)", "rgba(183,102,0,0.4)", "rgba(171,77,0,0.4)",
+        "rgba(159,51,0,0.4)", "rgba(147,26,0,0.4)", "rgba(135,0,0,0.4)"
+    ];
 
+    // Probably should just have full data!
     var device_to_group = {};
+
+    // Avoid magic strings for heatmap elements
+    var heatmap_filters_selector = $('#heatmap_filters').find('select');
+    var matrix_body_selector = $('#matrix_body');
+    var heatmap_wrapper_selector = $('#heatmap_wrapper');
+    // TODO TODO TODO TEMPORARILY EXPOSE
+    var heatmap_data = {};
 
     window.CHARTS.prepare_chart_options = function(charts) {
         var options = {};
@@ -92,7 +109,7 @@ $(document).ready(function () {
         }
     };
 
-    window.CHARTS.display_treament_groups = function(treatment_groups) {
+    window.CHARTS.display_treatment_groups = function(treatment_groups) {
         // TODO KIND OF UGLY
         var header_keys = [
             // 'device',
@@ -193,9 +210,117 @@ $(document).ready(function () {
         $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
     };
 
+    window.CHARTS.get_heatmap_dropdowns = function(starting_index) {
+        if (heatmap_data.matrices && _.keys(heatmap_data.matrices).length > 0) {
+            heatmap_wrapper_selector.show();
+
+            var current_index = 0;
+            var data_level = heatmap_data.values;
+            var current;
+
+            while (current_index < starting_index) {
+                current = heatmap_filters_selector.eq(current_index);
+                data_level = data_level[current.val()];
+                current_index++;
+            }
+
+            while (current_index < heatmap_filters_selector.length) {
+                current = heatmap_filters_selector.eq(current_index);
+                var former_value = current.val();
+
+                if (former_value === null || starting_index < current_index) {
+                    current.empty();
+                    $.each(_.sortBy(_.keys(data_level)), function (index, key) {
+                        var dropdown_text = key.split('\n')[0];
+                        current.append($('<option>').val(key).text(dropdown_text));
+                    });
+
+                    if (former_value && current.find('option[value="' + former_value + '"]').length > 0) {
+                        current.val(former_value);
+                    }
+                }
+
+                data_level = data_level[current.val()];
+                current_index++;
+            }
+
+            // Make the heatmap
+            // Get the values for the heatmap
+            var means = {};
+
+            $.each(data_level, function (key, values) {
+                means[key] = d3.mean(values);
+            });
+
+            var median = d3.median(means);
+            // Get the min
+            var min_value = _.min(means);
+            min_value -= min_value * 0.000001;
+            // Get the max
+            var max_value = _.max(means);
+            max_value += max_value * 0.000001;
+            // Get the colorscale
+            var color_scale = d3.scale.quantile()
+                .domain([min_value, median, max_value])
+                .range(colors);
+
+            // Actually display the heatmap
+            var current_matrix = heatmap_data.matrices[$('#id_heatmap_matrix').val()];
+
+            matrix_body_selector.empty();
+
+            // Check to see if new forms will be generated
+            for (var row_index = 0; row_index < current_matrix.length; row_index++) {
+                var row_id = 'row_' + row_index;
+                var current_row = $('<tr>')
+                    .attr('id', row_id);
+
+                for (var column_index = 0; column_index < current_matrix[row_index].length; column_index++) {
+                    var new_cell = $('<td>');
+
+                    var current_key = row_index + '_' + column_index;
+                    var value = data_level[current_key];
+                    var mean_value = means[current_key];
+
+                    if (value) {
+                        new_cell.html(value.join(', '));
+                        new_cell.css('background-color', color_scale(mean_value));
+                    }
+                    else {
+                        new_cell.css('background-color', '#606060');
+                    }
+
+                    // Add
+                    current_row.append(new_cell);
+                }
+
+                matrix_body_selector.append(current_row);
+            }
+        }
+        else {
+            heatmap_wrapper_selector.hide();
+        }
+    };
+
+    // window.CHARTS.make_heatmap = function() {
+    //
+    // };
+
     window.CHARTS.make_charts = function(json, charts, changes_to_options) {
         // Show the chart options
         // NOTE: the chart options are currently shown by default, subject to change
+
+        heatmap_data = json.heatmap;
+
+        window.CHARTS.get_heatmap_dropdowns(0);
+
+        // Naive way to learn whether dose vs. time
+        var is_dose = $('#' + charts + 'dose_select').prop('checked');
+
+        var x_axis_label = 'Time (Days)';
+        if (is_dose) {
+            x_axis_label = 'Dose (μM)';
+        }
 
         // If nothing to show
         if (!json.assays) {
@@ -234,7 +359,7 @@ $(document).ready(function () {
                     }
                 },
                 hAxis: {
-                    title: 'Time (Days)',
+                    title: x_axis_label,
                     textStyle: {
                         bold: true
                     },
@@ -291,12 +416,13 @@ $(document).ready(function () {
             // Merge options with the specified changes
             $.extend(options, changes_to_options);
 
+            // REMOVED FOR NOW
             // Find out whether to shrink text
-            $.each(assays[index][0], function(index, column_header) {
-                if (column_header.length > 12) {
-                    options.legend.textStyle.fontSize = 10;
-                }
-            });
+            // $.each(assays[index][0], function(index, column_header) {
+            //     if (column_header.length > 12) {
+            //         options.legend.textStyle.fontSize = 10;
+            //     }
+            // });
 
             var chart = null;
 
@@ -355,55 +481,63 @@ $(document).ready(function () {
             }
         }
 
-        window.CHARTS.display_treament_groups(json.treatment_groups);
+        window.CHARTS.display_treatment_groups(json.treatment_groups);
 
         // Triggers for legends (TERRIBLE SELECTOR)
-        $(document).on('mouseover', 'g:has("g > text")', function() {
+        // $(document).on('mouseover', 'g:has("g > text")', function() {
+        $(document).on('mouseover', 'g:has(text[font-size="12"])', function() {
             var text_section = $(this).find('text');
             if (text_section.length === 1) {
-                var current_pos = $(this).position();
-                // Make it appear slightly below the legend
-                var current_top = current_pos.top + 50;
-                // Get the furthest left it should go
-                var current_left = $('#breadcrumbs').position.left;
+            var current_pos = $(this).position();
+            // Make it appear slightly below the legend
+            var current_top = current_pos.top + 50;
+            // Get the furthest left it should go
+            var current_left = $('#breadcrumbs').position.left;
 
-                var content_split = null;
-                var row_id_to_use = null;
-                var row_clone = null;
+            var content_split = null;
+            var row_id_to_use = null;
+            var row_clone = null;
 
-                // Naive, assumes Group would never be in a device name
-                if ($(this).find('text').text().indexOf('Group') > -1) {
-                    content_split = $(this).find('text').text().split(/(\d+)/);
-                    row_id_to_use = '#' + content_split[0].replace(' ', '_') + content_split[1];
-                    row_clone = $(row_id_to_use).clone().addClass('bg-warning');
-                }
-                else {
-                    // Naive, assumes spaces will not be in device name
-                    content_split = $(this).find('text').text().split(/(\s+)/);
-                    row_id_to_use = '#' + device_to_group[content_split[0]];
-                    row_clone = $(row_id_to_use).clone().addClass('bg-warning');
-                }
+            // Naive, assumes Group would never be in a device name
+            if (text_section.text().indexOf('Group') > -1) {
+                // content_split = $(this).find('text').text().split(/(\d+)/);
+                content_split = text_section.text().split(/(\d+)/);
+                row_id_to_use = '#' + content_split[0].replace(' ', '_') + content_split[1];
+                row_clone = $(row_id_to_use).clone().addClass('bg-warning');
+            }
+            else {
+                // Naive, assumes spaces will not be in device name
+                // content_split = $(this).find('text').text().split(/(\s+)/);
+                content_split = text_section.text().split(/(\s+)/);
+                row_id_to_use = '#' + device_to_group[content_split[0]];
+                row_clone = $(row_id_to_use).clone().addClass('bg-warning');
+            }
 
-                $('#group_display_body').empty().append(row_clone);
+            $('#group_display_body').empty().append(row_clone);
 
-                var second_row = $('<tr>').addClass('bg-warning');
-                var hidden_rows = false;
+            var second_row = $('<tr>').addClass('bg-warning');
+            var hidden_rows = false;
 
-                $(row_id_to_use).find('td:hidden').each(function(index) {
-                    hidden_rows = true;
-                    second_row.append($(this).clone().show());
-                });
+            $(row_id_to_use).find('td:hidden').each(function(index) {
+                hidden_rows = true;
+                second_row.append($(this).clone().show());
+            });
 
-                if (hidden_rows) {
-                    $('#group_display_body').append(second_row);
-                }
+            if (hidden_rows) {
+                $('#group_display_body').append(second_row);
+            }
 
-                $('#group_display').show()
-                    .css({top: current_top, left: current_left, position:'absolute'});
+            $('#group_display').show()
+                .css({top: current_top, left: current_left, position:'absolute'});
             }
         });
-        $(document).on('mouseout', 'g:has("g > text")', function() {
+        $(document).on('mouseout', 'g:has(text[font-size="12"])', function() {
             $('#group_display').hide();
         });
     };
+
+    // Triggers for heatmap filters
+    heatmap_filters_selector.change(function() {
+        window.CHARTS.get_heatmap_dropdowns(Math.floor($(this).data('heatmap-index')));
+    });
 });
