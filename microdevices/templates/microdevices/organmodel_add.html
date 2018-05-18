@@ -2,12 +2,12 @@
 {% load static %}
 
 {% block breadcrumbs %}
-    <li><a href="/microdevices/model">Organ Models</a></li>
+    <li><a href="/microdevices/model">MPS Models</a></li>
     <li class="active">
         {% if object %}
             Edit <em>{{ object }}</em>
         {% else %}
-            Add Organ Model
+            Add MPS Model
         {% endif %}
     </li>
 {% endblock %}
@@ -29,7 +29,7 @@
     <form class="form-horizontal" method="post" enctype="multipart/form-data">
 
     <h1>
-        Add Organ Model
+        Add MPS Model
     {% endif %}
     <br>
     {% csrf_token %}
@@ -41,7 +41,7 @@
 
     {% include 'tracking.html' %}
 
-    <legend>Organ Model</legend>
+    <legend>MPS Model</legend>
 
     {% include 'generic_field.html' with field=form.name label="Model Name*" %}
 
@@ -71,6 +71,9 @@
     {% include 'generic_field.html' with field=form.organ label="Organ*" %}
 
     {% include 'generic_field.html' with field=form.center label="Center*" %}
+
+    {% include 'generic_field.html' with field=form.disease label="Disease" %}
+    {# <h6 class="text-center">Note: Leave "Disease" blank for models that are healthy at the start of a study.</h6>#}
 
     {% include 'generic_field.html' with field=form.description label="Description" %}
 

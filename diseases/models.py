@@ -10,22 +10,22 @@ class Disease(models.Model):
     overview_state_blurb = models.TextField(default='', blank=True)
     overview_state_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
 
-    overview_biology_blurb = models.TextField(default='', blank=True)
-    overview_biology_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
-
-    overview_clinicaldata_blurb = models.TextField(default='', blank=True)
-    overview_clinicaldata_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
-    overview_clinicaldata_num_results = models.IntegerField(default=0, null=True, blank=True)
-    overview_clinicaldata_num_phaseI = models.IntegerField(default=0, null=True, blank=True)
-    overview_clinicaldata_num_phaseII = models.IntegerField(default=0, null=True, blank=True)
-    overview_clinicaldata_num_phaseIII = models.IntegerField(default=0, null=True, blank=True)
-    overview_clinicaldata_num_phaseIV = models.IntegerField(default=0, null=True, blank=True)
-
-    overview_models_blurb = models.TextField(default='', blank=True)
-    overview_models_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
-
-    overview_data_blurb = models.TextField(default='', blank=True)
-    overview_data_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
+    # overview_biology_blurb = models.TextField(default='', blank=True)
+    # overview_biology_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
+    #
+    # overview_clinicaldata_blurb = models.TextField(default='', blank=True)
+    # overview_clinicaldata_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
+    # overview_clinicaldata_num_results = models.IntegerField(default=0, null=True, blank=True)
+    # overview_clinicaldata_num_phaseI = models.IntegerField(default=0, null=True, blank=True)
+    # overview_clinicaldata_num_phaseII = models.IntegerField(default=0, null=True, blank=True)
+    # overview_clinicaldata_num_phaseIII = models.IntegerField(default=0, null=True, blank=True)
+    # overview_clinicaldata_num_phaseIV = models.IntegerField(default=0, null=True, blank=True)
+    #
+    # overview_models_blurb = models.TextField(default='', blank=True)
+    # overview_models_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
+    #
+    # # overview_data_blurb = models.TextField(default='', blank=True)
+    # # overview_data_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
 
     # Everything necessary for the Biology Page
     biology_blurb = models.TextField(default='', blank=True)
@@ -35,7 +35,7 @@ class Disease(models.Model):
     biology_genomic_geo_url = models.CharField(max_length=200, null=True, blank=True)
     biology_genomic_omim_url = models.CharField(max_length=200, null=True, blank=True)
     biology_genomic_exsnp_url = models.CharField(max_length=200, null=True, blank=True)
-    biology_genomic_diseasesorg_url = models.CharField(max_length=200, null=True)
+    biology_genomic_diseasesorg_url = models.CharField(max_length=200, null=True, blank=True)
 
     # Everything necessary for the Clinical Data Page
     clinicaldata_blurb = models.TextField(default='', blank=True)
@@ -65,7 +65,7 @@ class DiseaseClinicalTrial(models.Model):
     trial_name = models.CharField(max_length=200, null=True, blank=True)
     phase = models.CharField(max_length=20, null=True, blank=True)
     status = models.CharField(max_length=200, null=True, blank=True)
-    results = models.CharField(max_length=200, null=True, blank=True)
+    results = models.BooleanField(default=False)
     institution = models.CharField(max_length=200, null=True, blank=True)
     drugs = models.CharField(max_length=200, null=True, blank=True)
 

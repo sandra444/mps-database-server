@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import Group
 
 from mps.base.models import LockableModel, TrackableModel
+from cellsamples.models import CellType, CellSubtype
 from django.core.validators import MaxValueValidator
 
 
@@ -149,6 +150,8 @@ class OrganModel(LockableModel):
     # model_name = models.CharField(max_length=200, unique=True)
     name = models.CharField(max_length=200, unique=True)
     organ = models.ForeignKey('cellsamples.Organ')
+    disease = models.ForeignKey('diseases.Disease', null=True, blank=True)
+
     # Centers are now required
     center = models.ForeignKey(MicrophysiologyCenter)
     device = models.ForeignKey(Microdevice)
@@ -231,27 +234,6 @@ class OrganModelLocation(models.Model):
     organ_model = models.ForeignKey(OrganModel)
 
 
-# REMOVED FOR NOW
-# class MicrodeviceSublayout(models.Model):
-#     """Describes a the layout of sections for a device"""
-#     device = models.ForeignKey(Microdevice)
-#
-#     number_of_rows = models.IntegerField()
-#     number_of_columns = models.IntegerField()
-#
-#
-# class MicrodeviceSection(models.Model):
-#     """Describes a section of a device, for instance if a device has to compartments (apical and basal)"""
-#     device_sublayout = models.ForeignKey(MicrodeviceSublayout)
-#
-#     row_index = models.IntegerField()
-#     column_index = models.IntegerField()
-#
-#     name = models.CharField(max_length=255)
-#
-#     volume = models.FloatField()
-#
-#     # VOLUME UNITS TOO?
-#
-#     def __unicode__(self):
-#         return self.name
+class OrganModelCell(models.Model):
+    organ_model = models.ForeignKey(OrganModel)
+    cell_type = models.ForeignKey(CellType)

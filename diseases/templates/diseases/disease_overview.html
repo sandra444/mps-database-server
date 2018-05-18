@@ -4,7 +4,7 @@
 {# TODO REQUIRES AESTHETIC REVISION #}
 
 {% block breadcrumbs %}
-    <li><a href="/diseases/">Disease List</a></li>
+    <li><a href="/diseases/">Diseases</a></li>
     <li class="active">{{ disease.name}}</li>
 {% endblock %}
 
@@ -32,104 +32,6 @@
         {% else %}
         <div class="col-sm-10 col-md-12 text-wrapped">
             {{ disease.overview_state_blurb|safe }}
-        </div>
-        {% endif %}
-    </div>
-    <br><br>
-
-    <legend><a href="biology/">{{ disease.name }} Disease Biology</a></legend>
-    <div class="row">
-        {% if disease.overview_biology_image %}
-        <div class="col-sm-10 col-md-6 text-wrapped">
-            {{ disease.overview_biology_blurb|safe }}
-        </div>
-        <div class="col-md-6 thumbnail text-center row-center">
-            <img src="{{disease.overview_biology_image.url}}" class="img-responsive"></img>
-        </div>
-        {% else %}
-        <div class="col-sm-10 col-md-12 text-wrapped">
-            {{ disease.overview_biology_blurb|safe }}
-        </div>
-        {% endif %}
-    </div>
-    <br><br>
-
-    <legend><a href="clinicaldata/">{{ disease.name }} Clinical Data</a></legend>
-    <div class="row">
-        {% if disease.overview_clinicaldata_image %}
-        <div class="col-sm-10 col-md-6 text-wrapped padded-bottom">
-            {{ disease.overview_clinicaldata_blurb|safe }}
-        </div>
-        <div class="col-md-6 thumbnail text-center row-center">
-            <img src="{{disease.overview_clinicaldata_image.url}}" class="img-responsive"></img>
-        </div>
-        {% else %}
-        <div class="col-sm-10 col-md-12 text-wrapped">
-            {{ disease.overview_clinicaldata_blurb|safe }}
-        </div>
-        {% endif %}
-    </div>
-    <br>
-    <div class="panel panel-default">
-        <div class="panel-body">
-            <div class="row">
-                <div class="col-xs-12">
-                <table class="table table-striped">
-                    <thead>
-                        <h4 class="text-center"><a href="https://www.clinicaltrials.gov/">ClinicalTrials.gov</a></h4>
-                        <tr>
-                            <th>Trials with Results</th>
-                            <th>Trials in Phase I</th>
-                            <th>Trials in Phase II</th>
-                            <th>Trials in Phase III</th>
-                            <th>Trials in Phase IV</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>{{disease.overview_clinicaldata_num_results}}</td>
-                            <td>{{disease.overview_clinicaldata_num_phaseI}}</td>
-                            <td>{{disease.overview_clinicaldata_num_phaseII}}</td>
-                            <td>{{disease.overview_clinicaldata_num_phaseIII}}</td>
-                            <td>{{disease.overview_clinicaldata_num_phaseIV}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <br><br>
-
-    <legend><a href="model/">{{ disease.name }} Disease Models</a></legend>
-    <div class="row">
-        {% if disease.overview_models_image %}
-        <div class="col-sm-10 col-md-6 text-wrapped">
-            {{ disease.overview_models_blurb|safe }}
-        </div>
-        <div class="col-md-6 thumbnail text-center row-center">
-            <img src="{{disease.overview_models_image.url}}" class="img-responsive"></img>
-        </div>
-        {% else %}
-        <div class="col-sm-10 col-md-12 text-wrapped">
-            {{ disease.overview_models_blurb|safe }}
-        </div>
-        {% endif %}
-    </div>
-    <br><br>
-
-    <legend><a href="../../../under_construction">{{ disease.name }} Data Analysis</a></legend>
-    <div class="row">
-        {% if disease.overview_data_image %}
-        <div class="col-sm-10 col-md-6 text-wrapped">
-            {{ disease.overview_data_blurb|safe }}
-        </div>
-        <div class="col-md-6 thumbnail text-center row-center">
-            <img src="{{disease.overview_data_image.url}}" class="img-responsive"></img>
-        </div>
-        {% else %}
-        <div class="col-sm-10 col-md-12 text-wrapped">
-            {{ disease.overview_data_blurb|safe }}
         </div>
         {% endif %}
     </div>

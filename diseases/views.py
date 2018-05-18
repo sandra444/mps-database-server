@@ -3,6 +3,7 @@ from mps.mixins import SpecificGroupRequiredMixin
 # from forms import DiseaseForm
 from django.shortcuts import render
 from models import Disease, DiseaseBiologyOtherResources, DiseaseClinicalTrial
+from microdevices.models import OrganModel
 
 
 # Create your views here.
@@ -51,6 +52,7 @@ class DiseaseModel(DetailView):
     def get_context_data(self, **kwargs):
         context = {}
         context['disease'] = Disease.objects.get(pk=self.kwargs['pk'])
+        context['disease_models'] = OrganModel.objects.filter(disease__name=context['disease'])
         return context
     template_name = 'diseases/disease_model.html'
 
