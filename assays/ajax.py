@@ -1470,7 +1470,11 @@ def fetch_pre_submission_filters(request):
         organ_model_ids = {organ_model[0]: True for organ_model in organ_models}
 
         if current_filters.get('organ_models', []):
-            organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if int(id) in organ_model_ids]
+            new_organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if int(id) in organ_model_ids]
+
+            # In case changes in filters eliminate all organ models
+            if new_organ_model_ids:
+                organ_model_ids = new_organ_model_ids
 
         accessible_matrix_items = accessible_matrix_items.filter(
             organ_model_id__in=organ_model_ids
@@ -1490,7 +1494,11 @@ def fetch_pre_submission_filters(request):
         compound_ids = {compound[0]: True for compound in compounds}
 
         if current_filters.get('compounds', []):
-            compound_ids = [int(id) for id in current_filters.get('compounds', []) if int(id) in compound_ids]
+            new_compound_ids = [int(id) for id in current_filters.get('compounds', []) if int(id) in compound_ids]
+
+            # In case changes in filters eliminate all compounds
+            if new_compound_ids:
+                compound_ids = new_compound_ids
 
         accessible_matrix_items = accessible_matrix_items.filter(
             assaysetupcompound__compound_instance__compound_id__in=compound_ids
@@ -1512,7 +1520,11 @@ def fetch_pre_submission_filters(request):
         target_ids = {target[0]: True for target in targets}
 
         if current_filters.get('targets', []):
-            target_ids = [int(id) for id in current_filters.get('targets', []) if int(id) in target_ids]
+            new_target_ids = [int(id) for id in current_filters.get('targets', []) if int(id) in target_ids]
+
+            # In case changes in filters eliminate all targets
+            if new_target_ids:
+                target_ids = new_target_ids
 
             accessible_study_assays = accessible_study_assays.filter(target_id__in=target_ids)
 

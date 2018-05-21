@@ -31,9 +31,9 @@ $(document).ready(function() {
             success: function (json) {
                 $('#results').prop('hidden', false);
                 $('#filter').prop('hidden', true);
-                $('.filter-table').prop('hidden', true);
 
-                // TODO TODO TODO HIDE THE DATATABLE HEADERS HERE
+                // HIDE THE DATATABLE HEADERS HERE
+                $('.filter-table').prop('hidden', true);
 
                 window.CHARTS.prepare_side_by_side_charts(json, charts_name);
                 window.CHARTS.make_charts(json, charts_name);
