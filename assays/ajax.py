@@ -1214,8 +1214,8 @@ def fetch_data_points(request):
             study_id__in=accessible_studies
         ).prefetch_related(
             'organ_model',
-            # 'assaysetupcompound__compound_instance',
-            # 'assaydatapoint__study_assay__target'
+            'assaysetupcompound_set__compound_instance',
+            'assaydatapoint_set__study_assay__target'
         )
 
         if current_filters.get('organ_models', []):
@@ -1234,6 +1234,10 @@ def fetch_data_points(request):
 
         if current_filters.get('targets', []):
             target_ids = [int(id) for id in current_filters.get('targets', []) if id]
+
+            matrix_items = matrix_items.filter(
+                assaydatapoint__study_assay__target_id__in=target_ids
+            ).distinct()
 
             pre_filter.update({
                 'study_assay__target_id__in': target_ids
@@ -1485,7 +1489,7 @@ def fetch_pre_submission_filters(request):
 
         compound_ids = {compound[0]: True for compound in compounds}
 
-        if current_filters.get('compound', []):
+        if current_filters.get('compounds', []):
             compound_ids = [int(id) for id in current_filters.get('compounds', []) if int(id) in compounds]
 
         accessible_matrix_items = accessible_matrix_items.filter(
