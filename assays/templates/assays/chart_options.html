@@ -1,18 +1,28 @@
 <div id="{{ chart_prefix }}chart_options" class="well hidden-print chart-option-block">
 {#    <h3 class="text-center">Chip Readout Data</h3>#}
-    <h3 class="text-center">{{ chart_title }}</h3>
+    <h3 class="text-center">
+        {{ chart_title }}
+    </h3>
+    <div class="text-center">
+        <button>Change Filtering</button>
+        <button>Change Grouping</button>
+    </div>
     <div class="row">
         <label class="radio-inline">
             <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}device_select" value="device" checked>
-            View by Device
+            By Chip
         </label>
         <label class="radio-inline">
             <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}group_select" value="group">
-            View by Group
+            By Group
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}matrix_select" value="matrix">
+            By Matrix
         </label>
         <label class="radio-inline">
             <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}dose_select" value="dose">
-            View by Dose-Response
+            By Dose-Response
         </label>
         <label for="{{ chart_prefix }}percent_control" class="pull-right">
             <input type="checkbox" name="{{ chart_prefix }}percent_control" id="{{ chart_prefix }}percent_control" />
@@ -67,5 +77,62 @@
             <input type="checkbox" name="{{ chart_prefix }}log_y" id="{{ chart_prefix }}log_y" />
             Log Scale Y-Axis&nbsp;
         </label>
+    </div>
+</div>
+
+<div hidden id="{{ chart_prefix }}filtering_popup">
+    Filter Pop-up
+    <table>
+        <thead>
+            <tr>
+                <th>Filter</th>
+                <th>In Use?</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>X</td>
+                <td>Study</td>
+            </tr>
+            <tr>
+                <td>X</td>
+                <td>Organ Model</td>
+            </tr>
+            <tr>
+                <td>X</td>
+                <td>Matrix</td>
+            </tr>
+            <tr>
+                <td>X</td>
+                <td>Compound</td>
+            </tr>
+            <tr>
+                <td>X</td>
+                <td>Chip</td>
+            </tr>
+            <tr>
+                <td>X</td>
+                <td>Assay</td>
+            </tr>
+            <tr>
+                <td>X</td>
+                <td>Sample Location</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div hidden id="{{ chart_prefix }}grouping_popup">
+    Grouping Pop-up
+    <div class="row">
+        <div>
+
+        </div>
+        <div>
+
+        </div>
+        <div>
+
+        </div>
     </div>
 </div>

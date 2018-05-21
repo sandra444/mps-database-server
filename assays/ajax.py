@@ -18,7 +18,8 @@ from .utils import (
     # REPLACED_DATA_POINT_CODE,
     # MATRIX_ITEM_PREFETCH,
     DEFAULT_EXPORT_HEADER,
-    get_repro_data
+    get_repro_data,
+    get_user_accessible_studies
 )
 
 from StringIO import StringIO
@@ -578,6 +579,7 @@ def get_data_as_json(ids, data_points=None):
     return data
 
 
+# TODO TODO TODO MAKE SURE THIS WORKS WITH NEW FILTERING
 def get_control_data(
         study,
         mean_type,
@@ -696,14 +698,17 @@ def get_control_data(
 
 
 # TODO WE MAY WANT THE DEFINITION OF A TREATMENT GROUP TO CHANGE, WHO KNOWS
-def get_item_groups(study):
+def get_item_groups(study, matrix_items=None):
     treatment_groups = {}
     setup_to_treatment_group = {}
 
     # By pulling the setups for the study, I avoid problems with preview data
-    setups = AssayMatrixItem.objects.filter(
-        study=study
-    ).prefetch_related(
+    if not matrix_items:
+        matrix_items = AssayMatrixItem.objects.filter(
+            study=study
+        )
+
+    setups = matrix_items.prefetch_related(
         'organ_model',
         'assaysetupsetting_set__setting',
         'assaysetupsetting_set__addition_location',
@@ -793,6 +798,7 @@ def get_data_for_heatmap(raw_data):
     return data
 
 
+# TODO TODO TODO MAKE SURE STUDY NO LONGER REQUIRED
 def get_data_points_for_charting(
         raw_data,
         key,
@@ -802,8 +808,10 @@ def get_data_points_for_charting(
         include_all,
         truncate_negative,
         dynamic_excluded,
-        study,
+        post_filter=None,
+        study=None,
         matrix_item=None,
+        matrix_items=None,
         new_data=False,
         additional_data=None
 ):
@@ -822,8 +830,19 @@ def get_data_points_for_charting(
     new_data - indicates whether data in raw_data is new
     additional_data - data to merge with raw_data (used when displaying individual readouts for convenience)
     """
+    post_filter_options = {
+        'study': {},
+        'matrix_item__organ_model': {},
+        'matrix_item__matrix': {},
+        'matrix_item__assaysetupcompound__compound_instance__compound': {},
+        'matrix_item': {},
+        'study_assay__target': {},
+        # 'study_assay__method': {},
+        'sample_location': {},
+    }
+
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
-    treatment_group_representatives, setup_to_treatment_group = get_item_groups(study)
+    treatment_group_representatives, setup_to_treatment_group = get_item_groups(study, matrix_items)
 
     final_data = {
         'sorted_assays': [],
@@ -858,8 +877,11 @@ def get_data_points_for_charting(
 
     averaged_data = {}
 
-    all_sample_locations = {}
     all_keys = {}
+    key_discrimination = {}
+    use_key_discrimination = key in ['device', 'matrix']
+
+    all_sample_locations = {}
 
     # Append the additional_data as necessary
     # Why is this done? It is an expedient way to avoid duplicating data
@@ -867,10 +889,16 @@ def get_data_points_for_charting(
         raw_data.extend(additional_data)
 
     if not matrix_item:
-        heatmap_matrices = AssayMatrix.objects.filter(
-            study_id=study,
-            representation='plate'
-        )
+        if not matrix_items:
+            heatmap_matrices = AssayMatrix.objects.filter(
+                study_id=study,
+                representation='plate'
+            )
+        else:
+            heatmap_matrices = AssayMatrix.objects.filter(
+                assaymatrixitem__in=matrix_items,
+                representation='plate'
+            )
 
         heatmap_data = raw_data.filter(matrix_item__matrix_id__in=heatmap_matrices)
 
@@ -900,8 +928,11 @@ def get_data_points_for_charting(
 
         sample_location = raw.sample_location.name
 
-        setup_id = raw.matrix_item_id
-        chip_id = raw.matrix_item.name
+        matrix_item_id = raw.matrix_item_id
+        matrix_item_name = raw.matrix_item.name
+
+        matrix_id = raw.matrix_item.matrix_id
+        matrix_name = raw.matrix_item.matrix.name
 
         # Convert to days for now
         time = raw.time / 1440.0
@@ -918,7 +949,7 @@ def get_data_points_for_charting(
             # If by compound
             if key == 'group':
                 # tag = get_list_of_present_compounds(related_compounds_map, raw, ' & ')
-                tag = 'Group {}'.format(setup_to_treatment_group.get(setup_id).get('index') + 1)
+                tag = 'Group {}'.format(setup_to_treatment_group.get(matrix_item_id).get('index') + 1)
             elif key == 'dose':
                 tag = []
                 concentration = 0
@@ -934,9 +965,18 @@ def get_data_points_for_charting(
                     tag = ' & '.join(tag)
                 else:
                     tag = '-No Compound-'
+            # If by matrix
+            elif key == 'matrix':
+                tag = (matrix_id, matrix_name)
+
+                if all_keys.setdefault(matrix_name, matrix_id) != matrix_id:
+                    key_discrimination.update({matrix_name: True})
             # If by device
             else:
-                tag = chip_id
+                tag = (matrix_item_id, matrix_item_name)
+
+                if all_keys.setdefault(matrix_item_name, matrix_item_id) != matrix_item_id:
+                    key_discrimination.update({matrix_item_name: True})
 
             # Set data in nested monstrosity that is initial_data
             initial_data.setdefault(
@@ -1004,8 +1044,6 @@ def get_data_points_for_charting(
                             time: average_and_interval
                         })
 
-    initial_data = None
-
     accommodate_sample_location = len(all_sample_locations) > 1
 
     for target, units in averaged_data.items():
@@ -1034,6 +1072,12 @@ def get_data_points_for_charting(
             final_data.get('sorted_assays').append(assay_label)
 
             for tag, sample_locations in tags.items():
+                # TODO: A little naive
+                if use_key_discrimination and key_discrimination.get(tag[1], ''):
+                    tag = '{} ({})'.format(tag[1], tag[0])
+                elif use_key_discrimination:
+                    tag = tag[1]
+
                 for sample_location, time_values in sample_locations.items():
                     accommodate_intervals = False
                     include_current = False
@@ -1043,7 +1087,7 @@ def get_data_points_for_charting(
                     else:
                         current_key = tag
 
-                    all_keys.update({current_key: True})
+                    # all_keys.update({current_key: True})
 
                     for time, value_and_interval in time_values.items():
                         value = value_and_interval[0]
@@ -1128,9 +1172,6 @@ def get_data_points_for_charting(
                 for y, value in data_point.items():
                     current_table[y_header.get(y)][x_header.get(x)] = value
 
-    controls = None
-    averaged_data = None
-
     final_data.get('sorted_assays').sort(key=lambda s: s.upper())
     final_data['assays'] = [[] for x in range(len(final_data.get('sorted_assays')))]
 
@@ -1145,17 +1186,70 @@ def get_data_points_for_charting(
 
 
 def fetch_data_points(request):
+    pre_filter = {}
+
     if request.POST.get('matrix_item', ''):
         matrix_items = AssayMatrixItem.objects.filter(pk=int(request.POST.get('matrix_item')))
         matrix_item = matrix_items[0]
         study = matrix_item.study
-    else:
+        pre_filter.update({
+            'matrix_item_id__in': matrix_items
+        })
+    elif request.POST.get('study', ''):
         matrix_item = None
         study = AssayStudy.objects.get(pk=int(request.POST.get('study', None)))
         matrix_items = AssayMatrixItem.objects.filter(study=study)
+        pre_filter.update({
+            'matrix_item_id__in': matrix_items
+        })
+    elif request.POST.get('filters', ''):
+        current_filters = json.loads(request.POST.get('filters', '{}'))
+        accessible_studies = get_user_accessible_studies(request.user)
+
+        if current_filters.get('groups', []):
+            group_ids = [int(id) for id in current_filters.get('groups', []) if id]
+            accessible_studies = accessible_studies.filter(group_id__in=group_ids)
+
+        matrix_items = AssayMatrixItem.objects.filter(
+            study_id__in=accessible_studies
+        ).prefetch_related(
+            'organ_model',
+            # 'assaysetupcompound__compound_instance',
+            # 'assaydatapoint__study_assay__target'
+        )
+
+        if current_filters.get('organ_models', []):
+            organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if id]
+
+            matrix_items = matrix_items.filter(
+                organ_model_id__in=organ_model_ids
+            ) | matrix_items.filter(organ_model=None)
+
+        if current_filters.get('compounds', []):
+            compound_ids = [int(id) for id in current_filters.get('compounds', []) if id]
+
+            matrix_items = matrix_items.filter(
+                assaysetupcompound__compound_instance__compound_id__in=compound_ids
+            ) | matrix_items.filter(assaysetupcompound__isnull=True)
+
+        if current_filters.get('targets', []):
+            target_ids = [int(id) for id in current_filters.get('targets', []) if id]
+
+            pre_filter.update({
+                'study_assay__target_id__in': target_ids
+            })
+
+        pre_filter.update({
+            'matrix_item_id__in': matrix_items
+        })
+
+        matrix_item = None
+        study = accessible_studies
+    else:
+        return HttpResponseServerError()
 
     data_points = AssayDataPoint.objects.filter(
-        matrix_item_id__in=matrix_items
+        **pre_filter
     ).prefetch_related(
         #TODO
         'study_assay__target',
@@ -1176,7 +1270,8 @@ def fetch_data_points(request):
         request.POST.get('truncate_negative', ''),
         json.loads(request.POST.get('dynamic_excluded', '{}')),
         study=study,
-        matrix_item=matrix_item
+        matrix_item=matrix_item,
+        matrix_items=matrix_items
     )
 
     return HttpResponse(json.dumps(data),
@@ -1326,6 +1421,117 @@ def fetch_assay_study_reproducibility(request):
                         content_type='application/json')
 
 
+# NAIVE: REQUIRES REVISION
+def fetch_pre_submission_filters(request):
+    current_filters = json.loads(request.POST.get('filters', '{}'))
+    filters_present = False
+
+    for key, value in current_filters.items():
+        if value:
+            filters_present = True
+            break
+
+    accessible_studies = get_user_accessible_studies(request.user)
+
+    groups = sorted(list(set([
+        (study.group_id, study.group.name) for study in
+        accessible_studies
+    ])), key=lambda x: x[1])
+
+    group_ids = {group[0]: True for group in groups}
+
+    organ_models = {}
+    targets = {}
+    compounds = {}
+    number_of_points = 'Please Make a Selection'
+
+    if filters_present:
+        if current_filters.get('groups', []):
+            group_ids = [int(id) for id in current_filters.get('groups', []) if int(id) in group_ids]
+
+        accessible_studies = accessible_studies.filter(group_id__in=group_ids)
+
+        accessible_matrix_items = AssayMatrixItem.objects.filter(
+            study_id__in=accessible_studies
+        ).prefetch_related(
+            'organ_model'
+        )
+
+        # Please note exclusion of null organ model here
+        organ_models = sorted(list(set([
+            (matrix_item.organ_model_id, matrix_item.organ_model.name) for matrix_item in
+            accessible_matrix_items.exclude(organ_model_id=None)
+        ])), key=lambda x: x[1])
+
+        organ_model_ids = {organ_model[0]: True for organ_model in organ_models}
+
+        if current_filters.get('organ_models', []):
+            organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if int(id) in organ_model_ids]
+
+        accessible_matrix_items = accessible_matrix_items.filter(
+            organ_model_id__in=organ_model_ids
+        ) | accessible_matrix_items.filter(organ_model=None)
+
+        accessible_compounds = AssaySetupCompound.objects.filter(
+            matrix_item__in=accessible_matrix_items
+        ).prefetch_related(
+            'compound_instance__compound'
+        )
+
+        compounds = sorted(list(set([
+            (compound.compound_instance.compound_id, compound.compound_instance.compound.name) for compound in
+            accessible_compounds
+        ])), key=lambda x: x[1])
+
+        compound_ids = {compound[0]: True for compound in compounds}
+
+        if current_filters.get('compound', []):
+            compound_ids = [int(id) for id in current_filters.get('compounds', []) if int(id) in compounds]
+
+        accessible_matrix_items = accessible_matrix_items.filter(
+            assaysetupcompound__compound_instance__compound_id__in=compound_ids
+        ) | accessible_matrix_items.filter(
+            assaysetupcompound__isnull=True
+        )
+
+        accessible_study_assays = AssayStudyAssay.objects.filter(
+            assaydatapoint__matrix_item_id__in=accessible_matrix_items
+        ).prefetch_related(
+            'target'
+        )
+
+        targets = sorted(list(set([
+            (study_assay.target_id, study_assay.target.name) for study_assay in
+            accessible_study_assays
+        ])), key=lambda x: x[1])
+
+        target_ids = {target[0]: True for target in targets}
+
+        if current_filters.get('targets', []):
+            target_ids = [int(id) for id in current_filters.get('targets', []) if int(id) in target_ids]
+
+            accessible_study_assays = accessible_study_assays.filter(target_id__in=target_ids)
+
+        number_of_points = AssayDataPoint.objects.filter(
+            matrix_item_id__in=accessible_matrix_items,
+            study_assay_id__in=accessible_study_assays,
+            replaced=False
+        ).count()
+
+    data = {
+        'filters': {
+            'groups': groups,
+            'organ_models': organ_models,
+            'targets': targets,
+            'compounds': compounds,
+        },
+        'number_of_points': number_of_points
+    }
+
+    return HttpResponse(json.dumps(data),
+                        content_type='application/json')
+
+
 def study_viewer_validation(request):
     study = None
     if request.POST.get('study', ''):
@@ -1379,6 +1585,9 @@ switch = {
     'validate_data_file': {
         'call': validate_data_file,
         'validation': study_editor_validation
+    },
+    'fetch_pre_submission_filters': {
+        'call': fetch_pre_submission_filters
     }
 }
 

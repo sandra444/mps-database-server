@@ -4,7 +4,6 @@ from .models import (
     # PhysicalUnits,
     AssaySampleLocation,
     TIME_CONVERSIONS,
-    # AssayStudy,
     AssayDataPoint,
     AssayDataFileUpload,
     AssaySubtarget,
@@ -12,23 +11,17 @@ from .models import (
     AssayStudyAssay,
     # AssayImage,
     # AssayImageSetting
+    AssayStudy,
+    AssayStudyStakeholder
 )
-# from compounds.models import (
-#     CompoundSupplier,
-#     CompoundInstance
-# )
+
+from mps.templatetags.custom_filters import VIEWER_SUFFIX, ADMIN_SUFFIX
 
 from django.db import connection, transaction
-# import ujson as json
-# from urllib import unquote
-# from django.utils import timezone
 import xlrd
 
 from django.conf import settings
-# Convert to valid file name
 import string
-# import re
-# import os
 import codecs
 import cStringIO
 
@@ -36,9 +29,6 @@ import pandas as pd
 import numpy as np
 
 import csv
-# from django.utils.dateparse import parse_date
-#
-# from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
 from chardet.universaldetector import UniversalDetector
 
@@ -234,6 +224,76 @@ class UnicodeWriter:
         """This function writes out all rows given"""
         for row in rows:
             self.writerow(row)
+
+
+def get_user_accessible_studies(user):
+    """This function acquires a queryset of all studies the user has access to
+    
+    Params:
+    user - Django user instance
+    """
+    queryset = AssayStudy.objects.all().prefetch_related(
+        'group',
+    )
+
+    user_group_names = [
+        group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in user.groups.all()
+    ]
+
+    data_group_filter = {}
+    access_group_filter = {}
+    unrestricted_filter = {}
+    unsigned_off_filter = {}
+    stakeholder_group_filter = {}
+    missing_stakeholder_filter = {}
+
+    stakeholder_group_whitelist = list(set(
+        AssayStudyStakeholder.objects.filter(
+            group__name__in=user_group_names
+        ).values_list('study_id', flat=True)
+    ))
+
+    missing_stakeholder_blacklist = list(set(
+        AssayStudyStakeholder.objects.filter(
+            signed_off_by_id=None,
+            sign_off_required=True
+        ).values_list('study_id', flat=True)
+    ))
+
+    data_group_filter.update({
+        'group__name__in': user_group_names
+    })
+    access_group_filter.update({
+        'access_groups__name__in': user_group_names,
+    })
+    unrestricted_filter.update({
+        'restricted': False
+    })
+    unsigned_off_filter.update({
+        'signed_off_by': None
+    })
+    stakeholder_group_filter.update({
+        'id__in': stakeholder_group_whitelist
+    })
+    missing_stakeholder_filter.update({
+        'id__in': missing_stakeholder_blacklist
+    })
+
+    # Show if:
+    # 1: Study has group matching user_group_names
+    # 2: Study has Stakeholder group matching user_group_name AND is signed off on
+    # 3: Study has access group matching user_group_names AND is signed off on AND all Stakeholders have signed off
+    # 4: Study is unrestricted AND is signed off on AND all Stakeholders have signed off
+    combined = queryset.filter(**data_group_filter) | \
+               queryset.filter(**stakeholder_group_filter).exclude(**unsigned_off_filter) | \
+               queryset.filter(**access_group_filter).exclude(**unsigned_off_filter).exclude(
+                   **missing_stakeholder_filter) | \
+               queryset.filter(**unrestricted_filter).exclude(**unsigned_off_filter).exclude(
+                   **missing_stakeholder_filter)
+
+    combined = combined.distinct()
+
+    return combined
 
 
 def label_to_number(label):

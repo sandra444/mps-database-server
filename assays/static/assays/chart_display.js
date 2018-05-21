@@ -201,9 +201,9 @@ $(document).ready(function () {
         $('.DTTT_container').css('float', 'none');
 
         // Clarify usage of sort
-        $('.sorting').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
-        $('.sorting_asc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
-        $('.sorting_desc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+        // $('.sorting').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+        // $('.sorting_asc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+        // $('.sorting_desc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
 
         // Recalculate responsive and fixed headers
         $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
@@ -340,9 +340,9 @@ $(document).ready(function () {
             var options = {
                 title: assay,
                 interpolateNulls: true,
+                // Changes styling and prevents flickering issue
                 // tooltip: {
                 //     isHtml: true
-                //     trigger: 'selection'
                 // },
                 titleTextStyle: {
                     fontSize: 18,
