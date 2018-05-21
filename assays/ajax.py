@@ -1490,7 +1490,7 @@ def fetch_pre_submission_filters(request):
         compound_ids = {compound[0]: True for compound in compounds}
 
         if current_filters.get('compounds', []):
-            compound_ids = [int(id) for id in current_filters.get('compounds', []) if int(id) in compounds]
+            compound_ids = [int(id) for id in current_filters.get('compounds', []) if int(id) in compound_ids]
 
         accessible_matrix_items = accessible_matrix_items.filter(
             assaysetupcompound__compound_instance__compound_id__in=compound_ids
