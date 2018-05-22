@@ -19,8 +19,9 @@
         </a>
     </div>
 
-    <div class="row text-center padded-bottom">
-        <h2 class="text-success">Number of Points: <span id="number_of_points"></span></h2>
+    <div id="number_of_points_container" class="row text-center padded-bottom text-success">
+        <h1 id="select_user_group_message" class="text-danger">Please Select at Least One MPS User Group</h1>
+        <h2>Number of Points: <span id="number_of_points"></span></h2>
     </div>
 
     <div class="row padded-bottom">
@@ -57,11 +58,11 @@
     <div class="row padded-bottom">
         <div class="col-xs-6">
 {#            <table id="id_study_assay__target" class="table table-striped table-hover">#}
-            <table id="filter_compounds" class="table table-striped table-hover filter-table">
+            <table id="filter_targets" class="table table-striped table-hover filter-table">
                 <thead>
                     <tr>
                         <th>Select</th>
-                        <th>Compound</th>
+                        <th>Target/Analyte</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -71,11 +72,11 @@
         </div>
         <div class="col-xs-6">
 {#            <table id="id_study_assay__target" class="table table-striped table-hover">#}
-            <table id="filter_targets" class="table table-striped table-hover filter-table">
+            <table id="filter_compounds" class="table table-striped table-hover filter-table">
                 <thead>
                     <tr>
                         <th>Select</th>
-                        <th>Target/Analyte</th>
+                        <th>Compound</th>
                     </tr>
                 </thead>
                 <tbody>

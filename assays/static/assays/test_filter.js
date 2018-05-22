@@ -9,6 +9,14 @@ $(document).ready(function() {
         'targets': {}
     };
 
+    // Odd ID
+    var submit_button_selector = $('#submit');
+    // var back_button_selector = ;
+
+    var number_of_points_selector = $('#number_of_points');
+    var number_of_points_container_selector = $('#number_of_points_container');
+    var select_user_group_message_selector = $('#select_user_group_message');
+
     var charts_name = 'charts';
 
     function show_plots() {
@@ -49,6 +57,10 @@ $(document).ready(function() {
     }
 
     function refresh_filters(parent_filter) {
+        number_of_points_container_selector.removeClass('text-success text-danger');
+        number_of_points_container_selector.addClass('text-warning');
+        number_of_points_selector.html('Calculating, Please Wait');
+
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
@@ -59,7 +71,26 @@ $(document).ready(function() {
                 filters: JSON.stringify(filters)
             },
             success: function (json) {
-                $('#number_of_points').html(json.number_of_points);
+                number_of_points_selector.html(json.number_of_points);
+                if (json.number_of_points > 0) {
+                    number_of_points_container_selector.removeClass('text-warning text-danger');
+                    number_of_points_container_selector.addClass('text-success');
+                    submit_button_selector.removeAttr('disabled');
+                }
+                else {
+                    number_of_points_container_selector.removeClass('text-warning text-success');
+                    number_of_points_container_selector.addClass('text-danger');
+                    submit_button_selector.attr('disabled', 'disabled');
+                }
+
+                // Test if this is an "initial" query
+                if (_.isEmpty(json.filters.organ_models)) {
+                    select_user_group_message_selector.show();
+                    submit_button_selector.attr('disabled', 'disabled');
+                }
+                else {
+                    select_user_group_message_selector.hide();
+                }
 
                 $.each(json.filters, function (filter, contents) {
                     // Do not refresh current
@@ -70,9 +101,9 @@ $(document).ready(function() {
                     var current_table = $('#filter_' + filter);
                     var current_body = current_table.find('tbody');
 
-                    current_body.empty();
                     current_table.DataTable().clear();
                     current_table.DataTable().destroy();
+                    current_body.empty();
 
                     var initial_filter = filters[filter];
                     var current_filter = {};
@@ -132,6 +163,9 @@ $(document).ready(function() {
                 $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
             },
             error: function (xhr, errmsg, err) {
+                number_of_points_container_selector.removeClass('text-warning text-success');
+                number_of_points_container_selector.addClass('text-danger');
+                number_of_points_selector.html('An Error has Occurred');
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
@@ -148,7 +182,8 @@ $(document).ready(function() {
     });
     refresh_filters();
 
-    $('#submit').click(function() {
+    // TODO, THESE TRIGGERS SHOULD BE BASED ON THE ANCHOR, NOT BUTTON CLICKS
+    submit_button_selector.click(function() {
         show_plots();
     });
 

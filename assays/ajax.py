@@ -1447,7 +1447,7 @@ def fetch_pre_submission_filters(request):
     organ_models = {}
     targets = {}
     compounds = {}
-    number_of_points = 'Please Make a Selection'
+    number_of_points = 0
 
     if filters_present:
         if current_filters.get('groups', []):
@@ -1480,6 +1480,32 @@ def fetch_pre_submission_filters(request):
             organ_model_id__in=organ_model_ids
         ) | accessible_matrix_items.filter(organ_model=None)
 
+        accessible_study_assays = AssayStudyAssay.objects.filter(
+            assaydatapoint__matrix_item_id__in=accessible_matrix_items
+        ).prefetch_related(
+            'target'
+        )
+
+        targets = sorted(list(set([
+            (study_assay.target_id, study_assay.target.name) for study_assay in
+            accessible_study_assays
+        ])), key=lambda x: x[1])
+
+        target_ids = {target[0]: True for target in targets}
+
+        if current_filters.get('targets', []):
+            new_target_ids = [int(id) for id in current_filters.get('targets', []) if int(id) in target_ids]
+
+            # In case changes in filters eliminate all targets
+            if new_target_ids:
+                target_ids = new_target_ids
+
+            accessible_study_assays = accessible_study_assays.filter(target_id__in=target_ids)
+
+            accessible_matrix_items = accessible_matrix_items.filter(
+                assaydatapoint__study_assay__in=accessible_study_assays
+            ).distinct()
+
         accessible_compounds = AssaySetupCompound.objects.filter(
             matrix_item__in=accessible_matrix_items
         ).prefetch_related(
@@ -1506,31 +1532,14 @@ def fetch_pre_submission_filters(request):
             assaysetupcompound__isnull=True
         )
 
-        accessible_study_assays = AssayStudyAssay.objects.filter(
-            assaydatapoint__matrix_item_id__in=accessible_matrix_items
-        ).prefetch_related(
-            'target'
-        )
-
-        targets = sorted(list(set([
-            (study_assay.target_id, study_assay.target.name) for study_assay in
-            accessible_study_assays
-        ])), key=lambda x: x[1])
-
-        target_ids = {target[0]: True for target in targets}
-
-        if current_filters.get('targets', []):
-            new_target_ids = [int(id) for id in current_filters.get('targets', []) if int(id) in target_ids]
-
-            # In case changes in filters eliminate all targets
-            if new_target_ids:
-                target_ids = new_target_ids
-
-            accessible_study_assays = accessible_study_assays.filter(target_id__in=target_ids)
-
         number_of_points = AssayDataPoint.objects.filter(
             matrix_item_id__in=accessible_matrix_items,
             study_assay_id__in=accessible_study_assays,
+            replaced=False
+        ).count()
+    else:
+        number_of_points = AssayDataPoint.objects.filter(
+            study_id__in=accessible_studies,
             replaced=False
         ).count()
 
