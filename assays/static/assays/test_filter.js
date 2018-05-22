@@ -81,10 +81,10 @@ $(document).ready(function() {
                     $.each(contents, function (index, content) {
                         var content_id = content[0];
                         var content_name = content[1];
-                        var checkbox = '<input class="filter-checkbox" data-filter="' + filter + '" type="checkbox" value="' + content_id + '">';
+                        var checkbox = '<input class="big-checkbox filter-checkbox" data-filter="' + filter + '" type="checkbox" value="' + content_id + '">';
                         if (initial_filter[content_id]) {
                             current_filter[content_id] = true;
-                            checkbox = '<input checked class="filter-checkbox" data-filter="' + filter + '" type="checkbox" value="' + content_id + '">';
+                            checkbox = '<input checked class="big-checkbox filter-checkbox" data-filter="' + filter + '" type="checkbox" value="' + content_id + '">';
                         }
 
                         rows_to_add.push(
@@ -116,7 +116,8 @@ $(document).ready(function() {
                         bDestroy: true,
                         columnDefs: [
                             // Treat the group column as if it were just the number
-                            { "type": "dom-checkbox", "targets": 0, "width": "10%" }
+                            { "type": "dom-checkbox", "targets": 0, "width": "10%" },
+                            { "className": "dt-center", "targets": 0}
                         ]
                     });
                 });

@@ -3,10 +3,6 @@
     <h3 class="text-center">
         {{ chart_title }}
     </h3>
-    <div class="text-center">
-        <button>Change Filtering</button>
-        <button>Change Grouping</button>
-    </div>
     <div class="row">
         <label class="radio-inline">
             <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}device_select" value="device" checked>
@@ -81,52 +77,400 @@
 </div>
 
 <div id="{{ chart_prefix }}filtering">
-    <h3>Filters</h3>
-    <table class="table table-bordered table-hover table-striped table-condensed">
-        <tbody>
-            <tr>
-                <td>X</td>
-                <td>Study</td>
-            </tr>
-            <tr>
-                <td>X</td>
-                <td>Organ Model</td>
-            </tr>
-            <tr>
-                <td>X</td>
-                <td>Matrix</td>
-            </tr>
-            <tr>
-                <td>X</td>
-                <td>Compound</td>
-            </tr>
-            <tr>
-                <td>X</td>
-                <td>Chip</td>
-            </tr>
-            <tr>
-                <td>X</td>
-                <td>Assay</td>
-            </tr>
-            <tr>
-                <td>X</td>
-                <td>Sample Location</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-<div hidden id="{{ chart_prefix }}grouping_popup">
-    Grouping Pop-up
     <div class="row">
-        <div>
-
-        </div>
-        <div>
-
-        </div>
-        <div>
-
+    <div class="col-xs-3">
+        <p class="text-center">
+            <label>
+                Organ Models Metadata
+            </label>
+        </p>
+        <div class="table-responsive">
+            <table class="table table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th>Filter</th>
+                        <th>Group</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Study
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Organ Model
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Device
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Chip Matrix
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Chip ID (Item)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Chip Type
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Assay Target/Analyte
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Method/Kit
+                        </td>
+                    </tr>
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <input type="checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            Sampling Time#}
+{#                        </td>#}
+{#                    </tr>#}
+                </tbody>
+            </table>
         </div>
     </div>
+
+
+    <div class="col-xs-3">
+        <p class="text-center">
+            <label>
+                Cell Metadata
+            </label>
+        </p>
+        <div class="table-responsive">
+            <table class="table table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th>Filter</th>
+                        <th>Group</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Cell Type
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Cell Origin
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Cell Sample
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Cell Lot
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Cell Density
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+    <div class="col-xs-3">
+        <p class="text-center">
+            <label>
+                Compound Metadata
+            </label>
+        </p>
+        <div class="table-responsive">
+            <table class="table table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th>Filter</th>
+                        <th>Group</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Compound
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Compound Concentration
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Compound Addition Time
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Compound Addition Duration
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Compound Addition Location
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="col-xs-3">
+        <p class="text-center">
+            <label>
+                Setting Metadata
+            </label>
+        </p>
+        <div class="table-responsive">
+            <table class="table table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th>Filter</th>
+                        <th>Group</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Setting
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Setting Value
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Setting Time
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Setting Duration
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox">
+                        </td>
+                        <td>
+                            Setting Location
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 </div>
