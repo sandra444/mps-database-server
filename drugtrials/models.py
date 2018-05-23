@@ -3,6 +3,7 @@ from django.db import models
 from mps.base.models import LockableModel
 from microdevices.models import OrganModel
 from cellsamples.models import Organ
+from diseases.models import Disease
 
 from assays.models import PhysicalUnits
 
@@ -117,6 +118,7 @@ class DrugTrial(LockableModel):
 
     # End of Participant Information
 
+    disease = models.ForeignKey(Disease, null=True, blank=True)
     trial_type = models.CharField(max_length=1, choices=TRIALTYPES)
     trial_sub_type = models.CharField(max_length=1,
                                       choices=TRIALSUBTYPES, default='C')

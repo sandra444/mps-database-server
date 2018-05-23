@@ -2,8 +2,8 @@
 {% load staticfiles %}
 
 {% block load %}
-    <script src="{% static "diseases/disease_clinicaldata.js" %}"></script>
     <script src="{% static "js/display_datatable.js" %}"></script>
+    <script src="{% static "diseases/disease_clinicaldata.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -41,55 +41,97 @@
     </div>
     <br><br>
 
+    {% if trial_findings %}
     <div class="col-md-12">
-        <div class="panel-group" id="accordion">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">ClinicalTrials.gov</a>
-                    </h4>
-                </div>
-                <div id="collapse1" class="panel-collapse collapse in">
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <table id="trials" class="table table-striped">
-                                    {% if clinicaltrials %}
-                                    <thead>
-                                        <tr>
-                                            <th>Trial Name</th>
-                                            <th>Phase</th>
-                                            <th>Status</th>
-                                            <th>Results</th>
-                                            <th>Institution</th>
-                                            <th>Drugs</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for key in clinicaltrials %}
-                                        <tr>
-                                            <td><a target="_blank" href="https://clinicaltrials.gov/ct2/show/{{ key.trial_id }}"> {{ key.trial_name }}</a></td>
-                                            <td>{{key.phase}}</td>
-                                            <td>{{key.status}}</td>
-                                            {% if key.results %}
-                                                <td><a target="_blank" href="https://clinicaltrials.gov/ct2/show/results/{{ key.trial_id }}">Yes</a></td>
-                                            {% else %}
-                                                <td>No</td>
-                                            {% endif %}
-                                            <td>{{key.institution}}</td>
-                                            <td>{{key.drugs}}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                    {% else %}
-                                    No clinical trials currently linked to this disease in the database.
-                                    {% endif %}
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <table hidden id="drugtrials" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View</th>
+                    <th>Drug Trial ID</th>
+                    <th>Compound</th>
+                    <th>Species</th>
+                    <th>Trial Type</th>
+                    <th>Finding</th>
+                    <th>Descriptor</th>
+                    <th>+/-</th>
+                    <th>Frequency</th>
+                    <th>Value</th>
+                    <th>Value Units</th>
+                    <th>Project</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for finding in trial_findings %}
+                <tr class="finding" id={{ finding.id }}>
+                    <td><a class="btn btn-primary" href="/drugtrials/{{ finding.drug_trial.id }}">View</a></td>
+                    <td>{{ finding.drug_trial.id }}</td>
+                    <td>
+                        <a href="/compounds/{{ finding.drug_trial.compound.id }}">
+                            {{ finding.drug_trial.compound }}
+                        </a>
+                    </td>
+                    <td>{{ finding.drug_trial.species }}</td>
+                    <td>{{ finding.drug_trial.get_trial_type_display }}</td>
+                    <td>{{ finding.finding_name }}</td>
+                    <td>{{ finding.descriptor|default_if_none:"" }}</td>
+                    <td>{{ finding.get_result_display }}</td>
+                    <td>{{ finding.frequency|default_if_none:"" }}</td>
+                    <td>{{ finding.value|default_if_none:"" }}</td>
+                    <td>{{ finding.value_units|default_if_none:"" }}</td>
+                    <td>
+                        {% if finding.drug_trial.compound.mps %}
+                            MPS
+                        {% endif %}
+                        {% if finding.drug_trial.compound.epa %}
+                            EPA
+                        {% endif %}
+                        {% if finding.drug_trial.compound.tctc %}
+                            TCTC
+                        {% endif %}
+                        {% if not finding.drug_trial.compound.epa and not finding.drug_trial.compound.mps and not finding.drug_trial.compound.tctc %}
+                            Unassigned
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <!-- <table id="trials" class="table table-striped">
+            {% if clinicaltrials %}
+            <thead>
+                <tr>
+                    <th>Trial Name</th>
+                    <th>Phase</th>
+                    <th>Status</th>
+                    <th>Results</th>
+                    <th>Institution</th>
+                    <th>Drugs</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for key in clinicaltrials %}
+                <tr>
+                    <td><a target="_blank" href="https://clinicaltrials.gov/ct2/show/{{ key.trial_id }}"> {{ key.trial_name }}</a></td>
+                    <td>{{key.phase}}</td>
+                    <td>{{key.status}}</td>
+                    {% if key.results %}
+                        <td><a target="_blank" href="https://clinicaltrials.gov/ct2/show/results/{{ key.trial_id }}">Yes</a></td>
+                    {% else %}
+                        <td>No</td>
+                    {% endif %}
+                    <td>{{key.institution}}</td>
+                    <td>{{key.drugs}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            {% else %}
+            No clinical trials currently linked to this disease in the database.
+            {% endif %}
+        </table>-->
     </div>
+    {% else %}
+    <br><br>
+    <h3>There are currenty no findings associated with {{disease.name}} drug trials in the database.</h3>
+    <br><br>
+    {% endif %}
 {% endblock %}
