@@ -237,50 +237,45 @@ $(document).ready(function () {
         // END data manipulation section
         /////////////
 
-        /////////////
-        // START EVENTS Section
-        /////////////
-
-        window.onload=function() {
-            // when page loads, hide the advanced section
-            document.getElementById("gallery-box").style.display = "none";
-            document.getElementById("post-format-hide").checked = true;
-            document.getElementById("post-format-show").checked = false;
-
-
-            // attach event listener to links using onclick, fire the function
-             document.getElementById("post-format-show").onclick = function() {
-                 toggleadvanced("post-format-show");
-                 return false;
-             };
-             document.getElementById("post-format-hide").onclick = function() {
-                 toggleadvanced("post-format-hide");
-                 return false;
-             };
-        };
-
-        function toggleadvanced(advancedid) {
-            if (advancedid == "post-format-hide") {
-                document.getElementById("gallery-box").style.display = "none";
-                document.getElementById("post-format-hide").checked= true;
-                document.getElementById("post-format-show").checked = false;
-                document.getElementById("radioshowhide").value="hide";
-            } else {
-                document.getElementById("gallery-box").style.display = "block";
-                document.getElementById("post-format-hide").checked = false;
-                document.getElementById("post-format-show").checked = true;
-                document.getElementById("radioshowhide").value="show";
-                }
-        };
-
-        /////////////
-        // END EVENTS Section
-        /////////////
-
         },
         error: function (xhr, errmsg, err) {
             alert('An unknown error has occurred.');
             console.log(xhr.status + ": " + xhr.responseText);
         }
     });
+
+    /////////////
+    // START EVENTS Section
+    /////////////
+
+    // when page loads, hide the advanced section
+    document.getElementById("gallery-box").style.display = "none";
+    document.getElementById("post-format-hide").checked = true;
+    document.getElementById("post-format-show").checked = false;
+
+    // attach event listener to links using onclick, fire the function
+    document.getElementById("post-format-show").onclick = function() {
+        toggleadvanced("post-format-show");
+    };
+    document.getElementById("post-format-hide").onclick = function() {
+        toggleadvanced("post-format-hide");
+    };
+
+    function toggleadvanced(advancedid) {
+        if (advancedid === "post-format-hide") {
+            document.getElementById("gallery-box").style.display = "none";
+            document.getElementById("post-format-hide").checked= true;
+            document.getElementById("post-format-show").checked = false;
+            // document.getElementById("radioshowhide").value="hide";
+        } else {
+            document.getElementById("gallery-box").style.display = "block";
+            document.getElementById("post-format-hide").checked = false;
+            document.getElementById("post-format-show").checked = true;
+            // document.getElementById("radioshowhide").value="show";
+            }
+    }
+
+    /////////////
+    // END EVENTS Section
+    /////////////
 });
