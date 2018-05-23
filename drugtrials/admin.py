@@ -182,6 +182,7 @@ class DrugTrialAdmin(LockableAdmin):
             'fields': (('compound', 'title'),
                        ('drug_display', 'figure1_display', 'figure2_display',),
                        ('trial_type', 'trial_sub_type', 'trial_date'),
+                       ('disease'),
                        ('condition', 'description',),
                        ('figure1', 'figure2',),)
         }),
