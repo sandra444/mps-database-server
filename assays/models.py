@@ -43,9 +43,20 @@ TIME_CONVERSIONS = [
 
 TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
 
+DEFAULT_SETUP_CRITERIA = (
+    'matrix.study_id',
+    'device_id',
+    'organ_model_id',
+    'organ_model_protocol_id',
+    'variance_from_organ_model_protocol'
+)
+
 DEFAULT_SETTING_CRITERIA = (
     'setting_id',
     'unit_id',
+    'value',
+    'addition_time',
+    'duration',
     'addition_location'
 )
 

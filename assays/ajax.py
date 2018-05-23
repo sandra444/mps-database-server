@@ -698,7 +698,7 @@ def get_control_data(
 
 
 # TODO WE MAY WANT THE DEFINITION OF A TREATMENT GROUP TO CHANGE, WHO KNOWS
-def get_item_groups(study, matrix_items=None):
+def get_item_groups(study, criteria, matrix_items=None):
     treatment_groups = {}
     setup_to_treatment_group = {}
 
@@ -721,16 +721,41 @@ def get_item_groups(study, matrix_items=None):
         'assaysetupcompound_set__addition_location',
     )
 
+    if not criteria:
+        setup_criteria = DEFAULT_SETUP_CRITERIA
+        setting_criteria = DEFAULT_SETTING_CRITERIA
+        compound_criteria = DEFAULT_COMPOUND_CRITERIA
+        cell_criteria = DEFAULT_CELL_CRITERIA
+    else:
+        setup_criteria = criteria.get('setup_criteria', {})
+        setting_criteria = criteria.get('setting_criteria', {})
+        compound_criteria = criteria.get('compound_criteria', {})
+        cell_criteria = criteria.get('cell_criteria', {})
+
+    setup_attribute_getter = attrgetter(*setup_criteria)
+
     for setup in setups:
-        treatment_group_tuple = (
-            setup.device_id,
-            setup.organ_model_id,
-            setup.organ_model_protocol_id,
-            setup.variance_from_organ_model_protocol,
-            setup.devolved_settings(),
-            setup.devolved_compounds(),
-            setup.devolved_cells()
-        )
+        # treatment_group_tuple = (
+        #     # Somewhat odd that matrix items are not bound to studies for convenience
+        #     setup.matrix.study_id,
+        #     setup.device_id,
+        #     setup.organ_model_id,
+        #     setup.organ_model_protocol_id,
+        #     setup.variance_from_organ_model_protocol,
+        #     setup.devolved_settings(),
+        #     setup.devolved_compounds(),
+        #     setup.devolved_cells()
+        # )
+        treatment_group_tuple = setup_attribute_getter(setup)
+
+        if setting_criteria:
+            treatment_group_tuple += setup.devolved_settings(setting_criteria)
+
+        if compound_criteria:
+            treatment_group_tuple += setup.devolved_compounds(compound_criteria)
+
+        if cell_criteria:
+            treatment_group_tuple += setup.devolved_cells(cell_criteria)
 
         current_representative = treatment_groups.setdefault(treatment_group_tuple, setup.quick_dic())
 
@@ -808,6 +833,7 @@ def get_data_points_for_charting(
         include_all,
         truncate_negative,
         dynamic_excluded,
+        group_criteria=None,
         post_filter=None,
         study=None,
         matrix_item=None,
@@ -833,16 +859,28 @@ def get_data_points_for_charting(
     post_filter_options = {
         'study': {},
         'matrix_item__organ_model': {},
+        'matrix_item__device': {},
         'matrix_item__matrix': {},
         'matrix_item__assaysetupcompound__compound_instance__compound': {},
         'matrix_item': {},
+        'matrix_item__test_type': {},
         'study_assay__target': {},
-        # 'study_assay__method': {},
+        'study_assay__method': {},
         'sample_location': {},
+        'time': {},
+        'matrix_item__assaysetupcell__cell_sample__cell_type': {},
+        'matrix_item__assaysetupcell__cell_sample__cell_subtype': {},
+        'matrix_item__assaysetupcell__passage': {},
+        'matrix_item__assaysetupcell__cell_density': {},
+        'matrix_item__assaysetupcell__addition_location': {},
     }
 
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
-    treatment_group_representatives, setup_to_treatment_group = get_item_groups(study, matrix_items)
+    treatment_group_representatives, setup_to_treatment_group = get_item_groups(
+        study,
+        group_criteria,
+        matrix_items
+    )
 
     final_data = {
         'sorted_assays': [],
@@ -1244,7 +1282,7 @@ def fetch_data_points(request):
             })
 
         pre_filter.update({
-            'matrix_item_id__in': matrix_items
+            'matrix_item_id__in': matrix_items.filter(assaydatapoint__isnull=False).distinct()
         })
 
         matrix_item = None

@@ -76,16 +76,16 @@
     </div>
 </div>
 
-<div id="{{ chart_prefix }}filtering">
+<div id="{{ chart_prefix }}filtering" class="well">
     <div class="row">
     <div class="col-xs-3">
         <p class="text-center">
             <label>
-                Organ Models Metadata
+                Assay Metadata
             </label>
         </p>
-        <div class="table-responsive">
-            <table class="table table-bordered table-condensed">
+        <div>
+            <table class="table table-bordered table-condensed bg-white">
                 <thead>
                     <tr>
                         <th>Filter</th>
@@ -101,7 +101,7 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
                             Study
@@ -114,20 +114,7 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
-                        </td>
-                        <td>
-                            Organ Model
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <a role='button' class="btn btn-sm">
-                                <span class="glyphicon glyphicon-filter"></span>
-                            </a>
-                        </td>
-                        <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
                             Device
@@ -140,23 +127,10 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
-                            Chip Matrix
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <a role='button' class="btn btn-sm">
-                                <span class="glyphicon glyphicon-filter"></span>
-                            </a>
-                        </td>
-                        <td>
-                            <input type="checkbox">
-                        </td>
-                        <td>
-                            Chip ID (Item)
+                            Organ Model
                         </td>
                     </tr>
                     <tr>
@@ -166,23 +140,10 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
-                            Chip Type
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <a role='button' class="btn btn-sm">
-                                <span class="glyphicon glyphicon-filter"></span>
-                            </a>
-                        </td>
-                        <td>
-                            <input type="checkbox">
-                        </td>
-                        <td>
-                            Assay Target/Analyte
+                            Organ Model Protocol
                         </td>
                     </tr>
                     <tr>
@@ -192,20 +153,109 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
+                        </td>
+                        <td>
+                            Variance from Protocol
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            {# Not currently used in grouping #}
+{#                            <input type="checkbox">#}
+                        </td>
+                        <td>
+
+                            Matrix
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                        {# Not currently used in grouping #}
+{#                            <input type="checkbox">#}
+                        </td>
+                        <td>
+                            Matrix Item
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                        {# Not currently used in grouping #}
+{#                            <input type="checkbox">#}
+                        </td>
+                        <td>
+                            Test Type
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                        {# For the moment, Target *ALWAYS* acts as a grouping criteria #}
+{#                            <input type="checkbox">#}
+                        </td>
+                        <td>
+                           Target/Analyte
+                        </td>
+                    </tr>
+                    {# NOTE THAT THESE ARE SPECIAL EXCEPTIONS TO HOW GROUPING NORMALLY WORKS #}
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input checked type="checkbox">
                         </td>
                         <td>
                             Method/Kit
                         </td>
                     </tr>
-{#                    <tr>#}
-{#                        <td>#}
-{#                            <input type="checkbox">#}
-{#                        </td>#}
-{#                        <td>#}
-{#                            Sampling Time#}
-{#                        </td>#}
-{#                    </tr>#}
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input checked type="checkbox">
+                        </td>
+                        <td>
+                            Sample Location
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input checked type="checkbox">
+                        </td>
+                        <td>
+                            Sample Time
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -218,8 +268,8 @@
                 Cell Metadata
             </label>
         </p>
-        <div class="table-responsive">
-            <table class="table table-bordered table-condensed">
+        <div>
+            <table class="table table-bordered table-condensed bg-white">
                 <thead>
                     <tr>
                         <th>Filter</th>
@@ -261,23 +311,10 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
-                            Cell Sample
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <a role='button' class="btn btn-sm">
-                                <span class="glyphicon glyphicon-filter"></span>
-                            </a>
-                        </td>
-                        <td>
-                            <input type="checkbox">
-                        </td>
-                        <td>
-                            Cell Lot
+                            Cell Sample (Includes Type and Origin)
                         </td>
                     </tr>
                     <tr>
@@ -287,10 +324,62 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
+                        </td>
+                        <td>
+                            Cell Biosensor
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input checked type="checkbox">
+                        </td>
+                        <td>
+                            Cell Passage
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input checked type="checkbox">
                         </td>
                         <td>
                             Cell Density
+                        </td>
+                    </tr>
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input checked type="checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            Cell Density Unit#}
+{#                        </td>#}
+{#                    </tr>#}
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input checked type="checkbox">
+                        </td>
+                        <td>
+                            Cell Addition Location
                         </td>
                     </tr>
                 </tbody>
@@ -306,8 +395,8 @@
                 Compound Metadata
             </label>
         </p>
-        <div class="table-responsive">
-            <table class="table table-bordered table-condensed">
+        <div>
+            <table class="table table-bordered table-condensed bg-white">
                 <thead>
                     <tr>
                         <th>Filter</th>
@@ -323,7 +412,7 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
                             Compound
@@ -336,10 +425,10 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
-                            Compound Concentration
+                            Compound Supplier
                         </td>
                     </tr>
                     <tr>
@@ -349,7 +438,59 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
+                        </td>
+                        <td>
+                            Compound Lot
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input checked type="checkbox">
+                        </td>
+                        <td>
+                            Compound Receipt Date
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input checked type="checkbox">
+                        </td>
+                        <td>
+                            Compound Concentration
+                        </td>
+                    </tr>
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input checked type="checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            Compound Concentration Unit#}
+{#                        </td>#}
+{#                    </tr>#}
+                    <tr>
+                        <td>
+                            <a role='button' class="btn btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input checked type="checkbox">
                         </td>
                         <td>
                             Compound Addition Time
@@ -362,7 +503,7 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
                             Compound Addition Duration
@@ -375,7 +516,7 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
                             Compound Addition Location
@@ -393,8 +534,8 @@
                 Setting Metadata
             </label>
         </p>
-        <div class="table-responsive">
-            <table class="table table-bordered table-condensed">
+        <div>
+            <table class="table table-bordered table-condensed bg-white">
                 <thead>
                     <tr>
                         <th>Filter</th>
@@ -410,12 +551,25 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
                             Setting
                         </td>
                     </tr>
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input checked type="checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            Setting Unit#}
+{#                        </td>#}
+{#                    </tr>#}
                     <tr>
                         <td>
                             <a role='button' class="btn btn-sm">
@@ -423,7 +577,7 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
                             Setting Value
@@ -436,7 +590,7 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
                             Setting Time
@@ -449,7 +603,7 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
                             Setting Duration
@@ -462,7 +616,7 @@
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input checked type="checkbox">
                         </td>
                         <td>
                             Setting Location
