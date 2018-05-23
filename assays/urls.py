@@ -91,6 +91,7 @@ urlpatterns = [
     # Images
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/images/$', AssayStudyImages.as_view(), name='study-images'),
 
+    url(r'^assays/test_filter/$', TestFilterView.as_view(), name='test-filter'),
     url(r'^assays/test_filter2/$', TestFilter2View.as_view(), name='test-filter2'),
 
     # Ajax
