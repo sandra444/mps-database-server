@@ -2635,9 +2635,96 @@ def study_editor_validation(request):
     else:
         return HttpResponseForbidden()
 
+#~#Sandra Added for demo of grouping on stage....may want to remove when done with
+def fetch_test_filter(request):
+    data = {}
+
+    # ~# What sending into test_filter.py file
+    mydictionary = {}
+    #~# dGroup and dGroup number - tier - Filter by - Group by
+    mydictionary['d01-1-y-n-datagroup'] = 'Data Group'
+    mydictionary['d02-1-y-y-mpsmodel'] = 'MPS Model'
+    #mydictionary['d03-1-y-y-organmodel'] = 'Organ Model'
+    #mydictionary['d04-1-n-n-device'] = 'Device'
+    mydictionary['d05-1-n-n-disease'] = 'Disease'
+
+    mydictionary['d05-1-y-y-datapointtarget'] = 'Assay Target'
+    mydictionary['d06-2-n-n-datapointmethodkit'] = 'Method/Kit'
+    mydictionary['d07-2-y-y-datapointreportingunit'] = 'Reporting Unit'
+    mydictionary['d08-2-n-n-datapointsampletime'] = 'Data Point Sample Time'
+    mydictionary['d09-2-y-y-datapointlocation'] = 'Data Point Sample Location'
+    mydictionary['d10-2-n-n-datapointvalue'] = 'Data Point Value'
+
+    mydictionary['s01-3-n-n-studyname'] = 'Study Name'
+    mydictionary['s02-3-n-n-studycategory'] = 'Study Category(s) (Tox, Disease, etc)'
+    mydictionary['s03-3-n-n-chipmatrix'] = 'Chip Set/Matrix'
+    mydictionary['s04-3-n-n-chipname'] = 'Chip Name/Item'
+    mydictionary['s05-3-n-n-chiptype'] = 'Chip Type (Compound or Control)'
+
+    mydictionary['p01-1-y-y-compoundname'] = 'Compound Name'
+    mydictionary['p02-4-n-n-compoundadditionlocation'] = 'Compound Addition Location'
+    mydictionary['p03-4-n-n-compoundconcentration'] = 'Compound Concentration'
+    mydictionary['p04-4-n-n-compoundadditiontime'] = 'Compound Addition Time'
+    mydictionary['p05-4-n-n-compoundadditionduration'] = 'Compound Addition Duration'
+
+    mydictionary['l01-1-n-n-celltype'] = 'Cell Type'
+    mydictionary['l02-5-n-n-cellorigin'] = 'Cell Origin'
+    mydictionary['l03-5-n-n-cellsample'] = 'Cell Sample'
+    mydictionary['l04-5-n-n-celllot'] = 'Cell Lot'
+    mydictionary['l05-5-n-n-celldensity'] = 'Cell Density'
+
+    mydictionary['g01-6-n-n-settingname'] = 'Setting Name'
+    mydictionary['g02-6-n-n-settinglocation'] = 'Setting Location'
+    mydictionary['g03-6-n-n-settingvalue'] = 'Setting Value'
+    mydictionary['g04-6-n-n-settingtime'] = 'Setting Time'
+    mydictionary['g05-6-n-n-settingduration'] = 'Setting Duration'
+
+    keylist = []
+    vallist = []
+
+    for k in mydictionary:
+        keylist.append(k)
+        vallist.append(mydictionary[k])
+
+    data['keylist']= keylist
+    data['vallist'] = vallist
+
+    #lists of names for filter list (but not building in filtering functionality)
+    mpsmodellist = ['organ model 1','organ model 2','organ model 3','organ model 4']
+    datagrouplist = ['Rusyn_TAMU', 'Taylor_MPS', 'Cirit_MIT']
+    diseaselist = ['a disease','another disease']
+    studynamelist = ['study 1','study 2','study 3']
+    devicelist = ['some device','another device','other device']
+    chipmatrixlist = AssayMatrix.objects.values_list('name', flat=True)
+    chipnamelist = AssayMatrixItem.objects.values_list('name', flat=True)
+    datapointmethodkitlist = AssayMethod.objects.values_list('name', flat=True)
+    datapointtargetlist = AssayTarget.objects.values_list('name', flat=True)
+    datapointreportingunitlist = PhysicalUnits.objects.values_list('unit', flat=True)
+    compoundnamelist = ['cisplatin','cadmium','calcium','alcohol','blah blah']
+    datapointlocationlist = AssaySampleLocation.objects.values_list('name', flat=True)
+
+    data['mpsmodellist'] = mpsmodellist
+    data['datagrouplist'] = datagrouplist
+    data['studynamelist'] = studynamelist
+    data['devicelist'] = devicelist
+    data['chipmatrixlist'] = chipmatrixlist
+    data['chipnamelist'] = chipnamelist
+    data['datapointmethodkitlist'] = datapointmethodkitlist
+    data['datapointtargetlist'] = datapointtargetlist
+    data['datapointreportingunitlist'] = datapointreportingunitlist
+    data['compoundnamelist'] = compoundnamelist
+    data['diseaselist'] = diseaselist
+    data['datapointlocationlist'] = datapointlocationlist
+
+    return HttpResponse(json.dumps(data),
+                        content_type='application/json')
+
+#~#End of Sandra's added section
 
 # TODO TODO TODO
 switch = {
+    #~# Sandra added the next line for grouping demo
+    'fetch_test_filter': {'call': fetch_test_filter},
     # 'fetch_readout': {'call': fetch_readout},
     'fetch_center_id': {'call': fetch_center_id},
     # 'fetch_chip_readout': {'call': fetch_chip_readout},
