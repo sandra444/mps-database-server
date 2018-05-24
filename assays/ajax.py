@@ -1475,38 +1475,29 @@ def fetch_pre_submission_filters(request):
 
     accessible_studies = get_user_accessible_studies(request.user)
 
-    groups = sorted(list(set([
-        (study.group_id, study.group.name) for study in
-        accessible_studies
+    # Notice EXCLUSION of items without organ models
+    accessible_matrix_items = AssayMatrixItem.objects.filter(
+        study_id__in=accessible_studies
+    ).exclude(
+        organ_model_id=None
+    ).prefetch_related(
+        'organ_model'
+    )
+
+    # Please note exclusion of null organ model here
+    organ_models = sorted(list(set([
+        (matrix_item.organ_model_id, matrix_item.organ_model.name) for matrix_item in
+        accessible_matrix_items.exclude(organ_model_id=None)
     ])), key=lambda x: x[1])
 
-    group_ids = {group[0]: True for group in groups}
+    organ_model_ids = {organ_model[0]: True for organ_model in organ_models}
 
-    organ_models = {}
+    groups = {}
     targets = {}
     compounds = {}
     number_of_points = 0
 
     if filters_present:
-        if current_filters.get('groups', []):
-            group_ids = [int(id) for id in current_filters.get('groups', []) if int(id) in group_ids]
-
-        accessible_studies = accessible_studies.filter(group_id__in=group_ids)
-
-        accessible_matrix_items = AssayMatrixItem.objects.filter(
-            study_id__in=accessible_studies
-        ).prefetch_related(
-            'organ_model'
-        )
-
-        # Please note exclusion of null organ model here
-        organ_models = sorted(list(set([
-            (matrix_item.organ_model_id, matrix_item.organ_model.name) for matrix_item in
-            accessible_matrix_items.exclude(organ_model_id=None)
-        ])), key=lambda x: x[1])
-
-        organ_model_ids = {organ_model[0]: True for organ_model in organ_models}
-
         if current_filters.get('organ_models', []):
             new_organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if int(id) in organ_model_ids]
 
@@ -1516,7 +1507,27 @@ def fetch_pre_submission_filters(request):
 
         accessible_matrix_items = accessible_matrix_items.filter(
             organ_model_id__in=organ_model_ids
-        ) | accessible_matrix_items.filter(organ_model=None)
+        )
+
+        accessible_studies = accessible_studies.filter(
+            id__in=list(accessible_matrix_items.values_list('study_id', flat=True))
+        )
+
+        groups = sorted(list(set([
+            (study.group_id, study.group.name) for study in
+            accessible_studies
+        ])), key=lambda x: x[1])
+
+        group_ids = {group[0]: True for group in groups}
+
+        if current_filters.get('groups', []):
+            group_ids = [int(id) for id in current_filters.get('groups', []) if int(id) in group_ids]
+
+        accessible_studies = accessible_studies.filter(group_id__in=group_ids)
+
+        accessible_matrix_items = accessible_matrix_items.filter(
+            study_id__in=accessible_studies
+        )
 
         accessible_study_assays = AssayStudyAssay.objects.filter(
             assaydatapoint__matrix_item_id__in=accessible_matrix_items

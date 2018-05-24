@@ -84,7 +84,7 @@ $(document).ready(function() {
                 }
 
                 // Test if this is an "initial" query
-                if (_.isEmpty(json.filters.organ_models)) {
+                if (_.isEmpty(json.filters.groups)) {
                     select_user_group_message_selector.show();
                     submit_button_selector.attr('disabled', 'disabled');
                 }

@@ -421,9 +421,9 @@ $(document).ready(function () {
             };
 
             // NAIVE: I shouldn't perform a whole refresh just to change the scale!
-            if (document.getElementById(charts + 'category_select').checked) {
-                options.focusTarget = 'category';
-            }
+            // if (document.getElementById(charts + 'category_select').checked) {
+            //     options.focusTarget = 'category';
+            // }
 
             if (document.getElementById(charts + 'log_x').checked) {
                 options.hAxis.scaleType = 'log';

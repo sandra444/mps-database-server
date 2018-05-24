@@ -55,14 +55,15 @@
         </label>
     </div>
     <div class="row">
-        <label class="radio-inline text-danger">
-            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}datum_select" value="datum" checked>
-            Tooltips for each Data Point
-        </label>
-        <label class="radio-inline text-danger">
-            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}category_select" value="category">
-            Tooltips for Entire Time Point
-        </label>
+        {# Subject to removal #}
+{#        <label class="radio-inline">#}
+{#            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}datum_select" value="datum" checked>#}
+{#            Tooltips for each Data Point#}
+{#        </label>#}
+{#        <label class="radio-inline">#}
+{#            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}category_select" value="category">#}
+{#            Tooltips for Entire Time Point#}
+{#        </label>#}
         <label for="{{ chart_prefix }}log_x" class="pull-right">
             <input type="checkbox" name="{{ chart_prefix }}log_x" id="{{ chart_prefix }}log_x" />
             Log Scale X-Axis&nbsp;
@@ -108,19 +109,19 @@
                         </td>
                     </tr>
                     {# Subject to removal? #}
-                    <tr class="text-danger">
-                        <td>
-                            <a role='button' class="btn btn-sm">
-                                <span class="glyphicon glyphicon-filter"></span>
-                            </a>
-                        </td>
-                        <td>
-                            <input checked type="checkbox">
-                        </td>
-                        <td>
-                            Device
-                        </td>
-                    </tr>
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input checked type="checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            Device#}
+{#                        </td>#}
+{#                    </tr>#}
                     {# Subject to removal? #}
                     <tr class="text-danger">
                         <td>
@@ -132,37 +133,37 @@
                             <input checked type="checkbox">
                         </td>
                         <td>
-                            Organ Model
+                            MPS Model
                         </td>
                     </tr>
                     {# Subject to removal? #}
-                    <tr class="text-danger">
-                        <td>
-                            <a role='button' class="btn btn-sm">
-                                <span class="glyphicon glyphicon-filter"></span>
-                            </a>
-                        </td>
-                        <td>
-                            <input checked type="checkbox">
-                        </td>
-                        <td>
-                            Organ Model Protocol
-                        </td>
-                    </tr>
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input checked type="checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            MPS Model Protocol#}
+{#                        </td>#}
+{#                    </tr>#}
                     {# Subject to removal? #}
-                    <tr class="text-danger">
-                        <td>
-                            <a role='button' class="btn btn-sm">
-                                <span class="glyphicon glyphicon-filter"></span>
-                            </a>
-                        </td>
-                        <td>
-                            <input checked type="checkbox">
-                        </td>
-                        <td>
-                            Variance from Protocol
-                        </td>
-                    </tr>
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input checked type="checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            Variance from Protocol#}
+{#                        </td>#}
+{#                    </tr>#}
                     <tr>
                         <td>
                             <a role='button' class="btn btn-sm">
@@ -193,20 +194,20 @@
                         </td>
                     </tr>
                     {# Subject to removal? #}
-                    <tr class="text-danger">
-                        <td>
-                            <a role='button' class="btn btn-sm">
-                                <span class="glyphicon glyphicon-filter"></span>
-                            </a>
-                        </td>
-                        <td>
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
                         {# Not currently used in grouping #}
 {#                            <input type="checkbox">#}
-                        </td>
-                        <td>
-                            Test Type
-                        </td>
-                    </tr>
+{#                        </td>#}
+{#                        <td>#}
+{#                            Test Type#}
+{#                        </td>#}
+{#                    </tr>#}
                     <tr>
                         <td>
                             <a role='button' class="btn btn-sm">
