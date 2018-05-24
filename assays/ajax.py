@@ -630,7 +630,7 @@ def get_control_data(
 
         time = raw.time / 1440.0
 
-        replaced = raw.replaced
+        # replaced = raw.replaced
         excluded = raw.excluded
 
         # No dynamic quality here

@@ -32,6 +32,25 @@ $(document).ready(function () {
     // TODO TODO TODO TEMPORARILY EXPOSE
     var heatmap_data = {};
 
+    // CONTRIVED DIALOG
+    // Interestingly, this dialog should be separate and apart from chart_options
+    // Really, I might as well make it from JS here
+    // TODO PLEASE MAKE THIS NOT CONTRIVED SOON
+    var dialog_example = $('#filter_popup');
+    if (dialog_example) {
+        dialog_example.dialog({
+           closeOnEscape: true,
+           autoOpen: false,
+           close: function() {
+               $('body').removeClass('stop-scrolling');
+           },
+           open: function() {
+               $('body').addClass('stop-scrolling');
+           }
+        });
+        dialog_example.removeProp('hidden');
+    }
+
     window.CHARTS.prepare_chart_options = function(charts) {
         var options = {};
 
@@ -539,5 +558,12 @@ $(document).ready(function () {
     // Triggers for heatmap filters
     heatmap_filters_selector.change(function() {
         window.CHARTS.get_heatmap_dropdowns(Math.floor($(this).data('heatmap-index')));
+    });
+
+    // Triggers for spawning filters
+    // TODO REVISE THIS TERRIBLE SELECTOR
+    $('.glyphicon-filter').click(function() {
+        console.log(dialog_example);
+        dialog_example.dialog('open');
     });
 });
