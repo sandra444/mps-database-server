@@ -1,82 +1,3 @@
-<div id="{{ chart_prefix }}chart_options" class="well hidden-print chart-option-block">
-{#    <h3 class="text-center">Chip Readout Data</h3>#}
-    <h3 class="text-center">
-        {{ chart_title }}
-    </h3>
-    <div class="row">
-        <label class="radio-inline">
-            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}device_select" value="device" checked>
-            By Chip
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}group_select" value="group">
-            By Group
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}matrix_select" value="matrix">
-            By Matrix
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}dose_select" value="dose">
-            By Dose-Response
-        </label>
-        <label for="{{ chart_prefix }}percent_control" class="pull-right">
-            <input type="checkbox" name="{{ chart_prefix }}percent_control" id="{{ chart_prefix }}percent_control" />
-            Convert to Percent of Control&nbsp;
-        </label>
-    </div>
-    <div class="row">
-        <label class="radio-inline">
-            <input type="radio" name="{{ chart_prefix }}mean_type" id="{{ chart_prefix }}arithmetic_select" value="arithmetic" checked>
-            Arithmetic Mean
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="{{ chart_prefix }}mean_type" id="{{ chart_prefix }}geometric_select" value="geometric">
-            Geometric Mean
-        </label>
-        <label for="{{ chart_prefix }}include_all" class="pull-right">
-            <input type="checkbox" name="{{ chart_prefix }}include_all" id="{{ chart_prefix }}include_all" />
-            {# Beyond crude, don't do things like this #}
-            Include Excluded Data&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        </label>
-    </div>
-    <div class="row">
-        <label class="radio-inline">
-            <input type="radio" name="{{ chart_prefix }}interval_type" id="{{ chart_prefix }}ste_select" value="ste" checked>
-            Standard Error
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="{{ chart_prefix }}interval_type" id="{{ chart_prefix }}std_select" value="std">
-            Standard Deviation
-        </label>
-        <label for="{{ chart_prefix }}truncate_negative" class="pull-right">
-            <input type="checkbox" name="{{ chart_prefix }}truncate_negative" id="{{ chart_prefix }}truncate_negative" />
-            Treat Negative Values as Zero&nbsp;
-        </label>
-    </div>
-    <div class="row">
-        {# Subject to removal #}
-{#        <label class="radio-inline">#}
-{#            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}datum_select" value="datum" checked>#}
-{#            Tooltips for each Data Point#}
-{#        </label>#}
-{#        <label class="radio-inline">#}
-{#            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}category_select" value="category">#}
-{#            Tooltips for Entire Time Point#}
-{#        </label>#}
-        <label for="{{ chart_prefix }}log_x" class="pull-right">
-            <input type="checkbox" name="{{ chart_prefix }}log_x" id="{{ chart_prefix }}log_x" />
-            Log Scale X-Axis&nbsp;
-        </label>
-    </div>
-    <div class="row">
-        <label for="{{ chart_prefix }}log_y" class="pull-right">
-            <input type="checkbox" name="{{ chart_prefix }}log_y" id="{{ chart_prefix }}log_y" />
-            Log Scale Y-Axis&nbsp;
-        </label>
-    </div>
-</div>
-
 <div id="{{ chart_prefix }}filtering" class="well">
     <div class="row">
     <div class="col-xs-3">
@@ -633,4 +554,83 @@
         </div>
     </div>
 </div>
+</div>
+
+<div id="{{ chart_prefix }}chart_options" class="well hidden-print chart-option-block">
+{#    <h3 class="text-center">Chip Readout Data</h3>#}
+    <h3 class="text-center">
+        {{ chart_title }}
+    </h3>
+    <div class="row">
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}device_select" value="device" checked>
+            By Chip
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}group_select" value="group">
+            By Group
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}matrix_select" value="matrix">
+            By Matrix
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}dose_select" value="dose">
+            By Dose-Response
+        </label>
+        <label for="{{ chart_prefix }}percent_control" class="pull-right">
+            <input type="checkbox" name="{{ chart_prefix }}percent_control" id="{{ chart_prefix }}percent_control" />
+            Convert to Percent of Control&nbsp;
+        </label>
+    </div>
+    <div class="row">
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}mean_type" id="{{ chart_prefix }}arithmetic_select" value="arithmetic" checked>
+            Arithmetic Mean
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}mean_type" id="{{ chart_prefix }}geometric_select" value="geometric">
+            Geometric Mean
+        </label>
+        <label for="{{ chart_prefix }}include_all" class="pull-right">
+            <input type="checkbox" name="{{ chart_prefix }}include_all" id="{{ chart_prefix }}include_all" />
+            {# Beyond crude, don't do things like this #}
+            Include Excluded Data&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </label>
+    </div>
+    <div class="row">
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}interval_type" id="{{ chart_prefix }}ste_select" value="ste" checked>
+            Standard Error
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}interval_type" id="{{ chart_prefix }}std_select" value="std">
+            Standard Deviation
+        </label>
+        <label for="{{ chart_prefix }}truncate_negative" class="pull-right">
+            <input type="checkbox" name="{{ chart_prefix }}truncate_negative" id="{{ chart_prefix }}truncate_negative" />
+            Treat Negative Values as Zero&nbsp;
+        </label>
+    </div>
+    <div class="row">
+        {# Subject to removal #}
+{#        <label class="radio-inline">#}
+{#            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}datum_select" value="datum" checked>#}
+{#            Tooltips for each Data Point#}
+{#        </label>#}
+{#        <label class="radio-inline">#}
+{#            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}category_select" value="category">#}
+{#            Tooltips for Entire Time Point#}
+{#        </label>#}
+        <label for="{{ chart_prefix }}log_x" class="pull-right">
+            <input type="checkbox" name="{{ chart_prefix }}log_x" id="{{ chart_prefix }}log_x" />
+            Log Scale X-Axis&nbsp;
+        </label>
+    </div>
+    <div class="row">
+        <label for="{{ chart_prefix }}log_y" class="pull-right">
+            <input type="checkbox" name="{{ chart_prefix }}log_y" id="{{ chart_prefix }}log_y" />
+            Log Scale Y-Axis&nbsp;
+        </label>
+    </div>
 </div>
