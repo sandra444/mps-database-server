@@ -1516,9 +1516,14 @@ class AssayStudy(FlaggableModel):
     access_groups = models.ManyToManyField(Group, blank=True, related_name='study_access_groups')
 
     # THESE ARE NOW EXPLICIT FIELDS IN STUDY
-    group = models.ForeignKey(Group, help_text='Bind to a group')
+    group = models.ForeignKey(Group, verbose_name='Data Group', help_text='Select the Data Group. The study will be bound to this group')
 
-    restricted = models.BooleanField(default=True, help_text='Check box to restrict to selected group')
+    restricted = models.BooleanField(
+        default=True,
+        help_text='Check box to restrict to the Access Groups selected below.'
+                  ' Access is granted to access group(s) after Data Group admin and all designated'
+                  ' Stakeholder Group admin(s) sign off on the study'
+    )
 
     # Special addition, would put in base model, but don't want excess...
     signed_off_notes = models.CharField(max_length=255, blank=True, default='')
