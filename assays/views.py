@@ -274,13 +274,21 @@ class AssayStudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
 # BEGIN NEW
 def get_queryset_with_organ_model_map(queryset):
     """Takes a queryset and returns it with a organ model map"""
+    # Not DRY
+    study_ids = list(queryset.values_list('id', flat=True))
+
     setups = AssayMatrixItem.objects.filter(
-        organ_model__isnull=False
+        organ_model__isnull=False,
+        study_id__in=study_ids
     ).prefetch_related(
-        'matrix__study',
-        'device',
+        # 'matrix__study',
+        # 'device',
         'organ_model',
-        'organ_model_protocol'
+        # 'organ_model_protocol'
+    ).only(
+        'id',
+        'study_id',
+        'organ_model'
     )
 
     organ_model_map = {}
@@ -302,9 +310,12 @@ def get_queryset_with_organ_model_map(queryset):
 
 def get_queryset_with_number_of_data_points(queryset):
     """Add number of data points to each object in an Assay Study querysey"""
+    study_ids = list(queryset.values_list('id', flat=True))
+
     data_points = AssayDataPoint.objects.filter(
-        replaced=False
-    )
+        replaced=False,
+        study_id__in=study_ids
+    ).only('id', 'study_id')
 
     data_points_map = {}
 
@@ -316,9 +327,12 @@ def get_queryset_with_number_of_data_points(queryset):
             data_point.study_id: current_value + 1
         })
 
-    images = AssayImage.objects.all().prefetch_related(
-        'matrix_item'
-    )
+    images = AssayImage.objects.filter(
+        setting__study_id__in=study_ids
+    ).prefetch_related(
+        'matrix_item',
+        'setting'
+    ).only('id', 'matrix_item', 'setting')
 
     images_map = {}
 
@@ -384,7 +398,10 @@ class AssayStudyList(LoginRequiredMixin, ListView):
         get_queryset_with_number_of_data_points(combined)
         get_queryset_with_stakeholder_sign_off(combined)
 
-        return combined
+        return combined.prefetch_related(
+            'created_by',
+            'signed_off_by'
+        )
 
 
 class AssayStudyAdd(OneGroupRequiredMixin, CreateView):

@@ -233,7 +233,7 @@ def get_user_accessible_studies(user):
     user - Django user instance
     """
     queryset = AssayStudy.objects.all().prefetch_related(
-        'group',
+        'group'
     )
 
     user_group_names = [

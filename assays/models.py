@@ -71,6 +71,8 @@ DEFAULT_COMPOUND_CRITERIA = (
 
 DEFAULT_CELL_CRITERIA = (
     'cell_sample_id',
+    # Alternative
+    # 'cell_sample__cell_type_id',
     'biosensor_id',
     'density',
     'density_unit_id',

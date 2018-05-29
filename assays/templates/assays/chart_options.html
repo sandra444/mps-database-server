@@ -18,12 +18,13 @@
                 <tbody>
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='study' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            {# Exclude from grouping for now #}
+{#                            <input checked type="checkbox">#}
                         </td>
                         <td>
                             Study
@@ -46,7 +47,7 @@
                     {# Subject to removal? #}
                     <tr class="text-danger">
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='matrix_item__organ_model' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
